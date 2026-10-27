@@ -1,5 +1,7 @@
 # Tay cầm joystick → Arduino Mega → ESP32-CAM → Wi-Fi → game
 
+> **Tài liệu cũ.** Mạch joystick → Arduino Mega → ESP32-CAM đã được thay bằng tay cầm V2 "Halo" (ESP32 DevKitC + BMI160 + joystick + cò Hall). Xem [docs/15](15-tay-cam-v2-halo.md). Giữ lại để tham khảo (cách mở tường lửa, gửi UDP vẫn dùng được).
+
 Đường đi của tín hiệu:
 
 ```

@@ -1,5 +1,7 @@
 # Giao thức tay cầm (Arduino Mega ↔ PC)
 
+> **Tài liệu cũ.** Giao thức này dành cho tay cầm Arduino Mega + MPU6050, nay đã thay bằng tay cầm V2 "Halo" (ESP32 + BMI160). Xem [docs/15](15-tay-cam-v2-halo.md). Giữ lại để tham khảo.
+
 Phiên bản 1. Cổng COM, **115200 baud**, 8N1. Firmware: `firmware/tay_cam_mega/`. Bộ giải mã tham chiếu: `khkt/protocol.py` (Python) và `Phong thi nghiem ao/Assets/Scripts/Input/PacketParser.cs` (C#).
 
 ## Vì sao gửi dữ liệu thô dạng nhị phân

@@ -1,5 +1,7 @@
 # Bản vẽ tay cầm VR (bản V1)
 
+> **Tài liệu cũ.** Bản V1 (ống PVC + hộp thắt lưng) đã được thay bằng tay cầm V2 "Halo". Xem [docs/15](15-tay-cam-v2-halo.md). Số đo bàn tay trong tài liệu này vẫn được dùng cho V2.
+
 Tài liệu ngày 27/10/2026. Đây là bước 1 (số liệu) và bước 2 (bản vẽ 2D) trong kế hoạch thiết kế tay cầm. Các bước sau chưa làm:
 
 - bước 3: mô hình 3D;

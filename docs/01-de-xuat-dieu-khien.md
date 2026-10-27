@@ -1,5 +1,7 @@
 # Đề xuất hệ điều khiển cho môi trường thực tế ảo
 
+> **Tài liệu cũ.** Hệ điều khiển trong tài liệu này (Arduino Mega + MPU6050) đã được thay bằng tay cầm V2 "Halo": ESP32 DevKitC + BMI160 + joystick KY-023 + cò Hall SS49E, đo xa gần bằng OpenCV qua vòng halo. Xem [docs/15](15-tay-cam-v2-halo.md). Giữ lại để tham khảo quá trình nghiên cứu.
+
 Tài liệu nghiên cứu cho phần điều khiển của dự án *Phòng thí nghiệm ảo nhiều người*. Viết ngày 22/10/2026, dựa trên bản thiết kế cùng ngày. Mã nguồn đi kèm: `firmware/`, `Phong thi nghiem ao/Assets/Scripts/Input` và `Interaction`, `khkt/`.
 
 ## Tóm tắt

@@ -1,5 +1,7 @@
 # Kiến trúc phần mềm
 
+> **Lưu ý.** Phần tay cầm trong tài liệu này theo bản Arduino Mega + MPU6050, nay đã thay bằng tay cầm V2 "Halo" (ESP32 + BMI160). Xem [docs/15](15-tay-cam-v2-halo.md). Các phần phần mềm khác vẫn còn giá trị tham khảo.
+
 ## Luồng dữ liệu (phương án A: stream từ PC)
 
 ```

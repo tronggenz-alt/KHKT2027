@@ -1,50 +1,72 @@
-# Phòng thí nghiệm ảo nhiều người (KHKT)
+# VERA Lab: phòng thí nghiệm thực tế ảo Hóa – Sinh tích hợp AI
 
-Khung dự án cho phòng lab hóa học ảo: kính VR Box + điện thoại, tay cầm tự chế (Arduino Mega + MPU6050), nhiều người cùng làm, đo độ khéo tay, AI theo ngữ cảnh. Bản thiết kế gốc: `Bản thiết kế dự án KHKT Phòng thí nghiệm ảo nhiều người.md`.
+**VERA Lab** (Virtual Experiment & Reality-based AI Lab) là hệ thống trải nghiệm phòng thí nghiệm thực tế ảo Hóa – Sinh, tích hợp AI đám mây / cục bộ, dùng trong dạy học. Đây là dự án Khoa học kỹ thuật của **Nguyễn Ngọc Bảo Trọng** và **Trần Đức Trọng**.
 
-## Đọc gì trước
+Thành phần chính:
+
+- **Phòng lab hóa học ảo 3D** (Unity 6, URP):
+  - 720 hóa chất xếp kệ, bộ máy hóa học tính phản ứng thật;
+  - chuẩn độ, phòng máy phân tích, lắp ráp dụng cụ tự do kèm mạng dòng chảy;
+  - robot trợ lý theo kế hoạch AI.
+- **Tay cầm tự chế V2 "Halo":**
+  - ESP32 DevKitC 38 chân + cảm biến chuyển động BMI160 + joystick KY-023 + cò analog bằng cảm biến Hall SS49E;
+  - vòng halo huỳnh quang để webcam (OpenCV) đo xa gần và vị trí tay;
+  - vỏ in 3D. Xem [docs/15](docs/15-tay-cam-v2-halo.md).
+- **Điều khiển góc nhìn bằng đầu qua webcam** (OpenCV, thử nghiệm). Xem [docs/16](docs/16-dieu-khien-bang-dau.md).
+- **Web quản lý:** kho hóa chất, thiết bị, nhật ký; mạng lưới khóa AI.
+
+> **Phần cứng đã thay:** các bản tay cầm cũ (Arduino Mega + MPU6050; joystick → Mega → ESP32-CAM; bản V1 ống PVC) không còn dùng. Tài liệu và firmware của chúng vẫn giữ trong kho để tham khảo. Mỗi tài liệu cũ có ghi chú ở đầu.
+
+## Tài liệu
+
+### Đang dùng
 
 | Tài liệu | Nội dung |
 | --- | --- |
-| [docs/01-de-xuat-dieu-khien.md](docs/01-de-xuat-dieu-khien.md) | **Nghiên cứu và đề xuất hệ điều khiển** (đọc đầu tiên) |
-| [docs/02-giao-thuc-tay-cam.md](docs/02-giao-thuc-tay-cam.md) | Gói tin nhị phân Mega → PC, lệnh PC → Mega |
-| [docs/03-kien-truc.md](docs/03-kien-truc.md) | Kiến trúc phần mềm, các module, quyết định thiết kế |
-| [docs/04-kiem-thu-tuan-1.md](docs/04-kiem-thu-tuan-1.md) | Danh sách đo kiểm tuần 1 (độ trễ, trôi góc, say) |
-| [docs/05-unity.md](docs/05-unity.md) | Cảnh phòng thí nghiệm (mặt bằng, phím xem thử), cài đặt Unity, nối tay cầm với XR Interaction Toolkit |
+| [docs/15-tay-cam-v2-halo.md](docs/15-tay-cam-v2-halo.md) | **Tay cầm V2 "Halo"**: ESP32 38 chân + BMI160 + joystick + cò analog Hall; vòng halo cho OpenCV đo xa gần; 7 file STL in 3D, 5 bản vẽ 2D, sơ đồ đấu nối |
+| [docs/16-dieu-khien-bang-dau.md](docs/16-dieu-khien-bang-dau.md) | **Điều khiển góc nhìn bằng đầu qua webcam** (F8): OpenCV + YuNet nhận diện mặt; quay đầu để xoay (kiểu lái), ghé gần để phóng to, ngả xa để nhìn rộng |
+| [docs/05-unity.md](docs/05-unity.md) | Cảnh phòng thí nghiệm (mặt bằng, phím xem thử), cài đặt Unity |
 | [docs/06-phong-lab-moi-hoa-chat-ai.md](docs/06-phong-lab-moi-hoa-chat-ai.md) | Lab 300 m², 720 hóa chất xếp kệ và tra cứu, bộ máy hóa học, chuẩn độ tự chọn, AI đám mây và robot trợ lý |
-| [docs/07-web-quan-ly-robot-phong-moi.md](docs/07-web-quan-ly-robot-phong-moi.md) | Web quản lý (kho, thiết bị, nhật ký), mạng lưới khóa Groq/DeepSeek/Gemini, robot hình người theo kế hoạch AI, phòng máy phân tích và phòng robot |
-| [docs/08-tai-lieu-tham-khao-thiet-bi.md](docs/08-tai-lieu-tham-khao-thiet-bi.md) | Tài liệu, datasheet, tiêu chuẩn (ưu tiên tiếng Việt) về nguyên lý và cách dùng các máy phân tích, thiết bị phòng lab |
-| [docs/09-tay-cam-esp32-cam.md](docs/09-tay-cam-esp32-cam.md) | **Tay cầm joystick → Arduino Mega → ESP32-CAM → Wi-Fi**: bảng đấu nối, mở tường lửa, đủ cử động nhân vật bằng 1 cần + 1 nút (chế độ ĐI / TAY) |
-| [docs/10-lab-quoc-te-tai-khu-toi-uu.md](docs/10-lab-quoc-te-tai-khu-toi-uu.md) | **Phong cách lab trường quốc tế, cửa tự động, tải / gỡ từng khu khi đi qua cửa mà vẫn giữ hiện trạng**, lối vào phòng hóa chất kính mờ; giai đoạn B: occlusion culling + cổng, HLOD, impostor, cửa sổ ảo, kèm số đo FPS từng kỹ thuật |
-| [docs/11-lap-rap-tu-do.md](docs/11-lap-rap-tu-do.md) | **Lắp ráp dụng cụ bằng khớp nối chuẩn** (giai đoạn C1 + C2): khoảng 40 bộ phận cho nhiều loại thí nghiệm (chưng cất, hồi lưu, điều chế – thu khí, nhiệt phân, lọc, chiết, cô cạn), hệ kín / hở, trọng tâm và đổ |
-| [docs/12-khu-che-tao.md](docs/12-khu-che-tao.md) | **Khu chế tạo dụng cụ**: ngăn kính trong phòng lab, giao diện lắp ráp 3D riêng (bảng bộ phận có ảnh, bảng kiểm tra, hoàn tác), gia công ra bàn thí nghiệm |
-| [docs/13-ban-ve-tay-cam-vr.md](docs/13-ban-ve-tay-cam-vr.md) | **Bản vẽ tay cầm VR (V1)**: số đo bàn tay → ống Ø34, 5 bản vẽ 2D (ba hình chiếu, bố trí trong, hộp thắt lưng, sơ đồ đấu nối 19 lõi, cách cầm và đeo), dự trù chi phí |
-| [docs/14-mang-dong-chay.md](docs/14-mang-dong-chay.md) | **Mạng dòng chảy** (giai đoạn C3 + C4): bộ dụng cụ đã gia công chạy như thật: chưng cất (nhiệt độ sôi theo thành phần, nhiệt kế), hồi lưu, dẫn – rửa – thu khí, áp suất hệ kín, lọc / lọc hút, chiết, nhiệt phân, cô cạn; hình ảnh giọt, dòng, bọt khí, hơi, giọt ngưng, mực nước ống úp |
-| [docs/15-tay-cam-v2-halo.md](docs/15-tay-cam-v2-halo.md) | **Tay cầm VR V2 "Halo"** (thay V1): ESP32 38 chân + BMI160 + joystick + cò analog bằng cảm biến Hall; vòng halo cho OpenCV đo xa gần; 7 file STL in 3D, 5 bản vẽ 2D, sơ đồ đấu nối |
-| [docs/16-dieu-khien-bang-dau.md](docs/16-dieu-khien-bang-dau.md) | **Điều khiển góc nhìn bằng đầu qua webcam** (thử nghiệm, F8): OpenCV + YuNet nhận diện mặt, quay đầu để xoay (kiểu lái), ghé gần để phóng to, ngả xa để nhìn rộng; dùng song song với chuột, tay cầm |
-| [docs/trinh-bay/VERA_Lab_trinh_bay.pdf](docs/trinh-bay/VERA_Lab_trinh_bay.pdf) | **Bản trình bày VERA Lab** (16 trang PDF): tên, mô tả, kiến trúc, tiến độ, tính năng Hóa, tay cầm Halo, quy hoạch 2 tầng Hóa – Sinh, LMS, nhiều người, AI cục bộ, lộ trình. Dựng lại bằng `tools/trinh_bay/lam_trinh_bay.py` |
-| [docs/anh-phong-lab/](docs/anh-phong-lab/), [docs/anh-demo/](docs/anh-demo/) | Ảnh chụp cảnh phòng lab và từng bước demo chuẩn độ |
+| [docs/07-web-quan-ly-robot-phong-moi.md](docs/07-web-quan-ly-robot-phong-moi.md) | Web quản lý (kho, thiết bị, nhật ký), mạng lưới khóa Groq / DeepSeek / Gemini, robot hình người theo kế hoạch AI, phòng máy phân tích và phòng robot |
+| [docs/08-tai-lieu-tham-khao-thiet-bi.md](docs/08-tai-lieu-tham-khao-thiet-bi.md) | Tài liệu, datasheet, tiêu chuẩn (ưu tiên tiếng Việt) về nguyên lý và cách dùng máy phân tích, thiết bị phòng lab |
+| [docs/10-lab-quoc-te-tai-khu-toi-uu.md](docs/10-lab-quoc-te-tai-khu-toi-uu.md) | Phong cách lab trường quốc tế, cửa tự động, tải / gỡ từng khu khi đi qua cửa mà vẫn giữ hiện trạng; tối ưu đồ họa (occlusion culling, HLOD, impostor, cửa sổ ảo) kèm số đo FPS |
+| [docs/11-lap-rap-tu-do.md](docs/11-lap-rap-tu-do.md) | Lắp ráp dụng cụ bằng khớp nối chuẩn: khoảng 40 bộ phận cho chưng cất, hồi lưu, điều chế – thu khí, nhiệt phân, lọc, chiết, cô cạn; hệ kín / hở, trọng tâm và đổ |
+| [docs/12-khu-che-tao.md](docs/12-khu-che-tao.md) | Khu chế tạo dụng cụ: ngăn kính trong phòng lab, giao diện lắp ráp 3D riêng, gia công ra bàn thí nghiệm |
+| [docs/14-mang-dong-chay.md](docs/14-mang-dong-chay.md) | Mạng dòng chảy: bộ dụng cụ chạy như thật (chưng cất theo nhiệt độ sôi, hồi lưu, dẫn – rửa – thu khí, áp suất hệ kín, lọc, chiết, nhiệt phân, cô cạn); hình ảnh giọt, dòng, bọt khí, hơi |
+| [docs/trinh-bay/VERA_Lab_trinh_bay.pdf](docs/trinh-bay/VERA_Lab_trinh_bay.pdf) | Bản trình bày VERA Lab (16 trang PDF). Dựng lại bằng `tools/trinh_bay/lam_trinh_bay.py` |
+| [docs/anh-phong-lab/](docs/anh-phong-lab/), [docs/anh-demo/](docs/anh-demo/) | Ảnh chụp phòng lab và các bài demo |
+
+### Tài liệu cũ (phần cứng đã thay, giữ để tham khảo)
+
+| Tài liệu | Nội dung |
+| --- | --- |
+| [docs/01-de-xuat-dieu-khien.md](docs/01-de-xuat-dieu-khien.md) | Nghiên cứu, đề xuất hệ điều khiển ban đầu (Arduino Mega + MPU6050) |
+| [docs/02-giao-thuc-tay-cam.md](docs/02-giao-thuc-tay-cam.md) | Gói tin nhị phân Mega → PC |
+| [docs/03-kien-truc.md](docs/03-kien-truc.md) | Kiến trúc phần mềm ban đầu (phần tay cầm theo bản Mega) |
+| [docs/04-kiem-thu-tuan-1.md](docs/04-kiem-thu-tuan-1.md) | Danh sách đo kiểm tuần 1 (độ trễ, trôi góc, say) |
+| [docs/09-tay-cam-esp32-cam.md](docs/09-tay-cam-esp32-cam.md) | Tay cầm joystick → Arduino Mega → ESP32-CAM → Wi-Fi |
+| [docs/13-ban-ve-tay-cam-vr.md](docs/13-ban-ve-tay-cam-vr.md) | Bản vẽ tay cầm V1 (ống PVC + hộp thắt lưng). Số đo bàn tay vẫn dùng cho V2 |
 
 ## Cấu trúc thư mục
 
 ```
-firmware/tay_cam_mega/     Firmware Arduino Mega: đọc IMU thô, joystick, nút; rung + đèn
-firmware/tay_cam_esp32cam/ Firmware tay cầm ESP32-CAM + 1 mạch joystick (USB hoặc Bluetooth, cùng gói tin)
 Phong thi nghiem ao/        Project Unity 6 (URP)
   Assets/Scripts/
-    Input/                 Nguồn tay cầm (serial, bàn phím-chuột), bộ lọc hướng, arm model
-    Interaction/           Rót theo góc nghiêng, khóa buret, lắc bình, cúi đọc vạch
-    Simulation/            Mô hình chuẩn độ (công thức pH)
-    Recording/             Ghi chuyển động 100 Hz ra CSV
-    Environment/           Quạt quay, trạm dịch chuyển, xem cảnh bằng chuột-bàn phím
-    Demo/                  Chế độ demo: kịch bản chuẩn độ, giao diện, kính lúp, thẻ dụng cụ
-    Editor/LabBuilder/     Dựng toàn bộ cảnh phòng thí nghiệm bằng code (menu KHKT)
-  Scenes/PhongThiNghiem.unity  Cảnh phòng lab + phòng hóa chất + ban công
+    Simulation/            Bộ máy hóa học (cân bằng, động học, màu, bay hơi), danh mục hóa chất
+    Interaction/           Vật chứa, rót, buret, nguồn nhiệt, cân, máy ly tâm
+    Assembly/              Lắp ráp bằng khớp nối, khu chế tạo, mạng dòng chảy (Flow/)
+    Demo/                  Bàn tay ảo, giao diện, robot trợ lý, máy phân tích, kịch bản chuẩn độ
+    Input/                 Tay cầm (UDP / serial), bàn phím – chuột, điều khiển bằng đầu (HeadTracking)
+    Rendering/             Tải / gỡ từng khu, lưu trạng thái, tối ưu đồ họa
+    Environment/           Người xem (DesktopViewer), cửa tự động, trạm dịch chuyển
+    Editor/LabBuilder/     Dựng toàn bộ cảnh bằng code (menu KHKT)
+data/chem/                 Danh mục hóa chất, nhiệt độ sôi
+server/                    Web quản lý (web/, lab/), máy chủ AI (ai/)
+tools/                     head_tracker.py (webcam), tay_cam_v2/ (dựng 3D, bản vẽ tay cầm Halo),
+                           trinh_bay/, kiem_thu_unity/ (bài chạy tự động Unity), mo_hinh/ (mô hình YuNet)
 khkt/                      Thư viện Python: giao thức, bộ lọc hướng, mô hình chuẩn độ và rót, chỉ số khéo tay
-tests/                     Kiểm thử cho khkt/ (21 bài)
-tools/                     Công cụ: xem dữ liệu tay cầm, theo dõi bằng webcam (thử nghiệm)
-server/ai/                 Máy chủ AI theo ngữ cảnh (FastAPI, khung)
-data/reactions/            Cơ sở dữ liệu phản ứng (mẫu định dạng)
+tests/                     Kiểm thử Python và kiểm thử bộ máy hóa học (C#)
+firmware/                  Firmware các bản tay cầm CŨ (Mega, ESP32-CAM), giữ để tham khảo
 ```
 
 ## Chạy nhanh
@@ -57,20 +79,21 @@ pip install -r requirements.txt
 python -m unittest discover -s tests -v
 ```
 
-```bash
-python tools/tay_cam_monitor.py --port COM5
-```
+Unity: mở thư mục `Phong thi nghiem ao` bằng Unity 6000.6.7f1, chạy menu **KHKT → Dựng phòng thí nghiệm**, rồi Play. Xem [docs/05-unity.md](docs/05-unity.md).
 
-Nạp firmware: mở `firmware/tay_cam_mega/tay_cam_mega.ino` bằng Arduino IDE, chọn board *Arduino Mega 2560*, nạp. Firmware không cần thư viện ngoài (chỉ `Wire`).
-
-Tay cầm joystick → Mega → ESP32-CAM (Wi-Fi): xem [docs/09-tay-cam-esp32-cam.md](docs/09-tay-cam-esp32-cam.md). Thử game bằng tay cầm giả lập (mở game trước):
+Điều khiển bằng đầu qua webcam: trong Unity bấm **F8**. Cần Python, `opencv-python` và webcam. Thử riêng chương trình nhận diện:
 
 ```bash
-python tools/tay_cam_udp.py gia-lap --mega
+python tools/head_tracker.py --hien
 ```
-
-Unity: xem [docs/05-unity.md](docs/05-unity.md).
 
 ## Trạng thái
 
-Đây là **khung**: firmware, giao thức, mô hình chuẩn độ và phân tích kỹ năng đã viết đầy đủ và có kiểm thử Python; script Unity đã biên dịch sạch bằng trình biên dịch của Unity nhưng **chưa chạy thử trong cảnh**; `tools/webcam_tracker.py` mới thử trên ảnh giả lập, chưa thử với webcam thật. Cảnh phòng lab 3D đã dựng, có chế độ demo chạy bằng chuột-bàn phím: bài chuẩn độ làm được trọn vẹn, mọi dụng cụ có thẻ thông tin (xem [docs/05-unity.md](docs/05-unity.md#chạy-demo)). Chưa gắn tay cầm thật và kính VR; đồng bộ nhiều người (Photon) và bạn AI chưa làm.
+| Phần | Trạng thái |
+| --- | --- |
+| Phòng lab hóa học 3D | Chạy được bằng chuột – bàn phím: chuẩn độ, thí nghiệm định tính, tra cứu 720 hóa chất, robot trợ lý, lắp ráp và gia công bộ dụng cụ, mạng dòng chảy. Có bài chạy tự động kiểm tra từng phần |
+| Phòng máy phân tích | 6 máy cho kết quả theo mô hình. Đang làm lại theo quy trình vận hành và datasheet thật, kèm chế độ xem bên trong máy |
+| Tay cầm V2 "Halo" | Đã có thiết kế 3D, bản vẽ, sơ đồ đấu nối. Đang đặt linh kiện, **firmware cho ESP32 + BMI160 chưa viết** |
+| Điều khiển bằng đầu (webcam) | Thử nghiệm, chạy được (F8) |
+| Bản chạy | Windows (.exe). Bản macOS cần cài thêm mô-đun Mac Build Support cho Unity |
+| Chưa làm | Phòng sinh học tầng 2, hệ thống học tập cho giáo viên – học sinh, nhiều người cùng làm, AI cục bộ |
