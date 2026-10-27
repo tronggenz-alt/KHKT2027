@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quản lý phòng thí nghiệm</title>
+<style>
+:root {
+  --bg: #f4f6f8; --panel: #ffffff; --panel-2: #f8fafb; --line: #e2e7ec; --text: #17202a; --muted: #5d6b78;
+  --accent: #0f7c86; --accent-soft: #e2f3f4; --good: #1f8a4c; --good-soft: #e3f4ea; --warn: #b26b00; --warn-soft: #fbefd9;
+  --bad: #c2362f; --bad-soft: #fbe5e3; --shadow: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.08); --on-accent: #ffffff;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1418; --panel: #172026; --panel-2: #1c272e; --line: #2a3740; --text: #e6edf2; --muted: #93a3b0;
+    --accent: #3cc2cc; --accent-soft: #143238; --good: #4cc983; --good-soft: #15301f; --warn: #f0b04a; --warn-soft: #362a12;
+    --bad: #ff7b72; --bad-soft: #3a1a18; --shadow: none; --on-accent: #062a2e;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif; }
+header { background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; }
+.bar { max-width: 1240px; margin: 0 auto; padding: 12px 20px 0; }
+.title { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.title h1 { font-size: 18px; margin: 0; font-weight: 650; letter-spacing: -.01em; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px; font-size: 12px;
+        background: var(--panel-2); border: 1px solid var(--line); color: var(--muted); }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.chip.on .dot { background: var(--good); } .chip.off .dot { background: var(--bad); }
+nav { display: flex; gap: 2px; margin-top: 10px; overflow-x: auto; }
+nav button { border: 0; background: none; color: var(--muted); padding: 9px 14px; font: inherit; font-weight: 550; cursor: pointer;
+             border-bottom: 2px solid transparent; white-space: nowrap; }
+nav button.active { color: var(--accent); border-color: var(--accent); }
+main { max-width: 1240px; margin: 0 auto; padding: 20px; }
+section { display: none; } section.active { display: block; }
+h2 { font-size: 15px; margin: 0 0 10px; font-weight: 650; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; box-shadow: var(--shadow); margin-bottom: 16px; }
+.grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); margin-bottom: 16px; }
+.stat { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; box-shadow: var(--shadow); }
+.stat .k { color: var(--muted); font-size: 12px; } .stat .v { font-size: 24px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.stat.warn .v { color: var(--warn); } .stat.bad .v { color: var(--bad); } .stat.good .v { color: var(--good); }
+.two { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; } @media (max-width: 860px) { .two { grid-template-columns: 1fr; } }
+.toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+input, select, textarea { font: inherit; color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 7px; padding: 7px 10px; }
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+input[type=number] { width: 84px; } textarea { width: 100%; resize: vertical; }
+button.b { font: inherit; border: 1px solid var(--line); background: var(--panel); color: var(--text); border-radius: 7px; padding: 6px 12px; cursor: pointer; }
+button.b:hover { border-color: var(--accent); } button.b.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
+button.b.danger:hover { border-color: var(--bad); color: var(--bad); } button.b.sm { padding: 3px 8px; font-size: 12px; }
+button.b:disabled { opacity: .55; cursor: default; }
+.tablewrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+th { font-size: 12px; color: var(--muted); font-weight: 600; background: var(--panel-2); position: sticky; top: 0; }
+td.num, th.num { text-align: right; }
+tr.low td { background: var(--warn-soft); }
+.badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; background: var(--panel-2); color: var(--muted); border: 1px solid var(--line); white-space: nowrap; }
+.badge.good { background: var(--good-soft); color: var(--good); border-color: transparent; }
+.badge.warn { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
+.badge.bad { background: var(--bad-soft); color: var(--bad); border-color: transparent; }
+.swatch { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.groups { display: grid; gap: 6px; }
+.grow { display: grid; grid-template-columns: 170px 1fr 36px; gap: 8px; align-items: center; font-size: 13px; }
+.track { height: 8px; background: var(--panel-2); border-radius: 4px; overflow: hidden; } .fill { height: 100%; border-radius: 4px; }
+.muted { color: var(--muted); } .small { font-size: 12px; } .mono { font-family: Consolas, ui-monospace, monospace; }
+.log { border-left: 3px solid var(--line); padding: 6px 10px; margin-bottom: 8px; background: var(--panel-2); border-radius: 0 6px 6px 0; }
+.log.Warning { border-color: var(--warn); } .log.Danger { border-color: var(--bad); }
+.log .t { font-weight: 600; } .log pre { margin: 4px 0 0; white-space: pre-wrap; font: inherit; color: var(--muted); }
+.pager { display: flex; gap: 8px; align-items: center; justify-content: flex-end; margin-top: 10px; }
+.form { display: grid; gap: 10px; grid-template-columns: 150px 1fr 160px 150px 90px auto; align-items: end; }
+@media (max-width: 960px) { .form { grid-template-columns: 1fr 1fr; } }
+.form label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
+.answer { white-space: pre-wrap; background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 12px; min-height: 48px; }
+.steps { counter-reset: s; list-style: none; padding: 0; margin: 0; }
+.steps li { counter-increment: s; padding: 8px 10px 8px 40px; position: relative; border-bottom: 1px solid var(--line); }
+.steps li::before { content: counter(s); position: absolute; left: 8px; top: 8px; width: 22px; height: 22px; border-radius: 50%;
+                    background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 700; display: grid; place-items: center; }
+.toast { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: var(--bg); padding: 10px 14px; border-radius: 8px;
+         opacity: 0; transition: opacity .2s; pointer-events: none; max-width: 420px; }
+.toast.show { opacity: .95; }
+.explain { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
+.explain b { color: var(--text); font-weight: 600; }
+.prov { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); margin-bottom: 16px; }
+.prov .card { margin: 0; }
+@media (max-width: 600px) { main, .bar { padding-left: 12px; padding-right: 12px; } .grow { grid-template-columns: 110px 1fr 30px; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="title">
+      <h1>Phòng thí nghiệm ảo · Quản lý</h1>
+      <span class="chip" id="aiChip"><span class="dot"></span><span id="aiText">Đang kiểm tra AI…</span></span>
+    </div>
+    <nav id="tabs">
+      <button data-tab="tong-quan" class="active">Tổng quan</button>
+      <button data-tab="kho">Kho hóa chất</button>
+      <button data-tab="thiet-bi">Thiết bị</button>
+      <button data-tab="nhat-ky">Nhật ký</button>
+      <button data-tab="khoa">Mạng lưới khóa AI</button>
+      <button data-tab="thu">Thử AI &amp; robot</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- ======================= Tổng quan ======================= -->
+  <section id="tong-quan" class="active">
+    <div class="grid" id="stats"></div>
+    <div class="two">
+      <div class="card"><h2>Hóa chất theo nhóm</h2><div class="groups" id="groups"></div></div>
+      <div class="card"><h2>Sắp hết, cần nhập thêm</h2><div class="tablewrap"><table id="lowTable"></table></div></div>
+    </div>
+    <div class="card"><h2>Hoạt động gần đây</h2><div id="recent"></div></div>
+  </section>
+
+  <!-- ======================= Kho hóa chất ======================= -->
+  <section id="kho">
+    <div class="card">
+      <div class="toolbar">
+        <input id="q" placeholder="Tìm tên, công thức, số thứ tự, vị trí kệ…" style="flex:1;min-width:220px">
+        <select id="nhom"><option value="">Mọi nhóm</option></select>
+        <label class="small"><input type="checkbox" id="lowOnly"> Chỉ chất sắp hết</label>
+      </div>
+      <div class="tablewrap"><table id="chemTable"></table></div>
+      <div class="pager"><span class="muted small" id="chemInfo"></span>
+        <button class="b sm" id="prev">‹ Trước</button><button class="b sm" id="next">Sau ›</button></div>
+    </div>
+  </section>
+
+  <!-- ======================= Thiết bị ======================= -->
+  <section id="thiet-bi">
+    <div class="card">
+      <div class="toolbar">
+        <input id="eq" placeholder="Tìm thiết bị…" style="flex:1;min-width:200px">
+        <select id="eqType"><option value="">Mọi loại</option></select>
+        <span class="muted small">Sửa số trong bảng là lưu ngay.</span>
+      </div>
+      <div class="tablewrap"><table id="eqTable"></table></div>
+    </div>
+  </section>
+
+  <!-- ======================= Nhật ký ======================= -->
+  <section id="nhat-ky">
+    <div class="card">
+      <h2>Ghi chú mới</h2>
+      <div class="toolbar">
+        <input id="noteTitle" placeholder="Tiêu đề (ví dụ: Buổi thực hành lớp 11A2)" style="flex:1;min-width:220px">
+        <select id="noteLevel"><option value="Info">Thông tin</option><option value="Warning">Cảnh báo</option><option value="Danger">Nguy hiểm</option></select>
+        <button class="b primary" id="noteAdd">Ghi</button>
+      </div>
+      <textarea id="noteBody" rows="2" placeholder="Nội dung (không bắt buộc)"></textarea>
+    </div>
+    <div class="card">
+      <div class="toolbar">
+        <select id="logType">
+          <option value="">Tất cả</option><option value="hien_tuong">Hiện tượng</option><option value="su_co">Sự cố</option>
+          <option value="phan_tich">Kết quả máy phân tích</option><option value="robot">Lệnh robot</option>
+          <option value="kho">Nhập / xuất kho</option><option value="ghi_chu">Ghi chú</option>
+        </select>
+        <span class="muted small">Phòng lab ảo tự ghi hiện tượng, sự cố, kết quả phân tích khi máy chủ đang chạy.</span>
+      </div>
+      <div id="logs"></div>
+    </div>
+  </section>
+
+  <!-- ======================= Khóa AI ======================= -->
+  <section id="khoa">
+    <p class="explain">Nhiều khóa API của <b>Groq</b>, <b>DeepSeek</b> và <b>Gemini</b> dùng chung như một: mỗi lần gọi chọn khóa đang rảnh
+      có <b>ưu tiên</b> nhỏ nhất, cùng ưu tiên thì xoay vòng khóa lâu chưa dùng nhất (chia đều hạn mức miễn phí). Khóa bị giới hạn tốc độ (429)
+      tự nghỉ rồi quay lại, khóa sai (401/403) nghỉ 1 giờ, và nếu mọi khóa đều lỗi thì máy chủ chuyển sang Claude (nếu có <span class="mono">ANTHROPIC_API_KEY</span>).
+      Khóa chỉ lưu trong <span class="mono">data/lab.db</span> trên máy này; web và ứng dụng Unity chỉ thấy dạng che.</p>
+    <div class="prov" id="provCards"></div>
+    <div class="card">
+      <h2>Thêm khóa</h2>
+      <div class="form">
+        <label>Nhà cung cấp<select id="kProv"></select></label>
+        <label>Khóa API<input id="kKey" type="password" autocomplete="off" spellcheck="false" placeholder="dán khóa vào đây"></label>
+        <label>Nhãn<input id="kLabel" placeholder="ví dụ: tài khoản 1"></label>
+        <label>Ghim mô hình (không bắt buộc)<input id="kModel" placeholder="tự chọn mạnh nhất"></label>
+        <label>Ưu tiên<input id="kPrio" type="number" value="10" min="0" max="99"></label>
+        <button class="b primary" id="kAdd">Thêm</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Các khóa</h2>
+      <div class="tablewrap"><table id="keyTable"></table></div>
+    </div>
+  </section>
+
+  <!-- ======================= Thử AI ======================= -->
+  <section id="thu">
+    <div class="two">
+      <div class="card">
+        <h2>Hỏi thử qua mạng lưới khóa</h2>
+        <textarea id="askQ" rows="3">Vì sao nhỏ dung dịch NaOH vào CuSO4 lại có kết tủa xanh lam?</textarea>
+        <div class="toolbar" style="margin-top:8px"><button class="b primary" id="askBtn">Gửi</button><span class="muted small" id="askMeta"></span></div>
+        <div class="answer" id="askOut"></div>
+      </div>
+      <div class="card">
+        <h2>Thử lập kế hoạch cho robot</h2>
+        <p class="explain">Mô hình AI không nhìn thấy cảnh 3D. Ứng dụng gửi <b>ảnh chụp cảnh dạng chữ</b> (mỗi vật một mã), mô hình trả về
+          <b>kế hoạch</b> gồm các kỹ năng có sẵn tham chiếu mã vật, máy chủ <b>kiểm tra</b> từng bước, rồi robot thực hiện bằng đi bộ và IK tay.</p>
+        <textarea id="planQ" rows="2">Minh họa thí nghiệm nhận biết ion Cu2+ bằng NaOH trong ống nghiệm 1 giúp mình</textarea>
+        <details style="margin:8px 0"><summary class="small muted">Ảnh chụp cảnh mẫu (sửa được)</summary>
+          <textarea id="planScene" rows="10" class="mono small"></textarea></details>
+        <div class="toolbar"><button class="b primary" id="planBtn">Lập kế hoạch</button><span class="muted small" id="planMeta"></span></div>
+        <div class="answer" id="planSay"></div>
+        <ol class="steps" id="planSteps"></ol>
+        <div class="small" id="planDrop"></div>
+      </div>
+    </div>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmt = n => Number(n).toLocaleString("vi-VN", { maximumFractionDigits: 2 });
+const STATE = { dd: "dung dịch", long: "lỏng", ran: "rắn", khi: "khí", giay: "giấy thử" };
+const KIND = { hien_tuong: "Hiện tượng", su_co: "Sự cố", phan_tich: "Phân tích", robot: "Robot", kho: "Kho", ghi_chu: "Ghi chú" };
+const STATUS = { tot: ["Tốt", "good"], chua_thu: ["Chưa thử", ""], gioi_han: ["Giới hạn tốc độ", "warn"], khoa_sai: ["Khóa sai", "bad"],
+                 loi: ["Lỗi", "warn"], loi_mang: ["Lỗi mạng", "warn"] };
+let groups = {};
+
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 2600); }
+
+async function api(path, opt = {}) {
+  const r = await fetch(path, { headers: { "Content-Type": "application/json" }, ...opt, body: opt.body ? JSON.stringify(opt.body) : undefined });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.detail || r.statusText);
+  return data;
+}
+
+function when(ts) {
+  const d = new Date(ts * 1000), s = (Date.now() - d) / 1000;
+  if (s < 60) return "vừa xong"; if (s < 3600) return Math.floor(s / 60) + " phút trước"; if (s < 86400) return Math.floor(s / 3600) + " giờ trước";
+  return d.toLocaleString("vi-VN");
+}
+
+// ---------------- Tab ----------------
+const loaders = {};
+document.querySelectorAll("#tabs button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("#tabs button").forEach(x => x.classList.toggle("active", x === b));
+  document.querySelectorAll("main section").forEach(s => s.classList.toggle("active", s.id === b.dataset.tab));
+  location.hash = b.dataset.tab;
+  loaders[b.dataset.tab]?.();
+});
+
+async function health() {
+  try {
+    const h = await api("/suc-khoe");
+    $("#aiChip").className = "chip " + (h.ok ? "on" : "off");
+    $("#aiText").textContent = h.ok ? `AI: ${h.mo_hinh || h.nha_cung_cap}` : "AI: chưa có khóa nào dùng được";
+  } catch { $("#aiChip").className = "chip off"; $("#aiText").textContent = "Mất kết nối máy chủ"; }
+}
+
+// ---------------- Tổng quan ----------------
+loaders["tong-quan"] = async () => {
+  const d = await api("/api/tong-quan");
+  groups = d.nhom;
+  const tiles = [
+    ["Hóa chất trong kho", d.so_hoa_chat, ""], ["Sắp hết", d.sap_het, d.sap_het ? "warn" : "good"], ["Kệ hóa chất", d.so_ke, ""],
+    ["Loại thiết bị", d.so_thiet_bi, ""], ["Dụng cụ (cái)", d.tong_dung_cu, ""], ["Hỏng", d.dung_cu_hong, d.dung_cu_hong ? "bad" : "good"],
+    ["Đang mượn", d.dang_muon, ""], ["Sự cố 7 ngày", d.su_co_7_ngay, d.su_co_7_ngay ? "warn" : "good"],
+    ["Khóa AI dùng được", `${d.khoa_dung_duoc}/${d.khoa_api}`, d.khoa_dung_duoc ? "good" : "warn"],
+  ];
+  $("#stats").innerHTML = tiles.map(([k, v, c]) => `<div class="stat ${c}"><div class="k">${esc(k)}</div><div class="v">${esc(v)}</div></div>`).join("");
+  const max = Math.max(...Object.values(d.nhom).map(g => g.so_luong));
+  $("#groups").innerHTML = Object.values(d.nhom).sort((a, b) => b.so_luong - a.so_luong).map(g =>
+    `<div class="grow"><span>${esc(g.ten)}</span><div class="track"><div class="fill" style="width:${g.so_luong / max * 100}%;background:${esc(g.mau)}"></div></div><span class="muted num">${g.so_luong}</span></div>`).join("");
+  $("#lowTable").innerHTML = d.sap_het_ds.length
+    ? `<tr><th>Hóa chất</th><th>Vị trí</th><th class="num">Còn</th><th class="num">Tối thiểu</th></tr>` +
+      d.sap_het_ds.map(c => `<tr><td>${esc(c.ten)} <span class="muted">${esc(c.cong_thuc)}</span></td><td class="mono">${esc(c.vi_tri)}</td><td class="num">${fmt(c.so_luong)} ${esc(c.don_vi)}</td><td class="num">${fmt(c.toi_thieu)}</td></tr>`).join("")
+    : `<tr><td class="muted">Không có chất nào dưới mức tối thiểu.</td></tr>`;
+  const logs = await api("/api/nhat-ky?gioi_han=6");
+  $("#recent").innerHTML = logs.length ? logs.map(logHtml).join("") : `<p class="muted">Chưa có hoạt động. Mở phòng lab ảo khi máy chủ đang chạy để ghi nhật ký tự động.</p>`;
+  fillGroupSelect();
+};
+
+function fillGroupSelect() {
+  const sel = $("#nhom");
+  if (sel.options.length > 1) return;
+  Object.entries(groups).forEach(([ma, g]) => sel.add(new Option(`${g.ten} (${g.so_luong})`, ma)));
+}
+
+// ---------------- Kho hóa chất ----------------
+let page = 1, qTimer;
+loaders["kho"] = async () => {
+  if (!Object.keys(groups).length) groups = (await api("/api/tong-quan")).nhom;
+  fillGroupSelect();
+  const p = new URLSearchParams({ q: $("#q").value, nhom: $("#nhom").value, sap_het: $("#lowOnly").checked, trang: page, moi_trang: 40 });
+  const d = await api("/api/hoa-chat?" + p);
+  const pages = Math.max(1, Math.ceil(d.tong / d.moi_trang));
+  $("#chemInfo").textContent = `${d.tong} chất · trang ${d.trang}/${pages}`;
+  $("#prev").disabled = page <= 1; $("#next").disabled = page >= pages;
+  $("#chemTable").innerHTML = `<tr><th class="num">STT</th><th>Tên</th><th>Công thức</th><th>Nhóm</th><th>Dạng</th><th>Vị trí</th>
+      <th class="num">Tồn kho</th><th class="num">Tối thiểu</th><th>Hạn dùng</th><th></th></tr>` +
+    d.ds.map(c => `<tr class="${c.sap_het ? "low" : ""}" data-stt="${c.stt}">
+      <td class="num muted">${c.stt}</td><td>${esc(c.ten)}${c.nguy_hiem.length ? ` <span class="badge warn" title="${esc(c.nguy_hiem.join(", "))}">nguy hiểm</span>` : ""}</td>
+      <td class="mono">${esc(c.cong_thuc)}</td>
+      <td><span class="swatch" style="background:${esc(groups[c.nhom]?.mau || "#888")}"></span>${esc(groups[c.nhom]?.ten || c.nhom)}</td>
+      <td class="small">${esc(STATE[c.trang_thai] || c.trang_thai)}${c.nong_do ? " " + esc(c.nong_do) : ""}</td>
+      <td class="mono small">${esc(c.vi_tri)}</td>
+      <td class="num"><b>${fmt(c.so_luong)}</b> ${esc(c.don_vi)}</td>
+      <td class="num"><input type="number" min="0" value="${c.toi_thieu}" data-f="toi_thieu"></td>
+      <td><input type="date" value="${esc(c.han_dung)}" data-f="han_dung"></td>
+      <td style="white-space:nowrap"><button class="b sm" data-a="+">+ Nhập</button> <button class="b sm" data-a="-">− Xuất</button></td></tr>`).join("");
+};
+$("#q").oninput = () => { clearTimeout(qTimer); qTimer = setTimeout(() => { page = 1; loaders.kho(); }, 250); };
+$("#nhom").onchange = $("#lowOnly").onchange = () => { page = 1; loaders.kho(); };
+$("#prev").onclick = () => { page--; loaders.kho(); };
+$("#next").onclick = () => { page++; loaders.kho(); };
+$("#chemTable").addEventListener("click", async e => {
+  const b = e.target.closest("button[data-a]"); if (!b) return;
+  const tr = b.closest("tr"), name = tr.children[1].firstChild.textContent;
+  const v = parseFloat((prompt(`${b.dataset.a === "+" ? "Nhập thêm" : "Xuất dùng"} bao nhiêu (${name})?`, "100") || "").replace(",", "."));
+  if (!(v > 0)) return;
+  try { await api(`/api/hoa-chat/${tr.dataset.stt}`, { method: "PATCH", body: { them: b.dataset.a === "+" ? v : -v } }); toast("Đã cập nhật " + name); loaders.kho(); }
+  catch (err) { toast(err.message); }
+});
+$("#chemTable").addEventListener("change", async e => {
+  const f = e.target.dataset.f; if (!f) return;
+  const tr = e.target.closest("tr");
+  try { await api(`/api/hoa-chat/${tr.dataset.stt}`, { method: "PATCH", body: { [f]: f === "toi_thieu" ? parseFloat(e.target.value) || 0 : e.target.value } }); toast("Đã lưu"); }
+  catch (err) { toast(err.message); }
+});
+
+// ---------------- Thiết bị ----------------
+let equipment = [];
+loaders["thiet-bi"] = async () => {
+  equipment = await api("/api/thiet-bi");
+  const sel = $("#eqType");
+  if (sel.options.length === 1) [...new Set(equipment.map(e => e.phan_loai))].sort().forEach(t => sel.add(new Option(t, t)));
+  renderEquipment();
+};
+function renderEquipment() {
+  const q = $("#eq").value.toLowerCase(), t = $("#eqType").value;
+  const rows = equipment.filter(e => (!t || e.phan_loai === t) && (!q || (e.ten + " " + (e.ten_tieng_anh || "") + " " + (e.cong_dung || "")).toLowerCase().includes(q)));
+  $("#eqTable").innerHTML = `<tr><th class="num">STT</th><th>Tên</th><th>Loại</th><th>Công dụng</th><th class="num">Số lượng</th><th class="num">Hỏng</th>
+      <th class="num">Đang mượn</th><th class="num">Sẵn sàng</th><th>Vị trí</th></tr>` +
+    rows.map(e => `<tr data-stt="${e.stt}"><td class="num muted">${e.stt}</td><td>${esc(e.ten)}<div class="muted small">${esc(e.ten_tieng_anh || "")}</div></td>
+      <td class="small">${esc(e.phan_loai)}</td><td class="small muted">${esc(e.cong_dung || "")}</td>
+      <td class="num"><input type="number" min="0" value="${e.so_luong}" data-f="so_luong"></td>
+      <td class="num"><input type="number" min="0" value="${e.hong}" data-f="hong"></td>
+      <td class="num"><input type="number" min="0" value="${e.dang_muon}" data-f="dang_muon"></td>
+      <td class="num"><span class="badge ${e.san_sang > 0 ? "good" : "bad"}">${e.san_sang}</span></td>
+      <td><input value="${esc(e.vi_tri)}" data-f="vi_tri" placeholder="tủ, kệ…" style="width:120px"></td></tr>`).join("");
+}
+$("#eq").oninput = renderEquipment; $("#eqType").onchange = renderEquipment;
+$("#eqTable").addEventListener("change", async e => {
+  const f = e.target.dataset.f; if (!f) return;
+  const stt = +e.target.closest("tr").dataset.stt;
+  try {
+    const r = await api(`/api/thiet-bi/${stt}`, { method: "PATCH", body: { [f]: f === "vi_tri" ? e.target.value : parseInt(e.target.value) || 0 } });
+    const i = equipment.findIndex(x => x.stt === stt);
+    equipment[i] = { ...equipment[i], ...r, san_sang: r.so_luong - r.hong - r.dang_muon };
+    renderEquipment(); toast("Đã lưu " + r.ten);
+  } catch (err) { toast(err.message); }
+});
+
+// ---------------- Nhật ký ----------------
+function logHtml(l) {
+  return `<div class="log ${esc(l.muc_do)}"><span class="badge">${esc(KIND[l.loai] || l.loai)}</span> <span class="t">${esc(l.tieu_de)}</span>
+    <span class="muted small"> · ${when(l.thoi_gian)}${l.nguon ? " · " + esc(l.nguon) : ""}</span>${l.noi_dung ? `<pre>${esc(l.noi_dung)}</pre>` : ""}</div>`;
+}
+loaders["nhat-ky"] = async () => {
+  const logs = await api("/api/nhat-ky?gioi_han=200" + ($("#logType").value ? "&loai=" + $("#logType").value : ""));
+  $("#logs").innerHTML = logs.length ? logs.map(logHtml).join("") : `<p class="muted">Chưa có mục nào.</p>`;
+};
+$("#logType").onchange = () => loaders["nhat-ky"]();
+$("#noteAdd").onclick = async () => {
+  const t = $("#noteTitle").value.trim(); if (!t) { toast("Nhập tiêu đề"); return; }
+  await api("/api/nhat-ky", { method: "POST", body: { loai: "ghi_chu", tieu_de: t, noi_dung: $("#noteBody").value, muc_do: $("#noteLevel").value, nguon: "web" } });
+  $("#noteTitle").value = $("#noteBody").value = ""; loaders["nhat-ky"]();
+};
+
+// ---------------- Khóa AI ----------------
+const WHERE = { groq: "console.groq.com → API Keys", deepseek: "platform.deepseek.com → API keys", gemini: "aistudio.google.com → Get API key" };
+loaders["khoa"] = async () => {
+  const d = await api("/api/khoa");
+  const sel = $("#kProv");
+  if (!sel.options.length) Object.entries(d.nha_cung_cap).forEach(([k, p]) => sel.add(new Option(p.ten, k)));
+  $("#provCards").innerHTML = Object.entries(d.nha_cung_cap).map(([k, p]) => {
+    const mine = d.ds.filter(x => x.nha_cung_cap === k), ok = mine.filter(x => x.bat && !x.dang_nghi_giay && x.trang_thai !== "khoa_sai").length;
+    return `<div class="card"><h2>${esc(p.ten)}</h2><div class="small muted">Mô hình: tự lấy danh sách từ ${esc(p.ten)}, dùng mô hình mạnh nhất, lỗi hoặc hết hạn mức thì tự chuyển mô hình khác</div>
+      <div class="small muted">Lấy khóa: ${esc(WHERE[k] || "")}</div><div style="margin-top:6px"><span class="badge ${ok ? "good" : mine.length ? "warn" : ""}">${ok}/${mine.length} khóa sẵn sàng</span></div></div>`;
+  }).join("");
+  $("#keyTable").innerHTML = d.ds.length ? `<tr><th>#</th><th>Nhà cung cấp</th><th>Nhãn</th><th>Khóa</th><th>Mô hình</th><th class="num">Ưu tiên</th>
+      <th>Trạng thái</th><th class="num">Gọi / lỗi</th><th class="num">Trễ</th><th>Bật</th><th></th></tr>` +
+    d.ds.map(k => {
+      const [st, cls] = STATUS[k.trang_thai] || [k.trang_thai, ""];
+      return `<tr data-id="${k.id}"><td class="muted">${k.id}</td><td>${esc(k.ten_nha_cung_cap)}</td><td>${esc(k.nhan)}</td><td class="mono small">${esc(k.khoa)}</td>
+        <td><input value="${esc(k.mo_hinh)}" placeholder="tự chọn mạnh nhất" title="Ghim một mô hình để thử trước; để trống là tự chọn" data-f="mo_hinh" style="width:170px">
+          ${k.mo_hinh_dang_dung ? `<div class="small">Đang dùng <span class="mono">${esc(k.mo_hinh_dang_dung)}</span></div>` : ""}
+          ${k.thu_tu_mo_hinh.length ? `<details class="small muted"><summary>Thứ tự thử (${k.thu_tu_mo_hinh.length})</summary>${k.thu_tu_mo_hinh.map((m, i) =>
+            `<div class="mono">${i + 1}. ${esc(m.ten)}${m.nghi_giay ? ` <span title="${esc(m.ly_do)}">· nghỉ ${m.nghi_giay > 5400 ? Math.round(m.nghi_giay / 3600) + " giờ" : m.nghi_giay > 90 ? Math.round(m.nghi_giay / 60) + " phút" : m.nghi_giay + " s"}: ${esc(m.ly_do)}</span>` : ""}</div>`).join("")}</details>` : ""}</td>
+        <td class="num"><input type="number" min="0" max="99" value="${k.uu_tien}" data-f="uu_tien" style="width:64px"></td>
+        <td><span class="badge ${cls}" title="${esc(k.loi_gan_nhat)}">${esc(st)}</span>${k.dang_nghi_giay ? `<div class="small muted">nghỉ ${k.dang_nghi_giay} s</div>` : ""}
+          ${k.loi_gan_nhat ? `<div class="small muted" style="max-width:220px">${esc(k.loi_gan_nhat)}</div>` : ""}</td>
+        <td class="num">${k.so_lan_goi} / ${k.so_lan_loi}</td><td class="num">${k.tre_ms ? Math.round(k.tre_ms) + " ms" : "–"}</td>
+        <td><input type="checkbox" ${k.bat ? "checked" : ""} data-f="bat"></td>
+        <td style="white-space:nowrap"><button class="b sm" data-a="thu">Thử</button> <button class="b sm danger" data-a="xoa">Xóa</button></td></tr>`;
+    }).join("") : `<tr><td class="muted">Chưa có khóa nào. Thêm ít nhất một khóa Groq, DeepSeek hoặc Gemini ở trên.</td></tr>`;
+};
+$("#kAdd").onclick = async () => {
+  const key = $("#kKey").value.trim(); if (!key) { toast("Dán khóa API trước"); return; }
+  try {
+    await api("/api/khoa", { method: "POST", body: { nha_cung_cap: $("#kProv").value, khoa: key, nhan: $("#kLabel").value, mo_hinh: $("#kModel").value, uu_tien: +$("#kPrio").value || 10 } });
+    $("#kKey").value = $("#kLabel").value = $("#kModel").value = ""; toast("Đã thêm khóa"); loaders.khoa(); health();
+  } catch (err) { toast(err.message); }
+};
+$("#keyTable").addEventListener("change", async e => {
+  const f = e.target.dataset.f; if (!f) return;
+  const id = e.target.closest("tr").dataset.id;
+  const v = f === "bat" ? e.target.checked : f === "uu_tien" ? +e.target.value : e.target.value;
+  await api(`/api/khoa/${id}`, { method: "PATCH", body: { [f]: v } }); toast("Đã lưu"); loaders.khoa(); health();
+});
+$("#keyTable").addEventListener("click", async e => {
+  const b = e.target.closest("button[data-a]"); if (!b) return;
+  const id = b.closest("tr").dataset.id;
+  if (b.dataset.a === "xoa") {
+    if (!confirm("Xóa khóa #" + id + "?")) return;
+    await api(`/api/khoa/${id}`, { method: "DELETE" }); toast("Đã xóa"); loaders.khoa(); health(); return;
+  }
+  b.disabled = true; b.textContent = "…";
+  try { const r = await api(`/api/khoa/${id}/thu`, { method: "POST" }); toast(r.ok ? `Khóa #${id} dùng được: ${r.mo_hinh} (${r.tre_ms} ms, ${r.so_mo_hinh} mô hình${r.bo_qua.length ? ", bỏ qua " + r.bo_qua.length + " mô hình lỗi" : ""})` : `Khóa #${id} lỗi: ${r.loi}`); }
+  catch (err) { toast(err.message); }
+  loaders.khoa(); health();
+});
+
+// ---------------- Thử AI & robot ----------------
+$("#askBtn").onclick = async () => {
+  $("#askBtn").disabled = true; $("#askOut").textContent = "Đang hỏi…"; $("#askMeta").textContent = "";
+  try {
+    const r = await api("/api/ai/thu", { method: "POST", body: { cau_hoi: $("#askQ").value } });
+    $("#askOut").textContent = r.tra_loi; $("#askMeta").textContent = `${r.nha_cung_cap} · ${r.mo_hinh} · khóa #${r.khoa_id}`;
+  } catch (err) { $("#askOut").textContent = err.message; }
+  $("#askBtn").disabled = false;
+};
+
+const SAMPLE_SCENE = {
+  khu_vuc: "Bàn định tính (bàn 4)", nguoi_dang_cam: "", robot_dang_cam: "", che_do: "tự do",
+  vat: [
+    { id: "ong_nghiem_1", ten: "Ống nghiệm 1", loai: "ong_nghiem", chua: "trống", khoang_cach: 0.5 },
+    { id: "ong_nghiem_2", ten: "Ống nghiệm 2", loai: "ong_nghiem", chua: "trống", khoang_cach: 0.5 },
+    { id: "hoa_chat:253", ten: "Đồng(II) sunfat CuSO4 0,5 M", loai: "lo_hoa_chat", chua: "CuSO4 0,5 M", khoang_cach: 0.9 },
+    { id: "hoa_chat:124", ten: "Natri hiđroxit NaOH 1 M", loai: "lo_hoa_chat", chua: "NaOH 1 M", khoang_cach: 0.9 },
+    { id: "coc_1", ten: "Cốc có mỏ 100 ml", loai: "coc", chua: "trống", khoang_cach: 0.6 },
+    { id: "thiet_bi_1", ten: "Đèn cồn", loai: "thiet_bi", chua: "", khoang_cach: 0.7 },
+    { id: "cho_dat_1", ten: "Chỗ đặt: Giá ống nghiệm", loai: "cho_dat", chua: "", khoang_cach: 0.5 },
+  ],
+  su_kien: [],
+};
+$("#planScene").value = JSON.stringify(SAMPLE_SCENE, null, 2);
+$("#planBtn").onclick = async () => {
+  let scene;
+  try { scene = JSON.parse($("#planScene").value); } catch { toast("Ảnh chụp cảnh không phải JSON hợp lệ"); return; }
+  $("#planBtn").disabled = true; $("#planSay").textContent = "Đang lập kế hoạch…"; $("#planSteps").innerHTML = $("#planDrop").innerHTML = ""; $("#planMeta").textContent = "";
+  try {
+    const r = await api("/robot/ke-hoach", { method: "POST", body: { cau_hoi: $("#planQ").value, the_gioi: scene, lich_su: [] } });
+    $("#planSay").textContent = r.tra_loi || "(không có lời đáp)"; $("#planMeta").textContent = "nguồn: " + r.nguon;
+    $("#planSteps").innerHTML = r.ke_hoach.map(s => `<li><b class="mono">${esc(s.ky_nang)}</b>${s.doi_tuong ? ` <span class="badge">${esc(s.doi_tuong)}</span>` : ""}
+      ${s.dich ? ` → <span class="badge">${esc(s.dich)}</span>` : ""}${s.so_luong ? ` <span class="muted">× ${fmt(s.so_luong)}</span>` : ""}${s.loi ? `<div class="muted small">“${esc(s.loi)}”</div>` : ""}</li>`).join("");
+    $("#planDrop").innerHTML = r.bo_qua.length ? `<p class="muted">Máy chủ đã bỏ ${r.bo_qua.length} bước không hợp lệ:</p>` + r.bo_qua.map(x => `<div class="badge warn" style="margin:2px">${esc(x)}</div>`).join("") : "";
+  } catch (err) { $("#planSay").textContent = err.message; }
+  $("#planBtn").disabled = false;
+};
+
+// ---------------- Khởi động ----------------
+health(); setInterval(health, 30000);
+// tự làm mới các trang chỉ để xem (không làm mới trang có ô đang sửa)
+setInterval(() => { const a = document.querySelector("main section.active")?.id; if (a === "nhat-ky" || a === "tong-quan") loaders[a](); }, 15000);
+const start = location.hash.slice(1);
+(document.querySelector(`#tabs button[data-tab="${start}"]`) || document.querySelector("#tabs button")).click();
+</script>
+</body>
+</html>

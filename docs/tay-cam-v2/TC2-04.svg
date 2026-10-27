@@ -1,0 +1,268 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 820" width="1180" height="820"><style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&amp;family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap');
+.paper{fill:var(--sheet,#fbfcfa);stroke:var(--rule,#c8d2d0);stroke-width:1}
+.ln{fill:none;stroke:var(--ink,#18272c);stroke-width:1.4;stroke-linejoin:round}
+.thin{fill:none;stroke:var(--ink,#18272c);stroke-width:.7}
+.hid{fill:none;stroke:var(--ink-2,#5d6e72);stroke-width:.8;stroke-dasharray:4 3}
+.ctr{fill:none;stroke:var(--ink-2,#5d6e72);stroke-width:.6;stroke-dasharray:14 3 2 3}
+.dim{fill:none;stroke:var(--dim,#0a6b8a);stroke-width:.75}
+.dimt{fill:var(--dim,#0a6b8a);font:500 11.5px 'JetBrains Mono',ui-monospace,monospace}
+.arr{fill:var(--dim,#0a6b8a)}
+.t{fill:var(--ink,#18272c);font:500 12.5px 'Be Vietnam Pro','Segoe UI',sans-serif}
+.tb{fill:var(--ink,#18272c);font:700 12.5px 'Be Vietnam Pro','Segoe UI',sans-serif}
+.ts{fill:var(--ink-2,#5d6e72);font:400 11px 'Be Vietnam Pro','Segoe UI',sans-serif}
+.tw{fill:var(--warn,#b4471a);font:600 11.5px 'Be Vietnam Pro','Segoe UI',sans-serif}
+.h{fill:var(--ink,#18272c);font:700 17px 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.06em}
+.hs{fill:var(--ink-2,#5d6e72);font:600 12px 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.08em}
+.pvc{fill:var(--pvc,#dde5e3);stroke:var(--ink,#18272c);stroke-width:1.4}
+.pvc2{fill:var(--pvc2,#c9d4d1);stroke:var(--ink,#18272c);stroke-width:1.4}
+.mica{fill:var(--mica,rgba(110,180,210,.35));stroke:var(--ink,#18272c);stroke-width:1.1}
+.cut{fill:url(#gach);stroke:var(--ink,#18272c);stroke-width:1.2}
+.gach{stroke:var(--ink,#18272c);stroke-width:.7}
+.pcbk{fill:#2a3036;stroke:var(--ink,#18272c);stroke-width:1}
+.pcbb{fill:#2563a6;stroke:var(--ink,#18272c);stroke-width:1}
+.pcbt{fill:#0f7c86;stroke:var(--ink,#18272c);stroke-width:1}
+.pcbr{fill:#c0392b;stroke:var(--ink,#18272c);stroke-width:1}
+.phip{fill:#c9a066;stroke:var(--ink,#18272c);stroke-width:1}
+.kim{fill:#aab3b8;stroke:var(--ink,#18272c);stroke-width:1}
+.dong{fill:#c99a3b;stroke:var(--ink,#18272c);stroke-width:1}
+.nhua{fill:#4a5257;stroke:var(--ink,#18272c);stroke-width:1}
+.ledx{fill:#22b573;stroke:var(--ink,#18272c);stroke-width:.8}
+.ledd{fill:#e0362c;stroke:var(--ink,#18272c);stroke-width:.8}
+.pin{fill:#3b4a52;stroke:var(--ink,#18272c);stroke-width:1}
+.hand{fill:var(--hand,#e9b98f);stroke:var(--hand-ln,#9c5f37);stroke-width:1.3}
+.handln{fill:none;stroke:var(--hand-ln,#9c5f37);stroke-width:1.1}
+.fig{fill:none;stroke:var(--fig,#a9bcc0);stroke-linecap:round;stroke-linejoin:round}
+.figf{fill:var(--fig,#a9bcc0)}
+.zone{fill:var(--ok,#2f7d4f);fill-opacity:.16;stroke:var(--ok,#2f7d4f);stroke-width:1;stroke-dasharray:5 3}
+.zonet{fill:var(--ok,#2f7d4f);font:600 11.5px 'Be Vietnam Pro','Segoe UI',sans-serif}
+.box{fill:none;stroke:var(--ink-2,#5d6e72);stroke-width:1;stroke-dasharray:7 4}
+.mod{fill:var(--sheet,#fbfcfa);stroke:var(--ink,#18272c);stroke-width:1.4}
+.modh{fill:var(--pvc,#dde5e3)}
+.dot{fill:var(--ink,#18272c)}
+.ball{fill:var(--sheet,#fbfcfa);stroke:var(--ink,#18272c);stroke-width:1.1}
+.ballt{fill:var(--ink,#18272c);font:700 11px 'JetBrains Mono',ui-monospace,monospace}
+.warnbox{fill:var(--warn,#b4471a);fill-opacity:.1;stroke:var(--warn,#b4471a);stroke-width:1}
+.cable{fill:none;stroke:var(--gnd,#2b3135);stroke-linecap:round}
+.wire{fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.gnd{stroke:var(--gnd,#2b3135)}
+</style><defs><marker id="m24" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M0,1.5 L10,5 L0,8.5 z" class="arr"/></marker><pattern id="gach" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" class="gach"/></pattern></defs>
+<style>
+.vo{fill:var(--pvc,#dde5e3);stroke:var(--ink,#18272c);stroke-width:1.1;fill-rule:evenodd}
+.toi{fill:#2a3238;stroke:var(--ink,#18272c);stroke-width:1;fill-rule:evenodd}
+.hl{fill:var(--halo,#11b5d4);stroke:var(--ink,#18272c);stroke-width:1;fill-rule:evenodd}
+.vien{fill:none;stroke:var(--ink,#18272c);stroke-width:1.6;stroke-linejoin:round}
+.cutv{fill:url(#gach);stroke:var(--ink,#18272c);stroke-width:1.1;fill-rule:evenodd}
+.lkf{stroke:var(--ink,#18272c);stroke-width:.8;fill-rule:evenodd}
+.chart{fill:none;stroke:var(--dim,#0a6b8a);stroke-width:2.2}
+.grid{fill:none;stroke:var(--rule,#c8d2d0);stroke-width:.7}
+.tay{fill:var(--hand,#e9b98f);fill-opacity:.55;stroke:var(--hand-ln,#9c5f37);stroke-width:1.1}
+.cam{fill:var(--ink-2,#5d6e72)}
+.tia{fill:none;stroke:var(--halo,#11b5d4);stroke-width:1;stroke-dasharray:5 4}
+.code{fill:var(--ink,#18272c);font:500 12px 'JetBrains Mono',ui-monospace,monospace}
+</style>
+<rect x="6" y="6" width="1168" height="808" rx="4" class="paper" />
+<rect x="14" y="14" width="1152" height="792" class="thin" />
+<rect x="626" y="732" width="540" height="74" class="ln" />
+<line x1="626" y1="762" x2="1036" y2="762" class="thin" />
+<line x1="1036" y1="732" x2="1036" y2="806" class="thin" />
+<line x1="1036" y1="762" x2="1166" y2="762" class="thin" />
+<line x1="1036" y1="784" x2="1166" y2="784" class="thin" />
+<text x="636" y="753" class="h" text-anchor="start" >SƠ ĐỒ ĐẤU NỐI ESP32</text>
+<text x="636" y="779" class="ts" text-anchor="start" >ESP32 DevKitC 38 chân · mọi cảm biến chạy 3,3 V</text>
+<text x="636" y="797" class="ts" text-anchor="start" >Đơn vị: mm · Dự án KHKT Phòng thí nghiệm ảo · 27/10/2026</text>
+<text x="1046" y="745" class="hs" text-anchor="start" >BẢN VẼ SỐ</text>
+<text x="1046" y="759" class="tb" text-anchor="start" >TC2-04</text>
+<text x="1046" y="777" class="ts" text-anchor="start" >Tay cầm V2 · Halo</text>
+<text x="1046" y="799" class="ts" text-anchor="start" >Chiếu góc thứ nhất</text>
+<text x="40" y="46" class="h" text-anchor="start" >SƠ ĐỒ ĐẤU NỐI</text>
+<text x="40" y="62" class="ts" text-anchor="start" >chỉ dùng chân ADC1 cho tín hiệu analog (ADC2 không đọc được khi bật Wi-Fi)</text>
+<rect x="470" y="110" width="230" height="564" rx="6" class="mod" />
+<rect x="520" y="116" width="130" height="46" class="lkf" style="fill:#55626a"/>
+<text x="585" y="144" class="ts" text-anchor="middle" style="fill:#e6eaec">ESP32-WROOM-32</text>
+<rect x="569" y="660" width="32" height="18" class="kim" />
+<text x="585" y="650" class="ts" text-anchor="middle" >USB</text>
+<circle cx="482" cy="176" r="4" class="ln" />
+<text x="492" y="180" class="code" text-anchor="start" >3V3</text>
+<circle cx="482" cy="202" r="4" class="ln" />
+<text x="492" y="206" class="code" text-anchor="start" >EN</text>
+<circle cx="482" cy="228" r="4" class="ln" />
+<text x="492" y="232" class="code" text-anchor="start" >VP 36</text>
+<circle cx="482" cy="254" r="4" class="ln" />
+<text x="492" y="258" class="code" text-anchor="start" >VN 39</text>
+<circle cx="482" cy="280" r="4" class="ln" />
+<text x="492" y="284" class="code" text-anchor="start" >34</text>
+<circle cx="482" cy="306" r="4" class="ln" />
+<text x="492" y="310" class="code" text-anchor="start" >35</text>
+<circle cx="482" cy="332" r="4" class="ln" />
+<text x="492" y="336" class="code" text-anchor="start" >32</text>
+<circle cx="482" cy="358" r="4" class="ln" />
+<text x="492" y="362" class="code" text-anchor="start" >33</text>
+<circle cx="482" cy="384" r="4" class="ln" />
+<text x="492" y="388" class="code" text-anchor="start" >25</text>
+<circle cx="482" cy="410" r="4" class="ln" />
+<text x="492" y="414" class="code" text-anchor="start" >26</text>
+<circle cx="482" cy="436" r="4" class="ln" />
+<text x="492" y="440" class="code" text-anchor="start" >27</text>
+<circle cx="482" cy="462" r="4" class="ln" />
+<text x="492" y="466" class="code" text-anchor="start" >14</text>
+<circle cx="482" cy="488" r="4" class="ln" />
+<text x="492" y="492" class="code" text-anchor="start" >12</text>
+<circle cx="482" cy="514" r="4" class="ln" />
+<text x="492" y="518" class="code" text-anchor="start" >GND</text>
+<circle cx="482" cy="540" r="4" class="ln" />
+<text x="492" y="544" class="code" text-anchor="start" >13</text>
+<circle cx="482" cy="566" r="4" class="ln" />
+<text x="492" y="570" class="code" text-anchor="start" >SD2</text>
+<circle cx="482" cy="592" r="4" class="ln" />
+<text x="492" y="596" class="code" text-anchor="start" >SD3</text>
+<circle cx="482" cy="618" r="4" class="ln" />
+<text x="492" y="622" class="code" text-anchor="start" >CMD</text>
+<circle cx="482" cy="644" r="4" class="ln" />
+<text x="492" y="648" class="code" text-anchor="start" >5V</text>
+<circle cx="688" cy="176" r="4" class="ln" />
+<text x="678" y="180" class="code" text-anchor="end" >GND</text>
+<circle cx="688" cy="202" r="4" class="ln" />
+<text x="678" y="206" class="code" text-anchor="end" >23</text>
+<circle cx="688" cy="228" r="4" class="ln" />
+<text x="678" y="232" class="code" text-anchor="end" >22</text>
+<circle cx="688" cy="254" r="4" class="ln" />
+<text x="678" y="258" class="code" text-anchor="end" >TX0</text>
+<circle cx="688" cy="280" r="4" class="ln" />
+<text x="678" y="284" class="code" text-anchor="end" >RX0</text>
+<circle cx="688" cy="306" r="4" class="ln" />
+<text x="678" y="310" class="code" text-anchor="end" >21</text>
+<circle cx="688" cy="332" r="4" class="ln" />
+<text x="678" y="336" class="code" text-anchor="end" >GND</text>
+<circle cx="688" cy="358" r="4" class="ln" />
+<text x="678" y="362" class="code" text-anchor="end" >19</text>
+<circle cx="688" cy="384" r="4" class="ln" />
+<text x="678" y="388" class="code" text-anchor="end" >18</text>
+<circle cx="688" cy="410" r="4" class="ln" />
+<text x="678" y="414" class="code" text-anchor="end" >5</text>
+<circle cx="688" cy="436" r="4" class="ln" />
+<text x="678" y="440" class="code" text-anchor="end" >17</text>
+<circle cx="688" cy="462" r="4" class="ln" />
+<text x="678" y="466" class="code" text-anchor="end" >16</text>
+<circle cx="688" cy="488" r="4" class="ln" />
+<text x="678" y="492" class="code" text-anchor="end" >4</text>
+<circle cx="688" cy="514" r="4" class="ln" />
+<text x="678" y="518" class="code" text-anchor="end" >0</text>
+<circle cx="688" cy="540" r="4" class="ln" />
+<text x="678" y="544" class="code" text-anchor="end" >2</text>
+<circle cx="688" cy="566" r="4" class="ln" />
+<text x="678" y="570" class="code" text-anchor="end" >15</text>
+<circle cx="688" cy="592" r="4" class="ln" />
+<text x="678" y="596" class="code" text-anchor="end" >SD1</text>
+<circle cx="688" cy="618" r="4" class="ln" />
+<text x="678" y="622" class="code" text-anchor="end" >SD0</text>
+<circle cx="688" cy="644" r="4" class="ln" />
+<text x="678" y="648" class="code" text-anchor="end" >CLK</text>
+<circle cx="482" cy="176" r="4.5" class="ln" style="fill:#e0362c;stroke:#e0362c"/>
+<circle cx="482" cy="280" r="4.5" class="ln" style="fill:#f08c00;stroke:#f08c00"/>
+<circle cx="482" cy="306" r="4.5" class="ln" style="fill:#8d5a2b;stroke:#8d5a2b"/>
+<circle cx="482" cy="332" r="4.5" class="ln" style="fill:#c0392b;stroke:#c0392b"/>
+<circle cx="482" cy="358" r="4.5" class="ln" style="fill:#7f8c8d;stroke:#7f8c8d"/>
+<circle cx="482" cy="436" r="4.5" class="ln" style="fill:#8e44ad;stroke:#8e44ad"/>
+<circle cx="482" cy="514" r="4.5" class="dot" />
+<circle cx="688" cy="228" r="4.5" class="ln" style="fill:#2e9e44;stroke:#2e9e44"/>
+<circle cx="688" cy="306" r="4.5" class="ln" style="fill:#d9a400;stroke:#d9a400"/>
+<circle cx="688" cy="332" r="4.5" class="dot" />
+<rect x="60" y="120" width="180" height="140" rx="5" class="mod" />
+<rect x="60" y="120" width="180" height="22" rx="5" class="modh" />
+<text x="150" y="136" class="tb" text-anchor="middle" >Joystick KY-023</text>
+<text x="232" y="166" class="ts" text-anchor="end" >+5V (nối 3V3)</text>
+<circle cx="240" cy="162" r="3" class="dot" />
+<text x="232" y="188" class="ts" text-anchor="end" >GND</text>
+<circle cx="240" cy="184" r="3" class="dot" />
+<text x="232" y="210" class="ts" text-anchor="end" >VRx</text>
+<circle cx="240" cy="206" r="3" class="dot" />
+<text x="232" y="232" class="ts" text-anchor="end" >VRy</text>
+<circle cx="240" cy="228" r="3" class="dot" />
+<text x="232" y="254" class="ts" text-anchor="end" >SW</text>
+<circle cx="240" cy="250" r="3" class="dot" />
+<rect x="60" y="300" width="180" height="110" rx="5" class="mod" />
+<rect x="60" y="300" width="180" height="22" rx="5" class="modh" />
+<text x="150" y="316" class="tb" text-anchor="middle" >Hall SS49E (cò)</text>
+<text x="232" y="346" class="ts" text-anchor="end" >1 VCC</text>
+<circle cx="240" cy="342" r="3" class="dot" />
+<text x="232" y="368" class="ts" text-anchor="end" >2 GND</text>
+<circle cx="240" cy="364" r="3" class="dot" />
+<text x="232" y="390" class="ts" text-anchor="end" >3 OUT</text>
+<circle cx="240" cy="386" r="3" class="dot" />
+<rect x="250" y="365" width="12" height="24" rx="2" class="mod" />
+<text x="270" y="381" class="ts" text-anchor="start" >100 nF</text>
+<rect x="60" y="450" width="180" height="132" rx="5" class="mod" />
+<rect x="60" y="450" width="180" height="22" rx="5" class="modh" />
+<text x="150" y="466" class="tb" text-anchor="middle" >BMI160</text>
+<text x="232" y="496" class="ts" text-anchor="end" >VIN</text>
+<circle cx="240" cy="492" r="3" class="dot" />
+<text x="232" y="518" class="ts" text-anchor="end" >GND</text>
+<circle cx="240" cy="514" r="3" class="dot" />
+<text x="232" y="540" class="ts" text-anchor="end" >SDA</text>
+<circle cx="240" cy="536" r="3" class="dot" />
+<text x="232" y="562" class="ts" text-anchor="end" >SCL</text>
+<circle cx="240" cy="558" r="3" class="dot" />
+<path d="M470,176 L330,176 L330,492" class="wire" stroke="#e0362c" stroke-width="2.6"/>
+<path d="M240,162 L330,162" class="wire" stroke="#e0362c" stroke-width="2.2"/>
+<circle cx="330" cy="162" r="3" class="dot" />
+<path d="M240,342 L330,342" class="wire" stroke="#e0362c" stroke-width="2.2"/>
+<circle cx="330" cy="342" r="3" class="dot" />
+<path d="M240,492 L330,492" class="wire" stroke="#e0362c" stroke-width="2.2"/>
+<circle cx="330" cy="492" r="3" class="dot" />
+<path d="M470,514 L350,514 L350,184" class="wire gnd" stroke-width="2.6"/>
+<path d="M240,184 L350,184" class="wire gnd" stroke-width="2.2"/>
+<circle cx="350" cy="184" r="3" class="dot" />
+<path d="M240,364 L350,364" class="wire gnd" stroke-width="2.2"/>
+<circle cx="350" cy="364" r="3" class="dot" />
+<path d="M240,514 L350,514" class="wire gnd" stroke-width="2.2"/>
+<circle cx="350" cy="514" r="3" class="dot" />
+<path d="M256,365 L256,386" class="wire" stroke="#c0392b" stroke-width="1.4"/>
+<path d="M256,389 L256,400 L350,400" class="wire gnd" stroke-width="1.4"/>
+<path d="M240,206 L380,206 L380,280 L470,280" class="wire" stroke="#f08c00" stroke-width="2.2"/>
+<path d="M240,228 L392,228 L392,306 L470,306" class="wire" stroke="#8d5a2b" stroke-width="2.2"/>
+<path d="M240,250 L404,250 L404,436 L470,436" class="wire" stroke="#8e44ad" stroke-width="2.2"/>
+<path d="M240,386 L416,386 L416,332 L470,332" class="wire" stroke="#c0392b" stroke-width="2.2"/>
+<path d="M240,536 L300,536 L300,700 L760,700 L760,306 L700,306" class="wire" stroke="#d9a400" stroke-width="2.2"/>
+<path d="M240,558 L300,558 L300,712 L772,712 L772,228 L700,228" class="wire" stroke="#2e9e44" stroke-width="2.2"/>
+<text x="530" y="730" class="ts" text-anchor="middle" >I2C: SDA → GPIO21, SCL → GPIO22 (địa chỉ 0x68)</text>
+<rect x="820" y="110" width="320" height="230" rx="8" class="box" />
+<text x="832" y="130" class="hs" text-anchor="start" >NGUỒN · TÍNH SAU</text>
+<text x="834" y="158" class="t" text-anchor="start" >Pin LiPo 1S 1000 mAh</text>
+<text x="834" y="174" class="ts" text-anchor="start" >40 × 25 × 9, nằm trong cán</text>
+<text x="834" y="194" class="t" text-anchor="start" >TP4056 USB-C có bảo vệ</text>
+<text x="834" y="210" class="ts" text-anchor="start" >sạc qua cửa ở nắp đáy</text>
+<text x="834" y="230" class="t" text-anchor="start" >Công tắc trượt</text>
+<text x="834" y="246" class="ts" text-anchor="start" >khe ở nắp đáy</text>
+<text x="834" y="266" class="t" text-anchor="start" >Hạ áp 3,3 V (HT7333)</text>
+<text x="834" y="282" class="ts" text-anchor="start" >→ chân 3V3, hoặc tăng áp 5 V → chân 5V</text>
+<text x="834" y="302" class="t" text-anchor="start" >Đo pin: chia áp 100k/100k</text>
+<text x="834" y="318" class="ts" text-anchor="start" >→ GPIO33</text>
+<path d="M470,358 L430,358 L430,96 L980,96 L980,110" class="wire" stroke="#7f8c8d" stroke-width="1.6" stroke-dasharray="6 4"/>
+<text x="820" y="380" class="hs" text-anchor="start" >BẢNG CHÂN</text>
+<text x="820" y="404" class="code" text-anchor="start" >GPIO34</text>
+<text x="910" y="404" class="t" text-anchor="start" >VRx joystick</text>
+<text x="1050" y="404" class="ts" text-anchor="start" >ADC1</text>
+<text x="820" y="426" class="code" text-anchor="start" >GPIO35</text>
+<text x="910" y="426" class="t" text-anchor="start" >VRy joystick</text>
+<text x="1050" y="426" class="ts" text-anchor="start" >ADC1</text>
+<text x="820" y="448" class="code" text-anchor="start" >GPIO27</text>
+<text x="910" y="448" class="t" text-anchor="start" >SW joystick</text>
+<text x="1050" y="448" class="ts" text-anchor="start" >INPUT_PULLUP</text>
+<text x="820" y="470" class="code" text-anchor="start" >GPIO32</text>
+<text x="910" y="470" class="t" text-anchor="start" >OUT Hall SS49E</text>
+<text x="1050" y="470" class="ts" text-anchor="start" >ADC1</text>
+<text x="820" y="492" class="code" text-anchor="start" >GPIO21</text>
+<text x="910" y="492" class="t" text-anchor="start" >SDA BMI160</text>
+<text x="1050" y="492" class="ts" text-anchor="start" >I2C</text>
+<text x="820" y="514" class="code" text-anchor="start" >GPIO22</text>
+<text x="910" y="514" class="t" text-anchor="start" >SCL BMI160</text>
+<text x="1050" y="514" class="ts" text-anchor="start" >I2C</text>
+<text x="820" y="536" class="code" text-anchor="start" >GPIO33</text>
+<text x="910" y="536" class="t" text-anchor="start" >điện áp pin</text>
+<text x="1050" y="536" class="ts" text-anchor="start" >ADC1, sau</text>
+<text x="820" y="558" class="code" text-anchor="start" >3V3, GND</text>
+<text x="910" y="558" class="t" text-anchor="start" >nguồn cảm biến</text>
+<text x="1050" y="558" class="ts" text-anchor="start" ></text>
+<text x="820" y="588" class="ts" text-anchor="start" >Gói UDP giữ dạng docs/02: j2x j2y = joystick, nút bit 4,</text>
+<text x="820" y="604" class="ts" text-anchor="start" >thêm trường cò 0–1023 và dữ liệu BMI160.</text>
+</svg>

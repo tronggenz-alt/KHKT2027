@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 560" width="1180" height="560"><style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&amp;family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap');
+.paper{fill:var(--sheet,#fbfcfa);stroke:var(--rule,#c8d2d0);stroke-width:1}
+.ln{fill:none;stroke:var(--ink,#18272c);stroke-width:1.4;stroke-linejoin:round}
+.thin{fill:none;stroke:var(--ink,#18272c);stroke-width:.7}
+.hid{fill:none;stroke:var(--ink-2,#5d6e72);stroke-width:.8;stroke-dasharray:4 3}
+.ctr{fill:none;stroke:var(--ink-2,#5d6e72);stroke-width:.6;stroke-dasharray:14 3 2 3}
+.dim{fill:none;stroke:var(--dim,#0a6b8a);stroke-width:.75}
+.dimt{fill:var(--dim,#0a6b8a);font:500 11.5px 'JetBrains Mono',ui-monospace,monospace}
+.arr{fill:var(--dim,#0a6b8a)}
+.t{fill:var(--ink,#18272c);font:500 12.5px 'Be Vietnam Pro','Segoe UI',sans-serif}
+.tb{fill:var(--ink,#18272c);font:700 12.5px 'Be Vietnam Pro','Segoe UI',sans-serif}
+.ts{fill:var(--ink-2,#5d6e72);font:400 11px 'Be Vietnam Pro','Segoe UI',sans-serif}
+.tw{fill:var(--warn,#b4471a);font:600 11.5px 'Be Vietnam Pro','Segoe UI',sans-serif}
+.h{fill:var(--ink,#18272c);font:700 17px 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.06em}
+.hs{fill:var(--ink-2,#5d6e72);font:600 12px 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.08em}
+.pvc{fill:var(--pvc,#dde5e3);stroke:var(--ink,#18272c);stroke-width:1.4}
+.pvc2{fill:var(--pvc2,#c9d4d1);stroke:var(--ink,#18272c);stroke-width:1.4}
+.mica{fill:var(--mica,rgba(110,180,210,.35));stroke:var(--ink,#18272c);stroke-width:1.1}
+.cut{fill:url(#gach);stroke:var(--ink,#18272c);stroke-width:1.2}
+.gach{stroke:var(--ink,#18272c);stroke-width:.7}
+.pcbk{fill:#2a3036;stroke:var(--ink,#18272c);stroke-width:1}
+.pcbb{fill:#2563a6;stroke:var(--ink,#18272c);stroke-width:1}
+.pcbt{fill:#0f7c86;stroke:var(--ink,#18272c);stroke-width:1}
+.pcbr{fill:#c0392b;stroke:var(--ink,#18272c);stroke-width:1}
+.phip{fill:#c9a066;stroke:var(--ink,#18272c);stroke-width:1}
+.kim{fill:#aab3b8;stroke:var(--ink,#18272c);stroke-width:1}
+.dong{fill:#c99a3b;stroke:var(--ink,#18272c);stroke-width:1}
+.nhua{fill:#4a5257;stroke:var(--ink,#18272c);stroke-width:1}
+.ledx{fill:#22b573;stroke:var(--ink,#18272c);stroke-width:.8}
+.ledd{fill:#e0362c;stroke:var(--ink,#18272c);stroke-width:.8}
+.pin{fill:#3b4a52;stroke:var(--ink,#18272c);stroke-width:1}
+.hand{fill:var(--hand,#e9b98f);stroke:var(--hand-ln,#9c5f37);stroke-width:1.3}
+.handln{fill:none;stroke:var(--hand-ln,#9c5f37);stroke-width:1.1}
+.fig{fill:none;stroke:var(--fig,#a9bcc0);stroke-linecap:round;stroke-linejoin:round}
+.figf{fill:var(--fig,#a9bcc0)}
+.zone{fill:var(--ok,#2f7d4f);fill-opacity:.16;stroke:var(--ok,#2f7d4f);stroke-width:1;stroke-dasharray:5 3}
+.zonet{fill:var(--ok,#2f7d4f);font:600 11.5px 'Be Vietnam Pro','Segoe UI',sans-serif}
+.box{fill:none;stroke:var(--ink-2,#5d6e72);stroke-width:1;stroke-dasharray:7 4}
+.mod{fill:var(--sheet,#fbfcfa);stroke:var(--ink,#18272c);stroke-width:1.4}
+.modh{fill:var(--pvc,#dde5e3)}
+.dot{fill:var(--ink,#18272c)}
+.ball{fill:var(--sheet,#fbfcfa);stroke:var(--ink,#18272c);stroke-width:1.1}
+.ballt{fill:var(--ink,#18272c);font:700 11px 'JetBrains Mono',ui-monospace,monospace}
+.warnbox{fill:var(--warn,#b4471a);fill-opacity:.1;stroke:var(--warn,#b4471a);stroke-width:1}
+.cable{fill:none;stroke:var(--gnd,#2b3135);stroke-linecap:round}
+.wire{fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.gnd{stroke:var(--gnd,#2b3135)}
+</style><defs><marker id="m3" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M0,1.5 L10,5 L0,8.5 z" class="arr"/></marker><pattern id="gach" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" class="gach"/></pattern></defs>
+<rect x="6" y="6" width="1168" height="548" rx="4" class="paper" />
+<rect x="14" y="14" width="1152" height="532" class="thin" />
+<rect x="626" y="472" width="540" height="74" class="ln" />
+<line x1="626" y1="502" x2="1036" y2="502" class="thin" />
+<line x1="1036" y1="502" x2="1166" y2="502" class="thin" />
+<line x1="1036" y1="472" x2="1036" y2="546" class="thin" />
+<line x1="1036" y1="524" x2="1166" y2="524" class="thin" />
+<text x="636" y="493" class="h" text-anchor="start" >HỘP ĐEO THẮT LƯNG</text>
+<text x="636" y="519" class="ts" text-anchor="start" >Hộp nhựa 158×90×60, kẹp thắt lưng phía sau</text>
+<text x="636" y="537" class="ts" text-anchor="start" >Đơn vị: mm · Dự án KHKT Phòng thí nghiệm ảo · 27/10/2026</text>
+<text x="1046" y="485" class="hs" text-anchor="start" >BẢN VẼ SỐ</text>
+<text x="1046" y="499" class="tb" text-anchor="start" >TC-03</text>
+<text x="1046" y="517" class="ts" text-anchor="start" >Phiên bản V1</text>
+<text x="1046" y="539" class="ts" text-anchor="start" >Chiếu góc thứ nhất</text>
+<text x="40" y="48" class="h" text-anchor="start" >NHÌN TỪ TRÊN (đã mở nắp)</text>
+<text x="40" y="64" class="ts" text-anchor="start" >sạc dự phòng nằm dưới tấm đế mica, xem hình cắt bên phải</text>
+<rect x="60" y="112" width="426.6" height="243" rx="16.2" class="pvc2" />
+<rect x="66.8" y="118.8" width="413.1" height="229.5" rx="10.8" class="paper" />
+<rect x="76.2" y="195.7" width="274.3" height="143.9" rx="2" class="pcbt" />
+<text x="211.2" y="274" class="tb" text-anchor="middle" style="fill:#fff">ARDUINO MEGA 2560</text>
+<text x="211.2" y="294.2" class="ts" text-anchor="middle" style="fill:#d8f3f5">101,6 × 53,3</text>
+<rect x="69.2" y="211.9" width="9" height="20.3" class="kim" />
+<rect x="362.4" y="128.2" width="116.1" height="116.1" rx="2" class="pcbr" />
+<rect x="384" y="139" width="72.9" height="40.5" class="nhua" />
+<text x="420.5" y="209.2" class="tb" text-anchor="middle" style="fill:#fff">L298N</text>
+<text x="420.5" y="225.4" class="ts" text-anchor="middle" style="fill:#fde3df">43 × 43 × 27</text>
+<rect x="362.4" y="260.5" width="109.4" height="72.9" rx="2" class="pcbk" />
+<rect x="440.7" y="271.3" width="27" height="51.3" class="kim" />
+<text x="397.5" y="301" class="tb" text-anchor="middle" style="fill:#fff;font-size:10.5px">ESP32-CAM</text>
+<text x="397.5" y="317.2" class="ts" text-anchor="middle" style="fill:#d6dbe0">40,5 × 27</text>
+<rect x="286.8" y="133.6" width="59.4" height="43.2" class="phip" />
+<text x="316.5" y="160.6" class="ts" text-anchor="middle" style="fill:#3b2a10">chia áp</text>
+<rect x="49.2" y="149.8" width="16.2" height="32.4" class="nhua" />
+<rect x="22.2" y="159.2" width="27" height="13.5" class="pin" />
+<circle cx="57.3" cy="149.8" r="1.8" class="dot" />
+<line x1="57.3" y1="149.8" x2="63.3" y2="93.8" class="thin" />
+<text x="67.3" y="97.8" class="t" text-anchor="start" >PG9: cáp 20 lõi từ tay cầm</text>
+<rect x="481.2" y="284.8" width="10.8" height="24.3" class="nhua" />
+<circle cx="486.6" cy="309.1" r="1.8" class="dot" />
+<line x1="486.6" y1="309.1" x2="500.6" y2="349.1" class="thin" />
+<text x="504.6" y="353.1" class="t" text-anchor="start" >lỗ sạc pin dự phòng</text>
+<rect x="141" y="125.5" width="108" height="54" class="box" />
+<text x="195" y="155.2" class="ts" text-anchor="middle" >dây nối, đầu cắm</text>
+<line x1="60" y1="357" x2="60" y2="393" class="dim" />
+<line x1="486.6" y1="357" x2="486.6" y2="393" class="dim" />
+<line x1="60" y1="389" x2="486.6" y2="389" class="dim" marker-start="url(#m3)" marker-end="url(#m3)"/>
+<text x="273.3" y="385" class="dimt" text-anchor="middle" >158</text>
+<line x1="58" y1="112" x2="22" y2="112" class="dim" />
+<line x1="58" y1="355" x2="22" y2="355" class="dim" />
+<line x1="26" y1="112" x2="26" y2="355" class="dim" marker-start="url(#m3)" marker-end="url(#m3)"/>
+<text x="21" y="233.5" class="dimt" text-anchor="middle" transform="rotate(-90 21 233.5)" >90</text>
+<circle cx="411" cy="344.2" r="1.8" class="dot" />
+<line x1="411" y1="344.2" x2="391" y2="421" class="thin" />
+<text x="387" y="425" class="t" text-anchor="end" >ăng-ten ESP32 sát vách nhựa, xa tấm kim loại</text>
+<text x="620" y="120" class="h" text-anchor="start" >CẮT DỌC (CHỒNG LỚP)</text>
+<rect x="620" y="150" width="426.6" height="162" rx="3" class="cut" />
+<rect x="626.8" y="156.8" width="413.1" height="148.5" class="paper" />
+<rect x="641.6" y="260.7" width="378" height="43.2" rx="5" class="pcbk" />
+<text x="830.6" y="285" class="ts" text-anchor="middle" style="fill:#e6eaec">sạc dự phòng 10 000 mAh · 140×68×16</text>
+<rect x="630.8" y="247.2" width="405" height="5.4" class="mica" />
+<rect x="647" y="237.8" width="8.1" height="9.5" class="dong" />
+<rect x="809" y="237.8" width="8.1" height="9.5" class="dong" />
+<rect x="1019.6" y="237.8" width="8.1" height="9.5" class="dong" />
+<rect x="636.2" y="233.4" width="274.3" height="4.3" class="pcbt" />
+<rect x="674" y="204" width="162" height="29.4" class="nhua" />
+<rect x="922.4" y="166.2" width="116.1" height="64.8" class="pcbr" />
+<rect x="938.6" y="166.2" width="81" height="54" class="nhua" />
+<rect x="846.8" y="204" width="59.4" height="29.7" class="pcbk" />
+<rect x="620" y="150" width="426.6" height="6.8" class="pvc" />
+<rect x="741.5" y="312" width="189" height="18.9" rx="3" class="kim" />
+<text x="836" y="342" class="ts" text-anchor="middle" >kẹp thắt lưng (mặt sau)</text>
+<line x1="1048.6" y1="150" x2="1080.6" y2="150" class="dim" />
+<line x1="1048.6" y1="312" x2="1080.6" y2="312" class="dim" />
+<line x1="1076.6" y1="150" x2="1076.6" y2="312" class="dim" marker-start="url(#m3)" marker-end="url(#m3)"/>
+<text x="1089.6" y="231" class="dimt" text-anchor="middle" transform="rotate(-90 1089.6 231)" >60</text>
+<line x1="639.6" y1="260.7" x2="594" y2="260.7" class="dim" />
+<line x1="639.6" y1="303.9" x2="594" y2="303.9" class="dim" />
+<line x1="598" y1="260.7" x2="598" y2="303.9" class="dim" marker-start="url(#m3)" marker-end="url(#m3)"/>
+<text x="593" y="282.3" class="dimt" text-anchor="middle" transform="rotate(-90 593 282.3)" >16</text>
+<line x1="920.4" y1="166.2" x2="594" y2="166.2" class="dim" />
+<line x1="920.4" y1="231" x2="594" y2="231" class="dim" />
+<line x1="598" y1="166.2" x2="598" y2="231" class="dim" marker-start="url(#m3)" marker-end="url(#m3)"/>
+<text x="593" y="198.6" class="dimt" text-anchor="middle" transform="rotate(-90 593 198.6)" >27</text>
+<text x="979.1" y="142" class="ts" text-anchor="middle" >L298N + tản nhiệt</text>
+<text x="755" y="198" class="ts" text-anchor="middle" >đầu cắm Mega</text>
+<text x="876.5" y="198" class="ts" text-anchor="middle" >ESP32-CAM</text>
+<text x="640" y="384" class="hs" text-anchor="start" >GHI CHÚ</text>
+<text x="640" y="404" class="ts" text-anchor="start" >1. Khối lượng hộp ước tính ≈ 420 g (hộp 110, sạc 210, mạch 77, dây 20).</text>
+<text x="640" y="422" class="ts" text-anchor="start" >2. Một cáp USB: sạc → cổng USB-B của Mega. Cáp thứ hai cắt đầu: đường 5V riêng</text>
+<text x="640" y="440" class="ts" text-anchor="start" >    cho L298N và ESP32-CAM, để mô-tơ và Wi-Fi không đi qua cầu chì 500 mA của Mega.</text>
+<text x="640" y="458" class="ts" text-anchor="start" >3. Sạc dự phòng tự tắt khi dòng tải dưới khoảng 50–100 mA: tải ở đây ≈ 250 mA, không bị.</text>
+</svg>

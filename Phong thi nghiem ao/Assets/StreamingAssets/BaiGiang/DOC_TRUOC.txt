@@ -1,0 +1,13 @@
+ẢNH BÀI GIẢNG CHO CÁC MÀN HÌNH TRONG PHÒNG LAB ẢO
+
+Xuất slide bài giảng ra ảnh PNG hoặc JPG (PowerPoint: File > Export > PNG), rồi thả vào thư mục con
+đúng tên màn hình. Mở lại game là màn hình hiện các slide đó trước, theo thứ tự tên file (01.png, 02.png...).
+Bấm chuột trái vào màn hình (hoặc nhấn nút tay cầm ở chế độ TAY) để sang trang.
+
+  tuong_video_1   màn hình trái của tường video (tường bảng)
+  tuong_video_2   màn hình giữa (mặc định chiếu camera bàn giáo viên, slide xếp sau camera)
+  tuong_video_3   màn hình phải
+  ban_1 ... ban_9 màn hình nhóm ở từng bàn học sinh
+  hanh_lang       màn hình bảng tin ở hành lang
+
+Ví dụ: StreamingAssets/BaiGiang/tuong_video_1/01.png

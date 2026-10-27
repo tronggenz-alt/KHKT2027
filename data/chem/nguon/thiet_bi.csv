@@ -1,0 +1,81 @@
+STT,Ten_thiet_bi,Ten_tieng_Anh,Phan_loai,Cong_dung,Thong_so_pho_bien
+1,Coc co mo,Beaker,Dung cu thuy tinh,Dung va tron chat long,50/100/250/400/600/1000 mL
+2,Binh tam giac,Erlenmeyer flask,Dung cu thuy tinh,Dung tron va chuan do,50/100/250/500/1000 mL
+3,Binh cau day bang,Round-bottom flask,Dung cu thuy tinh,Dun hoi luu va chung cat,50/100/250/500/1000 mL
+4,Binh cau day tron,Florence flask,Dung cu thuy tinh,Dun deu,250/500/1000 mL
+5,Binh dinh muc,Volumetric flask,Dung cu do luong,Pha dung dich chinh xac,10/25/50/100/250/500/1000 mL
+6,Ong nghiem,Test tube,Dung cu thuy tinh,Phan ung luong nho,10/15/18/20 mm
+7,Gia ong nghiem,Test tube rack,Dung cu ho tro,Giữ ong nghiem,12/24 lo
+8,Kep ong nghiem,Test tube clamp,Dung cu ho tro,Kep ong khi dun,Go hoac kim loai
+9,Ong dong,Graduated cylinder,Dung cu do luong,Do the tich chat long,10/25/50/100/250/500/1000 mL
+10,Pipet bau,Volumetric pipette,Dung cu do luong,Lay the tich chinh xac,1/2/5/10/25/50 mL
+11,Pipet chia do,Graduated pipette,Dung cu do luong,Lay the tich bien doi,1/5/10 mL
+12,Micro pipet,Micropipette,Dung cu do luong,Lay the tich sieu nho,10-1000 microL
+13,Qua bop cao su,Pipette bulb,Dung cu ho tro,Hut chat long,3 van
+14,Buret,Burette,Dung cu do luong,Chuan do the tich,25/50 mL
+15,Kep buret,Burette clamp,Dung cu ho tro,Giữ buret,Kim loai
+16,Pheu chiet,Separatory funnel,Dung cu thuy tinh,Chiet tach chat long,125/250/500 mL
+17,Pheu loc,Funnel,Dung cu thuy tinh,Loc chat long,60/75/90/110 mm
+18,Giay loc,Filter paper,Vat tu tieu hao,Loc chat ran,80/110/125 mm
+19,Pheu Buchner,Buchner funnel,Dung cu loc,Loc chan khong,Co dinh
+20,Binh hut loc,Vacuum flask,Dung cu loc,Loc chan khong,250/500/1000 mL
+21,Den con,Alcohol lamp,Dung cu dun nong,Dun nong nhiet do thap,100/150 mL
+22,Den Bunsen,Bunsen burner,Dung cu dun nong,Dun nong nhiet do cao,Co dinh
+23,Kieng ba chan,Tripod stand,Dung cu ho tro,Do dung cu khi dun,Kim loai
+24,Luoi amiang,Wire gauze,Dung cu ho tro,Phan bo nhiet,100/125 mm
+25,Gia do,Ring stand,Dung cu ho tro,Giữ dung cu,60/90 cm
+26,Vong sat,Iron ring,Dung cu ho tro,Do binh cau,50/75/100 mm
+27,Kep van nang,Universal clamp,Dung cu ho tro,Kep dung cu,Kim loai
+28,Chen nung,Crucible,Dung cu nung,Nung o nhiet do cao,15/30/50 mL
+29,Nap chen nung,Crucible lid,Dung cu nung,Day chen nung,Phu hop chen
+30,Kep chen nung,Crucible tongs,Dung cu ho tro,Gap chen nung,Kim loai
+31,Tam giac dat set,Clay triangle,Dung cu ho tro,Do chen nung,Co dinh
+32,Dua thuy tinh,Stirring rod,Dung cu ho tro,Khuay dung dich,20/25/30 cm
+33,Thia xuc hoa chat,Spatula/Scoopula,Dung cu ho tro,Lay hoa chat ran,Kim loai/nhua
+34,Can dien tu,Electronic balance,Thiet bi do luong,Can khoi luong,0.01 g / 0.001 g
+35,Can ky thuat,Analytical balance,Thiet bi do luong,Can chinh xac cao,0.0001 g
+36,Nhiet ke,thermometer,Thiet bi do luong,Do nhiet do,-10 den 110 C / 0-360 C
+37,Giay do pH,pH paper,Vat tu tieu hao,Do pH nhanh,Dai 0-14
+38,May do pH,pH meter,Thiet bi do luong,Do pH chinh xac,0.01 pH
+39,Bep dien,Hot plate,Dung cu dun nong,Dun nong co dieu chinh,500-2000 W
+40,May khuay tu,Magnetic stirrer,Thiet bi ho tro,Khuay dung dich,100-1500 rpm
+41,Thanh khuay tu,Stir bar,Dung cu ho tro,Khuay tu,10-50 mm
+42,Binh tia,Wash bottle,Dung cu ho tro,Rua dung cu,250/500 mL
+43,Bat su,Evaporating dish,Dung cu su,Co can dung dich,50/100/150 mL
+44,Mat kinh dong ho,Watch glass,Dung cu ho tro,Day coc va can hoa chat,60/75/90/100 mm
+45,Dia Petri,Petri dish,Dung cu,Chua mau va nuoi cay,60/90 mm
+46,Coi va chay su,Mortar and pestle,Dung cu su,Nghien chat ran,60/100/150 mm
+47,Ong sinh hanh,Condenser,Dung cu thuy tinh,Lam lanh hoi,200/300/400 mm
+48,Bo chung cat,Distillation apparatus,Bo thiet bi,Tach chat long,500/1000 mL
+49,Binh hut am,Desiccator,Dung cu bao quan,Bao quan hoa chat kho,150/210/250 mm
+50,Kinh bao ho, Safety goggles,An toan,Bao ve mat,Trong suot
+51,Gang tay cao su,Rubber gloves,An toan,Bao ve tay,Size S/M/L
+52,Ao choang thi nghiem,Lab coat/Apron,An toan,Bao ve quan ao,Vai/nhua
+53,Tu hut khi doc,Fume hood,Thiet bi an toan,Loai bo khi doc,1.2/1.5/1.8 m
+54,Voinuoc rua mat khan,Eyewash station,Thiet bi an toan,Rua mat khan cap,Co dinh
+55,Voinuoc sen khan, safety shower,Thiet bi an toan,Rua toan than,Co dinh
+56,Binh chua chat thai,Chemical waste container,Thiet bi an toan,Chua chat thai,5/10/20 L
+57,Binh cuu hoa,Fire extinguisher,Thiet bi an toan,Chua chay,CO2/bot
+58,Chan dap,Balance,Thiet bi do luong,Can khoi luong,0.1 g
+59,Binh tam giac co nhanh,Filtering flask,Dung cu thuy tinh,Loc chan khong,250/500 mL
+60,Ong nghiem ly tam,Centrifuge tube,Dung cu thuy tinh,Ly tam mau,10/15 mL
+61,May ly tam,Centrifuge,Thiet bi,Tach chat ran long,3000-12000 rpm
+62,Bep tu,Heating mantle,Dung cu dun nong,Dun binh cau,100/250/500 mL
+63,Bo dieu che khi,Gas generator,Bo thiet bi,Dieu che khi trong phong,Co dinh
+64,Binh chua khi, Gas cylinder,Thiet bi,Chua khi nen,1/5/40 L
+65,Van giam ap,Pressure regulator,Thiet bi,Dieu chinh ap suat,Co dinh
+66,Ong dan khi,Gas delivery tube,Dung cu,Dan khi,Thuy tinh/mem
+67,Bom hut chan khong,Vacuum pump,Thiet bi,Tao chan khong,Co dinh
+68,May do do dan dien,Conductivity meter,Thiet bi do luong,Do do dan,0-200 mS/cm
+69,May quang pho,spectrophotometer,Thiet bi do luong,Do hap thu anh sang,400-700 nm
+70,May do do duc,Colorimeter,Thiet bi do luong,Do mau,Co dinh
+71,Bo do nhiet do dien tu,Digital thermometer,Thiet bi do luong,Do nhiet do chinh xac,-50 den 300 C
+72,Binh dinh muc 100mL,Volumetric flask,Dung cu do luong,Pha dung dich chuan,100 mL
+73,Buret tu dong,Automatic burette,Dung cu do luong,Chuan do tu dong,50 mL
+74,Bo chuan do, Titration set,Bo thiet bi,Chuan do hoan chinh,Co dinh
+75,May do oxy hoa tan,DO meter,Thiet bi do luong,Do oxy hoa tan,0-20 mg/L
+76,May do do pH deo,Portable pH meter,Thiet bi do luong,Do pH di dong,Co dinh
+77,Can bang dien tu,Top-loading balance,Thiet bi do luong,Can khoi luong lon,0.01 g / 2000 g
+78,Bo ong nghiem mau,Test tube colorimeter,Bo thiet bi,So mau,Co dinh
+79,Binh rua khi,Gas washing bottle,Dung cu thuy tinh,Rua khi,250/500 mL
+80,Binh an toan,Safety bottle,Dung cu an toan,Giam ap suat,500/1000 mL

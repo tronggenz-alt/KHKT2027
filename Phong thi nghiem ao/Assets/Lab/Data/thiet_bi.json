@@ -1,0 +1,645 @@
+{
+ "phien_ban": 1,
+ "thiet_bi": [
+  {
+   "stt": 1,
+   "ten": "Cốc có mỏ",
+   "ten_tieng_anh": "Beaker",
+   "phan_loai": "Dụng cụ thủy tinh",
+   "cong_dung": "Đựng và trộn chất lỏng",
+   "thong_so": "50/100/250/400/600/1000 mL"
+  },
+  {
+   "stt": 2,
+   "ten": "Bình tam giác (bình nón)",
+   "ten_tieng_anh": "Erlenmeyer flask",
+   "phan_loai": "Dụng cụ thủy tinh",
+   "cong_dung": "Đựng, trộn, chuẩn độ",
+   "thong_so": "50/100/250/500/1000 mL"
+  },
+  {
+   "stt": 3,
+   "ten": "Bình cầu đáy bằng",
+   "ten_tieng_anh": "Round-bottom flask",
+   "phan_loai": "Dụng cụ thủy tinh",
+   "cong_dung": "Đun hồi lưu, chưng cất",
+   "thong_so": "50/100/250/500/1000 mL"
+  },
+  {
+   "stt": 4,
+   "ten": "Bình cầu đáy tròn",
+   "ten_tieng_anh": "Florence flask",
+   "phan_loai": "Dụng cụ thủy tinh",
+   "cong_dung": "Đun nóng đều",
+   "thong_so": "250/500/1000 mL"
+  },
+  {
+   "stt": 5,
+   "ten": "Bình định mức",
+   "ten_tieng_anh": "Volumetric flask",
+   "phan_loai": "Dụng cụ đo lường",
+   "cong_dung": "Pha dung dịch chính xác",
+   "thong_so": "10/25/50/100/250/500/1000 mL"
+  },
+  {
+   "stt": 6,
+   "ten": "Ống nghiệm",
+   "ten_tieng_anh": "Test tube",
+   "phan_loai": "Dụng cụ thủy tinh",
+   "cong_dung": "Phản ứng lượng nhỏ",
+   "thong_so": "10/15/18/20 mm"
+  },
+  {
+   "stt": 7,
+   "ten": "Giá ống nghiệm",
+   "ten_tieng_anh": "Test tube rack",
+   "phan_loai": "Dụng cụ hỗ trợ",
+   "cong_dung": "Giữ ống nghiệm",
+   "thong_so": "12/24 lỗ"
+  },
+  {
+   "stt": 8,
+   "ten": "Kẹp ống nghiệm",
+   "ten_tieng_anh": "Test tube clamp",
+   "phan_loai": "Dụng cụ hỗ trợ",
+   "cong_dung": "Kẹp ống khi đun",
+   "thong_so": "Gỗ hoặc kim lỗại"
+  },
+  {
+   "stt": 9,
+   "ten": "Ống đong",
+   "ten_tieng_anh": "Graduated cylinder",
+   "phan_loai": "Dụng cụ đo lường",
+   "cong_dung": "Đo thể tích chất lỏng",
+   "thong_so": "10/25/50/100/250/500/1000 mL"
+  },
+  {
+   "stt": 10,
+   "ten": "Pipet bầu",
+   "ten_tieng_anh": "Volumetric pipette",
+   "phan_loai": "Dụng cụ đo lường",
+   "cong_dung": "Lấy thể tích chính xác",
+   "thong_so": "1/2/5/10/25/50 mL"
+  },
+  {
+   "stt": 11,
+   "ten": "Pipet chia độ",
+   "ten_tieng_anh": "Graduated pipette",
+   "phan_loai": "Dụng cụ đo lường",
+   "cong_dung": "Lấy thể tích tùy chọn",
+   "thong_so": "1/5/10 mL"
+  },
+  {
+   "stt": 12,
+   "ten": "Micropipet",
+   "ten_tieng_anh": "Micropipette",
+   "phan_loai": "Dụng cụ đo lường",
+   "cong_dung": "Lấy thể tích rất nhỏ",
+   "thong_so": "10-1000 microL"
+  },
+  {
+   "stt": 13,
+   "ten": "Quả bóp cao su",
+   "ten_tieng_anh": "Pipette bulb",
+   "phan_loai": "Dụng cụ hỗ trợ",
+   "cong_dung": "Hut chất lỏng",
+   "thong_so": "3 van"
+  },
+  {
+   "stt": 14,
+   "ten": "Buret",
+   "ten_tieng_anh": "Burette",
+   "phan_loai": "Dụng cụ đo lường",
+   "cong_dung": "Chuẩn độ thể tích",
+   "thong_so": "25/50 mL"
+  },
+  {
+   "stt": 15,
+   "ten": "Kẹp buret",
+   "ten_tieng_anh": "Burette clamp",
+   "phan_loai": "Dụng cụ hỗ trợ",
+   "cong_dung": "Giữ buret",
+   "thong_so": "Kim lỗại"
+  },
+  {
+   "stt": 16,
+   "ten": "Phễu chiết",
+   "ten_tieng_anh": "Separatory funnel",
+   "phan_loai": "Dụng cụ thủy tinh",
+   "cong_dung": "Chiết tách chất lỏng",
+   "thong_so": "125/250/500 mL"
+  },
+  {
+   "stt": 17,
+   "ten": "Phễu lọc",
+   "ten_tieng_anh": "Funnel",
+   "phan_loai": "Dụng cụ thủy tinh",
+   "cong_dung": "Loc chất lỏng",
+   "thong_so": "60/75/90/110 mm"
+  },
+  {
+   "stt": 18,
+   "ten": "Giấy lọc",
+   "ten_tieng_anh": "Filter paper",
+   "phan_loai": "Vật tư tiêu hao",
+   "cong_dung": "Lọc chất rắn",
+   "thong_so": "80/110/125 mm"
+  },
+  {
+   "stt": 19,
+   "ten": "Phễu Buchner",
+   "ten_tieng_anh": "Buchner funnel",
+   "phan_loai": "Dụng cụ lọc",
+   "cong_dung": "Lọc chân không",
+   "thong_so": "Cố định"
+  },
+  {
+   "stt": 20,
+   "ten": "Bình hút lọc",
+   "ten_tieng_anh": "Vacuum flask",
+   "phan_loai": "Dụng cụ lọc",
+   "cong_dung": "Lọc chân không",
+   "thong_so": "250/500/1000 mL"
+  },
+  {
+   "stt": 21,
+   "ten": "Đèn cồn",
+   "ten_tieng_anh": "Alcohol lamp",
+   "phan_loai": "Dụng cụ đun nóng",
+   "cong_dung": "Đun nóng nhiệt độ thấp",
+   "thong_so": "100/150 mL"
+  },
+  {
+   "stt": 22,
+   "ten": "Đèn Bunsen",
+   "ten_tieng_anh": "Bunsen burner",
+   "phan_loai": "Dụng cụ đun nóng",
+   "cong_dung": "Đun nóng nhiệt độ cao",
+   "thong_so": "Cố định"
+  },
+  {
+   "stt": 23,
+   "ten": "Kiềng ba chân",
+   "ten_tieng_anh": "Tripod stand",
+   "phan_loai": "Dụng cụ hỗ trợ",
+   "cong_dung": "Đỡ dụng cụ khi đun",
+   "thong_so": "Kim lỗại"
+  },
+  {
+   "stt": 24,
+   "ten": "Lưới tản nhiệt",
+   "ten_tieng_anh": "Wire gauze",
+   "phan_loai": "Dụng cụ hỗ trợ",
+   "cong_dung": "Phân bố nhiệt",
+   "thong_so": "100/125 mm"
+  },
+  {
+   "stt": 25,
+   "ten": "Giá đỡ (giá sắt)",
+   "ten_tieng_anh": "Ring stand",
+   "phan_loai": "Dụng cụ hỗ trợ",
+   "cong_dung": "Giữ dụng cụ",
+   "thong_so": "60/90 cm"
+  },
+  {
+   "stt": 26,
+   "ten": "Vòng sắt",
+   "ten_tieng_anh": "Iron ring",
+   "phan_loai": "Dụng cụ hỗ trợ",
+   "cong_dung": "Đỡ bình cầu",
+   "thong_so": "50/75/100 mm"
+  },
+  {
+   "stt": 27,
+   "ten": "Kẹp vạn năng",
+   "ten_tieng_anh": "Universal clamp",
+   "phan_loai": "Dụng cụ hỗ trợ",
+   "cong_dung": "Kẹp dụng cụ",
+   "thong_so": "Kim lỗại"
+  },
+  {
+   "stt": 28,
+   "ten": "Chén nung",
+   "ten_tieng_anh": "Crucible",
+   "phan_loai": "Dụng cụ nung",
+   "cong_dung": "Nung ở nhiệt độ cao",
+   "thong_so": "15/30/50 mL"
+  },
+  {
+   "stt": 29,
+   "ten": "Nắp chén nung",
+   "ten_tieng_anh": "Crucible lid",
+   "phan_loai": "Dụng cụ nung",
+   "cong_dung": "Đậy chén nung",
+   "thong_so": "Vừa chén"
+  },
+  {
+   "stt": 30,
+   "ten": "Kẹp chén nung",
+   "ten_tieng_anh": "Crucible tongs",
+   "phan_loai": "Dụng cụ hỗ trợ",
+   "cong_dung": "Gắp chén nung",
+   "thong_so": "Kim lỗại"
+  },
+  {
+   "stt": 31,
+   "ten": "Tam giác sứ",
+   "ten_tieng_anh": "Clay triangle",
+   "phan_loai": "Dụng cụ hỗ trợ",
+   "cong_dung": "Đỡ chén nung",
+   "thong_so": "Cố định"
+  },
+  {
+   "stt": 32,
+   "ten": "Đũa thủy tinh",
+   "ten_tieng_anh": "Stirring rod",
+   "phan_loai": "Dụng cụ hỗ trợ",
+   "cong_dung": "Khuấy dung dịch",
+   "thong_so": "20/25/30 cm"
+  },
+  {
+   "stt": 33,
+   "ten": "Thìa xúc hóa chất",
+   "ten_tieng_anh": "Spatula/Scoopula",
+   "phan_loai": "Dụng cụ hỗ trợ",
+   "cong_dung": "Lấy hóa chất rắn",
+   "thong_so": "Kim lỗại/nhua"
+  },
+  {
+   "stt": 34,
+   "ten": "Cân điện tử",
+   "ten_tieng_anh": "Electronic balance",
+   "phan_loai": "Thiết bị đo",
+   "cong_dung": "Cân khối lượng",
+   "thong_so": "0.01 g / 0.001 g"
+  },
+  {
+   "stt": 35,
+   "ten": "Cân phân tích",
+   "ten_tieng_anh": "Analytical balance",
+   "phan_loai": "Thiết bị đo",
+   "cong_dung": "Cân chính xác cao",
+   "thong_so": "0.0001 g"
+  },
+  {
+   "stt": 36,
+   "ten": "Nhiệt kế",
+   "ten_tieng_anh": "thermometer",
+   "phan_loai": "Thiết bị đo",
+   "cong_dung": "Đo nhiệt độ",
+   "thong_so": "-10 đến 110 C / 0-360 C"
+  },
+  {
+   "stt": 37,
+   "ten": "Giấy đo pH",
+   "ten_tieng_anh": "pH paper",
+   "phan_loai": "Vật tư tiêu hao",
+   "cong_dung": "Đo pH nhanh",
+   "thong_so": "Dải 0-14"
+  },
+  {
+   "stt": 38,
+   "ten": "Máy đo pH",
+   "ten_tieng_anh": "pH meter",
+   "phan_loai": "Thiết bị đo",
+   "cong_dung": "Đo pH chính xác",
+   "thong_so": "0.01 pH"
+  },
+  {
+   "stt": 39,
+   "ten": "Bếp điện",
+   "ten_tieng_anh": "Hot plate",
+   "phan_loai": "Dụng cụ đun nóng",
+   "cong_dung": "Đun nóng có điều chỉnh",
+   "thong_so": "500-2000 W"
+  },
+  {
+   "stt": 40,
+   "ten": "Máy khuấy từ",
+   "ten_tieng_anh": "Magnetic stirrer",
+   "phan_loai": "Thiết bị hỗ trợ",
+   "cong_dung": "Khuấy dung dịch",
+   "thong_so": "100-1500 rpm"
+  },
+  {
+   "stt": 41,
+   "ten": "Con khuấy từ",
+   "ten_tieng_anh": "Stir bar",
+   "phan_loai": "Dụng cụ hỗ trợ",
+   "cong_dung": "Khuấy từ",
+   "thong_so": "10-50 mm"
+  },
+  {
+   "stt": 42,
+   "ten": "Bình tia",
+   "ten_tieng_anh": "Wash bottle",
+   "phan_loai": "Dụng cụ hỗ trợ",
+   "cong_dung": "Rửa dụng cụ",
+   "thong_so": "250/500 mL"
+  },
+  {
+   "stt": 43,
+   "ten": "Bát sứ",
+   "ten_tieng_anh": "Evaporating dish",
+   "phan_loai": "Dụng cụ sứ",
+   "cong_dung": "Cô cạn dung dịch",
+   "thong_so": "50/100/150 mL"
+  },
+  {
+   "stt": 44,
+   "ten": "Mặt kính đồng hồ",
+   "ten_tieng_anh": "Watch glass",
+   "phan_loai": "Dụng cụ hỗ trợ",
+   "cong_dung": "Đậy cốc, cân hóa chất",
+   "thong_so": "60/75/90/100 mm"
+  },
+  {
+   "stt": 45,
+   "ten": "Đĩa Petri",
+   "ten_tieng_anh": "Petri dish",
+   "phan_loai": "Dụng cụ",
+   "cong_dung": "Chứa mẫu, nuôi cấy",
+   "thong_so": "60/90 mm"
+  },
+  {
+   "stt": 46,
+   "ten": "Cối và chày sứ",
+   "ten_tieng_anh": "Mortar and pestle",
+   "phan_loai": "Dụng cụ sứ",
+   "cong_dung": "Nghiền chất rắn",
+   "thong_so": "60/100/150 mm"
+  },
+  {
+   "stt": 47,
+   "ten": "Ống sinh hàn",
+   "ten_tieng_anh": "Condenser",
+   "phan_loai": "Dụng cụ thủy tinh",
+   "cong_dung": "Làm lạnh hơi",
+   "thong_so": "200/300/400 mm"
+  },
+  {
+   "stt": 48,
+   "ten": "Bộ chưng cất",
+   "ten_tieng_anh": "Distillation apparatus",
+   "phan_loai": "Bộ thiết bị",
+   "cong_dung": "Tach chất lỏng",
+   "thong_so": "500/1000 mL"
+  },
+  {
+   "stt": 49,
+   "ten": "Bình hút ẩm",
+   "ten_tieng_anh": "Desiccator",
+   "phan_loai": "Dụng cụ bảo quản",
+   "cong_dung": "Bảo quản hóa chất khô",
+   "thong_so": "150/210/250 mm"
+  },
+  {
+   "stt": 50,
+   "ten": "Kính bảo hộ",
+   "ten_tieng_anh": "Safety goggles",
+   "phan_loai": "Bảo hộ",
+   "cong_dung": "Bảo vệ mắt",
+   "thong_so": "Trong suốt"
+  },
+  {
+   "stt": 51,
+   "ten": "Găng tay cao su",
+   "ten_tieng_anh": "Rubber gloves",
+   "phan_loai": "Bảo hộ",
+   "cong_dung": "Bảo vệ tay",
+   "thong_so": "Size S/M/L"
+  },
+  {
+   "stt": 52,
+   "ten": "Áo choàng thí nghiệm",
+   "ten_tieng_anh": "Lab coat/Apron",
+   "phan_loai": "Bảo hộ",
+   "cong_dung": "Bảo vệ quần áo",
+   "thong_so": "Vải / nhựa"
+  },
+  {
+   "stt": 53,
+   "ten": "Tủ hút khí độc",
+   "ten_tieng_anh": "Fume hood",
+   "phan_loai": "Thiết bị an toàn",
+   "cong_dung": "Hút khí độc ra ngoài",
+   "thong_so": "1.2/1.5/1.8 m"
+  },
+  {
+   "stt": 54,
+   "ten": "Vòi rửa mắt khẩn cấp",
+   "ten_tieng_anh": "Eyewash station",
+   "phan_loai": "Thiết bị an toàn",
+   "cong_dung": "Rửa mắt khẩn cấp",
+   "thong_so": "Cố định"
+  },
+  {
+   "stt": 55,
+   "ten": "Vòi sen khẩn cấp",
+   "ten_tieng_anh": "safety shower",
+   "phan_loai": "Thiết bị an toàn",
+   "cong_dung": "Rửa toàn thân",
+   "thong_so": "Cố định"
+  },
+  {
+   "stt": 56,
+   "ten": "Bình chứa chất thải",
+   "ten_tieng_anh": "Chemical waste container",
+   "phan_loai": "Thiết bị an toàn",
+   "cong_dung": "Chứa chất thải",
+   "thong_so": "5/10/20 L"
+  },
+  {
+   "stt": 57,
+   "ten": "Bình chữa cháy",
+   "ten_tieng_anh": "Fire extinguisher",
+   "phan_loai": "Thiết bị an toàn",
+   "cong_dung": "Chữa cháy",
+   "thong_so": "CO2 / bọt"
+  },
+  {
+   "stt": 58,
+   "ten": "Cân đĩa",
+   "ten_tieng_anh": "Balance",
+   "phan_loai": "Thiết bị đo",
+   "cong_dung": "Cân khối lượng",
+   "thong_so": "0.1 g"
+  },
+  {
+   "stt": 59,
+   "ten": "Bình tam giác có nhánh",
+   "ten_tieng_anh": "Filtering flask",
+   "phan_loai": "Dụng cụ thủy tinh",
+   "cong_dung": "Lọc chân không",
+   "thong_so": "250/500 mL"
+  },
+  {
+   "stt": 60,
+   "ten": "Ống ly tâm",
+   "ten_tieng_anh": "Centrifuge tube",
+   "phan_loai": "Dụng cụ thủy tinh",
+   "cong_dung": "Ly tâm mẫu",
+   "thong_so": "10/15 mL"
+  },
+  {
+   "stt": 61,
+   "ten": "Máy ly tâm",
+   "ten_tieng_anh": "Centrifuge",
+   "phan_loai": "Thiết bị",
+   "cong_dung": "Tách rắn - lỏng",
+   "thong_so": "3000-12000 rpm"
+  },
+  {
+   "stt": 62,
+   "ten": "Bếp bọc gia nhiệt",
+   "ten_tieng_anh": "Heating mantle",
+   "phan_loai": "Dụng cụ đun nóng",
+   "cong_dung": "Đun bình cầu",
+   "thong_so": "100/250/500 mL"
+  },
+  {
+   "stt": 63,
+   "ten": "Bộ điều chế khí (bình Kíp)",
+   "ten_tieng_anh": "Gas generator",
+   "phan_loai": "Bộ thiết bị",
+   "cong_dung": "Điều chế khí trong phòng thí nghiệm",
+   "thong_so": "Cố định"
+  },
+  {
+   "stt": 64,
+   "ten": "Bình chứa khí",
+   "ten_tieng_anh": "Gas cylinder",
+   "phan_loai": "Thiết bị",
+   "cong_dung": "Chứa khí nén",
+   "thong_so": "1/5/40 L"
+  },
+  {
+   "stt": 65,
+   "ten": "Van giảm áp",
+   "ten_tieng_anh": "Pressure regulator",
+   "phan_loai": "Thiết bị",
+   "cong_dung": "Điều chỉnh áp suất",
+   "thong_so": "Cố định"
+  },
+  {
+   "stt": 66,
+   "ten": "Ống dẫn khí",
+   "ten_tieng_anh": "Gas delivery tube",
+   "phan_loai": "Dụng cụ",
+   "cong_dung": "Dẫn khí",
+   "thong_so": "Thủy tinh / ống mềm"
+  },
+  {
+   "stt": 67,
+   "ten": "Bơm hút chân không",
+   "ten_tieng_anh": "Vacuum pump",
+   "phan_loai": "Thiết bị",
+   "cong_dung": "Tạo chân không",
+   "thong_so": "Cố định"
+  },
+  {
+   "stt": 68,
+   "ten": "Máy đo độ dẫn điện",
+   "ten_tieng_anh": "Conductivity meter",
+   "phan_loai": "Thiết bị đo",
+   "cong_dung": "Đo độ dẫn điện",
+   "thong_so": "0-200 mS/cm"
+  },
+  {
+   "stt": 69,
+   "ten": "Máy quang phổ",
+   "ten_tieng_anh": "spectrophotometer",
+   "phan_loai": "Thiết bị đo",
+   "cong_dung": "Đo độ hấp thụ ánh sáng",
+   "thong_so": "400-700 nm"
+  },
+  {
+   "stt": 70,
+   "ten": "Máy so màu",
+   "ten_tieng_anh": "Colorimeter",
+   "phan_loai": "Thiết bị đo",
+   "cong_dung": "Đo màu",
+   "thong_so": "Cố định"
+  },
+  {
+   "stt": 71,
+   "ten": "Nhiệt kế điện tử",
+   "ten_tieng_anh": "Digital thermometer",
+   "phan_loai": "Thiết bị đo",
+   "cong_dung": "Đo nhiệt độ chính xác",
+   "thong_so": "-50 đến 300 C"
+  },
+  {
+   "stt": 72,
+   "ten": "Bình định mức 100 mL",
+   "ten_tieng_anh": "Volumetric flask",
+   "phan_loai": "Dụng cụ đo lường",
+   "cong_dung": "Pha dung dịch chuẩn",
+   "thong_so": "100 mL"
+  },
+  {
+   "stt": 73,
+   "ten": "Buret tự động",
+   "ten_tieng_anh": "Automatic burette",
+   "phan_loai": "Dụng cụ đo lường",
+   "cong_dung": "Chuẩn độ tự động",
+   "thong_so": "50 mL"
+  },
+  {
+   "stt": 74,
+   "ten": "Bộ chuẩn độ",
+   "ten_tieng_anh": "Titration set",
+   "phan_loai": "Bộ thiết bị",
+   "cong_dung": "Chuẩn độ hoàn chỉnh",
+   "thong_so": "Cố định"
+  },
+  {
+   "stt": 75,
+   "ten": "Máy đo oxi hòa tan",
+   "ten_tieng_anh": "DO meter",
+   "phan_loai": "Thiết bị đo",
+   "cong_dung": "Đo oxi hòa tan",
+   "thong_so": "0-20 mg/L"
+  },
+  {
+   "stt": 76,
+   "ten": "Máy đo pH cầm tay",
+   "ten_tieng_anh": "Portable pH meter",
+   "phan_loai": "Thiết bị đo",
+   "cong_dung": "Đo pH di động",
+   "thong_so": "Cố định"
+  },
+  {
+   "stt": 77,
+   "ten": "Cân điện tử bàn",
+   "ten_tieng_anh": "Top-loading balance",
+   "phan_loai": "Thiết bị đo",
+   "cong_dung": "Cân khối lượng lớn",
+   "thong_so": "0.01 g / 2000 g"
+  },
+  {
+   "stt": 78,
+   "ten": "Bộ ống so màu",
+   "ten_tieng_anh": "Test tube colorimeter",
+   "phan_loai": "Bộ thiết bị",
+   "cong_dung": "So màu",
+   "thong_so": "Cố định"
+  },
+  {
+   "stt": 79,
+   "ten": "Bình rửa khí",
+   "ten_tieng_anh": "Gas washing bottle",
+   "phan_loai": "Dụng cụ thủy tinh",
+   "cong_dung": "Rửa khí",
+   "thong_so": "250/500 mL"
+  },
+  {
+   "stt": 80,
+   "ten": "Bình an toàn",
+   "ten_tieng_anh": "Safety bottle",
+   "phan_loai": "Dụng cụ an toàn",
+   "cong_dung": "Giảm áp suất",
+   "thong_so": "500/1000 mL"
+  }
+ ]
+}

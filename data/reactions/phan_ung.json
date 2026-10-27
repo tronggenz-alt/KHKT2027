@@ -1,0 +1,56 @@
+{
+  "_ghi_chu": "Mẫu định dạng cơ sở dữ liệu phản ứng. Mỗi mục PHẢI được đối chiếu SGK Hóa học (ghi trang vào 'nguon') trước khi dùng cho thực nghiệm. 'hien_tuong' là mã hiệu ứng để Unity dựng hình; LLM không quyết định phản ứng.",
+  "phien_ban": 1,
+  "phan_ung": [
+    {
+      "id": "cuso4_naoh",
+      "chat": ["CuSO4", "NaOH"],
+      "phuong_trinh": "CuSO4 + 2NaOH → Cu(OH)2↓ + Na2SO4",
+      "hien_tuong": [{"loai": "ket_tua", "mau": "#2f7fd0", "ten_mau": "xanh lam"}],
+      "dinh_tinh": "Nhận biết ion Cu2+ bằng dung dịch kiềm",
+      "the_thong_tin": "Xuất hiện kết tủa xanh lam là đồng(II) hiđroxit Cu(OH)2.",
+      "an_toan": ["NaOH ăn da: đeo kính bảo hộ và găng tay"],
+      "nguon": "CẦN ĐỐI CHIẾU SGK"
+    },
+    {
+      "id": "na2co3_hcl",
+      "chat": ["Na2CO3", "HCl"],
+      "phuong_trinh": "Na2CO3 + 2HCl → 2NaCl + H2O + CO2↑",
+      "hien_tuong": [{"loai": "sui_bot", "khi": "CO2", "toc_do": "nhanh"}],
+      "dinh_tinh": "Nhận biết muối cacbonat bằng axit",
+      "the_thong_tin": "Bọt khí không màu, không mùi là CO2; dẫn qua nước vôi trong thấy vẩn đục.",
+      "an_toan": ["HCl đặc bốc khói, gây bỏng: dùng dung dịch loãng"],
+      "nguon": "CẦN ĐỐI CHIẾU SGK"
+    },
+    {
+      "id": "agno3_nacl",
+      "chat": ["AgNO3", "NaCl"],
+      "phuong_trinh": "AgNO3 + NaCl → AgCl↓ + NaNO3",
+      "hien_tuong": [{"loai": "ket_tua", "mau": "#f2f2f2", "ten_mau": "trắng"}],
+      "dinh_tinh": "Nhận biết ion Cl- (dùng cho bài mẫu bí ẩn)",
+      "the_thong_tin": "Kết tủa trắng AgCl, hóa đen dần ngoài ánh sáng.",
+      "an_toan": ["AgNO3 làm đen da: đeo găng tay"],
+      "nguon": "CẦN ĐỐI CHIẾU SGK"
+    },
+    {
+      "id": "bacl2_na2so4",
+      "chat": ["BaCl2", "Na2SO4"],
+      "phuong_trinh": "BaCl2 + Na2SO4 → BaSO4↓ + 2NaCl",
+      "hien_tuong": [{"loai": "ket_tua", "mau": "#ffffff", "ten_mau": "trắng"}],
+      "dinh_tinh": "Nhận biết ion SO4 2- (dùng cho bài mẫu bí ẩn)",
+      "the_thong_tin": "Kết tủa trắng BaSO4, không tan trong axit.",
+      "an_toan": ["Muối bari tan độc: không để dính miệng"],
+      "nguon": "CẦN ĐỐI CHIẾU SGK"
+    },
+    {
+      "id": "hcl_naoh",
+      "chat": ["HCl", "NaOH"],
+      "phuong_trinh": "HCl + NaOH → NaCl + H2O",
+      "hien_tuong": [{"loai": "toa_nhiet", "delta_h_kj_mol": -57.3}, {"loai": "doi_mau_chi_thi"}],
+      "dinh_luong": {"mo_hinh": "chuan_do", "ka": null},
+      "the_thong_tin": "Phản ứng trung hòa tỏa nhiệt. Dùng phenolphtalein: dung dịch chuyển hồng nhạt bền khoảng 30 giây là đến điểm cuối.",
+      "an_toan": ["Tráng buret bằng chính dung dịch NaOH trước khi nạp"],
+      "nguon": "CẦN ĐỐI CHIẾU SGK"
+    }
+  ]
+}

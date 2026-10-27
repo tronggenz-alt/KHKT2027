@@ -1,0 +1,721 @@
+STT,Ten_hoa_chat,Cong_thuc,Phan_loai,Trang_thai,Nong_do_goi_y
+1,Hidro,H2,Don chat,Khi,100%
+2,Oxi,O2,Don chat,Khi,100%
+3,Nito,N2,Don chat,Khi,100%
+4,Clo,Cl2,Don chat,Khi,100%
+5,Flo,F2,Don chat,Khi,100%
+6,Brom,Br2,Don chat,Long,100%
+7,Iot,I2,Don chat,Ran,100%
+8,Luu huynh,S,Don chat,Ran,100%
+9,Photpho do,P,Don chat,Ran,100%
+10,Photpho trang,P,Don chat,Ran,100%
+11,Cacbon than chi,C,Don chat,Ran,100%
+12,Cacbon kim cuong,C,Don chat,Ran,100%
+13,Natri,Na,Kim loai,Ran,100%
+14,Kali,K,Kim loai,Ran,100%
+15,Liti,Li,Kim loai,Ran,100%
+16,Magie,Mg,Kim loai,Ran,100%
+17,Nhom,Al,Kim loai,Ran,100%
+18,Sat,Fe,Kim loai,Ran,100%
+19,Kem,Zn,Kim loai,Ran,100%
+20,Dong,Cu,Kim loai,Ran,100%
+21,Bac,Ag,Kim loai,Ran,100%
+22,Vang,Au,Kim loai,Ran,100%
+23,Chi,Pb,Kim loai,Ran,100%
+24,Thiec,Sn,Kim loai,Ran,100%
+25,Niken,Ni,Kim loai,Ran,100%
+26,Coban,Co,Kim loai,Ran,100%
+27,Mangan,Mn,Kim loai,Ran,100%
+28,Crom,Cr,Kim loai,Ran,100%
+29,Canxi,Ca,Kim loai,Ran,100%
+30,Bari,Ba,Kim loai,Ran,100%
+31,Thuy ngan,Hg,Kim loai,Long,100%
+32,Bo,B,Don chat,Ran,100%
+33,Silic,Si,Don chat,Ran,100%
+34,Asen,As,Don chat,Ran,100%
+35,Titan,Ti,Kim loai,Ran,100%
+36,Vonfram,W,Kim loai,Ran,100%
+37,Natri oxit,Na2O,Oxit bazơ,Ran,100%
+38,Kali oxit,K2O,Oxit bazơ,Ran,100%
+39,Liti oxit,Li2O,Oxit bazơ,Ran,100%
+40,Canxi oxit,CaO,Oxit bazơ,Ran,100%
+41,Magie oxit,MgO,Oxit bazơ,Ran,100%
+42,Bari oxit,BaO,Oxit bazơ,Ran,100%
+43,Stronti oxit,SrO,Oxit bazơ,Ran,100%
+44,Nhom oxit,Al2O3,Oxit lưỡng tính,Ran,100%
+45,Sat(II) oxit,FeO,Oxit bazơ,Ran,100%
+46,Sat(III) oxit,Fe2O3,Oxit bazơ,Ran,100%
+47,Sat tu oxit,Fe3O4,Oxit hon hop,Ran,100%
+48,Dong(II) oxit,CuO,Oxit bazơ,Ran,100%
+49,Dong(I) oxit,Cu2O,Oxit bazơ,Ran,100%
+50,Kem oxit,ZnO,Oxit lưỡng tính,Ran,100%
+51,Chi(II) oxit,PbO,Oxit bazơ,Ran,100%
+52,Chi(IV) oxit,PbO2,Oxit axit,Ran,100%
+53,Chi(II,IV) oxit,Pb3O4,Oxit hon hop,Ran,100%
+54,Thiec(II) oxit,SnO,Oxit bazơ,Ran,100%
+55,Thiec(IV) oxit,SnO2,Oxit lưỡng tính,Ran,100%
+56,Mangan(II) oxit,MnO,Oxit bazơ,Ran,100%
+57,Mangan(IV) oxit,MnO2,Oxit lưỡng tính,Ran,100%
+58,Mangan(VII) oxit,Mn2O7,Oxit axit,Long,100%
+59,Crom(II) oxit,CrO,Oxit bazơ,Ran,100%
+60,Crom(III) oxit,Cr2O3,Oxit lưỡng tính,Ran,100%
+61,Crom(VI) oxit,CrO3,Oxit axit,Ran,100%
+62,Niken(II) oxit,NiO,Oxit bazơ,Ran,100%
+63,Coban(II) oxit,CoO,Oxit bazơ,Ran,100%
+64,Titan dioxit,TiO2,Oxit lưỡng tính,Ran,100%
+65,Silic dioxit,SiO2,Oxit axit,Ran,100%
+66,Photpho pentoxit,P2O5,Oxit axit,Ran,100%
+67,Photpho trioxit,P2O3,Oxit axit,Ran,100%
+68,Luu huynh dioxit,SO2,Oxit axit,Khi,100%
+69,Luu huynh trioxit,SO3,Oxit axit,Long,100%
+70,Dinito oxit,N2O,Oxit trung tinh,Khi,100%
+71,Nito oxit,NO,Oxit trung tinh,Khi,100%
+72,Dinito trioxit,N2O3,Oxit axit,Khi,100%
+73,Nito dioxit,NO2,Oxit axit,Khi,100%
+74,Dinito pentoxit,N2O5,Oxit axit,Ran,100%
+75,Cacbon monoxit,CO,Oxit trung tinh,Khi,100%
+76,Cacbon dioxit,CO2,Oxit axit,Khi,100%
+77,Bo trioxit,B2O3,Oxit axit,Ran,100%
+78,Asen(III) oxit,As2O3,Oxit axit,Ran,100%
+79,Asen(V) oxit,As2O5,Oxit axit,Ran,100%
+80,Bac oxit,Ag2O,Oxit bazơ,Ran,100%
+81,Thuy ngan(II) oxit,HgO,Oxit bazơ,Ran,100%
+82,Cadmi oxit,CdO,Oxit bazơ,Ran,100%
+83,Beri oxit,BeO,Oxit lưỡng tính,Ran,100%
+84,Zirconi dioxit,ZrO2,Oxit lưỡng tính,Ran,100%
+85,Vanadi pentoxit,V2O5,Oxit lưỡng tính,Ran,100%
+86,Molipden trioxit,MoO3,Oxit axit,Ran,100%
+87,Vonfram trioxit,WO3,Oxit axit,Ran,100%
+88,Antimon trioxit,Sb2O3,Oxit lưỡng tính,Ran,100%
+89,Bitmut trioxit,Bi2O3,Oxit bazơ,Ran,100%
+90,Selen dioxit,SeO2,Oxit axit,Ran,100%
+91,Telu dioxit,TeO2,Oxit lưỡng tính,Ran,100%
+92,Diclo monoxit,Cl2O,Oxit axit,Khi,100%
+93,Diclo heptoxit,Cl2O7,Oxit axit,Long,100%
+94,Diiot pentoxit,I2O5,Oxit axit,Ran,100%
+95,Nuoc,H2O,Dung moi,Long,100%
+96,Nuoc nang,D2O,Dung moi,Long,100%
+97,Nuoc oxy gia,H2O2,Dung dich,Long,3% (0.88M); 30% (9.8M)
+98,Axit clohidric,HCl,Axit vo co,Dung dich,0.1M; 1M; 2M; 6M; 37% (~12M)
+99,Axit bromhidric,HBr,Axit vo co,Dung dich,0.1M; 1M; 48% (~8.9M)
+100,Axit iothidric,HI,Axit vo co,Dung dich,0.1M; 1M; 57% (~7.6M)
+101,Axit flohidric,HF,Axit vo co,Dung dich,0.1M; 1M; 49% (~28.9M)
+102,Axit sunfuric,H2SO4,Axit vo co,Dung dich,0.1M; 1M; 2M; 98% (~18M)
+103,Axit sunfuro,H2SO3,Axit vo co,Dung dich,0.1M; 6%
+104,Axit nitric,HNO3,Axit vo co,Dung dich,0.1M; 1M; 6M; 65-70% (~14-16M)
+105,Axit nitrơ,HNO2,Axit vo co,Dung dich,0.1M
+106,Axit photphoric,H3PO4,Axit vo co,Dung dich,0.1M; 1M; 85% (~14.7M)
+107,Axit photphorơ,H3PO3,Axit vo co,Dung dich,0.1M
+108,Axit photphinơ,H3PO2,Axit vo co,Dung dich,50%
+109,Axit cacbonic,H2CO3,Axit vo co,Dung dich,bao hoa (~0.03M)
+110,Axit hidrosunfua,H2S,Axit vo co,Dung dich,0.1M; bao hoa (~0.1M)
+111,Axit hipoclorơ,HClO,Axit vo co,Dung dich,0.1M
+112,Axit clorơ,HClO2,Axit vo co,Dung dich,0.1M
+113,Axit cloric,HClO3,Axit vo co,Dung dich,0.1M; 30%
+114,Axit percloric,HClO4,Axit vo co,Dung dich,0.1M; 60% (~9.2M); 70% (~11.6M)
+115,Axit bromic,HBrO3,Axit vo co,Dung dich,0.1M
+116,Axit iodic,HIO3,Axit vo co,Dung dich,0.1M
+117,Axit silicic,H2SiO3,Axit vo co,Dung dich,0.1M
+118,Axit boric,H3BO3,Axit vo co,Dung dich,0.1M; 3%; 5%
+119,Axit cromic,H2CrO4,Axit vo co,Dung dich,0.1M
+120,Axit dicromic,H2Cr2O7,Axit vo co,Dung dich,0.1M
+121,Axit pemanganic,HMnO4,Axit vo co,Dung dich,0.01M
+122,Axit xianhidric,HCN,Axit vo co,Dung dich,0.1M; 5%
+123,Axit thioxianic,HSCN,Axit vo co,Dung dich,0.1M
+124,Natri hidroxit,NaOH,Bazơ,Dung dich,0.1M; 0.5M; 1M; 2M; 50% (~19.3M)
+125,Kali hidroxit,KOH,Bazơ,Dung dich,0.1M; 1M; 45% (~11.7M)
+126,Liti hidroxit,LiOH,Bazơ,Dung dich,0.1M; 1M
+127,Canxi hidroxit,Ca(OH)2,Bazơ,Dung dich,nuoc voi trong bao hoa (~0.02M)
+128,Magie hidroxit,Mg(OH)2,Bazơ,Huyền phù,ket tua
+129,Bari hidroxit,Ba(OH)2,Bazơ,Dung dich,0.1M; 0.5M
+130,Stronti hidroxit,Sr(OH)2,Bazơ,Dung dich,0.1M
+131,Nhom hidroxit,Al(OH)3,Bazơ lưỡng tính,Ket tua,ket tua
+132,Sat(II) hidroxit,Fe(OH)2,Bazơ,Ket tua,ket tua
+133,Sat(III) hidroxit,Fe(OH)3,Bazơ,Ket tua,ket tua
+134,Dong(II) hidroxit,Cu(OH)2,Bazơ,Ket tua,ket tua
+135,Kem hidroxit,Zn(OH)2,Bazơ lưỡng tính,Ket tua,ket tua
+136,Chi(II) hidroxit,Pb(OH)2,Bazơ lưỡng tính,Ket tua,ket tua
+137,Niken(II) hidroxit,Ni(OH)2,Bazơ,Ket tua,ket tua
+138,Coban(II) hidroxit,Co(OH)2,Bazơ,Ket tua,ket tua
+139,Crom(III) hidroxit,Cr(OH)3,Bazơ lưỡng tính,Ket tua,ket tua
+140,Mangan(II) hidroxit,Mn(OH)2,Bazơ,Ket tua,ket tua
+141,Bac hidroxit,AgOH,Bazơ,Ket tua,ket tua
+142,Amoni hidroxit,NH4OH,Bazơ yếu,Dung dich,tuong duong NH3 1M
+143,Amoniac,NH3,Bazơ yếu,Dung dich,0.1M; 1M; 25-28% (~13.4-14.8M)
+144,Beri hidroxit,Be(OH)2,Bazơ lưỡng tính,Ket tua,ket tua
+145,Cadmi hidroxit,Cd(OH)2,Bazơ,Ket tua,ket tua
+146,Thiec(II) hidroxit,Sn(OH)2,Bazơ lưỡng tính,Ket tua,ket tua
+147,Thiec(IV) hidroxit,Sn(OH)4,Bazơ lưỡng tính,Ket tua,ket tua
+148,Bitmut(III) hidroxit,Bi(OH)3,Bazơ,Ket tua,ket tua
+149,Natri clorua,NaCl,Muoi,Dung dich,0.9% (sinh ly); 1M; 5M
+150,Kali clorua,KCl,Muoi,Dung dich,1M; bao hoa
+151,Liti clorua,LiCl,Muoi,Ran,100%
+152,Amoni clorua,NH4Cl,Muoi,Dung dich,1M; bao hoa
+153,Canxi clorua,CaCl2,Muoi,Dung dich,1M; bao hoa
+154,Magie clorua,MgCl2,Muoi,Dung dich,0.1M; 1M
+155,Bari clorua,BaCl2,Muoi,Dung dich,0.1M; 0.5M; 1M
+156,Stronti clorua,SrCl2,Muoi,Dung dich,0.1M; 1M
+157,Nhom clorua,AlCl3,Muoi,Dung dich,0.1M; 1M
+158,Sat(II) clorua,FeCl2,Muoi,Dung dich,0.1M; 1M
+159,Sat(III) clorua,FeCl3,Muoi,Dung dich,0.1M; 1M; 40% (~7.4M)
+160,Dong(I) clorua,CuCl,Muoi,Ran,100%
+161,Dong(II) clorua,CuCl2,Muoi,Dung dich,0.1M; 1M
+162,Kem clorua,ZnCl2,Muoi,Dung dich,0.1M; 1M
+163,Chi(II) clorua,PbCl2,Muoi,Dung dich,0.1M; bao hoa
+164,Bac clorua,AgCl,Muoi,Ket tua,ket tua
+165,Thuy ngan(II) clorua,HgCl2,Muoi,Dung dich,0.1M
+166,Thuy ngan(I) clorua,Hg2Cl2,Muoi,Ran,100%
+167,Thiec(II) clorua,SnCl2,Muoi,Dung dich,0.1M; 1M
+168,Thiec(IV) clorua,SnCl4,Muoi,Long,100%
+169,Niken(II) clorua,NiCl2,Muoi,Dung dich,0.1M; 1M
+170,Coban(II) clorua,CoCl2,Muoi,Dung dich,0.1M; 1M
+171,Mangan(II) clorua,MnCl2,Muoi,Dung dich,0.1M; 1M
+172,Crom(III) clorua,CrCl3,Muoi,Dung dich,0.1M; 1M
+173,Cadmi clorua,CdCl2,Muoi,Dung dich,0.1M
+174,Beri clorua,BeCl2,Muoi,Dung dich,0.1M
+175,Titan(IV) clorua,TiCl4,Muoi,Long,100%
+176,Natri hipoclorit,NaClO,Muoi,Dung dich,5% (nuoc Javen)
+177,Canxi hipoclorit,Ca(OCl)2,Muoi,Dung dich,70% bot; 5% dung dich
+178,Kali clorat,KClO3,Muoi,Ran,100%
+179,Natri clorat,NaClO3,Muoi,Ran,100%
+180,Natri perclorat,NaClO4,Muoi,Ran,100%
+181,Kali perclorat,KClO4,Muoi,Ran,100%
+182,Amoni perclorat,NH4ClO4,Muoi,Ran,100%
+183,Natri bromua,NaBr,Muoi,Dung dich,0.1M; 1M
+184,Kali bromua,KBr,Muoi,Dung dich,0.1M; 1M
+185,Amoni bromua,NH4Br,Muoi,Dung dich,0.1M
+186,Canxi bromua,CaBr2,Muoi,Dung dich,0.1M
+187,Magie bromua,MgBr2,Muoi,Dung dich,0.1M
+188,Bari bromua,BaBr2,Muoi,Dung dich,0.1M
+189,Nhom bromua,AlBr3,Muoi,Ran,100%
+190,Sat(II) bromua,FeBr2,Muoi,Dung dich,0.1M
+191,Sat(III) bromua,FeBr3,Muoi,Dung dich,0.1M
+192,Dong(II) bromua,CuBr2,Muoi,Dung dich,0.1M
+193,Kem bromua,ZnBr2,Muoi,Dung dich,0.1M
+194,Bac bromua,AgBr,Muoi,Ket tua,ket tua
+195,Chi(II) bromua,PbBr2,Muoi,Ket tua,ket tua
+196,Natri iodua,NaI,Muoi,Dung dich,0.1M; 1M
+197,Kali iodua,KI,Muoi,Dung dich,0.1M; 1M
+198,Amoni iodua,NH4I,Muoi,Dung dich,0.1M
+199,Canxi iodua,CaI2,Muoi,Dung dich,0.1M
+200,Magie iodua,MgI2,Muoi,Dung dich,0.1M
+201,Bari iodua,BaI2,Muoi,Dung dich,0.1M
+202,Nhom iodua,AlI3,Muoi,Ran,100%
+203,Sat(II) iodua,FeI2,Muoi,Dung dich,0.1M
+204,Dong(I) iodua,CuI,Muoi,Ket tua,ket tua
+205,Bac iodua,AgI,Muoi,Ket tua,ket tua
+206,Chi(II) iodua,PbI2,Muoi,Ket tua,ket tua
+207,Kem iodua,ZnI2,Muoi,Dung dich,0.1M
+208,Natri florua,NaF,Muoi,Dung dich,0.1M; 2%
+209,Kali florua,KF,Muoi,Dung dich,0.1M; 1M
+210,Canxi florua,CaF2,Muoi,Ran,100%
+211,Magie florua,MgF2,Muoi,Ran,100%
+212,Bari florua,BaF2,Muoi,Ran,100%
+213,Nhom florua,AlF3,Muoi,Ran,100%
+214,Natri hexaflorosilicat,Na2SiF6,Muoi,Ran,100%
+215,Criolit,Na3AlF6,Muoi,Ran,100%
+216,Natri nitrat,NaNO3,Muoi,Dung dich,0.1M; 1M
+217,Kali nitrat,KNO3,Muoi,Dung dich,0.1M; 1M
+218,Liti nitrat,LiNO3,Muoi,Dung dich,0.1M
+219,Amoni nitrat,NH4NO3,Muoi,Dung dich,1M
+220,Canxi nitrat,Ca(NO3)2,Muoi,Dung dich,0.1M; 1M
+221,Magie nitrat,Mg(NO3)2,Muoi,Dung dich,0.1M; 1M
+222,Bari nitrat,Ba(NO3)2,Muoi,Dung dich,0.1M; 1M
+223,Stronti nitrat,Sr(NO3)2,Muoi,Dung dich,0.1M
+224,Nhom nitrat,Al(NO3)3,Muoi,Dung dich,0.1M; 1M
+225,Sat(II) nitrat,Fe(NO3)2,Muoi,Dung dich,0.1M
+226,Sat(III) nitrat,Fe(NO3)3,Muoi,Dung dich,0.1M; 1M
+227,Dong(II) nitrat,Cu(NO3)2,Muoi,Dung dich,0.1M; 1M
+228,Kem nitrat,Zn(NO3)2,Muoi,Dung dich,0.1M; 1M
+229,Chi(II) nitrat,Pb(NO3)2,Muoi,Dung dich,0.1M; 1M
+230,Bac nitrat,AgNO3,Muoi,Dung dich,0.01M; 0.05M; 0.1M
+231,Thuy ngan(II) nitrat,Hg(NO3)2,Muoi,Dung dich,0.1M
+232,Thiec(II) nitrat,Sn(NO3)2,Muoi,Dung dich,0.1M
+233,Niken(II) nitrat,Ni(NO3)2,Muoi,Dung dich,0.1M; 1M
+234,Coban(II) nitrat,Co(NO3)2,Muoi,Dung dich,0.1M; 1M
+235,Mangan(II) nitrat,Mn(NO3)2,Muoi,Dung dich,0.1M
+236,Crom(III) nitrat,Cr(NO3)3,Muoi,Dung dich,0.1M
+237,Cadmi nitrat,Cd(NO3)2,Muoi,Dung dich,0.1M
+238,Bitmut(III) nitrat,Bi(NO3)3,Muoi,Dung dich,0.1M
+239,Kali nitrit,KNO2,Muoi,Dung dich,0.1M; 1M
+240,Natri nitrit,NaNO2,Muoi,Dung dich,0.1M; 1M
+241,Amoni nitrit,NH4NO2,Muoi,Dung dich,0.1M
+242,Natri sunfat,Na2SO4,Muoi,Dung dich,0.1M; 1M
+243,Kali sunfat,K2SO4,Muoi,Dung dich,0.1M; 1M
+244,Liti sunfat,Li2SO4,Muoi,Dung dich,0.1M
+245,Amoni sunfat,(NH4)2SO4,Muoi,Dung dich,0.1M; 1M
+246,Canxi sunfat,CaSO4,Muoi,Ran,100%
+247,Magie sunfat,MgSO4,Muoi,Dung dich,0.1M; 1M
+248,Bari sunfat,BaSO4,Muoi,Ket tua,ket tua
+249,Stronti sunfat,SrSO4,Muoi,Ket tua,ket tua
+250,Nhom sunfat,Al2(SO4)3,Muoi,Dung dich,0.1M; 1M
+251,Sat(II) sunfat,FeSO4,Muoi,Dung dich,0.1M; 1M
+252,Sat(III) sunfat,Fe2(SO4)3,Muoi,Dung dich,0.1M; 1M
+253,Dong(II) sunfat,CuSO4,Muoi,Dung dich,0.1M; 0.5M; 1M
+254,Kem sunfat,ZnSO4,Muoi,Dung dich,0.1M; 1M
+255,Chi(II) sunfat,PbSO4,Muoi,Ket tua,ket tua
+256,Bac sunfat,Ag2SO4,Muoi,Ran,100%
+257,Thuy ngan(II) sunfat,HgSO4,Muoi,Ran,100%
+258,Thiec(II) sunfat,SnSO4,Muoi,Dung dich,0.1M
+259,Niken(II) sunfat,NiSO4,Muoi,Dung dich,0.1M; 1M
+260,Coban(II) sunfat,CoSO4,Muoi,Dung dich,0.1M; 1M
+261,Mangan(II) sunfat,MnSO4,Muoi,Dung dich,0.1M; 1M
+262,Crom(III) sunfat,Cr2(SO4)3,Muoi,Dung dich,0.1M
+263,Cadmi sunfat,CdSO4,Muoi,Dung dich,0.1M
+264,Beri sunfat,BeSO4,Muoi,Dung dich,0.1M
+265,Natri hidrosunfat,NaHSO4,Muoi,Dung dich,0.1M; 1M
+266,Kali hidrosunfat,KHSO4,Muoi,Dung dich,0.1M; 1M
+267,Amoni hidrosunfat,NH4HSO4,Muoi,Dung dich,0.1M; 1M
+268,Natri sunfit,Na2SO3,Muoi,Dung dich,0.1M; 1M
+269,Kali sunfit,K2SO3,Muoi,Dung dich,0.1M
+270,Natri hidrosunfit,NaHSO3,Muoi,Dung dich,0.1M; bao hoa
+271,Natri thiosunfat,Na2S2O3,Muoi,Dung dich,0.05M; 0.1M; 1M
+272,Natri pyrosunfit,Na2S2O5,Muoi,Ran,100%
+273,Natri pesunfat,Na2S2O8,Muoi,Ran,100%
+274,Kali pesunfat,K2S2O8,Muoi,Ran,100%
+275,Natri cacbonat,Na2CO3,Muoi,Dung dich,0.1M; 0.5M; 1M
+276,Kali cacbonat,K2CO3,Muoi,Dung dich,0.1M; 1M
+277,Liti cacbonat,Li2CO3,Muoi,Dung dich,0.1M
+278,Amoni cacbonat,(NH4)2CO3,Muoi,Dung dich,0.1M; 1M
+279,Canxi cacbonat,CaCO3,Muoi,Ran,100%
+280,Magie cacbonat,MgCO3,Muoi,Ran,100%
+281,Bari cacbonat,BaCO3,Muoi,Ran,100%
+282,Stronti cacbonat,SrCO3,Muoi,Ran,100%
+283,Sat(II) cacbonat,FeCO3,Muoi,Ran,100%
+284,Dong(II) cacbonat,CuCO3,Muoi,Ran,100%
+285,Kem cacbonat,ZnCO3,Muoi,Ran,100%
+286,Chi(II) cacbonat,PbCO3,Muoi,Ran,100%
+287,Bac cacbonat,Ag2CO3,Muoi,Ran,100%
+288,Mangan(II) cacbonat,MnCO3,Muoi,Ran,100%
+289,Natri hidrocacbonat,NaHCO3,Muoi,Dung dich,0.1M; 0.5M; 1M
+290,Kali hidrocacbonat,KHCO3,Muoi,Dung dich,0.1M; 1M
+291,Amoni hidrocacbonat,NH4HCO3,Muoi,Dung dich,0.1M; 1M
+292,Canxi hidrocacbonat,Ca(HCO3)2,Muoi,Dung dich,bao hoa
+293,Magie hidrocacbonat,Mg(HCO3)2,Muoi,Dung dich,bao hoa
+294,Bari hidrocacbonat,Ba(HCO3)2,Muoi,Dung dich,bao hoa
+295,Natri photphat,Na3PO4,Muoi,Dung dich,0.1M; 1M
+296,Kali photphat,K3PO4,Muoi,Dung dich,0.1M; 1M
+297,Canxi photphat,Ca3(PO4)2,Muoi,Ran,100%
+298,Magie photphat,Mg3(PO4)2,Muoi,Ran,100%
+299,Nhom photphat,AlPO4,Muoi,Ran,100%
+300,Sat(III) photphat,FePO4,Muoi,Ran,100%
+301,Bac photphat,Ag3PO4,Muoi,Ket tua,ket tua
+302,Bari photphat,Ba3(PO4)2,Muoi,Ran,100%
+303,Natri hidrophotphat,Na2HPO4,Muoi,Dung dich,0.1M; 1M
+304,Natri dihidrophotphat,NaH2PO4,Muoi,Dung dich,0.1M; 1M
+305,Kali hidrophotphat,K2HPO4,Muoi,Dung dich,0.1M; 1M
+306,Kali dihidrophotphat,KH2PO4,Muoi,Dung dich,0.1M; 1M
+307,Amoni hidrophotphat,(NH4)2HPO4,Muoi,Dung dich,0.1M; 1M
+308,Amoni dihidrophotphat,NH4H2PO4,Muoi,Dung dich,0.1M; 1M
+309,Amoni photphat,(NH4)3PO4,Muoi,Dung dich,0.1M
+310,Canxi dihidrophotphat,Ca(H2PO4)2,Muoi,Ran,100%
+311,Canxi hidrophotphat,CaHPO4,Muoi,Ran,100%
+312,Natri pyrophotphat,Na4P2O7,Muoi,Ran,100%
+313,Natri tripolyphotphat,Na5P3O10,Muoi,Ran,100%
+314,Natri axetat,CH3COONa,Muoi huu co,Dung dich,0.1M; 1M
+315,Kali axetat,CH3COOK,Muoi huu co,Dung dich,0.1M; 1M
+316,Amoni axetat,CH3COONH4,Muoi huu co,Dung dich,1M; 10M
+317,Canxi axetat,(CH3COO)2Ca,Muoi huu co,Dung dich,bao hoa
+318,Magie axetat,(CH3COO)2Mg,Muoi huu co,Dung dich,0.1M
+319,Bari axetat,(CH3COO)2Ba,Muoi huu co,Dung dich,0.1M
+320,Chi(II) axetat,(CH3COO)2Pb,Muoi huu co,Dung dich,0.1M; 1M
+321,Dong(II) axetat,(CH3COO)2Cu,Muoi huu co,Dung dich,0.1M
+322,Kem axetat,(CH3COO)2Zn,Muoi huu co,Dung dich,0.1M
+323,Bac axetat,CH3COOAg,Muoi huu co,Dung dich,0.1M
+324,Natri format,HCOONa,Muoi huu co,Dung dich,0.1M; 1M
+325,Amoni format,HCOONH4,Muoi huu co,Dung dich,0.1M
+326,Natri oxalat,(COONa)2,Muoi huu co,Dung dich,0.1M; 1M
+327,Kali oxalat,(COOK)2,Muoi huu co,Dung dich,0.1M
+328,Amoni oxalat,(COONH4)2,Muoi huu co,Dung dich,0.1M
+329,Kali natri tartrat,NaKC4H4O6,Muoi huu co,Ran,100%
+330,Natri benzoat,C6H5COONa,Muoi huu co,Dung dich,0.1M; 1M
+331,Kali benzoat,C6H5COOK,Muoi huu co,Dung dich,0.1M
+332,Amoni benzoat,C6H5COONH4,Muoi huu co,Dung dich,0.1M
+333,Natri lactat,CH3CH(OH)COONa,Muoi huu co,Dung dich,0.1M; 60%
+334,Natri xitrat,Na3C6H5O7,Muoi huu co,Dung dich,0.1M; 1M
+335,Kali xitrat,K3C6H5O7,Muoi huu co,Dung dich,0.1M
+336,Amoni xitrat,(NH4)3C6H5O7,Muoi huu co,Dung dich,0.1M
+337,Natri dihidroxitrat,Na2C6H6O7,Muoi huu co,Dung dich,0.1M
+338,Kali pemanganat,KMnO4,Muoi oxy hoa,Dung dich,0.01M; 0.02M; 0.1M
+339,Natri pemanganat,NaMnO4,Muoi oxy hoa,Dung dich,0.1M
+340,Kali manganat,K2MnO4,Muoi,Dung dich,0.1M
+341,Kali cromat,K2CrO4,Muoi,Dung dich,0.1M; 1M
+342,Kali dicromat,K2Cr2O7,Muoi oxy hoa,Dung dich,0.05M; 0.1M; 1M
+343,Natri cromat,Na2CrO4,Muoi,Dung dich,0.1M; 1M
+344,Natri dicromat,Na2Cr2O7,Muoi oxy hoa,Dung dich,0.1M; 1M
+345,Amoni dicromat,(NH4)2Cr2O7,Muoi oxy hoa,Ran,100%
+346,Chi(II) cromat,PbCrO4,Muoi,Ket tua,ket tua
+347,Bari cromat,BaCrO4,Muoi,Ket tua,ket tua
+348,Bac cromat,Ag2CrO4,Muoi,Ket tua,ket tua
+349,Kali xianua,KCN,Muoi,Dung dich,0.1M; 1M
+350,Natri xianua,NaCN,Muoi,Dung dich,0.1M; 1M
+351,Kali thioxianat,KSCN,Muoi,Dung dich,0.1M; 1M
+352,Amoni thioxianat,NH4SCN,Muoi,Dung dich,0.1M; 1M
+353,Natri sunfua,Na2S,Muoi,Dung dich,0.1M; 1M
+354,Kali sunfua,K2S,Muoi,Dung dich,0.1M; 1M
+355,Canxi sunfua,CaS,Muoi,Ran,100%
+356,Sat(II) sunfua,FeS,Muoi,Ran,100%
+357,Pyrit,FeS2,Muoi,Ran,100%
+358,Dong(II) sunfua,CuS,Muoi,Ket tua,ket tua
+359,Kem sunfua,ZnS,Muoi,Ket tua,ket tua
+360,Chi(II) sunfua,PbS,Muoi,Ket tua,ket tua
+361,Bac sunfua,Ag2S,Muoi,Ket tua,ket tua
+362,Thuy ngan(II) sunfua,HgS,Muoi,Ket tua,ket tua
+363,Cadmi sunfua,CdS,Muoi,Ket tua,ket tua
+364,Mangan(II) sunfua,MnS,Muoi,Ket tua,ket tua
+365,Natri hidrosunfua,NaHS,Muoi,Dung dich,0.1M
+366,Natri silicat,Na2SiO3,Muoi,Dung dich,0.1M; 40% (thuy tinh long)
+367,Kali silicat,K2SiO3,Muoi,Dung dich,0.1M
+368,Natri tetraborat (borax),Na2B4O7,Muoi,Dung dich,0.1M; bao hoa
+369,Natri peroxit,Na2O2,Chất oxy hoa,Ran,100%
+370,Kali peroxit,K2O2,Chất oxy hoa,Ran,100%
+371,Bari peroxit,BaO2,Chất oxy hoa,Ran,100%
+372,Canxi cacbua,CaC2,Muoi,Ran,100%
+373,Magie nitrua,Mg3N2,Muoi,Ran,100%
+374,Nhom cacbua,Al4C3,Muoi,Ran,100%
+375,Canxi nitrua,Ca3N2,Muoi,Ran,100%
+376,Natri amit,NaNH2,Muoi,Ran,100%
+377,Natri hidrua,NaH,Chat khu,Ran,100%
+378,Liti nhom hidrua,LiAlH4,Chat khu,Ran,100%
+379,Natri borohidrua,NaBH4,Chat khu,Ran,100%
+380,Kali ferocyanua,K4[Fe(CN)6],Phuc chat,Dung dich,0.1M
+381,Kali fericyanua,K3[Fe(CN)6],Phuc chat,Dung dich,0.1M
+382,Kali hexacyanocobaltat,K3[Co(CN)6],Phuc chat,Dung dich,0.1M
+383,Dong(II) sunfat ngam nuoc,CuSO4.5H2O,Muoi tinh the,Ran,100%
+384,Sat(II) sunfat ngam nuoc,FeSO4.7H2O,Muoi tinh the,Ran,100%
+385,Muoi Mohr,Fe(NH4)2(SO4)2.6H2O,Muoi kép,Ran,100%
+386,Phen chua,KAl(SO4)2.12H2O,Muoi kép,Ran,100%
+387,Phen amoni,NH4Al(SO4)2.12H2O,Muoi kép,Ran,100%
+388,Phen crom,KCr(SO4)2.12H2O,Muoi kép,Ran,100%
+389,Natri thiosunfat ngam nuoc,Na2S2O3.5H2O,Muoi tinh the,Ran,100%
+390,Magie sunfat ngam nuoc,MgSO4.7H2O,Muoi tinh the,Ran,100%
+391,Chi(II) axetat ngam nuoc,(CH3COO)2Pb.3H2O,Muoi tinh the,Ran,100%
+392,Axit oxalic ngam nuoc,(COOH)2.2H2O,Axit huu co,Ran,100%
+393,Giay quy tim,-,Chi thi,Giay,thu pH
+394,Dung dich phenolphtalein,-,Chi thi,Dung dich,1% trong etanol
+395,Dung dich metyl da cam,-,Chi thi,Dung dich,0.1% (pH 3.1-4.4)
+396,Dung dich metyl do,-,Chi thi,Dung dich,0.1% (pH 4.4-6.2)
+397,Dung dich bromothymol xanh,-,Chi thi,Dung dich,0.1% (pH 6.0-7.6)
+398,Dung dich bromocresol xanh,-,Chi thi,Dung dich,0.1% (pH 3.8-5.4)
+399,Dung dich thymol xanh,-,Chi thi,Dung dich,0.1% (pH 8.0-9.6)
+400,Dung dich alizarin vang,-,Chi thi,Dung dich,0.1%
+401,Dung dich hồ tinh bột,-,Chi thi,Dung dich,1%
+402,Thuoc thu Fehling A,-,Thuoc thu,Dung dich,CuSO4 7%
+403,Thuoc thu Fehling B,-,Thuoc thu,Dung dich,KNaC4H4O6 + NaOH
+404,Thuoc thu Tollens,-,Thuoc thu,Dung dich,AgNO3/NH3 pha moi
+405,Thuoc thu Biuret,-,Thuoc thu,Dung dich,NaOH + CuSO4 loang
+406,Thuoc thu Ninhydrin,-,Thuoc thu,Dung dich,0.1%
+407,Thuoc thu Lugol,-,Thuoc thu,Dung dich,I2/KI
+408,Thuoc thu Benedict,-,Thuoc thu,Dung dich,CuSO4 + xitrat + Na2CO3
+409,Thuoc thu Millon,-,Thuoc thu,Dung dich,Hg/HNO3
+410,Thuoc thu Molisch,-,Thuoc thu,Dung dich,alpha-naphtol 5%
+411,Thuoc thu Schiff,-,Thuoc thu,Dung dich,fuchsin khu mau
+412,Thuoc thu Nessler,-,Thuoc thu,Dung dich,K2HgI4/KOH
+413,Nuoc brom,-,Thuoc thu,Dung dich,bao hoa (~0.2M)
+414,Nuoc clo,-,Thuoc thu,Dung dich,bao hoa (~0.1M)
+415,Dung dich iot (I2/KI),-,Thuoc thu,Dung dich,0.05M; 0.1M
+416,Diphenylamin,-,Thuoc thu,Dung dich,1% trong H2SO4
+417,Axit picric,-,Thuoc thu,Dung dich,1%
+418,Metan,CH4,Hidrocacbon,Khi,100%
+419,Etan,C2H6,Hidrocacbon,Khi,100%
+420,Propan,C3H8,Hidrocacbon,Khi,100%
+421,Butan,C4H10,Hidrocacbon,Khi,100%
+422,Pentan,C5H12,Hidrocacbon,Long,100%
+423,Hexan,C6H14,Hidrocacbon,Long,100%
+424,Heptan,C7H16,Hidrocacbon,Long,100%
+425,Octan,C8H18,Hidrocacbon,Long,100%
+426,Etilen,C2H4,Hidrocacbon,Khi,100%
+427,Propilen,C3H6,Hidrocacbon,Khi,100%
+428,Butilen,C4H8,Hidrocacbon,Khi,100%
+429,Isobutilen,(CH3)2C=CH2,Hidrocacbon,Khi,100%
+430,Axetilen,C2H2,Hidrocacbon,Khi,100%
+431,Propin,C3H4,Hidrocacbon,Khi,100%
+432,Butadien-1,3,CH2=CH-CH=CH2,Hidrocacbon,Khi,100%
+433,Isopren,C5H8,Hidrocacbon,Long,100%
+434,Benzen,C6H6,Hidrocacbon,Long,100%
+435,Toluen,C6H5CH3,Hidrocacbon,Long,100%
+436,o-Xilen,C6H4(CH3)2,Hidrocacbon,Long,100%
+437,m-Xilen,C6H4(CH3)2,Hidrocacbon,Long,100%
+438,p-Xilen,C6H4(CH3)2,Hidrocacbon,Long,100%
+439,Etylbenzen,C6H5C2H5,Hidrocacbon,Long,100%
+440,Styren,C6H5CH=CH2,Hidrocacbon,Long,100%
+441,Naphtalen,C10H8,Hidrocacbon,Ran,100%
+442,Antracen,C14H10,Hidrocacbon,Ran,100%
+443,Cumen,C6H5CH(CH3)2,Hidrocacbon,Long,100%
+444,Xiclohexan,C6H12,Hidrocacbon,Long,100%
+445,Xiclopropan,C3H6,Hidrocacbon,Khi,100%
+446,Metylxiclohexan,C7H14,Hidrocacbon,Long,100%
+447,Clorometan,CH3Cl,Dẫn xuất halogen,Khi,100%
+448,Diclometan,CH2Cl2,Dẫn xuất halogen,Long,100%
+449,Cloroform,CHCl3,Dẫn xuất halogen,Long,100%
+450,Cacbon tetraclorua,CCl4,Dẫn xuất halogen,Long,100%
+451,Cloetan,C2H5Cl,Dẫn xuất halogen,Khi,100%
+452,1,2-Dicloetan,C2H4Cl2,Dẫn xuất halogen,Long,100%
+453,Vinyl clorua,C2H3Cl,Dẫn xuất halogen,Khi,100%
+454,Clorobenzen,C6H5Cl,Dẫn xuất halogen,Long,100%
+455,o-Diclorobenzen,C6H4Cl2,Dẫn xuất halogen,Long,100%
+456,Bromobenzen,C6H5Br,Dẫn xuất halogen,Long,100%
+457,Bromometan,CH3Br,Dẫn xuất halogen,Khi,100%
+458,Iodometan,CH3I,Dẫn xuất halogen,Long,100%
+459,1,2-Dibromoetan,C2H4Br2,Dẫn xuất halogen,Long,100%
+460,Allyl clorua,CH2=CHCH2Cl,Dẫn xuất halogen,Long,100%
+461,Bromoetan,C2H5Br,Dẫn xuất halogen,Long,100%
+462,Iodoetan,C2H5I,Dẫn xuất halogen,Long,100%
+463,Benzyl clorua,C6H5CH2Cl,Dẫn xuất halogen,Long,100%
+464,Freon-12,CCl2F2,Dẫn xuất halogen,Khi,100%
+465,Freon-22,CHClF2,Dẫn xuất halogen,Khi,100%
+466,Tetrafloetylen,C2F4,Dẫn xuất halogen,Khi,100%
+467,Methanol,CH3OH,Ancol,Long,100%
+468,Etanol,C2H5OH,Ancol,Long,96%; 90%; 70%; 99.5%
+469,Propan-1-ol,C3H7OH,Ancol,Long,100%
+470,Propan-2-ol,(CH3)2CHOH,Ancol,Long,100%
+471,Butan-1-ol,C4H9OH,Ancol,Long,100%
+472,Butan-2-ol,C4H9OH,Ancol,Long,100%
+473,Isobutanol,(CH3)2CHCH2OH,Ancol,Long,100%
+474,tert-Butanol,(CH3)3COH,Ancol,Long,100%
+475,Pentan-1-ol,C5H11OH,Ancol,Long,100%
+476,Etylen glicol,HOCH2CH2OH,Ancol,Long,100%
+477,Propylen glicol,CH3CH(OH)CH2OH,Ancol,Long,100%
+478,Glixerol,C3H5(OH)3,Ancol,Long,100%; 12%
+479,Butan-1,3-diol,C4H10O2,Ancol,Long,100%
+480,Phenol,C6H5OH,Phenol,Ran,100%; 5% dung dich
+481,o-Cresol,CH3C6H4OH,Phenol,Long,100%
+482,m-Cresol,CH3C6H4OH,Phenol,Long,100%
+483,p-Cresol,CH3C6H4OH,Phenol,Ran,100%
+484,Catechol,C6H4(OH)2,Phenol,Ran,100%
+485,Resorcinol,C6H4(OH)2,Phenol,Ran,100%
+486,Hidroquinon,C6H4(OH)2,Phenol,Ran,100%
+487,Ancol benzylic,C6H5CH2OH,Ancol,Long,100%
+488,Xiclohexanol,C6H11OH,Ancol,Long,100%
+489,Ancol allylic,CH2=CHCH2OH,Ancol,Long,100%
+490,Andehit fomic,HCHO,Andehit,Khi/Dung dich,37-40% (formalin)
+491,Andehit axetic,CH3CHO,Andehit,Long,100%; 40%
+492,Propanal,C2H5CHO,Andehit,Long,100%
+493,Butanal,C3H7CHO,Andehit,Long,100%
+494,Acrolein,CH2=CHCHO,Andehit,Long,100%
+495,Benzandehit,C6H5CHO,Andehit,Long,100%
+496,Phtalandehit,o-C6H4(CHO)2,Andehit,Ran,100%
+497,Glutarandehit,OHC(CH2)3CHO,Andehit,Long,25%
+498,Axeton,(CH3)2CO,Xeton,Long,100%
+499,Butanon,C2H5COCH3,Xeton,Long,100%
+500,Pentan-2-on,C3H7COCH3,Xeton,Long,100%
+501,Xiclohexanon,C6H10O,Xeton,Long,100%
+502,Axetophenon,C6H5COCH3,Xeton,Long,100%
+503,Benzophenon,(C6H5)2CO,Xeton,Ran,100%
+504,Axit formic,HCOOH,Axit huu co,Long,85-90%
+505,Axit axetic,CH3COOH,Axit huu co,Long,99-100% (bang); 5% (giam an); 1M
+506,Axit propionic,C2H5COOH,Axit huu co,Long,100%
+507,Axit butyric,C3H7COOH,Axit huu co,Long,100%
+508,Axit valeric,C4H9COOH,Axit huu co,Long,100%
+509,Axit oxalic,(COOH)2,Axit huu co,Dung dich,0.1M; 5%
+510,Axit malonic,HOOCCH2COOH,Axit huu co,Ran,100%
+511,Axit succinic,HOOC(CH2)2COOH,Axit huu co,Ran,100%
+512,Axit acrylic,CH2=CHCOOH,Axit huu co,Long,100%
+513,Axit lactic,CH3CH(OH)COOH,Axit huu co,Long,85-90%
+514,Axit malic,HOOCCH2CH(OH)COOH,Axit huu co,Ran,100%
+515,Axit xitric,C6H8O7,Axit huu co,Ran,100%; 0.1M
+516,Axit tartaric,C4H6O6,Axit huu co,Ran,100%
+517,Axit benzoic,C6H5COOH,Axit huu co,Ran,100%
+518,Axit phtalic,C6H4(COOH)2,Axit huu co,Ran,100%
+519,Axit salicylic,C6H4(OH)COOH,Axit huu co,Ran,100%
+520,Axit palmitic,C15H31COOH,Axit beo,Ran,100%
+521,Axit stearic,C17H35COOH,Axit beo,Ran,100%
+522,Axit oleic,C17H33COOH,Axit beo,Long,100%
+523,Axit linoleic,C17H31COOH,Axit beo,Long,100%
+524,Axit lauric,C11H23COOH,Axit beo,Ran,100%
+525,Axit glutamic,HOOC(CH2)2CH(NH2)COOH,Amino axit,Ran,100%
+526,Glyxin,NH2CH2COOH,Amino axit,Ran,100%
+527,Alanin,CH3CH(NH2)COOH,Amino axit,Ran,100%
+528,Axit uric,C5H4N4O3,Axit huu co,Ran,100%
+529,Axit nucleic,-,Axit huu co,Dung dich,-
+530,Metyl format,HCOOCH3,Este,Long,100%
+531,Etyl format,HCOOC2H5,Este,Long,100%
+532,Propyl format,HCOOC3H7,Este,Long,100%
+533,Metyl axetat,CH3COOCH3,Este,Long,100%
+534,Etyl axetat,CH3COOC2H5,Este,Long,100%
+535,Propyl axetat,CH3COOC3H7,Este,Long,100%
+536,Butyl axetat,CH3COOC4H9,Este,Long,100%
+537,Pentyl axetat,CH3COOC5H11,Este,Long,100%
+538,Octyl axetat,CH3COOC8H17,Este,Long,100%
+539,Isoamyl axetat,CH3COOC5H11,Este,Long,100% (dau chuoi)
+540,Metyl propionat,C2H5COOCH3,Este,Long,100%
+541,Etyl propionat,C2H5COOC2H5,Este,Long,100%
+542,Etyl butyrat,C3H7COOC2H5,Este,Long,100%
+543,Metyl benzoat,C6H5COOCH3,Este,Long,100%
+544,Etyl benzoat,C6H5COOC2H5,Este,Long,100%
+545,Metyl acrylat,CH2=CHCOOCH3,Este,Long,100%
+546,Metyl metacrylat,CH2=C(CH3)COOCH3,Este,Long,100%
+547,Tristearin,(C17H35COO)3C3H5,Chat beo,Ran,100%
+548,Tripalmitin,(C15H31COO)3C3H5,Chat beo,Ran,100%
+549,Triolein,(C17H33COO)3C3H5,Chat beo,Long,100%
+550,Dau an,-,Chat beo,Long,100%
+551,Mo dong vat,-,Chat beo,Ran,100%
+552,Metylamin,CH3NH2,Amin,Khi/Dung dich,40% dung dich
+553,Etylamin,C2H5NH2,Amin,Dung dich,70%
+554,Propylamin,C3H7NH2,Amin,Long,100%
+555,Dimetylamin,(CH3)2NH,Amin,Khi/Dung dich,40%
+556,Trimetylamin,(CH3)3N,Amin,Khi/Dung dich,25%
+557,Anilin,C6H5NH2,Amin,Long,100%
+558,N-Metylanilin,C6H5NHCH3,Amin,Long,100%
+559,Etylendiamin,NH2CH2CH2NH2,Amin,Long,100%
+560,Hexametylendiamin,NH2(CH2)6NH2,Amin,Ran,100%
+561,Pyridin,C5H5N,Amin,Long,100%
+562,Trietylamin,(C2H5)3N,Amin,Long,100%
+563,Valin,(CH3)2CHCH(NH2)COOH,Amino axit,Ran,100%
+564,Leucin,C6H13NO2,Amino axit,Ran,100%
+565,Isoleucin,C6H13NO2,Amino axit,Ran,100%
+566,Serin,C3H7NO3,Amino axit,Ran,100%
+567,Threonin,C4H9NO3,Amino axit,Ran,100%
+568,Methionin,C5H11NO2S,Amino axit,Ran,100%
+569,Phenylalanin,C9H11NO2,Amino axit,Ran,100%
+570,Tryptophan,C11H12N2O2,Amino axit,Ran,100%
+571,Lysin,C6H14N2O2,Amino axit,Ran,100%
+572,Arginin,C6H14N4O2,Amino axit,Ran,100%
+573,Histidin,C6H9N3O2,Amino axit,Ran,100%
+574,Axit aspartic,C4H7NO4,Amino axit,Ran,100%
+575,Cystein,C3H7NO2S,Amino axit,Ran,100%
+576,Prolin,C5H9NO2,Amino axit,Ran,100%
+577,Tyrosin,C9H11NO3,Amino axit,Ran,100%
+578,Glucozo,C6H12O6,Cacbohidrat,Ran,100%; dung dich 1%; 5%; 10%
+579,Fructozo,C6H12O6,Cacbohidrat,Ran,100%; dung dich 1%
+580,Saccarozo,C12H22O11,Cacbohidrat,Ran,100%; dung dich 10%
+581,Mantozo,C12H22O11,Cacbohidrat,Ran,100%
+582,Lactozo,C12H22O11,Cacbohidrat,Ran,100%
+583,Tinh bot,(C6H10O5)n,Cacbohidrat,Ran,100%; ho tinh bot 1%
+584,Xenlulozo,(C6H10O5)n,Cacbohidrat,Ran,100%
+585,Glycogen,(C6H10O5)n,Cacbohidrat,Ran,100%
+586,Chitin,(C8H13NO5)n,Cacbohidrat,Ran,100%
+587,Dextrin,(C6H10O5)n,Cacbohidrat,Ran,100%
+588,Xenlulozo trinitrat,[C6H7O2(ONO2)3]n,Dan xuat,Ran,100%
+589,Xenlulozo axetat,[C6H7O2(OCOCH3)3]n,Dan xuat,Ran,100%
+590,Cacboxymetyl xenlulozo (CMC),-,Polyme,Ran,100%
+591,Agar,-,Polyme,Ran,100%
+592,Pectin,-,Polyme,Ran,100%
+593,Inulin,-,Cacbohidrat,Ran,100%
+594,Long trang trung,-,Protein,Dung dich keo,100%
+595,Casein,-,Protein,Ran,100%
+596,Gelatin,-,Protein,Ran,100%
+597,Hemoglobin,-,Protein,Ran,100%
+598,Ure,(NH2)2CO,Hop chat N,Ran,100%; dung dich 10%
+599,Polyetylen (PE),(C2H4)n,Polyme,Ran,100%
+600,Polypropylen (PP),(C3H6)n,Polyme,Ran,100%
+601,PVC,(C2H3Cl)n,Polyme,Ran,100%
+602,Polystyren (PS),(C8H8)n,Polyme,Ran,100%
+603,PMMA,(C5H8O2)n,Polyme,Ran,100%
+604,PET,-,Polyme,Ran,100%
+605,Teflon (PTFE),(C2F4)n,Polyme,Ran,100%
+606,Nilon-6,-,Polyme,Ran,100%
+607,Nilon-6,6,-,Polyme,Ran,100%
+608,Bakelit,-,Polyme,Ran,100%
+609,Cao su tu nhien,(C5H8)n,Polyme,Ran,100%
+610,Cao su buna,-,Polyme,Ran,100%
+611,Cao su buna-S,-,Polyme,Ran,100%
+612,Cao su buna-N,-,Polyme,Ran,100%
+613,Keo ure-foman-dehit,-,Polyme,Long,100%
+614,Keo epoxi,-,Polyme,Long,100%
+615,Poliuretan (PU),-,Polyme,Ran,100%
+616,PVA,(C2H4O)n,Polyme,Ran,100%
+617,PAN,(C3H3N)n,Polyme,Ran,100%
+618,Polycacbonat (PC),-,Polyme,Ran,100%
+619,ABS,-,Polyme,Ran,100%
+620,Silicone,-,Polyme,Long,100%
+621,Nuoc cat,-,Dung moi,Long,100%
+622,Nuoc deion,-,Dung moi,Long,100%
+623,Nuoc bien nhan tao,-,Dung dich,Long,3.5% NaCl
+624,Dau hoa,-,Dung moi,Long,100%
+625,Xang,-,Dung moi,Long,100%
+626,Dau diesel,-,Dung moi,Long,100%
+627,Ete etylic,C2H5OC2H5,Dung moi,Long,100%
+628,Ete dau hoa,-,Dung moi,Long,100%
+629,DMSO,(CH3)2SO,Dung moi,Long,100%
+630,DMF,HCON(CH3)2,Dung moi,Long,100%
+631,THF,C4H8O,Dung moi,Long,100%
+632,Dioxan,C4H8O2,Dung moi,Long,100%
+633,Axetonitril,CH3CN,Dung moi,Long,100%
+634,Disunfua cacbon,CS2,Dung moi,Long,100%
+635,Nitrobenzen,C6H5NO2,Dung moi,Long,100%
+636,Silica gel,SiO2.xH2O,Chat hut am,Ran,100%
+637,Canxi clorua khan,CaCl2,Chat hut am,Ran,100%
+638,Photpho pentoxit,P2O5,Chat hut am,Ran,100%
+639,Than hoat tinh,C,Chat hap phu,Ran,100%
+640,Bong thuy tinh,-,Vat lieu,Ran,100%
+641,Amiang,-,Vat lieu,Ran,100%
+642,Da bot,-,Vat lieu,Ran,100%
+643,Giay loc,-,Vat lieu,Giay,100%
+644,Giay do pH,-,Vat lieu,Giay,100%
+645,Khi CO2,CO2,Khi,Khi,100%
+646,Khi CO,CO,Khi,Khi,100%
+647,Khi SO2,SO2,Khi,Khi,100%
+648,Khi NH3,NH3,Khi,Khi,100%
+649,Khi H2S,H2S,Khi,Khi,100%
+650,Khi NO2,NO2,Khi,Khi,100%
+651,Khi Cl2,Cl2,Khi,Khi,100%
+652,Khi O2,O2,Khi,Khi,100%
+653,Khi H2,H2,Khi,Khi,100%
+654,Khi N2,N2,Khi,Khi,100%
+655,Giam an,-,Dung dich,Long,5% CH3COOH
+656,Nuoc muoi sinh ly,-,Dung dich,Long,0.9% NaCl
+657,Con 70,-,Dung dich,Long,70% C2H5OH
+658,Con 90,-,Dung dich,Long,90% C2H5OH
+659,Thuoc tim,-,Dung dich,Dung dich,0.1% KMnO4
+660,Baking soda,-,Ran,Ran,100% NaHCO3
+661,Muoi iot,-,Ran,Ran,NaCl + KI
+662,Phan dam ure,-,Ran,Ran,46% N
+663,Phan lan nung chay,-,Ran,Ran,Ca3(PO4)2
+664,Phan kali,-,Ran,Ran,KCl 60%
+665,Superphotphat don,-,Ran,Ran,Ca(H2PO4)2
+666,Superphotphat kep,-,Ran,Ran,Ca(H2PO4)2
+667,Thach cao,CaSO4.2H2O,Ran,Ran,100%
+668,Voi song,CaO,Ran,Ran,100%
+669,Voi toi,Ca(OH)2,Ran,Ran,100%
+670,Xi mang,-,Hon hop,Ran,100%
+671,Thuy tinh long,Na2SiO3,Dung dich,Long,40%
+672,Keo dan,-,Polyme,Long,100%
+673,Muc in,-,Hon hop,Long,100%
+674,Thuoc nhuan trang,-,Hon hop,Ran,100%
+675,Xa phong,-,Hon hop,Ran,100%
+676,Chat giat bot,-,Hon hop,Ran,100%
+677,Dau goi,-,Hon hop,Long,100%
+678,Kem danh rang,-,Hon hop,Long,100%
+679,Nuoc Javen,-,Dung dich,Long,5% NaClO
+680,Cloramin B,-,Ran,Ran,25-60% Cl hoat dong
+681,CuSO4 khan,CuSO4,Chat hut nuoc,Ran,100%
+682,Cobalt(II) clorua khan,CoCl2,Chat chi thi am,Ran,100%
+683,Giay cobalt clorua,-,Chi thi,Giay,-
+684,Giay chi thi am,-,Chi thi,Giay,-
+685,Axit tactric,C4H6O6,Axit huu co,Dung dich,0.1M
+686,Natri hidroxit ran,NaOH,Bazơ,Ran,100% (vien)
+687,Kali hidroxit ran,KOH,Bazơ,Ran,100% (vien)
+688,Canxi clorua ran,CaCl2,Muoi,Ran,100%
+689,Magie sunfat ran,MgSO4,Muoi,Ran,100%
+690,Kem sunfat ran,ZnSO4,Muoi,Ran,100%
+691,Sat(III) clorua khan,FeCl3,Muoi,Ran,100%
+692,Nhom sunfat ran,Al2(SO4)3,Muoi,Ran,100%
+693,Amoni clorua ran,NH4Cl,Muoi,Ran,100%
+694,Natri axetat ran,CH3COONa,Muoi huu co,Ran,100%
+695,Natri cacbonat ran,Na2CO3,Muoi,Ran,100%
+696,Kali pemanganat ran,KMnO4,Muoi oxy hoa,Ran,100%
+697,Kali dicromat ran,K2Cr2O7,Muoi oxy hoa,Ran,100%
+698,Bac nitrat ran,AgNO3,Muoi,Ran,100%
+699,Chi(II) nitrat ran,Pb(NO3)2,Muoi,Ran,100%
+700,Bari clorua ran,BaCl2,Muoi,Ran,100%
+701,Amoni nitrat ran,NH4NO3,Muoi,Ran,100%
+702,Natri hidroxit 10%,NaOH,Bazơ,Dung dich,10% (~2.8M)
+703,Axit sunfuric 10%,H2SO4,Axit vo co,Dung dich,10% (~1.1M)
+704,Axit clohidric 10%,HCl,Axit vo co,Dung dich,10% (~3M)
+705,Axit axetic 10%,CH3COOH,Axit huu co,Dung dich,10% (~1.7M)
+706,Dung dich KOH 0.5M,KOH,Bazơ,Dung dich,0.5M
+707,Dung dich Ba(OH)2 0.05M,Ba(OH)2,Bazơ,Dung dich,0.05M
+708,Dung dich H2C2O4 0.05M,(COOH)2,Axit huu co,Dung dich,0.05M
+709,Dung dich KMnO4 0.02M,KMnO4,Muoi oxy hoa,Dung dich,0.02M
+710,Dung dich Na2S2O3 0.1M,Na2S2O3,Muoi,Dung dich,0.1M
+711,Dung dich I2 0.1M,I2,Thuoc thu,Dung dich,0.1M trong KI
+712,Dung dich Br2 0.1M,Br2,Thuoc thu,Dung dich,0.1M
+713,Dung dich AgNO3 0.02M,AgNO3,Muoi,Dung dich,0.02M
+714,Dung dich BaCl2 0.2M,BaCl2,Muoi,Dung dich,0.2M
+715,Dung dich HCl 0.5M,HCl,Axit vo co,Dung dich,0.5M
+716,Dung dich NaOH 0.5M,NaOH,Bazơ,Dung dich,0.5M
+717,Dung dich CuSO4 0.5M,CuSO4,Muoi,Dung dich,0.5M
+718,Dung dich FeSO4 0.5M,FeSO4,Muoi,Dung dich,0.5M
+719,Dung dich FeCl3 0.5M,FeCl3,Muoi,Dung dich,0.5M
+720,Dung dich NH3 2M,NH3,Bazơ,Dung dich,2M

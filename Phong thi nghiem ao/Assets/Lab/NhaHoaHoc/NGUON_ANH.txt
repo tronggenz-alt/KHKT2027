@@ -1,0 +1,12 @@
+﻿Ảnh chân dung các nhà hóa học, tải từ Wikimedia Commons ngày 2026-10-26.
+Cả 7 ảnh đều ghi giấy phép Public domain (thuộc phạm vi công cộng) trên Commons.
+
+lavoisier.jpg  https://commons.wikimedia.org/wiki/File:David_-_Portrait_of_Monsieur_Lavoisier_(cropped)2.jpg
+dalton.jpg     https://commons.wikimedia.org/wiki/File:John_Dalton_by_Thomas_Phillips,_1835.jpg
+mendeleev.jpg  https://commons.wikimedia.org/wiki/File:Dmitri_Mendeleev.jpg   (bản thu nhỏ 960 px)
+curie.jpg      https://commons.wikimedia.org/wiki/File:Marie_Curie_c._1920s.jpg   (bản thu nhỏ 960 px)
+avogadro.png   https://commons.wikimedia.org/wiki/File:Amadeo_Avogadro.png
+faraday.jpg    https://commons.wikimedia.org/wiki/File:Michael_Faraday_sitting_crop.jpg   (bản thu nhỏ 960 px)
+arrhenius.jpg  https://commons.wikimedia.org/wiki/File:Arrhenius2.jpg
+
+Trình dựng cảnh (LabSceneBuilder.Style.cs, PortraitMaterial) tự dùng file <mã>.jpg|png ở đây; xóa file thì quay về chân dung tạm.

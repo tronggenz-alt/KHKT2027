@@ -1,0 +1,10 @@
+numpy>=2.0
+pyserial>=3.5
+# công cụ thử nghiệm theo dõi bằng webcam (tools/webcam_tracker.py)
+opencv-contrib-python>=4.8
+# máy chủ AI (server/ai)
+fastapi>=0.110
+uvicorn>=0.29
+httpx>=0.27
+# AI đám mây Claude cho máy chủ AI (tùy chọn; khóa ANTHROPIC_API_KEY chỉ đặt trên máy chủ)
+anthropic

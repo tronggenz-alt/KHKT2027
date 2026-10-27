@@ -1,0 +1,13 @@
+# 13th Gen Intel(R) Core(TM) i5-1334U | 12 luồng | RAM 24299 MB | Intel(R) Iris(R) Xe Graphics (12149 MB, Direct3D11) | 1920x1080 | chất lượng PC
+khu,fps_tb,fps_1pct_thap,ms_tb,ms_p95,batches,setpass,tam_giac_k
+Bàn chuẩn độ (bàn 1),32.2,15.9,31.06,52.58,-1,537,744
+Bàn định tính (bàn 4),48.4,40.5,20.68,22.64,-1,62,48
+Khu thiết bị phân tích,42.0,33.1,23.81,26.74,-1,137,308
+Bàn đun nóng - tổng hợp,41.4,33.1,24.17,28.06,-1,151,265
+Tủ hút khí độc,35.4,22.3,28.21,39.12,-1,418,299
+Phòng hóa chất,25.7,19.3,38.84,48.45,-1,1095,624
+Phòng máy phân tích hiện đại,57.7,46.7,17.34,19.15,-1,135,54
+Phòng tự động hóa & robot,51.3,37.9,19.48,22.49,-1,104,86
+Toàn cảnh,32.8,25.6,30.52,36.97,-1,530,379
+Đi bộ dọc phòng lab,46.4,27.6,21.54,28.35,-1,113,144
+TỔNG,41.1,18.9,24.31,39.74,,,

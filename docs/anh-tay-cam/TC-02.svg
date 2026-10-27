@@ -1,0 +1,257 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 780" width="1180" height="780"><style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&amp;family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap');
+.paper{fill:var(--sheet,#fbfcfa);stroke:var(--rule,#c8d2d0);stroke-width:1}
+.ln{fill:none;stroke:var(--ink,#18272c);stroke-width:1.4;stroke-linejoin:round}
+.thin{fill:none;stroke:var(--ink,#18272c);stroke-width:.7}
+.hid{fill:none;stroke:var(--ink-2,#5d6e72);stroke-width:.8;stroke-dasharray:4 3}
+.ctr{fill:none;stroke:var(--ink-2,#5d6e72);stroke-width:.6;stroke-dasharray:14 3 2 3}
+.dim{fill:none;stroke:var(--dim,#0a6b8a);stroke-width:.75}
+.dimt{fill:var(--dim,#0a6b8a);font:500 11.5px 'JetBrains Mono',ui-monospace,monospace}
+.arr{fill:var(--dim,#0a6b8a)}
+.t{fill:var(--ink,#18272c);font:500 12.5px 'Be Vietnam Pro','Segoe UI',sans-serif}
+.tb{fill:var(--ink,#18272c);font:700 12.5px 'Be Vietnam Pro','Segoe UI',sans-serif}
+.ts{fill:var(--ink-2,#5d6e72);font:400 11px 'Be Vietnam Pro','Segoe UI',sans-serif}
+.tw{fill:var(--warn,#b4471a);font:600 11.5px 'Be Vietnam Pro','Segoe UI',sans-serif}
+.h{fill:var(--ink,#18272c);font:700 17px 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.06em}
+.hs{fill:var(--ink-2,#5d6e72);font:600 12px 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.08em}
+.pvc{fill:var(--pvc,#dde5e3);stroke:var(--ink,#18272c);stroke-width:1.4}
+.pvc2{fill:var(--pvc2,#c9d4d1);stroke:var(--ink,#18272c);stroke-width:1.4}
+.mica{fill:var(--mica,rgba(110,180,210,.35));stroke:var(--ink,#18272c);stroke-width:1.1}
+.cut{fill:url(#gach);stroke:var(--ink,#18272c);stroke-width:1.2}
+.gach{stroke:var(--ink,#18272c);stroke-width:.7}
+.pcbk{fill:#2a3036;stroke:var(--ink,#18272c);stroke-width:1}
+.pcbb{fill:#2563a6;stroke:var(--ink,#18272c);stroke-width:1}
+.pcbt{fill:#0f7c86;stroke:var(--ink,#18272c);stroke-width:1}
+.pcbr{fill:#c0392b;stroke:var(--ink,#18272c);stroke-width:1}
+.phip{fill:#c9a066;stroke:var(--ink,#18272c);stroke-width:1}
+.kim{fill:#aab3b8;stroke:var(--ink,#18272c);stroke-width:1}
+.dong{fill:#c99a3b;stroke:var(--ink,#18272c);stroke-width:1}
+.nhua{fill:#4a5257;stroke:var(--ink,#18272c);stroke-width:1}
+.ledx{fill:#22b573;stroke:var(--ink,#18272c);stroke-width:.8}
+.ledd{fill:#e0362c;stroke:var(--ink,#18272c);stroke-width:.8}
+.pin{fill:#3b4a52;stroke:var(--ink,#18272c);stroke-width:1}
+.hand{fill:var(--hand,#e9b98f);stroke:var(--hand-ln,#9c5f37);stroke-width:1.3}
+.handln{fill:none;stroke:var(--hand-ln,#9c5f37);stroke-width:1.1}
+.fig{fill:none;stroke:var(--fig,#a9bcc0);stroke-linecap:round;stroke-linejoin:round}
+.figf{fill:var(--fig,#a9bcc0)}
+.zone{fill:var(--ok,#2f7d4f);fill-opacity:.16;stroke:var(--ok,#2f7d4f);stroke-width:1;stroke-dasharray:5 3}
+.zonet{fill:var(--ok,#2f7d4f);font:600 11.5px 'Be Vietnam Pro','Segoe UI',sans-serif}
+.box{fill:none;stroke:var(--ink-2,#5d6e72);stroke-width:1;stroke-dasharray:7 4}
+.mod{fill:var(--sheet,#fbfcfa);stroke:var(--ink,#18272c);stroke-width:1.4}
+.modh{fill:var(--pvc,#dde5e3)}
+.dot{fill:var(--ink,#18272c)}
+.ball{fill:var(--sheet,#fbfcfa);stroke:var(--ink,#18272c);stroke-width:1.1}
+.ballt{fill:var(--ink,#18272c);font:700 11px 'JetBrains Mono',ui-monospace,monospace}
+.warnbox{fill:var(--warn,#b4471a);fill-opacity:.1;stroke:var(--warn,#b4471a);stroke-width:1}
+.cable{fill:none;stroke:var(--gnd,#2b3135);stroke-linecap:round}
+.wire{fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.gnd{stroke:var(--gnd,#2b3135)}
+</style><defs><marker id="m2" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M0,1.5 L10,5 L0,8.5 z" class="arr"/></marker><pattern id="gach" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" class="gach"/></pattern></defs>
+<rect x="6" y="6" width="1168" height="768" rx="4" class="paper" />
+<rect x="14" y="14" width="1152" height="752" class="thin" />
+<rect x="626" y="692" width="540" height="74" class="ln" />
+<line x1="626" y1="722" x2="1036" y2="722" class="thin" />
+<line x1="1036" y1="722" x2="1166" y2="722" class="thin" />
+<line x1="1036" y1="692" x2="1036" y2="766" class="thin" />
+<line x1="1036" y1="744" x2="1166" y2="744" class="thin" />
+<text x="636" y="713" class="h" text-anchor="start" >TAY CẦM VR V1 · BỐ TRÍ BÊN TRONG</text>
+<text x="636" y="739" class="ts" text-anchor="start" >Cắt dọc qua trục ống, bỏ nửa phía trước người xem</text>
+<text x="636" y="757" class="ts" text-anchor="start" >Đơn vị: mm · Dự án KHKT Phòng thí nghiệm ảo · 27/10/2026</text>
+<text x="1046" y="705" class="hs" text-anchor="start" >BẢN VẼ SỐ</text>
+<text x="1046" y="719" class="tb" text-anchor="start" >TC-02</text>
+<text x="1046" y="737" class="ts" text-anchor="start" >Phiên bản V1</text>
+<text x="1046" y="759" class="ts" text-anchor="start" >Chiếu góc thứ nhất</text>
+<text x="40" y="48" class="h" text-anchor="start" >CẮT DỌC TAY CẦM</text>
+<text x="40" y="64" class="ts" text-anchor="start" >nhìn từ phía phải (−Y); số trong vòng tròn ứng với bảng bên dưới</text>
+<rect x="295" y="408" width="560" height="16" class="zone" />
+<text x="575" y="444" class="zonet" text-anchor="middle" >vùng bàn tay ôm: 140 mm (cần ≥ 91 mm cho tay to P95)</text>
+<rect x="223" y="232" width="328" height="8" class="cut" />
+<rect x="839" y="232" width="88" height="8" class="cut" />
+<rect x="215" y="360" width="468" height="8" class="cut" />
+<rect x="771" y="360" width="164" height="8" class="cut" />
+<path d="M295,220 L195,220 L195,380 L295,380 L295,368 L207,368 L207,320 L195,320 L195,280 L207,280 L207,232 L295,232 Z" class="cut" />
+<path d="M855,220 L955,220 L955,380 L855,380 L855,368 L943,368 L943,232 L855,232 Z" class="cut" />
+<rect x="943" y="258" width="12" height="20" class="paper" style="stroke:none"/>
+<rect x="943" y="322" width="12" height="20" class="paper" style="stroke:none"/>
+<path d="M939,258 h24 a10,10 0 0 1 0,20 h-24 Z" class="ledx" />
+<path d="M939,322 h24 a10,10 0 0 1 0,20 h-24 Z" class="ledd" />
+<rect x="171" y="262" width="24" height="76" class="nhua" />
+<path d="M171,270 Q143,270 147,300 Q143,330 171,330 Z" class="nhua" />
+<rect x="55" y="286" width="92" height="28" class="pin" />
+<rect x="195" y="286" width="40" height="28" class="pin" />
+<path d="M235,304 C271,344 375,348 447,328" class="cable" stroke-width="9" stroke-opacity=".55"/>
+<path d="M471,317.6 L515,268 L503,260" class="wire" stroke="#e0362c" stroke-width="1.6"/>
+<path d="M567,320 L595,332" class="wire" stroke="#d9a400" stroke-width="1.6"/>
+<path d="M551,317.6 L567,300" class="wire" stroke="#f08c00" stroke-width="1.6"/>
+<path d="M575,317.6 L687,298" class="wire" stroke="#f5a742" stroke-width="1.6"/>
+<path d="M455,317.6 L415,312 L397,324" class="wire" stroke="#8a969b" stroke-width="1.6"/>
+<path d="M579,324 L655,348 L695,336" class="wire" stroke="#7f8c8d" stroke-width="1.6"/>
+<path d="M583,320 L815,340 L939,248" class="wire" stroke="#16a596" stroke-width="1.6"/>
+<rect x="303" y="262" width="118" height="76" rx="6" class="zone" style="fill-opacity:.08;stroke-dasharray:2 2"/>
+<rect x="311" y="270" width="102" height="60" rx="3" class="kim" />
+<rect x="413" y="297.2" width="24" height="5.6" class="kim" />
+<path d="M419,292.8 A20,20 0 1 1 435,292.8 Z" class="dong" />
+<rect x="447" y="317.6" width="136" height="6.4" class="phip" />
+<rect x="471" y="306.4" width="24" height="9.6" rx="3" class="dong" />
+<rect x="503" y="306.4" width="24" height="9.6" rx="3" class="dong" />
+<rect x="471" y="266.4" width="64" height="6.4" class="phip" />
+<rect x="491" y="246" width="24" height="14" class="nhua" />
+<rect x="485" y="222" width="36" height="24" rx="3" class="nhua" />
+<rect x="595" y="333.6" width="84" height="6.4" class="pcbb" />
+<rect x="631" y="326.4" width="16" height="7.2" class="nhua" />
+<line x1="607" y1="350" x2="641" y2="350" class="ln" style="stroke:#e0362c"/>
+<path d="M641,346 l9,4 l-9,4 Z" class="ledd" />
+<text x="653" y="354" class="tb" text-anchor="start" >X</text>
+<line x1="607" y1="350" x2="607" y2="380" class="ln" style="stroke:#2d7be0"/>
+<path d="M603,380 l4,9 l4,-9 Z" class="ln" style="fill:#2d7be0;stroke:#2d7be0"/>
+<text x="613" y="390" class="tb" text-anchor="start" >−Z</text>
+<text x="601" y="354" class="tb" text-anchor="end" >⊗Y</text>
+<rect x="547" y="293.6" width="136" height="6.4" class="pcbk" />
+<rect x="564.6" y="300" width="4.8" height="12" class="kim" />
+<rect x="588.6" y="300" width="4.8" height="12" class="kim" />
+<rect x="612.6" y="300" width="4.8" height="12" class="kim" />
+<rect x="636.6" y="300" width="4.8" height="12" class="kim" />
+<rect x="660.6" y="300" width="4.8" height="12" class="kim" />
+<rect x="583" y="248" width="64" height="45.6" class="nhua" />
+<rect x="647" y="256" width="20" height="36" class="kim" />
+<path d="M583,248 Q583,222 615,222 Q647,222 647,248 Z" class="nhua" />
+<rect x="607" y="188" width="16" height="34" class="kim" />
+<rect x="575" y="172" width="80" height="16" rx="6" class="pcbk" />
+<rect x="567" y="248" width="12" height="52" class="kim" />
+<rect x="699" y="293.6" width="136" height="6.4" class="pcbk" />
+<rect x="716.6" y="300" width="4.8" height="12" class="kim" />
+<rect x="740.6" y="300" width="4.8" height="12" class="kim" />
+<rect x="764.6" y="300" width="4.8" height="12" class="kim" />
+<rect x="788.6" y="300" width="4.8" height="12" class="kim" />
+<rect x="812.6" y="300" width="4.8" height="12" class="kim" />
+<rect x="735" y="248" width="64" height="45.6" class="nhua" />
+<rect x="799" y="256" width="20" height="36" class="kim" />
+<path d="M735,248 Q735,222 767,222 Q799,222 799,248 Z" class="nhua" />
+<rect x="759" y="188" width="16" height="34" class="kim" />
+<rect x="727" y="172" width="80" height="16" rx="6" class="pcbk" />
+<rect x="719" y="248" width="12" height="52" class="kim" />
+<rect x="539" y="248" width="304" height="8" class="mica" />
+<rect x="687" y="320" width="80" height="40" class="nhua" />
+<rect x="699" y="360" width="8" height="4" class="kim" />
+<path d="M687,360.8 L763,386 Q779,392 771,378 L699,359.2 Z" class="kim" />
+<circle cx="551.8" cy="300" r="9" class="ball" />
+<path d="M551.8,291 A9,9 0 0 1 560.8,300 L551.8,300 Z" class="dot" />
+<path d="M551.8,309 A9,9 0 0 1 542.8,300 L551.8,300 Z" class="dot" />
+<line x1="35" y1="300" x2="983" y2="300" class="ctr" />
+<circle cx="335" cy="236" r="1.8" class="dot" />
+<line x1="335" y1="236" x2="335" y2="112" class="thin" />
+<circle cx="335" cy="112" r="10" class="ball" />
+<text x="335" y="116" class="ballt" text-anchor="middle" >1</text>
+<circle cx="231" cy="224" r="1.8" class="dot" />
+<line x1="231" y1="224" x2="231" y2="112" class="thin" />
+<circle cx="231" cy="112" r="10" class="ball" />
+<text x="231" y="116" class="ballt" text-anchor="middle" >2</text>
+<circle cx="159" cy="268" r="1.8" class="dot" />
+<line x1="159" y1="268" x2="111" y2="112" class="thin" />
+<circle cx="111" cy="112" r="10" class="ball" />
+<text x="111" y="116" class="ballt" text-anchor="middle" >3</text>
+<circle cx="503" cy="222" r="1.8" class="dot" />
+<line x1="503" y1="222" x2="503" y2="112" class="thin" />
+<circle cx="503" cy="112" r="10" class="ball" />
+<text x="503" y="116" class="ballt" text-anchor="middle" >7</text>
+<circle cx="615" cy="172" r="1.8" class="dot" />
+<line x1="615" y1="172" x2="615" y2="112" class="thin" />
+<circle cx="615" cy="112" r="10" class="ball" />
+<text x="615" y="116" class="ballt" text-anchor="middle" >9</text>
+<circle cx="831" cy="252" r="1.8" class="dot" />
+<line x1="831" y1="252" x2="875" y2="112" class="thin" />
+<circle cx="875" cy="112" r="10" class="ball" />
+<text x="875" y="116" class="ballt" text-anchor="middle" >11</text>
+<circle cx="767" cy="172" r="1.8" class="dot" />
+<line x1="767" y1="172" x2="767" y2="112" class="thin" />
+<circle cx="767" cy="112" r="10" class="ball" />
+<text x="767" y="116" class="ballt" text-anchor="middle" >10</text>
+<circle cx="951" cy="248" r="1.8" class="dot" />
+<line x1="951" y1="248" x2="951" y2="112" class="thin" />
+<circle cx="951" cy="112" r="10" class="ball" />
+<text x="951" y="116" class="ballt" text-anchor="middle" >13</text>
+<circle cx="95" cy="314" r="1.8" class="dot" />
+<line x1="95" y1="314" x2="95" y2="486" class="thin" />
+<circle cx="95" cy="486" r="10" class="ball" />
+<text x="95" y="490" class="ballt" text-anchor="middle" >4</text>
+<circle cx="359" cy="330" r="1.8" class="dot" />
+<line x1="359" y1="330" x2="359" y2="486" class="thin" />
+<circle cx="359" cy="486" r="10" class="ball" />
+<text x="359" y="490" class="ballt" text-anchor="middle" >5</text>
+<circle cx="535" cy="317.6" r="1.8" class="dot" />
+<line x1="535" y1="317.6" x2="535" y2="486" class="thin" />
+<circle cx="535" cy="486" r="10" class="ball" />
+<text x="535" y="490" class="ballt" text-anchor="middle" >6</text>
+<circle cx="551.8" cy="309" r="1.8" class="dot" />
+<line x1="551.8" y1="309" x2="599" y2="486" class="thin" />
+<circle cx="599" cy="486" r="10" class="ball" />
+<text x="599" y="490" class="ballt" text-anchor="middle" >14</text>
+<circle cx="655" cy="333.6" r="1.8" class="dot" />
+<line x1="655" y1="333.6" x2="663" y2="486" class="thin" />
+<circle cx="663" cy="486" r="10" class="ball" />
+<text x="663" y="490" class="ballt" text-anchor="middle" >8</text>
+<circle cx="743" cy="380" r="1.8" class="dot" />
+<line x1="743" y1="380" x2="743" y2="486" class="thin" />
+<circle cx="743" cy="486" r="10" class="ball" />
+<text x="743" y="490" class="ballt" text-anchor="middle" >12</text>
+<line x1="215" y1="362" x2="215" y2="390" class="dim" />
+<line x1="551.8" y1="311" x2="551.8" y2="390" class="dim" />
+<line x1="215" y1="386" x2="551.8" y2="386" class="dim" marker-start="url(#m2)" marker-end="url(#m2)"/>
+<text x="383.4" y="382" class="dimt" text-anchor="middle" >84</text>
+<text x="40" y="516" class="hs" text-anchor="start" >BẢNG CHÚ THÍCH</text>
+<circle cx="50" cy="534" r="9" class="ball" />
+<text x="50" y="538" class="ballt" text-anchor="middle" >1</text>
+<text x="66" y="538" class="t" text-anchor="start" >Ống PVC Ø34×2, dài 180</text>
+<text x="380" y="538" class="dimt" text-anchor="end" >50,6 g</text>
+<circle cx="50" cy="556" r="9" class="ball" />
+<text x="50" y="560" class="ballt" text-anchor="middle" >2</text>
+<text x="66" y="560" class="t" text-anchor="start" >Nắp bịt sau Ø34, lỗ Ø4 xỏ dây đeo</text>
+<text x="380" y="560" class="dimt" text-anchor="end" >12 g</text>
+<circle cx="50" cy="578" r="9" class="ball" />
+<text x="50" y="582" class="ballt" text-anchor="middle" >3</text>
+<text x="66" y="582" class="t" text-anchor="start" >Ốc siết cáp PG9 (cáp Ø4–8)</text>
+<text x="380" y="582" class="dimt" text-anchor="end" >–</text>
+<circle cx="50" cy="600" r="9" class="ball" />
+<text x="50" y="604" class="ballt" text-anchor="middle" >4</text>
+<text x="66" y="604" class="t" text-anchor="start" >Cáp 20 lõi chống nhiễu, 1,2 m</text>
+<text x="380" y="604" class="dimt" text-anchor="end" >–</text>
+<circle cx="50" cy="622" r="9" class="ball" />
+<text x="50" y="626" class="ballt" text-anchor="middle" >5</text>
+<text x="66" y="626" class="t" text-anchor="start" >Mô-tơ 130 + ốc M3 lệch tâm, bọc mút</text>
+<text x="380" y="626" class="dimt" text-anchor="end" >20 g</text>
+<circle cx="50" cy="644" r="9" class="ball" />
+<text x="50" y="648" class="ballt" text-anchor="middle" >6</text>
+<text x="66" y="648" class="t" text-anchor="start" >Phíp đấu dây 34×24 + 2 điện trở 220 Ω</text>
+<text x="380" y="648" class="dimt" text-anchor="end" >5 g</text>
+<circle cx="50" cy="666" r="9" class="ball" />
+<text x="50" y="670" class="ballt" text-anchor="middle" >7</text>
+<text x="66" y="670" class="t" text-anchor="start" >Nút Căn lại + Hỏi AI (6×6, mũ Ø9)</text>
+<text x="380" y="670" class="dimt" text-anchor="end" >2 g</text>
+<circle cx="430" cy="534" r="9" class="ball" />
+<text x="430" y="538" class="ballt" text-anchor="middle" >8</text>
+<text x="446" y="538" class="t" text-anchor="start" >MPU6050 GY-521, trục trùng trục tay cầm</text>
+<text x="760" y="538" class="dimt" text-anchor="end" >2,5 g</text>
+<circle cx="430" cy="556" r="9" class="ball" />
+<text x="430" y="560" class="ballt" text-anchor="middle" >9</text>
+<text x="446" y="560" class="t" text-anchor="start" >Joystick 1 KY-023 (chỉnh tinh)</text>
+<text x="760" y="560" class="dimt" text-anchor="end" >10 g</text>
+<circle cx="430" cy="578" r="9" class="ball" />
+<text x="430" y="582" class="ballt" text-anchor="middle" >10</text>
+<text x="446" y="582" class="t" text-anchor="start" >Joystick 2 KY-023 (di chuyển)</text>
+<text x="760" y="582" class="dimt" text-anchor="end" >10 g</text>
+<circle cx="430" cy="600" r="9" class="ball" />
+<text x="430" y="604" class="ballt" text-anchor="middle" >11</text>
+<text x="446" y="604" class="t" text-anchor="start" >Tấm mica 76×30×2 + 4 trụ đồng M2</text>
+<text x="760" y="604" class="dimt" text-anchor="end" >9 g</text>
+<circle cx="430" cy="622" r="9" class="ball" />
+<text x="430" y="626" class="ballt" text-anchor="middle" >12</text>
+<text x="446" y="626" class="t" text-anchor="start" >Công tắc hành trình KW11 có cần (cò)</text>
+<text x="760" y="626" class="dimt" text-anchor="end" >2 g</text>
+<circle cx="430" cy="644" r="9" class="ball" />
+<text x="430" y="648" class="ballt" text-anchor="middle" >13</text>
+<text x="446" y="648" class="t" text-anchor="start" >Nắp bịt trước + LED xanh, đỏ 5 mm</text>
+<text x="760" y="648" class="dimt" text-anchor="end" >13 g</text>
+<circle cx="430" cy="666" r="9" class="ball" />
+<text x="430" y="670" class="ballt" text-anchor="middle" >14</text>
+<text x="446" y="670" class="t" text-anchor="start" >Trọng tâm, cách mép sau ống 84 mm</text>
+<text x="760" y="670" class="dimt" text-anchor="end" >Σ 150 g</text>
+</svg>

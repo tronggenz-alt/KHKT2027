@@ -1,0 +1,31 @@
+﻿# Unity
+Phong thi nghiem ao/[Ll]ibrary/
+Phong thi nghiem ao/[Tt]emp/
+Phong thi nghiem ao/[Oo]bj/
+Phong thi nghiem ao/[Bb]uild*/
+Phong thi nghiem ao/[Ll]ogs/
+Phong thi nghiem ao/[Uu]ser[Ss]ettings/
+*.csproj
+*.sln
+# Python
+__pycache__/
+.venv/
+# Dữ liệu ghi
+sessions/
+marker_*.png
+# CSDL web quản lý (tồn kho, nhật ký, khóa API thật) - không đưa lên git
+data/lab.db
+data/lab.db-*
+
+# Unity: thêm
+Phong thi nghiem ao/.vs/
+Phong thi nghiem ao/[Mm]emoryCaptures/
+Phong thi nghiem ao/[Rr]ecordings/
+*.pidb
+*.userprefs
+.vs/
+.idea/
+# Cài đặt cục bộ của Claude Code (không phải mã nguồn)
+.claude/
+# Nhật ký
+*.log
