@@ -171,8 +171,14 @@ Tài liệu này dành cho Claude Code của thành viên mới. Đọc hết tr
   3. Mở PR hoặc cập nhật PR đang có. PR ghi phần đã làm, kết quả kiểm thử và ảnh chụp.
 
   Không để việc đã xong nằm lại trên máy Mac qua ngày.
-- Trước khi đẩy:
-  - `git pull --rebase origin main` để lấy thay đổi mới của tầng 1;
-  - có xung đột ở file dùng chung thì giữ hành vi tầng 1 và ghi rõ trong PR.
+- **Lấy thay đổi mới của tầng 1:** `git fetch origin` rồi `git merge origin/main` vào nhánh của mình. Không dùng rebase trên nhánh đã đẩy. Có xung đột ở file dùng chung thì giữ hành vi tầng 1 và ghi rõ trong PR.
+
+**An toàn kho (bắt buộc):**
+- **Cấm** `git push --force` / `--force-with-lease`, `git reset --hard` trên nhánh đã đẩy, xóa nhánh của người khác, sửa lịch sử `main`, đổi cài đặt kho GitHub.
+- **Không commit file cảnh sinh ra:** `Assets/Scenes/**/*.unity`, `OcclusionCullingData.asset`. Cảnh dựng lại từ code sau khi gộp, nên commit vào chỉ gây xung đột khổng lồ. Vẫn phải commit file `.meta` của script / dữ liệu mới.
+- Mỗi PR nhỏ, một chủ đề. Không gom định dạng lại hay đổi tên hàng loạt file tầng 1.
+- Lỡ đẩy khóa API hay mật khẩu: báo chủ dự án **ngay**. Khóa đó coi như lộ và phải thu hồi. Xóa commit không đủ.
+- Trên Mac đặt `git config core.autocrlf input` để không đổi kiểu xuống dòng của cả kho.
+- Claude Code bên kia chỉ được chạy `git push` vào nhánh của mình. Không tự gộp PR.
 - Không đưa lên kho: khóa API, `.env`, `Library/`, `Temp/`, bản build, tệp lớn hơn 50 MB.
 - Ảnh trong tài liệu chỉ dùng ảnh tự chụp từ dự án hoặc ảnh phạm vi công cộng.

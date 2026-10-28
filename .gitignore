@@ -29,3 +29,13 @@ Phong thi nghiem ao/[Rr]ecordings/
 .claude/
 # Nhật ký
 *.log
+
+# Bí mật: không bao giờ đưa lên git
+.env
+.env.*
+*.pem
+*.key
+*.p12
+secrets/
+# macOS
+.DS_Store
