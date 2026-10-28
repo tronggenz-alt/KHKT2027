@@ -1,12 +1,13 @@
-# Hợp đồng kỹ thuật cho người tham gia mới (tầng 2: lab sinh học + máy chủ nhiều người)
+# Hợp đồng kỹ thuật cho người tham gia mới (tầng 2: lab sinh học, phòng robot, máy chủ nhiều người)
 
 Tài liệu này dành cho Claude Code của thành viên mới. Đọc hết trước khi viết code. **"Phải"** là bắt buộc; **"Không"** là cấm.
 
 ## 1. Nhiệm vụ
 
 1. **Lab sinh học tầng 2.** Dựng bằng code, cùng phong cách tầng 1, có thí nghiệm chạy được.
-2. **Máy chủ nhiều người.** Nhiều học sinh cùng vào một phòng lab, thấy nhau và làm thí nghiệm chung.
-3. **Chỉ góc nhìn thứ nhất (FPS).**
+2. **Phòng robot tầng 1: bàn lập trình khối lệnh** (mục 5). Đây là phần duy nhất còn lại của kế hoạch máy phân tích.
+3. **Máy chủ nhiều người.** Nhiều học sinh cùng vào một phòng lab, thấy nhau và làm thí nghiệm chung.
+4. **Chỉ góc nhìn thứ nhất (FPS).**
    - Không làm góc nhìn thứ ba, camera bay tự do, camera khán giả hay bản đồ nhìn từ trên để chơi.
    - Mọi thao tác đều qua mắt và tay của chính người chơi.
    - Ngoại lệ duy nhất đã có sẵn: màn hình vận hành máy toàn màn hình (`InstrumentScreen`) và giao diện lắp ráp (`FabricationWorkspace`). Chúng là giao diện 2D của máy, không phải góc nhìn.
@@ -83,7 +84,30 @@ Tài liệu này dành cho Claude Code của thành viên mới. Đọc hết tr
 - **Số liệu phải có nguồn:** ghi URL trong JSON. Phần ước lượng ghi `"mo_phong": true`. Ưu tiên nguồn tiếng Việt (SGK, TCVN, giáo trình đại học).
 - **An toàn sinh học:** không hướng dẫn nuôi, tạo tác nhân gây bệnh. Vi sinh vật chỉ dùng chủng an toàn dạy học (E. coli K-12, nấm men…). AI phải từ chối nhẹ nhàng các yêu cầu nguy hiểm.
 
-## 5. Máy chủ nhiều người
+## 5. Phòng robot: bàn lập trình khối lệnh
+
+**Vị trí:** khu `phong_robot` có sẵn (x 13,5 → 27, z −9 → −2,2). Cobot, máy hút nhả, máy in 3D giữ trưng bày, chỉ thêm thẻ nguyên lý (cobot: ISO/TS 15066).
+
+**Giao diện:**
+- bấm vào bàn thì mở giao diện kéo thả khối toàn màn hình, giống `InstrumentScreen` / `FabricationWorkspace`;
+- dùng `DesktopViewer.UiCapture` để thả con trỏ, thoát thì về đúng góc nhìn thứ nhất.
+
+**Khối:**
+- mỗi kỹ năng robot có sẵn là một khối: `di_toi`, `cam`, `lay_hoa_chat`, `rot`, `lac`, `doi`, `dun_nong`, `khuay`, `do_ph`, `can`, `ly_tam`, `phan_tich`… (danh sách đầy đủ trong `SKILLS` của `server/ai/robot_plan.py` và `switch` trong `Demo/LabRobot.Skills.cs`);
+- khối điều khiển: lặp N lần, chờ, nếu – thì theo số đo cảm biến (ví dụ pH < 7);
+- ô tham số liệt kê vật có thật gần đó, lấy mã từ `RobotWorld` (`ong_nghiem_1`, `hoa_chat:253`…).
+
+**Chạy:**
+- chương trình khối chuyển thành `List<RobotStep>` (`ky_nang`, `doi_tuong`, `dich`, `so_luong`) rồi gọi `LabRobot.ExecutePlan`. Không viết bộ chạy robot thứ hai;
+- trước khi chạy phải qua bộ kiểm tra an toàn giống `validate()` trong `robot_plan.py`, **viết lại bằng C#** để chạy khi không có mạng;
+- khối đang chạy được tô sáng; lỗi hiện ngay trên khối hỏng;
+- lưu / mở chương trình ra JSON.
+
+**Khối lặp, điều kiện:** mở rộng tối thiểu `ExecutePlan` (hoặc bộ chạy bọc ngoài gọi từng bước). Không đổi tên kỹ năng hiện có vì AI và web đang dùng.
+
+**Kiểm thử:** thêm chế độ `KHKT_TEST=robot_khoi`: dựng một chương trình (lấy HCl, rót, đo pH, nếu pH < 7 thì báo) và chạy hết; chương trình sai (vật không tồn tại, rót vào lọ hóa chất gốc) phải bị chặn.
+
+## 6. Máy chủ nhiều người
 
 - **Không phá chế độ một người:** chế độ mặc định vẫn chạy offline. Nhiều người là tùy chọn: kết nối khi có máy chủ.
 - **Đề xuất kiến trúc:**
@@ -102,7 +126,7 @@ Tài liệu này dành cho Claude Code của thành viên mới. Đọc hết tr
 - **Tài khoản, phòng:** dùng / mở rộng FastAPI hiện có (`server/lab`). Không lưu mật khẩu dạng thô; khóa API không bao giờ gửi xuống máy khách.
 - **Tải / gỡ khu (`ZoneStreamer`):** chỉ phía máy khách theo vị trí người chơi đó. Máy chủ giữ toàn bộ trạng thái thế giới (`WorldState`).
 
-## 6. Phần cứng (tương thích)
+## 7. Phần cứng (tương thích)
 
 - **Tay cầm hiện tại là V2 "Halo"** ([docs/15](docs/15-tay-cam-v2-halo.md)): ESP32 DevKitC 38 chân + BMI160 + joystick KY-023 + cò Hall SS49E + vòng halo cho webcam (OpenCV).
   - Firmware chưa viết.
@@ -117,7 +141,7 @@ Tài liệu này dành cho Claude Code của thành viên mới. Đọc hết tr
   - cổng nối tiếp là `/dev/cu.*` (`SerialControllerSource` đang dò theo tên COM của Windows, cần thêm nhánh cho Mac);
   - webcam cần cấp quyền Camera cho Unity / Terminal.
 
-## 7. Quy ước code và tài liệu
+## 8. Quy ước code và tài liệu
 
 - **Tiếng Việt** cho giao diện, chú thích code, tài liệu, thông báo. Số thập phân dùng dấu phẩy khi hiển thị (`CultureInfo("vi-VN")`).
 - **Namespace** `Khkt.*`. Theo cách đặt tên, mật độ chú thích của code xung quanh.
@@ -127,7 +151,7 @@ Tài liệu này dành cho Claude Code của thành viên mới. Đọc hết tr
   - Màn hình, texture động chỉ vẽ lại khi đổi.
 - **Tài liệu:** mỗi phần lớn có một file `docs/NN-ten.md` (số tiếp theo sau số lớn nhất hiện có). Ghi nguồn số liệu, kết quả kiểm thử, ảnh chụp.
 
-## 8. Kiểm thử bắt buộc trước khi gộp
+## 9. Kiểm thử bắt buộc trước khi gộp
 
 | Kiểm thử | Lệnh / vị trí |
 |---|---|
@@ -137,7 +161,7 @@ Tài liệu này dành cho Claude Code của thành viên mới. Đọc hết tr
 | Unity tự động | `tools/kiem_thu_unity/KhktAutoTest.cs`: thêm chế độ (ví dụ `KHKT_TEST=tang2`) làm như học sinh, ghi log `[KHKT-PLAY]`, chụp ảnh |
 | Hồi quy | Các chế độ cũ `may`, `may2`, `may3`, `may4`, `khu` và bài đầy đủ vẫn phải đạt |
 
-## 9. Git
+## 10. Git
 
 - Kho: `https://github.com/tronggenz-alt/KHKT2027` (riêng tư), nhánh chính `main`.
 - **Làm trên nhánh riêng** (`tang2/...`, `mang/...`), mở PR, không đẩy thẳng `main`.
