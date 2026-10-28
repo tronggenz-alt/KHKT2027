@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="vi" data-theme="sang">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cài đặt · CHEMISTRY</title>
+  <meta name="color-scheme" content="light dark">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230f2b48' stroke-width='1.8' stroke-linejoin='round'%3E%3Cpath d='M12 2.5l8.2 4.75v9.5L12 21.5l-8.2-4.75v-9.5z'/%3E%3Cpath d='M12 6.6l4.7 2.7M7.3 14.7l4.7 2.7M7.3 9.3v5.4' stroke-width='1.3'/%3E%3C/svg%3E">
+  <script>
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem("giai-chuoi-giao-dien"); } catch (e) {}
+      if (t !== "sang" && t !== "toi") t = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "toi" : "sang";
+      document.documentElement.dataset.theme = t;
+      // hoạt ảnh mở Cài đặt: ẩn tạm các mục cho tới khi biết admin có bật không (lần trước nhớ trong máy); tối đa 1,5 giây
+      try { if (localStorage.getItem("hoat-anh-cai-dat") !== "0") document.documentElement.classList.add("cho-hoat-anh"); } catch (e) {}
+      setTimeout(function () { document.documentElement.classList.remove("cho-hoat-anh"); }, 1500);
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Be Vietnam Pro"', '-apple-system', '"Segoe UI"', 'Roboto', 'sans-serif'],
+            serif: ['"Be Vietnam Pro"', '-apple-system', '"Segoe UI"', 'Roboto', 'sans-serif'],
+            mono: ['"JetBrains Mono"', '"SFMono-Regular"', 'Consolas', 'monospace'],
+          },
+          colors: {
+            giay: 'var(--giay)', 'giay-lom': 'var(--giay-lom)', muc: 'var(--muc)', 'muc-2': 'var(--muc-2)', lang: 'var(--lang)',
+            chi: 'var(--chi)', 'chi-dam': 'var(--chi-dam)', nhan: 'var(--nhan)', 'nhan-lom': 'var(--nhan-lom)',
+            'ho-phach': 'var(--ho-phach)', gach: 'var(--gach)', lam: 'var(--lam)',
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="min-h-screen">
+  <div id="toasts" class="fixed bottom-4 right-4 left-4 sm:left-auto z-50 flex flex-col gap-2 sm:w-96" aria-live="polite"></div>
+
+  <!-- THANH TRÊN -->
+  <header class="thanh-tren">
+    <div class="khung flex items-center justify-between gap-4 h-16">
+      <a href="/" class="flex items-center gap-3 min-w-0 no-underline">
+        <svg class="w-6 h-6 text-nhan shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 2.5l8.2 4.75v9.5L12 21.5l-8.2-4.75v-9.5z"/><path d="M12 6.6l4.7 2.7M7.3 14.7l4.7 2.7M7.3 9.3v5.4" stroke-width="1.2"/>
+        </svg>
+        <span class="logo-chu">CHEMISTRY</span>
+        <span class="logo-phu hidden md:inline">Cài đặt</span>
+      </a>
+      <div class="flex items-center gap-2 sm:gap-3">
+        <a href="/" class="btn btn-sm whitespace-nowrap">← Về trang giải</a>
+        <button type="button" id="nut-che-do" class="nut-che-do" aria-label="Chuyển sang chế độ tối" title="Chế độ tối">
+          <svg class="bieu-tuong-trang" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
+          <svg class="bieu-tuong-mat-troi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="khung bo-cuc">
+    <aside class="cot-ben" aria-label="Mục cài đặt">
+      <div class="cot-ben-dinh">
+        <p class="dem-ben"><span id="so-muc-ben">01</span><span class="text-lang" id="tong-muc-ben"> / 07</span></p>
+        <nav class="ds-muc-ben">
+          <a href="#muc-tai-khoan" class="muc-ben dang" data-muc="muc-tai-khoan"><span class="cham-ben"></span><span class="so-ben">01</span><span>Tài khoản</span></a>
+          <a href="#muc-key" class="muc-ben" data-muc="muc-key"><span class="cham-ben"></span><span class="so-ben">02</span><span>Key Gemini</span></a>
+          <a href="#muc-huong-dan" class="muc-ben" data-muc="muc-huong-dan"><span class="cham-ben"></span><span class="so-ben">03</span><span>Cách lấy key</span></a>
+          <a href="#muc-lich-su" class="muc-ben" data-muc="muc-lich-su"><span class="cham-ben"></span><span class="so-ben">04</span><span>Lịch sử</span></a>
+          <a href="#muc-ma-claude" class="muc-ben" data-muc="muc-ma-claude"><span class="cham-ben"></span><span class="so-ben">05</span><span>Mã Claude</span></a>
+          <a href="#muc-key-claude" class="muc-ben" data-muc="muc-key-claude"><span class="cham-ben"></span><span class="so-ben">06</span><span>Key Claude</span></a>
+          <a href="#muc-claude-rieng" class="muc-ben" data-muc="muc-claude-rieng"><span class="cham-ben"></span><span class="so-ben">07</span><span>API key Claude</span></a>
+          <a href="#muc-hoat-dong" class="muc-ben" data-muc="muc-hoat-dong" id="ben-hoat-dong" hidden><span class="cham-ben"></span><span class="so-ben">08</span><span>Hoạt động</span></a>
+        </nav>
+      </div>
+    </aside>
+
+    <main class="min-w-0 pb-16">
+      <section class="pt-12 sm:pt-14 pb-8">
+        <p class="chu-mo">Tài khoản · Key AI · Lịch sử</p>
+        <h1 class="tieu-de-lon">Cài đặt</h1>
+        <p class="doan-dan">
+          Mỗi người dùng <b>key Gemini của riêng mình</b> để giải bài. Chưa có key thì được
+          <em class="nghieng-serif">dùng thử vài bài</em> bằng key của chủ app.
+        </p>
+      </section>
+
+      <!-- 01 TÀI KHOẢN -->
+      <section id="muc-tai-khoan" class="muc">
+        <div class="duong-rang-cua"></div>
+        <p class="so-muc">01</p>
+        <h2 class="tieu-de-muc">Tài khoản</h2>
+        <div id="the-tai-khoan" class="the the-muc mt-6"><p class="ghi-chu-nho">Đang tải…</p></div>
+      </section>
+
+      <!-- 02 KEY GEMINI -->
+      <section id="muc-key" class="muc">
+        <div class="duong-rang-cua"></div>
+        <p class="so-muc">02</p>
+        <h2 class="tieu-de-muc">Key Gemini của bạn</h2>
+        <p class="mo-ta-muc">Dán key lấy ở <a class="lien-ket" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">aistudio.google.com</a> (xem mục 03 nếu chưa có).</p>
+
+        <div class="the the-muc mt-6">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <p class="nhan-mono">Key hiện tại</p>
+            <span id="huy-hieu-key" class="huy-hieu">…</span>
+          </div>
+          <p id="mo-ta-key" class="ghi-chu-nho mt-2"></p>
+          <div id="canh-bao-khoa-chinh" class="hop-canh-bao mt-4 hidden">
+            App chưa tạo được khoá mã hoá (<code>data/app_secret.key</code>) nên chưa lưu được key (key phải được mã hoá trước khi lưu).
+            Chủ app kiểm tra quyền ghi thư mục <code>data/</code>. Vẫn bấm “Kiểm tra key” được.
+          </div>
+
+          <form id="form-key" class="mt-5" autocomplete="off" novalidate>
+            <label for="o-key" class="nhan-mono block mb-2">Dán GEMINI API key</label>
+            <div class="o-key">
+              <input id="o-key" name="gemini-key" type="password" class="o-nhap o-nhap-mono" placeholder="AIza…" maxlength="300"
+                     autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true">
+              <button type="button" id="nut-hien-key" class="btn btn-sm nut-hien" aria-pressed="false" aria-controls="o-key">Hiện</button>
+            </div>
+            <div class="flex flex-wrap gap-3 mt-4">
+              <button type="button" id="nut-kiem-tra-key" class="btn"><span class="nhan">Kiểm tra key</span></button>
+              <button type="submit" id="nut-luu-key" class="btn btn-primary"><span class="nhan">Lưu key</span></button>
+              <button type="button" id="nut-xoa-key" class="btn btn-nguy-hiem hidden">Xoá key của tôi</button>
+            </div>
+            <div id="ket-qua-kiem-tra" class="ket-qua-kiem-tra mt-4 hidden" aria-live="polite"></div>
+          </form>
+
+          <ul class="ghi-chu-nho mt-6 list-disc ml-5 space-y-1">
+            <li>Key được <b>mã hoá</b> trước khi lưu. App không bao giờ gửi lại key cho trình duyệt hay ghi vào log – chỉ hiện 4 ký tự cuối.</li>
+            <li>Có key riêng thì <b>mọi bài giải dùng key của bạn</b>. Key lỗi hoặc hết hạn mức thì app báo lỗi, không tự chuyển sang key của chủ app.</li>
+            <li>“Kiểm tra key” gọi thử một yêu cầu rất nhỏ tới Gemini (tốn 1 lượt). Ô trống thì kiểm tra key đã lưu. “Lưu key” cũng kiểm tra trước khi lưu.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 03 HƯỚNG DẪN LẤY KEY -->
+      <section id="muc-huong-dan" class="muc">
+        <div class="duong-rang-cua"></div>
+        <p class="so-muc">03</p>
+        <h2 class="tieu-de-muc">Cách lấy key Gemini</h2>
+        <p class="mo-ta-muc">Miễn phí, khoảng 1 phút, chỉ cần một tài khoản Google.</p>
+
+        <ol class="ds-buoc-key">
+          <li class="the buoc-key">
+            <span class="so">BƯỚC 01</span>
+            <h3>Mở Google AI Studio</h3>
+            <p>Vào trang <a class="lien-ket" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">aistudio.google.com/apikey</a>
+              và đăng nhập bằng tài khoản Google (dùng chính tài khoản đang đăng nhập app cũng được).</p>
+            <div class="minh-hoa" aria-hidden="true">
+              <div class="thanh-dia-chi"><span class="ba-cham"><i></i><i></i><i></i></span><span class="o-dia-chi">aistudio.google.com/apikey</span></div>
+              <div class="than-mh"><b class="text-muc">Google AI Studio</b><span>·</span><span>Get API key</span><span class="nut-mh vien ml-auto">Sign in</span></div>
+            </div>
+          </li>
+          <li class="the buoc-key">
+            <span class="so">BƯỚC 02</span>
+            <h3>Bấm “Create API key”</h3>
+            <p>Ở trang <b>API keys</b>, bấm nút <b>Create API key</b> (Tạo khoá API). Lần đầu Google có thể hỏi đồng ý điều khoản – bấm đồng ý.</p>
+            <div class="minh-hoa" aria-hidden="true">
+              <div class="thanh-dia-chi"><span class="ba-cham"><i></i><i></i><i></i></span><span class="o-dia-chi">aistudio.google.com/apikey</span></div>
+              <div class="than-mh"><b class="text-muc">API keys</b><span class="nut-mh tro ml-auto">＋ Create API key</span></div>
+            </div>
+          </li>
+          <li class="the buoc-key">
+            <span class="so">BƯỚC 03</span>
+            <h3>Chọn dự án rồi sao chép key</h3>
+            <p>Chọn một dự án Google Cloud có sẵn (hoặc để AI Studio tự tạo dự án mới) → <b>Create</b>. Key hiện ra: bấm <b>Copy</b>.
+              Key là một chuỗi dài, thường bắt đầu bằng <code>AIza</code>.</p>
+            <div class="minh-hoa" aria-hidden="true">
+              <div class="thanh-dia-chi"><span class="ba-cham"><i></i><i></i><i></i></span><span class="o-dia-chi">aistudio.google.com/apikey</span></div>
+              <div class="than-mh"><div class="dong-key"><span class="gia-tri">AIzaSy•••••••••••••••••••••••••Xk3Q</span><span class="nut-mh vien tro">⧉ Copy</span></div></div>
+            </div>
+          </li>
+          <li class="the buoc-key">
+            <span class="so">BƯỚC 04</span>
+            <h3>Dán vào app</h3>
+            <p>Lên <a class="lien-ket" href="#muc-key">mục 02</a>, dán vào ô, bấm <b>Kiểm tra key</b> rồi <b>Lưu key</b>. Xong – từ giờ mọi bài giải dùng key của bạn.</p>
+            <div class="minh-hoa" aria-hidden="true">
+              <div class="thanh-dia-chi"><span class="ba-cham"><i></i><i></i><i></i></span><span class="o-dia-chi">CHEMISTRY › Cài đặt</span></div>
+              <div class="than-mh"><div class="dong-key"><span class="gia-tri">••••••••••••••••••••••••••••••••</span></div>
+                <span class="nut-mh vien">Kiểm tra key</span><span class="nut-mh tro">Lưu key</span></div>
+            </div>
+          </li>
+        </ol>
+
+        <div class="the the-trong p-5 mt-5">
+          <p class="nhan-mono">Lưu ý</p>
+          <ul class="ghi-chu-nho mt-3 list-disc ml-5 space-y-1">
+            <li>Gói miễn phí của Google giới hạn số lượt gọi mỗi phút và mỗi ngày cho từng mô hình (xem ở AI Studio → <b>Usage &amp; limits</b>).
+              Một bài giải dùng khoảng 3–8 lượt, đề khó (HSG) nhiều hơn.</li>
+            <li>Muốn hạn mức cao hơn hoặc dùng Gemini Pro cho đề khó: bật thanh toán (<b>Billing</b>) cho dự án của key trong AI Studio.</li>
+            <li>Giữ key bí mật như mật khẩu. Nếu lộ key: vào trang API keys xoá key cũ, tạo key mới rồi lưu lại ở đây.</li>
+            <li>Hướng dẫn chính thức của Google:
+              <a class="lien-ket" href="https://ai.google.dev/gemini-api/docs/api-key" target="_blank" rel="noopener noreferrer">ai.google.dev/gemini-api/docs/api-key</a>.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 04 LỊCH SỬ -->
+      <section id="muc-lich-su" class="muc">
+        <div class="duong-rang-cua"></div>
+        <p class="so-muc">04</p>
+        <div class="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 class="tieu-de-muc">Lịch sử bài giải</h2>
+            <p class="mo-ta-muc">Chỉ bạn xem được các bài của mình. Bấm “Xem” để mở lại kết quả.</p>
+          </div>
+          <button type="button" id="nut-tai-lai-lich-su" class="btn btn-sm">Tải lại</button>
+        </div>
+        <div id="lich-su" class="mt-6"><p class="ghi-chu-nho">Đang tải…</p></div>
+      </section>
+
+      <!-- 05 MÃ CLAUDE (backend kiểm tra mã + trừ lượt; nhập sai 5 lần/giờ → khoá ô nhập 1 giờ) -->
+      <section id="muc-ma-claude" class="muc">
+        <div class="duong-rang-cua"></div>
+        <p class="so-muc">05</p>
+        <h2 class="tieu-de-muc">Mã Claude</h2>
+        <p class="mo-ta-muc">Bài giải mặc định dùng Gemini, chọn mô hình theo độ khó. Có mã Claude (do admin cấp) thì bài HSG được giải bằng
+          Claude – mỗi bài giải thành công bằng Claude trừ 1 lượt.</p>
+        <div class="the the-muc mt-6">
+          <div id="tt-ma-claude"><p class="ghi-chu-nho">Đang tải…</p></div>
+          <form id="form-ma-claude" class="mt-4 flex flex-wrap items-end gap-3" novalidate>
+            <div class="flex-1" style="min-width: 200px">
+              <label for="o-ma-claude" class="nhan-mono block mb-2">Nhập mã</label>
+              <input id="o-ma-claude" class="o-nhap font-mono" placeholder="CLD-XXXX-XXXX" maxlength="32" autocomplete="off"
+                     spellcheck="false" autocapitalize="characters">
+            </div>
+            <button type="submit" id="nut-ma-claude" class="btn btn-primary btn-sm"><span class="nhan">Kích hoạt</span></button>
+          </form>
+          <p id="kq-ma-claude" class="ghi-chu-nho mt-3" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <!-- 06 KEY CLAUDE dùng chung (key chỉ nằm trong .env của máy chủ; backend so key, khoá 1 giờ khi sai 5 lần/giờ theo tài khoản + IP) -->
+      <section id="muc-key-claude" class="muc">
+        <div class="duong-rang-cua"></div>
+        <p class="so-muc">06</p>
+        <h2 class="tieu-de-muc">Key Claude</h2>
+        <p class="mo-ta-muc">Nhập key do chủ app cung cấp để mở khoá Claude: trên trang giải sẽ có công tắc “Dùng Claude” – bật thì bài đó
+          (và mục Cơ chế) giải bằng Claude, có giới hạn số bài mỗi ngày. Không nhập key thì bài giải dùng Gemini như bình thường.</p>
+        <div class="the the-muc mt-6">
+          <div id="tt-key-claude"><p class="ghi-chu-nho">Đang tải…</p></div>
+          <form id="form-key-claude" class="mt-4 flex flex-wrap items-end gap-3" novalidate>
+            <div class="flex-1" style="min-width: 200px">
+              <label for="o-key-claude" class="nhan-mono block mb-2">Key Claude</label>
+              <input id="o-key-claude" type="password" class="o-nhap font-mono" placeholder="Nhập key" maxlength="200" autocomplete="off"
+                     spellcheck="false">
+            </div>
+            <button type="submit" id="nut-key-claude" class="btn btn-primary btn-sm"><span class="nhan">Kích hoạt</span></button>
+          </form>
+          <p id="kq-key-claude" class="ghi-chu-nho mt-3" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <!-- 07 API KEY CLAUDE CỦA BẠN (key riêng – lưu mã hoá, chỉ hiện 4 ký tự cuối; gọi bằng key của bạn, không tốn lượt/tiền máy chủ) -->
+      <section id="muc-claude-rieng" class="muc">
+        <div class="duong-rang-cua"></div>
+        <p class="so-muc">07</p>
+        <h2 class="tieu-de-muc">API key Claude của bạn</h2>
+        <p class="mo-ta-muc">Có API key Claude riêng (platform.claude.com → API keys) thì dùng được Claude mà không cần Key Claude chung:
+          bài giải gọi bằng key của bạn, không tính vào lượt Claude của app. Key được mã hoá khi lưu, app chỉ hiện 4 ký tự cuối.</p>
+        <div class="the the-muc mt-6">
+          <div id="tt-claude-rieng"><p class="ghi-chu-nho">Đang tải…</p></div>
+          <form id="form-claude-rieng" class="mt-4 flex flex-wrap items-end gap-3" novalidate>
+            <div class="flex-1" style="min-width: 220px">
+              <label for="o-claude-rieng" class="nhan-mono block mb-2">API key Claude</label>
+              <input id="o-claude-rieng" type="password" class="o-nhap font-mono" placeholder="sk-ant-api03-…" maxlength="300" autocomplete="off" spellcheck="false">
+            </div>
+            <button type="submit" id="nut-claude-rieng" class="btn btn-primary btn-sm"><span class="nhan">Lưu &amp; kiểm tra</span></button>
+            <button type="button" id="nut-xoa-claude-rieng" class="btn btn-sm btn-nguy-hiem hidden">Xoá key</button>
+          </form>
+          <label id="khung-dung-key-rieng" class="cong-tac mt-4 hidden">
+            <input type="checkbox" id="dung-key-rieng">
+            <span class="ranh"><span class="nut-tron"></span></span>
+            <span>Dùng key của tôi <small class="ghi-chu-nho">(tắt → giải bằng Key Claude chung / Gemini như bình thường)</small></span>
+          </label>
+          <div id="khung-yeu-cau-key" class="mt-4 hidden">
+            <button type="button" id="nut-yeu-cau-key" class="btn btn-sm btn-primary">Gửi yêu cầu cho admin</button>
+          </div>
+          <p id="kq-claude-rieng" class="ghi-chu-nho mt-3" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <!-- 08 HOẠT ĐỘNG (chỉ admin; backend cũng chỉ trả dữ liệu cho admin) -->
+      <section id="muc-hoat-dong" class="muc" hidden>
+        <div class="duong-rang-cua"></div>
+        <p class="so-muc">08</p>
+        <div class="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 class="tieu-de-muc">Hoạt động</h2>
+            <p class="mo-ta-muc">Chỉ admin thấy mục này: ai vừa đăng ký, đăng nhập, đăng nhập sai… Bấm vào tên để xem chi tiết, khoá / mở khoá; bấm vào IP để xem mọi tài khoản dùng IP đó.</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" id="hd-tai-lai" class="btn btn-sm">Tải lại</button>
+            <a href="/admin" class="btn btn-sm">Trang quản trị →</a>
+          </div>
+        </div>
+        <div class="the the-muc mt-6">
+          <p class="nhan-mono">Đang online <span class="normal-case tracking-normal font-sans ghi-chu-nho">(hoạt động trong 5 phút gần nhất)</span></p>
+          <div id="hd-online" class="mt-3"><p class="ghi-chu-nho">Đang tải…</p></div>
+        </div>
+        <div id="hd-loc" class="mt-6"></div>
+        <div id="hd-ds" class="mt-4"><p class="ghi-chu-nho">Đang tải…</p></div>
+        <button type="button" id="hd-them" class="btn btn-sm mt-4 hidden">Xem thêm</button>
+        <p class="ghi-chu-nho mt-4" data-nguon-ip hidden></p>
+      </section>
+    </main>
+  </div>
+
+  <footer class="chan-trang-web">
+    <div class="khung py-6 flex flex-wrap justify-between gap-2">
+      <span><span class="logo-chu text-base">CHEMISTRY</span> — key của bạn được mã hoá, chỉ server dùng để gọi Gemini.</span>
+      <span class="font-mono">Google OAuth · Gemini API</span>
+    </div>
+  </footer>
+
+  <form id="form-dang-xuat" method="post" action="/auth/dang-xuat" class="hidden">
+    <input type="hidden" name="csrf_token" id="csrf-dang-xuat">
+  </form>
+
+  <script src="/static/tai-khoan.js"></script>
+  <script src="/static/hoat-dong.js"></script>
+  <script src="/static/cai-dat.js"></script>
+</body>
+</html>

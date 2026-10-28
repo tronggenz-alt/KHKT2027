@@ -1,0 +1,31 @@
+<linker>
+  <assembly fullname="Assembly-CSharp">
+    <type fullname="PhongThiNghiem.ToaNha.BanDoData" preserve="all"/>
+    <type fullname="PhongThiNghiem.ToaNha.PhongData" preserve="all"/>
+    <type fullname="PhongThiNghiem.ToaNha.XuatPhatData" preserve="all"/>
+    <type fullname="PhongThiNghiem.ToaNha.KhuData" preserve="all"/>
+    <type fullname="PhongThiNghiem.ToaNha.VachData" preserve="all"/>
+    <type fullname="PhongThiNghiem.ToaNha.PhongConData" preserve="all"/>
+    <type fullname="PhongThiNghiem.ToaNha.TramData" preserve="all"/>
+    <type fullname="PhongThiNghiem.ToaNha.NoiThatData" preserve="all"/>
+    <type fullname="PhongThiNghiem.ToaNha.ToaNhaData" preserve="all"/>
+    <type fullname="PhongThiNghiem.ToaNha.ToaNhaThongSo" preserve="all"/>
+    <type fullname="PhongThiNghiem.ToaNha.GiengTroiThongSo" preserve="all"/>
+    <type fullname="PhongThiNghiem.ToaNha.PhongThongSo" preserve="all"/>
+    <type fullname="PhongThiNghiem.ToaNha.VachThongSo" preserve="all"/>
+    <type fullname="PhongThiNghiem.ToaNha.CuaThongSo" preserve="all"/>
+    <type fullname="PhongThiNghiem.ToaNha.VienKhuThongSo" preserve="all"/>
+    <type fullname="PhongThiNghiem.ToaNha.LoiDiThongSo" preserve="all"/>
+    <type fullname="PhongThiNghiem.ToaNha.TramThongSo" preserve="all"/>
+    <type fullname="PhongThiNghiem.ToaNha.NoiThatThongSo" preserve="all"/>
+    <type fullname="PhongThiNghiem.ToaNha.VatLieuToaNhaThongSo" preserve="all"/>
+    <type fullname="PhongThiNghiem.ToaNha.DenChieuThongSo" preserve="all"/>
+    <type fullname="PhongThiNghiem.ThiNghiem.NguyenToHoaHoc" preserve="all"/>
+    <type fullname="PhongThiNghiem.ThiNghiem.GoiNguyenToWrapper" preserve="all"/>
+    <type fullname="PhongThiNghiem.HeThong.CauNoiTrang" preserve="all"/>
+  </assembly>
+  <assembly fullname="UnityEngine.CoreModule">
+    <type fullname="UnityEngine.GameObject" preserve="all"/>
+    <type fullname="UnityEngine.Transform" preserve="all"/>
+  </assembly>
+</linker>

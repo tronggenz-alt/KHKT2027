@@ -1,0 +1,203 @@
+{
+ "de_bai": "Hoàn thành chuỗi phản ứng sau (ghi rõ điều kiện):\nCH4 → C2H2 → CH3CHO → C2H5OH → CH3COOH → CH3COOC2H5",
+ "loi_giai": {
+  "so_do": [
+   {
+    "ki_hieu": "CH4",
+    "cong_thuc": "CH4",
+    "ten": "methane",
+    "smiles": "C"
+   },
+   {
+    "ki_hieu": "C2H2",
+    "cong_thuc": "CH≡CH",
+    "ten": "acetylene",
+    "smiles": "C#C"
+   },
+   {
+    "ki_hieu": "CH3CHO",
+    "cong_thuc": "CH3CHO",
+    "ten": "acetaldehyde",
+    "smiles": "CC=O"
+   },
+   {
+    "ki_hieu": "C2H5OH",
+    "cong_thuc": "C2H5OH",
+    "ten": "ethanol",
+    "smiles": "CCO"
+   },
+   {
+    "ki_hieu": "CH3COOH",
+    "cong_thuc": "CH3COOH",
+    "ten": "acetic acid",
+    "smiles": "CC(=O)O"
+   },
+   {
+    "ki_hieu": "CH3COOC2H5",
+    "cong_thuc": "CH3COOC2H5",
+    "ten": "ethyl acetate",
+    "smiles": "CCOC(C)=O"
+   }
+  ],
+  "cac_buoc": [
+   {
+    "so": 1,
+    "chat_dau": "CH4",
+    "chat_sau": "C2H2",
+    "phuong_trinh": "2CH4 → C2H2 + 3H2",
+    "chat_tham_gia": [
+     {
+      "ten": "methane",
+      "smiles": "C",
+      "he_so": 2
+     }
+    ],
+    "san_pham": [
+     {
+      "ten": "acetylene",
+      "smiles": "C#C",
+      "he_so": 1
+     },
+     {
+      "ten": "hydrogen",
+      "smiles": "[H][H]",
+      "he_so": 3
+     }
+    ],
+    "dieu_kien": "1500°C, làm lạnh nhanh",
+    "loai_phan_ung": "nhiệt phân (dehydrogen hoá)",
+    "giai_thich": "Nung methane ở 1500 °C rồi làm lạnh nhanh thu được acetylene; đây là cách điều chế acetylene trong công nghiệp."
+   },
+   {
+    "so": 2,
+    "chat_dau": "C2H2",
+    "chat_sau": "CH3CHO",
+    "phuong_trinh": "C2H2 + H2O → CH3CHO",
+    "chat_tham_gia": [
+     {
+      "ten": "acetylene",
+      "smiles": "C#C",
+      "he_so": 1
+     },
+     {
+      "ten": "nước",
+      "smiles": "O",
+      "he_so": 1
+     }
+    ],
+    "san_pham": [
+     {
+      "ten": "acetaldehyde",
+      "smiles": "CC=O",
+      "he_so": 1
+     }
+    ],
+    "dieu_kien": "HgSO4, H2SO4, 80°C",
+    "loai_phan_ung": "cộng nước (hydrate hoá)",
+    "giai_thich": "Acetylene cộng nước tạo enol CH2=CH–OH không bền, chuyển ngay thành acetaldehyde (phản ứng Kucherov)."
+   },
+   {
+    "so": 3,
+    "chat_dau": "CH3CHO",
+    "chat_sau": "C2H5OH",
+    "phuong_trinh": "CH3CHO + H2 → C2H5OH",
+    "chat_tham_gia": [
+     {
+      "ten": "acetaldehyde",
+      "smiles": "CC=O",
+      "he_so": 1
+     },
+     {
+      "ten": "hydrogen",
+      "smiles": "[H][H]",
+      "he_so": 1
+     }
+    ],
+    "san_pham": [
+     {
+      "ten": "ethanol",
+      "smiles": "CCO",
+      "he_so": 1
+     }
+    ],
+    "dieu_kien": "Ni, t°",
+    "loai_phan_ung": "cộng hydrogen (khử aldehyde)",
+    "giai_thich": "Aldehyde bị khử bởi H2 (xúc tác Ni, đun nóng) tạo alcohol bậc một."
+   },
+   {
+    "so": 4,
+    "chat_dau": "C2H5OH",
+    "chat_sau": "CH3COOH",
+    "phuong_trinh": "C2H5OH + O2 → CH3COOH + H2O",
+    "chat_tham_gia": [
+     {
+      "ten": "ethanol",
+      "smiles": "CCO",
+      "he_so": 1
+     },
+     {
+      "ten": "oxygen",
+      "smiles": "O=O",
+      "he_so": 1
+     }
+    ],
+    "san_pham": [
+     {
+      "ten": "acetic acid",
+      "smiles": "CC(=O)O",
+      "he_so": 1
+     },
+     {
+      "ten": "nước",
+      "smiles": "O",
+      "he_so": 1
+     }
+    ],
+    "dieu_kien": "men giấm, 25–30°C",
+    "loai_phan_ung": "oxi hoá (lên men giấm)",
+    "giai_thich": "Dung dịch ethanol loãng bị oxi hoá bởi oxygen không khí nhờ men giấm tạo acetic acid."
+   },
+   {
+    "so": 5,
+    "chat_dau": "CH3COOH",
+    "chat_sau": "CH3COOC2H5",
+    "phuong_trinh": "CH3COOH + C2H5OH ⇌ CH3COOC2H5 + H2O",
+    "chat_tham_gia": [
+     {
+      "ten": "acetic acid",
+      "smiles": "CC(=O)O",
+      "he_so": 1
+     },
+     {
+      "ten": "ethanol",
+      "smiles": "CCO",
+      "he_so": 1
+     }
+    ],
+    "san_pham": [
+     {
+      "ten": "ethyl acetate",
+      "smiles": "CCOC(C)=O",
+      "he_so": 1
+     },
+     {
+      "ten": "nước",
+      "smiles": "O",
+      "he_so": 1
+     }
+    ],
+    "dieu_kien": "H2SO4 đặc, t°",
+    "loai_phan_ung": "ester hoá",
+    "giai_thich": "Acid carboxylic phản ứng thuận nghịch với alcohol (xúc tác H2SO4 đặc, đun nóng) tạo ester và nước."
+   }
+  ],
+  "chat_an": [],
+  "nguon_tham_khao": [
+   "https://vi.wikipedia.org/wiki/Acetylen",
+   "https://vi.wikipedia.org/wiki/Ethyl_acetat",
+   "https://pubchem.ncbi.nlm.nih.gov/compound/177",
+   "SGK Hoá học 11"
+  ],
+  "ghi_chu": "Bước 4 có thể dùng cách khác: oxi hoá ethanol bằng CuO thành acetaldehyde rồi oxi hoá tiếp bằng O2 (xúc tác Mn2+)."
+ }
+}

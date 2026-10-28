@@ -1,0 +1,64 @@
+{
+  "id": "tuy",
+  "ten": "Tuyến tuỵ",
+  "can_duyet": true,
+  "chuong_trinh": "Sinh học 11 – Tiêu hoá; Bài tiết và cân bằng nội môi (CT GDPT 2018)",
+  "vi_tri": [
+    "Nằm phía sau dạ dày, sát thành sau khoang bụng; đầu tuỵ nằm trong khúc cong của tá tràng."
+  ],
+  "cau_tao": [
+    "Tuỵ là tuyến pha: vừa có chức năng ngoại tiết, vừa có chức năng nội tiết.",
+    "Phần ngoại tiết tiết dịch tuỵ theo ống tuỵ đổ vào tá tràng.",
+    "Phần nội tiết là các đảo tuỵ: tế bào β tiết insulin, tế bào α tiết glucagon."
+  ],
+  "chuc_nang": [
+    "Dịch tuỵ chứa enzyme tiêu hoá cả tinh bột (amylase), protein (trypsin) và lipid (lipase); có NaHCO₃ trung hoà acid từ dạ dày xuống.",
+    "Hormone insulin và glucagon điều hoà nồng độ glucose trong máu."
+  ],
+  "co_che": [
+    "Glucose máu tăng (sau ăn) → tế bào β tiết insulin → tế bào gan, cơ tăng nhận glucose, gan tổng hợp glycogen → glucose máu giảm về bình thường.",
+    "Glucose máu giảm (khi đói) → tế bào α tiết glucagon → gan phân giải glycogen thành glucose → glucose máu tăng về bình thường.",
+    "Đây là cơ chế điều hoà theo liên hệ ngược: khi glucose máu trở về bình thường, tuỵ giảm tiết hormone."
+  ],
+  "lien_he": [
+    "Đái tháo đường type 1: tuỵ không sản xuất đủ insulin, người bệnh cần tiêm insulin.",
+    "Đái tháo đường type 2: tế bào kém đáp ứng với insulin, liên quan đến béo phì, ít vận động, ăn nhiều đường.",
+    "Viêm tuỵ cấp có thể do uống nhiều rượu hoặc sỏi mật."
+  ],
+  "diem_thi": [
+    "Insulin là hormone làm giảm glucose máu; glucagon làm tăng glucose máu.",
+    "Sơ đồ điều hoà glucose máu: bộ phận tiếp nhận kích thích – bộ phận điều khiển (tuỵ) – bộ phận thực hiện (gan, cơ, các tế bào).",
+    "Tuỵ là tuyến pha; dịch tuỵ đổ vào tá tràng."
+  ],
+  "trac_nghiem": [
+    {
+      "cau": "Hormone nào sau đây làm giảm nồng độ glucose trong máu?",
+      "lua_chon": ["Glucagon", "Insulin", "Adrenaline", "Cortisol"],
+      "dap_an": "B",
+      "giai_thich": "Insulin làm tế bào tăng nhận glucose và kích thích gan tổng hợp glycogen."
+    },
+    {
+      "cau": "Tế bào α của đảo tuỵ tiết hormone",
+      "lua_chon": ["insulin", "ADH", "glucagon", "thyroxine"],
+      "dap_an": "C",
+      "giai_thich": "Tế bào α tiết glucagon, tế bào β tiết insulin."
+    },
+    {
+      "cau": "Dịch tuỵ được đổ vào đoạn nào của ống tiêu hoá?",
+      "lua_chon": ["Dạ dày", "Ruột già", "Thực quản", "Tá tràng"],
+      "dap_an": "D",
+      "giai_thich": "Dịch tuỵ theo ống tuỵ đổ vào tá tràng, nơi tiêu hoá hoá học diễn ra mạnh."
+    },
+    {
+      "cau": "Người bị đái tháo đường type 1 thường phải",
+      "lua_chon": ["tiêm insulin", "tiêm glucagon", "ăn thật nhiều đường", "uống nhiều nước muối"],
+      "dap_an": "A",
+      "giai_thich": "Tuỵ của người bệnh không tiết đủ insulin nên cần bổ sung insulin để hạ glucose máu."
+    }
+  ],
+  "goi_y_hoi": [
+    "Insulin và glucagon điều hoà glucose máu thế nào?",
+    "Vì sao tuỵ được gọi là tuyến pha?",
+    "Đái tháo đường type 1 và type 2 khác nhau ra sao?"
+  ]
+}

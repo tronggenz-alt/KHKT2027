@@ -1,0 +1,60 @@
+{
+ "de_bai": "Xác định cấu tạo các chất A, B, C, D trong chuỗi: CH2=CH–CH3 →[HBr] A →[NaOH, t°] B →[CuO, t°] C (C3H6O) →[HCN] D",
+ "ctpt_de_cho": {"C": "C3H6O"},
+ "dieu_kien_de_cho": {"1": "HBr", "2": "NaOH, t°", "3": "CuO, t°", "4": "HCN"},
+ "loi_giai": {
+  "so_do": [
+   {"ki_hieu": "CH2=CH–CH3", "cong_thuc": "CH2=CH–CH3", "ten": "propene", "smiles": "C=CC"},
+   {"ki_hieu": "A", "cong_thuc": "CH3–CHBr–CH3", "ten": "2-bromopropane", "smiles": "CC(C)Br"},
+   {"ki_hieu": "B", "cong_thuc": "CH3–CH(OH)–CH3", "ten": "propan-2-ol", "smiles": "CC(C)O"},
+   {"ki_hieu": "C", "cong_thuc": "CH3–CO–CH3", "ten": "propanone (acetone)", "smiles": "CC(C)=O"},
+   {"ki_hieu": "D", "cong_thuc": "(CH3)2C(OH)–CN", "ten": "2-hydroxy-2-methylpropanenitrile", "smiles": "CC(C)(O)C#N"}
+  ],
+  "cac_buoc": [
+   {
+    "so": 1, "chat_dau": "CH2=CH–CH3", "chat_sau": "A",
+    "phuong_trinh": "CH2=CH–CH3 + HBr → CH3–CHBr–CH3",
+    "chat_tham_gia": [{"ten": "propene", "smiles": "C=CC", "he_so": 1}, {"ten": "hydrogen bromide", "smiles": "Br", "he_so": 1}],
+    "san_pham": [{"ten": "2-bromopropane", "smiles": "CC(C)Br", "he_so": 1}],
+    "dieu_kien": "HBr",
+    "loai_phan_ung": "cộng HBr (quy tắc Markovnikov)",
+    "giai_thich": "Theo quy tắc Markovnikov, H cộng vào C mang nhiều H hơn (C đầu mạch), Br cộng vào C bậc II → sản phẩm chính là 2-bromopropane; sản phẩm phụ là 1-bromopropane."
+   },
+   {
+    "so": 2, "chat_dau": "A", "chat_sau": "B",
+    "phuong_trinh": "CH3–CHBr–CH3 + NaOH → CH3–CH(OH)–CH3 + NaBr",
+    "chat_tham_gia": [{"ten": "2-bromopropane", "smiles": "CC(C)Br", "he_so": 1}, {"ten": "sodium hydroxide", "smiles": "[Na+].[OH-]", "he_so": 1}],
+    "san_pham": [{"ten": "propan-2-ol", "smiles": "CC(C)O", "he_so": 1}, {"ten": "sodium bromide", "smiles": "[Na+].[Br-]", "he_so": 1}],
+    "dieu_kien": "NaOH, t°",
+    "loai_phan_ung": "thế nguyên tử halogen bằng nhóm OH",
+    "giai_thich": "Đun dẫn xuất halogen với dung dịch NaOH, nhóm OH thay thế nguyên tử Br → alcohol bậc II propan-2-ol."
+   },
+   {
+    "so": 3, "chat_dau": "B", "chat_sau": "C",
+    "phuong_trinh": "CH3–CH(OH)–CH3 + CuO → CH3–CO–CH3 + Cu + H2O",
+    "chat_tham_gia": [{"ten": "propan-2-ol", "smiles": "CC(C)O", "he_so": 1}, {"ten": "copper(II) oxide", "smiles": "[Cu]=O", "he_so": 1}],
+    "san_pham": [{"ten": "propanone", "smiles": "CC(C)=O", "he_so": 1}, {"ten": "copper", "smiles": "[Cu]", "he_so": 1}, {"ten": "nước", "smiles": "O", "he_so": 1}],
+    "dieu_kien": "CuO, t°",
+    "loai_phan_ung": "oxi hoá không hoàn toàn alcohol bậc II",
+    "giai_thich": "Alcohol bậc II bị CuO (t°) oxi hoá thành ketone. C3H6O có độ bất bão hoà k = 1, đúng với nhóm C=O của propanone."
+   },
+   {
+    "so": 4, "chat_dau": "C", "chat_sau": "D",
+    "phuong_trinh": "CH3–CO–CH3 + HCN → (CH3)2C(OH)–CN",
+    "chat_tham_gia": [{"ten": "propanone", "smiles": "CC(C)=O", "he_so": 1}, {"ten": "hydrogen cyanide", "smiles": "C#N", "he_so": 1}],
+    "san_pham": [{"ten": "2-hydroxy-2-methylpropanenitrile", "smiles": "CC(C)(O)C#N", "he_so": 1}],
+    "dieu_kien": "HCN",
+    "loai_phan_ung": "cộng HCN vào nhóm carbonyl",
+    "giai_thich": "Nhóm CN gắn vào C của nhóm C=O, H gắn vào O → cyanohydrin; mạch carbon tăng thêm 1 C."
+   }
+  ],
+  "chat_an": [
+   {"ki_hieu": "A", "ten": "2-bromopropane", "smiles": "CC(C)Br", "cong_thuc": "CH3–CHBr–CH3"},
+   {"ki_hieu": "B", "ten": "propan-2-ol", "smiles": "CC(C)O", "cong_thuc": "CH3–CH(OH)–CH3"},
+   {"ki_hieu": "C", "ten": "propanone (acetone)", "smiles": "CC(C)=O", "cong_thuc": "CH3–CO–CH3"},
+   {"ki_hieu": "D", "ten": "2-hydroxy-2-methylpropanenitrile", "smiles": "CC(C)(O)C#N", "cong_thuc": "(CH3)2C(OH)–CN"}
+  ],
+  "nguon_tham_khao": ["SGK Hoá học 11 (Chương trình GDPT 2018) – dẫn xuất halogen, alcohol, hợp chất carbonyl"],
+  "ghi_chu": "Sản phẩm phụ ở bước (1) là 1-bromopropane (CH3–CH2–CH2Br)."
+ }
+}

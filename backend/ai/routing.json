@@ -1,0 +1,11 @@
+{
+  "_ghi_chu": [
+    "Thứ tự gọi AI (AI đầu = chính, sau = dự phòng 1, 2) cho TỪNG hệ thống. Router (backend/ai/router.py) đi lần lượt:",
+    "AI nào chưa có key / người dùng không có quyền (Claude) thì bỏ qua; AI lỗi / hết hạn mức / quá thời gian thì chuyển AI kế tiếp và ghi nhật ký.",
+    "Admin đổi thứ tự ở /admin → Thứ tự AI (lưu CSDL, đè lên file này); nút Về mặc định = quay lại file này.",
+    "Tên hợp lệ: claude, gemini, openai (ChatGPT)."
+  ],
+  "giai_chuoi": ["claude", "gemini", "openai"],
+  "mo_hinh_3d": ["claude", "gemini", "openai"],
+  "co_che": ["claude", "gemini", "openai"]
+}

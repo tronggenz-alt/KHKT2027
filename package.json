@@ -1,0 +1,14 @@
+{
+  "name": "chemistry-platform",
+  "version": "1.1.0",
+  "description": "CHEMISTRY – AI-Powered Organic Chemistry Reaction Solver, 2D Physical Chemistry Simulations & 3D Virtual Laboratory",
+  "scripts": {
+    "start": "./start.command",
+    "test": ".venv/bin/pytest -q && node --test tests/js/*.test.mjs",
+    "test:py": ".venv/bin/pytest -q",
+    "test:js": "node --test tests/js/*.test.mjs",
+    "eval": ".venv/bin/python eval/chay_eval.py"
+  },
+  "author": "",
+  "license": "MIT"
+}

@@ -1,0 +1,75 @@
+{
+  "id": "nao",
+  "ten": "Não bộ",
+  "can_duyet": true,
+  "chuong_trinh": "Sinh học 11 – Cảm ứng ở động vật (CT GDPT 2018); nền tảng KHTN 8",
+  "vi_tri": [
+    "Nằm trong hộp sọ, nối với tuỷ sống qua lỗ chẩm ở đáy hộp sọ."
+  ],
+  "cau_tao": [
+    "Não gồm: đại não, não trung gian (đồi thị, vùng dưới đồi), tiểu não và trụ não (hành não, cầu não, não giữa).",
+    "Đại não lớn nhất, chia hai bán cầu; vỏ đại não là chất xám có nhiều khe, rãnh làm tăng diện tích bề mặt.",
+    "Đơn vị cấu tạo của hệ thần kinh là neuron, gồm thân, sợi nhánh và sợi trục; nhiều sợi trục có bao myelin.",
+    "Não và tuỷ sống tạo thành hệ thần kinh trung ương; hệ thần kinh của người thuộc dạng hệ thần kinh ống."
+  ],
+  "chuc_nang": [
+    "Đại não: trung khu của ý thức, tư duy, trí nhớ, ngôn ngữ; điều khiển vận động có ý thức; trung khu của phản xạ có điều kiện.",
+    "Tiểu não: điều hoà, phối hợp các cử động phức tạp và giữ thăng bằng cơ thể.",
+    "Trụ não: chứa trung khu điều hoà hô hấp, tim mạch, tiêu hoá (chủ yếu ở hành não).",
+    "Vùng dưới đồi: điều hoà thân nhiệt, cảm giác đói, khát; điều khiển hoạt động của tuyến yên."
+  ],
+  "co_che": [
+    "Ở trạng thái nghỉ, mặt trong màng neuron tích điện âm so với mặt ngoài (điện thế nghỉ khoảng −70 mV).",
+    "Khi bị kích thích, điện thế hoạt động xuất hiện và lan truyền dọc sợi trục; trên sợi có bao myelin, xung truyền theo kiểu nhảy cóc nên nhanh hơn.",
+    "Tại synapse hoá học, xung thần kinh làm chuỳ synapse giải phóng chất trung gian (ví dụ acetylcholine) vào khe synapse; chất này gắn thụ thể ở màng sau và gây xung mới. Tin truyền qua synapse chỉ theo một chiều.",
+    "Phản xạ là phản ứng của cơ thể trả lời kích thích, thực hiện nhờ cung phản xạ: thụ thể → neuron cảm giác → trung ương thần kinh → neuron vận động → cơ quan đáp ứng."
+  ],
+  "lien_he": [
+    "Rượu, ma tuý và các chất kích thích tác động lên synapse, gây nghiện và tổn thương não.",
+    "Đột quỵ (tai biến mạch máu não) xảy ra khi mạch máu não bị tắc hoặc vỡ.",
+    "Ngủ đủ giấc, đội mũ bảo hiểm khi đi xe máy, xe đạp điện để bảo vệ não."
+  ],
+  "diem_thi": [
+    "Chức năng của từng phần não, đặc biệt tiểu não (thăng bằng) và hành não (trung khu hô hấp, tim mạch).",
+    "Phân biệt phản xạ không điều kiện (bẩm sinh, bền vững) và phản xạ có điều kiện (học được, cần vỏ đại não).",
+    "Điện thế nghỉ, điện thế hoạt động; tốc độ truyền xung trên sợi có myelin và không có myelin.",
+    "Synapse truyền tin một chiều; tác động của thuốc, chất độc lên synapse."
+  ],
+  "trac_nghiem": [
+    {
+      "cau": "Bộ phận nào của não giữ vai trò điều hoà, phối hợp cử động và giữ thăng bằng?",
+      "lua_chon": ["Tiểu não", "Đại não", "Hành não", "Vùng dưới đồi"],
+      "dap_an": "A",
+      "giai_thich": "Tiểu não phối hợp các cử động phức tạp và giữ thăng bằng; tổn thương tiểu não làm đi lại loạng choạng."
+    },
+    {
+      "cau": "Trung khu điều hoà hô hấp và tim mạch nằm chủ yếu ở",
+      "lua_chon": ["vỏ đại não", "tiểu não", "hành não", "tuỷ sống"],
+      "dap_an": "C",
+      "giai_thich": "Hành não (thuộc trụ não) chứa trung khu hô hấp và trung khu điều hoà tim mạch – tổn thương hành não rất nguy hiểm đến tính mạng."
+    },
+    {
+      "cau": "Trên sợi trục có bao myelin, xung thần kinh lan truyền",
+      "lua_chon": ["liên tục và chậm hơn sợi không có myelin", "theo hai chiều cùng lúc", "mà không cần sự di chuyển của ion", "theo kiểu nhảy cóc, nhanh hơn sợi không có myelin"],
+      "dap_an": "D",
+      "giai_thich": "Bao myelin cách điện nên xung nhảy từ eo Ranvier này sang eo Ranvier khác, tốc độ nhanh hơn và tiết kiệm năng lượng."
+    },
+    {
+      "cau": "Tin truyền qua synapse hoá học chỉ theo một chiều vì",
+      "lua_chon": ["chỉ màng trước chứa chất trung gian và chỉ màng sau có thụ thể", "màng sau synapse không có thụ thể", "khe synapse quá hẹp", "xung thần kinh chỉ đi một chiều trên sợi trục"],
+      "dap_an": "A",
+      "giai_thich": "Chất trung gian chỉ được giải phóng từ chuỳ synapse (màng trước) và chỉ có thụ thể ở màng sau, nên tin không thể truyền ngược lại."
+    },
+    {
+      "cau": "Phản xạ nào sau đây là phản xạ có điều kiện?",
+      "lua_chon": ["Rụt tay khi chạm vào vật nóng", "Tiết nước bọt khi thức ăn chạm vào lưỡi", "Dừng xe khi thấy đèn đỏ", "Co đồng tử khi gặp ánh sáng mạnh"],
+      "dap_an": "C",
+      "giai_thich": "Dừng xe khi thấy đèn đỏ là phản xạ học được trong quá trình sống, cần sự tham gia của vỏ đại não."
+    }
+  ],
+  "goi_y_hoi": [
+    "Xung thần kinh truyền qua synapse như thế nào?",
+    "Phản xạ có điều kiện khác phản xạ không điều kiện ra sao?",
+    "Vì sao người say rượu đi lại loạng choạng?"
+  ]
+}

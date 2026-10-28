@@ -1,0 +1,67 @@
+{
+  "phien_ban": 1,
+  "san_pham": {
+    "CO2_khi": { "cong_thuc": "CO2", "the": "g", "delta_f_H": -393.5, "M": 44.0, "nguon": "SGK Hoá học 10 (KNTT)" },
+    "H2O_hoi": { "cong_thuc": "H2O", "the": "g", "delta_f_H": -241.8, "M": 18.0, "nguon": "SGK Hoá học 10 (KNTT)" },
+    "H2O_long": { "cong_thuc": "H2O", "the": "l", "delta_f_H": -285.8, "M": 18.0, "nguon": "SGK Hoá học 10 (KNTT)" }
+  },
+  "khong_khi": {
+    "ti_le_mol_N2_O2": 3.76,
+    "M_O2": 32.0,
+    "M_N2": 28.0
+  },
+  "danh_sach": [
+    {
+      "id": "isooctane",
+      "ten": "Isooctane (Xăng chuẩn RON 100)",
+      "cong_thuc": "C8H18",
+      "the": "l",
+      "C": 8,
+      "H": 18,
+      "O": 0,
+      "M": 114.0,
+      "delta_f_H": -259.2,
+      "nguon": "SGK Hoá học 10 (KNTT) & Bảng nhiệt động NIST",
+      "mo_ta": "2,2,4-Trimethylpentane – chất chuẩn quy ước có chỉ số octane RON = 100."
+    },
+    {
+      "id": "ethanol",
+      "ten": "Ethanol (Cồn sinh học E100)",
+      "cong_thuc": "C2H5OH",
+      "the": "l",
+      "C": 2,
+      "H": 6,
+      "O": 1,
+      "M": 46.0,
+      "delta_f_H": -277.7,
+      "nguon": "SGK Hoá học 10 (KNTT)",
+      "mo_ta": "Nhiên liệu sinh học tái tạo, pha trộn vào xăng sinh học E5, E10."
+    },
+    {
+      "id": "methane",
+      "ten": "Methane (Khí thiên nhiên CNG)",
+      "cong_thuc": "CH4",
+      "the": "g",
+      "C": 1,
+      "H": 4,
+      "O": 0,
+      "M": 16.0,
+      "delta_f_H": -74.8,
+      "nguon": "SGK Hoá học 10 (KNTT)",
+      "mo_ta": "Thành phần chính của khí thiên nhiên và khí sinh học biogas, phát thải CO2 thấp."
+    },
+    {
+      "id": "hydrogen",
+      "ten": "Hydrogen (Hydro xanh)",
+      "cong_thuc": "H2",
+      "the": "g",
+      "C": 0,
+      "H": 2,
+      "O": 0,
+      "M": 2.0,
+      "delta_f_H": 0.0,
+      "nguon": "SGK Hoá học 10 (KNTT)",
+      "mo_ta": "Nhiên liệu tương lai, sản phẩm cháy chỉ là nước, nhiệt trị cực cao 120,9 MJ/kg."
+    }
+  ]
+}

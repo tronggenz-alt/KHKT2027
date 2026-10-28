@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="vi" data-theme="sang">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quản trị · CHEMISTRY</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="color-scheme" content="light dark">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230f2b48' stroke-width='1.8' stroke-linejoin='round'%3E%3Cpath d='M12 2.5l8.2 4.75v9.5L12 21.5l-8.2-4.75v-9.5z'/%3E%3Cpath d='M12 6.6l4.7 2.7M7.3 14.7l4.7 2.7M7.3 9.3v5.4' stroke-width='1.3'/%3E%3C/svg%3E">
+  <script>
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem("giai-chuoi-giao-dien"); } catch (e) {}
+      if (t !== "sang" && t !== "toi") t = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "toi" : "sang";
+      document.documentElement.dataset.theme = t;
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Be Vietnam Pro"', '-apple-system', '"Segoe UI"', 'Roboto', 'sans-serif'],
+            serif: ['"Be Vietnam Pro"', '-apple-system', '"Segoe UI"', 'Roboto', 'sans-serif'],
+            mono: ['"JetBrains Mono"', '"SFMono-Regular"', 'Consolas', 'monospace'],
+          },
+          colors: {
+            giay: 'var(--giay)', 'giay-lom': 'var(--giay-lom)', muc: 'var(--muc)', 'muc-2': 'var(--muc-2)', lang: 'var(--lang)',
+            chi: 'var(--chi)', 'chi-dam': 'var(--chi-dam)', nhan: 'var(--nhan)', 'nhan-lom': 'var(--nhan-lom)',
+            'ho-phach': 'var(--ho-phach)', gach: 'var(--gach)', lam: 'var(--lam)',
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="min-h-screen">
+  <div id="toasts" class="fixed bottom-4 right-4 left-4 sm:left-auto z-50 flex flex-col gap-2 sm:w-96" aria-live="polite"></div>
+
+  <!-- THANH TRÊN -->
+  <header class="thanh-tren">
+    <div class="khung flex items-center justify-between gap-3 h-16">
+      <a href="/" class="flex items-center gap-3 min-w-0 no-underline">
+        <svg class="w-6 h-6 text-nhan shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 2.5l8.2 4.75v9.5L12 21.5l-8.2-4.75v-9.5z"/><path d="M12 6.6l4.7 2.7M7.3 14.7l4.7 2.7M7.3 9.3v5.4" stroke-width="1.2"/>
+        </svg>
+        <span class="logo-chu">CHEMISTRY</span>
+        <span class="logo-phu hidden md:inline">Quản trị</span>
+      </a>
+      <div class="flex items-center gap-2 sm:gap-3">
+        <a href="/" class="btn btn-sm whitespace-nowrap">← <span class="hidden sm:inline">Về trang giải</span><span class="sm:hidden">App</span></a>
+        <div id="khu-tai-khoan" class="flex items-center"></div>
+        <button type="button" id="nut-che-do" class="nut-che-do" aria-label="Chuyển sang chế độ tối" title="Chế độ tối">
+          <svg class="bieu-tuong-trang" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
+          <svg class="bieu-tuong-mat-troi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="ad-main" class="khung pb-16 che-do-luoi">
+    <section class="pt-10 sm:pt-12 pb-6 chi-luoi">
+      <p class="chu-mo">Chỉ admin</p>
+      <h1 class="tieu-de-lon">Quản trị</h1>
+      <p class="doan-dan">Ai đang dùng app, ai vừa đăng ký hay đăng nhập, dấu hiệu đáng ngờ. Trang tự cập nhật – không cần tải lại.</p>
+      <div class="flex flex-wrap gap-2 mt-4">
+        <a href="/admin/mindmap" class="btn btn-sm inline-flex">Sơ đồ hệ thống (mind map) →</a>
+        <a href="/admin/ai-rieng" class="btn btn-sm btn-primary inline-flex">AI Riêng (Gia sư Hoá Hữu Cơ) →</a>
+      </div>
+    </section>
+
+    <!-- Tổng quan -->
+    <div id="ad-so" class="luoi-so chi-luoi" aria-live="polite">
+      <div class="the the-so xanh"><span class="so" data-so="online">–</span><span class="nhan">Đang online</span></div>
+      <div class="the the-so vang"><span class="so" data-so="dang_ky_hom_nay">–</span><span class="nhan">Đăng ký mới hôm nay</span></div>
+      <div class="the the-so"><span class="so" data-so="dang_nhap_hom_nay">–</span><span class="nhan">Lượt đăng nhập hôm nay</span></div>
+      <div class="the the-so do"><span class="so" data-so="dang_nhap_sai_hom_nay">–</span><span class="nhan">Đăng nhập sai hôm nay</span></div>
+      <div class="the the-so"><span class="so" data-so="bai_giai_hom_nay">–</span><span class="nhan">Bài đã giải hôm nay</span></div>
+    </div>
+
+    <!-- Lưới thẻ thu gọn: bấm một thẻ → hiệu ứng quét (chuyen-canh.js) → mở đầy đủ khối tương ứng [data-khoi] bên dưới -->
+    <nav class="luoi-the chi-luoi" aria-label="Các mục quản trị">
+      <button type="button" class="the-nho" data-mo="truc-tiep" aria-controls="khoi-truc-tiep">
+        <span class="the-nho-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></span>
+        <span class="the-nho-than"><span class="the-nho-tieu-de">Hoạt động trực tiếp <span class="cham-live">LIVE</span></span>
+          <span class="the-nho-tom-tat" data-tom-tat="truc-tiep">Đang tải…</span></span>
+        <span class="the-nho-mui" aria-hidden="true">→</span>
+      </button>
+      <button type="button" class="the-nho" data-mo="online" aria-controls="khoi-online">
+        <span class="the-nho-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><circle cx="18.5" cy="7.5" r="2.2" fill="currentColor" stroke="none"/></svg></span>
+        <span class="the-nho-than"><span class="the-nho-tieu-de">Đang online</span>
+          <span class="the-nho-tom-tat" data-tom-tat="online">Đang tải…</span></span>
+        <span class="the-nho-mui" aria-hidden="true">→</span>
+      </button>
+      <button type="button" class="the-nho" data-mo="bieu-do" aria-controls="khoi-bieu-do">
+        <span class="the-nho-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M6 17v-6M11 17V6M16 17v-4M20 17V9"/></svg></span>
+        <span class="the-nho-than"><span class="the-nho-tieu-de">14 ngày gần nhất</span>
+          <span class="the-nho-tom-tat" data-tom-tat="bieu-do">Đang tải…</span></span>
+        <span class="the-nho-mui" aria-hidden="true">→</span>
+      </button>
+      <button type="button" class="the-nho" data-mo="canh-bao" aria-controls="khoi-canh-bao">
+        <span class="the-nho-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17.5v.01"/></svg></span>
+        <span class="the-nho-than"><span class="the-nho-tieu-de">Cảnh báo</span>
+          <span class="the-nho-tom-tat" data-tom-tat="canh-bao">Đang tải…</span></span>
+        <span class="the-nho-mui" aria-hidden="true">→</span>
+      </button>
+      <button type="button" class="the-nho" data-mo="nguoi-dung" aria-controls="khoi-nguoi-dung">
+        <span class="the-nho-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c1.9.7 3.1 2.4 3.5 5.2"/></svg></span>
+        <span class="the-nho-than"><span class="the-nho-tieu-de">Người dùng</span>
+          <span class="the-nho-tom-tat" data-tom-tat="nguoi-dung">Đang tải…</span></span>
+        <span class="the-nho-mui" aria-hidden="true">→</span>
+      </button>
+      <button type="button" class="the-nho" data-mo="chi-phi" aria-controls="khoi-chi-phi">
+        <span class="the-nho-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg></span>
+        <span class="the-nho-than"><span class="the-nho-tieu-de">Chi phí AI</span>
+          <span class="the-nho-tom-tat" data-tom-tat="chi-phi">Đang tải…</span></span>
+        <span class="the-nho-mui" aria-hidden="true">→</span>
+      </button>
+      <button type="button" class="the-nho" data-mo="cai-dat-chung" aria-controls="khoi-cai-dat-chung">
+        <span class="the-nho-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></span>
+        <span class="the-nho-than"><span class="the-nho-tieu-de">Cài đặt chung</span>
+          <span class="the-nho-tom-tat" data-tom-tat="cai-dat-chung">Đang tải…</span></span>
+        <span class="the-nho-mui" aria-hidden="true">→</span>
+      </button>
+      <button type="button" class="the-nho" data-mo="claude-api" aria-controls="khoi-claude-api">
+        <span class="the-nho-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></svg></span>
+        <span class="the-nho-than"><span class="the-nho-tieu-de">Claude API (máy chủ)</span>
+          <span class="the-nho-tom-tat" data-tom-tat="claude-api">Đang tải…</span></span>
+        <span class="the-nho-mui" aria-hidden="true">→</span>
+      </button>
+      <button type="button" class="the-nho" data-mo="ma-claude" aria-controls="khoi-ma-claude">
+        <span class="the-nho-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4V8z"/><path d="M14 6v12" stroke-dasharray="2 2.5"/></svg></span>
+        <span class="the-nho-than"><span class="the-nho-tieu-de">Mã Claude</span>
+          <span class="the-nho-tom-tat" data-tom-tat="ma-claude">Đang tải…</span></span>
+        <span class="the-nho-mui" aria-hidden="true">→</span>
+      </button>
+      <button type="button" class="the-nho" data-mo="key-claude" aria-controls="khoi-key-claude">
+        <span class="the-nho-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l3 3M15 8l2 2"/></svg></span>
+        <span class="the-nho-than"><span class="the-nho-tieu-de">Key Claude</span>
+          <span class="the-nho-tom-tat" data-tom-tat="key-claude">Đang tải…</span></span>
+        <span class="the-nho-mui" aria-hidden="true">→</span>
+      </button>
+      <button type="button" class="the-nho" data-mo="email-rac" aria-controls="khoi-email-rac">
+        <span class="the-nho-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 7.9 8 9 4.6-1.1 8-4.5 8-9V6l-8-3z"/><path d="m9.5 9.5 5 5M14.5 9.5l-5 5"/></svg></span>
+        <span class="the-nho-than"><span class="the-nho-tieu-de">Email rác</span>
+          <span class="the-nho-tom-tat" data-tom-tat="email-rac">Đang tải…</span></span>
+        <span class="the-nho-mui" aria-hidden="true">→</span>
+      </button>
+      <button type="button" class="the-nho" data-mo="thu-tu-ai" aria-controls="khoi-thu-tu-ai">
+        <span class="the-nho-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M7 4 4 7M7 4l3 3M17 20V4M17 20l-3-3M17 20l3-3"/></svg></span>
+        <span class="the-nho-than"><span class="the-nho-tieu-de">Thứ tự AI</span>
+          <span class="the-nho-tom-tat" data-tom-tat="thu-tu-ai">Đang tải…</span></span>
+        <span class="the-nho-mui" aria-hidden="true">→</span>
+      </button>
+      <button type="button" class="the-nho" data-mo="ma-giao-dien" aria-controls="khoi-ma-giao-dien">
+        <span class="the-nho-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10" r="1.3"/><circle cx="12" cy="7.5" r="1.3"/><circle cx="15.5" cy="10" r="1.3"/><path d="M12 21a2.5 2.5 0 0 1 0-5h1.5a2 2 0 0 0 0-4"/></svg></span>
+        <span class="the-nho-than"><span class="the-nho-tieu-de">Mã giao diện</span>
+          <span class="the-nho-tom-tat" data-tom-tat="ma-giao-dien">Đang tải…</span></span>
+        <span class="the-nho-mui" aria-hidden="true">→</span>
+      </button>
+      <button type="button" class="the-nho" data-mo="notebooklm" aria-controls="khoi-notebooklm">
+        <span class="the-nho-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10M6 10h10M6 14h6"/></svg></span>
+        <span class="the-nho-than"><span class="the-nho-tieu-de">NotebookLM – Tài khoản</span>
+          <span class="the-nho-tom-tat" data-tom-tat="notebooklm">Đang tải…</span></span>
+        <span class="the-nho-mui" aria-hidden="true">→</span>
+      </button>
+      <button type="button" class="the-nho" data-mo="lo-trinh" aria-controls="khoi-lo-trinh">
+        <span class="the-nho-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg></span>
+        <span class="the-nho-than"><span class="the-nho-tieu-de">Lộ trình học Sinh</span>
+          <span class="the-nho-tom-tat" data-tom-tat="lo-trinh">Đang tải…</span></span>
+        <span class="the-nho-mui" aria-hidden="true">→</span>
+      </button>
+      <button type="button" class="the-nho" data-mo="phong-thi-nghiem" aria-controls="khoi-phong-thi-nghiem">
+        <span class="the-nho-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6L4.5 18.5A2 2 0 0 0 6.2 21.5h11.6a2 2 0 0 0 1.7-3L14 9V3"/><path d="M7 15h10"/></svg></span>
+        <span class="the-nho-than"><span class="the-nho-tieu-de">Phòng thí nghiệm</span>
+          <span class="the-nho-tom-tat" data-tom-tat="phong-thi-nghiem">Đang tải…</span></span>
+        <span class="the-nho-mui" aria-hidden="true">→</span>
+      </button>
+      <a href="/admin/ai-rieng" class="the-nho" style="text-decoration: none;">
+        <span class="the-nho-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l8.2 4.75v9.5L12 21.5l-8.2-4.75v-9.5z"/><path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/></svg></span>
+        <span class="the-nho-than"><span class="the-nho-tieu-de">AI Riêng (Gia sư)</span>
+          <span class="the-nho-tom-tat">Dạy kiến thức, thư viện lời giải, sân tập, bộ đề</span></span>
+        <span class="the-nho-mui" aria-hidden="true">→</span>
+      </a>
+    </nav>
+
+    <!-- Thanh trên cùng khi đang mở một khối: Quay lại (hoặc phím Esc / nút Back của trình duyệt) -->
+    <div class="thanh-quay-lai chi-mo">
+      <button type="button" id="nut-quay-lai" class="btn btn-sm">← Quay lại</button>
+      <span id="ten-khoi-mo" class="font-semibold text-muc"></span>
+      <span class="ghi-chu-nho an-tren-dt">Esc / nút Back để quay lại</span>
+    </div>
+
+    <div class="grid gap-6 mt-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] items-start khung-khoi">
+      <!-- Hoạt động trực tiếp -->
+      <section class="the the-muc min-w-0" aria-labelledby="td-truc-tiep" id="khoi-truc-tiep" data-khoi="truc-tiep">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <h2 id="td-truc-tiep" tabindex="-1" class="font-semibold text-muc text-lg">Hoạt động trực tiếp</h2>
+            <span id="ad-trang-thai" class="trang-thai-luong"><i></i><span>đang kết nối…</span></span>
+          </div>
+          <button type="button" id="ad-thong-bao" class="btn btn-sm" aria-pressed="false">🔔 Thông báo đăng ký mới: tắt</button>
+        </div>
+        <div id="ad-loc" class="mt-4"></div>
+        <div id="ad-ds" class="mt-3"><p class="ghi-chu-nho">Đang tải…</p></div>
+        <button type="button" id="ad-them" class="btn btn-sm mt-4 hidden">Xem thêm</button>
+      </section>
+
+      <div class="flex flex-col gap-6 min-w-0 khung-khoi">
+        <section class="the the-muc" aria-labelledby="td-online" id="khoi-online" data-khoi="online">
+          <h2 id="td-online" tabindex="-1" class="font-semibold text-muc text-lg">Đang online</h2>
+          <p class="ghi-chu-nho">Có hoạt động trong 5 phút gần nhất.</p>
+          <div id="ad-online" class="mt-3"><p class="ghi-chu-nho">Đang tải…</p></div>
+        </section>
+        <section class="the the-muc" aria-labelledby="td-bieu-do" id="khoi-bieu-do" data-khoi="bieu-do">
+          <h2 id="td-bieu-do" tabindex="-1" class="font-semibold text-muc text-lg">14 ngày gần nhất</h2>
+          <div class="flex flex-wrap gap-4 mt-1">
+            <span class="chu-giai"><i style="background: var(--nhan)"></i>Đăng nhập</span>
+            <span class="chu-giai"><i style="background: var(--ho-phach)"></i>Đăng ký</span>
+          </div>
+          <div id="ad-bieu-do" class="mt-3"></div>
+        </section>
+        <section class="the the-muc" aria-labelledby="td-canh-bao" id="khoi-canh-bao" data-khoi="canh-bao">
+          <h2 id="td-canh-bao" tabindex="-1" class="font-semibold text-muc text-lg">Cảnh báo</h2>
+          <p class="ghi-chu-nho">Nhiều tài khoản cùng IP (7 ngày) · đăng nhập sai nhiều lần (24 giờ) · tạo tài khoản hàng loạt · đăng nhập từ quốc gia / tỉnh-thành khác thường lệ (7 ngày).</p>
+          <div id="ad-canh-bao" class="mt-3 flex flex-col gap-3"><p class="ghi-chu-nho">Đang tải…</p></div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Người dùng -->
+    <section class="the the-muc mt-6" aria-labelledby="td-nguoi-dung" id="khoi-nguoi-dung" data-khoi="nguoi-dung">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <h2 id="td-nguoi-dung" tabindex="-1" class="font-semibold text-muc text-lg">Người dùng <span id="ad-so-nd" class="ghi-chu-nho"></span></h2>
+        <div class="flex flex-wrap items-center gap-3">
+          <label class="ghi-chu-nho flex items-center gap-1"><input type="checkbox" id="ad-loc-key-bat"> Chỉ hiện người được bật key Claude riêng</label>
+          <label class="ghi-chu-nho flex items-center gap-1"><input type="checkbox" id="ad-loc-key-yc"> Đang yêu cầu</label>
+          <input type="search" id="ad-tim" class="o-nhap" style="max-width: 320px" placeholder="Tìm theo tên hoặc email" aria-label="Tìm người dùng">
+        </div>
+      </div>
+      <p class="ghi-chu-nho mt-1">Bấm tiêu đề cột để sắp xếp, bấm một dòng để xem chi tiết (lịch sử đăng nhập, đổi tên, khoá / mở khoá), bấm một IP để xem mọi tài khoản từng dùng IP đó.</p>
+      <div class="cuon-ngang mt-3">
+        <table class="bang-nd">
+          <thead><tr>
+            <th data-cot="id" class="so-hd">ID</th><th data-cot="ten">Tên</th><th data-cot="email">Email</th><th data-cot="vai_tro">Vai trò</th>
+            <th data-cot="xac_thuc">Email xác thực</th><th data-cot="tao_luc">Ngày tạo</th><th data-cot="dang_nhap_cuoi">Đăng nhập cuối</th>
+            <th data-cot="ip_cuoi">IP gần nhất</th><th data-cot="so_bai_giai" class="so-hd">Bài đã giải</th><th data-cot="trang_thai">Trạng thái</th>
+            <th data-cot="key_rieng">Key Claude riêng</th>
+          </tr></thead>
+          <tbody id="ad-bang"><tr><td colspan="11" class="ghi-chu-nho">Đang tải…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Chi phí AI -->
+    <section class="the the-muc mt-6" aria-labelledby="td-chi-phi" id="khoi-chi-phi" data-khoi="chi-phi">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <h2 id="td-chi-phi" tabindex="-1" class="font-semibold text-muc text-lg">Chi phí AI</h2>
+        <div class="phan-doan" role="radiogroup" aria-label="Khoảng thời gian">
+          <label><input type="radio" name="cp-ngay" value="1" checked><span>Hôm nay</span></label>
+          <label><input type="radio" name="cp-ngay" value="7"><span>7 ngày</span></label>
+          <label><input type="radio" name="cp-ngay" value="30"><span>30 ngày</span></label>
+        </div>
+      </div>
+      <p class="ghi-chu-nho mt-1">Mỗi lần gọi AI: mô hình, token vào/ra (lấy từ phản hồi API), có nâng mô hình không, thành công hay lỗi.
+        Dễ → Flash-Lite · Trung bình → Flash · HSG → Pro (Claude chỉ khi có mã Claude hoặc Key Claude).</p>
+      <div id="ad-chi-phi" class="mt-3"><p class="ghi-chu-nho">Đang tải…</p></div>
+    </section>
+
+    <!-- Cài đặt chung (lưu CSDL, áp dụng ngay cho mọi người) -->
+    <section class="the the-muc mt-6" aria-labelledby="td-cai-dat-chung" id="khoi-cai-dat-chung" data-khoi="cai-dat-chung">
+      <h2 id="td-cai-dat-chung" tabindex="-1" class="font-semibold text-muc text-lg">Cài đặt chung</h2>
+      <label class="cong-tac mt-3">
+        <input type="checkbox" id="cd-hoat-anh">
+        <span class="ranh"><span class="nut-tron"></span></span>
+        <span>Hoạt ảnh Cài đặt <small class="ghi-chu-nho">(hiệu ứng công nghệ khi người dùng mở trang Cài đặt; áp dụng ngay cho mọi tài khoản)</small></span>
+      </label>
+    </section>
+
+    <!-- Claude API máy chủ: tiền + token (Admin API Anthropic, cache 10 phút) – số dư ƯỚC TÍNH = tổng đã nạp − chi phí -->
+    <section class="the the-muc mt-6" aria-labelledby="td-claude-api" id="khoi-claude-api" data-khoi="claude-api">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 id="td-claude-api" tabindex="-1" class="font-semibold text-muc text-lg">Claude API (máy chủ)</h2>
+          <p class="ghi-chu-nho mt-1">Chi phí + token lấy từ Admin API của Anthropic (theo ngày UTC, lưu tạm 10 phút). Anthropic không cho đọc số dư –
+            số dư dưới đây là <b>ước tính</b> = tổng tiền admin ghi đã nạp − chi phí từ lần nạp đầu.</p>
+        </div>
+        <button type="button" id="cl-lam-moi" class="btn btn-sm">Làm mới</button>
+      </div>
+      <div id="ad-claude-api" class="mt-4"><p class="ghi-chu-nho">Đang tải…</p></div>
+      <div class="luoi-claude-nap mt-5">
+        <form id="cl-form-nap" class="flex flex-wrap items-end gap-3" novalidate>
+          <label><span class="nhan-mono block mb-1">Đã nạp (USD)</span><input type="number" id="cl-nap-usd" class="o-nhap" min="0.01" step="0.01" placeholder="vd 20" style="width:130px"></label>
+          <label class="flex-1" style="min-width:160px"><span class="nhan-mono block mb-1">Ghi chú</span><input type="text" id="cl-nap-ghi-chu" class="o-nhap" maxlength="200" placeholder="vd thẻ Visa 12/10"></label>
+          <button type="submit" class="btn btn-primary btn-sm">Ghi lần nạp</button>
+        </form>
+        <form id="cl-form-nguong" class="flex flex-wrap items-end gap-3" novalidate>
+          <label><span class="nhan-mono block mb-1">Cảnh báo khi số dư dưới (USD)</span><input type="number" id="cl-nguong" class="o-nhap" min="0" step="0.5" style="width:130px"></label>
+          <button type="submit" class="btn btn-sm">Lưu ngưỡng</button>
+        </form>
+      </div>
+      <div id="cl-lich-su-nap" class="mt-4"></div>
+    </section>
+
+    <!-- Mã kích hoạt Claude -->
+    <section class="the the-muc mt-6" aria-labelledby="td-ma-claude" id="khoi-ma-claude" data-khoi="ma-claude">
+      <h2 id="td-ma-claude" tabindex="-1" class="font-semibold text-muc text-lg">Mã Claude</h2>
+      <p class="ghi-chu-nho mt-1">Mặc định không ai dùng được Claude (trừ admin). Mã chỉ hiện <b>đúng một lần</b> lúc tạo – cơ sở dữ liệu chỉ lưu bản băm.</p>
+      <form id="ad-form-ma" class="luoi-tao-ma mt-4" novalidate>
+        <label><span class="nhan-mono">Số lượt</span><input type="number" id="ma-luot" class="o-nhap" min="1" max="100000" value="20" required></label>
+        <label><span class="nhan-mono">Hết hạn (hết ngày)</span><input type="date" id="ma-het-han" class="o-nhap" required></label>
+        <label><span class="nhan-mono">Số tài khoản dùng chung</span><input type="number" id="ma-tai-khoan" class="o-nhap" min="1" max="1000" value="1" required></label>
+        <label class="rong"><span class="nhan-mono">Ghi chú (cấp cho ai)</span><input type="text" id="ma-ghi-chu" class="o-nhap" maxlength="200" placeholder="vd: cho bạn Lan lớp 12A1"></label>
+        <div><button type="submit" class="btn btn-primary btn-sm">Tạo mã</button></div>
+      </form>
+      <div id="ad-ma-moi" class="ma-moi mt-4" hidden></div>
+      <div class="cuon-ngang mt-4">
+        <table class="bang-nd bang-ma">
+          <thead><tr><th class="so-hd">ID</th><th>Mã</th><th>Lượt</th><th>Hết hạn</th><th>Tài khoản đang dùng</th><th>Trạng thái</th><th>Ghi chú</th><th></th></tr></thead>
+          <tbody id="ad-ds-ma"><tr><td colspan="8" class="ghi-chu-nho">Đang tải…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Key Claude dùng chung (key chỉ nằm trong .env – trang này không bao giờ hiện key) -->
+    <section class="the the-muc mt-6" aria-labelledby="td-key-claude" id="khoi-key-claude" data-khoi="key-claude">
+      <h2 id="td-key-claude" tabindex="-1" class="font-semibold text-muc text-lg">Key Claude</h2>
+      <p class="ghi-chu-nho mt-1" id="ad-key-cau-hinh">Đang tải…</p>
+      <div class="cuon-ngang mt-4">
+        <table class="bang-nd bang-ma">
+          <thead><tr><th class="so-hd">ID</th><th>Người dùng</th><th>Trạng thái</th><th>Kích hoạt lúc</th><th class="so-hd">Bài Claude hôm nay</th><th class="so-hd">Tổng bài</th>
+            <th>Nhập sai key (24h / 30 ngày)</th><th></th></tr></thead>
+          <tbody id="ad-ds-key"><tr><td colspan="8" class="ghi-chu-nho">Đang tải…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Thứ tự AI cho từng hệ thống (backend/ai/router.py): kéo thả → lưu CSDL đè routing.json; AI lỗi → AI kế tiếp -->
+    <section class="the the-muc mt-6" aria-labelledby="td-thu-tu-ai" id="khoi-thu-tu-ai" data-khoi="thu-tu-ai">
+      <h2 id="td-thu-tu-ai" tabindex="-1" class="font-semibold text-muc text-lg">Thứ tự AI</h2>
+      <p class="ghi-chu-nho mt-1">Kéo thả (hoặc bấm ↑ ↓) để đổi thứ tự cho từng hệ thống – AI đầu là <b>Chính</b>, sau là <b>Dự phòng 1, 2</b>.
+        AI lỗi / hết hạn mức / quá <span id="tt-timeout">30</span> giây không phản hồi → tự chuyển AI kế tiếp. AI chưa có key, hoặc người dùng
+        không có quyền (Claude), tự bỏ qua. Lưu ngay, áp dụng cho yêu cầu mới. Xem trên <a class="lien-ket" href="/admin/mindmap">sơ đồ hệ thống</a>.</p>
+      <div id="tt-luoi" class="luoi-thu-tu mt-4"><p class="ghi-chu-nho">Đang tải…</p></div>
+      <h3 class="nhan-mono mt-6">Lần chuyển AI dự phòng gần đây</h3>
+      <div id="tt-du-phong" class="mt-2"></div>
+    </section>
+
+    <!-- Mã giao diện (nút "+K" trên trang chủ): admin cấp mã → người dùng đổi theme. CSDL chỉ lưu HMAC; mã gốc chỉ hiện một lần lúc tạo -->
+    <section class="the the-muc mt-6" aria-labelledby="td-ma-giao-dien" id="khoi-ma-giao-dien" data-khoi="ma-giao-dien">
+      <h2 id="td-ma-giao-dien" tabindex="-1" class="font-semibold text-muc text-lg">Mã giao diện</h2>
+      <p class="ghi-chu-nho mt-1">Người dùng bấm <b>+K</b> trên trang chủ, nhập mã → đổi giao diện ngay. Mỗi mã gắn một theme; đặt được số lượt
+        (mỗi tài khoản tính 1 lượt) và hạn dùng. Để trống ô Mã → app tự sinh mã ngẫu nhiên. Bấm <b>Chép</b> cạnh mã để đưa cho người khác –
+        ai có mã (đã đăng nhập) nhập ở nút +K là vào giao diện đó. Mã chỉ admin xem được (lưu mã hoá, kiểm tra bằng bản băm).</p>
+      <form id="gd-form" class="flex flex-wrap items-end gap-3 mt-4" novalidate>
+        <label><span class="nhan-mono block mb-1">Theme</span><select id="gd-theme" class="o-nhap" style="width:auto"></select></label>
+        <label><span class="nhan-mono block mb-1">Mã (tuỳ chọn)</span><input type="text" id="gd-ma" class="o-nhap font-mono" maxlength="40" placeholder="vd HOAXUAN2027" style="width:190px"></label>
+        <label><span class="nhan-mono block mb-1">Số lượt</span><input type="number" id="gd-luot" class="o-nhap" min="1" placeholder="không giới hạn" style="width:140px"></label>
+        <label><span class="nhan-mono block mb-1">Hạn dùng</span><input type="date" id="gd-han" class="o-nhap" style="width:auto"></label>
+        <label class="flex-1" style="min-width:160px"><span class="nhan-mono block mb-1">Ghi chú</span><input type="text" id="gd-ghi-chu" class="o-nhap" maxlength="200"></label>
+        <button type="submit" class="btn btn-primary btn-sm">Tạo mã</button>
+      </form>
+      <div id="gd-vua-tao" class="hop-vang mt-4 hidden" role="status"></div>
+      <div class="cuon-ngang mt-4">
+        <table class="bang-nd">
+          <thead><tr><th class="so-hd">ID</th><th>Mã</th><th>Theme</th><th class="so-hd">Đã dùng</th><th>Hạn</th><th>Trạng thái</th><th>Ghi chú</th><th>Tạo bởi</th><th></th></tr></thead>
+          <tbody id="gd-ds"><tr><td colspan="9" class="ghi-chu-nho">Đang tải…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Email rác: chặn email ảo / tạm thời khi đăng ký (email_rac.py – mọi kiểm tra ở server) -->
+    <section class="the the-muc mt-6" aria-labelledby="td-email-rac" id="khoi-email-rac" data-khoi="email-rac">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 id="td-email-rac" tabindex="-1" class="font-semibold text-muc text-lg">Email rác</h2>
+          <p class="ghi-chu-nho mt-1" id="er-danh-sach">Đang tải…</p>
+        </div>
+        <button type="button" id="er-cap-nhat" class="btn btn-sm">Cập nhật danh sách ngay</button>
+      </div>
+      <div id="er-thong-ke" class="mt-3"></div>
+      <h3 class="nhan-mono mt-5">Tài khoản nghi ngờ – chờ bạn duyệt</h3>
+      <p class="ghi-chu-nho mt-1">Tên email trông ngẫu nhiên (vd xk29fjq8zz@gmail.com): không bị chặn, vẫn dùng app bình thường cho tới khi bạn khoá.</p>
+      <div id="er-nghi-ngo" class="mt-2"></div>
+      <h3 class="nhan-mono mt-5">Danh sách chặn / cho phép của bạn</h3>
+      <p class="ghi-chu-nho mt-1">Có hiệu lực ngay. Dùng được dấu * (vd <span class="font-mono">tempmail.*</span>, <span class="font-mono">*.xyz</span>), khớp cả
+        tên miền con. "Cho phép" thắng mọi kiểm tra tên miền (dùng khi một tên miền thật bị chặn nhầm).</p>
+      <form id="er-form" class="flex flex-wrap items-end gap-3 mt-2" novalidate>
+        <label><span class="nhan-mono block mb-1">Tên miền</span><input type="text" id="er-ten-mien" class="o-nhap" maxlength="253" placeholder="vd tempmail.* hoặc example.com" style="width:240px"></label>
+        <label><span class="nhan-mono block mb-1">Loại</span><select id="er-loai" class="o-nhap"><option value="chan">Chặn</option><option value="cho">Cho phép</option></select></label>
+        <label class="flex-1" style="min-width:160px"><span class="nhan-mono block mb-1">Ghi chú</span><input type="text" id="er-ghi-chu" class="o-nhap" maxlength="200"></label>
+        <button type="submit" class="btn btn-primary btn-sm">Thêm</button>
+      </form>
+      <div id="er-quy-tac" class="mt-3"></div>
+      <div class="flex flex-wrap items-end justify-between gap-3 mt-5">
+        <h3 class="nhan-mono">Các lần bị chặn (giữ 90 ngày, mới nhất trước)</h3>
+        <div class="flex flex-wrap gap-2">
+          <select id="er-loc-ly-do" class="o-nhap" style="width:auto" aria-label="Lọc theo lý do"><option value="">Mọi lý do</option></select>
+          <input type="search" id="er-tim" class="o-nhap" style="max-width:220px" placeholder="Tìm email / IP" aria-label="Tìm email hoặc IP">
+        </div>
+      </div>
+      <div id="er-chan" class="mt-2"></div>
+    </section>
+
+    <!-- NotebookLM – Tài khoản (Google) -->
+    <section class="the the-muc mt-6" aria-labelledby="td-notebooklm" id="khoi-notebooklm" data-khoi="notebooklm">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 id="td-notebooklm" tabindex="-1" class="font-semibold text-muc text-lg flex items-center gap-2">
+            <span>Google NotebookLM – Quản lý tài khoản</span>
+            <span id="nlm-so-tk" class="ghi-chu-nho"></span>
+          </h2>
+          <p class="ghi-chu-nho mt-1">Kết nối đa tài khoản Google phục vụ nghiên cứu tài liệu, hiển thị trên Mindmap và liên kết kho tri thức AI Riêng.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" id="nlm-btn-kiem-tra-tat-ca" class="btn btn-sm">Kiểm tra kết nối</button>
+          <button type="button" id="nlm-btn-them" class="btn btn-primary btn-sm">+ Thêm tài khoản Google</button>
+        </div>
+      </div>
+
+      <!-- Cảnh báo nếu có tài khoản lỗi/hết hạn -->
+      <div id="nlm-canh-bao-chung" class="mt-4 hidden p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 text-sm flex items-center gap-2"></div>
+
+      <!-- Bảng tài khoản -->
+      <div class="cuon-ngang mt-4">
+        <table class="bang-nd">
+          <thead>
+            <tr>
+              <th>Tài khoản</th>
+              <th>Email</th>
+              <th>Trạng thái</th>
+              <th class="so-hd">Số Notebook</th>
+              <th>Đồng bộ cuối</th>
+              <th class="text-right">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="nlm-bang-ds">
+            <tr><td colspan="6" class="ghi-chu-nho">Đang tải…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Hộp thoại Thêm / Cập nhật tài khoản: <dialog> + showModal() → luôn nằm trên thanh cố định / hiệu ứng chuyển khối -->
+      <dialog id="nlm-modal" class="hop-thoai hop-nlm" aria-labelledby="nlm-modal-tieu-de">
+        <form id="nlm-form" novalidate>
+          <input type="hidden" id="nlm-form-id" value="">
+          <div class="dau">
+            <div>
+              <h3 id="nlm-modal-tieu-de" class="font-semibold text-muc text-lg leading-tight">Thêm tài khoản Google NotebookLM</h3>
+              <p class="ghi-chu-nho mt-1">Dán cookie của tài khoản Google đang đăng nhập NotebookLM.</p>
+            </div>
+            <button type="button" id="nlm-modal-dong" class="nut-dong-hop flex-none" aria-label="Đóng">&times;</button>
+          </div>
+
+          <div class="than space-y-5">
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label for="nlm-ten-goi-nho" class="block text-sm font-medium text-muc mb-1">Tên gợi nhớ</label>
+                <input type="text" id="nlm-ten-goi-nho" class="o-nhap w-full" placeholder="Ví dụ: Google Chính" maxlength="100">
+              </div>
+              <div>
+                <label for="nlm-email" class="block text-sm font-medium text-muc mb-1">Email Google <span class="text-muc-2 font-normal">(không bắt buộc)</span></label>
+                <input type="email" id="nlm-email" class="o-nhap w-full" placeholder="Tự lấy sau khi kết nối" autocomplete="off">
+              </div>
+            </div>
+
+            <div>
+              <div class="flex items-baseline justify-between gap-3 mb-1">
+                <label for="nlm-cookie" class="text-sm font-medium text-muc">Cookie Google</label>
+                <a href="https://notebooklm.google.com" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap">Mở NotebookLM ↗</a>
+              </div>
+              <textarea id="nlm-cookie" class="o-nhap w-full font-mono text-xs h-32 resize-y" placeholder="Dán chuỗi cookie (SID, HSID, SSID, OSID...), JSON từ EditThisCookie/Cookie-Editor, hoặc lệnh curl..." autocomplete="off" spellcheck="false"></textarea>
+              <p id="nlm-cookie-dem" class="text-xs mt-1" aria-live="polite"></p>
+              <div id="nlm-cookie-loi" class="text-xs text-red-600 mt-1 hidden" role="alert"></div>
+              <p class="ghi-chu-nho mt-2">🔒 Cookie được mã hóa AES-GCM trên máy chủ, không bao giờ gửi lại trình duyệt và không ghi vào nhật ký.</p>
+            </div>
+
+            <details class="text-xs bg-[var(--giay-lom)] p-3 rounded-lg border border-[var(--chi)]">
+              <summary class="font-medium cursor-pointer text-muc select-none">Hướng dẫn lấy Cookie từng bước</summary>
+              <ol class="list-decimal ml-4 mt-2 space-y-1 text-muc-2">
+                <li>Đăng nhập <a href="https://notebooklm.google.com" target="_blank" rel="noopener noreferrer" class="text-blue-500 underline">notebooklm.google.com</a> trên Chrome/Firefox.</li>
+                <li>Nhấn <kbd class="px-1 py-0.5 bg-neutral-200 dark:bg-neutral-800 rounded font-mono">F12</kbd> (hoặc chuột phải → Kiểm tra) → chọn thẻ <b>Network</b> (Mạng).</li>
+                <li>F5 tải lại trang NotebookLM → nhấn vào yêu cầu đầu tiên (ví dụ <code>notebooklm.google.com</code>).</li>
+                <li>Tại mục <b>Request Headers</b>, copy toàn bộ giá trị sau <code>cookie:</code> và dán vào ô trên.</li>
+                <li><i>(Hoặc dùng tiện ích Cookie-Editor / EditThisCookie: bấm Export → Export as JSON rồi dán vào đây).</i></li>
+              </ol>
+            </details>
+
+            <label class="flex items-center gap-2 text-sm text-muc cursor-pointer w-fit">
+              <input type="checkbox" id="nlm-is-default" class="rounded">
+              Đặt làm tài khoản mặc định
+            </label>
+          </div>
+
+          <div class="chan">
+            <div id="nlm-form-loi" class="text-xs text-red-600 mr-auto hidden" role="alert"></div>
+            <button type="button" id="nlm-btn-huy" class="btn btn-sm">Hủy</button>
+            <button type="submit" id="nlm-btn-luu" class="btn btn-primary btn-sm">Lưu &amp; Kết nối</button>
+          </div>
+        </form>
+      </dialog>
+    </section>
+
+    <!-- Phòng thí nghiệm Hoá ảo: công tắc bản Unity 3D cho mọi người (app_settings "phong_thi_nghiem") + trạng thái bản build -->
+    <section class="the the-muc mt-6" aria-labelledby="td-phong-thi-nghiem" id="khoi-phong-thi-nghiem" data-khoi="phong-thi-nghiem">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 id="td-phong-thi-nghiem" tabindex="-1" class="font-semibold text-muc text-lg">Phòng thí nghiệm Hoá ảo</h2>
+          <p class="ghi-chu-nho mt-1">Bản Web 3D luôn mở cho mọi người. Bản Unity 3D (chân thực hơn, nặng hơn) chỉ hiện nút chuyển khi bật công tắc dưới đây và đã có bản build.</p>
+        </div>
+        <a href="/hoa-hoc/phong-thi-nghiem" class="btn btn-sm" target="_blank" rel="noopener">Mở Phòng thí nghiệm ↗</a>
+      </div>
+      <label class="cong-tac mt-4">
+        <input type="checkbox" id="ptn-unity-bat">
+        <span class="ranh"><span class="nut-tron"></span></span>
+        <span>Cho mọi người dùng bản 3D Unity <small class="ghi-chu-nho">(áp dụng ngay cho mọi tài khoản; admin luôn thấy nút khi đã có bản build)</small></span>
+      </label>
+      <p id="ptn-unity-canh-bao" class="ghi-chu-nho mt-2" hidden></p>
+      <dl class="luoi-tt mt-4">
+        <div><span>Bản build Unity</span><b id="ptn-unity-build">–</b></div>
+        <div><span>Dung lượng</span><b id="ptn-unity-dung-luong">–</b></div>
+        <div><span>Thư mục build</span><code>frontend/unity-lab/Build/</code></div>
+        <div><span>Hướng dẫn build</span><code>unity/README.md</code></div>
+      </dl>
+    </section>
+
+    <!-- Lộ trình học Sinh (chỉ admin): danh sách bài ở config/lo_trinh_sinh_hoc.json, tiến độ lưu CSDL theo từng tài khoản admin -->
+    <section class="the the-muc mt-6" aria-labelledby="td-lo-trinh" id="khoi-lo-trinh" data-khoi="lo-trinh">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 id="td-lo-trinh" tabindex="-1" class="font-semibold text-muc text-lg">Lộ trình học Sinh</h2>
+          <p id="lt-ten" class="ghi-chu-nho mt-1"></p>
+        </div>
+        <a href="/sinh-hoc" class="btn btn-sm" target="_blank" rel="noopener">Mở Phòng Lab 3D ↗</a>
+      </div>
+      <div class="lt-tong mt-4">
+        <div class="flex items-baseline justify-between gap-3">
+          <b id="lt-dem" class="text-muc">–</b>
+          <span id="lt-phan-tram" class="lt-phan-tram">0%</span>
+        </div>
+        <div id="lt-thanh-tong" class="lt-thanh" role="progressbar" aria-label="Tiến độ lộ trình" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div>
+      </div>
+      <div id="lt-ds" class="mt-5 space-y-4"><p class="ghi-chu-nho">Đang tải…</p></div>
+    </section>
+  </main>
+
+  <footer class="chan-trang-web">
+    <div class="khung py-6 flex flex-wrap justify-between gap-2">
+      <span><span class="logo-chu text-base">CHEMISTRY</span> — trang quản trị (chỉ admin). Không hiển thị mật khẩu, mã xác thực hay key.</span>
+      <span class="font-mono">admin_cli.py · /admin</span>
+      <span class="ghi-chu-nho w-full" data-nguon-ip hidden></span>
+    </div>
+  </footer>
+
+  <script src="/static/tai-khoan.js"></script>
+  <script src="/static/hoat-dong.js"></script>
+  <script src="/static/chuyen-canh.js"></script>
+  <script src="/static/admin.js"></script>
+</body>
+</html>

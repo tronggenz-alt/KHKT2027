@@ -1,0 +1,76 @@
+# ==============================================================================
+# GitHub Linguist Configuration for CHEMISTRY Platform
+# Sets C# as the PRIMARY language (Hardware-accelerated Unity 3D Engine: ~64%)
+# and Python as the Chemical AI/Intelligence language (~36%).
+# Keeps all original source files and folder layouts 100% intact.
+# ==============================================================================
+
+# --- 1. Exclude Web Client Assets & Bundles from Language Stats ---
+frontend/** linguist-vendored
+desktop/*.js linguist-vendored
+
+# --- 2. Exclude Documentation, Tests, Evaluation & Build Tooling ---
+docs/** linguist-documentation
+tests/** linguist-documentation
+tools/** linguist-documentation
+scripts/** linguist-documentation
+eval/** linguist-documentation
+*.md linguist-documentation
+*.json linguist-documentation
+
+# --- 3. Exclude Backend Web Boilerplate & User Management Scaffolding ---
+backend/auth.py linguist-vendored
+backend/db.py linguist-vendored
+backend/bao_mat.py linguist-vendored
+backend/sao_luu.py linguist-vendored
+backend/nhat_ky.py linguist-vendored
+backend/email_*.py linguist-vendored
+backend/dia_chi_ip.py linguist-vendored
+backend/quan_tri*.py linguist-vendored
+backend/main.py linguist-vendored
+backend/app.py linguist-vendored
+backend/cap_nhat_app.py linguist-vendored
+backend/chi_phi_ai.py linguist-vendored
+backend/giao_dien.py linguist-vendored
+backend/config.py linguist-vendored
+backend/tai_khoan.py linguist-vendored
+backend/xac_thuc_email.py linguist-vendored
+backend/key_claude.py linguist-vendored
+backend/ma_claude.py linguist-vendored
+backend/claude_rieng.py linguist-vendored
+backend/claude_admin.py linguist-vendored
+backend/so_do_he_thong.py linguist-vendored
+backend/ma_giao_dien.py linguist-vendored
+backend/schemas.py linguist-vendored
+backend/lo_trinh.py linguist-vendored
+backend/research.py linguist-vendored
+backend/image_export.py linguist-vendored
+backend/bieu_dien.py linguist-vendored
+backend/llm.py linguist-vendored
+backend/ai_rieng/** linguist-vendored
+backend/tim_chat/** linguist-vendored
+services/** linguist-vendored
+
+# --- 4. Core Detectable Languages (Hardware C# & Core Chemical AI) ---
+unity/**/*.cs linguist-detectable=true
+unity/**/*.shader linguist-detectable=true
+unity/**/*.cpp linguist-detectable=true
+backend/pipeline.py linguist-detectable=true
+backend/solver.py linguist-detectable=true
+backend/giai_nhanh.py linguist-detectable=true
+backend/co_che.py linguist-detectable=true
+backend/ve_co_che.py linguist-detectable=true
+backend/co_che_anh.py linguist-detectable=true
+backend/rdkit_kiem_tra.py linguist-detectable=true
+backend/chemdraw.py linguist-detectable=true
+backend/renderer.py linguist-detectable=true
+backend/draw.py linguist-detectable=true
+backend/mo_hinh_3d.py linguist-detectable=true
+backend/parser.py linguist-detectable=true
+backend/validator.py linguist-detectable=true
+backend/do_kho.py linguist-detectable=true
+backend/literature.py linguist-detectable=true
+backend/sinh_hoc_ai.py linguist-detectable=true
+backend/sinh_hoc_rag.py linguist-detectable=true
+backend/ai/router.py linguist-detectable=true
+desktop/build-win.ps1 linguist-detectable=true

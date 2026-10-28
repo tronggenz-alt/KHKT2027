@@ -1,0 +1,76 @@
+{
+  "phien_ban": 1,
+  "ten_muc": "Hoá lý",
+  "mo_ta_muc": "Mô phỏng tương tác các quy luật nhiệt động học, khí, cân bằng và tốc độ phản ứng.",
+  "mo_phong": [
+    {
+      "id": "cong-thuc",
+      "loai": "thu-vien",
+      "ten": "Công thức Hoá lý",
+      "phu_de": "Công thức · chứng minh từng bước",
+      "mo_ta": "Thư viện hơn 30 công thức hoá lý trọng tâm với lời giải thích và chứng minh từng bước.",
+      "duong_dan": "/hoa-hoc/hoa-ly/cong-thuc",
+      "bieu_tuong": "∑",
+      "nhan": [
+        "Thư viện",
+        "Công thức",
+        "Chứng minh"
+      ],
+      "trang_thai": "co"
+    },
+    {
+      "id": "dong-co-nhiet",
+      "ten": "Động cơ nhiệt 4 kỳ",
+      "ten_tam": true,
+      "phu_de": "Chu trình Otto · kéo chuột điều khiển",
+      "mo_ta": "Mô phỏng 2D động cơ nhiệt 4 kỳ: chu trình Otto và Diesel, đồ thị p–V và T–s, công và nhiệt, nhiên liệu, định luật I.",
+      "duong_dan": "/hoa-hoc/hoa-ly/dong-co-nhiet",
+      "bieu_tuong": "⚙️",
+      "nhan": [
+        "Nhiệt động học",
+        "Định luật I",
+        "Mở rộng 10–12 · HSG"
+      ],
+      "trang_thai": "co"
+    },
+    {
+      "id": "khi-ly-tuong",
+      "ten": "Khí lý tưởng pV = nRT",
+      "phu_de": "Phương trình trạng thái khí lý tưởng",
+      "mo_ta": "Khám phá mối liên hệ giữa áp suất, thể tích, nhiệt độ và số mol chất khí.",
+      "duong_dan": "/hoa-hoc/hoa-ly/khi-ly-tuong",
+      "bieu_tuong": "🎈",
+      "nhan": [
+        "Khí lý tưởng",
+        "Lớp 10 · 12"
+      ],
+      "trang_thai": "co"
+    },
+    {
+      "id": "can-bang-le-chatelier",
+      "ten": "Cân bằng hoá học & Le Chatelier",
+      "phu_de": "Nguyên lý chuyển dịch cân bằng",
+      "mo_ta": "Ảnh hưởng của nhiệt độ, nồng độ và áp suất lên hằng số cân bằng Kc.",
+      "duong_dan": "/hoa-hoc/hoa-ly/can-bang-le-chatelier",
+      "bieu_tuong": "⚖️",
+      "nhan": [
+        "Cân bằng",
+        "Lớp 11"
+      ],
+      "trang_thai": "co"
+    },
+    {
+      "id": "toc-do-phan-ung",
+      "ten": "Tốc độ phản ứng & năng lượng hoạt hoá",
+      "phu_de": "Phương trình Arrhenius & va chạm hiệu quả",
+      "mo_ta": "Năng lượng hoạt hoá Ea, chất xúc tác và phân bố Maxwell–Boltzmann.",
+      "duong_dan": "/hoa-hoc/hoa-ly/toc-do-phan-ung",
+      "bieu_tuong": "⚡",
+      "nhan": [
+        "Động học",
+        "Lớp 10"
+      ],
+      "trang_thai": "co"
+    }
+  ]
+}

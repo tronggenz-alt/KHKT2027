@@ -1,0 +1,348 @@
+{
+  "id": "an-toan",
+  "ten": "An toàn phòng thí nghiệm",
+  "lop": 10,
+  "bieu_tuong": "🥽",
+  "huy_hieu": "Nhập môn",
+  "mo_ta": "Bài nhập môn: tìm 8 lỗi mất an toàn, học 9 biểu tượng cảnh báo GHS và cách xử lí sự cố.",
+  "muc_tieu": [
+    "Nhận ra các thao tác mất an toàn thường gặp trong phòng thí nghiệm.",
+    "Hiểu ý nghĩa 9 biểu tượng cảnh báo nguy hiểm theo hệ thống GHS.",
+    "Biết cách xử lí ban đầu khi bị bỏng acid/base, làm đổ vỡ thuỷ ngân, cháy cồn."
+  ],
+  "dung_cu": [
+    "Kính bảo hộ",
+    "Áo choàng thí nghiệm",
+    "Găng tay",
+    "Đèn cồn",
+    "Ống nghiệm, kẹp ống nghiệm",
+    "Cốc thuỷ tinh",
+    "Tủ hút",
+    "Bình chữa cháy"
+  ],
+  "hoa_chat": [
+    {
+      "ten": "Sulfuric acid đặc (H₂SO₄ 98%)",
+      "nguy_hiem": [
+        "an_mon"
+      ]
+    },
+    {
+      "ten": "Ethanol (cồn)",
+      "nguy_hiem": [
+        "de_chay",
+        "kich_ung"
+      ]
+    },
+    {
+      "ten": "Sodium hydroxide (NaOH)",
+      "nguy_hiem": [
+        "an_mon"
+      ]
+    },
+    {
+      "ten": "Thuỷ ngân (Hg) trong nhiệt kế",
+      "nguy_hiem": [
+        "doc_cap",
+        "suc_khoe",
+        "moi_truong"
+      ]
+    }
+  ],
+  "buoc": [
+    {
+      "id": "tim_loi",
+      "tieu_de": "Tìm 8 lỗi mất an toàn trên bàn thí nghiệm",
+      "huong_dan": "Bấm vào các vị trí được đánh số trên bàn. Có cả việc làm ĐÚNG để đánh lừa – hãy suy nghĩ trước khi bấm.",
+      "goi_y": "Để ý: kính bảo hộ, nhãn lọ, cách pha acid, cách ngửi, cách đun, đồ ăn, cách lấy hoá chất, đèn cồn.",
+      "dieu_kien": "tim_du_loi"
+    },
+    {
+      "id": "ghs",
+      "tieu_de": "Ghép 9 biểu tượng cảnh báo GHS với ý nghĩa",
+      "huong_dan": "Chọn ý nghĩa cho từng biểu tượng rồi bấm Kiểm tra.",
+      "goi_y": "Đầu lâu = độc cấp tính; bàn tay bị ăn mòn = ăn mòn; ngọn lửa trên vòng tròn = chất oxi hoá.",
+      "dieu_kien": "ghep_dung_ghs"
+    },
+    {
+      "id": "su_co",
+      "tieu_de": "Đọc cách xử lí 3 sự cố",
+      "huong_dan": "Mở lần lượt: bỏng acid/base, vỡ nhiệt kế thuỷ ngân, cháy cồn.",
+      "goi_y": "Thuỷ ngân: rắc bột lưu huỳnh. Cháy cồn: phủ khăn ướt hoặc cát.",
+      "dieu_kien": "doc_du_su_co"
+    },
+    {
+      "id": "cau_hoi",
+      "tieu_de": "Làm câu hỏi cuối bài",
+      "huong_dan": "Trả lời câu hỏi theo 3 dạng của đề thi tốt nghiệp THPT.",
+      "goi_y": "",
+      "dieu_kien": "lam_cau_hoi"
+    }
+  ],
+  "an_toan": [
+    "Luôn đeo kính bảo hộ, mặc áo choàng; buộc gọn tóc dài.",
+    "Đọc kĩ nhãn và biểu tượng cảnh báo trước khi dùng hoá chất.",
+    "Không ăn uống, không nếm hoá chất, không ngửi trực tiếp.",
+    "Pha loãng acid đặc: rót TỪ TỪ acid vào nước, khuấy đều.",
+    "Thí nghiệm sinh khí độc làm trong tủ hút; báo ngay giáo viên khi có sự cố."
+  ],
+  "cau_hinh": {
+    "loi": [
+      {
+        "id": "khong_kinh",
+        "ten": "Không đeo kính bảo hộ khi làm thí nghiệm",
+        "giai_thich": "Hoá chất bắn vào mắt có thể gây bỏng, thậm chí mù. Luôn đeo kính bảo hộ khi làm thí nghiệm.",
+        "vi_tri": "Kính bảo hộ đặt trên bàn"
+      },
+      {
+        "id": "lo_khong_nhan",
+        "ten": "Lọ hoá chất không có nhãn",
+        "giai_thich": "Không biết lọ chứa chất gì dễ dùng nhầm, gây phản ứng nguy hiểm. Mọi lọ phải có nhãn ghi tên, nồng độ, cảnh báo.",
+        "vi_tri": "Các lọ hoá chất trên kệ"
+      },
+      {
+        "id": "do_nuoc_vao_acid",
+        "ten": "Đổ nước vào H₂SO₄ đặc",
+        "giai_thich": "Pha loãng H₂SO₄ đặc toả rất nhiều nhiệt; đổ nước vào acid làm nước sôi tức thì, bắn acid ra ngoài. Phải rót TỪ TỪ acid vào nước và khuấy đều.",
+        "vi_tri": "Cốc H₂SO₄ đặc và bình nước"
+      },
+      {
+        "id": "ngui_truc_tiep",
+        "ten": "Ngửi trực tiếp miệng ống nghiệm",
+        "giai_thich": "Khí độc có thể gây ngộ độc, bỏng đường hô hấp. Muốn ngửi, phẩy nhẹ tay trên miệng ống cho hơi bay về phía mũi.",
+        "vi_tri": "Bạn học sinh cạnh giá ống nghiệm"
+      },
+      {
+        "id": "huong_mieng_ong",
+        "ten": "Hướng miệng ống nghiệm đang đun về phía người",
+        "giai_thich": "Chất lỏng có thể sôi bắn ra. Miệng ống nghiệm phải hướng về phía không có người; kẹp ống ở khoảng 1/3 tính từ miệng ống.",
+        "vi_tri": "Ống nghiệm đang đun trên đèn cồn"
+      },
+      {
+        "id": "an_uong",
+        "ten": "Ăn uống trong phòng thí nghiệm",
+        "giai_thich": "Thức ăn, đồ uống có thể nhiễm hoá chất độc. Tuyệt đối không ăn uống trong phòng thí nghiệm.",
+        "vi_tri": "Cốc nước và bánh mì"
+      },
+      {
+        "id": "cam_tay",
+        "ten": "Dùng tay cầm hoá chất",
+        "giai_thich": "Hoá chất có thể ăn mòn hoặc gây độc qua da. Lấy hoá chất bằng thìa, kẹp và đeo găng tay.",
+        "vi_tri": "Đĩa bột hoá chất"
+      },
+      {
+        "id": "den_khong_nguoi",
+        "ten": "Đèn cồn đang cháy không có người trông",
+        "giai_thich": "Dễ gây cháy lan. Khi không dùng, tắt đèn cồn bằng cách đậy nắp (không thổi).",
+        "vi_tri": "Đèn cồn cuối bàn"
+      }
+    ],
+    "bay": [
+      {
+        "id": "tu_hut",
+        "ten": "Thí nghiệm sinh khí độc làm trong tủ hút",
+        "giai_thich": "Việc làm ĐÚNG: tủ hút hút khí độc ra ngoài.",
+        "vi_tri": "Tủ hút"
+      },
+      {
+        "id": "binh_cuu_hoa",
+        "ten": "Bình chữa cháy đặt gần cửa",
+        "giai_thich": "Việc làm ĐÚNG: bình chữa cháy phải ở nơi dễ lấy.",
+        "vi_tri": "Bình chữa cháy"
+      },
+      {
+        "id": "thung_thai",
+        "ten": "Thùng thu gom chất thải hoá học riêng",
+        "giai_thich": "Việc làm ĐÚNG: không đổ hoá chất xuống cống.",
+        "vi_tri": "Thùng chất thải hoá học"
+      },
+      {
+        "id": "gang_tay",
+        "ten": "Găng tay chuẩn bị sẵn",
+        "giai_thich": "Việc làm ĐÚNG: đeo găng tay khi làm việc với hoá chất ăn mòn.",
+        "vi_tri": "Hộp găng tay"
+      }
+    ],
+    "ghs": [
+      {
+        "id": "GHS01",
+        "ma": "no",
+        "ten": "Chất nổ",
+        "y_nghia": "Chất nổ – có thể nổ khi va đập, ma sát, đun nóng",
+        "vi_du": "TNT, pháo hoa"
+      },
+      {
+        "id": "GHS02",
+        "ma": "de_chay",
+        "ten": "Dễ cháy",
+        "y_nghia": "Chất dễ cháy",
+        "vi_du": "Ethanol, xăng, acetone"
+      },
+      {
+        "id": "GHS03",
+        "ma": "oxi_hoa",
+        "ten": "Chất oxi hoá",
+        "y_nghia": "Chất oxi hoá – gây cháy hoặc làm cháy mạnh hơn",
+        "vi_du": "KMnO₄, KClO₃, KNO₃"
+      },
+      {
+        "id": "GHS04",
+        "ma": "khi_nen",
+        "ten": "Khí nén",
+        "y_nghia": "Khí nén, khí hoá lỏng dưới áp suất – có thể nổ khi bị nung",
+        "vi_du": "Bình O₂, bình CO₂"
+      },
+      {
+        "id": "GHS05",
+        "ma": "an_mon",
+        "ten": "Ăn mòn",
+        "y_nghia": "Chất ăn mòn – gây bỏng da, tổn thương mắt, ăn mòn kim loại",
+        "vi_du": "H₂SO₄ đặc, NaOH"
+      },
+      {
+        "id": "GHS06",
+        "ma": "doc_cap",
+        "ten": "Độc cấp tính",
+        "y_nghia": "Chất độc cấp tính – có thể gây chết người",
+        "vi_du": "Thuỷ ngân (Hg), KCN"
+      },
+      {
+        "id": "GHS07",
+        "ma": "kich_ung",
+        "ten": "Có hại, kích ứng",
+        "y_nghia": "Có hại, gây kích ứng da, mắt, đường hô hấp (nhẹ hơn GHS06)",
+        "vi_du": "CuSO₄ (có hại khi nuốt), ethanol"
+      },
+      {
+        "id": "GHS08",
+        "ma": "suc_khoe",
+        "ten": "Nguy hại sức khoẻ",
+        "y_nghia": "Nguy hại sức khoẻ lâu dài – gây ung thư, đột biến, hại cơ quan",
+        "vi_du": "Benzene, formaldehyde"
+      },
+      {
+        "id": "GHS09",
+        "ma": "moi_truong",
+        "ten": "Nguy hại môi trường",
+        "y_nghia": "Nguy hại cho môi trường, đặc biệt sinh vật dưới nước",
+        "vi_du": "CuSO₄, thuỷ ngân"
+      }
+    ],
+    "su_co": [
+      {
+        "id": "bong_acid_base",
+        "ten": "Bỏng acid hoặc base",
+        "buoc": [
+          "Lập tức rửa vùng bị dính hoá chất dưới vòi nước sạch chảy liên tục ít nhất 15 phút.",
+          "Cởi bỏ quần áo, đồ trang sức dính hoá chất (tránh để hoá chất tiếp tục tiếp xúc da).",
+          "Không tự ý bôi kem, dầu hay hoá chất trung hoà lên vết bỏng; làm theo hướng dẫn của giáo viên, nhân viên y tế.",
+          "Hoá chất bắn vào mắt: rửa mắt bằng nước sạch liên tục, rồi đưa đến cơ sở y tế."
+        ]
+      },
+      {
+        "id": "vo_thuy_ngan",
+        "ten": "Đổ vỡ nhiệt kế thuỷ ngân",
+        "buoc": [
+          "Không dùng tay nhặt, không dùng chổi quét hay máy hút bụi (làm thuỷ ngân phân tán, bay hơi nhiều hơn).",
+          "Cho mọi người ra khỏi khu vực, mở cửa cho thoáng khí.",
+          "Rắc bột lưu huỳnh lên chỗ thuỷ ngân rơi: Hg + S → HgS (khó bay hơi), rồi gom vào lọ kín.",
+          "Báo giáo viên để xử lí chất thải đúng quy định."
+        ]
+      },
+      {
+        "id": "chay_con",
+        "ten": "Cháy cồn tràn ra bàn",
+        "buoc": [
+          "Dùng khăn ướt hoặc cát phủ kín ngọn lửa để ngăn tiếp xúc với không khí.",
+          "Tắt các đèn cồn khác, đưa hoá chất dễ cháy ra xa.",
+          "Đám cháy lớn: dùng bình chữa cháy và báo ngay giáo viên.",
+          "Phòng tránh: không thổi tắt đèn cồn, không châm đèn cồn từ đèn cồn khác."
+        ]
+      }
+    ]
+  },
+  "cau_hoi": {
+    "bon_lua_chon": [
+      {
+        "cau": "Khi pha loãng sulfuric acid đặc, cách làm đúng là",
+        "lua_chon": [
+          "rót từ từ nước vào acid",
+          "rót từ từ acid vào nước và khuấy đều",
+          "rót nhanh acid vào nước",
+          "đổ đồng thời acid và nước vào cốc"
+        ],
+        "dap_an": "B",
+        "giai_thich": "H₂SO₄ đặc tan trong nước toả rất nhiều nhiệt; rót từ từ acid vào nước (nhiều) để nhiệt được hấp thụ, không làm nước sôi bắn."
+      },
+      {
+        "cau": "Biểu tượng cảnh báo hình đầu lâu xương chéo (GHS06) cho biết hoá chất",
+        "lua_chon": [
+          "dễ cháy",
+          "ăn mòn",
+          "độc cấp tính",
+          "là chất oxi hoá"
+        ],
+        "dap_an": "C",
+        "giai_thich": "GHS06 cảnh báo chất độc cấp tính, có thể gây chết người khi nuốt, hít hoặc tiếp xúc."
+      },
+      {
+        "cau": "Khi làm vỡ nhiệt kế thuỷ ngân, chất nên rắc lên chỗ thuỷ ngân rơi là",
+        "lua_chon": [
+          "bột lưu huỳnh",
+          "nước",
+          "muối ăn",
+          "bột than"
+        ],
+        "dap_an": "A",
+        "giai_thich": "Hg + S → HgS: chuyển thuỷ ngân thành chất rắn khó bay hơi, dễ thu gom."
+      },
+      {
+        "cau": "Thao tác nào sau đây là ĐÚNG khi đun ống nghiệm chứa chất lỏng trên đèn cồn?",
+        "lua_chon": [
+          "Hướng miệng ống nghiệm về phía bạn bên cạnh",
+          "Cho chất lỏng đầy đến miệng ống",
+          "Đun tập trung ở đáy ống ngay từ đầu",
+          "Kẹp ống nghiệm ở khoảng 1/3 ống tính từ miệng"
+        ],
+        "dap_an": "D",
+        "giai_thich": "Kẹp ở 1/3 từ miệng ống, chất lỏng không quá 1/3 ống, hơ nóng đều rồi mới đun tập trung, miệng ống hướng ra chỗ không có người."
+      }
+    ],
+    "dung_sai": [
+      {
+        "cau": "Về an toàn trong phòng thí nghiệm:",
+        "y": [
+          {
+            "noi_dung": "Có thể ngửi trực tiếp miệng lọ để nhận biết hoá chất.",
+            "dung": false,
+            "giai_thich": "Phải phẩy nhẹ tay cho hơi bay về phía mũi."
+          },
+          {
+            "noi_dung": "Tắt đèn cồn bằng cách đậy nắp, không thổi.",
+            "dung": true,
+            "giai_thich": "Thổi có thể làm lửa bùng vào bình cồn."
+          },
+          {
+            "noi_dung": "Biểu tượng GHS02 (ngọn lửa) cảnh báo chất dễ cháy.",
+            "dung": true,
+            "giai_thich": "GHS02 = chất dễ cháy."
+          },
+          {
+            "noi_dung": "Có thể ăn nhẹ trong phòng thí nghiệm nếu đã rửa tay.",
+            "dung": false,
+            "giai_thich": "Tuyệt đối không ăn uống trong phòng thí nghiệm."
+          }
+        ]
+      }
+    ],
+    "tra_loi_ngan": [
+      {
+        "cau": "Hệ thống GHS có tổng cộng bao nhiêu biểu tượng cảnh báo nguy hiểm?",
+        "dap_so": "9",
+        "don_vi": "",
+        "sai_so": 0,
+        "giai_thich": "GHS01 → GHS09."
+      }
+    ]
+  }
+}

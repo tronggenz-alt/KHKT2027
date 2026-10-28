@@ -1,0 +1,578 @@
+{
+  "tieu_chuan": "Sketchfab 3D Models Integration - PROMPT_DUNG_3D_TU_SKETCHFAB.md",
+  "ngay_tao": "2026-10-24",
+  "chinh_sach_ban_quyen": "Chi chap nhan CC Attribution (CC BY 4.0) va CC0 Public Domain. Cam giay phep phi thuong mai NC.",
+  "so_luong_mo_hinh_hop_le": 30,
+  "danh_sach": [
+    {
+      "uid": "1ac2a62c52a848bbaf746146dc7253f8",
+      "ten": "lab bench",
+      "tac_gia": "Konstantin_Keller",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/lab-bench-1ac2a62c52a848bbaf746146dc7253f8",
+      "vai_tro": "ban_chinh",
+      "nhom": "Bàn & phòng",
+      "dung_cho": "Bàn chính 5 trạm (thay bàn procedural)",
+      "so_mat_goc": 54480,
+      "ngan_sach_tam_giac": 20000,
+      "kich_thuoc_chuan_m": [
+        2.4,
+        0.9,
+        1.2
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "fc5951d8af674da4bf55aef0693ff1d0",
+      "ten": "Chemistry Lab Table",
+      "tac_gia": "Jawahar Yokesh",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/chemistry-lab-table-fc5951d8af674da4bf55aef0693ff1d0",
+      "vai_tro": "ban_chau",
+      "nhom": "Bàn & phòng",
+      "dung_cho": "Bàn hoá có chậu – P. Định tính, P. Chuẩn bị",
+      "so_mat_goc": 20816,
+      "ngan_sach_tam_giac": 20000,
+      "kich_thuoc_chuan_m": [
+        1.8,
+        0.9,
+        0.9
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "19159dbfd8824061ab483edaa8951b1e",
+      "ten": "Lab Counter W/ Sink (UV Wrapped, No textures)",
+      "tac_gia": "Kimbell Whatley",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/lab-counter-w-sink-uv-wrapped-no-textures-19159dbfd8824061ab483edaa8951b1e",
+      "vai_tro": "ban_tuong",
+      "nhom": "Bàn & phòng",
+      "dung_cho": "Bàn tường có chậu – mọi phòng (gắn texture CC0)",
+      "so_mat_goc": 880,
+      "ngan_sach_tam_giac": 20000,
+      "kich_thuoc_chuan_m": [
+        2.0,
+        0.9,
+        0.8
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "2bcc5a137887424db4e834ba601c8e4b",
+      "ten": "Low Poly Laboratory Assets",
+      "tac_gia": "Paolo Mercogliano",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/low-poly-laboratory-assets-2bcc5a137887424db4e834ba601c8e4b",
+      "vai_tro": "bo_do_lab",
+      "nhom": "Bàn & phòng",
+      "dung_cho": "Ghế, kệ, đồ trang trí rải các phòng",
+      "so_mat_goc": 32468,
+      "ngan_sach_tam_giac": 20000,
+      "kich_thuoc_chuan_m": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "6d6100a7b18f4ab798ff484130b31fe1",
+      "ten": "Lab chair",
+      "tac_gia": "Just8",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/lab-chair-6d6100a7b18f4ab798ff484130b31fe1",
+      "vai_tro": "ghe",
+      "nhom": "Bàn & phòng",
+      "dung_cho": "Ghế lab",
+      "so_mat_goc": 5698,
+      "ngan_sach_tam_giac": 10000,
+      "kich_thuoc_chuan_m": [
+        0.45,
+        0.65,
+        0.45
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "8049918476e1432d8e773ae5a24a3026",
+      "ten": "Laboratory stool",
+      "tac_gia": "SirWyrm",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/laboratory-stool-8049918476e1432d8e773ae5a24a3026",
+      "vai_tro": "ghe",
+      "nhom": "Bàn & phòng",
+      "dung_cho": "Ghế đẩu bên bàn",
+      "so_mat_goc": 5410,
+      "ngan_sach_tam_giac": 10000,
+      "kich_thuoc_chuan_m": [
+        0.45,
+        0.65,
+        0.45
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "801cc7a78e374a45b0d59dc039b9d93e",
+      "ten": "Fume Hood",
+      "tac_gia": "cashblack77",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/fume-hood-801cc7a78e374a45b0d59dc039b9d93e",
+      "vai_tro": "tu_hut",
+      "nhom": "Tủ hút khí độc",
+      "dung_cho": "Tủ hút khí độc – P. Định tính",
+      "so_mat_goc": 1280,
+      "ngan_sach_tam_giac": 30000,
+      "kich_thuoc_chuan_m": [
+        1.5,
+        2.3,
+        0.9
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "b8594f7dc7e8442dbaaae7a11da4a962",
+      "ten": "Chemistry Glassware",
+      "tac_gia": "maxdragonn",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/chemistry-glassware-b8594f7dc7e8442dbaaae7a11da4a962",
+      "vai_tro": "thuy_tinh",
+      "nhom": "Dụng cụ thuỷ tinh",
+      "dung_cho": "Cốc, bình, ống – bộ chính",
+      "so_mat_goc": 4004,
+      "ngan_sach_tam_giac": 5000,
+      "kich_thuoc_chuan_m": [
+        0.1,
+        0.15,
+        0.1
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "f2991abcaaa44616ad5f72d29a3d47b3",
+      "ten": "FREE Conical Flask | Laboratory | Low poly",
+      "tac_gia": "Naked Singularity Studio",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/free-conical-flask-laboratory-low-poly-f2991abcaaa44616ad5f72d29a3d47b3",
+      "vai_tro": "binh_tam_giac",
+      "nhom": "Dụng cụ thuỷ tinh",
+      "dung_cho": "Bình tam giác chuẩn độ",
+      "so_mat_goc": 2742,
+      "ngan_sach_tam_giac": 5000,
+      "kich_thuoc_chuan_m": [
+        0.085,
+        0.145,
+        0.085
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "18910c5df5134de784ed6811407e2a05",
+      "ten": "Lab Glassware",
+      "tac_gia": "thelegokid4455",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/lab-glassware-18910c5df5134de784ed6811407e2a05",
+      "vai_tro": "thuy_tinh",
+      "nhom": "Dụng cụ thuỷ tinh",
+      "dung_cho": "Dụng cụ thuỷ tinh phụ",
+      "so_mat_goc": 2278,
+      "ngan_sach_tam_giac": 5000,
+      "kich_thuoc_chuan_m": [
+        0.1,
+        0.15,
+        0.1
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "6fab3ffddbe44cb4bf2e6bbccd49d32f",
+      "ten": "Erlenmeyer Flask Collection",
+      "tac_gia": "3dLabWare",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/erlenmeyer-flask-collection-6fab3ffddbe44cb4bf2e6bbccd49d32f",
+      "vai_tro": "binh_tam_giac",
+      "nhom": "Dụng cụ thuỷ tinh",
+      "dung_cho": "Bình tam giác trang trí (nặng, giảm lưới)",
+      "so_mat_goc": 99840,
+      "ngan_sach_tam_giac": 5000,
+      "kich_thuoc_chuan_m": [
+        0.085,
+        0.145,
+        0.085
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "4bb5f945638a46ba9ea5684d0f38ebad",
+      "ten": "Burette",
+      "tac_gia": "3dLabWare",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/burette-4bb5f945638a46ba9ea5684d0f38ebad",
+      "vai_tro": "burette",
+      "nhom": "Dụng cụ thuỷ tinh",
+      "dung_cho": "Burette trạm chuẩn độ",
+      "so_mat_goc": 7894,
+      "ngan_sach_tam_giac": 5000,
+      "kich_thuoc_chuan_m": [
+        0.04,
+        0.75,
+        0.04
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "9d204d9be6744ea1a491bd152c61228f",
+      "ten": "Burette stand",
+      "tac_gia": "VeeRuby Technologies Pvt Ltd",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/burette-stand-9d204d9be6744ea1a491bd152c61228f",
+      "vai_tro": "gia_burette",
+      "nhom": "Dụng cụ thuỷ tinh",
+      "dung_cho": "Giá đỡ + kẹp burette",
+      "so_mat_goc": 17548,
+      "ngan_sach_tam_giac": 5000,
+      "kich_thuoc_chuan_m": [
+        0.25,
+        0.85,
+        0.2
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "63f6d4df98464f07ac896e9efa9b8d85",
+      "ten": "Test Tubes",
+      "tac_gia": "Microsoft",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/test-tubes-63f6d4df98464f07ac896e9efa9b8d85",
+      "vai_tro": "ong_nghiem",
+      "nhom": "Dụng cụ thuỷ tinh",
+      "dung_cho": "Ống nghiệm nhận biết ion",
+      "so_mat_goc": 7678,
+      "ngan_sach_tam_giac": 5000,
+      "kich_thuoc_chuan_m": [
+        0.02,
+        0.16,
+        0.02
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "f09bcbfe529e4314a1acbf7b7d1e867f",
+      "ten": "Test Tube Rack",
+      "tac_gia": "Harry Bond",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/test-tube-rack-f09bcbfe529e4314a1acbf7b7d1e867f",
+      "vai_tro": "gia_ong_nghiem",
+      "nhom": "Dụng cụ thuỷ tinh",
+      "dung_cho": "Giá ống nghiệm",
+      "so_mat_goc": 1358,
+      "ngan_sach_tam_giac": 5000,
+      "kich_thuoc_chuan_m": [
+        0.26,
+        0.18,
+        0.08
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "90d4bead93af4c69897d39688164d567",
+      "ten": "Lab/medicine bottle",
+      "tac_gia": "Sousinho",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/labmedicine-bottle-90d4bead93af4c69897d39688164d567",
+      "vai_tro": "lo_hoa_chat",
+      "nhom": "Dụng cụ thuỷ tinh",
+      "dung_cho": "Lọ thuốc thử",
+      "so_mat_goc": 1220,
+      "ngan_sach_tam_giac": 5000,
+      "kich_thuoc_chuan_m": [
+        0.06,
+        0.12,
+        0.06
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "286cf37a56ac46e499f2e743fc1875f5",
+      "ten": "Assorted Bottle - Chemical Lab",
+      "tac_gia": "kane_sk06",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/assorted-bottle-chemical-lab-286cf37a56ac46e499f2e743fc1875f5",
+      "vai_tro": "lo_hoa_chat",
+      "nhom": "Dụng cụ thuỷ tinh",
+      "dung_cho": "Chai hoá chất trên kệ (nặng, giảm lưới)",
+      "so_mat_goc": 286374,
+      "ngan_sach_tam_giac": 5000,
+      "kich_thuoc_chuan_m": [
+        0.06,
+        0.12,
+        0.06
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "fb2a28f1476f455390fa252c59ce5c76",
+      "ten": "Lab Kit",
+      "tac_gia": "A9908244",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/lab-kit-fb2a28f1476f455390fa252c59ce5c76",
+      "vai_tro": "bo_dung_cu",
+      "nhom": "Dụng cụ thuỷ tinh",
+      "dung_cho": "Bộ dụng cụ – lấy chi tiết lẻ",
+      "so_mat_goc": 129624,
+      "ngan_sach_tam_giac": 15000,
+      "kich_thuoc_chuan_m": [
+        0.5,
+        0.3,
+        0.5
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "5185e41b2beb48fa8f15ca3707f43e10",
+      "ten": "Bunsen Burner",
+      "tac_gia": "Dreamsoft Innovations Private Limited",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/bunsen-burner-5185e41b2beb48fa8f15ca3707f43e10",
+      "vai_tro": "den_bunsen",
+      "nhom": "Lửa & đèn",
+      "dung_cho": "Đèn Bunsen",
+      "so_mat_goc": 2758,
+      "ngan_sach_tam_giac": 5000,
+      "kich_thuoc_chuan_m": [
+        0.1,
+        0.15,
+        0.1
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "e87b4e7dfb3d4e1a8118a79baa0ac39d",
+      "ten": "FLAME TEST",
+      "tac_gia": "UJJWAL CHAUHAN",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/flame-test-e87b4e7dfb3d4e1a8118a79baa0ac39d",
+      "vai_tro": "thu_lua",
+      "nhom": "Lửa & đèn",
+      "dung_cho": "Tham khảo/ dùng cho thử màu ngọn lửa",
+      "so_mat_goc": 80460,
+      "ngan_sach_tam_giac": 5000,
+      "kich_thuoc_chuan_m": [
+        0.15,
+        0.15,
+        0.15
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "ba6315fe80d34b5ba7ff912f5ec71b19",
+      "ten": "Fire Animation",
+      "tac_gia": "3DHaupt",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/fire-animation-ba6315fe80d34b5ba7ff912f5ec71b19",
+      "vai_tro": "ngon_lua",
+      "nhom": "Lửa & đèn",
+      "dung_cho": "Ngọn lửa hoạt ảnh (hoặc tự làm VFX theo mẫu)",
+      "so_mat_goc": 3200,
+      "ngan_sach_tam_giac": 5000,
+      "kich_thuoc_chuan_m": [
+        0.04,
+        0.1,
+        0.04
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "d9d5ed5de83b4d899ab93f55bdc3d0bc",
+      "ten": "Candle light",
+      "tac_gia": "al0sral0",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/candle-light-d9d5ed5de83b4d899ab93f55bdc3d0bc",
+      "vai_tro": "ngon_lua",
+      "nhom": "Lửa & đèn",
+      "dung_cho": "Ngọn lửa đèn cồn nhỏ",
+      "so_mat_goc": 972,
+      "ngan_sach_tam_giac": 5000,
+      "kich_thuoc_chuan_m": [
+        0.04,
+        0.1,
+        0.04
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "61a536cf4e1f4995a8128863f8994e3e",
+      "ten": "Emergency Shower with Eye Wash",
+      "tac_gia": "cesar.seidel",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/emergency-shower-with-eye-wash-61a536cf4e1f4995a8128863f8994e3e",
+      "vai_tro": "an_toan",
+      "nhom": "An toàn",
+      "dung_cho": "Vòi sen + rửa mắt – Sảnh an toàn",
+      "so_mat_goc": 15226,
+      "ngan_sach_tam_giac": 20000,
+      "kich_thuoc_chuan_m": [
+        0.6,
+        2.2,
+        0.6
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "5676b179b3b744c0aaae53a3dcea2300",
+      "ten": "Fire Extinguisher",
+      "tac_gia": "Loïc",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/fire-extinguisher-5676b179b3b744c0aaae53a3dcea2300",
+      "vai_tro": "an_toan",
+      "nhom": "An toàn",
+      "dung_cho": "Bình chữa cháy",
+      "so_mat_goc": 2792,
+      "ngan_sach_tam_giac": 20000,
+      "kich_thuoc_chuan_m": [
+        0.6,
+        2.2,
+        0.6
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "355f1e119c33452ea9e2e8d306360435",
+      "ten": "Safety Goggles",
+      "tac_gia": "Microsoft",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/safety-goggles-355f1e119c33452ea9e2e8d306360435",
+      "vai_tro": "an_toan",
+      "nhom": "An toàn",
+      "dung_cho": "Kính bảo hộ (đeo lên nhân vật)",
+      "so_mat_goc": 5706,
+      "ngan_sach_tam_giac": 20000,
+      "kich_thuoc_chuan_m": [
+        0.6,
+        2.2,
+        0.6
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "79ac684e66b34554ba869bd2fc3c2653",
+      "ten": "MultiMeter - FREE",
+      "tac_gia": "Mathieu Godard",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/multimeter-free-79ac684e66b34554ba869bd2fc3c2653",
+      "vai_tro": "dien_hoa",
+      "nhom": "Điện hoá",
+      "dung_cho": "Đồng hồ vạn năng – pin Galvani",
+      "so_mat_goc": 2066,
+      "ngan_sach_tam_giac": 30000,
+      "kich_thuoc_chuan_m": [
+        0.25,
+        0.15,
+        0.2
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "dffccb9f1bc34c2e81e004729231f224",
+      "ten": "DC Regulated Power Supply Unit",
+      "tac_gia": "Eydeet",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/dc-regulated-power-supply-unit-dffccb9f1bc34c2e81e004729231f224",
+      "vai_tro": "dien_hoa",
+      "nhom": "Điện hoá",
+      "dung_cho": "Nguồn DC – điện phân (100k mặt, giảm lưới)",
+      "so_mat_goc": 100000,
+      "ngan_sach_tam_giac": 30000,
+      "kich_thuoc_chuan_m": [
+        0.25,
+        0.15,
+        0.2
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "88bd95949fc94e44b1efb260ad03db62",
+      "ten": "Electrodesin Container Final Aug82011",
+      "tac_gia": "joepapp",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/electrodesin-container-final-aug82011-88bd95949fc94e44b1efb260ad03db62",
+      "vai_tro": "dien_hoa",
+      "nhom": "Điện hoá",
+      "dung_cho": "Tham khảo điện cực",
+      "so_mat_goc": 50822,
+      "ngan_sach_tam_giac": 30000,
+      "kich_thuoc_chuan_m": [
+        0.25,
+        0.15,
+        0.2
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "e835a3b126a4463583727dbac2fedecc",
+      "ten": "Modern Scientist in a Lab Coat",
+      "tac_gia": "restore50",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/modern-scientist-in-a-lab-coat-e835a3b126a4463583727dbac2fedecc",
+      "vai_tro": "nhan_vat",
+      "nhom": "Nhân vật",
+      "dung_cho": "Giáo sư – rig bằng Mixamo",
+      "so_mat_goc": 214666,
+      "ngan_sach_tam_giac": 60000,
+      "kich_thuoc_chuan_m": [
+        0.6,
+        1.7,
+        0.4
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    },
+    {
+      "uid": "59db594edf914c62827150c307e162e4",
+      "ten": "Casual Scientist In A Lab Coat",
+      "tac_gia": "restore50",
+      "giay_phep": "CC Attribution",
+      "url": "https://sketchfab.com/3d-models/casual-scientist-in-a-lab-coat-59db594edf914c62827150c307e162e4",
+      "vai_tro": "nhan_vat",
+      "nhom": "Nhân vật",
+      "dung_cho": "Nhân vật dự phòng",
+      "so_mat_goc": 221707,
+      "ngan_sach_tam_giac": 60000,
+      "kich_thuoc_chuan_m": [
+        0.6,
+        1.7,
+        0.4
+      ],
+      "trang_thai": "san_sang_fallback_procedural",
+      "sha256": null
+    }
+  ]
+}

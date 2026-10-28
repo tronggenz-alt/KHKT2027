@@ -1,0 +1,70 @@
+{
+  "id": "nhan-biet-ion",
+  "ten": "Nhận biết ion trong dung dịch",
+  "lop": "11–12",
+  "bieu_tuong": "🔬",
+  "mo_ta": "Các ống nghiệm không nhãn: dùng thuốc thử để nhận ra từng ion, viết phương trình ion thu gọn; thử màu ngọn lửa.",
+  "muc_tieu": [
+    "Chọn thuốc thử phù hợp để nhận biết các ion Cl⁻, Br⁻, I⁻, SO₄²⁻, CO₃²⁻, Fe³⁺, Fe²⁺, Cu²⁺, Al³⁺, Mg²⁺, NH₄⁺.",
+    "Mô tả hiện tượng và viết phương trình ion thu gọn của phản ứng nhận biết.",
+    "Nhận biết Na, K, Li, Ca, Ba, Cu qua màu ngọn lửa."
+  ],
+  "dung_cu": ["Giá ống nghiệm", "Ống nghiệm", "Ống nhỏ giọt", "Đèn cồn", "Kẹp gỗ", "Dây platinum (hoặc nichrome) thử màu ngọn lửa", "Giấy quỳ tím"],
+  "hoa_chat": [
+    { "ten": "Dung dịch sodium hydroxide (NaOH)", "nguy_hiem": ["an_mon"] },
+    { "ten": "Dung dịch ammonia (NH₃)", "nguy_hiem": ["an_mon", "moi_truong"] },
+    { "ten": "Dung dịch silver nitrate (AgNO₃)", "nguy_hiem": ["an_mon", "moi_truong"] },
+    { "ten": "Dung dịch barium chloride (BaCl₂)", "nguy_hiem": ["doc_cap"] },
+    { "ten": "Dung dịch hydrochloric acid (HCl) loãng", "nguy_hiem": ["an_mon"] },
+    { "ten": "Dung dịch sulfuric acid (H₂SO₄) loãng", "nguy_hiem": ["an_mon"] },
+    { "ten": "Dung dịch potassium thiocyanate (KSCN)", "nguy_hiem": ["kich_ung"] },
+    { "ten": "Muối NaCl, KCl, LiCl, CaCl₂, BaCl₂, CuCl₂ (thử màu ngọn lửa)", "nguy_hiem": ["kich_ung"] }
+  ],
+  "buoc": [
+    { "id": "cation", "tieu_de": "Nhỏ NaOH vào các ống để tìm cation tạo kết tủa màu", "huong_dan": "Chọn ống, chọn thuốc thử NaOH, bấm \"Nhỏ 1 giọt\". Thử nhỏ dư để xem kết tủa có tan không.", "goi_y": "Nâu đỏ: Fe³⁺ · trắng xanh hoá nâu: Fe²⁺ · xanh lam: Cu²⁺ · keo trắng tan trong NaOH dư: Al³⁺ · trắng: Mg²⁺.", "dieu_kien": "da_thu_cation" },
+    { "id": "anion", "tieu_de": "Dùng AgNO₃, BaCl₂, HCl để nhận biết anion", "huong_dan": "AgNO₃ cho kết tủa với halide; BaCl₂ cho kết tủa với SO₄²⁻, CO₃²⁻; HCl làm CO₃²⁻ sủi bọt.", "goi_y": "BaSO₄ không tan trong HCl, BaCO₃ tan và sủi bọt.", "dieu_kien": "da_thu_anion" },
+    { "id": "ket_luan", "tieu_de": "Chọn ion cho từng ống rồi bấm \"Kiểm tra\"", "huong_dan": "Càng ít lượt thử, điểm càng cao.", "goi_y": "NH₄⁺: nhỏ NaOH, đun nóng rồi đặt quỳ ẩm trên miệng ống.", "dieu_kien": "da_kiem_tra" },
+    { "id": "ngon_lua", "tieu_de": "Thử màu ngọn lửa", "huong_dan": "Chuyển sang tab \"Ngọn lửa\", chọn muối và đưa vào ngọn lửa đèn cồn.", "goi_y": "Na vàng · K tím nhạt · Li đỏ tía · Ca đỏ cam · Ba lục vàng · Cu lục lam.", "dieu_kien": "da_thu_lua" }
+  ],
+  "an_toan": [
+    "AgNO₃ làm đen da; NaOH, NH₃, H₂SO₄ gây bỏng – đeo găng tay và kính bảo hộ.",
+    "Đun ống nghiệm: hướng miệng ống ra chỗ không có người.",
+    "Ngửi khí NH₃ bằng cách phẩy nhẹ tay; muối barium tan đều độc."
+  ],
+  "cau_hinh": {
+    "so_ong": [4, 6],
+    "ion": ["Cl-", "Br-", "I-", "SO4_2-", "CO3_2-", "Fe3+", "Fe2+", "Cu2+", "Al3+", "Mg2+", "NH4+"],
+    "thuoc_thu": ["NaOH", "NH3", "AgNO3", "BaCl2", "HCl", "H2SO4", "KSCN"],
+    "kim_loai_ngon_lua": ["Na", "K", "Li", "Ca", "Ba", "Cu"],
+    "diem": { "toi_da": 100, "luot_mien_phi_moi_ong": 2, "tru_moi_luot_them": 4, "tru_doan_sai": 15 }
+  },
+  "cau_hoi": {
+    "bon_lua_chon": [
+      { "cau": "Thuốc thử dùng để nhận biết ion Fe³⁺, tạo dung dịch màu đỏ máu là",
+        "lua_chon": ["NaOH", "KSCN", "BaCl₂", "AgNO₃"], "dap_an": "B",
+        "giai_thich": "Fe³⁺ + 3SCN⁻ → Fe(SCN)₃ có màu đỏ máu." },
+      { "cau": "Nhỏ từ từ đến dư dung dịch NaOH vào dung dịch AlCl₃, hiện tượng quan sát được là",
+        "lua_chon": ["có kết tủa keo trắng, sau đó kết tủa tan", "có kết tủa trắng không tan", "có kết tủa xanh lam", "không có hiện tượng"], "dap_an": "A",
+        "giai_thich": "Al³⁺ + 3OH⁻ → Al(OH)₃↓; Al(OH)₃ lưỡng tính nên tan trong NaOH dư: Al(OH)₃ + OH⁻ → [Al(OH)₄]⁻." },
+      { "cau": "Ion nào tạo kết tủa trắng với dung dịch BaCl₂ và kết tủa đó không tan trong HCl?",
+        "lua_chon": ["CO₃²⁻", "Cl⁻", "SO₄²⁻", "NO₃⁻"], "dap_an": "C",
+        "giai_thich": "BaSO₄ không tan trong acid; BaCO₃ tan trong HCl và sủi bọt CO₂." },
+      { "cau": "Đốt muối của kim loại nào cho ngọn lửa màu vàng?",
+        "lua_chon": ["K", "Cu", "Ba", "Na"], "dap_an": "D",
+        "giai_thich": "Na cho ngọn lửa vàng; K tím nhạt, Cu lục lam, Ba lục vàng." }
+    ],
+    "dung_sai": [
+      { "cau": "Nhỏ dung dịch NH₃ đến dư vào các dung dịch muối:",
+        "y": [
+          { "noi_dung": "CuSO₄: tạo kết tủa xanh lam, sau đó kết tủa tan thành dung dịch xanh lam thẫm.", "dung": true, "giai_thich": "Cu(OH)₂ + 4NH₃ → [Cu(NH₃)₄]²⁺ + 2OH⁻." },
+          { "noi_dung": "AlCl₃: tạo kết tủa keo trắng, sau đó kết tủa tan.", "dung": false, "giai_thich": "Al(OH)₃ không tan trong NH₃ dư." },
+          { "noi_dung": "FeCl₃: tạo kết tủa nâu đỏ.", "dung": true, "giai_thich": "Fe³⁺ + 3NH₃ + 3H₂O → Fe(OH)₃↓ + 3NH₄⁺." },
+          { "noi_dung": "MgCl₂: không có hiện tượng.", "dung": false, "giai_thich": "Tạo kết tủa trắng Mg(OH)₂." }
+        ] }
+    ],
+    "tra_loi_ngan": [
+      { "cau": "Cho dung dịch AgNO₃ dư vào 200 mL dung dịch NaCl 0,10 M. Khối lượng kết tủa AgCl thu được là bao nhiêu gam? (Ag = 108; Cl = 35,5; làm tròn đến hàng phần trăm)",
+        "dap_so": "2,87", "don_vi": "g", "sai_so": 0.01, "giai_thich": "n(AgCl) = n(Cl⁻) = 0,020 mol → m = 0,020 × 143,5 = 2,87 g." }
+    ]
+  }
+}

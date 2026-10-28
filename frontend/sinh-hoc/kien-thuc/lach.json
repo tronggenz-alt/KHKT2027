@@ -1,0 +1,64 @@
+{
+  "id": "lach",
+  "ten": "Lách",
+  "can_duyet": true,
+  "chuong_trinh": "Sinh học 11 – Miễn dịch ở người và động vật (CT GDPT 2018)",
+  "vi_tri": [
+    "Nằm ở phần trên bên trái khoang bụng, phía sau dạ dày, sát dưới cơ hoành."
+  ],
+  "cau_tao": [
+    "Lách là cơ quan lympho thứ cấp, gồm tuỷ đỏ (chứa nhiều hồng cầu) và tuỷ trắng (chứa nhiều tế bào lympho).",
+    "Lách có rất nhiều mạch máu và được bao bởi lớp vỏ mỏng nên dễ vỡ khi bị chấn thương."
+  ],
+  "chuc_nang": [
+    "Lọc máu: giữ lại và phá huỷ hồng cầu già, mầm bệnh trong máu.",
+    "Là nơi tế bào lympho gặp kháng nguyên và được hoạt hoá, tham gia đáp ứng miễn dịch đặc hiệu.",
+    "Dự trữ một lượng máu nhất định."
+  ],
+  "co_che": [
+    "Hệ miễn dịch có cơ quan lympho sơ cấp (tuỷ xương đỏ, tuyến ức – nơi tạo ra và làm tế bào lympho trưởng thành) và cơ quan lympho thứ cấp (lách, hạch bạch huyết… – nơi tế bào lympho tiếp xúc với kháng nguyên).",
+    "Miễn dịch không đặc hiệu (da, niêm mạc, thực bào, phản ứng viêm, sốt) là hàng rào có sẵn; miễn dịch đặc hiệu gồm miễn dịch thể dịch (tế bào B, kháng thể) và miễn dịch tế bào (tế bào T).",
+    "Khi gặp kháng nguyên, tế bào B được hoạt hoá và biệt hoá thành tương bào tiết kháng thể cùng các tế bào nhớ."
+  ],
+  "lien_he": [
+    "Chấn thương mạnh vùng bụng trái có thể làm vỡ lách, gây chảy máu trong rất nguy hiểm.",
+    "Người đã cắt bỏ lách dễ bị nhiễm khuẩn hơn, cần tiêm phòng đầy đủ.",
+    "Tiêm vaccine giúp cơ thể tạo tế bào nhớ, phòng bệnh chủ động."
+  ],
+  "diem_thi": [
+    "Phân biệt cơ quan lympho sơ cấp và thứ cấp; tế bào B trưởng thành ở tuỷ xương, tế bào T trưởng thành ở tuyến ức.",
+    "Phân biệt miễn dịch không đặc hiệu và đặc hiệu; miễn dịch thể dịch và miễn dịch tế bào.",
+    "Cơ sở khoa học của tiêm vaccine: tạo trí nhớ miễn dịch."
+  ],
+  "trac_nghiem": [
+    {
+      "cau": "Lách thuộc nhóm cơ quan nào của hệ miễn dịch?",
+      "lua_chon": ["Cơ quan lympho thứ cấp", "Cơ quan lympho sơ cấp", "Tuyến nội tiết", "Cơ quan bài tiết"],
+      "dap_an": "A",
+      "giai_thich": "Lách là nơi tế bào lympho đã trưởng thành gặp kháng nguyên và được hoạt hoá – cơ quan lympho thứ cấp."
+    },
+    {
+      "cau": "Tế bào lympho T trưởng thành ở",
+      "lua_chon": ["tuỷ xương đỏ", "tuyến ức", "lách", "hạch bạch huyết"],
+      "dap_an": "B",
+      "giai_thich": "Tế bào T được tạo ra từ tuỷ xương nhưng di chuyển đến tuyến ức để trưởng thành."
+    },
+    {
+      "cau": "Tế bào trực tiếp tiết ra kháng thể là",
+      "lua_chon": ["tế bào T độc", "đại thực bào", "tương bào (biệt hoá từ tế bào B)", "hồng cầu"],
+      "dap_an": "C",
+      "giai_thich": "Tế bào B được hoạt hoá biệt hoá thành tương bào tiết kháng thể và tế bào B nhớ."
+    },
+    {
+      "cau": "Tiêm vaccine giúp phòng bệnh vì",
+      "lua_chon": ["vaccine tiêu diệt ngay mọi mầm bệnh", "vaccine là kháng thể có sẵn", "vaccine làm tăng số lượng hồng cầu", "vaccine kích thích cơ thể tạo kháng thể và tế bào nhớ đặc hiệu"],
+      "dap_an": "D",
+      "giai_thich": "Vaccine đưa kháng nguyên vô hại vào cơ thể, kích thích đáp ứng miễn dịch đặc hiệu và tạo trí nhớ miễn dịch."
+    }
+  ],
+  "goi_y_hoi": [
+    "Lách có vai trò gì trong miễn dịch?",
+    "Miễn dịch đặc hiệu và không đặc hiệu khác nhau thế nào?",
+    "Vì sao tiêm vaccine giúp phòng bệnh?"
+  ]
+}

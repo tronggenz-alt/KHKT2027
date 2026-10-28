@@ -1,0 +1,5 @@
+#!/bin/bash
+# Chốt chặn "vùng Phòng Lab Sinh học 3D chỉ Claude được commit" đã TẮT theo quyết định người dùng ngày 26/10/2026:
+# Gemini được sửa trực tiếp, quy tắc phối hợp ở .agents/rules/phong_lab_3d_phoi_hop.md.
+# Giữ file này để core.hooksPath=.githooks vẫn hợp lệ. Muốn bật lại chốt chặn: xem bản cũ trong lịch sử git của file này.
+exit 0

@@ -1,0 +1,70 @@
+{
+  "id": "dien-phan",
+  "ten": "Điện phân dung dịch",
+  "lop": 12,
+  "bieu_tuong": "⚡",
+  "mo_ta": "Điện phân CuSO₄ (điện cực trơ), NaCl có màng ngăn, CuSO₄ với anode đồng; tính theo định luật Faraday.",
+  "muc_tieu": [
+    "Xác định thứ tự điện phân ở cathode và anode.",
+    "Áp dụng n(e) = I·t / F (F = 96 485 C/mol) để tính khối lượng kim loại, thể tích khí (đkc) và biến thiên pH.",
+    "Hiểu ứng dụng của điện phân: điều chế NaOH, Cl₂; tinh luyện đồng."
+  ],
+  "dung_cu": ["Bình điện phân có màng ngăn", "Điện cực graphite (than chì)", "Điện cực đồng", "Nguồn điện một chiều có ampe kế", "Đồng hồ bấm giây", "Cân điện tử"],
+  "hoa_chat": [
+    { "ten": "Dung dịch copper(II) sulfate (CuSO₄) 0,5 M", "nguy_hiem": ["kich_ung", "moi_truong"] },
+    { "ten": "Dung dịch sodium chloride (NaCl) 1 M", "nguy_hiem": [] },
+    { "ten": "Phenolphthalein, giấy quỳ ẩm", "nguy_hiem": [] }
+  ],
+  "buoc": [
+    { "id": "chon", "tieu_de": "Chọn bài điện phân", "huong_dan": "Ba bài: CuSO₄ điện cực trơ · NaCl có màng ngăn · CuSO₄ anode đồng.", "goi_y": "Ở cathode: ion kim loại sau Al bị khử trước H₂O. Ở anode: Cl⁻ bị oxi hoá trước H₂O; SO₄²⁻, NO₃⁻ không bị điện phân.", "dieu_kien": "da_chon_bai" },
+    { "id": "dat", "tieu_de": "Đặt cường độ dòng I và thời gian t", "huong_dan": "Ví dụ I = 2 A, t = 965 s.", "goi_y": "n(e) = I·t / F = 2 × 965 / 96 485 = 0,02 mol.", "dieu_kien": "da_dat_I_t" },
+    { "id": "chay", "tieu_de": "Bật nguồn, tua nhanh tới hết thời gian", "huong_dan": "Bấm \"Bật nguồn\", chọn tốc độ tua ×10 hoặc ×60.", "goi_y": "Quan sát: kim loại bám cathode, bọt khí ở điện cực, màu dung dịch.", "dieu_kien": "da_chay_xong" },
+    { "id": "doi_chieu", "tieu_de": "Đối chiếu kết quả với định luật Faraday", "huong_dan": "Nhập khối lượng kim loại bạn tính được rồi bấm \"Kiểm tra\".", "goi_y": "m(Cu) = n(e)/2 × 64 = 0,64 g (I = 2 A, t = 965 s).", "dieu_kien": "da_doi_chieu" }
+  ],
+  "an_toan": [
+    "Cl₂ độc: điện phân NaCl trong tủ hút, thời gian ngắn.",
+    "Tắt nguồn trước khi tháo, lau điện cực.",
+    "Không chạm tay ướt vào nguồn điện."
+  ],
+  "cau_hinh": {
+    "bai": [
+      { "id": "cuso4_tro", "ten": "CuSO₄ – điện cực trơ (graphite)", "V_dd": 0.2, "C0": 0.5, "dien_cuc": { "cathode": "graphite", "anode": "graphite" }, "mau_dd": [70, 150, 230] },
+      { "id": "nacl_mang_ngan", "ten": "NaCl – có màng ngăn", "V_dd": 0.2, "C0": 1.0, "dien_cuc": { "cathode": "graphite", "anode": "graphite" }, "mau_dd": null },
+      { "id": "cuso4_anode_cu", "ten": "CuSO₄ – anode đồng (tinh luyện đồng)", "V_dd": 0.2, "C0": 0.5, "dien_cuc": { "cathode": "Cu tinh khiết", "anode": "Cu thô" }, "mau_dd": [70, 150, 230] }
+    ],
+    "I": { "tu": 0.5, "den": 5, "buoc": 0.5, "mac_dinh": 2 },
+    "t": { "tu": 60, "den": 7200, "mac_dinh": 965 },
+    "toc_do": [1, 10, 60, 300]
+  },
+  "cau_hoi": {
+    "bon_lua_chon": [
+      { "cau": "Điện phân dung dịch CuSO₄ với điện cực trơ, ở anode xảy ra quá trình",
+        "lua_chon": ["2H₂O → O₂ + 4H⁺ + 4e", "Cu → Cu²⁺ + 2e", "2SO₄²⁻ → S₂O₈²⁻ + 2e", "Cu²⁺ + 2e → Cu"], "dap_an": "A",
+        "giai_thich": "SO₄²⁻ không bị điện phân; nước bị oxi hoá ở anode tạo O₂ và H⁺." },
+      { "cau": "Điện phân dung dịch CuSO₄ (điện cực trơ) với I = 5 A trong 1 930 s. Khối lượng Cu bám ở cathode là (Cu = 64)",
+        "lua_chon": ["1,60 g", "6,40 g", "0,80 g", "3,20 g"], "dap_an": "D",
+        "giai_thich": "n(e) = 5 × 1 930 / 96 485 = 0,1 mol → n(Cu) = 0,05 mol → m = 3,20 g." },
+      { "cau": "Điện phân dung dịch NaCl có màng ngăn; sau một thời gian nhỏ phenolphthalein vào khu vực cathode thấy",
+        "lua_chon": ["dung dịch không đổi màu", "dung dịch chuyển màu hồng", "có kết tủa trắng", "dung dịch chuyển màu xanh lam"], "dap_an": "B",
+        "giai_thich": "Ở cathode: 2H₂O + 2e → H₂ + 2OH⁻; môi trường base làm phenolphthalein hoá hồng." },
+      { "cau": "Trong tinh luyện đồng bằng phương pháp điện phân, anode (cực dương) là",
+        "lua_chon": ["thanh đồng tinh khiết", "thanh graphite", "thanh đồng thô", "dung dịch CuSO₄"], "dap_an": "C",
+        "giai_thich": "Anode đồng thô tan ra: Cu → Cu²⁺ + 2e; Cu²⁺ bám vào cathode đồng tinh khiết." }
+    ],
+    "dung_sai": [
+      { "cau": "Điện phân dung dịch NaCl có màng ngăn (điện cực trơ):",
+        "y": [
+          { "noi_dung": "Ở cathode thoát ra khí H₂.", "dung": true, "giai_thich": "Na⁺ không bị khử; nước bị khử: 2H₂O + 2e → H₂ + 2OH⁻." },
+          { "noi_dung": "Khí thoát ra ở anode làm mất màu giấy quỳ ẩm.", "dung": true, "giai_thich": "Cl₂ ẩm có tính tẩy màu." },
+          { "noi_dung": "Ion Na⁺ bị khử thành Na ở cathode.", "dung": false, "giai_thich": "Na⁺ đứng trước Al trong dãy hoạt động, không bị khử trong dung dịch." },
+          { "noi_dung": "Nếu không có màng ngăn, Cl₂ tác dụng với NaOH tạo nước Javel.", "dung": true, "giai_thich": "Cl₂ + 2NaOH → NaCl + NaClO + H₂O." }
+        ] }
+    ],
+    "tra_loi_ngan": [
+      { "cau": "Điện phân dung dịch CuSO₄ (điện cực trơ) với I = 2 A trong 965 s. Thể tích khí O₂ thoát ra ở anode (đkc, 24,79 L/mol) là bao nhiêu lít? (làm tròn đến hàng phần nghìn)",
+        "dap_so": "0,124", "don_vi": "L", "sai_so": 0.001, "giai_thich": "n(e) = 0,02 mol → n(O₂) = 0,005 mol → V = 0,005 × 24,79 ≈ 0,124 L." },
+      { "cau": "Điện phân dung dịch AgNO₃ (điện cực trơ) với I = 1 A trong 965 s. Khối lượng Ag bám ở cathode là bao nhiêu gam? (Ag = 108; làm tròn đến hàng phần trăm)",
+        "dap_so": "1,08", "don_vi": "g", "sai_so": 0.01, "giai_thich": "n(e) = 0,01 mol → n(Ag) = 0,01 mol → m = 1,08 g." }
+    ]
+  }
+}

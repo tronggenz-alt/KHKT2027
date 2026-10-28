@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="vi" data-theme="sang">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Đăng nhập · CHEMISTRY</title>
+  <meta name="color-scheme" content="light dark">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230f2b48' stroke-width='1.8' stroke-linejoin='round'%3E%3Cpath d='M12 2.5l8.2 4.75v9.5L12 21.5l-8.2-4.75v-9.5z'/%3E%3Cpath d='M12 6.6l4.7 2.7M7.3 14.7l4.7 2.7M7.3 9.3v5.4' stroke-width='1.3'/%3E%3C/svg%3E">
+  <script>
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem("giai-chuoi-giao-dien"); } catch (e) {}
+      if (t !== "sang" && t !== "toi") t = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "toi" : "sang";
+      document.documentElement.dataset.theme = t;
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Be Vietnam Pro"', '-apple-system', '"Segoe UI"', 'Roboto', 'sans-serif'],
+            serif: ['"Be Vietnam Pro"', '-apple-system', '"Segoe UI"', 'Roboto', 'sans-serif'],
+            mono: ['"JetBrains Mono"', '"SFMono-Regular"', 'Consolas', 'monospace'],
+          },
+          colors: {
+            giay: 'var(--giay)', 'giay-lom': 'var(--giay-lom)', muc: 'var(--muc)', 'muc-2': 'var(--muc-2)', lang: 'var(--lang)',
+            chi: 'var(--chi)', 'chi-dam': 'var(--chi-dam)', nhan: 'var(--nhan)', 'nhan-lom': 'var(--nhan-lom)',
+            'ho-phach': 'var(--ho-phach)', gach: 'var(--gach)', lam: 'var(--lam)',
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="min-h-screen flex flex-col">
+  <div id="toasts" class="fixed bottom-4 right-4 left-4 sm:left-auto z-50 flex flex-col gap-2 sm:w-96" aria-live="polite"></div>
+
+  <header class="thanh-tren">
+    <div class="khung flex items-center justify-between gap-4 h-16">
+      <a href="/" class="flex items-center gap-3 min-w-0 no-underline">
+        <svg class="w-6 h-6 text-nhan shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 2.5l8.2 4.75v9.5L12 21.5l-8.2-4.75v-9.5z"/><path d="M12 6.6l4.7 2.7M7.3 14.7l4.7 2.7M7.3 9.3v5.4" stroke-width="1.2"/>
+        </svg>
+        <span class="logo-chu">CHEMISTRY</span>
+        <span class="logo-phu hidden md:inline">Hoá hữu cơ · THPT &amp; HSG</span>
+      </a>
+      <button type="button" id="nut-che-do" class="nut-che-do" aria-label="Chuyển sang chế độ tối" title="Chế độ tối">
+        <svg class="bieu-tuong-trang" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
+        <svg class="bieu-tuong-mat-troi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="khung flex-1">
+    <div class="luoi-dang-nhap">
+      <!-- Giới thiệu -->
+      <section class="pt-12 sm:pt-16">
+        <p class="chu-mo">Tài khoản</p>
+        <h1 class="tieu-de-lon">Đăng nhập để bắt đầu</h1>
+        <p class="doan-dan">
+          Giải chuỗi phản ứng hữu cơ bằng AI, <em class="nghieng-serif">kiểm tra bằng RDKit</em>, vẽ cấu tạo và mô hình 3D.
+        </p>
+        <ul class="ds-loi-ich">
+          <li><span class="so-loi-ich">01</span><span>Tài khoản mới được <b>dùng thử <span id="so-luot">3</span> bài</b> miễn phí.</span></li>
+          <li><span class="so-loi-ich">02</span><span>Sau đó dán <b>key Gemini của bạn</b> (miễn phí ở aistudio.google.com) để giải không giới hạn.</span></li>
+          <li><span class="so-loi-ich">03</span><span>Lịch sử bài giải được lưu riêng – chỉ bạn xem được.</span></li>
+        </ul>
+      </section>
+
+      <!-- Thẻ đăng nhập / tạo tài khoản -->
+      <section class="pt-6 lg:pt-16 pb-16">
+        <div class="the the-dang-nhap">
+          <div class="phan-doan" role="radiogroup" aria-label="Đăng nhập hoặc tạo tài khoản">
+            <label><input type="radio" name="che-do" value="dang-nhap" checked><span>Đăng nhập</span></label>
+            <label><input type="radio" name="che-do" value="dang-ky"><span>Tạo tài khoản</span></label>
+          </div>
+
+          <div id="khu-google" class="hidden mt-6">
+            <a id="nut-google" href="/auth/dang-nhap" class="btn nut-google w-full justify-center">
+              <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+              <span>Tiếp tục với Google</span>
+            </a>
+            <div class="vach-hoac"><span>hoặc dùng email</span></div>
+          </div>
+
+          <form id="form-dang-nhap" class="mt-6 flex flex-col gap-4" novalidate>
+            <div id="khung-ten" class="hidden">
+              <label for="o-ten" class="nhan-mono block mb-2">Tên hiển thị <span class="normal-case tracking-normal font-sans">(không bắt buộc)</span></label>
+              <input id="o-ten" class="o-nhap" autocomplete="name" maxlength="80" placeholder="Vd: Trọng">
+            </div>
+            <div>
+              <label for="o-email" class="nhan-mono block mb-2">Email</label>
+              <input id="o-email" type="email" class="o-nhap" autocomplete="username" inputmode="email" maxlength="254" required placeholder="ban@example.com">
+            </div>
+            <div>
+              <label for="o-mat-khau" class="nhan-mono block mb-2">Mật khẩu</label>
+              <div class="o-key">
+                <input id="o-mat-khau" type="password" class="o-nhap" autocomplete="current-password" minlength="8" maxlength="200" required>
+                <button type="button" id="nut-hien-mk" class="btn btn-sm nut-hien" aria-pressed="false" aria-controls="o-mat-khau">Hiện</button>
+              </div>
+              <p id="goi-y-mk" class="ghi-chu-nho mt-1 hidden">Ít nhất 8 ký tự.</p>
+              <button type="button" id="nut-quen-mk" class="lien-ket ghi-chu-nho mt-2">Quên mật khẩu?</button>
+            </div>
+            <div id="khung-mk2" class="hidden">
+              <label for="o-mat-khau-2" class="nhan-mono block mb-2">Nhập lại mật khẩu</label>
+              <input id="o-mat-khau-2" type="password" class="o-nhap" autocomplete="new-password" maxlength="200">
+            </div>
+            <!-- ô BẪY bot (honeypot): người thật không thấy / không tab tới nên luôn trống; bot tự điền → server chặn -->
+            <div class="o-bay" aria-hidden="true">
+              <label for="o-website">Website (để trống)</label>
+              <input id="o-website" type="text" name="website" tabindex="-1" autocomplete="off" value="">
+            </div>
+            <div id="khung-turnstile" class="hidden"></div>
+            <div id="loi-dang-nhap" class="ket-qua-kiem-tra loi hidden" role="alert"></div>
+            <button type="submit" id="nut-gui" class="btn btn-primary btn-lon w-full justify-center">
+              <span class="nhan">Đăng nhập</span><span class="quay hidden"></span>
+            </button>
+            <p id="ghi-chu-ip" class="ghi-chu-nho">App ghi lại địa chỉ IP và thiết bị khi đăng nhập để bảo mật tài khoản.</p>
+          </form>
+
+          <!-- Quên mật khẩu: nhập email để nhận mã -->
+          <form id="form-quen" class="mt-6 flex flex-col gap-4 hidden" novalidate>
+            <p class="nhan-mono">Quên mật khẩu</p>
+            <p class="ghi-chu-nho">Nhập email của tài khoản – app gửi mã 6 số để bạn đặt mật khẩu mới.</p>
+            <div>
+              <label for="o-email-quen" class="nhan-mono block mb-2">Email</label>
+              <input id="o-email-quen" type="email" class="o-nhap" autocomplete="username" inputmode="email" maxlength="254" placeholder="ban@example.com">
+            </div>
+            <div id="loi-quen" class="ket-qua-kiem-tra loi hidden" role="alert"></div>
+            <button type="submit" id="nut-gui-ma-quen" class="btn btn-primary btn-lon w-full justify-center">
+              <span class="nhan">Gửi mã</span><span class="quay hidden"></span>
+            </button>
+            <button type="button" class="btn btn-sm self-start nut-quay-lai">← Quay lại đăng nhập</button>
+          </form>
+
+          <!-- Nhập mã 6 số: xác thực email (đăng ký / tài khoản cũ) hoặc đặt lại mật khẩu -->
+          <form id="form-ma" class="mt-6 flex flex-col gap-4 hidden" novalidate>
+            <p id="tieu-de-ma" class="nhan-mono">Xác thực email</p>
+            <p id="mo-ta-ma" class="ghi-chu-nho" aria-live="polite"></p>
+            <div>
+              <label for="o-ma" class="nhan-mono block mb-2">Mã 6 số</label>
+              <input id="o-ma" class="o-nhap o-ma" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••">
+            </div>
+            <div id="khung-mk-moi" class="hidden flex flex-col gap-4">
+              <div>
+                <label for="o-mk-moi" class="nhan-mono block mb-2">Mật khẩu mới</label>
+                <input id="o-mk-moi" type="password" class="o-nhap" autocomplete="new-password" maxlength="200" placeholder="Ít nhất 8 ký tự">
+              </div>
+              <div>
+                <label for="o-mk-moi-2" class="nhan-mono block mb-2">Nhập lại mật khẩu mới</label>
+                <input id="o-mk-moi-2" type="password" class="o-nhap" autocomplete="new-password" maxlength="200">
+              </div>
+            </div>
+            <div id="loi-ma" class="ket-qua-kiem-tra loi hidden" role="alert"></div>
+            <button type="submit" id="nut-xac-nhan-ma" class="btn btn-primary btn-lon w-full justify-center">
+              <span class="nhan">Xác nhận</span><span class="quay hidden"></span>
+            </button>
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <button type="button" id="nut-gui-lai-ma" class="btn btn-sm">Gửi lại mã</button>
+              <button type="button" class="btn btn-sm nut-quay-lai">← Quay lại</button>
+            </div>
+            <p class="ghi-chu-nho">Không thấy email? Xem thư mục <b>Spam / Quảng cáo</b>. Mã có hiệu lực 10 phút; nhập sai 5 lần phải gửi mã mới.</p>
+          </form>
+
+          <p id="ghi-chu-the" class="ghi-chu-nho mt-5">Chưa có tài khoản? Chọn <b>Tạo tài khoản</b> ở trên.</p>
+        </div>
+        <p class="ghi-chu-nho mt-4 max-w-md">Mật khẩu được băm (scrypt) trước khi lưu. Tài khoản mới cần xác thực email bằng mã 6 số; quên mật khẩu thì nhận mã qua email.</p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="chan-trang-web">
+    <div class="khung py-6 flex flex-wrap justify-between gap-2">
+      <span><span class="logo-chu text-base">CHEMISTRY</span> — PubChem · Wikipedia · RDKit · Gemini</span>
+    </div>
+  </footer>
+
+  <script src="/static/tai-khoan.js"></script>
+  <script src="/static/dang-nhap.js"></script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Thư viện dụng cụ – Phòng thí nghiệm ảo</title>
+<!-- Trang xem nhanh model dụng cụ (dùng khi chỉnh hinh-hoc.js / LabHinh.cs), không nằm trong luồng người dùng.
+     Mở: /static/hoa-hoc/phong-thi-nghiem/thu-vien-dung-cu.html
+       ?so-sanh=1  thêm hàng "CŨ" (profile thô + LatheGeometry) để đối chiếu
+       ?solo=cu    chỉ hiện hàng CŨ (cùng góc máy)   ?khung=1    phủ lưới đa giác      ?cam=x,y,z,tx,ty,tz   đặt camera (mét)      ?q=thap  vật liệu kính nhẹ -->
+<style>
+  html, body { margin: 0; height: 100%; background: #dfe6ee; font: 14px/1.4 system-ui, sans-serif; }
+  #ct { position: fixed; inset: 0; }
+  .tn { position: fixed; padding: 2px 8px; border-radius: 6px; background: rgba(15, 43, 72, .78); color: #fff; font-size: 13px; pointer-events: none; transform: translate(-50%, 0); }
+</style>
+<script src="/static/hoa-hoc/phong-thi-nghiem/hinh-hoc.js"></script>
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
+</script>
+</head>
+<body>
+<div id="ct"></div>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+
+const HH = window.PTNHinhHoc, Q = new URLSearchParams(location.search);
+const V2 = (x, y) => new THREE.Vector2(x, y);
+const cao = Q.get("q") !== "thap";
+
+const r = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+r.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+r.setSize(innerWidth, innerHeight);
+r.toneMapping = THREE.ACESFilmicToneMapping;
+r.shadowMap.enabled = true;
+r.shadowMap.type = THREE.PCFSoftShadowMap;
+document.getElementById("ct").appendChild(r.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xdfe6ee);
+const pm = new THREE.PMREMGenerator(r);
+scene.environment = pm.fromScene(new RoomEnvironment(r), 0.04).texture;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x8899aa, 0.55));
+const den = new THREE.DirectionalLight(0xffffff, 1.6);
+den.position.set(1.4, 2.6, 1.6);
+den.castShadow = true;
+den.shadow.mapSize.set(2048, 2048);
+Object.assign(den.shadow.camera, { left: -1, right: 1, top: 1, bottom: -1, near: 0.5, far: 7 });
+scene.add(den);
+const camera = new THREE.PerspectiveCamera(30, innerWidth / innerHeight, 0.01, 40);
+const ctl = new OrbitControls(camera, r.domElement);
+const soCam = (Q.get("cam") || "0,0.2,0.95,0,0.07,0").split(",").map(Number);
+camera.position.set(soCam[0], soCam[1], soCam[2]);
+ctl.target.set(soCam[3], soCam[4], soCam[5]);
+ctl.update();
+
+// mặt bàn phenolic xanh
+const ban = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.04, 0.9), new THREE.MeshStandardMaterial({ color: 0x1d4f91, roughness: 0.35, metalness: 0.05 }));
+ban.position.y = -0.02; ban.receiveShadow = true; scene.add(ban);
+
+const kinh = cao
+  ? new THREE.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0, roughness: 0.05, transmission: 1, ior: 1.5, thickness: 0.02, specularIntensity: 1, envMapIntensity: 1.7,
+      clearcoat: 1, clearcoatRoughness: 0.04, attenuationColor: new THREE.Color(0xd6e8fb), attenuationDistance: 0.5, side: THREE.DoubleSide, depthWrite: false })
+  : new THREE.MeshPhysicalMaterial({ color: 0xe1ecf7, roughness: 0.06, transparent: true, opacity: 0.26, clearcoat: 1, envMapIntensity: 1.7, side: THREE.DoubleSide, depthWrite: false });
+const longVl = (mau, op) => new THREE.MeshPhysicalMaterial({ color: mau, roughness: 0.12, transparent: true, opacity: op, clearcoat: 0.6, clearcoatRoughness: 0.1, envMapIntensity: 0.9, depthWrite: false });
+const khung = Q.get("khung") === "1";
+const wire = new THREE.MeshBasicMaterial({ color: 0x0b3a6b, wireframe: true, transparent: true, opacity: 0.5 });
+
+function buf(m) {
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.BufferAttribute(m.v, 3)); g.setAttribute("normal", new THREE.BufferAttribute(m.n, 3));
+  g.setAttribute("uv", new THREE.BufferAttribute(m.uv, 2)); g.setIndex(new THREE.BufferAttribute(m.i, 1));
+  return g;
+}
+function them(geo, vl, x, z = 0, y = 0) {
+  const m = new THREE.Mesh(geo, vl); m.position.set(x, y, z); m.castShadow = vl !== kinh; m.receiveShadow = true; m.renderOrder = vl === kinh ? 2 : 1;
+  scene.add(m);
+  if (khung) { const w = new THREE.Mesh(geo, wire); w.position.copy(m.position); scene.add(w); }
+  return m;
+}
+function nhan(chu, x, z) {
+  const d = document.createElement("div"); d.className = "tn"; d.textContent = chu; d.dataset.x = x; d.dataset.z = z; document.body.appendChild(d);
+}
+
+// ---- hàng MỚI (hinh-hoc.js)
+const M = (ngoai, x, hLong, mau, op, z = 0) => {
+  const pts = HH.muotProfile(ngoai);
+  them(buf(HH.latheMem(HH.thanhThuyTinh(ngoai), { phan: 72 })), kinh, x, z);
+  if (hLong) them(buf(HH.latheMem(HH.chatLong(pts, hLong), { phan: 48 })), longVl(mau, op), x, z);
+};
+const DC = HH.DUNG_CU;
+const soloCu = Q.get("solo") === "cu"; // chỉ hiện hàng CŨ, cùng góc máy với hàng mới (đối chiếu trước/sau)
+const zMoi = Q.get("so-sanh") === "1" ? 0.22 : 0;
+if (!soloCu) {
+M(DC.coc(0.04, 0.09), -0.42, 0.05, 0x7fc4ff, 0.45, zMoi);
+M(DC.binhTamGiac(0.05, 0.15, 0.016, 0.1), -0.27, 0.03, 0xe83e8c, 0.6, zMoi);
+M(DC.ongNghiem(0.0115, 0.15), -0.14, 0.075, 0x8be28b, 0.5, zMoi);
+M(DC.ongNghiem(0.0115, 0.15), -0.1, 0.075, 0xffd166, 0.5, zMoi);
+M(DC.ongNghiem(0.0115, 0.15), -0.06, 0.04, 0xff6b6b, 0.5, zMoi);
+M(DC.loThuoc(0.03, 0.12, 0.0135), 0.05, 0.06, 0x4cc9f0, 0.55, zMoi);
+M(DC.denCon(), 0.2, 0.04, 0xbfe3ff, 0.35, zMoi);
+M(DC.coc(0.07, 0.14), 0.38, 0.1, 0xb87333, 0.5, zMoi);
+nhan("MỚI", -0.5, zMoi);
+}
+
+// ---- hàng CŨ (để so sánh): profile thô + LatheGeometry của bản trước
+if (Q.get("so-sanh") === "1" || soloCu) {
+  const L = (p, x, z) => them(new THREE.LatheGeometry(p, 48), kinh, x, z);
+  const zc = soloCu ? 0 : -0.22;
+  L([V2(0, 0.0015), V2(0.04 * 0.94, 0), V2(0.04, 0.012), V2(0.04, 0.09), V2(0.04 * 1.07, 0.094)], -0.42, zc);
+  L([V2(0, 0.0015), V2(0.05 * 0.95, 0), V2(0.05, 0.014), V2(0.016 * 1.02, 0.1), V2(0.016, 0.15), V2(0.016 * 1.18, 0.155)], -0.27, zc);
+  const ong = (r, h) => { const p = []; for (let i = 0; i <= 10; i++) { const a = (i / 10) * Math.PI / 2; p.push(V2(r * Math.sin(a) + 1e-4, r - r * Math.cos(a))); } p.push(V2(r, h), V2(r * 1.14, h + 0.003)); return p; };
+  L(ong(0.0115, 0.15), -0.14, zc); L(ong(0.0115, 0.15), -0.1, zc); L(ong(0.0115, 0.15), -0.06, zc);
+  L([V2(0, 0), V2(0.028, 0), V2(0.03, 0.01), V2(0.03, 0.08), V2(0.014, 0.1), V2(0.013, 0.12)], 0.05, zc);
+  L([V2(0, 0), V2(0.042, 0), V2(0.046, 0.012), V2(0.044, 0.05), V2(0.016, 0.07), V2(0.012, 0.085)], 0.2, zc);
+  L([V2(0, 0.0015), V2(0.07 * 0.94, 0), V2(0.07, 0.012), V2(0.07, 0.14), V2(0.07 * 1.07, 0.144)], 0.38, zc);
+  nhan("CŨ", -0.5, zc);
+}
+
+function veNhan() {
+  for (const d of document.querySelectorAll(".tn")) {
+    const v = new THREE.Vector3(Number(d.dataset.x), 0.2, Number(d.dataset.z)).project(camera);
+    d.style.left = ((v.x + 1) / 2) * innerWidth + "px"; d.style.top = ((1 - v.y) / 2) * innerHeight + "px";
+  }
+}
+function ve() { r.render(scene, camera); veNhan(); } // không gọi ctl.update() ở đây: nó phát "change" → đệ quy
+ctl.addEventListener("change", ve);
+addEventListener("resize", () => { r.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); ve(); });
+ve(); requestAnimationFrame(() => { ve(); window.sanSang = true; });
+window.GALLERY = { ve, camera, ctl };
+</script>
+</body>
+</html>

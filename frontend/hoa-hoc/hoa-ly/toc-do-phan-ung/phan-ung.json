@@ -1,0 +1,69 @@
+{
+  "danh_sach": [
+    {
+      "id": "A_B_C_D",
+      "ten": "A + B → C + D (Mô hình tổng quát cơ bản)",
+      "phuong_trinh": "A + B → C + D",
+      "chat": [
+        { "ct": "A", "ten": "Chất phản ứng A", "vai_tro": "chat_dau", "mau": "var(--hl-chat-a, #38bdf8)" },
+        { "ct": "B", "ten": "Chất phản ứng B", "vai_tro": "chat_dau", "mau": "var(--hl-chat-b, #f59e0b)" },
+        { "ct": "C", "ten": "Sản phẩm C", "vai_tro": "san_pham", "mau": "var(--hl-chat-c, #34d399)" },
+        { "ct": "D", "ten": "Sản phẩm D", "vai_tro": "san_pham", "mau": "var(--hl-chat-d, #a855f7)" }
+      ],
+      "Ea_kJ": 50.0,
+      "A": 1.0e10,
+      "dH_kJ": -20.0,
+      "Ea_xt_kJ": 30.0,
+      "deltaEa_xt_kJ": 20.0,
+      "bac": { "A": 1, "B": 1 },
+      "nguon": "Hoá lý cơ sở - Động hoá học kinh điển Arrhenius"
+    },
+    {
+      "id": "H2O2_H2O_O2",
+      "ten": "2H₂O₂ → 2H₂O + O₂ (Phân huỷ hydrogen peroxide)",
+      "phuong_trinh": "2H₂O₂(dd) → 2H₂O(l) + O₂(k)",
+      "chat": [
+        { "ct": "H2O2", "ten": "Hydrogen peroxide", "vai_tro": "chat_dau", "mau": "var(--hl-chat-a, #38bdf8)" },
+        { "ct": "H2O", "ten": "Nước", "vai_tro": "san_pham", "mau": "var(--hl-chat-c, #94a3b8)" },
+        { "ct": "O2", "ten": "Khí Oxygen", "vai_tro": "san_pham", "mau": "var(--hl-chat-d, #f43f5e)" }
+      ],
+      "Ea_kJ": 75.0,
+      "A": 1.5e11,
+      "dH_kJ": -98.2,
+      "Ea_xt_kJ": 55.0,
+      "xuc_tac": "MnO₂ hoặc KI",
+      "bac": { "H2O2": 1 },
+      "nguon": "SGK Hoá học 10 (KNTT) - Bài Tốc độ phản ứng hoá học"
+    },
+    {
+      "id": "2HI_H2_I2",
+      "ten": "2HI → H₂ + I₂ (Phân huỷ hydrogen iodide nhiệt độ cao)",
+      "phuong_trinh": "2HI(k) → H₂(k) + I₂(k)",
+      "chat": [
+        { "ct": "HI", "ten": "Hydrogen iodide", "vai_tro": "chat_dau", "mau": "var(--hl-chat-a, #e2e8f0)" },
+        { "ct": "H2", "ten": "Khí Hydrogen", "vai_tro": "san_pham", "mau": "var(--hl-chat-c, #38bdf8)" },
+        { "ct": "I2", "ten": "Hơi Iodine tím", "vai_tro": "san_pham", "mau": "var(--hl-chat-d, #a855f7)" }
+      ],
+      "Ea_kJ": 184.0,
+      "A": 1.0e12,
+      "dH_kJ": 9.48,
+      "bac": { "HI": 2 },
+      "nguon": "Bodenstein kinetics data & Physical Chemistry textbook"
+    },
+    {
+      "id": "Zn_HCl",
+      "ten": "Zn + 2HCl → ZnCl₂ + H₂ (Ảnh hưởng diện tích bề mặt)",
+      "phuong_trinh": "Zn(r) + 2HCl(dd) → ZnCl₂(dd) + H₂(k)",
+      "chat": [
+        { "ct": "Zn", "ten": "Kẽm kim loại (hạt/bột)", "vai_tro": "chat_dau", "pha": "r", "mau": "var(--hl-chat-a, #94a3b8)" },
+        { "ct": "HCl", "ten": "Hydrochloric acid", "vai_tro": "chat_dau", "pha": "dd", "mau": "var(--hl-chat-b, #38bdf8)" },
+        { "ct": "H2", "ten": "Khí Hydrogen", "vai_tro": "san_pham", "pha": "k", "mau": "var(--hl-chat-d, #f59e0b)" }
+      ],
+      "Ea_kJ": 42.0,
+      "A": 5.0e8,
+      "dH_kJ": -153.0,
+      "bac": { "HCl": 1 },
+      "nguon": "SGK Hoá học 10 (CTST) - Thực hành các yếu tố ảnh hưởng tốc độ phản ứng"
+    }
+  ]
+}

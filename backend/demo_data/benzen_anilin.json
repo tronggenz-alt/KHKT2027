@@ -1,0 +1,98 @@
+{
+ "de_bai": "Hoàn thành chuỗi phản ứng: C6H6 → C6H5NO2 → C6H5NH2",
+ "loi_giai": {
+  "so_do": [
+   {
+    "ki_hieu": "C6H6",
+    "cong_thuc": "C6H6",
+    "ten": "benzene",
+    "smiles": "c1ccccc1"
+   },
+   {
+    "ki_hieu": "C6H5NO2",
+    "cong_thuc": "C6H5NO2",
+    "ten": "nitrobenzene",
+    "smiles": "O=[N+]([O-])c1ccccc1"
+   },
+   {
+    "ki_hieu": "C6H5NH2",
+    "cong_thuc": "C6H5NH2",
+    "ten": "aniline",
+    "smiles": "Nc1ccccc1"
+   }
+  ],
+  "cac_buoc": [
+   {
+    "so": 1,
+    "chat_dau": "C6H6",
+    "chat_sau": "C6H5NO2",
+    "phuong_trinh": "C6H6 + HNO3 → C6H5NO2 + H2O",
+    "chat_tham_gia": [
+     {
+      "ten": "benzene",
+      "smiles": "c1ccccc1",
+      "he_so": 1
+     },
+     {
+      "ten": "nitric acid",
+      "smiles": "O[N+](=O)[O-]",
+      "he_so": 1
+     }
+    ],
+    "san_pham": [
+     {
+      "ten": "nitrobenzene",
+      "smiles": "O=[N+]([O-])c1ccccc1",
+      "he_so": 1
+     },
+     {
+      "ten": "nước",
+      "smiles": "O",
+      "he_so": 1
+     }
+    ],
+    "dieu_kien": "H2SO4 đặc, t°",
+    "loai_phan_ung": "thế (nitro hoá)",
+    "giai_thich": "Benzene phản ứng thế với HNO3 đặc (xúc tác H2SO4 đặc) tạo nitrobenzene."
+   },
+   {
+    "so": 2,
+    "chat_dau": "C6H5NO2",
+    "chat_sau": "C6H5NH2",
+    "phuong_trinh": "C6H5NO2 + 6[H] → C6H5NH2 + 2H2O",
+    "chat_tham_gia": [
+     {
+      "ten": "nitrobenzene",
+      "smiles": "O=[N+]([O-])c1ccccc1",
+      "he_so": 1
+     },
+     {
+      "ten": "hydrogen mới sinh",
+      "smiles": "[H]",
+      "he_so": 6
+     }
+    ],
+    "san_pham": [
+     {
+      "ten": "aniline",
+      "smiles": "Nc1ccccc1",
+      "he_so": 1
+     },
+     {
+      "ten": "nước",
+      "smiles": "O",
+      "he_so": 2
+     }
+    ],
+    "dieu_kien": "Fe + HCl, t°",
+    "loai_phan_ung": "khử",
+    "giai_thich": "Nitrobenzene bị hydrogen mới sinh (Fe + HCl) khử thành aniline."
+   }
+  ],
+  "chat_an": [],
+  "nguon_tham_khao": [
+   "SGK Hoá học 12"
+  ],
+  "ghi_chu": "Thực tế sinh ra C6H5NH3Cl, sau đó cho NaOH vào để giải phóng aniline."
+ }
+}

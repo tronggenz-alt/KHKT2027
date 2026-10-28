@@ -1,0 +1,127 @@
+{
+  "_ghi_chu": [
+    "Sơ đồ hệ thống cho /admin/mindmap. Thêm hệ thống / nhánh mới: chỉ sửa file này (không cần sửa code).",
+    "Hệ thống có \"ai\": nhánh AI do server dựng THEO THỨ TỰ của router (backend/ai/routing.json + /admin → Thứ tự AI) – không vẽ tay:",
+    "  mỗi nhà cung cấp (claude | gemini | openai) thành một node (Chính / Dự phòng 1 / Dự phòng 2, nối fallback nét đứt theo thứ tự),",
+    "  con của nó là các mô hình hệ thống này dùng. \"dieu_kien\": khi nào AI đó được dùng. \"khac\": các node không dùng AI.",
+    "Node mô hình: \"model_tu\" = tên thuộc tính trong backend/config.py (settings) → server điền TÊN MÔ HÌNH THẬT từ .env;",
+    "  \"gemini_du_phong\" = danh sách GEMINI_MODEL_DU_PHONG. Node không dùng AI: \"khong_ai\": true.",
+    "\"dem\": lọc bảng ai_usage để đếm số lần gọi hôm nay (kind = loại yêu cầu, step = bước) – node con thừa hưởng của cha.",
+    "Xác định từ code (12/10/2026): llm.py + backend/ai (bậc lite/flash/pro/claude, router), giai_nhanh.cau_hinh_muc, do_kho.py,",
+    "  co_che._phien_manh, co_che_anh.doc_anh, mo_hinh_3d.nhan_dien, literature.rut_tu_khoa."
+  ],
+  "ten": "Giải Chuỗi Hữu Cơ",
+  "mo_ta": "App web FastAPI + HTML/JS · AI chỉ gọi ở server (backend/llm.py + backend/ai) · ghi chi phí mỗi lần gọi vào ai_usage",
+  "nha_cung_cap": {
+    "claude": {"ten": "Anthropic Claude", "logo": "claude.svg", "mau": "#D97757", "endpoint": "api.anthropic.com/v1/messages (Anthropic SDK, streaming)"},
+    "gemini": {"ten": "Google Gemini", "logo": "googlegemini.svg", "mau": "#8E75B2", "endpoint": "generativelanguage.googleapis.com (google-genai SDK)"},
+    "openai": {"ten": "OpenAI ChatGPT", "logo": "openai.svg", "mau": "#10A37F", "endpoint": "api.openai.com/v1/responses (SDK openai, streaming)"}
+  },
+  "he_thong": [
+    {
+      "id": "giai_chuoi", "ten": "Giải chuỗi", "mau": "#38BDF8", "bieu_tuong": "chuoi", "phia": "trai",
+      "mo_ta": "Giải chuỗi phản ứng theo mức thông minh: phân loại độ khó → MỘT lần gọi AI (streaming) → RDKit kiểm tra → sửa theo mức.",
+      "endpoint": "POST /api/giai · GET /api/tien-trinh/{job} · POST /api/phuong-trinh/{job}",
+      "code": "backend/pipeline.py (_chay_nhanh) · giai_nhanh.py · do_kho.py",
+      "dem": {"kind": ["giai", "phuong_trinh"]},
+      "ai": {
+        "claude": {"dieu_kien": "chỉ khi có quyền Claude (admin / Key Claude / mã Claude / API key riêng) và bật \"Dùng Claude\"",
+          "con": [
+            {"id": "gc_sonnet", "ai": "claude", "model_tu": "model", "nhan": "mức Kỹ", "dung_cho": "Mức Kỹ khi có quyền Claude"},
+            {"id": "gc_opus", "ai": "claude", "model_tu": "claude_model_manh", "nhan": "mức Tối đa", "dung_cho": "Mức Tối đa – chỉ người có quyền Claude"}
+          ]},
+        "gemini": {"dieu_kien": "mặc định cho mọi người (theo độ khó / mức thông minh); key Gemini riêng của người dùng cũng ở đây",
+          "con": [
+            {"id": "gc_lite", "ai": "gemini", "model_tu": "gemini_model_lite", "nhan": "Nhanh · phân loại",
+             "dung_cho": "Phân loại độ khó · mức Nhanh · sửa lỗi RDKit ở mức Cân bằng · rút từ khoá tra cứu tài liệu"},
+            {"id": "gc_flash", "ai": "gemini", "model_tu": "gemini_model", "nhan": "Cân bằng", "dung_cho": "Mức Cân bằng · Xem phương trình chi tiết"},
+            {"id": "gc_pro", "ai": "gemini", "model_tu": "gemini_model_hsg", "nhan": "Kỹ", "dung_cho": "Mức Kỹ · thay Claude khi Claude lỗi"},
+            {"id": "gc_du_phong", "ai": "gemini", "model_tu": "gemini_du_phong", "nhan": "hết hạn mức",
+             "dung_cho": "Gemini hết hạn mức / mô hình không dùng được → tự lùi lần lượt sang các mô hình này"}
+          ]},
+        "openai": {"dieu_kien": "khi các AI trước lỗi / hết hạn mức / quá thời gian (chỉ key máy chủ – không dùng cho người dùng key Gemini riêng)",
+          "con": [{"id": "gc_openai", "ai": "openai", "model_tu": "openai_model", "nhan": "mọi mức", "dung_cho": "Giải chuỗi (mọi mức), phương trình chi tiết"}]}
+      },
+      "khac": []
+    },
+    {
+      "id": "mo_hinh_3d", "ten": "Mô hình 3D", "mau": "#A78BFA", "bieu_tuong": "khoi", "phia": "phai",
+      "mo_ta": "Dựng mô hình 3D: SMILES / tên tiếng Anh tra thẳng PubChem + RDKit; chỉ ảnh hoặc tên tiếng Việt mới cần AI nhận diện.",
+      "endpoint": "POST /api/3d",
+      "code": "backend/mo_hinh_3d.py (nhan_dien, _hoi_ai)",
+      "dem": {"kind": ["3d"]},
+      "ai": {
+        "claude": {"dieu_kien": "không dùng cho mục 3D (yêu cầu 3D không mang quyền Claude) – luôn bị bỏ qua", "con": []},
+        "gemini": {"dieu_kien": "chỉ khi đọc ẢNH hoặc tên TIẾNG VIỆT",
+          "con": [
+            {"id": "m3_flash", "ai": "gemini", "model_tu": "gemini_model", "nhan": "nhận diện", "dung_cho": "Nhận diện chất trong ảnh / tên tiếng Việt (bậc flash)"},
+            {"id": "m3_du_phong", "ai": "gemini", "model_tu": "gemini_du_phong", "nhan": "hết hạn mức", "dung_cho": "Gemini hết hạn mức → tự lùi sang các mô hình này"}
+          ]},
+        "openai": {"dieu_kien": "khi Gemini lỗi / hết hạn mức (chỉ key máy chủ)",
+          "con": [{"id": "m3_openai", "ai": "openai", "model_tu": "openai_model", "nhan": "nhận diện", "dung_cho": "Nhận diện chất trong ảnh / tên tiếng Việt"}]}
+      },
+      "khac": [
+        {"id": "m3_pubchem", "ten": "PubChem + RDKit", "khong_ai": true,
+         "dung_cho": "SMILES hoặc tên tiếng Anh → tra PubChem, dựng toạ độ 3D bằng RDKit (không gọi AI)"}
+      ]
+    },
+    {
+      "id": "co_che", "ten": "Cơ chế", "mau": "#F472B6", "bieu_tuong": "co_che", "phia": "phai",
+      "mo_ta": "AI viết toàn bộ cơ chế (mũi tên cong, trung gian) → RDKit kiểm tra → sửa; vẽ SVG + CDXML. Có đọc ảnh đề + bước xác nhận.",
+      "endpoint": "POST /api/co-che · POST /api/co-che/doc-anh · POST /api/co-che/chat",
+      "code": "backend/co_che.py (_phien_manh) · co_che_anh.py · ve_co_che.py",
+      "dem": {"kind": ["co_che", "co_che_anh"]},
+      "ai": {
+        "claude": {"dieu_kien": "chỉ khi có quyền Claude và bật \"Dùng Claude\"",
+          "con": [
+            {"id": "cc_opus", "ai": "claude", "model_tu": "claude_model_manh", "nhan": "viết cơ chế", "dung_cho": "Viết cơ chế (CLAUDE_MODEL_MANH)"},
+            {"id": "cc_sonnet", "ai": "claude", "model_tu": "model", "nhan": "đọc ảnh đề", "dung_cho": "Đọc ảnh đề khi Key Claude / admin bật \"Dùng Claude\""}
+          ]},
+        "gemini": {"dieu_kien": "mặc định cho mọi người",
+          "con": [
+            {"id": "cc_pro", "ai": "gemini", "model_tu": "gemini_model_hsg", "nhan": "viết cơ chế", "dung_cho": "Viết cơ chế · đọc lại ảnh đề mức HSG · thay Claude khi Claude lỗi"},
+            {"id": "cc_flash", "ai": "gemini", "model_tu": "gemini_model", "nhan": "đọc ảnh đề", "dung_cho": "Đọc ảnh đề (lần đầu) – đề khó thì đọc lại bằng bậc cao hơn"},
+            {"id": "cc_lite", "ai": "gemini", "model_tu": "gemini_model_lite", "nhan": "sửa chất",
+             "dung_cho": "Sửa một chất ở bước xác nhận ảnh (khi PubChem không nhận ra tên) · rút từ khoá tra cứu tài liệu"},
+            {"id": "cc_du_phong", "ai": "gemini", "model_tu": "gemini_du_phong", "nhan": "hết hạn mức", "dung_cho": "Gemini hết hạn mức → tự lùi sang các mô hình này"}
+          ]},
+        "openai": {"dieu_kien": "khi các AI trước lỗi / hết hạn mức / quá thời gian (chỉ key máy chủ)",
+          "con": [{"id": "cc_openai", "ai": "openai", "model_tu": "openai_model", "nhan": "mọi bước", "dung_cho": "Viết cơ chế, đọc ảnh đề, sửa chất"}]}
+      },
+      "khac": []
+    },
+    {
+      "id": "ha_tang", "ten": "Hạ tầng chung", "mau": "#FBBF24", "bieu_tuong": "ha_tang", "phia": "trai",
+      "mo_ta": "Phần dùng chung cho cả ba mục: tra cứu, xuất ảnh / ChemDraw, giao diện, tài khoản.",
+      "endpoint": "—", "code": "backend/",
+      "con": [
+        {"id": "ht_tra_cuu", "ten": "Tra cứu web & tài liệu", "mo_ta": "Crossref, Unpaywall, OpenAlex, Semantic Scholar, Europe PMC, arXiv, PubChem (API hợp pháp, song song ≤ 20 giây)",
+         "endpoint": "gọi trong POST /api/giai, /api/co-che", "code": "backend/literature.py · pubchem_lookup",
+         "dem": {"step": ["tra_cuu"]},
+         "con": [
+           {"id": "ht_tra_cuu_ai", "ai": "gemini", "model_tu": "gemini_model_lite", "nhan": "rút từ khoá",
+            "dung_cho": "Rút từ khoá / DOI từ đề (kể cả trong ảnh) trước khi tra cứu – đi theo thứ tự AI của mục đang chạy; tra cứu bản thân không dùng AI"}
+         ]},
+        {"id": "ht_xuat", "ten": "Xuất ảnh / file ChemDraw", "mo_ta": "Ảnh đáp án PNG, SVG, CDXML, mở ChemDraw trên máy chạy app",
+         "endpoint": "GET /api/tep · /api/tai · POST /api/chemdraw", "code": "backend/renderer.py · image_export.py · chemdraw.py",
+         "con": [{"id": "ht_xuat_ai", "ten": "RDKit + Pillow", "khong_ai": true, "dung_cho": "Vẽ cấu trúc và xuất file – không gọi AI"}]},
+        {"id": "ht_ma_gd", "ten": "Mã giao diện", "mo_ta": "Nút +K: admin cấp mã (kiểm bằng HMAC) → đổi theme bằng biến CSS + lớp hiệu ứng",
+         "endpoint": "POST /api/theme/redeem · /admin/api/ma-giao-dien", "code": "backend/ma_giao_dien.py · frontend/giao-dien.js · frontend/themes/*.js",
+         "con": [{"id": "ht_ma_gd_ai", "ten": "HMAC + theme CSS", "khong_ai": true, "dung_cho": "Kiểm mã ở server, đổi biến CSS + canvas hiệu ứng ở trình duyệt – không gọi AI"}]},
+        {"id": "ht_tai_khoan", "ten": "Tài khoản", "mo_ta": "Đăng nhập Google / email + mã OTP, chặn email rác, quyền Claude, nhật ký",
+         "endpoint": "/auth/* · /api/toi · /admin/api/*", "code": "backend/auth.py · xac_thuc_email.py · email_rac.py · bao_mat.py",
+         "con": [{"id": "ht_tai_khoan_ai", "ten": "Xác thực + email", "khong_ai": true, "dung_cho": "SMTP / Resend, Turnstile, dnspython (MX) – không gọi AI"}]}
+      ]
+    },
+    {
+      "id": "notebooklm", "ten": "NotebookLM", "mau": "#4285F4", "bieu_tuong": "notebooklm", "phia": "phai",
+      "mo_ta": "Google NotebookLM đa tài khoản · Nguồn tài liệu PDF, Web, YouTube, Docs · Hỏi đáp trực tiếp & Nhập vào AI Riêng",
+      "endpoint": "GET /admin/api/notebooklm/mindmap · POST /admin/api/notebooklm/query",
+      "code": "services/notebooklm/",
+      "is_notebooklm_root": true,
+      "con": [
+        {"id": "nlm_tai_khoan", "ten": "Tài khoản Google & Nguồn", "khong_ai": true, "dung_cho": "Quản lý cookie đa tài khoản, đồng bộ sổ tay và tài liệu nghiên cứu"}
+      ]
+    }
+  ]
+}

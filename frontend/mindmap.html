@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sơ đồ hệ thống · CHEMISTRY</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="color-scheme" content="dark">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2363d4a1' stroke-width='1.8' stroke-linejoin='round'%3E%3Cpath d='M12 2.5l8.2 4.75v9.5L12 21.5l-8.2-4.75v-9.5z'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* Trang sơ đồ luôn nền đen (không theo chế độ sáng / tối của app) */
+    :root {
+      --nen: #0A0A0F; --nen-2: #12121A; --vien: rgba(255, 255, 255, 0.09); --chu: #E8E8F0; --chu-2: #9A9AAE; --chu-3: #6B6B80;
+      --ok: #34D399; --loi: #F87171; --tat: #6B7280; --sans: "Be Vietnam Pro", -apple-system, "Segoe UI", sans-serif;
+      --mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: var(--nen); color: var(--chu); font-family: var(--sans); overflow: hidden; }
+    #khung { position: fixed; inset: 0; cursor: grab; touch-action: none; user-select: none;
+      background-color: var(--nen); background-image: radial-gradient(rgba(255, 255, 255, 0.075) 1px, transparent 1.3px); background-size: 24px 24px; }
+    #khung.dang-keo { cursor: grabbing; }
+    #san { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
+    #canh { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: visible; pointer-events: none; }
+    #canh path { fill: none; }
+    .duong { stroke-width: 1.8; stroke-linecap: round; }
+    .duong-sang { stroke-width: 7; opacity: 0.16; stroke-linecap: round; }
+    .duong-fb { stroke-width: 1.4; stroke-dasharray: 5 5; opacity: 0.85; }
+    .nhan-fb { font: 500 10px var(--mono); letter-spacing: 0.08em; fill: var(--chu-2); paint-order: stroke; stroke: var(--nen); stroke-width: 4px; }
+
+    .nut { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 14px;
+      background: rgba(18, 18, 26, 0.92); border: 1px solid var(--vien); color: var(--chu); cursor: pointer; white-space: nowrap;
+      box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.8); transition: border-color 0.2s, box-shadow 0.2s; }
+    .nut:hover { border-color: var(--mau, #fff); box-shadow: 0 0 0 1px var(--mau, #fff), 0 0 22px -4px var(--mau, #fff); }
+    .nut .dem-con { font: 500 10px var(--mono); color: var(--chu-3); margin-left: 2px; }
+    .nut.thu-gon .dem-con { color: var(--mau); }
+    .goc { padding: 14px 20px; gap: 12px; border-radius: 18px; border-color: rgba(99, 212, 161, 0.5);
+      box-shadow: 0 0 0 1px rgba(99, 212, 161, 0.25), 0 0 40px -6px rgba(99, 212, 161, 0.55), 0 0 90px -20px rgba(99, 212, 161, 0.5); }
+    .goc svg { width: 30px; height: 30px; color: #63d4a1; filter: drop-shadow(0 0 6px rgba(99, 212, 161, 0.7)); }
+    .goc b { font-size: 17px; font-weight: 700; letter-spacing: 0.01em; }
+    .goc small { display: block; font: 500 10px var(--mono); color: var(--chu-2); letter-spacing: 0.08em; text-transform: uppercase; }
+    .cap1 { border-color: color-mix(in srgb, var(--mau) 55%, transparent); box-shadow: 0 0 26px -8px var(--mau); }
+    .cap1 svg { width: 20px; height: 20px; color: var(--mau); }
+    .cap1 b { font-size: 15px; font-weight: 600; }
+    .cap1 .so { font: 500 10px var(--mono); color: var(--chu-2); padding: 2px 7px; border-radius: 999px; background: rgba(255, 255, 255, 0.06); }
+    .nhanh b { font-size: 13px; font-weight: 600; }
+    .nhanh small { display: block; font-size: 10.5px; color: var(--chu-3); max-width: 230px; overflow: hidden; text-overflow: ellipsis; }
+    .ai { padding: 9px 12px; gap: 11px; min-width: 236px; }
+    .logo { width: 30px; height: 30px; flex: none; border-radius: 9px; display: grid; place-items: center; background: rgba(255, 255, 255, 0.05); }
+    .logo i { width: 18px; height: 18px; background: var(--mau-hang); -webkit-mask: var(--logo) center / contain no-repeat; mask: var(--logo) center / contain no-repeat; }
+    .ai .ten { font: 500 12px var(--mono); color: var(--chu); }
+    .ai .vai { display: inline-block; margin-top: 3px; font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 999px; }
+    .vai.chinh { background: rgba(52, 211, 153, 0.12); color: #6EE7B7; }
+    .vai.co_dieu_kien { background: rgba(217, 119, 87, 0.15); color: #F0A585; }
+    .vai.du_phong, .vai.du_phong_2 { background: rgba(255, 255, 255, 0.07); color: var(--chu-2); border: 1px dashed rgba(255, 255, 255, 0.2); }
+    .vai.khong_dung { background: transparent; color: var(--chu-2); border: 1px dashed rgba(255, 255, 255, 0.14); font-weight: 500; }
+    .vai.du_phong_1 { background: rgba(251, 191, 36, 0.12); color: #FCD34D; border: 1px dashed rgba(251, 191, 36, 0.35); }
+    .ai.ncc { padding: 11px 14px; min-width: 210px; border-width: 1.5px; }
+    .ai.ncc .logo { width: 36px; height: 36px; } .ai.ncc .logo i { width: 22px; height: 22px; }
+    .ten-ncc { font-size: 14px; font-weight: 700; }
+    .ai .dk { display: block; margin-top: 2px; font-size: 10.5px; color: var(--chu-3); max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
+    .ai.ncc .dk { display: inline; margin-left: 6px; }
+    .ai.mo-hinh { min-width: 220px; padding: 7px 11px; } .ai.mo-hinh .logo { width: 24px; height: 24px; } .ai.mo-hinh .logo i { width: 14px; height: 14px; }
+    .ai .goi { font: 500 10px var(--mono); color: var(--chu-3); margin-left: 6px; }
+    .cham { width: 9px; height: 9px; border-radius: 50%; flex: none; margin-left: auto; background: var(--tat); }
+    .cham.ok { background: var(--ok); box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.6); animation: nhip 2.2s infinite; }
+    .cham.loi { background: var(--loi); box-shadow: 0 0 10px rgba(248, 113, 113, 0.8); }
+    .cham.dang { background: var(--tat); animation: mo 1s infinite alternate; }
+    @keyframes nhip { 0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.55); } 70% { box-shadow: 0 0 0 7px rgba(52, 211, 153, 0); } 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); } }
+    @keyframes mo { from { opacity: 0.35; } to { opacity: 1; } }
+    .khong-ai { border-style: dashed; opacity: 0.85; }
+    .khong-ai .the-ko { font: 500 10px var(--mono); color: var(--chu-3); padding: 1px 7px; border-radius: 999px; border: 1px solid var(--vien); }
+
+    /* bảng điều khiển */
+    .bang { position: fixed; z-index: 5; background: rgba(18, 18, 26, 0.86); border: 1px solid var(--vien); border-radius: 14px; backdrop-filter: blur(8px); }
+    #tren { top: 14px; left: 14px; padding: 12px 14px; max-width: min(560px, calc(100vw - 28px)); }
+    #tren h1 { margin: 0; font-size: 16px; font-weight: 700; }
+    #tren p { margin: 4px 0 0; font-size: 11.5px; color: var(--chu-2); }
+    #tren a { color: #63d4a1; text-decoration: none; font-size: 12px; }
+    .hang-nut { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    button.btn { font: 500 11.5px var(--sans); color: var(--chu); background: rgba(255, 255, 255, 0.06); border: 1px solid var(--vien); border-radius: 9px;
+      padding: 6px 10px; cursor: pointer; }
+    button.btn:hover { border-color: rgba(99, 212, 161, 0.6); color: #fff; }
+    #chu-giai { display: flex; flex-wrap: wrap; gap: 10px 14px; margin-top: 10px; font-size: 11px; color: var(--chu-2); }
+    #chu-giai span { display: inline-flex; align-items: center; gap: 6px; }
+    #chu-giai .cham { margin: 0; animation: none; }
+    #duoi { right: 14px; bottom: 14px; padding: 6px; display: flex; align-items: center; gap: 4px; }
+    #duoi span { font: 500 11px var(--mono); color: var(--chu-2); min-width: 44px; text-align: center; }
+    #trang-thai { left: 14px; bottom: 14px; padding: 8px 12px; font: 500 11px var(--mono); color: var(--chu-2); max-width: calc(100vw - 180px); }
+    #goi-y { position: fixed; z-index: 6; pointer-events: none; max-width: 340px; padding: 12px 14px; border-radius: 12px; font-size: 12px; line-height: 1.5;
+      background: rgba(12, 12, 18, 0.97); border: 1px solid rgba(255, 255, 255, 0.14); box-shadow: 0 16px 40px -10px #000; opacity: 0; transition: opacity 0.12s; }
+    #goi-y.hien { opacity: 1; }
+    #goi-y h3 { margin: 0 0 6px; font-size: 13px; }
+    #goi-y dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; }
+    #goi-y dt { color: var(--chu-3); } #goi-y dd { margin: 0; color: var(--chu); word-break: break-word; }
+    #goi-y code { font: 11px var(--mono); color: #C4B5FD; }
+    /* Drawer chi tiết NotebookLM bên phải */
+    #nlm-drawer {
+      position: fixed; top: 0; right: 0; bottom: 0; width: min(460px, 100vw);
+      background: rgba(14, 14, 22, 0.97); border-left: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(20px); z-index: 25; transform: translateX(100%);
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex; flex-direction: column; box-shadow: -12px 0 40px rgba(0, 0, 0, 0.85);
+    }
+    #nlm-drawer.mo { transform: translateX(0); }
+    .drawer-header { padding: 16px 20px; border-bottom: 1px solid var(--vien); display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .drawer-body { flex: 1; overflow-y: auto; padding: 18px 20px; display: flex; flex-direction: column; gap: 16px; }
+    .drawer-footer { padding: 12px 18px; border-top: 1px solid var(--vien); background: rgba(10, 10, 15, 0.7); }
+    .chat-khung { display: flex; flex-direction: column; gap: 10px; max-height: 240px; overflow-y: auto; padding-right: 4px; }
+    .chat-tin { padding: 9px 13px; border-radius: 12px; font-size: 12.5px; line-height: 1.5; }
+    .chat-tin.hoi { background: rgba(66, 133, 244, 0.18); border: 1px solid rgba(66, 133, 244, 0.4); color: #93C5FD; align-self: flex-end; max-width: 90%; }
+    .chat-tin.dap { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--vien); color: var(--chu); align-self: flex-start; max-width: 95%; }
+    .chat-tin pre { white-space: pre-wrap; font-family: inherit; margin: 0; }
+    .nguon-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; border-radius: 8px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--vien); font-size: 12px; }
+    .badge-tag { font: 500 10px var(--mono); padding: 2px 7px; border-radius: 999px; }
+    @media (max-width: 640px) { #tren p, #chu-giai { display: none; } #trang-thai { display: none; } }
+    @media (prefers-reduced-motion: reduce) { .cham.ok, .cham.dang { animation: none; } }
+  </style>
+</head>
+<body>
+  <div id="khung" aria-label="Sơ đồ hệ thống – kéo để di chuyển, cuộn để phóng to / thu nhỏ, bấm một nút để mở / thu nhánh">
+    <div id="san">
+      <svg id="canh" aria-hidden="true">
+        <defs><marker id="mui-ten" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0 0L10 5L0 10z" fill="#9A9AAE"/></marker></defs>
+        <g id="lop-canh"></g><g id="lop-fb"></g>
+      </svg>
+      <div id="lop-nut"></div>
+    </div>
+  </div>
+
+  <div id="tren" class="bang">
+    <a href="/admin">← Quản trị</a>
+    <h1>Sơ đồ hệ thống</h1>
+    <p>Mỗi mục dùng AI nào (đọc từ cấu hình + .env đang chạy), vai trò Chính / Dự phòng, trạng thái và số lần gọi hôm nay.
+      Kéo để di chuyển · cuộn để phóng to · bấm một nút để mở / thu nhánh · rê chuột xem chi tiết.</p>
+    <div class="hang-nut">
+      <button type="button" class="btn" id="nut-vua">Vừa khung</button>
+      <button type="button" class="btn" id="nut-mo-het">Mở hết</button>
+      <button type="button" class="btn" id="nut-thu-het">Thu gọn</button>
+      <button type="button" class="btn" id="nut-lam-moi">Kiểm tra lại trạng thái</button>
+    </div>
+    <!-- Bộ chọn tài khoản NotebookLM -->
+    <div id="nlm-thanh-tai-khoan" style="display:none; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--vien);" class="hang-nut">
+      <span style="font-size: 11px; color: #4285F4; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10M6 10h10M6 14h6"/></svg>
+        NotebookLM:
+      </span>
+      <select id="nlm-chon-tk" class="btn" style="padding: 4px 8px; border-color: rgba(66, 133, 244, 0.4);"></select>
+    </div>
+    <div id="chu-giai">
+      <span><i class="cham ok"></i>hoạt động</span><span><i class="cham loi"></i>lỗi</span><span><i class="cham"></i>chưa cấu hình / chưa rõ</span>
+      <span><svg width="34" height="8"><path d="M1 4H30" stroke="#9A9AAE" stroke-dasharray="4 4" marker-end="url(#mui-ten)"/></svg>fallback</span>
+    </div>
+  </div>
+  <div id="duoi" class="bang">
+    <button type="button" class="btn" id="nut-nho" aria-label="Thu nhỏ">−</button><span id="ti-le">100%</span>
+    <button type="button" class="btn" id="nut-to" aria-label="Phóng to">+</button>
+  </div>
+  <div id="trang-thai" class="bang">Đang tải…</div>
+  <div id="goi-y" role="tooltip"></div>
+
+  <!-- Drawer Chi tiết NotebookLM bên phải -->
+  <aside id="nlm-drawer" aria-hidden="true" role="dialog" aria-labelledby="nlm-drawer-title">
+    <div class="drawer-header">
+      <div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="color: #4285F4; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">NotebookLM</span>
+          <span id="nlm-drawer-badge" class="badge-tag" style="background: rgba(66, 133, 244, 0.15); color: #93C5FD;">0 nguồn</span>
+        </div>
+        <h2 id="nlm-drawer-title" style="margin: 4px 0 0; font-size: 16px; font-weight: 700; color: #fff;">Tên Notebook</h2>
+      </div>
+      <button type="button" id="nlm-drawer-dong" class="btn" style="padding: 4px 10px; font-size: 16px; line-height: 1;">✕</button>
+    </div>
+    <div class="drawer-body">
+      <!-- Tóm tắt & Nút mở web -->
+      <div>
+        <p id="nlm-drawer-mota" style="margin: 0; font-size: 12.5px; color: var(--chu-2); line-height: 1.5;"></p>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
+          <a id="nlm-drawer-link-web" href="#" target="_blank" rel="noopener noreferrer" class="btn" style="color: #60A5FA; display: inline-flex; align-items: center; gap: 6px; text-decoration: none;">
+            Mở trên Google NotebookLM ↗
+          </a>
+          <button type="button" id="nlm-drawer-btn-ai-rieng" class="btn" style="background: rgba(99, 212, 161, 0.15); border-color: rgba(99, 212, 161, 0.4); color: #63d4a1;">
+            Dùng làm tài liệu cho AI Riêng
+          </button>
+        </div>
+      </div>
+
+      <!-- Danh sách nguồn tài liệu -->
+      <div>
+        <div style="font-size: 12px; font-weight: 600; color: var(--chu); margin-bottom: 8px; display: flex; justify-content: space-between;">
+          <span>Nguồn tài liệu & Ghi chú</span>
+          <span id="nlm-drawer-so-nguon" style="color: var(--chu-3); font-family: var(--mono); font-size: 11px;">0 mục</span>
+        </div>
+        <div id="nlm-drawer-ds-nguon" style="display: flex; flex-direction: column; gap: 6px;"></div>
+      </div>
+
+      <!-- Hỏi đáp trực tiếp với Notebook -->
+      <div style="border-top: 1px solid var(--vien); padding-top: 14px;">
+        <div style="font-size: 12px; font-weight: 600; color: var(--chu); margin-bottom: 8px;">
+          Hỏi đáp trực tiếp với Notebook này
+        </div>
+        <div id="nlm-chat-ds" class="chat-khung">
+          <div class="chat-tin dap">Bạn có thể hỏi bất kỳ câu hỏi nào về nội dung các tài liệu trong notebook này.</div>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <form id="nlm-chat-form" style="display: flex; gap: 8px;">
+        <input type="text" id="nlm-chat-nhap" class="btn" style="flex: 1; text-align: left; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" placeholder="Hỏi nội dung trong notebook…" required>
+        <button type="submit" id="nlm-chat-gui" class="btn" style="background: #4285F4; border-color: #4285F4; color: #fff; font-weight: 600;">Gửi</button>
+      </form>
+    </div>
+  </aside>
+
+  <script src="/static/mindmap.js"></script>
+</body>
+</html>

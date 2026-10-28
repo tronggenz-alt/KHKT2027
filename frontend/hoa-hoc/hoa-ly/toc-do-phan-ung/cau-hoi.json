@@ -1,0 +1,139 @@
+{
+  "phien_ban": 1,
+  "mon": "Hoá lý",
+  "chu_de": "Tốc độ phản ứng & Năng lượng hoạt hoá",
+  "danh_sach": [
+    {
+      "id": "ch-01",
+      "dang": "I",
+      "tieu_de": "Câu 1 (Phần I): Định nghĩa năng lượng hoạt hoá Ea",
+      "cau_hoi": "Năng lượng hoạt hoá (Ea) của một phản ứng hoá học theo thuyết va chạm hoạt động là gì?",
+      "lua_chon": [
+        "A. Năng lượng tối thiểu mà các phân tử va chạm cần phải có để phản ứng hoá học có thể xảy ra",
+        "B. Toàn bộ nhiệt lượng toả ra khi phản ứng hoàn thành",
+        "C. Động năng trung bình của tất cả các phân tử trong hệ phản ứng",
+        "D. Năng lượng giải phóng khi phá vỡ liên kết của các chất sản phẩm"
+      ],
+      "dap_an": "A",
+      "giai_thich": "Theo thuyết va chạm hoạt động và mô hình Arrhenius (D4), năng lượng hoạt hoá Ea là rào cản năng lượng tối thiểu mà các phân tử tham gia va chạm phải vượt qua để có thể tạo thành phức chất hoạt động (trạng thái chuyển tiếp) và chuyển hoá thành sản phẩm.",
+      "nguon": "SGK Hoá học 10 (KNTT) - Bài Thuyết va chạm và Năng lượng hoạt hoá"
+    },
+    {
+      "id": "ch-02",
+      "dang": "I",
+      "tieu_de": "Câu 2 (Phần I): Cơ chế làm tăng tốc độ của chất xúc tác",
+      "cau_hoi": "Chất xúc tác làm tăng tốc độ của một phản ứng hoá học chủ yếu dựa trên cơ chế nào sau đây?",
+      "lua_chon": [
+        "A. Làm tăng nhiệt độ của hệ phản ứng",
+        "B. Làm mở ra con đường phản ứng mới có năng lượng hoạt hoá Ea thấp hơn",
+        "C. Làm biến thiên enthalpy ΔrH° của phản ứng âm hơn",
+        "D. Làm tăng nồng độ ban đầu của các chất tham gia phản ứng"
+      ],
+      "dap_an": "B",
+      "giai_thich": "Theo lý thuyết động học (D7), chất xúc tác tham gia vào phản ứng tạo thành hợp chất trung gian, mở ra một đường đi mới có năng lượng hoạt hoá Ea thấp hơn (Ea_xt < Ea). Do đó phân số phân tử có đủ năng lượng phản ứng exp(−Ea/RT) tăng lên vọt, làm tốc độ phản ứng tăng mạnh.",
+      "nguon": "SGK Hoá học 10 (CTST) - Bài Yếu tố xúc tác trong phản ứng hoá học"
+    },
+    {
+      "id": "ch-03",
+      "dang": "I",
+      "tieu_de": "Câu 3 (Phần I): Quy tắc kinh nghiệm Van 't Hoff về nhiệt độ",
+      "cau_hoi": "Theo quy tắc kinh nghiệm Van 't Hoff, khi nhiệt độ của phản ứng tăng thêm 10 °C thì tốc độ phản ứng thường tăng lên khoảng bao nhiêu lần (hệ số nhiệt độ γ)?",
+      "lua_chon": [
+        "A. Từ 2 đến 4 lần",
+        "B. Từ 10 đến 20 lần",
+        "C. Từ 50 đến 100 lần",
+        "D. Luôn tăng đúng 10 lần"
+      ],
+      "dap_an": "A",
+      "giai_thich": "Quy tắc kinh nghiệm Van 't Hoff (D3) chỉ ra rằng với đa số các phản ứng hoá học thông thường có Ea cỡ 50–80 kJ/mol ở nhiệt độ phòng, khi nhiệt độ tăng thêm 10 °C thì tốc độ phản ứng tăng từ 2 đến 4 lần (hệ số γ = 2–4).",
+      "nguon": "SGK Hoá học 10 - Bài Ảnh hưởng của nhiệt độ đến tốc độ phản ứng"
+    },
+    {
+      "id": "ch-04",
+      "dang": "II",
+      "tieu_de": "Câu 4 (Phần II): Đúng / Sai về Thuyết va chạm và Phân bố Maxwell–Boltzmann",
+      "cau_hoi": "Xét các phát biểu về thuyết va chạm hoạt động và phân bố năng lượng:",
+      "y": [
+        { "noi_dung": "a) Mọi va chạm giữa các phân tử chất phản ứng đều dẫn đến phản ứng hoá học tạo thành sản phẩm.", "dung": false },
+        { "noi_dung": "b) Chỉ những va chạm có năng lượng tịnh tiến dọc theo phương nối tâm lớn hơn hoặc bằng năng lượng hoạt hoá Ea và có định hướng không gian thuận lợi mới là va chạm hiệu quả.", "dung": true },
+        { "noi_dung": "c) Khi nhiệt độ tăng, đường phân bố năng lượng Maxwell dẹt xuống và phần diện tích đuôi có năng lượng E ≥ Ea tăng lên đáng kể.", "dung": true },
+        { "noi_dung": "d) Tỉ lệ va chạm có năng lượng vượt ngưỡng Ea tỉ lệ thuận với thừa số Arrhenius exp(−Ea / RT).", "dung": true }
+      ],
+      "giai_thich": "Ý a sai: Đa số các va chạm là va chạm không hiệu quả do không đủ năng lượng vượt qua rào cản Ea hoặc không đúng hướng không gian, các phân tử chỉ nảy ra đàn hồi.",
+      "nguon": "SGK Hoá học 10 & Hoá lý cơ sở - Phân bố Maxwell-Boltzmann và Thuyết va chạm"
+    },
+    {
+      "id": "ch-05",
+      "dang": "II",
+      "tieu_de": "Câu 5 (Phần II): Đúng / Sai về Bậc phản ứng và Chu kỳ bán huỷ",
+      "cau_hoi": "Xét động học của các phản ứng hoá học theo các bậc động học khác nhau:",
+      "y": [
+        { "noi_dung": "a) Đối với phản ứng bậc 1, thời gian bán huỷ t½ = ln 2 / k là hằng số và hoàn toàn không phụ thuộc vào nồng độ ban đầu của chất phản ứng.", "dung": true },
+        { "noi_dung": "b) Đối với phản ứng bậc 2 (dạng A + A → sản phẩm), thời gian bán huỷ t½ = 1 / (k · C₀) tỉ lệ nghịch với nồng độ ban đầu C₀.", "dung": true },
+        { "noi_dung": "c) Đối với phản ứng bậc 0, tốc độ phản ứng v = k không đổi theo thời gian cho tới khi chất phản ứng bị tiêu thụ hết.", "dung": true },
+        { "noi_dung": "d) Bậc phản ứng hoá học luôn luôn bằng hệ số tỉ lượng đứng trước chất đó trong phương trình hoá học tổng cộng.", "dung": false }
+      ],
+      "giai_thich": "Ý d sai: Bậc phản ứng chỉ trùng hệ số tỉ lượng đối với phản ứng sơ cấp (diễn ra qua 1 giai đoạn). Đối với phản ứng phức tạp diễn ra qua nhiều giai đoạn nối tiếp, bậc phản ứng bắt buộc phải xác định bằng thực nghiệm.",
+      "nguon": "Hoá lý - Động học phản ứng bậc 0, bậc 1, bậc 2"
+    },
+    {
+      "id": "ch-06",
+      "dang": "II",
+      "tieu_de": "Câu 6 (Phần II): Đúng / Sai về Giản đồ năng lượng phản ứng",
+      "cau_hoi": "Xét giản đồ biểu diễn năng lượng tiềm năng theo toạ độ phản ứng:",
+      "y": [
+        { "noi_dung": "a) Đỉnh cao nhất của đường cong năng lượng tương ứng với trạng thái chuyển tiếp (phức chất hoạt động).", "dung": true },
+        { "noi_dung": "b) Hiệu số giữa mức năng lượng trạng thái chuyển tiếp và mức năng lượng chất đầu chính là năng lượng hoạt hoá của phản ứng thuận Ea_t.", "dung": true },
+        { "noi_dung": "c) Đối với phản ứng toả nhiệt, mức năng lượng của sản phẩm nằm cao hơn mức năng lượng của các chất đầu.", "dung": false },
+        { "noi_dung": "d) Khi có chất xúc tác, đỉnh của đường cong năng lượng hạ thấp xuống nhưng hiệu số năng lượng giữa chất đầu và sản phẩm (ΔrH°) không thay đổi.", "dung": true }
+      ],
+      "giai_thich": "Ý c sai: Đối với phản ứng toả nhiệt (ΔH < 0), năng lượng của sản phẩm phải thấp hơn năng lượng của chất phản ứng ban đầu (phần năng lượng dư thừa được toả ra môi trường dưới dạng nhiệt).",
+      "nguon": "SGK Hoá học 10 - Giản đồ năng lượng hoạt hoá"
+    },
+    {
+      "id": "ch-07",
+      "dang": "III",
+      "tieu_de": "Câu 7 (Phần III): Tỉ số tốc độ phản ứng khi tăng 10 °C",
+      "cau_hoi": "Một phản ứng hoá học có năng lượng hoạt hoá Ea = 50,0 kJ/mol. Tính tỉ số giữa hằng số tốc độ k ở 308,15 K (35 °C) so với hằng số tốc độ k ở 298,15 K (25 °C) (cho hằng số R = 8,31446 J/(mol·K), kết quả làm tròn đến bốn chữ số thập phân, ví dụ 1,9243).",
+      "dap_so": "1,9243",
+      "tinh_bang": {
+        "ham": "tiLeTocDo",
+        "tham_so": { "Ea_kJ": 50.0, "T1": 298.15, "T2": 308.15 },
+        "truong": "tiLe",
+        "lam_tron": 4
+      },
+      "giai_thich": "ln(k₂/k₁) = −(Ea/R) · (1/T₂ − 1/T₁) = −(50000 / 8,31446) · (1/308,15 − 1/298,15) = 0,65457 => k₂/k₁ = e^(0,65457) ≈ 1,9243.",
+      "nguon": "Bài tập Phương trình Arrhenius"
+    },
+    {
+      "id": "ch-08",
+      "dang": "III",
+      "tieu_de": "Câu 8 (Phần III): Hằng số tốc độ của phản ứng bậc 1",
+      "cau_hoi": "Một phản ứng phân huỷ phóng xạ hoặc phản ứng phân huỷ hoá học tuân theo động học bậc 1 có chu kỳ bán huỷ t½ = 30,0 giây. Tính hằng số tốc độ phản ứng k (theo đơn vị s⁻¹, kết quả làm tròn đến sáu chữ số thập phân, ví dụ 0,023105).",
+      "dap_so": "0,023105",
+      "tinh_bang": {
+        "ham": "thoiGianBanHuyBac1",
+        "tham_so": { "t_half": 30.0 },
+        "truong": "k",
+        "lam_tron": 6
+      },
+      "giai_thich": "k = ln(2) / t½ = 0,693147 / 30,0 ≈ 0,023105 s⁻¹.",
+      "nguon": "Động học phản ứng bậc 1"
+    },
+    {
+      "id": "ch-09",
+      "dang": "III",
+      "tieu_de": "Câu 9 (Phần III): Hệ số tăng tốc độ nhờ chất xúc tác",
+      "cau_hoi": "Ở 298,15 K, khi thêm chất xúc tác vào một phản ứng hoá học, năng lượng hoạt hoá Ea giảm đi một lượng ΔEa = 20,0 kJ/mol. Giả sử thừa số trước hàm mũ A không đổi, tính xem tốc độ phản ứng tăng lên bao nhiêu lần (cho R = 8,31446 J/(mol·K), kết quả làm tròn đến một chữ số thập phân, ví dụ 3190,4).",
+      "dap_so": "3190,4",
+      "tinh_bang": {
+        "ham": "heSoTangXucTac",
+        "tham_so": { "deltaEa_kJ": 20.0, "T": 298.15 },
+        "truong": "heSo",
+        "lam_tron": 1
+      },
+      "giai_thich": "k_xt / k = exp(ΔEa / (RT)) = exp(20000 / (8,31446 · 298,15)) = exp(8,0682) ≈ 3190,4 lần.",
+      "nguon": "Bài tập Năng lượng hoạt hoá và xúc tác"
+    }
+  ]
+}

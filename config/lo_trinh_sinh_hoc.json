@@ -1,0 +1,62 @@
+{
+  "ten": "Lộ trình Sinh học – Cơ thể người (Sinh học 11, CT GDPT 2018)",
+  "ghi_chu": "Chỉ admin thấy (/admin → Lộ trình học). Sửa tên bài thoải mái; KHÔNG đổi 'id' của bài đã đánh dấu (tiến độ lưu theo id). 'co_quan' = id trong frontend/sinh-hoc/kien-thuc/danh-muc.json (hiện nút mở Phòng Lab 3D).",
+  "chuong": [
+    {
+      "id": "c1",
+      "ten": "Chương 1. Trao đổi chất và chuyển hoá năng lượng ở động vật",
+      "bai": [
+        { "id": "tieu-hoa-hinh-thuc", "ten": "Các hình thức tiêu hoá ở động vật (nội bào, túi tiêu hoá, ống tiêu hoá)", "co_quan": [] },
+        { "id": "tieu-hoa-nguoi", "ten": "Tiêu hoá ở người: khoang miệng, dạ dày, ruột non, ruột già", "co_quan": ["da_day", "ruot_non", "ruot_gia"] },
+        { "id": "tuyen-tieu-hoa", "ten": "Tuyến tiêu hoá: gan, tuỵ – dịch mật, dịch tuỵ", "co_quan": ["gan", "tuy"] },
+        { "id": "tieu-hoa-dong-vat", "ten": "Tiêu hoá ở thú ăn thịt và thú ăn thực vật (dạ dày 4 ngăn, manh tràng)", "co_quan": ["da_day", "ruot_gia"] },
+        { "id": "ho-hap-be-mat", "ten": "Bề mặt trao đổi khí và các hình thức hô hấp ở động vật", "co_quan": ["phoi"] },
+        { "id": "ho-hap-nguoi", "ten": "Hô hấp ở người: thông khí, trao đổi khí ở phổi, điều hoà hô hấp", "co_quan": ["phoi"] },
+        { "id": "tuan-hoan-cac-dang", "ten": "Các dạng hệ tuần hoàn: hở – kín, đơn – kép", "co_quan": ["tim", "mach_mau"] },
+        { "id": "tim-hoat-dong", "ten": "Hoạt động của tim: tính tự động, chu kì tim, nhịp tim", "co_quan": ["tim"] },
+        { "id": "mach-hoat-dong", "ten": "Hoạt động của hệ mạch: huyết áp, vận tốc máu", "co_quan": ["mach_mau"] },
+        { "id": "dieu-hoa-tim-mach", "ten": "Điều hoà hoạt động tim mạch", "co_quan": ["tim", "mach_mau"] },
+        { "id": "mien-dich", "ten": "Miễn dịch không đặc hiệu, miễn dịch đặc hiệu và vaccine", "co_quan": ["lach", "da"] },
+        { "id": "can-bang-noi-moi", "ten": "Cân bằng nội môi: khái niệm và cơ chế (tiếp nhận – điều khiển – thực hiện)", "co_quan": ["than", "da"] },
+        { "id": "bai-tiet-than", "ten": "Bài tiết: tạo nước tiểu ở thận, điều hoà áp suất thẩm thấu (ADH)", "co_quan": ["than"] },
+        { "id": "glucose-mau", "ten": "Điều hoà glucose máu: gan, tuỵ, insulin và glucagon", "co_quan": ["gan", "tuy"] }
+      ]
+    },
+    {
+      "id": "c2",
+      "ten": "Chương 2. Cảm ứng ở động vật",
+      "bai": [
+        { "id": "neuron-he-than-kinh", "ten": "Neuron và các dạng hệ thần kinh", "co_quan": ["nao", "tuy_song"] },
+        { "id": "dien-the", "ten": "Điện thế nghỉ, điện thế hoạt động và sự lan truyền xung thần kinh", "co_quan": ["nao"] },
+        { "id": "synapse", "ten": "Synapse và sự truyền tin qua synapse", "co_quan": ["nao", "co"] },
+        { "id": "phan-xa", "ten": "Phản xạ, cung phản xạ; phản xạ có điều kiện và không điều kiện", "co_quan": ["tuy_song", "nao"] },
+        { "id": "giac-quan", "ten": "Cơ quan cảm giác: thị giác, thính giác", "co_quan": [] },
+        { "id": "tap-tinh", "ten": "Tập tính ở động vật và ứng dụng", "co_quan": [] }
+      ]
+    },
+    {
+      "id": "c3",
+      "ten": "Chương 3. Sinh trưởng và phát triển ở động vật",
+      "bai": [
+        { "id": "hormone-sinh-truong", "ten": "Hormone điều hoà sinh trưởng, phát triển (GH, thyroxine, hormone sinh dục)", "co_quan": ["xuong"] },
+        { "id": "nhan-to-sinh-truong", "ten": "Các nhân tố ảnh hưởng đến sinh trưởng, phát triển ở người (dinh dưỡng, vận động)", "co_quan": ["xuong", "co"] }
+      ]
+    },
+    {
+      "id": "c4",
+      "ten": "Chương 4. Sinh sản ở động vật",
+      "bai": [
+        { "id": "sinh-san-nguoi", "ten": "Sinh sản ở người và điều hoà sinh sản", "co_quan": [] },
+        { "id": "suc-khoe-sinh-san", "ten": "Sinh đẻ có kế hoạch, bảo vệ sức khoẻ sinh sản vị thành niên", "co_quan": [] }
+      ]
+    },
+    {
+      "id": "on-tap",
+      "ten": "Ôn tập",
+      "bai": [
+        { "id": "trac-nghiem-co-quan", "ten": "Làm trắc nghiệm 15 cơ quan trên Phòng Lab 3D", "co_quan": [] },
+        { "id": "de-minh-hoa", "ten": "Luyện đề minh hoạ tốt nghiệp THPT môn Sinh học", "co_quan": [] }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+# Không đưa vào ảnh Docker: bí mật, dữ liệu người dùng, môi trường Python của máy Mac, file tạm
+.env
+.env.*
+!.env.example
+.git
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+data
+outputs
+logs
+tests
+*.command
+.DS_Store

@@ -1,0 +1,87 @@
+{
+  "id": "chuan-do",
+  "ten": "Chuẩn độ acid – base",
+  "lop": 11,
+  "bieu_tuong": "🧪",
+  "mo_ta": "Chuẩn độ HCl và CH₃COOH bằng NaOH 0,100 M, chọn chất chỉ thị, vẽ đường cong pH – V, tính nồng độ acid.",
+  "muc_tieu": [
+    "Thực hiện chuẩn độ dung dịch acid bằng dung dịch sodium hydroxide (NaOH) có nồng độ đã biết.",
+    "Chọn chất chỉ thị phù hợp và xác định điểm cuối chuẩn độ.",
+    "Vẽ, đọc đường cong chuẩn độ pH – V(NaOH) và tính nồng độ acid."
+  ],
+  "dung_cu": ["Burette 50 mL (chia vạch 0,1 mL)", "Bình tam giác 100 mL", "Pipette 20,00 mL", "Giá và kẹp burette", "Cốc thuỷ tinh", "Giấy trắng lót dưới bình"],
+  "hoa_chat": [
+    { "ten": "Dung dịch sodium hydroxide (NaOH) 0,100 M", "nguy_hiem": ["an_mon"] },
+    { "ten": "Dung dịch hydrochloric acid (HCl)", "nguy_hiem": ["an_mon"] },
+    { "ten": "Dung dịch ethanoic acid (acetic acid, CH₃COOH)", "nguy_hiem": ["kich_ung"] },
+    { "ten": "Phenolphthalein (khoảng đổi màu pH 8,2 – 10,0: không màu → hồng)", "nguy_hiem": [] },
+    { "ten": "Methyl orange (khoảng đổi màu pH 3,1 – 4,4: đỏ → vàng)", "nguy_hiem": [] }
+  ],
+  "buoc": [
+    { "id": "chi_thi", "tieu_de": "Chọn acid và nhỏ 2–3 giọt chất chỉ thị", "huong_dan": "Bình tam giác đã có 20,00 mL acid. Chọn chất chỉ thị ở bảng điều khiển.", "goi_y": "HCl: dùng được cả phenolphthalein và methyl orange. CH₃COOH: dùng phenolphthalein vì điểm tương đương có pH > 7.", "dieu_kien": "co_chi_thi" },
+    { "id": "chay_nhanh", "tieu_de": "Mở khoá cho NaOH chảy nhanh tới khoảng 15 mL, vừa nhỏ vừa lắc", "huong_dan": "Bấm \"Chảy nhanh\"; bấm \"Lắc bình\" để trộn đều.", "goi_y": "Điểm tương đương dự kiến ở 20 mL (khi C(acid) = 0,1 M).", "dieu_kien": "V_tu_15" },
+    { "id": "nho_giot", "tieu_de": "Chuyển sang nhỏ từng giọt cho tới khi dung dịch đổi màu bền sau khi lắc", "huong_dan": "Bấm \"Từng giọt\" hoặc \"+1 giọt\"; sau mỗi vài giọt bấm \"Lắc bình\".", "goi_y": "Vệt màu xuất hiện rồi biến mất khi lắc = sắp tới điểm cuối. Dừng khi màu bền khoảng 30 giây.", "dieu_kien": "doi_mau_ben" },
+    { "id": "doc_buret", "tieu_de": "Đọc thể tích trên burette (đáy mặt khum)", "huong_dan": "Dùng ô phóng to vạch burette, nhập số đọc rồi bấm \"Ghi số đọc\".", "goi_y": "Mắt ngang vạch, đọc ở đáy mặt khum, ghi 2 chữ số sau dấu phẩy (ví dụ 19,95).", "dieu_kien": "da_doc_buret" },
+    { "id": "tinh", "tieu_de": "Tính nồng độ acid", "huong_dan": "C(acid) = C(NaOH) · V(NaOH) / V(acid). Nhập kết quả rồi bấm \"Kiểm tra\".", "goi_y": "Với V(NaOH) = 20,00 mL: C = 0,100 × 20,00 / 20,00 = 0,100 M.", "dieu_kien": "da_tinh_dung" }
+  ],
+  "an_toan": [
+    "Đeo kính bảo hộ, găng tay: NaOH và HCl gây bỏng da, tổn thương mắt.",
+    "Kiểm tra khoá burette trước khi rót; rót NaOH vào burette bằng phễu, thấp hơn tầm mắt.",
+    "Đọc thể tích ở đáy mặt khum, mắt ngang vạch."
+  ],
+  "cau_hinh": {
+    "Cb": 0.1,
+    "Va": 20,
+    "V_buret": 50,
+    "the_tich_giot": 0.05,
+    "toc_do_nhanh": 0.5,
+    "khoang_giot": 0.5,
+    "bai": [
+      { "id": "hcl", "cong_thuc": "HCl", "ten": "hydrochloric acid", "Ca": 0.1, "Ka": null, "mo_ta": "acid mạnh – base mạnh" },
+      { "id": "ch3cooh", "cong_thuc": "CH₃COOH", "ten": "ethanoic acid (acetic acid)", "Ca": 0.1, "Ka": 1.75e-5, "mo_ta": "acid yếu – base mạnh (Ka = 1,75·10⁻⁵)" }
+    ],
+    "chi_thi": ["phenolphthalein", "methyl_orange"],
+    "on_thi": { "Ca_tu": 0.06, "Ca_den": 0.14 }
+  },
+  "cau_hoi": {
+    "bon_lua_chon": [
+      { "cau": "Chuẩn độ 20,00 mL dung dịch HCl bằng NaOH 0,100 M, điểm cuối ứng với 15,00 mL NaOH. Nồng độ HCl là",
+        "lua_chon": ["0,050 M", "0,133 M", "0,075 M", "0,100 M"], "dap_an": "C",
+        "giai_thich": "C(HCl) = 0,100 × 15,00 / 20,00 = 0,075 M." },
+      { "cau": "Khi chuẩn độ CH₃COOH bằng NaOH, chất chỉ thị phù hợp nhất là",
+        "lua_chon": ["phenolphthalein", "methyl orange", "quỳ tím", "không cần chất chỉ thị"], "dap_an": "A",
+        "giai_thich": "Điểm tương đương có pH ≈ 8,7 (môi trường base do CH₃COO⁻ thuỷ phân), nằm trong khoảng đổi màu 8,2 – 10,0 của phenolphthalein." },
+      { "cau": "pH tại điểm tương đương khi chuẩn độ HCl bằng NaOH (25 °C) bằng",
+        "lua_chon": ["1,00", "4,76", "7,00", "8,73"], "dap_an": "C",
+        "giai_thich": "Tại điểm tương đương dung dịch chỉ có NaCl – muối không thuỷ phân – nên pH = 7." },
+      { "cau": "Cách đọc thể tích trên burette đúng là",
+        "lua_chon": ["đọc ở mép trên mặt khum, mắt nhìn từ trên xuống", "đọc ở đáy mặt khum, mắt nhìn từ dưới lên", "đọc ở vị trí bất kì của mặt khum", "đọc ở đáy mặt khum, mắt ngang vạch"], "dap_an": "D",
+        "giai_thich": "Với dung dịch trong suốt, đọc ở đáy mặt khum và mắt đặt ngang vạch để tránh sai số thị sai." },
+      { "cau": "Tại điểm \"nửa tương đương\" khi chuẩn độ CH₃COOH (Ka = 1,75·10⁻⁵) bằng NaOH, pH của dung dịch bằng",
+        "lua_chon": ["2,88", "4,76", "7,00", "8,73"], "dap_an": "B",
+        "giai_thich": "Khi đã trung hoà một nửa, [CH₃COOH] = [CH₃COO⁻] nên pH = pKa = −lg(1,75·10⁻⁵) ≈ 4,76." }
+    ],
+    "dung_sai": [
+      { "cau": "Chuẩn độ 20,00 mL HCl 0,100 M bằng NaOH 0,100 M:",
+        "y": [
+          { "noi_dung": "Điểm tương đương ứng với 20,00 mL NaOH.", "dung": true, "giai_thich": "n(HCl) = n(NaOH) → V = 0,100 × 20,00 / 0,100 = 20,00 mL." },
+          { "noi_dung": "Trước điểm tương đương, dung dịch có pH > 7.", "dung": false, "giai_thich": "Còn dư HCl nên pH < 7." },
+          { "noi_dung": "Gần điểm tương đương, pH thay đổi rất đột ngột (bước nhảy pH).", "dung": true, "giai_thich": "Chỉ thêm 0,2 mL (19,9 → 20,1 mL), pH tăng từ 3,6 lên 10,4." },
+          { "noi_dung": "Methyl orange không dùng được cho phép chuẩn độ này.", "dung": false, "giai_thich": "Bước nhảy pH (≈ 3,6 – 10,4) bao trùm khoảng đổi màu 3,1 – 4,4 nên vẫn dùng được." }
+        ] },
+      { "cau": "Chuẩn độ 20,00 mL CH₃COOH 0,100 M bằng NaOH 0,100 M:",
+        "y": [
+          { "noi_dung": "Tại điểm tương đương, dung dịch có môi trường base (pH ≈ 8,7).", "dung": true, "giai_thich": "CH₃COO⁻ + H₂O ⇌ CH₃COOH + OH⁻." },
+          { "noi_dung": "Bước nhảy pH ngắn hơn so với chuẩn độ HCl cùng nồng độ.", "dung": true, "giai_thich": "Acid yếu nên pH trước điểm tương đương cao hơn, bước nhảy ngắn hơn." },
+          { "noi_dung": "Khi chưa thêm NaOH, pH của dung dịch bằng 1,00.", "dung": false, "giai_thich": "CH₃COOH là acid yếu: pH ≈ 2,88." },
+          { "noi_dung": "Có thể dùng methyl orange để xác định điểm cuối chính xác.", "dung": false, "giai_thich": "Methyl orange đổi màu ở pH 3,1 – 4,4, sớm hơn nhiều so với điểm tương đương (pH ≈ 8,7)." }
+        ] }
+    ],
+    "tra_loi_ngan": [
+      { "cau": "Chuẩn độ 20,00 mL CH₃COOH bằng NaOH 0,100 M hết 16,40 mL. Nồng độ CH₃COOH là bao nhiêu mol/L? (làm tròn đến hàng phần nghìn)",
+        "dap_so": "0,082", "don_vi": "M", "sai_so": 0.001, "giai_thich": "C = 0,100 × 16,40 / 20,00 = 0,082 M." },
+      { "cau": "Thêm 10,00 mL NaOH 0,100 M vào 20,00 mL HCl 0,100 M. Tính pH của dung dịch thu được (làm tròn đến hàng phần trăm).",
+        "dap_so": "1,48", "don_vi": "", "sai_so": 0.01, "giai_thich": "n(H⁺) dư = 2,00 − 1,00 = 1,00 mmol trong 30,00 mL → [H⁺] = 0,0333 M → pH = 1,48." }
+    ]
+  }
+}

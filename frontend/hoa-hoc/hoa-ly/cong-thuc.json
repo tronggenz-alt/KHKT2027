@@ -1,0 +1,2938 @@
+{
+  "phien_ban": 1,
+  "chu_de": [
+    {
+      "id": "khi",
+      "ten": "Khí lý tưởng"
+    },
+    {
+      "id": "nhiet-dong",
+      "ten": "Nhiệt động học"
+    },
+    {
+      "id": "nhiet-hoa",
+      "ten": "Nhiệt hoá học"
+    },
+    {
+      "id": "dong-hoc",
+      "ten": "Tốc độ phản ứng"
+    },
+    {
+      "id": "can-bang",
+      "ten": "Cân bằng hoá học"
+    }
+  ],
+  "cong_thuc": [
+    {
+      "id": "pt-trang-thai",
+      "ma": "K1",
+      "chu_de": "khi",
+      "ten": "Phương trình trạng thái khí lý tưởng",
+      "latex": "pV = nRT",
+      "latex_text": "pV = nRT",
+      "ky_hieu": [
+        {
+          "k": "p",
+          "y": "áp suất chất khí",
+          "dv": "Pa (hoặc bar)"
+        },
+        {
+          "k": "V",
+          "y": "thể tích khối khí",
+          "dv": "m³ (hoặc L)"
+        },
+        {
+          "k": "n",
+          "y": "số mol khí",
+          "dv": "mol"
+        },
+        {
+          "k": "R",
+          "y": "hằng số khí lý tưởng = 8,314 J/(mol·K) = 0,08314 bar·L/(mol·K)",
+          "dv": "J/(mol·K)"
+        },
+        {
+          "k": "T",
+          "y": "nhiệt độ tuyệt đối",
+          "dv": "K"
+        }
+      ],
+      "dieu_kien": "Khí loãng, áp suất thấp, nhiệt độ không quá thấp",
+      "lop": "Vật lí 12 · Hoá 10",
+      "muc_do": "sgk",
+      "mo_phong": [
+        {
+          "id": "khi-ly-tuong",
+          "query": "giu=T"
+        },
+        {
+          "id": "dong-co-nhiet",
+          "query": "ky=1"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_KhiLyTuong.theTich",
+        "vao": {
+          "n": 1,
+          "T": 298.15,
+          "p_bar": 1
+        },
+        "ra": 24.79,
+        "dv": "L",
+        "sai_so": 0.01
+      },
+      "chung_minh": {
+        "loai": "chung-minh",
+        "can_toan": "khong",
+        "buoc": [
+          {
+            "loi": "Xét một lượng khí xác định n mol biến đổi từ trạng thái 1 (p₁, V₁, T₁) sang trạng thái trung gian 1' (p₂, V', T₁) theo quá trình đẳng nhiệt Boyle (T₁ không đổi).",
+            "latex": "p_1 V_1 = p_2 {V'}",
+            "to_mau": [
+              "V'"
+            ],
+            "hinh": "trang-thai-trung-gian"
+          },
+          {
+            "loi": "Từ trạng thái trung gian 1' (p₂, V', T₁) sang trạng thái 2 (p₂, V₂, T₂) theo quá trình đẳng áp Charles (p₂ không đổi).",
+            "latex": "\\frac{{V'}}{T_1} = \\frac{V_2}{T_2} \\implies {V'} = V_2 \\cdot \\frac{T_1}{T_2}",
+            "to_mau": [
+              "V'"
+            ],
+            "hinh": "trang-thai-trung-gian"
+          },
+          {
+            "loi": "Khử V' bằng cách thay vào biểu thức của định luật Boyle, ta thu được phương trình kết hợp Clapéron.",
+            "latex": "p_1 V_1 = p_2 \\cdot \\left(V_2 \\frac{T_1}{T_2}\\right) \\implies {\\frac{p_1 V_1}{T_1} = \\frac{p_2 V_2}{T_2} = \\text{const}}",
+            "to_mau": [
+              "p1 V1 / T1 = p2 V2 / T2"
+            ],
+            "hinh": "trang-thai-trung-gian"
+          },
+          {
+            "loi": "Theo định luật Avogadro: ở cùng p và T, thể tích V tỉ lệ thuận với số mol n. Do đó hằng số tỉ lệ phải tỉ lệ thuận với n, ta đặt hằng số = n·R.",
+            "latex": "\\frac{pV}{T} = {n \\cdot R} \\implies pV = nRT",
+            "to_mau": [
+              "n R"
+            ],
+            "hinh": "trang-thai-trung-gian"
+          },
+          {
+            "loi": "Xác định hằng số R từ thực nghiệm đkc (25 °C = 298,15 K, p = 1 bar, thể tích mol Vm = 24,79 L/mol = 0,02479 m³/mol).",
+            "latex": "R = \\frac{p \\cdot V_m}{T} = \\frac{10^5 \\cdot 0{,}02479}{298{,}15} \\approx {8{,}314 \\text{ J/(mol}\\cdot\\text{K)}}",
+            "to_mau": [
+              "8,314"
+            ],
+            "hinh": "trang-thai-trung-gian"
+          }
+        ],
+        "y_chinh": "Kết hợp hai định luật thực nghiệm Boyle và Charles qua trạng thái trung gian, sau đó chuẩn hoá theo định luật Avogadro với hằng số khí R = 8,314 J/(mol·K).",
+        "hinh": "trang-thai-trung-gian",
+        "cach_2": {
+          "ten": "Cách 2: Thuyết động học phân tử vi mô",
+          "buoc": [
+            {
+              "loi": "Từ mô hình động học chất khí, áp suất gây ra bởi các hạt phân tử va chạm lên thành bình là: p = \\frac{1}{3}\\mu m \\langle v^2\\rangle = \\frac{2}{3}\\mu \\bar{W}_{\\text{đ}}.",
+              "latex": "p = \\frac{2}{3}\\mu \\bar{W}_{\\text{đ}} = \\frac{2}{3} \\frac{N}{V} \\bar{W}_{\\text{đ}}"
+            },
+            {
+              "loi": "Thay động năng tịnh tiến trung bình \\bar{W}_{\\text{đ}} = \\frac{3}{2}kT vào phương trình áp suất vi mô.",
+              "latex": "p = \\frac{2}{3} \\frac{N}{V} \\left(\\frac{3}{2}kT\\right) = \\frac{N}{V} kT \\implies pV = N k T"
+            },
+            {
+              "loi": "Vì số phân tử N = n N_A và hằng số khí R = N_A k, ta thu được ngay phương trình trạng thái Clapéron - Mendeleev.",
+              "latex": "pV = n (N_A k) T = n R T"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ap-suat-dong-hoc",
+      "ma": "K2",
+      "chu_de": "khi",
+      "ten": "Phương trình cơ bản của thuyết động học chất khí",
+      "latex": "p = \\frac{1}{3} \\mu m \\langle v^2 \\rangle",
+      "latex_text": "p = (1/3) * mu * m * <v^2>",
+      "ky_hieu": [
+        {
+          "k": "p",
+          "y": "áp suất chất khí tác dụng lên thành bình",
+          "dv": "Pa"
+        },
+        {
+          "k": "μ",
+          "y": "mật độ phân tử μ = N/V",
+          "dv": "m⁻³"
+        },
+        {
+          "k": "m",
+          "y": "khối lượng của một phân tử khí",
+          "dv": "kg"
+        },
+        {
+          "k": "⟨v²⟩",
+          "y": "trung bình bình phương tốc độ phân tử",
+          "dv": "m²/s²"
+        }
+      ],
+      "dieu_kien": "Chuyển động hỗn loạn đều, va chạm hoàn toàn đàn hồi với thành bình",
+      "lop": "Vật lí 12",
+      "muc_do": "sgk",
+      "mo_phong": [
+        {
+          "id": "khi-ly-tuong",
+          "query": "theo_doi=1"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_KhiLyTuong.apSuatViMo",
+        "vao": {
+          "N": 2.43e+22,
+          "V_L": 1.0,
+          "m_kg": 4.65e-26,
+          "v_rms": 515.0
+        },
+        "ra": 1.0,
+        "dv": "bar",
+        "sai_so": 0.05
+      },
+      "chung_minh": {
+        "loai": "chung-minh",
+        "can_toan": "khong",
+        "buoc": [
+          {
+            "loi": "Xét 1 phân tử khối lượng m chuyển động trong hộp lập phương cạnh ℓ với vận tốc vx vuông góc với thành bình.",
+            "latex": "\\text{Hộp lập phương thể tích } V = \\ell^3, \\text{ hạt có toạ độ vận tốc } (v_x, v_y, v_z)",
+            "to_mau": [
+              "V = \\ell^3"
+            ],
+            "hinh": "phan-tu-dap-thanh"
+          },
+          {
+            "loi": "Khi va chạm đàn hồi với thành bình, thành phần vận tốc đổi chiều từ +vx thành −vx, biến thiên động lượng của hạt là Δpx.",
+            "latex": "\\Delta p_x = m(-v_x) - m(+v_x) = {-2mv_x} \\implies \\Delta p_{\\text{thành}} = +2mv_x",
+            "to_mau": [
+              "-2mv_x"
+            ],
+            "hinh": "phan-tu-dap-thanh"
+          },
+          {
+            "loi": "Thời gian giữa hai lần va chạm liên tiếp vào cùng một diện tích thành bình đối diện là Δt.",
+            "latex": "\\Delta t = \\frac{2\\ell}{v_x}",
+            "to_mau": [
+              "2\\ell / v_x"
+            ],
+            "hinh": "phan-tu-dap-thanh"
+          },
+          {
+            "loi": "Lực trung bình do 1 phân tử tác dụng lên thành bình theo định luật II Newton.",
+            "latex": "F_1 = \\frac{\\Delta p}{\\Delta t} = \\frac{2mv_x}{2\\ell / v_x} = {\\frac{m v_x^2}{\\ell}}",
+            "to_mau": [
+              "m v_x^2 / \\ell"
+            ],
+            "hinh": "phan-tu-dap-thanh"
+          },
+          {
+            "loi": "Với N phân tử chuyển động trong bình, tổng lực tác dụng lên thành bình.",
+            "latex": "F = \\sum_{i=1}^N \\frac{m v_{xi}^2}{\\ell} = \\frac{Nm}{\\ell} \\langle v_x^2 \\rangle",
+            "to_mau": [
+              "Nm / \\ell"
+            ],
+            "hinh": "phan-tu-dap-thanh"
+          },
+          {
+            "loi": "Vì phân tử chuyển động hỗn loạn đẳng hướng trong không gian 3 chiều: ⟨vx²⟩ = ⟨vy²⟩ = ⟨vz²⟩.",
+            "latex": "\\langle v^2 \\rangle = \\langle v_x^2 \\rangle + \\langle v_y^2 \\rangle + \\langle v_z^2 \\rangle = 3 \\langle v_x^2 \\rangle \\implies {\\langle v_x^2 \\rangle = \\frac{1}{3} \\langle v^2 \\rangle}",
+            "to_mau": [
+              "1/3"
+            ],
+            "hinh": "phan-tu-dap-thanh"
+          },
+          {
+            "loi": "Áp suất p bằng lực chia cho diện tích mặt thành S = ℓ², chú ý thể tích V = ℓ³ và mật độ μ = N/V.",
+            "latex": "p = \\frac{F}{S} = \\frac{Nm \\langle v^2 \\rangle}{3\\ell \\cdot \\ell^2} = \\frac{Nm \\langle v^2 \\rangle}{3V} = {\\frac{1}{3} \\mu m \\langle v^2 \\rangle}",
+            "to_mau": [
+              "1/3 \\mu m <v^2>"
+            ],
+            "hinh": "phan-tu-dap-thanh"
+          }
+        ],
+        "y_chinh": "Áp suất chất khí là kết quả vĩ mô của vô số va chạm đàn hồi vi mô của các phân tử lên thành bình trong chuyển động hỗn loạn đẳng hướng.",
+        "hinh": "phan-tu-dap-thanh"
+      }
+    },
+    {
+      "id": "dong-nang-tinh-tien",
+      "ma": "K3",
+      "chu_de": "khi",
+      "ten": "Động năng tịnh tiến trung bình của phân tử",
+      "latex": "\\bar{W}_{\\text{đ}} = \\frac{3}{2} kT",
+      "latex_text": "W_d = (3/2) * k * T",
+      "ky_hieu": [
+        {
+          "k": "W̄đ",
+          "y": "động năng tịnh tiến trung bình của một phân tử",
+          "dv": "J"
+        },
+        {
+          "k": "k",
+          "y": "hằng số Boltzmann k = R/NA = 1,3806·10⁻²³",
+          "dv": "J/K"
+        },
+        {
+          "k": "T",
+          "y": "nhiệt độ tuyệt đối",
+          "dv": "K"
+        }
+      ],
+      "dieu_kien": "Khí lý tưởng ở trạng thái cân bằng nhiệt",
+      "lop": "Vật lí 12",
+      "muc_do": "sgk",
+      "mo_phong": [
+        {
+          "id": "khi-ly-tuong",
+          "query": "giu=T"
+        },
+        {
+          "id": "dong-co-nhiet",
+          "query": "ky=2"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_KhiLyTuong.dongNangTrungBinh",
+        "vao": {
+          "T": 298.15
+        },
+        "ra": 6.17e-21,
+        "dv": "J",
+        "sai_so": 5e-23
+      },
+      "chung_minh": {
+        "loai": "chung-minh",
+        "can_toan": "khong",
+        "buoc": [
+          {
+            "loi": "Phương trình động học phân tử K2 biểu diễn theo tích pV và tổng số phân tử N.",
+            "latex": "p = \\frac{1}{3} \\frac{N}{V} m \\langle v^2 \\rangle \\implies pV = {\\frac{1}{3} N m \\langle v^2 \\rangle}",
+            "to_mau": [
+              "1/3 N m <v^2>"
+            ],
+            "hinh": "dong-nang-nhiet-do"
+          },
+          {
+            "loi": "Biểu diễn phương trình trạng thái khí lý tưởng K1 theo số phân tử N = n·NA và hằng số Boltzmann k = R/NA.",
+            "latex": "pV = nRT = \\left(\\frac{N}{N_A}\\right) RT = {N k T}",
+            "to_mau": [
+              "N k T"
+            ],
+            "hinh": "dong-nang-nhiet-do"
+          },
+          {
+            "loi": "Đồng nhất hai vế biểu thức pV giữa thuyết động học và phương trình trạng thái nhiệt động.",
+            "latex": "\\frac{1}{3} N m \\langle v^2 \\rangle = N k T \\implies \\frac{1}{2} m \\langle v^2 \\rangle = {\\frac{3}{2} k T}",
+            "to_mau": [
+              "3/2 k T"
+            ],
+            "hinh": "dong-nang-nhiet-do"
+          }
+        ],
+        "y_chinh": "Nhiệt độ tuyệt đối T là thước đo trực tiếp cho động năng tịnh tiến trung bình của các phân tử chất khí.",
+        "hinh": "dong-nang-nhiet-do"
+      }
+    },
+    {
+      "id": "can-van-toc-trung-binh",
+      "ma": "K4",
+      "chu_de": "khi",
+      "ten": "Căn quân phương vận tốc nhiệt (v_rms)",
+      "latex": "v_{\\text{rms}} = \\sqrt{\\frac{3RT}{M}}",
+      "latex_text": "v_rms = sqrt(3*R*T / M)",
+      "ky_hieu": [
+        {
+          "k": "v_rms",
+          "y": "vận tốc căn quân phương",
+          "dv": "m/s"
+        },
+        {
+          "k": "R",
+          "y": "hằng số khí = 8,314 J/(mol·K)",
+          "dv": "J/(mol·K)"
+        },
+        {
+          "k": "T",
+          "y": "nhiệt độ tuyệt đối",
+          "dv": "K"
+        },
+        {
+          "k": "M",
+          "y": "khối lượng mol chất khí",
+          "dv": "kg/mol"
+        }
+      ],
+      "dieu_kien": "Khí lý tưởng cân bằng nhiệt",
+      "lop": "Vật lí 12",
+      "muc_do": "sgk",
+      "mo_phong": [
+        {
+          "id": "khi-ly-tuong",
+          "query": "tab=toc-do"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_KhiLyTuong.vanTocRms",
+        "vao": {
+          "T": 298.15,
+          "M_g_mol": 28.013
+        },
+        "ra": 515.2,
+        "dv": "m/s",
+        "sai_so": 0.5
+      },
+      "chung_minh": {
+        "loai": "chung-minh",
+        "can_toan": "khong",
+        "buoc": [
+          {
+            "loi": "Từ biểu thức động năng tịnh tiến trung bình K3: (1/2)m⟨v²⟩ = (3/2)kT, suy ra trung bình bình phương vận tốc.",
+            "latex": "\\langle v^2 \\rangle = {\\frac{3kT}{m}}",
+            "to_mau": [
+              "3kT / m"
+            ],
+            "hinh": "van-toc-can-quan-phuong"
+          },
+          {
+            "loi": "Nhân cả tử và mẫu với số Avogadro NA, nhận thấy k·NA = R và m·NA = M (khối lượng mol tính bằng kg/mol).",
+            "latex": "\\langle v^2 \\rangle = \\frac{3 (k N_A) T}{m N_A} = {\\frac{3RT}{M}}",
+            "to_mau": [
+              "3RT / M"
+            ],
+            "hinh": "van-toc-can-quan-phuong"
+          },
+          {
+            "loi": "Lấy căn bậc hai hai vế, thu được căn quân phương tốc độ nhiệt v_rms.",
+            "latex": "v_{\\text{rms}} = \\sqrt{\\langle v^2 \\rangle} = {\\sqrt{\\frac{3RT}{M}}}",
+            "to_mau": [
+              "sqrt(3RT / M)"
+            ],
+            "hinh": "van-toc-can-quan-phuong"
+          }
+        ],
+        "y_chinh": "Tốc độ nhiệt của phân tử khí tỉ lệ thuận với căn bậc hai của nhiệt độ T và tỉ lệ nghịch với căn khối lượng mol M. Mở rộng từ phân bố Maxwell: v_p = √(2RT/M) và v̄ = √(8RT/(πM)).",
+        "hinh": "van-toc-can-quan-phuong"
+      }
+    },
+    {
+      "id": "dalton",
+      "ma": "K5",
+      "chu_de": "khi",
+      "ten": "Định luật Dalton về áp suất riêng phần",
+      "latex": "p = \\sum p_i, \\quad p_i = x_i \\cdot p",
+      "latex_text": "p = sum(p_i), p_i = x_i * p",
+      "ky_hieu": [
+        {
+          "k": "p",
+          "y": "áp suất toàn phần của hỗn hợp khí",
+          "dv": "bar (Pa)"
+        },
+        {
+          "k": "p_i",
+          "y": "áp suất riêng phần của cấu tử i",
+          "dv": "bar (Pa)"
+        },
+        {
+          "k": "x_i",
+          "y": "phân số mol xi = ni / n_tổng",
+          "dv": ""
+        }
+      ],
+      "dieu_kien": "Hỗn hợp khí lý tưởng không phản ứng hoá học với nhau",
+      "lop": "Hoá 10 · Vật lí 12",
+      "muc_do": "sgk",
+      "mo_phong": [
+        {
+          "id": "khi-ly-tuong",
+          "query": "hon_hop=1"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_KhiLyTuong.apSuatRiengPhan",
+        "vao": {
+          "p_tong": 1.0,
+          "x_i": 0.78
+        },
+        "ra": 0.78,
+        "dv": "bar",
+        "sai_so": 0.01
+      },
+      "chung_minh": {
+        "loai": "chung-minh",
+        "can_toan": "khong",
+        "buoc": [
+          {
+            "loi": "Áp dụng định luật động học K2 cho từng cấu tử trong hỗn hợp. Do khí lý tưởng không tương tác xa, mỗi loại phân tử đập vào thành bình hoàn toàn độc lập.",
+            "latex": "F_i = \\frac{N_i m_i \\langle v_i^2 \\rangle}{3\\ell} \\implies p_i = \\frac{N_i m_i \\langle v_i^2 \\rangle}{3V}",
+            "to_mau": [
+              "p_i"
+            ],
+            "hinh": "ap-suat-rieng-phan-dalton"
+          },
+          {
+            "loi": "Áp suất tổng cộng là tổng xung lực do tất cả các phân tử đập lên thành bình trên một đơn vị diện tích.",
+            "latex": "p = \\frac{F_{\\text{tổng}}}{S} = \\sum_{i} \\frac{F_i}{S} = {\\sum_{i} p_i}",
+            "to_mau": [
+              "sum p_i"
+            ],
+            "hinh": "ap-suat-rieng-phan-dalton"
+          },
+          {
+            "loi": "Từ phương trình trạng thái khí lý tưởng: pi = (ni/V)RT và p = (n_tổng/V)RT.",
+            "latex": "\\frac{p_i}{p} = \\frac{\\frac{n_i R T}{V}}{\\frac{n_{\\text{tổng}} R T}{V}} = \\frac{n_i}{n_{\\text{tổng}}} = {x_i \\implies p_i = x_i \\cdot p}",
+            "to_mau": [
+              "p_i = x_i * p"
+            ],
+            "hinh": "ap-suat-rieng-phan-dalton"
+          }
+        ],
+        "y_chinh": "Áp suất tổng của hỗn hợp khí bằng tổng áp suất riêng phần của từng chất; áp suất riêng phần tỉ lệ thuận với phần mol của chất đó.",
+        "hinh": "ap-suat-rieng-phan-dalton"
+      }
+    },
+    {
+      "id": "dang-qua-trinh",
+      "ma": "K6",
+      "chu_de": "khi",
+      "ten": "Các định luật đẳng quá trình & Độ không tuyệt đối",
+      "latex": "\\frac{pV}{T} = \\text{hằng}, \\quad T = t(^{\\circ}\\text{C}) + 273{,}15",
+      "latex_text": "pV/T = const, T = t(C) + 273.15",
+      "ky_hieu": [
+        {
+          "k": "Boyle",
+          "y": "Đẳng nhiệt: pV = hằng (T không đổi)",
+          "dv": ""
+        },
+        {
+          "k": "Charles",
+          "y": "Đẳng áp: V/T = hằng (p không đổi)",
+          "dv": ""
+        },
+        {
+          "k": "Gay-Lussac",
+          "y": "Đẳng tích: p/T = hằng (V không đổi)",
+          "dv": ""
+        }
+      ],
+      "dieu_kien": "Lượng khí không đổi (n = hằng số)",
+      "lop": "Vật lí 12",
+      "muc_do": "sgk",
+      "mo_phong": [
+        {
+          "id": "khi-ly-tuong",
+          "query": "giu=T"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_KhiLyTuong.theTichCharles",
+        "vao": {
+          "V1": 24.79,
+          "T1": 298.15,
+          "T2": 596.3
+        },
+        "ra": 49.58,
+        "dv": "L",
+        "sai_so": 0.05
+      },
+      "chung_minh": {
+        "loai": "chung-minh",
+        "can_toan": "khong",
+        "buoc": [
+          {
+            "loi": "Xuất phát từ phương trình pV = nRT với lượng chất n cố định.",
+            "latex": "\\frac{pV}{T} = nR = {\\text{const}}",
+            "to_mau": [
+              "const"
+            ],
+            "hinh": "dang-qua-trinh-do-khong"
+          },
+          {
+            "loi": "Cố định lần lượt từng đại lượng: T = hằng số suy ra pV = hằng số (Boyle); p = hằng số suy ra V/T = hằng số (Charles); V = hằng số suy ra p/T = hằng số (Gay-Lussac).",
+            "latex": "T = \\text{const} \\implies p_1 V_1 = p_2 V_2; \\quad p = \\text{const} \\implies \\frac{V_1}{T_1} = \\frac{V_2}{T_2}",
+            "to_mau": [
+              "V1/T1 = V2/T2"
+            ],
+            "hinh": "dang-qua-trinh-do-khong"
+          },
+          {
+            "loi": "Độ không tuyệt đối: Trên đồ thị thực nghiệm Charles vẽ thể tích V theo nhiệt độ Celsius t(°C), đường thẳng có dạng V(t) = V₀·(1 + α·t) với α ≈ 1/273,15.",
+            "latex": "V = 0 \\implies 1 + \\frac{t}{273{,}15} = 0 \\implies {t = -273{,}15^{\\circ}\\text{C}}",
+            "to_mau": [
+              "-273,15"
+            ],
+            "hinh": "dang-qua-trinh-do-khong"
+          }
+        ],
+        "y_chinh": "Mọi định luật đẳng quá trình đều là trường hợp riêng của phương trình trạng thái. Kéo dài đường đẳng áp V theo t(°C) về thể tích triệt tiêu V = 0 xác định độ không tuyệt đối 0 K = −273,15 °C.",
+        "hinh": "dang-qua-trinh-do-khong"
+      }
+    },
+    {
+      "id": "cong-dang-nhiet",
+      "ma": "K7",
+      "chu_de": "khi",
+      "ten": "Công trong quá trình giãn đẳng nhiệt thuận nghịch",
+      "latex": "A' = nRT \\ln\\left(\\frac{V_2}{V_1}\\right)",
+      "latex_text": "A' = n*R*T * ln(V2/V1)",
+      "ky_hieu": [
+        {
+          "k": "A'",
+          "y": "công do chất khí sinh ra",
+          "dv": "J"
+        },
+        {
+          "k": "n",
+          "y": "số mol khí",
+          "dv": "mol"
+        },
+        {
+          "k": "T",
+          "y": "nhiệt độ tuyệt đối giữ không đổi",
+          "dv": "K"
+        },
+        {
+          "k": "V₁, V₂",
+          "y": "thể tích đầu và thể tích cuối",
+          "dv": "m³ (L)"
+        }
+      ],
+      "dieu_kien": "Khí lý tưởng giãn nở thuận nghịch ở nhiệt độ T không đổi",
+      "lop": "Chuyên đề Vật lí 12 · Mở rộng",
+      "muc_do": "mo-rong",
+      "mo_phong": [
+        {
+          "id": "khi-ly-tuong",
+          "query": "giu=T"
+        },
+        {
+          "id": "dong-co-nhiet",
+          "query": "chu_trinh=otto"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_KhiLyTuong.congDangNhiet",
+        "vao": {
+          "n": 1,
+          "T": 298.15,
+          "V1": 24.79,
+          "V2": 12.4
+        },
+        "ra": -1714.7,
+        "dv": "J",
+        "sai_so": 5.0
+      },
+      "chung_minh": {
+        "loai": "chung-minh",
+        "can_toan": "tich-phan",
+        "buoc": [
+          {
+            "loi": "Công vi phân của khí khi thể tích dịch chuyển dV chống lại áp suất ngoài là δA' = p·dV.",
+            "latex": "\\delta A' = p \\cdot dV",
+            "to_mau": [
+              "p dV"
+            ],
+            "hinh": "cong-dang-nhiet-tich-phan"
+          },
+          {
+            "loi": "Từ phương trình khí lý tưởng ở nhiệt độ không đổi: p = nRT / V.",
+            "latex": "\\delta A' = {\\frac{nRT}{V} dV}",
+            "to_mau": [
+              "nRT / V"
+            ],
+            "hinh": "cong-dang-nhiet-tich-phan"
+          },
+          {
+            "loi": "Tích phân hai vế từ thể tích ban đầu V₁ đến thể tích cuối V₂ với nhiệt độ T là hằng số.",
+            "latex": "A' = \\int_{V_1}^{V_2} \\frac{nRT}{V} dV = nRT \\left[ \\ln V \\right]_{V_1}^{V_2} = {nRT \\ln\\left(\\frac{V_2}{V_1}\\right)}",
+            "to_mau": [
+              "nRT ln(V2/V1)"
+            ],
+            "hinh": "cong-dang-nhiet-tich-phan"
+          }
+        ],
+        "y_chinh": "Công giãn đẳng nhiệt thuận nghịch chính là tích phân diện tích dưới đường hyperbol p = nRT/V trên đồ thị p–V.",
+        "hinh": "cong-dang-nhiet-tich-phan",
+        "cach_2": {
+          "ten": "Cách 2: Tổng vi phân diện tích Riemann dưới hyperbol",
+          "buoc": [
+            {
+              "loi": "Trên giản đồ p–V, chia quá trình giãn đẳng nhiệt từ V₁ đến V₂ thành m dải vi phân liên tiếp có độ rộng \\Delta V.",
+              "latex": "A' = \\sum_{i=1}^m p_i \\Delta V_i"
+            },
+            {
+              "loi": "Trong mỗi nấc nhỏ, áp suất tuân theo định luật Boyle p_i = \frac{nRT}{V_i}. Khi số dải m \to \\infty, tổng Riemann tiến tới diện tích tích phân giới hạn bởi đường cong hyperbol.",
+              "latex": "A' = \\lim_{m \to \\infty} \\sum_{i=1}^m \frac{nRT}{V_i} \\Delta V_i = nRT \\int_{V_1}^{V_2} \frac{dV}{V}"
+            },
+            {
+              "loi": "Tích phân hàm 1/V cho nguyên hàm hàm logarit tự nhiên, xác nhận chuẩn xác công sinh ra.",
+              "latex": "A' = nRT \\left[ \\ln V \right]_{V_1}^{V_2} = nRT \\ln\\left(\frac{V_2}{V_1}\right)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "van-der-waals",
+      "ma": "K8",
+      "chu_de": "khi",
+      "ten": "Phương trình trạng thái khí thực Van der Waals",
+      "latex": "\\left(p + \\frac{a n^2}{V^2}\\right)(V - nb) = nRT",
+      "latex_text": "(p + a*n^2/V^2)*(V - n*b) = n*R*T",
+      "ky_hieu": [
+        {
+          "k": "a",
+          "y": "thông số hiệu chỉnh lực hút tương hỗ giữa các phân tử",
+          "dv": "bar·L²/mol²"
+        },
+        {
+          "k": "b",
+          "y": "thông số đồng thể tích riêng của phân tử",
+          "dv": "L/mol"
+        },
+        {
+          "k": "nb",
+          "y": "thể tích chiếm chỗ bởi n mol phân tử khí",
+          "dv": "L"
+        }
+      ],
+      "dieu_kien": "Khí thực ở áp suất cao hoặc nhiệt độ thấp",
+      "lop": "Đại học · Chuyên ban",
+      "muc_do": "dai-hoc",
+      "mo_phong": [
+        {
+          "id": "khi-ly-tuong",
+          "query": "khi=CO2&vdw=1"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_KhiLyTuong.apSuatVanDerWaals",
+        "vao": {
+          "n": 1,
+          "T": 300,
+          "V_L": 0.5,
+          "a": 3.64,
+          "b": 0.0427
+        },
+        "ra": 39.98,
+        "dv": "bar",
+        "sai_so": 0.05
+      },
+      "chung_minh": {
+        "loai": "suy-luan-mo-hinh",
+        "can_toan": "khong",
+        "buoc": [
+          {
+            "loi": "Khí thực có kích thước hữu hạn, không thể coi là chất điểm. Thể tích tự do thực sự để các phân tử chuyển động bị giảm đi một lượng nb.",
+            "latex": "V_{\\text{thực}} = {V - nb}",
+            "to_mau": [
+              "V - nb"
+            ],
+            "hinh": "khi-thuc-van-der-waals"
+          },
+          {
+            "loi": "Lực hút phân tử làm các phân tử gần thành bình bị kéo ngược trở lại lòng chất khí, làm giảm cả số lần và cường độ va chạm lên thành bình. Mức giảm áp suất tỉ lệ với mật độ bình phương (n/V)².",
+            "latex": "p_{\\text{lý tưởng}} = {p + \\frac{a n^2}{V^2}}",
+            "to_mau": [
+              "p + a n^2 / V^2"
+            ],
+            "hinh": "khi-thuc-van-der-waals"
+          },
+          {
+            "loi": "Thay thể tích tự do và áp suất hiệu chỉnh vào phương trình trạng thái khí lý tưởng p_lý_tưởng · V_thực = nRT.",
+            "latex": "{\\left(p + \\frac{a n^2}{V^2}\\right)(V - nb) = nRT}",
+            "to_mau": [
+              "(p + a n^2/V^2)(V - nb) = nRT"
+            ],
+            "hinh": "khi-thuc-van-der-waals"
+          }
+        ],
+        "y_chinh": "Mô hình Van der Waals hiệu chỉnh hai khiếm khuyết lớn của mô hình khí lý tưởng: thể tích riêng của phân tử (b) và lực hút tĩnh điện tương hỗ (a).",
+        "hinh": "khi-thuc-van-der-waals"
+      }
+    },
+    {
+      "id": "dinh-luat-1",
+      "ma": "N1",
+      "chu_de": "nhiet-dong",
+      "ten": "Định luật I nhiệt động học",
+      "latex": "\\Delta U = A + Q",
+      "latex_text": "deltaU = A + Q",
+      "ky_hieu": [
+        {
+          "k": "ΔU",
+          "y": "độ biến thiên nội năng của hệ",
+          "dv": "J"
+        },
+        {
+          "k": "A",
+          "y": "công hệ nhận được (A > 0 nếu nén hệ, A < 0 nếu hệ sinh công)",
+          "dv": "J"
+        },
+        {
+          "k": "Q",
+          "y": "nhiệt lượng hệ nhận được (Q > 0 nếu nhận nhiệt, Q < 0 nếu toả nhiệt)",
+          "dv": "J"
+        }
+      ],
+      "dieu_kien": "Áp dụng cho mọi hệ nhiệt động học",
+      "lop": "Vật lí 12",
+      "muc_do": "sgk",
+      "mo_phong": [
+        {
+          "id": "dong-co-nhiet",
+          "query": "tab=so-lieu"
+        },
+        {
+          "id": "khi-ly-tuong",
+          "query": "doan_nhiet=1"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_DongCoNhiet.dinhLuat1",
+        "vao": {
+          "A": -500,
+          "Q": 1200
+        },
+        "ra": 700,
+        "dv": "J",
+        "sai_so": 1
+      },
+      "chung_minh": {
+        "loai": "dinh-luat-thuc-nghiem",
+        "can_toan": "khong",
+        "buoc": [
+          {
+            "loi": "Định luật I là biểu hiện của Định luật Bảo toàn và Chuyển hoá Năng lượng trong các hiện tượng nhiệt. Năng lượng không tự nhiên sinh ra hay mất đi.",
+            "latex": "\\Delta E_{\\text{hệ}} = E_{\\text{trao đổi}} \\implies \\Delta U = {A + Q}",
+            "to_mau": [
+              "A + Q"
+            ],
+            "hinh": "can-bang-nang-luong-dl1"
+          },
+          {
+            "loi": "Quy ước dấu quốc tế (IUPAC): Đại lượng nào làm TĂNG nội năng của hệ thì mang dấu DƯƠNG (hệ nhận nhiệt Q > 0, hệ nhận công nén A > 0).",
+            "latex": "\\text{Nén khí (nhận công): } A > 0; \\quad \\text{Khí đẩy pít-tông (sinh công): } A' = -A > 0 \\implies A < 0",
+            "to_mau": [
+              "A' = -A"
+            ],
+            "hinh": "can-bang-nang-luong-dl1"
+          },
+          {
+            "loi": "Kiểm chứng thực tế: Trong chu trình động cơ nhiệt khép kín, sau mỗi vòng quay hệ trở về trạng thái ban đầu nên ΔU = 0, suy ra tổng công sinh ra đúng bằng tổng nhiệt lượng trao đổi.",
+            "latex": "\\oint dU = 0 \\implies A'_{\\text{chu trình}} = {Q_1 - Q_2}",
+            "to_mau": [
+              "Q1 - Q2"
+            ],
+            "hinh": "can-bang-nang-luong-dl1"
+          }
+        ],
+        "y_chinh": "Định luật bảo toàn năng lượng trong nhiệt động học: Độ biến thiên nội năng bằng tổng đại số của công và nhiệt lượng mà hệ nhận được.",
+        "hinh": "can-bang-nang-luong-dl1"
+      }
+    },
+    {
+      "id": "cong-cua-khi",
+      "ma": "N2",
+      "chu_de": "nhiet-dong",
+      "ten": "Công cơ học của khối khí & Diện tích đồ thị p–V",
+      "latex": "A' = \\int_{V_1}^{V_2} p \\, dV",
+      "latex_text": "A' = integral(p dV)",
+      "ky_hieu": [
+        {
+          "k": "A'",
+          "y": "công cơ học do chất khí sinh ra",
+          "dv": "J"
+        },
+        {
+          "k": "p",
+          "y": "áp suất chất khí tác dụng lên mặt pít-tông",
+          "dv": "Pa"
+        },
+        {
+          "k": "dV",
+          "y": "độ biến thiên thể tích",
+          "dv": "m³"
+        }
+      ],
+      "dieu_kien": "Quá trình biến đổi thuận nghịch",
+      "lop": "Vật lí 12",
+      "muc_do": "sgk",
+      "mo_phong": [
+        {
+          "id": "dong-co-nhiet",
+          "query": "tab=thong-so"
+        },
+        {
+          "id": "khi-ly-tuong",
+          "query": "giu=p"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_DongCoNhiet.congDangAp",
+        "vao": {
+          "p_bar": 1.0,
+          "deltaV_L": 5.0
+        },
+        "ra": 500,
+        "dv": "J",
+        "sai_so": 1
+      },
+      "chung_minh": {
+        "loai": "chung-minh",
+        "can_toan": "tich-phan",
+        "buoc": [
+          {
+            "loi": "Khí tác dụng lực nén F = p·S lên mặt pít-tông có diện tích S. Khi pít-tông dịch chuyển một đoạn vi phân dx, công sinh ra là δA'.",
+            "latex": "\\delta A' = F \\cdot dx = (p \\cdot S) \\cdot dx",
+            "to_mau": [
+              "p S dx"
+            ],
+            "hinh": "pit-tong-dx"
+          },
+          {
+            "loi": "Nhận thấy S·dx chính là độ biến thiên thể tích vi phân dV của buồng xilanh.",
+            "latex": "dV = S \\cdot dx \\implies {\\delta A' = p \\cdot dV}",
+            "to_mau": [
+              "p dV"
+            ],
+            "hinh": "pit-tong-dx"
+          },
+          {
+            "loi": "Lấy tích phân (tổng) các dải diện tích hình chữ nhật mảnh p·dV từ thể tích đầu V₁ đến thể tích cuối V₂.",
+            "latex": "A' = {\\int_{V_1}^{V_2} p \\, dV} = \\text{Diện tích hình thang cong dưới đường } p(V)",
+            "to_mau": [
+              "integral p dV"
+            ],
+            "hinh": "pit-tong-dx"
+          }
+        ],
+        "y_chinh": "Công của khối khí khi giãn nở hay nén ép bằng tích phân p·dV, tương ứng hình học với diện tích nằm dưới đường biểu diễn quá trình trên đồ thị p–V.",
+        "hinh": "pit-tong-dx",
+        "cach_2": {
+          "ten": "Cách 2: Giải tích hình học diện tích dưới đồ thị p–V",
+          "buoc": [
+            {
+              "loi": "Mọi quá trình biến đổi trạng thái của chất khí được biểu diễn thành một đường cong L(p, V) trên mặt phẳng toạ độ p–V.",
+              "latex": "L: p = p(V)"
+            },
+            {
+              "loi": "Diện tích hình thang cong giới hạn bởi đường L, trục hoành p = 0 và hai đường dóng thẳng đứng V = V₁ và V = V₂ có giá trị bằng tích phân diện tích S = \\int_{V_1}^{V_2} p(V)\\,dV.",
+              "latex": "S = \\int_{V_1}^{V_2} p\\,dV"
+            },
+            {
+              "loi": "Theo định nghĩa công vi phân \\delta A' = p\\,dV, diện tích này chính là công cơ học A' mà khối khí sinh ra khi giãn nở.",
+              "latex": "A' = S = \\int_{V_1}^{V_2} p\\,dV"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "noi-nang-khi",
+      "ma": "N3",
+      "chu_de": "nhiet-dong",
+      "ten": "Nội năng khí lý tưởng & Nhiệt dung mol đẳng tích",
+      "latex": "U = \\frac{f}{2} nRT, \\quad C_v = \\frac{f}{2} R",
+      "latex_text": "U = (f/2)*n*R*T, Cv = (f/2)*R",
+      "ky_hieu": [
+        {
+          "k": "U",
+          "y": "nội năng nhiệt động học của chất khí",
+          "dv": "J"
+        },
+        {
+          "k": "f",
+          "y": "số bậc tự do (f = 3 với khí đơn nguyên tử, f = 5 với khí lưỡng nguyên tử)",
+          "dv": ""
+        },
+        {
+          "k": "Cv",
+          "y": "nhiệt dung mol đẳng tích",
+          "dv": "J/(mol·K)"
+        }
+      ],
+      "dieu_kien": "Khí lý tưởng, bỏ qua thế năng tương tác xa",
+      "lop": "Chuyên đề Vật lí 12",
+      "muc_do": "sgk",
+      "mo_phong": [
+        {
+          "id": "dong-co-nhiet",
+          "query": "tab=thong-so"
+        },
+        {
+          "id": "khi-ly-tuong",
+          "query": "giu=V"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_DongCoNhiet.noiNang",
+        "vao": {
+          "f": 5,
+          "n": 1,
+          "T": 300
+        },
+        "ra": 6236,
+        "dv": "J",
+        "sai_so": 5
+      },
+      "chung_minh": {
+        "loai": "chung-minh",
+        "can_toan": "khong",
+        "buoc": [
+          {
+            "loi": "Với khí đơn nguyên tử (f = 3 bậc tự do tịnh tiến), nội năng chỉ gồm tổng động năng tịnh tiến của N phân tử (từ K3).",
+            "latex": "U = N \\cdot \\bar{W}_{\\text{đ}} = N \\cdot \\left(\\frac{3}{2} kT\\right) = {\\frac{3}{2} nRT}",
+            "to_mau": [
+              "3/2 nRT"
+            ],
+            "hinh": "bac-tu-do-noi-nang"
+          },
+          {
+            "loi": "Theo định nghĩa nhiệt dung mol đẳng tích: Cv là nhiệt lượng cần cung cấp để 1 mol chất tăng thêm 1 K khi giữ nguyên thể tích (A' = 0).",
+            "latex": "C_v = \\frac{1}{n} \\frac{dU}{dT} = \\frac{1}{n} \\frac{d}{dT}\\left(\\frac{3}{2} nRT\\right) = {\\frac{3}{2} R}",
+            "to_mau": [
+              "3/2 R"
+            ],
+            "hinh": "bac-tu-do-noi-nang"
+          },
+          {
+            "loi": "Định lý phân bố đều năng lượng: Mỗi bậc tự do đóng góp (1/2)kT vào phân tử. Với khí lưỡng nguyên tử như N₂, O₂ (f = 5 gồm 3 tịnh tiến + 2 quay).",
+            "latex": "U = {\\frac{f}{2} nRT}, \\quad C_v = \\frac{f}{2} R \\quad (f = 5 \\implies C_v = 2{,}5R)",
+            "to_mau": [
+              "f/2 nRT"
+            ],
+            "hinh": "bac-tu-do-noi-nang"
+          }
+        ],
+        "y_chinh": "Nội năng của khí lý tưởng chỉ phụ thuộc vào nhiệt độ T; mỗi bậc tự do chuyển động đóng góp (1/2)R vào nhiệt dung mol đẳng tích.",
+        "hinh": "bac-tu-do-noi-nang"
+      }
+    },
+    {
+      "id": "he-thuc-mayer",
+      "ma": "N4",
+      "chu_de": "nhiet-dong",
+      "ten": "Hệ thức Mayer giữa nhiệt dung mol đẳng áp và đẳng tích",
+      "latex": "C_p - C_v = R",
+      "latex_text": "Cp - Cv = R",
+      "ky_hieu": [
+        {
+          "k": "Cp",
+          "y": "nhiệt dung mol đẳng áp",
+          "dv": "J/(mol·K)"
+        },
+        {
+          "k": "Cv",
+          "y": "nhiệt dung mol đẳng tích",
+          "dv": "J/(mol·K)"
+        },
+        {
+          "k": "R",
+          "y": "hằng số khí lý tưởng = 8,314",
+          "dv": "J/(mol·K)"
+        }
+      ],
+      "dieu_kien": "Khí lý tưởng",
+      "lop": "Chuyên đề Vật lí 12",
+      "muc_do": "sgk",
+      "mo_phong": [
+        {
+          "id": "dong-co-nhiet",
+          "query": "tab=thong-so"
+        },
+        {
+          "id": "khi-ly-tuong",
+          "query": "giu=p"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_DongCoNhiet.hieuNhietDungMayer",
+        "vao": {},
+        "ra": 8.314,
+        "dv": "J/(mol·K)",
+        "sai_so": 0.001
+      },
+      "chung_minh": {
+        "loai": "chung-minh",
+        "can_toan": "khong",
+        "buoc": [
+          {
+            "loi": "Áp dụng định luật I nhiệt động học cho quá trình đẳng áp: Nhiệt lượng nhận vào Q dùng để tăng nội năng ΔU và sinh công giãn nở A'.",
+            "latex": "Q = {\\Delta U + A'}",
+            "to_mau": [
+              "Delta U + A'"
+            ],
+            "hinh": "he-thuc-mayer"
+          },
+          {
+            "loi": "Biểu diễn từng đại lượng qua nhiệt dung và phương trình trạng thái khí lý tưởng: Q = n·Cp·ΔT; ΔU = n·Cv·ΔT; A' = p·ΔV = n·R·ΔT.",
+            "latex": "n C_p \\Delta T = {n C_v \\Delta T + n R \\Delta T}",
+            "to_mau": [
+              "n Cv DeltaT + n R DeltaT"
+            ],
+            "hinh": "he-thuc-mayer"
+          },
+          {
+            "loi": "Chia cả hai vế cho n·ΔT, ta thu được hệ thức Mayer nổi tiếng.",
+            "latex": "C_p = C_v + R \\implies {C_p - C_v = R}",
+            "to_mau": [
+              "Cp - Cv = R"
+            ],
+            "hinh": "he-thuc-mayer"
+          }
+        ],
+        "y_chinh": "Ở điều kiện đẳng áp, chất khí vừa phải tăng nội năng vừa phải sinh công đẩy pít-tông giãn nở nên nhiệt dung Cp luôn lớn hơn nhiệt dung Cv đúng bằng hằng số khí R.",
+        "hinh": "he-thuc-mayer"
+      }
+    },
+    {
+      "id": "he-thuc-poisson",
+      "ma": "N5",
+      "chu_de": "nhiet-dong",
+      "ten": "Phương trình đoạn nhiệt Poisson",
+      "latex": "T V^{\\gamma - 1} = \\text{hằng}, \\quad p V^\\gamma = \\text{hằng}",
+      "latex_text": "T * V^(gamma-1) = const, p * V^gamma = const",
+      "ky_hieu": [
+        {
+          "k": "γ",
+          "y": "chỉ số đoạn nhiệt γ = Cp / Cv",
+          "dv": ""
+        },
+        {
+          "k": "p, V, T",
+          "y": "áp suất, thể tích và nhiệt độ khối khí",
+          "dv": "bar, L, K"
+        }
+      ],
+      "dieu_kien": "Quá trình biến đổi đoạn nhiệt thuận nghịch (Q = 0)",
+      "lop": "Chuyên đề Vật lí 12 · Mở rộng",
+      "muc_do": "mo-rong",
+      "mo_phong": [
+        {
+          "id": "dong-co-nhiet",
+          "query": "ky=2"
+        },
+        {
+          "id": "khi-ly-tuong",
+          "query": "doan_nhiet=1"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_DongCoNhiet.apSuatDoanNhiet",
+        "vao": {
+          "p1": 1.0,
+          "V1": 10.0,
+          "V2": 5.0,
+          "gamma": 1.4
+        },
+        "ra": 2.639,
+        "dv": "bar",
+        "sai_so": 0.005
+      },
+      "chung_minh": {
+        "loai": "chung-minh",
+        "can_toan": "tich-phan",
+        "buoc": [
+          {
+            "loi": "Trong quá trình đoạn nhiệt, hệ cách nhiệt hoàn toàn với môi trường: δQ = 0. Định luật I cho dU = −p·dV.",
+            "latex": "dU = -p \\, dV \\implies {n C_v dT = -p \\, dV}",
+            "to_mau": [
+              "n Cv dT = -p dV"
+            ],
+            "hinh": "nen-doan-nhiet-poisson"
+          },
+          {
+            "loi": "Thay p = nRT/V từ phương trình khí lý tưởng vào biểu thức trên.",
+            "latex": "n C_v dT = -\\frac{nRT}{V} dV \\implies \\frac{dT}{T} = {-\\frac{R}{C_v} \\frac{dV}{V}}",
+            "to_mau": [
+              "-R/Cv"
+            ],
+            "hinh": "nen-doan-nhiet-poisson"
+          },
+          {
+            "loi": "Sử dụng hệ thức Mayer: R/Cv = (Cp − Cv)/Cv = γ − 1.",
+            "latex": "\\frac{dT}{T} = -(\\gamma - 1) \\frac{dV}{V} \\implies \\frac{dT}{T} + (\\gamma - 1) \\frac{dV}{V} = 0",
+            "to_mau": [
+              "gamma - 1"
+            ],
+            "hinh": "nen-doan-nhiet-poisson"
+          },
+          {
+            "loi": "Lấy tích phân hai vế, ta được biểu thức liên hệ giữa T và V.",
+            "latex": "\\ln T + (\\gamma - 1) \\ln V = \\text{const} \\implies {T V^{\\gamma - 1} = \\text{const}}",
+            "to_mau": [
+              "T V^(gamma-1) = const"
+            ],
+            "hinh": "nen-doan-nhiet-poisson"
+          },
+          {
+            "loi": "Thay T = pV/(nR) vào biểu thức T·V^(γ−1), ta thu được phương trình theo p và V.",
+            "latex": "\\frac{pV}{nR} V^{\\gamma - 1} = \\text{const} \\implies {p V^\\gamma = \\text{const}}",
+            "to_mau": [
+              "p V^gamma = const"
+            ],
+            "hinh": "nen-doan-nhiet-poisson"
+          }
+        ],
+        "y_chinh": "Trong quá trình đoạn nhiệt, nhiệt lượng không trao đổi nên công nén làm toàn bộ nội năng và nhiệt độ khối khí tăng mạnh theo quy luật luỹ thừa Poisson pV^γ = const.",
+        "hinh": "nen-doan-nhiet-poisson",
+        "cach_2": {
+          "ten": "Cách 2: Vi phân toàn phần kết hợp phương trình trạng thái",
+          "buoc": [
+            {
+              "loi": "Lấy vi phân toàn phần của phương trình trạng thái pV = nRT: dp\\cdot V + p\\cdot dV = nR\\,dT.",
+              "latex": "dT = \frac{p\\,dV + V\\,dp}{nR}"
+            },
+            {
+              "loi": "Thế vào phương trình nguyên lý I đoạn nhiệt n C_v dT + p\\,dV = 0 và sử dụng hệ thức Mayer nR = n(C_p - C_v).",
+              "latex": "C_v (p\\,dV + V\\,dp) + (C_p - C_v) p\\,dV = 0 \\implies C_v V\\,dp + C_p p\\,dV = 0"
+            },
+            {
+              "loi": "Chia cả hai vế cho C_v p V và đặt chỉ số đoạn nhiệt \\gamma = C_p/C_v, ta được \frac{dp}{p} + \\gamma \frac{dV}{V} = 0, tích phân ra pV^\\gamma = \\text{const}.",
+              "latex": "\\ln p + \\gamma \\ln V = \\text{const} \\iff p V^\\gamma = \\text{const}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "hieu-suat-dong-co",
+      "ma": "N6",
+      "chu_de": "nhiet-dong",
+      "ten": "Hiệu suất nhiệt của động cơ nhiệt",
+      "latex": "\\eta = \\frac{A'}{Q_1} = 1 - \\frac{Q_2}{Q_1}",
+      "latex_text": "eta = A'/Q1 = 1 - Q2/Q1",
+      "ky_hieu": [
+        {
+          "k": "η",
+          "y": "hiệu suất nhiệt của chu trình động cơ",
+          "dv": ""
+        },
+        {
+          "k": "A'",
+          "y": "công có ích sinh ra trong một chu trình",
+          "dv": "J"
+        },
+        {
+          "k": "Q₁",
+          "y": "nhiệt lượng nhận vào từ nguồn nóng (hoặc do nhiên liệu cháy cấp)",
+          "dv": "J"
+        },
+        {
+          "k": "Q₂",
+          "y": "nhiệt lượng thải ra cho nguồn lạnh (môi trường)",
+          "dv": "J"
+        }
+      ],
+      "dieu_kien": "Chu trình nhiệt động khép kín",
+      "lop": "Vật lí 12",
+      "muc_do": "sgk",
+      "mo_phong": [
+        {
+          "id": "dong-co-nhiet",
+          "query": "tab=so-lieu"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_DongCoNhiet.hieuSuatNhiet",
+        "vao": {
+          "Q1": 1000,
+          "Q2": 450
+        },
+        "ra": 0.55,
+        "dv": "",
+        "sai_so": 0.005
+      },
+      "chung_minh": {
+        "loai": "chung-minh",
+        "can_toan": "khong",
+        "buoc": [
+          {
+            "loi": "Sau một chu trình biến đổi tuần hoàn khép kín, môi chất trở về đúng trạng thái đầu nên biến thiên nội năng triệt tiêu: ΔU = 0.",
+            "latex": "\\Delta U_{\\text{chu trình}} = 0",
+            "to_mau": [
+              "Delta U = 0"
+            ],
+            "hinh": "so-do-dong-co-nhiet"
+          },
+          {
+            "loi": "Theo Định luật I nhiệt động học: Công sinh ra A' bằng tổng nhiệt lượng trao đổi với các nguồn nhiệt.",
+            "latex": "A' = Q_1 - Q_2",
+            "to_mau": [
+              "Q1 - Q2"
+            ],
+            "hinh": "so-do-dong-co-nhiet"
+          },
+          {
+            "loi": "Hiệu suất nhiệt η theo định nghĩa là tỉ số giữa công có ích sinh ra và tổng nhiệt lượng tiêu tốn nhận từ nguồn nóng.",
+            "latex": "\\eta = \\frac{A'}{Q_1} = \\frac{Q_1 - Q_2}{Q_1} = {1 - \\frac{Q_2}{Q_1}}",
+            "to_mau": [
+              "1 - Q2/Q1"
+            ],
+            "hinh": "so-do-dong-co-nhiet"
+          }
+        ],
+        "y_chinh": "Động cơ nhiệt không thể chuyển hoá toàn bộ nhiệt lượng nhận được thành công cơ học; luôn có một phần nhiệt Q₂ bắt buộc phải thải ra nguồn lạnh.",
+        "hinh": "so-do-dong-co-nhiet"
+      }
+    },
+    {
+      "id": "hieu-suat-otto",
+      "ma": "N7",
+      "chu_de": "nhiet-dong",
+      "ten": "Hiệu suất nhiệt của chu trình Otto lý tưởng",
+      "latex": "\\eta_{\\text{Otto}} = 1 - \\frac{1}{r^{\\gamma - 1}}",
+      "latex_text": "eta_Otto = 1 - 1 / r^(gamma-1)",
+      "ky_hieu": [
+        {
+          "k": "r",
+          "y": "tỉ số nén r = V₁ / V₂",
+          "dv": ""
+        },
+        {
+          "k": "γ",
+          "y": "chỉ số đoạn nhiệt của hỗn hợp môi chất khí",
+          "dv": ""
+        }
+      ],
+      "dieu_kien": "Chu trình Otto lý tưởng gồm 2 đoạn nhiệt và 2 đẳng tích",
+      "lop": "Chuyên đề Vật lí 12 · Mở rộng",
+      "muc_do": "mo-rong",
+      "mo_phong": [
+        {
+          "id": "dong-co-nhiet",
+          "query": "chu_trinh=otto"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_DongCoNhiet.hieuSuatOtto",
+        "vao": {
+          "r": 8,
+          "gamma": 1.4
+        },
+        "ra": 0.5647,
+        "dv": "",
+        "sai_so": 0.0005
+      },
+      "chung_minh": {
+        "loai": "chung-minh",
+        "can_toan": "khong",
+        "buoc": [
+          {
+            "loi": "Nhiệt lượng cấp vào đẳng tích (2→3) và nhiệt lượng nhả ra đẳng tích (4→1) tính theo nhiệt dung Cv.",
+            "latex": "Q_1 = n C_v (T_3 - T_2), \\quad Q_2 = n C_v (T_4 - T_1)",
+            "to_mau": [
+              "Q1, Q2"
+            ],
+            "hinh": "chu-trinh-otto-pv"
+          },
+          {
+            "loi": "Áp dụng phương trình đoạn nhiệt Poisson N5 cho hai hành trình nén (1→2) và sinh công giãn nở (3→4) với tỉ số nén r = V₁/V₂ = V₄/V₃.",
+            "latex": "T_2 = T_1 \\cdot r^{\\gamma - 1}, \\quad T_3 = T_4 \\cdot r^{\\gamma - 1}",
+            "to_mau": [
+              "r^(gamma-1)"
+            ],
+            "hinh": "chu-trinh-otto-pv"
+          },
+          {
+            "loi": "Trừ vế theo vế hai biểu thức nhiệt độ.",
+            "latex": "T_3 - T_2 = r^{\\gamma - 1} (T_4 - T_1)",
+            "to_mau": [
+              "T3 - T2"
+            ],
+            "hinh": "chu-trinh-otto-pv"
+          },
+          {
+            "loi": "Thay vào công thức hiệu suất nhiệt động cơ N6.",
+            "latex": "\\eta = 1 - \\frac{Q_2}{Q_1} = 1 - \\frac{n C_v (T_4 - T_1)}{n C_v (T_3 - T_2)} = 1 - \\frac{T_4 - T_1}{r^{\\gamma - 1} (T_4 - T_1)} = {1 - \\frac{1}{r^{\\gamma - 1}}}",
+            "to_mau": [
+              "1 - 1/r^(gamma-1)"
+            ],
+            "hinh": "chu-trinh-otto-pv"
+          }
+        ],
+        "y_chinh": "Hiệu suất chu trình Otto chỉ phụ thuộc vào tỉ số nén r và bản chất khí γ; tỉ số nén r càng cao thì hiệu suất động cơ nhiệt càng lớn.",
+        "hinh": "chu-trinh-otto-pv"
+      }
+    },
+    {
+      "id": "dinh-ly-carnot",
+      "ma": "N8",
+      "chu_de": "nhiet-dong",
+      "ten": "Định lý Carnot & Giới hạn cực đại của hiệu suất",
+      "latex": "\\eta_{\\text{max}} = 1 - \\frac{T_{\\text{lạnh}}}{T_{\\text{nóng}}}",
+      "latex_text": "eta_max = 1 - T_lanh / T_nong",
+      "ky_hieu": [
+        {
+          "k": "η_max",
+          "y": "hiệu suất cực đại của chu trình Carnot thuận nghịch",
+          "dv": ""
+        },
+        {
+          "k": "T_lạnh",
+          "y": "nhiệt độ tuyệt đối của nguồn lạnh",
+          "dv": "K"
+        },
+        {
+          "k": "T_nóng",
+          "y": "nhiệt độ tuyệt đối của nguồn nóng",
+          "dv": "K"
+        }
+      ],
+      "dieu_kien": "Chu trình thuận nghịch hoạt động giữa hai nguồn nhiệt cố định",
+      "lop": "Chuyên đề Vật lí 12 · Mở rộng",
+      "muc_do": "mo-rong",
+      "mo_phong": [
+        {
+          "id": "dong-co-nhiet",
+          "query": "tab=so-lieu"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_DongCoNhiet.hieuSuatCarnot",
+        "vao": {
+          "T_lanh": 300,
+          "T_nong": 1500
+        },
+        "ra": 0.8,
+        "dv": "",
+        "sai_so": 0.005
+      },
+      "chung_minh": {
+        "loai": "chung-minh",
+        "can_toan": "khong",
+        "buoc": [
+          {
+            "loi": "Theo định lý Carnot, mọi động cơ nhiệt thực tế hoạt động giữa hai nguồn nhiệt T_lạnh và T_nóng đều có hiệu suất không vượt quá hiệu suất Carnot: η ≤ 1 − T_lạnh/T_nóng.",
+            "latex": "\\eta_{\\text{Carnot}} = {1 - \\frac{T_1}{T_3}}",
+            "to_mau": [
+              "1 - T1/T3"
+            ],
+            "hinh": "chu-trinh-carnot-so-sanh"
+          },
+          {
+            "loi": "So sánh hiệu suất chu trình Otto N7 với Carnot: Từ quan hệ đoạn nhiệt T₂ = T₁·r^(γ−1) ta có η_Otto = 1 − T₁/T₂.",
+            "latex": "\\eta_{\\text{Otto}} = 1 - \\frac{T_1}{T_2}",
+            "to_mau": [
+              "1 - T1/T2"
+            ],
+            "hinh": "chu-trinh-carnot-so-sanh"
+          },
+          {
+            "loi": "Do quá trình cháy cấp nhiệt (2→3) làm nhiệt độ tăng mạnh nên T₂ < T₃, suy ra T₁/T₂ > T₁/T₃.",
+            "latex": "T_2 < T_3 \\implies 1 - \\frac{T_1}{T_2} < 1 - \\frac{T_1}{T_3} \\implies {\\eta_{\\text{Otto}} < \\eta_{\\text{Carnot}}}",
+            "to_mau": [
+              "eta_Otto < eta_Carnot"
+            ],
+            "hinh": "chu-trinh-carnot-so-sanh"
+          }
+        ],
+        "y_chinh": "Chu trình Carnot thiết lập trần hiệu suất lý thuyết cực đại cho mọi động cơ nhiệt; chu trình Otto luôn có hiệu suất thấp hơn Carnot cùng dải nhiệt độ vì quá trình truyền nhiệt không đẳng nhiệt.",
+        "hinh": "chu-trinh-carnot-so-sanh"
+      }
+    },
+    {
+      "id": "bien-thien-enthalpy-tao-thanh",
+      "ma": "H1",
+      "chu_de": "nhiet-hoa",
+      "ten": "Tính biến thiên enthalpy phản ứng theo enthalpy tạo thành chuẩn",
+      "latex": "\\Delta_r H^\\circ_{298} = \\sum \\Delta_f H^\\circ_{298}(\\text{sp}) - \\sum \\Delta_f H^\\circ_{298}(\\text{đầu})",
+      "latex_text": "delta_r_H = sum(delta_f_H(sp)) - sum(delta_f_H(dau))",
+      "ky_hieu": [
+        {
+          "k": "ΔrH°",
+          "y": "biến thiên enthalpy chuẩn của phản ứng",
+          "dv": "kJ/mol"
+        },
+        {
+          "k": "ΔfH°",
+          "y": "enthalpy tạo thành chuẩn của các chất",
+          "dv": "kJ/mol"
+        }
+      ],
+      "dieu_kien": "Điều kiện chuẩn (298,15 K, 1 bar)",
+      "lop": "Hoá 10",
+      "muc_do": "sgk",
+      "mo_phong": [
+        {
+          "id": "dong-co-nhiet",
+          "query": "tab=nhien-lieu"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_DongCoNhiet.deltaH_isooctane",
+        "vao": {},
+        "ra": -5065.0,
+        "dv": "kJ/mol",
+        "sai_so": 1.0
+      },
+      "chung_minh": {
+        "loai": "chung-minh",
+        "can_toan": "khong",
+        "buoc": [
+          {
+            "loi": "Theo định nghĩa, enthalpy tạo thành chuẩn ΔfH° là nhiệt tạo thành 1 mol chất từ các đơn chất bền ở điều kiện chuẩn.",
+            "latex": "\\text{Đơn chất bền} \\to \\text{Chất}, \\quad \\Delta H = \\Delta_f H^\\circ",
+            "to_mau": [
+              "delta_f_H"
+            ],
+            "hinh": "chu-trinh-hess"
+          },
+          {
+            "loi": "Dựng chu trình Hess qua trạng thái trung gian là các đơn chất bền: Phân huỷ các chất đầu thành đơn chất bền cần biến thiên enthalpy bằng −ΣΔfH°(chất đầu).",
+            "latex": "\\text{Chất đầu} \\to \\text{Đơn chất bền}, \\quad \\Delta H_1 = {-\\sum \\Delta_f H^\\circ(\\text{chất đầu})}",
+            "to_mau": [
+              "-sum delta_f_H(dau)"
+            ],
+            "hinh": "chu-trinh-hess"
+          },
+          {
+            "loi": "Từ các đơn chất bền tổng hợp nên các chất sản phẩm, biến thiên enthalpy bằng +ΣΔfH°(sản phẩm).",
+            "latex": "\\text{Đơn chất bền} \\to \\text{Sản phẩm}, \\quad \\Delta H_2 = {+\\sum \\Delta_f H^\\circ(\\text{sản phẩm})}",
+            "to_mau": [
+              "+sum delta_f_H(sp)"
+            ],
+            "hinh": "chu-trinh-hess"
+          },
+          {
+            "loi": "Vì enthalpy H là hàm trạng thái (định luật Hess), nhiệt phản ứng đường trực tiếp bằng tổng hai chặng qua đơn chất bền.",
+            "latex": "\\Delta_r H^\\circ = \\Delta H_1 + \\Delta H_2 = {\\sum \\Delta_f H^\\circ(\\text{sản phẩm}) - \\sum \\Delta_f H^\\circ(\\text{chất đầu})}",
+            "to_mau": [
+              "sum(sp) - sum(dau)"
+            ],
+            "hinh": "chu-trinh-hess"
+          }
+        ],
+        "y_chinh": "Định luật Hess: Biến thiên enthalpy của phản ứng chỉ phụ thuộc vào trạng thái đầu và trạng thái cuối, không phụ thuộc vào con đường biến đổi.",
+        "hinh": "chu-trinh-hess"
+      }
+    },
+    {
+      "id": "bien-thien-enthalpy-lien-ket",
+      "ma": "H2",
+      "chu_de": "nhiet-hoa",
+      "ten": "Tính biến thiên enthalpy phản ứng theo năng lượng liên kết",
+      "latex": "\\Delta_r H^\\circ_{298} = \\sum E_b(\\text{chất đầu}) - \\sum E_b(\\text{sản phẩm})",
+      "latex_text": "delta_r_H = sum(Eb(dau)) - sum(Eb(sp))",
+      "ky_hieu": [
+        {
+          "k": "Eb",
+          "y": "năng lượng liên kết hoá học (cần cung cấp để phá vỡ 1 mol liên kết ở thể khí)",
+          "dv": "kJ/mol"
+        }
+      ],
+      "dieu_kien": "Các chất phản ứng và sản phẩm đều ở thể khí",
+      "lop": "Hoá 10",
+      "muc_do": "sgk",
+      "mo_phong": [
+        {
+          "id": "dong-co-nhiet",
+          "query": "tab=nhien-lieu"
+        },
+        {
+          "id": "toc-do-phan-ung",
+          "query": "tab=nang-luong"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_DongCoNhiet.deltaH_Eb_H2_Cl2",
+        "vao": {
+          "Eb_H2": 436,
+          "Eb_Cl2": 242,
+          "Eb_HCl": 431
+        },
+        "ra": -184,
+        "dv": "kJ",
+        "sai_so": 1
+      },
+      "chung_minh": {
+        "loai": "chung-minh",
+        "can_toan": "khong",
+        "buoc": [
+          {
+            "loi": "Chặng 1: Cung cấp năng lượng để bẻ gãy toàn bộ các liên kết hoá học trong các phân tử chất đầu thành các nguyên tử riêng rẽ ở thể khí.",
+            "latex": "\\Delta H_1 = {+\\sum E_b(\\text{chất đầu})} > 0 \\quad (\\text{thu nhiệt})",
+            "to_mau": [
+              "+sum Eb(dau)"
+            ],
+            "hinh": "nang-luong-lien-ket"
+          },
+          {
+            "loi": "Chặng 2: Các nguyên tử tự do liên kết với nhau tạo thành các phân tử sản phẩm mới, quá trình này giải phóng năng lượng.",
+            "latex": "\\Delta H_2 = {-\\sum E_b(\\text{sản phẩm})} < 0 \\quad (\\text{toả nhiệt})",
+            "to_mau": [
+              "-sum Eb(sp)"
+            ],
+            "hinh": "nang-luong-lien-ket"
+          },
+          {
+            "loi": "Cộng hai chặng lại theo định luật Hess, ta thu được biến thiên enthalpy của phản ứng.",
+            "latex": "\\Delta_r H^\\circ = \\Delta H_1 + \\Delta H_2 = {\\sum E_b(\\text{chất đầu}) - \\sum E_b(\\text{sản phẩm})}",
+            "to_mau": [
+              "sum Eb(dau) - sum Eb(sp)"
+            ],
+            "hinh": "nang-luong-lien-ket"
+          }
+        ],
+        "y_chinh": "Phản ứng hoá học bản chất là sự tái tổ hợp liên kết: Bẻ gãy liên kết cũ cần thu năng lượng (dấu dương), hình thành liên kết mới toả năng lượng (dấu âm).",
+        "hinh": "nang-luong-lien-ket"
+      }
+    },
+    {
+      "id": "nhiet-tri-va-afr",
+      "ma": "H3",
+      "chu_de": "nhiet-hoa",
+      "ten": "Nhiệt trị thấp (LHV) & Tỉ lệ không khí/nhiên liệu lý thuyết (AFR)",
+      "latex": "\\text{LHV} = \\frac{-\\Delta_c H^\\circ}{M}, \\quad \\text{AFR} = \\frac{n_{\\text{O}_2} \\cdot (32 + 3{,}76 \\cdot 28)}{M}",
+      "latex_text": "LHV = -delta_c_H / M, AFR = m_kk / m_nl",
+      "ky_hieu": [
+        {
+          "k": "LHV",
+          "y": "nhiệt trị thấp của nhiên liệu (nước tạo thành ở thể hơi)",
+          "dv": "MJ/kg"
+        },
+        {
+          "k": "AFR",
+          "y": "tỉ lệ khối lượng không khí / nhiên liệu theo hệ số tỉ lượng",
+          "dv": "kg_kk/kg_nl"
+        },
+        {
+          "k": "M",
+          "y": "khối lượng mol của nhiên liệu",
+          "dv": "g/mol"
+        }
+      ],
+      "dieu_kien": "Cháy hoàn toàn với không khí khô (coi O₂ chiếm 21%, N₂ chiếm 79% thể tích, tỉ lệ mol N₂/O₂ = 3,76)",
+      "lop": "Hoá 10 · Chuyên đề",
+      "muc_do": "sgk",
+      "mo_phong": [
+        {
+          "id": "dong-co-nhiet",
+          "query": "tab=nhien-lieu"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_DongCoNhiet.lhv_isooctane",
+        "vao": {},
+        "ra": 44.43,
+        "dv": "MJ/kg",
+        "sai_so": 0.05
+      },
+      "chung_minh": {
+        "loai": "chung-minh",
+        "can_toan": "khong",
+        "buoc": [
+          {
+            "loi": "Viết phương trình phản ứng cháy hoàn toàn của 1 mol hydrocarbon CxHy với không khí tỉ lượng (gồm O₂ và 3,76 mol N₂ trơ đi kèm mỗi mol O₂).",
+            "latex": "\\text{C}_x\\text{H}_y + \\left(x + \\frac{y}{4}\\right) \\text{O}_2 + 3{,}76\\left(x + \\frac{y}{4}\\right) \\text{N}_2 \\to x\\text{CO}_2 + \\frac{y}{2}\\text{H}_2\\text{O(hơi)} + 3{,}76\\left(x + \\frac{y}{4}\\right) \\text{N}_2",
+            "to_mau": [
+              "x + y/4"
+            ],
+            "hinh": "nhiet-chay-nhien-lieu"
+          },
+          {
+            "loi": "Nhiệt trị thấp (LHV) là năng lượng toả ra khi đốt cháy 1 kg nhiên liệu với H₂O ở thể hơi (không ngưng tụ thu hồi nhiệt hoá hơi).",
+            "latex": "\\text{LHV} = \\frac{-\\Delta_c H^\\circ (\\text{kJ/mol})}{M (\\text{g/mol})} = {\\frac{-\\Delta_c H^\\circ}{M} \\, (\\text{MJ/kg})}",
+            "to_mau": [
+              "-delta_c_H / M"
+            ],
+            "hinh": "nhiet-chay-nhien-lieu"
+          },
+          {
+            "loi": "Tỉ lệ khối lượng không khí / nhiên liệu (AFR): Khối lượng không khí ứng với 1 mol O₂ là 32 + 3,76·28 = 137,28 g.",
+            "latex": "\\text{AFR} = \\frac{m_{\\text{kk}}}{m_{\\text{nl}}} = {\\frac{\\left(x + \\frac{y}{4}\\right) \\cdot 137{,}28}{M}}",
+            "to_mau": [
+              "(x + y/4) * 137,28 / M"
+            ],
+            "hinh": "nhiet-chay-nhien-lieu"
+          }
+        ],
+        "y_chinh": "Cầu nối trực tiếp giữa hoá học nhiệt động (enthalpy mol) và kỹ thuật động cơ đốt trong (nhiệt trị thực tế MJ/kg và lưu lượng nạp không khí).",
+        "hinh": "nhiet-chay-nhien-lieu"
+      }
+    },
+    {
+      "id": "dinh-luat-kirchhoff",
+      "ma": "H4",
+      "chu_de": "nhiet-hoa",
+      "ten": "Định luật Kirchhoff về sự phụ thuộc của nhiệt phản ứng vào nhiệt độ",
+      "latex": "\\Delta_r H^\\circ(T_2) = \\Delta_r H^\\circ(T_1) + \\int_{T_1}^{T_2} \\Delta C_p \\, dT",
+      "latex_text": "delta_r_H(T2) = delta_r_H(T1) + delta_Cp * (T2 - T1)",
+      "ky_hieu": [
+        {
+          "k": "ΔrH°(T)",
+          "y": "biến thiên enthalpy phản ứng tại nhiệt độ T",
+          "dv": "kJ/mol"
+        },
+        {
+          "k": "ΔCp",
+          "y": "hiệu nhiệt dung mol đẳng áp: ΔCp = ΣCp(sản phẩm) − ΣCp(chất đầu)",
+          "dv": "kJ/(mol·K)"
+        }
+      ],
+      "dieu_kien": "Quá trình đẳng áp, không có chuyển pha trong khoảng T1 đến T2",
+      "lop": "Chuyên đề Hoá 10 · HSG",
+      "muc_do": "mo-rong",
+      "mo_phong": [
+        {
+          "id": "dong-co-nhiet",
+          "query": "tab=nhien-lieu"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_DongCoNhiet.kirchhoff",
+        "vao": {
+          "dH1": -5065.0,
+          "dCp": -0.05,
+          "dT": 100
+        },
+        "ra": -5070.0,
+        "dv": "kJ/mol",
+        "sai_so": 0.5
+      },
+      "chung_minh": {
+        "loai": "chung-minh",
+        "can_toan": "tich-phan",
+        "buoc": [
+          {
+            "loi": "Theo định nghĩa nhiệt dung mol đẳng áp: (∂H/∂T)p = Cp. Lấy đạo hàm biến thiên enthalpy phản ứng ΔrH theo nhiệt độ.",
+            "latex": "\\frac{d(\\Delta_r H)}{dT} = {\\sum C_p(\\text{sản phẩm}) - \\sum C_p(\\text{chất đầu}) = \\Delta C_p}",
+            "to_mau": [
+              "Delta Cp"
+            ],
+            "hinh": "dinh-luat-kirchhoff"
+          },
+          {
+            "loi": "Phân li biến số và lấy tích phân hai vế từ nhiệt độ T₁ đến nhiệt độ T₂.",
+            "latex": "\\int_{\\Delta_r H(T_1)}^{\\Delta_r H(T_2)} d(\\Delta_r H) = \\int_{T_1}^{T_2} \\Delta C_p \\, dT",
+            "to_mau": [
+              "integral Delta Cp dT"
+            ],
+            "hinh": "dinh-luat-kirchhoff"
+          },
+          {
+            "loi": "Nếu coi ΔCp hầu như không đổi trong khoảng nhiệt độ khảo sát, ta thu được biểu thức dạng sai phân.",
+            "latex": "{\\Delta_r H^\\circ(T_2) = \\Delta_r H^\\circ(T_1) + \\Delta C_p \\cdot (T_2 - T_1)}",
+            "to_mau": [
+              "Delta_r H(T2) = Delta_r H(T1) + Delta Cp * (T2 - T1)"
+            ],
+            "hinh": "dinh-luat-kirchhoff"
+          }
+        ],
+        "y_chinh": "Định luật Kirchhoff giúp tính chính xác nhiệt phản ứng ở nhiệt độ cao trong buồng đốt động cơ từ số liệu nhiệt động đo ở nhiệt độ phòng chuẩn.",
+        "hinh": "dinh-luat-kirchhoff"
+      }
+    },
+    {
+      "id": "toc-do-trung-binh",
+      "ma": "D1",
+      "chu_de": "dong-hoc",
+      "ten": "Tốc độ trung bình của phản ứng hoá học",
+      "latex": "\\bar{v} = -\\frac{1}{a} \\frac{\\Delta C_A}{\\Delta t} = +\\frac{1}{c} \\frac{\\Delta C_C}{\\Delta t}",
+      "latex_text": "v = -(1/a)*deltaC_A/deltat = +(1/c)*deltaC_C/deltat",
+      "ky_hieu": [
+        {
+          "k": "v̄",
+          "y": "tốc độ trung bình của phản ứng trong khoảng thời gian Δt",
+          "dv": "mol/(L·s) hoặc M/s"
+        },
+        {
+          "k": "ΔC",
+          "y": "độ biến thiên nồng độ chất trong khoảng thời gian Δt",
+          "dv": "mol/L"
+        },
+        {
+          "k": "a, c",
+          "y": "hệ số tỉ lượng của chất phản ứng A và sản phẩm C",
+          "dv": ""
+        }
+      ],
+      "dieu_kien": "Phản ứng đồng thể thể tích không đổi",
+      "lop": "Hoá 10",
+      "muc_do": "sgk",
+      "mo_phong": [
+        {
+          "id": "toc-do-phan-ung",
+          "query": "tab=dong-hoc"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_TocDo.tocDoTrungBinh",
+        "vao": {
+          "deltaC": 0.04,
+          "deltaT": 20,
+          "heSo": 2
+        },
+        "ra": 0.001,
+        "dv": "M/s",
+        "sai_so": 0.0001
+      },
+      "chung_minh": {
+        "loai": "chung-minh",
+        "can_toan": "khong",
+        "buoc": [
+          {
+            "loi": "Xét phản ứng tổng quát a A + b B → c C + d D. Cứ mỗi a mol A phản ứng mất đi thì đồng thời sinh ra đúng c mol chất C.",
+            "latex": "\\frac{\\Delta n_A}{-a} = \\frac{\\Delta n_C}{c}",
+            "to_mau": [
+              "Delta n_A / -a = Delta n_C / c"
+            ],
+            "hinh": "toc-do-trung-binh-ti-luong"
+          },
+          {
+            "loi": "Chia cả hai vế cho thể tích bình phản ứng V (giữ không đổi), chuyển từ biến thiên số mol sang biến thiên nồng độ mol ΔC = Δn / V.",
+            "latex": "-\\frac{1}{a} \\Delta C_A = +\\frac{1}{c} \\Delta C_C",
+            "to_mau": [
+              "-1/a Delta C_A = +1/c Delta C_C"
+            ],
+            "hinh": "toc-do-trung-binh-ti-luong"
+          },
+          {
+            "loi": "Chia tiếp cho khoảng thời gian phản ứng Δt. Dấu trừ phía trước chất tham gia đảm bảo tốc độ phản ứng v luôn luôn nhận giá trị dương.",
+            "latex": "{\\bar{v} = -\\frac{1}{a} \\frac{\\Delta C_A}{\\Delta t} = +\\frac{1}{c} \\frac{\\Delta C_C}{\\Delta t}}",
+            "to_mau": [
+              "v = -1/a Delta C / Delta t"
+            ],
+            "hinh": "toc-do-trung-binh-ti-luong"
+          }
+        ],
+        "y_chinh": "Chia nồng độ biến thiên cho hệ số tỉ lượng giúp giá trị tốc độ đo theo bất kỳ chất tham gia hay sản phẩm nào cũng hoàn toàn đồng nhất.",
+        "hinh": "toc-do-trung-binh-ti-luong"
+      }
+    },
+    {
+      "id": "dinh-luat-tac-dung-khoi-luong",
+      "ma": "D2",
+      "chu_de": "dong-hoc",
+      "ten": "Định luật tác dụng khối lượng cho phản ứng sơ cấp",
+      "latex": "v = k \\cdot C_A^a C_B^b",
+      "latex_text": "v = k * C_A^a * C_B^b",
+      "ky_hieu": [
+        {
+          "k": "v",
+          "y": "tốc độ tức thời của phản ứng",
+          "dv": "mol/(L·s)"
+        },
+        {
+          "k": "k",
+          "y": "hằng số tốc độ phản ứng (phụ thuộc vào nhiệt độ và bản chất chất)",
+          "dv": "tuỳ bậc"
+        },
+        {
+          "k": "C_A, C_B",
+          "y": "nồng độ mol của các chất phản ứng",
+          "dv": "mol/L"
+        }
+      ],
+      "dieu_kien": "Phản ứng sơ cấp diễn ra trong 1 giai đoạn va chạm",
+      "lop": "Hoá 10",
+      "muc_do": "sgk",
+      "mo_phong": [
+        {
+          "id": "toc-do-phan-ung",
+          "query": "tab=va-cham"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_TocDo.tocDoTucThoi",
+        "vao": {
+          "k": 0.05,
+          "cA": 0.2,
+          "cB": 0.4,
+          "a": 1,
+          "b": 1
+        },
+        "ra": 0.004,
+        "dv": "M/s",
+        "sai_so": 0.0001
+      },
+      "chung_minh": {
+        "loai": "suy-luan-mo-hinh",
+        "can_toan": "khong",
+        "buoc": [
+          {
+            "loi": "Theo thuyết va chạm hoạt động: Phản ứng hoá học chỉ xảy ra khi các phân tử chất phản ứng va chạm trực tiếp với nhau.",
+            "latex": "A + B \\to \\text{Sản phẩm}",
+            "to_mau": [
+              "A + B"
+            ],
+            "hinh": "dinh-luat-tac-dung-khoi-luong"
+          },
+          {
+            "loi": "Số cặp va chạm A–B trong một đơn vị thể tích mỗi giây tỉ lệ thuận với mật độ phân tử A nhân với mật độ phân tử B (gấp đôi số hạt A thì số va chạm tăng gấp đôi).",
+            "latex": "Z_{AB} \\propto N_A \\cdot N_B \\propto {C_A \\cdot C_B}",
+            "to_mau": [
+              "C_A * C_B"
+            ],
+            "hinh": "dinh-luat-tac-dung-khoi-luong"
+          },
+          {
+            "loi": "Không phải mọi va chạm đều gây ra phản ứng: Chỉ phần va chạm có đủ năng lượng và góc va chạm thuận lợi mới thành công. Toàn bộ phần này được gom vào hằng số k.",
+            "latex": "v = P \\cdot e^{-\\frac{E_a}{RT}} \\cdot Z_{AB} = {k \\cdot C_A \\cdot C_B}",
+            "to_mau": [
+              "k * C_A * C_B"
+            ],
+            "hinh": "dinh-luat-tac-dung-khoi-luong"
+          }
+        ],
+        "y_chinh": "Tốc độ phản ứng sơ cấp tỉ lệ thuận với tích nồng độ của các chất tham gia với số mũ bằng hệ số tỉ lượng trong phương trình hoá học.",
+        "hinh": "dinh-luat-tac-dung-khoi-luong"
+      }
+    },
+    {
+      "id": "quy-tac-vant-hoff",
+      "ma": "D3",
+      "chu_de": "dong-hoc",
+      "ten": "Quy tắc kinh nghiệm Van 't Hoff về nhiệt độ",
+      "latex": "\\frac{v_2}{v_1} = \\gamma^{\\frac{T_2 - T_1}{10}}",
+      "latex_text": "v2 / v1 = gamma^((T2-T1)/10)",
+      "ky_hieu": [
+        {
+          "k": "γ",
+          "y": "hệ số nhiệt độ Van 't Hoff (thường nằm trong khoảng 2 đến 4)",
+          "dv": ""
+        },
+        {
+          "k": "T₁, T₂",
+          "y": "nhiệt độ của phản ứng",
+          "dv": "K (hoặc °C)"
+        }
+      ],
+      "dieu_kien": "Khoảng nhiệt độ không quá rộng quanh nhiệt độ phòng",
+      "lop": "Hoá 10",
+      "muc_do": "sgk",
+      "mo_phong": [
+        {
+          "id": "toc-do-phan-ung",
+          "query": "tab=nhiet-do"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_TocDo.tiLeTocDoVanTHoff",
+        "vao": {
+          "gamma": 2.0,
+          "T1": 20,
+          "T2": 50
+        },
+        "ra": 8.0,
+        "dv": "lần",
+        "sai_so": 0.01
+      },
+      "chung_minh": {
+        "loai": "suy-luan-mo-hinh",
+        "can_toan": "khong",
+        "buoc": [
+          {
+            "loi": "Từ phương trình Arrhenius D4: Tỉ số hằng số tốc độ ở hai nhiệt độ liên hệ qua năng lượng hoạt hoá Ea.",
+            "latex": "\\ln\\left(\\frac{k_2}{k_1}\\right) = {\\frac{E_a}{R} \\frac{T_2 - T_1}{T_1 T_2}}",
+            "to_mau": [
+              "Ea/R * (T2-T1)/(T1*T2)"
+            ],
+            "hinh": "he-so-nhiet-do-vant-hoff"
+          },
+          {
+            "loi": "Khi khoảng nhiệt độ ΔT = T₂ − T₁ nhỏ quanh nhiệt độ phòng (khoảng 300 K): T₁·T₂ ≈ T².",
+            "latex": "\\ln\\left(\\frac{k_2}{k_1}\\right) \\approx \\left[\\frac{10 E_a}{R T^2}\\right] \\cdot \\frac{T_2 - T_1}{10}",
+            "to_mau": [
+              "10 Ea / (R T^2)"
+            ],
+            "hinh": "he-so-nhiet-do-vant-hoff"
+          },
+          {
+            "loi": "Đặt γ = exp(10·Ea / (R·T²)), ta thu được quy tắc Van 't Hoff kinh nghiệm.",
+            "latex": "\\frac{v_2}{v_1} = {\\gamma^{\\frac{T_2 - T_1}{10}}}",
+            "to_mau": [
+              "gamma^((T2-T1)/10)"
+            ],
+            "hinh": "he-so-nhiet-do-vant-hoff"
+          },
+          {
+            "loi": "Giải thích vì sao γ ≈ 2–4: Ở T = 298,15 K, nếu phản ứng có Ea ≈ 51 kJ/mol thì γ = exp(10·51000 / (8,314·298,15²)) ≈ 2,0.",
+            "latex": "E_a \\approx 50 \\text{ kJ/mol} \\implies \\gamma \\approx 2{,}0",
+            "to_mau": [
+              "gamma approx 2,0"
+            ],
+            "hinh": "he-so-nhiet-do-vant-hoff"
+          }
+        ],
+        "y_chinh": "Quy tắc Van 't Hoff là trường hợp xấp xỉ tuyến tính của phương trình Arrhenius trong khoảng nhiệt độ hẹp quanh nhiệt độ phòng.",
+        "hinh": "he-so-nhiet-do-vant-hoff"
+      }
+    },
+    {
+      "id": "phuong-trinh-arrhenius",
+      "ma": "D4",
+      "chu_de": "dong-hoc",
+      "ten": "Phương trình Arrhenius & Năng lượng hoạt hoá",
+      "latex": "k = A \\cdot e^{-\\frac{E_a}{RT}}, \\quad \\ln\\left(\\frac{k_2}{k_1}\\right) = -\\frac{E_a}{R}\\left(\\frac{1}{T_2} - \\frac{1}{T_1}\\right)",
+      "latex_text": "k = A * exp(-Ea/(R*T)), ln(k2/k1) = -(Ea/R)*(1/T2 - 1/T1)",
+      "ky_hieu": [
+        {
+          "k": "k",
+          "y": "hằng số tốc độ phản ứng",
+          "dv": "s⁻¹ (tuỳ bậc)"
+        },
+        {
+          "k": "A",
+          "y": "thừa số tần số tiền luỹ thừa (tổng số va chạm)",
+          "dv": "cùng đơn vị k"
+        },
+        {
+          "k": "Ea",
+          "y": "năng lượng hoạt hoá của phản ứng",
+          "dv": "J/mol hoặc kJ/mol"
+        },
+        {
+          "k": "R",
+          "y": "hằng số khí = 8,314 J/(mol·K)",
+          "dv": "J/(mol·K)"
+        },
+        {
+          "k": "T",
+          "y": "nhiệt độ tuyệt đối",
+          "dv": "K"
+        }
+      ],
+      "dieu_kien": "Áp dụng cho mọi phản ứng nhiệt hoá học",
+      "lop": "Chuyên đề Hoá 10 · Đại học",
+      "muc_do": "mo-rong",
+      "mo_phong": [
+        {
+          "id": "toc-do-phan-ung",
+          "query": "tab=arrhenius"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_TocDo.kTheoArrhenius",
+        "vao": {
+          "A": 10000000000.0,
+          "Ea_kJ": 50,
+          "T": 298.15
+        },
+        "ra": 17.393,
+        "dv": "s⁻¹",
+        "sai_so": 0.02
+      },
+      "chung_minh": {
+        "loai": "suy-luan-mo-hinh",
+        "can_toan": "khong",
+        "buoc": [
+          {
+            "loi": "Theo phân bố thống kê Maxwell-Boltzmann, tỉ lệ va chạm giữa hai phân tử có động năng theo phương nối tâm lớn hơn hoặc bằng rào cản năng lượng hoạt hoá Ea tỉ lệ với hàm số mũ e^(−Ea/RT).",
+            "latex": "f_{\\text{hiệu quả}} = {e^{-\\frac{E_a}{RT}}}",
+            "to_mau": [
+              "e^(-Ea/RT)"
+            ],
+            "hinh": "arrhenius-va-cham-hoat-dong"
+          },
+          {
+            "loi": "Tốc độ phản ứng tỉ lệ thuận với số va chạm hiệu quả: k = A·e^(−Ea/RT) với A là thừa số tần số va chạm có định hướng.",
+            "latex": "k = A \\cdot e^{-\\frac{E_a}{RT}}",
+            "to_mau": [
+              "k = A * e^(-Ea/RT)"
+            ],
+            "hinh": "arrhenius-va-cham-hoat-dong"
+          },
+          {
+            "loi": "Lấy logarit tự nhiên hai vế.",
+            "latex": "\\ln k = \\ln A - \\frac{E_a}{RT}",
+            "to_mau": [
+              "ln k = ln A - Ea/RT"
+            ],
+            "hinh": "arrhenius-va-cham-hoat-dong"
+          },
+          {
+            "loi": "Lập hiệu giữa hai nhiệt độ T₁ và T₂ để triệt tiêu thừa số tiền luỹ thừa A.",
+            "latex": "\\ln k_2 - \\ln k_1 = {-\\frac{E_a}{R}\\left(\\frac{1}{T_2} - \\frac{1}{T_1}\\right)}",
+            "to_mau": [
+              "ln(k2/k1) = -Ea/R * (1/T2 - 1/T1)"
+            ],
+            "hinh": "arrhenius-va-cham-hoat-dong"
+          }
+        ],
+        "y_chinh": "Phương trình Arrhenius định lượng ảnh hưởng then chốt của nhiệt độ lên hằng số tốc độ qua thừa số Boltzmann e^(−Ea/RT).",
+        "hinh": "arrhenius-va-cham-hoat-dong"
+      }
+    },
+    {
+      "id": "dong-hoc-bac-1",
+      "ma": "D5",
+      "chu_de": "dong-hoc",
+      "ten": "Động học phản ứng bậc 1 & Chu kỳ bán phản ứng",
+      "latex": "\\ln\\left(\\frac{C_0}{C}\\right) = kt, \\quad t_{1/2} = \\frac{\\ln 2}{k}",
+      "latex_text": "ln(C0/C) = k*t, t1/2 = ln(2)/k",
+      "ky_hieu": [
+        {
+          "k": "C₀",
+          "y": "nồng độ ban đầu của chất phản ứng tại t = 0",
+          "dv": "mol/L"
+        },
+        {
+          "k": "C",
+          "y": "nồng độ còn lại tại thời điểm t",
+          "dv": "mol/L"
+        },
+        {
+          "k": "k",
+          "y": "hằng số tốc độ phản ứng bậc 1",
+          "dv": "s⁻¹"
+        },
+        {
+          "k": "t₁/₂",
+          "y": "thời gian bán phản ứng (chu kỳ bán huỷ)",
+          "dv": "s"
+        }
+      ],
+      "dieu_kien": "Phản ứng bậc 1 đồng thể",
+      "lop": "Chuyên đề Hoá 10",
+      "muc_do": "sgk",
+      "mo_phong": [
+        {
+          "id": "toc-do-phan-ung",
+          "query": "bac=1"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_TocDo.thoiGianBanHuyBac1",
+        "vao": {
+          "k": 0.023105
+        },
+        "ra": 30.0,
+        "dv": "s",
+        "sai_so": 0.1
+      },
+      "chung_minh": {
+        "loai": "chung-minh",
+        "can_toan": "tich-phan",
+        "buoc": [
+          {
+            "loi": "Theo định nghĩa tốc độ tức thời cho phản ứng bậc 1: Tốc độ phân huỷ chất tỉ lệ bậc nhất với nồng độ hiện tại của nó.",
+            "latex": "-\\frac{dC}{dt} = k \\cdot C",
+            "to_mau": [
+              "-dC/dt = k*C"
+            ],
+            "hinh": "phan-ra-bac-1"
+          },
+          {
+            "loi": "Phân li biến số và tích phân hai vế từ t = 0 (nồng độ C₀) đến thời điểm t (nồng độ C).",
+            "latex": "\\int_{C_0}^{C} \\frac{dC}{C} = -k \\int_{0}^{t} dt \\implies \\left[\\ln C\\right]_{C_0}^{C} = -kt",
+            "to_mau": [
+              "ln C - ln C0 = -kt"
+            ],
+            "hinh": "phan-ra-bac-1"
+          },
+          {
+            "loi": "Gom logarit: ln(C/C₀) = −kt hay đảo lại ln(C₀/C) = kt.",
+            "latex": "{\\ln\\left(\\frac{C_0}{C}\\right) = kt \\iff C = C_0 e^{-kt}}",
+            "to_mau": [
+              "ln(C0/C) = kt"
+            ],
+            "hinh": "phan-ra-bac-1"
+          },
+          {
+            "loi": "Tại thời điểm bán huỷ t = t₁/₂, nồng độ giảm đi một nửa: C = C₀/2.",
+            "latex": "\\ln\\left(\\frac{C_0}{C_0/2}\\right) = \\ln 2 = k \\cdot t_{1/2} \\implies {t_{1/2} = \\frac{\\ln 2}{k} \\approx \\frac{0{,}693}{k}}",
+            "to_mau": [
+              "t1/2 = ln 2 / k"
+            ],
+            "hinh": "phan-ra-bac-1"
+          }
+        ],
+        "y_chinh": "Trong phản ứng bậc 1, nồng độ giảm theo hàm mũ và thời gian bán huỷ t₁/₂ là hằng số tuyệt đối, không phụ thuộc vào nồng độ ban đầu C₀.",
+        "cach_2": {
+          "ten": "Cách suy luận không dùng vi tích phân",
+          "buoc": [
+            {
+              "loi": "Vì xác suất phản ứng của mỗi phân tử trong một khoảng thời gian nhỏ là không đổi và độc lập với nhau, nên trong mỗi khoảng thời gian bằng nhau Δt, cùng một TỈ LỆ chất bị phân huỷ.",
+              "latex": "\\frac{\\Delta C}{C} = \\text{hằng số}"
+            },
+            {
+              "loi": "Do đó nồng độ chất giảm theo một cấp số nhân đều đặn sau các chu kỳ thời gian liên tiếp.",
+              "latex": "C(t) = C_0 \\cdot q^t"
+            },
+            {
+              "loi": "Thời gian để nồng độ giảm đi một nửa (giảm 50%) luôn luôn là một khoảng thời gian cố định t₁/₂, hoàn toàn không phụ thuộc lượng chất ban đầu nhiều hay ít.",
+              "latex": "t_{1/2} = \\text{hằng số độc lập } C_0"
+            }
+          ]
+        },
+        "hinh": "phan-ra-bac-1"
+      }
+    },
+    {
+      "id": "dong-hoc-bac-2-va-0",
+      "ma": "D6",
+      "chu_de": "dong-hoc",
+      "ten": "Phương trình động học phản ứng bậc 2 và bậc 0",
+      "latex": "\\text{Bậc 2: } \\frac{1}{C} - \\frac{1}{C_0} = kt, \\quad \\text{Bậc 0: } C = C_0 - kt",
+      "latex_text": "Bac 2: 1/C - 1/C0 = k*t; Bac 0: C = C0 - k*t",
+      "ky_hieu": [
+        {
+          "k": "Bậc 2",
+          "y": "t₁/₂ = 1 / (k·C₀) (thời gian bán huỷ tỉ lệ nghịch với nồng độ ban đầu)",
+          "dv": ""
+        },
+        {
+          "k": "Bậc 0",
+          "y": "t₁/₂ = C₀ / (2k) (thời gian bán huỷ tỉ lệ thuận với nồng độ ban đầu)",
+          "dv": ""
+        }
+      ],
+      "dieu_kien": "Phản ứng đồng thể",
+      "lop": "Chuyên đề Hoá 10 · HSG",
+      "muc_do": "mo-rong",
+      "mo_phong": [
+        {
+          "id": "toc-do-phan-ung",
+          "query": "bac=2"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_TocDo.nongDoBac2",
+        "vao": {
+          "C0": 0.1,
+          "k": 0.5,
+          "t": 20
+        },
+        "ra": 0.05,
+        "dv": "M",
+        "sai_so": 0.001
+      },
+      "chung_minh": {
+        "loai": "chung-minh",
+        "can_toan": "tich-phan",
+        "buoc": [
+          {
+            "loi": "Phản ứng bậc 2 (2A → SP): −dC/dt = k·C². Tích phân phân li biến số: −∫dC/C² = k·∫dt.",
+            "latex": "\\frac{1}{C} - \\frac{1}{C_0} = kt \\implies {\\frac{1}{C} = \\frac{1}{C_0} + kt}",
+            "to_mau": [
+              "1/C - 1/C0 = kt"
+            ],
+            "hinh": "dong-hoc-bac-0-va-2"
+          },
+          {
+            "loi": "Thay C = C₀/2 vào biểu thức bậc 2: 1/(C₀/2) − 1/C₀ = 1/C₀ = k·t₁/₂.",
+            "latex": "{t_{1/2} = \\frac{1}{k C_0}}",
+            "to_mau": [
+              "t1/2 = 1/(k C0)"
+            ],
+            "hinh": "dong-hoc-bac-0-va-2"
+          },
+          {
+            "loi": "Phản ứng bậc 0: Tốc độ không phụ thuộc nồng độ (−dC/dt = k). Tích phân trực tiếp cho hàm bậc nhất.",
+            "latex": "C = C_0 - kt, \\quad t_{1/2} = {\\frac{C_0}{2k}} \\quad (C \\ge 0)",
+            "to_mau": [
+              "C = C0 - kt"
+            ],
+            "hinh": "dong-hoc-bac-0-va-2"
+          }
+        ],
+        "y_chinh": "Đồ thị tuyến tính hoá: Bậc 1 vẽ ln C theo t; bậc 2 vẽ 1/C theo t; bậc 0 vẽ trực tiếp C theo t.",
+        "hinh": "dong-hoc-bac-0-va-2",
+        "cach_2": {
+          "ten": "Cách 2: Khảo sát đối chiếu phản ứng động học bậc 0",
+          "buoc": [
+            {
+              "loi": "Với phản ứng bậc 0: Tốc độ phản ứng hoàn toàn không phụ thuộc nồng độ chất tham gia v = -\frac{dC}{dt} = k.",
+              "latex": "-\frac{dC}{dt} = k"
+            },
+            {
+              "loi": "Tích phân hai vế từ t = 0 (nồng độ C₀) đến thời điểm t: C(t) giảm tuyến tính đều đặn theo thời gian.",
+              "latex": "\\int_{C_0}^C dC = -k \\int_0^t dt \\implies C(t) = C_0 - kt \\quad (C \\ge 0)"
+            },
+            {
+              "loi": "Thời gian bán rã bậc 0 khi C = C₀/2 là t₁/₂ = C₀/(2k), tỉ lệ thuận với nồng độ ban đầu (trái ngược hoàn toàn bậc 1 độc lập C₀ và bậc 2 tỉ lệ nghịch 1/C₀).",
+              "latex": "t_{1/2} = \frac{C_0}{2k}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "anh-huong-xuc-tac-toc-do",
+      "ma": "D7",
+      "chu_de": "dong-hoc",
+      "ten": "Ảnh hưởng của chất xúc tác lên hằng số tốc độ phản ứng",
+      "latex": "\\frac{k_{\\text{xt}}}{k} = e^{\\frac{\\Delta E_a}{RT}}",
+      "latex_text": "k_xt / k = exp(deltaEa / (R*T))",
+      "ky_hieu": [
+        {
+          "k": "k_xt / k",
+          "y": "hệ số tăng tốc độ nhờ chất xúc tác",
+          "dv": "lần"
+        },
+        {
+          "k": "ΔEa",
+          "y": "độ giảm năng lượng hoạt hoá nhờ xúc tác ΔEa = Ea − Ea_xt",
+          "dv": "kJ/mol"
+        }
+      ],
+      "dieu_kien": "Chất xúc tác cùng nhiệt độ, coi thừa số tần số A không đổi đáng kể",
+      "lop": "Hoá 10",
+      "muc_do": "sgk",
+      "mo_phong": [
+        {
+          "id": "toc-do-phan-ung",
+          "query": "xuc_tac=1"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_TocDo.heSoTangXucTac",
+        "vao": {
+          "deltaEa_kJ": 20,
+          "T": 298.15
+        },
+        "ra": 3190.4,
+        "dv": "lần",
+        "sai_so": 2.0
+      },
+      "chung_minh": {
+        "loai": "chung-minh",
+        "can_toan": "khong",
+        "buoc": [
+          {
+            "loi": "Chất xúc tác tham gia vào quá trình phản ứng tạo phức trung gian, mở ra một cơ chế phản ứng mới với năng lượng hoạt hoá thấp hơn: Ea_xt = Ea − ΔEa.",
+            "latex": "E_{a,\\text{xt}} = E_a - \\Delta E_a < E_a",
+            "to_mau": [
+              "Ea - deltaEa"
+            ],
+            "hinh": "do-thi-nang-luong"
+          },
+          {
+            "loi": "Viết biểu thức Arrhenius D4 cho phản ứng khi không có xúc tác và khi có xúc tác (với cùng thừa số tần số A).",
+            "latex": "k = A \\cdot e^{-\\frac{E_a}{RT}}, \\quad k_{\\text{xt}} = A \\cdot e^{-\\frac{E_a - \\Delta E_a}{RT}}",
+            "to_mau": [
+              "k_xt"
+            ],
+            "hinh": "do-thi-nang-luong"
+          },
+          {
+            "loi": "Lập tỉ số giữa hai hằng số tốc độ.",
+            "latex": "\\frac{k_{\\text{xt}}}{k} = \\frac{A \\cdot e^{-\\frac{E_a - \\Delta E_a}{RT}}}{A \\cdot e^{-\\frac{E_a}{RT}}} = {e^{\\frac{\\Delta E_a}{RT}}}",
+            "to_mau": [
+              "exp(deltaEa / RT)"
+            ],
+            "hinh": "do-thi-nang-luong"
+          }
+        ],
+        "y_chinh": "Chất xúc tác làm giảm năng lượng hoạt hoá Ea, giúp số va chạm vượt qua rào cản tăng lên theo hàm số mũ cực mạnh mà không làm thay đổi biến thiên enthalpy ΔH của phản ứng.",
+        "hinh": "do-thi-nang-luong"
+      }
+    },
+    {
+      "id": "hang-so-can-bang-kc",
+      "ma": "C1",
+      "chu_de": "can-bang",
+      "ten": "Biểu thức hằng số cân bằng nồng độ Kc",
+      "latex": "K_c = \\frac{[C]^c [D]^d}{[A]^a [B]^b}",
+      "latex_text": "Kc = [C]^c * [D]^d / ([A]^a * [B]^b)",
+      "ky_hieu": [
+        {
+          "k": "Kc",
+          "y": "hằng số cân bằng hoá học tính theo nồng độ mol",
+          "dv": "(mol/L)^Δn"
+        },
+        {
+          "k": "[A], [B], [C], [D]",
+          "y": "nồng độ mol của các chất ở trạng thái cân bằng",
+          "dv": "mol/L"
+        }
+      ],
+      "dieu_kien": "Hệ cân bằng hoá học ở nhiệt độ xác định không đổi",
+      "lop": "Hoá 11",
+      "muc_do": "sgk",
+      "mo_phong": [
+        {
+          "id": "can-bang-le-chatelier",
+          "query": "tab=can-bang"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_CanBang.tinhKc",
+        "vao": {
+          "cA": 0.033762,
+          "cB": 0.012476,
+          "a": 1,
+          "b": 2
+        },
+        "ra": 0.00461,
+        "dv": "M",
+        "sai_so": 5e-05
+      },
+      "chung_minh": {
+        "loai": "chung-minh",
+        "can_toan": "khong",
+        "buoc": [
+          {
+            "loi": "Xét phản ứng thuận nghịch sơ cấp: a A + b B ⇌ c C + d D. Tốc độ phản ứng thuận vt và tốc độ phản ứng nghịch vn theo định luật tác dụng khối lượng.",
+            "latex": "v_t = k_t \\cdot [A]^a [B]^b, \\quad v_n = k_n \\cdot [C]^c [D]^d",
+            "to_mau": [
+              "vt, vn"
+            ],
+            "hinh": "can-bang-dong-vt-vn"
+          },
+          {
+            "loi": "Ở trạng thái cân bằng hoá học (cân bằng động), tốc độ phản ứng thuận đúng bằng tốc độ phản ứng nghịch: vt = vn.",
+            "latex": "k_t \\cdot [A]^a [B]^b = k_n \\cdot [C]^c [D]^d",
+            "to_mau": [
+              "vt = vn"
+            ],
+            "hinh": "can-bang-dong-vt-vn"
+          },
+          {
+            "loi": "Chuyển vế để gom các thừa số nồng độ sang một vế và tỉ số hằng số tốc độ sang vế kia.",
+            "latex": "\\frac{[C]^c [D]^d}{[A]^a [B]^b} = {\\frac{k_t}{k_n}}",
+            "to_mau": [
+              "kt / kn"
+            ],
+            "hinh": "can-bang-dong-vt-vn"
+          },
+          {
+            "loi": "Vì kt và kn chỉ phụ thuộc vào nhiệt độ nên tỉ số kt/kn là một hằng số xác định ở nhiệt độ đó, ký hiệu là Kc.",
+            "latex": "{K_c = \\frac{k_t}{k_n} = \\frac{[C]^c [D]^d}{[A]^a [B]^b}}",
+            "to_mau": [
+              "Kc = [C]^c [D]^d / ([A]^a [B]^b)"
+            ],
+            "hinh": "can-bang-dong-vt-vn"
+          }
+        ],
+        "y_chinh": "Hằng số cân bằng Kc đặc trưng cho trạng thái cân bằng của phản ứng ở nhiệt độ xác định; biểu thức Kc áp dụng đúng cho mọi phản ứng nhiệt động học.",
+        "hinh": "can-bang-dong-vt-vn",
+        "cach_2": {
+          "ten": "Cách 2: Nhiệt động học qua thế hoá và năng lượng Gibbs",
+          "buoc": [
+            {
+              "loi": "Biến thiên năng lượng tự do Gibbs của phản ứng ở trạng thái bất kỳ là \\Delta_r G = \\Delta_r G^\\circ + RT\\ln Q.",
+              "latex": "\\Delta_r G = \\Delta_r G^\\circ + RT\\ln Q"
+            },
+            {
+              "loi": "Tại trạng thái cân bằng hoá học bền vững, hệ đạt cực tiểu năng lượng Gibbs \\Delta_r G = 0 và thương số phản ứng Q trở thành hằng số cân bằng K.",
+              "latex": "0 = \\Delta_r G^\\circ + RT\\ln K \\implies \\Delta_r G^\\circ = -RT\\ln K"
+            },
+            {
+              "loi": "Biểu thức khẳng định hằng số cân bằng K là một đại lượng nhiệt động học xác định duy nhất ở mỗi nhiệt độ, bảo đảm tỉ số nồng độ tại cân bằng luôn là hằng số.",
+              "latex": "K = e^{-\frac{\\Delta_r G^\\circ}{RT}} = \frac{[C]^c [D]^d}{[A]^a [B]^b}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ti-so-phan-ung-q",
+      "ma": "C2",
+      "chu_de": "can-bang",
+      "ten": "Thương số phản ứng Q & Chiều chuyển dịch cân bằng",
+      "latex": "Q < K_c \\implies \\text{chiều thuận}, \\quad Q > K_c \\implies \\text{chiều nghịch}",
+      "latex_text": "Q < Kc -> thuan, Q > Kc -> nghich, Q = Kc -> can bang",
+      "ky_hieu": [
+        {
+          "k": "Q",
+          "y": "thương số phản ứng tính tại thời điểm nồng độ tức thời bất kỳ",
+          "dv": ""
+        },
+        {
+          "k": "Kc",
+          "y": "hằng số cân bằng hoá học tại nhiệt độ khảo sát",
+          "dv": ""
+        }
+      ],
+      "dieu_kien": "Phản ứng hoá học thuận nghịch",
+      "lop": "Hoá 11",
+      "muc_do": "sgk",
+      "mo_phong": [
+        {
+          "id": "can-bang-le-chatelier",
+          "query": "tab=chuyen-dich"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_CanBang.tinhQ",
+        "vao": {
+          "cA": 0.04,
+          "cB": 0.01,
+          "a": 1,
+          "b": 2
+        },
+        "ra": 0.0025,
+        "dv": "",
+        "sai_so": 0.0001
+      },
+      "chung_minh": {
+        "loai": "suy-luan-mo-hinh",
+        "can_toan": "khong",
+        "buoc": [
+          {
+            "loi": "Định nghĩa thương số phản ứng Q có dạng biểu thức hệt như Kc nhưng thay nồng độ cân bằng bằng nồng độ tức thời tại thời điểm bất kỳ.",
+            "latex": "Q = \\frac{C_C^c C_D^d}{C_A^a C_B^b}",
+            "to_mau": [
+              "Q"
+            ],
+            "hinh": "thuong-so-q-so-voi-k"
+          },
+          {
+            "loi": "Lập tỉ số giữa tốc độ phản ứng thuận tức thời và tốc độ phản ứng nghịch tức thời.",
+            "latex": "\\frac{v_t}{v_n} = \\frac{k_t \\cdot C_A^a C_B^b}{k_n \\cdot C_C^c C_D^d} = {\\frac{K_c}{Q}}",
+            "to_mau": [
+              "Kc / Q"
+            ],
+            "hinh": "thuong-so-q-so-voi-k"
+          },
+          {
+            "loi": "So sánh Q với Kc: Nếu Q < Kc suy ra vt > vn, phản ứng diễn ra theo CHIỀU THUẬN. Nếu Q > Kc suy ra vt < vn, phản ứng chuyển dịch theo CHIỀU NGHỊCH. Nếu Q = Kc thì hệ đang CÂN BẰNG.",
+            "latex": "{Q < K_c \\implies v_t > v_n \\, (\\to); \\quad Q > K_c \\implies v_t < v_n \\, (\\leftarrow)}",
+            "to_mau": [
+              "Q < Kc -> thuan"
+            ],
+            "hinh": "thuong-so-q-so-voi-k"
+          }
+        ],
+        "y_chinh": "So sánh thương số phản ứng Q với hằng số cân bằng K là công cụ vạn năng và chính xác nhất để xác định chiều tự diễn biến của mọi phản ứng hoá học.",
+        "hinh": "thuong-so-q-so-voi-k"
+      }
+    },
+    {
+      "id": "chuyen-dich-ap-suat",
+      "ma": "C3",
+      "chu_de": "can-bang",
+      "ten": "Ảnh hưởng của áp suất & Độ biến thiên số mol khí Δn",
+      "latex": "Q' = s^{\\Delta n} \\cdot K_c, \\quad \\Delta n = (c+d) - (a+b)",
+      "latex_text": "Q' = s^(delta_n) * Kc",
+      "ky_hieu": [
+        {
+          "k": "s",
+          "y": "hệ số nén thể tích (thể tích mới V' = V / s với s > 1 khi nén)",
+          "dv": ""
+        },
+        {
+          "k": "Δn",
+          "y": "độ biến thiên số mol khí trong phương trình phản ứng",
+          "dv": "mol"
+        }
+      ],
+      "dieu_kien": "Phản ứng có sự tham gia của các chất ở thể khí",
+      "lop": "Hoá 11",
+      "muc_do": "sgk",
+      "mo_phong": [
+        {
+          "id": "can-bang-le-chatelier",
+          "query": "nen=2"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_CanBang.qSauNen",
+        "vao": {
+          "K": 0.00461,
+          "s": 2,
+          "delta_n": 1
+        },
+        "ra": 0.00922,
+        "dv": "",
+        "sai_so": 5e-05
+      },
+      "chung_minh": {
+        "loai": "chung-minh",
+        "can_toan": "khong",
+        "buoc": [
+          {
+            "loi": "Khi nén hệ làm thể tích giảm s lần (V' = V/s), ngay tại thời điểm nén nồng độ tức thời của mọi chất khí đều tăng s lần: C' = s·C.",
+            "latex": "C'_i = s \\cdot [C_i]",
+            "to_mau": [
+              "s * [Ci]"
+            ],
+            "hinh": "nen-thay-doi-Q"
+          },
+          {
+            "loi": "Thay các nồng độ mới vào thương số phản ứng Q'.",
+            "latex": "Q' = \\frac{(s[C])^c (s[D])^d}{(s[A])^a (s[B])^b} = s^{(c+d)-(a+b)} \\cdot \\frac{[C]^c [D]^d}{[A]^a [B]^b} = {s^{\\Delta n} \\cdot K_c}",
+            "to_mau": [
+              "s^delta_n * Kc"
+            ],
+            "hinh": "nen-thay-doi-Q"
+          },
+          {
+            "loi": "Biện luận chiều theo nguyên lý Le Chatelier: Khi nén s > 1, nếu Δn < 0 (chiều thuận giảm số mol khí) thì s^Δn < 1 suy ra Q' < Kc, cân bằng dịch theo CHIỀU THUẬN để giảm áp suất.",
+            "latex": "{\\Delta n < 0 \\implies Q' < K_c \\implies \\text{Chuyển dịch chiều thuận (giảm số mol khí)}}",
+            "to_mau": [
+              "delta_n < 0 -> thuan"
+            ],
+            "hinh": "nen-thay-doi-Q"
+          },
+          {
+            "loi": "Nếu Δn = 0 (số mol khí hai vế bằng nhau): s⁰ = 1 suy ra Q' = Kc, áp suất hoàn toàn KHÔNG làm chuyển dịch cân bằng.",
+            "latex": "\\Delta n = 0 \\implies Q' = K_c \\implies \\text{Cân bằng không chuyển dịch}",
+            "to_mau": [
+              "delta_n = 0"
+            ],
+            "hinh": "nen-thay-doi-Q"
+          }
+        ],
+        "y_chinh": "Khi tăng áp suất (nén thể tích), cân bằng chuyển dịch theo chiều làm giảm số mol khí (chiều có Δn < 0); nếu số mol khí hai vế bằng nhau thì áp suất không làm thay đổi vị trí cân bằng.",
+        "hinh": "nen-thay-doi-Q"
+      }
+    },
+    {
+      "id": "phuong-trinh-vant-hoff",
+      "ma": "C4",
+      "chu_de": "can-bang",
+      "ten": "Ảnh hưởng của nhiệt độ & Phương trình Van 't Hoff cho Kc",
+      "latex": "\\ln\\left(\\frac{K_2}{K_1}\\right) = -\\frac{\\Delta_r H^\\circ}{R}\\left(\\frac{1}{T_2} - \\frac{1}{T_1}\\right)",
+      "latex_text": "ln(K2/K1) = -(delta_r_H/R)*(1/T2 - 1/T1)",
+      "ky_hieu": [
+        {
+          "k": "K₁, K₂",
+          "y": "hằng số cân bằng ở nhiệt độ T₁ và T₂",
+          "dv": ""
+        },
+        {
+          "k": "ΔrH°",
+          "y": "biến thiên enthalpy chuẩn của phản ứng",
+          "dv": "J/mol hoặc kJ/mol"
+        },
+        {
+          "k": "R",
+          "y": "hằng số khí = 8,314 J/(mol·K)",
+          "dv": "J/(mol·K)"
+        }
+      ],
+      "dieu_kien": "Biến thiên enthalpy ΔrH° hầu như không đổi trong khoảng nhiệt độ khảo sát",
+      "lop": "Hoá 11 · Mở rộng",
+      "muc_do": "mo-rong",
+      "mo_phong": [
+        {
+          "id": "can-bang-le-chatelier",
+          "query": "tab=nhiet-do"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_CanBang.kcTheoT",
+        "vao": {
+          "T": 323.15,
+          "T_ref": 298.15,
+          "Kc_ref": 0.00461,
+          "deltaH_kJ": 57.2
+        },
+        "ra": 0.02748,
+        "dv": "",
+        "sai_so": 0.0001
+      },
+      "chung_minh": {
+        "loai": "chung-minh",
+        "can_toan": "khong",
+        "buoc": [
+          {
+            "loi": "Biểu diễn hằng số cân bằng qua tỉ số hai hằng số tốc độ thuận và nghịch theo Arrhenius D4.",
+            "latex": "K_c = \\frac{k_t}{k_n} = \\frac{A_t \\cdot e^{-\\frac{E_{a,t}}{RT}}}{A_n \\cdot e^{-\\frac{E_{a,n}}{RT}}} = \\frac{A_t}{A_n} e^{-\\frac{E_{a,t} - E_{a,n}}{RT}}",
+            "to_mau": [
+              "Ea,t - Ea,n"
+            ],
+            "hinh": "nhiet-do-vant-hoff-can-bang"
+          },
+          {
+            "loi": "Từ giản đồ năng lượng: Hiệu số năng lượng hoạt hoá giữa chiều thuận và chiều nghịch chính là biến thiên enthalpy phản ứng ΔrH°.",
+            "latex": "E_{a,t} - E_{a,n} = {\\Delta_r H^\\circ}",
+            "to_mau": [
+              "delta_r_H"
+            ],
+            "hinh": "nhiet-do-vant-hoff-can-bang"
+          },
+          {
+            "loi": "Lấy logarit tự nhiên hai vế.",
+            "latex": "\\ln K_c = \\ln\\left(\\frac{A_t}{A_n}\\right) - \\frac{\\Delta_r H^\\circ}{RT}",
+            "to_mau": [
+              "ln Kc"
+            ],
+            "hinh": "nhiet-do-vant-hoff-can-bang"
+          },
+          {
+            "loi": "Lập hiệu giữa hai nhiệt độ T₁ và T₂.",
+            "latex": "{\\ln\\left(\\frac{K_2}{K_1}\\right) = -\\frac{\\Delta_r H^\\circ}{R}\\left(\\frac{1}{T_2} - \\frac{1}{T_1}\\right)}",
+            "to_mau": [
+              "ln(K2/K1)"
+            ],
+            "hinh": "nhiet-do-vant-hoff-can-bang"
+          },
+          {
+            "loi": "Biện luận Le Chatelier: Nếu phản ứng thu nhiệt (ΔrH° > 0), khi tăng nhiệt độ (T₂ > T₁) thì 1/T₂ < 1/T₁ suy ra K₂ > K₁ (cân bằng dịch theo chiều thuận thu nhiệt để hạ nhiệt).",
+            "latex": "\\Delta_r H^\\circ > 0 \\text{ và } T \\uparrow \\implies K_c \\uparrow \\, (\\text{chiều thuận})",
+            "to_mau": [
+              "T tang -> K tang"
+            ],
+            "hinh": "nhiet-do-vant-hoff-can-bang"
+          }
+        ],
+        "y_chinh": "Khi tăng nhiệt độ, cân bằng chuyển dịch theo chiều phản ứng thu nhiệt (ΔH > 0); khi giảm nhiệt độ, cân bằng chuyển dịch theo chiều toả nhiệt (ΔH < 0).",
+        "cach_2": {
+          "ten": "Cách nhiệt động học qua thế đẳng áp Gibbs",
+          "buoc": [
+            {
+              "loi": "Từ nhiệt động học cổ điển: Biến thiên năng lượng tự do Gibbs chuẩn liên hệ trực tiếp với hằng số cân bằng.",
+              "latex": "\\Delta_r G^\\circ = -RT \\ln K"
+            },
+            {
+              "loi": "Mặt khác, theo định nghĩa: ΔrG° = ΔrH° − T·ΔrS°.",
+              "latex": "-RT \\ln K = \\Delta_r H^\\circ - T \\Delta_r S^\\circ \\implies \\ln K = -\\frac{\\Delta_r H^\\circ}{RT} + \\frac{\\Delta_r S^\\circ}{R}"
+            },
+            {
+              "loi": "Lấy đạo hàm hoặc lập hiệu ở hai nhiệt độ (coi ΔrH° và ΔrS° không đổi) ta thu được phương trình Van 't Hoff.",
+              "latex": "\\frac{d \\ln K}{dT} = \\frac{\\Delta_r H^\\circ}{RT^2}"
+            }
+          ]
+        },
+        "hinh": "nhiet-do-vant-hoff-can-bang"
+      }
+    },
+    {
+      "id": "moi-lien-he-kp-kc",
+      "ma": "C5",
+      "chu_de": "can-bang",
+      "ten": "Mối liên hệ giữa hằng số cân bằng Kp và Kc",
+      "latex": "K_p = K_c \\cdot (RT)^{\\Delta n}",
+      "latex_text": "Kp = Kc * (R*T)^delta_n",
+      "ky_hieu": [
+        {
+          "k": "Kp",
+          "y": "hằng số cân bằng tính theo áp suất riêng phần (bar)",
+          "dv": "bar^Δn"
+        },
+        {
+          "k": "Kc",
+          "y": "hằng số cân bằng tính theo nồng độ mol (M)",
+          "dv": "M^Δn"
+        },
+        {
+          "k": "R",
+          "y": "hằng số khí R = 0,08314 bar·L/(mol·K)",
+          "dv": "bar·L/(mol·K)"
+        },
+        {
+          "k": "Δn",
+          "y": "độ biến thiên số mol khí giữa sản phẩm và chất đầu",
+          "dv": "mol"
+        }
+      ],
+      "dieu_kien": "Hệ khí lý tưởng ở trạng thái cân bằng",
+      "lop": "Hoá 11 · Mở rộng",
+      "muc_do": "mo-rong",
+      "mo_phong": [
+        {
+          "id": "can-bang-le-chatelier",
+          "query": "tab=thong-so"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_CanBang.kpTuKc",
+        "vao": {
+          "Kc": 0.00461,
+          "T": 298.15,
+          "delta_n": 1
+        },
+        "ra": 0.11428,
+        "dv": "bar",
+        "sai_so": 0.0005
+      },
+      "chung_minh": {
+        "loai": "chung-minh",
+        "can_toan": "khong",
+        "buoc": [
+          {
+            "loi": "Theo phương trình trạng thái khí lý tưởng K1: Áp suất riêng phần pi của mỗi chất khí liên hệ với nồng độ mol Ci = ni/V.",
+            "latex": "p_i = \\frac{n_i}{V} R T = {C_i \\cdot R T}",
+            "to_mau": [
+              "Ci * RT"
+            ],
+            "hinh": "quan-he-kp-va-kc"
+          },
+          {
+            "loi": "Thay biểu thức áp suất riêng phần vào định nghĩa hằng số cân bằng Kp = (pC)^c·(pD)^d / [(pA)^a·(pB)^b].",
+            "latex": "K_p = \\frac{(C_C \\cdot RT)^c (C_D \\cdot RT)^d}{(C_A \\cdot RT)^a (C_B \\cdot RT)^b}",
+            "to_mau": [
+              "Kp"
+            ],
+            "hinh": "quan-he-kp-va-kc"
+          },
+          {
+            "loi": "Tách và gom riêng phần nồng độ và các thừa số (RT).",
+            "latex": "K_p = \\left( \\frac{C_C^c C_D^d}{C_A^a C_B^b} \\right) \\cdot (RT)^{(c+d)-(a+b)}",
+            "to_mau": [
+              "(RT)^((c+d)-(a+b))"
+            ],
+            "hinh": "quan-he-kp-va-kc"
+          },
+          {
+            "loi": "Nhận thấy cụm nồng độ chính là Kc và số mũ chính là Δn.",
+            "latex": "{K_p = K_c \\cdot (RT)^{\\Delta n}}",
+            "to_mau": [
+              "Kp = Kc * (RT)^delta_n"
+            ],
+            "hinh": "quan-he-kp-va-kc"
+          }
+        ],
+        "y_chinh": "Kp và Kc chuyển đổi qua lại thuận tiện bằng thừa số (RT)^Δn; khi phản ứng có số mol khí hai vế bằng nhau (Δn = 0) thì Kp = Kc.",
+        "hinh": "quan-he-kp-va-kc"
+      }
+    },
+    {
+      "id": "bang-ice",
+      "ma": "C6",
+      "chu_de": "can-bang",
+      "ten": "Bảng tính nồng độ cân bằng ICE cho phản ứng phân li A ⇌ 2B",
+      "latex": "K_c = \\frac{4x^2}{C_0 - x} \\implies x = \\frac{-K_c + \\sqrt{K_c^2 + 16 K_c C_0}}{8}",
+      "latex_text": "Kc = 4x^2 / (C0 - x) -> x = (-Kc + sqrt(Kc^2 + 16*Kc*C0)) / 8",
+      "ky_hieu": [
+        {
+          "k": "C₀",
+          "y": "nồng độ ban đầu của chất A (ví dụ N₂O₄)",
+          "dv": "mol/L"
+        },
+        {
+          "k": "x",
+          "y": "nồng độ của chất A đã bị phân li ở trạng thái cân bằng",
+          "dv": "mol/L"
+        },
+        {
+          "k": "2x",
+          "y": "nồng độ chất B (ví dụ NO₂) tạo thành ở trạng thái cân bằng",
+          "dv": "mol/L"
+        }
+      ],
+      "dieu_kien": "Phản ứng phân li thuận nghịch A ⇌ 2B thể tích không đổi",
+      "lop": "Hoá 11",
+      "muc_do": "sgk",
+      "mo_phong": [
+        {
+          "id": "can-bang-le-chatelier",
+          "query": "tab=can-bang"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_CanBang.canBangPhanLi",
+        "vao": {
+          "C0": 0.04,
+          "Kc": 0.00461
+        },
+        "ra": 0.006238,
+        "dv": "M",
+        "sai_so": 2e-05
+      },
+      "chung_minh": {
+        "loai": "chung-minh",
+        "can_toan": "khong",
+        "buoc": [
+          {
+            "loi": "Lập bảng ICE (Initial - Change - Equilibrium): Ban đầu [A] = C₀, [B] = 0. Biến thiên [A] phản ứng −x, [B] tạo thành +2x. Cân bằng [A] = C₀ − x, [B] = 2x.",
+            "latex": "\\begin{aligned} \\text{Ban đầu (I): } & [A]_0 = C_0, \\quad [B]_0 = 0 \\\\ \\text{Phản ứng (C): } & -x, \\quad +2x \\\\ \\text{Cân bằng (E): } & [A] = C_0 - x, \\quad [B] = 2x \\end{aligned}",
+            "to_mau": [
+              "C0 - x, 2x"
+            ],
+            "hinh": "bang-ice-phan-li"
+          },
+          {
+            "loi": "Thay các nồng độ cân bằng vào biểu thức hằng số cân bằng Kc.",
+            "latex": "K_c = \\frac{[B]^2}{[A]} = {\\frac{(2x)^2}{C_0 - x} = \\frac{4x^2}{C_0 - x}}",
+            "to_mau": [
+              "4x^2 / (C0 - x)"
+            ],
+            "hinh": "bang-ice-phan-li"
+          },
+          {
+            "loi": "Quy đồng mẫu số và chuyển vế đưa về phương trình bậc hai chuẩn theo ẩn x: 4x² + Kc·x − Kc·C₀ = 0.",
+            "latex": "4x^2 + K_c x - K_c C_0 = 0",
+            "to_mau": [
+              "4x^2 + Kc x - Kc C0 = 0"
+            ],
+            "hinh": "bang-ice-phan-li"
+          },
+          {
+            "loi": "Giải phương trình bậc hai lấy nghiệm dương phù hợp ý nghĩa vật lý (0 < x < C₀).",
+            "latex": "{x = \\frac{-K_c + \\sqrt{K_c^2 + 16 K_c C_0}}{8}}",
+            "to_mau": [
+              "(-Kc + sqrt(Kc^2 + 16 Kc C0)) / 8"
+            ],
+            "hinh": "bang-ice-phan-li"
+          }
+        ],
+        "y_chinh": "Bảng ICE cho phép giải chính xác và chặt chẽ nồng độ cân bằng của mọi cấu tử từ nồng độ ban đầu và hằng số Kc mà không cần ước lượng.",
+        "hinh": "bang-ice-phan-li"
+      }
+    },
+    {
+      "id": "xuc-tac-can-bang",
+      "ma": "C7",
+      "chu_de": "can-bang",
+      "ten": "Chất xúc tác không làm chuyển dịch cân bằng hoá học",
+      "latex": "K_c' = \\frac{k_t'}{k_n'} = \\frac{k_t \\cdot e^{\\frac{\\Delta E_a}{RT}}}{k_n \\cdot e^{\\frac{\\Delta E_a}{RT}}} = K_c",
+      "latex_text": "Kc_moi = kt'/kn' = Kc",
+      "ky_hieu": [
+        {
+          "k": "Kc",
+          "y": "hằng số cân bằng khi không có xúc tác",
+          "dv": ""
+        },
+        {
+          "k": "Kc'",
+          "y": "hằng số cân bằng khi có mặt chất xúc tác",
+          "dv": ""
+        }
+      ],
+      "dieu_kien": "Chất xúc tác hoá học ở cùng nhiệt độ",
+      "lop": "Hoá 11",
+      "muc_do": "sgk",
+      "mo_phong": [
+        {
+          "id": "can-bang-le-chatelier",
+          "query": "xuc_tac=1"
+        }
+      ],
+      "vi_du_so": {
+        "ham": "HL_CanBang.tiLeKcXucTac",
+        "vao": {
+          "deltaEa_kJ": 15,
+          "T": 298.15
+        },
+        "ra": 1.0,
+        "dv": "",
+        "sai_so": 0.0001
+      },
+      "chung_minh": {
+        "loai": "chung-minh",
+        "can_toan": "khong",
+        "buoc": [
+          {
+            "loi": "Chất xúc tác làm giảm rào cản năng lượng hoạt hoá của cả chiều thuận và chiều nghịch cùng một lượng ΔEa: Ea,t' = Ea,t − ΔEa và Ea,n' = Ea,n − ΔEa.",
+            "latex": "\\Delta E_{a,t} = \\Delta E_{a,n} = \\Delta E_a",
+            "to_mau": [
+              "Delta Ea,t = Delta Ea,n"
+            ],
+            "hinh": "xuc-tac-khong-doi-can-bang"
+          },
+          {
+            "loi": "Theo phương trình Arrhenius, tốc độ phản ứng thuận và tốc độ phản ứng nghịch đều tăng lên CÙNG MỘT HỆ SỐ e^(ΔEa/RT).",
+            "latex": "k_t' = k_t \\cdot e^{\\frac{\\Delta E_a}{RT}}, \\quad k_n' = k_n \\cdot e^{\\frac{\\Delta E_a}{RT}}",
+            "to_mau": [
+              "exp(deltaEa / RT)"
+            ],
+            "hinh": "xuc-tac-khong-doi-can-bang"
+          },
+          {
+            "loi": "Hằng số cân bằng mới Kc' là tỉ số giữa hai hằng số tốc độ mới.",
+            "latex": "K_c' = \\frac{k_t'}{k_n'} = \\frac{k_t \\cdot e^{\\frac{\\Delta E_a}{RT}}}{k_n \\cdot e^{\\frac{\\Delta E_a}{RT}}} = \\frac{k_t}{k_n} = {K_c}",
+            "to_mau": [
+              "Kc' = Kc"
+            ],
+            "hinh": "xuc-tac-khong-doi-can-bang"
+          }
+        ],
+        "y_chinh": "Chất xúc tác làm tăng tốc độ phản ứng thuận và nghịch với số lần bằng nhau, do đó KHÔNG làm chuyển dịch vị trí cân bằng và KHÔNG làm thay đổi hằng số Kc; nó chỉ giúp hệ đạt đến trạng thái cân bằng nhanh hơn.",
+        "hinh": "xuc-tac-khong-doi-can-bang"
+      }
+    }
+  ]
+}

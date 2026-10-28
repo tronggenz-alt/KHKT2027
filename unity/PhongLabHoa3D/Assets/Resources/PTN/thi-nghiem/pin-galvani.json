@@ -1,0 +1,62 @@
+{
+  "id": "pin-galvani",
+  "ten": "Pin Galvani (pin điện hoá)",
+  "lop": 12,
+  "bieu_tuong": "🔋",
+  "mo_ta": "Ghép hai điện cực kim loại với cầu muối KNO₃, đo sức điện động, quan sát dòng electron và vai trò cầu muối.",
+  "muc_tieu": [
+    "Lắp pin điện hoá từ hai điện cực kim loại và cầu muối.",
+    "Xác định anode, cathode, chiều dòng electron; tính E°pin = E°(cathode) − E°(anode).",
+    "Giải thích vai trò của cầu muối."
+  ],
+  "dung_cu": ["2 cốc thuỷ tinh 100 mL", "Cầu muối chứa KNO₃ (ống chữ U)", "Vôn kế", "Dây dẫn, kẹp cá sấu", "Thanh kim loại: Mg, Zn, Fe, Ni, Sn, Pb, Cu, Ag"],
+  "hoa_chat": [
+    { "ten": "Dung dịch muối 1 M của kim loại làm điện cực (ZnSO₄, CuSO₄, AgNO₃…)", "nguy_hiem": ["kich_ung", "moi_truong"] },
+    { "ten": "Dung dịch potassium nitrate (KNO₃) bão hoà trong cầu muối", "nguy_hiem": ["oxi_hoa"] }
+  ],
+  "buoc": [
+    { "id": "chon", "tieu_de": "Chọn hai kim loại làm điện cực", "huong_dan": "Mặc định là pin Zn – Cu. Có thể đổi sang cặp khác.", "goi_y": "Kim loại có E° nhỏ hơn là anode (cực âm).", "dieu_kien": "da_chon_cap" },
+    { "id": "doc", "tieu_de": "Đọc vôn kế, xác định anode – cathode và chiều electron", "huong_dan": "Bấm \"Ghi số đo\" để lưu vào sổ tay.", "goi_y": "E°pin = E°(cathode) − E°(anode). Zn – Cu: 0,340 − (−0,763) = 1,103 V.", "dieu_kien": "da_doc_von" },
+    { "id": "rut", "tieu_de": "Rút cầu muối và quan sát vôn kế", "huong_dan": "Bấm \"Rút cầu muối\".", "goi_y": "Không có đường cho ion di chuyển → mạch hở → vôn kế chỉ 0 V.", "dieu_kien": "da_rut_cau_muoi" },
+    { "id": "nong_do", "tieu_de": "(Mở rộng) Thay đổi nồng độ ion, quan sát E", "huong_dan": "Kéo thanh trượt nồng độ. E tính theo phương trình Nernst.", "goi_y": "E = E° − (0,0592/n)·lg Q – phần mở rộng, ngoài chương trình bắt buộc.", "dieu_kien": "da_doi_nong_do" }
+  ],
+  "an_toan": [
+    "Muối của Pb, Ag, Ni độc – tránh dính da, rửa tay sau thí nghiệm.",
+    "Không đổ dung dịch muối kim loại nặng xuống cống; thu gom vào thùng chất thải."
+  ],
+  "cau_hinh": {
+    "kim_loai": ["Mg", "Zn", "Fe", "Ni", "Sn", "Pb", "Cu", "Ag"],
+    "mac_dinh": { "trai": "Zn", "phai": "Cu" },
+    "nong_do": { "tu": 0.001, "den": 1, "mac_dinh": 1 },
+    "muoi": { "Mg": "MgSO₄", "Zn": "ZnSO₄", "Fe": "FeSO₄", "Ni": "NiSO₄", "Sn": "SnSO₄", "Pb": "Pb(NO₃)₂", "Cu": "CuSO₄", "Ag": "AgNO₃" }
+  },
+  "cau_hoi": {
+    "bon_lua_chon": [
+      { "cau": "Trong pin điện hoá Zn – Cu, quá trình xảy ra ở anode là",
+        "lua_chon": ["Cu²⁺ + 2e → Cu", "Zn → Zn²⁺ + 2e", "Cu → Cu²⁺ + 2e", "Zn²⁺ + 2e → Zn"], "dap_an": "B",
+        "giai_thich": "Anode là nơi xảy ra sự oxi hoá; Zn có E° nhỏ hơn nên bị oxi hoá." },
+      { "cau": "Biết E°(Zn²⁺/Zn) = −0,763 V; E°(Ag⁺/Ag) = +0,799 V. Sức điện động chuẩn của pin Zn – Ag là",
+        "lua_chon": ["0,036 V", "0,799 V", "1,562 V", "2,361 V"], "dap_an": "C",
+        "giai_thich": "E°pin = 0,799 − (−0,763) = 1,562 V." },
+      { "cau": "Vai trò của cầu muối trong pin điện hoá là",
+        "lua_chon": ["cho ion di chuyển để trung hoà điện tích hai dung dịch, giữ cho mạch kín", "dẫn electron giữa hai cốc", "làm tăng thế điện cực chuẩn", "phản ứng với kim loại ở anode"], "dap_an": "A",
+        "giai_thich": "Electron đi ở mạch ngoài; trong dung dịch, ion của cầu muối di chuyển để trung hoà điện tích, nếu không pin ngừng hoạt động." },
+      { "cau": "Trong các kim loại Mg, Zn, Cu, Ag, cặp điện cực tạo pin có sức điện động chuẩn lớn nhất là",
+        "lua_chon": ["Zn – Cu", "Mg – Zn", "Cu – Ag", "Mg – Ag"], "dap_an": "D",
+        "giai_thich": "Hai kim loại có E° chênh nhau nhiều nhất: 0,799 − (−2,37) = 3,169 V." }
+    ],
+    "dung_sai": [
+      { "cau": "Khi pin Zn – Cu (cầu muối KNO₃) hoạt động:",
+        "y": [
+          { "noi_dung": "Electron đi từ điện cực Zn sang điện cực Cu qua dây dẫn.", "dung": true, "giai_thich": "Electron đi từ anode (cực âm) sang cathode (cực dương) ở mạch ngoài." },
+          { "noi_dung": "Khối lượng thanh Cu giảm dần.", "dung": false, "giai_thich": "Cu²⁺ bị khử bám lên thanh Cu nên thanh Cu nặng thêm." },
+          { "noi_dung": "Nồng độ Cu²⁺ trong cốc chứa điện cực Cu giảm dần.", "dung": true, "giai_thich": "Cu²⁺ + 2e → Cu." },
+          { "noi_dung": "Ion NO₃⁻ trong cầu muối di chuyển về phía cốc chứa điện cực Cu.", "dung": false, "giai_thich": "Anion đi về phía anode (cốc Zn) để trung hoà Zn²⁺ mới sinh ra." }
+        ] }
+    ],
+    "tra_loi_ngan": [
+      { "cau": "Biết E°(Ni²⁺/Ni) = −0,257 V; E°(Cu²⁺/Cu) = +0,340 V. Sức điện động chuẩn của pin Ni – Cu là bao nhiêu vôn? (làm tròn đến hàng phần nghìn)",
+        "dap_so": "0,597", "don_vi": "V", "sai_so": 0.001, "giai_thich": "E°pin = 0,340 − (−0,257) = 0,597 V." }
+    ]
+  }
+}

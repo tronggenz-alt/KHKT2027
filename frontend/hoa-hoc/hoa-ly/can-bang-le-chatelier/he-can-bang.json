@@ -1,0 +1,164 @@
+{
+  "danh_sach": [
+    {
+      "id": "N2O4_2NO2",
+      "ten": "2NO₂ ⇌ N₂O₄ (Dime hoá khí nitrogen dioxide)",
+      "phuong_trinh": "2NO₂(k) ⇌ N₂O₄(k)",
+      "chieu_phan_ly": "N₂O₄(k) ⇌ 2NO₂(k)",
+      "chat": [
+        {
+          "ct": "NO2",
+          "ten": "Nitrogen dioxide",
+          "he_so": 2,
+          "he_so_phan_ly": 2,
+          "vai_tro": "chat_dau",
+          "pha": "k",
+          "mau": "var(--hl-khi-no2, #b45309)",
+          "mau_rgb": [180, 83, 9],
+          "do_dam": 1.0
+        },
+        {
+          "ct": "N2O4",
+          "ten": "Dinitrogen tetroxide",
+          "he_so": 1,
+          "he_so_phan_ly": 1,
+          "vai_tro": "san_pham",
+          "pha": "k",
+          "mau": "var(--hl-khi-n2o4, #f8fafc)",
+          "mau_rgb": [248, 250, 252],
+          "do_dam": 0.0
+        }
+      ],
+      "dH_kJ": -57.2,
+      "dH_phan_ly_kJ": 57.2,
+      "K_ref": 216.92,
+      "Kc_ref_phan_ly": 0.00461,
+      "T_ref": 298.15,
+      "loai_K": "Kc",
+      "Ea_t_kJ": 13.0,
+      "A_t": 1.0e8,
+      "nguon": "SGK Hoá học 11 (KNTT / CTST / Cánh Diều) & IUPAC Gold Book"
+    },
+    {
+      "id": "H2_I2_2HI",
+      "ten": "H₂ + I₂ ⇌ 2HI (Tổng hợp khí hydrogen iodide)",
+      "phuong_trinh": "H₂(k) + I₂(k) ⇌ 2HI(k)",
+      "chat": [
+        {
+          "ct": "H2",
+          "ten": "Hydrogen",
+          "he_so": 1,
+          "vai_tro": "chat_dau",
+          "pha": "k",
+          "mau": "var(--hl-khi-h2, #a855f7)",
+          "mau_rgb": [168, 85, 247]
+        },
+        {
+          "ct": "I2",
+          "ten": "Iodine (hơi)",
+          "he_so": 1,
+          "vai_tro": "chat_dau",
+          "pha": "k",
+          "mau": "var(--hl-khi-i2, #7c3aed)",
+          "mau_rgb": [124, 58, 237],
+          "do_dam": 0.9
+        },
+        {
+          "ct": "HI",
+          "ten": "Hydrogen iodide",
+          "he_so": 2,
+          "vai_tro": "san_pham",
+          "pha": "k",
+          "mau": "var(--hl-khi-hi, #e2e8f0)",
+          "mau_rgb": [226, 232, 240],
+          "do_dam": 0.0
+        }
+      ],
+      "dH_kJ": -9.48,
+      "K_ref": 54.0,
+      "T_ref": 700.0,
+      "loai_K": "Kc",
+      "Ea_t_kJ": 165.0,
+      "A_t": 1.0e11,
+      "nguon": "SGK Hoá học 11 - Bài Cân bằng hoá học: delta_n = 0 áp suất không chuyển dịch"
+    },
+    {
+      "id": "N2_3H2_2NH3",
+      "ten": "N₂ + 3H₂ ⇌ 2NH₃ (Tổng hợp ammonia - Chu trình Haber)",
+      "phuong_trinh": "N₂(k) + 3H₂(k) ⇌ 2NH₃(k)",
+      "chat": [
+        {
+          "ct": "N2",
+          "ten": "Nitrogen",
+          "he_so": 1,
+          "vai_tro": "chat_dau",
+          "pha": "k",
+          "mau": "var(--hl-khi-n2, #38bdf8)"
+        },
+        {
+          "ct": "H2",
+          "ten": "Hydrogen",
+          "he_so": 3,
+          "vai_tro": "chat_dau",
+          "pha": "k",
+          "mau": "var(--hl-khi-h2, #818cf8)"
+        },
+        {
+          "ct": "NH3",
+          "ten": "Ammonia",
+          "he_so": 2,
+          "vai_tro": "san_pham",
+          "pha": "k",
+          "mau": "var(--hl-khi-nh3, #34d399)"
+        }
+      ],
+      "dH_kJ": -91.8,
+      "dS_J_K": -198.1,
+      "K_ref": 5.435e5,
+      "T_ref": 298.15,
+      "loai_K": "Kp",
+      "Ea_t_kJ": 230.0,
+      "Ea_xt_kJ": 100.0,
+      "xuc_tac": "Bột sắt (Fe) xúc tác công nghiệp",
+      "dieu_kien_cn": { "T_K": 723.15, "p_bar": 200 },
+      "nguon": "SGK Hoá học 11 (KNTT) - Ứng dụng quá trình Haber-Bosch trong công nghiệp"
+    },
+    {
+      "id": "Fe3_SCN_FeSCN",
+      "ten": "Fe³⁺ + SCN⁻ ⇌ [Fe(SCN)]²⁺ (Phức thiocyanate màu đỏ máu)",
+      "phuong_trinh": "Fe³⁺(aq) + SCN⁻(aq) ⇌ [Fe(SCN)]²⁺(aq)",
+      "chat": [
+        {
+          "ct": "Fe3+",
+          "ten": "Sắt(III)",
+          "he_so": 1,
+          "vai_tro": "chat_dau",
+          "pha": "aq",
+          "mau": "var(--hl-ion-fe3, #fde047)"
+        },
+        {
+          "ct": "SCN-",
+          "ten": "Thiocyanate",
+          "he_so": 1,
+          "vai_tro": "chat_dau",
+          "pha": "aq",
+          "mau": "var(--hl-ion-scn, #f1f5f9)"
+        },
+        {
+          "ct": "[Fe(SCN)]2+",
+          "ten": "Phức sắt thiocyanate",
+          "he_so": 1,
+          "vai_tro": "san_pham",
+          "pha": "aq",
+          "mau": "var(--hl-ion-fescn, #dc2626)",
+          "do_dam": 1.0
+        }
+      ],
+      "dH_kJ": -24.0,
+      "K_ref": 138.0,
+      "T_ref": 298.15,
+      "loai_K": "Kc",
+      "nguon": "SGK Hoá học 11 - Thực hành chuyển dịch cân bằng ion trong dung dịch"
+    }
+  ]
+}

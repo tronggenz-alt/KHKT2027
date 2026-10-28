@@ -1,0 +1,138 @@
+{
+  "toa_nha": {
+    "ten": "Trung tâm Thí nghiệm Hoá học Hiện đại",
+    "rong": 36.0,
+    "sau": 30.0,
+    "cao_sanh": 8.0,
+    "cao_phong": 5.0,
+    "cao_hanh_lang": 4.0,
+    "xuat_phat": [18.0, 27.0]
+  },
+  "gieng_troi": {
+    "tam": [18.0, 25.0],
+    "kich_thuoc": [8.0, 6.0],
+    "cao": 8.0
+  },
+  "bang_tuan_hoan": {
+    "vi_tri": [18.0, 2.05, 29.82],
+    "goc_xoay": [0.0, 180.0, 0.0],
+    "kich_thuoc": [7.0, 3.6, 0.1]
+  },
+  "phong": [
+    {
+      "id": "sanh",
+      "ten": "Sảnh đón tiếp & Bảng tuần hoàn",
+      "hcn": [12.0, 20.0, 24.0, 30.0],
+      "cao": 8.0,
+      "mau": "#0a192f"
+    },
+    {
+      "id": "chuan-do",
+      "ten": "Phòng Chuẩn độ & Định lượng",
+      "hcn": [2.0, 1.0, 11.0, 9.0],
+      "cao": 5.0,
+      "mau": "#1e3a5f",
+      "cua": { "tam": [6.5, 9.0], "rong": 1.8, "cao": 2.6, "truc": "z" }
+    },
+    {
+      "id": "nhan-biet",
+      "ten": "Phòng Nhận biết ion & Thử ngọn lửa",
+      "hcn": [2.0, 11.0, 10.0, 19.0],
+      "cao": 5.0,
+      "mau": "#3d2c1d",
+      "cua": { "tam": [10.0, 15.0], "rong": 1.8, "cao": 2.6, "truc": "x" }
+    },
+    {
+      "id": "pin-galvani",
+      "ten": "Phòng Pin Galvani & Điện hoá",
+      "hcn": [19.5, 1.0, 27.5, 9.0],
+      "cao": 5.0,
+      "mau": "#2a1e4a",
+      "cua": { "tam": [23.5, 9.0], "rong": 1.8, "cao": 2.6, "truc": "z" }
+    },
+    {
+      "id": "dien-phan",
+      "ten": "Phòng Điện phân dung dịch",
+      "hcn": [27.5, 1.0, 35.5, 9.0],
+      "cao": 5.0,
+      "mau": "#1e2a4a",
+      "cua": { "tam": [27.5, 5.0], "rong": 1.8, "cao": 2.6, "truc": "x" }
+    },
+    {
+      "id": "an-toan",
+      "ten": "Phòng Kho hoá chất & An toàn",
+      "hcn": [2.0, 21.0, 10.0, 27.0],
+      "cao": 5.0,
+      "mau": "#1e3f35",
+      "cua": { "tam": [10.0, 24.0], "rong": 1.8, "cao": 2.6, "truc": "x" }
+    },
+    {
+      "id": "pha-che",
+      "ten": "Phòng Cân & Pha chế hoá chất",
+      "hcn": [26.0, 11.0, 34.0, 17.0],
+      "cao": 5.0,
+      "mau": "#233544",
+      "cua": { "tam": [26.0, 14.0], "rong": 1.8, "cao": 2.6, "truc": "x" }
+    },
+    {
+      "id": "hoi-thao",
+      "ten": "Phòng Hội thảo & Trưng bày kết quả",
+      "hcn": [24.0, 19.0, 34.0, 27.0],
+      "cao": 5.0,
+      "mau": "#1f2d3d",
+      "cua": { "tam": [24.0, 23.0], "rong": 1.8, "cao": 2.6, "truc": "x" }
+    }
+  ],
+  "hanh_lang": [
+    { "hcn": [16.5, 9.0, 19.5, 20.0], "ten": "Hành lang trục Bắc - Nam" },
+    { "hcn": [2.0, 9.0, 34.0, 11.0], "ten": "Hành lang trục Đông - Tây" },
+    { "hcn": [10.0, 17.0, 26.0, 20.0], "ten": "Hành lang kết nối sảnh" }
+  ],
+  "tram": [
+    {
+      "id": "chuan-do",
+      "ten": "Chuẩn độ Acid - Base",
+      "phong": "chuan-do",
+      "tam": [6.5, 5.0],
+      "kich_thuoc_ban": [2.4, 0.85, 1.2],
+      "diem_dung": [6.5, 6.2],
+      "goc_nhin": [0.0, 0.0, 0.0]
+    },
+    {
+      "id": "nhan-biet",
+      "ten": "Nhận biết Ion & Thử ngọn lửa",
+      "phong": "nhan-biet",
+      "tam": [6.0, 15.0],
+      "kich_thuoc_ban": [2.4, 0.85, 1.2],
+      "diem_dung": [7.2, 15.0],
+      "goc_nhin": [0.0, -90.0, 0.0]
+    },
+    {
+      "id": "pin-galvani",
+      "ten": "Pin Điện Hoá Galvani Zn - Cu",
+      "phong": "pin-galvani",
+      "tam": [23.5, 5.0],
+      "kich_thuoc_ban": [2.4, 0.85, 1.2],
+      "diem_dung": [23.5, 6.2],
+      "goc_nhin": [0.0, 0.0, 0.0]
+    },
+    {
+      "id": "dien-phan",
+      "ten": "Điện phân dung dịch CuSO4",
+      "phong": "dien-phan",
+      "tam": [31.5, 5.0],
+      "kich_thuoc_ban": [2.4, 0.85, 1.2],
+      "diem_dung": [31.5, 6.2],
+      "goc_nhin": [0.0, 0.0, 0.0]
+    },
+    {
+      "id": "an-toan",
+      "ten": "An toàn & Sơ cứu Phòng Lab",
+      "phong": "an-toan",
+      "tam": [6.0, 24.0],
+      "kich_thuoc_ban": [2.4, 0.85, 1.2],
+      "diem_dung": [7.2, 24.0],
+      "goc_nhin": [0.0, -90.0, 0.0]
+    }
+  ]
+}

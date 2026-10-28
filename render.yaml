@@ -1,0 +1,53 @@
+# Bản thiết kế (Blueprint) cho Render: New → Blueprint → chọn repo GitHub này. Hướng dẫn: HUONG_DAN_DUA_LEN_WEB.md
+# Các biến "sync: false" là KEY BÍ MẬT / thông tin riêng – Render hỏi giá trị lúc tạo dịch vụ; KHÔNG ghi giá trị vào file này.
+#
+# Gói FREE: web ngủ sau 15 phút không ai dùng (mở lại chờ ~1 phút), KHÔNG có ổ đĩa lưu → dữ liệu (CSDL, tài liệu AI Riêng)
+# được backend/sao_luu.py sao lưu vào repo GitHub riêng tư SAO_LUU_GITHUB_REPO mỗi SAO_LUU_PHUT phút + khi web đi ngủ,
+# và tự khôi phục khi web thức dậy. Nâng lên trả phí: plan: starter + thêm mục disk (mountPath /var/data) – không cần sao lưu.
+services:
+  - type: web
+    name: giai-chuoi-huu-co
+    runtime: docker
+    plan: free
+    region: singapore          # gần Việt Nam nhất
+    healthCheckPath: /api/suc-khoe
+    autoDeploy: true           # đẩy code mới lên GitHub → Render tự dựng lại
+    envVars:
+      - key: STORAGE_DIR
+        value: /var/data
+      - key: CHE_DO_CUC_BO
+        value: "0"
+      - key: TRUSTED_PROXIES   # bộ cân bằng tải của Render (mạng nội bộ) → lấy đúng IP người dùng cho giới hạn lượt
+        value: 10.0.0.0/8
+      - key: APP_SECRET_KEY    # khoá chính (ký phiên đăng nhập, mã hoá key người dùng) – Render tự sinh, KHÔNG nằm trong bản sao lưu
+        generateValue: true
+      - key: NOTEBOOKLM_COOKIE_KEY   # khoá AES-256-GCM mã hoá cookie Google NotebookLM – Render tự sinh, KHÔNG nằm trong bản sao lưu
+        generateValue: true
+      - key: SAO_LUU_GITHUB_REPO
+        value: tyrt07112/giai-chuoi-du-lieu
+      - key: SAO_LUU_PHUT
+        value: "2"
+      - key: SAO_LUU_GITHUB_TOKEN
+        sync: false
+      - key: CAP_ADMIN_EMAIL   # email tài khoản admin: đăng ký trên web bằng email này, xác thực xong là thành admin
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: CLAUDE_MODEL
+        sync: false
+      - key: CLAUDE_ACCESS_KEY
+        sync: false
+      - key: CLAUDE_DAILY_LIMIT
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: EMAIL_FROM
+        sync: false

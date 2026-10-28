@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="vi" data-theme="sang">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Phòng thí nghiệm ảo · CHEMISTRY</title>
+  <meta name="description" content="Phòng thí nghiệm Hoá học ảo 3D: an toàn phòng thí nghiệm, chuẩn độ acid – base, nhận biết ion, pin Galvani, điện phân dung dịch – chuẩn CT GDPT 2018.">
+  <meta name="color-scheme" content="light dark">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230f2b48' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 3h6M10 3v6L4.5 18.5A2 2 0 0 0 6.2 21.5h11.6a2 2 0 0 0 1.7-3L14 9V3'/%3E%3Cpath d='M7 15h10'/%3E%3C/svg%3E">
+  <script>
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem("giai-chuoi-giao-dien"); } catch (e) {}
+      if (t !== "sang" && t !== "toi") t = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "toi" : "sang";
+      document.documentElement.dataset.theme = t;
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Be Vietnam Pro"', '-apple-system', '"Segoe UI"', 'Roboto', 'sans-serif'],
+            mono: ['"JetBrains Mono"', '"SFMono-Regular"', 'Consolas', 'monospace'],
+          },
+          colors: {
+            giay: 'var(--giay)', 'giay-lom': 'var(--giay-lom)', muc: 'var(--muc)', 'muc-2': 'var(--muc-2)', lang: 'var(--lang)',
+            chi: 'var(--chi)', 'chi-dam': 'var(--chi-dam)', nhan: 'var(--nhan)', 'nhan-lom': 'var(--nhan-lom)',
+            'ho-phach': 'var(--ho-phach)', gach: 'var(--gach)', lam: 'var(--lam)',
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="/static/hoa-hoc/phong-thi-nghiem/ban-do.js"></script>
+  <script src="/static/hoa-hoc/phong-thi-nghiem/dieu-khien.js"></script>
+  <script src="/static/hoa-hoc/phong-thi-nghiem/hinh-hoc.js"></script>
+  <script src="/static/hoa-hoc/phong-thi-nghiem/tinh-toan.js"></script>
+  <script src="/static/hoa-hoc/phong-thi-nghiem/mo-phong.js"></script>
+  <script type="importmap">
+  { "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+    "ptn/ban-do": "/static/hoa-hoc/phong-thi-nghiem/ban-do.js",
+    "ptn/dieu-khien": "/static/hoa-hoc/phong-thi-nghiem/dieu-khien.js",
+    "ptn/phong-mo": "/static/hoa-hoc/phong-thi-nghiem/phong-mo.js",
+    "ptn/noi-that-thuc": "/static/hoa-hoc/phong-thi-nghiem/noi-that-thuc.js",
+    "ptn/vat-lieu-thuc": "/static/hoa-hoc/phong-thi-nghiem/vat-lieu-thuc.js",
+    "ptn/nhan-vat": "/static/hoa-hoc/phong-thi-nghiem/nhan-vat.js",
+    "ptn/ve-web": "/static/hoa-hoc/phong-thi-nghiem/ve-web.js",
+    "ptn/cau-unity": "/static/hoa-hoc/phong-thi-nghiem/cau-unity.js",
+    "ptn/giao-dien": "/static/hoa-hoc/phong-thi-nghiem/giao-dien.js",
+    "ptn/chon-che-do": "/static/hoa-hoc/phong-thi-nghiem/chon-che-do-lab.js",
+    "ptn/lab-unity-app": "/static/hoa-hoc/phong-thi-nghiem/lab-unity-app.js"
+  } }
+  </script>
+</head>
+<body class="ptn-trang">
+  <a href="#ptn-khung" class="ptn-bo-qua">Bỏ qua tới khung thí nghiệm</a>
+  <div id="toasts" class="fixed bottom-4 right-4 left-4 sm:left-auto z-[80] flex flex-col gap-2 sm:w-96" aria-live="polite"></div>
+
+  <header class="thanh-tren ptn-thanh-tren">
+    <div class="ptn-thanh-tren-trong">
+      <a href="/" class="flex items-center gap-3 min-w-0 no-underline">
+        <svg class="w-6 h-6 text-nhan shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9 3h6M10 3v6L4.5 18.5A2 2 0 0 0 6.2 21.5h11.6a2 2 0 0 0 1.7-3L14 9V3"/><path d="M7 15h10"/>
+        </svg>
+        <span class="logo-chu">CHEMISTRY</span>
+        <span class="logo-phu hidden md:inline">Phòng thí nghiệm ảo 3D</span>
+      </a>
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button type="button" id="ptn-nut-ban-day-du" class="btn btn-sm btn-primary whitespace-nowrap" hidden>Bản 3D đầy đủ</button>
+        <button type="button" id="ptn-nut-ung-dung" class="btn btn-sm btn-primary whitespace-nowrap" hidden>🖥 Mở bằng ứng dụng</button>
+        <a href="/" class="btn btn-sm whitespace-nowrap">← <span class="hidden sm:inline">Trang chủ</span></a>
+        <button type="button" id="nut-che-do" class="nut-che-do" aria-label="Chuyển sang chế độ tối" title="Chế độ tối">
+          <svg class="bieu-tuong-trang" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
+          <svg class="bieu-tuong-mat-troi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="ptn-bo-cuc" id="ptn-bo-cuc">
+    <!-- Khung 3D toàn màn hình -->
+    <div id="ptn-khung" class="ptn-khung" tabindex="0" aria-label="Khung thí nghiệm 3D không gian mở. Dùng WASD hoặc chuột để di chuyển nhân vật, E để vào bàn, Q/Esc để rời bàn, F đổi góc nhìn, V toàn cảnh.">
+      <div id="ptn-dang-tai" class="ptn-dang-tai" role="status">
+        <div class="ptn-vong" aria-hidden="true"></div>
+        <p id="ptn-dang-tai-chu">Đang dựng phòng thí nghiệm…</p>
+        <div class="ptn-thanh-tai" hidden><span></span></div>
+      </div>
+
+      <!-- Hướng dẫn lần đầu (3 bước) -->
+      <div id="ptn-huong-dan-dau" class="ptn-huong-dan-dau" hidden>
+        <div class="ptn-hdd-noi-dung">
+          <div class="ptn-hdd-buoc"><span class="ptn-hdd-so">1</span> Đi lại bằng <b>W A S D</b> hoặc chạm sàn</div>
+          <div class="ptn-hdd-buoc"><span class="ptn-hdd-so">2</span> Lại gần bàn có viền sáng</div>
+          <div class="ptn-hdd-buoc"><span class="ptn-hdd-so">3</span> Nhấn <b>E</b> để bắt đầu thí nghiệm</div>
+        </div>
+        <button type="button" id="ptn-hdd-dong" class="btn btn-sm btn-primary" aria-label="Đóng hướng dẫn">Đã hiểu</button>
+      </div>
+
+      <!-- Joystick cảm ứng (cho điện thoại) -->
+      <div id="ptn-joystick" class="ptn-joystick" hidden aria-hidden="true">
+        <div id="ptn-joystick-nut" class="ptn-joystick-nut"></div>
+      </div>
+    </div>
+
+    <!-- HUD GÓC TRÊN-TRÁI: Nút mở bản đồ + Badge khu vực -->
+    <div class="ptn-hud-goc ptn-hud-top-left">
+      <button type="button" id="ptn-nut-mo-ngan-keo" class="ptn-hud-nut-pill" title="Mở danh sách trạm & bản đồ phòng (M)" aria-label="Mở bản đồ và danh sách trạm">
+        <span class="ptn-icon-menu">☰</span>
+        <span>Bản đồ phòng</span>
+      </button>
+      <div id="ptn-hud-khu" class="ptn-hud-badge-khu">
+        <span id="ptn-khu-dot" class="ptn-khu-cham trung_tam"></span>
+        <span id="ptn-vi-tri-hien-tai">Khu vực tự do</span>
+      </div>
+    </div>
+
+    <!-- HUD GÓC TRÊN-PHẢI: Mini-map 160px SVG + Nút Unity -->
+    <div class="ptn-hud-goc ptn-hud-top-right">
+      <div id="ptn-ban-do-mini" class="ptn-ban-do-mini" aria-label="Bản đồ thu nhỏ phòng thí nghiệm">
+        <div class="ptn-mini-tieu-de">
+          <span>Bản đồ phòng</span>
+          <button type="button" id="ptn-mini-thu-phong" class="ptn-mini-nut-thu-phong" title="Mở rộng / Thu nhỏ bản đồ (M)" aria-label="Mở rộng hoặc thu nhỏ bản đồ">⤢</button>
+        </div>
+        <svg id="ptn-mini-svg" class="ptn-mini-svg" viewBox="0 0 220 160"></svg>
+      </div>
+      <div class="ptn-hud-hang-nut">
+        <button type="button" id="ptn-nut-unity" class="ptn-nut-unity" hidden>
+          <span id="ptn-nhan-unity">Web 3D ⇄ Unity 3D</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- HUD GÓC DƯỚI-GIỮA: Prompt ngữ cảnh tương tác (E) & Nút nổi -->
+    <div class="ptn-hud-goc ptn-hud-bottom-center">
+      <div id="ptn-hud-tuong-tac" class="ptn-hud-tuong-tac" hidden>
+        <kbd class="ptn-kbd-e">E</kbd>
+        <span id="ptn-hud-tuong-tac-chu">Thực hành thí nghiệm</span>
+      </div>
+      <button type="button" id="ptn-nut-lam-tn" class="ptn-nut-noi ptn-nut-lam-tn" hidden>🧪 Làm thí nghiệm (E)</button>
+      <button type="button" id="ptn-nut-roi-ban" class="ptn-nut-noi ptn-nut-roi-ban" hidden>← Rời bàn (Q / Esc)</button>
+    </div>
+
+    <!-- HUD GÓC DƯỚI-TRÁI: Phím tắt rút gọn & Nút trợ giúp (?) -->
+    <div class="ptn-hud-goc ptn-hud-bottom-left">
+      <div id="ptn-hud-phim-tat" class="ptn-hud-phim-tat">
+        <span><b>WASD</b> Di chuyển</span>
+        <span class="ptn-hud-sep">·</span>
+        <span><b>Chuột</b> Xoay</span>
+        <span class="ptn-hud-sep">·</span>
+        <span><b>Shift</b> Chạy</span>
+        <span class="ptn-hud-sep">·</span>
+        <span><b>Space</b> Nhảy</span>
+        <span class="ptn-hud-sep">·</span>
+        <span><b>F</b> Góc 1/3</span>
+        <span class="ptn-hud-sep">·</span>
+        <span><b>V</b> Toàn cảnh</span>
+        <button type="button" id="ptn-nut-tro-giup" class="ptn-nut-hoi" title="Bảng phím tắt đầy đủ (?)" aria-label="Bảng phím tắt">?</button>
+      </div>
+    </div>
+
+    <!-- HUD GÓC DƯỚI-PHẢI: Cụm nút camera & Cài đặt (⚙) -->
+    <div class="ptn-hud-goc ptn-hud-bottom-right">
+      <div id="ptn-hud-camera" class="ptn-hud-camera-group">
+        <div id="ptn-nhom-cam-di-dao" class="flex items-center gap-1">
+          <button type="button" class="ptn-nut-cam-hud" data-camera="theo_sau" title="Góc nhìn thứ 3 qua vai (F)">3</button>
+          <button type="button" class="ptn-nut-cam-hud" data-camera="goc_1" title="Góc nhìn thứ nhất (F)">1</button>
+          <button type="button" class="ptn-nut-cam-hud" data-camera="toan_canh" title="Toàn cảnh nhà búp bê (V)">V</button>
+          <button type="button" class="ptn-nut-cam-hud" data-camera="ve_cua" title="Về cửa vào phòng" aria-label="Về cửa vào">🚪</button>
+        </div>
+        <div id="ptn-nhom-cam-tai-ban" class="flex items-center gap-1" hidden>
+          <button type="button" class="ptn-nut-cam-hud" data-camera="trai" title="Xoay trái (←)">⟲</button>
+          <button type="button" class="ptn-nut-cam-hud" data-camera="phai" title="Xoay phải (→)">⟳</button>
+          <button type="button" class="ptn-nut-cam-hud" data-camera="gan" title="Phóng to (+)">＋</button>
+          <button type="button" class="ptn-nut-cam-hud" data-camera="xa" title="Thu nhỏ (−)">－</button>
+          <button type="button" class="ptn-nut-cam-hud" data-camera="dat_lai" title="Đặt lại góc nhìn (R)">⌂</button>
+        </div>
+        <button type="button" id="ptn-nut-cai-dat" class="ptn-nut-cam-hud" title="Cài đặt điều khiển & độ nhạy" aria-label="Cài đặt">⚙</button>
+      </div>
+    </div>
+
+    <!-- NGĂN KÉO TRÁI (Left Drawer): Bản đồ & Danh sách trạm -->
+    <div id="ptn-lop-phu-trai" class="ptn-lop-phu" hidden></div>
+    <nav id="ptn-ngan-keo-trai" class="ptn-cot-trai ptn-ngan-keo-trai" aria-label="Bản đồ phòng thí nghiệm" hidden>
+      <div class="ptn-ngan-keo-dau">
+        <div>
+          <h2 class="ptn-ngan-keo-tieu-de">Bản đồ phòng Lab</h2>
+          <p class="text-xs text-muc-2">5 khu vực thực hành chuẩn CT 2018</p>
+        </div>
+        <button type="button" id="ptn-ngan-keo-dong" class="ptn-nut-dong" aria-label="Đóng bản đồ">✕</button>
+      </div>
+      <div id="ptn-ds" class="ptn-ds" role="list"></div>
+      <div class="ptn-tuy-chon">
+        <p class="ptn-nhan-muc">Chế độ làm bài</p>
+        <div class="ptn-phan-doan" role="radiogroup" aria-label="Chế độ làm thí nghiệm">
+          <button type="button" role="radio" data-che-do="huong_dan" aria-checked="true">Hướng dẫn</button>
+          <button type="button" role="radio" data-che-do="tu_do" aria-checked="false">Tự do</button>
+        </div>
+        <p class="ptn-nhan-muc mt-3">Di chuyển</p>
+        <div class="ptn-phan-doan" role="radiogroup" aria-label="Kiểu di chuyển trong phòng">
+          <button type="button" role="radio" data-di-chuyen="di_bo" aria-checked="true">Đi bộ</button>
+          <button type="button" role="radio" data-di-chuyen="den_ngay" aria-checked="false">Đến ngay</button>
+        </div>
+        <p class="ptn-nhan-muc mt-3">Chất lượng hình 3D</p>
+        <div class="ptn-phan-doan" role="radiogroup" aria-label="Chất lượng hình ảnh 3D">
+          <button type="button" role="radio" data-chat-luong="cao" aria-checked="true">Cao</button>
+          <button type="button" role="radio" data-chat-luong="thap" aria-checked="false">Thấp</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- BẢNG ĐIỀU KHIỂN PHẢI (Right Drawer): Xuất hiện khi ở trạm -->
+    <aside class="ptn-cot-phai" id="ptn-cot-phai" aria-label="Bảng điều khiển thí nghiệm" hidden>
+      <div class="ptn-cot-phai-dau">
+        <div class="min-w-0 flex-1">
+          <h1 id="ptn-ten-tn" class="ptn-ten-tn">Phòng thí nghiệm ảo</h1>
+          <p id="ptn-phu-de" class="ptn-phu-de"></p>
+        </div>
+        <button type="button" id="ptn-nut-roi-ban-top" class="btn btn-sm btn-outline whitespace-nowrap ptn-btn-roi-ban" title="Rời bàn (Q / Esc)">← Rời bàn (Q)</button>
+      </div>
+      <button type="button" class="ptn-tay-keo" id="ptn-tay-keo" aria-label="Kéo lên / thu xuống bảng điều khiển" aria-expanded="false"><span></span></button>
+      <div class="ptn-the-tab" role="tablist" aria-label="Bảng thí nghiệm">
+        <button type="button" role="tab" id="tab-dieu-khien" data-tab="dieu-khien" aria-selected="true" aria-controls="pn-dieu-khien">Điều khiển</button>
+        <button type="button" role="tab" id="tab-so-tay" data-tab="so-tay" aria-selected="false" aria-controls="pn-so-tay">Sổ tay <span id="ptn-dem-so-tay" class="ptn-dem"></span></button>
+        <button type="button" role="tab" id="tab-cau-hoi" data-tab="cau-hoi" aria-selected="false" aria-controls="pn-cau-hoi">Câu hỏi</button>
+        <button type="button" role="tab" id="tab-thong-tin" data-tab="thong-tin" aria-selected="false" aria-controls="pn-thong-tin">Thông tin</button>
+        <button type="button" role="tab" id="tab-tham-quan" data-tab="tham-quan" aria-selected="false" aria-controls="pn-tham-quan" hidden>Tham quan</button>
+      </div>
+      <div class="ptn-than-tab">
+        <div role="tabpanel" id="pn-dieu-khien" aria-labelledby="tab-dieu-khien" class="ptn-pn"></div>
+        <div role="tabpanel" id="pn-so-tay" aria-labelledby="tab-so-tay" class="ptn-pn" hidden></div>
+        <div role="tabpanel" id="pn-cau-hoi" aria-labelledby="tab-cau-hoi" class="ptn-pn" hidden></div>
+        <div role="tabpanel" id="pn-thong-tin" aria-labelledby="tab-thong-tin" class="ptn-pn" hidden></div>
+        <div role="tabpanel" id="pn-tham-quan" aria-labelledby="tab-tham-quan" class="ptn-pn" hidden></div>
+      </div>
+      <div id="ptn-buoc" class="ptn-buoc" aria-live="polite" hidden></div>
+    </aside>
+  </main>
+
+  <!-- HỘP THOẠI CÀI ĐẶT ĐIỀU KHIỂN (⚙) -->
+  <dialog id="ptn-hop-cai-dat" class="hop-thoai ptn-hop" aria-labelledby="ptn-hop-cai-dat-tieu-de">
+    <div class="dau flex items-center justify-between">
+      <b id="ptn-hop-cai-dat-tieu-de">⚙ Cài đặt điều khiển</b>
+      <button type="button" class="ptn-nut-dong" data-dong aria-label="Đóng cài đặt">✕</button>
+    </div>
+    <div class="than space-y-4">
+      <div>
+        <div class="flex items-center justify-between text-xs mb-1">
+          <label for="ptn-cd-do-nhay" class="font-medium">Độ nhạy chuột / góc quay:</label>
+          <span id="ptn-cd-do-nhay-giatri" class="font-mono text-muc-2">1.0x</span>
+        </div>
+        <input type="range" id="ptn-cd-do-nhay" min="0.5" max="2.0" step="0.1" value="1.0" class="ptn-truot w-full">
+      </div>
+      <div class="space-y-2 text-xs">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" id="ptn-cd-dao-y" class="accent-nhan">
+          <span>Đảo trục Y chuột (Invert Y)</span>
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" id="ptn-cd-tu-xoay" class="accent-nhan" checked>
+          <span>Tự xoay camera theo hướng di chuyển</span>
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" id="ptn-cd-tu-vao-ban" class="accent-nhan" checked>
+          <span>Tự động vào bàn khi đứng gần (&gt; 0.6s)</span>
+        </label>
+      </div>
+      <div>
+        <p class="text-xs font-medium mb-1">Góc nhìn mặc định:</p>
+        <div class="ptn-phan-doan" role="radiogroup" aria-label="Góc nhìn mặc định">
+          <button type="button" role="radio" data-goc-mac-dinh="goc_3" aria-checked="true">Góc 3 (Qua vai)</button>
+          <button type="button" role="radio" data-goc-mac-dinh="goc_1" aria-checked="false">Góc 1 (Mắt)</button>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-2 border-t border-chi">
+        <button type="button" class="btn btn-sm btn-primary" data-dong>Xong</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- HỘP THOẠI HƯỚNG DẪN PHÍM TẮT (?) -->
+  <dialog id="ptn-hop-phim-tat" class="hop-thoai ptn-hop" aria-labelledby="ptn-hop-phim-tat-tieu-de">
+    <div class="dau flex items-center justify-between">
+      <b id="ptn-hop-phim-tat-tieu-de">⌨️ Bảng phím tắt & Điều khiển</b>
+      <button type="button" class="ptn-nut-dong" data-dong aria-label="Đóng trợ giúp">✕</button>
+    </div>
+    <div class="than">
+      <div class="ptn-phim-tat-grid mb-4">
+        <kbd>W A S D</kbd> <span>Di chuyển nhân vật theo hướng camera (hoặc phím mũi tên)</span>
+        <kbd>Chuột</kbd> <span>Xoay góc nhìn (Click canvas để khoá chuột / Kéo chuột)</span>
+        <kbd>Shift</kbd> <span>Chạy nhanh 3.4 m/s (gấp đôi tốc độ đi bộ)</span>
+        <kbd>Space</kbd> <span>Nhảy nhẹ 0.5 m vượt gờ</span>
+        <kbd>E / Enter</kbd> <span>Tương tác: Vào làm thí nghiệm tại bàn / Tủ bảo hộ</span>
+        <kbd>Q / Esc</kbd> <span>Rời bàn thí nghiệm trở về phòng đi dạo</span>
+        <kbd>F</kbd> <span>Đổi góc nhìn thứ nhất (1) ⇄ thứ ba qua vai (3)</span>
+        <kbd>V</kbd> <span>Toàn cảnh phòng (nhà búp bê) ⇄ Theo sau nhân vật</span>
+        <kbd>Cuộn chuột</kbd> <span>Thu phóng khoảng cách camera (1.8m – 6.0m)</span>
+        <kbd>M</kbd> <span>Mở rộng / Thu nhỏ bản đồ thu nhỏ</span>
+        <kbd>?</kbd> <span>Mở bảng hướng dẫn phím tắt này</span>
+      </div>
+      <div class="flex justify-end">
+        <button type="button" class="btn btn-sm btn-primary" data-dong>Đã hiểu</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="ptn-hop-unity" class="hop-thoai ptn-hop" aria-labelledby="ptn-hop-unity-tieu-de">
+    <div class="dau"><b id="ptn-hop-unity-tieu-de">Mở bản Unity 3D?</b></div>
+    <div class="than">
+      <p id="ptn-hop-unity-chu">Bản Unity nặng (khoảng 25 MB), nên dùng máy tính. Tiến trình thí nghiệm được giữ nguyên khi chuyển.</p>
+      <div class="flex justify-end gap-2 mt-4">
+        <button type="button" class="btn btn-sm" value="huy" data-dong>Ở lại Web 3D</button>
+        <button type="button" class="btn btn-primary btn-sm" id="ptn-hop-unity-mo">Vẫn mở Unity</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="ptn-hop-ung-dung" class="hop-thoai ptn-hop" aria-labelledby="ptn-hop-ung-dung-tieu-de">
+    <div class="dau flex items-center justify-between">
+      <b id="ptn-hop-ung-dung-tieu-de">🖥 Tải ứng dụng Phòng Lab Hoá 3D</b>
+      <button type="button" class="ptn-nut-dong" data-dong aria-label="Đóng">✕</button>
+    </div>
+    <div class="than">
+      <p class="ptn-ghi-chu mb-3">Ứng dụng máy tính độc lập chạy mượt mà 60 FPS, đồ hoạ URP cao cấp, không phụ thuộc vào trình duyệt.</p>
+      <div class="flex flex-col gap-2 mb-4">
+        <a id="ptn-link-tai-mac" href="#" target="_blank" class="btn btn-sm btn-primary" hidden>🍏 Tải về cho macOS (Apple Silicon / Intel)</a>
+        <a id="ptn-link-tai-win" href="#" target="_blank" class="btn btn-sm btn-primary" hidden>🪟 Tải về cho Windows</a>
+      </div>
+      <div class="ptn-ds-gon">
+        <div class="ptn-buoc-cai"><b>Bước 1:</b> Tải tệp zip về máy và giải nén.</div>
+        <div class="ptn-buoc-cai"><b>Bước 2:</b> Kéo <code>PhongLabHoa3D.app</code> vào thư mục <code>Applications</code>.</div>
+        <div class="ptn-buoc-cai"><b>Bước 3:</b> Lần đầu chạy: Nhấp chuột phải vào ứng dụng và chọn <b>Open (Mở)</b>.</div>
+      </div>
+      <div class="flex justify-end gap-2 mt-4">
+        <button type="button" class="btn btn-sm" data-dong>Đóng</button>
+      </div>
+    </div>
+  </dialog>
+
+  <noscript><p class="p-6">Cần bật JavaScript để dùng Phòng thí nghiệm ảo.</p></noscript>
+  <script type="module">
+    import { batDau } from "ptn/giao-dien";
+    batDau().catch((e) => {
+      console.error(e);
+      const d = document.getElementById("ptn-dang-tai-chu");
+      if (d) d.textContent = "Không tải được phòng thí nghiệm. Hãy tải lại trang.";
+    });
+  </script>
+</body>
+</html>

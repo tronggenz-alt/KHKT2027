@@ -1,0 +1,81 @@
+{
+  "name": "chemistry",
+  "productName": "CHEMISTRY",
+  "version": "1.1.0",
+  "description": "Ứng dụng toàn diện cho Hoá học & Sinh học 3D",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.antigravity.chemistry",
+    "productName": "CHEMISTRY",
+    "directories": {
+      "output": "dist"
+    },
+    "mac": {
+      "category": "public.app-category.education",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "assets/icon.icns",
+      "identity": null,
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "extendInfo": {
+        "NSCameraUsageDescription": "CHEMISTRY dùng camera để bạn xoay mô hình giải phẫu 3D bằng cử chỉ tay. Hình ảnh chỉ xử lý trên máy, không gửi đi.",
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLName": "CHEMISTRY Protocol",
+            "CFBundleURLSchemes": [
+              "chemistry"
+            ]
+          }
+        ]
+      }
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "files": [
+      "main.js",
+      "lab_webgl.js",
+      "cap_nhat.js",
+      "preload.js",
+      "quyen_camera.js",
+      "assets/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "may_chu/dist/may_chu_chemistry",
+        "to": "may_chu/may_chu_chemistry"
+      },
+      {
+        "from": "may_chu/dist/PhongLabHoa3D.app",
+        "to": "PhongLabHoa3D.app"
+      },
+      {
+        "from": "may_chu/dist/lab-webgl",
+        "to": "lab-webgl"
+      }
+    ],
+    "protocols": {
+      "name": "CHEMISTRY Protocol",
+      "schemes": [
+        "chemistry"
+      ]
+    }
+  }
+}

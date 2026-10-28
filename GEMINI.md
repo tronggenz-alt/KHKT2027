@@ -1,0 +1,1 @@
+Đọc và tuân theo AGENTS.md.

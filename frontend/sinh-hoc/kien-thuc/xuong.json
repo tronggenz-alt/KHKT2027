@@ -1,0 +1,66 @@
+{
+  "id": "xuong",
+  "ten": "Bộ xương",
+  "can_duyet": true,
+  "chuong_trinh": "KHTN 8 (hệ vận động); Sinh học 11 – Sinh trưởng và phát triển ở người (CT GDPT 2018)",
+  "vi_tri": [
+    "Khung nâng đỡ toàn bộ cơ thể: xương đầu (hộp sọ, xương mặt), xương thân (cột sống, xương sườn, xương ức) và xương chi (đai vai, đai hông và xương tay, chân)."
+  ],
+  "cau_tao": [
+    "Bộ xương người trưởng thành có khoảng 206 xương.",
+    "Xương dài gồm đầu xương (sụn bọc đầu xương, mô xương xốp chứa tuỷ đỏ) và thân xương (màng xương, mô xương cứng, khoang tuỷ).",
+    "Thành phần hoá học: chất hữu cơ (cốt giao) giúp xương mềm dẻo; muối khoáng (chủ yếu calcium) giúp xương rắn chắc.",
+    "Các xương nối với nhau bằng khớp: khớp bất động (xương sọ), khớp bán động (giữa các đốt sống), khớp động (khớp gối, khớp vai)."
+  ],
+  "chuc_nang": [
+    "Nâng đỡ, tạo hình dáng cơ thể; là chỗ bám của cơ giúp cơ thể vận động.",
+    "Bảo vệ cơ quan bên trong: hộp sọ bảo vệ não, lồng ngực bảo vệ tim và phổi, cột sống bảo vệ tuỷ sống.",
+    "Tuỷ đỏ trong xương tạo ra các tế bào máu; xương dự trữ calcium và phosphorus."
+  ],
+  "co_che": [
+    "Xương dài ra nhờ sự phân chia tế bào ở sụn tăng trưởng (gần hai đầu xương); xương to ra nhờ sự phân chia tế bào màng xương.",
+    "Sự phát triển của xương chịu ảnh hưởng của hormone sinh trưởng (GH), thyroxine và hormone sinh dục; vitamin D giúp hấp thu calcium.",
+    "Sau tuổi dậy thì, sụn tăng trưởng hoá xương nên xương không dài thêm nữa."
+  ],
+  "lien_he": [
+    "Thiếu vitamin D và calcium ở trẻ em gây còi xương; người cao tuổi dễ bị loãng xương, gãy xương.",
+    "Ngồi học sai tư thế, mang vác nặng một bên gây cong vẹo cột sống.",
+    "Tắm nắng sáng sớm, ăn thực phẩm giàu calcium và vận động đều đặn giúp xương chắc khoẻ."
+  ],
+  "diem_thi": [
+    "Cấu tạo bộ xương chủ yếu là kiến thức KHTN 8; Sinh học 11 liên hệ qua sinh trưởng và phát triển ở người.",
+    "Vai trò của GH: thiếu GH ở trẻ em gây bệnh lùn, thừa GH gây bệnh khổng lồ; vai trò của thyroxine và vitamin D.",
+    "Vì sao sau tuổi dậy thì chiều cao gần như không tăng nữa (sụn tăng trưởng đã hoá xương)."
+  ],
+  "trac_nghiem": [
+    {
+      "cau": "Xương dài ra nhờ",
+      "lua_chon": ["sự phân chia tế bào ở sụn tăng trưởng", "sự phân chia tế bào màng xương", "tuỷ đỏ trong khoang xương", "muối khoáng tích tụ ở thân xương"],
+      "dap_an": "A",
+      "giai_thich": "Sụn tăng trưởng gần hai đầu xương phân chia làm xương dài ra; màng xương làm xương to ra."
+    },
+    {
+      "cau": "Trẻ em thiếu vitamin D dễ mắc bệnh",
+      "lua_chon": ["loãng xương", "còi xương", "bướu cổ", "thiếu máu"],
+      "dap_an": "B",
+      "giai_thich": "Vitamin D cần cho hấp thu calcium; thiếu vitamin D làm xương mềm, dễ biến dạng (còi xương)."
+    },
+    {
+      "cau": "Hormone sinh trưởng (GH) được tiết ra quá nhiều ở giai đoạn trẻ em sẽ gây",
+      "lua_chon": ["bệnh lùn", "đái tháo đường", "bệnh bướu cổ", "bệnh khổng lồ"],
+      "dap_an": "D",
+      "giai_thich": "GH kích thích phân chia tế bào và phát triển xương; thừa GH khi sụn tăng trưởng còn hoạt động làm cơ thể cao quá mức."
+    },
+    {
+      "cau": "Chức năng tạo tế bào máu của xương là nhờ",
+      "lua_chon": ["màng xương", "sụn bọc đầu xương", "tuỷ đỏ", "mô xương cứng"],
+      "dap_an": "C",
+      "giai_thich": "Tuỷ đỏ trong mô xương xốp là nơi sinh ra hồng cầu, bạch cầu và tiểu cầu."
+    }
+  ],
+  "goi_y_hoi": [
+    "Xương dài ra và to ra nhờ đâu?",
+    "Vì sao người cao tuổi dễ gãy xương?",
+    "Hormone sinh trưởng ảnh hưởng tới xương thế nào?"
+  ]
+}

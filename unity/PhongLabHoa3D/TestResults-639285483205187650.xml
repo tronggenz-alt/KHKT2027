@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="3" result="Passed" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-25 11:05:20Z" end-time="2026-10-25 11:05:20Z" duration="0.0613184">
+  <test-suite type="TestSuite" id="1000" name="PhongLabHoa3D" fullname="PhongLabHoa3D" runstate="Runnable" testcasecount="44" result="Passed" start-time="2026-10-25 11:05:20Z" end-time="2026-10-25 11:05:20Z" duration="0.061318" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1056" name="Assembly-CSharp-Editor.dll" fullname="/Users/trantrong/Documents/Antigravity/unity/PhongLabHoa3D/Library/ScriptAssemblies/Assembly-CSharp-Editor.dll" runstate="Runnable" testcasecount="44" result="Passed" start-time="2026-10-25 11:05:20Z" end-time="2026-10-25 11:05:20Z" duration="0.056436" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="16634" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1057" name="PhongThiNghiem" fullname="PhongThiNghiem" runstate="Runnable" testcasecount="44" result="Passed" start-time="2026-10-25 11:05:20Z" end-time="2026-10-25 11:05:20Z" duration="0.056019" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1058" name="Tests" fullname="PhongThiNghiem.Tests" runstate="Runnable" testcasecount="44" result="Passed" start-time="2026-10-25 11:05:20Z" end-time="2026-10-25 11:05:20Z" duration="0.052712" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1001" name="TestBangTrangThaiNhanVat" fullname="PhongThiNghiem.Tests.TestBangTrangThaiNhanVat" classname="PhongThiNghiem.Tests.TestBangTrangThaiNhanVat" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-10-25 11:05:20Z" end-time="2026-10-25 11:05:20Z" duration="0.048558" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1002" name="Test_01_AnhXaMacDinh_TatCaSuKien" fullname="PhongThiNghiem.Tests.TestBangTrangThaiNhanVat.Test_01_AnhXaMacDinh_TatCaSuKien" methodname="Test_01_AnhXaMacDinh_TatCaSuKien" classname="PhongThiNghiem.Tests.TestBangTrangThaiNhanVat" runstate="Runnable" seed="262275964" result="Passed" start-time="2026-10-25 11:05:20Z" end-time="2026-10-25 11:05:20Z" duration="0.012710" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1003" name="Test_02_NapTuManifestJson" fullname="PhongThiNghiem.Tests.TestBangTrangThaiNhanVat.Test_02_NapTuManifestJson" methodname="Test_02_NapTuManifestJson" classname="PhongThiNghiem.Tests.TestBangTrangThaiNhanVat" runstate="Runnable" seed="384746574" result="Passed" start-time="2026-10-25 11:05:20Z" end-time="2026-10-25 11:05:20Z" duration="0.001917" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1004" name="Test_03_DieuKhienNhanVat_AnDauNgoiThuNhat_VaCuChi" fullname="PhongThiNghiem.Tests.TestBangTrangThaiNhanVat.Test_03_DieuKhienNhanVat_AnDauNgoiThuNhat_VaCuChi" methodname="Test_03_DieuKhienNhanVat_AnDauNgoiThuNhat_VaCuChi" classname="PhongThiNghiem.Tests.TestBangTrangThaiNhanVat" runstate="Runnable" seed="1122917093" result="Passed" start-time="2026-10-25 11:05:20Z" end-time="2026-10-25 11:05:20Z" duration="0.023845" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[Saving results to: /Users/trantrong/Library/Application Support/Antigravity/PhongLabHoa3D/TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

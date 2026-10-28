@@ -1,0 +1,397 @@
+{
+ "character": {
+  "id": "researcher",
+  "file": "models/researcher.glb",
+  "displayName": "Nhà nghiên cứu",
+  "outfit": "white lab coat",
+  "rig": "mixamo",
+  "boneNamePrefix": "mixamorig",
+  "heightMeters": 1.7,
+  "defaultAnimation": "idle",
+  "credit": "Model: \"Modern Scientist in a Lab Coat\" by restore50 (Sketchfab, CC BY 4.0). Animations: Adobe Mixamo.",
+  "nguon_da_chon": "A",
+  "file_goc": "~/Downloads/MoHinh3D/modern_scientist_in_a_lab_coat.glb"
+ },
+ "animations": {
+  "idle": {
+   "mixamoId": "c9c972d1-b96c-11e4-a802-0aaa78deedf9",
+   "loop": true
+  },
+  "idle_breathing": {
+   "mixamoId": "c9c6d0d5-b96c-11e4-a802-0aaa78deedf9",
+   "loop": true
+  },
+  "talk": {
+   "mixamoId": "c9c88301-b96c-11e4-a802-0aaa78deedf9",
+   "loop": true
+  },
+  "ask": {
+   "mixamoId": "c9c6fd7b-b96c-11e4-a802-0aaa78deedf9",
+   "loop": false
+  },
+  "point_back": {
+   "mixamoId": "c9c693bf-b96c-11e4-a802-0aaa78deedf9",
+   "loop": false
+  },
+  "point": {
+   "mixamoId": "c9c6947c-b96c-11e4-a802-0aaa78deedf9",
+   "loop": false
+  },
+  "think": {
+   "mixamoId": "c9c990e8-b96c-11e4-a802-0aaa78deedf9",
+   "loop": true
+  },
+  "typing": {
+   "mixamoId": "c9ccaf87-b96c-11e4-a802-0aaa78deedf9",
+   "loop": true
+  },
+  "writing": {
+   "mixamoId": "c9c64e6f-b96c-11e4-a802-0aaa78deedf9",
+   "loop": true
+  },
+  "search_files": {
+   "mixamoId": "c9ca04b6-b96c-11e4-a802-0aaa78deedf9",
+   "loop": false
+  },
+  "wave": {
+   "mixamoId": "c9c5ed32-b96c-11e4-a802-0aaa78deedf9",
+   "loop": false
+  },
+  "walk": {
+   "mixamoId": "4d2adf5a-39fa-4aa1-9272-e07c334bc0a3",
+   "loop": true,
+   "inPlace": true
+  },
+  "acknowledge": {
+   "mixamoId": "c9c91c6e-b96c-11e4-a802-0aaa78deedf9",
+   "loop": false
+  },
+  "nod": {
+   "mixamoId": "c9c91939-b96c-11e4-a802-0aaa78deedf9",
+   "loop": false
+  },
+  "happy": {
+   "mixamoId": "c9c91ba2-b96c-11e4-a802-0aaa78deedf9",
+   "loop": false
+  }
+ },
+ "unity_bo_sung": {
+  "running": {
+   "ten": "Running",
+   "loop": true,
+   "inPlace": true
+  },
+  "fast_run": {
+   "ten": "Fast Run",
+   "loop": true,
+   "inPlace": true
+  },
+  "jump": {
+   "ten": "Jump",
+   "loop": false
+  },
+  "falling_idle": {
+   "ten": "Falling Idle",
+   "loop": true
+  },
+  "landing": {
+   "ten": "Landing",
+   "loop": false
+  },
+  "turn_left_right": {
+   "ten": "Left/Right Turn",
+   "loop": false
+  }
+ },
+ "stateMap": {
+  "pageEnter": [
+   "walk",
+   "wave",
+   "idle"
+  ],
+  "aiThinking": "think",
+  "aiAnswering": "talk",
+  "highlightPart": "point",
+  "correctAnswer": [
+   "happy",
+   "idle"
+  ],
+  "confirm": "nod",
+  "askStudent": "ask"
+ },
+ "sketchfab_sources": [
+  {
+   "key": "A",
+   "ten": "Modern Scientist in a Lab Coat",
+   "tac_gia": "restore50",
+   "giay_phep": "CC Attribution",
+   "uid": "e835a3b126a4463583727dbac2fedecc",
+   "so_mat": 214666,
+   "url": "https://sketchfab.com/3d-models/e835a3b126a4463583727dbac2fedecc"
+  },
+  {
+   "key": "B",
+   "ten": "Casual Scientist In A Lab Coat",
+   "tac_gia": "restore50",
+   "giay_phep": "CC Attribution",
+   "uid": "59db594edf914c62827150c307e162e4",
+   "so_mat": 221707,
+   "url": "https://sketchfab.com/3d-models/59db594edf914c62827150c307e162e4"
+  },
+  {
+   "key": "C",
+   "ten": "Young Scientist in a White Lab Coat",
+   "tac_gia": "restore50",
+   "giay_phep": "CC Attribution",
+   "uid": "fe3aac0053334bd99c0d9e134fd65d45",
+   "so_mat": 460209,
+   "url": "https://sketchfab.com/3d-models/fe3aac0053334bd99c0d9e134fd65d45"
+  },
+  {
+   "key": "D",
+   "ten": "Female_Lab_Coat_Full_Sail_CGG",
+   "tac_gia": "KnightmareDave",
+   "giay_phep": "CC Attribution",
+   "uid": "7fe8ef9f5e724b37a4e03ec9c08eb0c2",
+   "so_mat": 158432,
+   "url": "https://sketchfab.com/3d-models/7fe8ef9f5e724b37a4e03ec9c08eb0c2"
+  }
+ ],
+ "ngan_sach": {
+  "tam_giac_toi_da": 30000,
+  "texture_px": 1024,
+  "glb_toi_da_mb": 5
+ },
+ "mo_rong": {
+  "_ghi_chu": "26 chuyển động thêm cho chân thật (người dùng yêu cầu 26/10/2026). 'ten' là tên dự kiến trên Mixamo; tìm bằng 'tu_khoa', không có đúng tên thì chọn động tác gần nhất và ghi tên thật vào 'mixamo_ten_thuc'. uu_tien 1 = tải trước.",
+  "start_walking": {
+   "ten": "Start Walking",
+   "tu_khoa": "start walking",
+   "nhom": "di_lai",
+   "loop": false,
+   "dung_khi": "Bắt đầu đi từ đứng yên",
+   "uu_tien": 1,
+   "inPlace": true
+  },
+  "stop_walking": {
+   "ten": "Stop Walking",
+   "tu_khoa": "stop walking",
+   "nhom": "di_lai",
+   "loop": false,
+   "dung_khi": "Dừng lại sau khi đi",
+   "uu_tien": 1,
+   "inPlace": true
+  },
+  "turn_left_90": {
+   "ten": "Left Turn 90",
+   "tu_khoa": "left turn 90",
+   "nhom": "di_lai",
+   "loop": false,
+   "dung_khi": "Quay trái tại chỗ",
+   "uu_tien": 1
+  },
+  "turn_right_90": {
+   "ten": "Right Turn 90",
+   "tu_khoa": "right turn 90",
+   "nhom": "di_lai",
+   "loop": false,
+   "dung_khi": "Quay phải tại chỗ",
+   "uu_tien": 1
+  },
+  "walk_backward": {
+   "ten": "Walking Backwards",
+   "tu_khoa": "walking backwards",
+   "nhom": "di_lai",
+   "loop": true,
+   "dung_khi": "Phím S – lùi lại",
+   "uu_tien": 2,
+   "inPlace": true
+  },
+  "strafe_left": {
+   "ten": "Left Strafe Walk",
+   "tu_khoa": "left strafe walk",
+   "nhom": "di_lai",
+   "loop": true,
+   "dung_khi": "Phím A – đi ngang trái",
+   "uu_tien": 2,
+   "inPlace": true
+  },
+  "strafe_right": {
+   "ten": "Right Strafe Walk",
+   "tu_khoa": "right strafe walk",
+   "nhom": "di_lai",
+   "loop": true,
+   "dung_khi": "Phím D – đi ngang phải",
+   "uu_tien": 2,
+   "inPlace": true
+  },
+  "reaching": {
+   "ten": "Reaching Out",
+   "tu_khoa": "reaching",
+   "nhom": "ban_thi_nghiem",
+   "loop": false,
+   "dung_khi": "Với tay tới dụng cụ (khoá burette, lọ thuốc thử)",
+   "uu_tien": 1
+  },
+  "picking_up": {
+   "ten": "Picking Up Object",
+   "tu_khoa": "picking up",
+   "nhom": "ban_thi_nghiem",
+   "loop": false,
+   "dung_khi": "Cầm ống nghiệm / bình lên",
+   "uu_tien": 1
+  },
+  "putting_down": {
+   "ten": "Put Down",
+   "tu_khoa": "putting down",
+   "nhom": "ban_thi_nghiem",
+   "loop": false,
+   "dung_khi": "Đặt dụng cụ xuống bàn",
+   "uu_tien": 1
+  },
+  "button_push": {
+   "ten": "Button Pushing",
+   "tu_khoa": "button pushing",
+   "nhom": "ban_thi_nghiem",
+   "loop": false,
+   "dung_khi": "Bật nguồn DC, bấm đồng hồ đo",
+   "uu_tien": 1
+  },
+  "looking_down": {
+   "ten": "Looking Down",
+   "tu_khoa": "looking down",
+   "nhom": "ban_thi_nghiem",
+   "loop": true,
+   "dung_khi": "Cúi nhìn dụng cụ khi chờ phản ứng",
+   "uu_tien": 2
+  },
+  "looking_around": {
+   "ten": "Looking Around",
+   "tu_khoa": "looking around",
+   "nhom": "cho",
+   "loop": false,
+   "dung_khi": "Đứng lâu – nhìn quanh phòng",
+   "uu_tien": 2
+  },
+  "weight_shift": {
+   "ten": "Weight Shift",
+   "tu_khoa": "weight shift",
+   "nhom": "cho",
+   "loop": true,
+   "dung_khi": "Đứng lâu – dồn trọng tâm",
+   "uu_tien": 2
+  },
+  "checking_watch": {
+   "ten": "Checking Watch",
+   "tu_khoa": "checking watch",
+   "nhom": "cho",
+   "loop": false,
+   "dung_khi": "Chờ điện phân / chờ kết quả",
+   "uu_tien": 2
+  },
+  "scratching_head": {
+   "ten": "Scratching Head",
+   "tu_khoa": "scratching head",
+   "nhom": "cho",
+   "loop": false,
+   "dung_khi": "Suy nghĩ khi trả lời sai",
+   "uu_tien": 3
+  },
+  "stretching": {
+   "ten": "Stretching",
+   "tu_khoa": "stretching",
+   "nhom": "cho",
+   "loop": false,
+   "dung_khi": "Đứng rất lâu không thao tác",
+   "uu_tien": 3
+  },
+  "stand_to_sit": {
+   "ten": "Stand To Sit",
+   "tu_khoa": "stand to sit",
+   "nhom": "ngoi",
+   "loop": false,
+   "dung_khi": "Ngồi xuống ghế đẩu / bàn giáo viên",
+   "uu_tien": 3
+  },
+  "sitting_idle": {
+   "ten": "Sitting Idle",
+   "tu_khoa": "sitting idle",
+   "nhom": "ngoi",
+   "loop": true,
+   "dung_khi": "Đang ngồi",
+   "uu_tien": 3
+  },
+  "sit_to_stand": {
+   "ten": "Sit To Stand",
+   "tu_khoa": "sit to stand",
+   "nhom": "ngoi",
+   "loop": false,
+   "dung_khi": "Đứng dậy khỏi ghế",
+   "uu_tien": 3
+  },
+  "sitting_talking": {
+   "ten": "Sitting Talking",
+   "tu_khoa": "sitting talking",
+   "nhom": "ngoi",
+   "loop": true,
+   "dung_khi": "Ngồi giảng ở bàn giáo viên",
+   "uu_tien": 3
+  },
+  "clapping": {
+   "ten": "Clapping",
+   "tu_khoa": "clapping",
+   "nhom": "cam_xuc",
+   "loop": false,
+   "dung_khi": "Hoàn thành một thí nghiệm",
+   "uu_tien": 2
+  },
+  "thumbs_up": {
+   "ten": "Thumbs Up",
+   "tu_khoa": "thumbs up",
+   "nhom": "cam_xuc",
+   "loop": false,
+   "dung_khi": "Thao tác đúng một bước",
+   "uu_tien": 2
+  },
+  "shaking_head_no": {
+   "ten": "Shaking Head No",
+   "tu_khoa": "shaking head no",
+   "nhom": "cam_xuc",
+   "loop": false,
+   "dung_khi": "Thao tác sai / quên đồ bảo hộ",
+   "uu_tien": 2
+  },
+  "surprised": {
+   "ten": "Surprised",
+   "tu_khoa": "surprised",
+   "nhom": "cam_xuc",
+   "loop": false,
+   "dung_khi": "Xuất hiện kết tủa, đổi màu, sủi bọt",
+   "uu_tien": 2
+  },
+  "disappointed": {
+   "ten": "Disappointed",
+   "tu_khoa": "disappointed",
+   "nhom": "cam_xuc",
+   "loop": false,
+   "dung_khi": "Trả lời sai câu hỏi ôn thi",
+   "uu_tien": 3
+  }
+ },
+ "tai_ve_mixamo": {
+  "thu_muc": "~/Downloads/MoHinh3D/mixamo",
+  "ten_file": "<key>.fbx",
+  "format": "FBX Binary (.fbx)",
+  "fps": 30,
+  "keyframe_reduction": "none",
+  "with_skin": [
+   "idle"
+  ],
+  "without_skin": "tất cả còn lại",
+  "in_place": "bật cho mọi clip có inPlace=true",
+  "nghi_giua_2_lan_tai_giay": [
+   3,
+   5
+  ]
+ }
+}

@@ -1,0 +1,132 @@
+{
+ "de_bai": "Hoàn thành chuỗi phản ứng: C2H4 → C2H5OH → CH3CHO → CH3COOH",
+ "loi_giai": {
+  "so_do": [
+   {
+    "ki_hieu": "C2H4",
+    "cong_thuc": "CH2=CH2",
+    "ten": "ethylene",
+    "smiles": "C=C"
+   },
+   {
+    "ki_hieu": "C2H5OH",
+    "cong_thuc": "C2H5OH",
+    "ten": "ethanol",
+    "smiles": "CCO"
+   },
+   {
+    "ki_hieu": "CH3CHO",
+    "cong_thuc": "CH3CHO",
+    "ten": "acetaldehyde",
+    "smiles": "CC=O"
+   },
+   {
+    "ki_hieu": "CH3COOH",
+    "cong_thuc": "CH3COOH",
+    "ten": "acetic acid",
+    "smiles": "CC(=O)O"
+   }
+  ],
+  "cac_buoc": [
+   {
+    "so": 1,
+    "chat_dau": "C2H4",
+    "chat_sau": "C2H5OH",
+    "phuong_trinh": "CH2=CH2 + H2O → CH3CH2OH",
+    "chat_tham_gia": [
+     {
+      "ten": "ethylene",
+      "smiles": "C=C",
+      "he_so": 1
+     },
+     {
+      "ten": "nước",
+      "smiles": "O",
+      "he_so": 1
+     }
+    ],
+    "san_pham": [
+     {
+      "ten": "ethanol",
+      "smiles": "CCO",
+      "he_so": 1
+     }
+    ],
+    "dieu_kien": "H3PO4, t°, p",
+    "loai_phan_ung": "cộng nước (hydrate hoá)",
+    "giai_thich": "Ethylene cộng nước có xúc tác acid tạo ethanol."
+   },
+   {
+    "so": 2,
+    "chat_dau": "C2H5OH",
+    "chat_sau": "CH3CHO",
+    "phuong_trinh": "C2H5OH + CuO → CH3CHO + Cu + H2O",
+    "chat_tham_gia": [
+     {
+      "ten": "ethanol",
+      "smiles": "CCO",
+      "he_so": 1
+     },
+     {
+      "ten": "copper(II) oxide",
+      "smiles": "[Cu]=O",
+      "he_so": 1
+     }
+    ],
+    "san_pham": [
+     {
+      "ten": "acetaldehyde",
+      "smiles": "CC=O",
+      "he_so": 1
+     },
+     {
+      "ten": "copper",
+      "smiles": "[Cu]",
+      "he_so": 1
+     },
+     {
+      "ten": "nước",
+      "smiles": "O",
+      "he_so": 1
+     }
+    ],
+    "dieu_kien": "t°",
+    "loai_phan_ung": "oxi hoá không hoàn toàn",
+    "giai_thich": "Alcohol bậc một bị CuO oxi hoá (đun nóng) thành aldehyde."
+   },
+   {
+    "so": 3,
+    "chat_dau": "CH3CHO",
+    "chat_sau": "CH3COOH",
+    "phuong_trinh": "2CH3CHO + O2 → 2CH3COOH",
+    "chat_tham_gia": [
+     {
+      "ten": "acetaldehyde",
+      "smiles": "CC=O",
+      "he_so": 2
+     },
+     {
+      "ten": "oxygen",
+      "smiles": "O=O",
+      "he_so": 1
+     }
+    ],
+    "san_pham": [
+     {
+      "ten": "acetic acid",
+      "smiles": "CC(=O)O",
+      "he_so": 2
+     }
+    ],
+    "dieu_kien": "Mn²⁺, t°",
+    "loai_phan_ung": "oxi hoá",
+    "giai_thich": "Aldehyde bị oxi hoá bởi oxygen (xúc tác muối Mn²⁺) thành carboxylic acid."
+   }
+  ],
+  "chat_an": [],
+  "nguon_tham_khao": [
+   "SGK Hoá học 11"
+  ],
+  "ghi_chu": ""
+ }
+}

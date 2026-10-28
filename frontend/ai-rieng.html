@@ -1,0 +1,766 @@
+<!doctype html>
+<html lang="vi" data-theme="sang">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Riêng – Gia sư Hoá Hữu Cơ · CHEMISTRY</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="color-scheme" content="light dark">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230f2b48' stroke-width='1.8' stroke-linejoin='round'%3E%3Cpath d='M12 2.5l8.2 4.75v9.5L12 21.5l-8.2-4.75v-9.5z'/%3E%3Cpath d='M12 6.6l4.7 2.7M7.3 14.7l4.7 2.7M7.3 9.3v5.4' stroke-width='1.3'/%3E%3C/svg%3E">
+  <script>
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem("giai-chuoi-giao-dien"); } catch (e) {}
+      if (t !== "sang" && t !== "toi") t = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "toi" : "sang";
+      document.documentElement.dataset.theme = t;
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Be Vietnam Pro"', '-apple-system', '"Segoe UI"', 'Roboto', 'sans-serif'],
+            serif: ['"Be Vietnam Pro"', '-apple-system', '"Segoe UI"', 'Roboto', 'sans-serif'],
+            mono: ['"JetBrains Mono"', '"SFMono-Regular"', 'Consolas', 'monospace'],
+          },
+          colors: {
+            giay: 'var(--giay)', 'giay-lom': 'var(--giay-lom)', muc: 'var(--muc)', 'muc-2': 'var(--muc-2)', lang: 'var(--lang)',
+            chi: 'var(--chi)', 'chi-dam': 'var(--chi-dam)', nhan: 'var(--nhan)', 'nhan-lom': 'var(--nhan-lom)',
+            'ho-phach': 'var(--ho-phach)', gach: 'var(--gach)', lam: 'var(--lam)',
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="min-h-screen">
+  <div id="toasts" class="fixed bottom-4 right-4 left-4 sm:left-auto z-50 flex flex-col gap-2 sm:w-96" aria-live="polite"></div>
+
+  <!-- THANH TRÊN -->
+  <header class="thanh-tren">
+    <div class="khung flex items-center justify-between gap-3 h-16">
+      <a href="/admin" class="flex items-center gap-3 min-w-0 no-underline">
+        <svg class="w-6 h-6 text-nhan shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 2.5l8.2 4.75v9.5L12 21.5l-8.2-4.75v-9.5z"/><path d="M12 6.6l4.7 2.7M7.3 14.7l4.7 2.7M7.3 9.3v5.4" stroke-width="1.2"/>
+        </svg>
+        <span class="logo-chu">CHEMISTRY</span>
+        <span class="logo-phu hidden sm:inline">AI Riêng</span>
+      </a>
+      <div class="flex items-center gap-2 sm:gap-3">
+        <a href="/admin" class="btn btn-sm whitespace-nowrap">← <span class="hidden sm:inline">Trang quản trị</span><span class="sm:hidden">Admin</span></a>
+        <a href="/" class="btn btn-sm whitespace-nowrap hidden md:inline-flex">Trang giải</a>
+        <div id="khu-tai-khoan" class="flex items-center"></div>
+        <button type="button" id="nut-che-do" class="nut-che-do" aria-label="Chuyển sang chế độ tối" title="Chế độ tối">
+          <svg class="bieu-tuong-trang" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
+          <svg class="bieu-tuong-mat-troi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="khung pb-20">
+    <section class="pt-8 sm:pt-10 pb-6">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p class="chu-mo">Chỉ admin</p>
+          <h1 class="tieu-de-lon">AI Riêng – Gia sư Hoá Hữu Cơ</h1>
+          <p class="doan-dan mt-1">Dạy tri thức hoá học từ tài liệu, quy tắc, bài mẫu và sửa sai. Giải 3 tầng (Thư viện 0 token → Kiến thức riêng → Mô hình mạnh khi RDKit bắt lỗi). Không cần huấn luyện lại mô hình.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" id="nut-tai-sao-luu" class="btn btn-sm" title="Tải file JSON sao lưu toàn bộ kho">Tải sao lưu</button>
+          <button type="button" id="nut-mo-phuc-hoi" class="btn btn-sm" title="Nhập kho từ file sao lưu JSON">Phục hồi</button>
+          <input type="file" id="inp-file-phuc-hoi" accept=".json" class="hidden">
+          <button type="button" id="nut-chay-kt-nhanh" class="btn btn-sm btn-primary">Chấm bộ đề</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Thống kê nhanh -->
+    <div id="ar-so" class="luoi-so mb-8" aria-live="polite">
+      <div class="the the-so xanh"><span class="so" data-so="tai_lieu">–</span><span class="nhan">Tài liệu đã nạp</span></div>
+      <div class="the the-so lam"><span class="so" data-so="doan">–</span><span class="nhan">Đoạn kiến thức</span></div>
+      <div class="the the-so"><span class="so" data-so="kien_thuc">–</span><span class="nhan">Quy tắc đã dạy</span></div>
+      <div class="the the-so vang"><span class="so" data-so="bai_mau">–</span><span class="nhan">Bài mẫu thư viện</span></div>
+      <div class="the the-so do"><span class="so" data-so="sua_sai">–</span><span class="nhan">Mục sửa sai</span></div>
+      <div class="the the-so"><span class="so" data-so="diem_kiem_tra">–</span><span class="nhan">Điểm kiểm tra gần nhất</span></div>
+    </div>
+
+    <!-- Thanh chuyển Tab chức năng -->
+    <nav class="flex overflow-x-auto gap-2 pb-2 mb-8 border-b border-chi-dam scrollbar-none" aria-label="Phân hệ AI Riêng">
+      <button type="button" class="tab-btn active px-4 py-2 font-medium text-sm rounded-lg whitespace-nowrap transition-colors" data-tab="tong-quan">01 Tổng quan & Cài đặt</button>
+      <button type="button" class="tab-btn px-4 py-2 font-medium text-sm rounded-lg whitespace-nowrap transition-colors" data-tab="tai-lieu">02 Tài liệu & Đoạn trích</button>
+      <button type="button" class="tab-btn px-4 py-2 font-medium text-sm rounded-lg whitespace-nowrap transition-colors" data-tab="kien-thuc">03 Kiến thức & Quy tắc</button>
+      <button type="button" class="tab-btn px-4 py-2 font-medium text-sm rounded-lg whitespace-nowrap transition-colors" data-tab="bai-mau">04 Thư viện lời giải</button>
+      <button type="button" class="tab-btn px-4 py-2 font-medium text-sm rounded-lg whitespace-nowrap transition-colors" data-tab="sua-sai">05 Sửa sai & Hàng chờ <span id="so-bao-sai-badge" class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-gach text-white hidden">0</span></button>
+      <button type="button" class="tab-btn px-4 py-2 font-medium text-sm rounded-lg whitespace-nowrap transition-colors" data-tab="san-tap">06 Sân tập (Thử nghiệm)</button>
+      <button type="button" class="tab-btn px-4 py-2 font-medium text-sm rounded-lg whitespace-nowrap transition-colors" data-tab="bo-de">07 Bộ đề kiểm tra</button>
+    </nav>
+
+    <!-- TAB 1: TỔNG QUAN & CÀI ĐẶT -->
+    <section id="tab-tong-quan" class="tab-noi-dung space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Trạng thái & Cơ chế giải 3 tầng -->
+        <div class="the p-6 lg:col-span-2 space-y-4">
+          <h2 class="text-xl font-serif font-semibold text-muc">Trạng thái kho & Cơ chế giải 3 tầng</h2>
+          <div class="p-4 rounded-lg bg-giay-lom border border-chi text-sm space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-medium text-muc">Mô hình nhúng (Embedding):</span>
+              <span class="nhan-mono font-mono text-nhan" id="txt-embed-model">gemini-embedding-2</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="font-medium text-muc">Trạng thái xử lý vector:</span>
+              <span id="txt-nhung-trang-thai" class="text-muc-2">Đang tải…</span>
+            </div>
+          </div>
+
+          <div class="space-y-3 pt-2">
+            <h3 class="font-semibold text-sm uppercase tracking-wider text-muc-2">Nguyên lý hoạt động 3 tầng</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div class="p-3 rounded-lg border border-chi bg-giay-lom">
+                <p class="font-bold text-nhan text-sm mb-1">Tầng 1: Thư viện (0 token)</p>
+                <p class="text-muc-2">Khớp bài mẫu đã duyệt trong thư viện. Trả kết quả tức thì, không tốn chi phí AI, không tính lượt dùng thử.</p>
+              </div>
+              <div class="p-3 rounded-lg border border-chi bg-giay-lom">
+                <p class="font-bold text-lam text-sm mb-1">Tầng 2: Kiến thức riêng</p>
+                <p class="text-muc-2">Tìm kiếm lai (Vector + FTS5) các quy tắc, tài liệu và mục sửa sai do giáo viên dạy. Mô hình rẻ (Flash/Lite) suy luận kèm dẫn nguồn.</p>
+              </div>
+              <div class="p-3 rounded-lg border border-chi bg-giay-lom">
+                <p class="font-bold text-ho-phach text-sm mb-1">Tầng 3: Tự sửa bằng RDKit</p>
+                <p class="text-muc-2">RDKit tự động kiểm tra SMILES và cân bằng. Nếu phát hiện lỗi cấu tạo, tự nâng lên mô hình mạnh để sửa bài.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form cài đặt chung -->
+        <div class="the p-6 space-y-4">
+          <h2 class="text-xl font-serif font-semibold text-muc">Cấu hình vận hành</h2>
+          <form id="form-cai-dat" class="space-y-4 text-sm">
+            <label class="cong-tac">
+              <input type="checkbox" id="cd-bat" name="bat">
+              <span class="ranh"><span class="nut-tron"></span></span>
+              <span class="font-medium">Kích hoạt AI Riêng</span>
+            </label>
+
+            <label class="cong-tac">
+              <input type="checkbox" id="cd-mo-nguoi-dung" name="mo_cho_nguoi_dung">
+              <span class="ranh"><span class="nut-tron"></span></span>
+              <span>Mở cho tất cả học sinh / người dùng</span>
+            </label>
+
+            <label class="cong-tac">
+              <input type="checkbox" id="cd-tu-luu" name="tu_luu_thu_vien">
+              <span class="ranh"><span class="nut-tron"></span></span>
+              <span>Tự lưu bài giải đúng vào thư viện</span>
+            </label>
+
+            <div>
+              <label class="block text-xs font-semibold uppercase text-muc-2 mb-1" for="cd-nghiem-ngat">Chế độ nghiêm ngặt</label>
+              <select id="cd-nghiem-ngat" name="che_do_nghiem_ngat" class="o-nhap w-full py-1.5 text-sm">
+                <option value="tat">Tắt (suy luận bình thường)</option>
+                <option value="canh_bao">Cảnh báo (ghi nhận bước chưa được dạy)</option>
+                <option value="tu_choi">Từ chối (không giải nếu chưa được dạy đủ)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold uppercase text-muc-2 mb-1" for="cd-mo-hinh">Ưu tiên mô hình giải</label>
+              <select id="cd-mo-hinh" name="mo_hinh" class="o-nhap w-full py-1.5 text-sm">
+                <option value="">Tự động (theo Router AI của hệ thống)</option>
+                <option value="gemini">Gemini</option>
+                <option value="openai">ChatGPT (OpenAI)</option>
+                <option value="claude">Claude</option>
+              </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <label class="block text-muc-2 mb-1" for="cd-k-doan">Số đoạn tài liệu (k)</label>
+                <input type="number" id="cd-k-doan" name="k_doan" min="1" max="20" class="o-nhap w-full py-1 text-sm">
+              </div>
+              <div>
+                <label class="block text-muc-2 mb-1" for="cd-k-kien-thuc">Số quy tắc (k)</label>
+                <input type="number" id="cd-k-kien-thuc" name="k_kien_thuc" min="1" max="20" class="o-nhap w-full py-1 text-sm">
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-full py-2">Lưu cài đặt</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- System Prompt tuỳ chỉnh -->
+      <div class="the p-6 space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-serif font-semibold text-muc">System Prompt của AI Riêng</h2>
+            <p class="text-xs text-muc-2">Lời chỉ dẫn chuyên sâu cho gia sư (kho kiến thức tìm kiếm sẽ được tự động đính kèm ở mỗi đề).</p>
+          </div>
+          <button type="button" id="nut-khoi-phuc-prompt" class="btn btn-sm">Về mặc định</button>
+        </div>
+        <textarea id="cd-system-prompt" class="o-nhap font-mono text-xs w-full h-36 leading-relaxed"></textarea>
+        <div class="flex justify-end">
+          <button type="button" id="nut-luu-prompt" class="btn btn-sm btn-primary">Lưu Prompt</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: TÀI LIỆU & ĐOẠN TRÍCH -->
+    <section id="tab-tai-lieu" class="tab-noi-dung hidden space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Cột thêm tài liệu -->
+        <div class="the p-6 space-y-4">
+          <h2 class="text-lg font-serif font-semibold text-muc">Nạp tài liệu mới</h2>
+          
+          <!-- Tab nạp: Thư mục / File / Link / Dán -->
+          <div class="phan-doan phan-doan-nho mb-3">
+            <label><input type="radio" name="cach-nap" value="thu-muc" checked><span>Tải thư mục 📁</span></label>
+            <label><input type="radio" name="cach-nap" value="tep"><span>Tải file</span></label>
+            <label><input type="radio" name="cach-nap" value="link"><span>Link web</span></label>
+            <label><input type="radio" name="cach-nap" value="van-ban"><span>Dán chữ</span></label>
+          </div>
+
+          <!-- Form nạp cả thư mục -->
+          <form id="form-nap-thu-muc" class="space-y-3 text-sm">
+            <!-- Chọn phương thức: Chọn folder từ máy hoặc Nhập đường dẫn -->
+            <div class="flex items-center gap-3 text-xs pb-1 border-b border-chi">
+              <label class="inline-flex items-center gap-1.5 cursor-pointer font-medium text-muc">
+                <input type="radio" name="kieu-thu-muc" value="chon-folder" checked class="text-nhan focus:ring-0">
+                <span>Chọn thư mục từ máy</span>
+              </label>
+              <label class="inline-flex items-center gap-1.5 cursor-pointer font-medium text-muc">
+                <input type="radio" name="kieu-thu-muc" value="duong-dan" class="text-nhan focus:ring-0">
+                <span>Nhập đường dẫn máy chủ</span>
+              </label>
+            </div>
+
+            <!-- Vùng 1: Chọn thư mục qua webkitdirectory -->
+            <div id="khoi-chon-folder" class="space-y-2">
+              <input type="file" id="inp-thu-muc-tai-lieu" webkitdirectory directory multiple class="hidden">
+              <div id="vung-chon-thu-muc" class="p-3.5 border-2 border-dashed border-chi-dam hover:border-nhan rounded-lg text-center cursor-pointer bg-giay-lom transition-colors">
+                <span class="text-2xl block mb-1">📁</span>
+                <p class="text-xs font-semibold text-muc">Nhấp để chọn cả thư mục</p>
+                <p class="text-[11px] text-muc-2 mt-0.5">Tự quét mọi file PDF, DOCX, TXT, Ảnh... trong cả thư mục con</p>
+              </div>
+
+              <div id="hop-tom-tat-folder" class="hidden p-2.5 rounded-lg bg-giay border border-chi text-xs space-y-1">
+                <div class="flex items-center justify-between">
+                  <span class="font-semibold text-muc" id="txt-ten-folder-goc">📁 Thư mục</span>
+                  <span class="text-nhan font-mono font-bold" id="txt-so-file-folder">0 file hợp lệ</span>
+                </div>
+                <p class="text-[11px] text-muc-2" id="txt-chi-tiet-folder">Đang kiểm tra...</p>
+              </div>
+            </div>
+
+            <!-- Vùng 2: Nhập đường dẫn thư mục local -->
+            <div id="khoi-duong-dan-folder" class="space-y-2 hidden">
+              <div>
+                <label class="block text-xs font-semibold text-muc-2 mb-1" for="inp-duong-dan-local">Đường dẫn thư mục trên máy</label>
+                <div class="flex gap-1.5">
+                  <input type="text" id="inp-duong-dan-local" placeholder="vd: /Users/.../TaiLieu hoặc D:\Hoa12" class="o-nhap flex-1 py-1 text-xs font-mono">
+                  <button type="button" id="nut-xem-truoc-thu-muc" class="btn btn-sm text-xs px-2.5 whitespace-nowrap">Quét thử</button>
+                </div>
+              </div>
+              <div id="hop-xem-truoc-local" class="hidden p-2.5 rounded-lg bg-giay border border-chi text-xs space-y-1">
+                <div class="flex items-center justify-between">
+                  <span class="font-semibold text-muc" id="txt-local-ten-folder">📁 Thư mục</span>
+                  <span class="text-nhan font-mono font-bold" id="txt-local-so-file">0 file</span>
+                </div>
+                <p class="text-[11px] text-muc-2" id="txt-local-chi-tiet">Chưa quét</p>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-muc-2 mb-1" for="inp-chu-de-thu-muc">Chủ đề phân loại chung</label>
+              <input type="text" id="inp-chu-de-thu-muc" placeholder="Để trống = tự lấy theo tên thư mục" class="o-nhap w-full py-1 text-sm">
+            </div>
+
+            <div class="space-y-1.5 pt-0.5">
+              <label class="cong-tac cong-tac-nho">
+                <input type="checkbox" id="chk-kem-thu-muc-con" checked>
+                <span class="ranh"><span class="nut-tron"></span></span>
+                <span>Tự ghép tên thư mục con vào chủ đề</span>
+              </label>
+              <label class="cong-tac cong-tac-nho">
+                <input type="checkbox" id="chk-co-loi-giai-thu-muc">
+                <span class="ranh"><span class="nut-tron"></span></span>
+                <span>Tài liệu có đề + lời giải (tự trích bài mẫu)</span>
+              </label>
+            </div>
+
+            <!-- Thanh tiến trình nạp thư mục -->
+            <div id="hop-tien-trinh-thu-muc" class="hidden space-y-1.5 pt-1">
+              <div class="flex items-center justify-between text-xs text-muc-2">
+                <span id="txt-trang-thai-tien-trinh">Đang nạp file...</span>
+                <span id="txt-phan-tram-tien-trinh" class="font-mono font-bold text-nhan">0%</span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-giay-lom border border-chi overflow-hidden">
+                <div id="thanh-tien-trinh-thu-muc" class="h-full bg-nhan transition-all duration-300" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <button type="submit" id="nut-nop-thu-muc" class="btn btn-primary w-full py-1.5 flex items-center justify-center gap-2">
+              <span>Nạp toàn bộ thư mục & Tách đoạn</span>
+            </button>
+          </form>
+
+          <!-- Form nạp file -->
+          <form id="form-nap-tep" class="space-y-3 text-sm hidden">
+            <div>
+              <label class="block text-xs font-semibold text-muc-2 mb-1">Chọn file (PDF, DOCX, TXT, Ảnh, XLSX)</label>
+              <input type="file" id="inp-tep-tai-lieu" multiple class="block w-full text-xs text-muc-2 file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-medium file:bg-nhan file:text-white hover:file:opacity-90">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-muc-2 mb-1" for="inp-chu-de-tep">Chủ đề phân loại</label>
+              <input type="text" id="inp-chu-de-tep" placeholder="vd: Hidrocacbon, Este, Peptit..." class="o-nhap w-full py-1 text-sm">
+            </div>
+            <label class="cong-tac cong-tac-nho">
+              <input type="checkbox" id="chk-co-loi-giai-tep">
+              <span class="ranh"><span class="nut-tron"></span></span>
+              <span>Tài liệu có đề + lời giải (tự trích bài mẫu)</span>
+            </label>
+            <button type="submit" class="btn btn-primary w-full py-1.5">Tải lên & Tách đoạn</button>
+          </form>
+
+          <!-- Form nạp link -->
+          <form id="form-nap-link" class="space-y-3 text-sm hidden">
+            <div>
+              <label class="block text-xs font-semibold text-muc-2 mb-1" for="inp-url-link">URL bài viết / tài liệu</label>
+              <input type="url" id="inp-url-link" placeholder="https://..." required class="o-nhap w-full py-1 text-sm">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-muc-2 mb-1" for="inp-ten-link">Tên gợi nhớ</label>
+              <input type="text" id="inp-ten-link" placeholder="Tên bài viết..." class="o-nhap w-full py-1 text-sm">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-muc-2 mb-1" for="inp-chu-de-link">Chủ đề</label>
+              <input type="text" id="inp-chu-de-link" placeholder="vd: Điều chế..." class="o-nhap w-full py-1 text-sm">
+            </div>
+            <button type="submit" class="btn btn-primary w-full py-1.5">Cào & Tách đoạn</button>
+          </form>
+
+          <!-- Form nạp văn bản -->
+          <form id="form-nap-van-ban" class="space-y-3 text-sm hidden">
+            <div>
+              <label class="block text-xs font-semibold text-muc-2 mb-1" for="inp-ten-vb">Tiêu đề tài liệu</label>
+              <input type="text" id="inp-ten-vb" placeholder="vd: Chuyên đề Phản ứng Oxi hoá..." required class="o-nhap w-full py-1 text-sm">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-muc-2 mb-1" for="inp-nd-vb">Nội dung văn bản</label>
+              <textarea id="inp-nd-vb" rows="6" placeholder="Dán nội dung sách, bài viết..." required class="o-nhap w-full text-xs"></textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-muc-2 mb-1" for="inp-chu-de-vb">Chủ đề</label>
+              <input type="text" id="inp-chu-de-vb" placeholder="Chủ đề..." class="o-nhap w-full py-1 text-sm">
+            </div>
+            <button type="submit" class="btn btn-primary w-full py-1.5">Lưu & Tách đoạn</button>
+          </form>
+        </div>
+
+        <!-- Danh sách tài liệu -->
+        <div class="the p-6 md:col-span-2 space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-serif font-semibold text-muc">Tài liệu trong kho (<span id="dem-tai-lieu">0</span>)</h2>
+            <button type="button" id="nut-lam-moi-tl" class="btn btn-sm">Làm mới</button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="bang w-full text-left text-xs">
+              <thead>
+                <tr>
+                  <th>Tên tài liệu</th>
+                  <th>Loại</th>
+                  <th class="w-40 sm:w-52">Chủ đề</th>
+                  <th>Số đoạn</th>
+                  <th>Trạng thái</th>
+                  <th class="text-right">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="ds-tai-lieu-body">
+                <tr><td colspan="6" class="text-center py-6 text-muc-2">Đang tải dữ liệu…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: KIẾN THỨC & QUY TẮC -->
+    <section id="tab-kien-thuc" class="tab-noi-dung hidden space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2 flex-1 max-w-md">
+          <input type="text" id="inp-tim-kt" placeholder="Tìm theo tiêu đề, nội dung, phản ứng..." class="o-nhap w-full py-1.5 text-xs">
+          <select id="sel-chu-de-kt" class="o-nhap py-1.5 text-xs">
+            <option value="">Mọi chủ đề</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" id="nut-nhap-kt-file" class="btn btn-sm">Nhập Excel / CSV</button>
+          <input type="file" id="inp-file-kt" accept=".csv,.xlsx" class="hidden">
+          <button type="button" id="nut-them-kt-moi" class="btn btn-sm btn-primary">+ Thêm quy tắc</button>
+        </div>
+      </div>
+
+      <!-- Danh sách quy tắc -->
+      <div class="the p-6">
+        <div class="overflow-x-auto">
+          <table class="bang w-full text-left text-xs">
+            <thead>
+              <tr>
+                <th class="w-12 text-center">Ưu tiên</th>
+                <th class="w-1/4">Tiêu đề quy tắc</th>
+                <th>Nội dung kiến thức / Quy luật</th>
+                <th class="w-44 sm:w-56">Chủ đề</th>
+                <th class="w-16 text-center">Bật</th>
+                <th class="w-28 text-right">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="ds-kien-thuc-body">
+              <tr><td colspan="6" class="text-center py-6 text-muc-2">Đang tải danh sách kiến thức…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: THƯ VIỆN LỜI GIẢI & BÀI MẪU -->
+    <section id="tab-bai-mau" class="tab-noi-dung hidden space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2 flex-1 max-w-md">
+          <input type="text" id="inp-tim-bm" placeholder="Tìm theo chuỗi phản ứng, chất..." class="o-nhap w-full py-1.5 text-xs">
+          <select id="sel-trang-thai-bm" class="o-nhap py-1.5 text-xs">
+            <option value="">Mọi trạng thái</option>
+            <option value="duyet" selected>Đã duyệt (dùng giải)</option>
+            <option value="cho_duyet">Chờ duyệt</option>
+            <option value="sai">Đã đánh dấu sai</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" id="nut-duyet-tat-ca-bm" class="btn btn-sm btn-primary">Duyệt bài chờ</button>
+          <button type="button" id="nut-them-bm-moi" class="btn btn-sm">+ Thêm bài mẫu</button>
+        </div>
+      </div>
+
+      <div class="the p-6">
+        <div class="overflow-x-auto">
+          <table class="bang w-full text-left text-xs">
+            <thead>
+              <tr>
+                <th class="w-1/3">Đề chuỗi phản ứng</th>
+                <th>Tóm tắt lời giải</th>
+                <th class="w-20">RDKit</th>
+                <th class="w-20">Nguồn</th>
+                <th class="w-16">Lượt</th>
+                <th class="w-24">Trạng thái</th>
+                <th class="w-28 text-right">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="ds-bai-mau-body">
+              <tr><td colspan="7" class="text-center py-6 text-muc-2">Đang tải bài mẫu…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: SỬA SAI & HÀNG CHỜ BÁO SAI -->
+    <section id="tab-sua-sai" class="tab-noi-dung hidden space-y-8">
+      <!-- Hàng chờ báo sai từ người dùng -->
+      <div class="the p-6 space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-serif font-semibold text-muc">Hàng chờ học sinh báo lời giải sai (<span id="dem-bao-sai">0</span>)</h2>
+            <p class="text-xs text-muc-2">Xem lại các bài người dùng báo cáo sai để chuyển thành mục dạy sửa cho AI.</p>
+          </div>
+          <button type="button" id="nut-lam-moi-bao-sai" class="btn btn-sm">Làm mới</button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="bang w-full text-left text-xs">
+            <thead>
+              <tr>
+                <th class="w-1/4">Đề bài</th>
+                <th class="w-24">Mô hình</th>
+                <th>Lời giải đã trả & Ghi chú của người dùng</th>
+                <th class="w-36 text-right">Xử lý</th>
+              </tr>
+            </thead>
+            <tbody id="ds-bao-sai-body">
+              <tr><td colspan="4" class="text-center py-4 text-muc-2">Không có phản ánh nào đang chờ.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Danh mục sửa sai đã dạy -->
+      <div class="the p-6 space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-serif font-semibold text-muc">Danh mục quy tắc sửa sai đã dạy (<span id="dem-sua-sai-list">0</span>)</h2>
+            <p class="text-xs text-muc-2">Những phản ứng AI từng làm sai đã được giáo viên sửa lại đáp án chuẩn (ưu tiên hàng đầu trong Prompt).</p>
+          </div>
+          <button type="button" id="nut-them-sua-sai-moi" class="btn btn-sm btn-primary">+ Thêm mục sửa sai</button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="bang w-full text-left text-xs">
+            <thead>
+              <tr>
+                <th class="w-1/4">Đề bài</th>
+                <th class="w-1/4">Chỗ AI đã sai</th>
+                <th class="w-1/3">Đáp án đúng & Lý do</th>
+                <th class="w-16">Bật</th>
+                <th class="w-24 text-right">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="ds-sua-sai-body">
+              <tr><td colspan="5" class="text-center py-4 text-muc-2">Chưa có mục sửa sai nào.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 6: SÂN TẬP (THỬ NGHIỆM) -->
+    <section id="tab-san-tap" class="tab-noi-dung hidden space-y-6">
+      <div class="the p-6 space-y-4">
+        <h2 class="text-lg font-serif font-semibold text-muc">Sân tập: Thử nghiệm giải với AI Riêng</h2>
+        <p class="text-xs text-muc-2">Nhập chuỗi phản ứng để kiểm tra AI Riêng áp dụng kho tri thức và dẫn nguồn như thế nào. Bạn có thể đánh giá Đúng (lưu vào thư viện) hoặc Sai (dạy sửa).</p>
+
+        <form id="form-san-tap" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold uppercase text-muc-2 mb-1" for="inp-de-san-tap">Đề chuỗi phản ứng</label>
+            <textarea id="inp-de-san-tap" rows="2" placeholder="vd: CH4 → C2H2 → CH3CHO → C2H5OH hoặc CH2=CH-CH3 →[HBr] A →[NaOH] B" required class="o-nhap w-full text-sm font-mono"></textarea>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-6 text-sm">
+            <label class="cong-tac cong-tac-nho">
+              <input type="checkbox" id="chk-bo-qua-tv" checked>
+              <span class="ranh"><span class="nut-tron"></span></span>
+              <span>Bắt buộc suy luận từ kho (bỏ qua khớp thư viện tầng 1)</span>
+            </label>
+            <label class="cong-tac cong-tac-nho">
+              <input type="checkbox" id="chk-so-sanh">
+              <span class="ranh"><span class="nut-tron"></span></span>
+              <span>Giải so sánh song song với AI thông thường</span>
+            </label>
+            <label class="cong-tac cong-tac-nho">
+              <input type="checkbox" id="chk-dung-claude-st">
+              <span class="ranh"><span class="nut-tron"></span></span>
+              <span>Dùng Claude (nếu có quyền)</span>
+            </label>
+          </div>
+
+          <button type="submit" id="nut-chay-san-tap" class="btn btn-primary px-6 py-2">Bắt đầu giải thử</button>
+        </form>
+      </div>
+
+      <!-- Khung hiển thị kết quả giải Sân tập -->
+      <div id="khung-kq-san-tap" class="hidden space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Cột AI Riêng -->
+          <div class="the p-5 border-l-4 border-l-nhan space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="font-serif font-semibold text-muc text-base">Kết quả: AI Riêng</h3>
+              <span id="st-ar-badge" class="chip">Đang giải…</span>
+            </div>
+            <div id="st-ar-tien-do" class="text-xs text-muc-2 space-y-1"></div>
+            <div id="st-ar-noi-dung" class="space-y-3 pt-2 text-xs"></div>
+            <!-- Nút đánh giá -->
+            <div id="st-ar-danh-gia" class="pt-4 border-t border-chi hidden flex items-center justify-end gap-2">
+              <button type="button" id="nut-st-sai" class="btn btn-sm btn-do">Sai → Dạy sửa</button>
+              <button type="button" id="nut-st-dung" class="btn btn-sm btn-primary">Đúng → Lưu thư viện</button>
+            </div>
+          </div>
+
+          <!-- Cột AI Thường (nếu bật so sánh) -->
+          <div id="cot-ai-thuong" class="the p-5 border-l-4 border-l-lam space-y-3 hidden">
+            <div class="flex items-center justify-between">
+              <h3 class="font-serif font-semibold text-muc text-base">Kết quả: AI Thường (không có kho riêng)</h3>
+              <span id="st-thuong-badge" class="chip">Đang giải…</span>
+            </div>
+            <div id="st-thuong-tien-do" class="text-xs text-muc-2 space-y-1"></div>
+            <div id="st-thuong-noi-dung" class="space-y-3 pt-2 text-xs"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 7: BỘ ĐỀ KIỂM TRA -->
+    <section id="tab-bo-de" class="tab-noi-dung hidden space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Cột form thêm câu hỏi -->
+        <div class="the p-6 space-y-4">
+          <h2 class="text-lg font-serif font-semibold text-muc">Thêm câu hỏi kiểm tra</h2>
+          <form id="form-them-ch" class="space-y-3 text-sm">
+            <div>
+              <label class="block text-xs font-semibold text-muc-2 mb-1" for="inp-de-ch">Đề chuỗi</label>
+              <textarea id="inp-de-ch" rows="2" placeholder="vd: C2H4 → A → B" required class="o-nhap w-full text-xs font-mono"></textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-muc-2 mb-1" for="inp-da-ch">Đáp án chuẩn các chất</label>
+              <input type="text" id="inp-da-ch" placeholder="A: C2H5OH; B: CH3COOH" required class="o-nhap w-full py-1 text-sm font-mono">
+              <p class="text-[11px] text-muc-2 mt-0.5">Định dạng: Kí hiệu: Công thức (ngăn cách bằng dấu chấm phẩy)</p>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-muc-2 mb-1" for="inp-cd-ch">Chủ đề</label>
+              <input type="text" id="inp-cd-ch" placeholder="vd: Ancol, Este..." class="o-nhap w-full py-1 text-sm">
+            </div>
+            <button type="submit" class="btn btn-primary w-full py-1.5">+ Thêm câu hỏi</button>
+          </form>
+
+          <div class="pt-3 border-t border-chi">
+            <button type="button" id="nut-nhap-bo-de-file" class="btn btn-sm w-full">Nhập câu hỏi từ Excel/CSV</button>
+            <input type="file" id="inp-file-bo-de" accept=".csv,.xlsx" class="hidden">
+          </div>
+        </div>
+
+        <!-- Cột danh sách câu hỏi & Lịch sử chấm -->
+        <div class="the p-6 md:col-span-2 space-y-6">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-serif font-semibold text-muc">Bộ câu hỏi kiểm tra (<span id="dem-bo-de">0</span>)</h2>
+            <button type="button" id="nut-chay-kiem-tra" class="btn btn-sm btn-primary">Chạy chấm toàn bộ</button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="bang w-full text-left text-xs">
+              <thead>
+                <tr>
+                  <th class="w-1/2">Đề bài</th>
+                  <th>Đáp án chuẩn</th>
+                  <th>Chủ đề</th>
+                  <th class="w-16">Bật</th>
+                  <th class="w-20 text-right">Xoá</th>
+                </tr>
+              </thead>
+              <tbody id="ds-bo-de-body">
+                <tr><td colspan="5" class="text-center py-4 text-muc-2">Đang tải câu hỏi…</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Lịch sử các lần chấm -->
+          <div class="pt-4 border-t border-chi space-y-3">
+            <h3 class="font-serif font-semibold text-base text-muc">Lịch sử các lần kiểm tra</h3>
+            <div class="overflow-x-auto">
+              <table class="bang w-full text-left text-xs">
+                <thead>
+                  <tr>
+                    <th>Thời gian</th>
+                    <th>Số câu</th>
+                    <th>Điểm đạt (%)</th>
+                    <th>Trạng thái</th>
+                    <th class="text-right">Chi tiết</th>
+                  </tr>
+                </thead>
+                <tbody id="ds-lich-su-kt-body">
+                  <tr><td colspan="5" class="text-center py-4 text-muc-2">Chưa có lần kiểm tra nào.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL XEM ĐOẠN TRÍCH TÀI LIỆU -->
+  <dialog id="modal-doan" class="the p-6 max-w-3xl w-full rounded-xl backdrop:bg-black/50">
+    <div class="flex items-center justify-between border-b border-chi pb-3 mb-4">
+      <h3 class="font-serif font-semibold text-lg text-muc" id="modal-doan-tieu-de">Đoạn trích tài liệu</h3>
+      <button type="button" class="btn btn-sm" onclick="this.closest('dialog').close()">Đóng</button>
+    </div>
+    <div id="modal-doan-noi-dung" class="max-h-[60vh] overflow-y-auto space-y-3 pr-2 text-xs"></div>
+  </dialog>
+
+  <!-- MODAL THÊM / SỬA QUY TẮC KIẾN THỨC -->
+  <dialog id="modal-kien-thuc" class="the p-6 max-w-xl w-full rounded-xl backdrop:bg-black/50">
+    <div class="flex items-center justify-between border-b border-chi pb-3 mb-4">
+      <h3 class="font-serif font-semibold text-lg text-muc" id="modal-kt-tieu-de">Thêm quy tắc mới</h3>
+      <button type="button" class="btn btn-sm" onclick="this.closest('dialog').close()">Đóng</button>
+    </div>
+    <form id="form-modal-kt" class="space-y-4 text-sm">
+      <input type="hidden" id="inp-kt-id">
+      <div>
+        <label class="block text-xs font-semibold text-muc-2 mb-1" for="inp-kt-tieu-de">Tiêu đề quy tắc</label>
+        <input type="text" id="inp-kt-tieu-de" placeholder="vd: Quy tắc cộng Markovnikov..." required class="o-nhap w-full text-sm">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-muc-2 mb-1" for="inp-kt-noi-dung">Nội dung kiến thức / Cơ chế</label>
+        <textarea id="inp-kt-noi-dung" rows="5" placeholder="Quy tắc, tác nhân, ngoại lệ cần nhớ..." required class="o-nhap w-full text-xs"></textarea>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-muc-2 mb-1" for="inp-kt-chu-de">Chủ đề</label>
+          <input type="text" id="inp-kt-chu-de" placeholder="Chủ đề..." class="o-nhap w-full text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-muc-2 mb-1" for="inp-kt-uu-tien">Mức ưu tiên (1-5)</label>
+          <select id="inp-kt-uu-tien" class="o-nhap w-full text-sm">
+            <option value="1">1 (Thấp)</option>
+            <option value="2">2</option>
+            <option value="3" selected>3 (Bình thường)</option>
+            <option value="4">4</option>
+            <option value="5">5 (Rất cao)</option>
+          </select>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button" class="btn btn-sm" onclick="this.closest('dialog').close()">Huỷ</button>
+        <button type="submit" class="btn btn-sm btn-primary">Lưu quy tắc</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- MODAL DẠY SỬA SAI -->
+  <dialog id="modal-sua-sai" class="the p-6 max-w-xl w-full rounded-xl backdrop:bg-black/50">
+    <div class="flex items-center justify-between border-b border-chi pb-3 mb-4">
+      <h3 class="font-serif font-semibold text-lg text-muc" id="modal-ss-tieu-de">Dạy sửa sai cho AI</h3>
+      <button type="button" class="btn btn-sm" onclick="this.closest('dialog').close()">Đóng</button>
+    </div>
+    <form id="form-modal-ss" class="space-y-3 text-sm">
+      <input type="hidden" id="inp-ss-id">
+      <input type="hidden" id="inp-ss-bao-sai-id">
+      <div>
+        <label class="block text-xs font-semibold text-muc-2 mb-1" for="inp-ss-de">Đề bài</label>
+        <textarea id="inp-ss-de" rows="2" required class="o-nhap w-full text-xs font-mono"></textarea>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-muc-2 mb-1" for="inp-ss-sai">Chỗ AI đã trả lời sai (để AI nhận diện lỗi)</label>
+        <textarea id="inp-ss-sai" rows="2" class="o-nhap w-full text-xs text-gach"></textarea>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-muc-2 mb-1" for="inp-ss-dung">Đáp án đúng chuẩn</label>
+        <textarea id="inp-ss-dung" rows="3" required placeholder="Viết rõ các chất hoặc phương trình đúng..." class="o-nhap w-full text-xs text-nhan font-medium"></textarea>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-muc-2 mb-1" for="inp-ss-ly-do">Lý do hoá học / Lưu ý</label>
+        <input type="text" id="inp-ss-ly-do" placeholder="Giải thích vì sao sai, quy tắc áp dụng..." class="o-nhap w-full text-sm">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-muc-2 mb-1" for="inp-ss-chu-de">Chủ đề</label>
+        <input type="text" id="inp-ss-chu-de" placeholder="Chủ đề..." class="o-nhap w-full text-sm">
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button" class="btn btn-sm" onclick="this.closest('dialog').close()">Huỷ</button>
+        <button type="submit" class="btn btn-sm btn-primary">Lưu mục sửa sai</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- MODAL CHI TIẾT LẦN CHẤM KIỂM TRA -->
+  <dialog id="modal-kt-chi-tiet" class="the p-6 max-w-3xl w-full rounded-xl backdrop:bg-black/50">
+    <div class="flex items-center justify-between border-b border-chi pb-3 mb-4">
+      <h3 class="font-serif font-semibold text-lg text-muc" id="modal-kt-ct-tieu-de">Kết quả kiểm tra</h3>
+      <button type="button" class="btn btn-sm" onclick="this.closest('dialog').close()">Đóng</button>
+    </div>
+    <div id="modal-kt-ct-body" class="max-h-[65vh] overflow-y-auto space-y-4 text-xs pr-2"></div>
+  </dialog>
+
+  <script src="/static/tai-khoan.js"></script>
+  <script src="/static/ai-rieng.js"></script>
+</body>
+</html>

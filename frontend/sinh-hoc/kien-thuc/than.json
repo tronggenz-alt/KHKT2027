@@ -1,0 +1,68 @@
+{
+  "id": "than",
+  "ten": "Thận và đường tiết niệu",
+  "can_duyet": true,
+  "chuong_trinh": "Sinh học 11 – Bài tiết và cân bằng nội môi (CT GDPT 2018); nền tảng KHTN 8",
+  "vi_tri": [
+    "Hai quả thận hình hạt đậu nằm sát thành sau khoang bụng, hai bên cột sống thắt lưng; thận phải thấp hơn thận trái một chút.",
+    "Đường dẫn nước tiểu: thận → niệu quản → bàng quang → niệu đạo."
+  ],
+  "cau_tao": [
+    "Thận gồm phần vỏ, phần tuỷ và bể thận.",
+    "Đơn vị cấu tạo và chức năng của thận là nephron (đơn vị thận); mỗi quả thận có khoảng 1 triệu nephron.",
+    "Mỗi nephron gồm cầu thận (búi mao mạch nằm trong nang Bowman) và ống thận (ống lượn gần, quai Henle, ống lượn xa) đổ vào ống góp.",
+    "Tuyến trên thận nằm ở đỉnh mỗi quả thận, tiết các hormone như aldosterone, adrenaline."
+  ],
+  "chuc_nang": [
+    "Lọc máu, thải chất thải (urea, creatinine, uric acid…) và chất độc ra ngoài qua nước tiểu.",
+    "Điều hoà cân bằng nội môi: lượng nước, nồng độ các ion, áp suất thẩm thấu và pH của máu."
+  ],
+  "co_che": [
+    "Lọc ở cầu thận: nước và các chất hoà tan có kích thước nhỏ từ máu đi vào nang Bowman tạo nước tiểu đầu (khoảng 170–180 lít/ngày); tế bào máu và protein lớn không lọt qua.",
+    "Tái hấp thu ở ống thận: glucose, amino acid được hấp thu lại gần như hoàn toàn; phần lớn nước và các ion cần thiết trở về máu.",
+    "Bài tiết tiếp: tế bào ống thận đưa thêm H⁺, K⁺, một số thuốc và chất độc vào nước tiểu → tạo nước tiểu chính thức (khoảng 1,5 lít/ngày) chảy ra bể thận.",
+    "Khi cơ thể thiếu nước, áp suất thẩm thấu máu tăng → tăng tiết ADH (do vùng dưới đồi tổng hợp, tuyến yên giải phóng) → ống lượn xa và ống góp tăng tái hấp thu nước → nước tiểu ít và đặc. Aldosterone làm tăng tái hấp thu Na⁺."
+  ],
+  "lien_he": [
+    "Sỏi thận: muối khoáng kết tinh trong thận; uống đủ nước, không nhịn tiểu để phòng bệnh.",
+    "Suy thận làm chất thải tích tụ trong máu; người bệnh phải chạy thận nhân tạo hoặc ghép thận.",
+    "Ăn quá mặn, lạm dụng thuốc giảm đau làm thận phải làm việc quá sức."
+  ],
+  "diem_thi": [
+    "Ba giai đoạn tạo nước tiểu; thành phần nước tiểu đầu so với máu.",
+    "Cơ chế điều hoà áp suất thẩm thấu nhờ ADH; vì sao uống nhiều nước thì đi tiểu nhiều.",
+    "Người bị đái tháo đường có glucose trong nước tiểu vì glucose máu cao vượt khả năng tái hấp thu của ống thận.",
+    "Sơ đồ cơ chế duy trì cân bằng nội môi: bộ phận tiếp nhận kích thích → bộ phận điều khiển → bộ phận thực hiện, có liên hệ ngược."
+  ],
+  "trac_nghiem": [
+    {
+      "cau": "Đơn vị cấu tạo và chức năng của thận là",
+      "lua_chon": ["cầu thận", "bể thận", "ống góp", "nephron"],
+      "dap_an": "D",
+      "giai_thich": "Mỗi nephron gồm cầu thận và ống thận, thực hiện đủ các bước lọc, tái hấp thu và bài tiết."
+    },
+    {
+      "cau": "Thành phần nào sau đây bình thường KHÔNG có trong nước tiểu đầu?",
+      "lua_chon": ["Glucose", "Urea", "Tế bào hồng cầu", "Ion Na⁺"],
+      "dap_an": "C",
+      "giai_thich": "Tế bào máu và protein có kích thước lớn không lọt qua lỗ lọc của cầu thận."
+    },
+    {
+      "cau": "Khi cơ thể bị mất nhiều nước (ra nhiều mồ hôi), điều nào sau đây xảy ra?",
+      "lua_chon": ["Tuyến yên giảm tiết ADH, nước tiểu loãng", "Tuyến yên tăng tiết ADH, ống thận tăng tái hấp thu nước", "Thận ngừng lọc máu", "Nước tiểu đầu không được tạo ra"],
+      "dap_an": "B",
+      "giai_thich": "Mất nước làm áp suất thẩm thấu máu tăng → tăng tiết ADH → ống lượn xa, ống góp tái hấp thu nhiều nước → nước tiểu ít, đặc."
+    },
+    {
+      "cau": "Người bị bệnh đái tháo đường có glucose trong nước tiểu vì",
+      "lua_chon": ["nồng độ glucose trong máu quá cao, ống thận không tái hấp thu hết", "cầu thận không lọc được glucose", "ống thận bài tiết thêm glucose", "thận tự tổng hợp glucose"],
+      "dap_an": "A",
+      "giai_thich": "Lượng glucose lọc vào nước tiểu đầu vượt quá khả năng tái hấp thu của ống thận nên phần dư đi ra nước tiểu."
+    }
+  ],
+  "goi_y_hoi": [
+    "Nước tiểu được tạo thành qua những giai đoạn nào?",
+    "Vì sao uống nhiều nước thì đi tiểu nhiều?",
+    "Thận tham gia cân bằng nội môi như thế nào?"
+  ]
+}

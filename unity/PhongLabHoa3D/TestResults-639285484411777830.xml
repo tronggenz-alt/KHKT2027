@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="3" result="Passed" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-25 11:07:20Z" end-time="2026-10-25 11:07:21Z" duration="0.1867626">
+  <test-suite type="TestSuite" id="1000" name="PhongLabHoa3D" fullname="PhongLabHoa3D" runstate="Runnable" testcasecount="44" result="Passed" start-time="2026-10-25 11:07:20Z" end-time="2026-10-25 11:07:21Z" duration="0.186763" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1056" name="Assembly-CSharp-Editor.dll" fullname="/Users/trantrong/Documents/Antigravity/unity/PhongLabHoa3D/Library/ScriptAssemblies/Assembly-CSharp-Editor.dll" runstate="Runnable" testcasecount="44" result="Passed" start-time="2026-10-25 11:07:20Z" end-time="2026-10-25 11:07:21Z" duration="0.182572" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="17573" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1057" name="PhongThiNghiem" fullname="PhongThiNghiem" runstate="Runnable" testcasecount="44" result="Passed" start-time="2026-10-25 11:07:20Z" end-time="2026-10-25 11:07:21Z" duration="0.182174" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1058" name="Tests" fullname="PhongThiNghiem.Tests" runstate="Runnable" testcasecount="44" result="Passed" start-time="2026-10-25 11:07:20Z" end-time="2026-10-25 11:07:21Z" duration="0.181869" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1039" name="TestNhanVatVaDieuKhien" fullname="PhongThiNghiem.Tests.TestNhanVatVaDieuKhien" classname="PhongThiNghiem.Tests.TestNhanVatVaDieuKhien" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-10-25 11:07:20Z" end-time="2026-10-25 11:07:21Z" duration="0.180864" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1040" name="Test_01_DungHinhGiaoSu_VaTrangBiBaoHo" fullname="PhongThiNghiem.Tests.TestNhanVatVaDieuKhien.Test_01_DungHinhGiaoSu_VaTrangBiBaoHo" methodname="Test_01_DungHinhGiaoSu_VaTrangBiBaoHo" classname="PhongThiNghiem.Tests.TestNhanVatVaDieuKhien" runstate="Runnable" seed="37131255" result="Passed" start-time="2026-10-25 11:07:20Z" end-time="2026-10-25 11:07:21Z" duration="0.107503" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[[BangTuanHoan3D] Đã nạp thành công 118/118 nguyên tố
+[DungPhongLab] Đã bake NavMesh phủ sàn phòng 22x16m!
+[DungNhanVat] Đã trang bị kính bảo hộ & găng tay cao su y tế!
+]]></output>
+            </test-case>
+            <test-case id="1041" name="Test_02_CheDoCamera_Goc3_Goc1_NhaBupBe" fullname="PhongThiNghiem.Tests.TestNhanVatVaDieuKhien.Test_02_CheDoCamera_Goc3_Goc1_NhaBupBe" methodname="Test_02_CheDoCamera_Goc3_Goc1_NhaBupBe" classname="PhongThiNghiem.Tests.TestNhanVatVaDieuKhien" runstate="Runnable" seed="401552342" result="Passed" start-time="2026-10-25 11:07:21Z" end-time="2026-10-25 11:07:21Z" duration="0.030255" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[[BangTuanHoan3D] Đã nạp thành công 118/118 nguyên tố
+[DungPhongLab] Đã bake NavMesh phủ sàn phòng 22x16m!
+]]></output>
+            </test-case>
+            <test-case id="1042" name="Test_03_VaoBan_Va_RoiBan" fullname="PhongThiNghiem.Tests.TestNhanVatVaDieuKhien.Test_03_VaoBan_Va_RoiBan" methodname="Test_03_VaoBan_Va_RoiBan" classname="PhongThiNghiem.Tests.TestNhanVatVaDieuKhien" runstate="Runnable" seed="870434429" result="Passed" start-time="2026-10-25 11:07:21Z" end-time="2026-10-25 11:07:21Z" duration="0.033254" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[[BangTuanHoan3D] Đã nạp thành công 118/118 nguyên tố
+[DungPhongLab] Đã bake NavMesh phủ sàn phòng 22x16m!
+Saving results to: /Users/trantrong/Library/Application Support/Antigravity/PhongLabHoa3D/TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="vi" data-theme="sang">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title id="hl-trang-title">Mô phỏng · Hoá lý · CHEMISTRY</title>
+  <meta name="description" content="Mô phỏng 2D nhiệt động học: chu trình nhiệt, đồ thị p–V và T–s, cân bằng công và nhiệt, định luật I.">
+  <meta name="color-scheme" content="light dark">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230f2b48' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 3h6M10 3v6L4.5 18.5A2 2 0 0 0 6.2 21.5h11.6a2 2 0 0 0 1.7-3L14 9V3'/%3E%3Cpath d='M7 15h10'/%3E%3C/svg%3E">
+  <script>
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem("giai-chuoi-giao-dien"); } catch (e) {}
+      if (t !== "sang" && t !== "toi") t = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "toi" : "sang";
+      document.documentElement.dataset.theme = t;
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Be Vietnam Pro"', '-apple-system', '"Segoe UI"', 'Roboto', 'sans-serif'],
+            mono: ['"JetBrains Mono"', '"SFMono-Regular"', 'Consolas', 'monospace'],
+          },
+          colors: {
+            giay: 'var(--giay)', 'giay-lom': 'var(--giay-lom)', muc: 'var(--muc)', 'muc-2': 'var(--muc-2)', lang: 'var(--lang)',
+            chi: 'var(--chi)', 'chi-dam': 'var(--chi-dam)', nhan: 'var(--nhan)', 'nhan-lom': 'var(--nhan-lom)',
+            'ho-phach': 'var(--ho-phach)', gach: 'var(--gach)', lam: 'var(--lam)',
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="stylesheet" href="/static/style.css">
+  <!-- Các module JS chung Hoá lý -->
+  <script src="/static/hoa-hoc/hoa-ly/chung/dinh-dang.js"></script>
+  <script src="/static/hoa-hoc/hoa-ly/chung/ngau-nhien.js"></script>
+  <script src="/static/hoa-hoc/hoa-ly/chung/hat.js"></script>
+  <script src="/static/hoa-hoc/hoa-ly/chung/bang-mau.js"></script>
+  <script src="/static/hoa-hoc/hoa-ly/chung/ve-hat.js"></script>
+  <script src="/static/hoa-hoc/hoa-ly/chung/do-thi.js"></script>
+  <script src="/static/hoa-hoc/hoa-ly/chung/keo.js"></script>
+  <script src="/static/hoa-hoc/hoa-ly/chung/khung-trang.js"></script>
+  <script src="/static/hoa-hoc/hoa-ly/chung/cau-hoi.js"></script>
+  <script src="/static/hoa-hoc/hoa-ly/chung/hinh-chung-minh.js"></script>
+  <script src="/static/hoa-hoc/hoa-ly/chung/cong-thuc.js"></script>
+  <script>
+    window.MathJax = {
+      startup: { typeset: false },
+      chtml: {
+        fontURL: "/static/vendor/mathjax-fonts/woff-v2",
+        mtextInheritFont: true,
+        merrorInheritFont: true,
+        scale: 1.02
+      },
+      tex: {
+        inlineMath: [["\\(", "\\)"]],
+        displayMath: [["\\[", "\\]"]]
+      }
+    };
+  </script>
+  <script src="/static/vendor/mathjax.3.2.2.js" defer></script>
+
+  <!-- Các module JS mô phỏng Động cơ nhiệt -->
+  <script src="/static/hoa-hoc/hoa-ly/dong-co-nhiet/co-cau.js"></script>
+  <script src="/static/hoa-hoc/hoa-ly/dong-co-nhiet/nhiet-dong.js"></script>
+  <script src="/static/hoa-hoc/hoa-ly/dong-co-nhiet/tien-do.js"></script>
+  <script src="/static/hoa-hoc/hoa-ly/dong-co-nhiet/dong-luc.js"></script>
+  <script src="/static/hoa-hoc/hoa-ly/dong-co-nhiet/hat-khi.js"></script>
+  <script src="/static/hoa-hoc/hoa-ly/dong-co-nhiet/ve.js"></script>
+  <script src="/static/hoa-hoc/hoa-ly/dong-co-nhiet/tuong-tac.js"></script>
+  <script src="/static/hoa-hoc/hoa-ly/dong-co-nhiet/giao-dien.js"></script>
+</head>
+<body class="bg-giay text-muc min-h-screen flex flex-col font-sans transition-colors duration-200">
+  <!-- Thanh điều hướng trên -->
+  <header class="border-b border-chi bg-giay/95 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-[1600px] mx-auto px-3 sm:px-6 h-14 flex items-center justify-between">
+      <div class="flex items-center gap-2 sm:gap-4 overflow-hidden">
+        <a href="/" class="font-mono text-base sm:text-lg font-bold tracking-tight text-nhan hover:opacity-85 transition-opacity flex items-center gap-1.5 shrink-0" title="Về trang chủ">
+          <span>chemistry:</span>
+        </a>
+        <span class="text-lang shrink-0">/</span>
+        <nav class="flex items-center gap-1.5 text-xs sm:text-sm truncate" aria-label="Breadcrumb">
+          <a href="/" class="text-lang hover:text-muc transition-colors shrink-0">Hoá học</a>
+          <span class="text-lang shrink-0">›</span>
+          <a href="/hoa-hoc/hoa-ly" class="text-lang hover:text-muc transition-colors shrink-0">Hoá lý</a>
+          <span class="text-lang shrink-0">›</span>
+          <span id="hl-breadcrumb-ten" class="font-medium text-muc truncate">Mô phỏng</span>
+        </nav>
+      </div>
+
+      <div class="flex items-center gap-2 shrink-0">
+        <!-- Nút thu gọn bảng điều khiển -->
+        <button type="button" id="hl-nut-thu-gon" class="hl-btn-pill-opt hidden lg:inline-flex items-center gap-1 text-xs px-2.5 py-1.5" title="Thu gọn bảng điều khiển để mở rộng khung hình">
+          Thu gọn bảng ❮
+        </button>
+        <!-- Nút toàn màn hình -->
+        <button type="button" id="hl-nut-toan-man-hinh" class="hl-btn-icon hidden sm:inline-flex" title="Toàn màn hình">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+        </button>
+        <!-- Nút xuất ảnh & chia sẻ -->
+        <button type="button" id="hl-btn-xuat-anh" class="hl-btn-icon hidden sm:inline-flex" title="Xuất ảnh PNG">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+        </button>
+        <button type="button" id="hl-btn-chia-se" class="hl-btn-icon hidden sm:inline-flex" title="Sao chép liên kết chia sẻ">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        </button>
+        <!-- Nút sáng tối -->
+        <button type="button" id="nut-che-do" class="nut-che-do p-2 rounded-lg border border-chi hover:bg-giay-lom transition-colors text-muc" aria-label="Chuyển chế độ sáng/tối" title="Chuyển chế độ sáng/tối">
+          <svg class="bieu-tuong-trang w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
+          <svg class="bieu-tuong-mat-troi w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Bố cục chính: Cột trái (SVG mô phỏng) & Cột phải (Điều khiển + Số liệu) -->
+  <main class="flex-1 max-w-[1600px] w-full mx-auto p-2 sm:p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-start">
+    <!-- CỘT TRÁI (~67-75%): SVG CHÍNH + THANH THỜI GIAN + NÚT CHẠY -->
+    <section id="hl-cot-hinh" class="lg:col-span-8 xl:col-span-9 flex flex-col gap-3 transition-all duration-300">
+      <!-- Thẻ chứa mô hình SVG -->
+      <div id="hl-khung-svg" class="hl-the-mo-hinh relative overflow-hidden rounded-xl border border-chi bg-the-lon-nen select-none touch-none">
+        <!-- Thanh công cụ nhanh trên đầu mô hình: chọn đồ thị phụ & tuỳ chọn -->
+        <div class="hl-thanh-cong-cu-mo-hinh flex items-center justify-between p-2.5 border-b border-chi/60 text-xs text-lang">
+          <div class="flex items-center gap-1 sm:gap-2 flex-wrap">
+            <span class="font-medium text-muc">Đồ thị:</span>
+            <button type="button" class="hl-btn-tab-do-thi active" data-do-thi="pv">p – V</button>
+            <button type="button" class="hl-btn-tab-do-thi" data-do-thi="ts">T – s</button>
+            <button type="button" class="hl-btn-tab-do-thi" data-do-thi="pphi">p – φ</button>
+            <span class="hidden sm:inline-block text-chi">|</span>
+            <button type="button" id="hl-btn-canh-thang" class="hl-btn-pill-opt hidden sm:inline-block" title="Bật/tắt chế độ Thẳng hàng như video">Thẳng hàng</button>
+            <button type="button" id="hl-btn-log" class="hl-btn-pill-opt hidden sm:inline-block" title="Đổi trục p dạng Logarit">Log p</button>
+            <button type="button" id="hl-btn-dien-tich" class="hl-btn-pill-opt hidden sm:inline-block active" title="Tô diện tích công">Tô công</button>
+            <button type="button" id="hl-btn-bong-ma" class="hl-btn-pill-opt hidden sm:inline-block" title="Ghim chu trình bóng ma (Phím G)">Ghim (G)</button>
+            <span id="hl-nhan-qua-trinh" class="text-xs font-semibold text-nhan ml-2"></span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="hl-chu-tua-nguoc" class="text-gach font-semibold text-xs opacity-0 transition-opacity">Tua ngược ↺</span>
+            <span id="hl-thong-bao-danh-lua" class="hl-badge-danh-lua opacity-0 transition-opacity">⚡ Đánh lửa!</span>
+          </div>
+        </div>
+
+        <!-- Khung vẽ SVG chính: chiều cao co giãn theo màn hình thật -->
+        <div id="hl-khung-svg-wrapper" class="relative w-full overflow-hidden" style="height: clamp(560px, calc(100vh - 210px), 960px);">
+          <svg id="hl-svg" class="w-full h-full block" preserveAspectRatio="none">
+            <!-- Được render bởi ve.js -->
+          </svg>
+          <!-- Canvas hạt khí cắt clip tuyệt đối theo vungKhi -->
+          <canvas id="hl-canvas-hat-khi" class="pointer-events-none absolute inset-0 w-full h-full"></canvas>
+        </div>
+
+        <!-- Thanh thời gian chu trình 0–720° -->
+        <div class="p-3 border-t border-chi/60 bg-giay/40">
+          <div class="flex items-center justify-between text-xs text-lang mb-1.5 font-mono">
+            <span>Tiến độ 4 kỳ (0° → 720°)</span>
+            <span>φ = <span id="hl-label-phi" class="font-bold text-muc">180</span>° · Vòng <span id="hl-label-vong">1</span></span>
+          </div>
+          <!-- Slider SVG / thanh dải màu -->
+          <div id="hl-thanh-thoi-gian" class="hl-timeline-track relative h-6 rounded-md cursor-pointer select-none" tabindex="0" role="slider" aria-valuenow="180" aria-valuemin="0" aria-valuemax="720" aria-label="Thanh góc quay trục khuỷu">
+            <div class="hl-timeline-segment hl-seg-nap" style="left: 0%; width: 25%;" title="Kỳ 1: Nạp (0°–180°)">Nạp</div>
+            <div class="hl-timeline-segment hl-seg-nen" style="left: 25%; width: 25%;" title="Kỳ 2: Nén (180°–360°)">Nén</div>
+            <div class="hl-timeline-marker hl-marker-lua" style="left: 50%;" title="Đánh lửa (360°)">⚡</div>
+            <div class="hl-timeline-segment hl-seg-no" style="left: 50%; width: 25%;" title="Kỳ 3: Nổ - Sinh công (360°–540°)">Sinh công</div>
+            <div class="hl-timeline-marker hl-marker-xa" style="left: 75%;" title="Mở van xả (540°)">💨</div>
+            <div class="hl-timeline-segment hl-seg-xa" style="left: 75%; width: 25%;" title="Kỳ 4: Xả (540°–720°)">Xả</div>
+            <!-- Con trỏ vị trí hiện tại -->
+            <div id="hl-timeline-thumb" class="hl-timeline-thumb" style="left: 25%;"></div>
+          </div>
+        </div>
+
+        <!-- Thanh điều khiển: Chạy/Dừng, Tốc độ, Nút nhảy kỳ, Đặt lại -->
+        <div class="p-3 border-t border-chi/60 flex flex-wrap items-center justify-between gap-2 bg-giay-lom/30">
+          <div class="flex items-center gap-1.5 sm:gap-2">
+            <button type="button" id="hl-btn-play" class="hl-btn-ctrl hl-btn-primary" title="Chạy / Tạm dừng (Phím Space)">
+              <svg id="hl-icon-play" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              <svg id="hl-icon-pause" class="w-4 h-4 hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+              <span id="hl-text-play" class="text-xs font-semibold">Chạy</span>
+            </button>
+            <button type="button" id="hl-btn-prev-ky" class="hl-btn-ctrl" title="Kỳ trước (Phím ←)">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <button type="button" id="hl-btn-next-ky" class="hl-btn-ctrl" title="Kỳ sau (Phím →)">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+            <button type="button" id="hl-btn-reset" class="hl-btn-ctrl" title="Đặt lại về điểm 1 (Phím R)">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              <span class="text-xs">Đặt lại</span>
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2 sm:gap-3 text-xs">
+            <label class="flex items-center gap-1.5 text-lang">
+              <span>Tốc độ:</span>
+              <select id="hl-select-toc-do" class="hl-select text-muc font-mono">
+                <option value="0.25">0,25×</option>
+                <option value="0.5">0,5×</option>
+                <option value="1" selected>1×</option>
+                <option value="2">2×</option>
+                <option value="4">4×</option>
+              </select>
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer text-lang">
+              <input type="checkbox" id="hl-chk-quan-tinh" class="hl-checkbox" checked>
+              <span>Quán tính</span>
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer text-lang">
+              <input type="checkbox" id="hl-chk-de-may" class="hl-checkbox">
+              <span class="font-medium text-nhan">Đề máy</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hướng dẫn tương tác nhanh -->
+      <div class="text-xs text-lang flex flex-wrap items-center justify-between gap-2 px-1">
+        <span>💡 <b>Kéo chuột:</b> Vung bánh đà · Kéo ngang pít-tông · Kéo chấm trên đồ thị p–V · Kéo thanh thời gian.</span>
+        <span class="font-mono text-[11px] hidden md:inline-block">Phím: Space, ←/→, 1–4, R, G</span>
+      </div>
+    </section>
+
+    <!-- CỘT PHẢI: THẺ ĐANG DIỄN RA + CÁC TAB -->
+    <section id="hl-cot-bang" class="lg:col-span-4 xl:col-span-3 flex flex-col gap-4">
+      <!-- 1. THẺ ĐANG DIỄN RA (TRỰC QUAN & ĐỊNH LUẬT I) -->
+      <div class="hl-card p-4 rounded-xl border border-chi bg-the-lon-nen shadow-sm">
+        <div class="flex items-center justify-between pb-2 border-b border-chi/60">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-nhan animate-ping"></span>
+            <h3 class="font-semibold text-sm text-muc">Trạng thái hiện tại</h3>
+          </div>
+          <span id="hl-badge-ky" class="hl-badge-ky">Kỳ 2 · Nén</span>
+        </div>
+
+        <p id="hl-ten-qua-trinh" class="text-xs font-medium text-nhan mt-2">Nén đoạn nhiệt (Q = 0)</p>
+
+        <!-- Lưới thông số thời gian thực -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 my-3 text-xs">
+          <div class="hl-stat-box">
+            <span class="hl-stat-label">Áp suất p</span>
+            <span id="hl-stat-p" class="hl-stat-val">1,00 <span class="hl-unit">bar</span></span>
+          </div>
+          <div class="hl-stat-box">
+            <span class="hl-stat-label">Thể tích V</span>
+            <span id="hl-stat-v" class="hl-stat-val">446,8 <span class="hl-unit">cm³</span></span>
+          </div>
+          <div class="hl-stat-box">
+            <span class="hl-stat-label">Nhiệt độ T</span>
+            <span id="hl-stat-t" class="hl-stat-val">300 <span class="hl-unit">K</span></span>
+          </div>
+          <div class="hl-stat-box">
+            <span class="hl-stat-label">Góc φ</span>
+            <span id="hl-stat-phi" class="hl-stat-val">180,0°</span>
+          </div>
+        </div>
+
+        <!-- BẢNG KIỂM ĐỊNH LUẬT I: ΔU = A + Q -->
+        <div class="hl-box-dinh-luat-1 p-2.5 rounded-lg border border-chi/80 bg-giay/70 text-xs">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="font-semibold text-muc flex items-center gap-1">
+              <span>Định luật I:</span>
+              <code class="font-mono text-nhan">ΔU = A + Q</code>
+            </span>
+            <span id="hl-chk-dl1-status" class="hl-tag-pass" title="Thoả mãn sai số ≤ 1e-6">✓ Khớp</span>
+          </div>
+          <div class="grid grid-cols-3 gap-1.5 text-center font-mono">
+            <div class="p-1 rounded bg-giay-lom/60">
+              <div class="text-[10px] text-lang">ΔU</div>
+              <div id="hl-val-du" class="font-bold text-muc">+0,0 J</div>
+            </div>
+            <div class="p-1 rounded bg-giay-lom/60">
+              <div class="text-[10px] text-lang">A (công nhận)</div>
+              <div id="hl-val-a" class="font-bold text-muc">+0,0 J</div>
+            </div>
+            <div class="p-1 rounded bg-giay-lom/60">
+              <div class="text-[10px] text-lang">Q (nhiệt nhận)</div>
+              <div id="hl-val-q" class="font-bold text-muc">+0,0 J</div>
+            </div>
+          </div>
+          <p class="text-[10px] text-lang mt-1 italic leading-tight">Quy ước SGK Vật lí 12: A > 0 khí nhận công; Q > 0 khí nhận nhiệt.</p>
+        </div>
+
+        <!-- Đồng hồ đề máy (nếu bật chế độ Đề máy) -->
+        <div id="hl-khu-de-may" class="mt-3 p-2.5 rounded-lg border border-nhan/40 bg-nhan/5 hidden text-xs">
+          <div class="flex items-center justify-between">
+            <span class="font-medium text-muc">Trạng thái động cơ:</span>
+            <span id="hl-trang-thai-dong-co" class="font-bold text-gach">Chưa nổ</span>
+          </div>
+          <div class="flex items-center justify-between mt-1 text-sm font-mono">
+            <span>Tốc độ: <b id="hl-rpm-val">0</b> rpm</span>
+            <span>Công suất: <b id="hl-p-dong-co">0,0</b> kW</span>
+          </div>
+          <div class="mt-2 flex items-center gap-2">
+            <label for="hl-slider-tai" class="text-xs text-lang whitespace-nowrap">Tải cản:</label>
+            <input type="range" id="hl-slider-tai" min="0" max="60" value="0" step="1" class="w-full">
+            <span id="hl-label-tai" class="font-mono text-xs text-muc w-12 text-right">0 N·m</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. BỐN TAB ĐIỀU KHIỂN & HỌC TẬP -->
+      <div class="hl-card rounded-xl border border-chi bg-the-lon-nen shadow-sm overflow-hidden flex flex-col">
+        <!-- Đầu Tab -->
+        <div class="flex border-b border-chi/60 text-xs font-medium bg-giay-lom/30 overflow-x-auto">
+          <button type="button" class="hl-tab-nav flex-1 py-2.5 text-center active whitespace-nowrap px-1.5" data-tab="thong-so">Thông số</button>
+          <button type="button" class="hl-tab-nav flex-1 py-2.5 text-center whitespace-nowrap px-1.5" data-tab="so-lieu">Số liệu</button>
+          <button type="button" class="hl-tab-nav flex-1 py-2.5 text-center whitespace-nowrap px-1.5" data-tab="nhien-lieu">Nhiên liệu</button>
+          <button type="button" class="hl-tab-nav flex-1 py-2.5 text-center whitespace-nowrap px-1.5" data-tab="cong-thuc">Công thức</button>
+          <button type="button" class="hl-tab-nav flex-1 py-2.5 text-center whitespace-nowrap px-1.5" data-tab="hoc">Học &amp; Thi</button>
+        </div>
+
+
+        <!-- Nội dung Tab -->
+        <div class="p-3.5 sm:p-4 text-xs">
+          <!-- TAB 1: THÔNG SỐ -->
+          <div id="hl-tab-thong-so" class="hl-tab-pane active flex flex-col gap-3">
+            <div class="flex items-center justify-between pb-1 border-b border-chi/40">
+              <span class="font-semibold text-muc">Chu trình &amp; Kết cấu</span>
+              <select id="hl-select-chu-trinh" class="hl-select font-sans text-xs">
+                <option value="otto" selected>Chu trình Otto (xăng)</option>
+                <option value="diesel">Chu trình Diesel (dầu)</option>
+                <option value="wiebe">Gần thực tế (Wiebe)</option>
+              </select>
+            </div>
+
+            <!-- Thanh trượt Tỉ số nén r -->
+            <div class="hl-ctrl-group">
+              <div class="flex justify-between">
+                <label for="hl-slider-r" class="font-medium text-muc">Tỉ số nén (r):</label>
+                <span id="hl-val-r" class="font-mono font-bold text-nhan">10,0</span>
+              </div>
+              <input type="range" id="hl-slider-r" min="4" max="22" step="0.5" value="10" class="w-full">
+              <div class="flex justify-between text-[10px] text-lang">
+                <span>4 (thấp)</span>
+                <span>Buồng cháy co giãn theo r</span>
+                <span>22 (Diesel)</span>
+              </div>
+            </div>
+
+            <!-- Tỉ số ngắt rc (chỉ hiện khi Diesel) -->
+            <div id="hl-group-rc" class="hl-ctrl-group hidden">
+              <div class="flex justify-between">
+                <label for="hl-slider-rc" class="font-medium text-muc">Tỉ số ngắt (rc):</label>
+                <span id="hl-val-rc" class="font-mono font-bold text-nhan">2,0</span>
+              </div>
+              <input type="range" id="hl-slider-rc" min="1.1" max="3.5" step="0.1" value="2.0" class="w-full">
+            </div>
+
+            <!-- Chỉ số đoạn nhiệt gamma -->
+            <div class="hl-ctrl-group">
+              <div class="flex justify-between">
+                <label for="hl-slider-gamma" class="font-medium text-muc">Chỉ số đoạn nhiệt (γ = cp/cv):</label>
+                <span id="hl-val-gamma" class="font-mono font-bold text-nhan">1,40</span>
+              </div>
+              <input type="range" id="hl-slider-gamma" min="1.25" max="1.67" step="0.01" value="1.40" class="w-full">
+            </div>
+
+            <!-- Nhiệt cấp q_in -->
+            <div class="hl-ctrl-group">
+              <div class="flex justify-between">
+                <label for="hl-slider-qin" class="font-medium text-muc">Nhiệt cấp q_in (kJ/kg):</label>
+                <span id="hl-val-qin" class="font-mono font-bold text-nhan">1500</span>
+              </div>
+              <input type="range" id="hl-slider-qin" min="200" max="2500" step="50" value="1500" class="w-full">
+            </div>
+
+            <!-- Nhiệt độ nạp T1 và áp suất nạp p1 -->
+            <div class="grid grid-cols-2 gap-2">
+              <div class="hl-ctrl-group">
+                <div class="flex justify-between">
+                  <label for="hl-slider-t1" class="text-muc">T₁ nạp (K):</label>
+                  <span id="hl-val-t1" class="font-mono text-nhan">300</span>
+                </div>
+                <input type="range" id="hl-slider-t1" min="250" max="350" step="5" value="300" class="w-full">
+              </div>
+              <div class="hl-ctrl-group">
+                <div class="flex justify-between">
+                  <label for="hl-slider-p1" class="text-muc">p₁ nạp (bar):</label>
+                  <span id="hl-val-p1" class="font-mono text-nhan">1,00</span>
+                </div>
+                <input type="range" id="hl-slider-p1" min="0.5" max="2.0" step="0.05" value="1.0" class="w-full">
+              </div>
+            </div>
+
+            <!-- Kích thước hình học xi-lanh (B, S, L) -->
+            <details class="hl-details text-xs">
+              <summary class="cursor-pointer text-lang hover:text-muc font-medium py-1">Kích thước xi-lanh (Bore × Stroke)</summary>
+              <div class="grid grid-cols-3 gap-2 pt-2">
+                <div>
+                  <span class="text-[10px] text-lang">Đường kính B:</span>
+                  <input type="number" id="hl-inp-b" value="80" min="50" max="120" class="hl-input-num"> mm
+                </div>
+                <div>
+                  <span class="text-[10px] text-lang">Hành trình S:</span>
+                  <input type="number" id="hl-inp-s" value="80" min="50" max="120" class="hl-input-num"> mm
+                </div>
+                <div>
+                  <span class="text-[10px] text-lang">Tay biên L:</span>
+                  <input type="number" id="hl-inp-l" value="140" min="100" max="250" class="hl-input-num"> mm
+                </div>
+              </div>
+            </details>
+          </div>
+
+          <!-- TAB 2: SỐ LIỆU -->
+          <div id="hl-tab-so-lieu" class="hl-tab-pane hidden flex flex-col gap-3">
+            <h4 class="font-semibold text-muc pb-1 border-b border-chi/40">Bảng trạng thái 5 điểm (0–4)</h4>
+            <div class="overflow-x-auto">
+              <table class="hl-table w-full text-[11px] font-mono">
+                <thead>
+                  <tr class="text-lang border-b border-chi/60">
+                    <th class="text-left py-1">Điểm</th>
+                    <th class="text-right py-1">p (bar)</th>
+                    <th class="text-right py-1">V (cm³)</th>
+                    <th class="text-right py-1">T (K)</th>
+                    <th class="text-right py-1">t (°C)</th>
+                  </tr>
+                </thead>
+                <tbody id="hl-tbody-trang-thai">
+                  <!-- Được cập nhật tự động bởi giao-dien.js -->
+                </tbody>
+              </table>
+            </div>
+
+            <h4 class="font-semibold text-muc pt-2 pb-1 border-b border-chi/40">Chỉ số nhiệt động &amp; Hiệu suất</h4>
+            <div class="grid grid-cols-2 gap-2 text-[11px]">
+              <div class="p-2 rounded bg-giay-lom/40">
+                <span class="text-lang block">Nhiệt cấp q_in:</span>
+                <span id="hl-val-qin-res" class="font-mono font-bold text-muc">1500,0 kJ/kg</span>
+              </div>
+              <div class="p-2 rounded bg-giay-lom/40">
+                <span class="text-lang block">Nhiệt thải q_out:</span>
+                <span id="hl-val-qout-res" class="font-mono font-bold text-muc">597,2 kJ/kg</span>
+              </div>
+              <div class="p-2 rounded bg-giay-lom/40">
+                <span class="text-lang block">Công chu trình w:</span>
+                <span id="hl-val-w-res" class="font-mono font-bold text-muc">902,8 kJ/kg</span>
+              </div>
+              <div class="p-2 rounded bg-giay-lom/40">
+                <span class="text-lang block">Công 1 chu trình W:</span>
+                <span id="hl-val-W-res" class="font-mono font-bold text-muc">468,5 J</span>
+              </div>
+              <div class="p-2 rounded bg-nhan/10 border border-nhan/30 col-span-2">
+                <div class="flex justify-between items-center">
+                  <span class="font-medium text-nhan">Hiệu suất nhiệt (η):</span>
+                  <span id="hl-val-eta-res" class="font-mono text-base font-bold text-nhan">60,2 %</span>
+                </div>
+                <div class="flex justify-between items-center text-[10px] text-lang mt-1">
+                  <span>Hiệu suất cực đại Carnot:</span>
+                  <span id="hl-val-carnot-res" class="font-mono font-medium">89,5 %</span>
+                </div>
+              </div>
+              <div class="p-2 rounded bg-giay-lom/40 col-span-2">
+                <div class="flex justify-between">
+                  <span class="text-lang">Áp suất hiệu dụng trung bình (MEP):</span>
+                  <span id="hl-val-mep-res" class="font-mono font-bold text-muc">11,65 bar</span>
+                </div>
+                <div class="flex justify-between mt-1">
+                  <span class="text-lang">Công suất (1200 rpm, 1 xi-lanh):</span>
+                  <span id="hl-val-cong-suat-res" class="font-mono font-bold text-muc">4,69 kW</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 3: NHIÊN LIỆU (CẦU NỐI HOÁ 10) -->
+          <div id="hl-tab-nhien-lieu" class="hl-tab-pane hidden flex flex-col gap-3">
+            <div class="pb-1 border-b border-chi/40">
+              <label for="hl-select-nhien-lieu" class="font-semibold text-muc block mb-1">Chọn nhiên liệu đốt:</label>
+              <select id="hl-select-nhien-lieu" class="hl-select w-full">
+                <!-- Nạp từ nhien-lieu.json -->
+              </select>
+            </div>
+
+            <!-- Phương trình hoá học phản ứng cháy -->
+            <div class="p-2.5 rounded-lg border border-chi/70 bg-giay/60">
+              <span class="text-[10px] text-lang uppercase font-semibold">Phương trình cháy với không khí (O₂ + 3,76 N₂):</span>
+              <p id="hl-pt-chay" class="font-mono text-[11px] text-nhan font-medium mt-1 select-all break-all"></p>
+            </div>
+
+            <!-- Các bước tính toán enthalpy -->
+            <div class="space-y-1.5 text-[11px]">
+              <div class="flex justify-between">
+                <span class="text-lang">Biến thiên enthalpy chuẩn (ΔcH°):</span>
+                <span id="hl-val-dch" class="font-mono font-bold text-muc">-- kJ/mol</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-lang">Nhiệt trị thấp (LHV):</span>
+                <span id="hl-val-lhv" class="font-mono font-bold text-muc">-- MJ/kg</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-lang">Tỉ lệ không khí/nhiên liệu (AFR):</span>
+                <span id="hl-val-afr" class="font-mono font-bold text-muc">-- kg/kg</span>
+              </div>
+            </div>
+
+            <!-- Thanh trượt lambda và k -->
+            <div class="space-y-2 pt-2 border-t border-chi/40">
+              <div>
+                <div class="flex justify-between text-[11px]">
+                  <label for="hl-slider-lambda" class="text-muc">Hệ số dư không khí (λ):</label>
+                  <span id="hl-val-lambda" class="font-mono text-nhan">1,00</span>
+                </div>
+                <input type="range" id="hl-slider-lambda" min="0.8" max="1.3" step="0.05" value="1.0" class="w-full">
+              </div>
+              <div>
+                <div class="flex justify-between text-[11px]">
+                  <label for="hl-slider-k" class="text-muc">Hệ số nhiệt hiệu dụng (k):</label>
+                  <span id="hl-val-k" class="font-mono text-nhan">0,55</span>
+                </div>
+                <input type="range" id="hl-slider-k" min="0.3" max="1.0" step="0.05" value="0.55" class="w-full">
+              </div>
+            </div>
+
+            <div class="pt-2 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] text-lang block">Nhiệt cấp q_in tính được:</span>
+                <span id="hl-val-qin-tinh" class="font-mono font-bold text-base text-nhan">-- kJ/kg</span>
+              </div>
+              <button type="button" id="hl-btn-ap-dung-qin" class="hl-btn-pill-opt active px-3 py-1.5">
+                Áp dụng q_in này
+              </button>
+            </div>
+            <p id="hl-canh-bao-t3" class="text-[10px] text-ho-phach hidden italic">
+              ⚠️ Nhiệt độ T₃ cao hơn động cơ thật (~2500–2800 K) do bỏ qua phân li ở nhiệt độ cao và truyền nhiệt qua vách xi-lanh.
+            </p>
+          </div>
+
+          <!-- TAB 4: CÔNG THỨC LIÊN QUAN (N1-N8 & H1-H3) -->
+          <div id="hl-tab-cong-thuc" class="hl-tab-pane hidden flex flex-col gap-3">
+            <div class="flex items-center justify-between pb-1 border-b border-chi/40">
+              <span class="font-semibold text-muc">Công thức &amp; Chứng minh</span>
+              <a href="/hoa-hoc/hoa-ly/cong-thuc" target="_blank" class="text-[11px] text-nhan hover:underline flex items-center gap-1">
+                <span>Toàn bộ thư viện (33)</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3 h-3"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+              </a>
+            </div>
+            <div id="hl-danh-sach-ct-mo-phong" class="space-y-3">
+              <!-- Render tự động các thẻ công thức của dong-co-nhiet -->
+            </div>
+          </div>
+
+          <!-- TAB 5: HỌC & THI (ÔN THI THPT & BẢN CHẤT HOÁ LÝ) -->
+          <div id="hl-tab-hoc" class="hl-tab-pane hidden flex flex-col gap-3">
+            <!-- Thuyết minh bản chất hoá học/nhiệt động của đoạn hiện tại -->
+            <div class="p-2.5 rounded-lg border border-chi/70 bg-giay/70">
+              <span id="hl-hoc-ten-doan" class="font-semibold text-muc text-xs block mb-1">Kỳ 2: Nén đoạn nhiệt (1 → 2)</span>
+              <p id="hl-hoc-giai-thich" class="text-[11px] text-lang leading-relaxed">
+                Pít-tông dịch chuyển từ ĐCD lên ĐCT, thể tích giảm từ V₁ về Vc. Quá trình diễn ra rất nhanh nên coi như không trao đổi nhiệt với môi trường (Q = 0). Khí nhận công (A > 0), nội năng tăng (ΔU = A > 0), dẫn đến nhiệt độ và áp suất tăng vọt.
+              </p>
+            </div>
+
+            <!-- Ngân hàng câu hỏi trắc nghiệm THPT -->
+            <div class="flex items-center justify-between pb-1 border-b border-chi/40 pt-1">
+              <h4 class="font-semibold text-muc text-xs">Luyện tập trắc nghiệm THPT</h4>
+              <div class="flex gap-1">
+                <button type="button" class="hl-btn-dang-cau active" data-dang="I">Phần I</button>
+                <button type="button" class="hl-btn-dang-cau" data-dang="II">Phần II</button>
+                <button type="button" class="hl-btn-dang-cau" data-dang="III">Phần III</button>
+              </div>
+            </div>
+
+            <!-- Khu hiển thị câu hỏi -->
+            <div id="hl-khu-cau-hoi" class="text-[11px] flex flex-col gap-2">
+              <!-- Nạp động từ cau-hoi.json -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Chân trang -->
+  <footer class="border-t border-chi py-4 text-center text-xs text-lang">
+    <p>CHEMISTRY · Mục Hoá lý 2D · Chu trình nhiệt động lực học tương tác</p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,66 @@
+{
+  "id": "da_day",
+  "ten": "Thực quản và dạ dày",
+  "can_duyet": true,
+  "chuong_trinh": "Sinh học 11 – Dinh dưỡng và tiêu hoá ở động vật (CT GDPT 2018); nền tảng KHTN 8",
+  "vi_tri": [
+    "Thực quản nối hầu với dạ dày, đi xuyên qua cơ hoành.",
+    "Dạ dày nằm ở phần trên, bên trái khoang bụng, ngay dưới cơ hoành."
+  ],
+  "cau_tao": [
+    "Dạ dày là đoạn phình to nhất của ống tiêu hoá, hình túi; thành có ba lớp cơ (dọc, vòng, chéo) giúp co bóp mạnh.",
+    "Lớp niêm mạc có nhiều tuyến vị tiết dịch vị gồm HCl, pepsinogen và chất nhầy.",
+    "Phía trên có tâm vị, phía dưới có môn vị (cơ vòng) điều chỉnh việc đưa thức ăn xuống tá tràng."
+  ],
+  "chuc_nang": [
+    "Thực quản dẫn thức ăn từ hầu xuống dạ dày nhờ nhu động.",
+    "Dạ dày chứa thức ăn, tiêu hoá cơ học (co bóp, nhào trộn) và tiêu hoá hoá học một phần protein.",
+    "HCl tạo môi trường acid giúp diệt nhiều vi khuẩn theo thức ăn vào."
+  ],
+  "co_che": [
+    "HCl hoạt hoá pepsinogen thành pepsin; pepsin cắt protein thành các chuỗi peptide ngắn.",
+    "Chất nhầy phủ lên niêm mạc, bảo vệ thành dạ dày khỏi tác dụng của HCl và pepsin.",
+    "Thức ăn được nhào trộn thành dạng sệt rồi được đẩy xuống tá tràng từng đợt qua môn vị."
+  ],
+  "lien_he": [
+    "Viêm loét dạ dày – tá tràng liên quan đến vi khuẩn H. pylori, căng thẳng, ăn uống thất thường, lạm dụng thuốc giảm đau.",
+    "Trào ngược dạ dày – thực quản khi tâm vị đóng không kín (ăn quá no, nằm ngay sau khi ăn).",
+    "Ăn đúng giờ, nhai kĩ, không bỏ bữa sáng giúp bảo vệ dạ dày."
+  ],
+  "diem_thi": [
+    "Ở dạ dày người chủ yếu diễn ra tiêu hoá cơ học và tiêu hoá hoá học một phần protein; tiêu hoá hoá học và hấp thụ chủ yếu diễn ra ở ruột non.",
+    "Vai trò của HCl và pepsin; vì sao dạ dày không tự tiêu hoá chính nó.",
+    "Dạ dày 4 ngăn của động vật nhai lại (dạ cỏ, dạ tổ ong, dạ lá sách, dạ múi khế); dạ múi khế là dạ dày chính thức tiết pepsin và HCl."
+  ],
+  "trac_nghiem": [
+    {
+      "cau": "Enzyme pepsin trong dịch vị có tác dụng phân giải",
+      "lua_chon": ["tinh bột", "lipid", "protein", "cellulose"],
+      "dap_an": "C",
+      "giai_thich": "Pepsin (được HCl hoạt hoá từ pepsinogen) cắt protein thành các chuỗi peptide ngắn."
+    },
+    {
+      "cau": "HCl trong dịch vị KHÔNG có vai trò nào sau đây?",
+      "lua_chon": ["Hoạt hoá pepsinogen thành pepsin", "Diệt một số vi khuẩn", "Tạo môi trường acid cho pepsin hoạt động", "Phân giải tinh bột thành glucose"],
+      "dap_an": "D",
+      "giai_thich": "HCl không phải enzyme nên không phân giải tinh bột; tinh bột được tiêu hoá ở khoang miệng và ruột non."
+    },
+    {
+      "cau": "Ở trâu, bò, ngăn dạ dày tiết pepsin và HCl là",
+      "lua_chon": ["dạ cỏ", "dạ tổ ong", "dạ lá sách", "dạ múi khế"],
+      "dap_an": "D",
+      "giai_thich": "Dạ múi khế là dạ dày chính thức; ba ngăn còn lại chủ yếu chứa, lên men thức ăn và hấp thụ bớt nước."
+    },
+    {
+      "cau": "Dạ dày không bị chính dịch vị phá huỷ chủ yếu nhờ",
+      "lua_chon": ["lớp chất nhầy phủ niêm mạc", "thành dạ dày không có tế bào sống", "dịch vị không chứa enzyme", "dạ dày luôn rỗng"],
+      "dap_an": "A",
+      "giai_thich": "Chất nhầy phủ bề mặt niêm mạc ngăn HCl và pepsin tiếp xúc trực tiếp với tế bào thành dạ dày."
+    }
+  ],
+  "goi_y_hoi": [
+    "Dạ dày tiêu hoá protein như thế nào?",
+    "Vì sao dạ dày không tự tiêu hoá chính nó?",
+    "Dạ dày 4 ngăn của bò hoạt động ra sao?"
+  ]
+}

@@ -1,0 +1,1091 @@
+<!doctype html>
+<html lang="vi" data-theme="sang">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CHEMISTRY</title>
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230f2b48' stroke-width='1.8' stroke-linejoin='round'%3E%3Cpath d='M12 2.5l8.2 4.75v9.5L12 21.5l-8.2-4.75v-9.5z'/%3E%3Cpath d='M12 6.6l4.7 2.7M7.3 14.7l4.7 2.7M7.3 9.3v5.4' stroke-width='1.3'/%3E%3C/svg%3E">
+  <!-- Chọn giao diện sáng/tối trước khi vẽ trang (tránh nháy màu): lựa chọn đã lưu, nếu không thì theo hệ điều hành -->
+  <script>
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem("giai-chuoi-giao-dien"); } catch (e) {}
+      if (t !== "sang" && t !== "toi") t = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "toi" : "sang";
+      document.documentElement.dataset.theme = t;
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+  <script>
+    // Màu lấy từ biến CSS → tự đổi theo giao diện sáng/tối (style.css)
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Be Vietnam Pro"', '-apple-system', '"Segoe UI"', 'Roboto', 'sans-serif'],
+            serif: ['"Be Vietnam Pro"', '-apple-system', '"Segoe UI"', 'Roboto', 'sans-serif'],
+            mono: ['"JetBrains Mono"', '"SFMono-Regular"', 'Consolas', 'monospace'],
+          },
+          colors: {
+            giay: 'var(--giay)', 'giay-lom': 'var(--giay-lom)', muc: 'var(--muc)', 'muc-2': 'var(--muc-2)', lang: 'var(--lang)',
+            chi: 'var(--chi)', 'chi-dam': 'var(--chi-dam)', nhan: 'var(--nhan)', 'nhan-lom': 'var(--nhan-lom)',
+            'ho-phach': 'var(--ho-phach)', gach: 'var(--gach)', lam: 'var(--lam)',
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="stylesheet" href="/static/style.css">
+  <!-- giao diện (theme): cấu hình từng theme + bộ áp theme (áp ngay trong <head>, không nháy) -->
+  <script src="/static/themes/default.js"></script>
+  <script src="/static/themes/sakura.js"></script>
+  <script src="/static/giao-dien.js"></script>
+</head>
+<body class="min-h-screen" data-muc-lon="" data-muc-hien="giai">
+  <script>
+    (function () { // mở thẳng một nhóm theo URL (không nháy trang chủ): ?bai=… / #muc-nhap… → Giải chuỗi, #muc-3d → 3D, #muc-co-che → Cơ chế
+      var h = location.hash.slice(1), m = "";
+      if (/[?&]bai=/.test(location.search) || /^(giai-chuoi|muc-nhap|muc-tuy-chon|muc-ket-qua|ket-qua)$/.test(h)) m = "giai";
+      else if (/^(mo-hinh-3d|muc-3d)$/.test(h)) m = "3d";
+      else if (/^(co-che|muc-co-che)$/.test(h)) m = "co-che";
+      else if (/^(tim-cau-tao|muc-tim-cau-tao|tim-chat|muc-tim-chat)$/.test(h)) m = "tim-cau-tao";
+      document.body.dataset.mucLon = m;
+      document.body.dataset.mucHien = m || "giai"; // nhóm dựng sẵn (kể cả khi đang ở trang chủ)
+    })();
+  </script>
+  <!-- Thông báo -->
+  <div id="toasts" class="fixed bottom-4 right-4 left-4 sm:left-auto z-50 flex flex-col gap-2 sm:w-96" aria-live="polite"></div>
+
+  <!-- THANH TRÊN (Awesomic Top Navigation) -->
+  <header class="thanh-tren">
+    <div class="khung flex items-center justify-between gap-3 sm:gap-4 h-16">
+      <div class="flex items-center gap-3 sm:gap-4 shrink-0">
+        <a href="/" class="flex items-center gap-1 shrink-0 no-underline logo-lien-ket" aria-label="chemistry: Trang chủ">
+          <span class="logo-chu">chemistry</span><span class="logo-dau-hai-cham">:</span>
+        </a>
+
+        <!-- Segmented Pill Toggle Chuyển Phân Hệ Hoá học ⇄ Sinh học (phong cách Claude Chat ⇄ Code) -->
+        <div class="segmented-pill-toggle" id="toggle-phan-he" role="tablist" aria-label="Chuyển đổi phân hệ Hoá học và Sinh học">
+          <div class="segmented-pill-glider" id="glider-phan-he" aria-hidden="true"></div>
+          <button type="button" class="segmented-pill-btn active" id="btn-toggle-hoa" role="tab" aria-selected="true" data-phan-he="hoa" title="Phân hệ Hoá học">
+            <span class="icon" aria-hidden="true">⚗️</span>
+            <span class="text">Hoá học</span>
+          </button>
+          <button type="button" class="segmented-pill-btn" id="btn-toggle-sinh" role="tab" aria-selected="false" data-phan-he="sinh" title="Phân hệ Sinh học">
+            <span class="icon" aria-hidden="true">🧬</span>
+            <span class="text">Sinh học</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Menu giữa kiểu Awesomic -->
+      <nav class="nav-awesomic hidden lg:flex items-center gap-5" aria-label="Điều hướng chính">
+        <button type="button" class="nav-link-awe" data-dieu-huong="giai">Chuỗi phản ứng</button>
+        <button type="button" class="nav-link-awe" data-dieu-huong="tim-cau-tao">Tìm cấu tạo</button>
+        <button type="button" class="nav-link-awe" data-dieu-huong="co-che">Cơ chế</button>
+        <button type="button" class="nav-link-awe" data-dieu-huong="3d">Mô hình 3D</button>
+        <a href="/hoa-hoc/phong-thi-nghiem" class="nav-link-awe nav-link-lab" title="Phòng thí nghiệm Hoá học ảo 3D">Phòng TN ảo ⚗️</a>
+        <a href="/hoa-hoc/hoa-ly" class="nav-link-awe">Hoá lý</a>
+        <button type="button" class="nav-link-awe" data-dieu-huong="tim-cau-tao">Tài liệu HSG</button>
+      </nav>
+
+      <!-- Cụm chức năng phải -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <a href="/hoa-hoc/phong-thi-nghiem" class="nav-lab-pill-mobile lg:hidden" title="Phòng thí nghiệm Hoá học ảo 3D" aria-label="Phòng thí nghiệm Hoá học ảo">
+          <span class="icon-lab" aria-hidden="true">⚗️</span>
+          <span class="chu-lab hidden min-[440px]:inline">Phòng TN</span>
+        </a>
+        <div id="khu-tai-khoan" class="khu-tai-khoan"></div>
+        <button type="button" class="btn-demo-pill hidden sm:inline-flex" data-dieu-huong="giai">Bắt đầu giải</button>
+        <button type="button" id="nut-che-do" class="nut-che-do" aria-label="Chuyển sang chế độ tối" title="Chế độ tối">
+          <svg class="bieu-tuong-trang" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
+          <svg class="bieu-tuong-mat-troi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        </button>
+        <button type="button" id="nut-ma-giao-dien" class="nut-k hidden sm:inline-flex" aria-haspopup="dialog" title="Nhập mã giao diện"><span class="nut-k-hoa" aria-hidden="true"></span>+K</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- TRANG CHỦ: Giao diện Awesomic (awesomic.com) -->
+  <section id="trang-chu" class="trang-chu" aria-label="Chọn công cụ">
+    <div class="khung khung-chinh-awesomic">
+      <!-- Visual Showcase Cards -->
+      <div class="luoi-the-lon">
+        <button type="button" class="the-lon the-lon-giai" data-chon-muc="giai">
+          <div class="the-lon-dau">
+            <span class="the-lon-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="4.5" cy="12" r="2.3"/><circle cx="19.5" cy="12" r="2.3"/><path d="M7 12h9.5M13.5 9l3 3-3 3"/></svg>
+            </span>
+            <span class="the-lon-tag">01 · CƠ BẢN ĐẾN NÂNG CAO</span>
+          </div>
+          <span class="the-lon-than">
+            <span class="the-lon-ten">Giải chuỗi phản ứng</span>
+            <span class="the-lon-mo-ta">Lời giải chi tiết từng nấc, điều kiện, xúc tác và ảnh cấu tạo ChemDraw.</span>
+          </span>
+          <div class="card-mini-preview">
+            <span class="card-preview-badge">A ➔ B ➔ C</span>
+            <span class="card-preview-badge">ChemDraw CDXML</span>
+            <span class="card-preview-badge">Từng nấc</span>
+          </div>
+          <span class="the-lon-trang-tri" aria-hidden="true"></span>
+        </button>
+
+        <button type="button" class="the-lon the-lon-green" data-chon-muc="tim-cau-tao">
+          <div class="the-lon-dau">
+            <span class="the-lon-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg>
+            </span>
+            <span class="the-lon-tag the-lon-tag-green">02 · ĐỀ DÀI HSG</span>
+          </div>
+          <span class="the-lon-than">
+            <span class="the-lon-ten">Tìm cấu tạo chất</span>
+            <span class="the-lon-mo-ta">Biện luận chất X, Y, Z từ đề dài THPT &amp; HSG với ma trận kiểm tra 100% dữ kiện.</span>
+          </span>
+          <div class="card-mini-preview">
+            <span class="card-preview-badge">Ma trận 100% OK</span>
+            <span class="card-preview-badge">Δ = 4</span>
+            <span class="card-preview-badge">HSG Quốc Gia</span>
+          </div>
+          <span class="the-lon-trang-tri" aria-hidden="true"></span>
+        </button>
+
+        <button type="button" class="the-lon the-lon-navy" data-chon-muc="co-che">
+          <div class="the-lon-dau">
+            <span class="the-lon-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 18c2.5-7.5 9-11.5 16-9.5"/><path d="M16.5 5l3.5 3.5-4.2 2.7"/><circle cx="4.6" cy="19.4" r="1.5"/></svg>
+            </span>
+            <span class="the-lon-tag the-lon-tag-navy">03 · BẢN CHẤT HOÁ HỌC</span>
+          </div>
+          <span class="the-lon-than">
+            <span class="the-lon-ten">Cơ chế phản ứng</span>
+            <span class="the-lon-mo-ta">Mũi tên cong chuyển dịch electron, chất trung gian carbocation &amp; gốc tự do.</span>
+          </span>
+          <div class="card-mini-preview">
+            <span class="card-preview-badge">Mũi tên cong</span>
+            <span class="card-preview-badge">SN1 / SN2</span>
+            <span class="card-preview-badge">Electrophil</span>
+          </div>
+          <span class="the-lon-trang-tri" aria-hidden="true"></span>
+        </button>
+
+        <button type="button" class="the-lon the-lon-dark" data-chon-muc="3d">
+          <div class="the-lon-dau">
+            <span class="the-lon-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8 20 7.4v9.2l-8 4.6-8-4.6V7.4z"/><path d="M4 7.4l8 4.6 8-4.6M12 12v9.2"/></svg>
+            </span>
+            <span class="the-lon-tag the-lon-tag-dark">04 · KHÔNG GIAN 3 CHIỀU</span>
+          </div>
+          <span class="the-lon-than">
+            <span class="the-lon-ten">Mô hình 3D phân tử</span>
+            <span class="the-lon-mo-ta">Dựng mô hình 3D tương tác từ SMILES, xoay 360°, đo góc &amp; khoảng cách liên kết.</span>
+          </span>
+          <div class="card-mini-preview">
+            <span class="card-preview-badge">3Dmol.js</span>
+            <span class="card-preview-badge">Ball &amp; Stick</span>
+            <span class="card-preview-badge">SMILES</span>
+          </div>
+          <span class="the-lon-trang-tri" aria-hidden="true"></span>
+        </button>
+      </div>
+
+      <!-- Showcase Banner: Lab Sinh học 3D -->
+      <div class="banner-lab-sinh-hoc">
+        <a href="/sinh-hoc" class="the-lab-ngang" title="Mở Phòng thí nghiệm ảo Sinh học 3D">
+          <div class="the-lab-trai">
+            <span class="the-lab-icon-box" aria-hidden="true">🧬</span>
+            <div class="the-lab-info">
+              <div class="the-lab-tags">
+                <span class="the-lab-tag">PHÒNG THÍ NGHIỆM ẢO</span>
+                <span class="the-lab-tag the-lab-tag-sub">GDPT 2018 · 3D INTERACTIVE</span>
+              </div>
+              <h2 class="the-lab-tieude">Phòng Lab Sinh học 3D</h2>
+              <p class="the-lab-mota">Mô hình 3D giải phẫu cơ thể người 360°, bóc tách cơ quan, chu kỳ tim, tuần hoàn máu &amp; Gia sư AI Bio-Tutor.</p>
+            </div>
+          </div>
+          <div class="the-lab-phai">
+            <span class="the-lab-cta">
+              <span>Khám phá ngay</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="the-lab-mui-ten" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Showcase Banner: Phòng thí nghiệm Hoá học ảo -->
+      <div class="banner-lab-sinh-hoc">
+        <a href="/hoa-hoc/phong-thi-nghiem" class="the-lab-ngang" title="Mở Phòng thí nghiệm Hoá học ảo 3D">
+          <div class="the-lab-trai">
+            <span class="the-lab-icon-box" aria-hidden="true">⚗️</span>
+            <div class="the-lab-info">
+              <div class="the-lab-tags">
+                <span class="the-lab-tag">PHÒNG THÍ NGHIỆM ẢO</span>
+                <span class="the-lab-tag the-lab-tag-sub">HOÁ HỌC · GDPT 2018</span>
+              </div>
+              <h2 class="the-lab-tieude">Phòng thí nghiệm Hoá học ảo</h2>
+              <p class="the-lab-mota">5 thí nghiệm 3D tương tác: an toàn phòng thí nghiệm, chuẩn độ acid – base, nhận biết ion, pin Galvani, điện phân dung dịch.</p>
+            </div>
+          </div>
+          <div class="the-lab-phai">
+            <span class="the-lab-cta">
+              <span>Vào thí nghiệm</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="the-lab-mui-ten" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Showcase Banner: Hoá lý -->
+      <div class="banner-lab-sinh-hoc">
+        <a href="/hoa-hoc/hoa-ly" class="the-lab-ngang" title="Mở Mục Hoá lý">
+          <div class="the-lab-trai">
+            <span class="the-lab-icon-box" aria-hidden="true">🌡️</span>
+            <div class="the-lab-info">
+              <div class="the-lab-tags">
+                <span class="the-lab-tag">HOÁ LÝ</span>
+                <span class="the-lab-tag the-lab-tag-sub">MÔ PHỎNG 2D · KÉO THẢ</span>
+              </div>
+              <h2 class="the-lab-tieude">Hoá lý</h2>
+              <p class="the-lab-mota">Mô phỏng nhiệt động học tương tác: chu trình nhiệt, đồ thị p–V và T–s, định luật I…</p>
+            </div>
+          </div>
+          <div class="the-lab-phai">
+            <span class="the-lab-cta">
+              <span>Vào Hoá lý</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="the-lab-mui-ten" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div id="khong-gian" class="khung bo-cuc khong-gian">
+    <!-- CỘT BÊN: mục lục 01–03 + tiến độ khi đang giải -->
+    <aside class="cot-ben" aria-label="Các bước">
+      <div class="cot-ben-dinh">
+        <p class="dem-ben"><span id="so-muc-ben">01</span><span class="text-lang"> / 06</span></p>
+        <!-- Mục lục dạng thư mục: 2 mục cha mở/đóng kiểu accordion (app.js khoiTaoNhomBen), bộ đếm vẫn theo bước con -->
+        <nav class="ds-muc-ben co-nhom" aria-label="Các bước">
+          <div class="nhom-ben mo co-buoc-dang" data-nhom="giai">
+            <button type="button" class="nut-nhom" id="nut-nhom-giai" aria-expanded="true" aria-controls="nhom-giai">
+              <svg class="thu-muc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="dong-lai" d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><path class="mo-ra" d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></svg><span class="ten-nhom">Giải chuỗi</span><span class="cham-dang" title="Bạn đang ở mục này"></span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+            </button>
+            <div class="vung-con" id="nhom-giai" role="group" aria-labelledby="nut-nhom-giai">
+              <div class="ds-con">
+                <a href="#muc-nhap" class="muc-ben dang" data-muc="muc-nhap" aria-current="step"><span class="cham-ben"></span><span class="so-ben">01</span><span>Nhập đề</span></a>
+                <a href="#muc-tuy-chon" class="muc-ben" data-muc="muc-tuy-chon"><span class="cham-ben"></span><span class="so-ben">02</span><span>Tuỳ chọn giải</span></a>
+                <a href="#muc-ket-qua" class="muc-ben" data-muc="muc-ket-qua"><span class="cham-ben"></span><span class="so-ben">03</span><span>Kết quả</span></a>
+              </div>
+            </div>
+          </div>
+          <div class="nhom-ben" data-nhom="3d">
+            <button type="button" class="nut-nhom" id="nut-nhom-3d" aria-expanded="false" aria-controls="nhom-3d">
+              <svg class="thu-muc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="dong-lai" d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><path class="mo-ra" d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></svg><span class="ten-nhom">Mô hình 3D</span><span class="cham-dang" title="Bạn đang ở mục này"></span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+            </button>
+            <div class="vung-con" id="nhom-3d" role="group" aria-labelledby="nut-nhom-3d">
+              <div class="ds-con">
+                <a href="#muc-3d" class="muc-ben" data-muc="muc-3d"><span class="cham-ben"></span><span class="so-ben">04</span><span>Mô hình 3D</span></a>
+              </div>
+            </div>
+          </div>
+          <div class="nhom-ben" data-nhom="co-che">
+            <button type="button" class="nut-nhom" id="nut-nhom-co-che" aria-expanded="false" aria-controls="nhom-co-che">
+              <svg class="thu-muc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="dong-lai" d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><path class="mo-ra" d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></svg><span class="ten-nhom">Cơ chế</span><span class="cham-dang" title="Bạn đang ở mục này"></span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+            </button>
+            <div class="vung-con" id="nhom-co-che" role="group" aria-labelledby="nut-nhom-co-che">
+              <div class="ds-con">
+                <a href="#muc-co-che" class="muc-ben" data-muc="muc-co-che"><span class="cham-ben"></span><span class="so-ben">05</span><span>Cơ chế phản ứng</span></a>
+              </div>
+            </div>
+          </div>
+          <div class="nhom-ben" data-nhom="tim-cau-tao">
+            <button type="button" class="nut-nhom" id="nut-nhom-tim-cau-tao" aria-expanded="false" aria-controls="nhom-tim-cau-tao">
+              <svg class="thu-muc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="dong-lai" d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><path class="mo-ra" d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></svg><span class="ten-nhom">Tìm chất</span><span class="cham-dang" title="Bạn đang ở mục này"></span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+            </button>
+            <div class="vung-con" id="nhom-tim-cau-tao" role="group" aria-labelledby="nut-nhom-tim-cau-tao">
+              <div class="ds-con">
+                <a href="#muc-tim-cau-tao" class="muc-ben" data-muc="muc-tim-cau-tao"><span class="cham-ben"></span><span class="so-ben">06</span><span>Tìm cấu tạo chất</span></a>
+              </div>
+            </div>
+          </div>
+          <div class="nhom-ben-ngoai">
+            <a href="/sinh-hoc" class="nut-lien-ket-ngoai" title="Mở Phòng thí nghiệm ảo Sinh học 3D">
+              <span class="icon-ngoai" aria-hidden="true">🧬</span>
+              <span class="ten-ngoai">Lab Sinh học 3D</span>
+              <svg class="mui-ten-ngoai ml-auto" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17L17 7M7 7h10v10"/></svg>
+            </a>
+            <a href="/hoa-hoc/phong-thi-nghiem" class="nut-lien-ket-ngoai" title="Mở Phòng thí nghiệm Hoá học ảo 3D">
+              <span class="icon-ngoai" aria-hidden="true">⚗️</span>
+              <span class="ten-ngoai">Phòng thí nghiệm ảo</span>
+              <svg class="mui-ten-ngoai ml-auto" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17L17 7M7 7h10v10"/></svg>
+            </a>
+          </div>
+        </nav>
+        <p class="ghi-chu-nho mt-8 hidden lg:block"><kbd>⌘</kbd>+<kbd>Enter</kbd> để giải nhanh</p>
+      </div>
+    </aside>
+
+    <main class="min-w-0 pb-16">
+      <div id="thanh-muc" class="thanh-muc">
+        <button type="button" id="nut-mini" class="nut-mini" title="Về trang chủ" aria-label="Về trang chủ">
+          <span class="nut-mini-icon" aria-hidden="true"></span><span class="nut-mini-ten"></span>
+        </button>
+        <nav class="buoc-ngang" data-cua-muc="giai" aria-label="Các bước giải chuỗi">
+          <a href="#muc-nhap" class="muc-ben" data-muc="muc-nhap"><span class="so-ben">01</span><span>Nhập đề</span></a>
+          <a href="#muc-tuy-chon" class="muc-ben" data-muc="muc-tuy-chon"><span class="so-ben">02</span><span>Tuỳ chọn</span></a>
+          <a href="#muc-ket-qua" class="muc-ben" data-muc="muc-ket-qua"><span class="so-ben">03</span><span>Kết quả</span></a>
+        </nav>
+        <div id="tien-do-ben" class="tien-do-ben hidden">
+          <p class="nhan-mono">Đang giải</p>
+          <p class="tien-do-ben-dong"><span id="giai-doan-ben">Phân tích</span> · <span id="dong-ho-ben">0.0 s</span></p>
+          <div class="thanh-tien-do"><span id="thanh-tien-do-ben"></span></div>
+        </div>
+      </div>
+      <!-- MỞ ĐẦU -->
+      <section class="pt-8 sm:pt-10 pb-8" data-thuoc-muc="giai">
+        <p class="chu-mo">Công cụ · Giải chuỗi phản ứng</p>
+        <h1 class="tieu-de-lon">Giải chuỗi phản ứng hữu cơ</h1>
+        <p class="doan-dan">
+          Nhập chuỗi bằng văn bản hoặc hình ảnh — app <b>tra cứu PubChem và Wikipedia</b>, giải bằng AI,
+          <em class="nghieng-serif">kiểm tra cân bằng bằng RDKit</em>, rồi vẽ cấu tạo từng chất và xuất ảnh đáp án.
+        </p>
+        <div id="trang-thai-he-thong" class="dong-su-kien"></div>
+      </section>
+
+      <form id="form-giai" data-thuoc-muc="giai" novalidate>
+        <!-- 01 NHẬP ĐỀ -->
+        <section id="muc-nhap" class="muc">
+          <div class="duong-rang-cua"></div>
+          <p class="so-muc">01</p>
+          <h2 class="tieu-de-muc">Nhập đề bài</h2>
+          <p class="mo-ta-muc">Chọn cách nhập: gõ chuỗi, tải ảnh chụp đề, hoặc lấy một chuỗi mẫu.</p>
+
+          <div class="luoi-cach-nhap" role="tablist" aria-label="Cách nhập đề">
+            <button type="button" class="the-chon dang" role="tab" aria-selected="true" data-cach="van-ban" id="tab-van-ban" aria-controls="khung-van-ban">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7V5h16v2M9 19h6M12 5v14"/></svg>
+              <span class="the-chon-ten">Văn bản</span>
+              <span class="the-chon-mo-ta">Gõ chuỗi, ghi tác nhân trên mũi tên</span>
+            </button>
+            <button type="button" class="the-chon" role="tab" aria-selected="false" data-cach="hinh-anh" id="tab-hinh-anh" aria-controls="khung-hinh-anh">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg>
+              <span class="the-chon-ten">Hình ảnh</span>
+              <span class="the-chon-mo-ta">Tải, kéo-thả hoặc dán ảnh đề</span>
+            </button>
+            <button type="button" class="the-chon" role="tab" aria-selected="false" data-cach="mau" id="tab-mau" aria-controls="khung-mau">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+              <span class="the-chon-ten">Chuỗi mẫu</span>
+              <span class="the-chon-mo-ta">5 chuỗi có sẵn để thử</span>
+            </button>
+          </div>
+
+          <!-- Văn bản -->
+          <div id="khung-van-ban" class="khung-nhap" role="tabpanel" aria-labelledby="tab-van-ban">
+            <div class="flex flex-wrap items-end justify-between gap-2 mb-2">
+              <label for="chuoi" class="nhan-mono">Chuỗi phản ứng</label>
+              <div class="flex gap-2">
+                <button type="button" id="nut-mui-ten" class="btn btn-sm whitespace-nowrap" title="Chèn mũi tên tại vị trí con trỏ">Chèn →</button>
+                <button type="button" id="nut-tac-nhan" class="btn btn-sm whitespace-nowrap" title="Chèn mũi tên kèm tác nhân/điều kiện, vd →[HBr]">Chèn →[tác nhân]</button>
+              </div>
+            </div>
+            <textarea id="chuoi" rows="4" class="o-nhap o-nhap-mono" placeholder="Ví dụ: CH4 → C2H2 → CH3CHO → C2H5OH → CH3COOH → CH3COOC2H5&#10;Có chất ẩn: C2H2 → X → C2H5OH → Y&#10;Tác nhân + CTPT: CH2=CH–CH3 →[HBr] A →[NaOH, t°] B →[CuO, t°] C (C3H6O)"></textarea>
+            <p class="ghi-chu-nho mt-2">Tác nhân gõ dạng <code>→[HBr]</code>, <code>-(HBr)-&gt;</code> hoặc <code>--HBr--&gt;</code>; CTPT đề cho viết trong ngoặc sau kí hiệu: <code>C (C3H6O)</code>.</p>
+          </div>
+
+          <!-- Hình ảnh -->
+          <div id="khung-hinh-anh" class="khung-nhap hidden" role="tabpanel" aria-labelledby="tab-hinh-anh">
+            <div id="vung-anh" class="vung-anh vung-anh-lon">
+              <input type="file" id="file-anh" accept="image/*" class="hidden">
+              <div id="anh-trong" class="flex flex-col items-center text-center gap-3 py-6">
+                <svg class="w-10 h-10 text-chi-dam" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 4v12m0-12l-4 4m4-4l4 4"/></svg>
+                <button type="button" id="nut-tai-anh" class="btn">Chọn ảnh đề</button>
+                <span class="ghi-chu-nho">hoặc kéo-thả ảnh vào đây · dán bằng <kbd>⌘</kbd>+<kbd>V</kbd> · PNG/JPG tối đa 10 MB</span>
+              </div>
+              <div id="anh-xem" class="hidden items-center gap-4">
+                <img id="anh-thu-nho" class="h-28 w-auto max-w-[45%] rounded-lg border border-chi bg-white object-contain" alt="Ảnh đề">
+                <div class="min-w-0 flex-1">
+                  <p id="ten-anh" class="text-sm font-medium truncate"></p>
+                  <p class="ghi-chu-nho">AI sẽ đọc đề từ ảnh này</p>
+                </div>
+                <button type="button" id="nut-bo-anh" class="btn btn-sm" aria-label="Bỏ ảnh">Bỏ ảnh</button>
+              </div>
+            </div>
+            <label for="ghi-chu-anh" class="nhan-mono block mt-4 mb-2">Ghi chú thêm cho AI <span class="normal-case tracking-normal font-sans">(không bắt buộc)</span></label>
+            <input id="ghi-chu-anh" class="o-nhap" placeholder="Ví dụ: chỉ giải câu b; C có CTPT C3H6O">
+          </div>
+
+          <!-- Chuỗi mẫu -->
+          <div id="khung-mau" class="khung-nhap hidden" role="tabpanel" aria-labelledby="tab-mau">
+            <div id="chuoi-mau" class="luoi-mau"></div>
+          </div>
+        </section>
+
+        <!-- 02 TUỲ CHỌN GIẢI -->
+        <section id="muc-tuy-chon" class="muc">
+          <div class="duong-rang-cua"></div>
+          <p class="so-muc">02</p>
+          <h2 class="tieu-de-muc">Tuỳ chọn giải</h2>
+          <p class="mo-ta-muc">Chọn mức độ đề và cách giải, rồi bấm <b>Giải chuỗi</b>.</p>
+
+          <div class="luoi-tuy-chon">
+            <!-- Card 1: Mức độ đề & Tra cứu -->
+            <fieldset class="the the-tuy-chon">
+              <legend class="nhan-mono">
+                <span>Mức độ đề</span>
+                <span class="hop-meo-cha">
+                  <button type="button" class="nut-meo" aria-label="Giải thích mức độ đề">?</button>
+                  <span class="hop-meo" role="tooltip">Tự động: AI phân loại đề rồi chọn mô hình. Phân loại sai thì chọn tay. HSG suy luận sâu hơn nhưng chậm hơn.</span>
+                </span>
+              </legend>
+
+              <div class="phan-doan mt-3">
+                <label><input type="radio" name="muc-do" value="" checked><span>Tự động</span></label>
+                <label><input type="radio" name="muc-do" value="trung_binh"><span>Trung bình</span></label>
+                <label><input type="radio" name="muc-do" value="hsg" id="de-kho"><span>HSG</span></label>
+              </div>
+
+              <!-- Thanh Mức độ thông minh -->
+              <div id="khung-thong-minh" class="khung-thong-minh tu-dong mt-3.5">
+                <div class="flex items-center justify-between gap-2">
+                  <div class="flex items-center">
+                    <span class="nhan-mono">Mức thông minh</span>
+                    <span class="hop-meo-cha">
+                      <button type="button" class="nut-meo" aria-label="Giải thích mức thông minh">?</button>
+                      <span class="hop-meo" role="tooltip">Bật 'Theo độ khó' thì mức này tự chỉnh theo đề. Kéo thanh để tự chọn.</span>
+                    </span>
+                  </div>
+                  <label class="ghi-chu-nho tm-tu-dong flex items-center gap-1.5 cursor-pointer">
+                    <input type="checkbox" id="tm-tu-dong" checked>
+                    <span>Theo độ khó</span>
+                  </label>
+                </div>
+                <input type="range" id="thanh-thong-minh" class="thanh-tm mt-2" min="0" max="3" step="1" value="1"
+                       aria-label="Mức độ thông minh" aria-describedby="tm-uoc-tinh">
+                <div class="nhan-tm" aria-hidden="true">
+                  <span data-i="0">Nhanh</span>
+                  <span data-i="1">Cân bằng</span>
+                  <span data-i="2">Kỹ</span>
+                  <span data-i="3" id="tm-toi-da">Tối đa</span>
+                </div>
+                <p id="tm-uoc-tinh" class="ghi-chu-nho mt-1 text-xs" aria-live="polite"></p>
+              </div>
+
+              <div class="duong-ngan-nhe"></div>
+
+              <!-- Các toggle điều khiển -->
+              <div class="space-y-2">
+                <!-- Tra cứu tài liệu khoa học -->
+                <div class="hang-tuy-chon">
+                  <div class="flex items-center">
+                    <label for="tra-cuu-tl" class="nhan-tuy-chon cursor-pointer">Tra cứu tài liệu khoa học</label>
+                    <span class="hop-meo-cha">
+                      <button type="button" class="nut-meo" aria-label="Giải thích tra cứu tài liệu">?</button>
+                      <span class="hop-meo" role="tooltip">Tự bật ở mức Kỹ, Tối đa hoặc khi đề có DOI.</span>
+                    </span>
+                    <small id="tl-ghi-chu" class="hidden"></small>
+                  </div>
+                  <label class="cong-tac cursor-pointer" for="tra-cuu-tl">
+                    <input type="checkbox" id="tra-cuu-tl">
+                    <span class="ranh"><span class="nut-tron"></span></span>
+                  </label>
+                </div>
+                <input type="file" id="file-pdf-bai" accept="application/pdf,.pdf" class="hidden">
+
+                <!-- Dùng Claude (kèm badge nhỏ admin) -->
+                <div id="khung-dung-claude" class="hang-tuy-chon" hidden>
+                  <div class="flex items-center gap-1.5">
+                    <label for="dung-claude" class="nhan-tuy-chon cursor-pointer"><span id="nhan-dung-claude">Dùng Claude</span></label>
+                    <span id="luot-claude" class="huy-hieu-admin">admin</span>
+                  </div>
+                  <label class="cong-tac cursor-pointer" for="dung-claude">
+                    <input type="checkbox" id="dung-claude">
+                    <span class="ranh"><span class="nut-tron"></span></span>
+                  </label>
+                </div>
+
+                <!-- Hiện Chrome khi tra cứu -->
+                <div class="hang-tuy-chon">
+                  <div class="flex items-center">
+                    <label for="hien-chrome" class="nhan-tuy-chon cursor-pointer">Hiện Chrome khi tra cứu</label>
+                    <span class="hop-meo-cha">
+                      <button type="button" class="nut-meo" aria-label="Giải thích hiện Chrome">?</button>
+                      <span class="hop-meo" role="tooltip">Bật để xem Chrome mở Wikipedia/PubChem. Tắt thì chạy ẩn.</span>
+                    </span>
+                  </div>
+                  <label class="cong-tac cursor-pointer" for="hien-chrome">
+                    <input type="checkbox" id="hien-chrome">
+                    <span class="ranh"><span class="nut-tron"></span></span>
+                  </label>
+                </div>
+              </div>
+            </fieldset>
+
+            <!-- Card 2: Lời giải -->
+            <fieldset class="the the-tuy-chon">
+              <legend class="nhan-mono">
+                <span>Lời giải</span>
+                <span class="hop-meo-cha">
+                  <button type="button" class="nut-meo" aria-label="Giải thích lựa chọn lời giải">?</button>
+                  <span class="hop-meo" role="tooltip">
+                    Đề đã có lời giải thì trả ngay, không tốn lượt; dùng key Gemini của người dùng nếu có, chưa có thì dùng key chủ app. <a href="/cai-dat#muc-key" class="lien-ket">Cài đặt</a>
+                  </span>
+                </span>
+              </legend>
+
+              <div class="phan-doan chon-ai mt-3" role="radiogroup" aria-label="AI giải bài">
+                <label id="lua-ai-rieng" hidden><input type="radio" name="nguon-giai" value="ai_rieng"><span>AI Riêng</span></label>
+                <label><input type="radio" name="nguon-giai" value="ai" checked><span>Tự động</span></label>
+                <label><input type="radio" name="nguon-giai" value="gemini"><span>Gemini</span></label>
+                <label id="lua-chatgpt" hidden><input type="radio" name="nguon-giai" value="openai"><span>ChatGPT</span></label>
+                <label><input type="radio" name="nguon-giai" value="demo" id="che-do-demo"><span>Demo</span></label>
+              </div>
+
+              <p id="ghi-chu-chon-ai" class="ghi-chu-nho mt-3">Lần lượt các AI theo thứ tự admin đặt, lỗi thì chuyển AI kế.</p>
+            </fieldset>
+          </div>
+
+          <!-- Mục Ví dụ & cách hoạt động (thu gọn, mặc định đóng, đặt dưới cùng) -->
+          <details class="the the-vd-hoat-dong mt-3">
+            <summary class="flex items-center justify-between cursor-pointer select-none py-2.5 px-4 font-mono text-xs tracking-wider uppercase text-lang">
+              <span class="flex items-center gap-2 font-medium">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                Ví dụ &amp; cách hoạt động
+              </span>
+              <span class="mui-ten-mo text-xs transition-transform duration-200">▾</span>
+            </summary>
+            <div class="px-4 pb-3.5 pt-2 border-t border-[var(--chi)]">
+              <ul class="ds-vd-hd space-y-1.5 text-xs text-muc-2">
+                <li class="flex items-baseline gap-2"><span class="cham-nho">·</span><span><b>Mức độ thông minh:</b> Dễ → Nhanh · Trung bình → Cân bằng · HSG → Kỹ</span></li>
+                <li class="flex items-baseline gap-2"><span class="cham-nho">·</span><span><b>Thứ tự AI ở chế độ Tự động:</b> Claude → Gemini → ChatGPT</span></li>
+                <li class="flex items-baseline gap-2"><span class="cham-nho">·</span><span><b>HSG:</b> Tra tối đa 14 trang web</span></li>
+                <li class="flex items-baseline gap-2"><span class="cham-nho">·</span><span><b>Demo:</b> Có 5 chuỗi mẫu</span></li>
+              </ul>
+            </div>
+          </details>
+
+          <!-- Thanh dưới cùng: nút Giải chuỗi, badge trạng thái key, tóm tắt nhập cùng hàng -->
+          <div class="flex flex-wrap items-center gap-3 mt-4">
+            <button type="submit" id="nut-giai" class="btn btn-primary btn-lon">
+              <span class="nhan">Giải chuỗi</span>
+              <svg class="mui-ten-nut w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              <span class="quay hidden"></span>
+            </button>
+            <div id="trang-thai-key" class="trang-thai-key hidden" aria-live="polite"></div>
+            <p id="tom-tat-nhap" class="ghi-chu-nho text-lang"></p>
+          </div>
+        </section>
+      </form>
+
+      <!-- 03 KẾT QUẢ -->
+      <section id="muc-ket-qua" class="muc" data-thuoc-muc="giai">
+        <div class="duong-rang-cua"></div>
+        <p class="so-muc">03</p>
+        <h2 class="tieu-de-muc">Kết quả</h2>
+
+        <!-- Tiến trình -->
+        <div id="the-tien-trinh" class="the p-5 sm:p-6 mt-5 hidden">
+          <div class="flex items-baseline justify-between mb-4">
+            <div>
+              <p class="nhan-mono">Tiến trình <span id="nhan-muc-do-tt" class="huy-hieu nhan-muc-do" hidden></span></p>
+              <p class="dem-giai-doan"><span id="so-giai-doan">01</span><span class="text-lang"> / 06</span></p>
+            </div>
+            <span id="dong-ho" class="font-mono text-xs text-lang">0.0 s</span>
+          </div>
+          <ol id="cac-buoc-tien-trinh" class="buoc-tien-trinh"></ol>
+          <div id="chuoi-tam" class="chuoi-tam hidden" aria-live="polite"></div>
+          <div id="nhat-ky" class="nhat-ky"></div>
+        </div>
+
+        <div id="cho-ket-qua" class="the the-trong p-8 mt-5 min-h-[260px] flex flex-col items-center justify-center text-center gap-4">
+          <svg class="w-16 h-16 text-chi-dam" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+            <path d="M32 6l22.5 13v26L32 58 9.5 45V19z"/><path d="M32 14.5l15.2 8.8M16.8 40.7L32 49.5M16.8 23.3v17.4" stroke-width="1.2"/>
+          </svg>
+          <p class="tieu-de-the">Chưa có kết quả</p>
+          <p class="text-muc-2 max-w-md text-[15px]">Nhập đề ở mục <b class="text-nhan">01</b>, chọn tuỳ chọn ở mục <b class="text-nhan">02</b> rồi bấm <b class="text-nhan">Giải chuỗi</b>. Ảnh đáp án và lời giải từng bước sẽ hiện ở đây.</p>
+        </div>
+
+        <div id="ket-qua" class="hidden flex flex-col gap-6 mt-5">
+          <div class="the the-nhan p-4 sm:p-6">
+            <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
+              <div>
+                <p class="nhan-mono">Ảnh đáp án <span id="nhan-muc-do-kq" class="huy-hieu nhan-muc-do" hidden></span></p>
+                <p id="mo-hinh" class="ghi-chu-nho mt-1"></p>
+                <p id="nang-muc" class="ghi-chu-nho mt-1" hidden></p>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <a id="nut-tai-png" class="btn btn-sm" href="#" download>
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 4v11m0 0l-4-4m4 4l4-4M5 20h14"/></svg>Tải PNG</a>
+                <a id="nut-tai-zip" class="btn btn-sm" href="#" download>
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 4v11m0 0l-4-4m4 4l4-4M5 20h14"/></svg>Tải ZIP</a>
+                <button id="nut-chemdraw" class="btn btn-sm btn-primary" type="button">Mở bằng ChemDraw</button>
+                <button id="nut-bao-sai" class="btn btn-sm" type="button" title="Báo cho giáo viên nếu AI giải sai">Báo sai</button>
+              </div>
+            </div>
+            <div id="canh-bao" class="hop-canh-bao hidden mb-4"></div>
+            <div class="relative">
+              <a id="lien-ket-anh" href="#" target="_blank" rel="noopener" class="khung-anh" title="Bấm để xem ảnh đầy đủ">
+                <img id="anh-dap-an" class="w-full h-auto" alt="Ảnh đáp án">
+              </a>
+              <a id="nut-tai-anh-goc" class="btn btn-sm nut-tai-goc" href="#" download title="Tải ảnh đáp án (PNG)">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 4v11m0 0l-4-4m4 4l4-4M5 20h14"/></svg>Tải ảnh</a>
+            </div>
+          </div>
+
+          <div class="the p-4 sm:p-6">
+            <div class="flex flex-wrap items-end justify-between mb-3 gap-3">
+              <div>
+                <p class="nhan-mono">Lời giải</p>
+                <h3 class="tieu-de-the">Sơ đồ chuỗi</h3>
+                <p id="thong-tin-giai" class="ghi-chu-nho mt-1"></p>
+              </div>
+              <button id="nut-mo-het" type="button" class="btn btn-sm hidden">Mở tất cả</button>
+            </div>
+            <div id="so-do-chuoi" class="so-do-chuoi"></div>
+            <div id="khoi-luu-y" class="mt-5 hidden"><p class="nhan-mono">Lưu ý</p><ul id="luu-y" class="ds-luu-y mt-2"></ul></div>
+            <div id="khoi-dap-an" class="hop-dap-an mt-4 hidden"><span class="nhan-mono">Đáp án</span><p id="dap-an" class="mt-1"></p></div>
+            <div id="khoi-ai-rieng" class="khoi-ai-rieng mt-4 hidden" aria-live="polite"></div>
+            <div class="mt-5">
+              <button id="nut-pt" type="button" class="btn btn-sm"><span class="nhan">Xem phương trình chi tiết</span><span class="quay hidden"></span></button>
+              <ol id="pt-chi-tiet" class="ds-pt mt-3 hidden"></ol>
+            </div>
+            <div id="cac-buoc" class="hidden"></div>
+          </div>
+
+          <div id="khoi-chat-an" class="the p-4 sm:p-6 hidden">
+            <p class="nhan-mono">Suy luận</p>
+            <h3 class="tieu-de-the mb-3">Các chất ẩn</h3>
+            <div class="overflow-x-auto"><table class="bang w-full"><thead><tr><th>Kí hiệu</th><th>Công thức</th><th>CTPT</th><th>Tên</th><th>Cấu tạo</th></tr></thead><tbody id="bang-chat-an"></tbody></table></div>
+          </div>
+
+          <div class="the p-4 sm:p-6">
+            <div id="ghi-chu" class="hidden mb-5"><p class="nhan-mono">Ghi chú</p><p class="noi-dung-ghi-chu text-muc-2 text-[15px] mt-1"></p></div>
+            <p class="nhan-mono mb-2">Nguồn tham khảo</p>
+            <ul id="nguon" class="ds-nguon"></ul>
+            <p id="nguon-ghi-chu" class="ghi-chu-nho mt-2 hidden">Chỉ dùng nguồn hợp pháp. Bài chỉ có tóm tắt: nếu bạn có quyền đọc bản đầy đủ (vd qua thư viện
+              trường), bấm <b>Tải lên PDF của bạn</b> để giải lại dựa trên toàn văn – file chỉ dùng cho lượt giải đó, không lưu, không chia sẻ.</p>
+            <p class="mt-5 nghieng-serif text-nhan" id="chan-trang">Lời giải do AI tạo – vui lòng kiểm tra lại</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 04 MÔ HÌNH 3D -->
+      <section id="muc-3d" class="muc" data-thuoc-muc="3d">
+        <div class="duong-rang-cua"></div>
+        <p class="so-muc">04</p>
+        <h2 class="tieu-de-muc">Mô hình 3D</h2>
+        <p class="mo-ta-muc">Nhập tên, công thức hoặc SMILES — hoặc ảnh — của <b>một chất</b>. App tra PubChem (AI hỗ trợ đọc tên tiếng Việt,
+          công thức thu gọn, ảnh) và dựng cấu dạng 3D để xoay, phóng to, tải về.</p>
+
+        <form id="form-3d" novalidate>
+          <div class="luoi-cach-nhap luoi-2" role="tablist" aria-label="Cách nhập chất cho mô hình 3D">
+            <button type="button" class="the-chon dang" role="tab" aria-selected="true" data-cach3d="van-ban" id="tab-3d-van-ban" aria-controls="khung-3d-van-ban">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7V5h16v2M9 19h6M12 5v14"/></svg>
+              <span class="the-chon-ten">Văn bản</span>
+              <span class="the-chon-mo-ta">Tên (Việt/Anh), công thức hoặc SMILES</span>
+            </button>
+            <button type="button" class="the-chon" role="tab" aria-selected="false" data-cach3d="hinh-anh" id="tab-3d-hinh-anh" aria-controls="khung-3d-hinh-anh">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg>
+              <span class="the-chon-ten">Hình ảnh</span>
+              <span class="the-chon-mo-ta">Ảnh công thức cấu tạo hoặc tên chất</span>
+            </button>
+          </div>
+
+          <div id="khung-3d-van-ban" class="khung-nhap" role="tabpanel" aria-labelledby="tab-3d-van-ban">
+            <label for="o-3d" class="nhan-mono">Chất cần dựng 3D</label>
+            <input id="o-3d" class="o-nhap mt-2" autocomplete="off" placeholder="Ví dụ: ethanol · axit axetic · CH3COOC2H5 · C6H5COOH · CC(=O)OCC">
+            <div id="goi-y-3d" class="flex flex-wrap gap-2 mt-3"></div>
+          </div>
+
+          <div id="khung-3d-hinh-anh" class="khung-nhap hidden" role="tabpanel" aria-labelledby="tab-3d-hinh-anh">
+            <div id="vung-anh-3d" class="vung-anh vung-anh-lon">
+              <input type="file" id="file-anh-3d" accept="image/*" class="hidden">
+              <div id="anh-3d-trong" class="flex flex-col items-center text-center gap-3 py-6">
+                <svg class="w-10 h-10 text-chi-dam" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 4v12m0-12l-4 4m4-4l4 4"/></svg>
+                <button type="button" id="nut-tai-anh-3d" class="btn">Chọn ảnh chất</button>
+                <span class="ghi-chu-nho">hoặc kéo-thả / dán (<kbd>⌘</kbd>+<kbd>V</kbd>) ảnh vào mục này · AI sẽ đọc ra chất</span>
+              </div>
+              <div id="anh-3d-xem" class="hidden items-center gap-4">
+                <img id="anh-3d-thu-nho" class="h-28 w-auto max-w-[45%] rounded-lg border border-chi bg-white object-contain" alt="Ảnh chất">
+                <div class="min-w-0 flex-1">
+                  <p id="ten-anh-3d" class="text-sm font-medium truncate"></p>
+                  <p class="ghi-chu-nho">AI sẽ nhận diện chất trong ảnh</p>
+                </div>
+                <button type="button" id="nut-bo-anh-3d" class="btn btn-sm">Bỏ ảnh</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-4 mt-5">
+            <button type="submit" id="nut-3d" class="btn btn-primary btn-lon">
+              <span class="nhan">Dựng mô hình 3D</span>
+              <svg class="mui-ten-nut w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              <span class="quay hidden"></span>
+            </button>
+            <p id="trang-thai-3d" class="ghi-chu-nho"></p>
+          </div>
+        </form>
+
+        <div id="ket-qua-3d" class="the the-nhan mt-6 hidden overflow-hidden">
+          <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px]">
+            <div class="p-4 sm:p-5 border-b lg:border-b-0 lg:border-r border-chi min-w-0">
+              <div class="thanh-dieu-khien-3d">
+                <div class="nhom-nut-3d">
+                  <div class="phan-doan phan-doan-nho" role="radiogroup" aria-label="Kiểu hiển thị">
+                    <label><input type="radio" name="kieu-3d" value="bong-que" checked><span>Bóng-que</span></label>
+                    <label><input type="radio" name="kieu-3d" value="que"><span>Que</span></label>
+                    <label><input type="radio" name="kieu-3d" value="dac"><span>Đặc</span></label>
+                    <label><input type="radio" name="kieu-3d" value="day"><span>Dây</span></label>
+                  </div>
+                  <select id="be-mat-3d" class="select-3d" aria-label="Bề mặt phân tử" title="Bề mặt phân tử">
+                    <option value="none">Tắt bề mặt</option>
+                    <option value="vdw">Bề mặt VDW</option>
+                    <option value="sas">Dung môi (SAS)</option>
+                    <option value="ses">Phân tử (SES)</option>
+                  </select>
+                  <select id="mau-3d" class="select-3d" aria-label="Bảng màu" title="Bảng màu nguyên tố">
+                    <option value="Jmol">Màu Jmol</option>
+                    <option value="carbon-toi">Carbon tối</option>
+                    <option value="rasmol">Rasmol</option>
+                  </select>
+                </div>
+                <div class="nhom-nut-3d">
+                  <label class="cong-tac cong-tac-nho"><input type="checkbox" id="nhan-3d"><span class="ranh"><span class="nut-tron"></span></span><span>Nhãn</span></label>
+                  <label class="cong-tac cong-tac-nho"><input type="checkbox" id="xoay-3d"><span class="ranh"><span class="nut-tron"></span></span><span>Tự xoay</span></label>
+                  <button type="button" id="nut-goc-3d" class="btn btn-sm" title="Đặt lại góc nhìn" aria-label="Đặt lại góc nhìn">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></svg>
+                  </button>
+                  <button type="button" id="nut-toan-man-hinh-3d" class="btn btn-sm" title="Toàn màn hình" aria-label="Toàn màn hình">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Thanh công cụ đo khoảng cách / góc liên kết -->
+              <div class="thanh-cong-cu-do-3d">
+                <button type="button" id="nut-do-kc-3d" class="nut-cong-cu-3d" title="Đo khoảng cách giữa 2 nguyên tử (nhấp chọn 2 nguyên tử)">📏 Đo khoảng cách</button>
+                <button type="button" id="nut-do-goc-3d" class="nut-cong-cu-3d" title="Đo góc liên kết (nhấp chọn 3 nguyên tử theo thứ tự)">📐 Đo góc liên kết</button>
+                <button type="button" id="nut-xoa-do-3d" class="nut-cong-cu-3d hidden text-gach" title="Xoá kết quả đo">✕ Xoá đo</button>
+                <div id="thong-bao-do-3d" class="thong-bao-do-3d">
+                  <span class="text-lang">Rê chuột xem nguyên tử · Bấm nút để đo liên kết</span>
+                </div>
+              </div>
+
+              <div id="khung-3d-wrapper" class="khung-3d-wrapper">
+                <div id="badge-hover-3d" class="badge-hover-3d hidden"></div>
+                <div id="khung-3d" class="khung-3d" aria-label="Mô hình 3D – kéo để xoay"></div>
+              </div>
+              <p class="ghi-chu-nho mt-2">Kéo để xoay · cuộn chuột hoặc chụm hai ngón để phóng to · chuột phải (hoặc Ctrl+kéo) để dịch chuyển.</p>
+            </div>
+            <div class="p-4 sm:p-5 flex flex-col gap-3 min-w-0">
+              <p class="nhan-mono">Thông tin chất</p>
+              <h3 id="ten-3d" class="tieu-de-the"></h3>
+              <p id="ten-en-3d" class="ghi-chu-nho -mt-2"></p>
+              <img id="anh-2d-3d" class="anh-phan-tu max-h-28 w-auto max-w-full self-start" alt="Công thức khung">
+              <dl class="ds-thong-tin">
+                <dt>CTPT</dt><dd id="ct-3d"></dd>
+                <dt>M</dt><dd id="m-3d"></dd>
+                <dt>IUPAC</dt><dd id="iupac-3d"></dd>
+                <dt>SMILES</dt><dd id="smiles-3d" class="font-mono text-[12px] break-all"></dd>
+                <dt>PubChem</dt><dd id="pubchem-3d"></dd>
+                <dt>Nguồn 3D</dt><dd id="nguon-3d"></dd>
+                <dt>Nhận diện</dt><dd id="cach-3d"></dd>
+              </dl>
+              <div id="canh-bao-3d" class="hop-canh-bao hidden"></div>
+              <div class="flex flex-wrap gap-2 pt-1">
+                <button type="button" id="tai-png-3d" class="btn btn-sm">Tải PNG</button>
+                <button type="button" id="tai-png-hd-3d" class="btn btn-sm font-semibold" title="Tải ảnh PNG độ phân giải cao (2560px) cực nét cho bài giảng/báo cáo">Tải PNG 4K</button>
+                <button type="button" id="tai-sdf-3d" class="btn btn-sm">Tải .sdf (3D)</button>
+                <button type="button" id="tai-xyz-3d" class="btn btn-sm">Tải .xyz</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 05 CƠ CHẾ PHẢN ỨNG -->
+      <section id="muc-co-che" class="muc" data-thuoc-muc="co-che">
+        <div class="duong-rang-cua"></div>
+        <p class="so-muc">05</p>
+        <h2 class="tieu-de-muc">Cơ chế phản ứng</h2>
+        <p class="mo-ta-muc">Nhập một phản ứng – app vẽ cơ chế với <b>mũi tên cong</b> (đẩy electron), xuất PNG, SVG và ChemDraw.
+          Có thể bấm <b>Cơ chế</b> cạnh một phương trình ở mục 03.</p>
+
+        <div class="khung-nhap">
+          <label for="o-co-che" class="nhan-mono">Phản ứng</label>
+          <textarea id="o-co-che" rows="2" class="o-nhap o-nhap-mono mt-2" maxlength="600"
+            placeholder="Ví dụ: CH3CH2Br + OH- → CH3CH2OH + Br- · propen + HBr · este hóa axit axetic với etanol · SMILES: CCBr.[OH-]"></textarea>
+          <!-- nhập đề bằng HÌNH ẢNH (tối đa 4 ảnh): chọn tệp, chụp bằng camera (điện thoại), kéo thả, dán ⌘V – nén ~1600 px trước khi gửi -->
+          <label class="cong-tac mt-3">
+            <input type="checkbox" id="tra-cuu-tl-co-che">
+            <span class="ranh"><span class="nut-tron"></span></span>
+            <span>Tra cứu tài liệu khoa học <small class="ghi-chu-nho">(tự bật khi có DOI trong ô Phản ứng)</small></span>
+          </label>
+          <div id="vung-anh-co-che" class="vung-anh mt-3">
+            <input type="file" id="file-anh-co-che" accept="image/*,.heic,.heif" multiple class="hidden">
+            <input type="file" id="chup-anh-co-che" accept="image/*" capture="environment" class="hidden">
+            <div class="flex flex-wrap items-center gap-2">
+              <button type="button" id="nut-tai-anh-co-che" class="btn btn-sm">Tải ảnh đề</button>
+              <button type="button" id="nut-chup-anh-co-che" class="btn btn-sm hidden">Chụp ảnh</button>
+              <button type="button" id="nut-doc-anh-co-che" class="btn btn-sm btn-primary hidden">
+                <span class="nhan">Đọc ảnh đề</span><span class="quay hidden"></span>
+              </button>
+              <span class="ghi-chu-nho">hoặc kéo thả / dán (⌘V) ảnh vào đây · tối đa 4 ảnh · JPG, PNG, WEBP, HEIC · có thể gõ thêm chữ, vd “vẽ cơ chế câu 2”</span>
+            </div>
+            <div id="ds-anh-co-che" class="ds-anh-co-che mt-3 hidden"></div>
+          </div>
+          <div id="goi-y-co-che" class="flex flex-wrap gap-2 mt-3"></div>
+          <div class="flex flex-wrap items-end gap-3 mt-4">
+            <div class="min-w-0 flex-1" style="min-width: 220px">
+              <label for="loai-co-che" class="nhan-mono block mb-2">Loại cơ chế</label>
+              <select id="loai-co-che" class="o-nhap chon-co-che">
+                <option value="">Tự động nhận diện</option>
+                <option value="SN2">Thế nucleophin SN2</option>
+                <option value="SN1">Thế nucleophin SN1</option>
+                <option value="E2">Tách E2</option>
+                <option value="E1">Tách E1</option>
+                <option value="AE">Cộng electrophin vào anken (Markovnikov)</option>
+                <option value="SEAR">Thế electrophin vòng benzen</option>
+                <option value="AN">Cộng nucleophin vào C=O</option>
+                <option value="ESTE_HOA">Este hoá (xúc tác H⁺)</option>
+                <option value="THUY_PHAN_ESTE">Thuỷ phân este (kiềm)</option>
+                <option value="KHAC">Khác – để AI viết (cần kiểm tra)</option>
+              </select>
+            </div>
+            <button type="button" id="nut-co-che" class="btn btn-primary">
+              <span class="nhan">Vẽ cơ chế</span><span class="quay hidden"></span>
+            </button>
+          </div>
+          <p id="trang-thai-co-che" class="ghi-chu-nho mt-3" aria-live="polite"></p>
+        </div>
+
+        <!-- BƯỚC XÁC NHẬN kết quả đọc ảnh (bắt buộc trước khi vẽ) -->
+        <div id="xac-nhan-co-che" class="the the-muc mt-6 hidden">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p class="nhan-mono">Kết quả đọc ảnh – kiểm tra trước khi vẽ</p>
+              <p id="xn-tom-tat" class="ghi-chu-nho mt-1"></p>
+            </div>
+            <button type="button" id="xn-bo" class="btn btn-sm">Bỏ kết quả</button>
+          </div>
+          <div class="xn-luoi mt-4">
+            <div id="xn-anh-goc" class="xn-anh-goc"></div>
+            <div class="min-w-0">
+              <label for="xn-de-bai" class="nhan-mono">Đề bài (sửa được)</label>
+              <textarea id="xn-de-bai" rows="5" class="o-nhap mt-2" maxlength="4000"></textarea>
+              <div id="xn-nghi" class="hop-vang mt-3 hidden"></div>
+              <div id="xn-phan-ung" class="mt-4"></div>
+              <div id="xn-cau-truc" class="mt-4"></div>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-3 mt-5">
+            <button type="button" id="xn-ve" class="btn btn-primary">Đúng rồi, vẽ cơ chế</button>
+            <button type="button" id="xn-ve-tat-ca" class="btn hidden">Vẽ tất cả</button>
+            <span id="xn-trang-thai" class="ghi-chu-nho" aria-live="polite"></span>
+          </div>
+        </div>
+
+        <div id="ket-qua-co-che" class="the the-muc mt-6 hidden">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p class="nhan-mono">Cơ chế</p>
+              <p id="ten-co-che" class="tieu-de-the mt-1"></p>
+              <div class="flex flex-wrap gap-2 mt-2"><span id="nguon-co-che" class="huy-hieu"></span></div>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" id="tai-png-co-che" class="btn btn-sm">Tải PNG</button>
+              <button type="button" id="tai-svg-co-che" class="btn btn-sm">Tải SVG</button>
+              <button type="button" id="tai-cdxml-co-che" class="btn btn-sm">Tải ChemDraw (.cdxml)</button>
+              <button type="button" id="copy-json-co-che" class="btn btn-sm">Copy JSON</button>
+            </div>
+          </div>
+          <div id="canh-bao-co-che" class="hop-canh-bao mt-4 hidden"></div>
+          <div id="khung-co-che" class="khung-co-che mt-4"></div>
+
+          <!-- Khu vực giải thích chi tiết các bước (Chạy ngầm / Async Background) -->
+          <div id="khoi-giai-thich-co-che" class="mt-4">
+            <button type="button" id="nut-xem-giai-thich-co-che" class="nut-xem-giai-thich" aria-expanded="false" aria-controls="hop-giai-thich-co-che">
+              <svg class="icon-kinh-lup" viewBox="0 0 20 20" fill="currentColor" width="16" height="16" aria-hidden="true">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+              </svg>
+              <span>Xem giải thích chi tiết các bước</span>
+              <svg class="icon-chevron" viewBox="0 0 20 20" fill="currentColor" width="16" height="16" aria-hidden="true">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <div id="hop-giai-thich-co-che" class="hop-giai-thich-co-che hidden" role="region" aria-label="Giải thích chi tiết các bước cơ chế"></div>
+          </div>
+          <ol id="buoc-co-che" class="ds-buoc-co-che mt-4 hidden"></ol>
+          <div id="nguon-co-che" class="mt-4 hidden"><p class="nhan-mono mb-2">Nguồn tham khảo</p><ul class="ds-nguon"></ul></div>
+        </div>
+      </section>
+
+      <!-- 06 TÌM CẤU TẠO CHẤT (TỪ ĐỀ DÀI) -->
+      <section id="muc-tim-cau-tao" class="muc" data-thuoc-muc="tim-cau-tao">
+        <div class="duong-rang-cua"></div>
+        <p class="so-muc">06</p>
+        <h2 class="tieu-de-muc">Tìm Cấu Tạo Chất</h2>
+        <p class="mo-ta-muc">
+          Biện luận cấu tạo chất <b>X, Y, Z...</b> từ đoạn văn đề dài THPT &amp; HSG với nhiều dữ kiện rải rác:
+          đốt cháy, thủy phân este/peptit, tráng bạc, tác dụng Na/NaOH, % khối lượng.
+          Trích dữ kiện nguyên văn, tính toán bằng code, suy luận và kiểm tra chéo ma trận ✓/✗.
+        </p>
+
+        <!-- Khung nhập đề -->
+        <div class="the the-muc mt-6">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <label for="de-bai-tim-chat" class="nhan-mono">Nội dung đề bài</label>
+            <span class="ghi-chu-nho">Dán chữ hoặc tải ảnh đề để AI nhận diện OCR trước</span>
+          </div>
+          <textarea id="de-bai-tim-chat" rows="5" class="o-nhap o-nhap-mono" placeholder="Dán đoạn văn đề bài dài vào đây... Ví dụ: Đốt cháy hoàn toàn 4,4g este no đơn chức X thu được 4,48 lít CO2 (đktc) và 3,6g H2O. Thuỷ phân X với NaOH thu được muối Y và ancol Z..."></textarea>
+
+          <!-- Tải ảnh & OCR -->
+          <div class="flex flex-wrap items-center justify-between gap-3 mt-3 pt-3 border-t border-chi">
+            <div class="flex items-center gap-2">
+              <input type="file" id="file-anh-tim-chat" accept="image/*" class="hidden">
+              <button type="button" id="nut-tai-anh-tim-chat" class="btn btn-sm">📷 Tải ảnh đề</button>
+              <span id="ten-anh-tim-chat" class="ghi-chu-nho truncate max-w-xs"></span>
+            </div>
+            <button type="button" id="nut-ocr-tim-chat" class="btn btn-sm btn-primary hidden">🔍 Đọc ảnh đề (OCR)</button>
+          </div>
+
+          <!-- Đề mẫu chọn nhanh -->
+          <div class="mt-4 pt-3 border-t border-chi">
+            <p class="nhan-mono text-xs">Hoặc thử nhanh với các đề mẫu chuẩn THPT &amp; HSG:</p>
+            <div id="ds-de-mau-tim-chat" class="chip-mau-container"></div>
+          </div>
+        </div>
+
+        <!-- Khung tuỳ chọn -->
+        <div class="the the-muc mt-6">
+          <p class="nhan-mono mb-3">Tuỳ chọn bổ sung (không bắt buộc)</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="trac-nghiem-tim-chat" class="nhan-mono block mb-1 text-xs">Các phương án trắc nghiệm (A/B/C/D)</label>
+              <textarea id="trac-nghiem-tim-chat" rows="3" class="o-nhap text-sm" placeholder="A. Etyl axetat&#10;B. Metyl propionat&#10;C. Propyl fomat&#10;D. Etyl fomat"></textarea>
+            </div>
+            <div>
+              <label for="cau-hoi-tim-chat" class="nhan-mono block mb-1 text-xs">Câu hỏi cụ thể cần trả lời</label>
+              <textarea id="cau-hoi-tim-chat" rows="3" class="o-nhap text-sm" placeholder="Ví dụ: Xác định CTPT và CTCT của este X, muối Y và ancol Z; tính phân tử khối của Y..."></textarea>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-3 mt-5 pt-3 border-t border-chi">
+            <label class="flex items-center gap-2 text-sm cursor-pointer select-none">
+              <input type="checkbox" id="dung-claude-tim-chat" checked>
+              <span>Ưu tiên dùng mô hình Claude (dự phòng Gemini Pro)</span>
+            </label>
+            <button type="button" id="nut-giai-tim-chat" class="btn btn-primary px-6 py-2">
+              <span class="btn-text">Tìm Cấu Tạo Chất</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Trạng thái tiến trình streaming -->
+        <div id="tien-do-tim-chat" class="the the-muc mt-6 hidden">
+          <div class="flex items-center gap-3">
+            <svg class="animate-spin w-5 h-5 text-nhan shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            <div class="min-w-0 flex-1">
+              <p id="thong-diep-tien-do-tim-chat" class="font-medium text-sm text-muc">Đang xử lý...</p>
+              <p id="chi-tiet-tien-do-tim-chat" class="ghi-chu-nho">Vui lòng đợi hệ thống phân tích và kiểm tra chéo ma trận.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Khung hiển thị kết quả -->
+        <div id="khung-ket-qua-tim-chat" class="mt-6 hidden">
+          <!-- Thanh điều khiển kết quả -->
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div class="flex items-center gap-3">
+              <span id="badge-tin-cay-tim-chat" class="huy-hieu-tin-cay cao">Độ tin cậy: CAO</span>
+              <span id="ai-model-tim-chat" class="ghi-chu-nho"></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" id="nut-xuat-anh-tim-chat" class="btn btn-sm">🖼️ Xuất ảnh lời giải (PNG)</button>
+              <button type="button" id="nut-sao-chep-tim-chat" class="btn btn-sm">📋 Sao chép</button>
+            </div>
+          </div>
+
+          <!-- Hộp cảnh báo nếu có -->
+          <div id="canh-bao-tim-chat" class="hop-canh-bao mb-4 hidden"></div>
+
+          <!-- Phần 4 hiển thị nổi bật trên cùng: ĐÁP ÁN CUỐI CÙNG -->
+          <div class="the-dap-an-chot">
+            <div class="flex items-center justify-between">
+              <h3 class="font-serif text-xl font-bold text-nhan">Đáp Án Cấu Tạo Chuẩn Xác</h3>
+              <span id="dap-an-tn-badge" class="huy-hieu hidden font-mono text-base font-bold"></span>
+            </div>
+            <div id="luoi-dap-an-chat" class="luoi-chat-dap-an"></div>
+            <div id="ket-luan-tim-chat" class="mt-4 pt-3 border-t border-chi text-sm leading-relaxed"></div>
+          </div>
+
+          <!-- Accordion (1): BẢNG DỮ KIỆN TRÍCH NGUYÊN VĂN -->
+          <div class="the-accordion mo" id="acc-du-kien">
+            <div class="the-accordion-dau" onclick="this.parentElement.classList.toggle('mo')">
+              <div class="the-accordion-tieu-de">
+                <span class="the-accordion-so">01</span>
+                <span>Bảng dữ kiện đã đối chiếu (<span id="dem-so-du-kien">0</span> dữ kiện)</span>
+              </div>
+              <svg class="the-accordion-icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+            <div class="the-accordion-than">
+              <p class="ghi-chu-nho mb-3">Mọi dữ kiện được AI trích nguyên văn từ đề để phục vụ đối chiếu và kiểm tra chéo.</p>
+              <div id="ds-du-kien-trich"></div>
+            </div>
+          </div>
+
+          <!-- Accordion (2): SUY LUẬN & TÍNH TOÁN BẰNG CODE -->
+          <div class="the-accordion mo" id="acc-suy-luan">
+            <div class="the-accordion-dau" onclick="this.parentElement.classList.toggle('mo')">
+              <div class="the-accordion-tieu-de">
+                <span class="the-accordion-so">02</span>
+                <span>Suy luận bản chất hoá học (Chuẩn 4 bước &rarr;)</span>
+              </div>
+              <svg class="the-accordion-icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+            <div class="the-accordion-than">
+              <div id="khoi-tinh-toan-code" class="p-3 mb-4 rounded-lg bg-giay-lom border border-chi text-sm font-mono"></div>
+              <div id="ds-cac-buoc-suy-luan" class="space-y-3"></div>
+            </div>
+          </div>
+
+          <!-- Accordion (3): MA TRẬN KIỂM TRA CHÉO -->
+          <div class="the-accordion mo" id="acc-kiem-tra">
+            <div class="the-accordion-dau" onclick="this.parentElement.classList.toggle('mo')">
+              <div class="the-accordion-tieu-de">
+                <span class="the-accordion-so">03</span>
+                <span>Ma trận kiểm tra chéo ứng viên (&check;/&cross;)</span>
+              </div>
+              <svg class="the-accordion-icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+            <div class="the-accordion-than overflow-x-auto">
+              <p class="ghi-chu-nho mb-3">Ứng viên chỉ được chấp nhận khi đạt &check; thỏa mãn 100% tất cả các dữ kiện của đề bài.</p>
+              <table class="bang-matrix" id="bang-matrix-kiem-tra">
+                <thead>
+                  <tr id="matrix-head-row">
+                    <th>Dữ kiện (ID)</th>
+                    <th>Nội dung nguyên văn</th>
+                  </tr>
+                </thead>
+                <tbody id="matrix-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="chan-trang-web">
+    <div class="khung py-6 flex flex-wrap justify-between gap-2">
+      <span><span class="logo-chu text-base">CHEMISTRY</span> — chạy trên máy của bạn, API key chỉ nằm ở server.</span>
+      <span class="font-mono">PubChem · Wikipedia · RDKit · ChemDraw</span>
+    </div>
+  </footer>
+
+  <script src="/static/tai-khoan.js"></script>
+  <script src="/static/app.js"></script>
+  <script src="/static/trang-chu.js"></script>
+</body>
+</html>

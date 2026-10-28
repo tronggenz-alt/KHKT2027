@@ -1,0 +1,340 @@
+{
+  "phien_ban": 1,
+  "phong": {
+    "rong": 22,
+    "sau": 16,
+    "cao": 4.2,
+    "cao_ban": 0.9,
+    "cua_chinh": { "x": 11, "z": 16, "rong": 2.4 },
+    "cua_so": [
+      { "tuong": "bac", "tu": 1.5, "den": 20.5, "day": 1.0, "dinh": 3.6 }
+    ]
+  },
+  "xuat_phat": { "x": 11, "z": 13.6, "huong": 0 },
+  "khu": [
+    {
+      "id": "an-toan",
+      "ten": "Sảnh & Khu An toàn",
+      "mau": "--ptn-khu-an-toan",
+      "hcn": [7, 11, 15, 16],
+      "bien": { "x": 11, "z": 12.2, "y": 3.1 },
+      "mo_ta": "Mặc đồ bảo hộ, học quy tắc an toàn trước khi làm thí nghiệm"
+    },
+    {
+      "id": "dinh-luong",
+      "ten": "Khu Phân tích Định lượng",
+      "mau": "--ptn-khu-dinh-luong",
+      "hcn": [0, 8, 7, 16],
+      "bien": { "x": 3.5, "z": 10.0, "y": 3.1 },
+      "mo_ta": "Chuẩn độ acid – base với burette, chất chỉ thị màu, theo dõi pH"
+    },
+    {
+      "id": "dinh-tinh",
+      "ten": "Khu Phân tích Định tính",
+      "mau": "--ptn-khu-dinh-tinh",
+      "hcn": [0, 0, 7, 8],
+      "bien": { "x": 3.5, "z": 3.0, "y": 3.1 },
+      "mo_ta": "Nhận biết ion trong dung dịch bằng thuốc thử đặc trưng và màu ngọn lửa"
+    },
+    {
+      "id": "dien-hoa",
+      "ten": "Khu Điện hoá học",
+      "mau": "--ptn-khu-dien-hoa",
+      "hcn": [15, 0, 22, 16],
+      "bien": { "x": 18.5, "z": 7.5, "y": 3.1 },
+      "mo_ta": "Pin điện hoá Galvani và bình điện phân dung dịch có màng ngăn"
+    },
+    {
+      "id": "trung-tam",
+      "ten": "Khu Trung tâm & Giảng dạy",
+      "mau": "--ptn-khu-trung-tam",
+      "hcn": [7, 0, 15, 11],
+      "bien": { "x": 11, "z": 1.8, "y": 3.1 },
+      "mo_ta": "Bàn giáo viên, bảng tương tác theo dõi tiến độ và bảng tuần hoàn hoá học"
+    }
+  ],
+  "phong_con": [
+    {
+      "khu": "dinh-tinh",
+      "ten": "Khu Phân tích Định tính",
+      "loi_vao": { "x": 7.0, "z": 5.5, "rong": 2.0 },
+      "vach": [
+        { "x1": 7.0, "z1": 0.0, "x2": 7.0, "z2": 4.5, "cao": 2.4, "chan_camera": true },
+        { "x1": 7.0, "z1": 6.5, "x2": 7.0, "z2": 8.0, "cao": 2.4, "chan_camera": true },
+        { "x1": 0.0, "z1": 8.0, "x2": 7.0, "z2": 8.0, "cao": 2.4, "chan_camera": true }
+      ]
+    },
+    {
+      "khu": "dinh-luong",
+      "ten": "Khu Phân tích Định lượng",
+      "loi_vao": { "x": 7.0, "z": 12.0, "rong": 2.0 },
+      "vach": [
+        { "x1": 7.0, "z1": 8.0, "x2": 7.0, "z2": 11.0, "cao": 2.4, "chan_camera": true },
+        { "x1": 7.0, "z1": 13.0, "x2": 7.0, "z2": 16.0, "cao": 2.4, "chan_camera": true }
+      ]
+    },
+    {
+      "khu": "trung-tam",
+      "ten": "Khu Trung tâm & Giảng dạy",
+      "loi_vao": { "x": 11.0, "z": 11.0, "rong": 2.0 },
+      "vach": [
+        { "x1": 7.0, "z1": 11.0, "x2": 10.0, "z2": 11.0, "cao": 2.4, "chan_camera": true },
+        { "x1": 12.0, "z1": 11.0, "x2": 15.0, "z2": 11.0, "cao": 2.4, "chan_camera": true }
+      ]
+    },
+    {
+      "khu": "dien-hoa",
+      "ten": "Khu Điện hoá học",
+      "loi_vao": { "x": 15.0, "z": 8.0, "rong": 2.4 },
+      "vach": [
+        { "x1": 15.0, "z1": 0.0, "x2": 15.0, "z2": 6.8, "cao": 2.4, "chan_camera": true },
+        { "x1": 15.0, "z1": 9.2, "x2": 15.0, "z2": 16.0, "cao": 2.4, "chan_camera": true }
+      ]
+    }
+  ],
+  "tram": [
+    {
+      "id": "an-toan",
+      "tn": "an-toan",
+      "khu": "an-toan",
+      "tam": [9.8, 12.6],
+      "huong": 0,
+      "ban": [2.6, 1.25],
+      "diem_dung": [9.8, 13.8],
+      "ban_kinh_tuong_tac": 1.6
+    },
+    {
+      "id": "chuan-do",
+      "tn": "chuan-do",
+      "khu": "dinh-luong",
+      "tam": [3.5, 11.5],
+      "huong": 0,
+      "ban": [2.6, 1.25],
+      "diem_dung": [3.5, 12.7],
+      "ban_kinh_tuong_tac": 1.6
+    },
+    {
+      "id": "nhan-biet-ion",
+      "tn": "nhan-biet-ion",
+      "khu": "dinh-tinh",
+      "tam": [3.5, 4.5],
+      "huong": 0,
+      "ban": [2.6, 1.25],
+      "diem_dung": [3.5, 5.7],
+      "ban_kinh_tuong_tac": 1.6
+    },
+    {
+      "id": "pin-galvani",
+      "tn": "pin-galvani",
+      "khu": "dien-hoa",
+      "tam": [18.5, 4.5],
+      "huong": 0,
+      "ban": [2.6, 1.25],
+      "diem_dung": [18.5, 5.7],
+      "ban_kinh_tuong_tac": 1.6
+    },
+    {
+      "id": "dien-phan",
+      "tn": "dien-phan",
+      "khu": "dien-hoa",
+      "tam": [18.5, 10.5],
+      "huong": 0,
+      "ban": [2.6, 1.25],
+      "diem_dung": [18.5, 11.7],
+      "ban_kinh_tuong_tac": 1.6
+    }
+  ],
+  "noi_that": [
+    {
+      "id": "tu-bao-ho",
+      "loai": "tu_bao_ho",
+      "tam": [8.2, 15.5],
+      "kich_thuoc": [1.2, 2.0, 0.6],
+      "huong": 0,
+      "chan": true,
+      "chan_camera": true,
+      "tuong_tac": "mac_bao_ho",
+      "chi_khi_cao": false
+    },
+    {
+      "id": "voi-khan-cap",
+      "loai": "voi_khan_cap",
+      "tam": [13.8, 15.5],
+      "kich_thuoc": [0.8, 2.2, 0.6],
+      "huong": 0,
+      "chan": true,
+      "chan_camera": true,
+      "chi_khi_cao": false
+    },
+    {
+      "id": "binh-chua-chay",
+      "loai": "binh_chua_chay",
+      "tam": [12.6, 15.6],
+      "kich_thuoc": [0.4, 0.8, 0.4],
+      "huong": 0,
+      "chan": true,
+      "chan_camera": false,
+      "chi_khi_cao": false
+    },
+    {
+      "id": "tu-so-cuu",
+      "loai": "tu_so_cuu",
+      "tam": [7.5, 15.6],
+      "kich_thuoc": [0.6, 0.8, 0.3],
+      "huong": 0,
+      "chan": false,
+      "chan_camera": false,
+      "chi_khi_cao": false
+    },
+    {
+      "id": "tuong-ghs",
+      "loai": "tuong_ghs",
+      "tam": [11.0, 15.9],
+      "kich_thuoc": [2.0, 1.2, 0.1],
+      "huong": 0,
+      "chan": false,
+      "chan_camera": false,
+      "chi_khi_cao": false
+    },
+    {
+      "id": "tu-hut",
+      "loai": "tu_hut",
+      "tam": [0.6, 2.5],
+      "kich_thuoc": [1.0, 2.2, 2.4],
+      "huong": 0,
+      "chan": true,
+      "chan_camera": true,
+      "chi_khi_cao": false
+    },
+    {
+      "id": "gia-thuoc-thu",
+      "loai": "gia_thuoc_thu",
+      "tam": [0.5, 6.0],
+      "kich_thuoc": [0.8, 1.8, 2.0],
+      "huong": 0,
+      "chan": true,
+      "chan_camera": true,
+      "chi_khi_cao": false
+    },
+    {
+      "id": "bon-rua",
+      "loai": "bon_rua",
+      "tam": [0.6, 14.5],
+      "kich_thuoc": [1.0, 0.9, 1.6],
+      "huong": 0,
+      "chan": true,
+      "chan_camera": false,
+      "chi_khi_cao": false
+    },
+    {
+      "id": "tu-hoa-chat-1",
+      "loai": "tu_hoa_chat",
+      "tam": [5.0, 0.5],
+      "kich_thuoc": [3.0, 2.2, 0.8],
+      "huong": 0,
+      "chan": true,
+      "chan_camera": true,
+      "chi_khi_cao": false
+    },
+    {
+      "id": "tu-hoa-chat-2",
+      "loai": "tu_hoa_chat",
+      "tam": [17.0, 0.5],
+      "kich_thuoc": [3.0, 2.2, 0.8],
+      "huong": 0,
+      "chan": true,
+      "chan_camera": true,
+      "chi_khi_cao": false
+    },
+    {
+      "id": "bang-tuong-tac",
+      "loai": "bang_tuong_tac",
+      "tam": [11.0, 0.15],
+      "kich_thuoc": [4.0, 2.0, 0.2],
+      "huong": 0,
+      "chan": false,
+      "chan_camera": false,
+      "chi_khi_cao": false
+    },
+    {
+      "id": "ban-giao-vien",
+      "loai": "ban_giao_vien",
+      "tam": [11.0, 2.2],
+      "kich_thuoc": [2.4, 0.9, 1.0],
+      "huong": 0,
+      "chan": true,
+      "chan_camera": false,
+      "chi_khi_cao": false
+    },
+    {
+      "id": "bang-tuan-hoan",
+      "loai": "bang_tuan_hoan",
+      "tam": [21.85, 8.0],
+      "kich_thuoc": [0.2, 2.0, 3.2],
+      "huong": 0,
+      "chan": false,
+      "chan_camera": false,
+      "chi_khi_cao": false
+    },
+    {
+      "id": "nguon-dc",
+      "loai": "nguon_dc",
+      "tam": [21.5, 14.0],
+      "kich_thuoc": [0.8, 1.2, 1.2],
+      "huong": 0,
+      "chan": true,
+      "chan_camera": false,
+      "chi_khi_cao": false
+    },
+    {
+      "id": "vach-kinh-1",
+      "loai": "vach_kinh",
+      "tam": [7.0, 14.5],
+      "kich_thuoc": [0.1, 1.1, 1.4],
+      "huong": 0,
+      "chan": true,
+      "chan_camera": true,
+      "chi_khi_cao": false
+    },
+    {
+      "id": "vach-kinh-2",
+      "loai": "vach_kinh",
+      "tam": [15.0, 14.5],
+      "kich_thuoc": [0.1, 1.1, 1.4],
+      "huong": 0,
+      "chan": true,
+      "chan_camera": true,
+      "chi_khi_cao": false
+    },
+    {
+      "id": "cay-tb",
+      "loai": "cay_xanh",
+      "tam": [0.8, 0.8],
+      "kich_thuoc": [0.8, 1.5, 0.8],
+      "huong": 0,
+      "chan": true,
+      "chan_camera": false,
+      "chi_khi_cao": true
+    },
+    {
+      "id": "cay-db",
+      "loai": "cay_xanh",
+      "tam": [21.2, 0.8],
+      "kich_thuoc": [0.8, 1.5, 0.8],
+      "huong": 0,
+      "chan": true,
+      "chan_camera": false,
+      "chi_khi_cao": true
+    },
+    {
+      "id": "cay-dn",
+      "loai": "cay_xanh",
+      "tam": [21.2, 15.2],
+      "kich_thuoc": [0.8, 1.5, 0.8],
+      "huong": 0,
+      "chan": true,
+      "chan_camera": false,
+      "chi_khi_cao": true
+    }
+  ]
+}
