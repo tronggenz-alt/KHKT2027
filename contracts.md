@@ -164,6 +164,15 @@ Tài liệu này dành cho Claude Code của thành viên mới. Đọc hết tr
 ## 10. Git
 
 - Kho: `https://github.com/tronggenz-alt/KHKT2027` (riêng tư), nhánh chính `main`.
-- **Làm trên nhánh riêng** (`tang2/...`, `mang/...`), mở PR, không đẩy thẳng `main`.
+- **Làm trên nhánh riêng** (`tang2/...`, `robot/...`, `mang/...`), mở PR, không đẩy thẳng `main`.
+- **Build xong là đẩy lên GitHub ngay (bắt buộc).** Mỗi khi xong một phần, ví dụ một phòng, một thiết bị hoặc một tính năng mạng, và kiểm thử ở mục 9 đã đạt:
+  1. Commit ngay.
+  2. `git push` lên kho dự án, vào nhánh đang làm.
+  3. Mở PR hoặc cập nhật PR đang có. PR ghi phần đã làm, kết quả kiểm thử và ảnh chụp.
+
+  Không để việc đã xong nằm lại trên máy Mac qua ngày.
+- Trước khi đẩy:
+  - `git pull --rebase origin main` để lấy thay đổi mới của tầng 1;
+  - có xung đột ở file dùng chung thì giữ hành vi tầng 1 và ghi rõ trong PR.
 - Không đưa lên kho: khóa API, `.env`, `Library/`, `Temp/`, bản build, tệp lớn hơn 50 MB.
 - Ảnh trong tài liệu chỉ dùng ảnh tự chụp từ dự án hoặc ảnh phạm vi công cộng.
