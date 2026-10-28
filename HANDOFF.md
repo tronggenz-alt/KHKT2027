@@ -28,10 +28,14 @@
    - Cấu hình file `.gitattributes` phân loại chính xác các tầng mã nguồn theo chuẩn GitHub Linguist.
    - Toàn bộ thư viện JS web/vendor và boilerplate khung web được loại trừ khỏi thống kê, giữ nguyên 100% bố cục và code của dự án.
    - Thống kê ngôn ngữ thực chất tập trung vào hai trụ cột: **C# (Unity 3D Hardware Lab chiếm ~63.4% - vị trí số 1)** và **Python (Chemical AI & Solver chiếm ~35.8%)**, cùng ShaderLab, PowerShell, C++.
-7. **ĐANG LÀM**: Bàn giao cho người dùng kiểm tra tỷ lệ C# tối ưu.
-8. **VIỆC TIẾP THEO**: Đưa lên GitHub hoặc tạo release tag v1.1.0.
-9. **LỖI CÒN TỒN**: Không có (0 lỗi tồn).
-10. **CÁCH CHẠY**:
+7. **Tải lên kho chứa GitHub KHKT2027**:
+   - Tạo commit snapshot sạch (không dính tệp nhị phân node >100MB từ lịch sử cũ).
+   - Đẩy (push) thành công lên kho chứa `https://github.com/tronggenz-alt/KHKT2027` trên nhánh `chemistry`.
+   - Bảo toàn an toàn 100% các tệp firmware và mã nguồn có sẵn trên nhánh `main` của repo.
+8. **ĐANG LÀM**: Bàn giao cho người dùng kiểm tra repo trên GitHub.
+9. **VIỆC TIẾP THEO**: Người dùng có thể tạo Pull Request gộp `chemistry` vào `main` hoặc tạo Release v1.1.0 trên GitHub.
+10. **LỖI CÒN TỒN**: Không có (0 lỗi tồn).
+11. **CÁCH CHẠY**:
    - Cài đặt: nháy đúp `./setup.command`
    - Chạy app web: nháy đúp `./start.command` (hoặc `npm start`)
    - Chạy test toàn bộ: `npm test` (hoặc `.venv/bin/pytest -q && node --test tests/js/*.test.mjs`)
