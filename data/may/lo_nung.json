@@ -1,0 +1,150 @@
+{
+  "ma": "lo_nung",
+  "ten": "Lò nung – xác định tro và nung vôi",
+  "may_mau": "Lò nung buồng gốm tới 1100 °C kèm chén sứ, cân phân tích 0,1 mg (quy trình xác định tro theo các TCVN; trên vỏ máy trong phòng lab ảo dùng tên chung)",
+  "nguyen_ly": [
+    "Nung chất khô ở (550 ± 25) °C: chất hữu cơ cháy hết thành CO₂ và H₂O, phần còn lại là tro (chất vô cơ: muối khoáng, oxit). Tro tổng số = khối lượng tro / khối lượng mẫu.",
+    "Muối của axit hữu cơ (natri benzoat, kali xitrat) khi nung để lại cacbonat kim loại kiềm trong tro.",
+    "Ở nhiệt độ cao hơn (khoảng 900 °C), canxi cacbonat bị phân hủy: CaCO₃ → CaO + CO₂ (nung vôi), khối lượng giảm 44% theo tỉ lệ khối lượng mol.",
+    "Tro phải trắng / xám nhạt; tro còn đen là còn cacbon chưa cháy hết, phải nung thêm.",
+    "Như sấy, phải nung đến khối lượng không đổi và làm nguội trong bình hút ẩm."
+  ],
+  "cong_thuc": [
+    "Tro (%) = (m₂ − m₀) / (m₁ − m₀) × 100",
+    "CaCO₃ → CaO + CO₂: m(CaO) / m(CaCO₃) = 56,08 / 100,09"
+  ],
+  "bo_phan": [
+    {
+      "ma": "buong",
+      "ten": "Buồng nung gốm chịu lửa",
+      "chuc_nang": "Chịu nhiệt tới 1100 °C; dây đốt quấn quanh vách."
+    },
+    {
+      "ma": "bo_dieu_khien",
+      "ten": "Bộ điều khiển chương trình nhiệt",
+      "chuc_nang": "Tăng nhiệt từ từ, giữ nhiệt, hạ nhiệt theo chương trình."
+    },
+    {
+      "ma": "cap_nhiet",
+      "ten": "Cặp nhiệt điện loại K",
+      "chuc_nang": "Đo nhiệt độ buồng nung."
+    },
+    {
+      "ma": "chen_su",
+      "ten": "Chén sứ",
+      "chuc_nang": "Đựng mẫu khi nung; chịu nhiệt cao."
+    },
+    {
+      "ma": "binh_hut_am",
+      "ten": "Bình hút ẩm",
+      "chuc_nang": "Làm nguội chén tro trước khi cân."
+    },
+    {
+      "ma": "can",
+      "ten": "Cân phân tích 0,1 mg",
+      "chuc_nang": "Cân chén, mẫu, tro."
+    }
+  ],
+  "thong_so": [
+    {
+      "ten": "Nhiệt độ tro hóa",
+      "gia_tri": "(550 ± 25) °C, đến khối lượng không đổi (chênh không quá 0,0005 g)",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://thuvienphapluat.vn/TCVN/Cong-nghe-Thuc-pham/TCVN-7038-2002-Gia-vi-Xac-dinh-trzo-tong-so-900188.aspx"
+    },
+    {
+      "ten": "Tro còn đen",
+      "gia_tri": "nhỏ thêm H₂O₂ hoặc HNO₃ đặc rồi nung lại đến tro trắng",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://thuvienphapluat.vn/TCVN/Cong-nghe-Thuc-pham/TCVN-5105-1990-thuy-san-phuong-phap-xac-dinh-ham-luong-tro-902559.aspx"
+    },
+    {
+      "ten": "Nhiệt độ phân hủy CaCO₃ trong lab ảo",
+      "gia_tri": "bắt đầu khoảng 750 °C, nhanh ở 900 °C",
+      "loai": "mô phỏng",
+      "mo_phong": true
+    },
+    {
+      "ten": "Tốc độ cháy, phân hủy theo thời gian",
+      "gia_tri": "ước lượng",
+      "loai": "mô phỏng",
+      "mo_phong": true
+    }
+  ],
+  "quy_trinh": [
+    {
+      "ma": "nung_chen",
+      "ten": "Nung và cân chén sứ rỗng (m₀)",
+      "viec": "Nung chén ở nhiệt độ làm việc, làm nguội trong bình hút ẩm, cân.",
+      "ly_do": "Chén mới có thể mất khối lượng khi nung lần đầu.",
+      "loi": ""
+    },
+    {
+      "ma": "can_mau",
+      "ten": "Cho mẫu (đã sấy khô) vào chén, cân (m₁)",
+      "viec": "Lấy mẫu khô, cân chén + mẫu.",
+      "ly_do": "Mẫu ướt sôi bắn ra khỏi chén khi nung.",
+      "loi": "Nung ngay mẫu lỏng: bắn, mất mẫu."
+    },
+    {
+      "ma": "than_hoa",
+      "ten": "Than hóa trên bếp",
+      "viec": "Đốt nhẹ mẫu trên bếp điện (trong tủ hút) đến khi hết khói.",
+      "ly_do": "Cho thẳng vào lò nóng: mẫu cháy bùng, bắn.",
+      "loi": ""
+    },
+    {
+      "ma": "nung",
+      "ten": "Nung ở 550 °C (hoặc 900 °C để nung vôi)",
+      "viec": "Đặt chén vào lò, nung theo chương trình nhiệt đến tro trắng.",
+      "ly_do": "Chất hữu cơ cháy hết; CaCO₃ chỉ phân hủy ở nhiệt độ cao hơn.",
+      "loi": "Nhiệt độ thấp / thời gian ngắn: tro còn đen."
+    },
+    {
+      "ma": "lam_nguoi_can",
+      "ten": "Làm nguội trong bình hút ẩm, cân (m₂)",
+      "viec": "Lấy chén ra (kẹp dài), để nguội bớt, cho vào bình hút ẩm, cân.",
+      "ly_do": "Tro (đặc biệt CaO) hút ẩm và CO₂ mạnh.",
+      "loi": "Để nguội ngoài không khí: CaO hút ẩm, khối lượng tăng."
+    },
+    {
+      "ma": "khoi_luong_khong_doi",
+      "ten": "Nung lại đến khối lượng không đổi",
+      "viec": "Nung thêm, cân lại đến khi chênh không quá 0,5 mg.",
+      "ly_do": "Đảm bảo chất hữu cơ đã cháy hết, phản ứng phân hủy đã xong.",
+      "loi": ""
+    },
+    {
+      "ma": "ket_qua",
+      "ten": "Tính tro, phân tích thành phần tro",
+      "viec": "Tính % tro; so khối lượng trước / sau nung vôi để suy ra lượng CaCO₃.",
+      "ly_do": "Biết lượng chất khoáng, hoặc lượng CaCO₃ trong đá vôi.",
+      "loi": ""
+    }
+  ],
+  "an_toan": [
+    "Lò rất nóng (tới 1100 °C): dùng kẹp dài, găng và kính chịu nhiệt; không mở cửa lò khi đang ở nhiệt độ cao nếu không cần.",
+    "Than hóa mẫu trong tủ hút (khói).",
+    "CaO tác dụng mạnh với nước, tỏa nhiệt: không chạm tay ướt."
+  ],
+  "thuat_ngu": [
+    {
+      "tu": "Tro tổng số",
+      "nghia": "Phần vô cơ còn lại sau khi nung cháy hết chất hữu cơ."
+    },
+    {
+      "tu": "Than hóa",
+      "nghia": "Đốt sơ bộ mẫu cho hết khói trước khi cho vào lò."
+    },
+    {
+      "tu": "Nung vôi",
+      "nghia": "Phân hủy đá vôi CaCO₃ thành vôi sống CaO và CO₂."
+    }
+  ],
+  "cau_hoi_on_tap": [
+    "Vì sao phải than hóa mẫu trước khi cho vào lò nung?",
+    "Tro của nước ngọt có ga chứa natri benzoat gồm chất gì?",
+    "Nung 1,000 g CaCO₃ ở 900 °C đến khối lượng không đổi thì còn lại bao nhiêu gam?",
+    "Vì sao vôi sống phải làm nguội trong bình hút ẩm?"
+  ]
+}

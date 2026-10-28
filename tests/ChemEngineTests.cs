@@ -425,6 +425,113 @@ static class ChemEngineTests
         var epP = PotentiometricTitration.Endpoints(cP, 100);
         Check(epP.Count == 2 && Math.Abs(epP[0].v - 10) < 0.15 && Math.Abs(epP[1].v - 20) < 0.25, "chuẩn độ H₃PO₄ 0,1 M (10 mL): hai điểm tương đương ở 10 và 20 mL", string.Join(" / ", epP.Select(e => $"{e.v:0.00}")));
 
+        Console.WriteLine("Máy phân tích đợt 3: XRD, SEM-EDS, NMR, bom nhiệt lượng");
+        Check(Formula.Count("CaSO4·2H2O")["O"] == 6 && Formula.Count("CaSO4·2H2O")["H"] == 4 && Math.Abs(Formula.MolarMass("NaCl") - 58.44) < 0.01, "công thức: đếm nước kết tinh, khối lượng mol NaCl 58,44");
+        // chất rắn từ mẫu
+        var salt = SolidResidue.From(Mix.Of(("Na+", 0.01), ("Cl-", 0.01)), 10, 10, true);
+        Check(salt.Count == 1 && salt[0].Id == "NaCl(r)" && Math.Abs(salt[0].Mg - 584.4) < 1, "cô cạn 10 mL NaCl 1 M: 584 mg tinh thể NaCl", string.Join(", ", salt.Select(s => $"{s.Id} {s.Mg:0.0} mg")));
+        var well = SolidResidue.From(Mix.Of(("Ca2+", 0.001), ("Mg2+", 0.0005), ("Cl-", 0.001), ("CO3", 0.0033)), 1000, 1000, true);
+        Check(well.Any(s => s.Id == "CaCO3" && Math.Abs(s.Mg - 100.1) < 1), "cô cạn 1 L nước giếng: cặn CaCO₃ 100 mg (cặn ấm đun nước)", string.Join(", ", well.Select(s => $"{s.Id} {s.Mg:0.0}")));
+        var barite = SolidResidue.From(Mix.Of(("BaSO4", 0.0005), ("Na+", 0.001), ("Cl-", 0.001)), 10, 10, false);
+        Check(barite.Count == 1 && barite[0].Id == "BaSO4" && Math.Abs(barite[0].Mg - 116.7) < 1, "lọc lấy kết tủa: chỉ còn BaSO₄ (NaCl tan đi theo nước lọc)");
+        var juiceSolid = SolidResidue.From(Mix.Of(("Cit", 0.03), ("hc:578", 0.25), ("hc:580", 0.1)), 1000, 10, true);
+        Check(juiceSolid.All(s => !s.Crystalline) && Math.Abs(SolidResidue.TotalMg(juiceSolid) - (0.3 * 192.12 + 2.5 * 180.16 + 1.0 * 342.3)) < 2, "cô cạn 10 mL nước cam: đường + axit vô định hình", $"{SolidResidue.TotalMg(juiceSolid):0} mg");
+        // XRD
+        var xrd = XrdLibrary.Load(Data("xrd.json"));
+        Near(xrd.TwoTheta(xrd.ById("halit").Lines[0].d), 31.69, 0.02, "XRD: vạch mạnh nhất của halit d = 2,821 Å → 2θ = 31,69° (Bragg, Cu Kα)");
+        Near(XrdLibrary.Displacement(31.7, 0.2), -0.149, 0.003, "XRD: mặt mẫu cao 0,2 mm làm pic dời −0,15°");
+        var mixSalts = SolidResidue.From(Mix.Of(("Na+", 0.006), ("K+", 0.004), ("Cl-", 0.01)), 10, 10, true);
+        var comp = xrd.Compose(mixSalts, out double amor);
+        var pat = new List<(double tt, double y)>();
+        for (double tt = 10; tt <= 80; tt += 0.02) pat.Add((tt, xrd.Intensity(comp, amor, tt, 20000, 0)));
+        var pks = XrdLibrary.Peaks(pat, 300);
+        var match = xrd.Match(pks);
+        Check(match.Take(2).Select(m => m.card.Id).OrderBy(x => x).SequenceEqual(new[] { "halit", "sylvit" }) && match[0].fom > 0.9 && match[1].fom > 0.9 && match[2].fom < 0.5,
+              "XRD: hỗn hợp NaCl + KCl tìm đúng 2 pha (độ khớp > 0,9), pha khác không khớp", string.Join(", ", match.Take(3).Select(m => $"{m.card.Id} {m.fom:0.00}")));
+        var amComp = xrd.Compose(juiceSolid, out double amJ);
+        var rngX = new Random(5);
+        var amPat = new List<(double tt, double y)>();
+        for (double tt = 10; tt <= 80; tt += 0.02) { double m = xrd.Intensity(amComp, amJ, tt, 24000, 0); amPat.Add((tt, m + Math.Sqrt(m) * (rngX.NextDouble() + rngX.NextDouble() + rngX.NextDouble() - 1.5) * 2)); }
+        var amMatch = xrd.Match(XrdLibrary.Peaks(amPat, 80)).Where(m => m.fom >= 0.75).ToList();
+        Check(amJ > 0.99 && amMatch.Count == 0, "XRD: chất khô nước cam (vô định hình, có nhiễu) không bị nhận nhầm thành pha tinh thể", string.Join(", ", amMatch.Select(m => m.card.Id)));
+        var bPatN = new List<(double tt, double y)>();
+        var baOnly = new List<XrdLibrary.Comp> { new XrdLibrary.Comp { Card = xrd.ById("barit"), Weight = 1, CrystalNm = 35 } };
+        for (double tt = 10; tt <= 80; tt += 0.02) { double m = xrd.Intensity(baOnly, 0, tt, 24000, 0); bPatN.Add((tt, m + Math.Sqrt(m) * (rngX.NextDouble() + rngX.NextDouble() + rngX.NextDouble() - 1.5) * 2)); }
+        var baMatch = xrd.Match(XrdLibrary.Peaks(bPatN, 80)).Where(m => m.fom >= 0.75).Select(m => m.card.Id).ToList();
+        Check(baMatch.SequenceEqual(new[] { "barit" }), "XRD: kết tủa BaSO₄ chỉ ra barit (thạch anh có vạch gần 26,7° không bị nhận nhầm)", string.Join(", ", baMatch));
+        var bComp = new List<XrdLibrary.Comp> { new XrdLibrary.Comp { Card = xrd.ById("barit"), Weight = 1, CrystalNm = 35 } };
+        var bPat = new List<(double tt, double y)>();
+        for (double tt = 20; tt <= 40; tt += 0.01) bPat.Add((tt, xrd.Intensity(bComp, 0, tt, 20000, 0)));
+        var bPk = XrdLibrary.Peaks(bPat, 300).Where(p => Math.Abs(p.tt - xrd.TwoTheta(3.103)) < 0.3).First();
+        double size = xrd.Scherrer(bPk.tt, bPk.fwhm);
+        Check(Math.Abs(size / 35 - 1) < 0.25, "XRD: kích thước tinh thể BaSO₄ từ độ rộng pic (Scherrer) ≈ 35 nm", $"{size:0} nm, FWHM {bPk.fwhm:0.000}°");
+        // EDS
+        var eds = EdsLibrary.Load(Data("eds.json"));
+        var rngE = new Random(1);
+        var fr = SolidResidue.AtomFractions(barite);
+        var sp = eds.Spectrum(fr, 15, true, true, 2e5, rngE);
+        var q = eds.Quantify(sp, 15, new[] { "Au", "C" });
+        Check(q.ContainsKey("Ba") && q.ContainsKey("S") && q.ContainsKey("O") && Math.Abs(q["Ba"] / q["S"] - 1) < 0.25, "EDS: BaSO₄ ra Ba : S ≈ 1 : 1 (bỏ Au lớp phủ, C băng dính)", string.Join(", ", q.Select(kv => $"{kv.Key} {kv.Value * 100:0}%")));
+        var spAu = eds.Quantify(sp, 15, null);
+        Check(spAu.ContainsKey("Au"), "EDS: mẫu phủ vàng có pic Au Mα 2,12 keV");
+        Check(EdsLibrary.Overvoltage(5, eds.Get("Cu").KeV) == 0 && EdsLibrary.Overvoltage(15, eds.Get("Cu").KeV) > 0, "EDS: 5 kV không kích thích được Cu Kα 8,05 keV, 15 kV thì được");
+        // NMR
+        var nmr = NmrLibrary.Load(Data("nmr.json"));
+        var wineLines = nmr.Lines(Mix.Of(("C2H5OH", 5.2), ("hc:467", 0.05)), 1000, 0.01, 0.9, 0.002);
+        var ch3 = wineLines.Where(l => l.Owner == "etanol" && l.Ppm < 1.5).OrderBy(l => l.Ppm).ToList();
+        Check(ch3.Count == 3 && Math.Abs(ch3[1].Amp / ch3[0].Amp - 2) < 1e-9 && Math.Abs((ch3[1].Ppm - ch3[0].Ppm) * 60 - 7) < 1e-6, "NMR: CH₃ etanol là vạch ba 1 : 2 : 1, cách 7 Hz (1,17 ppm)");
+        var rngN = new Random(2);
+        const double sw = 800, center = 5;
+        var (fre, fim) = NmrLibrary.Fid(wineLines, 2048, sw, center, 1.0, 0.02, rngN);
+        var nspec = NmrLibrary.Spectrum(fre, fim, sw, center, 0);
+        var ints = NmrLibrary.Integrate(nspec, wineLines, 1.0 / 60);
+        double Area(double ppm) => ints.OrderBy(g => Math.Abs(g.center - ppm)).First().area;
+        double ratio = Area(3.65) / Area(1.17);
+        Check(Math.Abs(ratio / (2.0 / 3) - 1) < 0.04, "NMR: tích phân CH₂ : CH₃ của etanol = 2 : 3", $"{ratio:0.000}");
+        var fitA = NmrLibrary.FitAreas(nspec, wineLines, 1.0);
+        double meEt = (fitA["metanol#0"] / 3) / (fitA["etanol#0"] / 3);
+        Check(Math.Abs(meEt / (0.05 / 5.2) - 1) < 0.08, "NMR (qNMR, khớp đường vạch): tỉ lệ mol metanol / etanol đúng ±8%", $"{meEt:0.0000} (thật {0.05 / 5.2:0.0000})");
+        double cMe = (fitA["metanol#0"] / 3) / (fitA["dss#0"] / 9) * 0.01 / 0.9;
+        Check(Math.Abs(cMe / 0.05 - 1) < 0.08, "NMR (qNMR với chuẩn nội DSS): metanol 0,05 M đúng ±8%", $"{cMe:0.0000} M; " + string.Join(" ", fitA.Select(kv => $"{kv.Key}={kv.Value:0.0000}")));
+        var bad = NmrLibrary.Spectrum(fre, fim, sw, center, 90);
+        Check(bad.Min(p => p.y) < -0.3 * bad.Max(p => p.y), "NMR: sai pha 90° làm vạch có phần âm lớn (phải chỉnh pha)");
+        // bom nhiệt lượng
+        var bomb = CalorimetryLibrary.Load(Data("nhiet_dot_chay.json"));
+        Near(bomb.ById("axit_benzoic").Ujg(), 26434, 0.5, "bom nhiệt lượng: axit benzoic chuẩn 26 434 J/g (NIST SRM 39j)");
+        Near(bomb.ById("glucozo").Ujg(), 2805000 / 180.16, 1, "glucozơ: Δn khí = 0 nên ΔcU = ΔcH = 15,57 kJ/g");
+        Near(bomb.ById("etanol").Ujg(), (1367600 - 8.314 * 298.15) / 46.07, 1, "etanol: ΔcU = ΔcH − Δn·R·T (Δn = −1)");
+        var rngC = new Random(3);
+        var runC = CalorimetryLibrary.Simulate(24.6, 25.0, 0.02, 0.0004, 10050, 26434 + 50, 5, 0.7, 25, 0.05, 0.0001, rngC);
+        var (rawDT, corrDT) = CalorimetryLibrary.CorrectedRise(runC.Curve, 5, 15);
+        double trueDT = (26434 + 50) / 10050.0;
+        Check(Math.Abs(corrDT / trueDT - 1) < 0.003 && Math.Abs(rawDT / trueDT - 1) > 0.003, "bom nhiệt lượng: ΔT hiệu chỉnh trao đổi nhiệt đúng ±0,3%, ΔT thô thì lệch", $"thô {rawDT:0.0000}, hiệu chỉnh {corrDT:0.0000}, thật {trueDT:0.0000} K");
+        double Cfound = (26434 + 50) / corrDT;
+        Check(Math.Abs(Cfound / 10050 - 1) < 0.003, "bom nhiệt lượng: hiệu chuẩn bằng axit benzoic tìm lại C = 10 050 J/K", $"{Cfound:0} J/K");
+        double eJuice = bomb.Energy(juiceSolid, out double combMg);
+        Check(Math.Abs(eJuice - (0.3e-3 * 1960600 + 2.5e-3 * 2805000 + 1.0e-3 * 5643400)) < 60 && combMg > 800,
+              "bom nhiệt lượng: năng lượng chất khô của 10 mL nước cam = Σ n·ΔcU", $"{eJuice / 1000:0.00} kJ từ {combMg:0} mg");
+
+        Console.WriteLine("Máy phụ trợ (đợt 4): tủ sấy, lò nung, máy cất nước, nồi hấp");
+        Near(SteamTable.PsatBar(100), 1.0142, 0.0005, "IAPWS-IF97: hơi bão hòa 100 °C = 1,0142 bar");
+        Near(SteamTable.PsatBar(121), 2.0504, 0.001, "IAPWS-IF97: hơi bão hòa 121 °C = 2,050 bar (dư khoảng 1,04 bar)");
+        Near(SteamTable.TsatC(1.01325 + 1.05 - 0.5), 112.7, 0.5, "nồi hấp còn 0,5 bar không khí: đồng hồ 1,05 bar nhưng chỉ khoảng 112,7 °C");
+        Near(Sterilization.LogReduction(121, 15, 1.8, 10), 8.33, 0.01, "tiệt trùng 121 °C 15 phút (D = 1,8 phút): giảm 8,3 bậc bào tử");
+        Check(Sterilization.LogReduction(112.7, 15, 1.8, 10) < 1.5, "ở 112,7 °C cùng 15 phút: giảm chưa tới 1,5 bậc, tiệt trùng không đạt", $"{Sterilization.LogReduction(112.7, 15, 1.8, 10):0.00} bậc");
+        var lime = new List<SolidResidue.Phase> { new SolidResidue.Phase { Id = "CaCO3", Formula = "CaCO3", Name = "canxi cacbonat", Mg = 1000 } };
+        var a550 = Gravimetry.Ash(lime, 550, 120, out _);
+        var a900 = Gravimetry.Ash(lime, 900, 120, out _);
+        Check(Math.Abs(SolidResidue.TotalMg(a550) - 1000) < 1 && Math.Abs(SolidResidue.TotalMg(a900) - 560.3) < 3, "lò nung: CaCO₃ bền ở 550 °C; 900 °C còn 56% (CaO)", $"{SolidResidue.TotalMg(a550):0} / {SolidResidue.TotalMg(a900):0} mg");
+        var sugarAsh = Gravimetry.Ash(juiceSolid, 550, 240, out double carb);
+        Check(SolidResidue.TotalMg(sugarAsh) < 0.5 && carb < 1, "lò nung: chất khô nước cam (đường, axit) cháy hết, gần như không còn tro");
+        var sodaAsh = Gravimetry.Ash(SolidResidue.From(Mix.Of(("Bz", 0.0012), ("Na+", 0.0012)), 1000, 1000, true), 550, 240, out _);
+        Check(sodaAsh.Count == 1 && sodaAsh[0].Id == "Na2CO3(r)" && Math.Abs(sodaAsh[0].Mg - 0.0006 * 105.99 * 1000) < 2, "lò nung: natri benzoat để lại Na₂CO₃ trong tro", string.Join(", ", sodaAsh.Select(p => $"{p.Id} {p.Mg:0.0}")));
+        var wetOj = Gravimetry.FromSolution(Mix.Of(("Cit", 0.03), ("hc:578", 0.25), ("hc:580", 0.1)), 1000, 10);
+        double moist = (wetOj.WaterG + wetOj.VolatileG) / wetOj.TotalG * 100;
+        Check(moist > 88 && moist < 94, "tủ sấy: nước cam có độ ẩm khoảng 91%", $"{moist:0.0}% (chất khô {wetOj.SolidsG:0.000} g)");
+        Check(Distiller.Grade(Distiller.Conductivity(1, 500, 0)) == 3 && Distiller.Grade(Distiller.Conductivity(2, 500, 0)) == 2 && Distiller.Grade(Distiller.Conductivity(2, 500, 600)) == 3,
+              "máy cất nước: cất một lần đạt loại 3, hai lần loại 2; để hở nhiều giờ hấp thụ CO₂ tụt xuống loại 3",
+              $"{Distiller.Conductivity(1, 500, 0):0.00} / {Distiller.Conductivity(2, 500, 0):0.00} / {Distiller.Conductivity(2, 500, 600):0.00} µS/cm");
+
         Console.WriteLine($"\n{passed} đạt, {failed} sai");
         return failed == 0 ? 0 : 1;
     }

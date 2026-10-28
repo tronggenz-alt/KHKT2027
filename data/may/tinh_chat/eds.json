@@ -1,0 +1,29 @@
+{
+  "ghi_chu": "Năng lượng vạch tia X (keV) dùng cho phổ EDS, chép từ X-Ray Data Booklet (LBNL), bảng 1-2: vạch Kα₁ cho nguyên tố nhẹ và chuyển tiếp, Lα₁ cho Ag, Ba, Mα₁ cho Au (lớp phủ). nhay: hệ số độ nhạy tương đối của đầu dò (mô phỏng).",
+  "nguon": "https://xdb.lbl.gov/Section1/Table_1-2.pdf",
+  "nguyen_to": [
+    {"ky_hieu": "C", "Z": 6, "vach": "Kα", "keV": 0.277, "nhay": 0.25},
+    {"ky_hieu": "N", "Z": 7, "vach": "Kα", "keV": 0.3924, "nhay": 0.3},
+    {"ky_hieu": "O", "Z": 8, "vach": "Kα", "keV": 0.5249, "nhay": 0.4},
+    {"ky_hieu": "F", "Z": 9, "vach": "Kα", "keV": 0.6768, "nhay": 0.45},
+    {"ky_hieu": "Na", "Z": 11, "vach": "Kα", "keV": 1.04098, "nhay": 0.6},
+    {"ky_hieu": "Mg", "Z": 12, "vach": "Kα", "keV": 1.2536, "nhay": 0.7},
+    {"ky_hieu": "Al", "Z": 13, "vach": "Kα", "keV": 1.4867, "nhay": 0.8},
+    {"ky_hieu": "Si", "Z": 14, "vach": "Kα", "keV": 1.73998, "nhay": 0.9},
+    {"ky_hieu": "P", "Z": 15, "vach": "Kα", "keV": 2.0137, "nhay": 0.95},
+    {"ky_hieu": "S", "Z": 16, "vach": "Kα", "keV": 2.30784, "nhay": 1.0},
+    {"ky_hieu": "Cl", "Z": 17, "vach": "Kα", "keV": 2.62239, "nhay": 1.0},
+    {"ky_hieu": "K", "Z": 19, "vach": "Kα", "keV": 3.3138, "nhay": 1.0},
+    {"ky_hieu": "Ca", "Z": 20, "vach": "Kα", "keV": 3.69168, "nhay": 1.0},
+    {"ky_hieu": "Cr", "Z": 24, "vach": "Kα", "keV": 5.41472, "nhay": 0.9},
+    {"ky_hieu": "Mn", "Z": 25, "vach": "Kα", "keV": 5.89875, "nhay": 0.85},
+    {"ky_hieu": "Fe", "Z": 26, "vach": "Kα", "keV": 6.40384, "nhay": 0.8},
+    {"ky_hieu": "Co", "Z": 27, "vach": "Kα", "keV": 6.93032, "nhay": 0.75},
+    {"ky_hieu": "Ni", "Z": 28, "vach": "Kα", "keV": 7.47815, "nhay": 0.7},
+    {"ky_hieu": "Cu", "Z": 29, "vach": "Kα", "keV": 8.04778, "nhay": 0.65},
+    {"ky_hieu": "Zn", "Z": 30, "vach": "Kα", "keV": 8.63886, "nhay": 0.6},
+    {"ky_hieu": "Ag", "Z": 47, "vach": "Lα", "keV": 2.98431, "nhay": 0.8},
+    {"ky_hieu": "Ba", "Z": 56, "vach": "Lα", "keV": 4.46626, "nhay": 0.7},
+    {"ky_hieu": "Au", "Z": 79, "vach": "Mα", "keV": 2.1229, "nhay": 0.7}
+  ]
+}

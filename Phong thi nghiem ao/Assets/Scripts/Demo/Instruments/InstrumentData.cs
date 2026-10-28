@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Khkt.Simulation.Chem;
 using UnityEngine;
 
@@ -52,12 +52,18 @@ namespace Khkt.Demo.Instruments
         public static InstrumentData Instance { get; private set; }
         public TextAsset uvVisDoc, aasDoc, uvVisBands, aasElements;
         public TextAsset ftirDoc, gcMsDoc, hplcDoc, titratorDoc, ftirLib, gcMsLib, hplcLib;
+        public TextAsset xrdDoc, semDoc, nmrDoc, calorimeterDoc, xrdLib, edsLib, nmrLib, calorimetryLib;
+        public TextAsset ovenDoc, furnaceDoc, distillerDoc, autoclaveDoc;
 
         UvVisLibrary uv;
         AasLibrary aas;
         FtirLibrary ftir;
         GcLibrary gc;
         HplcLibrary hplc;
+        XrdLibrary xrd;
+        EdsLibrary eds;
+        NmrLibrary nmr;
+        CalorimetryLibrary cal;
         readonly Dictionary<string, InstrumentDoc> docs = new Dictionary<string, InstrumentDoc>();
 
         void Awake() => Instance = this;
@@ -67,11 +73,15 @@ namespace Khkt.Demo.Instruments
         public FtirLibrary Ftir => ftir ??= ftirLib != null ? FtirLibrary.Load(ftirLib.text) : new FtirLibrary();
         public GcLibrary Gc => gc ??= gcMsLib != null ? GcLibrary.Load(gcMsLib.text) : new GcLibrary();
         public HplcLibrary Hplc => hplc ??= hplcLib != null ? HplcLibrary.Load(hplcLib.text) : new HplcLibrary();
+        public XrdLibrary Xrd => xrd ??= xrdLib != null ? XrdLibrary.Load(xrdLib.text) : new XrdLibrary();
+        public EdsLibrary Eds => eds ??= edsLib != null ? EdsLibrary.Load(edsLib.text) : new EdsLibrary();
+        public NmrLibrary Nmr => nmr ??= nmrLib != null ? NmrLibrary.Load(nmrLib.text) : new NmrLibrary();
+        public CalorimetryLibrary Calorimetry => cal ??= calorimetryLib != null ? CalorimetryLibrary.Load(calorimetryLib.text) : new CalorimetryLibrary();
 
         public InstrumentDoc Doc(string code)
         {
             if (docs.TryGetValue(code, out var d)) return d;
-            var ta = code switch { "uv_vis" => uvVisDoc, "aas" => aasDoc, "ftir" => ftirDoc, "gc_ms" => gcMsDoc, "hplc" => hplcDoc, "chuan_do_dien_the" => titratorDoc, _ => null };
+            var ta = code switch { "uv_vis" => uvVisDoc, "aas" => aasDoc, "ftir" => ftirDoc, "gc_ms" => gcMsDoc, "hplc" => hplcDoc, "chuan_do_dien_the" => titratorDoc, "xrd" => xrdDoc, "sem" => semDoc, "nmr" => nmrDoc, "nhiet_luong" => calorimeterDoc, "tu_say" => ovenDoc, "lo_nung" => furnaceDoc, "may_cat_nuoc" => distillerDoc, "noi_hap" => autoclaveDoc, _ => null };
             d = ta != null ? InstrumentDoc.Parse(ta.text) : new InstrumentDoc { Code = code, Name = code };
             docs[code] = d;
             return d;

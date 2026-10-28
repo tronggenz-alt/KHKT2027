@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Khkt.Assembly;
 using Khkt.Demo;
 using Khkt.Environment;
@@ -66,7 +66,7 @@ namespace Khkt.EditorTools
 
             // bàn chế tạo dọc tường đông: màn hình lớn, bàn phím, chuột
             var desk = Group("Bàn chế tạo", g, new Vector3(19.45f, 0, 11.65f), 90f);  // trục z cục bộ chỉ về tường đông: người ngồi phía tây nhìn sang
-            Box(desk, "Mặt làm việc chế tạo", new Vector3(0, 0.74f, 0), new Vector3(1.9f, 0.04f, 0.8f), Mat("MatBanCheTao", new Color(0.93f, 0.94f, 0.94f), 0.4f));
+            Box(desk, "Mặt làm việc chế tạo", new Vector3(0, 0.74f, 0), new Vector3(1.9f, 0.04f, 0.8f), Mat("MatBanCheTao", new Color(0.13f, 0.15f, 0.17f), 0.45f));
             Box(desk, "Tủ bàn chế tạo", new Vector3(0.55f, 0.37f, 0.05f), new Vector3(0.7f, 0.7f, 0.66f), cabinet);
             foreach (float x in new[] { -0.9f, 0.9f }) Box(desk, "Chân bàn", new Vector3(x, 0.36f, 0), new Vector3(0.05f, 0.72f, 0.74f), oak);
             var monitor = Group("Màn hình chế tạo", desk, new Vector3(0, 0.76f, 0.22f));
@@ -245,8 +245,8 @@ namespace Khkt.EditorTools
         static void BuildWorkshop(Transform root, Camera viewer, Material ghost, Shader outlineShader, Shader glassShader)
         {
             var w = Group(WorkshopName, root, WorkshopPos);
-            var floor = Mat("SanXuongAo", new Color(0.62f, 0.66f, 0.7f), 0.25f);
-            var back = Mat("PhongNenXuong", new Color(0.78f, 0.82f, 0.86f), 0.1f);
+            var floor = Mat("SanXuongAo", new Color(0.22f, 0.25f, 0.28f), 0.25f);
+            var back = Mat("PhongNenXuong", new Color(0.3f, 0.34f, 0.38f), 0.1f);
             Box(w, "Sàn xưởng", new Vector3(0, -0.01f, 0), new Vector3(9f, 0.02f, 9f), floor);
             Box(w, "Phông nền sau", new Vector3(0, 2.2f, 2.6f), new Vector3(9f, 4.4f, 0.1f), back, false);
             Box(w, "Phông nền trái", new Vector3(-4.5f, 2.2f, 0), new Vector3(0.1f, 4.4f, 9f), back, false);
@@ -257,13 +257,13 @@ namespace Khkt.EditorTools
             {
                 bool line = x % 64 < 2 || y % 64 < 2;
                 bool fine = x % 16 == 0 || y % 16 == 0;
-                return line ? new Color(0.62f, 0.72f, 0.78f) : fine ? new Color(0.86f, 0.9f, 0.92f) : new Color(0.93f, 0.95f, 0.96f);
+                return line ? new Color(0.25f, 0.5f, 0.56f) : fine ? new Color(0.17f, 0.2f, 0.23f) : new Color(0.12f, 0.14f, 0.16f);  // mặt bàn tối (epoxy đen) để dụng cụ thủy tinh nổi rõ, đỡ chói
             });
-            Box(table, "Mặt bàn ảo", new Vector3(0, 0.88f, 0), new Vector3(2.4f, 0.04f, 1.2f), Mat("MatBanAo", Color.white, 0.35f, 0, grid, new Vector2(12f, 6f)));
-            Box(table, "Thân bàn ảo", new Vector3(0, 0.43f, 0), new Vector3(2.36f, 0.86f, 1.16f), cabinet);
+            Box(table, "Mặt bàn ảo", new Vector3(0, 0.88f, 0), new Vector3(2.4f, 0.04f, 1.2f), Mat("MatBanAo", Color.white, 0.45f, 0, grid, new Vector2(12f, 6f)));
+            Box(table, "Thân bàn ảo", new Vector3(0, 0.43f, 0), new Vector3(2.36f, 0.86f, 1.16f), Mat("ThanBanAo", new Color(0.18f, 0.2f, 0.23f), 0.35f));
             Box(table, "Viền bàn ảo", new Vector3(0, 0.885f, -0.6f), new Vector3(2.4f, 0.03f, 0.01f), accent, false);
-            Box(table, "Vách sau bàn ảo", new Vector3(0, 1.25f, 0.62f), new Vector3(2.4f, 0.7f, 0.04f), panelGrey);
-            Label(table, "Vòi nước, vòi hút để thử nối ống · ra bàn đích nối lại vào vòi thật", new Vector3(0, 1.52f, 0.598f), Vector3.back, 0.026f, new Color(0.15f, 0.2f, 0.25f));
+            Box(table, "Vách sau bàn ảo", new Vector3(0, 1.25f, 0.62f), new Vector3(2.4f, 0.7f, 0.04f), Mat("VachBanAo", new Color(0.24f, 0.27f, 0.31f), 0.3f));
+            Label(table, "Vòi nước, vòi hút để thử nối ống · ra bàn đích nối lại vào vòi thật", new Vector3(0, 1.52f, 0.598f), Vector3.back, 0.026f, new Color(0.75f, 0.88f, 0.92f));
             float fy = 1.08f, fz = 0.585f;
             Fixture(table, "Vòi cấp nước (xưởng) 1", new Vector3(-0.75f, fy, fz), new Color(0.15f, 0.45f, 0.9f), "Vòi cấp nước 1 (đầu nối ống cao su)");
             Fixture(table, "Ống thoát nước (xưởng) 1", new Vector3(-0.63f, fy, fz), new Color(0.35f, 0.38f, 0.42f), "Ống thoát nước 1 (đầu nối ống cao su)");

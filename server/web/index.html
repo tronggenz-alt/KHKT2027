@@ -96,6 +96,7 @@ tr.low td { background: var(--warn-soft); }
       <button data-tab="tong-quan" class="active">Tổng quan</button>
       <button data-tab="kho">Kho hóa chất</button>
       <button data-tab="thiet-bi">Thiết bị</button>
+      <button data-tab="may">Hướng dẫn máy</button>
       <button data-tab="nhat-ky">Nhật ký</button>
       <button data-tab="khoa">Mạng lưới khóa AI</button>
       <button data-tab="thu">Thử AI &amp; robot</button>
@@ -137,6 +138,17 @@ tr.low td { background: var(--warn-soft); }
         <span class="muted small">Sửa số trong bảng là lưu ngay.</span>
       </div>
       <div class="tablewrap"><table id="eqTable"></table></div>
+    </div>
+  </section>
+
+  <!-- ======================= Hướng dẫn máy ======================= -->
+  <section id="may">
+    <div class="card">
+      <div class="toolbar">
+        <select id="maySel" style="flex:1;min-width:240px"></select>
+        <span class="muted small">Quy trình vận hành, nguyên lý, thông số có nguồn của từng máy trong phòng lab ảo (data/may). Trợ lý AI dùng đúng tài liệu này khi học sinh hỏi về máy.</span>
+      </div>
+      <div id="mayDoc"></div>
     </div>
   </section>
 
@@ -468,8 +480,30 @@ $("#planBtn").onclick = async () => {
   $("#planBtn").disabled = false;
 };
 
-// ---------------- Khởi động ----------------
-health(); setInterval(health, 30000);
+// ---------------- Hướng dẫn máy ----------------
+loaders["may"] = async () => {
+  if (!$("#maySel").options.length) {
+    const ds = await api("/may");
+    $("#maySel").innerHTML = ds.map(m => `<option value="${esc(m.ma)}">${esc(m.ten)} (${m.so_buoc} bước)</option>`).join("");
+    $("#maySel").onchange = showMachine;
+  }
+  showMachine();
+};
+async function showMachine() {
+  const d = await api("/may/" + encodeURIComponent($("#maySel").value));
+  const li = a => a.map(x => `<li>${esc(x)}</li>`).join("");
+  $("#mayDoc").innerHTML = `
+    <h2>${esc(d.ten)}</h2><p class="muted small">Máy mẫu: ${esc(d.may_mau)}</p>
+    <h3>Nguyên lý</h3><ul>${li(d.nguyen_ly)}</ul>
+    ${d.cong_thuc?.length ? `<p class="mono">${d.cong_thuc.map(esc).join(" · ")}</p>` : ""}
+    <h3>Quy trình vận hành</h3><ol>${d.quy_trinh.map(s => `<li><b>${esc(s.ten)}</b>: ${esc(s.viec)}${s.ly_do ? `<div class="muted small">Vì sao: ${esc(s.ly_do)}</div>` : ""}${s.loi ? `<div class="small" style="color:var(--warn)">Lỗi hay gặp: ${esc(s.loi)}</div>` : ""}</li>`).join("")}</ol>
+    <h3>An toàn</h3><ul>${li(d.an_toan)}</ul>
+    <h3>Bộ phận</h3><div class="tablewrap"><table><tr><th>Bộ phận</th><th>Chức năng</th></tr>${d.bo_phan.map(b => `<tr><td>${esc(b.ten)}</td><td>${esc(b.chuc_nang)}</td></tr>`).join("")}</table></div>
+    <h3>Thông số</h3><div class="tablewrap"><table><tr><th>Thông số</th><th>Giá trị</th><th>Nguồn</th></tr>${d.thong_so.map(t => `<tr><td>${esc(t.ten)}</td><td>${esc(t.gia_tri)}</td><td>${t.mo_phong ? `<span class="badge warn">mô phỏng</span>` : `<a href="${esc(t.nguon)}" target="_blank" rel="noopener">${esc(t.loai || "nguồn")}</a>`}</td></tr>`).join("")}</table></div>
+    <h3>Câu hỏi ôn tập</h3><ol>${li(d.cau_hoi_on_tap)}</ol>`;
+}
+
+// ---------------- Khởi động ----------------health(); setInterval(health, 30000);
 // tự làm mới các trang chỉ để xem (không làm mới trang có ô đang sửa)
 setInterval(() => { const a = document.querySelector("main section.active")?.id; if (a === "nhat-ky" || a === "tong-quan") loaders[a](); }, 15000);
 const start = location.hash.slice(1);

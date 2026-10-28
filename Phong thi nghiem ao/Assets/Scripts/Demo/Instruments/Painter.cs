@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -28,6 +29,44 @@ namespace Khkt.Demo.Instruments
         {
             Tex.SetPixels32(px);
             Tex.Apply(false);
+        }
+
+        /// <summary>Lưu / chép lại toàn bộ ảnh (để vẽ ảnh nặng một lần rồi dùng lại).</summary>
+        public Color32[] Snapshot() => (Color32[])px.Clone();
+        public void Restore(Color32[] src) { if (src != null && src.Length == px.Length) Array.Copy(src, px, px.Length); }
+
+        /// <summary>Làm mờ hộp bán kính r (ngang rồi dọc): ảnh chưa lấy nét.</summary>
+        public void Blur(int r)
+        {
+            if (r <= 0) return;
+            var tmp = new Color32[px.Length];
+            for (int pass = 0; pass < 2; pass++)
+            {
+                var src = pass == 0 ? px : tmp;
+                var dst = pass == 0 ? tmp : px;
+                for (int y = 0; y < H; y++)
+                    for (int x = 0; x < W; x++)
+                    {
+                        int sr = 0, sg = 0, sb = 0, n = 0;
+                        for (int k = -r; k <= r; k++)
+                        {
+                            int xx = pass == 0 ? x + k : x, yy = pass == 0 ? y : y + k;
+                            if ((uint)xx >= W || (uint)yy >= H) continue;
+                            var c = src[yy * W + xx];
+                            sr += c.r; sg += c.g; sb += c.b; n++;
+                        }
+                        dst[y * W + x] = new Color32((byte)(sr / n), (byte)(sg / n), (byte)(sb / n), 255);
+                    }
+            }
+        }
+
+        /// <summary>Đặt độ xám (0..1) một điểm, cộng dồn có giới hạn.</summary>
+        public void AddGray(int x, int y, float v)
+        {
+            if ((uint)x >= W || (uint)y >= H) return;
+            int i = y * W + x;
+            byte g = (byte)Mathf.Clamp(px[i].r + v * 255, 0, 255);
+            px[i] = new Color32(g, g, g, 255);
         }
 
         void Blend(int x, int y, Color c)

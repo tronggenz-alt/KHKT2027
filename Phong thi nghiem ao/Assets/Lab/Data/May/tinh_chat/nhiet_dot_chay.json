@@ -1,0 +1,15 @@
+{
+  "ghi_chu": "Nhiệt đốt cháy chuẩn ΔcH° (kJ/mol, sản phẩm CO₂ khí và H₂O lỏng) theo NIST Chemistry WebBook. Axit benzoic: giá trị trung bình NIST; còn có giá trị chứng nhận nhiệt đốt cháy trong bom (ΔcU) của chất chuẩn SRM 39j = 26 434 J/g. Máy tính ΔcU = ΔcH − Δn(khí)·R·T với Δn = n(CO₂) − n(O₂) theo công thức CₓHᵧO_z.",
+  "chat": [
+    {"id": "axit_benzoic", "ten": "Axit benzoic", "C": 7, "H": 6, "O": 2, "M": 122.12, "dH": -3228, "trang_thai": "rắn", "ids": ["Bz", "hc:517"], "chung_nhan_J_g": 26434,
+     "nguon": "https://webbook.nist.gov/cgi/cbook.cgi?ID=C65850&Units=SI&Mask=2", "nguon_chung_nhan": "https://tsapps.nist.gov/srmext/certificates/39J.pdf"},
+    {"id": "glucozo", "ten": "Glucozơ", "C": 6, "H": 12, "O": 6, "M": 180.16, "dH": -2805.0, "trang_thai": "rắn", "ids": ["hc:578", "hc:579"],
+     "nguon": "https://webbook.nist.gov/cgi/cbook.cgi?ID=C492626&Units=SI&Mask=2"},
+    {"id": "saccarozo", "ten": "Saccarozơ", "C": 12, "H": 22, "O": 11, "M": 342.30, "dH": -5643.4, "trang_thai": "rắn", "ids": ["hc:580", "hc:581", "hc:582"],
+     "nguon": "https://webbook.nist.gov/cgi/cbook.cgi?ID=C57501&Units=SI&Mask=2"},
+    {"id": "axit_xitric", "ten": "Axit xitric", "C": 6, "H": 8, "O": 7, "M": 192.12, "dH": -1960.6, "trang_thai": "rắn", "ids": ["Cit", "hc:515"],
+     "nguon": "https://webbook.nist.gov/cgi/cbook.cgi?ID=C77929&Units=SI&Mask=2"},
+    {"id": "etanol", "ten": "Etanol", "C": 2, "H": 6, "O": 1, "M": 46.07, "dH": -1367.6, "trang_thai": "lỏng", "ids": ["C2H5OH", "hc:468"],
+     "nguon": "https://webbook.nist.gov/cgi/cbook.cgi?ID=C64175&Units=SI&Mask=2"}
+  ]
+}

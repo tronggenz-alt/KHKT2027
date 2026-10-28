@@ -120,6 +120,44 @@ class DuLieuMayTest(unittest.TestCase):
         self.assertEqual([c["id"] for c in ids["duong"]["chat"]], ["fructozo", "glucozo", "saccarozo", "mantozo", "lactozo"])
         self.assertEqual(k, sorted(k))
 
+    def test_thu_vien_dot_3(self):
+        import math
+        xrd = doc(MAY / "tinh_chat" / "xrd.json")
+        by = {p["id"]: p for p in xrd["pha"]}
+        for p in xrd["pha"]:
+            with self.subTest(pha=p["id"]):
+                self.assertTrue(p["nguon"].startswith("https://www.handbookofmineralogy.org/pdfs/"))
+                self.assertEqual(len(p["vach"]), 7)
+                self.assertEqual(max(i for _, i in p["vach"]), 100)
+        # Handbook of Mineralogy: halit 2.821 (100), canxit 3.035 (100); 2θ theo Bragg với Cu Kα1
+        self.assertEqual(by["halit"]["vach"][0], [2.821, 100])
+        self.assertEqual(by["canxit"]["vach"][0], [3.035, 100])
+        tt = 2 * math.degrees(math.asin(1.5406 / (2 * 2.821)))
+        self.assertAlmostEqual(tt, 31.69, delta=0.01)
+        eds = {e["ky_hieu"]: e for e in doc(MAY / "tinh_chat" / "eds.json")["nguyen_to"]}
+        # X-Ray Data Booklet bảng 1-2 (eV): Na Kα1 1040,98; Cl 2622,39; Cu 8047,78; Ba Lα1 4466,26; Au Mα1 2122,9
+        for el, ev in (("Na", 1040.98), ("Cl", 2622.39), ("Cu", 8047.78), ("Ba", 4466.26), ("Au", 2122.9)):
+            self.assertAlmostEqual(eds[el]["keV"] * 1000, ev, delta=0.5)
+        nmr = {c["id"]: c for c in doc(MAY / "tinh_chat" / "nmr.json")["chat"]}
+        # Fulmer 2010, bảng S1, cột D2O
+        self.assertEqual([s[0] for s in nmr["etanol"]["tin_hieu"]], [1.17, 3.65])
+        self.assertEqual(nmr["metanol"]["tin_hieu"][0][0], 3.34)
+        self.assertEqual(nmr["axeton"]["tin_hieu"][0][0], 2.22)
+        self.assertEqual(nmr["axit_axetic"]["tin_hieu"][0][0], 2.08)
+        for c in nmr.values():
+            with self.subTest(nmr=c["id"]):
+                # tổng số H không trao đổi khớp công thức
+                tong = sum(s[1] for s in c["tin_hieu"])
+                self.assertAlmostEqual(tong, {"etanol": 5, "metanol": 3, "axeton": 6, "axit_axetic": 3, "etyl_axetat": 8, "isoamyl_axetat": 14,
+                                              "glucozo": 7, "saccarozo": 14, "axit_xitric": 4}[c["id"]], delta=0.01)
+        nl = {c["id"]: c for c in doc(MAY / "tinh_chat" / "nhiet_dot_chay.json")["chat"]}
+        self.assertEqual(nl["axit_benzoic"]["chung_nhan_J_g"], 26434)
+        self.assertEqual((nl["axit_benzoic"]["dH"], nl["glucozo"]["dH"], nl["saccarozo"]["dH"], nl["axit_xitric"]["dH"]), (-3228, -2805.0, -5643.4, -1960.6))
+        for c in nl.values():
+            # khối lượng mol khớp công thức CxHyOz
+            m = c["C"] * 12.011 + c["H"] * 1.008 + c["O"] * 15.999
+            self.assertAlmostEqual(m, c["M"], delta=0.05)
+
     def test_ban_unity_giong_ban_goc(self):
         for f in sorted(MAY.rglob("*.json")):
             with self.subTest(file=str(f.relative_to(MAY))):

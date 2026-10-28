@@ -1,4 +1,4 @@
-using Khkt.Demo;
+﻿using Khkt.Demo;
 using Khkt.Interaction;
 using UnityEngine;
 using static Khkt.EditorTools.LabKit;
@@ -104,6 +104,9 @@ namespace Khkt.EditorTools
                 ("Mẫu nước thải xi mạ crom", new[] { "CrVI:0.02", "Na+:0.024", "SO4:0.004" }),                              // da cam, pH ~2,6
                 ("Mẫu rượu nghi pha metanol", new[] { "C2H5OH:5.2", "hc:467:0.05" }),                                        // 30°, metanol 1600 mg/L (GC-MS)
                 ("Mẫu nước ngọt có ga", new[] { "hc:580:0.3", "Cit:0.01", "Bz:0.0012", "Na+:0.0012", "CO3:0.02" }),       // đường, axit xitric, natri benzoat (HPLC)
+                ("Mẫu nước muối", new[] { "Na+:1", "Cl-:1" }),                                                          // cô cạn → tinh thể NaCl (XRD, SEM)
+                ("Mẫu kết tủa trắng", new[] { "Ba2+:0.05", "SO4:0.05", "Na+:0.1", "Cl-:0.1" }),                        // BaSO₄ kết tủa (XRD, SEM-EDS)
+                ("Mẫu cặn ấm đun nước", new[] { "CaCO3:0.05", "Ca2+:0.002", "CO3:0.002" }),                            // canxit (XRD)
             };
             const float rackX = -1.2f, pitchX = 0.075f;
             var rack = Group("Giá ống mẫu", prep, new Vector3(rackX + pitchX * (samples.Length - 1) / 2, top, 0.3f));
@@ -132,22 +135,22 @@ namespace Khkt.EditorTools
 
             // Thiết bị trưng bày (có thẻ thông tin)
             // tường tây: mặt máy quay +x; tường đông: quay -x; tường hành lang: quay -z
-            BigMachine(g, "Kính hiển vi điện tử quét (SEM)", new Vector3(0.7f, 0, -4.9f), new Vector3(1.0f, 1.6f, 1.2f), 0,
-                       "Chụp ảnh bề mặt vật liệu ở độ phóng đại hàng chục nghìn lần bằng chùm electron.");
-            BigMachine(g, "Máy nhiễu xạ tia X (XRD)", new Vector3(0.65f, 0, -3.2f), new Vector3(0.9f, 1.7f, 1.0f), 0,
-                       "Xác định cấu trúc tinh thể (mạng tinh thể NaCl, CaCO₃...) từ góc nhiễu xạ tia X.");
-            BigMachine(g, "Máy cộng hưởng từ hạt nhân (NMR) để bàn", new Vector3(12.95f, 0, -3.0f), new Vector3(0.7f, 1.1f, 0.7f), 180,
-                       "Phổ ¹H-NMR: số loại nguyên tử H và môi trường của chúng trong phân tử hữu cơ.");
-            BigMachine(g, "Tủ sấy", new Vector3(12.97f, 0, -4.0f), new Vector3(0.65f, 1.3f, 0.65f), 180,
-                       "Sấy khô dụng cụ, hóa chất ở 40-250 °C.");
-            BigMachine(g, "Lò nung", new Vector3(13.0f, 0, -5.0f), new Vector3(0.6f, 1.0f, 0.6f), 180,
-                       "Nung mẫu tới 1100 °C (nung vôi, xác định độ tro).");
-            BigMachine(g, "Máy cất nước hai lần", new Vector3(13.05f, 0, -6.0f), new Vector3(0.5f, 1.6f, 0.4f), 180,
-                       "Tạo nước cất tinh khiết cho phân tích.");
-            BigMachine(g, "Nồi hấp tiệt trùng", new Vector3(13.0f, 0, -7.0f), new Vector3(0.6f, 1.0f, 0.6f), 180,
-                       "Tiệt trùng dụng cụ bằng hơi nước 121 °C, áp suất cao.");
-            BigMachine(g, "Máy đo nhiệt lượng (bom nhiệt lượng)", new Vector3(4.3f, 0, -2.65f), new Vector3(0.6f, 1.0f, 0.5f), 90,
-                       "Đo nhiệt đốt cháy của nhiên liệu, thực phẩm.");
+            FloorAnalyzer(g, AnalyzerInstrument.Kind.Sem, new Vector3(0.7f, 0, -4.9f), new Vector3(1.0f, 1.6f, 1.2f), 0,
+                       "Chụp ảnh bề mặt chất rắn ở độ phóng đại hàng chục nghìn lần bằng chùm electron; phổ EDS cho biết nguyên tố.");
+            FloorAnalyzer(g, AnalyzerInstrument.Kind.Xrd, new Vector3(0.65f, 0, -3.2f), new Vector3(0.9f, 1.7f, 1.0f), 0,
+                       "Xác định pha tinh thể (NaCl, KCl, CaCO₃, BaSO₄...) của chất rắn từ góc nhiễu xạ tia X.");
+            FloorAnalyzer(g, AnalyzerInstrument.Kind.Nmr, new Vector3(12.95f, 0, -3.0f), new Vector3(0.7f, 1.1f, 0.7f), 180,
+                       "Phổ ¹H-NMR: số loại nguyên tử H, môi trường của chúng; định lượng các chất trong hỗn hợp (qNMR).");
+            FloorAnalyzer(g, AnalyzerInstrument.Kind.DryingOven, new Vector3(12.97f, 0, -4.0f), new Vector3(0.65f, 1.3f, 0.65f), 180,
+                       "Sấy mẫu ở 105 °C đến khối lượng không đổi: độ ẩm, chất khô (phương pháp khối lượng).");
+            FloorAnalyzer(g, AnalyzerInstrument.Kind.Furnace, new Vector3(13.0f, 0, -5.0f), new Vector3(0.6f, 1.0f, 0.6f), 180,
+                       "Nung ở 550 °C xác định tro; 900 °C nung vôi CaCO₃ → CaO.");
+            FloorAnalyzer(g, AnalyzerInstrument.Kind.Distiller, new Vector3(13.05f, 0, -6.0f), new Vector3(0.5f, 1.6f, 0.4f), 180,
+                       "Cất nước hai lần, kiểm tra độ dẫn điện, xếp loại nước theo TCVN 4851.");
+            FloorAnalyzer(g, AnalyzerInstrument.Kind.Autoclave, new Vector3(13.0f, 0, -7.0f), new Vector3(0.6f, 1.0f, 0.6f), 180,
+                       "Tiệt trùng bằng hơi nước bão hòa 121 °C (khoảng 1,05 bar dư) trong 15 phút; kiểm tra bằng chỉ thị sinh học.");
+            FloorAnalyzer(g, AnalyzerInstrument.Kind.Calorimeter, new Vector3(4.3f, 0, -2.65f), new Vector3(0.6f, 1.0f, 0.5f), 90,
+                       "Đo nhiệt đốt cháy của nhiên liệu, thực phẩm (năng lượng kcal/100 g).");
 
             foreach (float x in new[] { 2.5f, 6.75f, 11.0f })
                 foreach (float z in new[] { -7.6f, -4.0f })
@@ -182,6 +185,34 @@ namespace Khkt.EditorTools
             a.header = header;
             a.resultText = result;
             Info(g, name, desc, "Đặt ống mẫu (hoặc cuvet) vào ổ trên nóc máy, rồi bấm vào máy để chạy.");
+        }
+
+        /// <summary>Máy phân tích đứng trên sàn (XRD, SEM, NMR, bom nhiệt lượng): thân máy, kệ có ổ mẫu phía trước, màn hình nhỏ; bấm vào để mở màn hình vận hành.</summary>
+        static void FloorAnalyzer(Transform p, AnalyzerInstrument.Kind kind, Vector3 pos, Vector3 size, float yaw, string desc)
+        {
+            string name = AnalyzerInstrument.KindName(kind);
+            var g = Group(name, p, pos, yaw);
+            Box(g, "Thân", new Vector3(0, size.y / 2, 0), size, signWhite);
+            Box(g, "Mặt điều khiển", new Vector3(size.x / 2 + 0.004f, size.y * 0.7f, 0), new Vector3(0.008f, size.y * 0.25f, size.z * 0.6f), blackPlastic, false);
+            var scr = Box(g, "Màn hình máy", new Vector3(size.x / 2 + 0.009f, size.y * 0.72f, 0), new Vector3(0.004f, size.y * 0.18f, size.z * 0.45f), machineScreen, false);
+            NoShadow(scr);
+            Box(g, "Dải màu", new Vector3(size.x / 2 + 0.006f, 0.12f, 0), new Vector3(0.006f, 0.04f, size.z), accent, false);
+            var header = Label(g, name, new Vector3(size.x / 2 + 0.012f, size.y + 0.08f, 0), Vector3.right, 0.035f, new Color(0.05f, 0.3f, 0.36f)).GetComponent<TextMesh>();
+            // kệ nhỏ phía trước có ổ đặt ống mẫu
+            float ly = Mathf.Min(0.9f, size.y * 0.55f);
+            Box(g, "Kệ mẫu", new Vector3(size.x / 2 + 0.16f, ly - 0.02f, size.z * 0.3f), new Vector3(0.3f, 0.04f, 0.3f), epoxy);
+            Box(g, "Chân kệ mẫu", new Vector3(size.x / 2 + 0.16f, (ly - 0.04f) / 2, size.z * 0.3f), new Vector3(0.04f, ly - 0.04f, 0.04f), darkMetal);
+            var slot = Socket(g, "Ổ mẫu " + name, new Vector3(size.x / 2 + 0.16f, ly, size.z * 0.3f), new[] { "ong_nghiem", "cuvet" }, false,
+                              new Vector3(0, 0.07f, 0), new Vector3(0.08f, 0.14f, 0.08f), new Vector3(0, 0.002f, 0), 0.02f, socketRing);
+            var result = Label(g, "", new Vector3(size.x / 2 + 0.012f, size.y * 0.58f, 0), Vector3.right, 0.012f, new Color(0.85f, 0.95f, 1f)).GetComponent<TextMesh>();
+            result.anchor = TextAnchor.UpperCenter;
+            var a = g.gameObject.AddComponent<AnalyzerInstrument>();
+            a.kind = kind;
+            a.slot = slot;
+            a.screen = scr.GetComponent<Renderer>();
+            a.header = header;
+            a.resultText = result;
+            Info(g, name, desc, "Đặt ống mẫu vào ổ trên kệ trước máy (hoặc dùng mẫu chuẩn có sẵn), rồi bấm vào máy để mở màn hình vận hành.");
         }
 
         static void BigMachine(Transform p, string name, Vector3 pos, Vector3 size, float yaw, string desc)

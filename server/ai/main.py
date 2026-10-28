@@ -26,7 +26,7 @@ import re
 import unicodedata
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
@@ -34,7 +34,7 @@ from server.lab import api as lab_api
 from server.lab import db as lab_db
 from server.lab import keypool
 
-from . import providers
+from . import machines, providers
 from .robot_plan import PLAN_SCHEMA, SYSTEM_PLAN, format_scene, validate
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -73,7 +73,9 @@ SYSTEM_ASSIST = (
     "- mo_tra_cuu: mở bảng tra cứu hóa chất\n"
     "Chỉ thêm hành động khi học sinh yêu cầu hoặc khi tình huống nguy hiểm cần xử lý ngay. "
     "Giữ đúng phạm vi thí nghiệm trường phổ thông: không hướng dẫn điều chế chất nổ, chất độc hay vũ khí; "
-    "nếu được hỏi những điều đó, từ chối nhẹ nhàng và gợi ý thí nghiệm an toàn tương ứng. Không dùng markdown."
+    "nếu được hỏi những điều đó, từ chối nhẹ nhàng và gợi ý thí nghiệm an toàn tương ứng. "
+    "Khi có QUY TRÌNH MÁY đi kèm (tài liệu vận hành của phòng lab), hướng dẫn đúng thứ tự các bước và nhắc lỗi hay gặp, an toàn của máy đó; "
+    "không tự đặt thêm bước hay thông số. Không dùng markdown."
 )
 
 ASSIST_SCHEMA = {
@@ -305,6 +307,20 @@ def suc_khoe() -> dict:
     return {"ok": p is not None, "nha_cung_cap": p.NAME if p else "khong", "mo_hinh": p.model_name() if p else ""}
 
 
+@app.get("/may")
+def danh_sach_may() -> list[dict]:
+    """Các máy có hồ sơ vận hành (data/may): mã, tên, máy mẫu, số bước quy trình."""
+    return machines.listing()
+
+
+@app.get("/may/{ma}")
+def ho_so_may(ma: str) -> dict:
+    d = machines.MACHINES.get(ma)
+    if d is None:
+        raise HTTPException(status_code=404, detail="Không có máy này")
+    return d
+
+
 @app.get("/the-thong-tin/{phan_ung_id}")
 def the_thong_tin(phan_ung_id: str) -> dict:
     r = REACTIONS.get(phan_ung_id)
@@ -380,7 +396,8 @@ async def tro_ly(req: TroLyYeuCau) -> TroLyTraLoi:
     if p is None:
         return TroLyTraLoi(tra_loi="Máy chủ chưa cấu hình mô hình AI; robot dùng lệnh cơ bản.", nguon="khong")
     history = "\n".join(req.lich_su[-8:])
-    user = f"NGỮ CẢNH THÍ NGHIỆM:\n{req.ngu_canh}\n\nHỘI THOẠI GẦN ĐÂY:\n{history}\n\nHỌC SINH: {req.cau_hoi}"
+    sop = machines.context(req.cau_hoi, req.ngu_canh)
+    user = f"NGỮ CẢNH THÍ NGHIỆM:\n{req.ngu_canh}\n\n" + (f"QUY TRÌNH MÁY (tài liệu của phòng lab, coi là đúng):\n{sop}\n\n" if sop else "") + f"HỘI THOẠI GẦN ĐÂY:\n{history}\n\nHỌC SINH: {req.cau_hoi}"
     try:
         data = await p.structured(SYSTEM_ASSIST, user, ASSIST_SCHEMA, 1500)
     except Exception as e:  # mạng, khóa API, từ chối: Unity tự chuyển sang hiểu lệnh tại chỗ
@@ -396,7 +413,8 @@ async def robot_ke_hoach(req: KeHoachYeuCau) -> KeHoach:
         return KeHoach(tra_loi="Máy chủ chưa cấu hình mô hình AI; robot dùng lệnh cơ bản.", nguon="khong")
     scene = req.the_gioi.model_dump()
     history = "\n".join(req.lich_su[-8:])
-    user = f"ẢNH CHỤP CẢNH:\n{format_scene(scene)}\n\nHỘI THOẠI GẦN ĐÂY:\n{history}\n\nHỌC SINH: {req.cau_hoi}"
+    sop = machines.context(req.cau_hoi)
+    user = f"ẢNH CHỤP CẢNH:\n{format_scene(scene)}\n\n" + (f"QUY TRÌNH MÁY (tài liệu của phòng lab):\n{sop}\n\n" if sop else "") + f"HỘI THOẠI GẦN ĐÂY:\n{history}\n\nHỌC SINH: {req.cau_hoi}"
     try:
         data = await p.structured(SYSTEM_PLAN, user, PLAN_SCHEMA, 4000)  # 12 bước kèm lời giải thích cần ~2000-3000 token
     except Exception as e:  # mọi nhà cung cấp đều lỗi: Unity tự chuyển sang hiểu lệnh tại chỗ

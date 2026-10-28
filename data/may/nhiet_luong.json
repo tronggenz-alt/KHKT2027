@@ -1,0 +1,174 @@
+{
+  "ma": "nhiet_luong",
+  "ten": "Bom nhiệt lượng (đo nhiệt đốt cháy)",
+  "may_mau": "IKA C 200 (chế độ đẳng nhiệt vỏ – isoperibol, bom oxy 30 bar) (thông số lấy theo máy mẫu; trên vỏ máy trong phòng lab ảo dùng tên chung)",
+  "nguyen_ly": [
+    "Mẫu được đốt cháy hoàn toàn trong bom thép kín chứa oxy áp suất cao (30 bar). Nhiệt tỏa ra truyền cho bom và lượng nước bao quanh, làm nhiệt độ tăng ΔT (khoảng 1 – 3 K).",
+    "Nhiệt lượng Q = C·ΔT, với C là nhiệt dung của cả hệ (bom, nước, bình). C không tính được chính xác từ lý thuyết nên phải hiệu chuẩn bằng cách đốt chất chuẩn axit benzoic có nhiệt đốt cháy chứng nhận (26 434 J/g, NIST SRM 39j).",
+    "Bom thể tích không đổi nên đo được nhiệt đốt cháy ở thể tích không đổi ΔcU. Đổi ra ΔcH = ΔcU + Δn(khí)·R·T.",
+    "Vỏ bình giữ nhiệt độ không đổi, nên hệ vẫn trao đổi nhiệt nhẹ với vỏ trong lúc đo; phải hiệu chỉnh ΔT theo độ trôi nhiệt độ trước và sau khi đốt. Cũng phải trừ nhiệt của sợi đốt (dây mồi).",
+    "Dùng để đo nhiệt trị của nhiên liệu và năng lượng của thực phẩm. Mẫu lỏng chứa nhiều nước phải sấy khô trước, vì nước không cháy và làm mẫu không bắt lửa."
+  ],
+  "cong_thuc": [
+    "Q = C·ΔT",
+    "C = (m_chuẩn·26 434 J/g + Q_dây) / ΔT_chuẩn",
+    "ΔcH = ΔcU + Δn(khí)·R·T",
+    "1 kcal = 4,184 kJ"
+  ],
+  "bo_phan": [
+    {
+      "ma": "bom",
+      "ten": "Bom phân hủy bằng thép không gỉ",
+      "chuc_nang": "Bình kín chịu áp suất, chứa mẫu và oxy 30 bar."
+    },
+    {
+      "ma": "chen",
+      "ten": "Chén đựng mẫu",
+      "chuc_nang": "Chén thạch anh / thép đựng viên mẫu."
+    },
+    {
+      "ma": "day_dot",
+      "ten": "Dây đốt và sợi mồi",
+      "chuc_nang": "Dòng điện nung nóng dây, sợi bông mồi lửa cho mẫu."
+    },
+    {
+      "ma": "binh_nuoc",
+      "ten": "Bình nhiệt lượng chứa nước",
+      "chuc_nang": "Nước bao quanh bom nhận nhiệt; có cánh khuấy."
+    },
+    {
+      "ma": "nhiet_ke",
+      "ten": "Nhiệt kế điện tử (phân giải 0,0001 K)",
+      "chuc_nang": "Đo nhiệt độ nước theo thời gian."
+    },
+    {
+      "ma": "vo",
+      "ten": "Vỏ giữ nhiệt độ không đổi",
+      "chuc_nang": "Vỏ nước ổn nhiệt bao ngoài, giảm và kiểm soát trao đổi nhiệt."
+    },
+    {
+      "ma": "oxy",
+      "ten": "Trạm nạp oxy",
+      "chuc_nang": "Nạp oxy tinh khiết vào bom tới 30 bar."
+    }
+  ],
+  "thong_so": [
+    {
+      "ten": "Áp suất oxy làm việc",
+      "gia_tri": "30 bar",
+      "loai": "điển hình",
+      "nguon": "https://www.avantorsciences.com/export/en/product/7378170/calorimeters-c-200"
+    },
+    {
+      "ten": "Năng lượng tối đa một lần đốt",
+      "gia_tri": "40 000 J",
+      "loai": "điển hình",
+      "nguon": "https://www.avantorsciences.com/export/en/product/7378170/calorimeters-c-200"
+    },
+    {
+      "ten": "Độ phân giải nhiệt kế",
+      "gia_tri": "0,0001 K",
+      "loai": "điển hình",
+      "nguon": "https://www.avantorsciences.com/export/en/product/7378170/calorimeters-c-200"
+    },
+    {
+      "ten": "Nhiệt đốt cháy chứng nhận của axit benzoic chuẩn",
+      "gia_tri": "26 434 J/g ± 3 J/g (NIST SRM 39j)",
+      "loai": "chứng nhận",
+      "nguon": "https://tsapps.nist.gov/srmext/certificates/39J.pdf"
+    },
+    {
+      "ten": "Nhiệt đốt cháy chuẩn của glucozơ, saccarozơ, axit xitric, etanol, axit benzoic",
+      "gia_tri": "theo NIST Chemistry WebBook (xem data/may/tinh_chat/nhiet_dot_chay.json)",
+      "loai": "tra cứu",
+      "nguon": "https://webbook.nist.gov/chemistry/"
+    },
+    {
+      "ten": "Nhiệt dung thật của hệ, nhiệt sợi mồi, hằng số trao đổi nhiệt với vỏ",
+      "gia_tri": "C = 10 050 J/K; sợi mồi 50 J; k = 0,003 /phút",
+      "loai": "mô phỏng",
+      "mo_phong": true
+    }
+  ],
+  "quy_trinh": [
+    {
+      "ma": "hieu_chuan",
+      "ten": "Hiệu chuẩn bằng axit benzoic",
+      "viec": "Đốt khoảng 1 g axit benzoic chuẩn, tính nhiệt dung C của hệ.",
+      "ly_do": "C phụ thuộc bom, lượng nước, bình; chỉ biết chính xác bằng chất chuẩn.",
+      "loi": "Dùng C ghi trên máy, không hiệu chuẩn: kết quả lệch."
+    },
+    {
+      "ma": "chuan_bi_mau",
+      "ten": "Chuẩn bị, cân mẫu",
+      "viec": "Sấy khô mẫu lỏng / ẩm; ép viên; cân chính xác (0,1 mg) sao cho năng lượng dưới 40 kJ.",
+      "ly_do": "Nước không cháy; mẫu quá nhiều làm áp suất, nhiệt độ vượt giới hạn an toàn.",
+      "loi": "Mẫu ướt: không bắt lửa. Mẫu quá nặng: máy không cho đốt."
+    },
+    {
+      "ma": "nap_bom",
+      "ten": "Lắp dây mồi, nạp oxy",
+      "viec": "Buộc sợi mồi chạm mẫu, đóng bom, nạp oxy 30 bar, kiểm tra rò.",
+      "ly_do": "Đủ oxy thì mẫu cháy hoàn toàn thành CO₂ và H₂O.",
+      "loi": "Oxy thiếu: cháy không hết, có muội than, kết quả thấp."
+    },
+    {
+      "ma": "dat_bom",
+      "ten": "Đặt bom vào bình nước, khuấy",
+      "viec": "Đặt bom vào bình chứa lượng nước cố định, bật khuấy, chờ nhiệt độ ổn định.",
+      "ly_do": "Đo độ trôi nhiệt độ trước khi đốt (tiền kỳ).",
+      "loi": ""
+    },
+    {
+      "ma": "dot",
+      "ten": "Đốt, ghi nhiệt độ",
+      "viec": "Đốt mẫu; ghi nhiệt độ qua tiền kỳ, chính kỳ, hậu kỳ.",
+      "ly_do": "Ghi nhiệt độ trước, trong và sau khi đốt để tính độ tăng nhiệt độ và hiệu chỉnh trao đổi nhiệt.",
+      "loi": ""
+    },
+    {
+      "ma": "tinh",
+      "ten": "Hiệu chỉnh, tính nhiệt đốt cháy",
+      "viec": "Hiệu chỉnh ΔT theo trao đổi nhiệt, trừ nhiệt sợi mồi; tính nhiệt đốt cháy (J/g, kJ/mol, kcal/100 g).",
+      "ly_do": "Hệ vẫn trao đổi nhiệt với vỏ trong lúc đo.",
+      "loi": "Lấy ΔT = T cuối − T đầu: sai do trao đổi nhiệt."
+    },
+    {
+      "ma": "ket_thuc",
+      "ten": "Xả khí, rửa bom",
+      "viec": "Xả từ từ khí trong bom, mở, rửa và lau khô bom.",
+      "ly_do": "Khí cháy chứa axit (HNO₃) ăn mòn bom.",
+      "loi": ""
+    }
+  ],
+  "an_toan": [
+    "Bom chịu áp suất cao: không nạp quá áp suất cho phép, không đốt mẫu vượt năng lượng tối đa.",
+    "Oxy áp suất cao: không để dầu mỡ dính đầu nối (nguy cơ cháy nổ).",
+    "Xả khí trong bom từ từ, trong tủ hút."
+  ],
+  "thuat_ngu": [
+    {
+      "tu": "Nhiệt dung C",
+      "nghia": "Lượng nhiệt làm cả hệ bom + nước tăng 1 K (J/K)."
+    },
+    {
+      "tu": "Isoperibol",
+      "nghia": "Vỏ bình giữ nhiệt độ không đổi; có hiệu chỉnh trao đổi nhiệt."
+    },
+    {
+      "tu": "ΔcU, ΔcH",
+      "nghia": "Nhiệt đốt cháy ở thể tích không đổi / áp suất không đổi."
+    },
+    {
+      "tu": "Nhiệt trị",
+      "nghia": "Năng lượng tỏa ra khi đốt cháy hoàn toàn 1 g (hoặc 1 kg) chất."
+    }
+  ],
+  "cau_hoi_on_tap": [
+    "Vì sao phải hiệu chuẩn bom nhiệt lượng bằng axit benzoic?",
+    "Đốt 1,000 g axit benzoic làm nhiệt độ tăng 2,635 K. Tính nhiệt dung C (bỏ qua sợi mồi).",
+    "Vì sao nước cam phải sấy khô trước khi đốt?",
+    "Glucozơ có ΔcH = −2805 kJ/mol. Tính năng lượng của 1 g glucozơ (kJ, kcal).",
+    "Vì sao ΔcU và ΔcH của glucozơ bằng nhau, còn của axit benzoic thì khác nhau một chút?"
+  ]
+}

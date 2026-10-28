@@ -65,6 +65,33 @@ class AiServerTest(unittest.TestCase):
         self.assertEqual(main.find_chemical("NaOH")["stt"], 124)
         self.assertIsNone(main.find_chemical("xyz không có"))
 
+    def test_danh_sach_va_ho_so_may(self):
+        ds = self.client.get("/may").json()
+        self.assertEqual(len(ds), 14)
+        self.assertIn("noi_hap", [m["ma"] for m in ds])
+        d = self.client.get("/may/xrd").json()
+        self.assertEqual(d["ma"], "xrd")
+        self.assertTrue(d["quy_trinh"])
+        self.assertEqual(self.client.get("/may/khong_co").status_code, 404)
+
+    def test_tro_ly_kem_quy_trinh_may(self):
+        mod, calls = fake_provider({"tra_loi": "Đuổi hết không khí trước đã.", "hanh_dong": []})
+        main.providers.pick = lambda: mod
+        self.client.post("/tro-ly", json={"cau_hoi": "Dùng nồi hấp tiệt trùng thế nào?", "ngu_canh": "phòng máy"})
+        user = calls[0][2]
+        self.assertIn("QUY TRÌNH MÁY", user)
+        self.assertIn("Đuổi không khí", user)  # bước của nồi hấp theo data/may/noi_hap.json
+        calls.clear()
+        self.client.post("/tro-ly", json={"cau_hoi": "lấy đồng sunfat", "ngu_canh": "tự do"})
+        self.assertNotIn("QUY TRÌNH MÁY", calls[0][2])
+
+    def test_nhan_ra_may_trong_cau_hoi(self):
+        from server.ai import machines
+        self.assertEqual([d["ma"] for d in machines.find("cách dùng máy SEM?")], ["sem"])
+        self.assertEqual([d["ma"] for d in machines.find("đo phổ hồng ngoại")], ["ftir"])
+        self.assertEqual([d["ma"] for d in machines.find("GC-MS rượu")], ["gc_ms"])
+        self.assertEqual(machines.find("pha dung dịch NaCl"), [])
+
     def test_luoc_do_hanh_dong_hop_le(self):
         s = main.ASSIST_SCHEMA
         self.assertFalse(s["additionalProperties"])

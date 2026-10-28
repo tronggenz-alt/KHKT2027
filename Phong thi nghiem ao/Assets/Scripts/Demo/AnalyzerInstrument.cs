@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using Khkt.Interaction;
 using Khkt.Simulation;
@@ -18,7 +19,7 @@ namespace Khkt.Demo
     /// </summary>
     public class AnalyzerInstrument : MonoBehaviour, IDemoUsable
     {
-        public enum Kind { UvVis, Ftir, Aas, GcMs, Hplc, AutoTitrator }
+        public enum Kind { UvVis, Ftir, Aas, GcMs, Hplc, AutoTitrator, Xrd, Sem, Nmr, Calorimeter, DryingOven, Furnace, Distiller, Autoclave }
 
         public Kind kind;
         public PlaceSocket slot;
@@ -43,6 +44,14 @@ namespace Khkt.Demo
                 case Kind.Aas: return "Quang phổ hấp thụ nguyên tử AAS";
                 case Kind.GcMs: return "Sắc ký khí - khối phổ GC-MS";
                 case Kind.Hplc: return "Sắc ký lỏng HPLC";
+                case Kind.Xrd: return "Nhiễu xạ tia X (XRD)";
+                case Kind.Sem: return "Kính hiển vi điện tử quét (SEM-EDS)";
+                case Kind.Nmr: return "Cộng hưởng từ hạt nhân ¹H-NMR";
+                case Kind.Calorimeter: return "Bom nhiệt lượng";
+                case Kind.DryingOven: return "Tủ sấy";
+                case Kind.Furnace: return "Lò nung";
+                case Kind.Distiller: return "Máy cất nước hai lần";
+                case Kind.Autoclave: return "Nồi hấp tiệt trùng";
                 default: return "Chuẩn độ điện thế tự động";
             }
         }
@@ -82,6 +91,14 @@ namespace Khkt.Demo
                 Kind.Ftir => new Instruments.FtirProgram(),
                 Kind.GcMs => new Instruments.GcMsProgram(),
                 Kind.Hplc => new Instruments.HplcProgram(),
+                Kind.Xrd => new Instruments.XrdProgram(),
+                Kind.Sem => new Instruments.SemProgram(),
+                Kind.Nmr => new Instruments.NmrProgram(),
+                Kind.Calorimeter => new Instruments.CalorimeterProgram(),
+                Kind.DryingOven => new Instruments.DryingOvenProgram(),
+                Kind.Furnace => new Instruments.FurnaceProgram(),
+                Kind.Distiller => new Instruments.DistillerProgram(),
+                Kind.Autoclave => new Instruments.AutoclaveProgram(),
                 _ => new Instruments.TitratorProgram(),
             };
             Instruments.InstrumentScreen.Open(this, program, Sample);
@@ -118,6 +135,8 @@ namespace Khkt.Demo
                 case Kind.Aas: report = Aas(s); break;
                 case Kind.GcMs: report = Chromatogram(s, true); break;
                 case Kind.Hplc: report = Chromatogram(s, false); break;
+                case Kind.Xrd: case Kind.Sem: case Kind.Nmr: case Kind.Calorimeter: report = QuickSolidOrNmr(s); break;
+                case Kind.DryingOven: case Kind.Furnace: case Kind.Distiller: case Kind.Autoclave: report = "Máy phụ trợ: bấm vào máy để mở màn hình vận hành"; break;
                 default: report = Titrate(s); break;
             }
             Apply();
@@ -152,6 +171,36 @@ namespace Khkt.Demo
             Plot(pts, 380, 780, 0, Mathf.Max(0.2f, max * 1.15f), new Color32(110, 220, 255, 255));
             if (max < 0.02f) return "Gần như không hấp thụ ánh sáng khả kiến (dung dịch không màu)";
             return $"λmax ≈ {lmax:0} nm · A = {max.ToString("0.00", Vi)}\nMàu quan sát là màu bù của vùng {Band(lmax)}";
+        }
+
+        /// <summary>Chạy nhanh cho XRD / SEM / NMR / bom nhiệt lượng (robot dùng): tóm tắt từ mô hình của màn hình vận hành.</summary>
+        string QuickSolidOrNmr(LabContainer s)
+        {
+            Clear(new Color32(8, 18, 32, 255));
+            Axes();
+            var data = Instruments.InstrumentData.Instance;
+            if (data == null) return "Thiếu dữ liệu máy";
+            var mix = s.Total.Mix;
+            if (kind == Kind.Nmr)
+            {
+                var lines = data.Nmr.Lines(mix, s.VolumeMl, 0, 1, 0.002);
+                var owners = lines.Where(l => l.Owner != "nuoc").Select(l => data.Nmr.ById(l.Owner)?.Name).Distinct().ToList();
+                return owners.Count == 0 ? "Không có tín hiệu ¹H của chất trong thư viện (chỉ có nước)" : "Tín hiệu ¹H của: " + string.Join(", ", owners);
+            }
+            var solids = Khkt.Simulation.Chem.SolidResidue.From(mix, s.VolumeMl, Mathf.Min(10f, s.VolumeMl), true);
+            if (solids.Count == 0) return "Cô cạn không còn chất rắn";
+            if (kind == Kind.Calorimeter)
+            {
+                double e = data.Calorimetry.Energy(solids, out double mg);
+                return mg <= 0 ? "Chất khô không cháy được (muối vô cơ)" : $"Chất khô cháy được {mg / 1000:0.000} g / 10 mL · {e / 1000:0.0} kJ";
+            }
+            if (kind == Kind.Xrd)
+            {
+                var comps = data.Xrd.Compose(solids, out double amor);
+                return comps.Count == 0 ? (amor > 0 ? "Chất rắn vô định hình, không có pic nhiễu xạ" : "Pha tinh thể ngoài thư viện") : "Pha tinh thể: " + string.Join(", ", comps.Select(c => c.Card.Name));
+            }
+            var fr = Khkt.Simulation.Chem.SolidResidue.AtomFractions(solids);
+            return "Nguyên tố (EDS): " + string.Join(", ", fr.OrderByDescending(x => x.Value).Take(5).Select(x => $"{x.Key} {x.Value * 100:0}%"));
         }
 
         static string Band(float l) => l < 480 ? "lam - tím" : l < 560 ? "lục" : l < 600 ? "vàng" : "đỏ - cam";

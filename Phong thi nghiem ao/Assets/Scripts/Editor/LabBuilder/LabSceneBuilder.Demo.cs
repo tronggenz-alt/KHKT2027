@@ -416,6 +416,20 @@ namespace Khkt.EditorTools
             mayData.ftirLib = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/tinh_chat/ftir.json");
             mayData.gcMsLib = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/tinh_chat/gc_ms.json");
             mayData.hplcLib = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/tinh_chat/hplc.json");
+            // đợt 3: XRD, SEM-EDS, NMR, bom nhiệt lượng
+            mayData.xrdDoc = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/xrd.json");
+            mayData.semDoc = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/sem.json");
+            mayData.nmrDoc = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/nmr.json");
+            mayData.calorimeterDoc = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/nhiet_luong.json");
+            mayData.xrdLib = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/tinh_chat/xrd.json");
+            mayData.edsLib = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/tinh_chat/eds.json");
+            mayData.nmrLib = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/tinh_chat/nmr.json");
+            mayData.calorimetryLib = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/tinh_chat/nhiet_dot_chay.json");
+            // đợt 4: máy phụ trợ
+            mayData.ovenDoc = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/tu_say.json");
+            mayData.furnaceDoc = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/lo_nung.json");
+            mayData.distillerDoc = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/may_cat_nuoc.json");
+            mayData.autoclaveDoc = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/noi_hap.json");
             g.AddComponent<Khkt.Assembly.FluidNetwork>();
             var fx = g.AddComponent<ReactionFx>();
             fx.bubbleMaterial = Mat("BotKhi", new Color(1f, 1f, 1f, 0.55f), 0.95f, 0, transparent: true);

@@ -1,0 +1,151 @@
+{
+  "ma": "noi_hap",
+  "ten": "Nồi hấp tiệt trùng bằng hơi nước bão hòa (autoclave)",
+  "may_mau": "Nồi hấp đứng 121 – 134 °C, van xả khí, đồng hồ áp suất, khóa nắp an toàn (trên vỏ máy trong phòng lab ảo dùng tên chung)",
+  "nguyen_ly": [
+    "Nước sôi trong nồi kín: áp suất tăng thì nhiệt độ sôi tăng. Hơi nước bão hòa ở 121 °C có áp suất tuyệt đối khoảng 2,05 bar (dư khoảng 1,03 bar so với khí quyển).",
+    "Hơi nước bão hòa ngưng tụ trên vật cần tiệt trùng, truyền nhiệt rất nhanh; giữ 121 °C trong 15 phút diệt cả bào tử vi khuẩn chịu nhiệt.",
+    "Phải đuổi hết không khí trong nồi ra (mở van xả đến khi hơi phun đều). Còn không khí thì áp suất đồng hồ vẫn cao nhưng nhiệt độ thấp hơn (áp suất = áp suất hơi + áp suất không khí), tiệt trùng không đạt.",
+    "Hiệu quả diệt khuẩn đo bằng giá trị D: thời gian giảm 10 lần số bào tử. Bào tử Geobacillus stearothermophilus (chỉ thị sinh học) có D₁₂₁ khoảng 1,5 – 2 phút; giảm 1 °C thì D tăng theo hệ số z.",
+    "Chỉ mở nắp khi áp suất đã về 0 và nhiệt độ dưới 80 °C: mở khi còn áp suất, hơi và chất lỏng sôi trào gây bỏng nặng."
+  ],
+  "cong_thuc": [
+    "p_bão hòa(T) theo IAPWS-IF97",
+    "p_đồng hồ = p_hơi + p_không khí − p_khí quyển",
+    "lg(N₀/N) = Σ Δt / D(T), D(T) = D₁₂₁·10^((121 − T)/z)"
+  ],
+  "bo_phan": [
+    {
+      "ma": "noi",
+      "ten": "Thân nồi chịu áp, có giỏ đựng",
+      "chuc_nang": "Chứa nước ở đáy và vật cần tiệt trùng."
+    },
+    {
+      "ma": "day_dot",
+      "ten": "Dây đốt đáy nồi",
+      "chuc_nang": "Đun sôi nước tạo hơi."
+    },
+    {
+      "ma": "van_xa",
+      "ten": "Van xả khí",
+      "chuc_nang": "Mở lúc đầu để đuổi không khí; đóng khi hơi phun đều."
+    },
+    {
+      "ma": "dong_ho",
+      "ten": "Đồng hồ áp suất và nhiệt kế",
+      "chuc_nang": "Theo dõi áp suất (dư) và nhiệt độ trong nồi."
+    },
+    {
+      "ma": "van_an_toan",
+      "ten": "Van an toàn",
+      "chuc_nang": "Tự xả khi áp suất vượt giới hạn."
+    },
+    {
+      "ma": "khoa_nap",
+      "ten": "Khóa nắp liên động",
+      "chuc_nang": "Không mở được nắp khi còn áp suất."
+    }
+  ],
+  "thong_so": [
+    {
+      "ten": "Áp suất hơi nước bão hòa theo nhiệt độ",
+      "gia_tri": "phương trình miền 4 của IAPWS-IF97 (121 °C → 0,2050 MPa)",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.iapws.org/relguide/IF97-Rev.pdf"
+    },
+    {
+      "ten": "Chỉ thị sinh học G. stearothermophilus",
+      "gia_tri": "D₁₂₁ = 1,5 – 2,0 phút; z = 7 – 10 °C; diệt hoàn toàn sau 15 phút ở 121 °C",
+      "loai": "điển hình",
+      "nguon": "https://www.sigmaaldrich.com/product/mm/110274"
+    },
+    {
+      "ten": "Số bào tử trên chỉ thị, D₁₂₁, z dùng trong lab ảo",
+      "gia_tri": "10⁶ bào tử; D₁₂₁ = 1,8 phút; z = 10 °C",
+      "loai": "mô phỏng",
+      "mo_phong": true
+    },
+    {
+      "ten": "Tốc độ đun, xả, lượng không khí còn lại",
+      "gia_tri": "ước lượng",
+      "loai": "mô phỏng",
+      "mo_phong": true
+    }
+  ],
+  "quy_trinh": [
+    {
+      "ma": "cho_nuoc",
+      "ten": "Kiểm tra, châm nước đáy nồi",
+      "viec": "Châm nước cất đến vạch.",
+      "ly_do": "Thiếu nước: nồi cạn, cháy dây đốt.",
+      "loi": ""
+    },
+    {
+      "ma": "xep_do",
+      "ten": "Xếp đồ, đặt chỉ thị",
+      "viec": "Xếp đồ thưa, nút bông / nắp vặn lỏng; đặt ống chỉ thị sinh học ở giữa.",
+      "ly_do": "Hơi phải tiếp xúc mọi chỗ; nắp vặn chặt có thể nổ chai.",
+      "loi": ""
+    },
+    {
+      "ma": "dong_nap",
+      "ten": "Đóng nắp, mở van xả, bật đun",
+      "viec": "Đóng chặt nắp, mở van xả khí, bật đun.",
+      "ly_do": "Nồi phải kín thì áp suất, nhiệt độ mới tăng quá 100 °C; van xả mở để không khí thoát ra.",
+      "loi": ""
+    },
+    {
+      "ma": "duoi_khi",
+      "ten": "Đuổi không khí",
+      "viec": "Để van xả mở đến khi hơi phun đều vài phút rồi đóng van.",
+      "ly_do": "Không khí còn lại làm nhiệt độ thấp hơn áp suất chỉ.",
+      "loi": "Đóng van ngay: áp suất đủ nhưng nhiệt độ không đạt 121 °C."
+    },
+    {
+      "ma": "giu_nhiet",
+      "ten": "Giữ 121 °C trong 15 phút",
+      "viec": "Khi đạt 121 °C, giữ đủ 15 phút.",
+      "ly_do": "Đủ thời gian diệt bào tử (nhiều lần D).",
+      "loi": "Giữ không đủ thời gian: còn bào tử sống."
+    },
+    {
+      "ma": "ha_ap",
+      "ten": "Tắt đun, chờ hạ áp",
+      "viec": "Tắt đun, để tự hạ áp suất về 0 và nhiệt độ dưới 80 °C; không xả nhanh.",
+      "ly_do": "Xả nhanh làm môi trường lỏng sôi trào.",
+      "loi": "Mở nắp khi còn áp suất: nguy hiểm."
+    },
+    {
+      "ma": "kiem_tra",
+      "ten": "Kiểm tra chỉ thị sinh học",
+      "viec": "Ủ chỉ thị ở 56 °C; không đổi màu là tiệt trùng đạt.",
+      "ly_do": "Kiểm tra hiệu quả thật của mẻ hấp.",
+      "loi": ""
+    }
+  ],
+  "an_toan": [
+    "Không mở nắp khi đồng hồ còn áp suất; khóa nắp liên động phải hoạt động.",
+    "Đeo găng chịu nhiệt, tấm che mặt khi lấy đồ ra.",
+    "Kiểm tra van an toàn định kỳ."
+  ],
+  "thuat_ngu": [
+    {
+      "tu": "Hơi bão hòa",
+      "nghia": "Hơi nước cân bằng với nước lỏng; nhiệt độ và áp suất phụ thuộc nhau."
+    },
+    {
+      "tu": "Giá trị D",
+      "nghia": "Thời gian ở một nhiệt độ để số vi sinh vật giảm 10 lần."
+    },
+    {
+      "tu": "Chỉ thị sinh học",
+      "nghia": "Ống chứa bào tử vi khuẩn chịu nhiệt, dùng kiểm tra mẻ hấp."
+    }
+  ],
+  "cau_hoi_on_tap": [
+    "Vì sao phải đuổi hết không khí trong nồi hấp?",
+    "Ở 121 °C hơi nước bão hòa có áp suất bao nhiêu?",
+    "D₁₂₁ = 1,8 phút. Giữ 15 phút giảm được bao nhiêu bậc (lần 10) số bào tử?",
+    "Vì sao không được mở nắp khi đồng hồ còn áp suất?"
+  ]
+}

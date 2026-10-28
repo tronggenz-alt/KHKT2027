@@ -1,0 +1,27 @@
+{
+  "ghi_chu": "Thẻ chuẩn nhiễu xạ bột của 7 pha: 7 vạch mạnh nhất (d tính bằng Å, cường độ tương đối) và thông số ô mạng, chép đúng mục 'X-ray Powder Pattern' và 'Cell Data' của Handbook of Mineralogy (Mineralogical Society of America). Góc 2θ máy tính theo định luật Bragg với Cu Kα₁ λ = 1,5406 Å. ids: mã loài trong bộ máy hóa học (NaCl, KCl kết tinh khi cô cạn dung dịch có Na⁺ / K⁺ và Cl⁻). hinh_dang, co_hat_um: hình dạng, cỡ hạt nhìn dưới SEM; tinh_the_nm: kích thước tinh thể (độ rộng pic): mô phỏng.",
+  "lambda": 1.5406,
+  "pha": [
+    {"id": "halit", "ten": "Halit (NaCl)", "cong_thuc": "NaCl", "ids": ["NaCl(r)"], "o_mang": "lập phương Fm3m, a = 5,6404 Å",
+     "vach": [[2.821, 100], [1.994, 55], [1.628, 15], [3.258, 13], [1.261, 11], [1.1515, 7], [1.410, 6]],
+     "hinh_dang": "lap_phuong", "co_hat_um": 40, "tinh_the_nm": 200, "nguon": "https://www.handbookofmineralogy.org/pdfs/halite.pdf"},
+    {"id": "sylvit", "ten": "Sylvit (KCl)", "cong_thuc": "KCl", "ids": ["KCl(r)"], "o_mang": "lập phương Fm3m, a = 6,2931 Å",
+     "vach": [[3.146, 100], [2.224, 59], [1.816, 23], [1.407, 20], [1.284, 13], [1.573, 8], [1.0490, 6]],
+     "hinh_dang": "lap_phuong", "co_hat_um": 35, "tinh_the_nm": 200, "nguon": "https://www.handbookofmineralogy.org/pdfs/sylvite.pdf"},
+    {"id": "agcl", "ten": "Bạc clorua (clorargyrit, AgCl)", "cong_thuc": "AgCl", "ids": ["AgCl"], "o_mang": "lập phương Fm3m, a = 5,554 Å",
+     "vach": [[2.77, 100], [1.961, 60], [1.240, 40], [3.22, 30], [1.134, 30], [0.926, 30], [1.672, 20]],
+     "hinh_dang": "hat_min", "co_hat_um": 0.8, "tinh_the_nm": 60, "nguon": "https://www.handbookofmineralogy.org/pdfs/chlorargyrite.pdf"},
+    {"id": "canxit", "ten": "Canxit (CaCO₃)", "cong_thuc": "CaCO₃", "ids": ["CaCO3"], "o_mang": "mặt thoi R3c, a = 4,9896 Å, c = 17,0610 Å",
+     "vach": [[3.035, 100], [2.285, 18], [2.095, 18], [1.913, 17], [1.875, 17], [2.495, 14], [3.86, 12]],
+     "hinh_dang": "mat_thoi", "co_hat_um": 6, "tinh_the_nm": 120, "nguon": "https://www.handbookofmineralogy.org/pdfs/calcite.pdf"},
+    {"id": "thach_anh", "ten": "Thạch anh (SiO₂)", "cong_thuc": "SiO₂", "ids": ["SiO2(s)"], "o_mang": "lục phương P3₁21, a = 4,9135 Å, c = 5,4050 Å",
+     "vach": [[3.342, 100], [4.257, 22], [1.8179, 14], [1.5418, 9], [2.457, 8], [2.282, 8], [1.3718, 8]],
+     "hinh_dang": "manh_vo", "co_hat_um": 120, "tinh_the_nm": 300, "nguon": "https://www.handbookofmineralogy.org/pdfs/quartz.pdf"},
+    {"id": "barit", "ten": "Barit (BaSO₄)", "cong_thuc": "BaSO₄", "ids": ["BaSO4"], "o_mang": "trực thoi Pnma, a = 8,884 Å, b = 5,457 Å, c = 7,157 Å",
+     "vach": [[3.445, 100], [3.103, 95], [2.121, 80], [2.106, 75], [3.319, 70], [3.899, 50], [2.836, 50]],
+     "hinh_dang": "hat_min", "co_hat_um": 0.5, "tinh_the_nm": 35, "nguon": "https://www.handbookofmineralogy.org/pdfs/baryte.pdf"},
+    {"id": "thach_cao", "ten": "Thạch cao (CaSO₄·2H₂O)", "cong_thuc": "CaSO₄·2H₂O", "ids": ["CaSO4"], "o_mang": "đơn tà I2/a, a = 5,679 Å, b = 15,202 Å, c = 6,522 Å, β = 118,43°",
+     "vach": [[7.63, 100], [4.283, 100], [3.065, 75], [2.873, 45], [2.865, 35], [2.086, 25], [3.799, 17]],
+     "hinh_dang": "lang_tru", "co_hat_um": 25, "tinh_the_nm": 150, "nguon": "https://www.handbookofmineralogy.org/pdfs/gypsum.pdf"}
+  ]
+}
