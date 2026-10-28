@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
@@ -70,7 +70,25 @@ namespace Khkt.Demo
 
         LabContainer Sample => slot != null && slot.Occupant != null ? slot.Occupant.GetComponent<LabContainer>() : null;
 
+        /// <summary>
+        /// Người dùng bấm vào máy: mở màn hình vận hành riêng của máy (quy trình như máy thật, sơ đồ bên trong máy, phân tích chuyên sâu).
+        /// </summary>
         public void Use()
+        {
+            Instruments.InstrumentProgram program = kind switch
+            {
+                Kind.UvVis => new Instruments.UvVisProgram(),
+                Kind.Aas => new Instruments.AasProgram(),
+                Kind.Ftir => new Instruments.FtirProgram(),
+                Kind.GcMs => new Instruments.GcMsProgram(),
+                Kind.Hplc => new Instruments.HplcProgram(),
+                _ => new Instruments.TitratorProgram(),
+            };
+            Instruments.InstrumentScreen.Open(this, program, Sample);
+        }
+
+        /// <summary>Chạy nhanh (đặt mẫu, bấm là ra kết quả trên màn hình cạnh máy): robot trợ lý dùng, không mở màn hình vận hành.</summary>
+        public void RunQuick()
         {
             if (Running) return;
             var s = Sample;

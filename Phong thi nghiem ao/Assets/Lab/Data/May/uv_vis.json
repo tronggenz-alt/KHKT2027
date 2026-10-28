@@ -1,0 +1,63 @@
+{
+  "ma": "uv_vis",
+  "ten": "Quang phổ UV-Vis hai chùm tia",
+  "may_mau": "Shimadzu UV-1800 / UV-1900i (thông số lấy theo máy mẫu; trên vỏ máy trong phòng lab ảo dùng tên chung)",
+  "nguyen_ly": [
+    "Chiếu ánh sáng đơn sắc (một bước sóng) qua dung dịch đựng trong cuvet; chất tan hấp thụ một phần, phần còn lại tới detector.",
+    "Độ hấp thụ A = −log(I/I₀). Theo định luật Lambert – Beer, A = ε·b·c: tỉ lệ thuận với nồng độ c, với ε là hệ số hấp thụ mol của chất ở bước sóng đó và b là bề dày cuvet (1 cm).",
+    "Máy hai chùm tia chia ánh sáng thành hai đường: một qua cuvet mẫu, một qua cuvet so sánh (mẫu trắng). Máy lấy tỉ số hai tín hiệu nên bù được độ trôi của đèn.",
+    "Đèn đơteri D₂ phát vùng tử ngoại, đèn W-halogen phát vùng khả kiến; cách tử tách ánh sáng thành từng bước sóng; khe ra chỉ cho một dải hẹp (1 nm) đi qua.",
+    "Định lượng: đo dãy chuẩn đã biết nồng độ, dựng đường chuẩn A theo c, rồi suy ra nồng độ mẫu. Hỗn hợp nhiều chất hấp thụ thì tách bằng phổ: phổ đo được là tổng phổ của từng chất."
+  ],
+  "cong_thuc": ["A = −log T = −log(I/I₀)", "A = ε·b·c", "A(λ) = Σ εᵢ(λ)·b·cᵢ (hỗn hợp)"],
+  "bo_phan": [
+    {"ma": "den_d2", "ten": "Đèn đơteri (D₂)", "chuc_nang": "Nguồn sáng vùng tử ngoại (khoảng 190 – 340 nm)."},
+    {"ma": "den_w", "ten": "Đèn W-halogen", "chuc_nang": "Nguồn sáng vùng khả kiến và cận hồng ngoại (khoảng 340 – 1100 nm)."},
+    {"ma": "guong_doi_den", "ten": "Gương chuyển đèn", "chuc_nang": "Chọn đèn theo bước sóng đang đo."},
+    {"ma": "khe_vao", "ten": "Khe vào", "chuc_nang": "Tạo chùm sáng hẹp đi vào bộ đơn sắc."},
+    {"ma": "cach_tu", "ten": "Cách tử nhiễu xạ", "chuc_nang": "Tách ánh sáng trắng thành các bước sóng; xoay cách tử để chọn bước sóng."},
+    {"ma": "khe_ra", "ten": "Khe ra", "chuc_nang": "Chỉ cho dải bước sóng rất hẹp (độ rộng phổ 1 nm) đi tiếp."},
+    {"ma": "chia_chum", "ten": "Bộ chia chùm tia", "chuc_nang": "Chia ánh sáng đơn sắc thành chùm qua cuvet mẫu và chùm qua cuvet so sánh."},
+    {"ma": "cuvet_mau", "ten": "Cuvet mẫu", "chuc_nang": "Đựng dung dịch cần đo, bề dày 1 cm."},
+    {"ma": "cuvet_so_sanh", "ten": "Cuvet so sánh", "chuc_nang": "Đựng mẫu trắng (dung môi), làm mốc I₀."},
+    {"ma": "detector", "ten": "Detector photodiode silic", "chuc_nang": "Đổi cường độ ánh sáng thành tín hiệu điện; máy lấy tỉ số mẫu / so sánh."}
+  ],
+  "thong_so": [
+    {"ten": "Dải bước sóng", "gia_tri": "190 – 1100 nm", "loai": "điển hình", "nguon": "https://thietbi.tvu.edu.vn/ttthietbi/upload_file/2.Quang%20pho%20kha%20kieng.pdf"},
+    {"ten": "Độ rộng phổ (khe)", "gia_tri": "1 nm", "loai": "điển hình", "nguon": "https://ssi.shimadzu.com/products/uv-vis/uv-vis-nir-spectroscopy/uv-1900i/spec.html"},
+    {"ten": "Sai số bước sóng", "gia_tri": "±0,3 nm", "loai": "điển hình", "nguon": "https://thietbi.tvu.edu.vn/ttthietbi/upload_file/2.Quang%20pho%20kha%20kieng.pdf"},
+    {"ten": "Tốc độ quét tối đa", "gia_tri": "29 000 nm/phút", "loai": "điển hình", "nguon": "https://www.shimadzu.eu/uv-1900i"},
+    {"ten": "Bước sóng chuyển đèn D₂ / W", "gia_tri": "340 nm", "loai": "mô phỏng", "mo_phong": true, "ghi_chu": "Máy thật cho đặt điểm chuyển đèn; lab ảo dùng 340 nm."},
+    {"ten": "Vùng tuyến tính khuyên dùng", "gia_tri": "A ≈ 0,1 – 1,5; trên 2 thì pha loãng", "loai": "khuyến cáo", "nguon": "https://nifc.gov.vn/files/media/202407/Cac-van-de-thuong-gap-PGS.TS.Nguyen-Thi-Anh-Huong.pdf"},
+    {"ten": "Cuvet thủy tinh, nhựa", "gia_tri": "chỉ dùng vùng khả kiến (≥ khoảng 340 nm); vùng tử ngoại phải dùng cuvet thạch anh", "loai": "khuyến cáo", "nguon": "https://nifc.gov.vn/files/media/202407/Cac-van-de-thuong-gap-PGS.TS.Nguyen-Thi-Anh-Huong.pdf"},
+    {"ten": "Kiểm định máy", "gia_tri": "ĐLVN 372:2020", "loai": "văn bản", "nguon": "https://tcvn.gov.vn/wp-content/uploads/2017/08/372-2020_QTKD-PTD-quang-pho-tu-ngoai-kha-kien.pdf"}
+  ],
+  "quy_trinh": [
+    {"ma": "bat_may", "ten": "Bật máy, tự kiểm tra", "viec": "Bật nguồn; máy tự kiểm tra và bật đèn.", "ly_do": "Máy kiểm tra cách tử, đèn, detector trước khi đo.", "loi": "Đo ngay khi chưa xong tự kiểm tra: máy không cho đo."},
+    {"ma": "lam_nong", "ten": "Làm nóng đèn", "viec": "Chờ đèn ổn định (máy thật 15 – 30 phút; lab ảo rút ngắn).", "ly_do": "Cường độ đèn còn trôi khi chưa đủ nóng.", "loi": "Đo khi đèn chưa ổn định: đường nền trôi, số đo lệch dần."},
+    {"ma": "chon_che_do", "ten": "Chọn chế độ đo", "viec": "Đo tại một bước sóng, quét phổ, hoặc định lượng theo đường chuẩn; đặt bước sóng.", "ly_do": "Định lượng nên đo ở λmax: độ nhạy cao nhất, ít ảnh hưởng của sai số bước sóng.", "loi": "Đo ở sườn dải hấp thụ: kết quả nhạy với sai số bước sóng."},
+    {"ma": "chon_cuvet", "ten": "Chọn và tráng cuvet", "viec": "Dùng cuvet thạch anh khi đo dưới 340 nm; tráng cuvet bằng chính dung dịch đo; cầm ở mặt mờ.", "ly_do": "Thủy tinh, nhựa hấp thụ mạnh tia tử ngoại.", "loi": "Cuvet nhựa ở vùng UV: phổ bị cắt, máy báo tín hiệu yếu."},
+    {"ma": "do_nen", "ten": "Đo nền bằng mẫu trắng (auto zero / baseline)", "viec": "Đặt mẫu trắng (dung môi) vào cả hai vị trí, bấm đo nền.", "ly_do": "Trừ hấp thụ của dung môi và cuvet, đặt mốc A = 0.", "loi": "Bỏ qua: mọi số đo cộng thêm hấp thụ của dung môi, cuvet; đường chuẩn không qua gốc."},
+    {"ma": "day_chuan", "ten": "Đo dãy chuẩn", "viec": "Đo các dung dịch chuẩn từ loãng tới đặc.", "ly_do": "Dựng đường chuẩn A = a·c + b; kiểm tra tuyến tính (R² ≥ 0,995).", "loi": "Chuẩn quá đặc (A > 2): đường chuẩn cong."},
+    {"ma": "do_mau", "ten": "Đo mẫu", "viec": "Tráng cuvet bằng mẫu, đo; máy tính nồng độ từ đường chuẩn.", "ly_do": "Mẫu phải nằm trong khoảng nồng độ của dãy chuẩn.", "loi": "Mẫu quá đặc (A > 2 hoặc vượt chuẩn cao nhất): phải pha loãng rồi nhân lại hệ số."},
+    {"ma": "ket_thuc", "ten": "Rửa cuvet, tắt máy", "viec": "Rửa cuvet bằng nước cất, tắt đèn, tắt máy.", "ly_do": "Đèn D₂ có tuổi thọ giới hạn; cuvet bẩn làm sai lần đo sau.", "loi": ""}
+  ],
+  "an_toan": [
+    "Không nhìn thẳng vào đèn D₂ (phát tia tử ngoại).",
+    "Không để dung dịch tràn vào buồng mẫu; lau ngay nếu đổ.",
+    "Cầm cuvet ở mặt mờ, không chạm mặt trong suốt (dấu vân tay hấp thụ ánh sáng)."
+  ],
+  "thuat_ngu": [
+    {"tu": "λmax", "nghia": "Bước sóng mà chất hấp thụ mạnh nhất."},
+    {"tu": "ε (hệ số hấp thụ mol)", "nghia": "Độ hấp thụ của dung dịch 1 mol/L trong cuvet 1 cm, đơn vị L·mol⁻¹·cm⁻¹."},
+    {"tu": "Mẫu trắng", "nghia": "Dung dịch có mọi thứ trừ chất cần đo, dùng làm mốc A = 0."},
+    {"tu": "Đường chuẩn", "nghia": "Đồ thị A theo nồng độ của dãy chuẩn, dùng suy ra nồng độ mẫu."}
+  ],
+  "cau_hoi_on_tap": [
+    "Vì sao phải đo nền bằng mẫu trắng trước khi đo mẫu?",
+    "Dung dịch KMnO₄ màu tím hấp thụ mạnh nhất ở vùng màu nào? Vì sao?",
+    "Muốn đo ở 260 nm thì dùng cuvet loại gì? Vì sao?",
+    "Mẫu đo ra A = 2,8 thì làm gì để có kết quả đúng?",
+    "Hỗn hợp có hai chất cùng hấp thụ thì làm sao biết nồng độ từng chất?"
+  ]
+}

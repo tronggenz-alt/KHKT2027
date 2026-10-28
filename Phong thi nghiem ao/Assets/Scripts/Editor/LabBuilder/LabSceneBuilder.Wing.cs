@@ -102,6 +102,8 @@ namespace Khkt.EditorTools
                 ("Mẫu đất chua", new[] { "Al3+:0.004", "Fe3+:0.001", "SO4:0.008" }),                                         // pH ~3
                 ("Mẫu dầu chuối", new[] { "hc:539:0.4", "C2H5OH:0.5" }),
                 ("Mẫu nước thải xi mạ crom", new[] { "CrVI:0.02", "Na+:0.024", "SO4:0.004" }),                              // da cam, pH ~2,6
+                ("Mẫu rượu nghi pha metanol", new[] { "C2H5OH:5.2", "hc:467:0.05" }),                                        // 30°, metanol 1600 mg/L (GC-MS)
+                ("Mẫu nước ngọt có ga", new[] { "hc:580:0.3", "Cit:0.01", "Bz:0.0012", "Na+:0.0012", "CO3:0.02" }),       // đường, axit xitric, natri benzoat (HPLC)
             };
             const float rackX = -1.2f, pitchX = 0.075f;
             var rack = Group("Giá ống mẫu", prep, new Vector3(rackX + pitchX * (samples.Length - 1) / 2, top, 0.3f));

@@ -1,0 +1,58 @@
+{
+  "ma": "chuan_do_dien_the",
+  "ten": "Chuẩn độ điện thế tự động (axit – bazơ)",
+  "may_mau": "Metrohm 916 Ti-Touch với bộ định lượng 800 Dosino 20 mL và điện cực pH thủy tinh kết hợp (thông số lấy theo máy mẫu; trên vỏ máy trong phòng lab ảo dùng tên chung)",
+  "nguyen_ly": [
+    "Điện cực pH thủy tinh kết hợp gồm màng thủy tinh nhạy H⁺ và điện cực so sánh Ag/AgCl trong KCl 3 mol/L. Thế đo được thay đổi tuyến tính theo pH (phương trình Nernst): ở 25 °C, mỗi đơn vị pH ứng với 59,16 mV.",
+    "Điện cực thật lệch so với lý tưởng (độ dốc thấp hơn 100%, có thế lệch không). Vì vậy phải hiệu chuẩn bằng các dung dịch đệm pH 4,01; 7,00; 10,01 trước khi đọc pH.",
+    "Bộ định lượng (burette có động cơ) đẩy dung dịch chuẩn NaOH hoặc HCl từng lượng rất nhỏ vào cốc mẫu đang khuấy. Chế độ DET tự chỉnh lượng thêm mỗi lần: xa điểm tương đương thì thêm nhiều, gần bước nhảy thì thêm rất ít.",
+    "Điểm tương đương là nơi thế (pH) thay đổi nhanh nhất theo thể tích: cực đại của đạo hàm dE/dV. Không cần chất chỉ thị, nên đo được cả mẫu có màu, đục và axit nhiều nấc.",
+    "Nồng độ thật của dung dịch chuẩn NaOH thường thấp hơn nhãn (hấp thụ CO₂). Phải xác định hệ số chuẩn (titer) bằng chất chuẩn gốc kali hiđro phtalat (KHP) trước khi tính kết quả."
+  ],
+  "cong_thuc": ["E = E₀ − s·0,05916·pH (25 °C)", "n(axit) = c(NaOH)·t·V_tđ", "C = n / V_mẫu", "pH tại ½V_tđ = pKa (axit yếu một nấc)"],
+  "bo_phan": [
+    {"ma": "dosino", "ten": "Bộ định lượng (burette động cơ) 20 mL", "chuc_nang": "Piston do động cơ bước đẩy dung dịch chuẩn với lượng rất nhỏ, chính xác; tự nạp lại từ chai."},
+    {"ma": "chai_chuan", "ten": "Chai dung dịch chuẩn NaOH / HCl", "chuc_nang": "Chứa dung dịch chuẩn, có ống hút ẩm / hút CO₂ ở nắp."},
+    {"ma": "dien_cuc", "ten": "Điện cực pH thủy tinh kết hợp", "chuc_nang": "Màng thủy tinh nhạy H⁺ + điện cực so sánh Ag/AgCl, KCl 3 mol/L; đổi pH thành điện thế."},
+    {"ma": "dau_nho", "ten": "Đầu nhỏ giọt chống khuếch tán", "chuc_nang": "Đưa dung dịch chuẩn vào cốc dưới mặt chất lỏng."},
+    {"ma": "khuay", "ten": "Máy khuấy từ", "chuc_nang": "Trộn đều để điện cực đo đúng pH của cả dung dịch ngay sau mỗi lần thêm."},
+    {"ma": "coc", "ten": "Cốc chuẩn độ", "chuc_nang": "Chứa mẫu đã pha loãng bằng nước cất."},
+    {"ma": "bo_dieu_khien", "ten": "Bộ điều khiển màn hình cảm ứng", "chuc_nang": "Đọc thế điện cực, điều khiển định lượng, tìm điểm tương đương, tính kết quả."}
+  ],
+  "thong_so": [
+    {"ten": "Bộ định lượng", "gia_tri": "800 Dosino, đơn vị định lượng 20 mL (bản Food)", "loai": "điển hình", "nguon": "https://parts.ttech.vn/may-chuan-do-dien-the-916-food-ti-touch-metrohm-p108855.aspx"},
+    {"ten": "Chế độ chuẩn độ", "gia_tri": "DET, MET, SET, STAT, MAT", "loai": "điển hình", "nguon": "https://metrohm.com/content/metrohm/shared/en/products/2/9160/29160020.download.pdf"},
+    {"ten": "Điện cực khuyên dùng cho chuẩn độ axit – bazơ trong nước", "gia_tri": "điện cực pH kết hợp, chất điện li KCl 3 mol/L", "loai": "điển hình", "nguon": "https://metrohm.com/content/metrohm/shared/en/products/2/9160/29160020.download.pdf"},
+    {"ten": "Độ dốc Nernst lý thuyết ở 25 °C", "gia_tri": "59,16 mV / đơn vị pH (= 2,303·RT/F)", "loai": "hằng số vật lý", "nguon": "https://en.wikipedia.org/wiki/Nernst_equation"},
+    {"ten": "Tiêu chí chấp nhận hiệu chuẩn điện cực", "gia_tri": "độ dốc 95 – 103%, thế lệch trong khoảng ±15 mV", "loai": "khuyến cáo thường dùng", "mo_phong": true},
+    {"ten": "Điện cực, dung dịch chuẩn trong lab ảo", "gia_tri": "độ dốc thật 96,5%, thế lệch +12 mV; NaOH ghi nhãn 0,1 M nhưng nồng độ thật 0,0982 M", "loai": "mô phỏng", "mo_phong": true}
+  ],
+  "quy_trinh": [
+    {"ma": "hieu_chuan", "ten": "Hiệu chuẩn điện cực bằng 3 dung dịch đệm", "viec": "Nhúng điện cực lần lượt vào đệm pH 4,01; 7,00; 10,01 (tráng nước cất giữa các lần), ghi thế.", "ly_do": "Máy tính độ dốc và thế lệch thật của điện cực để đổi thế ra pH đúng.", "loi": "Không hiệu chuẩn: pH hiển thị lệch (điểm tương đương vẫn đúng vì tìm theo bước nhảy)."},
+    {"ma": "duoi_khi", "ten": "Đuổi bọt khí bộ định lượng", "viec": "Chạy lệnh chuẩn bị (PREP): nạp – đẩy dung dịch chuẩn vài lần để đuổi bọt khí.", "ly_do": "Bọt khí trong xilanh làm thể tích thêm vào sai.", "loi": "Còn bọt khí: thể tích tương đương sai."},
+    {"ma": "titer", "ten": "Xác định hệ số chuẩn (titer) bằng KHP", "viec": "Cân chính xác KHP (chất chuẩn gốc), hòa tan, chuẩn độ bằng NaOH; máy tính t = c thật / c ghi nhãn.", "ly_do": "NaOH hút CO₂ và ẩm nên nồng độ thật thấp hơn nhãn.", "loi": "Bỏ qua: kết quả sai đúng bằng độ lệch nồng độ NaOH (thường 1 – 3%)."},
+    {"ma": "lay_mau", "ten": "Lấy mẫu, pha loãng", "viec": "Hút chính xác một thể tích mẫu bằng pipet vào cốc, thêm nước cất cho ngập điện cực, bật khuấy.", "ly_do": "Lượng axit phải đủ để thể tích tương đương nằm trong dung tích bộ định lượng (20 mL).", "loi": "Lấy quá nhiều mẫu: vượt thể tích tối đa, phải nạp lại nhiều lần."},
+    {"ma": "chuan_do", "ten": "Chuẩn độ (DET)", "viec": "Chọn dung dịch chuẩn, bấm bắt đầu; máy tự thêm, ghi đường cong pH theo thể tích.", "ly_do": "Thêm từng lượng nhỏ, chờ thế ổn định rồi mới ghi điểm.", "loi": "Không khuấy: pH đo trễ, đường cong răng cưa, điểm tương đương lệch."},
+    {"ma": "ket_qua", "ten": "Đọc điểm tương đương, tính kết quả", "viec": "Xem cực đại dE/dV, kiểm tra bằng đồ thị Gran; máy tính nồng độ / hàm lượng.", "ly_do": "Điểm tương đương ứng với lượng chất chuẩn vừa đủ phản ứng hết với mẫu.", "loi": ""},
+    {"ma": "ket_thuc", "ten": "Rửa điện cực, cất vào dung dịch bảo quản", "viec": "Tráng điện cực bằng nước cất, ngâm trong KCl 3 mol/L.", "ly_do": "Màng thủy tinh khô sẽ đáp ứng chậm, sai.", "loi": ""}
+  ],
+  "an_toan": [
+    "NaOH, HCl ăn da: đeo kính, găng; lau ngay nếu đổ.",
+    "Màng thủy tinh của điện cực rất mỏng: không va vào thành cốc, không lau chà mạnh.",
+    "Không để điện cực khô; không ngâm trong nước cất lâu."
+  ],
+  "thuat_ngu": [
+    {"tu": "Điểm tương đương", "nghia": "Lúc lượng chất chuẩn thêm vào vừa đủ phản ứng hết với chất trong mẫu."},
+    {"tu": "Độ dốc điện cực", "nghia": "Số mV thay đổi khi pH đổi 1 đơn vị, tính theo % của 59,16 mV."},
+    {"tu": "Hệ số chuẩn (titer)", "nghia": "Tỉ số nồng độ thật / nồng độ ghi nhãn của dung dịch chuẩn."},
+    {"tu": "KHP", "nghia": "Kali hiđro phtalat KHC₈H₄O₄ (M = 204,22 g/mol): chất chuẩn gốc tinh khiết, bền, không hút ẩm."},
+    {"tu": "Đồ thị Gran", "nghia": "Biến đổi đường cong để phần trước điểm tương đương thành đường thẳng; cắt trục hoành ở V_tđ."}
+  ],
+  "cau_hoi_on_tap": [
+    "Vì sao máy tìm điểm tương đương ở chỗ dE/dV lớn nhất?",
+    "Điện cực chưa hiệu chuẩn thì điểm tương đương có sai không? pH đọc được có sai không?",
+    "Vì sao phải xác định hệ số chuẩn của NaOH bằng KHP?",
+    "Chuẩn độ axit axetic, pH ở nửa thể tích tương đương bằng bao nhiêu? Vì sao?",
+    "Giấm ăn chứa khoảng 0,8 mol/L axit axetic. Nên lấy bao nhiêu mL mẫu để V_tđ khoảng 10 – 18 mL NaOH 0,1 M?"
+  ]
+}

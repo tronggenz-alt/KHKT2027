@@ -1,0 +1,61 @@
+{
+  "ma": "ftir",
+  "ten": "Quang phổ hồng ngoại biến đổi Fourier (FTIR) có đầu đo ATR",
+  "may_mau": "Shimadzu IRSpirit + phụ kiện ATR kim cương QATR-S (thông số lấy theo máy mẫu; trên vỏ máy trong phòng lab ảo dùng tên chung)",
+  "nguyen_ly": [
+    "Phân tử hấp thụ tia hồng ngoại ở những tần số đúng bằng tần số dao động của liên kết (kéo giãn, uốn). Mỗi nhóm chức có vùng hấp thụ đặc trưng, ví dụ C=O khoảng 1700 – 1750 cm⁻¹, O-H khoảng 3200 – 3600 cm⁻¹.",
+    "Máy FTIR không dùng cách tử. Giao thoa kế Michelson chia chùm tia làm hai đường tới gương cố định và gương di động rồi gộp lại; khi gương di động chạy, cường độ ở detector dao động theo hiệu quang trình, tạo giao thoa đồ (interferogram).",
+    "Tia laser He-Ne chạy song song đánh dấu vị trí gương rất chính xác. Máy tính biến đổi Fourier (FFT) giao thoa đồ thành phổ theo số sóng; mọi số sóng được đo cùng lúc nên nhanh và nhạy.",
+    "Phép đo ATR: nhỏ mẫu lên tinh thể kim cương; tia hồng ngoại phản xạ toàn phần bên trong tinh thể và tạo sóng tắt dần đi vào mẫu khoảng 1 – 2 µm. Mẫu lỏng, rắn đều đo trực tiếp, không cần ép viên KBr.",
+    "Phổ mẫu được chia cho phổ nền (đo khi tinh thể sạch, không có mẫu) để khử hơi nước, CO₂ trong không khí và đặc tính của máy. Dung dịch nước có dải nước rất mạnh, phải trừ phổ nước mới thấy rõ chất tan."
+  ],
+  "cong_thuc": ["số sóng ν̃ = 1/λ (cm⁻¹)", "T = I_mẫu / I_nền", "A = −log T", "S/N ∝ √(số lần quét)"],
+  "bo_phan": [
+    {"ma": "nguon_ir", "ten": "Nguồn hồng ngoại (gốm nung nóng)", "chuc_nang": "Phát bức xạ hồng ngoại liên tục trên cả dải đo."},
+    {"ma": "chia_chum", "ten": "Bộ chia chùm KBr", "chuc_nang": "Cho một nửa chùm tia đi qua, phản xạ một nửa: chia ánh sáng về hai gương."},
+    {"ma": "guong_co_dinh", "ten": "Gương cố định", "chuc_nang": "Phản xạ một nửa chùm tia trở lại bộ chia chùm."},
+    {"ma": "guong_di_dong", "ten": "Gương di động", "chuc_nang": "Chạy tới lui, làm thay đổi hiệu quang trình giữa hai nửa chùm tia, tạo giao thoa."},
+    {"ma": "laser", "ten": "Laser He-Ne (632,8 nm)", "chuc_nang": "Đếm vân giao thoa để biết chính xác vị trí gương di động; là chuẩn số sóng của máy."},
+    {"ma": "atr", "ten": "Tinh thể ATR kim cương", "chuc_nang": "Tia phản xạ toàn phần bên trong; sóng tắt dần đi vào lớp mẫu sát mặt tinh thể."},
+    {"ma": "detector", "ten": "Detector DLATGS", "chuc_nang": "Detector nhiệt điện: đổi cường độ hồng ngoại thành tín hiệu điện (giao thoa đồ)."},
+    {"ma": "may_tinh", "ten": "Bộ xử lý FFT", "chuc_nang": "Biến đổi Fourier giao thoa đồ thành phổ, chia cho phổ nền."}
+  ],
+  "thong_so": [
+    {"ten": "Dải số sóng", "gia_tri": "7800 – 350 cm⁻¹", "loai": "điển hình", "nguon": "https://www.foodnavigator.com/Article/2017/11/13/Shimadzu-launches-two-compact-sized-FTIR-spectrophotometers"},
+    {"ten": "Độ phân giải chọn được", "gia_tri": "0,9; 2; 4; 8; 16 cm⁻¹", "loai": "điển hình", "nguon": "https://findlight.net/spectral-analysis/spectroscopy-solutions/ftir/irspirit-fourier-transform-infrared-ftir-spectrometer"},
+    {"ten": "Detector", "gia_tri": "DLATGS có điều nhiệt (IRSpirit-T)", "loai": "điển hình", "nguon": "https://www.foodnavigator.com/Article/2017/11/13/Shimadzu-launches-two-compact-sized-FTIR-spectrophotometers"},
+    {"ten": "ATR QATR-S", "gia_tri": "phản xạ một lần, lăng kính kim cương, góc tới 45°, đo tới 400 cm⁻¹", "loai": "điển hình", "nguon": "https://www.ssi.shimadzu.com/products/ftir/ftir-spectroscopy/irspirit/option.html"},
+    {"ten": "Vị trí dải đặc trưng của nhóm chức", "gia_tri": "theo bảng tần số nhóm chức (O-H, C-H, C=O, C-O…)", "loai": "tra cứu", "nguon": "https://owl.umass.edu/departments/OrganicChemistry/appendix/ir_group_frequencies.html"},
+    {"ten": "Thời gian khởi động, ổn định detector", "gia_tri": "rút ngắn còn vài giây", "loai": "mô phỏng", "mo_phong": true},
+    {"ten": "Cường độ, độ rộng dải trong thư viện phổ", "gia_tri": "ước lượng cho mục đích dạy học", "loai": "mô phỏng", "mo_phong": true}
+  ],
+  "quy_trinh": [
+    {"ma": "bat_may", "ten": "Bật máy, chờ ổn định", "viec": "Bật nguồn; chờ nguồn hồng ngoại, laser và detector ổn định.", "ly_do": "Nguồn sáng và detector cần nhiệt độ ổn định thì giao thoa đồ mới lặp lại.", "loi": "Đo ngay: máy chưa sẵn sàng, không cho đo."},
+    {"ma": "lau_tinh_the", "ten": "Lau sạch tinh thể ATR", "viec": "Lau tinh thể bằng khăn mềm thấm etanol / isopropanol, để khô.", "ly_do": "Cặn mẫu cũ còn trên tinh thể sẽ hiện lẫn trong phổ mẫu mới.", "loi": "Không lau: phổ có dải của mẫu trước (nhiễm chéo)."},
+    {"ma": "dat_thong_so", "ten": "Đặt thông số đo", "viec": "Chọn độ phân giải (thường 4 cm⁻¹) và số lần quét (16 – 64).", "ly_do": "Quét nhiều lần thì nhiễu giảm theo căn bậc hai số lần quét.", "loi": "Quét 1 – 4 lần: phổ nhiễu, dải yếu bị lẫn."},
+    {"ma": "do_nen", "ten": "Đo phổ nền (background)", "viec": "Đo khi tinh thể sạch, khô, chưa có mẫu.", "ly_do": "Phổ mẫu chia cho phổ nền để khử CO₂, hơi nước trong không khí và đặc tính máy.", "loi": "Không đo nền, hoặc nền cũ: phổ có dải CO₂ ở 2350 cm⁻¹ và răng cưa hơi nước."},
+    {"ma": "nho_mau", "ten": "Nhỏ mẫu lên tinh thể", "viec": "Nhỏ 1 – 2 giọt mẫu phủ kín tinh thể (mẫu rắn thì ép bằng núm ép).", "ly_do": "Sóng tắt dần chỉ đi vào lớp mẫu sát mặt tinh thể.", "loi": "Mẫu không phủ kín tinh thể: dải yếu."},
+    {"ma": "do_mau", "ten": "Đo phổ mẫu", "viec": "Bấm đo; máy quét, biến đổi Fourier và chia cho phổ nền.", "ly_do": "Phổ mẫu = I_mẫu / I_nền ở mọi số sóng.", "loi": ""},
+    {"ma": "xu_ly", "ten": "Xử lý phổ, nhận diện", "viec": "Trừ phổ nước (mẫu nước), gán dải theo nhóm chức, tra thư viện phổ.", "ly_do": "Dải nước che vùng O-H và 1640 cm⁻¹; trừ đi mới thấy chất tan.", "loi": "Đọc phổ dung dịch nước mà chưa trừ nước: tưởng nhầm là ancol (dải O-H)."},
+    {"ma": "ket_thuc", "ten": "Lau tinh thể, kết thúc", "viec": "Lau sạch mẫu khỏi tinh thể; tắt máy nếu không dùng nữa.", "ly_do": "Mẫu axit, muối để lâu làm bẩn, xước bề mặt tinh thể.", "loi": ""}
+  ],
+  "an_toan": [
+    "Không nhìn vào tia laser He-Ne trong máy.",
+    "Không dùng vật cứng, nhọn cạo tinh thể ATR; không để axit mạnh, kiềm mạnh lâu trên tinh thể.",
+    "Mẫu dễ bay hơi, độc (dung môi hữu cơ): đo nhanh, có thông gió."
+  ],
+  "thuat_ngu": [
+    {"tu": "Số sóng (cm⁻¹)", "nghia": "Số bước sóng trên 1 cm, tỉ lệ thuận với năng lượng tia. Phổ IR vẽ từ 4000 về 400 cm⁻¹."},
+    {"tu": "Giao thoa đồ", "nghia": "Tín hiệu detector theo vị trí gương di động; chứa thông tin của mọi số sóng cùng lúc."},
+    {"tu": "FFT", "nghia": "Biến đổi Fourier nhanh: phép toán đổi giao thoa đồ thành phổ."},
+    {"tu": "ATR", "nghia": "Phản xạ toàn phần suy giảm: đo lớp mẫu sát mặt tinh thể, không cần pha mẫu."},
+    {"tu": "Vùng vân tay", "nghia": "Vùng dưới khoảng 1500 cm⁻¹, nhiều dải phức tạp riêng cho từng chất; dùng để so thư viện."}
+  ],
+  "cau_hoi_on_tap": [
+    "Vì sao phải đo phổ nền trước khi đo mẫu? Không đo thì phổ có dải gì lạ?",
+    "Dải mạnh ở 1740 cm⁻¹ cho biết nhóm chức gì? Ở 3300 cm⁻¹ rộng?",
+    "Vì sao phổ dung dịch nước luôn có dải rộng ở 3300 và 1640 cm⁻¹? Làm sao thấy được chất tan?",
+    "Máy FTIR khác máy quang phổ dùng cách tử ở điểm nào? Gương di động để làm gì?",
+    "Quét 64 lần thay vì 4 lần thì nhiễu giảm bao nhiêu lần?"
+  ]
+}

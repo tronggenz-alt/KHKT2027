@@ -1,4 +1,4 @@
-﻿// Kiểm thử bộ máy hóa học (C# thuần, không cần Unity).
+// Kiểm thử bộ máy hóa học (C# thuần, không cần Unity).
 // Chạy:  powershell -ExecutionPolicy Bypass -File tools/chay_kiem_thu_hoa.ps1
 using System;
 using System.Collections.Generic;
@@ -238,6 +238,192 @@ static class ChemEngineTests
         }
         Check(firstFrac > 0.45, "phần cất đầu của rượu 20° giàu etanol", $"{firstFrac:P0} etanol");
         Check(tEnd > t0 + 5, "nhiệt độ sôi tăng dần khi etanol cạn", $"{t0:0.0} → {tEnd:0.0} °C");
+
+        Console.WriteLine("Máy phân tích: UV-Vis (phổ, định luật Beer, tách hỗn hợp) và AAS (đường chuẩn, pha loãng)");
+        var uv = UvVisLibrary.Load(System.IO.File.ReadAllText(System.IO.Path.Combine(root, "data", "may", "tinh_chat", "uv_vis.json")));
+        var unk = new List<string>();
+        // KMnO4: A tuyến tính theo nồng độ ở 525 nm, độ dốc = ε·b
+        var beer = new List<(double x, double y)>();
+        foreach (double c in new[] { 1e-4, 2e-4, 3e-4, 4e-4, 5e-4 })
+            beer.Add((c, UvVisLibrary.Absorbance(uv.Absorbers(Mix.Of(("MnO4-", c)), 1000, 7, 0, unk), 525)));
+        var fitMn = UvVisLibrary.Linear(beer);
+        Check(Math.Abs(fitMn.Slope - 2240) < 224 && fitMn.R2 > 0.9999, "KMnO₄ tuân theo định luật Beer, ε(525 nm) ≈ 2,24×10³", $"độ dốc {fitMn.Slope:0}, R² {fitMn.R2:0.0000}");
+        Near(uv.Get("MnO4-").LambdaMax(400, 700), 525, 1, "λmax của KMnO₄ = 525 nm");
+        // Cr(VI) trong axit: đúng số liệu chứng nhận NIST SRM 935a ở 350 nm (theo mol Cr)
+        Near(UvVisLibrary.Absorbance(uv.Absorbers(Mix.Of(("CrVI", 1e-4)), 1000, 3, 0, unk), 350), 10.672 * 294.18 / 2 * 1e-4, 0.002, "Cr(VI) pH 3: A(350 nm) theo NIST SRM 935a");
+        unk.Clear();
+        uv.Absorbers(Mix.Of(("CrVI", 1e-4)), 1000, 9, 0, unk);
+        Check(unk.Count == 1, "cromat ở pH 9: báo ngoài thư viện, không bịa số", unk.Count > 0 ? unk[0] : "");
+        unk.Clear();
+        uv.Absorbers(Mix.Of(("Cu2+", 0.05)), 1000, 4, 0, unk);
+        Check(unk.Count == 1, "Cu²⁺ (chưa có ε có nguồn): báo ngoài thư viện", unk.Count > 0 ? unk[0] : "");
+        // tách hỗn hợp KMnO4 + Cr(VI) + [Fe(SCN)]2+ từ phổ 360 – 700 nm
+        var mixAbs = uv.Absorbers(Mix.Of(("MnO4-", 2e-4), ("CrVI", 3e-4), ("FeSCN", 5e-5)), 1000, 2, 0, null);
+        var spec = new List<(double, double)>();
+        for (double l = 360; l <= 700; l += 2) spec.Add((l, UvVisLibrary.Absorbance(mixAbs, l)));
+        var comps = new List<UvVisLibrary.Entry> { uv.Get("MnO4-"), uv.Get("CrVI"), uv.Get("FeSCN"), uv.Get("CuNH3") };
+        var cs = UvVisLibrary.Unmix(comps, spec, 1, out double rms);
+        Check(Math.Abs(cs[0] / 2e-4 - 1) < 0.02 && Math.Abs(cs[1] / 3e-4 - 1) < 0.02 && Math.Abs(cs[2] / 5e-5 - 1) < 0.02 && cs[3] < 1e-6 && rms < 1e-4,
+              "tách hỗn hợp 3 chất màu từ phổ (đúng ±2%, chất không có = 0)", $"MnO₄⁻ {cs[0]:E2}, Cr {cs[1]:E2}, FeSCN {cs[2]:E2}, Cu {cs[3]:E1}, rms {rms:E1}");
+        Check(uv.CuvetteAbsorbance("nhua", 260) > 2 && uv.CuvetteAbsorbance("thach_anh", 260) < 0.01 && uv.CuvetteAbsorbance("nhua", 500) < 0.01, "cuvet nhựa chặn tia tử ngoại, thạch anh thì không");
+
+        var aas = AasLibrary.Load(System.IO.File.ReadAllText(System.IO.Path.Combine(root, "data", "may", "tinh_chat", "aas_nguyen_to.json")));
+        var cuL = aas.Get("Cu");
+        var std = cuL.Standards();
+        Check(std.SequenceEqual(new[] { 0.5, 1.0, 2.0, 5.0 }) || std.SequenceEqual(new[] { 0.5, 1.0, 2.0, 4.0 }), "dãy chuẩn Cu theo khoảng làm việc", string.Join(" / ", std));
+        var cal = new List<(double x, double y)> { (0, 0) };
+        foreach (double s in std) cal.Add((s, cuL.Absorbance(s)));
+        var fitCu = UvVisLibrary.Linear(cal);
+        Check(fitCu.R2 > 0.995, "đường chuẩn AAS Cu: R² > 0,995", $"R² {fitCu.R2:0.0000}, A(4 mg/L) {cuL.Absorbance(4):0.000}");
+        Near(cuL.Absorbance(10), 0.8, 0.06, "Cu ở giới hạn trên khoảng làm việc (10 mg/L): A ≈ 0,8 (sổ tay: 0,8 – 1,0)");
+        Check(cuL.Absorbance(254) < 2.0 && cuL.Absorbance(254) > 1.5, "mẫu rất đặc: A bão hòa dưới 2 như máy thật", $"A(254 mg/L) = {cuL.Absorbance(254):0.00}");
+        // nước thải mạ: Cu 0,004 M = 254 mg/L, pha loãng 100 lần rồi đọc theo đường chuẩn
+        var plating = Mix.Of(("Cu2+", 0.004), ("Zn2+", 0.003), ("Ni2+", 0.002), ("SO4", 0.009));
+        var el = AasLibrary.ElementMgL(plating, 1000);
+        Near(el["Cu"], 254.2, 0.5, "tổng Cu trong nước thải mạ = 254 mg/L");
+        double found = fitCu.X(cuL.Absorbance(el["Cu"] / 100)) * 100;
+        Check(Math.Abs(found / el["Cu"] - 1) < 0.02, "pha loãng ×100 rồi đo: tìm lại Cu đúng ±2%", $"{found:0.0} mg/L");
+        double over = fitCu.X(cuL.Absorbance(el["Cu"])) ;
+        Check(over < el["Cu"] * 0.5, "không pha loãng (ngoài đường chuẩn): kết quả sai rất xa", $"{over:0.0} mg/L thay vì {el["Cu"]:0}");
+        Check(AasLibrary.CountAtoms("Fe4[Fe(CN)6]3")["Fe"] == 7 && AasLibrary.CountAtoms("Cu(OH)2")["Cu"] == 1 && AasLibrary.CountAtoms("CrVI")["Cr"] == 1 && AasLibrary.CountAtoms("hc:468").Count == 0,
+              "đếm nguyên tử trong mã chất (phức, kết tủa, họ axit)");
+        var withPpt = Mix.Of(("Cu2+", 0.001), ("Cu(OH)2", 0.002));
+        var solids = new Dictionary<string, double>();
+        var elp = AasLibrary.ElementMgL(withPpt, 1000, solids);
+        Check(Math.Abs(elp["Cu"] - 0.003 * 63.55 * 1000) < 0.5 && Math.Abs(solids["Cu"] - 0.002 * 63.55 * 1000) < 0.5, "Cu trong kết tủa được tách riêng (cảnh báo phải lọc / phá mẫu)");
+        Check(aas.Get("Al").Absorbance(50, airAcetylene: true) < 0.001, "Al trong ngọn lửa không khí – axetilen: gần như không có tín hiệu");
+
+        Console.WriteLine("Máy phân tích đợt 2: FTIR, GC-MS, HPLC, chuẩn độ điện thế");
+        string Data(string f) => System.IO.File.ReadAllText(System.IO.Path.Combine(root, "data", "may", "tinh_chat", f));
+        var meoh = ChemEngine.RegisterOrganic(467, "Methanol", "CH3OH", new[] { "ancol", "de_chay" }, 0, 0, 32.04, 0.792);
+        var amyl = ChemEngine.RegisterOrganic(539, "Isoamyl axetat", "CH3COOC5H11", new[] { "este", "khong_tan" }, 0, 0, 130.19, 0.876);
+        var gluc = ChemEngine.RegisterOrganic(578, "Glucozơ", "C6H12O6", new[] { "cacbohidrat", "poliol" }, 0, 0, 180.16, 1.5);
+        var sucr = ChemEngine.RegisterOrganic(580, "Saccarozơ", "C12H22O11", new[] { "cacbohidrat", "poliol" }, 0, 0, 342.3, 1.5);
+        ChemEngine.RegisterOrganic(579, "Fructozơ", "C6H12O6", new[] { "cacbohidrat", "poliol" }, 0, 0, 180.16, 1.5);
+
+        // ---- FTIR ----
+        var ir = FtirLibrary.Load(Data("ftir.json"));
+        var irUnk = new List<string>();
+        var wine = ir.Composition(Mix.Of(("C2H5OH", 5.2)), 1000, 7, irUnk);
+        Near(wine.First(p => p.E.Id == "etanol").Amount, 5.2 * 46.07 / 789, 0.002, "FTIR: rượu 5,2 M = 30,4% thể tích etanol");
+        Near(wine.First(p => p.E.Id == "nuoc").Amount, 1 - 5.2 * 46.07 / 789, 0.002, "FTIR: nước chiếm phần thể tích còn lại");
+        var vinegarAcid = ir.Composition(Mix.Of(("Ac", 0.83)), 1000, 2.5, null);
+        var vinegarSalt = ir.Composition(Mix.Of(("Ac", 0.83)), 1000, 9, null);
+        double c1710a = FtirLibrary.Absorbance(vinegarAcid, 1710, false), c1550a = FtirLibrary.Absorbance(vinegarAcid, 1550, false);
+        double c1710b = FtirLibrary.Absorbance(vinegarSalt, 1710, false), c1550b = FtirLibrary.Absorbance(vinegarSalt, 1550, false);
+        Check(c1710a > 3 * c1550a && c1550b > 3 * c1710b, "FTIR: axit axetic (pH 2,5) có C=O 1710 cm⁻¹, ion axetat (pH 9) có COO⁻ 1550 cm⁻¹",
+              $"pH 2,5: {c1710a:0.000}/{c1550a:0.000}; pH 9: {c1710b:0.000}/{c1550b:0.000}");
+        // dầu chuối (isoamyl axetat + etanol) trong nước: trừ phổ nước, tách hỗn hợp đúng thành phần
+        var banana = ir.Composition(Mix.Of(("hc:539", 0.4), ("C2H5OH", 0.5)), 1000, 7, null);
+        var irSpec = new List<(double nu, double a)>();
+        for (double nu = 3800; nu >= 650; nu -= 4) irSpec.Add((nu, FtirLibrary.Absorbance(banana, nu, false)));
+        var irMix = ir.Unmix(irSpec, true, out double irRms);
+        var amylPart = irMix.FirstOrDefault(p => p.E.Id == "isoamyl_axetat");
+        var etPart = irMix.FirstOrDefault(p => p.E.Id == "etanol");
+        Check(amylPart.E != null && etPart.E != null && Math.Abs(amylPart.Amount / (0.4 * 130.19 / 876) - 1) < 0.03 && Math.Abs(etPart.Amount / (0.5 * 46.07 / 789) - 1) < 0.03 && irRms < 1e-4,
+              "FTIR: tách phổ dầu chuối ra isoamyl axetat + etanol đúng ±3%", $"{irMix.Count} chất, rms {irRms:E1}");
+        var hit = ir.Search(irSpec.Where(p => p.nu < 1800).ToList());
+        Check(hit[0].p.E.Id == "isoamyl_axetat", "FTIR: tra thư viện vùng vân tay ra isoamyl axetat đầu bảng", $"{hit[0].p.Label} HQI {hit[0].hqi:0}");
+        Check(ir.Assign(1738).Contains("este") && ir.Assign(2350).Contains("CO₂"), "FTIR: gán dải 1738 cm⁻¹ = C=O este, 2350 = CO₂");
+
+        // ---- GC-MS ----
+        var gc = GcLibrary.Load(Data("gc_ms.json"));
+        var gm = new GcLibrary.Method();
+        double tMe = gc.Retention(gc.ById("metanol").RI, gm).tr, tEt = gc.Retention(gc.ById("etanol").RI, gm).tr, tAm = gc.Retention(gc.ById("isoamyl_axetat").RI, gm).tr;
+        double tC10 = gc.Retention(1000, gm).tr, tC16 = gc.Retention(1600, gm).tr;
+        Check(tMe < tEt && tEt < tAm, "GC: metanol ra trước etanol, etanol trước isoamyl axetat", $"{tMe:0.00} / {tEt:0.00} / {tAm:0.00} phút");
+        Check(tC10 > 7.5 && tC10 < 10 && tC16 > 16 && tC16 < 20, "GC: n-C10, n-C16 ra ở thời gian hợp lý (40 °C 2 phút, 10 °C/phút)", $"C10 {tC10:0.00}, C16 {tC16:0.00} phút");
+        Near(gc.RetentionIndex(tAm, gm), 876, 6, "GC: tính ngược chỉ số lưu từ thời gian lưu (van den Dool – Kratz)");
+        Near(gc.RetentionIndex(tMe, gm), 360, 15, "GC: chỉ số lưu của metanol (ra trước n-C5) tính ngược đúng");
+        var hot = new GcLibrary.Method { T0 = 80 };
+        double dCold = gc.Retention(445, gm).tr - gc.Retention(360, gm).tr, dHot = gc.Retention(445, hot).tr - gc.Retention(360, hot).tr;
+        Check(dHot < dCold * 0.6, "GC: lò bắt đầu nóng (80 °C) làm metanol, etanol dồn sát nhau", $"Δt {dCold * 60:0.0} s → {dHot * 60:0.0} s");
+        var gunk = new List<string>(); var gnv = new List<string>();
+        var spirit = Mix.Of(("C2H5OH", 5.2), ("hc:467", 0.05));
+        var gp = gc.Peaks(spirit, 1000, gm, 10, gunk, gnv);
+        Check(gp.Count == 2 && gp[0].E.Id == "metanol" && !gp[1].Overloaded, "GC: rượu pha loãng ×10 cho 2 pic, etanol không quá tải", string.Join(", ", gp.Select(p => $"{p.E.Name} {p.Tr:0.00} ({p.AmountNg:0} ng)")));
+        var gpRaw = gc.Peaks(spirit, 1000, gm, 1, null, null);
+        Check(gpRaw.First(p => p.E.Id == "etanol").Overloaded && gpRaw.First(p => p.E.Id == "etanol").Saturated, "GC: rượu không pha loãng: pic etanol quá tải, detector bão hòa");
+        var ms = gc.SpectrumAt(gp, gp[0].Tr, gm);
+        var found1 = gc.Search(ms, gm.ScanLo);
+        Check(found1[0].e.Id == "metanol" && found1[0].match > 800, "GC-MS: phổ ở đỉnh pic 1 tra thư viện ra metanol (độ khớp > 800)", $"{found1[0].e.Name} {found1[0].match:0}, kế: {found1[1].e.Name} {found1[1].match:0}");
+        var ms2 = gc.SpectrumAt(gp, gp[1].Tr, gm);
+        Check(gc.Search(ms2, gm.ScanLo)[0].e.Id == "etanol", "GC-MS: pic 2 là etanol");
+        var calGc = new List<(double x, double y)>();
+        foreach (double mg in new[] { 20.0, 50, 100, 200, 500 })
+            calGc.Add((mg, GcLibrary.MeasuredArea(gc.Peaks(Mix.Of(("hc:467", mg / 32040.0), ("C2H5OH", 0.52)), 1000, gm, 1, null, null).First(p => p.E.Id == "metanol"))));
+        var fGc = UvVisLibrary.Linear(calGc);
+        double meFound = fGc.X(GcLibrary.MeasuredArea(gp[0])) * 10;
+        Check(fGc.R2 > 0.999 && Math.Abs(meFound / (0.05 * 32040) - 1) < 0.02, "GC: định lượng metanol trong rượu đúng ±2% (dãy chuẩn 20 – 500 mg/L, mẫu pha loãng ×10)", $"{meFound:0} mg/L, R² {fGc.R2:0.0000}");
+        double perPureEthanol = meFound / (5.2 * 46.07 / 789);
+        Check(perPureEthanol > 100 * 40, "GC: metanol tính theo cồn 100° vượt rất xa 100 mg/L", $"{perPureEthanol:0} mg/L cồn 100°");
+
+        // ---- HPLC ----
+        var hp = HplcLibrary.Load(Data("hplc.json"));
+        var acids = hp.Method("axit_huu_co");
+        double p0 = hp.Pressure("axetonitril", 0, 1.0, 30);
+        Check(p0 > 90 && p0 < 150, "HPLC: áp suất cột 250 × 4,6 mm, nước 1 mL/phút ≈ 100 – 150 bar", $"{p0:0} bar");
+        Check(hp.Pressure("metanol", 0.4, 2.0, 30) > HplcLibrary.MaxBar * 0.9, "HPLC: metanol 40%, 2 mL/phút gần / vượt giới hạn 400 bar", $"{hp.Pressure("metanol", 0.4, 2.0, 30):0} bar");
+        var oj = Mix.Of(("Cit", 0.03), ("hc:578", 0.25), ("hc:580", 0.1));
+        var ns = new List<string>();
+        var pa = hp.Peaks(acids, oj, 1000, 10, acids.Phi, acids.Ph, 1.0, 10, ns);
+        Check(pa.Count == 1 && pa[0].C.Id == "citric" && ns.Count == 2, "HPLC axit hữu cơ (UV 210): nước cam chỉ có pic axit xitric, đường không hấp thụ UV", string.Join(", ", pa.Select(p => $"{p.C.Name} {p.Tr:0.00}")) + " | không thấy: " + string.Join(", ", ns));
+        double trCit25 = pa[0].Tr;
+        var paPh7 = hp.Peaks(acids, oj, 1000, 10, acids.Phi, 7.0, 1.0);
+        Check(paPh7[0].Tr < hp.DeadTime(1.0) * 1.1 && trCit25 > hp.DeadTime(1.0) * 2, "HPLC: pha động pH 7 (axit ion hóa) làm axit xitric ra sát t₀, không tách", $"pH 2,5: {trCit25:0.00}; pH 7: {paPh7[0].Tr:0.00}; t₀ {hp.DeadTime(1.0):0.00} phút");
+        var sug = hp.Method("duong");
+        var ps = hp.Peaks(sug, oj, 1000, 10, sug.Phi, sug.Ph, 1.0);
+        Check(ps.Count == 2 && ps[0].C.Id == "glucozo" && ps[1].C.Id == "saccarozo" && HplcLibrary.Resolution(ps[0], ps[1]) > 1.5, "HPLC đường (NH₂, RID): glucozơ ra trước saccarozơ, tách hoàn toàn", string.Join(", ", ps.Select(p => $"{p.C.Name} {p.Tr:0.00}")));
+        var fruit = Mix.Of(("hc:579", 0.05), ("hc:578", 0.05), ("hc:580", 0.05));
+        var ps3 = hp.Peaks(sug, fruit, 1000, 1, sug.Phi, sug.Ph, 1.0);
+        Check(ps3.Select(p => p.C.Id).SequenceEqual(new[] { "fructozo", "glucozo", "saccarozo" }), "HPLC: thứ tự ra fructozơ, glucozơ, saccarozơ như tài liệu Supelco");
+        // định lượng saccarozơ theo chuẩn ngoài
+        var calLc = new List<(double x, double y)>();
+        foreach (double gL in new[] { 1.0, 2, 4, 6, 8 }) calLc.Add((gL, hp.Peaks(sug, Mix.Of(("hc:580", gL / 342.3)), 1000, 1, sug.Phi, sug.Ph, 1.0)[0].Area));
+        var fLc = UvVisLibrary.Linear(calLc);
+        double sucFound = fLc.X(ps[1].Area) * 10;
+        Check(Math.Abs(sucFound / (0.1 * 342.3) - 1) < 0.01, "HPLC: saccarozơ trong nước cam đúng ±1% (pha loãng ×10)", $"{sucFound:0.0} g/L");
+        var pres = hp.Method("bao_quan");
+        var soda = Mix.Of(("Bz", 0.0012), ("Cit", 0.01));
+        var pb = hp.Peaks(pres, soda, 1000, 1, pres.Phi, pres.Ph, 1.0);
+        var bz = pb.First(p => p.C.Id == "benzoic");
+        double bz50 = hp.Peaks(pres, soda, 1000, 1, 0.5, pres.Ph, 1.0).First(p => p.C.Id == "benzoic").Tr;
+        Check(bz.Tr > 6 && bz.Tr < 12 && bz50 < bz.Tr * 0.75, "HPLC: axit benzoic ra 6 – 12 phút; tăng metanol 40 → 50% thì ra sớm hơn", $"{bz.Tr:0.00} → {bz50:0.00} phút");
+
+        // ---- chuẩn độ điện thế ----
+        var calPts = PotentiometricTitration.Buffers.Select(ph => (ph, PotentiometricTitration.ElectrodeMv(ph, 0.965, 12))).ToList();
+        var (sl, off) = PotentiometricTitration.Calibrate(calPts);
+        Check(Math.Abs(sl - 0.965) < 1e-6 && Math.Abs(off - 12) < 1e-6, "chuẩn độ: hiệu chuẩn 3 đệm tìm lại độ dốc 96,5%, thế lệch +12 mV");
+        double rawPh = PotentiometricTitration.DisplayPh(PotentiometricTitration.ElectrodeMv(10.0, 0.965, 12), 1, 0);
+        Check(Math.Abs(rawPh - 10.0) > 0.2, "chuẩn độ: chưa hiệu chuẩn thì pH hiển thị lệch", $"pH thật 10,00 → hiển thị {rawPh:0.00}");
+        // KHP 1,000 mmol với NaOH thật 0,0982 M: V_tđ = 10,18 mL
+        var khp = new List<(double v, double mv)>();
+        for (double v = 0; v <= 14; v += 0.05) khp.Add((v, PotentiometricTitration.ElectrodeMv(PotentiometricTitration.KhpPh(1e-3, 0.05, 0.0982, v / 1000), 0.965, 12)));
+        var epK = PotentiometricTitration.Endpoints(khp);
+        Check(epK.Count == 1 && Math.Abs(epK[0].v - 10.183) < 0.03, "chuẩn độ KHP: một điểm tương đương ở 10,18 mL → hệ số chuẩn NaOH 0,982", epK.Count > 0 ? $"{epK[0].v:0.000} mL" : "không thấy");
+        // giấm 2 mL (0,83 M) trong 50 mL nước, NaOH 0,0982 M: V_tđ = 16,90 mL
+        var vin = Mix.Of(("Ac", 0.83 * 0.002));
+        var curve = new List<(double v, double mv)>();
+        var phCurve = new List<(double v, double ph)>();
+        for (double v = 0; v <= 22; v += 0.05)
+        {
+            double ph = PotentiometricTitration.SamplePh(vin, 0.052, true, 0.0982, v / 1000);
+            curve.Add((v, PotentiometricTitration.ElectrodeMv(ph, 0.965, 12)));
+            phCurve.Add((v, ph));
+        }
+        var epV = PotentiometricTitration.Endpoints(curve);
+        double veq = 0.83 * 2 / 0.0982;
+        Check(epV.Count == 1 && Math.Abs(epV[0].v - veq) < 0.05, "chuẩn độ giấm: điểm tương đương đúng ±0,05 mL", epV.Count > 0 ? $"{epV[0].v:0.000} mL (cần {veq:0.000})" : "không thấy");
+        double phHalf = phCurve.OrderBy(p => Math.Abs(p.v - veq / 2)).First().ph;
+        Near(phHalf, 4.74, 0.08, "chuẩn độ giấm: pH ở nửa thể tích tương đương ≈ pKa axit axetic");
+        var gran = PotentiometricTitration.Gran(phCurve, veq * 0.2, veq * 0.8);
+        Check(Math.Abs(gran.veq / veq - 1) < 0.01 && gran.r2 > 0.999, "chuẩn độ: đồ thị Gran cắt trục ở V_tđ (±1%)", $"{gran.veq:0.000} mL, R² {gran.r2:0.0000}");
+        // H3PO4 cho 2 điểm tương đương
+        var phos = Mix.Of(("PO4", 0.1 * 0.01));
+        var cP = new List<(double v, double mv)>();
+        for (double v = 0; v <= 24; v += 0.05) cP.Add((v, PotentiometricTitration.ElectrodeMv(PotentiometricTitration.SamplePh(phos, 0.06, true, 0.1, v / 1000), 1, 0)));
+        var epP = PotentiometricTitration.Endpoints(cP, 100);
+        Check(epP.Count == 2 && Math.Abs(epP[0].v - 10) < 0.15 && Math.Abs(epP[1].v - 20) < 0.25, "chuẩn độ H₃PO₄ 0,1 M (10 mL): hai điểm tương đương ở 10 và 20 mL", string.Join(" / ", epP.Select(e => $"{e.v:0.00}")));
 
         Console.WriteLine($"\n{passed} đạt, {failed} sai");
         return failed == 0 ? 0 : 1;

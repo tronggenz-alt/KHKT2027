@@ -1,0 +1,50 @@
+{
+  "mo_ta": "Dải hấp thụ UV-Vis của các chất trong lab ảo (mã chất theo bộ máy hóa học). Mỗi chất có nguồn cho λmax và ε. Dạng dải (độ rộng sigma, dạng Gauss) là gần đúng, ghi rõ ở 'dang_dai'. Chất không có trong bảng: máy báo 'ngoài thư viện', không bịa số.",
+  "don_vi": {"l": "nm", "eps": "L·mol⁻¹·cm⁻¹ (tính theo mol chất ghi ở 'theo_mol')", "sigma": "nm"},
+  "chat": [
+    {
+      "id": "MnO4-", "ten": "Pemanganat MnO₄⁻", "theo_mol": "MnO₄⁻",
+      "dai": [{"l": 525, "eps": 2240, "sigma": 30}],
+      "dang_dai": "một dải Gauss quanh λmax (máy thật thấy thêm các vai 507, 545 nm)",
+      "nguon": "https://cesad.ufs.br/ORBI/public/uploadCatalago/18033016022012Metodos_Instrumentais_de_Analise_-_Aula_13.pdf",
+      "ghi_chu": "ε = 2,24×10³ L·mol⁻¹·cm⁻¹ ở 525 nm (bài giảng Phân tích công cụ, ĐH Liên bang Sergipe). Các nguồn khác cho 2,2 – 2,4×10³."
+    },
+    {
+      "id": "CrVI", "ten": "Cr(VI) trong môi trường axit (HCrO₄⁻ / Cr₂O₇²⁻)", "theo_mol": "Cr", "dieu_kien_ph_max": 6.5,
+      "diem": [[235, 1803], [257, 2098], [313, 707], [350, 1570]],
+      "duoi": {"trai": 10, "phai": 45},
+      "dang_dai": "nội suy giữa các điểm chứng nhận; ngoài khoảng 235 – 350 nm giảm dần theo đuôi Gauss",
+      "nguon": "https://tsapps.nist.gov/srmext/certificates/archives/935a.pdf",
+      "ghi_chu": "NIST SRM 935a: K₂Cr₂O₇ trong HClO₄ 0,001 N, 23,5 °C, độ hấp thụ riêng εa (kg·g⁻¹·cm⁻¹) ở 0,020 g/kg: 12,260 (235 nm), 14,262 (257 nm), 4,805 (313 nm), 10,672 (350 nm). Đổi sang mol Cr: ε = εa × 294,18 / 2. Ở pH > 6,5 cromat CrO₄²⁻ chiếm ưu thế: chưa có số liệu, máy báo ngoài thư viện."
+    },
+    {
+      "id": "FeSCN", "ten": "Phức thioxianatosắt(III) [Fe(SCN)]²⁺", "theo_mol": "[Fe(SCN)]²⁺",
+      "dai": [{"l": 447, "eps": 4700, "sigma": 45}],
+      "dang_dai": "một dải Gauss quanh λmax",
+      "nguon": "https://bpb-us-e2.wpmucdn.com/sites.mst.edu/dist/9/280/files/2023/08/Datasheet.pdf",
+      "ghi_chu": "ε = 4700 L·mol⁻¹·cm⁻¹ ở 447 nm (Frank và Oswalt, dẫn trong tài liệu thí nghiệm của Missouri S&T). Các tài liệu khác cho 2800 – 7000 tùy điều kiện axit, lực ion: nên tự dựng đường chuẩn."
+    },
+    {
+      "id": "CuNH3", "ten": "Phức tetraammin đồng(II) [Cu(NH₃)₄]²⁺", "theo_mol": "Cu",
+      "dai": [{"l": 610, "eps": 88, "sigma": 60}],
+      "dang_dai": "một dải Gauss đỉnh 610 nm, chỉnh để ε(640 nm) = 77",
+      "nguon": "https://www.sciencedirect.com/science/article/abs/pii/S0003267002001356",
+      "nguon_phu": "https://www.ulm.edu/chemistry/courses/manuals/chem1010/experiment_07.pdf",
+      "ghi_chu": "ε(640 nm) = 77 L·mol⁻¹·cm⁻¹ (Analytica Chimica Acta, 2002). λmax 600 – 620 nm, danh nghĩa 610 nm (giáo trình thí nghiệm ĐH Louisiana Monroe); chỉ tạo phức này khi dư NH₃."
+    },
+    {
+      "id": "pp", "ten": "Phenolphtalein dạng bazơ (màu hồng)", "theo_mol": "phenolphtalein", "pKa": 9.3,
+      "dai": [{"l": 552, "eps": 23000, "sigma": 35}],
+      "dang_dai": "một dải Gauss quanh λmax",
+      "nguon": "https://www.merckmillipore.com/IL/en/product/mm/107233",
+      "nguon_phu": "https://en.wikipedia.org/wiki/Phenolphthalein",
+      "ghi_chu": "Merck: λmax 551 – 554 nm (đệm pH 9,8), độ hấp thụ riêng A(1%, 1 cm) = 700 – 750, đổi ra ε ≈ 700 – 750 × 318,33 / 10 = (2,2 – 2,4)×10⁴. Lab ảo: 1 giọt = 0,05 mL dung dịch 1% (khoảng 1,6 µmol); phần dạng bazơ theo pH với pKa ≈ 9,3."
+    }
+  ],
+  "cuvet": [
+    {"ma": "thach_anh", "ten": "Cuvet thạch anh", "cat_nm": 190, "ghi_chu": "Dùng được cả vùng tử ngoại."},
+    {"ma": "thuy_tinh", "ten": "Cuvet thủy tinh", "cat_nm": 340, "ghi_chu": "Hấp thụ mạnh dưới khoảng 340 nm."},
+    {"ma": "nhua", "ten": "Cuvet nhựa", "cat_nm": 340, "ghi_chu": "Hấp thụ mạnh dưới khoảng 340 nm; rẻ, dùng một lần."}
+  ],
+  "nguon_cuvet": "https://nifc.gov.vn/files/media/202407/Cac-van-de-thuong-gap-PGS.TS.Nguyen-Thi-Anh-Huong.pdf"
+}

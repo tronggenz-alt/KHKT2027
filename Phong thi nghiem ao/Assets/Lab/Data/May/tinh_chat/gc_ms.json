@@ -1,0 +1,32 @@
+{
+  "ghi_chu": "Thư viện GC-MS của lab ảo. ri: chỉ số lưu n-ankan trên cột 5% phenyl (DB-5, HP-5, HP-5MS, VF-5MS, RTX-5, SPB-5), chương trình tăng nhiệt; lấy trung vị các giá trị ở mục 'Normal alkane RI, non-polar column, temperature ramp' của NIST WebBook. pho: phổ khối EI 70 eV của NIST (m/z, cường độ so với pic cơ bản = 999), chỉ giữ mảnh ≥ 1%. ids: mã loài trong bộ máy hóa học (hc:<stt> theo danh mục hóa chất). rf: hệ số đáp ứng tương đối của detector (mô phỏng).",
+  "cot": {"ten": "5% phenyl – 95% dimetylpolysiloxan, 30 m × 0,25 mm × 0,25 µm", "t_m_phut": 1.37, "so_dia_ly_thuyet": 100000},
+  "chat": [
+    {"id": "metanol", "ten": "Metanol", "cong_thuc": "CH₃OH", "M": 32.04, "cas": "67-56-1", "ids": ["hc:467"], "ri": 360, "rf": 0.55,
+     "pho": [[14,17],[15,124],[28,46],[29,445],[30,65],[31,999],[32,743],[33,12]],
+     "nguon": "https://webbook.nist.gov/cgi/cbook.cgi?ID=C67561&Mask=2200"},
+    {"id": "etanol", "ten": "Etanol", "cong_thuc": "C₂H₅OH", "M": 46.07, "cas": "64-17-5", "ids": ["C2H5OH", "hc:468"], "ri": 445, "rf": 0.75,
+     "pho": [[13,14],[14,14],[15,66],[19,28],[25,25],[26,98],[27,224],[28,34],[29,298],[30,81],[31,999],[41,14],[42,47],[43,114],[45,514],[46,216]],
+     "nguon": "https://webbook.nist.gov/cgi/cbook.cgi?ID=C64175&Mask=2200"},
+    {"id": "axeton", "ten": "Axeton", "cong_thuc": "(CH₃)₂CO", "M": 58.08, "cas": "67-64-1", "ids": ["hc:498"], "ri": 496, "rf": 1.0,
+     "pho": [[14,45],[15,120],[25,13],[26,50],[27,71],[28,12],[29,36],[37,25],[38,28],[39,46],[40,13],[41,28],[42,96],[43,999],[44,25],[58,248]],
+     "nguon": "https://webbook.nist.gov/cgi/cbook.cgi?ID=C67641&Mask=2200"},
+    {"id": "etyl_axetat", "ten": "Etyl axetat", "cong_thuc": "CH₃COOC₂H₅", "M": 88.11, "cas": "141-78-6", "ids": ["hc:534"], "ri": 613, "rf": 1.0,
+     "pho": [[14,11],[15,52],[26,11],[27,54],[28,22],[29,124],[42,46],[43,999],[44,29],[45,146],[61,153],[70,118],[73,49],[88,70]],
+     "nguon": "https://webbook.nist.gov/cgi/cbook.cgi?ID=C141786&Mask=2200"},
+    {"id": "axit_axetic", "ten": "Axit axetic", "cong_thuc": "CH₃COOH", "M": 60.05, "cas": "64-19-7", "ids": ["Ac", "hc:505"], "ri": 622, "rf": 0.6,
+     "pho": [[13,21],[14,49],[15,171],[16,24],[18,28],[28,41],[29,85],[31,25],[41,36],[42,131],[43,999],[44,25],[45,903],[46,11],[60,747],[61,20]],
+     "nguon": "https://webbook.nist.gov/cgi/cbook.cgi?ID=C64197&Mask=2200"},
+    {"id": "isoamyl_ancol", "ten": "Ancol isoamylic (3-metylbutan-1-ol)", "cong_thuc": "(CH₃)₂CHCH₂CH₂OH", "M": 88.15, "cas": "123-51-3", "ids": [], "ri": 736, "rf": 1.1,
+     "pho": [[13,12],[14,44],[15,201],[16,12],[17,15],[18,43],[19,44],[26,66],[27,594],[28,190],[29,594],[30,23],[31,612],[37,25],[38,53],[39,436],[40,68],[41,805],[42,896],[43,823],[44,67],[45,199],[46,78],[47,15],[50,22],[51,25],[53,28],[54,17],[55,999],[56,128],[57,307],[58,16],[60,10],[69,53],[70,705],[71,49]],
+     "nguon": "https://webbook.nist.gov/cgi/cbook.cgi?ID=C123513&Mask=2200"},
+    {"id": "isoamyl_axetat", "ten": "Isoamyl axetat (dầu chuối)", "cong_thuc": "CH₃COOC₅H₁₁", "M": 130.19, "cas": "123-92-2", "ids": ["hc:539"], "ri": 876, "rf": 1.2,
+     "pho": [[15,18],[27,63],[29,56],[39,95],[40,15],[41,180],[42,156],[43,999],[44,31],[45,22],[53,21],[54,15],[55,547],[56,33],[57,28],[58,27],[61,157],[69,71],[70,612],[71,49],[73,96],[85,15],[87,134],[88,20]],
+     "nguon": "https://webbook.nist.gov/cgi/cbook.cgi?ID=C123922&Mask=2200"}
+  ],
+  "nen": {
+    "ghi_chu": "Nền khi quét từ m/z thấp (mô phỏng): nước H₂O (18, 17), không khí N₂ (28, 14), O₂ (32, 16), Ar (40). Hệ kín tốt: N₂ ≪ nước; rò khí: N₂ : O₂ ≈ 4 : 1.",
+    "nuoc": [[16,9],[17,212],[18,999]],
+    "khong_khi": [[14,70],[16,25],[28,999],[32,240],[40,12]]
+  }
+}

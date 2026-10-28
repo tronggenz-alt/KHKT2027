@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Khkt.Demo;
 using Khkt.Environment;
@@ -402,6 +402,20 @@ namespace Khkt.EditorTools
             catalog.chemicalsJson = AssetDatabase.LoadAssetAtPath<TextAsset>(ChemJsonPath);
             catalog.equipmentJson = AssetDatabase.LoadAssetAtPath<TextAsset>(EquipJsonPath);
             catalog.boilingJson = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/nhiet_do_soi.json");
+            // dữ liệu máy phân tích (bản chép data/may bằng tools/chep_du_lieu_may.py): màn hình vận hành UV-Vis, AAS
+            var mayData = g.AddComponent<Khkt.Demo.Instruments.InstrumentData>();
+            mayData.uvVisDoc = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/uv_vis.json");
+            mayData.aasDoc = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/aas.json");
+            mayData.uvVisBands = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/tinh_chat/uv_vis.json");
+            mayData.aasElements = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/tinh_chat/aas_nguyen_to.json");
+            // đợt 2: FTIR, GC-MS, HPLC, chuẩn độ điện thế
+            mayData.ftirDoc = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/ftir.json");
+            mayData.gcMsDoc = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/gc_ms.json");
+            mayData.hplcDoc = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/hplc.json");
+            mayData.titratorDoc = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/chuan_do_dien_the.json");
+            mayData.ftirLib = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/tinh_chat/ftir.json");
+            mayData.gcMsLib = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/tinh_chat/gc_ms.json");
+            mayData.hplcLib = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/tinh_chat/hplc.json");
             g.AddComponent<Khkt.Assembly.FluidNetwork>();
             var fx = g.AddComponent<ReactionFx>();
             fx.bubbleMaterial = Mat("BotKhi", new Color(1f, 1f, 1f, 0.55f), 0.95f, 0, transparent: true);

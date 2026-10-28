@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -615,7 +615,7 @@ namespace Khkt.Demo
             if (an != null)
             {
                 Say($"Chạy máy {AnalyzerInstrument.KindName(an.kind)} với {c.label}.");
-                an.Use();
+                an.RunQuick();  // robot chạy nhanh, không mở màn hình vận hành của người dùng
                 float guard = 0;
                 yield return null;
                 while (an.Running && guard < 20f) { guard += Time.deltaTime; yield return null; }

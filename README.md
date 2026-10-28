@@ -32,6 +32,8 @@ Thành phần chính:
 | [docs/10-lab-quoc-te-tai-khu-toi-uu.md](docs/10-lab-quoc-te-tai-khu-toi-uu.md) | Phong cách lab trường quốc tế, cửa tự động, tải / gỡ từng khu khi đi qua cửa mà vẫn giữ hiện trạng; tối ưu đồ họa (occlusion culling, HLOD, impostor, cửa sổ ảo) kèm số đo FPS |
 | [docs/11-lap-rap-tu-do.md](docs/11-lap-rap-tu-do.md) | Lắp ráp dụng cụ bằng khớp nối chuẩn: khoảng 40 bộ phận cho chưng cất, hồi lưu, điều chế – thu khí, nhiệt phân, lọc, chiết, cô cạn; hệ kín / hở, trọng tâm và đổ |
 | [docs/12-khu-che-tao.md](docs/12-khu-che-tao.md) | Khu chế tạo dụng cụ: ngăn kính trong phòng lab, giao diện lắp ráp 3D riêng, gia công ra bàn thí nghiệm |
+| [docs/18-may-phan-tich-dot-2.md](docs/18-may-phan-tich-dot-2.md) | **Máy phân tích đợt 2: FTIR, GC-MS, HPLC, chuẩn độ điện thế** có màn hình vận hành riêng: giao thoa đồ và trừ phổ nước (FTIR), phổ khối và chỉ số lưu NIST, định lượng metanol trong rượu (GC-MS), 3 phương pháp axit hữu cơ / đường / axit benzoic (HPLC), hiệu chuẩn điện cực, hệ số chuẩn KHP, đồ thị Gran (chuẩn độ) |
+| [docs/17-may-phan-tich-dot-1.md](docs/17-may-phan-tich-dot-1.md) | **Máy phân tích đợt 1: màn hình vận hành UV-Vis và AAS** như phần mềm máy thật: quy trình (Hướng dẫn / Thực hành), sơ đồ bên trong máy có hoạt cảnh, đường chuẩn, pha loãng, tách hỗn hợp bằng phổ; số liệu có nguồn (NIST, sổ tay Agilent, Shimadzu) |
 | [docs/14-mang-dong-chay.md](docs/14-mang-dong-chay.md) | Mạng dòng chảy: bộ dụng cụ chạy như thật (chưng cất theo nhiệt độ sôi, hồi lưu, dẫn – rửa – thu khí, áp suất hệ kín, lọc, chiết, nhiệt phân, cô cạn); hình ảnh giọt, dòng, bọt khí, hơi |
 | [docs/trinh-bay/VERA_Lab_trinh_bay.pdf](docs/trinh-bay/VERA_Lab_trinh_bay.pdf) | Bản trình bày VERA Lab (16 trang PDF). Dựng lại bằng `tools/trinh_bay/lam_trinh_bay.py` |
 | [docs/anh-phong-lab/](docs/anh-phong-lab/), [docs/anh-demo/](docs/anh-demo/) | Ảnh chụp phòng lab và các bài demo |
@@ -92,7 +94,7 @@ python tools/head_tracker.py --hien
 | Phần | Trạng thái |
 | --- | --- |
 | Phòng lab hóa học 3D | Chạy được bằng chuột – bàn phím: chuẩn độ, thí nghiệm định tính, tra cứu 720 hóa chất, robot trợ lý, lắp ráp và gia công bộ dụng cụ, mạng dòng chảy. Có bài chạy tự động kiểm tra từng phần |
-| Phòng máy phân tích | 6 máy cho kết quả theo mô hình. Đang làm lại theo quy trình vận hành và datasheet thật, kèm chế độ xem bên trong máy |
+| Phòng máy phân tích | Cả 6 máy (UV-Vis, AAS, FTIR, GC-MS, HPLC, chuẩn độ điện thế) có màn hình vận hành như máy thật, quy trình Hướng dẫn / Thực hành, phân tích chuyên sâu (docs/17, docs/18). SEM, XRD, NMR, bom nhiệt lượng làm ở đợt 3 |
 | Tay cầm V2 "Halo" | Đã có thiết kế 3D, bản vẽ, sơ đồ đấu nối. Đang đặt linh kiện, **firmware cho ESP32 + BMI160 chưa viết** |
 | Điều khiển bằng đầu (webcam) | Thử nghiệm, chạy được (F8) |
 | Bản chạy | Windows (.exe). Bản macOS cần cài thêm mô-đun Mac Build Support cho Unity |

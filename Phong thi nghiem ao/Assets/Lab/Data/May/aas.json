@@ -1,0 +1,60 @@
+{
+  "ma": "aas",
+  "ten": "Quang phổ hấp thụ nguyên tử ngọn lửa (AAS)",
+  "may_mau": "Máy AAS ngọn lửa không khí – axetilen (dòng Agilent 240/280FS AA, Shimadzu AA-7000); điều kiện đo theo sổ tay phương pháp của Agilent",
+  "nguyen_ly": [
+    "Dung dịch mẫu được hút lên qua ống mao quản, phun thành sương mù, trộn với không khí và axetilen rồi vào ngọn lửa khoảng 2300 °C. Dung môi bay hơi, muối phân li thành nguyên tử tự do ở trạng thái cơ bản.",
+    "Đèn catot rỗng làm bằng chính kim loại cần đo phát ra vạch phổ đặc trưng của nguyên tố đó. Chỉ nguyên tử của nguyên tố đó trong ngọn lửa mới hấp thụ được vạch này, nên phép đo rất chọn lọc.",
+    "Độ hấp thụ tỉ lệ với số nguyên tử trong ngọn lửa, tức tỉ lệ với nồng độ trong mẫu (vùng nồng độ thấp). Nồng độ cao thì đường chuẩn cong, phải pha loãng.",
+    "Mỗi nguyên tố cần một đèn và một bước sóng riêng; đo nhiều kim loại thì đổi đèn lần lượt.",
+    "Định lượng theo đường chuẩn: hút nước cất để về 0, đo dãy chuẩn, dựng đường chuẩn, đo mẫu, nhân hệ số pha loãng."
+  ],
+  "cong_thuc": ["A = −log(I/I₀) = k·c (nồng độ thấp)", "c(mẫu ban đầu) = c(đo) × hệ số pha loãng"],
+  "bo_phan": [
+    {"ma": "thap_den", "ten": "Tháp đèn catot rỗng", "chuc_nang": "Giữ nhiều đèn (Cu, Zn, Fe, Ni, Pb...); quay để chọn đèn của nguyên tố cần đo."},
+    {"ma": "den_d2", "ten": "Đèn D₂ hiệu chỉnh nền", "chuc_nang": "Đo phần hấp thụ không đặc trưng (khói, hạt muối) để trừ đi."},
+    {"ma": "mao_quan", "ten": "Ống mao quản hút mẫu", "chuc_nang": "Hút dung dịch mẫu nhờ dòng khí (hiệu ứng Venturi)."},
+    {"ma": "phun_suong", "ten": "Bộ phun sương và buồng phun", "chuc_nang": "Tạo sương mù mịn, giọt lớn chảy ra ống thải."},
+    {"ma": "dau_dot", "ten": "Đầu đốt khe 10 cm", "chuc_nang": "Ngọn lửa dẹt dài 10 cm cho đường đi ánh sáng dài, tăng độ nhạy."},
+    {"ma": "ngon_lua", "ten": "Ngọn lửa không khí – axetilen", "chuc_nang": "Nguyên tử hóa mẫu ở khoảng 2300 °C."},
+    {"ma": "don_sac", "ten": "Bộ đơn sắc", "chuc_nang": "Tách vạch phổ của nguyên tố khỏi ánh sáng ngọn lửa; khe 0,2 – 1 nm."},
+    {"ma": "pmt", "ten": "Ống nhân quang điện (PMT)", "chuc_nang": "Đổi ánh sáng yếu thành tín hiệu điện đủ lớn."}
+  ],
+  "thong_so": [
+    {"ten": "Điều kiện đo từng nguyên tố (bước sóng, khe, dòng đèn, ngọn lửa, khoảng làm việc)", "gia_tri": "xem data/may/tinh_chat/aas_nguyen_to.json", "loai": "khuyến cáo của hãng", "nguon": "https://diverdi.colostate.edu/C433/experiments/iron%20analysis/references/aas%20methods%20-%20agilent.pdf"},
+    {"ten": "Giới hạn trên khoảng làm việc", "gia_tri": "cho độ hấp thụ khoảng 0,8 – 1,0", "loai": "định nghĩa của hãng", "nguon": "https://diverdi.colostate.edu/C433/experiments/iron%20analysis/references/aas%20methods%20-%20agilent.pdf"},
+    {"ten": "Giới hạn dưới khoảng làm việc", "gia_tri": "khoảng 10 lần giới hạn phát hiện", "loai": "định nghĩa của hãng", "nguon": "https://diverdi.colostate.edu/C433/experiments/iron%20analysis/references/aas%20methods%20-%20agilent.pdf"},
+    {"ten": "Thứ tự mở / tắt khí", "gia_tri": "Mở không khí trước, axetilen sau; tắt axetilen trước, không khí sau", "loai": "quy trình", "nguon": "https://zimmer.fresnostate.edu/~davidz/Instruments/AAS/Part4/Part4.html"},
+    {"ten": "Tiêu chuẩn phương pháp (nước)", "gia_tri": "TCVN 6496:2009 (ISO 11047), TCVN 13090:2020", "loai": "văn bản", "nguon": "https://vanbanphapluat.co/tcvn-6496-2009-chat-luong-nuoc-xac-dinh-cadimi-crom-coban-chi-dong-kem"},
+    {"ten": "Thời gian làm nóng đèn", "gia_tri": "vài phút (lab ảo rút ngắn còn vài giây)", "loai": "mô phỏng", "mo_phong": true}
+  ],
+  "quy_trinh": [
+    {"ma": "bat_may", "ten": "Bật máy, bật hút khí", "viec": "Bật nguồn máy và quạt hút khí phía trên đầu đốt.", "ly_do": "Khí thải ngọn lửa và hơi kim loại phải được hút ra ngoài.", "loi": "Châm lửa khi chưa bật hút khí: cảnh báo an toàn."},
+    {"ma": "chon_den", "ten": "Chọn đèn, bước sóng, khe", "viec": "Quay tháp đèn tới đèn của nguyên tố cần đo; đặt bước sóng và khe theo bảng.", "ly_do": "Mỗi nguyên tố chỉ hấp thụ vạch của chính nó.", "loi": "Sai đèn hoặc sai bước sóng: không có tín hiệu."},
+    {"ma": "lam_nong_den", "ten": "Làm nóng đèn", "viec": "Chờ cường độ đèn ổn định.", "ly_do": "Đèn chưa ổn định làm đường nền trôi.", "loi": "Đo ngay: số đo dao động."},
+    {"ma": "chau_lua", "ten": "Mở khí, châm lửa", "viec": "Mở không khí, rồi mở axetilen, châm lửa.", "ly_do": "Mở axetilen trước dễ tạo hỗn hợp giàu nhiên liệu, nguy cơ cháy ngược.", "loi": "Mở axetilen trước không khí: máy báo nguy hiểm, không cho châm."},
+    {"ma": "ve_0", "ten": "Hút nước cất để về 0", "viec": "Hút nước cất (mẫu trắng), bấm về 0.", "ly_do": "Đặt mốc A = 0 cho ngọn lửa và dung môi.", "loi": "Bỏ qua: mọi số đo lệch."},
+    {"ma": "day_chuan", "ten": "Đo dãy chuẩn", "viec": "Hút lần lượt chuẩn 0,5 / 1 / 2 / 4 mg/L (theo khoảng làm việc của nguyên tố), giữa hai lần hút nước cất.", "ly_do": "Dựng đường chuẩn; kiểm tra R².", "loi": "Chuẩn vượt khoảng làm việc: đường chuẩn cong."},
+    {"ma": "do_mau", "ten": "Đo mẫu, pha loãng khi quá dải", "viec": "Hút mẫu; nếu tín hiệu vượt chuẩn cao nhất thì pha loãng ×10 hoặc ×100 rồi đo lại.", "ly_do": "Chỉ nội suy trong khoảng của đường chuẩn mới đúng.", "loi": "Đọc ngoài đường chuẩn: kết quả thấp hơn thật (đường cong)."},
+    {"ma": "tat_lua", "ten": "Hút nước, tắt lửa, tắt máy", "viec": "Hút nước cất vài phút rửa hệ phun; đóng axetilen trước rồi mới đóng không khí.", "ly_do": "Rửa muối bám trong đầu đốt; tắt đúng thứ tự để lửa tắt êm.", "loi": "Tắt không khí trước: nguy cơ cháy ngược."}
+  ],
+  "an_toan": [
+    "Luôn bật hút khí trước khi châm lửa.",
+    "Mở không khí trước, axetilen sau; tắt axetilen trước, không khí sau.",
+    "Không để ngọn lửa không người trông; không nhìn lâu vào ngọn lửa.",
+    "Mẫu có kết tủa, cặn phải lọc hoặc phá mẫu trước khi hút, tránh tắc ống mao quản."
+  ],
+  "thuat_ngu": [
+    {"tu": "Đèn catot rỗng", "nghia": "Đèn có catot làm bằng nguyên tố cần đo, phát đúng vạch phổ của nguyên tố đó."},
+    {"tu": "Nguyên tử hóa", "nghia": "Biến muối trong mẫu thành nguyên tử tự do trong ngọn lửa."},
+    {"tu": "Khoảng làm việc", "nghia": "Khoảng nồng độ đo chính xác: từ khoảng 10 lần giới hạn phát hiện tới nồng độ cho A khoảng 0,8 – 1,0."},
+    {"tu": "Hệ số pha loãng", "nghia": "Số lần pha loãng mẫu; nhân lại để ra nồng độ ban đầu."}
+  ],
+  "cau_hoi_on_tap": [
+    "Vì sao mỗi nguyên tố cần một đèn catot rỗng riêng?",
+    "Vì sao phải mở không khí trước axetilen khi châm lửa?",
+    "Nước thải mạ có Cu khoảng 250 mg/L: đo bằng AAS thế nào?",
+    "Mẫu có kết tủa Cu(OH)₂ thì hút thẳng vào máy được không? Vì sao?",
+    "Muốn đo Al bằng AAS cần ngọn lửa loại nào?"
+  ]
+}

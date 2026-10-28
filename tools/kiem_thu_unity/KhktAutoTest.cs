@@ -112,6 +112,29 @@ public class KhktAutoTest : MonoBehaviour
             UnityEditor.EditorApplication.Exit(0);
 #endif
             yield break;
+        }        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "may")
+        {
+            hand.enabled = false;
+            foreach (var r in hand.hand.GetComponentsInChildren<Renderer>()) r.enabled = false;
+            hand.enabled = true;
+            yield return MachineTest();
+            Log($"Xong sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "may2")
+        {
+            hand.enabled = false;
+            foreach (var r in hand.hand.GetComponentsInChildren<Renderer>()) r.enabled = false;
+            hand.enabled = true;
+            yield return MachineTest2();
+            Log($"Xong sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
         }        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "dau")
         {
             yield return HeadTest();
@@ -310,7 +333,7 @@ public class KhktAutoTest : MonoBehaviour
             hand.Pick(s.GetComponent<Grabbable>());
             hand.PlaceInSocket(a.slot);
             yield return Frames(2);
-            a.Use();
+            a.RunQuick();  // chạy nhanh như robot (màn hình vận hành có bài riêng: may)
             Time.timeScale = 3f;
             yield return new WaitUntil(() => !a.Running);
             Time.timeScale = 1f;
@@ -2150,6 +2173,502 @@ public class KhktAutoTest : MonoBehaviour
         while (Time.realtimeSinceStartup - tk < 2f) yield return null;
         bool alive = System.Diagnostics.Process.GetProcessesByName("python").Any(p => { try { return p.StartTime > DateTime.Now.AddSeconds(-30); } catch { return false; } });
         Log($"[dau] Bấm F8 tắt: trạng thái {ht.Status}, còn tiến trình python mới chạy={alive}");
+    }
+
+    // ---------- Máy phân tích: màn hình vận hành UV-Vis, AAS ----------
+
+    IEnumerator WaitReal(float seconds)
+    {
+        float t = Time.realtimeSinceStartup;
+        while (Time.realtimeSinceStartup - t < seconds) yield return null;
+    }
+
+    IEnumerator WaitGame(float seconds)
+    {
+        float t = Time.time;
+        while (Time.time - t < seconds) yield return null;
+    }
+
+    Khkt.Demo.Instruments.InstrumentScreen OpenMachine(AnalyzerInstrument a)
+    {
+        a.Use();
+        var scr = Khkt.Demo.Instruments.InstrumentScreen.Instance;
+        scr.ScreenCamera.targetTexture = rt;  // bố cục theo đúng cỡ ảnh chụp 1600 × 900
+        return scr;
+    }
+
+    void PutSample(string label, AnalyzerInstrument a)
+    {
+        var s = FindObjectsByType<LabContainer>().First(c => c.label == label);
+        hand.Pick(s.GetComponent<Grabbable>());
+        hand.PlaceInSocket(a.slot);
+    }
+
+    IEnumerator WaitFor(Func<bool> done, float maxGame = 60f)
+    {
+        float t = Time.time;
+        while (!done() && Time.time - t < maxGame) yield return null;
+    }
+
+    void ClearSlot(AnalyzerInstrument a)
+    {
+        if (a.slot.Occupant == null) return;
+        hand.Pick(a.slot.Occupant.GetComponent<Grabbable>());
+        hand.ReturnHome();
+    }
+
+    /// <summary>Đợt 2: FTIR, GC-MS, HPLC, chuẩn độ điện thế, làm như học sinh với ống mẫu thật trong phòng.</summary>
+    IEnumerator MachineTest2()
+    {
+        viewer.GoTo(7);
+        float tz = Time.realtimeSinceStartup;
+        while (FindObjectsByType<AnalyzerInstrument>().Length < 6 && Time.realtimeSinceStartup - tz < 20f) yield return null;
+        yield return Frames(5);
+        var an = FindObjectsByType<AnalyzerInstrument>();
+        AnalyzerInstrument A(AnalyzerInstrument.Kind k) => an.First(x => x.kind == k);
+        var data = Khkt.Demo.Instruments.InstrumentData.Instance;
+        Log($"[may2] Thư viện: FTIR {data?.Ftir.Entries.Count} chất, GC-MS {data?.Gc.Entries.Count} chất, HPLC {data?.Hplc.Methods.Count} phương pháp; mẫu trong phòng: {string.Join(", ", FindObjectsByType<LabContainer>().Where(c => c.label != null && c.label.StartsWith("Mẫu")).Select(c => c.label).OrderBy(x => x))}");
+
+        // ===== Chuẩn độ điện thế: giấm ăn (axit axetic 0,83 M) =====
+        var tA = A(AnalyzerInstrument.Kind.AutoTitrator);
+        PutSample("Mẫu giấm ăn", tA);
+        yield return Frames(2);
+        var scr = OpenMachine(tA);
+        var ti = (Khkt.Demo.Instruments.TitratorProgram)scr.Program;
+        scr.Guided = true;
+        yield return Frames(2);
+        Log($"[may2] Mở màn hình chuẩn độ: mở={Khkt.Demo.Instruments.InstrumentScreen.IsOpen}, camera lab bật={cam.enabled}, mẫu={ti.SampleName}");
+        ti.StartSample();
+        Log($"[may2] Chuẩn độ khi chưa hiệu chuẩn (Hướng dẫn): \"{scr.LastMessage}\"");
+        for (int i = 0; i < 3; i++) ti.CalibrateNext();
+        Log($"[may2] Hiệu chuẩn: độ dốc {ti.Slope * 100:0.0}%, lệch {ti.Offset:+0.0} mV; \"{scr.LastMessage}\"");
+        ti.Prime();
+        Time.timeScale = 4f;
+        ti.StartTiter();
+        yield return WaitFor(() => !ti.Running);
+        Log($"[may2] KHP: \"{scr.LastMessage}\" (NaOH thật 0,0982 M)");
+        ti.SetAliquot(2);
+        ti.StartSample();
+        yield return WaitFor(() => !ti.Running);
+        Time.timeScale = 1f;
+        Log($"[may2] Giấm 2 mL: {ti.Endpoints.Count} điểm tương đương, V = {(ti.Endpoints.Count > 0 ? ti.Endpoints[0].v : 0):0.000} mL (lý thuyết {0.83 * 2 / 0.0982:0.000}); C = {ti.LastResultEqPerL:0.0000} mol/L (thật 0,8300, sai {(ti.LastResultEqPerL / 0.83 - 1) * 100:+0.00;-0.00}%); Gran {ti.GranFit.veq:0.000} mL R² {ti.GranFit.r2:0.0000}; {ti.Curve.Count} điểm đo");
+        Log($"[may2] Bước đã xong: {string.Join(", ", scr.DoneSteps)}");
+        yield return Frames(3);
+        scr.Refresh(); ShotCam(scr.ScreenCamera, "t01_chuan_do_giam");
+        ti.SetPlot(1); yield return Frames(3); scr.Refresh(); ShotCam(scr.ScreenCamera, "t02_dao_ham");
+        ti.SetPlot(2); yield return Frames(3); scr.Refresh(); ShotCam(scr.ScreenCamera, "t03_gran");
+        scr.Close();
+        yield return Frames(2);
+        // Thực hành: không khuấy, không xác định hệ số
+        scr = OpenMachine(tA);
+        ti = (Khkt.Demo.Instruments.TitratorProgram)scr.Program;
+        scr.Guided = false;
+        ti.SetStirring(false);
+        ti.SetAliquot(2);
+        Time.timeScale = 4f;
+        ti.StartSample();
+        yield return WaitFor(() => !ti.Running);
+        Time.timeScale = 1f;
+        Log($"[may2] Thực hành (không hiệu chuẩn, không khuấy, không hệ số): V = {(ti.Endpoints.Count > 0 ? ti.Endpoints[0].v : 0):0.000} mL, C = {ti.LastResultEqPerL:0.0000} mol/L (sai {(ti.LastResultEqPerL / 0.83 - 1) * 100:+0.0;-0.0}%); \"{scr.LastMessage}\"");
+        scr.Close();
+        yield return Frames(2);
+
+        // ===== GC-MS: rượu nghi pha metanol =====
+        var gA = A(AnalyzerInstrument.Kind.GcMs);
+        PutSample("Mẫu rượu nghi pha metanol", gA);
+        yield return Frames(2);
+        scr = OpenMachine(gA);
+        var gc = (Khkt.Demo.Instruments.GcMsProgram)scr.Program;
+        scr.Guided = true;
+        gc.StartMs();
+        Log($"[may2] GC-MS bật MS khi chưa có khí mang: \"{scr.LastMessage}\"");
+        gc.OpenGas();
+        gc.StartMs();
+        Time.timeScale = 4f;
+        yield return WaitFor(() => gc.Vacuum >= 4f);
+        gc.Tune();
+        yield return WaitFor(() => gc.Tuned);
+        gc.SetMethod(80, 10, 50, 1.0, 29);
+        gc.SetDilution(10);
+        gc.UseSample();
+        gc.StartRun();
+        yield return WaitFor(() => !gc.Running);
+        Log($"[may2] Lò đầu 80 °C: {gc.Identified.Count} pic ({string.Join(", ", gc.Identified.Select(x => $"{x.hit.Name} {x.p.Tr:0.000}"))}); \"{scr.LastMessage}\"");
+        gc.SetMethod(40, 10, 50, 1.0, 29);
+        for (int i = 0; i < 5; i++)
+        {
+            gc.SelectStd(i);
+            gc.StartRun();
+            yield return WaitFor(() => !gc.Running);
+        }
+        gc.UseSample();
+        gc.StartRun();
+        yield return WaitFor(() => !gc.Running);
+        Time.timeScale = 1f;
+        Log($"[may2] GC-MS rượu ×10: {string.Join("; ", gc.Identified.Select(x => $"{x.p.Tr:0.00} phút RI {x.ri:0} → {x.hit.Name} (khớp {x.match:0}, RI NIST {x.hit.RI:0})"))}");
+        double per = gc.MeOHmgL / (gc.EthanolPct / 100);
+        Log($"[may2] Định lượng: metanol {gc.MeOHmgL:0} mg/L (thật {0.05 * 32040:0}, sai {(gc.MeOHmgL / (0.05 * 32040) - 1) * 100:+0.0;-0.0}%), etanol {gc.EthanolPct:0.0}% (thật {5.2 * 46.07 / 789 * 100:0.0}%); {per:0} mg/L cồn 100° = {per / 100:0} lần giới hạn");
+        Log($"[may2] Bước đã xong: {string.Join(", ", scr.DoneSteps)}");
+        yield return Frames(3);
+        gc.SetPlot(0); scr.Refresh(); yield return Frames(2); ShotCam(scr.ScreenCamera, "g01_gc_tic");
+        gc.Select(0); yield return Frames(3); scr.Refresh(); ShotCam(scr.ScreenCamera, "g02_gc_pho_khoi_metanol");
+        gc.SetPlot(2); yield return Frames(3); scr.Refresh(); ShotCam(scr.ScreenCamera, "g03_gc_duong_chuan");
+        scr.ShowPrinciple(); yield return Frames(2); scr.Refresh(); ShotCam(scr.ScreenCamera, "g04_gc_nguyen_ly");
+        scr.Close();
+        yield return Frames(2);
+        // Thực hành: không pha loãng, trễ dung môi dài, quét từ m/z 10
+        scr = OpenMachine(gA);
+        gc = (Khkt.Demo.Instruments.GcMsProgram)scr.Program;
+        scr.Guided = false;
+        gc.OpenGas(); gc.StartMs();
+        Time.timeScale = 4f;
+        yield return WaitFor(() => gc.Vacuum >= 4f);
+        gc.Tune();
+        yield return WaitFor(() => gc.Tuned);
+        gc.SetMethod(40, 10, 10, 1.5, 10);
+        gc.SetDilution(1);
+        gc.StartRun();
+        yield return WaitFor(() => !gc.Running);
+        Time.timeScale = 1f;
+        Log($"[may2] Thực hành GC-MS (×1, chia dòng 10:1, trễ 1,5 phút, m/z 10): {gc.Identified.Count} pic; quá tải={gc.Peaks.Any(p => p.Overloaded)}; thông báo cuối \"{scr.LastMessage}\"");
+        yield return Frames(3);
+        scr.Refresh(); ShotCam(scr.ScreenCamera, "g05_gc_thuc_hanh_loi");
+        scr.Close();
+        yield return Frames(2);
+
+        // ===== HPLC: nước cam (axit xitric 0,03 M, glucozơ 0,25 M, saccarozơ 0,1 M) =====
+        var hA = A(AnalyzerInstrument.Kind.Hplc);
+        PutSample("Mẫu nước cam", hA);
+        yield return Frames(2);
+        scr = OpenMachine(hA);
+        var lc = (Khkt.Demo.Instruments.HplcProgram)scr.Program;
+        scr.Guided = true;
+        lc.SelectMethod("axit_huu_co");
+        lc.StartPump();
+        lc.Purge();
+        Log($"[may2] HPLC bơm: {lc.PressureBar:0} bar; \"{scr.LastMessage}\"");
+        Time.timeScale = 4f;
+        yield return WaitFor(() => lc.Equil >= 5f);
+        lc.FilterSample();
+        lc.SetDilution(10);
+        lc.SelectAnalyte("citric");
+        for (int i = 0; i < 5; i++) { lc.SelectStd(i); lc.StartRun(); yield return WaitFor(() => !lc.Running); }
+        lc.UseSample();
+        lc.StartRun();
+        yield return WaitFor(() => !lc.Running);
+        Time.timeScale = 1f;
+        Log($"[may2] HPLC axit hữu cơ: pic {string.Join(", ", lc.Peaks.Select(p => $"{p.C.Name} {p.Tr:0.00} phút"))}; axit xitric {lc.Found:0} mg/L (thật {0.03 * 192120:0}, sai {(lc.Found / (0.03 * 192120) - 1) * 100:+0.0;-0.0}%)");
+        yield return Frames(3);
+        scr.Refresh(); ShotCam(scr.ScreenCamera, "h01_hplc_axit_huu_co");
+        lc.SetPh(7.0);
+        lc.SkipEquilibration();
+        Time.timeScale = 4f;
+        lc.StartRun();
+        yield return WaitFor(() => !lc.Running);
+        Time.timeScale = 1f;
+        Log($"[may2] HPLC pha động pH 7: axit xitric ra ở {lc.Peaks.FirstOrDefault().Tr:0.00} phút (t₀ 2,70 phút)");
+        lc.TurnOff();
+        lc.SelectMethod("duong");
+        lc.StartPump(); lc.Purge(); lc.SkipEquilibration();
+        lc.SetDilution(10);
+        lc.SelectAnalyte("saccarozo");
+        Time.timeScale = 4f;
+        for (int i = 0; i < 5; i++) { lc.SelectStd(i); lc.StartRun(); yield return WaitFor(() => !lc.Running); }
+        lc.UseSample();
+        lc.StartRun();
+        yield return WaitFor(() => !lc.Running);
+        Time.timeScale = 1f;
+        Log($"[may2] HPLC đường (RID): pic {string.Join(", ", lc.Peaks.Select(p => $"{p.C.Name} {p.Tr:0.00} phút"))}; saccarozơ {lc.Found:0.0} g/L (thật {0.1 * 342.3:0.0}, sai {(lc.Found / (0.1 * 342.3) - 1) * 100:+0.0;-0.0}%)");
+        Log($"[may2] Bước đã xong: {string.Join(", ", scr.DoneSteps)}");
+        yield return Frames(3);
+        scr.Refresh(); ShotCam(scr.ScreenCamera, "h02_hplc_duong");
+        lc.SetPlot(1); yield return Frames(3); scr.Refresh(); ShotCam(scr.ScreenCamera, "h03_hplc_duong_chuan");
+        lc.TurnOff();
+        scr.Close();
+        yield return Frames(2);
+        // nước ngọt có ga: axit benzoic
+        ClearSlot(hA);
+        PutSample("Mẫu nước ngọt có ga", hA);
+        yield return Frames(2);
+        scr = OpenMachine(hA);
+        lc = (Khkt.Demo.Instruments.HplcProgram)scr.Program;
+        scr.Guided = false;
+        lc.SelectMethod("bao_quan");
+        lc.StartPump(); lc.Purge(); lc.SkipEquilibration();
+        lc.SelectAnalyte("benzoic");
+        Time.timeScale = 4f;
+        for (int i = 0; i < 5; i++) { lc.SelectStd(i); lc.StartRun(); yield return WaitFor(() => !lc.Running); }
+        lc.UseSample();
+        lc.StartRun();
+        yield return WaitFor(() => !lc.Running);
+        Time.timeScale = 1f;
+        Log($"[may2] HPLC nước ngọt: pic {string.Join(", ", lc.Peaks.Select(p => $"{p.C.Name} {p.Tr:0.00} phút"))}; axit benzoic {lc.Found:0} mg/L (thật {0.0012 * 122120:0}, sai {(lc.Found / (0.0012 * 122120) - 1) * 100:+0.0;-0.0}%)");
+        lc.SetFlow(2.0);
+        Log($"[may2] HPLC metanol 40%, 2 mL/phút: {lc.PressureBar:0} bar (giới hạn 400)");
+        yield return Frames(3);
+        scr.Refresh(); ShotCam(scr.ScreenCamera, "h04_hplc_benzoic");
+        scr.Close();
+        yield return Frames(2);
+
+        // ===== FTIR: dầu chuối (isoamyl axetat 0,4 M + etanol 0,5 M trong nước) =====
+        var fA = A(AnalyzerInstrument.Kind.Ftir);
+        PutSample("Mẫu dầu chuối", fA);
+        yield return Frames(2);
+        scr = OpenMachine(fA);
+        var ir = (Khkt.Demo.Instruments.FtirProgram)scr.Program;
+        scr.Guided = true;
+        ir.TogglePower();
+        Time.timeScale = 4f;
+        yield return WaitFor(() => ir.Ready);
+        ir.PutSample();
+        Log($"[may2] FTIR nhỏ mẫu khi chưa đo nền (Hướng dẫn): \"{scr.LastMessage}\"");
+        ir.CleanCrystal();
+        ir.MeasureBackground();
+        ir.PutSample();
+        ir.Measure();
+        yield return WaitFor(() => !ir.Scanning);
+        yield return Frames(2);
+        Time.timeScale = 1f;
+        scr.Refresh(); ShotCam(scr.ScreenCamera, "f01_ftir_pho_tho");
+        ir.Analyze();
+        Log($"[may2] FTIR dầu chuối: trừ nước hệ số {ir.WaterScale:0.000}; tách: {string.Join(", ", ir.Unmixed.Select(u => $"{u.Label} {u.Amount * 100:0.00}%"))} (thật: isoamyl axetat {0.4 * 130.19 / 876 * 100:0.00}%, etanol {0.5 * 46.07 / 789 * 100:0.00}%); thư viện: {string.Join("; ", ir.Hits.Select(h => $"{h.p.Label} {h.hqi:0}"))}");
+        Log($"[may2] FTIR gán dải: {string.Join("; ", ir.Bands.Select(b => $"{b.nu:0} {b.group}"))}");
+        yield return Frames(3);
+        scr.Refresh(); ShotCam(scr.ScreenCamera, "f02_ftir_tru_nuoc_tach");
+        // định lượng etanol trong rượu
+        for (int i = 0; i < 5; i++)
+        {
+            ir.CleanCrystal();
+            ir.SelectStd(i);
+            Time.timeScale = 4f;
+            ir.Measure();
+            yield return WaitFor(() => !ir.Scanning);
+            ir.RecordStd();
+        }
+        ir.CleanCrystal();
+        scr.Close();
+        ClearSlot(fA);
+        PutSample("Mẫu rượu", fA);
+        yield return Frames(2);
+        scr = OpenMachine(fA);
+        // màn hình mới: chương trình mới (đường chuẩn trong chương trình cũ), nên chạy lại chuẩn trong cùng phiên
+        ir = (Khkt.Demo.Instruments.FtirProgram)scr.Program;
+        scr.Guided = false;
+        ir.TogglePower();
+        yield return WaitFor(() => ir.Ready);
+        ir.CleanCrystal(); ir.MeasureBackground();
+        for (int i = 0; i < 5; i++) { ir.CleanCrystal(); ir.SelectStd(i); ir.Measure(); yield return WaitFor(() => !ir.Scanning); ir.RecordStd(); }
+        ir.CleanCrystal(); ir.PutSample(); ir.Measure();
+        yield return WaitFor(() => !ir.Scanning);
+        Time.timeScale = 1f;
+        ir.Analyze();
+        Log($"[may2] FTIR rượu: etanol {ir.EthanolPct:0.0}% thể tích (thật {5.2 * 46.07 / 789 * 100:0.0}%), đường chuẩn {ir.Cal.Count} điểm R² {Khkt.Simulation.Chem.UvVisLibrary.Linear(ir.Cal.Select(c => (c.c, c.a)).ToList()).R2:0.0000}");
+        ir.SetPlot(3); yield return Frames(3); scr.Refresh(); ShotCam(scr.ScreenCamera, "f03_ftir_duong_chuan_etanol");
+        scr.Close();
+        // Thực hành: không đo nền, quét 1 lần
+        scr = OpenMachine(fA);
+        ir = (Khkt.Demo.Instruments.FtirProgram)scr.Program;
+        scr.Guided = false;
+        ir.TogglePower();
+        Time.timeScale = 4f;
+        yield return WaitFor(() => ir.Ready);
+        ir.SetScans(1);
+        ir.PutSample(); ir.Measure();
+        yield return WaitFor(() => !ir.Scanning);
+        Time.timeScale = 1f;
+        Log($"[may2] FTIR thực hành (không đo nền, quét 1 lần): \"{scr.LastMessage}\"");
+        yield return Frames(3);
+        scr.Refresh(); ShotCam(scr.ScreenCamera, "f04_ftir_khong_nen");
+        ir.SetPlot(1); scr.Refresh(); yield return Frames(2);
+        scr.Close();
+        Log($"[may2] Đóng: mở={Khkt.Demo.Instruments.InstrumentScreen.IsOpen}, camera lab bật={cam.enabled}, UiCapture={DesktopViewer.UiCapture}");
+    }
+
+    IEnumerator MachineTest()
+    {
+        viewer.GoTo(7);  // phòng máy phân tích được tải theo khu: tới nơi rồi mới tìm máy
+        float tz = Time.realtimeSinceStartup;
+        while (FindObjectsByType<AnalyzerInstrument>().Length < 6 && Time.realtimeSinceStartup - tz < 20f) yield return null;
+        yield return Frames(5);
+        var analyzers = FindObjectsByType<AnalyzerInstrument>();
+        var uvA = analyzers.First(x => x.kind == AnalyzerInstrument.Kind.UvVis);
+        var aasA = analyzers.First(x => x.kind == AnalyzerInstrument.Kind.Aas);
+        Log($"[may] Dữ liệu máy: {Khkt.Demo.Instruments.InstrumentData.Instance != null}, thư viện UV-Vis {Khkt.Demo.Instruments.InstrumentData.Instance?.Uv.Entries.Count} chất, AAS {Khkt.Demo.Instruments.InstrumentData.Instance?.Aas.Elements.Count} nguyên tố");
+
+        // ===== UV-Vis, chế độ Hướng dẫn: mẫu nước thải xi mạ crom (Cr(VI) 0,02 M) =====
+        PutSample("Mẫu nước thải xi mạ crom", uvA);
+        yield return Frames(2);
+        var scr = OpenMachine(uvA);
+        var uv = (Khkt.Demo.Instruments.UvVisProgram)scr.Program;
+        scr.Guided = true;
+        yield return Frames(3);
+        Log($"[may] Sau đặt cuvet: mẫu ở ổ UV-Vis = {uvA.slot.Occupant?.name}");
+        Log($"[may] Mở màn hình UV-Vis: mở={Khkt.Demo.Instruments.InstrumentScreen.IsOpen}, camera phòng lab bật={cam.enabled}, UiCapture={DesktopViewer.UiCapture}, mẫu ở ổ={uv.SampleName}");
+        scr.Refresh(); ShotCam(scr.ScreenCamera, "m01_uv_luc_mo");
+        uv.AutoZero();
+        Log($"[may] Đo nền khi máy chưa bật: \"{scr.LastMessage}\"");
+        uv.TogglePower();
+        Time.timeScale = 4f;
+        yield return WaitGame(3.5f);
+        uv.AutoZero();
+        Log($"[may] Hướng dẫn: đo nền khi đèn chưa nóng: \"{scr.LastMessage}\"");
+        yield return WaitGame(6.5f);
+        Time.timeScale = 1f;
+        uv.SelectMode(1);
+        uv.SelectCuvette("thach_anh");
+        uv.SetSource(Khkt.Demo.Instruments.UvVisProgram.Src.Blank);
+        uv.AutoZero();
+        Log($"[may] Đo nền với mẫu trắng: nền={uv.Baseline}, bước đã xong: {string.Join(", ", scr.DoneSteps)}");
+        uv.SetSource(Khkt.Demo.Instruments.UvVisProgram.Src.Sample);
+        uv.StartScan();
+        yield return WaitGame(3f);
+        double aMax1 = uv.Spectrum.Max(p => p.a);
+        Log($"[may] Quét mẫu chưa pha loãng: A lớn nhất {aMax1:0.00} (bão hòa do ánh sáng lạc), thông báo: \"{scr.LastMessage}\"");
+        uv.SetDilution(100);
+        uv.StartScan();
+        yield return WaitGame(3f);
+        var pk = uv.Spectrum.Where(p => p.l >= 300).OrderByDescending(p => p.a).First();
+        Log($"[may] Quét sau pha loãng ×100: đỉnh {pk.l:0} nm A {pk.a:0.000} (NIST: 350 nm, A = 1570 × 2×10⁻⁴ = 0,314); thông báo \"{scr.LastMessage}\"");
+        uv.SetLambdaMax();
+        uv.UnmixNow();
+        var cr = uv.Unmixed?.FirstOrDefault(u => u.e.Id == "CrVI");
+        Log($"[may] Tách hỗn hợp: {string.Join(", ", (uv.Unmixed ?? new List<(Khkt.Simulation.Chem.UvVisLibrary.Entry, double)>()).Select(u => $"{u.Item1.Id} {u.Item2:E2} M"))}, rms {uv.UnmixRms:0.0000}; Cr(VI) mẫu gốc = {(cr.HasValue ? cr.Value.c * 100 : 0):0.0000} M (thật 0,0200)");
+        yield return Frames(3);
+        scr.Refresh(); ShotCam(scr.ScreenCamera, "m02_uv_quet_pho_tach");
+        // đường chuẩn Cr(VI) ở 350 nm
+        uv.SelectMode(2);
+        uv.SelectAnalyte("CrVI");
+        uv.SetLambda(350);
+        for (int i = 0; i < 5; i++) { uv.SelectStd(i); uv.RecordStandard(); }
+        uv.QuantifySample();
+        Log($"[may] Đường chuẩn Cr(VI) 350 nm: {uv.CalPoints.Count} điểm, A = {uv.CalFit.Slope:0}·c + {uv.CalFit.Intercept:0.0000}, R² {uv.CalFit.R2:0.0000}; mẫu = {uv.SampleConc:0.00000} M (thật 0,02000, sai {(uv.SampleConc / 0.02 - 1) * 100:+0.0;-0.0}%); thông báo \"{scr.LastMessage}\"");
+        Log($"[may] Bước đã xong (Hướng dẫn): {string.Join(", ", scr.DoneSteps)}");
+        yield return Frames(3);
+        scr.Refresh(); ShotCam(scr.ScreenCamera, "m03_uv_duong_chuan");
+        scr.ShowPrinciple();
+        yield return Frames(2);
+        scr.Refresh(); ShotCam(scr.ScreenCamera, "m04_uv_nguyen_ly");
+        scr.Close();
+        yield return Frames(2);
+        Log($"[may] Đóng: mở={Khkt.Demo.Instruments.InstrumentScreen.IsOpen}, camera phòng lab bật={cam.enabled}, UiCapture={DesktopViewer.UiCapture}");
+
+        // ===== UV-Vis: hỗn hợp KMnO4 + Cr(VI) trong cuvet, tách bằng phổ =====
+        var chrome = FindObjectsByType<LabContainer>().First(c => c.label == "Mẫu nước thải xi mạ crom");
+        hand.Pick(chrome.GetComponent<Grabbable>());  // lấy ống mẫu crom ra khỏi ổ máy, trả về giá
+        hand.ReturnHome();
+        yield return Frames(2);
+        var cuv = FindObjectsByType<LabContainer>().First(c => c.name.StartsWith("Cuvet") && c.VolumeMl < 0.1f);
+        cuv.Add(Solution.Of(3f, Khkt.Simulation.Chem.Mix.Of(("MnO4-", 3e-3 * 2e-4), ("CrVI", 3e-3 * 3e-4), ("Cl-", 3e-3 * 0.01))));
+        yield return Frames(2);
+        hand.Pick(cuv.GetComponent<Grabbable>());
+        hand.PlaceInSocket(uvA.slot);
+        yield return Frames(2);
+        scr = OpenMachine(uvA);
+        uv = (Khkt.Demo.Instruments.UvVisProgram)scr.Program;
+        scr.Guided = false;
+        uv.TogglePower();
+        Time.timeScale = 4f;
+        yield return WaitGame(10f);
+        Time.timeScale = 1f;
+        uv.SelectCuvette("nhua");
+        uv.SetSource(Khkt.Demo.Instruments.UvVisProgram.Src.Blank);
+        uv.SetLambda(525);
+        uv.MeasureNow();
+        Log($"[may] Thực hành: quên đo nền, đo mẫu trắng ở 525 nm: A = {uv.LastA:0.000} (lẽ ra 0)");
+        uv.AutoZero();
+        uv.SetSource(Khkt.Demo.Instruments.UvVisProgram.Src.Sample);
+        uv.StartScan();
+        yield return WaitGame(3f);
+        Log($"[may] Thực hành: cuvet nhựa quét từ 300 nm: \"{scr.LastMessage}\"");
+        uv.UnmixNow();
+        Log($"[may] Hỗn hợp KMnO₄ 2×10⁻⁴ + Cr(VI) 3×10⁻⁴ M: tách được {string.Join(", ", uv.Unmixed.Select(u => $"{u.e.Id} {u.c:E2} M"))}, rms {uv.UnmixRms:0.0000}");
+        yield return Frames(3);
+        scr.Refresh(); ShotCam(scr.ScreenCamera, "m05_uv_hon_hop");
+        scr.Close();
+        yield return Frames(2);
+
+        // ===== AAS, chế độ Hướng dẫn: nước thải mạ điện (Cu 254, Zn 196, Ni 117 mg/L) =====
+        if (hand.Held != null) hand.ReturnHome();
+        PutSample("Mẫu nước thải mạ điện", aasA);
+        yield return Frames(2);
+        scr = OpenMachine(aasA);
+        var aas = (Khkt.Demo.Instruments.AasProgram)scr.Program;
+        scr.Guided = true;
+        aas.TogglePower();
+        yield return WaitGame(2.5f);
+        aas.OpenAcetylene();
+        Log($"[may] AAS Hướng dẫn: mở axetilen trước không khí: \"{scr.LastMessage}\" → axetilen mở={aas.Acetylene}");
+        aas.SetFan(true);
+        aas.SelectLamp("Cu");
+        Time.timeScale = 4f;
+        yield return WaitGame(4.5f);
+        aas.OpenAir();
+        aas.OpenAcetylene();
+        aas.Ignite();
+        Log($"[may] Châm lửa: lửa={aas.Flame}; bước đã xong: {string.Join(", ", scr.DoneSteps)}");
+        var found = new Dictionary<string, double>();
+        foreach (var (el, dil, truth) in new[] { ("Cu", 100, 254.2), ("Zn", 1000, 196.1), ("Ni", 100, 117.4) })
+        {
+            if (el != "Cu") { aas.SelectLamp(el); yield return WaitGame(4.5f); }
+            aas.SetSource(Khkt.Demo.Instruments.AasProgram.Src.Blank);
+            aas.SetAspirate(true);
+            yield return WaitGame(2f);
+            aas.AutoZero();
+            var std = aas.CalPoints;
+            int nStd = 4;
+            for (int i = 0; i < nStd; i++)
+            {
+                aas.SelectStd(i);
+                yield return WaitGame(2f);
+                aas.RecordStandard();
+            }
+            if (el == "Cu")
+            {
+                aas.SetSource(Khkt.Demo.Instruments.AasProgram.Src.Sample);
+                aas.SetDilution(1);
+                yield return WaitGame(2f);
+                aas.MeasureSample();
+                Log($"[may] Cu không pha loãng: \"{scr.LastMessage}\"");
+            }
+            aas.SetSource(Khkt.Demo.Instruments.AasProgram.Src.Sample);
+            aas.SetDilution(dil);
+            yield return WaitGame(2.5f);
+            aas.MeasureSample();
+            var r = aas.Results[el];
+            found[el] = r.orig;
+            Log($"[may] {el}: đường chuẩn R² {aas.CalFit.R2:0.0000}; đo {r.meas:0.000} mg/L × {r.dil} = {r.orig:0.0} mg/L (thật {truth:0.0}, sai {(r.orig / truth - 1) * 100:+0.0;-0.0}%) {r.note}");
+            if (el == "Cu")
+            {
+                Time.timeScale = 1f;
+                yield return WaitReal(0.5f);
+                scr.Refresh(); ShotCam(scr.ScreenCamera, "m06_aas_cu");
+                Time.timeScale = 4f;
+            }
+        }
+        aas.SelectLamp("Al");
+        Log($"[may] Chọn đèn Al: \"{scr.LastMessage}\"");
+        aas.CloseAir();
+        Log($"[may] Tắt: đóng không khí trước: \"{scr.LastMessage}\" (lửa={aas.Flame})");
+        aas.CloseAcetylene();
+        aas.CloseAir();
+        Log($"[may] Tắt đúng thứ tự: lửa={aas.Flame}, không khí={aas.Air}; bước đã xong: {string.Join(", ", scr.DoneSteps)}");
+        Time.timeScale = 1f;
+        yield return Frames(3);
+        scr.Refresh(); ShotCam(scr.ScreenCamera, "m07_aas_ket_qua");
+        scr.Close();
+        yield return Frames(2);
+
+        // AAS chế độ Thực hành: mở sai thứ tự
+        scr = OpenMachine(aasA);
+        aas = (Khkt.Demo.Instruments.AasProgram)scr.Program;
+        scr.Guided = false;
+        aas.TogglePower();
+        yield return WaitGame(2.5f);
+        aas.OpenAcetylene();
+        Log($"[may] AAS Thực hành: mở axetilen trước không khí: \"{scr.LastMessage}\"");
+        scr.Close();
+        yield return Frames(2);
+        Log($"[may] Đóng hết: camera phòng lab bật={cam.enabled}, UiCapture={DesktopViewer.UiCapture}");
     }
 
     Vector3 LabStationPos() => viewer.Stations.First(s => s.order == 12).transform.position;
