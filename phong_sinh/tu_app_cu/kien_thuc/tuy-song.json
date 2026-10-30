@@ -1,0 +1,63 @@
+{
+  "id": "tuy_song",
+  "ten": "Tuỷ sống và dây thần kinh",
+  "can_duyet": true,
+  "chuong_trinh": "Sinh học 11 – Cảm ứng ở động vật (CT GDPT 2018); nền tảng KHTN 8",
+  "vi_tri": [
+    "Tuỷ sống nằm trong ống sống, từ đốt sống cổ I đến khoảng đốt sống thắt lưng II.",
+    "Dây thần kinh tuỷ đi ra từ hai bên tuỷ sống qua các lỗ giữa các đốt sống, tới các cơ quan."
+  ],
+  "cau_tao": [
+    "Chất xám ở giữa (hình cánh bướm) là căn cứ của các phản xạ không điều kiện; chất trắng bao quanh gồm các đường dẫn truyền nối tuỷ sống với não.",
+    "Có 31 đôi dây thần kinh tuỷ; mỗi dây gồm rễ trước (vận động) và rễ sau (cảm giác) nhập lại nên là dây pha.",
+    "Tuỷ sống được bảo vệ bởi cột sống, màng tuỷ và dịch não tuỷ."
+  ],
+  "chuc_nang": [
+    "Là trung khu của nhiều phản xạ không điều kiện (phản xạ đầu gối, phản xạ rụt tay…).",
+    "Dẫn truyền xung thần kinh giữa não và các cơ quan: xung cảm giác đi lên não, xung vận động đi xuống cơ."
+  ],
+  "co_che": [
+    "Ví dụ phản xạ rụt tay khi chạm vật nóng: thụ thể ở da → neuron cảm giác theo rễ sau vào tuỷ sống → neuron trung gian ở chất xám → neuron vận động theo rễ trước → cơ co, tay rụt lại.",
+    "Phản xạ ở tuỷ sống xảy ra rất nhanh, không cần chờ não xử lí; sau đó thông tin mới được truyền lên não tạo cảm giác đau."
+  ],
+  "lien_he": [
+    "Chấn thương cột sống có thể làm tổn thương tuỷ sống, gây liệt và mất cảm giác phần cơ thể phía dưới chỗ tổn thương.",
+    "Ngồi học đúng tư thế, mang vác vừa sức để phòng cong vẹo cột sống và thoát vị đĩa đệm chèn ép dây thần kinh."
+  ],
+  "diem_thi": [
+    "Cung phản xạ gồm 5 bộ phận; phân biệt neuron cảm giác, neuron trung gian, neuron vận động.",
+    "Rễ trước dẫn truyền vận động, rễ sau dẫn truyền cảm giác; dây thần kinh tuỷ là dây pha.",
+    "Phản xạ không điều kiện có trung khu ở tuỷ sống và trụ não."
+  ],
+  "trac_nghiem": [
+    {
+      "cau": "Dây thần kinh tuỷ được gọi là dây pha vì",
+      "lua_chon": ["gồm cả bó sợi cảm giác và bó sợi vận động", "chỉ dẫn truyền xung vận động", "chỉ dẫn truyền xung cảm giác", "nối trực tiếp hai bán cầu đại não"],
+      "dap_an": "A",
+      "giai_thich": "Rễ sau (cảm giác) và rễ trước (vận động) nhập lại thành dây thần kinh tuỷ nên dây chứa cả hai loại sợi."
+    },
+    {
+      "cau": "Nếu rễ trước của một dây thần kinh tuỷ bị cắt, chi tương ứng sẽ",
+      "lua_chon": ["mất cảm giác nhưng vẫn cử động được", "mất khả năng vận động nhưng vẫn còn cảm giác", "mất cả cảm giác và vận động", "không bị ảnh hưởng"],
+      "dap_an": "B",
+      "giai_thich": "Rễ trước dẫn xung vận động từ tuỷ ra cơ; cắt rễ trước thì cơ không nhận được lệnh co, nhưng đường cảm giác qua rễ sau vẫn còn."
+    },
+    {
+      "cau": "Thứ tự đúng các bộ phận của một cung phản xạ là",
+      "lua_chon": ["thụ thể → neuron vận động → trung ương thần kinh → neuron cảm giác → cơ quan đáp ứng", "trung ương thần kinh → thụ thể → neuron cảm giác → cơ quan đáp ứng → neuron vận động", "cơ quan đáp ứng → neuron cảm giác → trung ương thần kinh → neuron vận động → thụ thể", "thụ thể → neuron cảm giác → trung ương thần kinh → neuron vận động → cơ quan đáp ứng"],
+      "dap_an": "D",
+      "giai_thich": "Kích thích được thụ thể tiếp nhận, truyền theo neuron cảm giác về trung ương thần kinh, được xử lí rồi theo neuron vận động tới cơ quan đáp ứng."
+    },
+    {
+      "cau": "Phản xạ đầu gối có trung khu nằm ở",
+      "lua_chon": ["vỏ đại não", "tiểu não", "tuỷ sống", "vùng dưới đồi"],
+      "dap_an": "C",
+      "giai_thich": "Phản xạ đầu gối là phản xạ không điều kiện, trung khu nằm ở chất xám tuỷ sống."
+    }
+  ],
+  "goi_y_hoi": [
+    "Cung phản xạ gồm những bộ phận nào?",
+    "Vì sao chấn thương cột sống có thể gây liệt?",
+    "Phản xạ rụt tay khi chạm vật nóng diễn ra thế nào?"
+  ]
+}

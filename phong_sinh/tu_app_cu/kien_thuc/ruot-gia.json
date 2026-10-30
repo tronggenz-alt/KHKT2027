@@ -1,0 +1,64 @@
+{
+  "id": "ruot_gia",
+  "ten": "Ruột già",
+  "can_duyet": true,
+  "chuong_trinh": "Sinh học 11 – Dinh dưỡng và tiêu hoá ở động vật (CT GDPT 2018); nền tảng KHTN 8",
+  "vi_tri": [
+    "Nối tiếp ruột non ở manh tràng (bụng dưới bên phải), chạy vòng quanh khối ruột non rồi tới trực tràng và hậu môn.",
+    "Ruột thừa là đoạn ruột nhỏ, tịt đầu, gắn vào manh tràng ở hố chậu phải."
+  ],
+  "cau_tao": [
+    "Gồm manh tràng (có ruột thừa), kết tràng (lên, ngang, xuống, sigma) và trực tràng.",
+    "Niêm mạc không có lông ruột như ruột non; có nhiều tuyến tiết chất nhầy.",
+    "Chứa rất nhiều vi khuẩn có lợi (hệ vi sinh vật đường ruột)."
+  ],
+  "chuc_nang": [
+    "Hấp thụ lại nước và một số muối khoáng.",
+    "Vi khuẩn có lợi lên men một phần chất xơ, tổng hợp một số vitamin (như vitamin K).",
+    "Tạo phân và thải phân ra ngoài qua hậu môn."
+  ],
+  "co_che": [
+    "Nước được hấp thụ dần khi chất bã di chuyển qua kết tràng, làm chất bã đặc lại thành phân.",
+    "Nhu động của ruột già đẩy phân xuống trực tràng; khi trực tràng căng sẽ gây phản xạ đại tiện."
+  ],
+  "lien_he": [
+    "Táo bón do ăn ít chất xơ, uống ít nước, ít vận động; nên ăn nhiều rau, quả.",
+    "Viêm ruột thừa gây đau bụng dưới bên phải, cần đến cơ sở y tế cấp cứu kịp thời.",
+    "Dùng kháng sinh bừa bãi có thể làm rối loạn hệ vi khuẩn đường ruột."
+  ],
+  "diem_thi": [
+    "Chức năng chính của ruột già là hấp thụ lại nước và thải phân, không phải nơi tiêu hoá chủ yếu.",
+    "Ở thú ăn thực vật có dạ dày đơn (thỏ, ngựa), manh tràng rất phát triển, chứa vi sinh vật cộng sinh tiêu hoá cellulose."
+  ],
+  "trac_nghiem": [
+    {
+      "cau": "Chức năng chủ yếu của ruột già ở người là",
+      "lua_chon": ["tiêu hoá protein", "hấp thụ lại nước và thải phân", "tiết dịch mật", "hấp thụ glucose là chủ yếu"],
+      "dap_an": "B",
+      "giai_thich": "Phần lớn chất dinh dưỡng đã được hấp thụ ở ruột non; ruột già chủ yếu hấp thụ lại nước và tạo phân."
+    },
+    {
+      "cau": "Ở thỏ và ngựa, manh tràng phát triển vì",
+      "lua_chon": ["là nơi tiết pepsin", "là nơi dự trữ dịch mật", "chứa vi sinh vật cộng sinh giúp tiêu hoá cellulose", "là nơi hấp thụ O₂"],
+      "dap_an": "C",
+      "giai_thich": "Thỏ, ngựa có dạ dày đơn nên manh tràng là nơi vi sinh vật lên men, tiêu hoá cellulose."
+    },
+    {
+      "cau": "Ăn nhiều chất xơ giúp phòng táo bón vì chất xơ",
+      "lua_chon": ["cung cấp nhiều năng lượng", "bị tiêu hoá hoàn toàn ở dạ dày", "làm giảm tiết dịch ruột", "giữ nước, tăng khối lượng phân và kích thích nhu động ruột"],
+      "dap_an": "D",
+      "giai_thich": "Chất xơ không bị tiêu hoá, giữ nước làm phân mềm và kích thích ruột co bóp."
+    },
+    {
+      "cau": "Vi khuẩn có lợi trong ruột già có thể tổng hợp",
+      "lua_chon": ["vitamin K", "insulin", "hemoglobin", "pepsin"],
+      "dap_an": "A",
+      "giai_thich": "Một số vi khuẩn đường ruột tổng hợp vitamin K và một số vitamin nhóm B."
+    }
+  ],
+  "goi_y_hoi": [
+    "Ruột già có vai trò gì trong tiêu hoá?",
+    "Vì sao ăn nhiều rau giúp phòng táo bón?",
+    "Manh tràng của thỏ khác của người thế nào?"
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "id": "da",
+  "ten": "Da",
+  "can_duyet": true,
+  "chuong_trinh": "KHTN 8 (da và điều hoà thân nhiệt); Sinh học 11 – Miễn dịch, cân bằng nội môi (CT GDPT 2018)",
+  "vi_tri": [
+    "Bao phủ toàn bộ bề mặt cơ thể; là cơ quan có diện tích lớn nhất."
+  ],
+  "cau_tao": [
+    "Lớp biểu bì: tầng sừng ở ngoài cùng (tế bào chết, dễ bong) và tầng tế bào sống (có tế bào chứa sắc tố melanin).",
+    "Lớp bì: có thụ thể cảm giác, tuyến mồ hôi, tuyến nhờn, nang lông và mạch máu.",
+    "Lớp mỡ dưới da: dự trữ năng lượng, cách nhiệt, chống va đập."
+  ],
+  "chuc_nang": [
+    "Bảo vệ cơ thể: chống va đập, ngăn vi khuẩn xâm nhập, chống thấm nước, chống tia tử ngoại (nhờ melanin).",
+    "Điều hoà thân nhiệt nhờ tuyến mồ hôi và sự co, giãn mạch máu dưới da.",
+    "Tiếp nhận cảm giác nóng, lạnh, đau, áp lực; bài tiết một phần chất thải qua mồ hôi; tổng hợp vitamin D dưới ánh nắng."
+  ],
+  "co_che": [
+    "Khi trời nóng: mạch máu dưới da giãn, tăng tiết mồ hôi → mồ hôi bay hơi lấy đi nhiệt, cơ thể toả nhiệt nhiều.",
+    "Khi trời lạnh: mạch máu dưới da co, cơ chân lông co (nổi da gà), có thể run để sinh nhiệt.",
+    "Trung khu điều hoà thân nhiệt nằm ở vùng dưới đồi.",
+    "Da và niêm mạc là hàng rào đầu tiên của miễn dịch không đặc hiệu."
+  ],
+  "lien_he": [
+    "Mụn trứng cá do tuyến nhờn bị tắc và nhiễm khuẩn; giữ da sạch, không nặn mụn.",
+    "Cháy nắng, ung thư da do tiếp xúc tia UV quá nhiều; dùng kem chống nắng, mặc áo dài tay khi ra nắng.",
+    "Bỏng nặng làm mất hàng rào bảo vệ, cơ thể dễ nhiễm trùng và mất nước."
+  ],
+  "diem_thi": [
+    "Cơ chế điều hoà thân nhiệt (vùng dưới đồi, co – giãn mạch, tiết mồ hôi) – một ví dụ của cân bằng nội môi.",
+    "Da và niêm mạc thuộc miễn dịch không đặc hiệu (hàng rào bảo vệ)."
+  ],
+  "trac_nghiem": [
+    {
+      "cau": "Khi trời nóng, cơ thể toả nhiệt nhờ",
+      "lua_chon": ["mạch máu dưới da co lại, giảm tiết mồ hôi", "mạch máu dưới da giãn ra, tăng tiết mồ hôi", "run cơ liên tục", "cơ chân lông co lại"],
+      "dap_an": "B",
+      "giai_thich": "Giãn mạch đưa nhiều máu ra bề mặt da để toả nhiệt; mồ hôi bay hơi lấy đi nhiệt của cơ thể."
+    },
+    {
+      "cau": "Trung khu điều hoà thân nhiệt nằm ở",
+      "lua_chon": ["tiểu não", "hành não", "vùng dưới đồi", "tuỷ sống"],
+      "dap_an": "C",
+      "giai_thich": "Vùng dưới đồi nhận thông tin về nhiệt độ và điều khiển các phản ứng sinh nhiệt, toả nhiệt."
+    },
+    {
+      "cau": "Da và niêm mạc thuộc hàng rào phòng thủ nào?",
+      "lua_chon": ["Miễn dịch không đặc hiệu", "Miễn dịch thể dịch", "Miễn dịch tế bào", "Miễn dịch nhân tạo"],
+      "dap_an": "A",
+      "giai_thich": "Da và niêm mạc là hàng rào vật lí, hoá học có sẵn, ngăn mọi loại mầm bệnh mà không phân biệt."
+    },
+    {
+      "cau": "Dưới tác dụng của ánh nắng, da tổng hợp được",
+      "lua_chon": ["vitamin A", "vitamin C", "vitamin K", "vitamin D"],
+      "dap_an": "D",
+      "giai_thich": "Tia UV giúp da chuyển tiền chất thành vitamin D, cần cho sự hấp thu calcium."
+    }
+  ],
+  "goi_y_hoi": [
+    "Da điều hoà thân nhiệt như thế nào?",
+    "Vì sao da là hàng rào miễn dịch đầu tiên?",
+    "Vì sao cần dùng kem chống nắng?"
+  ]
+}
