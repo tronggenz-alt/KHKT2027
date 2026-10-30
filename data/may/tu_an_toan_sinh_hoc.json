@@ -1,0 +1,141 @@
+{
+  "ma": "tu_an_toan_sinh_hoc",
+  "ten": "Tủ an toàn sinh học cấp II loại A2 (Esco Airstream)",
+  "may_mau": "Esco Airstream Class II Type A2, màng lọc ULPA/HEPA H14, tuần hoàn 70% khí, xả 30%, vận tốc gió 0,45 m/s",
+  "nguyen_ly": [
+    "Cơ chế màng chắn khí bảo vệ ba chiều: bảo vệ người thao tác nhờ luồng khí hút vào (inflow) qua lưới trước; bảo vệ mẫu cấy nhờ luồng khí thổi tầng laminar xuống (downflow); bảo vệ môi trường nhờ màng lọc HEPA xả.",
+    "Khí trong tủ được tuần hoàn 70% qua màng lọc HEPA xuống buồng làm việc và 30% xả ra ngoài qua màng lọc HEPA xả. Thể tích xả ra được bù tự động bởi dòng khí hút vào mặt trước tạo áp suất âm.",
+    "Màng lọc HEPA H14 có hiệu suất lọc giữ tối thiểu 99,995% các hạt bụi và vi sinh vật kích thước 0,3 micromet (MPPS), tạo môi trường làm việc đạt độ sạch Class 100 (ISO Class 5).",
+    "Dòng khí thổi tầng (laminar flow) duy trì vận tốc đều 0,45 m/s không tạo dòng cuộn xoáy, ngăn ngừa nhiễm chéo giữa các đĩa cấy và ống nghiệm trên mặt bàn."
+  ],
+  "cong_thuc": [
+    "V_downflow = 0,45 m/s",
+    "V_inflow = 0,53 m/s",
+    "Hieu_suat_HEPA = 99,995% (tai 0,3 um)"
+  ],
+  "bo_phan": [
+    {
+      "ma": "mang_hepa_cap",
+      "ten": "Màng lọc HEPA cấp khí laminar",
+      "chuc_nang": "Lọc sạch 99,995% vi sinh vật trước khi khí thổi tầng xuống mặt bàn thao tác."
+    },
+    {
+      "ma": "mang_hepa_xa",
+      "ten": "Màng lọc HEPA xả khí",
+      "chuc_nang": "Lọc sạch khí thải trước khi xả 30% thể tích ra môi trường phòng lab."
+    },
+    {
+      "ma": "kinh_truot_nghieng",
+      "ten": "Cửa kính cường lực trượt nghiêng 10 độ",
+      "chuc_nang": "Chống tia UV, tạo góc nhìn công thái học, có công tắc giới hạn độ mở an toàn (200 mm)."
+    },
+    {
+      "ma": "luoi_hut_truoc",
+      "ten": "Lưới hút khí mặt trước bàn",
+      "chuc_nang": "Hút dòng khí bảo vệ người thao tác, ngăn chặn sol khí mang mầm bệnh thoát ra ngoài."
+    },
+    {
+      "ma": "bang_dieu_khien",
+      "ten": "Bảng điều khiển vi xử lý Sentinel Gold",
+      "chuc_nang": "Hiển thị vận tốc gió, cảnh báo lệch áp suất màng lọc, điều khiển đèn chiếu và đèn UV."
+    },
+    {
+      "ma": "den_uv_tiet_trung",
+      "ten": "Đèn UV bước sóng 254 nm",
+      "chuc_nang": "Tiệt trùng bề mặt buồng làm việc trước và sau buổi làm việc, tự ngắt khi mở kính."
+    }
+  ],
+  "thong_so": [
+    {
+      "ten": "Vận tốc dòng khí laminar thổi xuống (Downflow)",
+      "gia_tri": "0,45 m/s (sai số cho phép +- 0,025 m/s)",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.escolifesciences.com/products/biological-safety-cabinets"
+    },
+    {
+      "ten": "Vận tốc dòng khí hút vào mặt trước (Inflow)",
+      "gia_tri": "0,53 m/s",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.escolifesciences.com/products/biological-safety-cabinets"
+    },
+    {
+      "ten": "Hiệu suất màng lọc hạt HEPA/ULPA",
+      "gia_tri": "99,995% tại kích thước hạt 0,3 micromet theo chuẩn EN 1822",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.escolifesciences.com/products/biological-safety-cabinets"
+    },
+    {
+      "ten": "Mô phỏng khí động lực học và sol khí",
+      "gia_tri": "Dòng hạt mô phỏng dòng laminar và cảnh báo xoáy khí khi tay chắn lưới",
+      "loai": "mô phỏng",
+      "mo_phong": true
+    }
+  ],
+  "quy_trinh": [
+    {
+      "ma": "chuan_bi",
+      "ten": "Khởi động và ổn định dòng khí",
+      "viec": "Bật quạt thổi trước khi bắt đầu làm việc 15 phút, kéo kính xuống đúng vị trí vạch dấu (chiều cao 200 mm).",
+      "ly_do": "Cho dòng khí quét sạch toàn bộ bụi bẩn và đạt độ sạch không khí chuẩn Class 100.",
+      "loi": "Thao tác ngay sau khi bật quạt: mẫu dễ bị nhiễm do dòng khí chưa ổn định."
+    },
+    {
+      "ma": "sat_khuan",
+      "ten": "Sát khuẩn buồng làm việc",
+      "viec": "Lau mặt bàn inox và vách bên bằng cồn ethanol 70% từ vùng sạch ra vùng bẩn.",
+      "ly_do": "Tiệt trùng bề mặt cơ học trước khi đưa dụng cụ nuôi cấy vào buồng.",
+      "loi": "Dùng cồn 90% hoặc cồn công nghiệp: bay hơi quá nhanh không đủ thời gian diệt khuẩn."
+    },
+    {
+      "ma": "xep_do",
+      "ten": "Bố trí dụng cụ theo luồng sạch sang bẩn",
+      "viec": "Đặt vật liệu vô trùng bên trái, vùng thao tác ở giữa, khay chứa rác thải sinh học bên phải; không che lấp lưới hút khí.",
+      "ly_do": "Duy trì nguyên tắc một chiều, tránh gió cuốn bụi từ vùng bẩn sang vùng vô trùng.",
+      "loi": "Đặt đồ chặn kín lưới hút trước: phá vỡ màn chắn khí, sol khí thoát ra phía mặt người."
+    },
+    {
+      "ma": "thao_tac",
+      "ten": "Thao tác tay chậm rãi trong tủ",
+      "viec": "Đưa tay thẳng vào tủ, chuyển động nhẹ nhàng, không khua tay nhanh ngang dòng khí.",
+      "ly_do": "Tránh tạo dòng xoáy khí cuộn kéo mầm bệnh và bụi bẩn ra khỏi buồng.",
+      "loi": "Khua tay nhanh hoặc dùng đèn cồn trong tủ: ngọn lửa làm loạn dòng laminar gây nhiễm mẫu."
+    },
+    {
+      "ma": "ket_thuc",
+      "ten": "Vệ sinh, bật UV và tắt tủ",
+      "viec": "Dọn sạch dụng cụ, lau lại bàn bằng cồn 70%, đóng kín hoàn toàn kính trượt, bật đèn UV hẹn giờ 15 phút.",
+      "ly_do": "Khử trùng bề mặt tiêu diệt hoàn toàn vi sinh vật còn sót lại.",
+      "loi": "Bật đèn UV trong khi cửa kính đang mở hoặc khi người đang đứng trước tủ: tổn thương mắt và da."
+    }
+  ],
+  "an_toan": [
+    "Tuyệt đối không sử dụng đèn cồn hoặc nguồn lửa hở trong tủ an toàn sinh học.",
+    "Không bao giờ bật đèn UV khi người đang ở gần hoặc kính chắn mở.",
+    "Không che chắn hoặc đặt dụng cụ lên lưới hút khí phía trước và phía sau bàn.",
+    "Chỉ sử dụng cho các vi sinh vật nhóm nguy cơ 1 và 2 (dạy học an toàn: E. coli K-12, nấm men, lactic)."
+  ],
+  "thuat_ngu": [
+    {
+      "tu": "Màng lọc HEPA",
+      "nghia": "High Efficiency Particulate Air - màng lọc sợi thủy tinh giữ 99,99% hạt siêu nhỏ."
+    },
+    {
+      "tu": "Dòng khí thổi tầng (Laminar flow)",
+      "nghia": "Dòng khí chuyển động song song theo cùng một hướng với vận tốc đồng đều, không xoáy."
+    },
+    {
+      "tu": "Dòng Inflow",
+      "nghia": "Dòng khí hút vào lưới trước tạo màn chắn khí bảo vệ người làm việc."
+    },
+    {
+      "tu": "Dòng Downflow",
+      "nghia": "Dòng khí sạch thổi tầng từ màng lọc trần xuống bảo vệ mẫu vật."
+    }
+  ],
+  "cau_hoi_on_tap": [
+    "Tủ an toàn sinh học cấp II loại A2 tuần hoàn bao nhiêu phần trăm khí và xả bao nhiêu phần trăm khí?",
+    "Vì sao không được sử dụng đèn cồn đốt lửa bên trong buồng làm việc của tủ an toàn sinh học?",
+    "Lưới hút khí ở mép trước bàn thao tác có vai trò bảo vệ ai và ngăn chặn điều gì?",
+    "Tại sao phải bố trí dụng cụ trên mặt bàn theo luồng một chiều từ sạch sang bẩn?"
+  ]
+}

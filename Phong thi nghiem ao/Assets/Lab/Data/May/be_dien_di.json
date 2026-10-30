@@ -1,0 +1,135 @@
+{
+  "ma": "be_dien_di",
+  "ten": "Hệ thống điện di gel agarose (Bio-Rad Sub-Cell GT)",
+  "may_mau": "Bio-Rad Sub-Cell GT Agarose Gel Electrophoresis System, khay UVT 15 x 10 cm, nắp an toàn ngắt điện liên động, bộ nguồn PowerPac Basic 300V",
+  "nguyen_ly": [
+    "Phân tử DNA mang điện tích âm đồng đều trên toàn bộ chiều dài nhờ các nhóm phosphat (PO4 3-) trên khung đường-phosphat. Khi đặt trong điện trường một chiều (DC), DNA di chuyển về phía cực dương (anode, màu đỏ).",
+    "Mạng lưới không gian ba chiều của chuỗi polymer agarose đóng vai trò như một cái rây phân tử. Đoạn DNA có kích thước ngắn (số cặp bazơ bp nhỏ) luồn lách qua các lỗ rây nhanh hơn và di chuyển xa hơn đoạn DNA kích thước dài.",
+    "Khoảng cách di chuyển của các phân tử DNA dạng mạch thẳng tỉ lệ nghịch với logarit cơ số 10 kích thước của chúng (log bp): v ~ 1 / log10(bp), cho phép xác định chính xác kích thước đoạn gen bằng cách so sánh với thang chuẩn DNA Ladder.",
+    "Thuốc nhuộm huỳnh quang liên kết DNA (như GelRed hoặc Ethidium Bromide) xen vào giữa các cặp bazơ; khi chiếu tia tử ngoại bước sóng 302 nm trong buồng Gel Doc, phức hệ huỳnh quang phát sáng mạnh cho phép chụp ảnh ghi nhận kết quả."
+  ],
+  "cong_thuc": [
+    "v ~ 1 / log10(bp)",
+    "V_dien_truong = U / d (V/cm, thuong dat 5 V/cm)",
+    "m_agarose = C% * V_dem / 100"
+  ],
+  "bo_phan": [
+    {
+      "ma": "be_dien_di",
+      "ten": "Bể điện di trong suốt đúc nguyên khối",
+      "chuc_nang": "Chứa dung dịch đệm dẫn điện TAE hoặc TBE 1x và khay gel nằm ngang."
+    },
+    {
+      "ma": "khay_do_gel_uvt",
+      "ten": "Khay đổ gel UVT truyền suốt tia cực tím",
+      "chuc_nang": "Chứa gel agarose đông đặc; truyền qua tia UV giúp soi trực tiếp trên bàn soi huỳnh quang."
+    },
+    {
+      "ma": "dien_cuc_bach_kim",
+      "ten": "Hai điện cực sợi bạch kim tinh khiết (Platin)",
+      "chuc_nang": "Dẫn dòng điện một chiều vào dung dịch đệm; cực âm đen (-), cực dương đỏ (+)."
+    },
+    {
+      "ma": "nap_an_toan",
+      "ten": "Nắp bảo vệ có cơ chế ngắt mạch an toàn",
+      "chuc_nang": "Bao bọc bể, chỉ khi đóng nắp đúng khớp mới nối thông mạch điện cao áp tới bộ nguồn."
+    },
+    {
+      "ma": "bo_nguon_dc",
+      "ten": "Bộ nguồn điện di PowerPac Basic 300V",
+      "chuc_nang": "Cung cấp điện áp ổn định từ 10V đến 300V và dòng điện tới 400 mA, có đồng hồ hẹn giờ tự ngắt."
+    }
+  ],
+  "thong_so": [
+    {
+      "ten": "Kích thước khay đổ gel agarose UVT",
+      "gia_tri": "15 x 10 cm, sức chứa tối đa 30 mẫu với 2 hàng lược",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.bio-rad.com/en-us/product/sub-cell-gt-agarose-gel-electrophoresis-systems"
+    },
+    {
+      "ten": "Điện áp vận hành tiêu chuẩn",
+      "gia_tri": "khoảng 5 V/cm khoảng cách giữa hai điện cực (thường 90 - 120 V)",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.bio-rad.com/en-us/product/sub-cell-gt-agarose-gel-electrophoresis-systems"
+    },
+    {
+      "ten": "Độ phân giải kích thước DNA theo nồng độ gel",
+      "gia_tri": "Gel 0,8%: 1 - 20 kb; Gel 1,5%: 200 - 3000 bp; Gel 2,0%: 100 - 1000 bp",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.bio-rad.com/en-us/product/sub-cell-gt-agarose-gel-electrophoresis-systems"
+    },
+    {
+      "ten": "Mô phỏng tốc độ di chuyển vạch DNA và vạch màu chỉ thị",
+      "gia_tri": "Di chuyển tuyến tính theo thời gian và nghịch biến theo log10(bp)",
+      "loai": "mô phỏng",
+      "mo_phong": true
+    }
+  ],
+  "quy_trinh": [
+    {
+      "ma": "do_gel",
+      "ten": "Nấu và đổ bản gel agarose 1%",
+      "viec": "Hòa 1 g bột agarose vào 100 mL đệm TAE 1x, đun sôi trong lò vi sóng cho tan trong suốt, để nguội tới 55 °C, thêm thuốc nhuộm GelRed, đổ vào khay đã cắm lược, chờ 30 phút cho gel đông đục mờ.",
+      "ly_do": "Agarose đông đặc tạo mạng lưới rây phân tử đồng nhất với các giếng chứa mẫu.",
+      "loi": "Đổ gel khi còn quá nóng (>65 °C): làm cong vênh khay nhựa UVT."
+    },
+    {
+      "ma": "dat_gel_vao_be",
+      "ten": "Rút lược và đặt gel vào bể điện di",
+      "viec": "Rút nhẹ lược theo phương thẳng đứng, đặt khay gel vào bể sao cho hàng giếng nằm ở phía cực âm (màu đen), châm đệm TAE 1x ngập mặt gel khoảng 2 - 3 mm.",
+      "ly_do": "DNA mang điện âm sẽ chạy từ cực âm sang cực dương.",
+      "loi": "Đặt ngược đầu giếng quay về cực dương đỏ: các đoạn DNA sẽ chạy ngược ra khỏi gel vào dung dịch đệm."
+    },
+    {
+      "ma": "tra_mau",
+      "ten": "Tra thang chuẩn và mẫu DNA vào giếng",
+      "viec": "Trộn mẫu DNA với dung dịch đệm tải (Loading dye 6x). Dùng micropipette tra 5 uL DNA ladder vào giếng 1 và 5 - 10 uL mẫu vào các giếng kế tiếp.",
+      "ly_do": "Loading dye chứa glycerol làm mẫu nặng chìm xuống đáy giếng và phẩm màu giúp theo dõi đường chạy.",
+      "loi": "Đâm đầu tip quá sâu xuyên thủng đáy giếng: mẫu rò xuống đệm bên dưới gel."
+    },
+    {
+      "ma": "chay_dien_di",
+      "ten": "Đậy nắp và bật nguồn điện",
+      "viec": "Đậy nắp an toàn, cắm dây vào nguồn (đen vào đen, đỏ vào đỏ), cài đặt 100 V trong 45 phút, bấm Run. Quan sát bọt khí sủi ở hai điện cực bạch kim.",
+      "ly_do": "Khởi động điện trường phân ly ion dẫn dòng di chuyển.",
+      "loi": "Không thấy bọt khí sủi: dây nguồn lỏng hoặc đệm không dẫn điện."
+    },
+    {
+      "ma": "chup_anh_gel",
+      "ten": "Soi và chụp ảnh gel trên máy Gel Doc",
+      "viec": "Tắt nguồn, lấy khay gel chuyển vào buồng chụp gel Gel Doc, bật đèn UV bước sóng 302 nm, đóng cửa buồng và chụp ảnh huỳnh quang.",
+      "ly_do": "Ghi nhận hình ảnh các vạch sáng huỳnh quang đại diện cho từng đoạn DNA khuếch đại.",
+      "loi": "Mở cửa buồng khi đèn UV đang bật: nguy hiểm cho mắt và da."
+    }
+  ],
+  "an_toan": [
+    "Điện trường 100 - 300 V có nguy cơ giật điện tử vong cao; luôn tắt nguồn trước khi mở nắp bể.",
+    "Tia cực tím UV trong buồng chụp gel làm bỏng võng mạc và ung thư da; chỉ bật đèn khi buồng đã đóng kín.",
+    "Thuốc nhuộm DNA huỳnh quang (như Ethidium Bromide) là tác nhân gây đột biến gen mạnh; luôn đeo găng tay nitrile khi tiếp xúc."
+  ],
+  "thuat_ngu": [
+    {
+      "tu": "Agarose",
+      "nghia": "Polysaccharide mạch thẳng chiết xuất từ rong đỏ tạo khuôn gel xốp cho điện di."
+    },
+    {
+      "tu": "Loading Dye (Đệm nạp mẫu)",
+      "nghia": "Dung dịch chứa chất làm nặng (glycerol/Ficoll) và phẩm màu (bromophenol blue, xylene cyanol)."
+    },
+    {
+      "tu": "DNA Ladder (Thang chuẩn DNA)",
+      "nghia": "Hỗn hợp các đoạn DNA có kích thước biết trước (ví dụ 100 bp - 1000 bp) dùng làm mốc so sánh."
+    },
+    {
+      "tu": "Buồng Gel Doc",
+      "nghia": "Hệ thống buồng tối có đèn chiếu tia tử ngoại/ánh sáng xanh và camera chụp huỳnh quang DNA."
+    }
+  ],
+  "cau_hoi_on_tap": [
+    "Vì sao trong điện di gel agarose các phân tử DNA lại di chuyển về phía cực dương (anode)?",
+    "Mối quan hệ giữa kích thước đoạn DNA và quãng đường di chuyển trong gel agarose là gì?",
+    "Tại sao hàng giếng nạp mẫu phải luôn được đặt ở phía cực âm (màu đen)?",
+    "Thành phần glycerol trong đệm nạp mẫu (Loading dye) có tác dụng gì khi tra mẫu vào giếng?"
+  ]
+}

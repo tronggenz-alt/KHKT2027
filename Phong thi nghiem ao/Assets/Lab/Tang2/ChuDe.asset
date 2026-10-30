@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2373217662f745dcb1b4477e46df9ba, type: 3}
+  m_Name: ChuDe
+  m_EditorClassIdentifier: Assembly-CSharp::Khkt.Environment.Tang2.BioThemeMap
+  pairs:
+  - id: Tuong
+    quocTe: {fileID: 2100000, guid: f06cbabdd809244c38e128902c793400, type: 2}
+    toiGian: {fileID: 2100000, guid: 3a176423d27534fa78f6f45b57c07e75, type: 2}
+  - id: San
+    quocTe: {fileID: 2100000, guid: da0206c78fba54baabf3ff1b55996507, type: 2}
+    toiGian: {fileID: 2100000, guid: 81dcaad50c13448f4a9336f2a0a96d9b, type: 2}
+  - id: MatBan
+    quocTe: {fileID: 2100000, guid: 2886b3a979b9f45fe8ab5bfd5274e62b, type: 2}
+    toiGian: {fileID: 2100000, guid: a5bb1c63bed8343f89ac5bd837256771, type: 2}
+  - id: Ghe
+    quocTe: {fileID: 2100000, guid: ffb32fb2dc916e245a8b9ab4958cd377, type: 2}
+    toiGian: {fileID: 2100000, guid: 5a3981d3a83254ded97360cd889e6444, type: 2}
+  - id: Vien
+    quocTe: {fileID: 2100000, guid: b2dbdc0fc4c5ded4aacc7af131ad002d, type: 2}
+    toiGian: {fileID: 2100000, guid: 8cb5cad6d216440f0baeb1256ec09d6f, type: 2}

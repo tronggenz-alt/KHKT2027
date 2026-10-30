@@ -259,7 +259,24 @@ namespace Khkt.EditorTools
             zoneRoots[ZoneMap.Corridor] = wing.Find("Hành lang");
             zoneRoots[ZoneMap.Analysis] = wing.Find("Phòng máy phân tích hiện đại");
             zoneRoots[ZoneMap.Robotics] = wing.Find("Phòng tự động hóa & robot");
-            for (int z = 0; z < n; z++) zoneRoots[z].gameObject.AddComponent<ZoneRoot>().zone = z;
+
+            var tang2 = root.Find("Tầng 2");
+            if (tang2 != null)
+            {
+                zoneRoots[ZoneMap.BioLab] = tang2.Find("Phòng thí nghiệm sinh học");
+                zoneRoots[ZoneMap.MicroBio] = tang2.Find("Phòng vi sinh");
+                zoneRoots[ZoneMap.BioStore] = tang2.Find("Kho sinh phẩm");
+                zoneRoots[ZoneMap.CorridorT2] = tang2.Find("Hành lang tầng 2");
+                zoneRoots[ZoneMap.Molecular] = tang2.Find("Phòng sinh học phân tử");
+                zoneRoots[ZoneMap.Greenhouse] = tang2.Find("Nhà kính thực vật");
+                zoneRoots[ZoneMap.EastCorridor] = tang2.Find("Hành lang đông tầng 2");
+            }
+            zoneRoots[ZoneMap.Stairs] = root.Find("Lõi thang bộ và thang máy");
+
+            for (int z = 0; z < n; z++)
+            {
+                if (zoneRoots[z] != null) zoneRoots[z].gameObject.AddComponent<ZoneRoot>().zone = z;
+            }
 
             // Nhánh nào có đồ tương tác (duyệt hậu thứ tự một lần)
             var stateful = new HashSet<Transform>();
@@ -321,7 +338,7 @@ namespace Khkt.EditorTools
                 if (z >= 0) MoveTo(t, z);
             }
 
-            var groups = new List<Transform>(zoneRoots) { root.Find("Điểm nhấn công nghệ"), root.Find("Đầu dò phản chiếu") };
+            var groups = new List<Transform>(zoneRoots.Where(r => r != null)) { root.Find("Điểm nhấn công nghệ"), root.Find("Đầu dò phản chiếu") };
             foreach (var grp in groups)
                 if (grp != null)
                     foreach (var c in grp.Cast<Transform>().ToArray()) Split(c);
@@ -363,13 +380,16 @@ namespace Khkt.EditorTools
 
             // Đồ cầm được đặt ở khu khác với gốc của nó (nếu có) thì chuyển sang gốc của khu chứa nó
             for (int z = 0; z < n; z++)
+            {
+                if (zoneRoots[z] == null) continue;
                 foreach (var gr in zoneRoots[z].GetComponentsInChildren<Grabbable>(true))
                 {
                     var up = gr.transform.parent.GetComponentInParent<Grabbable>(true);
                     if (up != null) continue;
                     int at = ZoneMap.At(gr.transform.position);
-                    if (at >= 0 && at != z) gr.transform.SetParent(zoneRoots[at], true);
+                    if (at >= 0 && at != z && zoneRoots[at] != null) gr.transform.SetParent(zoneRoots[at], true);
                 }
+            }
 
             // Bộ tải khu ở lõi
             var zsGo = new GameObject("Tải khu (ZoneStreamer)");
@@ -382,7 +402,8 @@ namespace Khkt.EditorTools
             {
                 int count = 0;
                 foreach (var go in scenes[z].GetRootGameObjects()) count += go.GetComponentsInChildren<Transform>(true).Length;
-                Debug.Log($"[KHKT] Khu {ZoneMap.Zones[z].name}: {count} vật tĩnh ở cảnh riêng, đồ tương tác ở lõi dưới \"{zoneRoots[z].name}\".");
+                string rootName = zoneRoots[z] != null ? zoneRoots[z].name : "(lõi)";
+                Debug.Log($"[KHKT] Khu {ZoneMap.Zones[z].name}: {count} vật tĩnh ở cảnh riêng, đồ tương tác ở lõi dưới \"{rootName}\".");
             }
             Debug.Log($"[KHKT] Tách khu xong: {moved.Count} nhánh chuyển sang cảnh khu, {back} nhánh kéo về lõi vì bị tham chiếu chéo.");
             return scenes;

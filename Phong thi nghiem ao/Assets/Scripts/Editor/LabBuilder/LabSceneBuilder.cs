@@ -82,6 +82,7 @@ namespace Khkt.EditorTools
             WingAccents(root);
             BuildBalcony(root);
             BuildOutdoor(root);
+            BuildFloor2(root);
             BuildLighting(root);
             BuildStationsAndViewer(root);
             AttachEquipmentInfo(root);
@@ -449,9 +450,9 @@ namespace Khkt.EditorTools
             Box(g, "Sàn hành lang", new Vector3(cx, -0.15f, CorridorZ / 2), new Vector3(StoreX, 0.3f, -CorridorZ), floorHall);
             Box(g, "Sàn dãy phòng nam", new Vector3(cx, -0.15f, (WingZ + CorridorZ) / 2), new Vector3(StoreX, 0.3f, CorridorZ - WingZ), floorLab);
             float z0 = WingZ - 0.1f, z1 = BalconyZ + 0.1f;
-            Box(g, "Trần", new Vector3(cx, H + 0.1f, (z0 + z1) / 2), new Vector3(StoreX + 0.2f, 0.2f, z1 - z0), ceilingMat);
-            Box(g, "Mái", new Vector3(cx, H + 0.35f, (z0 + z1) / 2), new Vector3(StoreX + 0.6f, 0.3f, z1 - z0 + 0.4f), facade);
-            Box(g, "Diềm mái", new Vector3(cx, H + 0.55f, (z0 + z1) / 2), new Vector3(StoreX + 0.7f, 0.1f, z1 - z0 + 0.5f), accentDark, false);
+            // Trần tầng 1 mỏng lại còn y 3.6..3.7 (mặt dưới giữ 3.6m để tầng 1 nguyên vẹn, sàn tầng 2 ở 3.7..3.8m tránh z-fighting)
+            Box(g, "Trần", new Vector3(cx, H + 0.05f, (z0 + z1) / 2), new Vector3(StoreX + 0.2f, 0.1f, z1 - z0), ceilingMat);
+            // Mái và Diềm mái đã dời lên đỉnh tầng 2 (y = 7.4m) trong LabSceneBuilder.Floor2.Shell.cs
             Box(g, "Bậc thềm", new Vector3(cx, -0.1f, z1 + 0.25f), new Vector3(StoreX, 0.2f, 0.5f), sill);
 
             // Tường giữa phòng thí nghiệm và hành lang: cửa trượt tự động (cánh lắp phía hành lang), đoạn x 7,6..13,6 là tường
@@ -474,7 +475,8 @@ namespace Khkt.EditorTools
             Wall(g, "Tường nam (ngoài)", true, WingZ, -0.1f, StoreX + 0.1f, paint, facade, -1,
                 Win(1.2f, 3.6f), Win(4.8f, 7.2f), Win(8.4f, 10.8f), Win(14.6f, 17.0f), Win(18.2f, 20.6f), Win(21.8f, 24.2f));
             Wall(g, "Tường tây dãy nam", false, 0f, WingZ + 0.1f, -0.1f, paint, facade, -1, Door(CorridorZ + 0.3f, -0.3f, 2.3f, 0f));
-            Wall(g, "Tường đông dãy nam", false, StoreX, WingZ + 0.1f, -0.1f, paint, facade, +1);
+            Wall(g, "Tường đông dãy nam", false, StoreX, WingZ + 0.1f, -0.1f, paint, facade, +1,
+                Auto(-1.9f, -0.3f, +1, ZoneMap.Corridor, ZoneMap.Stairs, leafLab));
         }
 
         static void Wall(Transform p, string name, bool alongX, float c, float from, float to,
@@ -678,6 +680,15 @@ namespace Khkt.EditorTools
                 ("Hành lang", new Vector3(StoreX / 2, 1.4f, CorridorZ / 2), new Vector3(StoreX, H, -CorridorZ)),
                 ("Phòng máy phân tích", new Vector3(RoomSplitX / 2, 1.6f, (WingZ + CorridorZ) / 2), new Vector3(RoomSplitX, H, CorridorZ - WingZ)),
                 ("Phòng robot", new Vector3((RoomSplitX + StoreX) / 2, 1.6f, (WingZ + CorridorZ) / 2), new Vector3(StoreX - RoomSplitX, H, CorridorZ - WingZ)),
+
+                // Tầng 2
+                ("Phòng sinh học", new Vector3(LabX / 2, F2_Y + 1.6f, LabZ / 2), new Vector3(LabX, F2_H, LabZ)),
+                ("Phòng vi sinh", new Vector3((LabX + StoreX) / 2, F2_Y + 1.6f, 11.25f), new Vector3(StoreX - LabX, F2_H, 7.5f)),
+                ("Kho sinh phẩm", new Vector3((LabX + StoreX) / 2, F2_Y + 1.6f, 3.75f), new Vector3(StoreX - LabX, F2_H, 7.5f)),
+                ("Hành lang tầng 2", new Vector3(StoreX / 2, F2_Y + 1.4f, CorridorZ / 2), new Vector3(StoreX, F2_H, -CorridorZ)),
+                ("Sinh học phân tử", new Vector3(RoomSplitX / 2, F2_Y + 1.6f, (WingZ + CorridorZ) / 2), new Vector3(RoomSplitX, F2_H, CorridorZ - WingZ)),
+                ("Nhà kính", new Vector3((RoomSplitX + StoreX) / 2, F2_Y + 2.0f, (WingZ + CorridorZ) / 2), new Vector3(StoreX - RoomSplitX, F2_H + 1.2f, CorridorZ - WingZ)),
+                ("Lõi thang", new Vector3(28.5f, F2_Y / 2, 1.9f), new Vector3(3f, F2_Y + F2_H, 8.2f)),
             };
             int ok = 0;
             foreach (var r in rooms)
@@ -831,6 +842,20 @@ namespace Khkt.EditorTools
             Station(g, 11, "Khu an toàn", new Vector3(1.9f, 0, 2.4f), -100, false);
             Station(g, 12, "Khu chế tạo dụng cụ", FabricationStationPos, 90, true);
             Station(g, 13, "Bàn thí nghiệm lắp ráp", AssemblyBenchPos + new Vector3(0, 0, -1.05f), 0, false);
+
+            // Trạm dịch chuyển Tầng 2 (20..31) theo bo_cuc_tang2.json
+            Station(g, 20, "Toàn cảnh lab sinh học", new Vector3(19.0f, F2_Y, 13.6f), -122, false);
+            Station(g, 21, "Bàn kính hiển vi (bàn 1)", new Vector3(6.05f, F2_Y, 2.6f), -90, true);
+            Station(g, 22, "Bàn giáo viên tầng 2", new Vector3(0.95f, F2_Y, 7.5f), 90, false);
+            Station(g, 23, "Tủ an toàn sinh học", new Vector3(6.6f, F2_Y, 13.4f), 0, false);
+            Station(g, 24, "Khu giải phẫu", new Vector3(16.4f, F2_Y, 11.2f), 90, false);
+            Station(g, 25, "Tủ ấm và nồi hấp", new Vector3(16.4f, F2_Y, 5.2f), 90, false);
+            Station(g, 26, "Phòng vi sinh", new Vector3(23.0f, F2_Y, 9.6f), 0, false);
+            Station(g, 27, "Kho sinh phẩm", new Vector3(23.5f, F2_Y, 3.7f), 0, false);
+            Station(g, 28, "Sinh học phân tử – tách chiết, PCR", new Vector3(6.7f, F2_Y, -3.4f), 180, false);
+            Station(g, 29, "Điện di và soi gel", new Vector3(11.2f, F2_Y, -6.0f), 180, false);
+            Station(g, 30, "Nhà kính – quang hợp", new Vector3(19.8f, F2_Y, -3.4f), 180, false);
+            Station(g, 31, "Sảnh thang máy tầng 2", new Vector3(27.8f, F2_Y, -1.5f), 270, false);
 
             var viewer = new GameObject("Người xem (chuột-bàn phím)");
             viewer.transform.SetParent(root, false);

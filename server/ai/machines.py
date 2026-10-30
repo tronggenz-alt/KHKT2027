@@ -30,6 +30,11 @@ ALIASES: dict[str, list[str]] = {
     "lo_nung": ["lo nung", "tro tong so", "nung voi"],
     "may_cat_nuoc": ["may cat nuoc", "nuoc cat", "do dan dien"],
     "noi_hap": ["noi hap", "tiet trung", "autoclave"],
+    "kinh_hien_vi": ["kinh hien vi", "microscope", "vat kinh", "thi kinh", "tieu ban", "soi tieu ban", "do phong dai"],
+    "tu_an_toan_sinh_hoc": ["tu an toan sinh hoc", "tu thao tac vo trung", "biosafety cabinet", "bsc", "tu bsc", "dong khi laminar"],
+    "may_pcr": ["may pcr", "luan nhiet", "thermal cycler", "khuech dai gen", "chu ky nhiet", "pcr"],
+    "be_dien_di": ["dien di", "be dien di", "dien di gel", "electrophoresis", "gel doc", "chup gel", "agarose"],
+    "tu_am_vi_sinh": ["tu am", "tu am vi sinh", "incubator", "u vi khuan", "u vi sinh", "dia petri"],
 }
 
 
