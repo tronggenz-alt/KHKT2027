@@ -195,4 +195,138 @@ Tất cả các endpoint trả JSON UTF-8; danh sách có dạng `{"muc": [...],
 
 ## Giao diện
 
-*(Phần này dành cho nhánh `tang2/dung-cu-giao-dien` ghi bổ sung)*
+Phần này do nhánh `tang2/dung-cu-giao-dien` thực hiện, bám sát các yêu cầu trong `phong_sinh/PROMPT_DUNG_CU_GIAO_DIEN.md` và `phong_sinh/HOP_DONG_GIAO_DIEN_BACKEND.md`.
+
+---
+
+### 1. Khung tương tác sinh học cốt lõi (`Khkt.Interaction.Bio`)
+
+Toàn bộ hệ thống tương tác dụng cụ và thiết bị tầng 2 được chuẩn hóa theo khung chung, đảm bảo phản hồi tức thì ($\le 1$ khung hình), đường cong chuyển động vật lý mượt mà, định dạng hiển thị tiếng Việt với số thập phân chuẩn `vi-VN` (dấu phẩy), giải phóng hoàn toàn rác bộ nhớ trong vòng lặp chính (0 B GC Alloc mỗi khung hình) và tuân thủ nguyên tắc "Giảm chuyển động":
+
+- **`BioKnob`**: Điều khiển các núm vặn vật lý: núm vi cấp / đại cấp và chiết áp đèn kính hiển vi, núm điều chỉnh thể tích micropipet, núm xoay điện áp nguồn điện di, núm chỉnh tốc độ ly tâm. Hỗ trợ bước vặn liên tục hoặc từng nấc rời rạc, góc giới hạn min/max, con trỏ xoay mượt mà với âm thanh click vật lý theo tần số góc.
+- **`BioButton`**: Nút bấm cơ học có hiệu ứng lún cơ học đàn hồi, độ phản hồi xúc giác (nút nguồn máy quang phổ, nút Tare/Blank, nút nhả đầu côn micropipet, nút chạy luân nhiệt PCR, nút mở nắp tủ vi sinh).
+- **`BioHinge`**: Bản lề giảm chấn góc xoay mềm cho nắp kính tủ an toàn sinh học cấp II, cửa kính tủ mát 4 °C, nắp tủ đông, nắp máy ly tâm, nắp buồng soi gel doc và cửa buồng đệm airlock.
+- **`IBioTarget`**: Giao diện tiêu chuẩn cho mọi vật mẫu và dụng cụ tiếp nhận dung dịch / sinh phẩm (`GlassSlide`, `PetriDish`, `EppendorfTube`, `ElectrophoresisWell`, `SpectroCuvette`, `PlantPot`, `PotometerTube`).
+- **`BioTool`**: Lớp cơ sở cho 108 dụng cụ cầm tay sinh học. Hỗ trợ cơ chế phím `Q` tự động trả dụng cụ về đúng giá / khay ban đầu; tâm ngắm (crosshair) chuyển trạng thái động; cơ chế nhấn giữ kèm vòng tiến trình `ProgressRing` cho các thao tác đòi hỏi thời gian tiêu chuẩn (đốt que cấy 3 s, nghiền mẫu 5 s, tẩy cồn 15 s).
+- **`BioFeedback`**: Hệ thống phản hồi xúc giác và thị giác: âm thanh thao tác, cảnh báo lỗi khoa học, thông báo toast tiếng Việt thanh thoát, ghi nhật ký sự kiện và lỗi sai khoa học sang `BioLabSync`.
+- **`CloseUpView`**: Hệ thống camera cận cảnh thị kính hiển vi, giếng gel điện di, buồng chụp UV gel doc và màn hình thiết bị phân tích, làm mờ hậu cảnh và chuyển đổi góc nhìn mượt mà.
+
+---
+
+### 2. Mô phỏng 108 dụng cụ tương tác theo 6 phân khu
+
+1. **Phòng thí nghiệm sinh học chung (x 0..20, z 0..15):**
+   - 29 kính hiển vi quang học hai mắt (`MicroscopeController`, `MicroscopeCameraProgram`): 27 kính trên 9 bàn học sinh, 1 kính bàn giáo viên có camera nối màn hình phụ, 1 kính tại đảo nhuộm Gram. Mô phỏng đầy đủ vật kính 4x, 10x, 40x, 100x dầu soi, bàn sa trượt XY, ốc vi cấp/đại cấp, màn chắn sáng, tụ quang Abbe và độ sáng đèn LED.
+   - Dụng cụ chuẩn bị tiêu bản (`SlidePrepTools`): Lam kính 75×25 mm, lamen 22×22 mm, kim mũi mác, panh mũi nhọn, dao lam, giấy thấm, giấy lau kính, lọ dầu soi cedar n = 1,515.
+   - Thí nghiệm sinh lý thực vật & vi sinh: Bình lên men rượu kị khí với bóng bay co dãn theo thể tích khí $\text{CO}_2$; bộ làm sữa chua lên men lactic ủ 42 °C; ống nghiệm catalase phân hủy $\text{H}_2\text{O}_2$.
+   - Bàn giải phẫu số (`DigitalAnatomyTable`): Mô hình giải phẫu 3D đa giác quan, chọn bóc tách từng lớp cơ quan (tuần hoàn, hô hấp, tiêu hóa, thần kinh) và phóng to chi tiết tiêu bản mô học.
+   - Tủ an toàn sinh học cấp II phòng chung: Quạt hút dòng khí tầng, đèn UV tiệt trùng trần, nắp kính trượt an toàn.
+
+2. **Phòng vi sinh (x 20..27, z 7,5..15) & buồng đệm:**
+   - Tủ an toàn sinh học cấp II loại A2 và pass-box đưa mẫu hai chiều.
+   - Đèn cồn tiệt trùng, que cấy vòng, que cấy thẳng (nung đỏ và làm nguội cạnh đèn cồn), que trang thủy tinh chữ L gạt thạch.
+   - Đĩa petri thạch PCA/LB/Sabouraud, ống thạch nghiêng, ống canh thang vô trùng.
+   - Tủ ấm vi sinh 37 °C có tuần hoàn khí, nồi hấp tiệt trùng áp suất đứng 121 °C.
+   - Đảo nhuộm Gram 4 bước (`dao_nhuom_gram`): Cố định nhiệt vết bôi, tím kết tinh (1 phút), dung dịch Lugol (1 phút), cồn 96% (15 giây), safranin (1 phút), vòi nước rửa trôi.
+   - Máy đếm khuẩn lạc bán tự động (`may_dem_khuan_lac`): Bút đếm điện tử, kính lúp chiếu sáng nền đen, đếm khuẩn lạc trong khoảng chuẩn 30–300 theo ISO 4833-1.
+
+3. **Kho sinh phẩm (x 20..27, z 0..7,5):**
+   - Tủ mát bảo quản 4 °C hai cánh kính cường lực (`GlassFridge`), cảm biến nhiệt độ thời gian thực.
+   - Tủ đông sâu -20 °C bảo quản kit PCR, enzyme và ADN.
+   - Kệ inox đa tầng chứa mẫu thực vật tươi, mô hình tiêu bản và hóa chất đệm.
+   - Ki-ốt sổ kho điện tử màn hình cảm ứng (`StockKiosk`, `StockProgram`): Tra cứu tồn kho 35 sinh phẩm BSL-1, kiểm tra hạn dùng và xuất/nhập sinh phẩm vào khay thí nghiệm.
+
+4. **Phòng sinh học phân tử (x 0..13,5, z -9..-3,6 sau nới hành lang):**
+   - Bộ micropipet cơ học thể tích thay đổi (P10: 0,5–10 µL, P200: 20–200 µL, P1000: 100–1000 µL) mô phỏng chính xác cơ cấu 2 nấc bấm vật lý: nấc 1 hút đúng thể tích định mức, nấc 2 xả cạn hoàn toàn (blow-out); đầu côn dùng 1 lần (đầu trắng, vàng, xanh) và nút bấm nhả đầu côn vào hộp thải.
+   - Máy lắc xoáy vortex trộn đều mẫu eppendorf 1,5 mL; máy ly tâm mini góc nghiêng và máy ly tâm để bàn có kiểm tra cân bằng đối xứng rotor theo công thức RCF.
+   - Tủ thao tác tiền PCR (PCR workstation) có đèn chiếu UV khử khuẩn và quạt thổi khí sạch HEPA.
+   - Máy luân nhiệt PCR 96 giếng (`PcrProgram`): Cài đặt chu kỳ nhiệt biến tính (94–95 °C), gắn mồi ($T_a = T_m - 5\,^\circ\text{C}$) và kéo dài (72 °C).
+   - Hệ thống điện di gel agarose 1% kèm bộ nguồn điện áp 50–150 V, khay đổ gel có lược tạo giếng, thước đo di chuyển vạch băng ADN.
+   - Hệ thống buồng chụp ảnh gel huỳnh quang Gel Doc (`GelDocProgram`): Nguồn kích thích ánh sáng xanh / UV, kính lọc màu cam, chụp ảnh lưu kết quả điện di với thang chuẩn ADN 1 kb / 100 bp.
+   - Máy quang phổ đo mật độ quang vi khuẩn $\text{OD}_{600}$ (`Od600Program`): Bước sóng 600 nm, chức năng Blank/Zero với môi trường nuôi cấy trắng, đo mật độ tế bào vi khuẩn.
+
+5. **Nhà kính thực vật (x 13,5..27, z -9..-3,6 sau nới hành lang):**
+   - Trạm quang hợp rong đuôi chó *Elodea*: Bể thủy sinh, phễu gom khí, ống nghiệm hứng oxy, đèn LED quang hợp điều chỉnh khoảng cách và cường độ sáng, bọt khí $\text{O}_2$ thoát ra tính theo phương trình sinh lý thực vật.
+   - Trạm thoát hơi nước mao quản (Potometer): Ống thủy tinh chứa bọt khí chỉ thị dịch chuyển theo cường độ thoát hơi nước, chịu ảnh hưởng của quạt gió và độ ẩm môi trường.
+   - Trạm thí nghiệm tính hướng sáng: Hộp tối có khe hẹp một bên, cây mầm đậu uốn cong về phía khe sáng theo gradient auxin.
+   - Giàn thủy canh màng dinh dưỡng NFT (Nutrient Film Technique): Tuần hoàn dung dịch khoáng, đo pH và EC dinh dưỡng tự động.
+
+6. **Hành lang tầng 2 (rộng 3,6 m) & khu vực chung:**
+   - Bảng tin thông báo điện tử hành lang (`ClassroomProgram`), ki-ốt thông tin tra cứu lịch thực hành và nội quy an toàn BSL-1.
+   - Tủ locker cá nhân học sinh, bồn rửa mắt khẩn cấp, vòi tắm an toàn, bộ xử lý sự cố tràn đổ sinh học.
+
+---
+
+### 3. Kịch bản thực hiện 15 bài thí nghiệm SGK GDPT 2018
+
+Hệ thống cho phép thực hiện trọn vẹn cả 15 bài thí nghiệm chuẩn, tự động đối chiếu các bước thao tác và tính toán hậu quả khoa học chính xác khi học sinh phạm lỗi:
+
+| Mã bài | Lớp | Tên bài thí nghiệm | Thao tác đúng chuẩn | Lỗi cố ý & Hậu quả khoa học tái hiện |
+|---|:---:|---|---|---|
+| `te_bao_hanh` | 10 | Tế bào biểu bì vảy hành | Dao lam cắt vảy mỏng, nhỏ xanh methylen, đậy lamen 45° | Để khô mẫu, không đậy lamen $\to$ bọt khí che khuất, tế bào nhăn rúm |
+| `khi_khong` | 10/11 | Khí khổng lá thài lài tía | Tách biểu bì mặt dưới lá, nhỏ nước cất, soi 40x | Tách nhầm biểu bì mặt trên $\to$ mật độ khí khổng cực thấp |
+| `co_nguyen_sinh` | 10 | Co và phản co nguyên sinh | Nhỏ NaCl 10% hút giấy thấm mép đối diện $\to$ co; nhỏ nước cất $\to$ phản co | Dùng nhầm nước cất ngay từ đầu $\to$ không xảy ra co nguyên sinh |
+| `catalase` | 10 | Phân hủy $\text{H}_2\text{O}_2$ bằng catalase | Khoai tây/gan tươi cho vào $\text{H}_2\text{O}_2$ 3% $\to$ sủi bọt oxy mạnh | Dùng mẫu đã luộc chín $\ge 65\,^\circ\text{C}$ $\to$ enzyme catalase biến tính, không bọt |
+| `len_men_ruou` | 10 | Lên men ethanol | Men sống + glucose 10% ở 32 °C đậy bóng bay $\to$ bóng phồng căng $\text{CO}_2$ | Dùng nước sôi $> 60\,^\circ\text{C}$ $\to$ nấm men chết nhiệt, bóng xẹp lép |
+| `len_men_lactic` | 10 | Lên men lactic (làm sữa chua) | Sữa ấm + men sữa chua ủ 42 °C trong 8h $\to$ pH giảm về 4,2, đông tụ mịn | Ủ ở nhiệt độ phòng 18 °C $\to$ vi khuẩn chậm lớn, pH không đạt, sữa lỏng |
+| `quang_hop` | 11 | Quang hợp rong đuôi chó | Ngập nước chứa $\text{NaHCO}_3$, bật đèn 100W cách 20cm $\to$ 35 bọt khí/phút | Tắt đèn hoặc che tối $\to$ pha sáng dừng lại, tốc độ bọt = 0 |
+| `thoat_hoi_nuoc` | 11 | Đo thoát hơi nước bằng potometer | Cuống cành cắm khít trong potometer, mở quạt $\to$ bọt dịch chuyển nhanh | Bôi vaseline phủ kín hai mặt lá $\to$ bít khí khổng, bọt khí đứng yên |
+| `huong_sang` | 11 | Hướng sáng cây mầm | Hộp có khe hẹp một bên, chiếu sáng lệch 45° $\to$ ngọn mầm uốn cong 42° | Đặt trong tối hoàn toàn $\to$ mầm vống dài vàng vọt, không uốn cong (0°) |
+| `tach_chiet_adn` | 12 | Tách chiết ADN thực vật | Nghiền chuối với đệm ly giải + muối, ủ 55 °C, lọc, rót cồn lạnh -20 °C $\to$ sợi ADN | Cồn ấm 25 °C và thiếu muối $\to$ không trung hòa photphat, không thấy sợi ADN |
+| `dem_vi_sinh` | 10 | Pha loãng & đếm khuẩn lạc | Pha loãng bậc 10, trang đĩa PCA, ủ 37 °C 24h $\to$ đĩa $10^{-4}$ có 120 CFU | Quên thay đầu côn micropipet $\to$ nhiễm carryover, khuẩn lạc mọc thành mảng |
+| `cay_ria` | 10 | Cấy ria trên đĩa thạch | Đốt đỏ que cấy vòng, ria 4 vùng $\to$ tách khuẩn lạc đơn ở vùng 3–4 | Quên đốt que cấy giữa các vùng $\to$ vi khuẩn mọc dày đặc, không tách đơn |
+| `nhuom_gram` | 10 | Kỹ thuật nhuộm Gram vi khuẩn | Tím kết tinh $\to$ Lugol $\to$ cồn 96% 15s $\to$ safranin: sữa chua tím, E. coli hồng | Tẩy cồn kéo dài 45s $\to$ tẩy trôi peptidoglycan Gram dương, hóa hồng giả |
+| `pcr_dien_di` | 12 | PCR và điện di gel agarose | Chạy PCR $T_a = 55\,^\circ\text{C}$, tra giếng gel 1%, cắm điện cực âm ở giếng $\to$ băng 500 bp | Cắm ngược cực điện di $\to$ ADN âm chạy ngược lên trên thoát khỏi giếng |
+| `duong_cong_od600` | 10 | Đo mật độ quang vi khuẩn | Bật máy quang phổ 600 nm, chuẩn Blank với môi trường trắng $\to$ đo đường cong log | Quên chuẩn Blank $\to$ hấp thụ nền môi trường làm lệch tuyệt đối kết quả |
+
+---
+
+### 4. Trang web quản lý phòng thí nghiệm sinh học (`server/web/sinh.html`)
+
+Trang quản lý phòng thí nghiệm tầng 2 được tích hợp mượt mà vào máy chủ FastAPI (`/sinh`), cùng ngôn ngữ thiết kế CSS với hệ thống chung (biến màu, thẻ, bảng cuộn `tablewrap`, huy hiệu, đồ thị SVG nhẹ không dùng thư viện ngoài) và tương thích hoàn toàn trên thiết bị di động (chiều rộng 375 px không vỡ layout, không cuộn ngang toàn trang):
+
+- **Tab 1: Tổng quan tầng 2 (`tong-quan`):** Sơ đồ mặt bằng SVG thể hiện chính xác 8 phân khu sau khi mở rộng hành lang 3,6 m. Từng thiết bị là một điểm báo trạng thái trực tiếp (xanh: sẵn sàng, lam: đang chạy, vàng: cần bảo trì, đỏ: hỏng); các thẻ thống kê tổng số dụng cụ, mượn trả, sinh phẩm sắp hết, cảnh báo nhiệt độ tủ và sự cố an toàn.
+- **Tab 2: Dụng cụ & thiết bị (`dung-cu`):** Danh mục 108 dụng cụ theo phòng và loại; tìm kiếm tiếng Việt tức thì không dấu; kiểm tra trạng thái quá hạn hiệu chuẩn; thao tác sửa đổi số lượng trực tiếp.
+- **Tab 3: Mượn – trả (`muon-tra`):** Quản lý phiếu mượn dụng cụ theo học sinh và lớp; hiển thị trạng thái quá hạn trả (màu đỏ); ghi nhận trả dụng cụ và tự động cập nhật số lượng hỏng về cơ sở dữ liệu.
+- **Tab 4: Kho sinh phẩm (`sinh-pham`):** Phân loại vị trí lưu trữ (tủ mát 4 °C, tủ đông -20 °C, kệ); phân loại hạn sử dụng (vàng $\le 30$ ngày, đỏ quá hạn); giao diện nhập/xuất tuân thủ nghiêm ngặt cấp an toàn `BSL-1`.
+- **Tab 5: Nhiệt độ tủ (`nhiet-do`):** Đồ thị SVG biến thiên nhiệt độ 24 giờ cho 3 tủ (`tu_mat_4`, `tu_dong_am20`, `tu_am_37`), đánh dấu ngưỡng cảnh báo chuẩn ($4 \pm 2\,^\circ\text{C}$, $-20 \pm 5\,^\circ\text{C}$, $37 \pm 1\,^\circ\text{C}$) và nhật ký mở cửa tủ kéo dài.
+- **Tab 6: Đặt lịch máy / phòng (`dat-lich`):** Lưới lịch tuần 7 ngày trực quan; đặt lịch máy/phòng; kiểm tra xung đột thời gian và trả về thông báo lỗi 409 Conflict chi tiết.
+- **Tab 7: Kết quả thí nghiệm (`ket-qua`):** Bảng tổng hợp kết quả 15 bài thí nghiệm theo lớp và học sinh; giáo viên chấm điểm trực tiếp; nút tải file CSV mã hóa UTF-8 BOM hiển thị chuẩn tiếng Việt trên Microsoft Excel.
+- **Tab 8: Sự cố an toàn sinh học (`su-co`):** Theo dõi các báo cáo sự cố (đổ vỡ lam kính, kim đâm, tràn hóa chất); giáo viên cập nhật quy trình xử lý và trạng thái giải quyết.
+- **Tab 9: Bảo trì – hiệu chuẩn (`bao-tri`):** Lập lịch và theo dõi lịch sử hiệu chuẩn micropipet, máy đo OD600, cân phân tích, tủ cấy an toàn sinh học.
+- **Tab 10: Hướng dẫn dụng cụ & 15 bài thí nghiệm (`huong-dan`):** Tra cứu nhanh quy trình thao tác chuẩn (SOP), thông số kỹ thuật có trích dẫn nguồn chuẩn hoặc cờ mô phỏng, lỗi thường gặp và quy tắc an toàn BSL-1 cho mọi dụng cụ.
+
+---
+
+### 5. Cơ chế đồng bộ dữ liệu Unity $\leftrightarrow$ Web (`BioLabSync.cs`)
+
+- **Địa chỉ máy chủ & chế độ ngoại tuyến:** Đồng bộ qua biến môi trường `KHKT_SERVER_URL` (mặc định `http://127.0.0.1:8000`). Chế độ `KHKT_WEB_SINH=0` tắt hoàn toàn đồng bộ mạng cho các môi trường kiểm thử cô lập.
+- **Gom mẻ sự kiện không chặn (Non-blocking Batching):** Gom mẻ định kỳ 5 giây hoặc khi hàng đợi đạt $\ge 20$ sự kiện, gửi bất đồng bộ qua `UnityWebRequest` tới endpoint `POST /lab/sinh/su-kien`. Cơ chế lùi thời gian thử lại khi mất kết nối (5s $\to$ 10s $\to$ 30s $\to$ 60s).
+- **Lưu trữ đệm ngoại tuyến (Offline Resiliency):** Hàng đợi tối đa 500 sự kiện; tự động lưu xuống tệp JSON Lines `hang_doi_sinh.jsonl` tại thư mục dữ liệu cục bộ khi thoát ứng dụng và nạp lại khi khởi động tiếp theo.
+
+---
+
+### 6. Kết quả kiểm thử tự động & Hiệu năng đồ họa
+
+Toàn bộ các bộ kiểm thử tự động đều đạt **100% PASS**:
+
+| Bộ kiểm thử | Lệnh thực thi | Kết quả | Ghi chú |
+|---|---|:---:|---|
+| **Python Backend Tests** | `/Users/trantrong/Documents/Antigravity/.venv/bin/python -m unittest discover -s tests` | **139 / 139 PASS** (1,02 s) | Kiểm tra toàn bộ API REST, CSDL SQLite, AI SOP, an toàn BSL-1 và xuất CSV BOM. |
+| **C# Chem Tests** | `bash tools/chay_kiem_thu_hoa.sh` | **147 / 147 PASS** (0,32 s) | Mô phỏng hóa học phân tích, UV-Vis, AAS, GC-MS, HPLC và xúc tác catalase. |
+| **C# Bio Tests** | `bash tools/chay_kiem_thu_hoa.sh tests/BioSimulationTests.cs` | **82 / 82 PASS** (0,15 s) | Vi sinh pha loãng, cấy ria, nhuộm Gram, micropipet, ly tâm, PCR, điện di, quang hợp, potometer. |
+| **Hành lang tầng 2** | `KHKT_TEST=tang2_hanh_lang` (Unity batchmode) | **PASS** | Kiểm tra mở rộng hành lang lên 3,6 m ($z \in [-3,6; 0]$), `ZoneMap.At` chuẩn xác, nhân vật di chuyển không kẹt cửa 3 phòng phía nam, chụp 5 ảnh mặt bằng và phối cảnh. |
+| **Đồng bộ Web Tầng 2** | `KHKT_TEST=tang2_web` (Unity batchmode) | **PASS** | Gửi sự kiện thành công lên FastAPI server, xử lý mượt mà khi ngắt mạng, lưu và nạp hàng đợi đĩa ngoại tuyến. |
+| **15 bài thí nghiệm** | `KHKT_TEST=tang2_dung_cu` (Unity batchmode) | **PASS** | Chạy toàn bộ 15 bài thí nghiệm theo 2 lượt (đúng chuẩn và sai cố ý), log chi tiết từng bước, chụp đủ 30 ảnh vào `docs/anh-tang2/dung_cu/`. |
+| **Hồi quy Tầng 2** | `KHKT_TEST=tang2` (Unity batchmode) | **PASS** | Kiểm tra 12 trạm tầng 2 (trạm 20..31), đổi theme Quốc tế / Tối giản Japandi. |
+| **Kiểm thử giao diện Web** | `capture_web_shots.py` (Playwright Chromium) | **PASS** | Kiểm tra cả 10 tab trên Desktop 1280px và Mobile 375px ở 2 chế độ Sáng / Tối, không lỗi console trình duyệt, chụp đủ 40 ảnh vào `docs/anh-tang2/web/`. |
+
+- **Hiệu năng hiển thị thực tế (Unity):**
+  - Trạm 23 (Tủ an toàn sinh học): **126,3 FPS**
+  - Trạm 30 (Nhà kính thực vật): **118,4 FPS**
+  - Trạm 28 (Sinh học phân tử): **117,4 FPS**
+  - Trạm 21 (Bàn kính hiển vi 1): **99,5 FPS**
+  - Trạm 29 (PCR điện di): **90,3 FPS**
+  - Trạm 25 (Phòng vi sinh): **83,0 FPS**
+  - Mọi điểm đều vượt xa mục tiêu mượt mà của dự án.
+

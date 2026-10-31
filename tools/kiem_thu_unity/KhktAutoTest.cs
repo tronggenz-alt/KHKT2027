@@ -23,6 +23,8 @@ public class KhktAutoTest : MonoBehaviour
     IEnumerator Start()
     {
         outDir = Environment.GetEnvironmentVariable("KHKT_SHOTS");
+        if (string.IsNullOrEmpty(outDir))
+            outDir = Path.GetFullPath(Path.Combine(Application.dataPath, "..", "..", "docs", "anh-tang2", "dung_cu"));
         Directory.CreateDirectory(outDir);
         float t0 = Time.realtimeSinceStartup;
         StartCoroutine(Watchdog());
@@ -296,6 +298,24 @@ public class KhktAutoTest : MonoBehaviour
         {
             yield return Floor2CorridorTest();
             Log($"Xong kiểm thử hành lang Tầng 2 sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "tang2_dung_cu")
+        {
+            yield return Floor2DungCuTest();
+            Log($"Xong kiểm thử dụng cụ Tầng 2 sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "tang2_web")
+        {
+            yield return Floor2WebTest();
+            Log($"Xong kiểm thử đồng bộ Web Tầng 2 sau {Time.realtimeSinceStartup - t0:0} s");
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.Exit(0);
 #endif
@@ -3543,6 +3563,210 @@ public class KhktAutoTest : MonoBehaviour
         Destroy(planGo);
         Log("[tang2_hanh_lang] Đã chụp mặt bằng 3,6 m: 10_sau_3m6_mat_bang.png");
         Log("[tang2_hanh_lang] PASS: Mở rộng hành lang Tầng 2 lên 3,6 m hoàn tất!");
+    }
+
+    IEnumerator Floor2DungCuTest()
+    {
+        Log("[KHKT-PLAY] Bắt đầu kiểm thử tự động 15 bài thí nghiệm Tầng 2 (Khu sinh học)");
+
+        string repoRoot = Path.GetFullPath(Path.Combine(Application.dataPath, "..", ".."));
+        string dungCuDir = Path.Combine(repoRoot, "docs", "anh-tang2", "dung_cu");
+        Directory.CreateDirectory(dungCuDir);
+        outDir = dungCuDir;
+
+        var zs = Khkt.Rendering.ZoneStreamer.Instance;
+        zs?.Keep(this, 300f,
+            new Vector3(10f, 4.5f, 7f),
+            new Vector3(23f, 4.5f, 11f),
+            new Vector3(23f, 4.5f, 3f),
+            new Vector3(6.5f, 4.5f, -4.5f),
+            new Vector3(20f, 4.5f, -4.5f),
+            new Vector3(13.5f, 4.5f, -1.8f));
+
+        // 1. Tế bào vảy hành (te_bao_hanh)
+        viewer.GoTo(21);
+        yield return Frames(8);
+        Log("[KHKT-PLAY] [te_bao_hanh] Bước 1: Dao lam cắt vảy hành, kẹp đặt lên lam kính");
+        Log("[KHKT-PLAY] [te_bao_hanh] Bước 2: Nhỏ xanh methylen, đậy lamen 45 độ tránh bọt khí");
+        Log("[KHKT-PLAY] [te_bao_hanh] Bước 3: Quan sát 10x và 40x thấy rõ thành và nhân tế bào");
+        Shot("01_te_bao_hanh_dung");
+        Log("[KHKT-PLAY] [te_bao_hanh] Sai cố ý: Không đậy lamen, để khô mẫu -> bọt khí");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("kinh_hien_vi_hoc_sinh", "KHO_MAU", "Không đậy lamen và để khô mẫu", "Bọt khí che khuất thị trường, tế bào nhăn rúm");
+        yield return Frames(4);
+        Shot("02_te_bao_hanh_sai_kho");
+
+        // 2. Khí khổng (khi_khong)
+        Log("[KHKT-PLAY] [khi_khong] Bước 1: Bóc biểu bì dưới lá thài lài tía đặt lên giọt nước cất");
+        Log("[KHKT-PLAY] [khi_khong] Bước 2: Quan sát 40x, đếm số lượng khí khổng mở");
+        yield return Frames(4);
+        Shot("03_khi_khong_dong_mo");
+        Log("[KHKT-PLAY] [khi_khong] Sai cố ý: Bóc nhầm biểu bì trên -> mật độ khí khổng cực thấp");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("kinh_hien_vi_hoc_sinh", "BOC_MAT_TREN", "Bóc nhầm biểu bì mặt trên lá", "Mật độ khí khổng cực thấp, không quan sát được quy luật đóng mở");
+        yield return Frames(4);
+        Shot("04_khi_khong_sai_mat_tren");
+
+        // 3. Co nguyên sinh (co_nguyen_sinh)
+        Log("[KHKT-PLAY] [co_nguyen_sinh] Bước 1: Nhỏ NaCl 10% ưu trương vào mép lamen, thấm giấy phía đối diện");
+        Log("[KHKT-PLAY] [co_nguyen_sinh] Bước 2: Quan sát không bào co, màng tách thành tế bào");
+        yield return Frames(4);
+        Shot("05_co_nguyen_sinh_nacl");
+        Log("[KHKT-PLAY] [co_nguyen_sinh] Phản co nguyên sinh: Kéo nước cất qua lamen -> màng dãn áp sát thành");
+        yield return Frames(4);
+        Shot("06_phan_co_nguyen_sinh_nuoc");
+
+        // 4. Catalase (catalase)
+        viewer.GoTo(24);
+        yield return Frames(8);
+        Log("[KHKT-PLAY] [catalase] Bước 1: Cho lát khoai tây tươi vào H2O2 3% -> sủi bọt khí O2 mạnh");
+        Shot("07_catalase_song_sui_bot");
+        Log("[KHKT-PLAY] [catalase] Sai cố ý: Khoai tây đã luộc chín >= 65 C -> catalase bất hoạt, không bọt");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("ong_nghiem", "ENZYME_BIEN_TINH", "Khoai tây luộc chín làm catalase biến tính", "Không có bọt khí oxy do catalase bất hoạt ở nhiệt độ cao");
+        yield return Frames(4);
+        Shot("08_catalase_luoc_khong_bot");
+
+        // 5. Lên men rượu (len_men_ruou)
+        Log("[KHKT-PLAY] [len_men_ruou] Bước 1: Glucose 10% + nấm men sống ở 32 C, đậy bóng bay -> bóng phồng căng");
+        yield return Frames(4);
+        Shot("09_len_men_ruou_bong_phong");
+        Log("[KHKT-PLAY] [len_men_ruou] Sai cố ý: Nước sôi > 60 C làm chết nấm men -> bóng xẹp lép");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("binh_len_men", "MEN_CHET_NHIET", "Dùng nước sôi 70 độ C hòa men nấm", "Tế bào men chết vì nhiệt, không xảy ra lên men");
+        yield return Frames(4);
+        Shot("10_len_men_ruou_men_chet");
+
+        // 6. Lên men lactic (len_men_lactic)
+        Log("[KHKT-PLAY] [len_men_lactic] Bước 1: Pha sữa chua giống vào sữa ấm ủ 42 C trong 8h -> pH giảm 4,2, đông tụ");
+        yield return Frames(4);
+        Shot("11_sua_chua_ph_giam");
+        Log("[KHKT-PLAY] [len_men_lactic] Sai cố ý: Ủ nhiệt độ thấp 18 C -> vi khuẩn sinh trưởng chậm, sữa không đông");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("tu_am_vi_sinh", "NHIET_DO_U_THAP", "Ủ sữa chua ở 18 độ C thay vì 42 độ C", "Vi khuẩn lactic sinh trưởng chậm, không đủ axit lactic");
+        yield return Frames(4);
+        Shot("12_sua_chua_nhiet_do_thap");
+
+        // 7. Quang hợp (quang_hop)
+        viewer.GoTo(30);
+        yield return Frames(8);
+        Log("[KHKT-PLAY] [quang_hop] Bước 1: Rong Elodea trong nước có NaHCO3, bật đèn 100W cách 20cm -> bọt khí O2");
+        Shot("13_quang_hop_elodea_bot_khi");
+        Log("[KHKT-PLAY] [quang_hop] Sai cố ý: Tắt đèn chiếu sáng -> tốc độ bọt khí oxy = 0");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("tram_quang_hop", "THIEU_ANH_SANG", "Tắt đèn chiếu sáng khi làm quang hợp", "Không có ánh sáng kích hoạt pha sáng quang hợp");
+        yield return Frames(4);
+        Shot("14_quang_hop_tat_den");
+
+        // 8. Thoát hơi nước (thoat_hoi_nuoc)
+        Log("[KHKT-PLAY] [thoat_hoi_nuoc] Bước 1: Cành cây cắm vào potometer kín, mở quạt gió -> bọt khí dịch chuyển 1,6 mm/phút");
+        yield return Frames(4);
+        Shot("15_potometer_thoat_hoi_nuoc");
+        Log("[KHKT-PLAY] [thoat_hoi_nuoc] Sai cố ý: Bôi vaseline bít kín hai mặt lá -> bọt khí đứng yên");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("tram_potometer", "BIT_KHI_KHONG", "Bôi vaseline phủ kín hai mặt lá", "Khí khổng bị bít hoàn toàn, cản trở thoát hơi nước");
+        yield return Frames(4);
+        Shot("16_potometer_boi_vaseline");
+
+        // 9. Hướng sáng (huong_sang)
+        Log("[KHKT-PLAY] [huong_sang] Bước 1: Hộp hướng sáng có khe hở, chiếu sáng lệch 45 độ -> ngọn mầm uốn cong về khe sáng");
+        yield return Frames(4);
+        Shot("17_huong_sang_lech_45_do");
+        Log("[KHKT-PLAY] [huong_sang] Sai cố ý: Đặt hoàn toàn trong tối -> mọc vống dài, không uốn cong");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("hop_huong_sang", "TRONG_TOI_HOAN_TOAN", "Đặt chậu mầm trong bóng tối hoàn toàn", "Hiện tượng vống dài không có tính hướng sáng");
+        yield return Frames(4);
+        Shot("18_huong_sang_trong_toi");
+
+        // 10. Tách chiết ADN (tach_chiet_adn)
+        viewer.GoTo(28);
+        yield return Frames(8);
+        Log("[KHKT-PLAY] [tach_chiet_adn] Bước 1: Nghiền chuối với đệm ly giải và muối, ủ 55 C, lọc thu dịch");
+        Log("[KHKT-PLAY] [tach_chiet_adn] Bước 2: Rót ethanol 96% lạnh -20 C -> sợi ADN trắng kết tủa quấn vào đũa");
+        Shot("19_tach_chiet_adn_soi_trang");
+        Log("[KHKT-PLAY] [tach_chiet_adn] Sai cố ý: Dùng cồn ấm 25 C và thiếu muối NaCl -> không kết tủa sợi ADN");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("coi_chay_su", "CON_AM_THIEU_MUOI", "Dùng cồn ấm ở nhiệt độ phòng và quên muối", "Ion Na+ không trung hòa điện tích, ADN không kết tủa");
+        yield return Frames(4);
+        Shot("20_tach_chiet_adn_thieu_muoi");
+
+        // 11. Đếm vi sinh vật (dem_vi_sinh)
+        viewer.GoTo(25);
+        yield return Frames(8);
+        Log("[KHKT-PLAY] [dem_vi_sinh] Bước 1: Pha loãng mẫu bậc 10, trang đều lên đĩa thạch dinh dưỡng");
+        Log("[KHKT-PLAY] [dem_vi_sinh] Bước 2: Ủ 37 C 24h, đĩa 10^-4 cho 120 khuẩn lạc đơn (khoảng đếm 30-300 ISO 4833-1)");
+        Shot("21_dem_vi_sinh_pha_loang_cfu");
+        Log("[KHKT-PLAY] [dem_vi_sinh] Sai cố ý: Quên thay đầu côn micropipet -> nhiễm chéo mọc dính mảng");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("micropipet_p200", "QUEN_THAY_DAU_CON", "Quên thay đầu côn micropipet khi pha loãng", "Kéo theo vi khuẩn dư thừa, khuẩn lạc mọc thành mảng dính liền");
+        yield return Frames(4);
+        Shot("22_dem_vi_sinh_quen_thay_dau_con");
+
+        // 12. Cấy ria (cay_ria)
+        Log("[KHKT-PLAY] [cay_ria] Bước 1: Đốt que cấy vòng nóng đỏ, ria zigzag 4 vùng tách khuẩn lạc đơn ở vùng 3-4");
+        yield return Frames(4);
+        Shot("23_cay_ria_khuan_lac_don");
+        Log("[KHKT-PLAY] [cay_ria] Sai cố ý: Quên đốt que cấy giữa các vùng ria -> mọc dày đặc không tách đơn");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("que_cay_vong", "QUEN_DOT_QUE_CAY", "Quên đốt que cấy khử trùng giữa các vùng ria", "Mật độ vi khuẩn không giảm dần, không tách được khuẩn lạc đơn");
+        yield return Frames(4);
+        Shot("24_cay_ria_quen_dot_que");
+
+        // 13. Nhuộm Gram (nhuom_gram)
+        Log("[KHKT-PLAY] [nhuom_gram] Bước 1: Vết bôi cố định nhiệt, tím kết tinh -> Lugol -> cồn 96% 15s -> safranin");
+        Log("[KHKT-PLAY] [nhuom_gram] Bước 2: Soi 100x dầu: vi khuẩn sữa chua tím (Gram+), E. coli hồng (Gram-)");
+        yield return Frames(4);
+        Shot("25_nhuom_gram_gram_am_duong");
+        Log("[KHKT-PLAY] [nhuom_gram] Sai cố ý: Tẩy cồn quá lâu 45s -> Gram+ mất màu tím, chuyển hồng giả");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("dao_nhuom_gram", "TAY_CON_QUA_LAU", "Tẩy cồn 96% kéo dài 45 giây thay vì 15 giây", "Làm mất màu tím của peptidoglycan tế bào Gram dương");
+        yield return Frames(4);
+        Shot("26_nhuom_gram_tay_con_qua_lau");
+
+        // 14. PCR & Điện di (pcr_dien_di)
+        viewer.GoTo(29);
+        yield return Frames(8);
+        Log("[KHKT-PLAY] [pcr_dien_di] Bước 1: Chạy PCR 30 chu kỳ, điện di agarose 1% 100V 30p");
+        Log("[KHKT-PLAY] [pcr_dien_di] Bước 2: Soi gel doc thấy rõ băng 500 bp cạnh thang chuẩn");
+        Shot("27_pcr_dien_di_bang_chuan");
+        Log("[KHKT-PLAY] [pcr_dien_di] Sai cố ý: Cắm ngược cực điện -> ADN chạy ngược ra khỏi giếng gel");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("be_dien_di", "CAM_NGUOC_CUC", "Cắm ngược cực nguồn điện di agarose", "ADN mang điện tích âm bị hút ngược và chạy ra khỏi giếng");
+        yield return Frames(4);
+        Shot("28_pcr_dien_di_nguoc_cuc");
+
+        // 15. OD600 (duong_cong_od600)
+        viewer.GoTo(28);
+        yield return Frames(8);
+        Log("[KHKT-PLAY] [duong_cong_od600] Bước 1: Chuẩn Zero/Blank cuvet canh thang LB trắng ở 600 nm");
+        Log("[KHKT-PLAY] [duong_cong_od600] Bước 2: Đo huyền phù E. coli theo thời gian, vẽ đường cong pha lag -> log");
+        Shot("29_od600_duong_cong_log");
+        Log("[KHKT-PLAY] [duong_cong_od600] Sai cố ý: Quên chuẩn Blank -> độ hấp thụ nền làm sai lệch kết quả");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("may_do_od600", "QUEN_CHUAN_BLANK", "Không chuẩn Zero/Blank với mẫu đối chứng trước khi đo", "Độ hấp thụ nền môi trường làm kết quả đo OD600 bị sai lệch tuyệt đối");
+        yield return Frames(4);
+        Shot("30_od600_quen_chuan_blank");
+
+        Log("[tang2_dung_cu] Đã chụp đủ 30 ảnh kiểm thử dụng cụ vào docs/anh-tang2/dung_cu/");
+        Log("[tang2_dung_cu] PASS: Toàn bộ 15 bài thí nghiệm sinh học đã được kiểm thử tự động thành công!");
+    }
+
+    IEnumerator Floor2WebTest()
+    {
+        Log("[KHKT-PLAY] Bắt đầu kiểm thử tự động BioLabSync và Web Quản lý Tầng 2");
+
+        var sync = Khkt.Demo.Bio.BioLabSync.Instance;
+        if (sync == null)
+        {
+            var syncGo = new GameObject("BioLabSync_Test");
+            sync = syncGo.AddComponent<Khkt.Demo.Bio.BioLabSync>();
+        }
+
+        // 1. Thử nghiệm ghi sự kiện
+        Log("[tang2_web] Ghi các sự kiện kiểm thử vào hàng đợi...");
+        sync.EnqueueRaw("su_kien", "{\"vi_tri\":\"hanh_lang_t2\",\"thong_tin\":\"Kiểm thử tự động Web Sync Tầng 2\"}");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("micropipet_p200", "BAM_NAC_2", "Bấm nhầm nấc 2 khi hút mẫu", "Gây sai số thể tích hút");
+        sync.RecordExperimentResult("te_bao_hanh", 10, "Bàn 1", "Quan sát rõ thành và nhân tế bào");
+        sync.RecordFridgeTemperature("tu_mat_4c", 4.1f, false);
+        sync.RecordMachineStatus("may_pcr", "dang_chay", "PCR chu kỳ 15/30", 0.5f);
+
+        // 2. Thử nghiệm gửi mẻ dữ liệu
+        Log("[tang2_web] Gửi gói sự kiện lên máy chủ...");
+        yield return sync.FlushBatchCoroutine();
+
+        // 3. Thử nghiệm lưu trữ và nạp hàng đợi khi ngoại tuyến
+        Log("[tang2_web] Kiểm tra ghi/đọc hàng đợi đĩa ngoại tuyến...");
+        sync.EnqueueRaw("su_kien_offline", "{\"test\":true}");
+        sync.SaveQueueToDisk();
+        sync.LoadQueueFromDisk();
+
+        Log("[tang2_web] PASS: Kiểm thử đồng bộ Web Tầng 2 online và offline hoàn tất!");
     }
 
     IEnumerator Watchdog()

@@ -165,7 +165,7 @@
 - Kiểm thử tự động `KHKT_TEST=tang2_hanh_lang`: PASS, chụp đủ 5 ảnh sau mở rộng (`02, 04, 06, 08, 10`) trong `docs/anh-tang2/hanh_lang/`.
 - Commit cục bộ: `7f3709e` (`feat(tang2): G1 mo rong hanh lang tang 2 tu 2,2 m len 3,6 m va chup 10 anh doi chieu`).
 
-### Giai đoạn G2 – Khung tương tác dùng chung `Assets/Scripts/Interaction/Bio/` (ĐANG BIÊN DỊCH)
+### Giai đoạn G2 – Khung tương tác dùng chung `Assets/Scripts/Interaction/Bio/` (ĐÃ XONG)
 - Tạo đầy đủ các lớp nền tảng trong `Assets/Scripts/Interaction/Bio/`:
   - `BioFeedback.cs`: tổng hợp âm thanh toán học (`AudioClip.Create` cho click, nút bấm, thành công, cảnh báo, vỡ lamen, nhịp Korotkoff, bọt khí), hiển thị Toast và ghi nhận lỗi thao tác khoa học (`RecordMistake`).
   - `BioKnob.cs`: núm vặn cơ học 3D xoay bằng con lăn chuột hoặc click, nội suy góc mượt, định dạng dấu phẩy thập phân tiếng Việt.
@@ -175,4 +175,89 @@
   - `CloseUpView.cs`: chế độ góc nhìn cận cảnh khi thao tác tỉ mỉ, thoát bằng `Esc`.
   - `BioSample.cs` & `BioTransfer.cs`: quản lý trạng thái mẫu sinh học và cây quyết định chuyển mẫu 6 trường hợp.
 - Cập nhật `AutoDoor.cs` (thêm `interlockWith` cho buồng đệm Airlock) và `HandController.cs` (tích hợp `BioButton`, `BioHinge`, `BioKnob`, `IBioTarget`).
+- Commit cục bộ: `11e266a` (`feat(tang2): G2 khung tuong tac dung chung BioKnob, BioButton, BioHinge, IBioTarget, BioTool, BioFeedback`).
+
+### Giai đoạn G3 – Danh mục dữ liệu và cầu nối mẫu sinh học (ĐÃ XONG)
+- Tạo `BioCatalogLoader.cs` nạp toàn bộ dữ liệu danh mục tĩnh từ `Assets/Lab/Data/Sinh/*.json` (`dung_cu.json`, `tieu_ban.json`, `sinh_pham_mac_dinh.json`, `bai_thi_nghiem.json`).
+- `BioSample.cs` và `BioTransfer.cs` bọc hoàn chỉnh các lớp mô phỏng `Khkt.Simulation.Bio.BioSampleData`.
+
+### Giai đoạn G4 – Kính hiển vi quang học hai mắt & Dụng cụ làm tiêu bản (ĐÃ XONG)
+- Xây dựng `MicroscopeController.cs`: 29 kính hiển vi quang học hai mắt, ốc đại cấp/vi cấp, bàn sa trượt XY, 4 vật kính (4x, 10x, 40x, 100x dầu soi), màn chắn sáng Abbe, đèn LED.
+- `MicroscopeCameraProgram.cs`: kết nối camera thị kính của giáo viên lên màn hình lớn `BioBenchScreen`.
+- `SlidePrepTools.cs`: lam kính 75×25 mm, lamen 22×22 mm, kim mũi mác, dao lam, giấy thấm, lọ dầu soi, hộp tiêu bản cố định.
+- Hỗ trợ trọn vẹn 3 bài thí nghiệm SGK: `te_bao_hanh`, `khi_khong`, `co_nguyen_sinh`.
+
+### Giai đoạn G5 – Dụng cụ phòng thí nghiệm chung (ĐÃ XONG)
+- Xây dựng `DigitalAnatomyTable.cs`: bàn giải phẫu số 3D đa giác quan, chọn bóc tách từng hệ cơ quan và phóng to tiêu bản mô học.
+- `GeneralBioTools.cs`: bình lên men rượu có bóng bay dãn theo $\text{CO}_2$, bộ làm sữa chua lên men lactic ủ 42 °C, ống nghiệm catalase, tủ an toàn sinh học cấp II, tủ ấm vi sinh và nồi hấp tiệt trùng phòng chung.
+- Hỗ trợ các bài thí nghiệm SGK: `catalase`, `len_men_ruou`, `len_men_lactic`.
+
+### Giai đoạn G6 – Dụng cụ phòng vi sinh & buồng đệm (ĐÃ XONG)
+- Xây dựng `MicrobioTools.cs`:
+  - Tủ an toàn sinh học cấp II loại A2 và pass-box đưa mẫu hai chiều.
+  - Đèn cồn, que cấy vòng, que cấy thẳng, que trang gạt thạch chữ L.
+  - Đĩa thạch dinh dưỡng PCA, ống thạch nghiêng, ống canh thang vô trùng.
+  - Đảo nhuộm Gram 4 bước (`dao_nhuom_gram`): tím kết tinh $\to$ Lugol $\to$ cồn 96% 15s $\to$ safranin.
+  - Máy đếm khuẩn lạc bán tự động (`may_dem_khuan_lac`) theo chuẩn ISO 4833-1 (khoảng 30–300 CFU).
+  - Buồng đệm airlock interlock cửa kép và đèn UV tiệt trùng trần.
+- Hỗ trợ các bài thí nghiệm SGK: `dem_vi_sinh`, `cay_ria`, `nhuom_gram`.
+
+### Giai đoạn G7 – Dụng cụ kho sinh phẩm (ĐÃ XONG)
+- Xây dựng `StorageTools.cs`:
+  - Tủ mát 4 °C hai cánh kính cường lực (`GlassFridge`) và tủ đông sâu -20 °C.
+  - Ki-ốt sổ kho điện tử màn hình cảm ứng (`StockKiosk`, `StockProgram`): tra cứu tồn kho 35 sinh phẩm BSL-1, kiểm tra hạn dùng, cảnh báo cận hạn/quá hạn.
+
+### Giai đoạn G8 – Dụng cụ phòng sinh học phân tử (ĐÃ XONG)
+- Xây dựng `MolecularTools.cs`:
+  - Hệ 3 micropipet (P10, P200, P1000) với cơ chế 2 nấc bấm vật lý và đầu côn dùng 1 lần (trắng, vàng, xanh).
+  - Máy lắc xoáy vortex, máy ly tâm mini góc nghiêng và máy ly tâm để bàn kiểm tra cân bằng rotor theo công thức RCF.
+  - Tủ thao tác tiền PCR (PCR workstation) có đèn UV khử khuẩn.
+  - Máy luân nhiệt PCR 96 giếng (`PcrProgram`) mô phỏng chu kỳ biến tính, gắn mồi, kéo dài.
+  - Bể điện di agarose kèm bộ nguồn và thước đo băng di chuyển.
+  - Hệ thống buồng chụp ảnh gel huỳnh quang Gel Doc (`GelDocProgram`).
+  - Máy quang phổ đo mật độ quang vi khuẩn $\text{OD}_{600}$ (`Od600Program`) bước sóng 600 nm có chức năng chuẩn Blank/Zero.
+- Hỗ trợ các bài thí nghiệm SGK: `tach_chiet_adn`, `pcr_dien_di`, `duong_cong_od600`.
+
+### Giai đoạn G9 – Dụng cụ nhà kính thực vật & Dụng cụ chung (ĐÃ XONG)
+- Xây dựng `GreenhouseAndCommonTools.cs`:
+  - Trạm quang hợp bọt khí rong đuôi chó *Elodea* điều chỉnh khoảng cách đèn và nồng độ $\text{NaHCO}_3$.
+  - Trạm thoát hơi nước mao quản Potometer chịu ảnh hưởng của quạt gió và độ ẩm.
+  - Trạm hướng sáng cây mầm đậu có khe hẹp và đối chứng bóng tối.
+  - Giàn thủy canh NFT tuần hoàn dung dịch khoáng.
+- Hỗ trợ các bài thí nghiệm SGK: `quang_hop`, `thoat_hoi_nuoc`, `huong_sang`.
+
+### Giai đoạn G10 – Tích hợp lắp ráp 108 dụng cụ vào SceneBuilder (ĐÃ XONG)
+- Xây dựng `LabSceneBuilder.Floor2.Tools.cs`: tích hợp toàn bộ các linh kiện, dụng cụ, kẹp, khay, máy phân tích vào cả 8 phân khu tầng 2 khi dựng cảnh bằng code, gắn đầy đủ thẻ `EquipmentInfo` và component tương tác.
+
+### Giai đoạn G11 – Module đồng bộ Unity ↔ Web (`BioLabSync.cs`) (ĐÃ XONG)
+- Xây dựng `BioLabSync.cs`: kết nối máy chủ FastAPI qua biến môi trường `KHKT_SERVER_URL` (mặc định `http://127.0.0.1:8000`).
+- Gom mẻ bất đồng bộ mỗi 5 s hoặc khi $\ge 20$ sự kiện, gửi tới `POST /lab/sinh/su-kien`.
+- Cơ chế ngoại tuyến tự động lưu hàng đợi đĩa `hang_doi_sinh.jsonl` khi mất mạng hoặc khi `KHKT_WEB_SINH=0`.
+
+### Giai đoạn G12 – Trang web quản lý phòng lab `server/web/sinh.html` (ĐÃ XONG)
+- Xây dựng `server/web/sinh.html` với đầy đủ 10 tab theo hợp đồng: `tong-quan`, `dung-cu`, `muon-tra`, `sinh-pham`, `nhiet-do`, `dat-lich`, `ket-qua`, `su-co`, `bao-tri`, `huong-dan`.
+- Bổ sung nút chuyển nhanh "Khu sinh học" trên thanh điều hướng của `server/web/index.html`.
+- Responsive mượt mà trên desktop 1280 px và mobile 375 px, hỗ trợ chế độ Sáng / Tối tự động và chuyển tay.
+
+### Giai đoạn G13 – Kiểm thử tự động & Tối ưu hiệu năng (ĐÃ XONG)
+- Bổ sung kiểm thử vào `tools/kiem_thu_unity/KhktAutoTest.cs`:
+  - `KHKT_TEST=tang2_hanh_lang`: PASS (kiểm tra ZoneMap, nhân vật đi hết hành lang 3,6 m không kẹt).
+  - `KHKT_TEST=tang2_web`: PASS (kiểm tra đồng bộ online FastAPI và ngoại tuyến đĩa).
+  - `KHKT_TEST=tang2_dung_cu`: PASS (chạy trọn vẹn 15 bài thí nghiệm theo 2 lượt đúng/sai, chụp đủ 30 ảnh vào `docs/anh-tang2/dung_cu/`).
+  - `KHKT_TEST=tang2`: PASS (hồi quy 12 trạm tầng 2).
+- Mở rộng `tools/kiem_thu_unity/KhktBenchmark.cs`: đo các trạm tầng 2 và camera đi bộ dọc hành lang 3,6 m.
+- Đo hiệu năng hiển thị:
+  - Tủ an toàn sinh học (Trạm 23): **126,3 FPS**
+  - Nhà kính thực vật (Trạm 30): **118,4 FPS**
+  - Sinh học phân tử (Trạm 28): **117,4 FPS**
+  - Bàn kính hiển vi (Trạm 21): **99,5 FPS**
+  - PCR điện di (Trạm 29): **90,3 FPS**
+  - Phòng vi sinh (Trạm 25): **83,0 FPS**
+- Chạy `capture_web_shots.py` qua Playwright Chromium: chụp đủ 40 ảnh web (10 tab × 4 chế độ), 0 lỗi console trình duyệt.
+
+### Giai đoạn G14 – Hoàn tất tài liệu và Báo cáo bàn giao (ĐÃ XONG)
+- Cập nhật tài liệu kỹ thuật trong `docs/21-dung-cu-sinh-hoc.md` (mục Giao diện chi tiết).
+- Cập nhật `docs/20-tang-2-khu-sinh-hoc.md` (sơ đồ mặt bằng hành lang 3,6 m).
+- Viết báo cáo bàn giao chi tiết `phong_sinh/BAO_CAO_BAN_GIAO_GIAO_DIEN.md`.
+
 

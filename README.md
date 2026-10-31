@@ -101,4 +101,4 @@ python tools/head_tracker.py --hien
 | Tay cầm V2 "Halo" | Đã có thiết kế 3D, bản vẽ, sơ đồ đấu nối. Đang đặt linh kiện, **firmware cho ESP32 + BMI160 chưa viết** |
 | Điều khiển bằng đầu (webcam) | Thử nghiệm, chạy được (F8) |
 | Bản chạy | Windows (.exe). Bản macOS cần cài thêm mô-đun Mac Build Support cho Unity |
-| Chưa làm | Phòng sinh học tầng 2, hệ thống học tập cho giáo viên – học sinh, nhiều người cùng làm, AI cục bộ |
+| Đã xong (Tầng 2) | Khu sinh học Tầng 2 (108 dụng cụ tương tác mượt, 15 bài thí nghiệm SGK 2018, hành lang 3,6 m, web quản lý sinh.html, đồng bộ BioLabSync, kiểm soát an toàn BSL-1) |

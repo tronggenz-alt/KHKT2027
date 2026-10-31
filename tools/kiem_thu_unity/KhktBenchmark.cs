@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -33,6 +33,12 @@ public class KhktBenchmark : MonoBehaviour
         var spots = new List<(string name, Action go)>();
         foreach (var st in viewer.Stations.OrderBy(s => s.order).Take(9)) { var s = st; spots.Add((s.displayName, () => viewer.GoTo(s))); }
         spots.Add(("Đi bộ dọc phòng lab", () => viewer.GoTo(9)));
+        foreach (var st in viewer.Stations.Where(s => s.order >= 20 && s.order <= 31).OrderBy(s => s.order))
+        {
+            var s = st;
+            spots.Add((s.displayName, () => viewer.GoTo(s)));
+        }
+        spots.Add(("Đi bộ dọc hành lang tầng 2 (3,6 m)", () => viewer.GoTo(27)));
         int standard = spots.Count;
         // khu chế tạo: bàn thí nghiệm lắp ráp trống / có 38 bộ phận rời như cách cũ / đang mở giao diện lắp ráp
         var loose = new List<GameObject>();
@@ -87,8 +93,16 @@ public class KhktBenchmark : MonoBehaviour
                 if (walk)  // lướt camera dọc phòng, xoay đều: đo cả lúc cảnh thay đổi liên tục
                 {
                     float k = (Time.realtimeSinceStartup - t0) / Measure;
-                    viewer.transform.position = Vector3.Lerp(new Vector3(18.5f, 0, 13f), new Vector3(2f, 0, 1.5f), k);
-                    viewer.LookAt(viewer.transform.position + Quaternion.Euler(0, 200 + 140 * k, 0) * Vector3.forward * 3 + Vector3.up * 1.2f);
+                    if (name.Contains("tầng 2"))
+                    {
+                        viewer.transform.position = Vector3.Lerp(new Vector3(1.5f, 3.8f, -1.8f), new Vector3(26.0f, 3.8f, -1.8f), k);
+                        viewer.LookAt(viewer.transform.position + Vector3.right * 3f);
+                    }
+                    else
+                    {
+                        viewer.transform.position = Vector3.Lerp(new Vector3(18.5f, 0, 13f), new Vector3(2f, 0, 1.5f), k);
+                        viewer.LookAt(viewer.transform.position + Quaternion.Euler(0, 200 + 140 * k, 0) * Vector3.forward * 3 + Vector3.up * 1.2f);
+                    }
                 }
                 yield return null;
                 ft.Add(Time.unscaledDeltaTime * 1000f);
