@@ -122,4 +122,19 @@
 - Bổ sung 3 bài kiểm thử mới vào `tests/test_ai_server.py`: đạt **11 / 11 test PASS**.
 - Toàn bộ kiểm thử Python `unittest discover -s tests`: đạt **139 / 139 test PASS**.
 
+### Giai đoạn B10 (2026-10-31)
+- Hoàn thành biên soạn tài liệu kỹ thuật tầng 2 `docs/21-dung-cu-sinh-hoc.md`:
+  - Mục 1: Kiến trúc dữ liệu danh mục tĩnh (`dung_cu.json`, `tieu_ban.json`, `chung_vi_sinh.json`, `moi_truong.json`, `sinh_pham_mac_dinh.json`, `bai_thi_nghiem.json`, hồ sơ SOP máy).
+  - Mục 2: Mở rộng `ChemEngine` (hóa chất, phản ứng catalase) và 11 lớp mô phỏng sinh học `Khkt.Simulation.Bio` (vi sinh pha loãng/nuôi cấy/nhiễm chéo, sinh lý quang hợp/thoát hơi nước/hướng sáng/lên men, sinh học phân tử ly tâm/PCR/điện di, enzyme học).
+  - Mục 3: CSDL SQLite `server/lab/sinh_db.py` với 8 bảng nghiệp vụ, kiểm tra an toàn `BSL-1`, quản lý lịch mượn trả và xung đột phòng/máy.
+  - Mục 4: RESTful API `server/lab/sinh_api.py` với hơn 20 endpoint, phục vụ `/sinh`, đồng bộ sự kiện lô, xuất CSV BOM UTF-8.
+  - Mục 5: AI SOP và an toàn sinh học `server/ai/machines.py`.
+- Hoàn thành báo cáo bàn giao backend `phong_sinh/BAO_CAO_BAN_GIAO_BACKEND.md`: tổng kết toàn bộ 10 giai đoạn B0–B10, kiểm tra hợp đồng, số lượng test và hướng dẫn chạy kiểm thử.
+- Xác nhận kiểm thử tự động đạt 100%:
+  - Python: **139 / 139 PASS** (1.40s)
+  - C# Hóa học: **147 / 147 PASS** (0.32s)
+  - C# Sinh học: **82 / 82 PASS** (0.15s)
+- Bàn giao nhánh `tang2/dung-cu-backend` cho nhánh giao diện `tang2/dung-cu-giao-dien`.
+
+
 
