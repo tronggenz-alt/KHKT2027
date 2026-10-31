@@ -104,6 +104,17 @@
 - Viết bộ kiểm thử `tests/test_sinh_db.py`: đạt **7 / 7 test PASS**.
 - Toàn bộ kiểm thử Python `unittest discover -s tests`: đạt **124 / 124 test PASS**.
 
+### Giai đoạn B8 (2026-10-31)
+- Đã xây dựng `server/lab/sinh_api.py` và gắn router vào `server/ai/main.py`:
+  - Tiền tố `/lab/sinh` với đầy đủ hơn 20 endpoint theo hợp đồng giao diện: `/tong-quan`, `/dung-cu`, `/sinh-pham`, `/nhiet-do`, `/dat-lich`, `/muon-tra`, `/ket-qua`, `/ket-qua.csv`, `/su-co`, `/bao-tri`, `/huong-dan/{ma}`, `/bai-thi-nghiem`, `/trang-thai-may`, `/su-kien`.
+  - Xuất file CSV UTF-8 có BOM (`\xef\xbb\xbf`) tại `/lab/sinh/ket-qua.csv`.
+  - Xử lý mảng sự kiện gửi theo lô tại `/lab/sinh/su-kien`.
+  - Xử lý mã lỗi HTTP chuẩn: 409 khi trùng lịch (`detail` kèm danh sách lịch trùng), 422 khi sai dữ liệu hoặc sinh phẩm không phải BSL-1, 404 khi không tìm thấy.
+  - Phục vụ trang `/sinh` (trả `server/web/sinh.html` hoặc fallback HTML nếu chưa có file, không lỗi 500).
+- Viết bộ kiểm thử `tests/test_sinh_web.py`: đạt **12 / 12 test PASS**.
+- Toàn bộ kiểm thử Python `unittest discover -s tests`: đạt **136 / 136 test PASS**.
+
+
 
 
 
