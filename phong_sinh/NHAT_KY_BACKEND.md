@@ -114,11 +114,12 @@
 - Viết bộ kiểm thử `tests/test_sinh_web.py`: đạt **12 / 12 test PASS**.
 - Toàn bộ kiểm thử Python `unittest discover -s tests`: đạt **136 / 136 test PASS**.
 
+### Giai đoạn B9 (2026-10-31)
+- Cập nhật `server/ai/machines.py`:
+  - Mở rộng `ALIASES` cho 2 máy mới (`gel_doc`, `may_do_od600`) và các nhóm dụng cụ sinh học tầng 2 (`micropipet_p200`, `micropipet_p10`, `micropipet_p1000`, `hop_dau_con`, `que_cay_vong`, `que_cay_thang`, `que_trang`, `dao_nhuom_gram`, `may_ly_tam_de_ban`, `may_ly_tam_mini`, `may_vortex`, `may_dem_khuan_lac`, `coi_chay_su`, `tram_potometer`, `tram_quang_hop`, `hop_huong_sang`, `gian_thuy_canh_nft`, `binh_len_men`, `bo_lam_sua_chua`, `ban_giai_phau_so`, `tu_thao_tac_pcr`, `bo_xu_ly_tran`, `lo_dau_soi`).
+  - Nạp `data/sinh/dung_cu.json` (`load_bio_tools`, `find_bio_tools`, `tool_summary`) và đưa `cong_dung`, `cach_dung`, `loi_thuong_gap`, `an_toan` vào `machines.context(...)` với giới hạn độ dài <= 1500 ký tự/dụng cụ, tối đa 2 dụng cụ/lượt.
+  - Bổ sung kiểm tra an toàn sinh học cấp 1 (`UNSAFE_BIO_KEYWORDS`, `is_unsafe_bio`, `bio_safety_refusal`, `BSL1_SAFETY_CONTEXT`): phát hiện yêu cầu nuôi cấy, phân lập bệnh phẩm, tạo mới hoặc tăng độc lực tác nhân gây bệnh (BSL-2/3/4) và chèn chỉ thị từ chối nhẹ nhàng kèm gợi ý thí nghiệm BSL-1 an toàn (`E. coli K-12`, `Saccharomyces cerevisiae`, `Lactobacillus bulgaricus`, `Bacillus subtilis`).
+- Bổ sung 3 bài kiểm thử mới vào `tests/test_ai_server.py`: đạt **11 / 11 test PASS**.
+- Toàn bộ kiểm thử Python `unittest discover -s tests`: đạt **139 / 139 test PASS**.
 
-
-
-
-
-
-- Kết quả kiểm thử: `tests/test_dung_cu_sinh.py` đạt 3/3 test dụng cụ, toàn bộ test suite Python đạt 117/117 test (0,60s).
 
