@@ -99,7 +99,7 @@ namespace Khkt.EditorTools
                                   || t.GetComponent<Khkt.Interaction.LabContainer>() != null || t.name == "Trạm" || t.name.StartsWith("Người xem")
                                   || t.name.StartsWith("Màn hình") || t.name == "Robot trợ lý" || t.GetComponent<Khkt.Demo.LabScreen>() != null
                                   || t.GetComponent<UvScroll>() != null || t.GetComponent<Khkt.Rendering.AutoDoor>() != null
-                                  || t.GetComponent<Khkt.Rendering.ClusterHlod>() != null);
+                                  || t.GetComponent<Khkt.Rendering.ClusterHlod>() != null || IsFloor2Dynamic(t));
             BakeReflectionProbes(root);
             BakeOutdoorViews(root);  // B4: chụp cảnh ngoài cho cửa sổ ảo
             BakeNavGrid(root);  // khi mọi khu còn đủ mặt: lúc chạy các khu ở xa đã gỡ, không tính lại được

@@ -39,3 +39,7 @@ Phong thi nghiem ao/[Rr]ecordings/
 secrets/
 # macOS
 .DS_Store
+
+# Lưới giải phẫu BodyParts3D tầng 2: sinh lại từ phong_sinh/tu_app_cu/bp3d.bin.gz mỗi lần dựng cảnh (~25 MB)
+Phong thi nghiem ao/Assets/Lab/Tang2/GiaiPhau/BP3D*.asset
+Phong thi nghiem ao/Assets/Lab/Tang2/GiaiPhau/BP3D*.asset.meta

@@ -91,7 +91,7 @@ namespace Khkt.EditorTools
             int sy = Mathf.RoundToInt(size.y * 1000);
             int sz = Mathf.RoundToInt(size.z * 1000);
             int sr = Mathf.RoundToInt(r * 1000);
-            string key = $"RBox_{sx}_{sy}_{sz}_{sr}";
+            string key = $"RB3_{sx}_{sy}_{sz}_{sr}";
 
             Mesh mesh = GetOrCreateRoundBoxMesh(key, size, r);
             var g = MeshObj(parent, name, mesh, center, m, collider: false, euler: euler);
@@ -123,137 +123,116 @@ namespace Khkt.EditorTools
             return mesh;
         }
 
+        /// <summary>
+        /// Hộp bo cạnh kín: mỗi mặt là một lưới phẳng trên mặt hộp, đẩy các điểm ngoài phần lõi ra mặt cầu bán kính r quanh lõi.
+        /// Các điểm trên cạnh chung của hai mặt trùng nhau nên không hở khe. Tam giác quay mặt ra ngoài theo quy ước của Unity
+        /// (Cross(b - a, c - a) hướng ra ngoài). Bản trước để hở 12 dải cạnh và lật mặt trên: nhìn thấy xuyên qua, nhấp nháy.
+        /// </summary>
         static Mesh GenerateRoundBox(Vector3 size, float r)
         {
-            var mesh = new Mesh();
-            var vertices = new List<Vector3>();
-            var normals = new List<Vector3>();
-            var uvs = new List<Vector2>();
-            var triangles = new List<int>();
-
             Vector3 half = size * 0.5f;
-            Vector3 inner = new Vector3(
-                Mathf.Max(0f, half.x - r),
-                Mathf.Max(0f, half.y - r),
-                Mathf.Max(0f, half.z - r)
-            );
-
-            // Sinh 8 góc cầu (mỗi góc 2x2 phân đoạn)
-            const int segs = 2;
-            int cornerOffset = 0;
-            for (int cx = -1; cx <= 1; cx += 2)
-            for (int cy = -1; cy <= 1; cy += 2)
-            for (int cz = -1; cz <= 1; cz += 2)
+            Vector3 inner = half - Vector3.one * r;
+            const int B = 3;  // số đoạn trên nửa cung bo của mỗi mặt (cả cung 90° là 2B đoạn)
+            float[] Axis(float inn)
             {
-                Vector3 cCenter = new Vector3(cx * inner.x, cy * inner.y, cz * inner.z);
-                int baseIndex = vertices.Count;
-
-                for (int lat = 0; lat <= segs; lat++)
-                {
-                    float theta = (lat / (float)segs) * (Mathf.PI * 0.5f);
-                    float sinT = Mathf.Sin(theta);
-                    float cosT = Mathf.Cos(theta);
-
-                    for (int lon = 0; lon <= segs; lon++)
-                    {
-                        float phi = (lon / (float)segs) * (Mathf.PI * 0.5f);
-                        Vector3 n = new Vector3(
-                            cx * Mathf.Cos(phi) * sinT,
-                            cy * cosT,
-                            cz * Mathf.Sin(phi) * sinT
-                        );
-                        if (n.sqrMagnitude > 1e-5f) n.Normalize(); else n = new Vector3(cx, cy, cz).normalized;
-
-                        Vector3 v = cCenter + n * r;
-                        vertices.Add(v);
-                        normals.Add(n);
-                        uvs.Add(new Vector2(v.x + half.x, v.z + half.z));
-                    }
-                }
-
-                int stride = segs + 1;
-                for (int lat = 0; lat < segs; lat++)
-                {
-                    for (int lon = 0; lon < segs; lon++)
-                    {
-                        int i0 = baseIndex + lat * stride + lon;
-                        int i1 = i0 + 1;
-                        int i2 = baseIndex + (lat + 1) * stride + lon;
-                        int i3 = i2 + 1;
-
-                        bool flip = (cx * cy * cz) < 0;
-                        if (flip)
-                        {
-                            triangles.Add(i0); triangles.Add(i2); triangles.Add(i1);
-                            triangles.Add(i1); triangles.Add(i2); triangles.Add(i3);
-                        }
-                        else
-                        {
-                            triangles.Add(i0); triangles.Add(i1); triangles.Add(i2);
-                            triangles.Add(i1); triangles.Add(i3); triangles.Add(i2);
-                        }
-                    }
-                }
-                cornerOffset++;
+                var l = new List<float>();
+                for (int k = B; k >= 1; k--) l.Add(-inn - r * Mathf.Tan(k * Mathf.PI / 4f / B));
+                l.Add(-inn);
+                l.Add(inn);
+                for (int k = 1; k <= B; k++) l.Add(inn + r * Mathf.Tan(k * Mathf.PI / 4f / B));
+                return l.ToArray();
             }
-
-            // Mặt phẳng chính 6 mặt (Top, Bottom, Front, Back, Left, Right)
-            void AddQuad(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, Vector3 n)
-            {
-                int b = vertices.Count;
-                vertices.Add(p0); vertices.Add(p1); vertices.Add(p2); vertices.Add(p3);
-                normals.Add(n); normals.Add(n); normals.Add(n); normals.Add(n);
-                uvs.Add(new Vector2(p0.x, p0.z));
-                uvs.Add(new Vector2(p1.x, p1.z));
-                uvs.Add(new Vector2(p2.x, p2.z));
-                uvs.Add(new Vector2(p3.x, p3.z));
-
-                triangles.Add(b); triangles.Add(b + 1); triangles.Add(b + 2);
-                triangles.Add(b); triangles.Add(b + 2); triangles.Add(b + 3);
-            }
-
-            // Top (+Y)
-            AddQuad(new Vector3(-inner.x, half.y, -inner.z),
-                    new Vector3(inner.x, half.y, -inner.z),
-                    new Vector3(inner.x, half.y, inner.z),
-                    new Vector3(-inner.x, half.y, inner.z), Vector3.up);
-
-            // Bottom (-Y)
-            AddQuad(new Vector3(-inner.x, -half.y, inner.z),
-                    new Vector3(inner.x, -half.y, inner.z),
-                    new Vector3(inner.x, -half.y, -inner.z),
-                    new Vector3(-inner.x, -half.y, -inner.z), Vector3.down);
-
-            // Front (+Z)
-            AddQuad(new Vector3(-inner.x, -inner.y, half.z),
-                    new Vector3(inner.x, -inner.y, half.z),
-                    new Vector3(inner.x, inner.y, half.z),
-                    new Vector3(-inner.x, inner.y, half.z), Vector3.forward);
-
-            // Back (-Z)
-            AddQuad(new Vector3(inner.x, -inner.y, -half.z),
-                    new Vector3(-inner.x, -inner.y, -half.z),
-                    new Vector3(-inner.x, inner.y, -half.z),
-                    new Vector3(inner.x, inner.y, -half.z), Vector3.back);
-
-            // Right (+X)
-            AddQuad(new Vector3(half.x, -inner.y, -inner.z),
-                    new Vector3(half.x, -inner.y, inner.z),
-                    new Vector3(half.x, inner.y, inner.z),
-                    new Vector3(half.x, inner.y, -inner.z), Vector3.right);
-
-            // Left (-X)
-            AddQuad(new Vector3(-half.x, -inner.y, inner.z),
-                    new Vector3(-half.x, -inner.y, -inner.z),
-                    new Vector3(-half.x, inner.y, -inner.z),
-                    new Vector3(-half.x, inner.y, inner.z), Vector3.left);
-
-            mesh.SetVertices(vertices);
-            mesh.SetNormals(normals);
+            var axes = new[] { Axis(inner.x), Axis(inner.y), Axis(inner.z) };
+            var verts = new List<Vector3>();
+            var norms = new List<Vector3>();
+            var uvs = new List<Vector2>();
+            var tris = new List<int>();
+            for (int a = 0; a < 3; a++)
+                for (int s = -1; s <= 1; s += 2)
+                {
+                    // u × v = pháp tuyến mặt (trục a, dấu s)
+                    int ua = s > 0 ? (a + 1) % 3 : (a + 2) % 3, va = s > 0 ? (a + 2) % 3 : (a + 1) % 3;
+                    float[] lu = axes[ua], lv = axes[va];
+                    int b0 = verts.Count;
+                    for (int i = 0; i < lu.Length; i++)
+                        for (int j = 0; j < lv.Length; j++)
+                        {
+                            var p = Vector3.zero;
+                            p[a] = s * half[a];
+                            p[ua] = lu[i];
+                            p[va] = lv[j];
+                            var c = new Vector3(Mathf.Clamp(p.x, -inner.x, inner.x), Mathf.Clamp(p.y, -inner.y, inner.y), Mathf.Clamp(p.z, -inner.z, inner.z));
+                            var n = (p - c).normalized;
+                            verts.Add(c + n * r);
+                            norms.Add(n);
+                            uvs.Add(new Vector2(lu[i] + half[ua], lv[j] + half[va]));
+                        }
+                    int row = lv.Length;
+                    for (int i = 0; i < lu.Length - 1; i++)
+                        for (int j = 0; j < lv.Length - 1; j++)
+                        {
+                            int p00 = b0 + i * row + j, p10 = p00 + row, p01 = p00 + 1, p11 = p10 + 1;
+                            tris.Add(p00); tris.Add(p10); tris.Add(p01);
+                            tris.Add(p10); tris.Add(p11); tris.Add(p01);
+                        }
+                }
+            var mesh = new Mesh();
+            mesh.SetVertices(verts);
+            mesh.SetNormals(norms);
             mesh.SetUVs(0, uvs);
-            mesh.SetTriangles(triangles, 0);
+            mesh.SetTriangles(tris, 0);
             mesh.RecalculateBounds();
+            mesh.RecalculateTangents();
             return mesh;
+        }
+
+        /// <summary>
+        /// Tấm tam giác dày (đầu hồi mái, vách dưới gầm cầu thang): tam giác trong mặt phẳng y–z gồm hai điểm đáy (zA, yA), (zB, yB)
+        /// và đỉnh (zP, yP), dày thick theo trục x, tâm ở x = 0 của nhóm cha. Mặt nào cũng quay ra ngoài.
+        /// </summary>
+        public static GameObject Triangle(Transform parent, string name, string meshName, Vector2 a, Vector2 b, Vector2 peak, float thick, Material m)
+        {
+            float h = thick / 2;
+            Vector3 P(Vector2 q, float x) => new Vector3(x, q.y, q.x);
+            EnsureT2Folders();
+            string path = $"{RootT2}/Meshes/{meshName}.asset";
+            var mesh = AssetDatabase.LoadAssetAtPath<Mesh>(path);
+            bool isNew = mesh == null;
+            if (isNew) mesh = new Mesh { name = meshName };
+            else mesh.Clear();
+            var v = new List<Vector3>();
+            var t = new List<int>();
+            void Tri(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 outward)
+            {
+                if (Vector3.Dot(Vector3.Cross(p1 - p0, p2 - p0), outward) < 0) { var tmp = p1; p1 = p2; p2 = tmp; }
+                int i = v.Count;
+                v.Add(p0); v.Add(p1); v.Add(p2);
+                t.Add(i); t.Add(i + 1); t.Add(i + 2);
+            }
+            Vector3 a0 = P(a, -h), b0 = P(b, -h), c0 = P(peak, -h), a1 = P(a, h), b1 = P(b, h), c1 = P(peak, h);
+            Vector3 mid = (a0 + b0 + c0 + a1 + b1 + c1) / 6f;
+            Tri(a0, b0, c0, Vector3.left);
+            Tri(a1, b1, c1, Vector3.right);
+            foreach (var (p, q) in new[] { (a0, b0), (b0, c0), (c0, a0) })
+            {
+                var p1 = p + Vector3.right * thick;
+                var q1 = q + Vector3.right * thick;
+                var outward = ((p + q) / 2 + Vector3.right * h) - mid;
+                Tri(p, q, q1, outward);
+                Tri(p, q1, p1, outward);
+            }
+            mesh.SetVertices(v);
+            mesh.SetTriangles(t, 0);
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
+            if (isNew) AssetDatabase.CreateAsset(mesh, path);
+            else EditorUtility.SetDirty(mesh);
+            var g = new GameObject(name);
+            g.transform.SetParent(parent, false);
+            g.AddComponent<MeshFilter>().sharedMesh = mesh;
+            g.AddComponent<MeshRenderer>().sharedMaterial = m;
+            g.AddComponent<MeshCollider>().sharedMesh = mesh;
+            return g;
         }
 
         // =====================================================================
@@ -367,6 +346,15 @@ namespace Khkt.EditorTools
             }
 
             int rowStride = segW + 1;
+            int front = verts.Count;
+            // mặt dưới: bộ đỉnh riêng (pháp tuyến ngược) để RecalculateNormals không triệt tiêu pháp tuyến hai mặt
+            for (int k = 0; k < front; k++)
+            {
+                verts.Add(verts[k]);
+                normals.Add(Vector3.down);
+                uvs.Add(uvs[k]);
+                colors.Add(colors[k]);
+            }
             for (int i = 0; i < segL; i++)
             {
                 for (int j = 0; j < segW; j++)
@@ -375,14 +363,10 @@ namespace Khkt.EditorTools
                     int v1 = v0 + 1;
                     int v2 = (i + 1) * rowStride + j;
                     int v3 = v2 + 1;
-
-                    // Mặt trên
                     tris.Add(v0); tris.Add(v2); tris.Add(v1);
                     tris.Add(v1); tris.Add(v2); tris.Add(v3);
-
-                    // Mặt dưới (Double-sided)
-                    tris.Add(v0); tris.Add(v1); tris.Add(v2);
-                    tris.Add(v1); tris.Add(v3); tris.Add(v2);
+                    tris.Add(front + v0); tris.Add(front + v1); tris.Add(front + v2);
+                    tris.Add(front + v1); tris.Add(front + v3); tris.Add(front + v2);
                 }
             }
 

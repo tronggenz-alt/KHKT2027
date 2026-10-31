@@ -12,8 +12,8 @@ Bố cục tầng 2 được dựng chính xác theo bản đồ quy hoạch m�
 - **Gốc thế giới Tầng 2:** GameObject `"Tầng 2"` đặt tại tọa độ `(0, 3.8, 0)`.
 - **Hệ thống kết nối liên tầng:**
   - **Lõi thang bộ & thang máy:** đặt tại tọa độ $x \in [27, 30]\text{ m}$, $z \in [-2.2, 6]\text{ m}$ bao trọn cả hai tầng ($y = 0 \to 7,4\text{ m}$).
-  - Cầu thang bộ một vế thẳng gồm 22 bậc, có mặt dốc va chạm ẩn ($32,61^\circ$) giúp `CharacterController` di chuyển mượt mà không bị khựng bậc.
-  - Thang máy thông tầng (`ElevatorController.cs`) hỗ trợ đóng mở cửa có giảm tốc, hiệu ứng mờ chuyển tầng và chuông báo tầng.
+  - Cầu thang bộ một vế thẳng: 22 cổ bậc cao 17,3 cm, 21 mặt bậc sâu 26,5 cm, từ z 0,33 (tầng 1) lên z 5,9 (tầng 2). Sàn tầng 2 chừa **lỗ thang** x 28,5..29,8, z 0..5,9 có lan can kính; tường bắc lõi thang ở tầng 2 mở thông sang hành lang đông. Va chạm là một mặt dốc ẩn (34°) qua chân các cổ bậc, bậc chỉ để nhìn.
+  - Thang máy chạy thật (`ElevatorController.cs`): cabin là vật thật đi lên / xuống trong giếng (1 tầng ≈ 5,2 s, vận tốc hình thang), người chơi đứng trong cabin đi theo, không dịch chuyển hay mờ màn hình. Cửa tầng + cửa cabin mở / đóng cùng nhau, cảm biến cửa mở lại khi có người đứng ở ngưỡng. Màn hình trong cabin báo "ĐANG LÊN TẦNG 2", bảng số tầng ở sảnh hai tầng, nút gọi ▲ / ▼, bảng nút trong cabin (1, 2, mở, đóng), chuông và tiếng chạy sinh bằng code.
   - Lõi thang đặt hoàn toàn ngoài khung phòng thí nghiệm tầng 1, không khoét sàn tầng 1, bảo toàn 100% kết cấu và thẩm mỹ tầng 1.
 
 ### Bản đồ phân khu Tầng 2
@@ -146,3 +146,21 @@ Toàn bộ các thuật toán mô phỏng được viết bằng C# thuần, **k
 
 - **BodyParts3D:** Dữ liệu giải phẫu số 3D (`bp3d.bin.gz`) được cung cấp bởi **Trung tâm Cơ sở Dữ liệu Khoa học Đời sống (DBCLS - Database Center for Life Science), Nhật Bản**, phát hành dưới giấy phép quốc tế **Creative Commons Attribution 4.0 International (CC BY 4.0)**.
 - **Tiêu bản vi mô và kiến thức cơ quan:** Kế thừa và chuẩn hóa từ hệ thống dữ liệu số SGK Sinh học 10, 11, 12 và đồ án nghiên cứu KHKT2027.
+
+---
+
+## 7. Sửa lỗi bản đầu (31/10/2026)
+
+Bản dựng đầu tiên của tầng 2 bị giật, nhấp nháy, thang bộ kẹt và không thông tầng. Nguyên nhân và cách sửa:
+
+| Lỗi | Nguyên nhân | Sửa |
+|---|---|---|
+| Giật, FPS thấp (cả khi ở tầng 1) | 13 đèn rọi và 8 đèn điểm của tầng 2 nằm ở cảnh lõi nên lúc nào cũng bật, chiếu xuyên sàn xuống tầng 1; mỗi bọt O₂ tạo một khối cầu có va chạm và một vật liệu mới (rò bộ nhớ); kính hiển vi, hộp tiêu bản đều có thẻ thông tin nên không gộp lô tĩnh | Đèn nằm trong nhóm phòng nên được tải / gỡ theo khu; bọt O₂ dùng bể 24 quả dựng sẵn và một vật liệu, chỉ chạy khi người chơi trong 8 m; chỉ kính bấm được mới có thẻ thông tin, 24 kính còn lại gộp lô |
+| Nhấp nháy, vật "không hiện rõ" | Lưới hộp bo cạnh (`RoundBox`) bị lật mặt trên và hở 12 dải cạnh; nhiều vật đặt làm con của khối đã co giãn nên méo và lệch; trần, tường, sàn chồng lên nhau trùng mặt phẳng (z-fighting); mái bê tông cắt ngang mái kính nhà kính; mô hình BodyParts3D lộn trái (lật trục x mà không đảo chiều tam giác) | Viết lại `GenerateRoundBox` kín, mặt quay ra ngoài; dựng lại toàn bộ đồ tầng 2 theo nhóm có vị trí + góc quay (không đặt vật dưới khối co giãn); sàn / trần / tường chỉ chạm cạnh, chữ cách mặt ≥ 2 mm; mái chừa nhà kính; đảo chiều tam giác khi nhập BodyParts3D |
+| Thang bộ kẹt, hai tầng không thông | Sàn sảnh tầng 2 phủ kín cả lõi thang (không có lỗ), tường bắc lõi chắn đầu thang, bậc thang có va chạm riêng | Chừa lỗ thang, mở tường bắc tầng 2, chỉ dốc ẩn có va chạm; vách gỗ kín gầm thang ở tầng 1 |
+| Thang máy dịch chuyển + mờ màn hình | Bản đầu chỉ dời người chơi sang tầng kia | Cabin chạy thật, màn hình báo tầng (xem mục 1) |
+
+Thêm chi tiết sinh học: logo Trường THPT Chuyên Lê Quý Đôn (tường bảng, tường đông phòng sinh học, hành lang tầng 2), tường các nhà sinh học (Darwin, Mendel, Pasteur, Leeuwenhoek, Hooke, Watson & Crick, GS Tôn Thất Tùng), áp phích vẽ bằng code (cấu trúc tế bào, chu kỳ tế bào, cây sự sống, ADN), triển lãm dự án sinh học, góc an toàn sinh học (bộ xử lý tràn, thùng rác nguy hại, nội quy phòng sinh học), quầy rửa tay, pass-box, khu tủ ấm – nồi hấp – cân – máy đo pH, đảo nhuộm Gram, máy đếm khuẩn lạc, buồng đệm vùng sạch, tủ lạnh cửa kính có hàng bên trong, kệ inox, mẫu ngâm, mô hình ADN / tế bào / bán thân, luồng một chiều tiền PCR → tách chiết → hậu PCR, buồng chụp gel có ảnh gel, giàn thủy canh NFT, bàn trồng cây, trạm quang hợp / thoát hơi nước / hướng sáng, cảm biến vi khí hậu.
+
+Lưới BodyParts3D (~25 MB) sinh lại từ `phong_sinh/tu_app_cu/bp3d.bin.gz` khi dựng cảnh, không đưa lên kho (`.gitignore`).
+

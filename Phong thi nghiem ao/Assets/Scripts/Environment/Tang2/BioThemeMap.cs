@@ -12,22 +12,33 @@ namespace Khkt.Environment.Tang2
         public Material toiGian;
     }
 
+    /// <summary>Bảng cặp vật liệu Quốc tế ↔ Tối giản của tầng 2 (so khớp đúng vật liệu, không so tên).</summary>
     [CreateAssetMenu(fileName = "ChuDe", menuName = "Khkt/BioThemeMap", order = 100)]
     public class BioThemeMap : ScriptableObject
     {
         public List<ThemeMaterialPair> pairs = new List<ThemeMaterialPair>();
 
-        public Material GetMaterial(Material current, LabThemeMode targetTheme)
+        Dictionary<Material, Material> toMinimal, toIntl;
+
+        void Build()
         {
-            if (current == null) return null;
+            toMinimal = new Dictionary<Material, Material>();
+            toIntl = new Dictionary<Material, Material>();
             foreach (var p in pairs)
             {
-                if (targetTheme == LabThemeMode.ToiGian && (p.quocTe == current || current.name.StartsWith(p.quocTe.name)))
-                    return p.toiGian;
-                if (targetTheme == LabThemeMode.QuocTe && (p.toiGian == current || current.name.StartsWith(p.toiGian.name)))
-                    return p.quocTe;
+                if (p.quocTe == null || p.toiGian == null) continue;
+                toMinimal[p.quocTe] = p.toiGian;
+                if (!toIntl.ContainsKey(p.toiGian)) toIntl[p.toiGian] = p.quocTe;
             }
-            return current;
+        }
+
+        /// <summary>Vật liệu tương ứng ở chủ đề đích, hoặc null nếu vật liệu này không đổi theo chủ đề.</summary>
+        public Material GetMaterial(Material current, LabThemeMode target)
+        {
+            if (current == null) return null;
+            if (toMinimal == null) Build();
+            var d = target == LabThemeMode.ToiGian ? toMinimal : toIntl;
+            return d.TryGetValue(current, out var m) ? m : null;
         }
     }
 }

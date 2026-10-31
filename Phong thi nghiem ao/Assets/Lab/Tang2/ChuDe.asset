@@ -13,18 +13,78 @@ MonoBehaviour:
   m_Name: ChuDe
   m_EditorClassIdentifier: Assembly-CSharp::Khkt.Environment.Tang2.BioThemeMap
   pairs:
-  - id: Tuong
-    quocTe: {fileID: 2100000, guid: f06cbabdd809244c38e128902c793400, type: 2}
+  - id: TuongSon
+    quocTe: {fileID: 2100000, guid: 963b39a96c72b68438375057e094a2a0, type: 2}
     toiGian: {fileID: 2100000, guid: 3a176423d27534fa78f6f45b57c07e75, type: 2}
-  - id: San
-    quocTe: {fileID: 2100000, guid: da0206c78fba54baabf3ff1b55996507, type: 2}
+  - id: SanPhongLab
+    quocTe: {fileID: 2100000, guid: eecb696eff667784aa927406c976be02, type: 2}
     toiGian: {fileID: 2100000, guid: 81dcaad50c13448f4a9336f2a0a96d9b, type: 2}
-  - id: MatBan
-    quocTe: {fileID: 2100000, guid: 2886b3a979b9f45fe8ab5bfd5274e62b, type: 2}
+  - id: T2_SanPhanTu
+    quocTe: {fileID: 2100000, guid: 07d8d83db915e42188289b068502feee, type: 2}
+    toiGian: {fileID: 2100000, guid: 81dcaad50c13448f4a9336f2a0a96d9b, type: 2}
+  - id: T2_SanKho
+    quocTe: {fileID: 2100000, guid: d50e82044d6454e578fb01be3a4d2d37, type: 2}
+    toiGian: {fileID: 2100000, guid: 81dcaad50c13448f4a9336f2a0a96d9b, type: 2}
+  - id: SanHanhLang
+    quocTe: {fileID: 2100000, guid: 431b5d4bb7a937640946dc12c577073f, type: 2}
+    toiGian: {fileID: 2100000, guid: 90cb8f47a840842d595aa7fd3b6d3df8, type: 2}
+  - id: T2_SanHanhLangDong
+    quocTe: {fileID: 2100000, guid: 9fd782d8db70143d38642aba36d43fd4, type: 2}
+    toiGian: {fileID: 2100000, guid: 90cb8f47a840842d595aa7fd3b6d3df8, type: 2}
+  - id: MatBanPhenolic
+    quocTe: {fileID: 2100000, guid: a6e7e69a8a470ad419f96d2a1ec604af, type: 2}
     toiGian: {fileID: 2100000, guid: a5bb1c63bed8343f89ac5bd837256771, type: 2}
-  - id: Ghe
-    quocTe: {fileID: 2100000, guid: ffb32fb2dc916e245a8b9ab4958cd377, type: 2}
+  - id: CanhTu
+    quocTe: {fileID: 2100000, guid: 1779a0a9c47bf3f419fdc99fddb49ba1, type: 2}
     toiGian: {fileID: 2100000, guid: 5a3981d3a83254ded97360cd889e6444, type: 2}
-  - id: Vien
-    quocTe: {fileID: 2100000, guid: b2dbdc0fc4c5ded4aacc7af131ad002d, type: 2}
-    toiGian: {fileID: 2100000, guid: 8cb5cad6d216440f0baeb1256ec09d6f, type: 2}
+  - id: LedXanh
+    quocTe: {fileID: 2100000, guid: d416bea38eb29e4448bf967c8b44efa7, type: 2}
+    toiGian: {fileID: 2100000, guid: e27bd26556cc24583947a48e02d3b447, type: 2}
+  - id: MauNhan
+    quocTe: {fileID: 2100000, guid: d0a44e6a7fcea654b8ea9a8d85468791, type: 2}
+    toiGian: {fileID: 2100000, guid: db0f3265f92364b52a7a1e8db13c7fff, type: 2}
+  - id: T2_MauNhan
+    quocTe: {fileID: 2100000, guid: b3fc6733fb48441bcb7bb2b51bb8c8c7, type: 2}
+    toiGian: {fileID: 2100000, guid: db0f3265f92364b52a7a1e8db13c7fff, type: 2}
+  - id: MauNhanDam
+    quocTe: {fileID: 2100000, guid: 6b1300027b63d664a80e32d8ac79b879, type: 2}
+    toiGian: {fileID: 2100000, guid: d3d9d7ed53e774b939fcd6379ef7c877, type: 2}
+  - id: T2_MauNhanDam
+    quocTe: {fileID: 2100000, guid: 9a8d8da89f9724ae0bedaf8f56605bcd, type: 2}
+    toiGian: {fileID: 2100000, guid: d3d9d7ed53e774b939fcd6379ef7c877, type: 2}
+  - id: VachDanHuong
+    quocTe: {fileID: 2100000, guid: fbc659f5d33eeba41882dad867ae12b5, type: 2}
+    toiGian: {fileID: 2100000, guid: 0f12b64c7ddd84cca911c9584499de0f, type: 2}
+  - id: T2_VienLoiDi
+    quocTe: {fileID: 2100000, guid: 4a126ac90ae254087865f6044f546ccc, type: 2}
+    toiGian: {fileID: 2100000, guid: db0f3265f92364b52a7a1e8db13c7fff, type: 2}
+  - id: T2_CanhCuaSinh
+    quocTe: {fileID: 2100000, guid: abf513f2236554f308a7bb728ae956cf, type: 2}
+    toiGian: {fileID: 2100000, guid: ec87dac128773451e9140b0bf4268a0e, type: 2}
+  - id: T2_CanhCuaViSinh
+    quocTe: {fileID: 2100000, guid: 12417a46ec959429db01dc327337fa05, type: 2}
+    toiGian: {fileID: 2100000, guid: ec87dac128773451e9140b0bf4268a0e, type: 2}
+  - id: T2_CanhCuaKho
+    quocTe: {fileID: 2100000, guid: 9552f520f13324e7892309e2a80f1cbd, type: 2}
+    toiGian: {fileID: 2100000, guid: ec87dac128773451e9140b0bf4268a0e, type: 2}
+  - id: T2_CanhCuaPhanTu
+    quocTe: {fileID: 2100000, guid: 774294bf7c72a4faf88c2bef13f6c351, type: 2}
+    toiGian: {fileID: 2100000, guid: ec87dac128773451e9140b0bf4268a0e, type: 2}
+  - id: T2_CanhCuaNhaKinh
+    quocTe: {fileID: 2100000, guid: 0b09f261089fe4592a723df3440fdb2e, type: 2}
+    toiGian: {fileID: 2100000, guid: ec87dac128773451e9140b0bf4268a0e, type: 2}
+  - id: MatGheXanhNgoc
+    quocTe: {fileID: 2100000, guid: 8976625e4f648664dbd794d2613fc4a2, type: 2}
+    toiGian: {fileID: 2100000, guid: 3fe24044f9eb146cab7a4a7ff97e6494, type: 2}
+  - id: MatGheCam
+    quocTe: {fileID: 2100000, guid: 3ac82457df9495743ae6701c9ed2a5cc, type: 2}
+    toiGian: {fileID: 2100000, guid: 3fe24044f9eb146cab7a4a7ff97e6494, type: 2}
+  - id: MatGheXanhCom
+    quocTe: {fileID: 2100000, guid: f107e880b3499c340a90b9f0f233d79a, type: 2}
+    toiGian: {fileID: 2100000, guid: 3fe24044f9eb146cab7a4a7ff97e6494, type: 2}
+  - id: MatGheVang
+    quocTe: {fileID: 2100000, guid: 2614f9c564cde064e86f648b6509b7e3, type: 2}
+    toiGian: {fileID: 2100000, guid: 3fe24044f9eb146cab7a4a7ff97e6494, type: 2}
+  - id: MatGheXanhTroi
+    quocTe: {fileID: 2100000, guid: af3e1987fd3fb6c4ca7b27d4a2851bd8, type: 2}
+    toiGian: {fileID: 2100000, guid: 3fe24044f9eb146cab7a4a7ff97e6494, type: 2}

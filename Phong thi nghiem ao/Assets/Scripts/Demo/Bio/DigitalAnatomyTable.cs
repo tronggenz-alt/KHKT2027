@@ -1,94 +1,56 @@
-using Khkt.Demo;
 using UnityEngine;
 
 namespace Khkt.Demo.Bio
 {
+    /// <summary>
+    /// Bàn giải phẫu số: mô hình BodyParts3D nằm trên mặt màn hình, bấm để đổi lớp bộ xương → hệ cơ → da.
+    /// Chỉ một lớp hiện một lúc (mỗi lớp hơn 100 nghìn đỉnh). Lớp mới hiện ra bằng hoạt cảnh nâng lên nhẹ 0,35 s.
+    /// </summary>
     public class DigitalAnatomyTable : MonoBehaviour, IDemoUsable
     {
-        [Header("Các lớp giải phẫu BodyParts3D")]
-        public GameObject layerSkeleton;
-        public GameObject layerMuscles;
-        public GameObject layerOrgans;
-        public GameObject layerSkin;
-
-        [Header("Hoạt cảnh tim & phổi")]
-        public Transform heartTransform;
-        public Transform lungsTransform;
-
-        [Header("Hiển thị thông tin")]
+        public GameObject layerSkeleton, layerMuscles, layerSkin;
         public TextMesh layerText;
+        public int layer;  // 0 xương, 1 cơ, 2 da
 
-        public enum AnatomyLayerMode
-        {
-            TatCa,
-            Xuong,
-            Co,
-            NoiTang,
-            Da
-        }
+        static readonly string[] Names = { "Bộ xương", "Hệ cơ", "Da" };
+        float anim = 1f;
+        Vector3[] basePos;
 
-        public AnatomyLayerMode currentMode = AnatomyLayerMode.TatCa;
-
-        const float HeartRateBpm = 72f;
-        const float BreathRateBpm = 16f;
+        GameObject[] Layers => new[] { layerSkeleton, layerMuscles, layerSkin };
 
         void Start()
         {
-            UpdateLayers();
+            var ls = Layers;
+            basePos = new Vector3[ls.Length];
+            for (int i = 0; i < ls.Length; i++) if (ls[i] != null) basePos[i] = ls[i].transform.localPosition;
+            Show();
+        }
+
+        public string UseHint => $"Bàn giải phẫu số: đang xem {Names[layer].ToLowerInvariant()}. Bấm để đổi lớp.";
+
+        public void Use()
+        {
+            layer = (layer + 1) % Names.Length;
+            anim = 0f;
+            Show();
+            enabled = true;
+        }
+
+        void Show()
+        {
+            var ls = Layers;
+            for (int i = 0; i < ls.Length; i++) if (ls[i] != null) ls[i].SetActive(i == layer);
+            if (layerText != null) layerText.text = "Lớp: " + Names[layer];
         }
 
         void Update()
         {
-            // Nhịp tim 72 bpm = 1.2 Hz
-            if (heartTransform != null)
-            {
-                float heartBeat = Mathf.Sin(Time.time * (HeartRateBpm / 60f) * Mathf.PI * 2f);
-                float heartScale = 1f + 0.08f * Mathf.Max(0f, heartBeat);
-                heartTransform.localScale = new Vector3(heartScale, heartScale, heartScale);
-            }
-
-            // Nhịp thở 16 bpm = 0.267 Hz
-            if (lungsTransform != null)
-            {
-                float breath = Mathf.Sin(Time.time * (BreathRateBpm / 60f) * Mathf.PI * 2f);
-                float lungExpansion = 1f + 0.05f * breath;
-                lungsTransform.localScale = new Vector3(lungExpansion, 1f, lungExpansion);
-            }
-        }
-
-        public string UseHint => $"Bàn giải phẫu 3D (Đang xem: {GetLayerName(currentMode)}). Bấm để đổi lớp.";
-
-        public void Use()
-        {
-            // Chuyển lớp giải phẫu tuần hoàn
-            currentMode = (AnatomyLayerMode)(((int)currentMode + 1) % 5);
-            UpdateLayers();
-        }
-
-        void UpdateLayers()
-        {
-            if (layerSkeleton != null) layerSkeleton.SetActive(currentMode == AnatomyLayerMode.TatCa || currentMode == AnatomyLayerMode.Xuong);
-            if (layerMuscles != null) layerMuscles.SetActive(currentMode == AnatomyLayerMode.TatCa || currentMode == AnatomyLayerMode.Co);
-            if (layerOrgans != null) layerOrgans.SetActive(currentMode == AnatomyLayerMode.TatCa || currentMode == AnatomyLayerMode.NoiTang);
-            if (layerSkin != null) layerSkin.SetActive(currentMode == AnatomyLayerMode.TatCa || currentMode == AnatomyLayerMode.Da);
-
-            if (layerText != null)
-            {
-                layerText.text = $"Lớp: {GetLayerName(currentMode)}\n[CC BY 4.0 DBCLS BodyParts3D]";
-            }
-        }
-
-        string GetLayerName(AnatomyLayerMode mode)
-        {
-            switch (mode)
-            {
-                case AnatomyLayerMode.TatCa: return "Toàn bộ";
-                case AnatomyLayerMode.Xuong: return "Bộ xương";
-                case AnatomyLayerMode.Co: return "Hệ cơ";
-                case AnatomyLayerMode.NoiTang: return "Nội tạng";
-                case AnatomyLayerMode.Da: return "Lớp da";
-                default: return "Toàn bộ";
-            }
+            if (anim >= 1f) { enabled = false; return; }
+            anim = Mathf.Min(1f, anim + Time.deltaTime / 0.35f);
+            var go = Layers[layer];
+            if (go == null || basePos == null) return;
+            float k = Khkt.Environment.Easing.EmphasizedDecelerate(anim);
+            go.transform.localPosition = basePos[layer] + Vector3.up * (0.04f * (1f - k));
         }
     }
 }

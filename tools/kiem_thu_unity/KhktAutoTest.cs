@@ -3264,7 +3264,7 @@ public class KhktAutoTest : MonoBehaviour
         if (switcher != null)
         {
             Log("[KHKT-PLAY] Đổi chủ đề sang Tối giản (Japandi)...");
-            switcher.SetTheme(Khkt.Environment.Tang2.BioTheme.ToiGian);
+            switcher.SetTheme(Khkt.Environment.Tang2.LabThemeMode.ToiGian);
             yield return new WaitForSeconds(1.0f);
 
             foreach (int st in new[] { 20, 26, 30 })
@@ -3275,7 +3275,7 @@ public class KhktAutoTest : MonoBehaviour
             }
 
             Log("[KHKT-PLAY] Đổi lại chủ đề Quốc tế...");
-            switcher.SetTheme(Khkt.Environment.Tang2.BioTheme.QuocTe);
+            switcher.SetTheme(Khkt.Environment.Tang2.LabThemeMode.QuocTe);
             yield return new WaitForSeconds(1.0f);
         }
 

@@ -1,88 +1,65 @@
 using System.Collections;
-using Khkt.Demo;
+using Khkt.Environment;
 using Khkt.Simulation.Bio;
 using UnityEngine;
 
 namespace Khkt.Demo.Bio
 {
+    /// <summary>Kính hiển vi bấm được: mỗi lần bấm xoay mâm sang vật kính kế tiếp (4× → 10× → 40× → 100×) có tiếng "tách".</summary>
     public class MicroscopeController : MonoBehaviour, IDemoUsable
     {
-        [Header("Mâm vật kính xoay")]
         public Transform nosepiece;
-        public int currentObjectiveIndex = 1; // 0=4x, 1=10x, 2=40x, 3=100x
-
-        [Header("Thị kính & Tiêu cự")]
+        public int currentObjectiveIndex;  // 0 = 4×, 1 = 10×, 2 = 40×, 3 = 100× dầu
         public float eyepieceMag = 10f;
-        public float fieldNumberMm = 20f;
-        public float focusOffsetUm = 0f;
+        public float fieldNumberMm = 18f;
 
-        [Header("Tiêu bản hiển thị")]
-        public Renderer slideRenderer;
-
-        static readonly ObjectiveType[] Objectives =
-        {
-            ObjectiveType.Scan4x,
-            ObjectiveType.Low10x,
-            ObjectiveType.High40x,
-            ObjectiveType.Oil100x
-        };
+        static readonly ObjectiveType[] Objectives = { ObjectiveType.Scan4x, ObjectiveType.Low10x, ObjectiveType.High40x, ObjectiveType.Oil100x };
+        bool turning;
 
         public string UseHint
         {
             get
             {
-                var (mag, na, color, isOil) = Optics.GetObjectiveProps(Objectives[currentObjectiveIndex]);
+                var (mag, _, color, isOil) = Optics.GetObjectiveProps(Objectives[currentObjectiveIndex]);
                 double total = Optics.TotalMagnification(eyepieceMag, mag);
                 double fov = Optics.FieldOfViewMm(fieldNumberMm, mag);
-                return $"Kính hiển vi: Vật kính {mag}× (vòng {color}) | Phóng đại {total}× | Thị trường {fov:F1} mm. Bấm để đổi vật kính.";
+                return $"Kính hiển vi: vật kính {mag}× (vòng {color}{(isOil ? ", dầu soi" : "")}), phóng đại {total}×, thị trường {fov:0.##} mm. Bấm để đổi vật kính.";
             }
         }
 
-        public void Use()
+        public void Use() => CycleObjective();
+
+        /// <summary>Độ phóng đại tổng (thị kính × vật kính) đang dùng.</summary>
+        public double CurrentMagnification => Optics.TotalMagnification(eyepieceMag, Optics.GetObjectiveProps(Objectives[currentObjectiveIndex]).mag);
+
+        /// <summary>Đường kính thị trường (mm) ở vật kính đang dùng.</summary>
+        public double CurrentFovMm => Optics.FieldOfViewMm(fieldNumberMm, Optics.GetObjectiveProps(Objectives[currentObjectiveIndex]).mag);
+
+        /// <summary>Độ lệch tiêu cự hiện tại (mm), dùng cho ảnh tiêu bản mờ / rõ.</summary>
+        public float FocusOffsetMm { get; private set; }
+
+        public void SetFocus(float offsetMm) => FocusOffsetMm = offsetMm;
+
+        public void CycleObjective()
         {
-            // Đổi vật kính xoay tuần hoàn (4x -> 10x -> 40x -> 100x)
+            if (turning) return;
             currentObjectiveIndex = (currentObjectiveIndex + 1) % Objectives.Length;
-            StartCoroutine(RotateNosepieceRoutine());
+            StartCoroutine(Turn());
         }
 
-        IEnumerator RotateNosepieceRoutine()
+        IEnumerator Turn()
         {
             if (nosepiece == null) yield break;
-
-            Quaternion startRot = nosepiece.localRotation;
-            Quaternion targetRot = Quaternion.Euler(0, currentObjectiveIndex * 90f, 0);
-
-            float duration = 0.25f;
-            float elapsed = 0f;
-
-            while (elapsed < duration)
+            turning = true;
+            var from = nosepiece.localRotation;
+            var to = Quaternion.Euler(0, currentObjectiveIndex * 90f, 0);
+            for (float t = 0; t < 0.25f; t += Time.deltaTime)
             {
-                elapsed += Time.deltaTime;
-                float t = Mathf.Clamp01(elapsed / duration);
-                // Đường cong cubic-bezier standard
-                nosepiece.localRotation = Quaternion.Slerp(startRot, targetRot, t);
+                nosepiece.localRotation = Quaternion.Slerp(from, to, Easing.Standard(t / 0.25f));
                 yield return null;
             }
-
-            nosepiece.localRotation = targetRot;
-            UpdateSlideFocus();
-        }
-
-        public void AdjustFocus(float deltaUm)
-        {
-            focusOffsetUm += deltaUm;
-            UpdateSlideFocus();
-        }
-
-        void UpdateSlideFocus()
-        {
-            if (slideRenderer == null || slideRenderer.sharedMaterial == null) return;
-
-            var (mag, na, _, isOil) = Optics.GetObjectiveProps(Objectives[currentObjectiveIndex]);
-            double dof = Optics.DepthOfFieldUm(eyepieceMag * mag, na, isOil);
-
-            slideRenderer.material.SetFloat("_FocusOffset", focusOffsetUm);
-            slideRenderer.material.SetFloat("_DOF", (float)dof);
+            nosepiece.localRotation = to;
+            turning = false;
         }
     }
 }

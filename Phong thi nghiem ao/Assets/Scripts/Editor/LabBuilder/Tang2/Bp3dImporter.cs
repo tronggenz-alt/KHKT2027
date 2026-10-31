@@ -43,6 +43,15 @@ namespace Khkt.EditorTools
             if (!AssetDatabase.IsValidFolder(outDir))
                 AssetDatabase.CreateFolder("Assets/Lab/Tang2", "GiaiPhau");
 
+            // đã nhập ở lần dựng trước thì dùng lại (giải mã ~250 nghìn đỉnh mất vài giây)
+            var cachedLayers = new Dictionary<string, Mesh>();
+            foreach (var l in new[] { "xuong", "co", "da" })
+            {
+                var m = AssetDatabase.LoadAssetAtPath<Mesh>($"{outDir}/BP3D2_{l}.asset");
+                if (m != null) cachedLayers[l] = m;
+            }
+            if (cachedLayers.Count == 3) return cachedLayers;
+
             string binGzPath = Path.Combine(Directory.GetCurrentDirectory(), "phong_sinh", "tu_app_cu", "bp3d.bin.gz");
             if (!File.Exists(binGzPath))
             {
@@ -137,6 +146,16 @@ namespace Khkt.EditorTools
                     }
                 }
 
+                // Lật x (hệ tay phải của trang web → hệ tay trái của Unity) làm ngược chiều tam giác: đảo lại để mặt quay ra ngoài.
+                // Bản trước bỏ qua bước này nên mô hình bị lộn trái (thấy mặt trong, pháp tuyến hướng vào trong, tối và nhấp nháy).
+                foreach (var idx in layerIndices.Values)
+                    for (int i = 0; i + 2 < idx.Count; i += 3)
+                    {
+                        int t = idx[i + 1];
+                        idx[i + 1] = idx[i + 2];
+                        idx[i + 2] = t;
+                    }
+
                 // Tạo mesh cho từng lớp
                 foreach (var kvp in layerVertices)
                 {
@@ -151,7 +170,7 @@ namespace Khkt.EditorTools
                     mesh.RecalculateNormals();
                     mesh.RecalculateBounds();
 
-                    string assetPath = $"{outDir}/BP3D_{lop}.asset";
+                    string assetPath = $"{outDir}/BP3D2_{lop}.asset";
                     AssetDatabase.CreateAsset(mesh, assetPath);
                     meshes[lop] = mesh;
                 }
