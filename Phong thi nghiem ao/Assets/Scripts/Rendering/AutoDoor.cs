@@ -37,6 +37,7 @@ namespace Khkt.Rendering
         public float Openness => open;
         public bool IsOpen => open > 0.95f;
         public bool IsAnyOpen => open > 0.02f;
+        public bool IsCurrentlyOpen => IsAnyOpen;
         public Vector3 Center => transform.position;
         public Vector3 Normal => transform.forward;
 

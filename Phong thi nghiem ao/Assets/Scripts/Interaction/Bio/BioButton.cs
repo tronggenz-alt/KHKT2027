@@ -8,7 +8,7 @@ namespace Khkt.Interaction.Bio
     /// Nút bấm cơ học hoặc công tắc bật/tắt 3D cho thiết bị sinh học.
     /// Khi bấm có hoạt cảnh lún nút 4 mm trong 0,12 s theo Easing.StdDecel và đổi màu đèn chỉ thị.
     /// </summary>
-    public class BioButton : MonoBehaviour
+    public class BioButton : MonoBehaviour, Khkt.Demo.IDemoUsable
     {
         public string buttonId = "";
         public string label = "Nút bấm";
@@ -17,13 +17,16 @@ namespace Khkt.Interaction.Bio
         public bool locked = false;
         public string lockedReason = "Nút đang khóa an toàn";
 
-        public Vector3 pressOffset = new Vector3(0f, -0.004f, 0f);
+        public Vector3 pressOffset = new Vector3(0f, -0.002f, 0f);
         public Renderer indicatorRenderer;
         public Color onColor = new Color(0.18f, 0.92f, 0.42f);
         public Color offColor = new Color(0.28f, 0.30f, 0.32f);
 
         public Action onPressed;
         public Action<bool> onToggled;
+
+        public string UseHint => GetPromptText();
+        public void Use() => Press();
 
         Vector3 baseLocalPos;
         float animTimer = -1f;

@@ -41,6 +41,12 @@ namespace Khkt.Interaction.Bio
             return Instance;
         }
 
+        public static void Enter(Transform target, string title, float fov = 40f, System.Action onExit = null)
+        {
+            if (target == null) return;
+            Enter(target.position, target.position + target.forward * 0.5f, title);
+        }
+
         public static void Enter(Vector3 cameraWorldPos, Vector3 lookAtWorldPos, string title)
         {
             var inst = Ensure();

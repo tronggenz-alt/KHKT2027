@@ -79,6 +79,7 @@ namespace Khkt.EditorTools
             BuildMolecularRoom(tang2);     // phòng sinh học phân tử
             BuildGreenhouse(tang2);        // nhà kính thực vật
             BuildEastCorridor(tang2);      // hành lang đông
+            BuildFloor2InteractiveTools(tang2); // gắn toàn bộ 108 dụng cụ tương tác Tầng 2
 
             EnsureFloor2ThemeMaterials();
             SetupFloor2ThemeSwitcher(tang2.gameObject);

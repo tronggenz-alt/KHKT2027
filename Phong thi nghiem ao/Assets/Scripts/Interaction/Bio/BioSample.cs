@@ -1,15 +1,73 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
+using Khkt.Simulation.Bio;
 
 namespace Khkt.Interaction.Bio
 {
+    [Serializable]
+    public struct BioDnaBandInfo
+    {
+        public int bp;
+        public double ng;
+        public bool smear;
+    }
+
+    [Serializable]
+    public struct BioContaminantInfo
+    {
+        public string organismId;
+        public int colonies;
+    }
+
     /// <summary>
     /// Dữ liệu và trạng thái vật lý – sinh hóa của một mẫu vật sinh học
     /// (trên lam kính, trong ống nghiệm, ống Eppendorf, ống PCR, đĩa Petri hoặc cốc thí nghiệm).
+    /// Bọc BioSampleData của Khkt.Simulation.Bio (mục 4 hợp đồng).
     /// </summary>
     public class BioSample : MonoBehaviour
     {
+        public readonly BioSampleData data = new BioSampleData();
+
         public string sampleId = "";
         public string sampleName = "Mẫu trống";
+        public string organismId = "";
+        public double cfuPerMl = 0.0;
+        public string specimenId = "";
+        public bool sterile = true;
+        public List<BioDnaBandInfo> dna = new List<BioDnaBandInfo>();
+        public List<BioContaminantInfo> contaminants = new List<BioContaminantInfo>();
+
+        public BioSampleData SyncToData()
+        {
+            data.organismId = organismId ?? "";
+            data.cfuPerMl = cfuPerMl;
+            data.specimenId = !string.IsNullOrEmpty(specimenId) ? specimenId : (sampleId ?? "");
+            data.sterile = sterile && !isContaminated;
+            data.dna.Clear();
+            for (int i = 0; i < dna.Count; i++)
+                data.dna.Add(new DnaBand { bp = dna[i].bp, ng = dna[i].ng, smear = dna[i].smear });
+            data.contaminants.Clear();
+            for (int i = 0; i < contaminants.Count; i++)
+                data.contaminants.Add(new Contaminant { organismId = contaminants[i].organismId, colonies = contaminants[i].colonies });
+            return data;
+        }
+
+        public void SyncFromData()
+        {
+            organismId = data.organismId ?? "";
+            cfuPerMl = data.cfuPerMl;
+            if (!string.IsNullOrEmpty(data.specimenId)) specimenId = data.specimenId;
+            sterile = data.sterile;
+            dna.Clear();
+            for (int i = 0; i < data.dna.Count; i++)
+                dna.Add(new BioDnaBandInfo { bp = data.dna[i].bp, ng = data.dna[i].ng, smear = data.dna[i].smear });
+            contaminants.Clear();
+            for (int i = 0; i < data.contaminants.Count; i++)
+                contaminants.Add(new BioContaminantInfo { organismId = data.contaminants[i].organismId, colonies = data.contaminants[i].colonies });
+            if (contaminants.Count > 0) isContaminated = true;
+        }
+
         public float volumeMl = 0f;
         public float volumeUl = 0f;
         public float concentrationPct = 1.0f;
@@ -62,6 +120,12 @@ namespace Khkt.Interaction.Bio
         {
             sampleId = "";
             sampleName = "Mẫu trống";
+            organismId = "";
+            cfuPerMl = 0.0;
+            specimenId = "";
+            sterile = true;
+            dna.Clear();
+            contaminants.Clear();
             volumeMl = 0f;
             volumeUl = 0f;
             stainId = "";

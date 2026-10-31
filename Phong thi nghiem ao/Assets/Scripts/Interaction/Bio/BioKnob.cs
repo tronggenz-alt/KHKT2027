@@ -8,7 +8,7 @@ namespace Khkt.Interaction.Bio
     /// núm chỉnh tốc độ máy khuấy từ, vòng chỉnh thể tích micropipet...).
     /// Xoay bằng con lăn chuột (scroll wheel) khi ngắm vào hoặc gọi trực tiếp từ mã kiểm thử.
     /// </summary>
-    public class BioKnob : MonoBehaviour
+    public class BioKnob : MonoBehaviour, Khkt.Demo.IDemoUsable
     {
         public string knobId = "";
         public string label = "Núm chỉnh";
@@ -16,6 +16,10 @@ namespace Khkt.Interaction.Bio
         public float minValue = 0f;
         public float maxValue = 100f;
         public float step = 1f;
+        public float fineStep = 0.1f;
+        public int detents = 0;
+        public float degreesPerUnit = 2.7f;
+        public bool wrap = false;
         public float value = 25f;
         public string valueFormat = "0.0";
 
@@ -27,6 +31,13 @@ namespace Khkt.Interaction.Bio
 
         public TextMesh digitalReadout;
         public Action<float> onValueChanged;
+
+        public float min { get => minValue; set => minValue = value; }
+        public float max { get => maxValue; set => maxValue = value; }
+        public Vector3 axis { get => rotationAxis; set => rotationAxis = value; }
+        public Action<float> onChanged { get => onValueChanged; set => onValueChanged = value; }
+        public string UseHint => GetPromptText();
+        public void Use() => AdjustSteps(1);
 
         Quaternion baseRotation;
         float currentVisualAngle;

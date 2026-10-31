@@ -242,6 +242,11 @@ namespace Khkt.Interaction.Bio
             return value.ToString(format, ViCulture);
         }
 
+        public static string FormatVi(double value, string format = "0.0")
+        {
+            return value.ToString(format, ViCulture);
+        }
+
         void Update()
         {
             if (toastTimer > 0f)

@@ -7,6 +7,52 @@ namespace Khkt.Interaction.Bio
     /// </summary>
     public static class BioTransfer
     {
+        // Cờ trạng thái vô trùng toàn cục (5.1.20, 5.1.21, 5.2.1, 5.2.2)
+        public static bool HandsWashed = false;
+        public static bool PpeEquipped = false;
+        public static bool SurfaceClean = false;
+        public static bool InsideBsc = false;
+        public static bool BscRunning = false;
+        public static double BscPurgeMinutes = 0.0;
+        public static double BscSashHeightCm = 20.0;
+        public static bool BscGrilleBlocked = false;
+        public static bool NearSpiritFlame = false;
+
+        public static Khkt.Simulation.Bio.AsepticContext BuildAsepticContext(bool toolSterile, double openSeconds)
+        {
+            return new Khkt.Simulation.Bio.AsepticContext
+            {
+                insideBsc = InsideBsc,
+                bscRunning = BscRunning,
+                bscPurgeMinutes = BscPurgeMinutes,
+                sashHeightCm = BscSashHeightCm,
+                grilleBlocked = BscGrilleBlocked,
+                surfaceClean = SurfaceClean,
+                handsWashed = HandsWashed,
+                ppeOn = PpeEquipped,
+                nearFlame = NearSpiritFlame,
+                toolSterile = toolSterile,
+                openSeconds = openSeconds
+            };
+        }
+
+        public static bool CheckContamination(bool toolSterile, double openSeconds, int seed, BioSample target)
+        {
+            var ctx = BuildAsepticContext(toolSterile, openSeconds);
+            if (Khkt.Simulation.Bio.ContaminationRules.Roll(in ctx, seed, out var contam))
+            {
+                if (target != null)
+                {
+                    target.isContaminated = true;
+                    target.sterile = false;
+                    target.contaminationReason = $"Tạp nhiễm {contam.organismId} ({contam.colonies} khuẩn lạc)";
+                    target.contaminants.Add(new BioContaminantInfo { organismId = contam.organismId, colonies = contam.colonies });
+                    target.SyncToData();
+                }
+                return true;
+            }
+            return false;
+        }
         /// <summary>
         /// Trường hợp 1: Tách / gắp mẫu mô (biểu bì hành, lá rong mái chèo) đặt lên lam kính.
         /// </summary>
@@ -329,6 +375,52 @@ namespace Khkt.Interaction.Bio
             }
 
             return tube.liquidColor;
+        }
+
+        /// <summary>
+        /// Chuyển thể tích chất lỏng sinh học ml từ src sang dst theo đúng tỷ lệ thể tích (Mục 4.2.6 PROMPT_DUNG_CU_GIAO_DIEN.md).
+        /// Bên trong gọi trực tiếp BioSampleData.MixInto của Backend (mục 4 hợp đồng).
+        /// </summary>
+        public static void Move(BioSample src, BioSample dst, double ml)
+        {
+            if (src == null || dst == null || ml <= 0.0) return;
+
+            double srcVol = System.Math.Max(0.0, src.volumeMl > 0f ? src.volumeMl : src.volumeUl * 0.001);
+            double dstVol = System.Math.Max(0.0, dst.volumeMl > 0f ? dst.volumeMl : dst.volumeUl * 0.001);
+            double moveMl = srcVol > 0.0 ? System.Math.Min(ml, srcVol) : ml;
+            double totalDstVol = dstVol + moveMl;
+            if (totalDstVol <= 1e-9) return;
+
+            double fracSrc = moveMl / totalDstVol;
+
+            if (string.IsNullOrEmpty(dst.sampleId)) dst.sampleId = src.sampleId;
+            if (dst.sampleName == "Mẫu trống" && !string.IsNullOrEmpty(src.sampleName)) dst.sampleName = src.sampleName;
+            dst.isContaminated = dst.isContaminated || src.isContaminated;
+            if (dst.isContaminated && string.IsNullOrEmpty(dst.contaminationReason))
+                dst.contaminationReason = src.contaminationReason;
+
+            var srcData = src.SyncToData();
+            var dstData = dst.SyncToData();
+
+            // Bản sao phần chuyển đi với lượng ADN chia theo tỷ lệ thể tích rút ra
+            var movedData = new Khkt.Simulation.Bio.BioSampleData();
+            movedData.CopyFrom(srcData);
+            double pullRatio = srcVol > 1e-9 ? System.Math.Min(1.0, moveMl / srcVol) : 1.0;
+            for (int i = 0; i < movedData.dna.Count; i++)
+            {
+                var b = movedData.dna[i];
+                movedData.dna[i] = new Khkt.Simulation.Bio.DnaBand { bp = b.bp, ng = b.ng * pullRatio, smear = b.smear };
+            }
+
+            Khkt.Simulation.Bio.BioSampleData.MixInto(dstData, dstVol, movedData, moveMl);
+            dst.SyncFromData();
+
+            src.volumeMl = Mathf.Max(0f, (float)(srcVol - moveMl));
+            src.volumeUl = src.volumeMl * 1000f;
+            dst.volumeMl = (float)totalDstVol;
+            dst.volumeUl = dst.volumeMl * 1000f;
+            dst.SetLiquidColor(Color.Lerp(dst.liquidColor, src.liquidColor, (float)fracSrc));
+            src.UpdateVisualColor();
         }
     }
 }

@@ -375,8 +375,8 @@ namespace Khkt.EditorTools
             Box(kiosk, "Đế ki-ốt", new Vector3(0, 0.03f, 0), new Vector3(0.52f, 0.06f, 0.42f), darkMetal);
             Box(kiosk, "Thân trụ", new Vector3(0, 0.62f, -0.04f), new Vector3(0.36f, 1.12f, 0.22f), bioWhite);
             NoShadow(Box(kiosk, "Màn cảm ứng", new Vector3(0, 1.24f, 0.02f), new Vector3(0.56f, 0.38f, 0.03f), bioDisplayBlue, false, new Vector3(22, 0, 0)));
-            Label(kiosk, "TRA CỨU 83 DỤNG CỤ\n& 15 THÍ NGHIỆM SINH HỌC", new Vector3(0, 1.25f, 0.042f), Vector3.forward, 0.02f, Color.white);
-            Info(kiosk, "Trạm tra cứu dụng cụ hành lang", "Ki-ốt cảm ứng tra cứu nhanh vị trí 83 dụng cụ và hướng dẫn 15 thí nghiệm Sinh học Tầng 2.");
+            Label(kiosk, "TRA CỨU 108 DỤNG CỤ\n& 15 THÍ NGHIỆM SINH HỌC", new Vector3(0, 1.25f, 0.042f), Vector3.forward, 0.02f, Color.white);
+            Info(kiosk, "Trạm tra cứu dụng cụ hành lang", "Ki-ốt cảm ứng tra cứu nhanh vị trí 108 dụng cụ và hướng dẫn 15 thí nghiệm Sinh học Tầng 2.");
 
             Plant(hall, new Vector3(0.45f, 0, F2_CorridorZ / 2), 4, 0.9f);
             Plant(hall, new Vector3(25.8f, 0, F2_CorridorZ + 0.35f), 4, 0.9f);
