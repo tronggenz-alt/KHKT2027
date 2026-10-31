@@ -43,5 +43,42 @@ namespace Khkt.Simulation.Bio
             if (glucoseGrams <= 0) return 0;
             return glucoseGrams * efficiency;
         }
+
+        /// <summary>
+        /// Khối lượng axit lactic (g) sinh ra theo thời gian ủ (giờ), nhiệt độ (°C) và thể tích sữa (mL) trong lên men sữa chua.
+        /// </summary>
+        public static double LacticAcidGramsAt(double hours, double tempC, double milkMl)
+        {
+            if (hours <= 0.0 || milkMl <= 0.0 || tempC < 10.0 || tempC > 55.0)
+                return 0.0;
+
+            // Nhiệt độ tối ưu cho L. bulgaricus / S. thermophilus là ~42 °C
+            double dt = tempC - 42.0;
+            double tempFactor = Math.Exp(-(dt * dt) / (2.0 * 8.5 * 8.5));
+
+            // Lượng axit lactic tối đa sinh ra đạt khoảng 0,95 g trên 100 mL sữa (tương ứng độ chua ~0,95%, pH ~4,4)
+            double maxGrams = (milkMl / 100.0) * 0.95;
+            double rate = 0.35 * tempFactor;
+            double progress = 1.0 - Math.Exp(-rate * hours);
+            return maxGrams * progress;
+        }
+
+        /// <summary>
+        /// Số mol khí CO2 sinh ra theo thời gian (giờ), nhiệt độ (°C), khối lượng đường (g) và trạng thái sống của nấm men.
+        /// </summary>
+        public static double Co2MolesAt(double hours, double tempC, double sugarG, bool yeastAlive)
+        {
+            if (!yeastAlive || hours <= 0.0 || sugarG <= 0.0 || tempC < 5.0 || tempC > 50.0)
+                return 0.0;
+
+            // Nhiệt độ tối ưu lên men rượu của S. cerevisiae khoảng 30 - 32 °C
+            double dt = tempC - 32.0;
+            double tempFactor = Math.Exp(-(dt * dt) / (2.0 * 9.0 * 9.0));
+
+            double maxMoles = MolesCo2FromGlucose(sugarG, 0.90);
+            double rate = 0.45 * tempFactor;
+            double progress = 1.0 - Math.Exp(-rate * hours);
+            return maxMoles * progress;
+        }
     }
 }

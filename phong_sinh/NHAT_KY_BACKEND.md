@@ -82,6 +82,18 @@
   - Mở rộng `Electrophoresis.cs`: thêm `BandPositionCm` (hỗ trợ cả cắm ngược cực trả về vị trí âm) và `LeftGel`.
 - Cập nhật `tests/BioSimulationTests.cs`: đạt **66 / 66 test PASS**.
 
+### Giai đoạn B6 (2026-10-31)
+- Đã triển khai 4 lớp C# mới kèm `.meta` và mở rộng 2 lớp hiện có trong `Phong thi nghiem ao/Assets/Scripts/Simulation/Bio/`:
+  - `Transpiration.cs`: `BubbleShiftMmPerMin` (thoát hơi nước qua potometer theo gió, ánh sáng, độ ẩm và bôi vaseline bịt khí khổng).
+  - `Phototropism.cs`: `BendAngleDeg` (uốn cong hướng sáng), `EtiolationFactor` (hiện tượng mọc vống trong tối).
+  - `DnaExtraction.cs`: `YieldUg` (tách chiết ADN thô theo muối, chất tẩy rửa, nhiệt độ ủ 55 °C và cồn lạnh -20 °C).
+  - `Catalase.cs`: `ActivityFactor` (hoạt tính tương đối của catalase theo nhiệt độ, = 0 khi luộc/quá 65 °C).
+  - Mở rộng `Optics.cs`: thêm `Brightness` (độ sáng trường nhìn theo chiết áp đèn, chắn sáng iris, tụ quang condenser và thiếu dầu soi ở vật kính 100x).
+  - Mở rộng `Fermentation.cs`: thêm `LacticAcidGramsAt` (động học tạo axit lactic trong sữa chua theo giờ và nhiệt độ), `Co2MolesAt` (sinh CO2 lên men rượu theo giờ và nhiệt độ).
+- Toàn bộ hàm cũ giữ nguyên chữ ký, không đổi kết quả kiểm thử cũ.
+- Cập nhật `tests/BioSimulationTests.cs`: đạt **82 / 82 test PASS** (66 + 16 bài kiểm thử mới). `ChemEngineTests.cs`: đạt **147 / 147 test PASS**.
+
+
 
 
 

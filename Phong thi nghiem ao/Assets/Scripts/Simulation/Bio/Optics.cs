@@ -65,5 +65,27 @@ namespace Khkt.Simulation.Bio
             if (dofUm <= 0) return 1.0;
             return Math.Abs(focalOffsetUm) / (dofUm * 0.5);
         }
+
+        /// <summary>
+        /// Độ sáng trường nhìn kính hiển vi (0..1) theo chiết áp đèn (lamp01), độ mở màn chắn sáng (iris01),
+        /// vị trí tụ quang (condenser01) và trạng thái thiếu dầu soi ở vật kính 100x.
+        /// </summary>
+        public static double Brightness(double lamp01, double iris01, double condenser01, bool oilNeededButMissing)
+        {
+            double l = Clamp01(lamp01);
+            if (l <= 0.0) return 0.0;
+            double ir = Clamp01(iris01);
+            double cd = Clamp01(condenser01);
+
+            double b = l * (0.12 + 0.88 * ir) * (0.25 + 0.75 * cd);
+            if (oilNeededButMissing)
+            {
+                // Khúc xạ toàn phần qua khe không khí giữa tiêu bản và vật kính 100x làm mất sáng nghiêm trọng
+                b *= 0.32;
+            }
+            return Clamp01(b);
+        }
+
+        private static double Clamp01(double v) => v < 0.0 ? 0.0 : (v > 1.0 ? 1.0 : v);
     }
 }

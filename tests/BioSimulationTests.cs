@@ -306,6 +306,65 @@ static class BioSimulationTests
         bool leftLong = Electrophoresis.LeftGel(100, 1.0, 120.0, 120.0, 8.0);
         Check(!leftShort && leftLong, "Chạy quá lâu ở điện áp cao (120V, 120 phút) làm băng 100 bp tràn ra khỏi bản gel 8 cm (LeftGel = true)");
 
+        // 17. THOÁT HƠI NƯỚC QUA LÁ (Transpiration - B6)
+        Console.WriteLine("\n[17] Thoát hơi nước bằng áp kế bọt khí (Transpiration):");
+        double trBase = Transpiration.BubbleShiftMmPerMin(0.2, 0.5, 0.5, false);
+        double trWindLight = Transpiration.BubbleShiftMmPerMin(0.9, 0.9, 0.3, false);
+        double trHumid = Transpiration.BubbleShiftMmPerMin(0.2, 0.5, 0.95, false);
+        double trBlocked = Transpiration.BubbleShiftMmPerMin(0.9, 0.9, 0.3, true);
+        Check(trWindLight > trBase * 1.8, "Gió mạnh + ánh sáng cao làm bọt khí potometer dịch chuyển nhanh hơn rõ rệt");
+        Check(trHumid < trBase * 0.4, "Độ ẩm không khí bão hòa (95%) làm giảm mạnh tốc độ thoát hơi nước");
+        Check(trBlocked < trBase * 0.2, "Bôi vaseline bịt kín khí khổng (stomataBlocked) làm tốc độ thoát hơi nước gần bằng 0");
+
+        // 18. HƯỚNG SÁNG & MỌC VỐNG TRONG TỐI (Phototropism - B6)
+        Console.WriteLine("\n[18] Hướng sáng & vươn dài trong tối (Phototropism):");
+        double bend48 = Phototropism.BendAngleDeg(48.0, 45.0, false);
+        double bend12 = Phototropism.BendAngleDeg(12.0, 45.0, false);
+        double bendDark = Phototropism.BendAngleDeg(48.0, 45.0, true);
+        Check(bend48 > bend12 && bend48 > 35.0 && bend48 <= 45.0, "Chiếu sáng lệch 45°: góc uốn cong hướng sáng tăng theo thời gian tiến về 45°");
+        Near(bendDark, 0.0, 1e-5, "Đặt trong tối hoàn toàn (fullyDark = true): cây mọc thẳng không uốn cong (0°)");
+        double etioLight = Phototropism.EtiolationFactor(48.0, false);
+        double etioDark = Phototropism.EtiolationFactor(48.0, true);
+        Check(Math.Abs(etioLight - 1.0) < 1e-6 && etioDark > 1.7, "Hệ số mọc vống (EtiolationFactor): = 1 ngoài sáng, > 1,7 sau 48h trong tối");
+
+        // 19. TÁCH CHIẾT ADN (DnaExtraction - B6)
+        Console.WriteLine("\n[19] Tách chiết ADN thô (DnaExtraction):");
+        double dnaOpt = DnaExtraction.YieldUg(10.0, "chuoi_chin", true, true, 55.0, -20.0, 2.0);
+        double dnaNoDet = DnaExtraction.YieldUg(10.0, "chuoi_chin", true, false, 55.0, -20.0, 2.0);
+        double dnaNoSalt = DnaExtraction.YieldUg(10.0, "chuoi_chin", false, true, 55.0, -20.0, 2.0);
+        double dnaWarmEth = DnaExtraction.YieldUg(10.0, "chuoi_chin", true, true, 55.0, 25.0, 2.0);
+        Check(dnaOpt > 1500.0, "Tách chiết ADN chuối chín đủ muối + chất tẩy + ủ 55°C + cồn lạnh -20°C đạt hiệu suất cao", $"{dnaOpt:F0} µg");
+        Near(dnaNoDet, 0.0, 1e-6, "Không có chất tẩy rửa phá màng tế bào -> không thu được ADN (0 µg)");
+        Check(dnaNoSalt < dnaOpt * 0.15 && dnaWarmEth < dnaOpt * 0.65,
+              "Thiếu muối NaCl hoặc dùng cồn ấm 25°C làm lượng ADN kết tủa giảm mạnh");
+
+        // 20. HOẠT TÍNH CATALASE (Catalase - B6)
+        Console.WriteLine("\n[20] Hệ số hoạt tính enzyme Catalase (Catalase):");
+        Near(Catalase.ActivityFactor(37.0, false), 1.0, 0.01, "Catalase ở nhiệt độ tối ưu 37 °C có hệ số hoạt tính = 1,0");
+        Check(Catalase.ActivityFactor(4.0, false) < 0.15 && Catalase.ActivityFactor(4.0, false) > 0.01,
+              "Catalase ngâm đá lạnh 4 °C giảm mạnh hoạt tính (< 0,15)");
+        Check(Catalase.ActivityFactor(37.0, true) == 0.0 && Catalase.ActivityFactor(80.0, false) == 0.0,
+              "Catalase đã luộc chín hoặc ở 80 °C bị biến tính hoàn toàn (hoạt tính = 0)");
+
+        // 21. MỞ RỘNG QUANG HỌC & LÊN MEN (Optics.Brightness & Fermentation - B6)
+        Console.WriteLine("\n[21] Độ sáng kính hiển vi & động học lên men theo thời gian:");
+        double brFull = Optics.Brightness(1.0, 1.0, 1.0, false);
+        double brDim = Optics.Brightness(0.5, 0.3, 0.5, false);
+        double brNoOil = Optics.Brightness(1.0, 1.0, 1.0, true);
+        Check(Math.Abs(brFull - 1.0) < 0.01 && brDim < brFull * 0.3 && brNoOil < brFull * 0.4,
+              "Optics.Brightness: tối đa = 1; giảm khi khép chắn sáng/hạ tụ quang; giảm > 60% khi vật kính 100x thiếu dầu soi");
+        Near(Optics.Brightness(0.0, 1.0, 1.0, false), 0.0, 1e-6, "Tắt đèn kính hiển vi (lamp=0) -> độ sáng = 0");
+
+        double lac8h = Fermentation.LacticAcidGramsAt(8.0, 42.0, 200.0);
+        double lacCold = Fermentation.LacticAcidGramsAt(8.0, 18.0, 200.0);
+        Check(lac8h > 1.2 && lacCold < lac8h * 0.3, "Ủ sữa chua 8h ở 42 °C sinh nhiều axit lactic hơn hẳn ở 18 °C", $"42°C={lac8h:F2}g, 18°C={lacCold:F2}g");
+
+        double co2Live = Fermentation.Co2MolesAt(4.0, 32.0, 18.016, true);
+        double co2Dead = Fermentation.Co2MolesAt(4.0, 32.0, 18.016, false);
+        double co2Boiled = Fermentation.Co2MolesAt(4.0, 60.0, 18.016, true);
+        Check(co2Live > 0.1 && co2Dead == 0.0 && co2Boiled == 0.0,
+              "Lên men rượu: nấm men sống ở 32 °C sinh CO2 mạnh; nấm men chết hoặc ở 60 °C không sinh CO2");
+
         Console.WriteLine($"\nKết quả: {passed} đạt, {failed} lỗi.");
         return failed == 0 ? 0 : 1;
     }
