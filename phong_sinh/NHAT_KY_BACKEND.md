@@ -42,3 +42,11 @@
 - Đã khảo sát hiện trạng mã nguồn: các lớp `Simulation/Bio`, `Simulation/Chem`, `server/lab`, `server/ai`.
 - Đã chạy kiểm thử baseline: 109 test Python, 140 test Chem C#, 29 test Bio C# đều đạt 100%.
 - Đã khởi tạo nhật ký và kế hoạch tổng thể.
+
+### Giai đoạn B1 (2026-10-31)
+- Đã viết bộ kiểm thử `tests/test_dung_cu_sinh.py` (chạy TDD đỏ trước khi có file dữ liệu).
+- Đã tạo 2 hồ sơ máy phân tích mới `data/may/gel_doc.json` và `data/may/may_do_od600.json`, bổ sung các thông số còn thiếu cho 6 máy hiện có (`kinh_hien_vi`, `tu_an_toan_sinh_hoc`, `tu_am_vi_sinh`, `noi_hap`, `may_pcr`, `be_dien_di`) mà không xóa khóa cũ.
+- Đồng bộ dữ liệu máy sang Unity (`Phong thi nghiem ao/Assets/Lab/Data/May/`) qua `tools/chep_du_lieu_may.py`. Bộ kiểm thử `tests/test_du_lieu_may.py` đạt 8/8 test PASS.
+- Đã xây dựng `data/sinh/dung_cu.json` với đúng 108 bản ghi khớp 100% mục 2 hợp đồng, đầy đủ trường, thông số có nguồn URL https thật hoặc `"mo_phong": true`.
+- Kết quả kiểm thử: `tests/test_dung_cu_sinh.py` đạt 3/3 test dụng cụ, toàn bộ test suite Python đạt 117/117 test (0,60s).
+

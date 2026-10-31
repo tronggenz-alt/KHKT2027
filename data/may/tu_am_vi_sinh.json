@@ -64,6 +64,12 @@
       "gia_tri": "Mô hình logistic tích phân qua pha lag, log và trần kích thước khuẩn lạc",
       "loai": "mô phỏng",
       "mo_phong": true
+    },
+    {
+      "ten": "Thể tích buồng nuôi cấy",
+      "gia_tri": "53 lít",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.memmert.com/products/incubators/incubator/IN55/"
     }
   ],
   "quy_trinh": [
