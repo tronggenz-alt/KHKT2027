@@ -1,0 +1,148 @@
+{
+  "ma": "kinh_hien_vi",
+  "ten": "Kính hiển vi quang học hai mắt (Olympus CX23)",
+  "may_mau": "Olympus CX23, 4 vật kính phẳng tiêu sắc Plan Achromat 4x, 10x, 40x, 100x dầu, đèn LED tích hợp",
+  "nguyen_ly": [
+    "Hệ thống phóng đại hai cấp quang học: vật kính tạo ảnh thật phóng đại của mẫu vật, thị kính tiếp tục phóng đại ảnh đó thành ảnh ảo cùng chiều với ảnh trung gian, cho mắt người quan sát.",
+    "Độ phóng đại tổng bằng tích độ phóng đại thị kính và vật kính: M = M_thi * M_vat. Với thị kính 10x và vật kính 4x, 10x, 40x, 100x, độ phóng đại tương ứng là 40x, 100x, 400x và 1000x.",
+    "Khẩu độ số NA (Numerical Aperture) quyết định độ phân giải theo giới hạn nhiễu xạ Abbe: d = 0,61 * lambda / NA. Vật kính 100x dầu có NA = 1,25 (nhờ dầu soi n = 1,515 ngăn khúc xạ) cho độ phân giải giới hạn khoảng 0,27 micromet.",
+    "Tụ quang Abbe (NA 1,25) và màn chắn sáng dạng đĩa mống mắt (iris diaphragm) điều chỉnh độ hội tụ và độ mở chùm sáng, cân bằng giữa độ phân giải và độ tương phản của tiêu bản."
+  ],
+  "cong_thuc": [
+    "M = M_thi * M_vat",
+    "FOV = FN / M_vat (FN = 20 mm)",
+    "d = 0,61 * lambda / NA"
+  ],
+  "bo_phan": [
+    {
+      "ma": "thi_kinh",
+      "ten": "Cặp thị kính 10x (FN 20 mm)",
+      "chuc_nang": "Phóng đại ảnh từ vật kính, chỉnh khoảng cách hai đồng tử và độ tụ (diopter)."
+    },
+    {
+      "ma": "mam_vat_kinh",
+      "ten": "Mâm xoay 4 vật kính",
+      "chuc_nang": "Chứa 4 vật kính (4x đỏ, 10x vàng, 40x xanh lam, 100x dầu trắng), xoay đổi nhanh độ phóng đại."
+    },
+    {
+      "ma": "ban_kinh",
+      "ten": "Bàn sa trượt cơ học 2 tầng",
+      "chuc_nang": "Đỡ lam kính, có kẹp giữ mẫu và hai núm dịch chuyển mẫu theo trục X - Y."
+    },
+    {
+      "ma": "tu_quang",
+      "ten": "Tụ quang Abbe NA 1,25 và màn chắn sáng",
+      "chuc_nang": "Hội tụ chùm sáng LED vào đúng mặt phẳng mẫu vật; điều chỉnh độ tương phản."
+    },
+    {
+      "ma": "den_led",
+      "ten": "Đèn LED ánh sáng trắng 0,5W",
+      "chuc_nang": "Chiếu sáng xuyên tâm đồng đều, nhiệt độ màu chuẩn tự nhiên, không tỏa nhiệt làm khô mẫu."
+    },
+    {
+      "ma": "num_chinh_tho_tinh",
+      "ten": "Núm điều chỉnh thô (sơ cấp) và vi cấp đồng trục",
+      "chuc_nang": "Nâng hạ bàn kính để lấy nét chính xác; núm vi cấp có độ dịch chuyển 2,5 micromet mỗi vạch."
+    }
+  ],
+  "thong_so": [
+    {
+      "ten": "Số trường thị kính (Field Number)",
+      "gia_tri": "FN = 20 mm",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.olympus-lifescience.com/en/microscopes/upright/cx23/"
+    },
+    {
+      "ten": "Khẩu độ số vật kính Plan Achromat",
+      "gia_tri": "4x (NA 0,10); 10x (NA 0,25); 40x (NA 0,65); 100x dầu (NA 1,25)",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.olympus-lifescience.com/en/microscopes/upright/cx23/"
+    },
+    {
+      "ten": "Khoảng dịch chuyển lấy nét vi cấp",
+      "gia_tri": "0,2 mm / vòng xoay, độ chia 2,5 micromet",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.olympus-lifescience.com/en/microscopes/upright/cx23/"
+    },
+    {
+      "ten": "Độ sâu trường ảnh DOF và độ mờ lấy nét",
+      "gia_tri": "DOF = lambda / NA^2; mô phỏng độ lệch tiêu cự bằng mip bias",
+      "loai": "mô phỏng",
+      "mo_phong": true
+    }
+  ],
+  "quy_trinh": [
+    {
+      "ma": "chuan_bi",
+      "ten": "Cắm điện, bật nguồn LED",
+      "viec": "Bật công tắc nguồn LED ở chân kính, chỉnh núm sáng ở mức vừa phải (mức 3-4).",
+      "ly_do": "Tránh để đèn sáng quá mức gây chói mắt và nhanh mỏi mắt khi quan sát.",
+      "loi": ""
+    },
+    {
+      "ma": "dat_lam",
+      "ten": "Đặt tiêu bản lên bàn sa trượt",
+      "viec": "Mở kẹp giữ lam kính, đặt tiêu bản sao cho lamen hướng lên trên, đưa vùng mẫu vào giữa lỗ sáng.",
+      "ly_do": "Cố định tiêu bản chắc chắn, đúng chiều để vật kính quan sát được qua lamen mỏng.",
+      "loi": "Đặt ngược lamen úp xuống: không lấy nét được ở vật kính 40x và 100x."
+    },
+    {
+      "ma": "chinh_4x",
+      "ten": "Tìm mẫu ở vật kính 4x hoặc 10x",
+      "viec": "Xoay mâm kính về vật kính 4x, vặn ốc sơ cấp nâng bàn kính lên gần nhất (nhìn ngang), rồi nhìn vào thị kính vặn ốc sơ cấp hạ dần xuống tới khi thấy mẫu rõ.",
+      "ly_do": "Thị trường ở 4x rộng (5 mm) giúp định vị mẫu nhanh và tránh đâm vỡ lam kính.",
+      "loi": "Vặn ốc sơ cấp lên trong khi mắt đang nhìn thị kính: dễ đâm vỡ lam kính."
+    },
+    {
+      "ma": "chuyen_40x",
+      "ten": "Chuyển vật kính 40x và lấy nét tinh",
+      "viec": "Đưa vùng mẫu quan tâm vào đúng tâm thị trường, xoay sang vật kính 40x (xanh lam), CHỈ dùng ốc vi cấp tinh chỉnh nét.",
+      "ly_do": "Hệ quang học đồng tiêu (parfocal) giúp ảnh gần đúng nét sẵn, chỉ cần ốc vi cấp.",
+      "loi": "Dùng ốc sơ cấp ở 40x: đầu vật kính đập vào lam kính vỡ tiêu bản."
+    },
+    {
+      "ma": "soi_dau_100x",
+      "ten": "Nhỏ dầu soi cho vật kính 100x",
+      "viec": "Xoay mâm lơ lửng giữa 40x và 100x, nhỏ 1 giọt dầu soi lên lamen, xoay vật kính 100x (vòng trắng) chạm vào giọt dầu, chỉnh ốc vi cấp.",
+      "ly_do": "Dầu soi có chiết suất n = 1,515 đồng nhất với thủy tinh, triệt tiêu phản xạ toàn phần ở mặt tiếp xúc.",
+      "loi": "Không nhỏ dầu: ảnh 100x tối đen, nhòe mờ do tán xạ ánh sáng."
+    },
+    {
+      "ma": "lau_kinh",
+      "ten": "Vệ sinh và tắt kính",
+      "viec": "Hạ bàn kính, lấy tiêu bản ra, lau sạch dầu soi trên vật kính 100x bằng giấy lau thấu kính chuyên dụng, hạ sáng và tắt nguồn.",
+      "ly_do": "Dầu soi để lâu sẽ khô cứng làm ố mốc và hỏng lớp phủ tráng gương thấu kính.",
+      "loi": "Dùng cồn mạnh hoặc giấy thô ráp lau thấu kính: xước lớp phủ chống phản quang."
+    }
+  ],
+  "an_toan": [
+    "Luôn bê kính bằng hai tay: một tay nắm chắc thân kính, một tay đỡ đáy đế kính.",
+    "Không bao giờ dùng ốc sơ cấp khi đang ở vật kính 40x hoặc 100x để tránh đâm vỡ lam kính.",
+    "Chỉ dùng giấy lau quang học chuyên dụng và cồn ete chuyên biệt để vệ sinh thấu kính.",
+    "Tắt đèn LED khi không sử dụng để kéo dài tuổi thọ bóng đèn."
+  ],
+  "thuat_ngu": [
+    {
+      "tu": "Khẩu độ số (NA)",
+      "nghia": "Đại lượng đo góc mở thu nhận ánh sáng của vật kính: NA = n * sin(alpha)."
+    },
+    {
+      "tu": "Độ sâu trường ảnh (DOF)",
+      "nghia": "Khoảng cách dọc trục quang học mà mẫu vật vẫn được nhìn thấy rõ nét."
+    },
+    {
+      "tu": "Hệ quang đồng tiêu (Parfocal)",
+      "nghia": "Khi đổi vật kính khác nhau, điểm lấy nét vẫn giữ nguyên không đổi đáng kể."
+    },
+    {
+      "tu": "Dầu soi kính hiển vi",
+      "nghia": "Dầu khoáng tổng hợp có chiết suất n = 1,515 tương đương phiến kính lamen."
+    }
+  ],
+  "cau_hoi_on_tap": [
+    "Độ phóng đại tổng của kính hiển vi khi dùng thị kính 10x và vật kính 40x là bao nhiêu?",
+    "Vì sao khi chuyển sang quan sát ở vật kính 40x và 100x chỉ được dùng núm điều chỉnh vi cấp?",
+    "Tác dụng của giọt dầu soi khi quan sát ở vật kính 100x là gì?",
+    "Đường kính thị trường quang học (FOV) thay đổi như thế nào khi tăng độ phóng đại?"
+  ]
+}

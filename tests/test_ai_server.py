@@ -67,11 +67,16 @@ class AiServerTest(unittest.TestCase):
 
     def test_danh_sach_va_ho_so_may(self):
         ds = self.client.get("/may").json()
-        self.assertEqual(len(ds), 14)
+        self.assertGreaterEqual(len(ds), 14)
         self.assertIn("noi_hap", [m["ma"] for m in ds])
+        self.assertIn("kinh_hien_vi", [m["ma"] for m in ds])
+        self.assertIn("may_pcr", [m["ma"] for m in ds])
         d = self.client.get("/may/xrd").json()
         self.assertEqual(d["ma"], "xrd")
         self.assertTrue(d["quy_trinh"])
+        d_bio = self.client.get("/may/kinh_hien_vi").json()
+        self.assertEqual(d_bio["ma"], "kinh_hien_vi")
+        self.assertTrue(d_bio["quy_trinh"])
         self.assertEqual(self.client.get("/may/khong_co").status_code, 404)
 
     def test_tro_ly_kem_quy_trinh_may(self):
@@ -90,6 +95,8 @@ class AiServerTest(unittest.TestCase):
         self.assertEqual([d["ma"] for d in machines.find("cách dùng máy SEM?")], ["sem"])
         self.assertEqual([d["ma"] for d in machines.find("đo phổ hồng ngoại")], ["ftir"])
         self.assertEqual([d["ma"] for d in machines.find("GC-MS rượu")], ["gc_ms"])
+        self.assertEqual([d["ma"] for d in machines.find("cách lấy nét kính hiển vi quang học?")], ["kinh_hien_vi"])
+        self.assertEqual([d["ma"] for d in machines.find("cài đặt nhiệt độ máy PCR nhân bản gen")], ["may_pcr"])
         self.assertEqual(machines.find("pha dung dịch NaCl"), [])
 
     def test_luoc_do_hanh_dong_hop_le(self):

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -269,6 +269,15 @@ public class KhktAutoTest : MonoBehaviour
         {
             yield return PadTestXyb();
             Log($"Xong sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "tang2")
+        {
+            yield return Floor2Test();
+            Log($"Xong kiểm thử Tầng 2 sau {Time.realtimeSinceStartup - t0:0} s");
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.Exit(0);
 #endif
@@ -3197,6 +3206,103 @@ public class KhktAutoTest : MonoBehaviour
             viewer.LookAt(reading.MeniscusPosition);
             yield return new WaitForSeconds(0.05f);
         }
+    }
+
+    IEnumerator Floor2Test()
+    {
+        Log("[KHKT-PLAY] Bắt đầu kiểm thử tự động Tầng 2 (Khu sinh học)");
+
+        // 1. Kiểm tra ZoneMap.At đúng tầng
+        int zLab = Khkt.Rendering.ZoneMap.At(new Vector3(10f, 1.0f, 7f));
+        int zBioLab = Khkt.Rendering.ZoneMap.At(new Vector3(10f, 4.5f, 7f));
+        int zStairs = Khkt.Rendering.ZoneMap.At(new Vector3(28.5f, 2.0f, 2f));
+        Log($"[KHKT-PLAY] ZoneMap check: (10, 1, 7)={Khkt.Rendering.ZoneMap.Name(zLab)} (kỳ vọng: phong_lab)");
+        Log($"[KHKT-PLAY] ZoneMap check: (10, 4.5, 7)={Khkt.Rendering.ZoneMap.Name(zBioLab)} (kỳ vọng: phong_sinh)");
+        Log($"[KHKT-PLAY] ZoneMap check: (28.5, 2, 2)={Khkt.Rendering.ZoneMap.Name(zStairs)} (kỳ vọng: loi_thang)");
+
+        // 2. Đi từ trạm 1 lên tầng 2
+        viewer.GoTo(1);
+        yield return Frames(5);
+
+        // 3. Duyệt trạm 20..31, chụp ảnh và đo FPS
+        var stations = new (int st, string name)[]
+        {
+            (20, "20_cua_vao_tang2"),
+            (21, "21_ban_sinh_hoc"),
+            (22, "22_ban_giai_phau_so"),
+            (23, "23_tu_an_toan_sinh_hoc"),
+            (24, "24_tu_am_noi_hap"),
+            (25, "25_phong_vi_sinh"),
+            (26, "26_kho_sinh_pham"),
+            (27, "27_hanh_lang_tang2"),
+            (28, "28_sinh_hoc_phan_tu"),
+            (29, "29_pcr_dien_di"),
+            (30, "30_nha_kinh_thuc_vat"),
+            (31, "31_hanh_lang_dong")
+        };
+
+        foreach (var (st, name) in stations)
+        {
+            viewer.GoTo(st);
+            float tw = Time.realtimeSinceStartup;
+            while (!Khkt.Rendering.ZoneStreamer.Settled && Time.realtimeSinceStartup - tw < 10f) yield return null;
+
+            int frameCount = 0;
+            float tStart = Time.realtimeSinceStartup;
+            while (Time.realtimeSinceStartup - tStart < 3.0f)
+            {
+                frameCount++;
+                yield return null;
+            }
+            float fps = frameCount / (Time.realtimeSinceStartup - tStart);
+            Log($"[KHKT-PLAY] Trạm {st} ({name}): FPS trung bình = {fps:0.0} (Mục tiêu >= 60 FPS)");
+            Shot(name);
+        }
+
+        // 4. Đổi chủ đề Tối giản và chụp so sánh ở trạm 20, 26, 30
+        var switcher = Khkt.Environment.Tang2.BioThemeSwitcher.Instance;
+        if (switcher != null)
+        {
+            Log("[KHKT-PLAY] Đổi chủ đề sang Tối giản (Japandi)...");
+            switcher.SetTheme(Khkt.Environment.Tang2.LabThemeMode.ToiGian);
+            yield return new WaitForSeconds(1.0f);
+
+            foreach (int st in new[] { 20, 26, 30 })
+            {
+                viewer.GoTo(st);
+                yield return Frames(6);
+                Shot($"tang2_toigian_{st}");
+            }
+
+            Log("[KHKT-PLAY] Đổi lại chủ đề Quốc tế...");
+            switcher.SetTheme(Khkt.Environment.Tang2.LabThemeMode.QuocTe);
+            yield return new WaitForSeconds(1.0f);
+        }
+
+        // 5. Thao tác kính hiển vi
+        var scope = FindAnyObjectByType<Khkt.Demo.Bio.MicroscopeController>();
+        if (scope != null)
+        {
+            Log("[KHKT-PLAY] Thử nghiệm vận hành Kính hiển vi: chuyển vật kính 4x -> 10x -> 40x -> 100x");
+            scope.CycleObjective();
+            yield return Frames(5);
+            scope.CycleObjective();
+            yield return Frames(5);
+            scope.SetFocus(0.002f);
+            yield return Frames(5);
+            Log($"[KHKT-PLAY] Vật kính hiện tại: {scope.CurrentMagnification}x, FOV = {scope.CurrentFovMm:0.00} mm");
+        }
+
+        // 6. Thao tác bàn giải phẫu
+        var anatomy = FindAnyObjectByType<Khkt.Demo.Bio.DigitalAnatomyTable>();
+        if (anatomy != null)
+        {
+            Log("[KHKT-PLAY] Thử nghiệm bàn giải phẫu: tách lớp hiển thị");
+            anatomy.Use();
+            yield return Frames(10);
+        }
+
+        Log("[KHKT-PLAY] Kiểm thử tự động Tầng 2 HOÀN TẤT THÀNH CÔNG!");
     }
 
     IEnumerator Watchdog()

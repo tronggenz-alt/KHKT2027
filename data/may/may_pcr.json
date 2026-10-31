@@ -1,0 +1,135 @@
+{
+  "ma": "may_pcr",
+  "ten": "Máy luân nhiệt chu kỳ PCR (Bio-Rad T100)",
+  "may_mau": "Bio-Rad T100 Thermal Cycler, khối nhiệt 96 giếng 0,2 mL, nắp gia nhiệt chống ngưng tụ 105 °C, tốc độ biến nhiệt 4 °C/s",
+  "nguyen_ly": [
+    "Khuếch đại chuỗi polymerase in vitro dựa trên 3 bước nhiệt tuần hoàn: biến tính tách sợi đôi DNA ở 94 - 95 °C, gắn mồi đặc hiệu ở nhiệt độ Ta (50 - 65 °C), và kéo dài sợi mới bởi enzyme Taq DNA polymerase chịu nhiệt ở 72 °C.",
+    "Khối nhiệt bán dẫn Peltier điều khiển dòng điện đảo chiều cho phép gia nhiệt và hạ nhiệt siêu nhanh với tốc độ tới 4 °C/s và độ đồng đều nhiệt độ cao giữa 96 giếng.",
+    "Khuếch đại theo cấp số nhân lý thuyết N = N0 * (1 + E)^n, trong đó N0 là lượng bản sao khuôn ban đầu, E là hiệu suất phản ứng (0,85 - 1,0), và n là số chu kỳ nhiệt luân chuyển (25 - 35 chu kỳ).",
+    "Nắp gia nhiệt (Heated Lid) duy trì ở 105 °C cao hơn nhiệt độ dung dịch trong ống, ngăn chặn hiện tượng bay hơi và ngưng tụ hơi nước lên nắp ống, đảm bảo nồng độ ion Mg2+ và đệm phản ứng không đổi."
+  ],
+  "cong_thuc": [
+    "N = N0 * (1 + E)^n",
+    "Ta = Tm - 5 °C",
+    "Tm = 2 * (A + T) + 4 * (G + C) °C (cong thuc Wallace cho moi ngan)"
+  ],
+  "bo_phan": [
+    {
+      "ma": "khoi_nhiet_peltier",
+      "ten": "Khối nhiệt 96 giếng Peltier",
+      "chuc_nang": "Chứa ống PCR 0,2 mL hoặc đĩa 96 giếng; điều nhiệt chính xác từ 4,0 °C đến 100,0 °C."
+    },
+    {
+      "ma": "nap_gia_nhiet",
+      "ten": "Nắp gia nhiệt áp lực 105 °C",
+      "chuc_nang": "Nung nóng đỉnh ống và ép chặt nắp ống ngăn ngừa bay hơi mà không cần phủ dầu khoáng."
+    },
+    {
+      "ma": "man_hinh_cam_ung",
+      "ten": "Màn hình màu cảm ứng 5,7 inch",
+      "chuc_nang": "Cài đặt chu trình nhiệt độ, thời gian các bước và hiển thị đồ thị tiến trình chạy theo thời gian thực."
+    },
+    {
+      "ma": "quat_tan_nhiet",
+      "ten": "Hệ thống quạt làm mát đối lưu",
+      "chuc_nang": "Giải phóng nhiệt nhanh chóng từ các phiến Peltier trong pha hạ nhiệt."
+    },
+    {
+      "ma": "cong_ket_noi",
+      "ten": "Cổng USB trích xuất dữ liệu",
+      "chuc_nang": "Sao chép chương trình chạy và nhật ký vận hành máy sang thẻ nhớ máy tính."
+    }
+  ],
+  "thong_so": [
+    {
+      "ten": "Tốc độ nâng nhiệt tối đa",
+      "gia_tri": "4,0 °C/giây",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.bio-rad.com/en-us/product/t100-thermal-cycler"
+    },
+    {
+      "ten": "Dải nhiệt độ điều khiển của khối mẫu",
+      "gia_tri": "4,0 °C đến 100,0 °C, độ chính xác +- 0,2 °C",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.bio-rad.com/en-us/product/t100-thermal-cycler"
+    },
+    {
+      "ten": "Nhiệt độ nắp gia nhiệt chống đọng sương",
+      "gia_tri": "105 °C",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.bio-rad.com/en-us/product/t100-thermal-cycler"
+    },
+    {
+      "ten": "Mô phỏng động học tích lũy bản sao DNA",
+      "gia_tri": "Tăng trưởng lũy thừa và bão hòa nồng độ enzyme/nucleotide",
+      "loai": "mô phỏng",
+      "mo_phong": true
+    }
+  ],
+  "quy_trinh": [
+    {
+      "ma": "chuan_bi_mau",
+      "ten": "Pha hỗn hợp phản ứng PCR (Master Mix)",
+      "viec": "Pha hỗn hợp gồm đệm Taq, dNTPs, cặp mồi xuôi/ngược, Taq polymerase và DNA khuôn trong ống PCR 0,2 mL đặt trên khay đá lạnh.",
+      "ly_do": "Giữ lạnh ngăn Taq polymerase hoạt động ngoài ý muốn trước khi chu trình nhiệt bắt đầu.",
+      "loi": "Để hỗn hợp ở nhiệt độ phòng lâu: mồi bắt cặp không đặc hiệu tạo sản phẩm phụ dimer."
+    },
+    {
+      "ma": "nap_ong",
+      "ten": "Nạp ống vào khối giếng nhiệt",
+      "viec": "Xếp đều các ống PCR vào các giếng, phân bố cân xứng để nắp ép đều lực, đậy chặt nắp máy luân nhiệt.",
+      "ly_do": "Đảm bảo sự tiếp xúc nhiệt tối ưu giữa thành ống và khối kim loại.",
+      "loi": "Đóng nắp lỏng hoặc xếp lệch: nắp ép cong vẹo ống, hơi bay làm cạn dung dịch phản ứng."
+    },
+    {
+      "ma": "cai_dat",
+      "ten": "Lập trình chu trình nhiệt luân chuyển",
+      "viec": "Cài đặt: Biến tính ban đầu 95 °C (3 phút); 30 chu kỳ gồm [95 °C 30s -> 58 °C 30s -> 72 °C 45s]; Kéo dài cuối 72 °C (5 phút); Giữ 4 °C.",
+      "ly_do": "Phù hợp với nhiệt độ nóng chảy của mồi và chiều dài đoạn gen cần nhân bản.",
+      "loi": "Cài nhiệt độ gắn mồi quá thấp: xuất hiện nhiều vạch phụ do mồi bám sai vị trí."
+    },
+    {
+      "ma": "chay_chu_trinh",
+      "ten": "Khởi động phản ứng và theo dõi",
+      "viec": "Bấm Start, theo dõi đồ thị nhiệt độ đạt 105 °C ở nắp trước khi khối giếng bắt đầu chu kỳ đầu tiên.",
+      "ly_do": "Nắp phải nóng trước để dung dịch không bị bay hơi ngưng tụ lên đỉnh ống.",
+      "loi": ""
+    },
+    {
+      "ma": "thu_san_pham",
+      "ten": "Lấy sản phẩm và bảo quản",
+      "viec": "Sau khi máy về bước giữ 4 °C, mở nắp lấy ống PCR ra, chuyển sang điện di kiểm tra hoặc bảo quản tủ đông -20 °C.",
+      "ly_do": "Bảo quản sản phẩm DNA không bị phân hủy bởi nuclease.",
+      "loi": "Để lâu trong máy tắt nguồn ở nhiệt độ phòng: DNA bị phân hủy dần."
+    }
+  ],
+  "an_toan": [
+    "Đeo găng tay sạch, thao tác trong phòng sạch phân tử để tránh nhiễm DNA ngoại lai và nuclease.",
+    "Khối nhiệt và nắp gia nhiệt đạt 105 °C có thể gây bỏng; chỉ mở máy khi chu trình kết thúc.",
+    "Dùng đầu tip có màng lọc (filter tips) khi hút dung dịch PCR để ngăn sol khí nhiễm chéo giữa các ống mẫu."
+  ],
+  "thuat_ngu": [
+    {
+      "tu": "Nhiệt độ nóng chảy của mồi (Tm)",
+      "nghia": "Nhiệt độ mà 50% phân tử mồi tách khỏi chuỗi khuôn bổ sung."
+    },
+    {
+      "tu": "Taq DNA Polymerase",
+      "nghia": "Enzyme tổng hợp DNA chịu nhiệt phân lập từ vi khuẩn suối nước nóng Thermus aquaticus."
+    },
+    {
+      "tu": "dNTPs",
+      "nghia": "Hỗn hợp 4 loại deoxynucleotide triphosphate (dATP, dCTP, dGTP, dTTP) làm nguyên liệu tổng hợp."
+    },
+    {
+      "tu": "Nắp gia nhiệt (Heated Lid)",
+      "nghia": "Nắp đậy có điện trở nung nóng 105 °C chống đọng hơi nước trên nắp ống phản ứng."
+    }
+  ],
+  "cau_hoi_on_tap": [
+    "Ba bước nhiệt trong một chu kỳ phản ứng PCR diễn ra ở các nhiệt độ nào và có vai trò gì?",
+    "Tại sao enzyme Taq polymerase lại được chọn sử dụng trong kỹ thuật PCR?",
+    "Nắp gia nhiệt (Heated Lid) duy trì ở 105 °C nhằm mục đích gì trong suốt phản ứng?",
+    "Nếu ban đầu có 1 phân tử DNA khuôn, sau 30 chu kỳ PCR lý thuyết sẽ tạo ra bao nhiêu phân tử DNA?"
+  ]
+}

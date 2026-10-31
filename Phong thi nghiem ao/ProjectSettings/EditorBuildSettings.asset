@@ -24,6 +24,30 @@ EditorBuildSettings:
     path: Assets/Scenes/Khu/Khu_PhongRobot.unity
     guid: 3a79d04ab26e3d94aaba31946fc8c444
   - enabled: 1
+    path: Assets/Scenes/Khu/Khu_PhongSinh.unity
+    guid: 2166a3b2813524f10a3f050cfd76ab05
+  - enabled: 1
+    path: Assets/Scenes/Khu/Khu_PhongViSinh.unity
+    guid: 8e37200526c0b4ec5847964db22a26d3
+  - enabled: 1
+    path: Assets/Scenes/Khu/Khu_KhoSinhPham.unity
+    guid: f548d30db8eaa453985923142a1fd132
+  - enabled: 1
+    path: Assets/Scenes/Khu/Khu_HanhLangT2.unity
+    guid: f11dac899fd6640afbaaaa879ee1ed0d
+  - enabled: 1
+    path: Assets/Scenes/Khu/Khu_SinhPhanTu.unity
+    guid: a1351306b32e740fa88a979eb465b566
+  - enabled: 1
+    path: Assets/Scenes/Khu/Khu_NhaKinh.unity
+    guid: 40fd357c5fef74610964c9651fa25852
+  - enabled: 1
+    path: Assets/Scenes/Khu/Khu_HanhLangDong.unity
+    guid: b0544392a5be04032802e381dbd1f16b
+  - enabled: 1
+    path: Assets/Scenes/Khu/Khu_LoiThang.unity
+    guid: 1840ff52da5d4429cad72bbe8b454698
+  - enabled: 1
     path: Assets/Scenes/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
   m_configObjects:

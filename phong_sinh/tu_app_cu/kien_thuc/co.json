@@ -1,0 +1,71 @@
+{
+  "id": "co",
+  "ten": "Hệ cơ",
+  "can_duyet": true,
+  "chuong_trinh": "KHTN 8 (hệ vận động); Sinh học 11 – synapse thần kinh – cơ (CT GDPT 2018)",
+  "vi_tri": [
+    "Cơ vân bám vào xương qua gân, phủ khắp cơ thể: cơ đầu – cổ, cơ thân (ngực, bụng, lưng) và cơ chi."
+  ],
+  "cau_tao": [
+    "Cơ thể người có hơn 600 cơ vân.",
+    "Có ba loại mô cơ: cơ vân (bám xương, co theo ý muốn), cơ trơn (thành nội quan, mạch máu, co không theo ý muốn) và cơ tim.",
+    "Bắp cơ gồm nhiều bó cơ; mỗi bó gồm nhiều tế bào cơ (sợi cơ); trong sợi cơ có tơ cơ dày (myosin) và tơ cơ mảnh (actin) xếp xen kẽ tạo nên vân sáng, vân tối.",
+    "Hai đầu bắp cơ thường thu hẹp thành gân bám vào xương (ví dụ gân gót bám vào xương gót chân)."
+  ],
+  "chuc_nang": [
+    "Co cơ kéo xương quanh khớp, tạo ra cử động và giữ tư thế cơ thể.",
+    "Co cơ sinh nhiệt, góp phần giữ thân nhiệt (run khi lạnh).",
+    "Các cơ hô hấp (cơ hoành, cơ liên sườn) giúp thông khí ở phổi."
+  ],
+  "co_che": [
+    "Xung thần kinh từ neuron vận động truyền qua synapse thần kinh – cơ (chất trung gian acetylcholine) làm sợi cơ co.",
+    "Khi co cơ, tơ cơ mảnh trượt vào giữa tơ cơ dày làm sợi cơ ngắn lại; quá trình này cần năng lượng ATP.",
+    "Khi hoạt động mạnh và kéo dài, cơ thiếu O₂ phải hô hấp kị khí tạo acid lactic, gây mỏi cơ."
+  ],
+  "lien_he": [
+    "Khởi động kĩ trước khi tập luyện để tránh chuột rút, giãn cơ, đứt gân.",
+    "Luyện tập thể dục thể thao đều đặn làm cơ phát triển, tăng sức bền.",
+    "Ngồi lâu, ít vận động làm cơ yếu, dễ đau lưng, mỏi cổ."
+  ],
+  "diem_thi": [
+    "Kiến thức hệ cơ chủ yếu thuộc KHTN 8; Sinh học 11 liên hệ qua synapse thần kinh – cơ (acetylcholine) và hô hấp tế bào.",
+    "Phân biệt ba loại mô cơ; nguyên nhân gây mỏi cơ.",
+    "Tác động của chất độc, thuốc lên synapse thần kinh – cơ (gây liệt cơ hoặc co cứng cơ)."
+  ],
+  "trac_nghiem": [
+    {
+      "cau": "Loại mô cơ nào co theo ý muốn?",
+      "lua_chon": ["Cơ trơn", "Cơ tim", "Cơ vân", "Cả ba loại mô cơ"],
+      "dap_an": "C",
+      "giai_thich": "Cơ vân bám vào xương, chịu sự điều khiển có ý thức của hệ thần kinh."
+    },
+    {
+      "cau": "Nguyên nhân chủ yếu gây mỏi cơ khi vận động mạnh, kéo dài là",
+      "lua_chon": ["thiếu O₂, tích tụ acid lactic", "thừa O₂ trong cơ", "cơ được cung cấp quá nhiều glucose", "xương không đủ calcium"],
+      "dap_an": "A",
+      "giai_thich": "Thiếu O₂ khiến tế bào cơ hô hấp kị khí, tạo ít ATP và tích tụ acid lactic gây mỏi."
+    },
+    {
+      "cau": "Chất trung gian hoá học tại synapse thần kinh – cơ là",
+      "lua_chon": ["insulin", "acetylcholine", "adrenaline", "ADH"],
+      "dap_an": "B",
+      "giai_thich": "Acetylcholine được giải phóng từ chuỳ synapse, gắn vào thụ thể trên màng sợi cơ và gây co cơ."
+    },
+    {
+      "cau": "Khi sợi cơ co, điều gì xảy ra với các tơ cơ?",
+      "lua_chon": ["Tơ cơ dày và tơ cơ mảnh cùng ngắn lại", "Tơ cơ dày tan ra", "Tơ cơ mảnh dài thêm", "Tơ cơ mảnh trượt vào giữa tơ cơ dày"],
+      "dap_an": "D",
+      "giai_thich": "Các tơ cơ không ngắn đi mà trượt lên nhau, làm sợi cơ ngắn lại."
+    }
+  ],
+  "goi_y_hoi": [
+    "Cơ co nhờ cơ chế nào?",
+    "Vì sao vận động mạnh trong thời gian dài bị mỏi cơ?",
+    "Cơ vân, cơ trơn và cơ tim khác nhau thế nào?"
+  ],
+  "mo_rong": [
+    "Cơ chế phân tử của co cơ: Ca²⁺ được giải phóng từ lưới cơ tương, gắn vào troponin làm lộ vị trí gắn trên actin; đầu myosin gắn actin và kéo (chu kì cầu nối) nhờ năng lượng ATP.",
+    "Bơm Ca²⁺ (SERCA) thu hồi Ca²⁺ về lưới cơ tương giúp cơ giãn ra.",
+    "Năng lượng tức thời từ creatine phosphate (phosphocreatine + ADP → creatine + ATP); acid lactic về gan được chuyển lại thành glucose (chu trình Cori)."
+  ]
+}

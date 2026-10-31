@@ -144,10 +144,11 @@ namespace Khkt.Rendering
                 Vector3 v = viewer.position;
                 int vz = ZoneMap.At(v);
                 if (vz >= 0) need[vz] = true;
-                else { need[ZoneMap.Lab] = true; need[ZoneMap.Store] = true; }  // ngoài hiên: nhìn qua cửa sổ vào trong
+                else if (v.y < 3.6f) { need[ZoneMap.Lab] = true; need[ZoneMap.Store] = true; }  // ngoài hiên tầng 1: nhìn qua cửa sổ vào trong
                 foreach (var d in AutoDoor.All)
                 {
                     Vector3 dv = d.Center - v;
+                    if (Mathf.Abs(dv.y) > 2.5f) continue;  // không nạp trước cửa ở tầng khác
                     if (dv.x * dv.x + dv.z * dv.z > preloadRadius * preloadRadius) continue;
                     Mark(d.zoneA);
                     Mark(d.zoneB);

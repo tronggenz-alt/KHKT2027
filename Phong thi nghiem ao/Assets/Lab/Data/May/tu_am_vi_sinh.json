@@ -1,0 +1,135 @@
+{
+  "ma": "tu_am_vi_sinh",
+  "ten": "Tủ ấm nuôi cấy vi sinh vật (Memmert IN30)",
+  "may_mau": "Memmert IN30 Natural Convection Incubator, dung tích 32 L, dải nhiệt RT +5 °C đến 80 °C, cửa trong bằng kính cường lực, đối lưu tự nhiên",
+  "nguyen_ly": [
+    "Cung cấp và duy trì nhiệt độ tối ưu ổn định cho quá trình sinh trưởng và trao đổi chất của vi sinh vật (như E. coli 37 °C, nấm men 28 - 30 °C, vi khuẩn lactic 37 - 42 °C).",
+    "Cơ chế truyền nhiệt đối lưu tự nhiên (Natural Convection) 4 mặt quanh thành buồng giúp phân bố nhiệt độ đồng đều mà không tạo luồng gió mạnh, tránh làm khô bề mặt thạch đĩa petri trong quá trình ủ mẫu 24 - 48 giờ.",
+    "Hệ thống điều khiển vi xử lý PID với cảm biến nhiệt độ bạch kim Pt100 độ nhạy cao kép (Class A) đảm bảo độ ổn định nhiệt độ cực cao (+- 0,1 °C) và tự động ngắt an toàn khi quá nhiệt.",
+    "Cấu trúc hai lớp cửa: cửa ngoài bằng thép không gỉ cách nhiệt dày giữ nhiệt độ buồng nuôi; cửa trong bằng kính cường lực trong suốt cho phép quan sát sự hình thành khuẩn lạc mà không làm xáo trộn nhiệt độ và độ ẩm buồng cấy."
+  ],
+  "cong_thuc": [
+    "dN / dt = r * N * (1 - N / K)",
+    "N(t) = K / (1 + ((K - N0) / N0) * exp(-r * t))",
+    "T_set = 37,0 °C (+- 0,1 °C)"
+  ],
+  "bo_phan": [
+    {
+      "ma": "buong_inox_304",
+      "ten": "Buồng ủ bằng thép không gỉ 304 dập sâu",
+      "chuc_nang": "Chứa giá để mẫu; chống ăn mòn hóa chất và dễ dàng khử trùng tẩy rửa."
+    },
+    {
+      "ma": "cua_trong_kinh",
+      "ten": "Cửa trong bằng kính cường lực",
+      "chuc_nang": "Ngăn cách nhiệt khi mở cửa ngoài, cho phép quan sát khuẩn lạc mà không làm mất nhiệt."
+    },
+    {
+      "ma": "thanh_nhiet_4_mat",
+      "ten": "Hệ thống gia nhiệt tích hợp 4 mặt thành buồng",
+      "chuc_nang": "Gia nhiệt đều không gian trong buồng, không dùng quạt gió nhằm hạn chế bay hơi nước."
+    },
+    {
+      "ma": "cam_bien_pt100",
+      "ten": "Cặp cảm biến nhiệt điện trở Pt100 Class A",
+      "chuc_nang": "Đo nhiệt độ chính xác tới 0,1 °C và giám sát bảo vệ quá nhiệt độc lập."
+    },
+    {
+      "ma": "man_hinh_single_display",
+      "ten": "Bảng điều khiển số ControlCOCKPIT",
+      "chuc_nang": "Cài đặt nhiệt độ ủ, thời gian hẹn giờ và vị trí cánh van thoát khí tươi."
+    }
+  ],
+  "thong_so": [
+    {
+      "ten": "Dải nhiệt độ cài đặt",
+      "gia_tri": "từ nhiệt độ phòng +5 °C đến +80 °C, độ phân giải hiển thị 0,1 °C",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.memmert.com/products/incubators/incubator/IN30/"
+    },
+    {
+      "ten": "Độ biến thiên nhiệt độ trong không gian ở 37 °C",
+      "gia_tri": "+- 0,6 °C theo tiêu chuẩn DIN 12880:2007-05",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.memmert.com/products/incubators/incubator/IN30/"
+    },
+    {
+      "ten": "Độ dao động nhiệt độ theo thời gian ở 37 °C",
+      "gia_tri": "+- 0,1 °C theo tiêu chuẩn DIN 12880:2007-05",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.memmert.com/products/incubators/incubator/IN30/"
+    },
+    {
+      "ten": "Mô phỏng đường cong sinh trưởng khuẩn lạc",
+      "gia_tri": "Mô hình logistic tích phân qua pha lag, log và trần kích thước khuẩn lạc",
+      "loai": "mô phỏng",
+      "mo_phong": true
+    }
+  ],
+  "quy_trinh": [
+    {
+      "ma": "bat_nguon",
+      "ten": "Khởi động và cài đặt nhiệt độ ủ",
+      "viec": "Bật công tắc nguồn, xoay núm Push-Turn trên màn hình cài đặt 37,0 °C, chờ 20 - 30 phút cho nhiệt độ buồng ổn định hoàn toàn.",
+      "ly_do": "Đảm bảo buồng ủ đạt đúng nhiệt độ sinh lý trước khi đưa mẫu vi sinh vào.",
+      "loi": "Đưa mẫu vào ngay khi nhiệt độ chưa ổn định: làm chậm pha tiềm phát (lag phase) của vi sinh vật."
+    },
+    {
+      "ma": "xep_dia_petri",
+      "ten": "Đặt đĩa petri úp ngược vào giá",
+      "viec": "Lật úp đĩa thạch petri (đáy chứa môi trường thạch hướng lên trên, nắp đậy nằm dưới), xếp thành chồng không quá 4 đĩa trên giá inox.",
+      "ly_do": "Hơi nước ngưng tụ trên nắp không nhỏ giọt xuống làm nhòe và lan tràn các khuẩn lạc đơn lẻ.",
+      "loi": "Để đĩa ngửa nắp lên: giọt nước ngưng nhỏ xuống mặt thạch hòa lẫn các khuẩn lạc thành vệt dính bết."
+    },
+    {
+      "ma": "dong_cua",
+      "ten": "Đóng kín hai lớp cửa tủ ấm",
+      "viec": "Đóng cửa kính bên trong sát gioăng, sau đó đóng chặt cánh cửa ngoài cách nhiệt.",
+      "ly_do": "Bảo toàn đối lưu nhiệt độ kín, tránh dao động nhiệt do dòng gió phòng bên ngoài thổi vào.",
+      "loi": "Cửa kính đóng kênh: nhiệt độ bị thất thoát liên tục khiến thanh nhiệt hoạt động quá tải."
+    },
+    {
+      "ma": "theo_doi",
+      "ten": "Theo dõi sinh trưởng sau 18 - 24 giờ",
+      "viec": "Quan sát qua lớp cửa kính trong suốt xem đĩa cấy đã xuất hiện khuẩn lạc mọc rõ hay chưa mà không cần mở bung cửa ngoài.",
+      "ly_do": "Hạn chế mất nhiệt và giảm nguy cơ nhiễm nấm mốc từ không khí phòng vào đĩa.",
+      "loi": ""
+    },
+    {
+      "ma": "lay_mau",
+      "ten": "Lấy mẫu và vệ sinh buồng tủ",
+      "viec": "Đeo găng tay lấy đĩa cấy ra đếm khuẩn lạc CFU hoặc chuyển vào tủ lạnh 4 °C để hãm phát triển. Lau sạch bề mặt buồng ấm bằng cồn 70%.",
+      "ly_do": "Bảo toàn số lượng khuẩn lạc, giữ sạch buồng ấm cho các mẻ ủ tiếp theo.",
+      "loi": "Để mẫu quá hạn trong tủ ấm: thạch khô nứt, khuẩn lạc già cỗi tự phân hủy."
+    }
+  ],
+  "an_toan": [
+    "Chỉ nuôi cấy các chủng vi sinh vật dạy học an toàn cấp độ BSL-1 (E. coli K-12, nấm men Saccharomyces cerevisiae, Lactobacillus).",
+    "Tuyệt đối không đưa vào tủ ấm các mẫu bệnh phẩm nguy hiểm hoặc vi sinh vật gây bệnh chưa rõ danh tính.",
+    "Đĩa petri có nứt vỡ hoặc bung nắp phải bọc kín trong túi rác sinh học và hấp tiệt trùng ngay lập tức."
+  ],
+  "thuat_ngu": [
+    {
+      "tu": "Đối lưu tự nhiên (Natural Convection)",
+      "nghia": "Sự lưu thông khí ấm do chênh lệch mật độ tự nhiên không cần dùng cánh quạt cưỡng bức."
+    },
+    {
+      "tu": "Khuẩn lạc (Colony)",
+      "nghia": "Quần thể vi sinh vật nhìn thấy bằng mắt thường sinh ra từ một tế bào mẹ đơn lẻ trên môi trường thạch."
+    },
+    {
+      "tu": "CFU (Colony Forming Unit)",
+      "nghia": "Đơn vị hình thành khuẩn lạc dùng để định lượng mật độ vi sinh vật sống."
+    },
+    {
+      "tu": "Cảm biến Pt100",
+      "nghia": "Cảm biến nhiệt điện trở bạch kim có điện trở 100 ohm tại 0 °C với độ nhạy và tuyến tính rất cao."
+    }
+  ],
+  "cau_hoi_on_tap": [
+    "Tại sao các đĩa thạch petri nuôi cấy vi sinh vật luôn phải được đặt úp ngược khi cho vào tủ ấm?",
+    "Ưu điểm của cơ chế gia nhiệt đối lưu tự nhiên so với đối lưu quạt gió cưỡng bức trong nuôi cấy vi sinh vật là gì?",
+    "Mục đích của việc thiết kế hai lớp cửa (cửa ngoài cách nhiệt và cửa trong kính trong suốt) là gì?",
+    "Các chủng vi sinh vật nào được phép nuôi cấy trong tủ ấm phòng thí nghiệm trường phổ thông?"
+  ]
+}

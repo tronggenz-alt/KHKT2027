@@ -13,7 +13,7 @@ namespace Khkt.EditorTools
     /// vật liệu URP và ảnh vân sinh bằng code. Vật liệu, lưới và ảnh được lưu thành asset trong
     /// Assets/Lab để cảnh lưu xong vẫn giữ được; dựng lại lần nữa thì ghi đè lên chính các asset đó.
     /// </summary>
-    internal static class LabKit
+    public static partial class LabKit
     {
         public const string Root = "Assets/Lab";
 
