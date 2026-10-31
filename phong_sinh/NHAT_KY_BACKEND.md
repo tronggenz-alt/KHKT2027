@@ -59,5 +59,12 @@
 - Bộ kiểm thử `tests/test_dung_cu_sinh.py` đạt 8/8 test PASS (không còn test nào bị skip).
 - Toàn bộ kiểm thử Python `unittest discover -s tests` đạt 117/117 test PASS.
 
+### Giai đoạn B3 (2026-10-31)
+- Cập nhật `Species.cs`: bổ sung các chất sinh học tầng 2 (`xanh_methylen`, `tim_ket_tinh`, `safranin`, `catalase`, `catalase_bat_hoat`) và hệ thống bí danh (`axit_lactic` → `Lac`, `con_70` / `con_96` / `etanol` → `C2H5OH`, `mb` → `xanh_methylen`).
+- Cập nhật `ChemKinetics.cs`: bổ sung hàm `CatalaseActivity(tempC, boiled)` và tích hợp xúc tác sinh học catalase phân hủy H₂O₂ giải phóng O₂ (tối ưu ở 37 °C, giảm mạnh ở 4 °C, biến tính mất hoạt tính khi đun >= 65 °C).
+- Cập nhật `data/reactions/phan_ung.json`: thêm phản ứng `h2o2_catalase`.
+- Cập nhật `tests/ChemEngineTests.cs`: đạt **147 / 147 test PASS** (140 bài cũ + 7 bài kiểm thử mới).
+
+
 - Kết quả kiểm thử: `tests/test_dung_cu_sinh.py` đạt 3/3 test dụng cụ, toàn bộ test suite Python đạt 117/117 test (0,60s).
 

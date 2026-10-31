@@ -93,6 +93,17 @@ namespace Khkt.Simulation.Chem
     {
         static readonly List<SpeciesDef> all = new List<SpeciesDef>();
         static readonly Dictionary<string, SpeciesDef> byId = new Dictionary<string, SpeciesDef>();
+        static readonly Dictionary<string, string> aliases = new Dictionary<string, string>
+        {
+            ["axit_lactic"] = "Lac",
+            ["lactic"] = "Lac",
+            ["etanol"] = "C2H5OH",
+            ["ethanol"] = "C2H5OH",
+            ["con_70"] = "C2H5OH",
+            ["con_96"] = "C2H5OH",
+            ["methylene_blue"] = "xanh_methylen",
+            ["mb"] = "xanh_methylen",
+        };
         static bool built;
 
         public static IReadOnlyList<SpeciesDef> All { get { Build(); return all; } }
@@ -101,7 +112,10 @@ namespace Khkt.Simulation.Chem
         public static SpeciesDef Get(string id)
         {
             Build();
-            return byId.TryGetValue(id, out var s) ? s : null;
+            if (string.IsNullOrEmpty(id)) return null;
+            if (byId.TryGetValue(id, out var s)) return s;
+            if (aliases.TryGetValue(id, out var realId) && byId.TryGetValue(realId, out s)) return s;
+            return null;
         }
 
         public static int IndexOf(string id)
@@ -352,6 +366,11 @@ namespace Khkt.Simulation.Chem
             Mol("diphenylamin", "(C6H5)2NH", 169.2, null, 0, "điphenylamin");
             Mol("picric", "C6H2(NO2)3OH", 229.1, "#F0E04A", 40, "axit picric");
             Mol("C2H5OH", "C2H5OH", 46.07, null, 0, "etanol");
+            Mol("xanh_methylen", "C16H18ClN3S", 319.85, "#1A53AF", 800, "xanh methylen");
+            Mol("tim_ket_tinh", "C25H30ClN3", 407.98, "#5A189A", 900, "tím kết tinh");
+            Mol("safranin", "C20H19ClN4", 350.84, "#D82A4A", 650, "safranin O");
+            Mol("catalase", "Catalase", 240000, "#E8DEC8", 0.2, "enzyme catalase");
+            Mol("catalase_bat_hoat", "Catalase(bt)", 240000, "#D8D0C0", 0.2, "catalase biến tính");
 
             // ---------- Phức (tạo trong cân bằng) ----------
             var c1 = AddRaw("CuNH3", "[Cu(NH3)4]2+", SpeciesKind.Complex, 2, 131.7, null); c1.Color = Rgb.Hex("#1F3FBF"); c1.ColorStrength = 55;
