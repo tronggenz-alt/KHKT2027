@@ -125,6 +125,36 @@ Quyết định đã tự chọn:
 Còn tồn:
 - không.
 
+### Giai đoạn 2 – Phần tính toán thuần (không cần webcam), có kiểm thử
+Đã làm:
+- Viết mô-đun tính toán thuần `tools/mediapipe_tinh.py`:
+  + Tách hướng đầu (yaw, pitch, roll, dist_z_cm) từ ma trận 4×4 `facial_transformation_matrixes` qua phân rã `cv2.RQDecomp3x3`, chuẩn hóa dấu ăn khớp 100% với `head_tracker.py`.
+  + Đo tròng mắt và hướng nhìn `gaze_x`, `gaze_y` ∈ [-1, 1] đã bù góc quay đầu yaw/pitch; đo khoảng cách theo đường kính tròng mắt ($d = f \cdot 11.7\text{ mm} / \text{đường\_kính\_px}$) cùng hệ số $e$ khoảng cách hai mắt.
+  + Đo vị trí bàn tay, cỡ bàn tay (wrist 0 -> middle MCP 9), chụm ngón (pinch) với bộ trễ hysteresis (vào < 0.25, ra > 0.35).
+  + Bộ lọc cử chỉ `BoLocCuChi`: độ tin cậy ≥ 0.6 và duy trì liên tục ≥ 150 ms để chống nhấp nháy.
+  + Hàm đóng gói `tao_goi_udp` giữ nguyên tất cả các trường cũ (`ok`, `yaw`, `pitch`, `e`, `t`) và bổ sung đầy đủ các trường mới.
+- Viết bộ kiểm thử tự động toàn diện `tests/test_mediapipe_tracker.py` kiểm tra ma trận giả lập, điểm mắt giả lập, tay giả lập và định dạng JSON.
+
+Tệp thêm / sửa:
+- `tools/mediapipe_tinh.py` (thêm mới).
+- `tests/test_mediapipe_tracker.py` (thêm mới).
+- `docs/20-mediapipe.md` (cập nhật nhật ký Giai đoạn 2).
+
+Kiểm thử:
+- `.venv/bin/python -m unittest discover -s tests -v` → 115/115 test PASS 100% (0.728s, 6/6 test MediaPipe mới đều đạt).
+
+Số đo:
+- Ma trận quay: sai số góc $\le 0.01^\circ$.
+- Đường kính tròng mắt giảm một nửa: khoảng cách tăng chính xác $2.0000 \times$.
+- Hysteresis chụm ngón: tỉ lệ 0.30 giữ nguyên trạng thái trước (0 hoặc 1), chỉ đổi trạng thái khi vượt ngưỡng 0.25 hoặc 0.35.
+- Cử chỉ: xác nhận sau đúng $\ge 150\text{ ms}$, đổi cử chỉ trước thời gian sẽ bị chặn.
+
+Quyết định đã tự chọn:
+- Sử dụng phân rã góc Euler của OpenCV (`RQDecomp3x3`) vì ổn định tuyệt đối, không bị gimbal lock ở các góc quay đầu thông thường của người ngồi trước webcam ($\pm 60^\circ$).
+
+Còn tồn:
+- không.
+
 ---
 
 ## Còn tồn
