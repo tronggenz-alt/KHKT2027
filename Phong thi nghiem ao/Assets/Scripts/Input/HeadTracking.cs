@@ -42,6 +42,18 @@ namespace Khkt.Input
         [Tooltip("Webcam: 'may' = tự chọn webcam máy tính (chặn điện thoại), hoặc số thứ tự")]
         public string cameraIndex = "may";
 
+        public enum FeelPreset
+        {
+            Nhe,    // Nhẹ: vùng chết rộng (35°), xoay đầm, lọc mạnh (smoothingRate 6), lũy thừa 2.0
+            Vua,    // Vừa (mặc định): vùng chết 30°, xoay cân bằng, lọc vừa (smoothingRate 12), lũy thừa 1.5
+            Nhanh   // Nhanh: vùng chết hẹp (20°), xoay nhạy, lọc nhẹ (smoothingRate 20), lũy thừa 1.2
+        }
+
+        [Header("Bộ cảm giác")]
+        [Tooltip("Bộ cảm giác: Nhe (lọc mạnh, xoay đầm), Vua (cân bằng), Nhanh (nhạy bén)")]
+        public FeelPreset feelPreset = FeelPreset.Vua;
+        public float powerCurve = 1.5f;
+
         [Header("Kiểu lái (Yaw)")]
         [Tooltip("Quay đầu dưới góc này thì không xoay (vùng chết 30°)")]
         public float deadZoneDeg = 30f;
@@ -155,6 +167,47 @@ namespace Khkt.Input
         {
             Instance = this;
             currentEngine = engine;
+            ApplyFeelPreset(feelPreset);
+        }
+
+        void OnValidate()
+        {
+            ApplyFeelPreset(feelPreset);
+        }
+
+        public void ApplyFeelPreset(FeelPreset preset)
+        {
+            feelPreset = preset;
+            switch (preset)
+            {
+                case FeelPreset.Nhe:
+                    deadZoneDeg = 35f;
+                    fullTurnDeg = 55f;
+                    smoothingRate = 6f;
+                    powerCurve = 2.0f;
+                    pitchDeadZoneDeg = 18f;
+                    fullPitchDeg = 40f;
+                    zoomDeadZone = 0.10f;
+                    break;
+                case FeelPreset.Vua:
+                    deadZoneDeg = 30f;
+                    fullTurnDeg = 50f;
+                    smoothingRate = 12f;
+                    powerCurve = 1.5f;
+                    pitchDeadZoneDeg = 15f;
+                    fullPitchDeg = 35f;
+                    zoomDeadZone = 0.07f;
+                    break;
+                case FeelPreset.Nhanh:
+                    deadZoneDeg = 20f;
+                    fullTurnDeg = 40f;
+                    smoothingRate = 20f;
+                    powerCurve = 1.2f;
+                    pitchDeadZoneDeg = 10f;
+                    fullPitchDeg = 30f;
+                    zoomDeadZone = 0.05f;
+                    break;
+            }
         }
 
         void Update()
@@ -273,7 +326,7 @@ namespace Khkt.Input
             // 1. Tính toán góc lái Yaw
             float dy = Mathf.DeltaAngle(neutralYaw, p.yaw);
             float magY = Mathf.Clamp01((Mathf.Abs(dy) - deadZoneDeg) / Mathf.Max(1f, fullTurnDeg - deadZoneDeg));
-            float targetTurn = Mathf.Sign(dy) * Mathf.Pow(magY, 1.5f);
+            float targetTurn = Mathf.Sign(dy) * Mathf.Pow(magY, powerCurve);
             turn = Mathf.Lerp(turn, targetTurn, 1f - Mathf.Exp(-smoothingRate * Time.unscaledDeltaTime));
 
             // 2. Tính toán nhìn lên/xuống Pitch (nếu bật)

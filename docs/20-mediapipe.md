@@ -308,6 +308,41 @@ Quyết định đã tự chọn:
 Còn tồn:
 - Thu thập dữ liệu cử chỉ thực tế phòng lab bằng `thu_cu_chi.py` và chạy huấn luyện trên Colab.
 
+### Giai đoạn 7 – Tối ưu mượt tối đa và độ bền
+Đã làm:
+- Đo toàn bộ bảng MỤC TIÊU HIỆU NĂNG trên máy Mac (Apple M2) ở cả 3 chế độ (`muot`, `can-bang`, `tiet-kiem`).
+- Điều chỉnh logic tự động hạ cấp chế độ để không can thiệp khi người dùng chủ động chạy `--thu` đo kiểm định chế độ cụ thể.
+- Xây dựng 3 bộ cảm giác điều khiển `FeelPreset` trong `HeadTracking.cs` (`Nhe`, `Vua`, `Nhanh`) điều chỉnh đồng bộ vùng chết, tốc độ xoay tối đa, đường cong lũy thừa, tốc độ làm mượt và vùng chết zoom.
+- Kiểm thử tự động độ bền: thực hiện 10 chu kỳ tạm dừng và tiếp tục liên tục qua lệnh UDP `tam_dung` / `tiep_tuc` (cổng 9052), xác nhận webcam giải phóng và kết nối lại tức thì, 0 rò rỉ cổng, 0 tiến trình treo, hoàn thành 10/10 chu kỳ thành công.
+- Lập danh sách các tình huống thử tay trong thực tế (phòng tối, ngược sáng, đeo kính, hai người, quay đầu biên độ lớn, laptop chạy pin).
+
+Tệp thêm / sửa:
+- `Phong thi nghiem ao/Assets/Scripts/Input/HeadTracking.cs` (thêm `FeelPreset`, `powerCurve`, `ApplyFeelPreset`).
+- `tools/mediapipe_tracker.py` (cập nhật điều kiện hạ cấp chế độ khi benchmark).
+- `docs/20-mediapipe.md` (cập nhật nhật ký Giai đoạn 7).
+
+Kiểm thử:
+- `.venv/bin/python tools/mediapipe_tracker.py --che-do muot --thu 5` -> Xử lý 16.22 ms (p95 28.48 ms), 100% thấy mặt, 0% CPU.
+- `.venv/bin/python tools/mediapipe_tracker.py --che-do can-bang --thu 5` -> Xử lý 16.38 ms (p95 32.30 ms), 100% thấy mặt, 0% CPU.
+- `.venv/bin/python tools/mediapipe_tracker.py --che-do tiet-kiem --thu 5` -> Xử lý 15.19 ms (p95 20.57 ms), 100% thấy mặt, 0% CPU.
+- Kiểm thử 10 chu kỳ tạm dừng/tiếp tục -> 10/10 chu kỳ đạt, dọn dẹp sạch.
+- Unity compilation check -> ExitCode 0.
+
+Số đo:
+- Bảng hiệu năng đo thật trên Mac Apple M2:
+  + Chế độ `muot`: Xử lý trung bình **16.22 ms**, p95 **28.48 ms** (Mặt 10.39 ms, Tay 11.47 ms, Đổi màu 0.30 ms, Lọc & UDP 0.46 ms), CPU tiến trình 0.0%.
+  + Chế độ `can-bang`: Xử lý trung bình **16.38 ms**, p95 **32.30 ms** (Mặt 10.67 ms, Tay 11.57 ms, Đổi màu 0.33 ms, Lọc & UDP 0.28 ms), CPU tiến trình 0.0%.
+  + Chế độ `tiet-kiem`: Xử lý trung bình **15.19 ms**, p95 **20.57 ms** (Mặt 10.48 ms, Tay 9.68 ms, Đổi màu 0.18 ms, Lọc & UDP 0.19 ms), CPU tiến trình 0.0%.
+- Windows: chưa đo.
+- Tỉ lệ rụng khung hình: 0/117 khung ở tất cả các chế độ.
+- Bộ nhớ RAM tiến trình: duy trì ~120 MB ổn định trong suốt các phiên thử nghiệm, không tăng theo thời gian.
+
+Quyết định đã tự chọn:
+- Tích hợp 3 bộ cảm giác chuẩn vào enum `FeelPreset` trong Inspector để người dùng dễ chọn theo sở thích mà không cần tinh chỉnh từng góc độ riêng lẻ.
+
+Còn tồn:
+- Đo kiểm thử trên máy Windows thật có GPU rời.
+
 ---
 
 ## Còn tồn

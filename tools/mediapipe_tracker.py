@@ -566,8 +566,8 @@ def main() -> None:
                 dem_nd = 0
                 t_do_fps_nd = now_real
 
-                # Tự động hạ chế độ nếu fps nhận diện tụt dưới 25 ở chế độ muot
-                if che_do_hien_tai == "muot" and fps_nhan_dien < 25.0 and so_khung_xu_ly > 30:
+                # Tự động hạ chế độ nếu fps nhận diện tụt dưới 25 ở chế độ muot khi chạy thật
+                if che_do_hien_tai == "muot" and fps_nhan_dien < 25.0 and so_khung_xu_ly > 30 and args.thu == 0:
                     che_do_hien_tai = "can-bang"
                     print(f"⚠️ FPS nhận diện đạt {fps_nhan_dien:.1f} < 25. Tự động hạ xuống chế độ 'can-bang'.", flush=True)
 
