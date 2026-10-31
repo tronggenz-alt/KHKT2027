@@ -250,3 +250,4 @@ Toàn bộ hệ thống Tầng 2 – Khu Sinh học của dự án VERA Lab đã
 - Biên dịch C# sạch sẽ 0 lỗi compiler.
 - 100% bài kiểm thử tự động Backend và Giao diện đều PASS.
 - Bàn giao trọn gói trên máy cục bộ, sẵn sàng cho công tác nghiệm thu và trình diễn KHKT 2027.
+
