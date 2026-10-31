@@ -219,6 +219,15 @@ public class KhktAutoTest : MonoBehaviour
             UnityEditor.EditorApplication.Exit(0);
 #endif
             yield break;
+        }
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "mediapipe")
+        {
+            yield return MediaPipeTest();
+            Log($"Xong sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
         }        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "hieu_ung")
         {
             hand.enabled = false;  // ảnh cận cảnh: không để bàn tay ảo che
@@ -2258,6 +2267,143 @@ public class KhktAutoTest : MonoBehaviour
         while (Time.realtimeSinceStartup - tk < 2f) yield return null;
         bool alive = System.Diagnostics.Process.GetProcessesByName("python").Any(p => { try { return p.StartTime > DateTime.Now.AddSeconds(-30); } catch { return false; } });
         Log($"[dau] Bấm F8 tắt: trạng thái {ht.Status}, còn tiến trình python mới chạy={alive}");
+    }
+
+    IEnumerator SendMediaPipe(System.Net.Sockets.UdpClient u, float seconds, bool ok, float yaw, float dist_cm, float gaze_x, float gaze_y)
+    {
+        float t0 = Time.realtimeSinceStartup;
+        var ci = System.Globalization.CultureInfo.InvariantCulture;
+        while (Time.realtimeSinceStartup - t0 < seconds)
+        {
+            string json;
+            if (ok)
+            {
+                json = $"{{\"ok\":1,\"yaw\":{yaw.ToString(ci)},\"pitch\":0.0,\"roll\":0.0,\"e\":0.10,\"dist_cm\":{dist_cm.ToString(ci)},\"gaze_x\":{gaze_x.ToString(ci)},\"gaze_y\":{gaze_y.ToString(ci)},\"blink_l\":0,\"blink_r\":0,\"fps\":30.0,\"t\":0,\"nguon\":\"mp\",\"hands\":[]}}";
+            }
+            else
+            {
+                json = "{\"ok\":0,\"yaw\":0,\"pitch\":0,\"e\":0,\"dist_cm\":0,\"t\":0,\"nguon\":\"mp\",\"hands\":[]}";
+            }
+            var b = System.Text.Encoding.UTF8.GetBytes(json);
+            u.Send(b, b.Length, "127.0.0.1", 9051);
+            float tw = Time.realtimeSinceStartup;
+            while (Time.realtimeSinceStartup - tw < 0.033f) yield return null;
+        }
+    }
+
+    IEnumerator MediaPipeTest()
+    {
+        var ht = Khkt.Input.HeadTracking.Instance;
+        var vcam = cam;
+        Log($"[mediapipe] Có HeadTracking: {ht != null}, trạng thái: {(ht != null ? ht.Status : "-")}, góc nhìn gốc {vcam.fieldOfView:0.0}°");
+        if (ht == null) yield break;
+        viewer.GoTo(5);
+        yield return Frames(10);
+        float fov0 = vcam.fieldOfView;
+
+        // 1) gửi gói MediaPipe giả lập qua UDP
+        ht.Begin(launch: false);
+        var u = new System.Net.Sockets.UdpClient();
+
+        // Nhìn thẳng 2.4 s (yaw 0°, dist_cm 60.0, gaze (0, 0)) để căn
+        yield return SendMediaPipe(u, 2.4f, true, 0f, 60.0f, 0f, 0f);
+        Log($"[mediapipe] Sau 2,4 s nhìn thẳng: đã căn={Khkt.Input.HeadTracking.Active}, trạng thái {ht.Status}, gói {ht.PacketsSeen}");
+
+        float Y() => viewer.transform.eulerAngles.y;
+        float y0 = Y();
+        yield return SendMediaPipe(u, 1f, true, 40f, 60.0f, 0f, 0f);
+        float dR = Mathf.DeltaAngle(y0, Y());
+
+        y0 = Y();
+        yield return SendMediaPipe(u, 1f, true, -40f, 60.0f, 0f, 0f);
+        float dL = Mathf.DeltaAngle(y0, Y());
+
+        y0 = Y();
+        yield return SendMediaPipe(u, 1f, true, 20f, 60.0f, 0f, 0f);
+        float dDead = Mathf.DeltaAngle(y0, Y());
+
+        y0 = Y();
+        yield return SendMediaPipe(u, 1f, true, 55f, 60.0f, 0f, 0f);
+        float dFull = Mathf.DeltaAngle(y0, Y());
+        Log($"[mediapipe] Quay đầu 1 s: phải 40° → góc nhìn {dR:+0.0;-0.0}°, trái 40° → {dL:+0.0;-0.0}°, phải 20° (vùng chết 30°) → {dDead:+0.0;-0.0}°, phải 55° → {dFull:+0.0;-0.0}°");
+
+        // Ghé gần: dist_cm giảm còn 45 cm (60 / 45 = 1.33x)
+        yield return SendMediaPipe(u, 1.2f, true, 0f, 45.0f, 0f, 0f);
+        float fovIn = vcam.fieldOfView;
+
+        // Ngả xa: dist_cm tăng lên 75 cm (60 / 75 = 0.8x)
+        yield return SendMediaPipe(u, 1.2f, true, 0f, 75.0f, 0f, 0f);
+        float fovOut = vcam.fieldOfView;
+        Log($"[mediapipe] Ghé gần (dist 45 cm): góc nhìn {fov0:0.0}° → {fovIn:0.0}° (phóng ×{fov0 / fovIn:0.00}); ngả xa (dist 75 cm): {fovOut:0.0}° (×{fov0 / fovOut:0.00})");
+
+        // Mất mặt đột ngột
+        y0 = Y();
+        yield return SendMediaPipe(u, 0.3f, true, 45f, 60.0f, 0f, 0f);
+        yield return SendMediaPipe(u, 1.2f, false, 0, 0, 0, 0);
+        float dLost = Mathf.DeltaAngle(y0, Y());
+        float tl = Time.realtimeSinceStartup;
+        while (Time.realtimeSinceStartup - tl < 0.6f) yield return null;
+        float yLost = Y();
+        while (Time.realtimeSinceStartup - tl < 1.2f) yield return null;
+        Log($"[mediapipe] Mất mặt sau khi quay 45°: tổng xoay {dLost:+0.0;-0.0}°, sau đó đứng yên={Mathf.Abs(Mathf.DeltaAngle(yLost, Y())) < 0.1f}, zoom về {Khkt.Input.HeadTracking.Zoom:0.00}, góc nhìn {vcam.fieldOfView:0.0}°");
+
+        // 2) Kiểm thử tay: MediaPipeHandSource
+        var handSrc = Khkt.Input.MediaPipeHandSource.Instance ?? FindAnyObjectByType<Khkt.Input.MediaPipeHandSource>();
+        if (handSrc == null)
+        {
+            handSrc = ht.gameObject.AddComponent<Khkt.Input.MediaPipeHandSource>();
+        }
+        Log($"[mediapipe-hand] Có MediaPipeHandSource: {handSrc != null}, đang kết nối: {handSrc.IsConnected}");
+
+        // A. Thấy tay: pinch = 0, handOk = 1
+        yield return SendMediaPipeHand(u, 0.4f, true, 0.5f, 0.5f, 0.15f, 0, "None");
+        Log($"[mediapipe-hand] Thấy tay: IsConnected={handSrc.IsConnected}, Trigger={handSrc.Latest.Pressed(Khkt.Input.ControllerButtons.Trigger)}");
+
+        // B. Chụm ngón tay (pinch = 1) -> Trigger bật
+        yield return SendMediaPipeHand(u, 0.3f, true, 0.5f, 0.5f, 0.15f, 1, "None");
+        bool trigOn = handSrc.Latest.Pressed(Khkt.Input.ControllerButtons.Trigger);
+        Log($"[mediapipe-hand] Chụm ngón (pinch=1): Trigger={trigOn}");
+
+        // C. Di chuyển tay khi đang chụm (x: 0.5 -> 0.7) -> Joy1.x thay đổi
+        yield return SendMediaPipeHand(u, 0.3f, true, 0.7f, 0.5f, 0.15f, 1, "None");
+        Vector2 joy = handSrc.Latest.Joy1;
+        Log($"[mediapipe-hand] Rê tay khi chụm: Joy1=({joy.x:+0.00;-0.00},{joy.y:+0.00;-0.00})");
+
+        // D. Thả chụm (pinch = 0) -> Trigger tắt, Joy1 về 0
+        yield return SendMediaPipeHand(u, 0.3f, true, 0.7f, 0.5f, 0.15f, 0, "None");
+        bool trigOff = !handSrc.Latest.Pressed(Khkt.Input.ControllerButtons.Trigger);
+        Log($"[mediapipe-hand] Thả chụm (pinch=0): Trigger={!trigOff}, Joy1=({handSrc.Latest.Joy1.x:0.00},{handSrc.Latest.Joy1.y:0.00})");
+
+        // E. Open_Palm giữ >= 1 s -> Recenter kích hoạt
+        yield return SendMediaPipeHand(u, 1.2f, true, 0.5f, 0.5f, 0.15f, 0, "Open_Palm");
+        bool recenterFired = handSrc.Latest.Pressed(Khkt.Input.ControllerButtons.Recenter);
+        Log($"[mediapipe-hand] Open_Palm giữ 1.2s: Recenter={recenterFired}");
+
+        // F. Mất tay khi đang chụm -> sau 0.3s IsConnected = false, Trigger tắt
+        yield return SendMediaPipeHand(u, 0.2f, true, 0.5f, 0.5f, 0.15f, 1, "None");
+        yield return SendMediaPipeHand(u, 0.5f, false, 0f, 0f, 0f, 0, "None");
+        Log($"[mediapipe-hand] Mất tay > 0.3s: IsConnected={handSrc.IsConnected}, Trigger={handSrc.Latest.Pressed(Khkt.Input.ControllerButtons.Trigger)}");
+
+        u.Close();
+        ht.Stop();
+        yield return Frames(3);
+    }
+
+    IEnumerator SendMediaPipeHand(System.Net.Sockets.UdpClient u, float seconds, bool handOk, float hx, float hy, float co, int pinch, string cuChi)
+    {
+        float t0 = Time.realtimeSinceStartup;
+        var ci = System.Globalization.CultureInfo.InvariantCulture;
+        while (Time.realtimeSinceStartup - t0 < seconds)
+        {
+            string handsJson = handOk 
+                ? $"[{{\"ben\":\"phai\",\"ok\":1,\"x\":{hx.ToString(ci)},\"y\":{hy.ToString(ci)},\"co\":{co.ToString(ci)},\"pinch\":{pinch},\"cu_chi\":\"{cuChi}\",\"tin\":0.95}}]"
+                : "[]";
+            string json = $"{{\"ok\":1,\"yaw\":0.0,\"pitch\":0.0,\"roll\":0.0,\"e\":0.10,\"dist_cm\":60.0,\"gaze_x\":0.0,\"gaze_y\":0.0,\"blink_l\":0,\"blink_r\":0,\"fps\":30.0,\"t\":{Time.realtimeSinceStartup.ToString(ci)},\"nguon\":\"mp\",\"hands\":{handsJson}}}";
+            var b = System.Text.Encoding.UTF8.GetBytes(json);
+            u.Send(b, b.Length, "127.0.0.1", 9051);
+            float tw = Time.realtimeSinceStartup;
+            while (Time.realtimeSinceStartup - tw < 0.033f) yield return null;
+        }
     }
 
     // ---------- Máy phân tích: màn hình vận hành UV-Vis, AAS ----------

@@ -1,4 +1,4 @@
-﻿using Khkt.Input;
+using Khkt.Input;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -67,6 +67,9 @@ namespace Khkt.Environment
             viewCam = cameraTransform != null ? cameraTransform.GetComponent<Camera>() : null;
             if (viewCam != null) baseFov = viewCam.fieldOfView;
             if (FindAnyObjectByType<Khkt.Input.HeadTracking>() == null) gameObject.AddComponent<Khkt.Input.HeadTracking>();
+            if (FindAnyObjectByType<Khkt.Input.MediaPipeHandSource>() == null) gameObject.AddComponent<Khkt.Input.MediaPipeHandSource>();
+            if (cameraTransform != null && cameraTransform.GetComponent<Khkt.Input.GazeHighlight>() == null)
+                cameraTransform.gameObject.AddComponent<Khkt.Input.GazeHighlight>();
         }
 
         /// <summary>
@@ -153,6 +156,8 @@ namespace Khkt.Environment
                 pitch = Mathf.Clamp(pitch - padLook.y * Mathf.Abs(padLook.y) * padTurnSpeed * 0.6f * Time.deltaTime, -80f, 80f);
             // điều khiển bằng đầu (webcam, F8): quay đầu sang bên nào thì góc nhìn xoay liên tục sang bên đó
             yaw += Khkt.Input.HeadTracking.Turn * headTurnSpeed * Time.deltaTime;
+            if (Khkt.Input.HeadTracking.PitchTurn != 0f)
+                pitch = Mathf.Clamp(pitch - Khkt.Input.HeadTracking.PitchTurn * Time.deltaTime, -80f, 80f);
             int step = PadInput.StationStep;
             if (step != 0 && stations.Length > 0)
             {

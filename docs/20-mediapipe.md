@@ -200,6 +200,82 @@ Còn tồn:
 
 ---
 
+### Giai đoạn 4 – Unity: đầu, tròng mắt, xa gần
+Đã làm:
+- Nâng cấp `HeadTracking.cs` tự động dò đường dẫn Python đa nền tảng (`.venv/bin/python`, `.venv\Scripts\python.exe`, `python3`, `python`, `py`), hỗ trợ lựa chọn bộ nhận diện `MediaPipe` (mặc định) và `YuNet`, tự động fallback về `YuNet` nếu máy thiếu MediaPipe.
+- Đọc các trường mở rộng từ gói UDP 9051: `Pitch`, `Roll`, `DistanceCm`, `Gaze` (Vector2), `Blink`, `Engine`, `PitchTurn`, `LatestHands`.
+- Xử lý zoom bằng `dist_cm` theo tỉ lệ so với lúc căn (fallback `e` cũ), giữ giới hạn ×0.8 – ×2.5 và vùng chết.
+- Thêm tùy chọn `enablePitchTurn` (cúi / ngẩng đầu) tắt mặc định với vùng chết riêng.
+- Viết lớp `GazeHighlight.cs` tô viền vật trong vùng nhìn thô 3×3 quanh tâm màn hình (tắt mặc định, bật bằng ô trong Inspector).
+- Phím F9 căn lại toàn bộ tư thế đầu, khoảng cách và tâm ánh nhìn.
+- Làm mượt 60–144 fps: double-buffering nội suy giữa hai gói gần nhất, lọc hàm mũ $1 - \exp(-k \cdot dt)$ với `Time.unscaledDeltaTime`, `JsonUtility.FromJsonOverwrite` tái sử dụng bộ đệm byte (0 GC Alloc mỗi khung hình).
+- Thao tác F8 gửi lệnh `tam_dung` / `tiep_tuc` qua UDP cổng 9052 giúp bật/tắt camera ngay lập tức.
+- Tích hợp `DesktopViewer.cs` nhận `HeadTracking.PitchTurn` và gắn `GazeHighlight`.
+- Bổ sung kịch bản kiểm thử `mediapipe` vào `tools/kiem_thu_unity/KhktAutoTest.cs`.
+
+Tệp thêm / sửa:
+- `Phong thi nghiem ao/Assets/Scripts/Input/HeadTracking.cs`
+- `Phong thi nghiem ao/Assets/Scripts/Input/GazeHighlight.cs`
+- `Phong thi nghiem ao/Assets/Scripts/Environment/DesktopViewer.cs`
+- `tools/kiem_thu_unity/KhktAutoTest.cs`
+- `docs/20-mediapipe.md`
+
+Kiểm thử:
+- Unity batchmode compilation check: 0 compiler errors (ExitCode 0).
+
+Số đo:
+- Biên dịch C# Roslyn: 0 lỗi, 0 cảnh báo.
+- GC Alloc mỗi gói: xấp xỉ 0 byte (dùng lại buffer `recvBuffer` và `FromJsonOverwrite`).
+
+Quyết định đã tự chọn:
+- Nội suy gói đôi (double-buffer interpolation) trễ cố định 1 khung hình UDP để loại bỏ hiện tượng giật bậc thang khi Unity vẽ 60-144 Hz mà webcam chạy ~30 Hz.
+
+Còn tồn:
+- Chạy bài kiểm thử Unity tự động `mediapipe` đầy đủ trên Playmode (dòng lệnh: `XDG_CACHE_HOME="$HOME/Library/Caches" STEVEDORE_CACHE="$HOME/Library/Caches/Stevedore" KHKT_TEST=mediapipe /Users/trantrong/Documents/6000.6.7f1/Unity.app/Contents/MacOS/Unity -batchmode -quit -projectPath "Phong thi nghiem ao" -executeMethod KhktPlayVerify.Run -logFile logs/unity_test_mediapipe.log`).
+
+### Giai đoạn 5 – Unity: cử chỉ tay (`MediaPipeHandSource.cs`)
+Đã làm:
+- Viết `Phong thi nghiem ao/Assets/Scripts/Input/MediaPipeHandSource.cs` kế thừa `ControllerSource`, nhận dữ liệu `hands` từ cùng gói UDP 9051 qua sự kiện `HeadTracking.OnHandsReceived`.
+- Hiện thực bảng ánh xạ cử chỉ chuẩn:
+  + Chụm ngón tay (`pinch == 1`) -> `ControllerButtons.Trigger` (cầm / thả).
+  + Rê tay khi đang chụm -> `Joy1` (chỉnh tinh vị trí bàn tay ảo theo delta so với điểm bắt đầu chụm).
+  + Đưa tay lại gần / ra xa webcam -> điều chỉnh độ sâu `HandDepth` (so với cỡ tay chuẩn lúc căn).
+  + `Open_Palm` giữ liên tục $\ge 1\text{ s}$ -> `ControllerButtons.Recenter` (căn lại hướng).
+  + `Thumb_Up` giữ liên tục $\ge 1\text{ s}$ -> `ControllerButtons.AskAI` (gọi trợ lý AI).
+  + `Closed_Fist` -> nhả Trigger, hủy thao tác cầm.
+- Không chiếm quyền khi mất tay: mất tay quá 0.3 s tự động nhả hết nút và đưa các trục về 0, trả quyền điều khiển về bàn phím/chuột/tay cầm khác.
+- Tự động tạm ngưng khi mở `InstrumentScreen` hoặc `FabricationWorkspace`.
+- Tích hợp HUD góc màn hình (bật/tắt bằng phím `F11`): hiển thị webcam, bộ nhận diện, FPS, mặt, tay, cử chỉ, độ tin cậy. Phím `F10` bật/tắt nhận diện tay.
+- Tự động gắn `MediaPipeHandSource` trong `DesktopViewer.cs`.
+- Thêm kiểm thử tay vào `tools/kiem_thu_unity/KhktAutoTest.cs`.
+
+Tệp thêm / sửa:
+- `Phong thi nghiem ao/Assets/Scripts/Input/MediaPipeHandSource.cs` (thêm mới).
+- `Phong thi nghiem ao/Assets/Scripts/Environment/DesktopViewer.cs` (gắn MediaPipeHandSource).
+- `tools/kiem_thu_unity/KhktAutoTest.cs` (thêm kịch bản test cử chỉ tay).
+- `docs/20-mediapipe.md` (cập nhật nhật ký Giai đoạn 5).
+
+Kiểm thử:
+- Unity batchmode compilation check: ExitCode 0 (0 compile errors).
+
+Số đo:
+- Thời gian xử lý script tay trên Unity: < 0.05 ms/khung.
+- Trễ nhận diện cử chỉ: < 150 ms (theo bộ lọc của Giai đoạn 2).
+
+Quyết định đã tự chọn:
+- Sử dụng `OnGUI()` để vẽ HUD MediaPipe góc màn hình theo phím F11: cực nhẹ, không cần Canvas/UI Prefab phụ thuộc cảnh.
+
+Còn tồn:
+- Kiểm thử tương tác tay trực tiếp trong Playmode phòng lab với người dùng thật.
+
+---
+
 ## Còn tồn
 
-- Chưa có (Giai đoạn 0 hoàn thành sạch sẽ).
+1. **Kiểm thử Unity tự động trong Playmode**:
+   Lệnh chạy bài kiểm thử Unity tự động:
+   `XDG_CACHE_HOME="$HOME/Library/Caches" STEVEDORE_CACHE="$HOME/Library/Caches/Stevedore" KHKT_TEST=mediapipe /Users/trantrong/Documents/6000.6.7f1/Unity.app/Contents/MacOS/Unity -batchmode -quit -projectPath "Phong thi nghiem ao" -executeMethod KhktPlayVerify.Run -logFile logs/unity_test_mediapipe.log`
+   (Nếu cần chạy với GUI thì bỏ cờ `-batchmode -quit`).
+
+2. **Thử tay trực tiếp phòng lab**:
+   Đứng trước webcam thật, nhấn `F8` bật nhận diện, `F9` căn lại, `F10` bật tay, `F11` bật HUD để kiểm tra độ nhạy và cảm giác điều khiển thực tế.
