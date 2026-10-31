@@ -51,6 +51,16 @@
       "the_thong_tin": "Phản ứng trung hòa tỏa nhiệt. Dùng phenolphtalein: dung dịch chuyển hồng nhạt bền khoảng 30 giây là đến điểm cuối.",
       "an_toan": ["Tráng buret bằng chính dung dịch NaOH trước khi nạp"],
       "nguon": "CẦN ĐỐI CHIẾU SGK"
+    },
+    {
+      "id": "h2o2_catalase",
+      "chat": ["H2O2", "catalase"],
+      "phuong_trinh": "2H2O2 --(catalase)--> 2H2O + O2↑",
+      "hien_tuong": [{"loai": "sui_bot", "khi": "O2", "toc_do": "rat_nhanh"}, {"loai": "toa_nhiet", "delta_h_kj_mol": -98.0}],
+      "dinh_tinh": "Xác nhận hoạt tính xúc tác của enzyme catalase trong mô tươi (gan, khoai tây)",
+      "the_thong_tin": "Enzyme catalase phân hủy H2O2 giải phóng khí O2 sủi bọt trắng xóa và tỏa nhiệt nhẹ; khi đun sôi mẫu vật, enzyme bị biến tính mất hoạt tính.",
+      "an_toan": ["Đeo kính bảo hộ khi làm việc với H2O2 3%"],
+      "nguon": "Sinh học 10 Kết nối tri thức - Bài 11: Thực hành một số thí nghiệm về enzyme"
     }
   ]
 }
