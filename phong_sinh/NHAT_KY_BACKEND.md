@@ -104,10 +104,37 @@
 - Viết bộ kiểm thử `tests/test_sinh_db.py`: đạt **7 / 7 test PASS**.
 - Toàn bộ kiểm thử Python `unittest discover -s tests`: đạt **124 / 124 test PASS**.
 
+### Giai đoạn B8 (2026-10-31)
+- Đã xây dựng `server/lab/sinh_api.py` và gắn router vào `server/ai/main.py`:
+  - Tiền tố `/lab/sinh` với đầy đủ hơn 20 endpoint theo hợp đồng giao diện: `/tong-quan`, `/dung-cu`, `/sinh-pham`, `/nhiet-do`, `/dat-lich`, `/muon-tra`, `/ket-qua`, `/ket-qua.csv`, `/su-co`, `/bao-tri`, `/huong-dan/{ma}`, `/bai-thi-nghiem`, `/trang-thai-may`, `/su-kien`.
+  - Xuất file CSV UTF-8 có BOM (`\xef\xbb\xbf`) tại `/lab/sinh/ket-qua.csv`.
+  - Xử lý mảng sự kiện gửi theo lô tại `/lab/sinh/su-kien`.
+  - Xử lý mã lỗi HTTP chuẩn: 409 khi trùng lịch (`detail` kèm danh sách lịch trùng), 422 khi sai dữ liệu hoặc sinh phẩm không phải BSL-1, 404 khi không tìm thấy.
+  - Phục vụ trang `/sinh` (trả `server/web/sinh.html` hoặc fallback HTML nếu chưa có file, không lỗi 500).
+- Viết bộ kiểm thử `tests/test_sinh_web.py`: đạt **12 / 12 test PASS**.
+- Toàn bộ kiểm thử Python `unittest discover -s tests`: đạt **136 / 136 test PASS**.
+
+### Giai đoạn B9 (2026-10-31)
+- Cập nhật `server/ai/machines.py`:
+  - Mở rộng `ALIASES` cho 2 máy mới (`gel_doc`, `may_do_od600`) và các nhóm dụng cụ sinh học tầng 2 (`micropipet_p200`, `micropipet_p10`, `micropipet_p1000`, `hop_dau_con`, `que_cay_vong`, `que_cay_thang`, `que_trang`, `dao_nhuom_gram`, `may_ly_tam_de_ban`, `may_ly_tam_mini`, `may_vortex`, `may_dem_khuan_lac`, `coi_chay_su`, `tram_potometer`, `tram_quang_hop`, `hop_huong_sang`, `gian_thuy_canh_nft`, `binh_len_men`, `bo_lam_sua_chua`, `ban_giai_phau_so`, `tu_thao_tac_pcr`, `bo_xu_ly_tran`, `lo_dau_soi`).
+  - Nạp `data/sinh/dung_cu.json` (`load_bio_tools`, `find_bio_tools`, `tool_summary`) và đưa `cong_dung`, `cach_dung`, `loi_thuong_gap`, `an_toan` vào `machines.context(...)` với giới hạn độ dài <= 1500 ký tự/dụng cụ, tối đa 2 dụng cụ/lượt.
+  - Bổ sung kiểm tra an toàn sinh học cấp 1 (`UNSAFE_BIO_KEYWORDS`, `is_unsafe_bio`, `bio_safety_refusal`, `BSL1_SAFETY_CONTEXT`): phát hiện yêu cầu nuôi cấy, phân lập bệnh phẩm, tạo mới hoặc tăng độc lực tác nhân gây bệnh (BSL-2/3/4) và chèn chỉ thị từ chối nhẹ nhàng kèm gợi ý thí nghiệm BSL-1 an toàn (`E. coli K-12`, `Saccharomyces cerevisiae`, `Lactobacillus bulgaricus`, `Bacillus subtilis`).
+- Bổ sung 3 bài kiểm thử mới vào `tests/test_ai_server.py`: đạt **11 / 11 test PASS**.
+- Toàn bộ kiểm thử Python `unittest discover -s tests`: đạt **139 / 139 test PASS**.
+
+### Giai đoạn B10 (2026-10-31)
+- Hoàn thành biên soạn tài liệu kỹ thuật tầng 2 `docs/21-dung-cu-sinh-hoc.md`:
+  - Mục 1: Kiến trúc dữ liệu danh mục tĩnh (`dung_cu.json`, `tieu_ban.json`, `chung_vi_sinh.json`, `moi_truong.json`, `sinh_pham_mac_dinh.json`, `bai_thi_nghiem.json`, hồ sơ SOP máy).
+  - Mục 2: Mở rộng `ChemEngine` (hóa chất, phản ứng catalase) và 11 lớp mô phỏng sinh học `Khkt.Simulation.Bio` (vi sinh pha loãng/nuôi cấy/nhiễm chéo, sinh lý quang hợp/thoát hơi nước/hướng sáng/lên men, sinh học phân tử ly tâm/PCR/điện di, enzyme học).
+  - Mục 3: CSDL SQLite `server/lab/sinh_db.py` với 8 bảng nghiệp vụ, kiểm tra an toàn `BSL-1`, quản lý lịch mượn trả và xung đột phòng/máy.
+  - Mục 4: RESTful API `server/lab/sinh_api.py` với hơn 20 endpoint, phục vụ `/sinh`, đồng bộ sự kiện lô, xuất CSV BOM UTF-8.
+  - Mục 5: AI SOP và an toàn sinh học `server/ai/machines.py`.
+- Hoàn thành báo cáo bàn giao backend `phong_sinh/BAO_CAO_BAN_GIAO_BACKEND.md`: tổng kết toàn bộ 10 giai đoạn B0–B10, kiểm tra hợp đồng, số lượng test và hướng dẫn chạy kiểm thử.
+- Xác nhận kiểm thử tự động đạt 100%:
+  - Python: **139 / 139 PASS** (1.40s)
+  - C# Hóa học: **147 / 147 PASS** (0.32s)
+  - C# Sinh học: **82 / 82 PASS** (0.15s)
+- Bàn giao nhánh `tang2/dung-cu-backend` cho nhánh giao diện `tang2/dung-cu-giao-dien`.
 
 
-
-
-
-- Kết quả kiểm thử: `tests/test_dung_cu_sinh.py` đạt 3/3 test dụng cụ, toàn bộ test suite Python đạt 117/117 test (0,60s).
 

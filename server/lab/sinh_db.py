@@ -355,8 +355,14 @@ def list_dung_cu(phong: str = "", phan_loai: str = "", tim: str = "") -> list[di
     w_query = (tim or "").strip().lower()
 
     for ma, static_item in _DUNG_CU_CACHE.items():
-        if phong and static_item.get("phong") != phong:
-            continue
+        if phong:
+            p_val = static_item.get("phong")
+            if isinstance(p_val, list):
+                if phong not in p_val:
+                    continue
+            elif p_val != phong:
+                continue
+
         if phan_loai and static_item.get("phan_loai") != phan_loai:
             continue
 
@@ -575,8 +581,9 @@ def list_muon_tra(ma_dung_cu: str = "", nguoi: str = "") -> list[dict]:
 def add_muon_tra(item: dict) -> dict:
     now = time.time()
     ma = item["ma_dung_cu"]
-    sl = int(item.get("so_luong", 1))
-    han_tra = float(item.get("han_tra", now + 7200.0))
+    sl = int(item.get("so_luong") or 1)
+    ht_val = item.get("han_tra")
+    han_tra = float(ht_val) if ht_val is not None else (now + 7200.0)
     cur = execute(
         "INSERT INTO muon_tra (ma_dung_cu, so_luong, nguoi, lop, luc_muon, han_tra, tinh_trang_tra) VALUES (?,?,?,?,?,?,?)",
         (ma, sl, item["nguoi"], item["lop"], now, han_tra, "chua_tra"),
@@ -592,8 +599,9 @@ def patch_muon_tra(id: int, item: dict) -> dict:
         return {}
     current = cur_rows[0]
 
-    luc_tra = float(item.get("luc_tra", time.time()))
-    tinh_trang = item.get("tinh_trang_tra", "tot")
+    lt_val = item.get("luc_tra")
+    luc_tra = float(lt_val) if lt_val is not None else time.time()
+    tinh_trang = item.get("tinh_trang_tra") or "tot"
 
     execute("UPDATE muon_tra SET luc_tra = ?, tinh_trang_tra = ? WHERE id = ?", (luc_tra, tinh_trang, id))
 
@@ -630,8 +638,9 @@ def get_ket_qua_by_id(id: int) -> dict | None:
 
 
 def add_ket_qua(item: dict) -> dict:
-    now = float(item.get("thoi_gian", time.time()))
-    du_lieu = item.get("du_lieu", "{}")
+    t_val = item.get("thoi_gian")
+    now = float(t_val) if t_val is not None else time.time()
+    du_lieu = item.get("du_lieu") or "{}"
     if isinstance(du_lieu, dict):
         du_lieu = json.dumps(du_lieu, ensure_ascii=False)
     diem = float(item["diem"]) if "diem" in item and item["diem"] is not None else None
@@ -672,16 +681,17 @@ def list_su_co(phong: str = "", trang_thai: str = "") -> list[dict]:
 
 
 def add_su_co(item: dict) -> dict:
-    now = float(item.get("thoi_gian", time.time()))
+    t_val = item.get("thoi_gian")
+    now = float(t_val) if t_val is not None else time.time()
     cur = execute(
         "INSERT INTO su_co_sinh (phong, loai, muc_do, mo_ta, xu_ly, trang_thai, thoi_gian) VALUES (?,?,?,?,?,?,?)",
         (
             item["phong"],
             item["loai"],
-            item.get("muc_do", "Info"),
+            item.get("muc_do") or "Info",
             item["mo_ta"],
-            item.get("xu_ly", ""),
-            item.get("trang_thai", "moi"),
+            item.get("xu_ly") or "",
+            item.get("trang_thai") or "moi",
             now,
         ),
     )
@@ -705,12 +715,13 @@ def list_bao_tri(ma_dung_cu: str = "") -> list[dict]:
 
 
 def add_bao_tri(item: dict) -> dict:
-    now = float(item.get("ngay", time.time()))
+    ng_val = item.get("ngay")
+    now = float(ng_val) if ng_val is not None else time.time()
     ma = item["ma_dung_cu"]
     loai = item["loai"]
     cur = execute(
         "INSERT INTO bao_tri (ma_dung_cu, loai, ngay, nguoi, ket_qua, ghi_chu) VALUES (?,?,?,?,?,?)",
-        (ma, loai, now, item["nguoi"], item["ket_qua"], item.get("ghi_chu", "")),
+        (ma, loai, now, item["nguoi"], item["ket_qua"], item.get("ghi_chu") or ""),
     )
     # Cập nhật lan_hieu_chuan / han_hieu_chuan nếu là hiệu chuẩn
     if "hieu_chuan" in loai.lower():
