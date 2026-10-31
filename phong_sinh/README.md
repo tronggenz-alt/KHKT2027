@@ -5,6 +5,10 @@ Thư mục này chứa mọi thứ cần để dựng tầng 2 (khu sinh học) 
 | Tệp | Nội dung |
 |---|---|
 | `PROMPT_ANTIGRAVITY.md` | Prompt đầy đủ cho Antigravity: bố cục, đồ họa, chủ đề Quốc tế / Tối giản, hoạt cảnh, liên kết app cũ, các giai đoạn, kiểm thử |
+| `PROMPT_DUNG_CU_BACKEND.md` | Prompt lần 2 – **Backend** (chạy trước): dữ liệu `data/sinh`, mô phỏng `Simulation/Bio`, máy chủ API `/lab/sinh`, AI |
+| `PROMPT_DUNG_CU_GIAO_DIEN.md` | Prompt lần 2 – **Giao diện** (chạy sau): mọi dụng cụ sinh học dùng được và mượt trong Unity, nới hành lang tầng 2 lên 3,6 m, trang web `/sinh`, đồng bộ Unity ↔ web |
+| `HOP_DONG_GIAO_DIEN_BACKEND.md` | Hợp đồng chung của hai prompt: ranh giới file, 108 mã dụng cụ, dạng JSON, chữ ký hàm mô phỏng, API |
+| `PROMPT_ANTIGRAVITY_DUNG_CU.md` | Bản gộp của hai prompt trên, chỉ để tham khảo |
 | `bo_cuc_tang2.json` | Tọa độ từng phòng, cửa, cửa sổ, đồ đạc, lõi thang, khu `ZoneMap` 5..12, trạm 20..31 (đo từ bản vẽ, 21,4 px = 1 m) |
 | `mat_bang_tang2.png` | Bản đồ quy hoạch 2 tầng (trang 13 bản trình bày) |
 | `tu_app_cu/` | Tài nguyên lấy từ phòng sinh học 3D của app cũ (web CHEMISTRY, `/sinh-hoc`) |
