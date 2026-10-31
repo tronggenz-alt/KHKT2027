@@ -1,4 +1,4 @@
-# VERA Lab: phòng thí nghiệm thực tế ảo Hóa – Sinh tích hợp AI
+# VERA Lab: phòng thí nghiệm thực tế ảo Hóa – Sinh tích hợp AI.
 
 **VERA Lab** (Virtual Experiment & Reality-based AI Lab) là hệ thống trải nghiệm phòng thí nghiệm thực tế ảo Hóa – Sinh, tích hợp AI đám mây / cục bộ, dùng trong dạy học. Đây là dự án Khoa học kỹ thuật của **Nguyễn Ngọc Bảo Trọng** và **Trần Đức Trọng**.
 
