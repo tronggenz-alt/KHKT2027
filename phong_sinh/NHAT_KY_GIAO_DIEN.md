@@ -154,7 +154,7 @@
 - Chạy `KHKT_TEST=truoc_g0` chụp 12 ảnh hiện trạng trạm `20..31` vào `docs/anh-tang2/truoc_dung_cu/` và 5 ảnh hành lang 2,2 m trước khi mở rộng (`01, 03, 05, 07, 09`) vào `docs/anh-tang2/hanh_lang/`.
 - Commit cục bộ: `8c4bdc5` (`docs(tang2): G0 ra soat 83 dung cu, phim tat va chup anh hien trang truoc khi sua`).
 
-### Giai đoạn G1 – Mở rộng hành lang Tầng 2 từ 2,2 m lên 3,6 m (ĐANG KIỂM THỬ)
+### Giai đoạn G1 – Mở rộng hành lang Tầng 2 từ 2,2 m lên 3,6 m (ĐÃ XONG)
 - Cập nhật `Assets/Scripts/Rendering/ZoneMap.cs`: thêm hằng số `F2CorridorZ = -3.6f`, cập nhật khu `8` (`hanh_lang_t2`: `z ∈ [-3.6, 0]`), khu `9` (`phong_sinh_phan_tu`: `z ∈ [-9.0, -3.6]`), khu `10` (`nha_kinh`: `z ∈ [-9.0, -3.6]`). Giữ nguyên Tầng 1 (`0..4`) và lõi thang (`12`).
 - Cập nhật `LabSceneBuilder.Floor2.cs` và `LabSceneBuilder.Floor2.Shell.cs`: dời tường nam hành lang Tầng 2 sang `z = -3.6`, xây kín tường đầu đông đoạn mở rộng `z ∈ [-3.6, -2.2]` tại `x = 27.0`, cập nhật tấm sàn, trần, mái, mái kính hai dốc của nhà kính và đầu dò phản chiếu.
 - Cập nhật `LabSceneBuilder.Floor2.SpecialRooms.cs`:
@@ -162,4 +162,17 @@
   - Dời các vật dụng sát tường nam hành lang (`Ghế băng chờ 1 & 2`, `Tủ trưng bày tiêu bản`, `Kệ tủ đồ cá nhân`, `Bình chữa cháy`, `Trạm tra cứu dụng cụ`) về `z ≈ -3.32 .. -3.45`, chừa lối đi thông thủy rộng ~2,9 m.
   - Dời toàn bộ nội thất Phòng Sinh học phân tử và Nhà kính vào trong vùng `z ∈ [-8.8, -3.8]`, bổ sung `Vòi rửa mắt khẩn cấp` và `Mô hình xoắn kép ADN` tại Phòng Sinh học phân tử.
 - Cập nhật tọa độ trạm `22..30` trong `LabSceneBuilder.cs`, `phong_sinh/bo_cuc_tang2.json` và `docs/20-tang-2-khu-sinh-hoc.md`.
+- Kiểm thử tự động `KHKT_TEST=tang2_hanh_lang`: PASS, chụp đủ 5 ảnh sau mở rộng (`02, 04, 06, 08, 10`) trong `docs/anh-tang2/hanh_lang/`.
+- Commit cục bộ: `7f3709e` (`feat(tang2): G1 mo rong hanh lang tang 2 tu 2,2 m len 3,6 m va chup 10 anh doi chieu`).
+
+### Giai đoạn G2 – Khung tương tác dùng chung `Assets/Scripts/Interaction/Bio/` (ĐANG BIÊN DỊCH)
+- Tạo đầy đủ các lớp nền tảng trong `Assets/Scripts/Interaction/Bio/`:
+  - `BioFeedback.cs`: tổng hợp âm thanh toán học (`AudioClip.Create` cho click, nút bấm, thành công, cảnh báo, vỡ lamen, nhịp Korotkoff, bọt khí), hiển thị Toast và ghi nhận lỗi thao tác khoa học (`RecordMistake`).
+  - `BioKnob.cs`: núm vặn cơ học 3D xoay bằng con lăn chuột hoặc click, nội suy góc mượt, định dạng dấu phẩy thập phân tiếng Việt.
+  - `BioButton.cs`: nút bấm cơ học / công tắc giữ trạng thái với hoạt cảnh lún 4 mm theo `Easing.StdDecel` và đèn báo `MaterialPropertyBlock`.
+  - `BioHinge.cs`: nắp bản lề / cửa mở / cửa kính trượt theo `Easing.EmphDecel`, hỗ trợ khóa an toàn (`isLocked`) kèm giải thích khoa học khi cố mở lúc nguy hiểm.
+  - `IBioTarget.cs` & `BioTool.cs` & `ProgressRing.cs`: giao diện tác động dụng cụ cầm tay lên mục tiêu (tức thì hoặc giữ chuột kèm thanh tiến trình `ProgressRing`).
+  - `CloseUpView.cs`: chế độ góc nhìn cận cảnh khi thao tác tỉ mỉ, thoát bằng `Esc`.
+  - `BioSample.cs` & `BioTransfer.cs`: quản lý trạng thái mẫu sinh học và cây quyết định chuyển mẫu 6 trường hợp.
+- Cập nhật `AutoDoor.cs` (thêm `interlockWith` cho buồng đệm Airlock) và `HandController.cs` (tích hợp `BioButton`, `BioHinge`, `BioKnob`, `IBioTarget`).
 

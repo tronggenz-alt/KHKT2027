@@ -29,11 +29,14 @@ namespace Khkt.Rendering
         public Renderer[] statusLights;
         [Tooltip("Cổng che khuất (occlusion portal) ở khung cửa: đóng cửa thì che phần phía sau")]
         public OcclusionPortal portal;
+        [Tooltip("Cửa khóa liên động (Airlock): cửa này chỉ mở khi cửa kia đã đóng kín")]
+        public AutoDoor interlockWith;
 
         public static readonly List<AutoDoor> All = new List<AutoDoor>();
 
         public float Openness => open;
         public bool IsOpen => open > 0.95f;
+        public bool IsAnyOpen => open > 0.02f;
         public Vector3 Center => transform.position;
         public Vector3 Normal => transform.forward;
 
@@ -64,6 +67,10 @@ namespace Khkt.Rendering
                 zs.Request(zoneA);
                 zs.Request(zoneB);
                 ready = zs.IsReady(zoneA) && zs.IsReady(zoneB);
+            }
+            if (want && interlockWith != null && interlockWith.IsAnyOpen)
+            {
+                ready = false;
             }
             float target = want && ready ? 1f : 0f;
             if (!Mathf.Approximately(open, target))

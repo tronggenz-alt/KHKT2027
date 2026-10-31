@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Khkt.Input;
 using Khkt.Interaction;
+using Khkt.Interaction.Bio;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -15,7 +16,7 @@ namespace Khkt.Demo
     /// </summary>
     public class HandController : MonoBehaviour
     {
-        public enum Act { None, Pick, Swirl, Use, Stopcock, Place, PlaceSurface, Pour, Suck, PipetteDrain, Drop, Spray, Scoop, Bubble, Measure, PaperTest, Attach }
+        public enum Act { None, Pick, Swirl, Use, Stopcock, Place, PlaceSurface, Pour, Suck, PipetteDrain, Drop, Spray, Scoop, Bubble, Measure, PaperTest, Attach, BioButton, BioHinge, BioKnob, BioTarget }
 
         public Camera viewCamera;
         public HandRig hand;
@@ -54,6 +55,13 @@ namespace Khkt.Demo
         IDemoUsable usable;
         StopcockHandle stopcock;
         Grabbable hoverGrab;
+        BioButton hoverBioButton;
+        BioHinge hoverBioHinge;
+        BioKnob hoverBioKnob;
+        IBioTarget hoverBioTarget;
+        string bioTargetPrompt = "";
+        float bioHoldTimer;
+        bool bioHoldCompleted;
         RaycastHit hit;
         bool hasHit;
         float pressTime = -1f, dropCooldown;
@@ -207,6 +215,63 @@ namespace Khkt.Demo
                         if (!string.IsNullOrEmpty(r)) Say(r, LabProcedure.Tone.Good);
                     }
                     break;
+                case Act.BioButton:
+                    if (pressed && hoverBioButton != null) hoverBioButton.Press();
+                    break;
+                case Act.BioHinge:
+                    if (pressed && hoverBioHinge != null) hoverBioHinge.Toggle();
+                    break;
+                case Act.BioKnob:
+                    if (hoverBioKnob != null)
+                    {
+                        if (mouse != null)
+                        {
+                            float scroll = mouse.scroll.ReadValue().y;
+                            if (Mathf.Abs(scroll) > 0.01f) hoverBioKnob.AdjustSteps(scroll > 0 ? 1 : -1);
+                        }
+                        if (pressed) hoverBioKnob.AdjustSteps(shift ? -1 : 1);
+                    }
+                    break;
+                case Act.BioTarget:
+                    if (hoverBioTarget != null)
+                    {
+                        var heldTool = Held != null ? Held.GetComponent<BioTool>() : null;
+                        float reqSec = hoverBioTarget.GetRequiredHoldSeconds(heldTool);
+                        if (reqSec <= 0.01f)
+                        {
+                            if (pressed) hoverBioTarget.OnToolApplyComplete(heldTool);
+                        }
+                        else if (down && !bioHoldCompleted)
+                        {
+                            Acting = true;
+                            bioHoldTimer += dt;
+                            float p01 = Mathf.Clamp01(bioHoldTimer / reqSec);
+                            hoverBioTarget.OnToolApplyStep(heldTool, dt, p01);
+                            ProgressRing.Show(bioTargetPrompt, p01);
+                            if (p01 >= 1f)
+                            {
+                                bioHoldCompleted = true;
+                                ProgressRing.Hide();
+                                hoverBioTarget.OnToolApplyComplete(heldTool);
+                            }
+                        }
+                    }
+                    break;
+            }
+            if (Current != Act.BioTarget || !down)
+            {
+                bioHoldTimer = 0f;
+                if (!down) bioHoldCompleted = false;
+                ProgressRing.Hide();
+            }
+            if (Held != null && Current != Act.BioKnob && HeldPart == null && mouse != null && !looking)
+            {
+                var heldKnob = Held.GetComponentInChildren<BioKnob>();
+                if (heldKnob != null)
+                {
+                    float scroll = mouse.scroll.ReadValue().y;
+                    if (Mathf.Abs(scroll) > 0.01f) heldKnob.AdjustSteps(scroll > 0 ? 1 : -1);
+                }
             }
             if (released || !down)
             {
@@ -295,6 +360,11 @@ namespace Khkt.Demo
             usable = null;
             stopcock = null;
             hoverGrab = null;
+            hoverBioButton = null;
+            hoverBioHinge = null;
+            hoverBioKnob = null;
+            hoverBioTarget = null;
+            bioTargetPrompt = "";
             if (!hasHit) return;
 
             var col = hit.collider;
@@ -307,6 +377,24 @@ namespace Khkt.Demo
             var surface = col.GetComponentInParent<PlaceSurface>();
             HoverInfo = col.GetComponentInParent<EquipmentInfo>();
             HoverRoot = grab != null ? grab.transform : HoverInfo != null ? HoverInfo.transform : null;
+
+            // Tương tác dụng cụ Sinh học Tầng 2 (ưu tiên nút bấm, nắp bản lề, núm xoay, mục tiêu nhận tác động)
+            var bBtn = col.GetComponentInParent<BioButton>();
+            if (bBtn != null) { hoverBioButton = bBtn; Current = Act.BioButton; HoverRoot = bBtn.transform; return; }
+            var bHinge = col.GetComponentInParent<BioHinge>();
+            if (bHinge != null && (Held == null || grab == null)) { hoverBioHinge = bHinge; Current = Act.BioHinge; HoverRoot = bHinge.transform; return; }
+            var bKnob = col.GetComponentInParent<BioKnob>();
+            if (bKnob != null && Held == null) { hoverBioKnob = bKnob; Current = Act.BioKnob; HoverRoot = bKnob.transform; return; }
+            var bTarget = col.GetComponentInParent<IBioTarget>();
+            var heldBioTool = Held != null ? Held.GetComponent<BioTool>() : null;
+            if (bTarget != null && (heldBioTool != null || grab == null) && bTarget.CanApplyTool(heldBioTool, out string bPrompt))
+            {
+                hoverBioTarget = bTarget;
+                bioTargetPrompt = bPrompt;
+                Current = Act.BioTarget;
+                HoverRoot = (bTarget as Component)?.transform;
+                return;
+            }
 
             if (Held == null)
             {
@@ -617,6 +705,16 @@ namespace Khkt.Demo
                 case Act.Measure: Hints.Add(("Đo", Held.GetComponent<MeterProbe>().LastReading)); break;
                 case Act.PaperTest: Hints.Add(("Nhấn", "Nhúng giấy thử")); break;
                 case Act.Attach: Hints.Add(("Nhấn", $"Lắp vào {Lower(AttachTarget.label)} ({AttachTarget.Describe()})")); break;
+                case Act.BioButton: if (hoverBioButton != null) Hints.Add(("Nhấn", hoverBioButton.GetPromptText())); break;
+                case Act.BioHinge: if (hoverBioHinge != null) Hints.Add(("Nhấn", hoverBioHinge.GetPromptText())); break;
+                case Act.BioKnob: if (hoverBioKnob != null) Hints.Add(("Lăn chuột", hoverBioKnob.GetPromptText())); break;
+                case Act.BioTarget:
+                    if (hoverBioTarget != null)
+                    {
+                        float req = hoverBioTarget.GetRequiredHoldSeconds(Held != null ? Held.GetComponent<BioTool>() : null);
+                        Hints.Add((req > 0.01f ? "Giữ" : "Nhấn", bioTargetPrompt));
+                    }
+                    break;
             }
             if (HeldPart != null) Hints.Add(("Lăn chuột / R E", "Xoay bộ phận"));
             if (Held != null && Current != Act.Place) Hints.Add(("Q", "Trả về chỗ cũ"));
