@@ -94,6 +94,37 @@ Quyết định đã tự chọn:
 Còn tồn:
 - không.
 
+### Giai đoạn 1 – Mô hình
+Đã làm:
+- Thêm `mediapipe==1.2.0` và `psutil>=7.0` vào `requirements.txt`.
+- Viết `tools/tai_mo_hinh_mediapipe.py` tự động tải các mô hình chính thức của Google: `face_landmarker.task`, `gesture_recognizer.task`, `hand_landmarker.task` vào `tools/mo_hinh/` và kiểm tra SHA-256.
+- Cập nhật `tools/mo_hinh/NGUON.txt` đầy đủ tên file, URL, giấy phép Apache 2.0, dung lượng, SHA-256 và ngày tải.
+- Chạy thử nghiệm 5 giây mở webcam FaceTime HD với cả FaceLandmarker và GestureRecognizer.
+
+Tệp thêm / sửa:
+- `requirements.txt` (thêm mediapipe, psutil).
+- `tools/tai_mo_hinh_mediapipe.py` (thêm mới).
+- `tools/mo_hinh/NGUON.txt` (thêm thông tin 3 mô hình).
+- `tools/mo_hinh/face_landmarker.task` (3,758,596 byte).
+- `tools/mo_hinh/gesture_recognizer.task` (8,373,440 byte).
+- `tools/mo_hinh/hand_landmarker.task` (7,819,105 byte).
+- `docs/20-mediapipe.md` (cập nhật nhật ký).
+
+Kiểm thử:
+- `.venv/bin/python tools/tai_mo_hinh_mediapipe.py` → tải thành công 3 mô hình, khớp SHA-256 100%.
+- Chạy thử nghiệm video 5s trên webcam thật → cả 2 mô hình nạp và xử lý mượt mà.
+
+Số đo:
+- Tốc độ chạy tuần tự thô ban đầu (chưa đa luồng): 120 khung trong 5.02s = 23.9 fps (thấy mặt: 0/120, thấy tay: 0/120 do không có người trước máy).
+- Dung lượng mô hình: face_landmarker 3.76 MB, gesture_recognizer 8.37 MB, hand_landmarker 7.82 MB.
+- Windows: chưa đo.
+
+Quyết định đã tự chọn:
+- Dùng `RunningMode.VIDEO` và sau đó ở Giai đoạn 3 dùng `LIVE_STREAM` bất đồng bộ đa luồng để đạt mục tiêu ≥ 30 fps.
+
+Còn tồn:
+- không.
+
 ---
 
 ## Còn tồn
