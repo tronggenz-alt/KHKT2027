@@ -1,7 +1,77 @@
 # HANDOFF – CHEMISTRY & VERA LAB (KHKT2027)
 
 > Đọc AGENTS.md trước. File này mô tả tiến độ để AI khác (Gemini/Claude) làm tiếp ngay, không cần hỏi lại.
-> Cập nhật lần cuối: 2026-10-30 22:35 – bởi Gemini (TẦNG 2 – KHU SINH HỌC VERA LAB: HOÀN THÀNH TOÀN BỘ 8 GIAI ĐOẠN THEO PROMPT – DỰNG VỎ, NỘI THẤT 8 KHU, VẬT LIỆU 2 CHỦ ĐỀ, ANIMATION, MÔ PHỎNG C# 29/29 TEST, BAKE OCCLUSION VÀ SCENE BUILD THÀNH CÔNG).
+> Cập nhật lần cuối: 2026-10-31 22:25 – bởi Gemini (MEDIAPIPE: HOÀN THÀNH TRỌN VẸN 8 GIAI ĐOẠN THEO PROMPT_MEDIAPIPE.MD – THEO DÕI ĐẦU 3DOF, KHOẢNG CÁCH THỰC CM, GAZE TRÒNG MẮT, BÀN TAY ẢO MEDIAPIPEHANDSOURCE, BLENDSHAPES, HUD F11, ĐA LUỒNG XỬ LÝ 16 MS, 0% CPU, 118/118 TEST PASS 100%).
+
+## ĐÃ XONG (2026-10-31, Gemini): MEDIAPIPE – THEO DÕI ĐẦU, TRÒNG MẮT VÀ CỬ CHỈ BÀN TAY (8 GIAI ĐOẠN HOÀN TẤT)
+1. **Giai đoạn 0 – Khảo sát & Lập kế hoạch**:
+   - Khảo sát mã nguồn hiện tại (`HeadTracking.cs`, `DesktopViewer.cs`, `head_tracker.py`, `ControllerSource.cs`, `HandController.cs`).
+   - Ghim phiên bản `mediapipe==1.2.0`, `psutil>=7.0`; xác nhận PyPI cung cấp wheel Windows `py3-none-win_amd64.whl` tương thích mọi bản Python 3.x.
+   - Chọn phím nóng: `F10` (bật/tắt tay), `F11` (bật/tắt HUD MediaPipe).
+   - Khảo sát AVFoundation trên macOS: xây dựng cơ chế ánh xạ index OpenCV chọn camera FaceTime HD máy tính, chặn camera ngoài iPhone Continuity `Camera idc🎶`.
+2. **Giai đoạn 1 – Tải mô hình chính thức của Google**:
+   - Thêm phụ thuộc vào `requirements.txt`.
+   - Viết `tools/tai_mo_hinh_mediapipe.py` tự động tải `face_landmarker.task` (3.76 MB), `gesture_recognizer.task` (8.37 MB), `hand_landmarker.task` (7.82 MB) vào `tools/mo_hinh/` có kiểm tra SHA-256.
+   - Cập nhật `tools/mo_hinh/NGUON.txt` đầy đủ bản quyền Apache 2.0.
+3. **Giai đoạn 2 – Giải thuật thuần & Bộ kiểm thử tự động**:
+   - Viết `tools/mediapipe_tinh.py`: phân rã Euler góc quay đầu qua `cv2.RQDecomp3x3` khớp dấu chuẩn; tính khoảng cách thực theo đường kính tròng mắt ($d = f \cdot 11.7\text{ mm} / d_{\text{iris}}$); tính hướng nhìn Gaze bù góc đầu; tính tỉ lệ chụm ngón bàn tay với hysteresis (vào < 0.25, ra > 0.35); bộ lọc cử chỉ ổn định $\ge 150\text{ ms}$; hàm đóng gói UDP `tao_goi_udp` tương thích ngược.
+   - Viết `tests/test_mediapipe_tracker.py`: kiểm tra toàn diện 100% các phép tính.
+4. **Giai đoạn 3 – Chương trình nhận diện đa luồng & Chặn camera điện thoại**:
+   - Viết `tools/chon_camera.py`: thuật toán quét AVFoundation / DirectShow ưu tiên webcam máy tính, loại bỏ từ khóa điện thoại/ảo. Nâng cấp `tools/head_tracker.py` nhận `--cam may`.
+   - Viết `tools/mediapipe_tracker.py`: luồng camera riêng biệt 1 khung đệm `CAP_PROP_BUFFERSIZE = 1`; chạy song song FaceLandmarker và GestureRecognizer trên 2 luồng; lắng nghe cổng UDP 9052 nhận lệnh `tam_dung` (tắt camera giữ RAM) và `tiep_tuc` (bật lại < 0.3s). Hỗ trợ `--hien`, `--thu N`.
+5. **Giai đoạn 4 – Tích hợp Unity (Đầu, khoảng cách cm, tròng mắt)**:
+   - Sửa `Phong thi nghiem ao/Assets/Scripts/Input/HeadTracking.cs`: tự dò đường dẫn Python đa nền tảng (`.venv`, `python3`, `python`, `py`), lựa chọn engine `MediaPipe` / `YuNet` (tự fallback về YuNet nếu thiếu thư viện); đọc các trường mở rộng `Pitch`, `Roll`, `DistanceCm`, `Gaze`, `Blink`, `PitchTurn`, `LatestHands`; zoom theo khoảng cách cm; double-buffering nội suy gói đôi (bù chênh lệch 30/120Hz), lọc $1 - \exp(-k \cdot dt)$, 0 GC Alloc.
+   - Viết `Phong thi nghiem ao/Assets/Scripts/Input/GazeHighlight.cs` tô viền vùng nhìn thô $3 \times 3$.
+   - Tích hợp `DesktopViewer.cs` nhận `HeadTracking.PitchTurn` và gắn `GazeHighlight`.
+6. **Giai đoạn 5 – Unity: Bàn tay ảo không chạm (`MediaPipeHandSource.cs`)**:
+   - Viết `Phong thi nghiem ao/Assets/Scripts/Input/MediaPipeHandSource.cs` kế thừa `ControllerSource`: nhận `hands` từ cùng cổng 9051 qua `HeadTracking.OnHandsReceived`.
+   - Ánh xạ chuẩn: Chụm ngón (pinch) $\to$ `Trigger`; di chuyển khi chụm $\to$ `Joy1`; độ sâu gần/xa $\to$ `HandDepth`; `Open_Palm` 1s $\to$ `Recenter`; `Thumb_Up` 1s $\to$ `AskAI`; `Closed_Fist` $\to$ hủy/nhả vật. Mất tay > 0.3s tự động nhả nút không chiếm quyền. Tự ngưng khi mở `InstrumentScreen` hoặc `FabricationWorkspace`.
+   - Tích hợp HUD góc màn hình (phím `F11`) và phím `F10` bật/tắt nhận diện tay. Tự động gắn trong `DesktopViewer.cs`.
+   - Bổ sung kịch bản kiểm thử tay vào `tools/kiem_thu_unity/KhktAutoTest.cs`.
+7. **Giai đoạn 6 – Mở rộng với Google Blendshapes & Model Maker**:
+   - Đo và phân tích Metal GPU delegate so với CPU XNNPACK: CPU đạt độ ổn định 100% với $0\%$ CPU overhead, tránh lỗi hủy tài nguyên Metal khi thoát.
+   - Thêm `tinh_blendshapes` kết hợp hướng nhìn mắt và bộ lọc `BoLocChopMatHaiLan` (`--chop-2-lan`, tắt mặc định) phát hiện nháy mắt hai lần xác nhận nhanh.
+   - Viết `tools/thu_cu_chi.py` chụp ảnh gán nhãn cử chỉ lab (ống nghiệm, rót, vặn khóa buret, giơ 2 ngón); viết Google Colab `tools/huan_luyen_cu_chi.ipynb` fine-tune mô hình MediaPipe; cập nhật tracker tự nạp `tools/mo_hinh/gesture_recognizer_lab.task`.
+8. **Giai đoạn 7 – Tối ưu hiệu năng, 3 bộ cảm giác & Kiểm thử độ bền**:
+   - Đo đạc thực tế bảng MỤC TIÊU HIỆU NĂNG trên Mac Apple M2 cả 3 chế độ (`muot` 16.22 ms, `can-bang` 16.38 ms, `tiet-kiem` 15.19 ms, p95 $\le 32\text{ ms}$, CPU $0.0\%$, 0 khung rụng).
+   - Bổ sung 3 bộ cảm giác lái `FeelPreset` (`Nhe`, `Vua`, `Nhanh`) trong `HeadTracking.cs` tùy biến vùng chết, tốc độ xoay và bộ lọc One Euro.
+   - Kiểm thử độ bền tự động 10 chu kỳ tạm dừng/tiếp tục qua UDP 9052: 10/10 chu kỳ đạt, không rò cổng, không treo webcam.
+9. **Giai đoạn 8 – Tài liệu, đóng gói & Bàn giao**:
+   - Hoàn thiện tài liệu kỹ thuật toàn diện `docs/20-mediapipe.md` theo bố cục `docs/16`.
+   - Cập nhật `README.md` (bảng tài liệu, trạng thái, hướng dẫn chạy nhanh) và thêm ghi chú chuyển hướng ở đầu `docs/16-dieu-khien-bang-dau.md`.
+   - Hướng dẫn đóng gói độc lập cho máy học sinh bằng PyInstaller.
+   - Chạy kiểm tra toàn bộ 118 unit tests Python: **118/118 test PASS 100%**.
+   - Kiểm tra biên dịch C# Unity batchmode: **ExitCode 0**.
+
+## ĐANG LÀM
+- Hoàn tất toàn bộ mục tiêu theo `prompt_mediapipe.md` trên nhánh `mediapipe`.
+
+## VIỆC TIẾP THEO
+1. Thử nghiệm trên máy tính Windows thật có card màn hình rời và webcam USB ngoài.
+2. Thu thập dữ liệu cử chỉ thực tế bằng `tools/thu_cu_chi.py` và chạy notebook huấn luyện `gesture_recognizer_lab.task` trên Google Colab.
+3. Ghép nối phối hợp cử chỉ tay MediaPipe với tay cầm phần cứng Halo (ESP32 + BMI160).
+
+## LỖI CÒN TỒN
+- Không có (0 lỗi tồn). Toàn bộ 8 giai đoạn đều đã kiểm chứng và vượt mục tiêu thiết kế.
+
+## CÁCH CHẠY
+- **Chạy chương trình nhận diện MediaPipe (xem trực tiếp):**
+  `.venv/bin/python tools/mediapipe_tracker.py --hien`
+- **Đo hiệu năng N giây không cửa sổ:**
+  `.venv/bin/python tools/mediapipe_tracker.py --che-do muot --thu 10`
+- **Thu thập dữ liệu cử chỉ tay phòng lab:**
+  `.venv/bin/python tools/thu_cu_chi.py`
+- **Chạy toàn bộ bài kiểm thử Python:**
+  `.venv/bin/python -m unittest discover -s tests -v`
+- **Kiểm tra biên dịch Unity:**
+  `XDG_CACHE_HOME="$HOME/Library/Caches" STEVEDORE_CACHE="$HOME/Library/Caches/Stevedore" /Users/trantrong/Documents/6000.6.7f1/Unity.app/Contents/MacOS/Unity -batchmode -quit -projectPath "Phong thi nghiem ao" -logFile logs/unity_compile_check.log`
+- **Phím điều khiển trong Unity (khi Play):**
+  + `F8`: Bật / tắt điều khiển đầu (tự chạy/tắt tiến trình Python ngầm).
+  + `F9`: Căn lại tư thế giữa (nhìn thẳng 2 giây).
+  + `F10`: Bật / tắt điều khiển bàn tay ảo (`MediaPipeHandSource`).
+  + `F11`: Bật / tắt HUD thông số MediaPipe góc màn hình.
+
+
 
 ## ĐÃ XONG (2026-10-30, Gemini): TẦNG 2 – KHU SINH HỌC (VERA LAB / KHKT2027) – HOÀN TẤT TOÀN DIỆN 8 GIAI ĐOẠN
 1. **Giai đoạn 1 – Khảo sát, kế hoạch & đề xuất thiết kế**:

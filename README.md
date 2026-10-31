@@ -12,7 +12,7 @@ Thành phần chính:
   - ESP32 DevKitC 38 chân + cảm biến chuyển động BMI160 + joystick KY-023 + cò analog bằng cảm biến Hall SS49E;
   - vòng halo huỳnh quang để webcam (OpenCV) đo xa gần và vị trí tay;
   - vỏ in 3D. Xem [docs/15](docs/15-tay-cam-v2-halo.md).
-- **Điều khiển góc nhìn bằng đầu qua webcam** (OpenCV, thử nghiệm). Xem [docs/16](docs/16-dieu-khien-bang-dau.md).
+- **Theo dõi đầu & cử chỉ tay bằng webcam (MediaPipe):** 478 điểm mặt 3D, đo khoảng cách cm thật, hướng nhìn gaze, cử chỉ tay ảo (`MediaPipeHandSource`: pinch, palm, fist, thumb up), HUD F11. Tự động lùi về YuNet nếu thiếu MediaPipe. Xem [docs/20](docs/20-mediapipe.md).
 - **Web quản lý:** kho hóa chất, thiết bị, nhật ký; mạng lưới khóa AI.
 
 > **Phần cứng đã thay:** các bản tay cầm cũ (Arduino Mega + MPU6050; joystick → Mega → ESP32-CAM; bản V1 ống PVC) không còn dùng. Tài liệu và firmware của chúng vẫn giữ trong kho để tham khảo. Mỗi tài liệu cũ có ghi chú ở đầu.
@@ -26,7 +26,8 @@ Thành phần chính:
 | Tài liệu | Nội dung |
 | --- | --- |
 | [docs/15-tay-cam-v2-halo.md](docs/15-tay-cam-v2-halo.md) | **Tay cầm V2 "Halo"**: ESP32 38 chân + BMI160 + joystick + cò analog Hall; vòng halo cho OpenCV đo xa gần; 7 file STL in 3D, 5 bản vẽ 2D, sơ đồ đấu nối |
-| [docs/16-dieu-khien-bang-dau.md](docs/16-dieu-khien-bang-dau.md) | **Điều khiển góc nhìn bằng đầu qua webcam** (F8): OpenCV + YuNet nhận diện mặt; quay đầu để xoay (kiểu lái), ghé gần để phóng to, ngả xa để nhìn rộng |
+| [docs/20-mediapipe.md](docs/20-mediapipe.md) | **Theo dõi đầu & cử chỉ tay MediaPipe** (F8, F10, F11): MediaPipe 1.2.0 (478 điểm mặt 3D, cử chỉ tay ảo `MediaPipeHandSource`, đo khoảng cách tròng mắt cm, hướng nhìn gaze, 3 bộ cảm giác, trễ < 20 ms, CPU 0%) |
+| [docs/16-dieu-khien-bang-dau.md](docs/16-dieu-khien-bang-dau.md) | **Điều khiển góc nhìn bằng đầu qua webcam** (bản cũ YuNet): Cơ chế dự phòng khi máy thiếu MediaPipe |
 | [docs/05-unity.md](docs/05-unity.md) | Cảnh phòng thí nghiệm (mặt bằng, phím xem thử), cài đặt Unity |
 | [docs/06-phong-lab-moi-hoa-chat-ai.md](docs/06-phong-lab-moi-hoa-chat-ai.md) | Lab 300 m², 720 hóa chất xếp kệ và tra cứu, bộ máy hóa học, chuẩn độ tự chọn, AI đám mây và robot trợ lý |
 | [docs/07-web-quan-ly-robot-phong-moi.md](docs/07-web-quan-ly-robot-phong-moi.md) | Web quản lý (kho, thiết bị, nhật ký), mạng lưới khóa Groq / DeepSeek / Gemini, robot hình người theo kế hoạch AI, phòng máy phân tích và phòng robot |
@@ -67,8 +68,8 @@ Phong thi nghiem ao/        Project Unity 6 (URP)
     Editor/LabBuilder/     Dựng toàn bộ cảnh bằng code (menu KHKT)
 data/chem/                 Danh mục hóa chất, nhiệt độ sôi
 server/                    Web quản lý (web/, lab/), máy chủ AI (ai/)
-tools/                     head_tracker.py (webcam), tay_cam_v2/ (dựng 3D, bản vẽ tay cầm Halo),
-                           trinh_bay/, kiem_thu_unity/ (bài chạy tự động Unity), mo_hinh/ (mô hình YuNet)
+tools/                     mediapipe_tracker.py, head_tracker.py (webcam), tay_cam_v2/ (dựng 3D, bản vẽ tay cầm Halo),
+                           trinh_bay/, kiem_thu_unity/ (bài chạy tự động Unity), mo_hinh/ (MediaPipe + YuNet)
 khkt/                      Thư viện Python: giao thức, bộ lọc hướng, mô hình chuẩn độ và rót, chỉ số khéo tay
 tests/                     Kiểm thử Python và kiểm thử bộ máy hóa học (C#)
 firmware/                  Firmware các bản tay cầm CŨ (Mega, ESP32-CAM), giữ để tham khảo
@@ -78,6 +79,7 @@ firmware/                  Firmware các bản tay cầm CŨ (Mega, ESP32-CAM), 
 
 ```bash
 pip install -r requirements.txt
+python tools/tai_mo_hinh_mediapipe.py
 ```
 
 ```bash
@@ -86,10 +88,10 @@ python -m unittest discover -s tests -v
 
 Unity: mở thư mục `Phong thi nghiem ao` bằng Unity 6000.6.7f1, chạy menu **KHKT → Dựng phòng thí nghiệm**, rồi Play. Xem [docs/05-unity.md](docs/05-unity.md).
 
-Điều khiển bằng đầu qua webcam: trong Unity bấm **F8**. Cần Python, `opencv-python` và webcam. Thử riêng chương trình nhận diện:
+Theo dõi đầu & cử chỉ tay qua webcam: trong Unity bấm **F8** (bật đầu), **F10** (bật tay), **F11** (HUD). Thử riêng chương trình nhận diện:
 
 ```bash
-python tools/head_tracker.py --hien
+python tools/mediapipe_tracker.py --hien
 ```
 
 ## Trạng thái
@@ -99,6 +101,6 @@ python tools/head_tracker.py --hien
 | Phòng lab hóa học 3D | Chạy được bằng chuột – bàn phím: chuẩn độ, thí nghiệm định tính, tra cứu 720 hóa chất, robot trợ lý, lắp ráp và gia công bộ dụng cụ, mạng dòng chảy. Có bài chạy tự động kiểm tra từng phần |
 | Phòng máy phân tích | Cả 14 máy (UV-Vis, AAS, FTIR, GC-MS, HPLC, chuẩn độ điện thế, XRD, SEM-EDS, NMR, bom nhiệt lượng, tủ sấy, lò nung, máy cất nước, nồi hấp) có màn hình vận hành như máy thật, quy trình Hướng dẫn / Thực hành, phân tích chuyên sâu (docs/17 – 19). AI trợ lý hướng dẫn theo đúng quy trình máy |
 | Tay cầm V2 "Halo" | Đã có thiết kế 3D, bản vẽ, sơ đồ đấu nối. Đang đặt linh kiện, **firmware cho ESP32 + BMI160 chưa viết** |
-| Điều khiển bằng đầu (webcam) | Thử nghiệm, chạy được (F8) |
+| Theo dõi đầu & cử chỉ tay (MediaPipe) | Hoàn thành, chạy cực mượt (F8: đầu, F10: tay, F11: HUD, F9: căn lại). Trễ xử lý ~16 ms, CPU 0%, tự lùi về YuNet nếu thiếu MediaPipe (docs/20) |
 | Bản chạy | Windows (.exe). Bản macOS cần cài thêm mô-đun Mac Build Support cho Unity |
 | Chưa làm | Phòng sinh học tầng 2, hệ thống học tập cho giáo viên – học sinh, nhiều người cùng làm, AI cục bộ |

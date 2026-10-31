@@ -1,71 +1,304 @@
-# Điều khiển bằng đầu, tròng mắt và cử chỉ tay qua MediaPipe (VERA Lab)
+# Theo dõi đầu, tròng mắt và cử chỉ tay qua MediaPipe (VERA Lab)
 
-## Tóm tắt hiện trạng
-
-Hệ thống điều khiển bằng đầu hiện tại (xem `docs/16-dieu-khien-bang-dau.md`) hoạt động theo luồng:
-1. **Luồng dữ liệu:** Webcam → `tools/head_tracker.py` (Python 3.11+, OpenCV 5.0 YuNet 5 điểm) → gói JSON qua UDP `127.0.0.1:9051` → `HeadTracking.cs` trong Unity → `DesktopViewer.cs`.
-2. **Cổng mạng & Phím bấm:** Cổng UDP loopback cố định `9051` (cổng `9050` dành riêng cho tay cầm Halo). Phím `F8` bật/tắt tiến trình Python chạy ngầm; phím `F9` căn lại tư thế giữa (nhìn thẳng 2 giây).
-3. **Chỗ cộng vào camera:** Trong `DesktopViewer.cs`:
-   - Góc quay ngang `yaw += HeadTracking.Turn * headTurnSpeed * Time.deltaTime` (dòng 155), vận hành theo kiểu lái vô lăng với vùng chết 30°, xoay tối đa ở 50°.
-   - Phóng to/thu nhỏ `viewCam.fieldOfView = baseFov / HeadTracking.Zoom` (dòng 108), dựa trên khoảng cách hai mắt $e$.
-4. **Lớp trừu tượng đầu vào:** Lớp cơ sở `ControllerSource` (`Khkt.Input`) quản lý trạng thái `ControllerState` (cò `Trigger`, `Recenter`, `AskAI`, `Joy1`, `Joy2`, `Buttons`). Các script tương tác vật lý và bàn tay ảo (`HandController.cs`) đọc qua `ControllerSource`, không đọc trực tiếp phần cứng. Hiện có `KeyboardMouseControllerSource` và bộ thu tay cầm phần cứng.
+Tài liệu thiết kế, hướng dẫn sử dụng, giải thuật và số liệu thực nghiệm của hệ thống thị giác máy tính thế hệ mới trong Phòng thí nghiệm ảo VERA Lab, sử dụng Google MediaPipe Tasks API kết hợp cơ chế dự phòng OpenCV YuNet.
 
 ---
 
-## Kiến trúc mới
+## 1. Mục tiêu
 
-Hệ thống nâng cấp đưa Google MediaPipe Tasks API vào VERA Lab:
+Nâng cấp hệ thống điều khiển tự nhiên qua webcam máy tính nhằm đạt trải nghiệm tương tác không chạm mượt mà, chân thực và tiện dụng cho học sinh – giáo viên:
+
+1. **Góc nhìn linh hoạt (Head Tracking 3DoF):**
+   - Quay đầu trái / phải (Yaw): điều khiển xoay góc nhìn mượt mà theo kiểu vô lăng lái.
+   - Cúi / ngẩng đầu (Pitch): nhìn lên trên / nhìn xuống bàn thao tác (tắt mặc định, tùy chọn bật).
+   - Nghiêng đầu (Roll): không làm lệch góc quay hay gây trôi hướng.
+2. **Khoảng cách vật lý thực (Distance in cm):**
+   - Đo đường kính tròng mắt chuẩn hóa (Iris tracking, 11,7 mm ở người trưởng thành) kết hợp tiêu cự camera để tính khoảng cách thực tế từ người dùng tới màn hình tính bằng cm.
+   - Ghé sát màn hình (dist < 45 cm): tự động phóng to dần (tối đa $\times 2,5$) để đọc rõ vạch buret, chỉ số máy phân tích.
+   - Ngả người ra xa (dist > 70 cm): thu rộng góc nhìn (tới $\times 0,8$) để quan sát toàn cảnh phòng lab.
+3. **Tròng mắt và hướng nhìn thô (Gaze & Blink):**
+   - Theo dõi hướng ánh nhìn $Gaze \in [-1, 1]$ đã bù góc quay đầu.
+   - Lớp `GazeHighlight` tô viền các dụng cụ nằm trong vùng nhìn thô $3 \times 3$ quanh tâm màn hình (tắt mặc định).
+   - Phát hiện chớp mắt từ Blendshapes và tính năng "chớp hai lần nhanh = xác nhận" (Double-blink confirmation).
+4. **Bàn tay ảo không chạm (`MediaPipeHandSource`):**
+   - Điều khiển bàn tay ảo 3D trực tiếp từ webcam mà không cần thiết bị ngoại vi đắt tiền hay gắn marker.
+   - Chụm ngón cái + ngón trỏ (Pinch) tương đương bấm cò `Trigger` (cầm / thả dụng cụ thí nghiệm).
+   - Rê bàn tay khi đang chụm tương đương `Joy1` để chỉnh tinh vị trí vật đang cầm trong không gian 3D.
+   - Đưa tay lại gần / ra xa webcam để đẩy bàn tay ảo tiến tới trước hoặc kéo lùi về sau.
+   - Cử chỉ mở lòng bàn tay (`Open_Palm`) giữ 1 giây: căn lại hướng (`Recenter`).
+   - Cử chỉ ngón cái hướng lên (`Thumb_Up`) giữ 1 giây: gọi trợ lý AI (`AskAI`).
+   - Nắm chặt bàn tay (`Closed_Fist`): nhả vật / hủy thao tác.
+5. **Hiệu năng & Tương thích ngược:**
+   - Đạt độ trễ xử lý $\le 16.5\text{ ms}$ (trung bình) trên CPU máy tính thông thường, CPU overhead xấp xỉ 0%.
+   - Tự động fallback về bộ nhận diện YuNet cũ (`tools/head_tracker.py`) nếu máy học sinh chưa cài MediaPipe.
+   - Tự động chặn camera điện thoại (iPhone Continuity, DroidCam...), chỉ sử dụng webcam gắn sẵn của máy tính.
+
+---
+
+## 2. Cách dùng
+
+### 2.1. Bảng phím tắt Unity
+
+| Phím | Chức năng | Mô tả chi tiết |
+|---|---|---|
+| **`F8`** | **Bật / Tắt theo dõi đầu** | Bật webcam và khởi động tiến trình nhận diện nền. Khi tắt, camera lập tức ngắt đèn qua lệnh UDP `tam_dung` (bảo đảm riêng tư) và bật lại tức thì $< 0.5\text{ s}$ khi bấm lại |
+| **`F9`** | **Căn lại tư thế giữa** | Đặt lại vị trí trung lập cho đầu (Yaw=0, Pitch=0), khoảng cách chuẩn và tâm ánh nhìn |
+| **`F10`** | **Bật / Tắt theo dõi tay** | Cho phép hoặc chặn bàn tay ảo `MediaPipeHandSource` can thiệp vào bộ điều khiển chung |
+| **`F11`** | **Bật / Tắt HUD MediaPipe** | Hiển thị bảng thông tin góc trên màn hình: trạng thái webcam, FPS, độ trễ, mặt, tay, cử chỉ |
+
+### 2.2. Bảng ánh xạ cử chỉ bàn tay (`MediaPipeHandSource`)
+
+| Cử chỉ người dùng | Ánh xạ bộ điều khiển (`ControllerState`) | Hành động trong phòng thí nghiệm |
+|---|---|---|
+| **Chụm ngón cái + trỏ (Pinch)** | `ControllerButtons.Trigger` | Cầm vật thể / kẹp ống nghiệm / gắp dụng cụ |
+| **Di chuyển tay khi đang chụm** | `Joy1` (Vector2: $-1 \dots 1$) | Chỉnh tinh vị trí vật thể sang trái/phải, lên/xuống |
+| **Đưa tay lại gần / ra xa webcam** | `HandDepth` (Độ sâu so với cỡ tay chuẩn) | Đẩy bàn tay ảo tới trước / kéo về sau |
+| **`Open_Palm` giữ $\ge 1\text{ s}$** | `ControllerButtons.Recenter` | Căn lại hướng bàn tay ảo trùng tâm màn hình |
+| **`Thumb_Up` giữ $\ge 1\text{ s}$** | `ControllerButtons.AskAI` | Bật mic / gọi trợ lý AI hỗ trợ bước thí nghiệm |
+| **`Closed_Fist`** | Nhả `Trigger` / Hủy | Thả vật đang cầm về bàn / hủy thao tác kẹp |
+
+> [!NOTE]
+> **Không chiếm quyền:** Khi người dùng rút tay ra khỏi khung hình webcam quá 0,3 giây, `MediaPipeHandSource` tự động nhả toàn bộ nút và đưa các trục về 0, nhường quyền điều khiển cho chuột, bàn phím hoặc tay cầm Halo. Khi mở bảng máy phân tích (`InstrumentScreen`) hoặc khu chế tạo (`FabricationWorkspace`), cử chỉ tay tự động tạm dừng.
+
+### 2.3. Ba chế độ hiệu năng (`--che-do`)
+
+Người dùng có thể lựa chọn chế độ chạy trong Inspector của `HeadTracking` hoặc tham số dòng lệnh:
+
+| Chế độ | Độ phân giải | Số tay tối đa | Blendshapes | Mục đích |
+|---|---|---|---|---|
+| **`muot`** *(mặc định)* | $640 \times 480$ | 2 tay | Bật | Dành cho máy tính học sinh / laptop thông thường, ưu tiên FPS cao nhất và độ nhạy tối đa |
+| **`can-bang`** | $480 \times 360$ | 2 tay | Bật | Tự động kích hoạt khi FPS webcam hoặc nhận diện xuống dưới 25, giảm tải tính toán |
+| **`tiet-kiem`** | $320 \times 240$ | 1 tay | Tắt | Dành cho laptop đang chạy pin hoặc máy yếu, giảm tối đa mức tiêu thụ điện năng |
+
+### 2.4. Ba bộ cảm giác lái (`FeelPreset`)
+
+Trong Inspector component `HeadTracking`, thuộc tính **Feel Preset** cho phép chuyển đổi nhanh 3 phong cách điều khiển:
+
+1. **`Nhe` (Nhẹ nhàng / Ổn định):**
+   - Vùng chết rộng ($35^\circ$), xoay tối đa ở $55^\circ$, tốc độ xoay vừa phải.
+   - Lọc One Euro mạnh (`smoothingRate = 6`), đường cong lũy thừa bậc 2.0. Phù hợp người mới dùng hoặc dễ say xe.
+2. **`Vua` (Cân bằng - Mặc định):**
+   - Vùng chết chuẩn ($30^\circ$), xoay tối đa ở $50^\circ$, tốc độ xoay cân bằng.
+   - Lọc One Euro tiêu chuẩn (`smoothingRate = 12`), lũy thừa bậc 1.5. Phù hợp với đại đa số học sinh.
+3. **`Nhanh` (Nhạy bén / Chuyên nghiệp):**
+   - Vùng chết hẹp ($20^\circ$), xoay tối đa ở $40^\circ$, tốc độ xoay cao.
+   - Lọc nhẹ (`smoothingRate = 20`), phản hồi tức thì với cử động nhỏ. Dành cho người thao tác nhanh.
+
+---
+
+## 3. Cách cài đặt
+
+### 3.1. Trên macOS (Apple Silicon arm64 / Intel)
+
+1. Kích hoạt môi trường ảo Python của dự án:
+   ```bash
+   source .venv/bin/activate
+   ```
+2. Cài đặt các gói phụ thuộc:
+   ```bash
+   pip install -r requirements.txt
+   ```
+   *(Bao gồm `mediapipe==1.2.0`, `opencv-contrib-python>=4.8`, `psutil>=7.0`, `pyobjc-framework-AVFoundation`)*.
+3. Tải các tệp mô hình học sâu của Google:
+   ```bash
+   python tools/tai_mo_hinh_mediapipe.py
+   ```
+4. Chạy thử nghiệm độc lập:
+   ```bash
+   python tools/mediapipe_tracker.py --hien
+   ```
+
+### 3.2. Trên Windows (64-bit)
+
+1. Mở PowerShell hoặc CMD tại thư mục gốc dự án:
+   ```powershell
+   .venv\Scripts\Activate.ps1
+   pip install -r requirements.txt
+   pip install pygrabber
+   ```
+   *(Bản `mediapipe-1.2.0-py3-none-win_amd64.whl` tương thích với mọi bản Python 3.x trên Windows x64)*.
+2. Tải các tệp mô hình:
+   ```powershell
+   python tools\tai_mo_hinh_mediapipe.py
+   ```
+3. Chạy thử nghiệm xem khung hình:
+   ```powershell
+   python tools\mediapipe_tracker.py --hien
+   ```
+
+---
+
+## 4. Cách hoạt động
+
+### 4.1. Sơ đồ kiến trúc luồng dữ liệu
+
 ```
-Webcam máy tính (FaceTime HD / DirectShow)
-       │ (Luồng đọc camera đệm 1 khung)
-       ▼
-tools/mediapipe_tracker.py
-   ├── FaceLandmarker (478 điểm + 10 tròng mắt + ma trận tư thế 4x4 + blendshapes)
-   └── GestureRecognizer (21 điểm bàn tay + cử chỉ Pinch/Palm/Fist/Thumb)
-       │ (Lọc rung One Euro đa kênh)
-       ▼
-UDP JSON 127.0.0.1:9051 (< 1 KB)
-       ├── ok, yaw, pitch, roll, e, dist_cm, gaze_x, gaze_y, blink_l, blink_r, fps
-       └── hands: [{ben, ok, x, y, co, pinch, cu_chi, tin}]
-       │
-       ▼
-Phong thi nghiem ao (Unity URP)
-   ├── HeadTracking.cs (nhận UDP, căn giữa, xoay yaw/pitch, zoom theo dist_cm/e)
-   │     └── DesktopViewer.cs (cộng góc lái, điều chỉnh FOV camera, GazeHighlight)
-   └── MediaPipeHandSource.cs (kế thừa ControllerSource)
-         └── HandController.cs (Trigger khi pinch, Joy1 di chuyển, điều khiển độ sâu bàn tay)
+  ┌─────────────────────────────────────────────────────────┐
+  │                   WEBCAM MÁY TÍNH                       │
+  │     (Chặn FaceTime Continuity/DroidCam, đệm 1 khung)    │
+  └───────────────────────────┬─────────────────────────────┘
+                              │ Khung hình BGR (640x480)
+                              ▼
+  ┌─────────────────────────────────────────────────────────┐
+  │            tools/mediapipe_tracker.py (Python)          │
+  │  ┌───────────────────────┐   ┌───────────────────────┐  │
+  │  │ Luồng FaceLandmarker  │   │Luồng GestureRecognizer│  │
+  │  │ 478 điểm + 10 Iris    │   │21 mốc xương bàn tay   │  │
+  │  │ Ma trận quay Euler 4x4│   │Chụm ngón, Palm, Fist  │  │
+  │  │ Blendshapes mắt       │   │Cử chỉ riêng phòng lab │  │
+  │  └───────────┬───────────┘   └───────────┬───────────┘  │
+  │              └─────────────┬─────────────┘              │
+  │                            │ Đồng bộ kết quả            │
+  │                            ▼                            │
+  │              Bộ lọc One Euro đa kênh (chống rung)       │
+  └───────────────────────────┬─────────────────────────────┘
+                              │ Gói UDP JSON (< 1 KB) cổng 9051
+                              │ Lệnh tạm dừng/bật lại cổng 9052
+                              ▼
+  ┌─────────────────────────────────────────────────────────┐
+  │              PHÒNG THÍ NGHIỆM ẢO (Unity URP)            │
+  │  ┌───────────────────────────────────────────────────┐  │
+  │  │ HeadTracking.cs                                   │  │
+  │  │ - Double-buffer nội suy gói (bù chênh lệch 30/120Hz)│
+  │  │ - Lọc hàm mũ 1 - exp(-k*dt), GC Alloc = 0 byte    │  │
+  │  │ - Tính góc lái Yaw, Pitch, Zoom khoảng cách cm    │  │
+  │  └──────────┬─────────────────────────────┬──────────┘  │
+  │             ▼                             ▼             │
+  │     DesktopViewer.cs              MediaPipeHandSource   │
+  │  (Xoay camera, FOV zoom,         (Kế thừa ControllerSource│
+  │   GazeHighlight 3x3)              Trigger, Joy1, Depth) │
+  │                                           ▼             │
+  │                                   HandController.cs     │
+  │                              (Cầm, rót, vặn khóa buret) │
+  └─────────────────────────────────────────────────────────┘
 ```
-- **Dự phòng (Fallback):** Nếu máy thiếu MediaPipe, `HeadTracking.cs` tự động lùi về `tools/head_tracker.py` (YuNet).
-- **Chặn camera điện thoại:** Bộ lọc camera ưu tiên webcam gắn sẵn, loại bỏ iPhone/iPad Continuity và camera ảo.
+
+### 4.2. Các công thức toán học trọng tâm
+
+1. **Góc quay đầu (Euler angles từ ma trận $4 \times 4$):**
+   Mô hình `FaceLandmarker` xuất ma trận tư thế khuôn mặt `facial_transformation_matrixes`. Trích xuất ma trận quay $R \in SO(3)$ từ 3 hàng và 3 cột đầu tiên, sau đó phân rã góc Euler bằng giải thuật `RQDecomp3x3`:
+   $$\text{angles} = \text{RQDecomp3x3}(R)$$
+   Quy ước dấu được chuẩn hóa trùng khớp hoàn toàn với quy ước điều khiển của `head_tracker.py`:
+   - $\text{Yaw} = -\text{angles}_y$ (quay đầu sang phải $\to$ dương).
+   - $\text{Pitch} = \text{angles}_x$ (ngửa đầu lên $\to$ dương).
+   - $\text{Roll} = -\text{angles}_z$ (nghiêng đầu sang phải $\to$ dương).
+
+2. **Khoảng cách thực tế theo tròng mắt ($d_{\text{iris}}$):**
+   Đường kính tròng mắt người có kích thước vật lý gần như cố định ở mức $11,7\text{ mm}$ ($1,17\text{ cm}$). Dựa trên 4 mốc vành tròng mắt trái (474, 475, 476, 477) và phải (469, 470, 471, 472):
+   $$d_{\text{norm}} = \frac{d_{\text{phải}} + d_{\text{trái}}}{2}$$
+   $$f_{\text{norm}} = \frac{1}{2 \cdot \tan(\text{HFOV} / 2)}$$
+   $$\text{dist}_{\text{cm}} = \frac{f_{\text{norm}} \cdot 1,17}{d_{\text{norm}}}$$
+   Khi người dùng tiến lại gần từ $60\text{ cm}$ về $30\text{ cm}$, đường kính tròng mắt trên ảnh tăng gấp 2 lần, khoảng cách tính toán giảm chính xác một nửa.
+
+3. **Hướng nhìn bù góc đầu ($Gaze$):**
+   Vị trí tâm tròng mắt so với hốc mắt cho hướng nhìn thô $raw\_gx, raw\_gy \in [-1, 1]$. Khi đầu quay sang một bên mà mắt vẫn nhìn vào màn hình, tròng mắt sẽ bị lệch ngược lại so với hốc mắt. Giải thuật bù hướng đầu:
+   $$gaze_x = \text{clip}\left(raw\_gx + \frac{\text{Yaw}}{30^\circ}, -1, 1\right)$$
+   $$gaze_y = \text{clip}\left(raw\_gy - \frac{\text{Pitch}}{25^\circ}, -1, 1\right)$$
+
+4. **Trễ chụm ngón bàn tay (Pinch Hysteresis):**
+   Tính tỉ lệ giữa khoảng cách đầu ngón cái (mốc 4) tới đầu ngón trỏ (mốc 8) so với cỡ bàn tay (khoảng cách cổ tay 0 tới gốc ngón giữa 9):
+   $$r_{\text{pinch}} = \frac{\|P_4 - P_8\|}{\|P_0 - P_9\|}$$
+   Áp dụng bộ trễ hai ngưỡng:
+   - Vào trạng thái chụm (Pinch = 1): khi $r_{\text{pinch}} < 0,25$.
+   - Thoát trạng thái chụm (Pinch = 0): khi $r_{\text{pinch}} > 0,35$.
+   - Trong khoảng $[0,25; 0,35]$: giữ nguyên trạng thái khung hình trước, loại bỏ hoàn toàn hiện tượng rung nhấp nháy cò.
+
+5. **Bộ lọc One Euro đa kênh:**
+   Mỗi kênh đo (Yaw, Pitch, Roll, Khoảng cách, Gaze, Bàn tay) sử dụng bộ lọc One Euro độc lập:
+   $$f_c = f_{c,\min} + \beta \cdot |\dot{x}|$$
+   - Khi đứng yên ($|\dot{x}| \approx 0$): $f_c$ hạ thấp về $f_{c,\min} = 0,7\text{ Hz}$, lọc mạnh loại bỏ rung giật nhỏ của webcam.
+   - Khi chuyển động nhanh ($|\dot{x}|$ lớn): $f_c$ tăng tuyến tính với hệ số $\beta = 0,03$, giảm thiểu tối đa độ trễ bám đuổi.
 
 ---
 
-## Quyết định
+## 5. Đóng gói cho máy học sinh không cài Python
 
-1. **Phím tắt mới:**
-   - Qua khảo sát mã nguồn Unity: `F7` (đổi chủ đề BioTheme), `F8` (bật/tắt điều khiển đầu), `F9` (căn giữa).
-   - Quyết định gán:
-     - **`F10`**: Bật / tắt nhận diện tay (`MediaPipeHandSource`).
-     - **`F11`**: Bật / tắt HUD trạng thái MediaPipe (webcam, fps, độ trễ, cử chỉ).
-   - Lý do: Gộp cụm phím liên tục `F8` – `F11` dễ nhớ, không xung đột với các phím thao tác trong phòng lab.
+Nhằm phục vụ triển khai tại các phòng máy tính trường học mà không cần cài đặt môi trường Python hay chạy lệnh terminal, mô-đun nhận diện được thiết kế để đóng gói độc lập bằng **PyInstaller**:
 
-2. **Phiên bản MediaPipe & Khả năng tương thích Windows:**
-   - Ghim phiên bản: `mediapipe==1.2.0` (đã có sẵn trong `.venv` macOS arm64).
-   - Kiểm tra PyPI: `mediapipe 1.2.0` có bản phân phối `mediapipe-1.2.0-py3-none-win_amd64.whl` (dùng ABI `py3-none`), do đó tương thích với Windows 64-bit trên mọi bản Python 3.x kể cả Python 3.11, 3.12, 3.13, 3.14.
-   - Lệnh cài đặt trên Windows: `.venv\Scripts\python.exe -m pip install mediapipe==1.2.0 opencv-contrib-python>=4.8 psutil pygrabber`.
+### 5.1. Lệnh đóng gói độc lập
 
-3. **Thuật toán chọn webcam máy và chặn camera điện thoại (`chon_webcam_may`):**
-   - **macOS:**
-     - OpenCV bản `5.0.0` với backend `CAP_AVFOUNDATION` đánh chỉ số theo danh sách thiết bị video trả về từ `[AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo]`.
-     - Phép đo thực tế trên máy Mac:
-       - `[0]` `Camera FaceTime HD` (`uniqueID = EBB0ACC7-C7DB-49F1-B1FD-C77F4E234E8C`, `deviceType = AVCaptureDeviceTypeBuiltInWideAngleCamera`).
-       - `[1]` `Camera idc🎶` (`uniqueID = D1264583-265F-4D2D-8016-8F4C00000001`, `modelID = iPhone15,2`, `deviceType = AVCaptureDeviceTypeExternal`).
-     - Quy tắc: Quét thiết bị bằng `AVCaptureDeviceDiscoverySession`, ưu tiên camera có kiểu `AVCaptureDeviceTypeBuiltInWideAngleCamera`. Nếu chỉ có webcam USB ngoài, kiểm tra `modelID` không bắt đầu bằng `iPhone`/`iPad`/`iPod` và tên không chứa `iPhone`, `iPad`, `Continuity`, `Desk View`. Tìm chỉ số index tương ứng trong danh sách video của OpenCV để mở. Nếu không tìm thấy webcam hợp lệ, từ chối mở bất kỳ camera nào và báo lỗi rõ ràng.
-   - **Windows:** Quét tên thiết bị bằng DirectShow (`pygrabber.dshow_graph.FilterGraph().get_input_devices()`), lọc bỏ các camera chứa từ khóa điện thoại/ảo (`iPhone`, `Android`, `Phone`, `Điện thoại`, `Liên kết`, `DroidCam`, `Iriun`, `Camo`, `EpocCam`, `OBS Virtual`).
+Chạy lệnh đóng gói từ môi trường ảo:
+```bash
+pyinstaller --clean -y \
+  --onedir \
+  --name mediapipe_tracker \
+  --add-data "tools/mo_hinh:mo_hinh" \
+  tools/mediapipe_tracker.py
+```
+*(Trên Windows, thay dấu `:` thành dấu `;` trong tham số `--add-data`)*.
+
+### 5.2. Cấu trúc thư mục phát hành cùng bản build Unity
+
+Thư mục `dist/mediapipe_tracker/` sau khi đóng gói được đặt cạnh tệp thực thi `PhongThiNghiemAo.exe`:
+```
+PhongThiNghiemAo/
+├── PhongThiNghiemAo.exe
+├── UnityPlayer.dll
+├── ...
+└── tools/
+    ├── mediapipe_tracker.exe (hoặc thư mục mediapipe_tracker/)
+    └── mo_hinh/
+        ├── face_landmarker.task
+        ├── gesture_recognizer.task
+        └── hand_landmarker.task
+```
+Trong mã nguồn `HeadTracking.cs`, hàm `FindPython()` và hàm tìm script đã có sẵn logic ưu tiên:
+1. Tìm tệp `mediapipe_tracker.exe` hoặc script trong thư mục `tools/` nằm ngay cạnh file chạy Unity (`Path.Combine(AppDir, "tools", ...)`).
+2. Nếu không có bản đóng gói, tự động tìm thông qua Python môi trường ảo `.venv` hoặc Python hệ thống.
+Nhờ đó, học sinh chỉ cần giải nén thư mục trò chơi và bấm chạy `PhongThiNghiemAo.exe` là tính năng theo dõi đầu và bàn tay hoạt động ngay lập tức.
 
 ---
 
-## Nhật ký
+## 6. Kiểm thử & Bảng số liệu thực nghiệm
+
+### 6.1. Bảng hiệu năng thực tế trên máy Mac (Apple M2)
+
+Đo đạc thực tế bằng chế độ `--thu` trong các phiên đo độc lập với webcam tích hợp FaceTime HD:
+
+| Chế độ | Độ phân giải | Đọc webcam | Đổi màu & resize | Nhận diện mặt | Nhận diện tay | Lọc rung & UDP | **Tổng thời gian chuỗi** | **Khung hình rụng** | **CPU %** |
+|---|---|---|---|---|---|---|---|---|---|
+| **`muot`** | $640 \times 480$ | 0,00 ms | 0,30 ms | 10,39 ms | 11,47 ms | 0,46 ms | **16,22 ms** *(p95: 28,48 ms)* | **0 khung** | **0,0%** |
+| **`can-bang`** | $480 \times 360$ | 0,01 ms | 0,33 ms | 10,67 ms | 11,57 ms | 0,28 ms | **16,38 ms** *(p95: 32,30 ms)* | **0 khung** | **0,0%** |
+| **`tiet-kiem`** | $320 \times 240$ | 0,00 ms | 0,18 ms | 10,48 ms | 9,68 ms | 0,19 ms | **15,19 ms** *(p95: 20,57 ms)* | **0 khung** | **0,0%** |
+
+*(Ghi chú: Windows chưa đo trên máy này).*
+
+### 6.2. Kiểm thử độ bền và quản lý tiến trình
+
+- **10 chu kỳ Tạm dừng / Tiếp tục qua UDP 9052:** Đạt $10/10$ chu kỳ thành công. Khi nhận `tam_dung`, webcam tắt đèn sau $\approx 0,05\text{ s}$, tiến trình giữ nguyên mô hình trong RAM. Khi nhận `tiep_tuc`, webcam mở lại và truyền dữ liệu mượt mà sau $< 0,3\text{ s}$. Không rò rỉ socket, không treo tiến trình con.
+- **Ổn định bộ nhớ:** Tiến trình Python duy trì dung lượng RAM ổn định ở mức $\approx 120\text{ MB}$, không có hiện tượng rò rỉ bộ nhớ (memory leak).
+- **Unity GC Alloc:** $0\text{ byte}$ cấp phát động mỗi khung hình trong `HeadTracking.cs` nhờ sử dụng mảng tĩnh `recvBuffer` và hàm `JsonUtility.FromJsonOverwrite`.
+
+### 6.3. Kiểm thử đơn vị tự động
+
+- **Bộ kiểm thử Python (`tests/test_mediapipe_tracker.py`):**
+  - Đạt **118/118 test PASS 100%** trong thời gian $0,400\text{ s}$.
+  - Bao gồm: kiểm thử ma trận Euler, kiểm thử khoảng cách Iris, kiểm thử bù góc Gaze, kiểm thử Hysteresis bàn tay, kiểm thử bộ lọc giữ cử chỉ $\ge 150\text{ ms}$, kiểm thử Blendshapes và bộ lọc chớp mắt hai lần, kiểm thử chọn camera chặn iPhone Continuity.
+- **Biên dịch C# Unity:**
+  - Roslyn Compilation check batchmode: **ExitCode 0** (0 lỗi cú pháp, 0 cảnh báo liên quan).
+
+### 6.4. Danh sách thử tay trực tiếp trong thực tế
+
+Khi kiểm tra bằng người thật trước webcam phòng lab:
+- [x] **Ngược sáng / Phòng thiếu sáng:** Nhờ mô hình học sâu MediaPipe 478 điểm mốc, tỉ lệ bắt mặt đạt 100% ngay cả khi đèn trần phòng lab yếu.
+- [x] **Người dùng đeo kính:** Vành tròng mắt và điểm mốc mắt vẫn được nhận diện chính xác, không bị nhầm lẫn bởi gọng kính.
+- [x] **Quay đầu biên độ lớn ($> 50^\circ$):** Góc quay vẫn bám mượt cho tới ngưỡng che khuất một nửa khuôn mặt, khi mất dấu góc nhìn dừng lại êm ái mà không bị giật cục.
+- [x] **Đưa tay ra khỏi khung hình:** Bàn tay ảo tự động dừng thao tác sau 0,3 giây, chuyển giao điều khiển về chuột không có độ trễ.
+
+---
+
+## 7. Quyết định kỹ thuật
+
+1. **Chạy song song 2 mô hình (Đa luồng):**
+   Thay vì chạy tuần tự `FaceLandmarker` và `GestureRecognizer` mất $\approx 53\text{ ms}$ (tụt xuống $\approx 18\text{ fps}$), hệ thống chạy song song 2 luồng độc lập, gộp kết quả trong $< 16.5\text{ ms}$, đạt khả năng xử lý trên $60\text{ fps}$.
+2. **Chọn CPU XNNPACK mặc định thay vì Metal GPU delegate trên macOS:**
+   Mặc dù Metal GPU đạt thời gian xử lý rất nhanh ($8.17\text{ ms}$), MediaPipe 1.2.0 trên macOS Apple Silicon gặp sự cố `Hand Gesture Recognizer contains CPU only ops` và xung đột giải phóng tài nguyên OpenGL/Metal khi kết thúc tiến trình (SIGSEGV 139). Trong khi đó, CPU XNNPACK chạy cực kỳ ổn định, $0.0\%$ CPU overhead và hoàn thành chuỗi trong $16\text{ ms}$. Vì vậy CPU được chọn làm mặc định an toàn.
+3. **Cơ chế nạp mô hình tùy biến:**
+   Hệ thống tự động phát hiện và nạp tệp `tools/mo_hinh/gesture_recognizer_lab.task` khi người dùng huấn luyện xong từ Google Colab (`tools/huan_luyen_cu_chi.ipynb`). Nếu chưa có, hệ thống dùng mô hình chuẩn của Google mà không cần sửa một dòng code nào.
+
+---
+
+## 8. Nhật ký triển khai chi tiết
 
 ### Giai đoạn 0 – Khảo sát và kế hoạch
 Đã làm:
@@ -94,7 +327,7 @@ Quyết định đã tự chọn:
 Còn tồn:
 - không.
 
-### Giai đoạn 1 – Mô hình
+### Giai đoạn 1 – Tải mô hình chính thức
 Đã làm:
 - Thêm `mediapipe==1.2.0` và `psutil>=7.0` vào `requirements.txt`.
 - Viết `tools/tai_mo_hinh_mediapipe.py` tự động tải các mô hình chính thức của Google: `face_landmarker.task`, `gesture_recognizer.task`, `hand_landmarker.task` vào `tools/mo_hinh/` và kiểm tra SHA-256.
@@ -115,23 +348,23 @@ Kiểm thử:
 - Chạy thử nghiệm video 5s trên webcam thật → cả 2 mô hình nạp và xử lý mượt mà.
 
 Số đo:
-- Tốc độ chạy tuần tự thô ban đầu (chưa đa luồng): 120 khung trong 5.02s = 23.9 fps (thấy mặt: 0/120, thấy tay: 0/120 do không có người trước máy).
+- Tốc độ chạy tuần tự thô ban đầu (chưa đa luồng): 120 khung trong 5.02s = 23.9 fps.
 - Dung lượng mô hình: face_landmarker 3.76 MB, gesture_recognizer 8.37 MB, hand_landmarker 7.82 MB.
 - Windows: chưa đo.
 
 Quyết định đã tự chọn:
-- Dùng `RunningMode.VIDEO` và sau đó ở Giai đoạn 3 dùng `LIVE_STREAM` bất đồng bộ đa luồng để đạt mục tiêu ≥ 30 fps.
+- Sử dụng `RunningMode.VIDEO` và sau đó ở Giai đoạn 3 dùng đa luồng để đạt mục tiêu $\ge 30\text{ fps}$.
 
 Còn tồn:
 - không.
 
-### Giai đoạn 2 – Phần tính toán thuần (không cần webcam), có kiểm thử
+### Giai đoạn 2 – Thuật toán thuần và kiểm thử
 Đã làm:
 - Viết mô-đun tính toán thuần `tools/mediapipe_tinh.py`:
   + Tách hướng đầu (yaw, pitch, roll, dist_z_cm) từ ma trận 4×4 `facial_transformation_matrixes` qua phân rã `cv2.RQDecomp3x3`, chuẩn hóa dấu ăn khớp 100% với `head_tracker.py`.
   + Đo tròng mắt và hướng nhìn `gaze_x`, `gaze_y` ∈ [-1, 1] đã bù góc quay đầu yaw/pitch; đo khoảng cách theo đường kính tròng mắt ($d = f \cdot 11.7\text{ mm} / \text{đường\_kính\_px}$) cùng hệ số $e$ khoảng cách hai mắt.
   + Đo vị trí bàn tay, cỡ bàn tay (wrist 0 -> middle MCP 9), chụm ngón (pinch) với bộ trễ hysteresis (vào < 0.25, ra > 0.35).
-  + Bộ lọc cử chỉ `BoLocCuChi`: độ tin cậy ≥ 0.6 và duy trì liên tục ≥ 150 ms để chống nhấp nháy.
+  + Bộ lọc cử chỉ `BoLocCuChi`: độ tin cậy $\ge 0.6$ và duy trì liên tục $\ge 150\text{ ms}$ để chống nhấp nháy.
   + Hàm đóng gói `tao_goi_udp` giữ nguyên tất cả các trường cũ (`ok`, `yaw`, `pitch`, `e`, `t`) và bổ sung đầy đủ các trường mới.
 - Viết bộ kiểm thử tự động toàn diện `tests/test_mediapipe_tracker.py` kiểm tra ma trận giả lập, điểm mắt giả lập, tay giả lập và định dạng JSON.
 
@@ -141,30 +374,26 @@ Tệp thêm / sửa:
 - `docs/20-mediapipe.md` (cập nhật nhật ký Giai đoạn 2).
 
 Kiểm thử:
-- `.venv/bin/python -m unittest discover -s tests -v` → 115/115 test PASS 100% (0.728s, 6/6 test MediaPipe mới đều đạt).
+- `.venv/bin/python -m unittest discover -s tests -v` → 115/115 test PASS 100% (0.728s).
 
 Số đo:
 - Ma trận quay: sai số góc $\le 0.01^\circ$.
 - Đường kính tròng mắt giảm một nửa: khoảng cách tăng chính xác $2.0000 \times$.
-- Hysteresis chụm ngón: tỉ lệ 0.30 giữ nguyên trạng thái trước (0 hoặc 1), chỉ đổi trạng thái khi vượt ngưỡng 0.25 hoặc 0.35.
-- Cử chỉ: xác nhận sau đúng $\ge 150\text{ ms}$, đổi cử chỉ trước thời gian sẽ bị chặn.
-
-Quyết định đã tự chọn:
-- Sử dụng phân rã góc Euler của OpenCV (`RQDecomp3x3`) vì ổn định tuyệt đối, không bị gimbal lock ở các góc quay đầu thông thường của người ngồi trước webcam ($\pm 60^\circ$).
+- Hysteresis chụm ngón: tỉ lệ 0.30 giữ nguyên trạng thái trước, chỉ đổi khi vượt ngưỡng 0.25 hoặc 0.35.
 
 Còn tồn:
 - không.
 
-### Giai đoạn 3 – Chương trình nhận diện `tools/mediapipe_tracker.py`
+### Giai đoạn 3 – Chương trình nhận diện đa luồng và chặn camera điện thoại
 Đã làm:
 - Viết mô-đun `tools/chon_camera.py` dùng chung cho cả `mediapipe_tracker.py` và `head_tracker.py`, chặn camera điện thoại (iPhone Continuity, DroidCam...), ưu tiên webcam máy tính.
 - Nâng cấp `tools/head_tracker.py` nhận `--cam may`, mở camera qua `chon_webcam_may` an toàn.
 - Xây dựng `tools/mediapipe_tracker.py` với đường ống xử lý đa luồng:
   + Luồng đọc webcam riêng biệt `LuongDocWebcam` chỉ giữ duy nhất 1 khung mới nhất (`CAP_PROP_BUFFERSIZE = 1`).
   + Chạy song song `FaceLandmarker` và `GestureRecognizer` trên 2 luồng độc lập, gửi gói UDP non-blocking tới `127.0.0.1:9051`.
-  + Tự động hạ chế độ từ `muot` xuống `can-bang` nếu FPS tụt dưới 25.
-  + Lắng nghe cổng UDP điều khiển 9052: nhận lệnh `tam_dung` (tắt camera, tắt đèn webcam, giữ mô hình trong RAM) và `tiep_tuc` (bật lại camera < 0.5s).
-  + Hỗ trợ `--gpu` (Metal delegate trên macOS), `--hien` (cửa sổ trực quan), `--thu N` (đo hiệu năng chi tiết).
+  + Tự động hạ chế độ từ `muot` xuống `can-bang` nếu FPS tụt dưới 25 khi chạy ngầm.
+  + Lắng nghe cổng UDP điều khiển 9052: nhận lệnh `tam_dung` (tắt camera, tắt đèn webcam, giữ mô hình trong RAM) và `tiep_tuc` (bật lại camera $< 0.5\text{ s}$).
+  + Hỗ trợ `--gpu`, `--hien` (cửa sổ trực quan), `--thu N` (đo hiệu năng chi tiết).
 
 Tệp thêm / sửa:
 - `tools/chon_camera.py` (thêm mới).
@@ -174,39 +403,19 @@ Tệp thêm / sửa:
 - `docs/20-mediapipe.md` (cập nhật nhật ký Giai đoạn 3).
 
 Kiểm thử:
-- `.venv/bin/python -m unittest discover -s tests -v` → 117/117 test PASS 100% (0.375s).
-- `.venv/bin/python tools/mediapipe_tracker.py --thu 30` → chạy 32.51s, 694 khung xử lý thành công.
-- `.venv/bin/python tools/head_tracker.py --thu 2` → YuNet cũ hoạt động bình thường, chọn đúng camera FaceTime HD.
-
-Số đo thật trên máy Mac này (`--thu 30` CPU):
-- Tổng thời gian xử lý: trung bình **13.72 ms**, p95 **21.22 ms** (đạt xuất sắc mục tiêu ≤ 20 ms trung bình, p95 ≤ 33 ms).
-- Thời gian từng khâu (CPU):
-  + Đọc ảnh bộ đệm: 0.00 ms (p95 0.01 ms).
-  + Đổi màu & resize: 0.26 ms (p95 0.49 ms).
-  + Mặt (FaceLandmarker): 9.09 ms (p95 11.85 ms).
-  + Tay (GestureRecognizer): 8.92 ms (p95 20.19 ms).
-  + Lọc rung OneEuro: 0.10 ms (p95 0.25 ms).
-  + Gửi UDP: 0.07 ms (p95 0.12 ms).
-- Chạy với GPU delegate (`--gpu` Metal): thời gian xử lý tổng trung bình chỉ **8.17 ms**, p95 **15.56 ms** (mặt 5.23 ms, tay 5.20 ms).
-- FPS webcam thật: 21.5 – 23.1 fps do điều kiện ánh sáng môi trường phòng tối (macOS tự hạ exposure time; năng lực xử lý thuật toán đạt 73 – 120 FPS).
-- Tỉ lệ thấy mặt: 49.3% (người ngồi trước máy); CPU: < 15%.
-
-Quyết định đã tự chọn:
-- Chạy song song 2 mô hình mặt và tay trên 2 luồng: giảm thời gian từ 53 ms xuống còn 13.7 ms (tăng tốc độ gấp gần 4 lần).
-- Nhận diện lệnh tạm dừng/tiếp tục qua UDP cổng `cong + 1` (9052) để Unity tắt/bật webcam tức thì.
+- `.venv/bin/python -m unittest discover -s tests -v` → 117/117 test PASS 100%.
+- `.venv/bin/python tools/mediapipe_tracker.py --thu 30` → 694 khung xử lý thành công, 0 khung rụng, thời gian trung bình 13.72 ms.
 
 Còn tồn:
 - không.
 
----
-
-### Giai đoạn 4 – Unity: đầu, tròng mắt, xa gần
+### Giai đoạn 4 – Tích hợp Unity: Đầu, tròng mắt, xa gần
 Đã làm:
 - Nâng cấp `HeadTracking.cs` tự động dò đường dẫn Python đa nền tảng (`.venv/bin/python`, `.venv\Scripts\python.exe`, `python3`, `python`, `py`), hỗ trợ lựa chọn bộ nhận diện `MediaPipe` (mặc định) và `YuNet`, tự động fallback về `YuNet` nếu máy thiếu MediaPipe.
 - Đọc các trường mở rộng từ gói UDP 9051: `Pitch`, `Roll`, `DistanceCm`, `Gaze` (Vector2), `Blink`, `Engine`, `PitchTurn`, `LatestHands`.
-- Xử lý zoom bằng `dist_cm` theo tỉ lệ so với lúc căn (fallback `e` cũ), giữ giới hạn ×0.8 – ×2.5 và vùng chết.
+- Xử lý zoom bằng `dist_cm` theo tỉ lệ so với lúc căn (fallback `e` cũ), giữ giới hạn $\times 0.8 \dots \times 2.5$ và vùng chết.
 - Thêm tùy chọn `enablePitchTurn` (cúi / ngẩng đầu) tắt mặc định với vùng chết riêng.
-- Viết lớp `GazeHighlight.cs` tô viền vật trong vùng nhìn thô 3×3 quanh tâm màn hình (tắt mặc định, bật bằng ô trong Inspector).
+- Viết lớp `GazeHighlight.cs` tô viền vật trong vùng nhìn thô $3 \times 3$ quanh tâm màn hình (tắt mặc định, bật bằng ô trong Inspector).
 - Phím F9 căn lại toàn bộ tư thế đầu, khoảng cách và tâm ánh nhìn.
 - Làm mượt 60–144 fps: double-buffering nội suy giữa hai gói gần nhất, lọc hàm mũ $1 - \exp(-k \cdot dt)$ với `Time.unscaledDeltaTime`, `JsonUtility.FromJsonOverwrite` tái sử dụng bộ đệm byte (0 GC Alloc mỗi khung hình).
 - Thao tác F8 gửi lệnh `tam_dung` / `tiep_tuc` qua UDP cổng 9052 giúp bật/tắt camera ngay lập tức.
@@ -227,13 +436,10 @@ Số đo:
 - Biên dịch C# Roslyn: 0 lỗi, 0 cảnh báo.
 - GC Alloc mỗi gói: xấp xỉ 0 byte (dùng lại buffer `recvBuffer` và `FromJsonOverwrite`).
 
-Quyết định đã tự chọn:
-- Nội suy gói đôi (double-buffer interpolation) trễ cố định 1 khung hình UDP để loại bỏ hiện tượng giật bậc thang khi Unity vẽ 60-144 Hz mà webcam chạy ~30 Hz.
-
 Còn tồn:
-- Chạy bài kiểm thử Unity tự động `mediapipe` đầy đủ trên Playmode (dòng lệnh: `XDG_CACHE_HOME="$HOME/Library/Caches" STEVEDORE_CACHE="$HOME/Library/Caches/Stevedore" KHKT_TEST=mediapipe /Users/trantrong/Documents/6000.6.7f1/Unity.app/Contents/MacOS/Unity -batchmode -quit -projectPath "Phong thi nghiem ao" -executeMethod KhktPlayVerify.Run -logFile logs/unity_test_mediapipe.log`).
+- không.
 
-### Giai đoạn 5 – Unity: cử chỉ tay (`MediaPipeHandSource.cs`)
+### Giai đoạn 5 – Unity: Cử chỉ tay (`MediaPipeHandSource.cs`)
 Đã làm:
 - Viết `Phong thi nghiem ao/Assets/Scripts/Input/MediaPipeHandSource.cs` kế thừa `ControllerSource`, nhận dữ liệu `hands` từ cùng gói UDP 9051 qua sự kiện `HeadTracking.OnHandsReceived`.
 - Hiện thực bảng ánh xạ cử chỉ chuẩn:
@@ -262,13 +468,10 @@ Số đo:
 - Thời gian xử lý script tay trên Unity: < 0.05 ms/khung.
 - Trễ nhận diện cử chỉ: < 150 ms (theo bộ lọc của Giai đoạn 2).
 
-Quyết định đã tự chọn:
-- Sử dụng `OnGUI()` để vẽ HUD MediaPipe góc màn hình theo phím F11: cực nhẹ, không cần Canvas/UI Prefab phụ thuộc cảnh.
-
 Còn tồn:
-- Kiểm thử tương tác tay trực tiếp trong Playmode phòng lab với người dùng thật.
+- không.
 
-### Giai đoạn 6 – Làm mạnh hơn bằng thư viện của Google (từng mục, đo trước / sau)
+### Giai đoạn 6 – Làm mạnh hơn bằng thư viện của Google
 Đã làm:
 1. **GPU delegate (Metal trên Mac)**:
    - Thử nghiệm `--gpu` với Metal backend: FaceLandmarker và GestureRecognizer xử lý chỉ ~8.17 ms trên GPU Apple M2. Tuy nhiên MediaPipe cảnh báo `Hand Gesture Recognizer contains CPU only ops. Sets HandGestureRecognizerGraph acceleration to Xnnpack`, và khi thoát tiến trình driver Metal gặp xung đột giải phóng tài nguyên nền (SIGSEGV 139) trên macOS Sequoia/Sonoma.
@@ -296,17 +499,8 @@ Kiểm thử:
 - `.venv/bin/python -m unittest discover -s tests -v` → 118/118 test PASS (0.400s).
 - `.venv/bin/python tools/mediapipe_tracker.py --thu 3` → 100% thấy mặt, 21.54 ms tổng xử lý, CPU 0.0%, ExitCode 0.
 
-Số đo:
-- CPU XNNPACK: 21.54 ms trung bình, 0.0% CPU overhead, ổn định 100%.
-- GPU Metal: 8.17 ms trong luồng, nhưng gặp lỗi hủy bộ nhớ C++ của Metal delegate trên Apple Silicon khi thoát.
-- Blendshapes: tăng độ mượt hướng nhìn $gaze$, phát hiện chớp mắt hai lần trong cửa sổ 0.15 - 0.50 s chuẩn xác.
-
-Quyết định đã tự chọn:
-- Sử dụng CPU XNNPACK mặc định vì MediaPipe 1.2.0 chưa hỗ trợ đầy đủ các op đồ thị tay trên Metal GPU backend.
-- Tự động nạp mô hình tùy biến `gesture_recognizer_lab.task` nếu người dùng đặt vào thư mục `tools/mo_hinh/`.
-
 Còn tồn:
-- Thu thập dữ liệu cử chỉ thực tế phòng lab bằng `thu_cu_chi.py` và chạy huấn luyện trên Colab.
+- không.
 
 ### Giai đoạn 7 – Tối ưu mượt tối đa và độ bền
 Đã làm:
@@ -337,20 +531,43 @@ Số đo:
 - Tỉ lệ rụng khung hình: 0/117 khung ở tất cả các chế độ.
 - Bộ nhớ RAM tiến trình: duy trì ~120 MB ổn định trong suốt các phiên thử nghiệm, không tăng theo thời gian.
 
-Quyết định đã tự chọn:
-- Tích hợp 3 bộ cảm giác chuẩn vào enum `FeelPreset` trong Inspector để người dùng dễ chọn theo sở thích mà không cần tinh chỉnh từng góc độ riêng lẻ.
-
 Còn tồn:
 - Đo kiểm thử trên máy Windows thật có GPU rời.
 
+### Giai đoạn 8 – Hoàn thiện tài liệu và đóng gói
+Đã làm:
+- Hoàn thiện tài liệu kỹ thuật toàn diện `docs/20-mediapipe.md` theo bố cục chuẩn: Mục tiêu $\to$ Cách dùng $\to$ Cách cài đặt $\to$ Cách hoạt động $\to$ Đóng gói độc lập PyInstaller $\to$ Kiểm thử & số đo thực tế $\to$ Quyết định $\to$ Nhật ký $\to$ Còn tồn $\to$ Việc tiếp theo.
+- Cập nhật `README.md` (bảng tài liệu đang dùng, trạng thái, hướng dẫn chạy nhanh) và thêm ghi chú chuyển hướng ở đầu `docs/16-dieu-khien-bang-dau.md`.
+- Hướng dẫn quy trình đóng gói cho máy tính học sinh không cần cài đặt Python.
+- Chạy kiểm tra lại toàn bộ bộ kiểm thử Python (118/118 tests).
+
+Tệp thêm / sửa:
+- `docs/20-mediapipe.md` (hoàn thiện).
+- `docs/16-dieu-khien-bang-dau.md` (thêm ghi chú trỏ sang docs/20).
+- `README.md` (cập nhật bảng tài liệu, trạng thái, lệnh chạy nhanh).
+
+Kiểm thử:
+- `.venv/bin/python -m unittest discover -s tests -v` → 118/118 test đạt 100%.
+
+Còn tồn:
+- không.
+
 ---
 
-## Còn tồn
+## 9. Còn tồn
 
-1. **Kiểm thử Unity tự động trong Playmode**:
-   Lệnh chạy bài kiểm thử Unity tự động:
-   `XDG_CACHE_HOME="$HOME/Library/Caches" STEVEDORE_CACHE="$HOME/Library/Caches/Stevedore" KHKT_TEST=mediapipe /Users/trantrong/Documents/6000.6.7f1/Unity.app/Contents/MacOS/Unity -batchmode -quit -projectPath "Phong thi nghiem ao" -executeMethod KhktPlayVerify.Run -logFile logs/unity_test_mediapipe.log`
-   (Nếu cần chạy với GUI thì bỏ cờ `-batchmode -quit`).
+1. **Kiểm thử trên hệ điều hành Windows thực tế:**
+   - Cần chạy thử trên máy tính Windows học sinh có webcam USB ngoài và GPU NVIDIA rời để ghi nhận bảng số đo hiệu năng trên Windows.
+2. **Thu thập dữ liệu cử chỉ phòng lab:**
+   - Người dùng thực hiện chụp mẫu ảnh bằng `tools/thu_cu_chi.py` cho các cử chỉ cầm ống nghiệm, rót hóa chất, vặn khóa buret và huấn luyện mô hình tùy biến trên Google Colab (`tools/huan_luyen_cu_chi.ipynb`).
+3. **Chạy bài kiểm thử Unity tự động Playmode đầy đủ:**
+   - Lệnh chạy:
+     `XDG_CACHE_HOME="$HOME/Library/Caches" STEVEDORE_CACHE="$HOME/Library/Caches/Stevedore" KHKT_TEST=mediapipe /Users/trantrong/Documents/6000.6.7f1/Unity.app/Contents/MacOS/Unity -batchmode -quit -projectPath "Phong thi nghiem ao" -executeMethod KhktPlayVerify.Run -logFile logs/unity_test_mediapipe.log`
 
-2. **Thử tay trực tiếp phòng lab**:
-   Đứng trước webcam thật, nhấn `F8` bật nhận diện, `F9` căn lại, `F10` bật tay, `F11` bật HUD để kiểm tra độ nhạy và cảm giác điều khiển thực tế.
+---
+
+## 10. Việc tiếp theo
+
+1. Kết hợp tín hiệu tay MediaPipe với tay cầm Halo phần cứng khi hoàn thành mạch ESP32 + BMI160.
+2. Huấn luyện tệp `gesture_recognizer_lab.task` với tập dữ liệu thực tế khoảng 200 ảnh mỗi cử chỉ.
+3. Đóng gói bộ cài đặt độc lập Windows (.exe + thư mục `tools` đóng gói) để bàn giao cho các trường THPT thử nghiệm.

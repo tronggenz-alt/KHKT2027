@@ -1,4 +1,7 @@
-﻿# Điều khiển góc nhìn bằng đầu qua webcam (thử nghiệm)
+# Điều khiển góc nhìn bằng đầu qua webcam (thử nghiệm)
+
+> [!NOTE]
+> **Đã có bản nâng cấp MediaPipe toàn diện**: Xem [Tài liệu MediaPipe (docs/20-mediapipe.md)](20-mediapipe.md) với 478 điểm mặt 3D, cử chỉ bàn tay ảo (`MediaPipeHandSource`), hướng nhìn tròng mắt (gaze), khoảng cách thực tế (cm) và độ trễ dưới 20 ms. Bản YuNet trong tài liệu này vẫn được duy trì làm cơ chế dự phòng tương thích ngược.
 
 ## Mục tiêu
 
