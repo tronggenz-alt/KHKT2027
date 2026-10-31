@@ -268,6 +268,46 @@ Quyết định đã tự chọn:
 Còn tồn:
 - Kiểm thử tương tác tay trực tiếp trong Playmode phòng lab với người dùng thật.
 
+### Giai đoạn 6 – Làm mạnh hơn bằng thư viện của Google (từng mục, đo trước / sau)
+Đã làm:
+1. **GPU delegate (Metal trên Mac)**:
+   - Thử nghiệm `--gpu` với Metal backend: FaceLandmarker và GestureRecognizer xử lý chỉ ~8.17 ms trên GPU Apple M2. Tuy nhiên MediaPipe cảnh báo `Hand Gesture Recognizer contains CPU only ops. Sets HandGestureRecognizerGraph acceleration to Xnnpack`, và khi thoát tiến trình driver Metal gặp xung đột giải phóng tài nguyên nền (SIGSEGV 139) trên macOS Sequoia/Sonoma.
+   - CPU XNNPACK chạy cực kỳ ổn định (ExitCode 0), tổng thời gian xử lý toàn chuỗi chỉ ~13.7 - 21.5 ms (vượt xa trần tốc độ webcam 30 FPS, CPU 0%). Do đó CPU XNNPACK được chốt làm mặc định an toàn; `--gpu` được lưu lại làm cờ tùy chọn.
+2. **Blendshapes**:
+   - Tích hợp `tinh_blendshapes`: trích xuất các hệ số `eyeLook*` và `eyeBlink*` kết hợp cùng tròng mắt hình học (50/50), giúp hướng nhìn ổn định và chớp mắt chính xác hơn.
+   - Thêm lớp `BoLocChopMatHaiLan` và cờ `--chop-2-lan` (tắt mặc định) cho phép phát hiện nháy mắt hai lần nhanh (150 - 500 ms) để xác nhận thao tác nhanh.
+3. **MediaPipe Model Maker – chuẩn bị công cụ cử chỉ lab**:
+   - Viết công cụ `tools/thu_cu_chi.py` mở webcam máy tính và chụp ảnh gán nhãn theo các phím bấm 1..4, 0 (`cam_ong_nghiem`, `rot_chat_long`, `van_khoa_buret`, `gio_hai_ngon`, `none`). Thư mục lưu trữ `data/du_lieu_cu_chi/` đã được bổ sung vào `.gitignore`.
+   - Viết sổ tay Google Colab `tools/huan_luyen_cu_chi.ipynb` hướng dẫn trọn vẹn quy trình fine-tuning mô hình nhận diện cử chỉ bằng `mediapipe-model-maker` và xuất tệp `gesture_recognizer_lab.task`.
+   - Cập nhật `mediapipe_tracker.py` tự động phát hiện và nạp `tools/mo_hinh/gesture_recognizer_lab.task` khi có sẵn, không có thì dùng mô hình gốc của Google.
+4. **Pose Landmarker**:
+   - Thêm cờ `--pose` (tắt mặc định) để người dùng có thể bật theo dõi thân trên khi cần thiết, giữ mặc định tắt để bảo toàn độ mượt tối đa.
+
+Tệp thêm / sửa:
+- `.gitignore` (thêm `data/du_lieu_cu_chi/`, `tools/mo_hinh/gesture_recognizer_lab.task`).
+- `tools/thu_cu_chi.py` (thêm mới).
+- `tools/huan_luyen_cu_chi.ipynb` (thêm mới).
+- `tools/mediapipe_tinh.py` (thêm `tinh_blendshapes`, `BoLocChopMatHaiLan`, cập nhật `tao_goi_udp`).
+- `tools/mediapipe_tracker.py` (hỗ trợ `--chop-2-lan`, `--pose`, tự động dùng `gesture_recognizer_lab.task`).
+- `tests/test_mediapipe_tracker.py` (thêm test blendshapes và chớp 2 lần).
+- `docs/20-mediapipe.md` (cập nhật nhật ký Giai đoạn 6).
+
+Kiểm thử:
+- `.venv/bin/python -m unittest discover -s tests -v` → 118/118 test PASS (0.400s).
+- `.venv/bin/python tools/mediapipe_tracker.py --thu 3` → 100% thấy mặt, 21.54 ms tổng xử lý, CPU 0.0%, ExitCode 0.
+
+Số đo:
+- CPU XNNPACK: 21.54 ms trung bình, 0.0% CPU overhead, ổn định 100%.
+- GPU Metal: 8.17 ms trong luồng, nhưng gặp lỗi hủy bộ nhớ C++ của Metal delegate trên Apple Silicon khi thoát.
+- Blendshapes: tăng độ mượt hướng nhìn $gaze$, phát hiện chớp mắt hai lần trong cửa sổ 0.15 - 0.50 s chuẩn xác.
+
+Quyết định đã tự chọn:
+- Sử dụng CPU XNNPACK mặc định vì MediaPipe 1.2.0 chưa hỗ trợ đầy đủ các op đồ thị tay trên Metal GPU backend.
+- Tự động nạp mô hình tùy biến `gesture_recognizer_lab.task` nếu người dùng đặt vào thư mục `tools/mo_hinh/`.
+
+Còn tồn:
+- Thu thập dữ liệu cử chỉ thực tế phòng lab bằng `thu_cu_chi.py` và chạy huấn luyện trên Colab.
+
 ---
 
 ## Còn tồn

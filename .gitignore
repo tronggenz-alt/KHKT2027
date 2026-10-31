@@ -1,4 +1,4 @@
-﻿# Unity
+# Unity
 Phong thi nghiem ao/[Ll]ibrary/
 Phong thi nghiem ao/[Tt]emp/
 Phong thi nghiem ao/[Oo]bj/
@@ -43,3 +43,7 @@ secrets/
 # Lưới giải phẫu BodyParts3D tầng 2: sinh lại từ phong_sinh/tu_app_cu/bp3d.bin.gz mỗi lần dựng cảnh (~25 MB)
 Phong thi nghiem ao/Assets/Lab/Tang2/GiaiPhau/BP3D*.asset
 Phong thi nghiem ao/Assets/Lab/Tang2/GiaiPhau/BP3D*.asset.meta
+
+# Dữ liệu thu thập và mô hình cử chỉ MediaPipe Model Maker phòng lab
+data/du_lieu_cu_chi/
+tools/mo_hinh/gesture_recognizer_lab.task

@@ -421,5 +421,63 @@ class ChonCameraTest(unittest.TestCase):
             self.assertEqual(uid, "UID_USB")
 
 
+    def test_blendshapes_gaze_va_chop_mat_hai_lan(self):
+        """Kiểm tra trích xuất blendshapes và phát hiện chớp mắt hai lần."""
+        class MockCat:
+            def __init__(self, name: str, score: float):
+                self.category_name = name
+                self.score = score
+
+        # 1. Blendshapes nhìn sang phải
+        cats_right = [
+            MockCat("eyeBlinkLeft", 0.05),
+            MockCat("eyeBlinkRight", 0.05),
+            MockCat("eyeLookOutRight", 0.8),
+            MockCat("eyeLookInRight", 0.0),
+            MockCat("eyeLookInLeft", 0.8),
+            MockCat("eyeLookOutLeft", 0.0),
+            MockCat("eyeLookUpLeft", 0.0),
+            MockCat("eyeLookDownLeft", 0.0),
+            MockCat("eyeLookUpRight", 0.0),
+            MockCat("eyeLookDownRight", 0.0),
+        ]
+        gx, gy, bl, br = mt.tinh_blendshapes(cats_right)
+        self.assertGreater(gx, 0.5)
+        self.assertEqual(bl, 0)
+        self.assertEqual(br, 0)
+
+        # 2. Blendshapes chớp 2 mắt
+        cats_blink = [
+            MockCat("eyeBlinkLeft", 0.85),
+            MockCat("eyeBlinkRight", 0.85),
+        ]
+        _, _, bl, br = mt.tinh_blendshapes(cats_blink)
+        self.assertEqual(bl, 1)
+        self.assertEqual(br, 1)
+
+        # 3. Bộ lọc chớp hai lần
+        detector = mt.BoLocChopMatHaiLan(min_interval=0.15, max_interval=0.50)
+        t = 1.0
+        # Mắt mở
+        self.assertFalse(detector.cap_nhat(0, 0, t))
+        # Lần 1: chớp mắt
+        t += 0.05
+        self.assertFalse(detector.cap_nhat(1, 1, t))
+        # Lần 1: mở mắt lại
+        t += 0.05
+        self.assertFalse(detector.cap_nhat(0, 0, t))
+
+        # Nghỉ 0.25 s (trong khoảng 0.15 - 0.50 s)
+        t += 0.25
+        # Lần 2: chớp mắt
+        self.assertFalse(detector.cap_nhat(1, 1, t))
+        # Lần 2: mở mắt lại -> xác nhận!
+        t += 0.05
+        self.assertTrue(detector.cap_nhat(0, 0, t))
+        # Khung tiếp theo: về False
+        t += 0.03
+        self.assertFalse(detector.cap_nhat(0, 0, t))
+
+
 if __name__ == "__main__":
     unittest.main()

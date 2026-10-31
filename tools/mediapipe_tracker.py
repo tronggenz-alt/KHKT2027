@@ -41,8 +41,10 @@ sys.path.insert(0, str(THU_MUC_GOC))
 from chon_camera import chon_webcam_may  # noqa: E402
 from mediapipe_tinh import (  # noqa: E402
     BoLocChopMat,
+    BoLocChopMatHaiLan,
     BoLocCuChi,
     tao_goi_udp,
+    tinh_blendshapes,
     tinh_gaze,
     tinh_khoang_cach_iris,
     tinh_tay,
@@ -199,6 +201,8 @@ def main() -> None:
     parser.add_argument("--che-do", choices=["muot", "can-bang", "tiet-kiem"], default="muot", help="chế độ hiệu năng")
     parser.add_argument("--khong-tay", action="store_true", help="tắt nhận diện tay")
     parser.add_argument("--gpu", action="store_true", help="bật GPU delegate (Metal Mac / Linux)")
+    parser.add_argument("--chop-2-lan", action="store_true", help="bật xác nhận bằng chớp mắt hai lần nhanh")
+    parser.add_argument("--pose", action="store_true", help="bật ước lượng tư thế thân người Pose Landmarker (tắt mặc định)")
     args = parser.parse_args()
 
     # Nâng mức ưu tiên tiến trình trên Windows
@@ -257,7 +261,12 @@ def main() -> None:
     gesture_recognizer: Optional[vision.GestureRecognizer] = None
     if not args.khong_tay:
         so_tay = 1 if args.che_do == "tiet-kiem" else 2
-        base_hand = mp_python.BaseOptions(model_asset_path=str(MO_HINH_TAY), delegate=delegate)
+        mo_hinh_tay_path = THU_MUC_GOC / "mo_hinh" / "gesture_recognizer_lab.task"
+        if mo_hinh_tay_path.exists():
+            print(f"Sử dụng mô hình cử chỉ tùy biến: {mo_hinh_tay_path.name}")
+        else:
+            mo_hinh_tay_path = MO_HINH_TAY
+        base_hand = mp_python.BaseOptions(model_asset_path=str(mo_hinh_tay_path), delegate=delegate)
         gesture_options = vision.GestureRecognizerOptions(
             base_options=base_hand,
             num_hands=so_tay,
@@ -274,6 +283,7 @@ def main() -> None:
     loc_gaze = OneEuro(min_cutoff=0.8, beta=0.05)         # gaze_x, gaze_y
     loc_tay: dict[str, OneEuro] = {}                      # ben -> OneEuro(x, y, co)
     loc_chop = BoLocChopMat(nguong_dong=0.45, nguong_mo=0.25)
+    loc_chop_2lan = BoLocChopMatHaiLan() if args.chop_2_lan else None
     loc_cu_chi = BoLocCuChi(nguong_tin=0.6, thoi_gian_giu_s=0.150)
     trang_thai_pinch: dict[str, bool] = {"trai": False, "phai": False}
 
@@ -454,12 +464,21 @@ def main() -> None:
                 # Hướng nhìn gaze
                 gaze_x, gaze_y = tinh_gaze(lm_mat, yaw_deg=yaw, pitch_deg=pitch)
 
-                # Chớp mắt từ blendshapes
+                # Chớp mắt và hướng nhìn từ blendshapes
+                xac_nhan_val = 0
                 if face_output.face_blendshapes:
-                    scores = {cat.category_name: cat.score for cat in face_output.face_blendshapes[0]}
-                    s_bl = scores.get("eyeBlinkLeft", 0.0)
-                    s_br = scores.get("eyeBlinkRight", 0.0)
-                    blink_l, blink_r = loc_chop.cap_nhat(s_bl, s_br)
+                    g_bs_x, g_bs_y, bl_bs, br_bs = tinh_blendshapes(
+                        face_output.face_blendshapes[0],
+                        yaw_deg=yaw,
+                        pitch_deg=pitch,
+                    )
+                    # Kết hợp trích xuất tròng mắt hình học và blendshapes (50/50)
+                    gaze_x = float(0.5 * gaze_x + 0.5 * g_bs_x)
+                    gaze_y = float(0.5 * gaze_y + 0.5 * g_bs_y)
+                    blink_l, blink_r = loc_chop.cap_nhat(float(bl_bs), float(br_bs))
+
+                    if loc_chop_2lan is not None and loc_chop_2lan.cap_nhat(blink_l, blink_r, now_real):
+                        xac_nhan_val = 1
 
                 # Lọc One Euro cho các đại lượng đầu
                 yaw, pitch, roll = (float(v) for v in loc_dau(np.array([yaw, pitch, roll]), now_real))
@@ -529,6 +548,7 @@ def main() -> None:
                 hands=hands_list,
                 t=now_real,
                 nguon="mp",
+                xac_nhan=xac_nhan_val,
             )
             data_bytes = json.dumps(goi).encode("utf-8")
             try:

@@ -194,6 +194,75 @@ class BoLocChopMat:
         return self.blink_l, self.blink_r
 
 
+def tinh_blendshapes(
+    categories: list[Any],
+    yaw_deg: float = 0.0,
+    pitch_deg: float = 0.0,
+) -> tuple[float, float, int, int]:
+    """Tính gaze và chớp mắt từ danh sách FaceBlendshapes categories.
+
+    Trả về: (gaze_x, gaze_y, blink_l, blink_r).
+    """
+    scores: dict[str, float] = {}
+    for c in categories:
+        name = getattr(c, "category_name", None) or getattr(c, "name", "")
+        val = getattr(c, "score", 0.0)
+        if name:
+            scores[name] = float(val)
+
+    blink_l = 1 if scores.get("eyeBlinkLeft", 0.0) >= 0.45 else 0
+    blink_r = 1 if scores.get("eyeBlinkRight", 0.0) >= 0.45 else 0
+
+    look_r_x = scores.get("eyeLookOutRight", 0.0) - scores.get("eyeLookInRight", 0.0)
+    look_l_x = scores.get("eyeLookInLeft", 0.0) - scores.get("eyeLookOutLeft", 0.0)
+    raw_gx = (look_r_x + look_l_x) / 2.0
+
+    look_r_y = scores.get("eyeLookUpRight", 0.0) - scores.get("eyeLookDownRight", 0.0)
+    look_l_y = scores.get("eyeLookUpLeft", 0.0) - scores.get("eyeLookDownLeft", 0.0)
+    raw_gy = (look_r_y + look_l_y) / 2.0
+
+    gaze_x = float(np.clip(raw_gx + yaw_deg / 30.0, -1.0, 1.0))
+    gaze_y = float(np.clip(raw_gy - pitch_deg / 25.0, -1.0, 1.0))
+
+    return gaze_x, gaze_y, blink_l, blink_r
+
+
+class BoLocChopMatHaiLan:
+    """Phát hiện chớp hai lần nhanh để xác nhận (double-blink confirmation).
+
+    Khoảng cách giữa 2 lần chớp mắt: từ 0.15 s đến 0.50 s.
+    """
+
+    def __init__(self, min_interval: float = 0.15, max_interval: float = 0.50):
+        self.min_interval = min_interval
+        self.max_interval = max_interval
+        self.last_blink_time = -1.0
+        self.prev_blinking = False
+
+    def cap_nhat(self, blink_l: int, blink_r: int, now: float) -> bool:
+        """Cập nhật trạng thái chớp mắt. Trả về True trong đúng 1 khung khi phát hiện chớp đôi."""
+        is_blinking = (blink_l == 1 and blink_r == 1)
+        confirmed_this_frame = False
+
+        # Bắt sườn xuống: vừa mở mắt trở lại sau khi chớp
+        if self.prev_blinking and not is_blinking:
+            if self.last_blink_time > 0:
+                delta = now - self.last_blink_time
+                if self.min_interval <= delta <= self.max_interval:
+                    confirmed_this_frame = True
+                    self.last_blink_time = -1.0
+                else:
+                    self.last_blink_time = now
+            else:
+                self.last_blink_time = now
+
+        if self.last_blink_time > 0 and (now - self.last_blink_time) > self.max_interval:
+            self.last_blink_time = -1.0
+
+        self.prev_blinking = is_blinking
+        return confirmed_this_frame
+
+
 def tinh_tay(
     landmarks: list[Any] | np.ndarray,
     prev_pinch: bool = False,
@@ -284,9 +353,10 @@ def tao_goi_udp(
     hands: list[dict[str, Any]] | None = None,
     t: float = 0.0,
     nguon: str = "mp",
+    xac_nhan: int = 0,
 ) -> dict[str, Any]:
     """Tạo từ điển gói tin UDP chuẩn, tương thích cả trường cũ lẫn trường mới."""
-    return {
+    d = {
         "ok": int(ok),
         "yaw": round(float(yaw), 2),
         "pitch": round(float(pitch), 4),
@@ -302,3 +372,6 @@ def tao_goi_udp(
         "fps": round(float(fps), 1),
         "hands": hands if hands is not None else [],
     }
+    if xac_nhan:
+        d["xac_nhan"] = 1
+    return d
