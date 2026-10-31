@@ -224,6 +224,88 @@ static class BioSimulationTests
         Check(GramStain.Result(true, 60, 60, 15, 45, true, 0.9) == GramResult.LoangLo, "Vết bôi quá dày (0,9) -> Loang lổ");
         Check(GramStain.Result(true, 60, 60, 15, 45, false, 0.4) == GramResult.KhongCoTeBao, "Quên cố định nhiệt -> Không có tế bào (rửa trôi)");
 
+        // 13. ĐỘ CHÍNH XÁC MICROPIPET (PipetteAccuracy - B5)
+        Console.WriteLine("\n[13] Độ chính xác Micropipet (PipetteAccuracy):");
+        double ulNormal = PipetteAccuracy.ActualUl(100.0, 200.0, 1, 0.0, true);
+        Near(ulNormal, 100.56, 1.0, "Hút đúng nấc 1, thẳng đứng, đầu côn ngập: ~100 µL (sai số ISO 8655 < 1%)");
+        double ulStage2 = PipetteAccuracy.ActualUl(100.0, 200.0, 2, 0.0, true);
+        Check(ulStage2 >= 105.0 && ulStage2 <= 120.0, "Bấm nhầm xuống nấc 2 khi hút: hút dư trong khoảng 1,05 - 1,20x", $"ulStage2={ulStage2:F1}");
+        double ulAir = PipetteAccuracy.ActualUl(100.0, 200.0, 1, 0.0, false);
+        double ulTilt = PipetteAccuracy.ActualUl(100.0, 200.0, 1, 45.0, true);
+        Check(ulAir < 30.0 && Math.Abs(ulTilt - 100.0) > Math.Abs(ulNormal - 100.0),
+              "Đầu côn không ngập hút thiếu nặng; nghiêng 45° (> 20°) làm tăng sai số");
+        Check(PipetteAccuracy.ResidualFraction(1) >= 0.02 && PipetteAccuracy.ResidualFraction(1) <= 0.05 && PipetteAccuracy.ResidualFraction(2) == 0.0,
+              "Nhả ở nấc 1 còn sót 2-5%; nhả hết nấc 2 (blow-out) còn sót ≈ 0");
+
+        // 14. LY TÂM & CÂN BẰNG ROTOR (Centrifugation - B5)
+        Console.WriteLine("\n[14] Máy ly tâm & cân bằng đối xứng (Centrifugation):");
+        // r = 7.5 cm, 10000 rpm -> RCF = 1.118e-5 * 7.5 * 10^8 = 8385 xg
+        Near(Centrifugation.Rcf(7.5, 10000.0), 8385.0, 1.0, "RCF ở r=7,5 cm, 10000 rpm = 8385 ×g");
+        Near(Centrifugation.Rpm(7.5, 8385.0), 10000.0, 1.0, "Rpm ngược từ RCF=8385 ×g, r=7,5 cm = 10000 rpm");
+
+        bool balOk = Centrifugation.IsBalanced(new List<(int, double)> { (3, 1.5), (9, 1.5) }, 12, out string reasonOk);
+        bool balMissing = Centrifugation.IsBalanced(new List<(int, double)> { (3, 1.5) }, 12, out string reasonMissing);
+        bool balMassDiff = Centrifugation.IsBalanced(new List<(int, double)> { (3, 1.5), (9, 2.2) }, 12, out string reasonMass);
+        Check(balOk, "2 ống đồng khối lượng ở lỗ 3 và lỗ 9 trên rotor 12 lỗ -> cân bằng", reasonOk);
+        Check(!balMissing && reasonMissing.Contains("lỗ 3") && reasonMissing.Contains("lỗ 9"),
+              "1 ống lẻ ở lỗ 3 báo rõ thiếu ống đối diện ở lỗ 9", reasonMissing);
+        Check(!balMassDiff && reasonMass.Contains("chênh lệch"), "2 ống đối diện nhưng lệch khối lượng (1,5g vs 2,2g) -> báo mất cân bằng", reasonMass);
+
+        // 15. MỞ RỘNG PCR (Pcr.Run - B5)
+        Console.WriteLine("\n[15] Chạy chương trình PCR tổng hợp (Pcr.Run):");
+        var pcrStd = new PcrSetup
+        {
+            hasTemplate = true, hasPrimers = true, hasTaq = true, hasDntp = true, hasBuffer = true,
+            lidHeated = true, productContamination = false,
+            annealC = 55.0, primerTm = 60.0, enzymeWarmMinutes = 0.0, templateCopies = 1e4,
+            cycles = 30, targetBp = 500
+        };
+        var bandsStd = new List<DnaBand>();
+        Pcr.Run(in pcrStd, 1, bandsStd);
+        Check(bandsStd.Count == 1 && bandsStd[0].bp == 500 && bandsStd[0].ng > 50.0,
+              "PCR đủ thành phần, Ta chuẩn (Tm - 5): ra đúng 1 băng 500 bp sáng rõ");
+
+        var pcrNoTaq = pcrStd;
+        pcrNoTaq.hasTaq = false;
+        var bandsNoTaq = new List<DnaBand>();
+        Pcr.Run(in pcrNoTaq, 1, bandsNoTaq);
+        Check(bandsNoTaq.Count == 0, "Thiếu enzyme Taq -> không có băng ADN nào");
+
+        var pcrLowTa = pcrStd;
+        pcrLowTa.annealC = 45.0; // < Tm - 10 (50)
+        var bandsLowTa = new List<DnaBand>();
+        Pcr.Run(in pcrLowTa, 1, bandsLowTa);
+        Check(bandsLowTa.Count >= 2, "Nhiệt độ gắn mồi quá thấp (Ta < Tm - 10) -> xuất hiện thêm băng phụ không đặc hiệu");
+
+        var pcrHighTa = pcrStd;
+        pcrHighTa.annealC = 61.5; // > Tm
+        var bandsHighTa = new List<DnaBand>();
+        Pcr.Run(in pcrHighTa, 1, bandsHighTa);
+        Check(bandsHighTa.Count == 1 && bandsHighTa[0].ng < bandsStd[0].ng * 0.3,
+              "Nhiệt độ gắn mồi cao hơn Tm (61,5 °C > 60 °C) -> băng mờ rõ rệt");
+
+        var pcrContamNeg = pcrStd;
+        pcrContamNeg.hasTemplate = false;
+        pcrContamNeg.productContamination = true;
+        var bandsContam = new List<DnaBand>();
+        Pcr.Run(in pcrContamNeg, 1, bandsContam);
+        Check(bandsContam.Count == 1 && bandsContam[0].bp == 500, "Đối chứng âm bị nhiễm chéo sản phẩm (productContamination) -> vẫn lên băng 500 bp");
+
+        // 16. MỞ RỘNG ĐIỆN DI (Electrophoresis.BandPositionCm & LeftGel - B5)
+        Console.WriteLine("\n[16] Vị trí băng & tràn gel điện di (Electrophoresis):");
+        double pos200 = Electrophoresis.BandPositionCm(200, 1.0, 100.0, 40.0, false);
+        double pos1500 = Electrophoresis.BandPositionCm(1500, 1.0, 100.0, 40.0, false);
+        double pos200Dense = Electrophoresis.BandPositionCm(200, 2.0, 100.0, 40.0, false);
+        Check(pos200 > pos1500 && pos200 > pos200Dense && pos200 > 0,
+              "BandPositionCm: đoạn ngắn (200 bp) chạy nhanh hơn 1500 bp và gel 1% chạy nhanh hơn gel 2%");
+
+        double posRev = Electrophoresis.BandPositionCm(500, 1.0, 100.0, 30.0, true);
+        Check(posRev < 0.0, "Cắm ngược cực điện (reversedPolarity = true) -> vị trí băng âm (chạy ngược khỏi giếng)");
+
+        bool leftShort = Electrophoresis.LeftGel(100, 1.0, 100.0, 30.0, 8.0);
+        bool leftLong = Electrophoresis.LeftGel(100, 1.0, 120.0, 120.0, 8.0);
+        Check(!leftShort && leftLong, "Chạy quá lâu ở điện áp cao (120V, 120 phút) làm băng 100 bp tràn ra khỏi bản gel 8 cm (LeftGel = true)");
+
         Console.WriteLine($"\nKết quả: {passed} đạt, {failed} lỗi.");
         return failed == 0 ? 0 : 1;
     }

@@ -74,6 +74,15 @@
   - `GramStain.cs`: `GramResult`, `Result` (đánh giá quy trình nhuộm Gram 4 bước theo chuẩn ASM).
 - Cập nhật `tests/BioSimulationTests.cs`: đạt **49 / 49 test PASS** (29 bài cũ + 20 bài kiểm thử mới).
 
+### Giai đoạn B5 (2026-10-31)
+- Đã triển khai 2 lớp C# mới kèm `.meta` và mở rộng 2 lớp hiện có trong `Phong thi nghiem ao/Assets/Scripts/Simulation/Bio/`:
+  - `PipetteAccuracy.cs`: `ActualUl` (sai số ISO 8655-2, lỗi bấm nấc 2 khi hút dư 12%, lỗi không ngập đầu côn, lỗi nghiêng > 20°), `ResidualFraction` (còn sót ~3,5% ở nấc 1, ≈ 0 ở nấc 2).
+  - `Centrifugation.cs`: `Rcf`, `Rpm` ($RCF = 1,118 \times 10^{-5} \cdot r \cdot rpm^2$), `IsBalanced` kiểm tra vị trí đối xứng và chênh khối lượng, trả `reasonVi` tiếng Việt rõ ràng ("Ống ở lỗ 3 chưa có ống đối diện ở lỗ 9.").
+  - Mở rộng `Pcr.cs`: thêm `PcrSetup` và `Pcr.Run` (kiểm tra đủ thành phần, ảnh hưởng của $T_a$ so với $T_m$, sinh băng phụ khi $T_a < T_m - 10$, mờ/mất băng khi $T_a > T_m$, nắp nhiệt, thời gian để ấm enzyme, nhiễm chéo sản phẩm ở đối chứng âm).
+  - Mở rộng `Electrophoresis.cs`: thêm `BandPositionCm` (hỗ trợ cả cắm ngược cực trả về vị trí âm) và `LeftGel`.
+- Cập nhật `tests/BioSimulationTests.cs`: đạt **66 / 66 test PASS**.
+
+
 
 
 - Kết quả kiểm thử: `tests/test_dung_cu_sinh.py` đạt 3/3 test dụng cụ, toàn bộ test suite Python đạt 117/117 test (0,60s).
