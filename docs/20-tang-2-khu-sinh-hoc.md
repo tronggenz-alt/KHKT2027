@@ -39,11 +39,11 @@ z=−9  └──────────┴────────────
 | Chỉ số | Mã khu | Tên hiển thị | Tọa độ giới hạn $(x, z)$ | Tầng |
 |:---:|---|---|---|:---:|
 | 5 | `phong_sinh` | Phòng thí nghiệm sinh học | $x \in [0, 20]$, $z \in [0, 15]$ | 2 |
-| 6 | `vi_sinh` | Phòng vi sinh | $x \in [20, 27]$, $z \in [7.5, 15]$ | 2 |
-| 7 | `kho_sinh` | Kho sinh phẩm | $x \in [20, 27]$, $z \in [0, 7.5]$ | 2 |
-| 8 | `hanh_lang_t2` | Hành lang tầng 2 | $x \in [0, 27]$, $z \in [-2.2, 0]$ | 2 |
-| 9 | `sinh_phan_tu` | Sinh học phân tử | $x \in [0, 13.5]$, $z \in [-9, -2.2]$ | 2 |
-| 10 | `nha_kinh` | Nhà kính thực vật | $x \in [13.5, 27]$, $z \in [-9, -2.2]$ | 2 |
+| 6 | `phong_vi_sinh` | Phòng vi sinh | $x \in [20, 27]$, $z \in [7.5, 15]$ | 2 |
+| 7 | `kho_sinh_pham` | Kho sinh phẩm | $x \in [20, 27]$, $z \in [0, 7.5]$ | 2 |
+| 8 | `hanh_lang_t2` | Hành lang tầng 2 | $x \in [0, 27]$, $z \in [-3.6, 0]$ | 2 |
+| 9 | `phong_sinh_phan_tu` | Sinh học phân tử | $x \in [0, 13.5]$, $z \in [-9, -3.6]$ | 2 |
+| 10 | `nha_kinh` | Nhà kính thực vật | $x \in [13.5, 27]$, $z \in [-9, -3.6]$ | 2 |
 | 11 | `hanh_lang_dong`| Hành lang đông tầng 2 | $x \in [27, 30]$, $z \in [6, 15]$ | 2 |
 | 12 | `loi_thang` | Lõi thang bộ & thang máy | $x \in [27, 30]$, $z \in [-2.2, 6]$ | Cả hai (-1) |
 

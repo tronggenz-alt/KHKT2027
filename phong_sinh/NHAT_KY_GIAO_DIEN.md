@@ -149,7 +149,17 @@
 
 ## 4. Nhật ký thực hiện theo từng giai đoạn
 
-### Giai đoạn G0 – Khởi tạo, rà soát & chụp ảnh trước khi sửa
-- Đọc toàn bộ `PROMPT_DUNG_CU_GIAO_DIEN.md`, `HOP_DONG_GIAO_DIEN_BACKEND.md`, và toàn bộ mã nguồn Tầng 1 + Tầng 2.
-- Chạy `KHKT_TEST=truoc_g0` chụp 12 ảnh trạm `20..31` vào `docs/anh-tang2/truoc_dung_cu/` và 5 ảnh hành lang 2,2 m trước khi mở rộng vào `docs/anh-tang2/hanh_lang/`.
+### Giai đoạn G0 – Khởi tạo, rà soát & chụp ảnh trước khi sửa (ĐÃ XONG)
+- Đọc 100% `PROMPT_DUNG_CU_GIAO_DIEN.md`, `HOP_DONG_GIAO_DIEN_BACKEND.md`, và toàn bộ mã nguồn Tầng 1 + Tầng 2.
+- Chạy `KHKT_TEST=truoc_g0` chụp 12 ảnh hiện trạng trạm `20..31` vào `docs/anh-tang2/truoc_dung_cu/` và 5 ảnh hành lang 2,2 m trước khi mở rộng (`01, 03, 05, 07, 09`) vào `docs/anh-tang2/hanh_lang/`.
+- Commit cục bộ: `8c4bdc5` (`docs(tang2): G0 ra soat 83 dung cu, phim tat va chup anh hien trang truoc khi sua`).
+
+### Giai đoạn G1 – Mở rộng hành lang Tầng 2 từ 2,2 m lên 3,6 m (ĐANG KIỂM THỬ)
+- Cập nhật `Assets/Scripts/Rendering/ZoneMap.cs`: thêm hằng số `F2CorridorZ = -3.6f`, cập nhật khu `8` (`hanh_lang_t2`: `z ∈ [-3.6, 0]`), khu `9` (`phong_sinh_phan_tu`: `z ∈ [-9.0, -3.6]`), khu `10` (`nha_kinh`: `z ∈ [-9.0, -3.6]`). Giữ nguyên Tầng 1 (`0..4`) và lõi thang (`12`).
+- Cập nhật `LabSceneBuilder.Floor2.cs` và `LabSceneBuilder.Floor2.Shell.cs`: dời tường nam hành lang Tầng 2 sang `z = -3.6`, xây kín tường đầu đông đoạn mở rộng `z ∈ [-3.6, -2.2]` tại `x = 27.0`, cập nhật tấm sàn, trần, mái, mái kính hai dốc của nhà kính và đầu dò phản chiếu.
+- Cập nhật `LabSceneBuilder.Floor2.SpecialRooms.cs`:
+  - Bố trí 2 dãy đèn trần hành lang tại `z = -1.1` và `z = -2.5`, đèn điểm tại `z = -1.8`.
+  - Dời các vật dụng sát tường nam hành lang (`Ghế băng chờ 1 & 2`, `Tủ trưng bày tiêu bản`, `Kệ tủ đồ cá nhân`, `Bình chữa cháy`, `Trạm tra cứu dụng cụ`) về `z ≈ -3.32 .. -3.45`, chừa lối đi thông thủy rộng ~2,9 m.
+  - Dời toàn bộ nội thất Phòng Sinh học phân tử và Nhà kính vào trong vùng `z ∈ [-8.8, -3.8]`, bổ sung `Vòi rửa mắt khẩn cấp` và `Mô hình xoắn kép ADN` tại Phòng Sinh học phân tử.
+- Cập nhật tọa độ trạm `22..30` trong `LabSceneBuilder.cs`, `phong_sinh/bo_cuc_tang2.json` và `docs/20-tang-2-khu-sinh-hoc.md`.
 

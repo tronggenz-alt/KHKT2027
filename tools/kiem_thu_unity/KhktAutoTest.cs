@@ -292,6 +292,15 @@ public class KhktAutoTest : MonoBehaviour
 #endif
             yield break;
         }
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "tang2_hanh_lang")
+        {
+            yield return Floor2CorridorTest();
+            Log($"Xong kiểm thử hành lang Tầng 2 sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
 
         // 0. Màn hình giới thiệu và các khu
         var intro = FindAnyObjectByType<IntroScreen>();
@@ -3404,6 +3413,136 @@ public class KhktAutoTest : MonoBehaviour
         ShotCam(plan, "09_truoc_2m2_mat_bang");
         Destroy(planGo);
         Log("[KHKT-PLAY] Đã chụp mặt bằng 2,2 m: 09_truoc_2m2_mat_bang.png");
+    }
+
+    IEnumerator Floor2CorridorTest()
+    {
+        Log("[KHKT-PLAY] Bắt đầu kiểm thử G1 – Mở rộng hành lang Tầng 2 (2,2 m -> 3,6 m)");
+        if (hand != null && hand.hand != null)
+            foreach (var r in hand.hand.GetComponentsInChildren<Renderer>()) r.enabled = false;
+
+        // 1. Kiểm tra ZoneMap.At
+        int zF1Hall = Khkt.Rendering.ZoneMap.At(new Vector3(13f, 0.5f, -1.5f));
+        int zF1Analysis = Khkt.Rendering.ZoneMap.At(new Vector3(5f, 0.5f, -2.9f));
+        int zF2Hall = Khkt.Rendering.ZoneMap.At(new Vector3(13f, 4.5f, -2.9f));
+        int zF2Mol = Khkt.Rendering.ZoneMap.At(new Vector3(5f, 4.5f, -4.2f));
+        int zF2Gh = Khkt.Rendering.ZoneMap.At(new Vector3(20f, 4.5f, -4.2f));
+
+        Log($"[tang2_hanh_lang] ZoneMap(13,0.5,-1.5) = {zF1Hall} (kỳ vọng 2)");
+        Log($"[tang2_hanh_lang] ZoneMap(5,0.5,-2.9) = {zF1Analysis} (kỳ vọng 3)");
+        Log($"[tang2_hanh_lang] ZoneMap(13,4.5,-2.9) = {zF2Hall} (kỳ vọng 8)");
+        Log($"[tang2_hanh_lang] ZoneMap(5,4.5,-4.2) = {zF2Mol} (kỳ vọng 9)");
+        Log($"[tang2_hanh_lang] ZoneMap(20,4.5,-4.2) = {zF2Gh} (kỳ vọng 10)");
+
+        if (zF1Hall != 2 || zF1Analysis != 3 || zF2Hall != 8 || zF2Mol != 9 || zF2Gh != 10)
+            throw new Exception($"Sai ZoneMap hành lang T2: {zF1Hall},{zF1Analysis},{zF2Hall},{zF2Mol},{zF2Gh}");
+
+        var zs = Khkt.Rendering.ZoneStreamer.Instance;
+        zs?.Keep(this, 60f,
+            new Vector3(10f, 4.5f, 7f),
+            new Vector3(23f, 4.5f, 11f),
+            new Vector3(23f, 4.5f, 3f),
+            new Vector3(13f, 4.5f, -1.8f),
+            new Vector3(6f, 4.5f, -6f),
+            new Vector3(20f, 4.5f, -6f),
+            new Vector3(28.5f, 4.5f, 10f),
+            new Vector3(28.5f, 4.5f, 2f));
+        yield return Frames(8);
+
+        var cc = viewer.GetComponent<CharacterController>();
+
+        // 2. Đi bộ dọc tâm hành lang mới z = -1.8 từ x = 1.5 sang x = 26.0
+        cc.enabled = false;
+        viewer.transform.position = new Vector3(1.5f, 3.8f, -1.8f);
+        cc.enabled = true;
+        yield return Frames(3);
+        int steps = 120;
+        Vector3 stepX = new Vector3((26.0f - 1.5f) / steps, -0.02f, 0f);
+        for (int i = 0; i < steps; i++)
+        {
+            cc.Move(stepX);
+            if (i % 20 == 0) yield return null;
+        }
+        float finalX = viewer.transform.position.x;
+        Log($"[tang2_hanh_lang] Đi bộ dọc hành lang (1.5 -> 26.0 tại z=-1.8): x cuối = {finalX:0.2f}");
+        if (Mathf.Abs(finalX - 26.0f) >= 0.3f)
+            throw new Exception($"Bị vướng vật cản khi đi dọc hành lang T2: finalX={finalX:0.2f}");
+
+        // Đi bộ qua cửa Phòng Sinh học phân tử (x = 6.7, z: -1.8 -> -4.5)
+        cc.enabled = false;
+        viewer.transform.position = new Vector3(6.7f, 3.8f, -1.8f);
+        cc.enabled = true;
+        yield return new WaitForSeconds(0.5f); // chờ AutoDoor mở
+        for (int i = 0; i < 40; i++)
+        {
+            cc.Move(new Vector3(0f, -0.02f, (-4.5f - (-1.8f)) / 40f));
+            if (i % 8 == 0) yield return null;
+        }
+        float molZ = viewer.transform.position.z;
+        Log($"[tang2_hanh_lang] Đi qua cửa Phòng Sinh học phân tử (z -1.8 -> -4.5): z cuối = {molZ:0.2f}");
+        if (Mathf.Abs(molZ - (-4.5f)) >= 0.3f)
+            throw new Exception($"Không đi qua được cửa Phòng Sinh học phân tử: molZ={molZ:0.2f}");
+
+        // Đi bộ qua cửa Nhà kính (x = 19.8, z: -1.8 -> -4.5)
+        cc.enabled = false;
+        viewer.transform.position = new Vector3(19.8f, 3.8f, -1.8f);
+        cc.enabled = true;
+        yield return new WaitForSeconds(0.5f); // chờ AutoDoor mở
+        for (int i = 0; i < 40; i++)
+        {
+            cc.Move(new Vector3(0f, -0.02f, (-4.5f - (-1.8f)) / 40f));
+            if (i % 8 == 0) yield return null;
+        }
+        float ghZ = viewer.transform.position.z;
+        Log($"[tang2_hanh_lang] Đi qua cửa Nhà kính (z -1.8 -> -4.5): z cuối = {ghZ:0.2f}");
+        if (Mathf.Abs(ghZ - (-4.5f)) >= 0.3f)
+            throw new Exception($"Không đi qua được cửa Nhà kính: ghZ={ghZ:0.2f}");
+
+        // 3. Chụp 5 ảnh sau mở rộng 3,6 m vào docs/anh-tang2/hanh_lang/
+        string repoRoot = Path.GetFullPath(Path.Combine(Application.dataPath, "..", ".."));
+        string hanhLangDir = Path.Combine(repoRoot, "docs", "anh-tang2", "hanh_lang");
+        Directory.CreateDirectory(hanhLangDir);
+        outDir = hanhLangDir;
+
+        var corridorViews = new (string name, Vector3 pos, Vector3 look)[]
+        {
+            ("02_sau_3m6_tay_nhin_dong", new Vector3(1.5f, 3.8f, -1.8f), new Vector3(25f, 5.2f, -1.8f)),
+            ("04_sau_3m6_dong_nhin_tay", new Vector3(26f, 3.8f, -1.8f), new Vector3(2f, 5.2f, -1.8f)),
+            ("06_sau_3m6_cua_phan_tu", new Vector3(6.7f, 3.8f, -0.8f), new Vector3(6.7f, 5.1f, -3.6f)),
+            ("08_sau_3m6_cua_nha_kinh", new Vector3(19.8f, 3.8f, -0.8f), new Vector3(19.8f, 5.1f, -3.6f)),
+        };
+
+        foreach (var v in corridorViews)
+        {
+            cc.enabled = false;
+            viewer.transform.position = v.pos;
+            cc.enabled = true;
+            viewer.seated = false;
+            viewer.EyeOffset = 0;
+            viewer.cameraTransform.localPosition = new Vector3(0, viewer.standingEyeHeight, 0);
+            viewer.LookAt(v.look);
+            yield return Frames(8);
+            Shot(v.name);
+            Log($"[tang2_hanh_lang] Đã chụp hành lang 3,6 m: {v.name}.png");
+        }
+
+        var planGo = new GameObject("Camera mặt bằng T2 3m6");
+        var plan = planGo.AddComponent<Camera>();
+        plan.orthographic = true;
+        plan.orthographicSize = 14.5f;
+        plan.transform.position = new Vector3(15f, 6.35f, 3.0f);
+        plan.transform.rotation = Quaternion.Euler(90, 0, 0);
+        plan.nearClipPlane = 0.05f;
+        plan.farClipPlane = 2.6f;
+        plan.clearFlags = CameraClearFlags.SolidColor;
+        plan.backgroundColor = new Color(0.93f, 0.95f, 0.97f);
+        plan.enabled = false;
+        UnityEngine.Rendering.Universal.CameraExtensions.GetUniversalAdditionalCameraData(plan).renderShadows = false;
+        yield return Frames(4);
+        ShotCam(plan, "10_sau_3m6_mat_bang");
+        Destroy(planGo);
+        Log("[tang2_hanh_lang] Đã chụp mặt bằng 3,6 m: 10_sau_3m6_mat_bang.png");
+        Log("[tang2_hanh_lang] PASS: Mở rộng hành lang Tầng 2 lên 3,6 m hoàn tất!");
     }
 
     IEnumerator Watchdog()

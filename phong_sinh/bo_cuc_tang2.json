@@ -18,9 +18,9 @@
     { "chi_so": 5, "id": "phong_sinh", "ten": "Phòng thí nghiệm sinh học", "canh": "Khu_PhongSinh", "tang": 1, "pham_vi": [0, 0, 20, 15] },
     { "chi_so": 6, "id": "phong_vi_sinh", "ten": "Phòng vi sinh", "canh": "Khu_PhongViSinh", "tang": 1, "pham_vi": [20, 7.5, 27, 15] },
     { "chi_so": 7, "id": "kho_sinh_pham", "ten": "Kho sinh phẩm", "canh": "Khu_KhoSinhPham", "tang": 1, "pham_vi": [20, 0, 27, 7.5] },
-    { "chi_so": 8, "id": "hanh_lang_t2", "ten": "Hành lang tầng 2", "canh": "Khu_HanhLangT2", "tang": 1, "pham_vi": [0, -2.2, 27, 0] },
-    { "chi_so": 9, "id": "phong_sinh_phan_tu", "ten": "Phòng sinh học phân tử", "canh": "Khu_SinhPhanTu", "tang": 1, "pham_vi": [0, -9, 13.5, -2.2] },
-    { "chi_so": 10, "id": "nha_kinh", "ten": "Nhà kính thực vật", "canh": "Khu_NhaKinh", "tang": 1, "pham_vi": [13.5, -9, 27, -2.2] },
+    { "chi_so": 8, "id": "hanh_lang_t2", "ten": "Hành lang tầng 2", "canh": "Khu_HanhLangT2", "tang": 1, "pham_vi": [0, -3.6, 27, 0] },
+    { "chi_so": 9, "id": "phong_sinh_phan_tu", "ten": "Phòng sinh học phân tử", "canh": "Khu_SinhPhanTu", "tang": 1, "pham_vi": [0, -9, 13.5, -3.6] },
+    { "chi_so": 10, "id": "nha_kinh", "ten": "Nhà kính thực vật", "canh": "Khu_NhaKinh", "tang": 1, "pham_vi": [13.5, -9, 27, -3.6] },
     { "chi_so": 11, "id": "hanh_lang_dong", "ten": "Hành lang đông tầng 2", "canh": "Khu_HanhLangDong", "tang": 1, "pham_vi": [27, 6, 30, 15] },
     { "chi_so": 12, "id": "loi_thang", "ten": "Cầu thang và thang máy", "canh": "Khu_LoiThang", "tang": -1, "pham_vi": [27, -2.2, 30, 6],
       "ghi_chu": "tang = -1: thuộc cả hai tầng (ZoneMap.At trả về khu này ở mọi độ cao). Phần tường, bậc, thang máy nằm ở cảnh lõi như vỏ tòa nhà" }
@@ -117,35 +117,35 @@
     },
 
     "hanh_lang_t2": {
-      "pham_vi": [0, -2.2, 27, 0],
-      "tuong_nam_z_-2.2": [
+      "pham_vi": [0, -3.6, 27, 0],
+      "tuong_nam_z_-3.6": [
         { "loai": "Auto", "a": 5.9, "b": 7.5, "noi": ["phong_sinh_phan_tu", "hanh_lang_t2"] },
         { "loai": "Auto", "a": 19.0, "b": 20.6, "noi": ["nha_kinh", "hanh_lang_t2"] },
         { "loai": "WinF", "doan": [[1.0, 4.8], [8.6, 12.6], [14.4, 18.2], [21.6, 26.0]], "day": 1.0, "dinh": 2.6 }
       ],
-      "noi_dung": "giống hành lang tầng 1: mảng màu quanh cửa theo khu, biển song ngữ, ghế băng, chậu cây; màn hình thông tin 'Phòng Lab Sinh học 3D' hiện cơ quan quay chậm (liên kết app cũ)"
+      "noi_dung": "hành lang rộng 3,6 m: mảng màu quanh cửa theo khu, biển song ngữ, 2 ghế băng chờ, tủ trưng bày tiêu bản mẫu, kệ tủ đồ cá nhân (Locker), ki-ốt tra cứu 83 dụng cụ, bình chữa cháy, màn hình bảng tin 'Phòng Lab Sinh học 3D'"
     },
 
     "phong_sinh_phan_tu": {
-      "pham_vi": [0, -9, 13.5, -2.2],
+      "pham_vi": [0, -9, 13.5, -3.6],
       "nguyen_tac": "luồng một chiều: tiền PCR (sạch) → tách chiết → hậu PCR; vạch sàn xanh lá → cam",
-      "tien_pcr": { "x": [0.2, 4.0], "noi_dung": "tủ thao tác PCR có đèn UV (tường tây), bàn pha mix, pipet, máy ly tâm mini, máy vortex, tủ đông −20 °C nhỏ" },
+      "tien_pcr": { "x": [0.2, 4.0], "noi_dung": "tủ thao tác PCR có đèn UV (tường tây), bàn pha mix, pipet, máy ly tâm mini, máy vortex, tủ đông sâu −80 °C" },
       "tach_chiet": { "x": [4.0, 9.0], "noi_dung": "bàn đảo: bể ổn nhiệt 60 °C, máy ly tâm, block gia nhiệt, ống falcon, cồn lạnh, đũa thủy tinh (tách DNA chuối / gan gà), máy đo OD600 / quang phổ vi thể" },
-      "hau_pcr": { "x": [9.0, 13.3], "noi_dung": "2 máy PCR (dọc tường nam), bàn điện di (khay đổ gel, bể điện di ngang, nguồn điện di), buồng chụp gel (bàn soi UV / ánh sáng xanh + màn hình), bồn rửa" },
+      "hau_pcr": { "x": [9.0, 13.3], "noi_dung": "2 máy PCR (dọc tường nam), bàn điện di (khay đổ gel, bể điện di ngang, nguồn điện di), buồng chụp gel (bàn soi UV / ánh sáng xanh + màn hình), mô hình xoắn kép ADN, vòi rửa mắt khẩn cấp" },
       "cua_so": [ { "tuong": "nam z = -9 (ngoài trời)", "doan": [[1.2, 3.6], [4.8, 7.2], [8.4, 10.8]], "day": 0.9, "dinh": 2.6 } ]
     },
 
     "nha_kinh": {
-      "pham_vi": [13.5, -9, 27, -2.2],
-      "mai": "mái kính hai dốc, nóc dọc trục x tại z = -5.6, đỉnh cao 4.8 m so với sàn tầng 2, khung nhôm 1,2 m; rèm che nắng cuộn một nửa",
-      "tuong": "nam (z = -9) và đông (x = 27, z -9..-2.2) là vách kính toàn phần 0.4..3.4 m, đố nhôm mỗi 1,2 m",
+      "pham_vi": [13.5, -9, 27, -3.6],
+      "mai": "mái kính hai dốc, nóc dọc trục x tại z = -6.3, đỉnh cao 4.8 m so với sàn tầng 2, khung nhôm 1,2 m; rèm che nắng cuộn một nửa",
+      "tuong": "nam (z = -9) và đông (x = 27, z -9..-3.6) là vách kính toàn phần 0.4..3.4 m, đố nhôm mỗi 1,2 m",
       "noi_dung": [
-        "3 dãy bàn trồng cây di động dọc trục x (z ≈ -7.6, -5.6, -3.6), chậu nhiều cỡ, cây dựng bằng code (lá cong, vân lá vẽ bằng code)",
-        "giá thủy canh NFT 3 tầng có đèn LED trồng cây (tường tây x = 13.7)",
+        "2 dãy bàn trồng cây di động dọc trục x (z ≈ -7.0, -5.2), chậu nhiều cỡ, cây dựng bằng code (lá cong, vân lá vẽ bằng code)",
+        "giá thủy canh NFT 3 tầng có đèn LED trồng cây (tường tây x = 13.95, z = -6.3)",
         "trạm quang hợp: cốc rong đuôi chó + đèn trên thước trượt khoảng cách → bọt O₂",
         "trạm thoát hơi nước: potometer + giấy coban clorua",
         "trạm hướng sáng: hộp tối có lỗ, cây đậu mầm theo ngày",
-        "bàn sang chậu: bao đất, bình tưới, xẻng nhỏ",
+        "bàn sang chậu: bao đất, bình tưới, xẻng nhỏ (z = -4.15)",
         "ống phun sương trên cao, cảm biến nhiệt / ẩm + bảng hiển thị, quạt thông gió đầu hồi, sàn bê tông chống trơn có rãnh thoát nước"
       ]
     },
@@ -161,15 +161,15 @@
   "tram_dich_chuyen": [
     { "so": 20, "ten": "Toàn cảnh lab sinh học", "vi_tri": [19.0, 13.6], "yaw": -122 },
     { "so": 21, "ten": "Bàn kính hiển vi (bàn 1)", "vi_tri": [6.05, 2.6], "yaw": -90, "ngoi": true },
-    { "so": 22, "ten": "Bàn giáo viên tầng 2", "vi_tri": [0.95, 7.5], "yaw": 90 },
+    { "so": 22, "ten": "Bàn giải phẫu số", "vi_tri": [16.4, 11.2], "yaw": 90 },
     { "so": 23, "ten": "Tủ an toàn sinh học", "vi_tri": [6.6, 13.4], "yaw": 0 },
-    { "so": 24, "ten": "Khu giải phẫu", "vi_tri": [16.4, 11.2], "yaw": 90 },
-    { "so": 25, "ten": "Tủ ấm và nồi hấp", "vi_tri": [16.4, 5.2], "yaw": 90 },
-    { "so": 26, "ten": "Phòng vi sinh", "vi_tri": [23.0, 9.6], "yaw": 0 },
-    { "so": 27, "ten": "Kho sinh phẩm", "vi_tri": [23.5, 3.7], "yaw": 0 },
-    { "so": 28, "ten": "Sinh học phân tử – tách chiết, PCR", "vi_tri": [6.7, -3.4], "yaw": 180 },
-    { "so": 29, "ten": "Điện di và soi gel", "vi_tri": [11.2, -6.0], "yaw": 180 },
-    { "so": 30, "ten": "Nhà kính – quang hợp", "vi_tri": [19.8, -3.4], "yaw": 180 },
+    { "so": 24, "ten": "Tủ ấm và nồi hấp", "vi_tri": [16.4, 5.2], "yaw": 90 },
+    { "so": 25, "ten": "Phòng vi sinh", "vi_tri": [23.0, 9.6], "yaw": 0 },
+    { "so": 26, "ten": "Kho sinh phẩm", "vi_tri": [23.5, 3.7], "yaw": 0 },
+    { "so": 27, "ten": "Hành lang tầng 2", "vi_tri": [13.5, -1.8], "yaw": 90 },
+    { "so": 28, "ten": "Sinh học phân tử – tách chiết, PCR", "vi_tri": [6.5, -4.4], "yaw": 180 },
+    { "so": 29, "ten": "Điện di và soi gel", "vi_tri": [11.2, -6.4], "yaw": 180 },
+    { "so": 30, "ten": "Nhà kính – quang hợp", "vi_tri": [20.2, -4.4], "yaw": 180 },
     { "so": 31, "ten": "Sảnh thang máy tầng 2", "vi_tri": [27.8, -1.5], "yaw": 270 }
   ]
 }

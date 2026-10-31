@@ -11,9 +11,9 @@ namespace Khkt.EditorTools
     ///   Phòng thí nghiệm sinh học  x 0..20,  z 0..15   9 bàn kính hiển vi (cùng vị trí 9 bàn tầng 1), bảng ở tường tây
     ///   Phòng vi sinh              x 20..27, z 7,5..15 buồng đệm x 25,2..27, z 7,5..10
     ///   Kho sinh phẩm              x 20..27, z 0..7,5
-    ///   Hành lang tầng 2           x 0..27,  z −2,2..0
-    ///   Phòng sinh học phân tử     x 0..13,5, z −9..−2,2
-    ///   Nhà kính thực vật          x 13,5..27, z −9..−2,2 (mái kính)
+    ///   Hành lang tầng 2           x 0..27,  z −3,6..0
+    ///   Phòng sinh học phân tử     x 0..13,5, z −9..−3,6
+    ///   Nhà kính thực vật          x 13,5..27, z −9..−3,6 (mái kính)
     ///   Hành lang đông tầng 2      x 27..30, z 6..15 (tầng 1 bên dưới để trống, chỉ có cột)
     ///   Lõi thang bộ + thang máy   x 27..30, z −2,2..6, cao cả hai tầng (tọa độ thế giới, nhóm ở gốc cảnh)
     ///
@@ -24,12 +24,13 @@ namespace Khkt.EditorTools
     {
         public const float F2_Y = 3.8f;      // mặt sàn tầng 2 (thế giới)
         public const float F2_H = 3.6f;      // chiều cao thông thủy tầng 2 (bằng H tầng 1)
+        public const float F2_CorridorZ = Khkt.Rendering.ZoneMap.F2CorridorZ; // -3.6f (hành lang tầng 2 rộng 3,6 m)
 
         // Màu khu tầng 2 (chủ đề Quốc tế)
         static Color zoneBioLab, zoneMicroBio, zoneBioStore, zoneMolecular, zoneGreenhouse;
         static Material leafBioLab, leafMicroBio, leafBioStore, leafMolecular, leafGreenhouse;
         // Vật liệu riêng tầng 2
-        static Material t2FloorKho, t2FloorPhanTu, t2FloorNhaKinh, t2FloorHallEast, t2CoreStone, t2EpoxyClean, t2FloorLine;
+        static Material t2FloorKho, t2FloorPhanTu, t2FloorNhaKinh, t2FloorHallEast, t2FloorCorridor, t2CoreStone, t2EpoxyClean, t2FloorLine;
         static Material t2Accent, t2AccentDark;
 
         static void InitFloor2Materials()
@@ -54,9 +55,10 @@ namespace Khkt.EditorTools
             var tiles = (Texture2D)floorLab.GetTexture("_BaseMap");
             var concreteTex = (Texture2D)concrete.GetTexture("_BaseMap");
             t2FloorKho = Mat("T2_SanKho", new Color(0.74f, 0.76f, 0.78f), 0.35f, 0, tiles, new Vector2(7f / 0.6f, 7.5f / 0.6f));
-            t2FloorPhanTu = Mat("T2_SanPhanTu", new Color(0.8f, 0.79f, 0.77f), 0.32f, 0, tiles, new Vector2(13.5f / 0.6f, 6.8f / 0.6f));
+            t2FloorCorridor = Mat("T2_SanHanhLangT2", new Color(0.76f, 0.74f, 0.7f), 0.3f, 0, tiles, new Vector2(27f / 1.2f, 3.6f / 1.2f));
+            t2FloorPhanTu = Mat("T2_SanPhanTu", new Color(0.8f, 0.79f, 0.77f), 0.32f, 0, tiles, new Vector2(13.5f / 0.6f, 5.4f / 0.6f));
             t2FloorHallEast = Mat("T2_SanHanhLangDong", new Color(0.76f, 0.74f, 0.7f), 0.3f, 0, tiles, new Vector2(3f / 0.6f, 9f / 0.6f));
-            t2FloorNhaKinh = Mat("T2_SanNhaKinh", new Color(0.66f, 0.66f, 0.64f), 0.2f, 0, concreteTex, new Vector2(6.75f, 3.4f));
+            t2FloorNhaKinh = Mat("T2_SanNhaKinh", new Color(0.66f, 0.66f, 0.64f), 0.2f, 0, concreteTex, new Vector2(6.75f, 2.7f));
             t2EpoxyClean = Mat("T2_SanEpoxySach", new Color(0.8f, 0.85f, 0.83f), 0.6f);  // sàn epoxy liền mảnh vùng sạch
             t2CoreStone = Mat("T2_DaMaiLoiThang", new Color(0.72f, 0.71f, 0.69f), 0.5f);   // đá mài lõi thang (không ron nên không lệch viên)
             t2FloorLine = Mat("T2_ChiTang", new Color(0.3f, 0.32f, 0.34f), 0.4f, 0.3f);
@@ -93,7 +95,7 @@ namespace Khkt.EditorTools
                 if (mb == null) continue;
                 string ns = mb.GetType().Namespace ?? "";
                 if (mb is Khkt.Environment.Tang2.ThemeOnly) continue;
-                if (ns.StartsWith("Khkt.Environment.Tang2") || ns.StartsWith("Khkt.Demo.Bio")) return true;
+                if (ns.StartsWith("Khkt.Environment.Tang2") || ns.StartsWith("Khkt.Demo.Bio") || ns.StartsWith("Khkt.Interaction.Bio")) return true;
             }
             return false;
         }
