@@ -65,6 +65,16 @@
 - Cập nhật `data/reactions/phan_ung.json`: thêm phản ứng `h2o2_catalase`.
 - Cập nhật `tests/ChemEngineTests.cs`: đạt **147 / 147 test PASS** (140 bài cũ + 7 bài kiểm thử mới).
 
+### Giai đoạn B4 (2026-10-31)
+- Đã triển khai 5 lớp C# thuần (không phụ thuộc `UnityEngine`, không cấp phát rác mỗi khung hình, tất định theo `seed`) kèm file `.meta` trong `Phong thi nghiem ao/Assets/Scripts/Simulation/Bio/`:
+  - `BioSampleData.cs`: cấu trúc `DnaBand`, `Contaminant`, lớp `BioSampleData` với `CopyFrom` và `MixInto` (chia mật độ theo thể tích, chuyển chủng ít tế bào hơn vào `contaminants`, gộp băng ADN cùng `bp`).
+  - `Dilution.cs`: `CfuPerMl`, `IsCountable` (30..300 theo ISO 4833-1), `CarryOverMl`, `SampleColonies` (Poisson tất định).
+  - `StreakPlate.cs`: `StreakStroke`, `ColonySpot`, `Colonies` (mô phỏng cấy ria 4 vùng tách khuẩn lạc đơn, giảm mật độ khi đốt que cấy, phụ thuộc nhiệt độ và thời gian ủ).
+  - `ContaminationRules.cs`: `AsepticContext`, `Probability`, `Roll` (khớp bảng hệ số `he_so_nhiem` trong `chung_vi_sinh.json`).
+  - `GramStain.cs`: `GramResult`, `Result` (đánh giá quy trình nhuộm Gram 4 bước theo chuẩn ASM).
+- Cập nhật `tests/BioSimulationTests.cs`: đạt **49 / 49 test PASS** (29 bài cũ + 20 bài kiểm thử mới).
+
+
 
 - Kết quả kiểm thử: `tests/test_dung_cu_sinh.py` đạt 3/3 test dụng cụ, toàn bộ test suite Python đạt 117/117 test (0,60s).
 

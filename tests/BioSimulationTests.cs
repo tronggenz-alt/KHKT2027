@@ -1,6 +1,8 @@
 // Kiểm thử bộ máy mô phỏng sinh học (C# thuần, không cần Unity).
 // Chạy:  bash tools/chay_kiem_thu_hoa.sh tests/BioSimulationTests.cs
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Khkt.Simulation.Bio;
 
 static class BioSimulationTests
@@ -113,6 +115,114 @@ static class BioSimulationTests
 
         double diameterCm = Fermentation.BalloonDiameterCm(balloonVol);
         Check(diameterCm > 20.0 && diameterCm < 24.0, "Đường kính bóng bay phồng: ~21.2 cm", $"{diameterCm:F1} cm");
+
+        // 8. MẪU SINH HỌC & TRỘN MẪU (BioSampleData - B4)
+        Console.WriteLine("\n[8] Trộn mẫu sinh học (BioSampleData):");
+        var dstSample = new BioSampleData { organismId = "", cfuPerMl = 0, sterile = true };
+        var srcSample = new BioSampleData { organismId = "e_coli_k12", cfuPerMl = 1e6, sterile = false };
+        srcSample.dna.Add(new DnaBand { bp = 500, ng = 40.0, smear = false });
+        BioSampleData.MixInto(dstSample, 9.0, srcSample, 1.0);
+        Near(dstSample.cfuPerMl, 1e5, 1.0, "Pha loãng 1 mL mẫu 10^6 CFU/mL vào 9 mL đệm -> 10^5 CFU/mL");
+        Check(dstSample.organismId == "e_coli_k12" && !dstSample.sterile, "Chủng sau pha loãng là e_coli_k12 và không còn sterile");
+
+        var otherStrain = new BioSampleData { organismId = "b_subtilis", cfuPerMl = 2e3, sterile = false };
+        otherStrain.dna.Add(new DnaBand { bp = 500, ng = 10.0, smear = true });
+        otherStrain.dna.Add(new DnaBand { bp = 1000, ng = 25.0, smear = false });
+        BioSampleData.MixInto(dstSample, 10.0, otherStrain, 1.0);
+        Check(dstSample.organismId == "e_coli_k12" && dstSample.contaminants.Count == 1 && dstSample.contaminants[0].organismId == "b_subtilis",
+              "Trộn chủng ít tế bào hơn (b_subtilis) vào chủng chính -> chuyển vào contaminants");
+        var band500 = dstSample.dna.First(b => b.bp == 500);
+        Check(Math.Abs(band500.ng - 50.0) < 0.01 && band500.smear && dstSample.dna.Count == 2,
+              "Gộp băng ADN cùng kích thước 500 bp: cộng khối lượng ng (40+10=50) và gộp cờ smear");
+
+        // 9. PHA LOÃNG BẬC 10 & ĐẾM KHUẨN LẠC (Dilution - B4)
+        Console.WriteLine("\n[9] Pha loãng & đếm khuẩn lạc (Dilution):");
+        Near(Dilution.CfuPerMl(125, 0.1, 1e-5), 1.25e8, 1e3, "125 khuẩn lạc từ 0,1 mL ở bậc 10^-5 -> 1,25*10^8 CFU/mL");
+        Check(Dilution.IsCountable(30) && Dilution.IsCountable(150) && Dilution.IsCountable(300) && !Dilution.IsCountable(29) && !Dilution.IsCountable(301),
+              "Đĩa đếm chuẩn ISO 4833: chỉ nhận 30..300 khuẩn lạc");
+        Check(Dilution.CarryOverMl(1000.0) > Dilution.CarryOverMl(200.0) && Dilution.CarryOverMl(200.0) > 0.0,
+              "Dư bám đầu côn (CarryOverMl) tăng theo cỡ đầu côn (P1000 > P200 > 0)");
+        int colSeed1 = Dilution.SampleColonies(85.0, 42);
+        int colSeed2 = Dilution.SampleColonies(85.0, 42);
+        Check(colSeed1 == colSeed2 && colSeed1 > 40 && colSeed1 < 130 && Dilution.SampleColonies(0.0, 42) == 0,
+              "SampleColonies Poisson tất định theo seed và trả 0 khi kỳ vọng = 0", $"kết quả={colSeed1}");
+
+        // 10. CẤY RIA 4 VÙNG (StreakPlate - B4)
+        Console.WriteLine("\n[10] Cấy ria 4 vùng (StreakPlate):");
+        var strokesGood = new List<StreakStroke>
+        {
+            new StreakStroke { zone = 1, x0 = -30, y0 = 20, x1 = 30, y1 = 20, loopSterilizedBefore = true },
+            new StreakStroke { zone = 2, x0 = 30, y0 = 20, x1 = 30, y1 = -20, loopSterilizedBefore = true },
+            new StreakStroke { zone = 3, x0 = 30, y0 = -20, x1 = -30, y1 = -20, loopSterilizedBefore = true },
+            new StreakStroke { zone = 4, x0 = -30, y0 = -20, x1 = 0, y1 = 0, loopSterilizedBefore = true },
+        };
+        var spotsGood = new List<ColonySpot>();
+        StreakPlate.Colonies(strokesGood, 1e8, "e_coli_k12", 24.0, 37.0, 101, spotsGood);
+
+        var strokesNoBurn = new List<StreakStroke>
+        {
+            new StreakStroke { zone = 1, x0 = -30, y0 = 20, x1 = 30, y1 = 20, loopSterilizedBefore = true },
+            new StreakStroke { zone = 2, x0 = 30, y0 = 20, x1 = 30, y1 = -20, loopSterilizedBefore = false },
+            new StreakStroke { zone = 3, x0 = 30, y0 = -20, x1 = -30, y1 = -20, loopSterilizedBefore = false },
+            new StreakStroke { zone = 4, x0 = -30, y0 = -20, x1 = 0, y1 = 0, loopSterilizedBefore = false },
+        };
+        var spotsNoBurn = new List<ColonySpot>();
+        StreakPlate.Colonies(strokesNoBurn, 1e8, "e_coli_k12", 24.0, 37.0, 101, spotsNoBurn);
+        Check(spotsGood.Count > 10 && spotsNoBurn.Count > spotsGood.Count * 1.5,
+              "Đốt que giữa các vùng giúp giảm mật độ tách khuẩn lạc đơn; quên đốt làm mọc dày khắp 4 vùng",
+              $"đúng={spotsGood.Count}, quên đốt={spotsNoBurn.Count}");
+
+        var spotsTooHot = new List<ColonySpot>();
+        StreakPlate.Colonies(strokesGood, 1e8, "e_coli_k12", 24.0, 55.0, 101, spotsTooHot);
+        var spotsHotLoop = new List<ColonySpot>();
+        StreakPlate.Colonies(strokesGood, 0.0, "e_coli_k12", 24.0, 37.0, 101, spotsHotLoop);
+        Check(spotsTooHot.Count == 0 && spotsHotLoop.Count == 0, "Ủ > 50 °C hoặc dí que cấy còn nóng đỏ (inoculum=0) -> không mọc khuẩn lạc");
+
+        var spotsCold = new List<ColonySpot>();
+        StreakPlate.Colonies(strokesGood, 1e8, "e_coli_k12", 24.0, 22.0, 101, spotsCold);
+        Check(spotsCold.Count > 0 && spotsCold[0].diameterMm < spotsGood[0].diameterMm * 0.6f,
+              "Ủ ở nhiệt độ thấp (22 °C so với tối ưu 37 °C) -> đường kính khuẩn lạc nhỏ hơn rõ rệt");
+
+        // 11. QUY TẮC TẠP NHIỄM VÔ TRÙNG (ContaminationRules - B4)
+        Console.WriteLine("\n[11] Quy tắc tạp nhiễm (ContaminationRules):");
+        var ctxGoodBsc = new AsepticContext
+        {
+            insideBsc = true, bscRunning = true, bscPurgeMinutes = 10, sashHeightCm = 18,
+            grilleBlocked = false, surfaceClean = true, handsWashed = true, ppeOn = true,
+            nearFlame = false, toolSterile = true, openSeconds = 15
+        };
+        var ctxBad = new AsepticContext
+        {
+            insideBsc = false, bscRunning = false, bscPurgeMinutes = 0, sashHeightCm = 40,
+            grilleBlocked = true, surfaceClean = false, handsWashed = false, ppeOn = false,
+            nearFlame = false, toolSterile = false, openSeconds = 60
+        };
+        var ctxFlame = new AsepticContext
+        {
+            insideBsc = false, surfaceClean = true, handsWashed = true, ppeOn = true,
+            nearFlame = true, toolSterile = true, openSeconds = 15
+        };
+        var ctxNoFlame = ctxFlame;
+        ctxNoFlame.nearFlame = false;
+
+        double pGood = ContaminationRules.Probability(in ctxGoodBsc);
+        double pBad = ContaminationRules.Probability(in ctxBad);
+        double pFlame = ContaminationRules.Probability(in ctxFlame);
+        double pNoFlame = ContaminationRules.Probability(in ctxNoFlame);
+        Check(pGood < 0.01 && pBad > 0.85, "Trong tủ BSC chuẩn xác suất nhiễm < 1%; thao tác bẩn + không tiệt trùng > 85%", $"pGood={pGood:F4}, pBad={pBad:F4}");
+        Check(pFlame < pNoFlame * 0.3, "Thao tác gần ngọn lửa đèn cồn giảm mạnh xác suất nhiễm so với xa đèn cồn", $"gần lửa={pFlame:F4}, xa lửa={pNoFlame:F4}");
+        bool rolledBad = ContaminationRules.Roll(in ctxBad, 7, out var contam);
+        Check(rolledBad && (contam.organismId == "tap_bacillus_khong_khi" || contam.organismId == "tap_nam_moc") && contam.colonies >= 1,
+              "Roll tạp nhiễm trả về chủng tạp nhiễm BSL-1 hợp lệ và số khuẩn lạc >= 1");
+
+        // 12. NHUỘM GRAM (GramStain - B4)
+        Console.WriteLine("\n[12] Quy trình nhuộm Gram (GramStain):");
+        Check(GramStain.Result(true, 60, 60, 15, 45, true, 0.4) == GramResult.Tim, "Vi khuẩn Gram dương nhuộm đúng chuẩn -> Tím");
+        Check(GramStain.Result(false, 60, 60, 15, 45, true, 0.4) == GramResult.Hong, "Vi khuẩn Gram âm nhuộm đúng chuẩn -> Hồng");
+        Check(GramStain.Result(true, 60, 60, 45, 45, true, 0.4) == GramResult.Hong, "Tẩy cồn quá lâu (45s) làm Gram dương mất màu tím thành Hồng");
+        Check(GramStain.Result(false, 60, 60, 2, 45, true, 0.4) == GramResult.Tim, "Tẩy cồn quá ngắn (2s) làm Gram âm giữ màu Tím giả");
+        Check(GramStain.Result(true, 60, 60, 15, 45, true, 0.9) == GramResult.LoangLo, "Vết bôi quá dày (0,9) -> Loang lổ");
+        Check(GramStain.Result(true, 60, 60, 15, 45, false, 0.4) == GramResult.KhongCoTeBao, "Quên cố định nhiệt -> Không có tế bào (rửa trôi)");
 
         Console.WriteLine($"\nKết quả: {passed} đạt, {failed} lỗi.");
         return failed == 0 ? 0 : 1;
