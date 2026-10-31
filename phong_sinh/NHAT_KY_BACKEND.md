@@ -48,5 +48,16 @@
 - Đã tạo 2 hồ sơ máy phân tích mới `data/may/gel_doc.json` và `data/may/may_do_od600.json`, bổ sung các thông số còn thiếu cho 6 máy hiện có (`kinh_hien_vi`, `tu_an_toan_sinh_hoc`, `tu_am_vi_sinh`, `noi_hap`, `may_pcr`, `be_dien_di`) mà không xóa khóa cũ.
 - Đồng bộ dữ liệu máy sang Unity (`Phong thi nghiem ao/Assets/Lab/Data/May/`) qua `tools/chep_du_lieu_may.py`. Bộ kiểm thử `tests/test_du_lieu_may.py` đạt 8/8 test PASS.
 - Đã xây dựng `data/sinh/dung_cu.json` với đúng 108 bản ghi khớp 100% mục 2 hợp đồng, đầy đủ trường, thông số có nguồn URL https thật hoặc `"mo_phong": true`.
+
+### Giai đoạn B2 (2026-10-31)
+- Đã tạo generator `tools/tao_du_lieu_sinh.py` và sinh 5 file dữ liệu sinh học trong `data/sinh/`:
+  - `tieu_ban.json`: 20 tiêu bản (12 tự làm, 8 cố định; đầy đủ 6 tiêu bản từ app cũ).
+  - `chung_vi_sinh.json`: 5 chủng BSL-1 giảng dạy + 2 tạp nhiễm BSL-1, đầy đủ thông số khuẩn lạc, hình thái tế bào, hệ số nhiễm (`he_so_nhiem`).
+  - `moi_truong.json`: 6 môi trường (PCA, NA, LB agar, Sabouraud, LB lỏng, nước muối sinh lý) với thành phần, điều kiện hấp vô trùng và hạn dùng.
+  - `sinh_pham_mac_dinh.json`: 35 mặt hàng sinh phẩm khởi tạo (mẫu tươi, hóa chất, enzyme, kit PCR, ladder, thuốc nhuộm; có mẫu cận date `sp_la_thai_lai` 3 ngày và hết hạn `sp_kit_ly_giai_het_han` để test cảnh báo).
+  - `bai_thi_nghiem.json`: 15 bài thí nghiệm chuẩn SGK (10, 11, 12), đầy đủ mục tiêu, mã dụng cụ, sinh phẩm, các bước chi tiết với điều kiện máy đọc được, câu hỏi và đáp án.
+- Bộ kiểm thử `tests/test_dung_cu_sinh.py` đạt 8/8 test PASS (không còn test nào bị skip).
+- Toàn bộ kiểm thử Python `unittest discover -s tests` đạt 117/117 test PASS.
+
 - Kết quả kiểm thử: `tests/test_dung_cu_sinh.py` đạt 3/3 test dụng cụ, toàn bộ test suite Python đạt 117/117 test (0,60s).
 
