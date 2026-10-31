@@ -93,6 +93,18 @@
 - Toàn bộ hàm cũ giữ nguyên chữ ký, không đổi kết quả kiểm thử cũ.
 - Cập nhật `tests/BioSimulationTests.cs`: đạt **82 / 82 test PASS** (66 + 16 bài kiểm thử mới). `ChemEngineTests.cs`: đạt **147 / 147 test PASS**.
 
+### Giai đoạn B7 (2026-10-31)
+- Đã triển khai `server/lab/sinh_db.py`:
+  - Thiết kế đầy đủ 8 bảng CSDL SQLite: `sinh_dung_cu`, `sinh_pham`, `nhiet_do_tu`, `dat_lich`, `muon_tra`, `ket_qua_tn`, `su_co_sinh`, `bao_tri`.
+  - Tự động nạp kho ban đầu từ `data/sinh/dung_cu.json` (đủ 108 dụng cụ) và `data/sinh/sinh_pham_mac_dinh.json` (35 mặt hàng, tự tính hạn dùng và có mẫu cận date, quá hạn để cảnh báo).
+  - Hỗ trợ `KHKT_DB`, khóa luồng `threading.Lock()` bảo vệ ghi, hàm `reset_for_tests` cách ly kiểm thử.
+  - Kiểm tra an toàn sinh học: bắt buộc `BSL-1`, từ chối cấp an toàn khác với ngoại lệ `ValueError`.
+  - Kiểm tra phát hiện trùng lịch đăng ký thiết bị / phòng thí nghiệm.
+  - Quản lý trạng thái mượn trả và tự động cập nhật số lượng hỏng khi học sinh hoàn trả.
+- Viết bộ kiểm thử `tests/test_sinh_db.py`: đạt **7 / 7 test PASS**.
+- Toàn bộ kiểm thử Python `unittest discover -s tests`: đạt **124 / 124 test PASS**.
+
+
 
 
 
