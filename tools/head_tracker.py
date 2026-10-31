@@ -32,6 +32,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from webcam_tracker import OneEuro  # noqa: E402  (bộ lọc dùng chung với bản theo dõi marker)
+from chon_camera import chon_webcam_may  # noqa: E402 (chọn webcam máy tính, chặn camera điện thoại)
 
 MO_HINH = Path(__file__).resolve().parent / "mo_hinh" / "face_detection_yunet_2023mar.onnx"
 # Mũi nhô trước đường hai mắt khoảng 0,45 lần khoảng cách hai mắt: quay đầu θ thì mũi lệch r = 0,45·tanθ (theo khoảng cách hai mắt)
@@ -80,7 +81,12 @@ def con_song(pid: int) -> bool:
 
 
 def mo_camera(chi_so: int) -> cv2.VideoCapture:
-    cap = cv2.VideoCapture(chi_so, cv2.CAP_DSHOW) if os.name == "nt" else cv2.VideoCapture(chi_so)
+    if os.name == "nt":
+        cap = cv2.VideoCapture(chi_so, cv2.CAP_DSHOW)
+    elif sys.platform == "darwin":
+        cap = cv2.VideoCapture(chi_so, cv2.CAP_AVFOUNDATION)
+    else:
+        cap = cv2.VideoCapture(chi_so)
     if not cap.isOpened():
         cap = cv2.VideoCapture(chi_so)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
@@ -90,7 +96,7 @@ def mo_camera(chi_so: int) -> cv2.VideoCapture:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--cam", type=int, default=0, help="số thứ tự webcam")
+    ap.add_argument("--cam", default="may", help="chọn webcam ('may' = tự chọn webcam máy, hoặc số thứ tự)")
     ap.add_argument("--cong", type=int, default=9051, help="cổng UDP gửi cho Unity")
     ap.add_argument("--may", default="127.0.0.1")
     ap.add_argument("--hien", action="store_true", help="hiện cửa sổ webcam kèm khung mặt và số đo")
@@ -98,27 +104,43 @@ def main() -> None:
     ap.add_argument("--cha", type=int, default=0, help="pid Unity: Unity tắt thì chương trình tự thoát")
     a = ap.parse_args()
 
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    dich = (a.may, a.cong)
+
+    chi_so_cam, ten_cam, thong_tin_cam = chon_webcam_may(a.cam)
+    if chi_so_cam is None:
+        loi = "khong_thay_webcam_may" if "khong_thay" in thong_tin_cam else "da_chan_camera_dien_thoai"
+        sock.sendto(json.dumps({"ok": 0, "loi": loi}).encode("utf-8"), dich)
+        sys.exit(f"Từ chối mở camera: {thong_tin_cam} (tên: '{ten_cam}')")
+
     if not MO_HINH.exists():
         sys.exit(f"Thiếu mô hình {MO_HINH} (xem tools/mo_hinh/NGUON.txt)")
-    cap = mo_camera(a.cam)
+    cap = mo_camera(chi_so_cam)
     if not cap.isOpened():
-        sys.exit(f"Không mở được webcam số {a.cam}")
-    ok, khung = cap.read()
-    if not ok:
-        sys.exit("Webcam không trả về hình")
+        sock.sendto(json.dumps({"ok": 0, "loi": "khong_mo_duoc_camera"}).encode("utf-8"), dich)
+        sys.exit(f"Không mở được webcam {ten_cam} (chỉ số {chi_so_cam})")
+
+    # Đọc thử một vài khung để warmup camera
+    ok, khung = False, None
+    for _ in range(10):
+        ok, khung = cap.read()
+        if ok:
+            break
+        time.sleep(0.04)
+
+    if not ok or khung is None:
+        sys.exit(f"Webcam '{ten_cam}' không trả về hình")
     h0, w0 = khung.shape[:2]
     ty_le = RONG_NHAN / w0
     nho = (RONG_NHAN, int(round(h0 * ty_le)))
     det = cv2.FaceDetectorYN.create(str(MO_HINH), "", nho, score_threshold=0.75)
     loc = OneEuro(min_cutoff=0.7, beta=0.02)  # lọc mạnh hơn khi đầu đứng yên (bớt rung góc quay)
 
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    dich = (a.may, a.cong)
     t0 = time.time()
     so_khung = so_thay = 0
     gan_day: list[tuple[float, float, float]] = []
     kiem_cha = 0.0
-    print(f"Đang theo dõi đầu: webcam {a.cam} {w0}×{h0}, gửi UDP {dich[0]}:{dich[1]}", flush=True)
+    print(f"Đang theo dõi đầu: webcam '{ten_cam}' (chỉ số {chi_so_cam}) {w0}×{h0}, gửi UDP {dich[0]}:{dich[1]}", flush=True)
     while True:
         ok, khung = cap.read()
         if not ok:

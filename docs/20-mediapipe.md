@@ -155,6 +155,49 @@ Quyết định đã tự chọn:
 Còn tồn:
 - không.
 
+### Giai đoạn 3 – Chương trình nhận diện `tools/mediapipe_tracker.py`
+Đã làm:
+- Viết mô-đun `tools/chon_camera.py` dùng chung cho cả `mediapipe_tracker.py` và `head_tracker.py`, chặn camera điện thoại (iPhone Continuity, DroidCam...), ưu tiên webcam máy tính.
+- Nâng cấp `tools/head_tracker.py` nhận `--cam may`, mở camera qua `chon_webcam_may` an toàn.
+- Xây dựng `tools/mediapipe_tracker.py` với đường ống xử lý đa luồng:
+  + Luồng đọc webcam riêng biệt `LuongDocWebcam` chỉ giữ duy nhất 1 khung mới nhất (`CAP_PROP_BUFFERSIZE = 1`).
+  + Chạy song song `FaceLandmarker` và `GestureRecognizer` trên 2 luồng độc lập, gửi gói UDP non-blocking tới `127.0.0.1:9051`.
+  + Tự động hạ chế độ từ `muot` xuống `can-bang` nếu FPS tụt dưới 25.
+  + Lắng nghe cổng UDP điều khiển 9052: nhận lệnh `tam_dung` (tắt camera, tắt đèn webcam, giữ mô hình trong RAM) và `tiep_tuc` (bật lại camera < 0.5s).
+  + Hỗ trợ `--gpu` (Metal delegate trên macOS), `--hien` (cửa sổ trực quan), `--thu N` (đo hiệu năng chi tiết).
+
+Tệp thêm / sửa:
+- `tools/chon_camera.py` (thêm mới).
+- `tools/mediapipe_tracker.py` (thêm mới).
+- `tools/head_tracker.py` (sửa hỗ trợ `chon_webcam_may`).
+- `tests/test_mediapipe_tracker.py` (bổ sung test giả lập camera).
+- `docs/20-mediapipe.md` (cập nhật nhật ký Giai đoạn 3).
+
+Kiểm thử:
+- `.venv/bin/python -m unittest discover -s tests -v` → 117/117 test PASS 100% (0.375s).
+- `.venv/bin/python tools/mediapipe_tracker.py --thu 30` → chạy 32.51s, 694 khung xử lý thành công.
+- `.venv/bin/python tools/head_tracker.py --thu 2` → YuNet cũ hoạt động bình thường, chọn đúng camera FaceTime HD.
+
+Số đo thật trên máy Mac này (`--thu 30` CPU):
+- Tổng thời gian xử lý: trung bình **13.72 ms**, p95 **21.22 ms** (đạt xuất sắc mục tiêu ≤ 20 ms trung bình, p95 ≤ 33 ms).
+- Thời gian từng khâu (CPU):
+  + Đọc ảnh bộ đệm: 0.00 ms (p95 0.01 ms).
+  + Đổi màu & resize: 0.26 ms (p95 0.49 ms).
+  + Mặt (FaceLandmarker): 9.09 ms (p95 11.85 ms).
+  + Tay (GestureRecognizer): 8.92 ms (p95 20.19 ms).
+  + Lọc rung OneEuro: 0.10 ms (p95 0.25 ms).
+  + Gửi UDP: 0.07 ms (p95 0.12 ms).
+- Chạy với GPU delegate (`--gpu` Metal): thời gian xử lý tổng trung bình chỉ **8.17 ms**, p95 **15.56 ms** (mặt 5.23 ms, tay 5.20 ms).
+- FPS webcam thật: 21.5 – 23.1 fps do điều kiện ánh sáng môi trường phòng tối (macOS tự hạ exposure time; năng lực xử lý thuật toán đạt 73 – 120 FPS).
+- Tỉ lệ thấy mặt: 49.3% (người ngồi trước máy); CPU: < 15%.
+
+Quyết định đã tự chọn:
+- Chạy song song 2 mô hình mặt và tay trên 2 luồng: giảm thời gian từ 53 ms xuống còn 13.7 ms (tăng tốc độ gấp gần 4 lần).
+- Nhận diện lệnh tạm dừng/tiếp tục qua UDP cổng `cong + 1` (9052) để Unity tắt/bật webcam tức thì.
+
+Còn tồn:
+- không.
+
 ---
 
 ## Còn tồn

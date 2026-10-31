@@ -14,12 +14,14 @@ from __future__ import annotations
 import math
 import sys
 import unittest
+from unittest import mock
 from pathlib import Path
 
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 import mediapipe_tinh as mt  # noqa: E402
+import chon_camera as cc  # noqa: E402
 
 
 def tao_ma_tran_quay_gia(
@@ -309,6 +311,114 @@ class MediaPipeTinhTest(unittest.TestCase):
         self.assertAlmostEqual(pkt["gaze_x"], -0.12)
         self.assertEqual(len(pkt["hands"]), 1)
         self.assertEqual(pkt["hands"][0]["cu_chi"], "Open_Palm")
+
+
+class GiaLapAVDevice:
+    def __init__(self, name: str, model_id: str, device_type: str, unique_id: str):
+        self._name = name
+        self._model_id = model_id
+        self._device_type = device_type
+        self._unique_id = unique_id
+
+    def localizedName(self): return self._name
+    def modelID(self): return self._model_id
+    def deviceType(self): return self._device_type
+    def uniqueID(self): return self._unique_id
+
+
+class ChonCameraTest(unittest.TestCase):
+    def test_chan_tu_khoa_dien_thoai(self):
+        """Kiểm tra nhận diện đúng từ khóa camera điện thoại và ảo."""
+        self.assertTrue(cc.la_camera_dien_thoai_hoac_ao("Camera idc🎶", "iPhone15,2", "AVCaptureDeviceTypeExternal"))
+        self.assertTrue(cc.la_camera_dien_thoai_hoac_ao("iPad Camera", "iPad13,1", "AVCaptureDeviceTypeExternal"))
+        self.assertTrue(cc.la_camera_dien_thoai_hoac_ao("DroidCam Source 3", "", ""))
+        self.assertTrue(cc.la_camera_dien_thoai_hoac_ao("OBS Virtual Camera", "", ""))
+        self.assertFalse(cc.la_camera_dien_thoai_hoac_ao("Camera FaceTime HD", "Camera FaceTime HD", "AVCaptureDeviceTypeBuiltInWideAngleCamera"))
+        self.assertFalse(cc.la_camera_dien_thoai_hoac_ao("Logitech C920 HD Pro", "C920", "AVCaptureDeviceTypeExternal"))
+
+    def test_gia_lap_cac_tinh_huong_thiet_bi(self):
+        """Giả lập danh sách thiết bị:
+        - webcam máy + iPhone (đủ thứ tự)
+        - chỉ có iPhone
+        - không có gì
+        - webcam USB rời
+        Luôn chọn đúng webcam máy hoặc không chọn gì; tuyệt đối không chọn iPhone.
+        """
+        dev_facetime = GiaLapAVDevice("Camera FaceTime HD", "FaceTime", "AVCaptureDeviceTypeBuiltInWideAngleCamera", "UID_FACETIME")
+        dev_iphone = GiaLapAVDevice("Camera idc🎶", "iPhone15,2", "AVCaptureDeviceTypeExternal", "UID_IPHONE")
+        dev_usb = GiaLapAVDevice("Logitech C920", "C920", "AVCaptureDeviceTypeExternal", "UID_USB")
+
+        def _mock_env(cv_list, disc_list):
+            mock_av = mock.MagicMock()
+            mock_av.AVCaptureDeviceTypeBuiltInWideAngleCamera = "AVCaptureDeviceTypeBuiltInWideAngleCamera"
+            mock_av.AVCaptureDeviceTypeExternal = "AVCaptureDeviceTypeExternal"
+            mock_av.AVMediaTypeVideo = "video"
+            mock_av.AVCaptureDevice.devicesWithMediaType_.return_value = cv_list
+            mock_session = mock.MagicMock()
+            mock_session.devices.return_value = disc_list
+            mock_av.AVCaptureDeviceDiscoverySession.discoverySessionWithDeviceTypes_mediaType_position_.return_value = mock_session
+            return mock_av
+
+        # 1. Webcam máy trước, iPhone sau
+        mock_av1 = _mock_env([dev_facetime, dev_iphone], [dev_facetime, dev_iphone])
+        with mock.patch("chon_camera.sys.platform", "darwin"), \
+             mock.patch.dict("sys.modules", {"AVFoundation": mock_av1}):
+
+            # Tự chọn -> phải chọn FaceTime HD (index 0)
+            idx, name, uid = cc.chon_webcam_may("may")
+            self.assertEqual(idx, 0)
+            self.assertEqual(name, "Camera FaceTime HD")
+            self.assertEqual(uid, "UID_FACETIME")
+
+            # Người dùng chọn index 1 (iPhone) -> bị từ chối
+            idx1, name1, loi1 = cc.chon_webcam_may(1)
+            self.assertIsNone(idx1)
+            self.assertEqual(loi1, "da_chan_camera_dien_thoai")
+
+        # 2. iPhone đứng trước (index 0), webcam máy đứng sau (index 1)
+        mock_av2 = _mock_env([dev_iphone, dev_facetime], [dev_iphone, dev_facetime])
+        with mock.patch("chon_camera.sys.platform", "darwin"), \
+             mock.patch.dict("sys.modules", {"AVFoundation": mock_av2}):
+
+            # Tự chọn -> vẫn phải tìm ra FaceTime HD tại index 1
+            idx, name, uid = cc.chon_webcam_may("may")
+            self.assertEqual(idx, 1)
+            self.assertEqual(name, "Camera FaceTime HD")
+            self.assertEqual(uid, "UID_FACETIME")
+
+            # Chọn index 0 (iPhone) -> bị từ chối
+            idx0, _, loi0 = cc.chon_webcam_may(0)
+            self.assertIsNone(idx0)
+            self.assertEqual(loi0, "da_chan_camera_dien_thoai")
+
+        # 3. Chỉ có iPhone, không có webcam máy
+        mock_av3 = _mock_env([dev_iphone], [dev_iphone])
+        with mock.patch("chon_camera.sys.platform", "darwin"), \
+             mock.patch.dict("sys.modules", {"AVFoundation": mock_av3}):
+
+            # Tự chọn -> không mở camera nào
+            idx, _, loi = cc.chon_webcam_may("may")
+            self.assertIsNone(idx)
+            self.assertEqual(loi, "khong_thay_webcam_may")
+
+        # 4. Không có thiết bị nào
+        mock_av4 = _mock_env([], [])
+        with mock.patch("chon_camera.sys.platform", "darwin"), \
+             mock.patch.dict("sys.modules", {"AVFoundation": mock_av4}):
+            idx, _, loi = cc.chon_webcam_may("may")
+            self.assertIsNone(idx)
+            self.assertEqual(loi, "khong_thay_thiet_bi_video_nao")
+
+        # 5. Webcam USB rời (không có webcam tích hợp, có USB + iPhone)
+        mock_av5 = _mock_env([dev_iphone, dev_usb], [dev_iphone, dev_usb])
+        with mock.patch("chon_camera.sys.platform", "darwin"), \
+             mock.patch.dict("sys.modules", {"AVFoundation": mock_av5}):
+
+            # Tự chọn -> chọn webcam USB rời tại index 1
+            idx, name, uid = cc.chon_webcam_may("may")
+            self.assertEqual(idx, 1)
+            self.assertEqual(name, "Logitech C920")
+            self.assertEqual(uid, "UID_USB")
 
 
 if __name__ == "__main__":
