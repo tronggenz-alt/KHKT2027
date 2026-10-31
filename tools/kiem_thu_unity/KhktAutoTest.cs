@@ -283,6 +283,15 @@ public class KhktAutoTest : MonoBehaviour
 #endif
             yield break;
         }
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "truoc_g0")
+        {
+            yield return Floor2BeforeShots();
+            Log($"Xong chụp hiện trạng G0 sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
 
         // 0. Màn hình giới thiệu và các khu
         var intro = FindAnyObjectByType<IntroScreen>();
@@ -3303,6 +3312,98 @@ public class KhktAutoTest : MonoBehaviour
         }
 
         Log("[KHKT-PLAY] Kiểm thử tự động Tầng 2 HOÀN TẤT THÀNH CÔNG!");
+    }
+
+    IEnumerator Floor2BeforeShots()
+    {
+        Log("[KHKT-PLAY] Bắt đầu chụp ảnh hiện trạng G0 (trước khi nâng cấp dụng cụ & hành lang)");
+        if (hand != null && hand.hand != null)
+            foreach (var r in hand.hand.GetComponentsInChildren<Renderer>()) r.enabled = false;
+
+        string repoRoot = Path.GetFullPath(Path.Combine(Application.dataPath, "..", ".."));
+        string truocDir = Path.Combine(repoRoot, "docs", "anh-tang2", "truoc_dung_cu");
+        string hanhLangDir = Path.Combine(repoRoot, "docs", "anh-tang2", "hanh_lang");
+        Directory.CreateDirectory(truocDir);
+        Directory.CreateDirectory(hanhLangDir);
+
+        var stations = new (int st, string name)[]
+        {
+            (20, "20_cua_vao_tang2"),
+            (21, "21_ban_sinh_hoc"),
+            (22, "22_ban_giai_phau_so"),
+            (23, "23_tu_an_toan_sinh_hoc"),
+            (24, "24_tu_am_noi_hap"),
+            (25, "25_phong_vi_sinh"),
+            (26, "26_kho_sinh_pham"),
+            (27, "27_hanh_lang_tang2"),
+            (28, "28_sinh_hoc_phan_tu"),
+            (29, "29_pcr_dien_di"),
+            (30, "30_nha_kinh_thuc_vat"),
+            (31, "31_hanh_lang_dong")
+        };
+
+        outDir = truocDir;
+        foreach (var (st, name) in stations)
+        {
+            viewer.GoTo(st);
+            yield return Frames(8);
+            Shot(name);
+            Log($"[KHKT-PLAY] Đã chụp hiện trạng trạm {st}: {name}.png");
+        }
+
+        // Chụp 5 ảnh hành lang 2,2 m trước khi mở rộng (G1)
+        outDir = hanhLangDir;
+        var zs = Khkt.Rendering.ZoneStreamer.Instance;
+        zs?.Keep(this, 60f,
+            new Vector3(10f, 4.5f, 7f),
+            new Vector3(23f, 4.5f, 11f),
+            new Vector3(23f, 4.5f, 3f),
+            new Vector3(13f, 4.5f, -1f),
+            new Vector3(6f, 4.5f, -5f),
+            new Vector3(20f, 4.5f, -5f),
+            new Vector3(28.5f, 4.5f, 10f),
+            new Vector3(28.5f, 4.5f, 2f));
+        yield return Frames(8);
+
+        var corridorViews = new (string name, Vector3 pos, Vector3 look)[]
+        {
+            ("01_truoc_2m2_tay_nhin_dong", new Vector3(1.5f, 3.8f, -1.1f), new Vector3(25f, 5.2f, -1.1f)),
+            ("03_truoc_2m2_dong_nhin_tay", new Vector3(26f, 3.8f, -1.1f), new Vector3(2f, 5.2f, -1.1f)),
+            ("05_truoc_2m2_cua_phan_tu", new Vector3(6.7f, 3.8f, -0.5f), new Vector3(6.7f, 5.1f, -2.2f)),
+            ("07_truoc_2m2_cua_nha_kinh", new Vector3(20.2f, 3.8f, -0.5f), new Vector3(20.2f, 5.1f, -2.2f)),
+        };
+
+        var cc = viewer.GetComponent<CharacterController>();
+        foreach (var v in corridorViews)
+        {
+            cc.enabled = false;
+            viewer.transform.position = v.pos;
+            cc.enabled = true;
+            viewer.seated = false;
+            viewer.EyeOffset = 0;
+            viewer.cameraTransform.localPosition = new Vector3(0, viewer.standingEyeHeight, 0);
+            viewer.LookAt(v.look);
+            yield return Frames(8);
+            Shot(v.name);
+            Log($"[KHKT-PLAY] Đã chụp hành lang 2,2 m: {v.name}.png");
+        }
+
+        var planGo = new GameObject("Camera mặt bằng T2");
+        var plan = planGo.AddComponent<Camera>();
+        plan.orthographic = true;
+        plan.orthographicSize = 14.5f;
+        plan.transform.position = new Vector3(15f, 6.35f, 3.0f);
+        plan.transform.rotation = Quaternion.Euler(90, 0, 0);
+        plan.nearClipPlane = 0.05f;
+        plan.farClipPlane = 2.6f;
+        plan.clearFlags = CameraClearFlags.SolidColor;
+        plan.backgroundColor = new Color(0.93f, 0.95f, 0.97f);
+        plan.enabled = false;
+        UnityEngine.Rendering.Universal.CameraExtensions.GetUniversalAdditionalCameraData(plan).renderShadows = false;
+        yield return Frames(4);
+        ShotCam(plan, "09_truoc_2m2_mat_bang");
+        Destroy(planGo);
+        Log("[KHKT-PLAY] Đã chụp mặt bằng 2,2 m: 09_truoc_2m2_mat_bang.png");
     }
 
     IEnumerator Watchdog()
