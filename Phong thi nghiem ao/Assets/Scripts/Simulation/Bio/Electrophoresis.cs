@@ -44,5 +44,34 @@ namespace Khkt.Simulation.Bio
             // Độ nhạy phát hiện: từ 1 ng trở lên bắt đầu nhìn rõ
             return Math.Min(1.0, massNg / 50.0);
         }
+
+        private static double UnclampedMigrationCm(int bp, double agarosePct, double volts, double minutes)
+        {
+            if (bp <= 0 || volts <= 0.0 || minutes <= 0.0) return 0.0;
+            double logBp = Math.Log10(Math.Max(10, bp));
+            double baseDist = Math.Max(0.2, 9.5 - 2.0 * logBp);
+            double gelFactor = 1.0 / Math.Sqrt(Math.Max(0.4, agarosePct));
+            return baseDist * gelFactor * (minutes / 60.0) * (volts / 100.0);
+        }
+
+        /// <summary>
+        /// Vị trí vạch băng ADN trên gel (cm tính từ giếng nạp mẫu) theo bp, nồng độ agarose (%), điện áp (V), thời gian (phút) và chiều cực điện.
+        /// Nếu cắm ngược cực (reversedPolarity = true), ADN mang điện âm sẽ chạy ngược về phía đầu giếng (giá trị âm).
+        /// </summary>
+        public static double BandPositionCm(int bp, double agarosePct, double volts, double minutes, bool reversedPolarity)
+        {
+            double d = UnclampedMigrationCm(bp, agarosePct, volts, minutes);
+            return reversedPolarity ? -d : d;
+        }
+
+        /// <summary>
+        /// Kiểm tra băng ADN đã chạy vượt ra ngoài chiều dài bản gel (gelLengthCm) hay chưa.
+        /// </summary>
+        public static bool LeftGel(int bp, double agarosePct, double volts, double minutes, double gelLengthCm)
+        {
+            if (gelLengthCm <= 0.0) return true;
+            double d = UnclampedMigrationCm(bp, agarosePct, volts, minutes);
+            return d > gelLengthCm;
+        }
     }
 }

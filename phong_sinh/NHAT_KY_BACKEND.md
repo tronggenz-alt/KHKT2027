@@ -74,6 +74,39 @@
   - `GramStain.cs`: `GramResult`, `Result` (đánh giá quy trình nhuộm Gram 4 bước theo chuẩn ASM).
 - Cập nhật `tests/BioSimulationTests.cs`: đạt **49 / 49 test PASS** (29 bài cũ + 20 bài kiểm thử mới).
 
+### Giai đoạn B5 (2026-10-31)
+- Đã triển khai 2 lớp C# mới kèm `.meta` và mở rộng 2 lớp hiện có trong `Phong thi nghiem ao/Assets/Scripts/Simulation/Bio/`:
+  - `PipetteAccuracy.cs`: `ActualUl` (sai số ISO 8655-2, lỗi bấm nấc 2 khi hút dư 12%, lỗi không ngập đầu côn, lỗi nghiêng > 20°), `ResidualFraction` (còn sót ~3,5% ở nấc 1, ≈ 0 ở nấc 2).
+  - `Centrifugation.cs`: `Rcf`, `Rpm` ($RCF = 1,118 \times 10^{-5} \cdot r \cdot rpm^2$), `IsBalanced` kiểm tra vị trí đối xứng và chênh khối lượng, trả `reasonVi` tiếng Việt rõ ràng ("Ống ở lỗ 3 chưa có ống đối diện ở lỗ 9.").
+  - Mở rộng `Pcr.cs`: thêm `PcrSetup` và `Pcr.Run` (kiểm tra đủ thành phần, ảnh hưởng của $T_a$ so với $T_m$, sinh băng phụ khi $T_a < T_m - 10$, mờ/mất băng khi $T_a > T_m$, nắp nhiệt, thời gian để ấm enzyme, nhiễm chéo sản phẩm ở đối chứng âm).
+  - Mở rộng `Electrophoresis.cs`: thêm `BandPositionCm` (hỗ trợ cả cắm ngược cực trả về vị trí âm) và `LeftGel`.
+- Cập nhật `tests/BioSimulationTests.cs`: đạt **66 / 66 test PASS**.
+
+### Giai đoạn B6 (2026-10-31)
+- Đã triển khai 4 lớp C# mới kèm `.meta` và mở rộng 2 lớp hiện có trong `Phong thi nghiem ao/Assets/Scripts/Simulation/Bio/`:
+  - `Transpiration.cs`: `BubbleShiftMmPerMin` (thoát hơi nước qua potometer theo gió, ánh sáng, độ ẩm và bôi vaseline bịt khí khổng).
+  - `Phototropism.cs`: `BendAngleDeg` (uốn cong hướng sáng), `EtiolationFactor` (hiện tượng mọc vống trong tối).
+  - `DnaExtraction.cs`: `YieldUg` (tách chiết ADN thô theo muối, chất tẩy rửa, nhiệt độ ủ 55 °C và cồn lạnh -20 °C).
+  - `Catalase.cs`: `ActivityFactor` (hoạt tính tương đối của catalase theo nhiệt độ, = 0 khi luộc/quá 65 °C).
+  - Mở rộng `Optics.cs`: thêm `Brightness` (độ sáng trường nhìn theo chiết áp đèn, chắn sáng iris, tụ quang condenser và thiếu dầu soi ở vật kính 100x).
+  - Mở rộng `Fermentation.cs`: thêm `LacticAcidGramsAt` (động học tạo axit lactic trong sữa chua theo giờ và nhiệt độ), `Co2MolesAt` (sinh CO2 lên men rượu theo giờ và nhiệt độ).
+- Toàn bộ hàm cũ giữ nguyên chữ ký, không đổi kết quả kiểm thử cũ.
+- Cập nhật `tests/BioSimulationTests.cs`: đạt **82 / 82 test PASS** (66 + 16 bài kiểm thử mới). `ChemEngineTests.cs`: đạt **147 / 147 test PASS**.
+
+### Giai đoạn B7 (2026-10-31)
+- Đã triển khai `server/lab/sinh_db.py`:
+  - Thiết kế đầy đủ 8 bảng CSDL SQLite: `sinh_dung_cu`, `sinh_pham`, `nhiet_do_tu`, `dat_lich`, `muon_tra`, `ket_qua_tn`, `su_co_sinh`, `bao_tri`.
+  - Tự động nạp kho ban đầu từ `data/sinh/dung_cu.json` (đủ 108 dụng cụ) và `data/sinh/sinh_pham_mac_dinh.json` (35 mặt hàng, tự tính hạn dùng và có mẫu cận date, quá hạn để cảnh báo).
+  - Hỗ trợ `KHKT_DB`, khóa luồng `threading.Lock()` bảo vệ ghi, hàm `reset_for_tests` cách ly kiểm thử.
+  - Kiểm tra an toàn sinh học: bắt buộc `BSL-1`, từ chối cấp an toàn khác với ngoại lệ `ValueError`.
+  - Kiểm tra phát hiện trùng lịch đăng ký thiết bị / phòng thí nghiệm.
+  - Quản lý trạng thái mượn trả và tự động cập nhật số lượng hỏng khi học sinh hoàn trả.
+- Viết bộ kiểm thử `tests/test_sinh_db.py`: đạt **7 / 7 test PASS**.
+- Toàn bộ kiểm thử Python `unittest discover -s tests`: đạt **124 / 124 test PASS**.
+
+
+
+
 
 
 - Kết quả kiểm thử: `tests/test_dung_cu_sinh.py` đạt 3/3 test dụng cụ, toàn bộ test suite Python đạt 117/117 test (0,60s).

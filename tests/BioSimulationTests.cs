@@ -224,6 +224,147 @@ static class BioSimulationTests
         Check(GramStain.Result(true, 60, 60, 15, 45, true, 0.9) == GramResult.LoangLo, "Vết bôi quá dày (0,9) -> Loang lổ");
         Check(GramStain.Result(true, 60, 60, 15, 45, false, 0.4) == GramResult.KhongCoTeBao, "Quên cố định nhiệt -> Không có tế bào (rửa trôi)");
 
+        // 13. ĐỘ CHÍNH XÁC MICROPIPET (PipetteAccuracy - B5)
+        Console.WriteLine("\n[13] Độ chính xác Micropipet (PipetteAccuracy):");
+        double ulNormal = PipetteAccuracy.ActualUl(100.0, 200.0, 1, 0.0, true);
+        Near(ulNormal, 100.56, 1.0, "Hút đúng nấc 1, thẳng đứng, đầu côn ngập: ~100 µL (sai số ISO 8655 < 1%)");
+        double ulStage2 = PipetteAccuracy.ActualUl(100.0, 200.0, 2, 0.0, true);
+        Check(ulStage2 >= 105.0 && ulStage2 <= 120.0, "Bấm nhầm xuống nấc 2 khi hút: hút dư trong khoảng 1,05 - 1,20x", $"ulStage2={ulStage2:F1}");
+        double ulAir = PipetteAccuracy.ActualUl(100.0, 200.0, 1, 0.0, false);
+        double ulTilt = PipetteAccuracy.ActualUl(100.0, 200.0, 1, 45.0, true);
+        Check(ulAir < 30.0 && Math.Abs(ulTilt - 100.0) > Math.Abs(ulNormal - 100.0),
+              "Đầu côn không ngập hút thiếu nặng; nghiêng 45° (> 20°) làm tăng sai số");
+        Check(PipetteAccuracy.ResidualFraction(1) >= 0.02 && PipetteAccuracy.ResidualFraction(1) <= 0.05 && PipetteAccuracy.ResidualFraction(2) == 0.0,
+              "Nhả ở nấc 1 còn sót 2-5%; nhả hết nấc 2 (blow-out) còn sót ≈ 0");
+
+        // 14. LY TÂM & CÂN BẰNG ROTOR (Centrifugation - B5)
+        Console.WriteLine("\n[14] Máy ly tâm & cân bằng đối xứng (Centrifugation):");
+        // r = 7.5 cm, 10000 rpm -> RCF = 1.118e-5 * 7.5 * 10^8 = 8385 xg
+        Near(Centrifugation.Rcf(7.5, 10000.0), 8385.0, 1.0, "RCF ở r=7,5 cm, 10000 rpm = 8385 ×g");
+        Near(Centrifugation.Rpm(7.5, 8385.0), 10000.0, 1.0, "Rpm ngược từ RCF=8385 ×g, r=7,5 cm = 10000 rpm");
+
+        bool balOk = Centrifugation.IsBalanced(new List<(int, double)> { (3, 1.5), (9, 1.5) }, 12, out string reasonOk);
+        bool balMissing = Centrifugation.IsBalanced(new List<(int, double)> { (3, 1.5) }, 12, out string reasonMissing);
+        bool balMassDiff = Centrifugation.IsBalanced(new List<(int, double)> { (3, 1.5), (9, 2.2) }, 12, out string reasonMass);
+        Check(balOk, "2 ống đồng khối lượng ở lỗ 3 và lỗ 9 trên rotor 12 lỗ -> cân bằng", reasonOk);
+        Check(!balMissing && reasonMissing.Contains("lỗ 3") && reasonMissing.Contains("lỗ 9"),
+              "1 ống lẻ ở lỗ 3 báo rõ thiếu ống đối diện ở lỗ 9", reasonMissing);
+        Check(!balMassDiff && reasonMass.Contains("chênh lệch"), "2 ống đối diện nhưng lệch khối lượng (1,5g vs 2,2g) -> báo mất cân bằng", reasonMass);
+
+        // 15. MỞ RỘNG PCR (Pcr.Run - B5)
+        Console.WriteLine("\n[15] Chạy chương trình PCR tổng hợp (Pcr.Run):");
+        var pcrStd = new PcrSetup
+        {
+            hasTemplate = true, hasPrimers = true, hasTaq = true, hasDntp = true, hasBuffer = true,
+            lidHeated = true, productContamination = false,
+            annealC = 55.0, primerTm = 60.0, enzymeWarmMinutes = 0.0, templateCopies = 1e4,
+            cycles = 30, targetBp = 500
+        };
+        var bandsStd = new List<DnaBand>();
+        Pcr.Run(in pcrStd, 1, bandsStd);
+        Check(bandsStd.Count == 1 && bandsStd[0].bp == 500 && bandsStd[0].ng > 50.0,
+              "PCR đủ thành phần, Ta chuẩn (Tm - 5): ra đúng 1 băng 500 bp sáng rõ");
+
+        var pcrNoTaq = pcrStd;
+        pcrNoTaq.hasTaq = false;
+        var bandsNoTaq = new List<DnaBand>();
+        Pcr.Run(in pcrNoTaq, 1, bandsNoTaq);
+        Check(bandsNoTaq.Count == 0, "Thiếu enzyme Taq -> không có băng ADN nào");
+
+        var pcrLowTa = pcrStd;
+        pcrLowTa.annealC = 45.0; // < Tm - 10 (50)
+        var bandsLowTa = new List<DnaBand>();
+        Pcr.Run(in pcrLowTa, 1, bandsLowTa);
+        Check(bandsLowTa.Count >= 2, "Nhiệt độ gắn mồi quá thấp (Ta < Tm - 10) -> xuất hiện thêm băng phụ không đặc hiệu");
+
+        var pcrHighTa = pcrStd;
+        pcrHighTa.annealC = 61.5; // > Tm
+        var bandsHighTa = new List<DnaBand>();
+        Pcr.Run(in pcrHighTa, 1, bandsHighTa);
+        Check(bandsHighTa.Count == 1 && bandsHighTa[0].ng < bandsStd[0].ng * 0.3,
+              "Nhiệt độ gắn mồi cao hơn Tm (61,5 °C > 60 °C) -> băng mờ rõ rệt");
+
+        var pcrContamNeg = pcrStd;
+        pcrContamNeg.hasTemplate = false;
+        pcrContamNeg.productContamination = true;
+        var bandsContam = new List<DnaBand>();
+        Pcr.Run(in pcrContamNeg, 1, bandsContam);
+        Check(bandsContam.Count == 1 && bandsContam[0].bp == 500, "Đối chứng âm bị nhiễm chéo sản phẩm (productContamination) -> vẫn lên băng 500 bp");
+
+        // 16. MỞ RỘNG ĐIỆN DI (Electrophoresis.BandPositionCm & LeftGel - B5)
+        Console.WriteLine("\n[16] Vị trí băng & tràn gel điện di (Electrophoresis):");
+        double pos200 = Electrophoresis.BandPositionCm(200, 1.0, 100.0, 40.0, false);
+        double pos1500 = Electrophoresis.BandPositionCm(1500, 1.0, 100.0, 40.0, false);
+        double pos200Dense = Electrophoresis.BandPositionCm(200, 2.0, 100.0, 40.0, false);
+        Check(pos200 > pos1500 && pos200 > pos200Dense && pos200 > 0,
+              "BandPositionCm: đoạn ngắn (200 bp) chạy nhanh hơn 1500 bp và gel 1% chạy nhanh hơn gel 2%");
+
+        double posRev = Electrophoresis.BandPositionCm(500, 1.0, 100.0, 30.0, true);
+        Check(posRev < 0.0, "Cắm ngược cực điện (reversedPolarity = true) -> vị trí băng âm (chạy ngược khỏi giếng)");
+
+        bool leftShort = Electrophoresis.LeftGel(100, 1.0, 100.0, 30.0, 8.0);
+        bool leftLong = Electrophoresis.LeftGel(100, 1.0, 120.0, 120.0, 8.0);
+        Check(!leftShort && leftLong, "Chạy quá lâu ở điện áp cao (120V, 120 phút) làm băng 100 bp tràn ra khỏi bản gel 8 cm (LeftGel = true)");
+
+        // 17. THOÁT HƠI NƯỚC QUA LÁ (Transpiration - B6)
+        Console.WriteLine("\n[17] Thoát hơi nước bằng áp kế bọt khí (Transpiration):");
+        double trBase = Transpiration.BubbleShiftMmPerMin(0.2, 0.5, 0.5, false);
+        double trWindLight = Transpiration.BubbleShiftMmPerMin(0.9, 0.9, 0.3, false);
+        double trHumid = Transpiration.BubbleShiftMmPerMin(0.2, 0.5, 0.95, false);
+        double trBlocked = Transpiration.BubbleShiftMmPerMin(0.9, 0.9, 0.3, true);
+        Check(trWindLight > trBase * 1.8, "Gió mạnh + ánh sáng cao làm bọt khí potometer dịch chuyển nhanh hơn rõ rệt");
+        Check(trHumid < trBase * 0.4, "Độ ẩm không khí bão hòa (95%) làm giảm mạnh tốc độ thoát hơi nước");
+        Check(trBlocked < trBase * 0.2, "Bôi vaseline bịt kín khí khổng (stomataBlocked) làm tốc độ thoát hơi nước gần bằng 0");
+
+        // 18. HƯỚNG SÁNG & MỌC VỐNG TRONG TỐI (Phototropism - B6)
+        Console.WriteLine("\n[18] Hướng sáng & vươn dài trong tối (Phototropism):");
+        double bend48 = Phototropism.BendAngleDeg(48.0, 45.0, false);
+        double bend12 = Phototropism.BendAngleDeg(12.0, 45.0, false);
+        double bendDark = Phototropism.BendAngleDeg(48.0, 45.0, true);
+        Check(bend48 > bend12 && bend48 > 35.0 && bend48 <= 45.0, "Chiếu sáng lệch 45°: góc uốn cong hướng sáng tăng theo thời gian tiến về 45°");
+        Near(bendDark, 0.0, 1e-5, "Đặt trong tối hoàn toàn (fullyDark = true): cây mọc thẳng không uốn cong (0°)");
+        double etioLight = Phototropism.EtiolationFactor(48.0, false);
+        double etioDark = Phototropism.EtiolationFactor(48.0, true);
+        Check(Math.Abs(etioLight - 1.0) < 1e-6 && etioDark > 1.7, "Hệ số mọc vống (EtiolationFactor): = 1 ngoài sáng, > 1,7 sau 48h trong tối");
+
+        // 19. TÁCH CHIẾT ADN (DnaExtraction - B6)
+        Console.WriteLine("\n[19] Tách chiết ADN thô (DnaExtraction):");
+        double dnaOpt = DnaExtraction.YieldUg(10.0, "chuoi_chin", true, true, 55.0, -20.0, 2.0);
+        double dnaNoDet = DnaExtraction.YieldUg(10.0, "chuoi_chin", true, false, 55.0, -20.0, 2.0);
+        double dnaNoSalt = DnaExtraction.YieldUg(10.0, "chuoi_chin", false, true, 55.0, -20.0, 2.0);
+        double dnaWarmEth = DnaExtraction.YieldUg(10.0, "chuoi_chin", true, true, 55.0, 25.0, 2.0);
+        Check(dnaOpt > 1500.0, "Tách chiết ADN chuối chín đủ muối + chất tẩy + ủ 55°C + cồn lạnh -20°C đạt hiệu suất cao", $"{dnaOpt:F0} µg");
+        Near(dnaNoDet, 0.0, 1e-6, "Không có chất tẩy rửa phá màng tế bào -> không thu được ADN (0 µg)");
+        Check(dnaNoSalt < dnaOpt * 0.15 && dnaWarmEth < dnaOpt * 0.65,
+              "Thiếu muối NaCl hoặc dùng cồn ấm 25°C làm lượng ADN kết tủa giảm mạnh");
+
+        // 20. HOẠT TÍNH CATALASE (Catalase - B6)
+        Console.WriteLine("\n[20] Hệ số hoạt tính enzyme Catalase (Catalase):");
+        Near(Catalase.ActivityFactor(37.0, false), 1.0, 0.01, "Catalase ở nhiệt độ tối ưu 37 °C có hệ số hoạt tính = 1,0");
+        Check(Catalase.ActivityFactor(4.0, false) < 0.15 && Catalase.ActivityFactor(4.0, false) > 0.01,
+              "Catalase ngâm đá lạnh 4 °C giảm mạnh hoạt tính (< 0,15)");
+        Check(Catalase.ActivityFactor(37.0, true) == 0.0 && Catalase.ActivityFactor(80.0, false) == 0.0,
+              "Catalase đã luộc chín hoặc ở 80 °C bị biến tính hoàn toàn (hoạt tính = 0)");
+
+        // 21. MỞ RỘNG QUANG HỌC & LÊN MEN (Optics.Brightness & Fermentation - B6)
+        Console.WriteLine("\n[21] Độ sáng kính hiển vi & động học lên men theo thời gian:");
+        double brFull = Optics.Brightness(1.0, 1.0, 1.0, false);
+        double brDim = Optics.Brightness(0.5, 0.3, 0.5, false);
+        double brNoOil = Optics.Brightness(1.0, 1.0, 1.0, true);
+        Check(Math.Abs(brFull - 1.0) < 0.01 && brDim < brFull * 0.3 && brNoOil < brFull * 0.4,
+              "Optics.Brightness: tối đa = 1; giảm khi khép chắn sáng/hạ tụ quang; giảm > 60% khi vật kính 100x thiếu dầu soi");
+        Near(Optics.Brightness(0.0, 1.0, 1.0, false), 0.0, 1e-6, "Tắt đèn kính hiển vi (lamp=0) -> độ sáng = 0");
+
+        double lac8h = Fermentation.LacticAcidGramsAt(8.0, 42.0, 200.0);
+        double lacCold = Fermentation.LacticAcidGramsAt(8.0, 18.0, 200.0);
+        Check(lac8h > 1.2 && lacCold < lac8h * 0.3, "Ủ sữa chua 8h ở 42 °C sinh nhiều axit lactic hơn hẳn ở 18 °C", $"42°C={lac8h:F2}g, 18°C={lacCold:F2}g");
+
+        double co2Live = Fermentation.Co2MolesAt(4.0, 32.0, 18.016, true);
+        double co2Dead = Fermentation.Co2MolesAt(4.0, 32.0, 18.016, false);
+        double co2Boiled = Fermentation.Co2MolesAt(4.0, 60.0, 18.016, true);
+        Check(co2Live > 0.1 && co2Dead == 0.0 && co2Boiled == 0.0,
+              "Lên men rượu: nấm men sống ở 32 °C sinh CO2 mạnh; nấm men chết hoặc ở 60 °C không sinh CO2");
+
         Console.WriteLine($"\nKết quả: {passed} đạt, {failed} lỗi.");
         return failed == 0 ? 0 : 1;
     }
