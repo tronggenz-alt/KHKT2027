@@ -70,6 +70,12 @@
       "gia_tri": "ước lượng",
       "loai": "mô phỏng",
       "mo_phong": true
+    },
+    {
+      "ten": "Chu trình tiệt trùng tiêu chuẩn",
+      "gia_tri": "121 °C trong 15 – 20 phút ở áp suất 1,05 bar",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.cdc.gov/infection-control/hcp/disinfection-sterilization/steam-sterilization.html"
     }
   ],
   "quy_trinh": [

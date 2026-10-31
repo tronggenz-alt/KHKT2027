@@ -43,6 +43,11 @@
       "ma": "den_uv_tiet_trung",
       "ten": "Đèn UV bước sóng 254 nm",
       "chuc_nang": "Tiệt trùng bề mặt buồng làm việc trước và sau buổi làm việc, tự ngắt khi mở kính."
+    },
+    {
+      "ma": "vach_kinh_20cm",
+      "ten": "Vạch đánh dấu chiều cao kính an toàn 20 cm",
+      "chuc_nang": "Giới hạn độ mở kính trượt ở đúng 20 cm (8 inch) để duy trì tốc độ và lưu lượng khí bảo vệ."
     }
   ],
   "thong_so": [
@@ -69,6 +74,18 @@
       "gia_tri": "Dòng hạt mô phỏng dòng laminar và cảnh báo xoáy khí khi tay chắn lưới",
       "loai": "mô phỏng",
       "mo_phong": true
+    },
+    {
+      "ten": "Chiều cao kính mở an toàn khi làm việc",
+      "gia_tri": "20 cm (8 inch)",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.thermofisher.com/order/catalog/product/1389"
+    },
+    {
+      "ten": "Thời gian chạy quạt đuổi khí trước khi làm việc",
+      "gia_tri": "5 phút thanh lọc khí tồn (Purge)",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.thermofisher.com/order/catalog/product/1389"
     }
   ],
   "quy_trinh": [
