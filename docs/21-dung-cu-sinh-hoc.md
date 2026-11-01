@@ -288,6 +288,8 @@ Mặt quầy / mặt đảo tầng 2 nhận đặt đồ (`PlaceSurface`, trư�
 
 Sai cố ý cho ra kết quả sai đúng khoa học: bỏ ligaza → không có khuẩn lạc; cắt plasmid một enzyme → hầu hết khuẩn lạc xanh; gen cắt một đầu → không ghép được; đĩa thiếu ampicillin → mọc kín; bỏ sốc nhiệt → rất ít khuẩn lạc.
 
+Ảnh bài thử Unity (2026-11-01, tất cả mục đạt): `docs/anh-tang2/phong_adn/`.
+
 Kiểm thử: `tests/BioSimulationTests.cs` mục [22] (18 phép thử DnaCloning); bài Unity `KHKT_TEST=phong_adn` (`tools/kiem_thu_unity/KhktAutoTest.cs`) thao tác thật toàn bộ quy trình bằng đúng các hàm bàn tay gọi, kiểm tra không có dụng cụ lơ lửng, chụp ảnh từng khu.
 
 ---

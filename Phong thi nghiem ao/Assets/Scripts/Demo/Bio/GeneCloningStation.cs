@@ -190,7 +190,7 @@ namespace Khkt.Demo.Bio
             outputCount++;
             var tube = BioFloor2InteractiveTools.MakeTube(outputRack != null ? outputRack : transform, $"Ống plasmid cắt kiểm tra {outputCount}",
                 new Vector3(0, 0, -0.03f + 0.025f * ((outputCount - 1) % 4)), "ong_eppendorf", $"K{outputCount}", new Color(0.2f, 0.5f, 0.95f));
-            tube.mix.Add("plasmid_cat_kiem_tra", 18f);
+            tube.mix.Add(MolCodes.PlasmidCheck, 18f);
             tube.mix.Add(MolCodes.LoadingDye, 4f);
             foreach (var b in bands) tube.mix.AddBand(new BioDnaBandInfo { bp = b.bp, ng = b.ng, smear = false });
             tube.Changed();

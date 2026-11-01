@@ -31,6 +31,7 @@ namespace Khkt.Demo.Bio
         public const string Water = "nuoc_khong_nuclease";
         public const string Ladder = "thang_adn_100bp";       // thang chuẩn 100 bp đã pha sẵn chất nạp mẫu
         public const string LoadingDye = "dem_nap_mau_6x";
+        public const string PlasmidCheck = "plasmid_cat_kiem_tra";  // plasmid tách từ khuẩn lạc, đã cắt EcoRI + BamHI
 
         public static string Name(string code)
         {
@@ -43,6 +44,7 @@ namespace Khkt.Demo.Bio
                 case Water: return "Nước không nuclease";
                 case Ladder: return "Thang ADN 100 bp";
                 case LoadingDye: return "Đệm nạp mẫu 6×";
+                case PlasmidCheck: return "Plasmid đã cắt kiểm tra";
                 default: return code;
             }
         }
