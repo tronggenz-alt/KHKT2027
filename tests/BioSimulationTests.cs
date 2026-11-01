@@ -365,6 +365,59 @@ static class BioSimulationTests
         Check(co2Live > 0.1 && co2Dead == 0.0 && co2Boiled == 0.0,
               "Lên men rượu: nấm men sống ở 32 °C sinh CO2 mạnh; nấm men chết hoặc ở 60 °C không sinh CO2");
 
+        // 22. GHÉP GEN – ADN TÁI TỔ HỢP (DnaCloning)
+        Console.WriteLine("\n[22] Ghép gen tạo ADN tái tổ hợp (DnaCloning):");
+        var both = new[] { "EcoRI", "BamHI" };
+        var vecFrags = DnaCloning.Digest(DnaCloning.Pu19(), both);
+        var vec = DnaCloning.Largest(vecFrags);
+        Check(vecFrags.Count == 2 && vec.LengthBp == 2665 && vecFrags.Sum(f => f.LengthBp) == DnaCloning.VectorLengthBp && !vec.Circular,
+              "Cắt pUC19 bằng EcoRI + BamHI: 2 đoạn thẳng, khung 2665 bp, tổng bằng 2686 bp", $"{vecFrags.Count} đoạn, khung {vec.LengthBp}");
+        Check(vec.HasAmpR && vec.LeftEnd == "BamHI" && vec.RightEnd == "EcoRI", "Khung giữ gen kháng ampicillin, hai đầu dính khác nhau (BamHI / EcoRI)");
+        var oneCut = DnaCloning.Digest(DnaCloning.Pu19(), new[] { "EcoRI" });
+        Check(oneCut.Count == 1 && oneCut[0].LengthBp == 2686 && oneCut[0].LeftEnd == "EcoRI" && oneCut[0].RightEnd == "EcoRI",
+              "Cắt pUC19 bằng một enzyme EcoRI: mở vòng thành một đoạn thẳng 2686 bp, hai đầu cùng loại");
+        var insFrags = DnaCloning.Digest(DnaCloning.GfpPcrProduct(), both);
+        var ins = DnaCloning.Largest(insFrags);
+        Check(insFrags.Count == 3 && ins.LengthBp == 726 && ins.LeftEnd == "EcoRI" && ins.RightEnd == "BamHI" && ins.InsertName == "GFP",
+              "Cắt sản phẩm PCR gen GFP 738 bp bằng EcoRI + BamHI: gen 726 bp có đầu dính EcoRI / BamHI");
+        Check(DnaCloning.EndsCompatible("EcoRI", "EcoRI") && !DnaCloning.EndsCompatible("EcoRI", "BamHI") && !DnaCloning.EndsCompatible("", "EcoRI"),
+              "Chỉ đầu dính cùng loại mới bắt cặp; đầu PCR chưa cắt không nối được");
+
+        var ligOk = DnaCloning.Ligate(vec, ins, true, true, 3.0, 16.0, 60.0);
+        Check(ligOk.Recombinant != null && ligOk.Recombinant.LengthBp == 3391 && ligOk.Recombinant.Circular && !ligOk.Recombinant.LacZIntact,
+              "Nối khung + gen bằng ligaza: plasmid tái tổ hợp vòng 3391 bp, lacZα bị gen chèn làm hỏng");
+        Check(ligOk.RecombinantShare > 0.9 && ligOk.SelfLigatedShare < 0.01,
+              "Cắt hai enzyme khác nhau: khung không tự đóng vòng, > 90 % plasmid vòng mang gen", $"tái tổ hợp {ligOk.RecombinantShare:P1}");
+        var noLigase = DnaCloning.Ligate(vec, ins, false, true, 3.0, 16.0, 60.0);
+        Check(noLigase.RecombinantShare == 0 && noLigase.CircularYield < 0.05, "Quên ADN ligaza: không có plasmid tái tổ hợp, gần như không có vòng");
+        var singleVec = DnaCloning.Largest(oneCut);
+        var singleIns = DnaCloning.Largest(DnaCloning.Digest(DnaCloning.GfpPcrProduct(), new[] { "EcoRI" }));
+        var ligSingle = DnaCloning.Ligate(singleVec, singleIns, true, true, 3.0, 16.0, 60.0);
+        Check(ligSingle.Recombinant == null && ligSingle.SelfLigatedShare > 0.9,
+              "Gen chỉ cắt một đầu (đầu kia là đầu PCR): không ghép được, khung một enzyme tự đóng vòng");
+        var ligUncut = DnaCloning.Ligate(DnaCloning.Pu19(), ins, true, true, 3.0, 16.0, 60.0);
+        Check(ligUncut.UncutShare == 1.0 && ligUncut.Recombinant == null, "Quên cắt plasmid: chỉ có plasmid ban đầu");
+
+        var trOk = DnaCloning.Transform(ligOk, true, 45, true, true, 7);
+        Check(trOk.WhiteColonies > 150 && trOk.BlueColonies < trOk.WhiteColonies / 10 && !trOk.Lawn,
+              "Biến nạp đúng (đá lạnh, sốc nhiệt 45 s, LB + Amp + X-gal): nhiều khuẩn lạc trắng, rất ít xanh", $"{trOk.WhiteColonies} trắng / {trOk.BlueColonies} xanh");
+        var trSame = DnaCloning.Transform(ligOk, true, 45, true, true, 7);
+        Check(trSame.WhiteColonies == trOk.WhiteColonies && trSame.BlueColonies == trOk.BlueColonies, "Cùng hạt giống → cùng số khuẩn lạc (kết quả xác định)");
+        var trSelf = DnaCloning.Transform(ligSingle, true, 45, true, true, 7);
+        Check(trSelf.BlueColonies > trSelf.WhiteColonies * 10, "Plasmid tự đóng vòng: hầu hết khuẩn lạc xanh");
+        Check(DnaCloning.Transform(ligOk, true, 45, false, true, 7).Lawn, "Đĩa thiếu ampicillin: vi khuẩn mọc kín đĩa");
+        var trNoShock = DnaCloning.Transform(ligOk, true, 0, true, true, 7);
+        Check(trNoShock.WhiteColonies < trOk.WhiteColonies * 0.15, "Bỏ sốc nhiệt 42 °C: số khuẩn lạc giảm mạnh");
+        var trNoLig = DnaCloning.Transform(noLigase, true, 45, true, true, 7);
+        Check(trNoLig.WhiteColonies == 0, "Không nối ligaza → không có khuẩn lạc trắng");
+
+        var check = DnaCloning.Digest(ligOk.Recombinant, both);
+        Check(check.Count == 2 && check.Any(f => f.LengthBp == 726) && check.Any(f => f.LengthBp == 2665),
+              "Cắt kiểm tra plasmid tái tổ hợp bằng EcoRI + BamHI: 2 băng 2665 bp và 726 bp (đúng gen ghép)");
+        var bands = new List<DnaBand>();
+        DnaCloning.ToBands(new List<DnaMolecule> { DnaCloning.Pu19() }, 100, bands);
+        Check(bands.Count == 1 && bands[0].bp < 2686, "Plasmid vòng siêu xoắn chưa cắt chạy nhanh hơn đoạn thẳng cùng kích thước");
+
         Console.WriteLine($"\nKết quả: {passed} đạt, {failed} lỗi.");
         return failed == 0 ? 0 : 1;
     }

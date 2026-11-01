@@ -323,6 +323,9 @@ def main() -> None:
 
     che_do_hien_tai = args.che_do
     process_info = psutil.Process()
+    process_info.cpu_percent()  # lần gọi đầu luôn trả 0: mồi trước để số đo cuối có nghĩa
+    ts_ms_truoc = 1             # dấu thời gian VIDEO mode phải tăng ngặt (khung khởi động dùng 1)
+    ket_qua_tay_cu = None       # khung bỏ qua nhận diện tay thì dùng lại kết quả gần nhất (tránh tay nhấp nháy)
 
     try:
         while True:
@@ -401,7 +404,9 @@ def main() -> None:
 
             t_doi_ms = (time.perf_counter() - t_doi_start) * 1000
 
-            ts_ms = int(now_real * 1000)
+            # Đồng hồ đơn điệu: time.time() có thể lùi khi đồng bộ giờ, MediaPipe sẽ báo lỗi dấu thời gian không tăng
+            ts_ms = max(ts_ms_truoc + 1, int(time.monotonic() * 1000))
+            ts_ms_truoc = ts_ms
 
             # Chạy song song FaceLandmarker và GestureRecognizer
             res_face = [None]
@@ -422,6 +427,7 @@ def main() -> None:
                 # Tối ưu: nếu không thấy tay > 1s, chạy nửa tần số (mỗi 2 khung chạy 1)
                 chay_nua = (now_real - last_hand_seen_time > 1.0) or (che_do_hien_tai == "tiet-kiem")
                 if chay_nua and (so_khung_xu_ly % 2 != 0):
+                    res_hand[0] = ket_qua_tay_cu
                     return
                 t_t0 = time.perf_counter()
                 res_hand[0] = gesture_recognizer.recognize_for_video(mp_img, ts_ms)
@@ -433,6 +439,7 @@ def main() -> None:
             th_tay.start()
             th_mat.join()
             th_tay.join()
+            ket_qua_tay_cu = res_hand[0]
 
             t_loc_start = time.perf_counter()
 
@@ -442,6 +449,7 @@ def main() -> None:
             dist_cm, e = 0.0, 0.0
             gaze_x, gaze_y = 0.0, 0.0
             blink_l, blink_r = 0, 0
+            xac_nhan_val = 0  # phải có giá trị cả khi không thấy mặt, nếu không gói UDP đầu tiên làm chương trình sập
 
             face_output = res_face[0]
             if face_output and face_output.face_landmarks:
@@ -465,7 +473,6 @@ def main() -> None:
                 gaze_x, gaze_y = tinh_gaze(lm_mat, yaw_deg=yaw, pitch_deg=pitch)
 
                 # Chớp mắt và hướng nhìn từ blendshapes
-                xac_nhan_val = 0
                 if face_output.face_blendshapes:
                     g_bs_x, g_bs_y, bl_bs, br_bs = tinh_blendshapes(
                         face_output.face_blendshapes[0],
@@ -566,8 +573,10 @@ def main() -> None:
                 dem_nd = 0
                 t_do_fps_nd = now_real
 
-                # Tự động hạ chế độ nếu fps nhận diện tụt dưới 25 ở chế độ muot khi chạy thật
-                if che_do_hien_tai == "muot" and fps_nhan_dien < 25.0 and so_khung_xu_ly > 30 and args.thu == 0:
+                # Tự động hạ chế độ khi chính khâu nhận diện chậm (fps nhận diện thấp hơn hẳn fps webcam).
+                # Webcam tự hạ 15 fps lúc thiếu sáng thì không hạ chế độ: máy vẫn xử lý kịp.
+                cham_hon_webcam = fps_nhan_dien + 5.0 < luong_cam.fps_webcam_that
+                if che_do_hien_tai == "muot" and fps_nhan_dien < 25.0 and cham_hon_webcam and so_khung_xu_ly > 30 and args.thu == 0:
                     che_do_hien_tai = "can-bang"
                     print(f"⚠️ FPS nhận diện đạt {fps_nhan_dien:.1f} < 25. Tự động hạ xuống chế độ 'can-bang'.", flush=True)
 

@@ -262,7 +262,7 @@ class TestSinhWeb(unittest.TestCase):
         # Trạng thái máy
         res_may = self.client.get("/lab/sinh/trang-thai-may")
         self.assertEqual(res_may.status_code, 200)
-        self.assertEqual(res_may.json()["tong"], 8)
+        self.assertEqual(res_may.json()["tong"], 9)  # 8 máy chính + trạm ghép gen
 
     def test_11_batch_su_kien(self):
         res = self.client.post("/lab/sinh/su-kien", json={
@@ -297,6 +297,39 @@ class TestSinhWeb(unittest.TestCase):
         data = res.json()
         self.assertEqual(data["nhan"], 3)
         self.assertEqual(len(data["loi"]), 0)
+
+    def test_11b_su_kien_dung_hop_dong_unity(self):
+        """Đúng tên sự kiện BioLabSync.cs gửi (hợp đồng mục 5): trước đây bị bỏ qua lặng lẽ."""
+        res = self.client.post("/lab/sinh/su-kien", json={"su_kien": [
+            {"loai": "ket_qua_tn", "du_lieu": {"hoc_sinh": "Học sinh", "lop": "12A1", "ban": "B1",
+                                               "ma_bai": "ghep_gen_adn_tai_to_hop", "du_lieu": {"khuan_lac_trang": 41}}},
+            {"loai": "nhiet_do_tu", "du_lieu": {"tu": "tu_mat_4", "nhiet_do": 4.6, "cua_mo": True}},
+            {"loai": "trang_thai_may", "du_lieu": {"ma": "may_pcr", "trang_thai": "dang_chay",
+                                                   "mo_ta": "Chu kỳ 12/30", "tien_do": 0.4}},
+            {"loai": "dung_cu_hong", "du_lieu": {"ma": "micropipet_p200", "so_luong": 1, "ly_do": "Đặt nằm ngang khi còn dịch"}},
+            {"loai": "can_bao_tri", "du_lieu": {"ma": "may_pcr", "ly_do": "Nắp nhiệt không lên 105 °C"}},
+            {"loai": "sinh_pham_xuat", "du_lieu": {"id": "sp_xanh_methylen_1", "so_luong": 1, "nguoi": "Học sinh"}},
+            {"loai": "khong_co_loai_nay", "du_lieu": {}},
+            {"loai": "trang_thai_may", "du_lieu": {"ma": "may_pcr", "trang_thai": "bay_bong"}},
+        ]})
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertEqual(data["nhan"], 6)
+        self.assertEqual([l["chi_so"] for l in data["loi"]], [6, 7])
+
+        kq = self.client.get("/lab/sinh/ket-qua", params={"ma_bai": "ghep_gen_adn_tai_to_hop"}).json()
+        self.assertEqual(kq["tong"], 1)
+        nd = self.client.get("/lab/sinh/nhiet-do", params={"tu": "tu_mat_4"}).json()["muc"]
+        self.assertTrue(any(abs(r["nhiet_do"] - 4.6) < 1e-6 and r["cua_mo"] == 1 for r in nd))
+        may = {m["ma"]: m for m in self.client.get("/lab/sinh/trang-thai-may").json()["muc"]}
+        self.assertEqual(may["may_pcr"]["trang_thai"], "dang_chay")
+        self.assertAlmostEqual(may["may_pcr"]["tien_do"], 0.4)
+        self.assertEqual(may["gel_doc"]["nguon"], "mac_dinh")
+        dc = {d["ma"]: d for d in self.client.get("/lab/sinh/dung-cu").json()["muc"]}
+        self.assertEqual(dc["micropipet_p200"]["hong"], 1)
+        self.assertEqual(dc["may_pcr"]["can_bao_tri"], 1)
+        su_co = self.client.get("/lab/sinh/su-co").json()["muc"]
+        self.assertTrue(any(r["loai"] == "vo_dung_cu" for r in su_co))
 
     def test_12_no_secret_leakage(self):
         # Kiểm tra không có khóa bí mật hoặc secret nào bị lộ trong phản hồi API

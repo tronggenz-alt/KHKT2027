@@ -441,21 +441,116 @@ def get_bai_thi_nghiem() -> dict:
     return {"muc": items, "tong": len(items)}
 
 
+# Trạng thái mặc định của 8 máy chính khi Unity chưa gửi gì (hoặc chưa mở app)
+_MAY_MAC_DINH = [
+    ("kinh_hien_vi", "Kính hiển vi quang học (29 máy)"),
+    ("tu_an_toan_sinh_hoc", "Tủ an toàn sinh học cấp II A2"),
+    ("tu_am_vi_sinh", "Tủ ấm vi sinh 37 °C"),
+    ("noi_hap", "Nồi hấp tiệt trùng 121 °C"),
+    ("may_pcr", "Máy luân nhiệt PCR 96 giếng"),
+    ("be_dien_di", "Bể điện di ngang + bộ nguồn"),
+    ("gel_doc", "Buồng chụp gel UV / Blue LED"),
+    ("may_do_od600", "Máy đo quang phổ OD600"),
+    ("tram_ghep_gen", "Trạm ghép gen (ADN tái tổ hợp)"),
+]
+_TRANG_THAI_HOP_LE = {"san_sang", "dang_chay", "canh_bao", "hong"}
+# Hợp đồng mục 5: trạng thái máy chỉ giữ trong bộ nhớ máy chủ (không ghi CSDL)
+_trang_thai_may: dict[str, dict] = {}
+
+
+def ghi_trang_thai_may(ma: str, trang_thai: str, mo_ta: str = "", tien_do: float = 0.0, luc: float | None = None) -> dict:
+    if not ma:
+        raise ValueError("thiếu mã máy 'ma'")
+    if trang_thai not in _TRANG_THAI_HOP_LE:
+        raise ValueError(f"trạng thái '{trang_thai}' không hợp lệ (san_sang | dang_chay | canh_bao | hong)")
+    muc = {
+        "ma": ma,
+        "trang_thai": trang_thai,
+        "mo_ta": mo_ta,
+        "tien_do": max(0.0, min(1.0, float(tien_do))),
+        "cap_nhat": luc or time.time(),
+        "nguon": "unity",
+    }
+    _trang_thai_may[ma] = muc
+    return muc
+
+
 @router.get("/lab/sinh/trang-thai-may")
 def get_trang_thai_may() -> dict:
-    """Trả về trạng thái hoạt động của 8 máy phân tích/thiết bị sinh học chính."""
-    now = time.time()
-    machines_status = [
-        {"ma": "kinh_hien_vi", "trang_thai": "san_sang", "mo_ta": "29 kính hiển vi quang học sẵn sàng", "tien_do": 1.0, "cap_nhat": now},
-        {"ma": "tu_an_toan_sinh_hoc", "trang_thai": "san_sang", "mo_ta": "Tủ an toàn sinh học cấp II A2, quạt thổi HEPA ổn định", "tien_do": 1.0, "cap_nhat": now},
-        {"ma": "tu_am_vi_sinh", "trang_thai": "dang_chay", "mo_ta": "Đang duy trì ủ ấm 37,0 °C", "tien_do": 0.65, "cap_nhat": now},
-        {"ma": "noi_hap", "trang_thai": "san_sang", "mo_ta": "Nồi hấp tiệt trùng 121 °C sẵn sàng mẻ mới", "tien_do": 1.0, "cap_nhat": now},
-        {"ma": "may_pcr", "trang_thai": "san_sang", "mo_ta": "Máy luân nhiệt PCR 96 giếng sẵn sàng", "tien_do": 1.0, "cap_nhat": now},
-        {"ma": "be_dien_di", "trang_thai": "san_sang", "mo_ta": "Bể điện di ngang + bộ nguồn 100V", "tien_do": 1.0, "cap_nhat": now},
-        {"ma": "gel_doc", "trang_thai": "san_sang", "mo_ta": "Hệ thống chụp ảnh gel buồng tối UV/Blue LED", "tien_do": 1.0, "cap_nhat": now},
-        {"ma": "may_do_od600", "trang_thai": "san_sang", "mo_ta": "Máy đo quang phổ OD600 bước sóng 600 nm", "tien_do": 1.0, "cap_nhat": now},
-    ]
-    return {"muc": machines_status, "tong": len(machines_status)}
+    """Trạng thái các máy sinh học chính: số Unity gửi lên (sự kiện trang_thai_may) đè lên trạng thái mặc định."""
+    muc = []
+    da_co = set()
+    for ma, ten in _MAY_MAC_DINH:
+        if ma in _trang_thai_may:
+            muc.append(dict(_trang_thai_may[ma]))
+        else:
+            muc.append({"ma": ma, "trang_thai": "san_sang", "mo_ta": f"{ten}: chưa có số liệu từ phòng ảo", "tien_do": 0.0, "cap_nhat": 0.0, "nguon": "mac_dinh"})
+        da_co.add(ma)
+    for ma, item in _trang_thai_may.items():
+        if ma not in da_co:
+            muc.append(dict(item))
+    return {"muc": muc, "tong": len(muc)}
+
+
+def _ap_su_kien(loai: str, dl: dict, t: float) -> None:
+    """Ghi một sự kiện Unity gửi lên theo bảng 'Loại sự kiện' (HOP_DONG_GIAO_DIEN_BACKEND.md mục 5)."""
+    if loai == "su_co":
+        sinh_db.add_su_co({
+            "phong": dl.get("phong", "phong_sinh"),
+            "loai": dl.get("loai", "su_kien_lab"),
+            "muc_do": dl.get("muc_do", "Info"),
+            "mo_ta": dl.get("mo_ta", str(dl)),
+            "xu_ly": dl.get("xu_ly", ""),
+            "trang_thai": dl.get("trang_thai", "moi"),
+            "thoi_gian": t,
+        })
+    elif loai == "dung_cu_hong":
+        ma = dl.get("ma", "")
+        static = sinh_db.get_static_dung_cu(ma)
+        if not static:
+            raise ValueError(f"không có dụng cụ '{ma}'")
+        hien = sinh_db.query("SELECT hong FROM sinh_dung_cu WHERE ma=?", (ma,))
+        hong = (hien[0]["hong"] if hien else 0) + max(1, int(dl.get("so_luong", 1)))
+        sinh_db.patch_dung_cu(ma, {"hong": hong})
+        phong = dl.get("phong") or static.get("phong") or "phong_sinh"
+        if isinstance(phong, list):  # dung_cu.json ghi "phong" là danh sách các phòng có dụng cụ này
+            phong = phong[0] if phong else "phong_sinh"
+        sinh_db.add_su_co({
+            "phong": phong,
+            "loai": "vo_dung_cu",
+            "muc_do": "canh_bao",
+            "mo_ta": f"[{ma}] {dl.get('ly_do', 'Dụng cụ hỏng trong phòng ảo')}",
+            "thoi_gian": t,
+        })
+    elif loai == "can_bao_tri":
+        ma = dl.get("ma", "")
+        if not sinh_db.get_static_dung_cu(ma):
+            raise ValueError(f"không có dụng cụ '{ma}'")
+        sinh_db.patch_dung_cu(ma, {"can_bao_tri": 1, "ghi_chu": dl.get("ly_do", "")})
+    elif loai in ("sinh_pham_xuat", "sinh_pham_nhap"):
+        so_luong = abs(float(dl.get("so_luong", 1)))
+        delta = -so_luong if loai == "sinh_pham_xuat" else so_luong
+        try:
+            sinh_db.change_sinh_pham_stock(dl.get("id", ""), delta, dl.get("nguoi", "Học sinh"), dl.get("ghi_chu", ""))
+        except KeyError as e:
+            raise ValueError(str(e))
+    elif loai in ("nhiet_do_tu", "nhiet_do"):
+        sinh_db.add_nhiet_do(dl.get("tu", "tu_mat_4"), float(dl.get("nhiet_do", 4.0)), int(bool(dl.get("cua_mo", 0))), t)
+    elif loai == "trang_thai_may":
+        ghi_trang_thai_may(dl.get("ma", ""), dl.get("trang_thai", "san_sang"), dl.get("mo_ta", ""), float(dl.get("tien_do", 0.0)), t)
+    elif loai in ("ket_qua_tn", "ket_qua"):
+        sinh_db.add_ket_qua({
+            "hoc_sinh": dl.get("hoc_sinh", "Học sinh"),
+            "lop": dl.get("lop", "Lớp"),
+            "ban": dl.get("ban", ""),
+            "ma_bai": dl.get("ma_bai", "bai_chua_dat_ten"),
+            "thoi_gian": t,
+            "du_lieu": dl.get("du_lieu", {}),
+            "diem": dl.get("diem"),
+            "nhan_xet": dl.get("nhan_xet", ""),
+        })
+    else:
+        raise ValueError(f"loại sự kiện '{loai}' không có trong hợp đồng")
 
 
 @router.post("/lab/sinh/su-kien")
@@ -464,32 +559,8 @@ def post_su_kien(batch: SuKienBatch) -> dict:
     loi = []
     for i, item in enumerate(batch.su_kien):
         try:
-            loai = item.loai
             dl = item.du_lieu if isinstance(item.du_lieu, dict) else {}
-            t = item.thoi_gian or time.time()
-            if loai == "su_co":
-                sinh_db.add_su_co({
-                    "phong": dl.get("phong", "phong_chinh"),
-                    "loai": dl.get("loai", "su_kien_lab"),
-                    "muc_do": dl.get("muc_do", "Info"),
-                    "mo_ta": dl.get("mo_ta", str(dl)),
-                    "xu_ly": dl.get("xu_ly", ""),
-                    "trang_thai": dl.get("trang_thai", "moi"),
-                    "thoi_gian": t,
-                })
-            elif loai == "nhiet_do":
-                sinh_db.add_nhiet_do(dl.get("tu", "tu_mat_4"), float(dl.get("nhiet_do", 4.0)), int(dl.get("cua_mo", 0)), t)
-            elif loai == "ket_qua":
-                sinh_db.add_ket_qua({
-                    "hoc_sinh": dl.get("hoc_sinh", "Học sinh"),
-                    "lop": dl.get("lop", "Lớp"),
-                    "ban": dl.get("ban", ""),
-                    "ma_bai": dl.get("ma_bai", "bai_chua_dat_ten"),
-                    "thoi_gian": t,
-                    "du_lieu": dl.get("du_lieu", {}),
-                    "diem": dl.get("diem"),
-                    "nhan_xet": dl.get("nhan_xet", ""),
-                })
+            _ap_su_kien(item.loai, dl, item.thoi_gian or time.time())
             nhan += 1
         except Exception as e:
             loi.append({"chi_so": i, "ly_do": str(e)})

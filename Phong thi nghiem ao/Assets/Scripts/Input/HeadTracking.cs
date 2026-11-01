@@ -89,6 +89,8 @@ namespace Khkt.Input
 
         public static event Action<HandData[], double> OnHandsReceived;
         public static event Action<Packet> OnPacketReceived;
+        /// <summary>Chớp mắt hai lần nhanh (Python chạy với --chop-2-lan gửi "xac_nhan": 1).</summary>
+        public static event Action OnDoubleBlink;
 
         public string Status { get; private set; } = "Tắt";
 
@@ -121,7 +123,25 @@ namespace Khkt.Input
             public int blink_l;
             public int blink_r;
             public float fps;
+            public int xac_nhan;
             public HandData[] hands;
+
+            /// <summary>
+            /// Về mặc định trước khi đọc gói mới: JsonUtility.FromJsonOverwrite giữ nguyên trường vắng mặt, nên gói YuNet
+            /// (không có dist_cm, hands) sẽ mang theo số cũ của gói MediaPipe trước đó nếu không xóa.
+            /// </summary>
+            public void Reset()
+            {
+                ok = 0; yaw = pitch = e = roll = dist_cm = gaze_x = gaze_y = fps = 0f;
+                t = 0; nguon = null; blink_l = blink_r = xac_nhan = 0; hands = null;
+            }
+
+            public void CopyFrom(Packet o)
+            {
+                ok = o.ok; yaw = o.yaw; pitch = o.pitch; e = o.e; t = o.t; nguon = o.nguon; roll = o.roll;
+                dist_cm = o.dist_cm; gaze_x = o.gaze_x; gaze_y = o.gaze_y; blink_l = o.blink_l; blink_r = o.blink_r;
+                fps = o.fps; xac_nhan = o.xac_nhan; hands = o.hands;  // mảng hands mỗi gói là mảng mới, dùng chung an toàn
+            }
         }
 
         Process proc;
@@ -135,6 +155,7 @@ namespace Khkt.Input
         Packet packetWork = new Packet();
         Packet pPrev = new Packet();
         Packet pCurr = new Packet();
+        readonly Packet pMain = new Packet();  // bản sao của luồng chính: luồng nghe có thể ghi đè pCurr bất cứ lúc nào
         bool hasPrev = false;
         bool hasCurr = false;
 
@@ -240,7 +261,8 @@ namespace Khkt.Input
             {
                 if (packetsIn != packetsRead)
                 {
-                    p = pCurr;
+                    pMain.CopyFrom(pCurr);
+                    p = pMain;
                     packetsRead = packetsIn;
                 }
             }
@@ -279,6 +301,7 @@ namespace Khkt.Input
                 OnHandsReceived?.Invoke(p.hands, p.t);
             }
             OnPacketReceived?.Invoke(p);
+            if (p.xac_nhan != 0) OnDoubleBlink?.Invoke();
 
             if (p.ok == 0 || (p.e <= 0 && p.dist_cm <= 0))
             {
@@ -389,9 +412,19 @@ namespace Khkt.Input
             zoomTarget = 1f;
             Status = "Tắt";
 
-            // Gửi lệnh tạm dừng qua UDP cổng điều khiển (9052)
-            GuiLenhDieuKhien("{\"lenh\":\"tam_dung\"}");
-            processPaused = true;
+            if (currentEngine == TrackingEngine.MediaPipe)
+            {
+                // Gửi lệnh tạm dừng qua UDP cổng điều khiển (9052): tắt webcam nhưng giữ mô hình, bật lại < 1 s
+                GuiLenhDieuKhien("{\"lenh\":\"tam_dung\"}");
+                processPaused = true;
+            }
+            else
+            {
+                // head_tracker.py (YuNet) không nghe lệnh điều khiển: tắt hẳn để nhả webcam
+                try { if (proc != null && !proc.HasExited) proc.Kill(); } catch { }
+                proc = null;
+                processPaused = false;
+            }
         }
 
         void ResumeTracking()
@@ -492,7 +525,9 @@ namespace Khkt.Input
 
             try
             {
-                string args = $"\"{script}\" --cong {port} --cam {cameraIndex} --cha {Process.GetCurrentProcess().Id} --che-do {cheDo}";
+                string args = $"\"{script}\" --cong {port} --cam {cameraIndex} --cha {Process.GetCurrentProcess().Id}";
+                // head_tracker.py (YuNet) không có --che-do: truyền vào làm argparse báo lỗi và đường lùi về YuNet luôn hỏng
+                if (eng == TrackingEngine.MediaPipe) args += $" --che-do {cheDo}";
                 var psi = new ProcessStartInfo(pyExe, args)
                 {
                     UseShellExecute = false,
@@ -604,7 +639,8 @@ namespace Khkt.Input
                     if (data == null || data.Length == 0) continue;
 
                     string json = Encoding.UTF8.GetString(data);
-                    // Dùng FromJsonOverwrite để tái sử dụng instance, 0 GC Alloc
+                    // Dùng FromJsonOverwrite để tái sử dụng instance (đặt lại trước để trường vắng mặt không giữ số cũ)
+                    packetWork.Reset();
                     JsonUtility.FromJsonOverwrite(json, packetWork);
 
                     lock (gate)
