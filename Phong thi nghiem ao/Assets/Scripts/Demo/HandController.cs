@@ -275,14 +275,14 @@ namespace Khkt.Demo
                 if (Mathf.Abs(scroll) > 0.01f)
                 {
                     if (heldKnob != null) heldKnob.AdjustSteps(scroll > 0 ? 1 : -1);
-                    else Held.GetComponent<IScrollAdjustable>()?.OnScroll(scroll);  // micropipet đang cầm: chỉnh µL
+                    else if (Held.GetComponent<IScrollAdjustable>() is IScrollAdjustable adj && (adj as Object) != null) adj.OnScroll(scroll);  // micropipet đang cầm: chỉnh µL
                 }
             }
             else if (Held == null && hasHit && mouse != null && !looking && Current != Act.BioKnob && Current != Act.Stopcock)
             {
                 // tay không, trỏ vào thiết bị chỉnh được bằng con lăn (bộ nguồn điện di: V, bể ổn nhiệt: °C...)
                 float scroll = mouse.scroll.ReadValue().y;
-                if (Mathf.Abs(scroll) > 0.01f) hit.collider.GetComponentInParent<IScrollAdjustable>()?.OnScroll(scroll);
+                if (Mathf.Abs(scroll) > 0.01f && hit.collider.GetComponentInParent<IScrollAdjustable>() is IScrollAdjustable adj && (adj as Object) != null) adj.OnScroll(scroll);
             }
             if (released || !down)
             {

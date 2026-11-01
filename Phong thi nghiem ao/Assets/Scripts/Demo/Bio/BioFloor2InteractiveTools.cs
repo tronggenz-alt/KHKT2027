@@ -98,9 +98,16 @@ namespace Khkt.Demo.Bio
                 }
             }
             if (!any) return;
-            var col = go.GetComponent<BoxCollider>() ?? go.AddComponent<BoxCollider>();
+            var col = Ensure<BoxCollider>(go);
             col.center = b.center;
             col.size = Vector3.Max(b.size, new Vector3(0.01f, 0.01f, 0.01f));
+        }
+
+        /// <summary>Lấy hoặc thêm thành phần. Không dùng "??": GetComponent trong trình soạn thảo trả đối tượng null giả mà ?? không bắt.</summary>
+        static T Ensure<T>(GameObject go) where T : Component
+        {
+            var c = go.GetComponent<T>();
+            return c != null ? c : go.AddComponent<T>();
         }
 
         static void SetInfoTitle(GameObject go, string title)
@@ -117,18 +124,18 @@ namespace Khkt.Demo.Bio
             var go = model.gameObject;
             FitBoxCollider(go, onlyIfNone: true);
             if (!string.IsNullOrEmpty(catalogId)) BioCatalogLoader.AttachToolInfo(go, catalogId);
-            var bt = go.GetComponent<BioTool>() ?? go.AddComponent<BioTool>();
+            var bt = Ensure<BioTool>(go);
             if (!string.IsNullOrEmpty(catalogId)) bt.toolId = catalogId;
             var info = go.GetComponent<EquipmentInfo>();
             if (info != null && !string.IsNullOrEmpty(info.title)) bt.displayName = info.title;
             if (grabbable)
             {
-                var g = go.GetComponent<Grabbable>() ?? go.AddComponent<Grabbable>();
+                var g = Ensure<Grabbable>(go);
                 g.kind = "dung_cu_sinh";
                 g.gripHeightM = grip;
                 g.massG = 80f;
             }
-            return go.GetComponent<T>() ?? go.AddComponent<T>();
+            return Ensure<T>(go);
         }
 
         static T Bind<T>(Transform root, string name, string catalogId, int occurrence = 0) where T : Component
@@ -184,7 +191,7 @@ namespace Khkt.Demo.Bio
         static Grabbable MakeGrabbable(GameObject go, float grip, bool lying = false, float length = 0.15f, float radius = 0.006f)
         {
             FitBoxCollider(go, false);
-            var g = go.GetComponent<Grabbable>() ?? go.AddComponent<Grabbable>();
+            var g = Ensure<Grabbable>(go);
             g.kind = "dung_cu_sinh";
             g.gripHeightM = grip;
             g.liesOnTable = lying;
@@ -296,7 +303,7 @@ namespace Khkt.Demo.Bio
             Cyl(go, "Mũi", 0, 0.004f, 0.06f, "NhuaTrang", Color.white);
             Cyl(go, "Thân", 0.06f, 0.013f, 0.15f, "NhuaTrang", new Color(0.95f, 0.95f, 0.95f));
             Cyl(go, "Nút đẩy", 0.21f, 0.008f, 0.025f, "NhuaTrang", button);
-            go.GetComponent<BioTool>().kind = BioToolKind.Micropipette;
+            Ensure<BioTool>(go).kind = BioToolKind.Micropipette;
             MakeGrabbable(go, 0.15f);
             var mp = go.AddComponent<Micropipette>();
             mp.ConfigureRangeById(id);
@@ -320,7 +327,7 @@ namespace Khkt.Demo.Bio
                     var mp = Bind<Micropipette>(c, ids[k], grabbable: true, grip: 0.15f);
                     FitBoxCollider(c.gameObject, false);
                     mp.ConfigureRangeById(ids[k]);
-                    c.GetComponent<BioTool>().kind = BioToolKind.Micropipette;
+                    Ensure<BioTool>(c.gameObject).kind = BioToolKind.Micropipette;
                     c.name = $"Micropipet {ids[k].Replace("micropipet_", "").ToUpperInvariant()}";
                     k++;
                 }
@@ -433,7 +440,7 @@ namespace Khkt.Demo.Bio
                 Stick(bio, b1, "Kéo nhỏ (Bàn 1)", new Vector3(0.355f, ty, -0.525f), "keo_nho", 0.11f, 0.004f, "Inox", Steel, "NhuaDen", Color.black).AddComponent<Scissors>();
                 // ống nhỏ giọt Pasteur mang nước cất: nhỏ lên lam kính làm tiêu bản tươi
                 var pasteur = Stick(bio, b1, "Ống nhỏ giọt (Bàn 1)", new Vector3(0.355f, ty, -0.49f), "ong_nho_giot", 0.12f, 0.004f, "ThuyTinh", Glass, "NhuaDo", new Color(0.8f, 0.15f, 0.1f));
-                var pbt = pasteur.GetComponent<BioTool>();
+                var pbt = Ensure<BioTool>(pasteur);
                 pbt.kind = BioToolKind.StainDropper;
                 pbt.reagentOrSampleId = "nuoc_cat";
                 pbt.reagentDisplayName = "Nước cất";
@@ -798,7 +805,7 @@ namespace Khkt.Demo.Bio
             if (pot != null)
             {
                 var pen = Stick(green, pot, "Bút đo EC / pH thủy canh", new Vector3(-0.2f, 0.82f, 0.2f), "may_do_ec_ph", 0.16f, 0.008f, "NhuaXanh", new Color(0.15f, 0.35f, 0.8f));
-                pen.GetComponent<EquipmentInfo>().usage = "Nhúng đầu đo vào máng dung dịch dinh dưỡng giàn NFT để đọc EC (mS/cm) và pH.";
+                Ensure<EquipmentInfo>(pen).usage = "Nhúng đầu đo vào máng dung dịch dinh dưỡng giàn NFT để đọc EC (mS/cm) và pH.";
                 Stick(green, pot, "Nhiệt kế nhà kính", new Vector3(-0.2f, 0.82f, 0.13f), "nhiet_ke", 0.22f, 0.0035f, "ThuyTinh", Glass, "NhuaDo", new Color(0.85f, 0.1f, 0.1f)).AddComponent<Thermometer>();
             }
             // đường ống phun sương sát mái kính (y 3,25), dọc giữa nhà kính

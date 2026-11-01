@@ -158,7 +158,13 @@ namespace Khkt.Demo.Bio
         public static void MachineStatus(string ma, string state, string text, float progress) =>
             BioLabSync.Instance?.RecordMachineStatus(ma, state, text, progress);
 
-        public static Micropipette Pipette(BioTool tool) => tool != null ? tool.GetComponent<Micropipette>() : null;
+        /// <summary>Micropipet trên dụng cụ đang cầm, hoặc null thật (không trả null giả của GetComponent để ?. dùng được).</summary>
+        public static Micropipette Pipette(BioTool tool)
+        {
+            if (tool == null) return null;
+            var p = tool.GetComponent<Micropipette>();
+            return p != null ? p : null;
+        }
     }
 
     // =========================================================================
@@ -1120,13 +1126,19 @@ namespace Khkt.Demo.Bio
         {
             S.AddButton("Bật nguồn buồng chụp", 0, 0, () => S.Done("chuan_bi"));
             S.AddButton("Đặt gel vào buồng", 1, 0, PlaceGel);
-            S.AddButton("Ánh sáng xanh 470 nm", 2, 0, () => { lightOn = true; S.Done("chon_che_do"); });
+            S.AddButton("Ánh sáng xanh 470 nm", 2, 0, LightOn);
             S.AddButton("Chụp & phân tích", 0, 1, Capture, true, 3);
             S.SetPlotAxes("ẢNH GEL (giếng ở trên, ADN chạy xuống)", "Giếng 1 → 8", "Quãng đường từ giếng", "1", "8", "xa", "giếng");
             Refresh();
         }
 
-        void PlaceGel()
+        public void LightOn()
+        {
+            lightOn = true;
+            S.Done("chon_che_do");
+        }
+
+        public void PlaceGel()
         {
             if (!S.Require("dat_gel")) return;
             if (Tank == null || !Tank.gelPlaced) { S.Say("Chưa có gel trong bể điện di.", 2); return; }
@@ -1135,7 +1147,7 @@ namespace Khkt.Demo.Bio
             S.Done("dat_gel");
         }
 
-        void Capture()
+        public void Capture()
         {
             if (!S.Require("chup_anh")) return;
             if (Tank == null || !Tank.gelPlaced) { S.Say("Chưa có gel.", 2); return; }

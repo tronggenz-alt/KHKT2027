@@ -231,7 +231,8 @@ namespace Khkt.Environment
             d.y = 0;
             d = d.sqrMagnitude > 1e-4f ? d.normalized : Vector3.back;
             controller.enabled = false;
-            transform.position = new Vector3(target.x, 0, target.z) + d * dist;
+            float floorY = target.y >= 3.6f ? 3.8f : 0f;  // vật ở tầng 2 (sàn y = 3,8, cùng ngưỡng với ZoneMap.At)
+            transform.position = new Vector3(target.x, floorY, target.z) + d * dist;
             controller.enabled = true;
             seated = false;
             EyeOffset = 0;

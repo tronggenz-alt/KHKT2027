@@ -554,6 +554,12 @@ Còn tồn:
 
 ---
 
+### Rà soát 2026-11-01 (Claude) – lỗi đã sửa
+
+- `mediapipe_tracker.py`: biến `xac_nhan_val` chỉ được gán khi thấy mặt nên **khung đầu tiên không có mặt làm chương trình sập** (UnboundLocalError) → luôn khởi tạo. Dấu thời gian VIDEO mode lấy theo `time.monotonic()` và luôn tăng ngặt. Khung bỏ qua nhận diện tay dùng lại kết quả trước (trước đây tay nhấp nháy ở chế độ `tiet-kiem`). Chỉ tự hạ chế độ khi khâu xử lý chậm hơn webcam (webcam tự hạ 15 fps lúc thiếu sáng không còn bị hiểu nhầm). Webcam bị chặn quyền / không lên hình: không treo im lặng nữa mà gửi `{"ok":0,"loi":"webcam_khong_len_hinh"}` mỗi giây, `--thu N` kết thúc đúng hạn và báo cáo không sập khi không có số liệu. Báo đúng mã lỗi chọn camera.
+- `HeadTracking.cs`: đường lùi về YuNet luôn hỏng vì truyền `--che-do` cho `head_tracker.py` (argparse báo lỗi) → chỉ truyền cho MediaPipe. F8 với YuNet tắt hẳn tiến trình (YuNet không nghe lệnh tạm dừng). Luồng nghe UDP và luồng chính dùng chung bộ đệm gói → sao chép gói dưới khóa trước khi dùng. `FromJsonOverwrite` giữ trường cũ (gói YuNet mang `dist_cm` cũ của MediaPipe làm zoom chết) → đặt lại gói trước khi đọc. Nhận `xac_nhan` (sự kiện `OnDoubleBlink`) và `loi` (hiện thông báo lỗi webcam).
+- Đo lại trên máy này khi webcam bị chặn quyền: chương trình chạy đủ 5 s, gửi gói lỗi, thoát sạch (trước đó treo vô hạn).
+
 ## 9. Còn tồn
 
 1. **Kiểm thử trên hệ điều hành Windows thực tế:**

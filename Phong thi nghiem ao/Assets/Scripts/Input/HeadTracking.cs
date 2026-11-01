@@ -124,6 +124,7 @@ namespace Khkt.Input
             public int blink_r;
             public float fps;
             public int xac_nhan;
+            public string loi;   // Python báo lỗi webcam: khong_thay_webcam_may, da_chan_camera_dien_thoai, webcam_khong_len_hinh...
             public HandData[] hands;
 
             /// <summary>
@@ -133,14 +134,14 @@ namespace Khkt.Input
             public void Reset()
             {
                 ok = 0; yaw = pitch = e = roll = dist_cm = gaze_x = gaze_y = fps = 0f;
-                t = 0; nguon = null; blink_l = blink_r = xac_nhan = 0; hands = null;
+                t = 0; nguon = null; blink_l = blink_r = xac_nhan = 0; hands = null; loi = null;
             }
 
             public void CopyFrom(Packet o)
             {
                 ok = o.ok; yaw = o.yaw; pitch = o.pitch; e = o.e; t = o.t; nguon = o.nguon; roll = o.roll;
                 dist_cm = o.dist_cm; gaze_x = o.gaze_x; gaze_y = o.gaze_y; blink_l = o.blink_l; blink_r = o.blink_r;
-                fps = o.fps; xac_nhan = o.xac_nhan; hands = o.hands;  // mảng hands mỗi gói là mảng mới, dùng chung an toàn
+                fps = o.fps; xac_nhan = o.xac_nhan; hands = o.hands; loi = o.loi;  // mảng hands mỗi gói là mảng mới, dùng chung an toàn
             }
         }
 
@@ -176,6 +177,7 @@ namespace Khkt.Input
         bool blinkVal;
         HandData[] latestHands;
         string lastError;
+        string lastWebcamError;
         TrackingEngine currentEngine;
         bool processPaused = false;
 
@@ -303,6 +305,14 @@ namespace Khkt.Input
             OnPacketReceived?.Invoke(p);
             if (p.xac_nhan != 0) OnDoubleBlink?.Invoke();
 
+            if (!string.IsNullOrEmpty(p.loi) && p.loi != lastWebcamError)
+            {
+                lastWebcamError = p.loi;
+                Status = "Lỗi webcam";
+                Say(p.loi == "webcam_khong_len_hinh" ? "Webcam không lên hình: kiểm tra quyền Camera (Cài đặt hệ thống → Quyền riêng tư) hoặc ứng dụng khác đang dùng webcam"
+                    : p.loi == "da_chan_camera_dien_thoai" ? "Đã chặn camera điện thoại: cắm / bật webcam của máy tính"
+                    : p.loi == "khong_thay_webcam_may" ? "Không tìm thấy webcam của máy tính" : "Lỗi webcam: " + p.loi);
+            }
             if (p.ok == 0 || (p.e <= 0 && p.dist_cm <= 0))
             {
                 turn = 0;
@@ -497,6 +507,7 @@ namespace Khkt.Input
         public void StartCalibration()
         {
             calibrated = false;
+            lastWebcamError = null;
             calStart = Time.realtimeSinceStartup;
             sumYaw = sumPitch = sumRoll = sumE = sumDist = sumGazeX = sumGazeY = 0;
             calN = 0;

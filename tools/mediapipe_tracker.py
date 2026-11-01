@@ -229,7 +229,8 @@ def main() -> None:
     # 1. Chọn camera máy tính hợp lệ
     chi_so_cam, ten_cam, thong_tin_cam = chon_webcam_may(args.cam)
     if chi_so_cam is None:
-        loi = "khong_thay_webcam_may" if "khong_thay" in thong_tin_cam else "da_chan_camera_dien_thoai"
+        # báo đúng lý do cho Unity (trước đây mọi lỗi khác "không thấy" đều bị báo nhầm là chặn camera điện thoại)
+        loi = "da_chan_camera_dien_thoai" if thong_tin_cam == "da_chan_camera_dien_thoai" else ("khong_thay_webcam_may" if "khong_thay" in thong_tin_cam else thong_tin_cam)
         sock_gui.sendto(json.dumps({"ok": 0, "loi": loi}).encode("utf-8"), dich_gui)
         sys.exit(f"Từ chối mở camera: {thong_tin_cam} (tên camera: '{ten_cam}')")
 
@@ -320,6 +321,8 @@ def main() -> None:
     t_kiem_cha = time.time()
     last_active_time = time.time()
     dang_tam_dung = False
+    t_khung_cuoi = time.time()   # lúc nhận khung hình gần nhất (để báo Unity khi webcam không lên hình)
+    t_bao_loi = 0.0
 
     che_do_hien_tai = args.che_do
     process_info = psutil.Process()
@@ -374,8 +377,20 @@ def main() -> None:
             t_doc_end = time.perf_counter()
 
             if khung is None or ts_khung == last_ts_khung:
+                # webcam bị macOS chặn quyền / đang bận: không treo im lặng mà báo Unity mỗi giây, --thu vẫn kết thúc đúng hạn
+                if now_real - t_khung_cuoi > 3.0 and now_real - t_bao_loi > 1.0:
+                    t_bao_loi = now_real
+                    try:
+                        sock_gui.sendto(json.dumps({"ok": 0, "loi": "webcam_khong_len_hinh", "t": round(now_real, 3), "nguon": "mp"}).encode("utf-8"), dich_gui)
+                    except Exception:
+                        pass
+                    if luong_cam.so_khung_doc == 0:
+                        print("Chưa nhận được khung hình nào từ webcam (kiểm tra quyền Camera trong Cài đặt hệ thống).", flush=True)
+                if args.thu > 0 and (now_real - t0_chay) >= args.thu:
+                    break
                 time.sleep(0.002)
                 continue
+            t_khung_cuoi = now_real
 
             # Bỏ khung cũ nếu có
             if last_ts_khung > 0 and (ts_khung - last_ts_khung) > 0.10:
@@ -623,6 +638,9 @@ def main() -> None:
         if args.hien:
             cv2.destroyAllWindows()
 
+    def tk(ds: list[float]) -> str:
+        return f"trung bình {np.mean(ds):.2f} ms | p95 {np.percentile(ds, 95):.2f} ms" if ds else "không có số liệu (chưa nhận khung hình)"
+
     # In báo cáo nếu có --thu
     if args.thu > 0:
         tong_s = max(1e-6, time.time() - t0_chay)
@@ -635,13 +653,13 @@ def main() -> None:
         print(f"Tỉ lệ thấy tay:  {so_thay_tay}/{so_khung_xu_ly} ({so_thay_tay / max(1, so_khung_xu_ly) * 100:.1f}%)")
         print(f"CPU tiến trình:  {cpu_pct:.1f}%")
         print("------------------ THỜI GIAN TỪNG KHÂU (ms) ------------------")
-        print(f"  • Đọc ảnh (camera):  trung bình {np.mean(thoi_gian_doc):.2f} ms | p95 {np.percentile(thoi_gian_doc, 95):.2f} ms")
-        print(f"  • Đổi màu & resize:  trung bình {np.mean(thoi_gian_doi_mau):.2f} ms | p95 {np.percentile(thoi_gian_doi_mau, 95):.2f} ms")
-        print(f"  • Mặt (FaceLand):    trung bình {np.mean(thoi_gian_mat):.2f} ms | p95 {np.percentile(thoi_gian_mat, 95):.2f} ms")
-        print(f"  • Tay (GestureRec):  trung bình {np.mean(thoi_gian_tay):.2f} ms | p95 {np.percentile(thoi_gian_tay, 95):.2f} ms")
-        print(f"  • Lọc rung OneEuro:  trung bình {np.mean(thoi_gian_loc):.2f} ms | p95 {np.percentile(thoi_gian_loc, 95):.2f} ms")
-        print(f"  • Gửi gói UDP:       trung bình {np.mean(thoi_gian_gui):.2f} ms | p95 {np.percentile(thoi_gian_gui, 95):.2f} ms")
-        print(f"  • TỔNG KHÂU XỬ LÝ:   trung bình {np.mean(thoi_gian_tong):.2f} ms | p95 {np.percentile(thoi_gian_tong, 95):.2f} ms")
+        print(f"  • Đọc ảnh (camera):  {tk(thoi_gian_doc)}")
+        print(f"  • Đổi màu & resize:  {tk(thoi_gian_doi_mau)}")
+        print(f"  • Mặt (FaceLand):    {tk(thoi_gian_mat)}")
+        print(f"  • Tay (GestureRec):  {tk(thoi_gian_tay)}")
+        print(f"  • Lọc rung OneEuro:  {tk(thoi_gian_loc)}")
+        print(f"  • Gửi gói UDP:       {tk(thoi_gian_gui)}")
+        print(f"  • TỔNG KHÂU XỬ LÝ:   {tk(thoi_gian_tong)}")
         print("========================================================================\n")
 
 

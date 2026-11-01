@@ -257,9 +257,44 @@ Toàn bộ hệ thống tương tác dụng cụ và thiết bị tầng 2 đư�
 
 ---
 
-### 3. Kịch bản thực hiện 15 bài thí nghiệm SGK GDPT 2018
+### 2b. Sắp xếp dụng cụ và phòng ghép mã ADN (rà soát 2026-11-01)
 
-Hệ thống cho phép thực hiện trọn vẹn cả 15 bài thí nghiệm chuẩn, tự động đối chiếu các bước thao tác và tính toán hậu quả khoa học chính xác khi học sinh phạm lỗi:
+**Nguyên tắc gắn dụng cụ** (`Demo/Bio/BioFloor2InteractiveTools.cs`, gọi khi dựng cảnh):
+- Máy và đồ lớn **đã có mô hình** trong trình dựng cảnh (máy PCR, bể điện di, buồng chụp gel, tủ an toàn sinh học, tủ ấm, nồi hấp, tủ lạnh, giàn NFT, các trạm nhà kính…) được gắn thành phần tương tác thẳng vào mô hình (`Bind`). Bản trước tạo thêm khối hộp xám trùng chỗ và đặt dụng cụ phòng vi sinh / kho sinh phẩm nhầm sang phòng sinh học chung (tọa độ x 0..3).
+- Dụng cụ nhỏ chưa có mô hình được tạo mới và đặt **theo vị trí của mô hình làm mốc** (bàn, quầy, tủ) nên luôn nằm trên mặt bàn thật:
+
+| Khu | Dụng cụ (xếp theo chức năng) |
+|---|---|
+| Bàn sinh học 1 (trạm 21) | Khay làm tiêu bản ở mép trước giữa kính 1 – 2: kim mũi mác, kẹp, dao lam, kéo, ống nhỏ giọt, lam kính, hộp lamen, giấy lau kính; lọ dầu soi, đồng hồ bấm giờ, bút ghi nhãn giữa kính 2 – 3; lọ xanh methylen / Lugol / nước cất / NaCl 5 % trên giá thuốc thử cầm lên nhỏ giọt được; đèn LED kẹp trên giá |
+| Bàn sinh học 2 | Bình lên men rượu + bóng bay, hũ sữa chua |
+| Quầy rửa tay | Dụng cụ thủy tinh sạch và dụng cụ đo cạnh giá úp: cốc có mỏ, ống đong, đĩa đồng hồ, phễu lọc, cối chày, đũa thủy tinh, nhiệt kế, giấy pH, giá 6 ống nghiệm |
+| Phòng vi sinh | Que cấy vòng, que trang, đĩa petri ở mép đảo nhuộm Gram (phía ghế); dãy 6 ống pha loãng và ống canh thang ở quầy tây; túi hấp hủy ở quầy chuẩn bị |
+| Phòng SHPT | Xem bảng quy trình bên dưới (luồng một chiều tiền PCR → tách chiết → hậu PCR) |
+
+Mặt quầy / mặt đảo tầng 2 nhận đặt đồ (`PlaceSurface`, trước đây cầm lên là không đặt xuống được). Con lăn chuột chỉnh thể tích micropipet đang cầm và điện áp bộ nguồn đang trỏ (`IScrollAdjustable` trước đây không được gọi).
+
+**Phòng ghép mã ADN – quy trình chạy thật** (`MolecularTools.cs`, `GeneCloningStation.cs`, mô phỏng `Simulation/Bio/DnaCloning.cs`):
+
+| Bước | Ở đâu | Thao tác (cầm dụng cụ rồi trỏ vào đích và bấm) | Kết quả do mô phỏng tính |
+|---|---|---|---|
+| 1. Chiếu UV | Tủ thao tác PCR (tường tây) | Bấm vào tủ | 15 phút UV (tua 6 s) |
+| 2. Pha PCR | Trong tủ: micropipet P10 / P200 / P1000, hộp đầu côn, khay đá 4 thuốc thử, 3 ống PCR (1, 2, Đ−), thùng rác đầu côn | Gắn đầu côn → hút (lăn chuột chỉnh µL) → nhả vào ống → thải đầu côn. Công thức 20 µL: 10 Master Mix + 1 mồi + 1 ADN khuôn + 8 nước; đối chứng âm thay khuôn bằng nước | Ống ghi đúng thành phần, thể tích. Dùng lại đầu côn đã chạm chất khác để hút ống gốc → ống gốc nhiễm, đối chứng âm có băng |
+| 3. Tách chiết ADN (tùy chọn) | Đảo giữa phòng | Bấm bộ tách chiết chuối 4 lần | Ống "ADN chuối" ra giá eppendorf; dùng làm khuôn PCR với mồi GFP → không có băng (chuối không có gen GFP) |
+| 4. PCR | Quầy hậu PCR: Máy PCR 1, 2 | Cầm ống trỏ vào máy để đặt; bấm máy mở màn hình: Tₐ, số chu kỳ, nắp nhiệt, Chạy / Tua tới cuối | `Pcr.Run` từ thành phần ống: khuôn pGFP → băng 738 bp; thiếu Master Mix / mồi / khuôn → không có sản phẩm; Tₐ quá thấp → băng phụ |
+| 5. Đổ gel | Lò vi sóng + khay đúc (giữa máy PCR 2 và bể điện di) | Bấm lò vi sóng; cầm khay trỏ vào lò, giữ chuột | Gel agarose 1 %, 8 giếng |
+| 6. Điện di | Bể điện di + bộ nguồn | Cầm khay trỏ vào bể; dùng micropipet P10 khu hậu PCR nạp thang chuẩn rồi mẫu; bấm bộ nguồn (lăn chuột chỉnh V) | Vạch thuốc nhuộm chạy dần; mẫu thiếu chất nạp mẫu nổi khỏi giếng |
+| 7. Chụp gel | Buồng chụp gel | Bấm: Bật nguồn → Đặt gel → Ánh sáng xanh → Chụp & phân tích | Ảnh gel vẽ từ băng thật; ước lượng bp bằng nội suy log theo thang chuẩn (~740 bp) |
+| 8. Ghép gen | Trạm ghép gen (tủ thấp tường bắc phía tây) | Mang ống PCR gen GFP tới, trỏ vào trạm để làm nguồn gen; bấm trạm: chọn enzyme cho plasmid / gen → Ủ cắt → Nối ligaza (tỉ lệ, nhiệt độ) → Biến nạp (đá, sốc nhiệt) → Cấy (ampicillin, X-gal) → Chọn khuẩn lạc trắng | Khung 2665 bp + gen 726 bp → plasmid tái tổ hợp 3391 bp; đĩa kết quả mọc khuẩn lạc xanh / trắng đúng tỉ lệ; ống "K1" (đã cắt EcoRI + BamHI, có chất nạp mẫu) ra giá để điện di kiểm tra (2 băng ~2670 và ~730 bp) |
+
+Sai cố ý cho ra kết quả sai đúng khoa học: bỏ ligaza → không có khuẩn lạc; cắt plasmid một enzyme → hầu hết khuẩn lạc xanh; gen cắt một đầu → không ghép được; đĩa thiếu ampicillin → mọc kín; bỏ sốc nhiệt → rất ít khuẩn lạc.
+
+Kiểm thử: `tests/BioSimulationTests.cs` mục [22] (18 phép thử DnaCloning); bài Unity `KHKT_TEST=phong_adn` (`tools/kiem_thu_unity/KhktAutoTest.cs`) thao tác thật toàn bộ quy trình bằng đúng các hàm bàn tay gọi, kiểm tra không có dụng cụ lơ lửng, chụp ảnh từng khu.
+
+---
+
+### 3. Kịch bản thực hiện 16 bài thí nghiệm SGK GDPT 2018
+
+Hệ thống cho phép thực hiện trọn vẹn cả 16 bài thí nghiệm (15 bài chuẩn + bài ghép gen tạo ADN tái tổ hợp), tự động đối chiếu các bước thao tác và tính toán hậu quả khoa học chính xác khi học sinh phạm lỗi:
 
 | Mã bài | Lớp | Tên bài thí nghiệm | Thao tác đúng chuẩn | Lỗi cố ý & Hậu quả khoa học tái hiện |
 |---|:---:|---|---|---|
