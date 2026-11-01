@@ -224,7 +224,7 @@ class TestDuLieuSinhHoc(unittest.TestCase):
         data = json.loads(f.read_text(encoding="utf-8"))
         self.assertEqual(data.get("phien_ban"), 1)
         bais = data.get("bai_thi_nghiem", [])
-        self.assertEqual(len(bais), 15, "Phải có đúng 15 bài thí nghiệm theo hợp đồng")
+        self.assertEqual(len(bais), 16, "15 bài theo hợp đồng + bài ghép gen (phòng ghép mã ADN)")
 
         dc_f = DATA_SINH / "dung_cu.json"
         dung_cu_keys = set()

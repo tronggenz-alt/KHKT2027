@@ -459,7 +459,7 @@ namespace Khkt.EditorTools
             Label(room, "KHU HẬU PCR · KHÔNG MANG ĐỒ SANG KHU TIỀN PCR", new Vector3(11.15f, 2.78f, WingZ + 0.104f), Vector3.forward, 0.045f, new Color(0.75f, 0.35f, 0.05f));
 
             // --- Tường bắc (z = -3.6): tủ thấp dưới kính mờ, mô hình ADN, vòi rửa mắt, áo blouse ---
-            LabCounter(room, "Tủ thấp tường bắc (tây)", new Vector3(2.7f, 0, -4.02f), 3.2f, 0.85f, 180f);
+            GeneCloningStation(LabCounter(room, "Tủ thấp tường bắc (tây)", new Vector3(2.7f, 0, -4.02f), 3.2f, 0.85f, 180f));
             var northEast = LabCounter(room, "Tủ thấp tường bắc (đông)", new Vector3(10.6f, 0, -4.02f), 3.8f, 0.85f, 180f);
             DnaModel(northEast, new Vector3(-1.1f, 0.86f, 0), 0.65f);
             var eyeWash = Group("Vòi rửa mắt khẩn cấp", room, new Vector3(4.85f, 0, -3.95f));
@@ -476,6 +476,65 @@ namespace Khkt.EditorTools
             Box(room, "Khung áp phích", new Vector3(13.398f, 1.8f, -6.6f), new Vector3(0.004f, 1.3f, 0.96f), darkMetal, false);
             Plant(room, new Vector3(4.45f, 0, -8.5f), 4, 0.9f);
             BiohazardBin(room, new Vector3(8.6f, 0, -8.5f));
+        }
+
+        /// <summary>
+        /// Trạm ghép gen (ADN tái tổ hợp) trên tủ thấp tường bắc: hộp đá enzyme cắt giới hạn + ligaza + plasmid, khối ủ 37 °C,
+        /// bể sốc nhiệt 42 °C, đĩa LB + ampicillin + X-gal (đĩa kết quả mọc khuẩn lạc xanh / trắng lúc chạy), giá ống kết quả,
+        /// màn hình quy trình. Hệ của quầy: mặt trước +z, mặt quầy y = 0,85.
+        /// </summary>
+        static void GeneCloningStation(Transform counter)
+        {
+            const float top = 0.85f;
+            var g = Group("Trạm ghép gen", counter);
+            // màn hình quy trình trên chân đế
+            Box(g, "Đế màn hình", new Vector3(0, top + 0.01f, -0.16f), new Vector3(0.2f, 0.02f, 0.14f), darkMetal);
+            Box(g, "Chân màn hình", new Vector3(0, top + 0.13f, -0.19f), new Vector3(0.04f, 0.22f, 0.03f), darkMetal, false);
+            Box(g, "Viền màn hình", new Vector3(0, top + 0.33f, -0.17f), new Vector3(0.56f, 0.34f, 0.025f), blackPlastic);
+            NoShadow(Box(g, "Màn hình", new Vector3(0, top + 0.33f, -0.156f), new Vector3(0.52f, 0.3f, 0.004f), bioDisplayBlue, false));
+            Label(g, "TRẠM GHÉP GEN\nADN TÁI TỔ HỢP pUC19 – GFP\ncắt → nối → biến nạp → chọn dòng", new Vector3(0, top + 0.33f, -0.152f), Vector3.forward, 0.022f, new Color(0.8f, 0.92f, 1f));
+
+            // hộp đá: plasmid, 3 enzyme cắt giới hạn, ligaza T4, đệm
+            var ice = Group("Hộp đá enzyme", g, new Vector3(-0.9f, top, 0.02f));
+            Box(ice, "Hộp xốp", new Vector3(0, 0.06f, 0), new Vector3(0.24f, 0.12f, 0.3f), signWhite);
+            Box(ice, "Đá", new Vector3(0, 0.122f, 0), new Vector3(0.21f, 0.004f, 0.27f), Mat("T2_DaLanh", new Color(0.85f, 0.92f, 0.98f), 0.9f), false);
+            var caps = new[] { ("Plasmid pUC19", new Color(0.55f, 0.3f, 0.85f)), ("EcoRI", new Color(0.9f, 0.2f, 0.2f)), ("BamHI", new Color(0.2f, 0.75f, 0.3f)),
+                               ("HindIII", new Color(0.95f, 0.8f, 0.15f)), ("Ligaza T4", new Color(0.2f, 0.45f, 0.95f)), ("Đệm 10×", new Color(0.95f, 0.95f, 0.95f)) };
+            for (int i = 0; i < caps.Length; i++)
+            {
+                var pos = new Vector3(-0.05f + (i % 2) * 0.1f, 0.124f, -0.09f + (i / 2) * 0.09f);
+                NoShadow(Cyl(ice, "Ống " + caps[i].Item1, pos + Vector3.up * 0.012f, 0.0055f, 0.024f, translucentPlastic, false));
+                Cyl(ice, "Nắp " + caps[i].Item1, pos + Vector3.up * 0.026f, 0.0065f, 0.005f, Mat("T2_Nap" + ColorUtility.ToHtmlStringRGB(caps[i].Item2), caps[i].Item2, 0.4f), false);
+                Label(ice, caps[i].Item1, pos + new Vector3(0, 0.038f, 0.02f), Vector3.forward, 0.008f, new Color(0.15f, 0.2f, 0.3f));
+            }
+            // khối ủ nhiệt (cắt 37 °C, nối 16 °C)
+            var block = Group("Khối ủ cắt – nối", g, new Vector3(-0.45f, top, 0f));
+            RoundBox(block, "Thân", new Vector3(0, 0.06f, 0), new Vector3(0.22f, 0.12f, 0.26f), 0.01f, bioWhite);
+            NoShadow(Box(block, "Màn số", new Vector3(0, 0.07f, 0.131f), new Vector3(0.1f, 0.03f, 0.004f), bioDisplayRed, false));
+            Label(block, "37,0 °C", new Vector3(0, 0.071f, 0.134f), Vector3.forward, 0.014f, new Color(1f, 0.5f, 0.4f));
+            // bể sốc nhiệt 42 °C
+            WaterBath(g, new Vector3(0.48f, top, -0.02f), 0f, "42,0 °C");
+            // đĩa kết quả (khuẩn lạc mọc lên lúc chạy) + chồng đĩa LB-Amp-X-gal mới
+            var dishG = Group("Đĩa kết quả", g, new Vector3(0.95f, top, 0.1f));
+            var dish = Lathe("T2_DiaPetri", 24, V(0, 0), V(0.045f, 0), V(0.045f, 0.014f), V(0.043f, 0.014f), V(0.043f, 0.002f), V(0, 0.002f));
+            NoShadow(MeshObj(dishG, "Đĩa petri", dish, Vector3.zero, bioPetri));
+            NoShadow(Cyl(dishG, "Thạch LB + Amp + X-gal", new Vector3(0, 0.006f, 0), 0.042f, 0.008f, Mat("T2_ThachXgal", new Color(0.93f, 0.9f, 0.78f, 0.9f), 0.5f, 0, transparent: true)));
+            Label(dishG, "LB + Amp + X-gal", new Vector3(0, 0.002f, 0.05f), Vector3.forward, 0.009f, new Color(0.2f, 0.25f, 0.3f));
+            PetriStack(g, new Vector3(1.15f, top, -0.12f), 3, 2);
+            // chỗ đặt ống sản phẩm PCR mang tới, giá ống kết quả
+            var src = Group("Chỗ đặt ống nguồn gen", g, new Vector3(-0.18f, top + 0.012f, 0.16f));
+            Cyl(src, "Giá đơn", new Vector3(0, -0.006f, 0), 0.015f, 0.012f, Mat("T2_GiaNhuaTrang", new Color(0.92f, 0.92f, 0.9f), 0.4f));
+            Label(g, "ĐẶT ỐNG PCR GEN GFP", new Vector3(-0.18f, top + 0.003f, 0.2f), Vector3.up, 0.01f, new Color(0.3f, 0.3f, 0.35f));
+            var rack = Group("Giá ống kết quả", g, new Vector3(1.38f, top + 0.012f, 0.1f));
+            Box(rack, "Giá", new Vector3(0, -0.002f, 0.008f), new Vector3(0.04f, 0.028f, 0.13f), Mat("T2_GiaNhuaTrang", new Color(0.92f, 0.92f, 0.9f), 0.4f));
+
+            Info(g, "Trạm ghép gen (ADN tái tổ hợp)",
+                "Cắt plasmid pUC19 và gen GFP bằng cùng enzyme cắt giới hạn (EcoRI, BamHI) → nối bằng ADN ligaza → biến nạp vào E. coli bằng sốc nhiệt 42 °C → cấy đĩa LB + ampicillin + X-gal: khuẩn lạc trắng mang gen ghép, xanh không có gen.",
+                "Bấm vào trạm để mở màn hình quy trình. Mang ống PCR gen GFP của em tới, trỏ vào trạm và bấm để dùng làm nguồn gen. Ống plasmid cắt kiểm tra xuất ra giá bên phải: nạp vào gel cạnh thang chuẩn.");
+            var st = g.gameObject.AddComponent<Khkt.Demo.Bio.GeneCloningStation>();
+            st.resultDish = dishG;
+            st.outputRack = rack;
+            st.sourceSlot = src;
         }
 
         /// <summary>Quầy thí nghiệm áp tường dài len, cao top, mặt trước nhìn về +z của nhóm khi yaw = 0 (tường ở −z).</summary>

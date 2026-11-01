@@ -257,7 +257,7 @@ class TestSinhWeb(unittest.TestCase):
         # 15 bài thí nghiệm
         res_bai = self.client.get("/lab/sinh/bai-thi-nghiem")
         self.assertEqual(res_bai.status_code, 200)
-        self.assertEqual(res_bai.json()["tong"], 15)
+        self.assertEqual(res_bai.json()["tong"], 16)
 
         # Trạng thái máy
         res_may = self.client.get("/lab/sinh/trang-thai-may")

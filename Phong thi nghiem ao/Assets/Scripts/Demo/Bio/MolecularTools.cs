@@ -1,9 +1,14 @@
 // -----------------------------------------------------------------------------
-// MolecularTools.cs — Toàn bộ dụng cụ và thiết bị Phòng Sinh học phân tử
-// (Mục 5.4 PROMPT_DUNG_CU_GIAO_DIEN.md & Mục 2, 4 HOP_DONG_GIAO_DIEN_BACKEND.md).
+// MolecularTools.cs — Dụng cụ và máy Phòng sinh học phân tử, nối thành một quy trình chạy thật:
+//   gắn đầu côn → hút thuốc thử trong khay đá → nhả vào ống PCR (ống ghi lại đúng thành phần, thể tích)
+//   → đặt ống vào máy PCR → màn hình máy chạy chu trình nhiệt (Pcr.Run tính băng sản phẩm từ chính thành phần ống)
+//   → đổ gel (lò vi sóng + khay đúc) → đặt gel vào bể → nạp thang chuẩn và mẫu vào giếng → bật nguồn
+//   → buồng chụp gel vẽ ảnh gel từ băng thật và ước lượng kích thước theo thang chuẩn.
+// Thao tác: cầm dụng cụ (bấm), trỏ vào đích rồi bấm (IBioTarget); con lăn chỉnh µL khi cầm micropipet.
 // -----------------------------------------------------------------------------
 using System;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using Khkt.Interaction;
 using Khkt.Interaction.Bio;
@@ -12,1067 +17,1319 @@ using Khkt.Simulation.Bio;
 
 namespace Khkt.Demo.Bio
 {
-    /// <summary>
-    /// 5.4.1. Micropipet tự động 2 nấc piston (P10, P200, P1000) — mã: micropipet_p10, micropipet_p200, micropipet_p1000
-    /// Dụng cụ quan trọng nhất của Phòng Sinh học phân tử, tuân thủ chuẩn ISO 8655.
-    /// </summary>
-    [DisallowMultipleComponent]
-    public class Micropipette : MonoBehaviour, IInteractable, IScrollAdjustable
+    // =========================================================================
+    // Thuốc thử và hỗn hợp trong ống
+    // =========================================================================
+
+    /// <summary>Mã các thuốc thử dùng trong phòng sinh học phân tử.</summary>
+    public static class MolCodes
     {
-        public string pipetteToolId = "micropipet_p200"; // micropipet_p10 | micropipet_p200 | micropipet_p1000
-        public float minUl = 20.0f;
-        public float maxUl = 200.0f;
-        public float stepUl = 0.2f;
-        public float volumeSetUl = 100.0f;
+        public const string MasterMix = "master_mix_2x";     // đệm, MgCl₂, dNTP, Taq, chất nạp mẫu xanh (kiểu "Green Master Mix")
+        public const string Primers = "cap_moi_gfp";          // mồi xuôi (đuôi EcoRI) + mồi ngược (đuôi BamHI), 10 µM mỗi loại
+        public const string Template = "adn_khuon_pgfp";      // ADN khuôn: plasmid mang gen GFP, 1 ng/µL
+        public const string BananaDna = "adn_chuoi";          // ADN thô tách từ chuối (không có gen GFP)
+        public const string Water = "nuoc_khong_nuclease";
+        public const string Ladder = "thang_adn_100bp";       // thang chuẩn 100 bp đã pha sẵn chất nạp mẫu
+        public const string LoadingDye = "dem_nap_mau_6x";
 
-        public bool tipAttached = false;
-        public string tipType = ""; // p10_trang | p200_vang | p1000_xanh
-        public int plungerStage = 0; // 0: thả, 1: nấc 1 (định lượng), 2: nấc 2 (thổi kiệt / blow-out)
-        public bool contaminated = false;
-        public bool damagedByHorizontalLiquid = false;
-        public bool aspiratedWithAirBubble = false;
-
-        public BioSample tipContent;
-        string cachedHint;
-
-        void Awake()
+        public static string Name(string code)
         {
-            ConfigureRangeById(pipetteToolId);
-            tipContent = GetComponent<BioSample>();
-            if (tipContent == null) tipContent = gameObject.AddComponent<BioSample>();
-            RebuildHint();
+            switch (code)
+            {
+                case MasterMix: return "Master Mix 2×";
+                case Primers: return "Cặp mồi GFP";
+                case Template: return "ADN khuôn pGFP";
+                case BananaDna: return "ADN chuối";
+                case Water: return "Nước không nuclease";
+                case Ladder: return "Thang ADN 100 bp";
+                case LoadingDye: return "Đệm nạp mẫu 6×";
+                default: return code;
+            }
         }
+
+        /// <summary>Thang chuẩn 100 bp: 100 – 1000 bp cách 100, thêm 1500; băng 500 bp đậm gấp đôi để định hướng.</summary>
+        public static readonly int[] LadderBp = { 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1500 };
+        public const double LadderNgPerBandPerUl = 1.0;
+
+        /// <summary>Chất có sẵn thuốc nạp mẫu (đặc, chìm xuống đáy giếng gel).</summary>
+        public static bool HasLoadingDye(string code) => code == MasterMix || code == Ladder || code == LoadingDye;
+    }
+
+    /// <summary>Hỗn hợp trong ống / đầu côn: thể tích từng thành phần (µL) và các băng ADN (ng).</summary>
+    [Serializable]
+    public class MolMix
+    {
+        public List<string> codes = new List<string>();
+        public List<float> ul = new List<float>();
+        public List<BioDnaBandInfo> dna = new List<BioDnaBandInfo>();
+
+        public float TotalUl { get { float s = 0; foreach (var v in ul) s += v; return s; } }
+        public bool IsEmpty => TotalUl < 0.01f;
+
+        public float Get(string code)
+        {
+            int i = codes.IndexOf(code);
+            return i >= 0 ? ul[i] : 0f;
+        }
+
+        public void Add(string code, float v)
+        {
+            if (v <= 0) return;
+            int i = codes.IndexOf(code);
+            if (i >= 0) ul[i] += v; else { codes.Add(code); ul.Add(v); }
+        }
+
+        public bool HasLoadingDye
+        {
+            get
+            {
+                for (int i = 0; i < codes.Count; i++) if (MolCodes.HasLoadingDye(codes[i]) && ul[i] > 0.05f) return true;
+                return false;
+            }
+        }
+
+        /// <summary>Lấy takeUl từ src (chia đều theo tỉ lệ mọi thành phần và lượng ADN); removeFromSrc = false với chai gốc.</summary>
+        public void TakeFrom(MolMix src, float takeUl, bool removeFromSrc)
+        {
+            float total = src.TotalUl;
+            if (total <= 0.0001f || takeUl <= 0) return;
+            float f = Mathf.Clamp01(takeUl / total);
+            for (int i = 0; i < src.codes.Count; i++)
+            {
+                Add(src.codes[i], src.ul[i] * f);
+                if (removeFromSrc) src.ul[i] -= src.ul[i] * f;
+            }
+            for (int i = 0; i < src.dna.Count; i++)
+            {
+                var b = src.dna[i];
+                AddBand(new BioDnaBandInfo { bp = b.bp, ng = b.ng * f, smear = b.smear });
+                if (removeFromSrc) { b.ng -= b.ng * f; src.dna[i] = b; }
+            }
+            if (removeFromSrc) src.Compact();
+        }
+
+        public void AddBand(BioDnaBandInfo b)
+        {
+            for (int i = 0; i < dna.Count; i++)
+                if (dna[i].bp == b.bp && dna[i].smear == b.smear) { var d = dna[i]; d.ng += b.ng; dna[i] = d; return; }
+            dna.Add(b);
+        }
+
+        public void Compact()
+        {
+            for (int i = codes.Count - 1; i >= 0; i--) if (ul[i] < 0.005f) { codes.RemoveAt(i); ul.RemoveAt(i); }
+            for (int i = dna.Count - 1; i >= 0; i--) if (dna[i].ng < 0.001) dna.RemoveAt(i);
+        }
+
+        public void Clear() { codes.Clear(); ul.Clear(); dna.Clear(); }
+
+        public string Describe()
+        {
+            if (IsEmpty) return "trống";
+            var sb = new StringBuilder();
+            sb.Append(BioFeedback.FormatVi(TotalUl, "0.0")).Append(" µL: ");
+            for (int i = 0; i < codes.Count; i++)
+            {
+                if (ul[i] < 0.05f) continue;  // vết nhiễm không ghi lên nhãn (nhưng vẫn tính trong PCR)
+                if (sb[sb.Length - 2] != ':') sb.Append(" + ");
+                sb.Append(BioFeedback.FormatVi(ul[i], "0.#")).Append(' ').Append(MolCodes.Name(codes[i]));
+            }
+            if (dna.Count > 0)
+            {
+                sb.Append(" · ADN: ");
+                for (int i = 0; i < dna.Count; i++) sb.Append(i > 0 ? ", " : "").Append(dna[i].bp).Append(" bp");
+            }
+            return sb.ToString();
+        }
+    }
+
+    /// <summary>Tiện ích chung: cập nhật thẻ thông tin khi trạng thái đổi, ghi trạng thái máy lên web.</summary>
+    static class MolUi
+    {
+        public static void Info(Component c, string description)
+        {
+            var info = c.GetComponent<EquipmentInfo>();
+            if (info != null) info.description = description;
+        }
+
+        public static void Say(string text, bool warn = false) =>
+            LabMessages.Say(text, warn ? LabMessages.Tone.Warn : LabMessages.Tone.Good);
+
+        public static void MachineStatus(string ma, string state, string text, float progress) =>
+            BioLabSync.Instance?.RecordMachineStatus(ma, state, text, progress);
+
+        public static Micropipette Pipette(BioTool tool) => tool != null ? tool.GetComponent<Micropipette>() : null;
+    }
+
+    // =========================================================================
+    // Ống thuốc thử gốc (cắm cố định trong khay đá)
+    // =========================================================================
+
+    [DisallowMultipleComponent]
+    public class ReagentTube : MonoBehaviour, IInteractable, IBioTarget
+    {
+        public string reagentCode = MolCodes.Water;
+        public float stockUl = 500f;
+        [Tooltip("Vết chất lạ lọt vào ống gốc do dùng lại đầu côn bẩn")]
+        public List<string> contaminants = new List<string>();
+
+        public string TargetName => MolCodes.Name(reagentCode);
+        public string UseHint => $"{TargetName} (còn {BioFeedback.FormatVi(stockUl, "0")} µL{(contaminants.Count > 0 ? " · ĐÃ NHIỄM" : "")}) · Cầm micropipet đã gắn đầu côn rồi bấm vào ống để hút";
+
+        public void Use(GameObject user) => MolUi.Say(UseHint);
+
+        public bool CanApplyTool(BioTool tool, out string prompt)
+        {
+            prompt = "";
+            var p = MolUi.Pipette(tool);
+            if (p == null) return false;
+            prompt = !p.tipAttached ? "Chưa gắn đầu côn" : p.load.IsEmpty ? $"Hút {p.VolumeText} {TargetName}" : "Đầu côn đang có dịch: nhả vào ống phản ứng trước";
+            return true;
+        }
+
+        public float GetRequiredHoldSeconds(BioTool tool) => 0f;
+        public void OnToolApplyStep(BioTool tool, float dt, float progress01) { }
+        public void OnToolApplyComplete(BioTool tool) => MolUi.Pipette(tool)?.AspirateStock(this);
+
+        /// <summary>Hỗn hợp của một lần hút v µL từ ống gốc (kèm vết nhiễm nếu có).</summary>
+        public void Draw(MolMix into, float v)
+        {
+            float take = Mathf.Min(v, stockUl);
+            into.Add(reagentCode, take);
+            foreach (var c in contaminants) into.Add(c, take * 0.002f);  // vết rất nhỏ nhưng PCR vẫn nhân lên được
+            if (reagentCode == MolCodes.Ladder)
+                foreach (int bp in MolCodes.LadderBp)
+                    into.AddBand(new BioDnaBandInfo { bp = bp, ng = take * MolCodes.LadderNgPerBandPerUl * (bp == 500 ? 2 : 1) });
+            stockUl -= take;
+        }
+    }
+
+    // =========================================================================
+    // Micropipet (P10 / P200 / P1000)
+    // =========================================================================
+
+    [DisallowMultipleComponent]
+    public class Micropipette : MonoBehaviour, IScrollAdjustable
+    {
+        public string pipetteToolId = "micropipet_p10"; // micropipet_p10 | micropipet_p200 | micropipet_p1000
+        public float minUl = 0.5f, maxUl = 10f, stepUl = 0.1f;
+        public float volumeSetUl = 10f;
+        public bool tipAttached;
+        public MolMix load = new MolMix();
+        /// <summary>Mọi chất đầu côn hiện tại đã chạm vào (để phát hiện dùng lại đầu côn gây nhiễm chéo).</summary>
+        public readonly HashSet<string> tipHistory = new HashSet<string>();
+
+        public string Model => pipetteToolId == "micropipet_p1000" ? "P1000" : pipetteToolId == "micropipet_p200" ? "P200" : "P10";
+        public string TipKind => pipetteToolId == "micropipet_p1000" ? "xanh" : "vang";
+        public string VolumeText => BioFeedback.FormatVi(volumeSetUl, maxUl <= 10f ? "0.0" : "0") + " µL";
+
+        void Awake() => ConfigureRangeById(pipetteToolId);
 
         public void ConfigureRangeById(string id)
         {
             pipetteToolId = id;
-            if (id == "micropipet_p10")
-            {
-                minUl = 0.5f; maxUl = 10.0f; stepUl = 0.02f;
-                if (volumeSetUl < minUl || volumeSetUl > maxUl) volumeSetUl = 5.0f;
-            }
-            else if (id == "micropipet_p1000")
-            {
-                minUl = 100.0f; maxUl = 1000.0f; stepUl = 1.0f;
-                if (volumeSetUl < minUl || volumeSetUl > maxUl) volumeSetUl = 500.0f;
-            }
-            else
-            {
-                pipetteToolId = "micropipet_p200";
-                minUl = 20.0f; maxUl = 200.0f; stepUl = 0.2f;
-                if (volumeSetUl < minUl || volumeSetUl > maxUl) volumeSetUl = 100.0f;
-            }
-            RebuildHint();
-        }
-
-        public string ExpectedTipColorName =>
-            pipetteToolId == "micropipet_p10" ? "côn trắng (P10)" :
-            pipetteToolId == "micropipet_p1000" ? "côn xanh (P1000)" : "côn vàng (P200)";
-
-        public string UseHint => cachedHint ?? "Micropipet";
-
-        public void RebuildHint()
-        {
-            string model = pipetteToolId == "micropipet_p10" ? "P10" : (pipetteToolId == "micropipet_p1000" ? "P1000" : "P200");
-            string tipStr = tipAttached ? ExpectedTipColorName : "Chưa gắn côn";
-            string volStr = BioFeedback.FormatVi(volumeSetUl, pipetteToolId == "micropipet_p10" ? "0.00" : "0.0");
-            string contentStr = (tipContent != null && tipContent.volumeUl > 0.01f)
-                ? $" · Đang chứa {BioFeedback.FormatVi(tipContent.volumeUl, "0.1")} µL {tipContent.sampleName}"
-                : "";
-            cachedHint = $"{model} · {volStr} µL · {tipStr}{contentStr}{(damagedByHorizontalLiquid ? " · [HỎNG CƠ CẤU — CẦN BẢO TRÌ]" : "")} · Giữ để hút / nhả · Con lăn: chỉnh µL";
+            if (id == "micropipet_p1000") { minUl = 100f; maxUl = 1000f; stepUl = 10f; }
+            else if (id == "micropipet_p200") { minUl = 20f; maxUl = 200f; stepUl = 1f; }
+            else { pipetteToolId = "micropipet_p10"; minUl = 0.5f; maxUl = 10f; stepUl = 0.5f; }
+            volumeSetUl = Mathf.Clamp(volumeSetUl, minUl, maxUl);
+            Refresh();
         }
 
         public void OnScroll(float delta)
         {
             if (Mathf.Abs(delta) < 0.001f) return;
-            float candidate = volumeSetUl + Mathf.Sign(delta) * stepUl * 5f;
-            SetVolume(candidate);
-        }
-
-        public bool SetVolume(float targetUl)
-        {
-            if (targetUl < minUl - 0.001f || targetUl > maxUl + 0.001f)
-            {
-                BioFeedback.RecordMistake(pipetteToolId, "van_the_tich_vuot_dai_iso8655",
-                    $"Vặn thể tích {BioFeedback.FormatVi(targetUl, "0.1")} µL vượt ngoài dải định mức [{BioFeedback.FormatVi(minUl, "0.1")} – {BioFeedback.FormatVi(maxUl, "0.0")} µL] của {pipetteToolId}!",
-                    "Vượt dải – hỏng cơ cấu bánh răng và lò xo định lượng theo chuẩn ISO 8655!");
-                volumeSetUl = Mathf.Clamp(targetUl, minUl, maxUl);
-                RebuildHint();
-                return false;
-            }
-            volumeSetUl = (float)Math.Round(targetUl / stepUl) * stepUl;
+            if (!load.IsEmpty) { MolUi.Say("Không vặn núm thể tích khi đầu côn đang chứa dịch", true); return; }
+            volumeSetUl = Mathf.Clamp(Mathf.Round((volumeSetUl + Mathf.Sign(delta) * stepUl) / stepUl) * stepUl, minUl, maxUl);
             BioFeedback.PlayClick();
-            RebuildHint();
-            return true;
+            Refresh();
+            MolUi.Say($"{Model}: đặt {VolumeText} (dải {BioFeedback.FormatVi(minUl, "0.#")} – {BioFeedback.FormatVi(maxUl, "0")} µL)");
         }
 
         public bool AttachTip(TipBox box)
         {
-            if (box != null && box.tipSizeId != pipetteToolId)
+            if (tipAttached) { MolUi.Say("Đã có đầu côn. Thải đầu côn cũ vào thùng rác đầu côn trước khi lấy cái mới.", true); return false; }
+            if (box.tipKind != TipKind)
             {
-                BioFeedback.RecordMistake(pipetteToolId, "gan_dau_con_sai_co",
-                    $"Cố gắn đầu côn của hộp '{box.tipSizeId}' vào thân '{pipetteToolId}'!",
-                    "Đầu côn sai kích cỡ sẽ không kín khí hoặc rơi ra khi hút. P10 dùng côn trắng, P200 dùng côn vàng, P1000 dùng côn xanh lam.");
+                BioFeedback.RecordMistake(pipetteToolId, "gan_dau_con_sai_co", $"Gắn đầu côn {box.tipKind} vào {Model}",
+                    "Đầu côn sai cỡ không kín khí: hút thiếu hoặc rơi đầu côn. P10 / P200 dùng côn vàng, P1000 dùng côn xanh.");
                 return false;
             }
-            if (box != null && !box.TakeOneTip()) return false;
+            if (!box.TakeOne()) return false;
             tipAttached = true;
-            tipType = ExpectedTipColorName;
-            if (tipContent != null) tipContent.ClearSample();
+            load.Clear();
+            tipHistory.Clear();
             BioFeedback.PlayClick();
-            BioFeedback.LogAction(pipetteToolId, "gan_dau_con", $"Đã ấn gắn chặt {ExpectedTipColorName} vô trùng vào {pipetteToolId} (tiếng 'cạch').");
-            RebuildHint();
+            Refresh();
+            MolUi.Say($"Đã gắn đầu côn vô trùng vào {Model}");
             return true;
         }
 
-        /// <summary>
-        /// Hút chất lỏng từ vật chứa: kiểm tra đủ 3 lỗi (ấn quá nấc 2 khi hút, đầu côn không ngập dịch sinh bọt khí, nghiêng > 20°).
-        /// </summary>
-        public bool Aspirate(BioSample source, int pressStage = 1, bool tipSubmerged = true, float tiltAngleDeg = 0f)
-        {
-            if (!tipAttached)
-            {
-                BioFeedback.RecordMistake(pipetteToolId, "hut_khong_gan_dau_con",
-                    "Hút chất lỏng khi CHƯA gắn đầu côn!",
-                    "Dịch tràn thẳng vào thân piston gây nhiễm bẩn và hỏng đệm kín khí của micropipet.");
-                return false;
-            }
-
-            plungerStage = pressStage;
-            float actualAspiratedUl = (float)PipetteAccuracy.ActualUl(volumeSetUl, maxUl, pressStage, tiltAngleDeg, tipSubmerged);
-
-            // Lỗi 1: Ấn quá tới nấc 2 (blow-out) trước khi hút -> hút thừa ~12%
-            if (pressStage >= 2)
-            {
-                BioFeedback.RecordMistake(pipetteToolId, "an_nac_2_khi_hut_dich",
-                    $"Ấn piston xuống tận NẤC 2 (nấc thổi kiệt) khi hút làm thể tích thực tế vọt lên {BioFeedback.FormatVi(actualAspiratedUl, "0.1")} µL (so với {BioFeedback.FormatVi(volumeSetUl, "0.1")} µL)!",
-                    "Khi hút mẫu chỉ được ấn piston tới NẤC 1 rồi thả từ từ. Nấc 2 chỉ dùng khi NHẢ mẫu để đẩy hết giọt cuối cùng ra khỏi đầu côn.");
-            }
-
-            // Lỗi 2: Đầu côn không ngập trong chất lỏng -> hút phải bọt khí, thể tích thiếu
-            if (!tipSubmerged)
-            {
-                aspiratedWithAirBubble = true;
-                BioFeedback.RecordMistake(pipetteToolId, "dau_con_khong_ngap_chat_long_bot_khi",
-                    $"Đầu côn không ngập dưới mặt thoáng dung dịch nên hút phải bọt khí (chỉ lấy được {BioFeedback.FormatVi(actualAspiratedUl, "0.1")} µL)!",
-                    "Phải nhúng đầu côn ngập 2–4 mm dưới bề mặt chất lỏng trong suốt quá trình thả piston.");
-            }
-            else
-            {
-                aspiratedWithAirBubble = false;
-            }
-
-            // Lỗi 3: Cầm nghiêng > 20° khi hút -> sai số cột áp thủy tĩnh
-            if (tiltAngleDeg > 20f)
-            {
-                BioFeedback.RecordMistake(pipetteToolId, "nghieng_micropipet_qua_20_do",
-                    $"Cầm nghiêng micropipet góc {BioFeedback.FormatVi(tiltAngleDeg, "0")}° (> 20°) khi hút mẫu làm tăng sai số hệ thống!",
-                    "Theo chuẩn ISO 8655, phải giữ micropipet thẳng đứng (góc nghiêng ≤ 20°) khi hút chất lỏng.");
-            }
-
-            if (source != null && tipContent != null)
-            {
-                BioTransfer.Move(source, tipContent, actualAspiratedUl * 0.001);
-                tipContent.volumeUl = actualAspiratedUl;
-                tipContent.volumeMl = actualAspiratedUl * 0.001f;
-            }
-            else if (tipContent != null)
-            {
-                tipContent.sampleId = "mau_pcr";
-                tipContent.sampleName = "Dung dịch phản ứng";
-                tipContent.volumeUl = actualAspiratedUl;
-                tipContent.volumeMl = actualAspiratedUl * 0.001f;
-            }
-
-            plungerStage = 0;
-            BioFeedback.PlayClick();
-            BioFeedback.LogAction(pipetteToolId, "hut_mau_micropipet",
-                $"Đã hút {BioFeedback.FormatVi(actualAspiratedUl, "0.1")} µL vào {ExpectedTipColorName}.");
-            RebuildHint();
-            return true;
-        }
-
-        /// <summary>
-        /// Nhả chất lỏng sang vật đích (nấc 1 nhả 96%, nấc 2 thổi kiệt 100%).
-        /// </summary>
-        public bool Dispense(BioSample target, int releaseStage = 2)
-        {
-            if (!tipAttached || tipContent == null || tipContent.volumeUl <= 0.001f)
-            {
-                BioFeedback.ShowToast("Đầu côn chưa có chất lỏng để nhả.", true);
-                return false;
-            }
-
-            plungerStage = releaseStage;
-            float currentUl = tipContent.volumeUl;
-            float residualFrac = (float)PipetteAccuracy.ResidualFraction(releaseStage);
-            float dispensedUl = currentUl * (1.0f - residualFrac);
-
-            if (releaseStage < 2)
-            {
-                BioFeedback.RecordMistake(pipetteToolId, "nha_mau_khong_an_het_nac_2",
-                    "Khi nhả mẫu chỉ ấn tới nấc 1 mà không ấn tiếp xuống nấc 2 (blow-out) nên còn sót ~4% dịch trong đầu côn!",
-                    "Khi nhả dịch, phải ấn qua nấc 1 xuống tận nấc 2 để đẩy hết giọt chất lỏng bám ở mũi côn.");
-            }
-
-            if (target != null)
-            {
-                BioTransfer.Move(tipContent, target, dispensedUl * 0.001);
-            }
-            tipContent.volumeUl = Mathf.Max(0f, currentUl - dispensedUl);
-            tipContent.volumeMl = tipContent.volumeUl * 0.001f;
-            if (tipContent.volumeUl <= 0.01f) tipContent.ClearSample();
-
-            plungerStage = 0;
-            BioFeedback.PlayClick();
-            BioFeedback.LogAction(pipetteToolId, "nha_mau_micropipet",
-                $"Đã nhả {BioFeedback.FormatVi(dispensedUl, "0.1")} µL từ {pipetteToolId} (nấc {releaseStage}).");
-            RebuildHint();
-            return true;
-        }
-
-        /// <summary>
-        /// Lỗi 4 (5.4.1 bước 6): Đặt micropipet nằm ngang khi còn chất lỏng trong đầu côn -> dịch chảy ngược vào thân làm hỏng máy!
-        /// </summary>
-        public void LayHorizontallyWithLiquidMistake()
-        {
-            if (tipAttached && tipContent != null && tipContent.volumeUl > 0.01f)
-            {
-                damagedByHorizontalLiquid = true;
-                contaminated = true;
-                BioFeedback.RecordMistake(pipetteToolId, "dat_micropipet_nam_ngang_khi_con_dich",
-                    $"Đặt {pipetteToolId} nằm ngang trên mặt bàn khi trong đầu côn đang còn {BioFeedback.FormatVi(tipContent.volumeUl, "0.1")} µL dung dịch!",
-                    "Chất lỏng chảy ngược vào trục piston làm ăn mòn lò xo, nhiễm bẩn thân pipet và làm HỎNG micropipet (đã gửi cảnh báo bảo trì lên web)!");
-                RebuildHint();
-            }
-        }
-
-        public void EjectTip(TipWaste wasteBin = null)
+        public void EjectTip(TipWaste waste)
         {
             if (!tipAttached) return;
             tipAttached = false;
-            tipType = "";
-            if (tipContent != null) tipContent.ClearSample();
-            if (wasteBin != null) wasteBin.ReceiveEjectedTip();
+            load.Clear();
+            tipHistory.Clear();
+            waste.Receive();
             BioFeedback.PlayClick();
-            BioFeedback.LogAction(pipetteToolId, "thai_bo_dau_con", $"Đã bấm nút đẩy đầu côn của {pipetteToolId} vào hộp rác đầu côn.");
-            RebuildHint();
+            Refresh();
+            MolUi.Say($"Đã đẩy đầu côn của {Model} vào thùng rác đầu côn");
         }
 
-        public void Use(GameObject user)
+        public void AspirateStock(ReagentTube stock)
         {
             if (!tipAttached)
             {
-                AttachTip(null);
+                BioFeedback.RecordMistake(pipetteToolId, "hut_khong_gan_dau_con", "Hút dịch khi chưa gắn đầu côn",
+                    "Dịch tràn vào thân piston: nhiễm bẩn và hỏng micropipet. Luôn gắn đầu côn mới trước khi hút.");
+                return;
             }
-            else if (tipContent == null || tipContent.volumeUl <= 0.01f)
-            {
-                Aspirate(null, 1, true, 0f);
-            }
-            else
-            {
-                Dispense(null, 2);
-            }
+            if (!load.IsEmpty) { MolUi.Say("Đầu côn đang có dịch: nhả vào ống phản ứng trước", true); return; }
+            // đầu côn đã chạm chất khác mà lại nhúng vào ống gốc: ống gốc bị nhiễm (lỗi kinh điển làm đối chứng âm có băng)
+            bool dirty = false;
+            foreach (var c in tipHistory)
+                if (c != stock.reagentCode && !stock.contaminants.Contains(c)) { stock.contaminants.Add(c); dirty = true; }
+            if (dirty)
+                BioFeedback.RecordMistake(pipetteToolId, "dung_lai_dau_con", $"Dùng lại đầu côn đã chạm chất khác để hút {stock.TargetName}",
+                    "Ống thuốc thử gốc đã bị nhiễm vết ADN / thuốc thử lạ: mọi ống pha sau đó đều nhiễm, đối chứng âm sẽ có băng. Mỗi thuốc thử một đầu côn mới.");
+            if (stock.stockUl < volumeSetUl) { MolUi.Say($"{stock.TargetName} sắp hết", true); }
+            stock.Draw(load, volumeSetUl);
+            tipHistory.Add(stock.reagentCode);
+            BioFeedback.PlayClick();
+            Refresh();
+            MolUi.Say($"Đã hút {VolumeText} {stock.TargetName}");
+        }
+
+        public void AspirateTube(MicroTube tube)
+        {
+            if (!tipAttached) { MolUi.Say("Gắn đầu côn trước khi hút", true); return; }
+            if (!load.IsEmpty) { DispenseTube(tube); return; }
+            float avail = tube.mix.TotalUl;
+            if (avail < 0.2f) { MolUi.Say($"Ống {tube.labelText} trống", true); return; }
+            float take = Mathf.Min(volumeSetUl, avail);
+            load.TakeFrom(tube.mix, take, true);
+            foreach (var c in tube.mix.codes) tipHistory.Add(c);
+            tipHistory.Add("ong_" + tube.labelText);
+            tube.Changed();
+            BioFeedback.PlayClick();
+            Refresh();
+            MolUi.Say($"Đã hút {BioFeedback.FormatVi(take, "0.0")} µL từ ống {tube.labelText}{(take < volumeSetUl - 0.05f ? " (ống không đủ thể tích đã đặt)" : "")}");
+        }
+
+        public void DispenseTube(MicroTube tube)
+        {
+            if (load.IsEmpty) return;
+            float v = load.TotalUl;
+            tube.mix.TakeFrom(load, v, true);
+            load.Clear();
+            foreach (var c in tube.mix.codes) tipHistory.Add(c);
+            tipHistory.Add("ong_" + tube.labelText);
+            tube.Changed();
+            BioFeedback.PlayClick();
+            Refresh();
+            MolUi.Say($"Đã nhả {BioFeedback.FormatVi(v, "0.0")} µL vào ống {tube.labelText} (ấn tới nấc 2 để đẩy hết giọt cuối)");
+        }
+
+        /// <summary>Nhả toàn bộ đầu côn ra (vào giếng gel...); trả về hỗn hợp vừa nhả.</summary>
+        public MolMix DispenseAll()
+        {
+            var m = new MolMix();
+            m.TakeFrom(load, load.TotalUl, true);
+            load.Clear();
+            tipHistory.Add("gel");
+            BioFeedback.PlayClick();
+            Refresh();
+            return m;
+        }
+
+        public void Refresh()
+        {
+            string tip = tipAttached ? $"đầu côn {TipKind}" : "chưa gắn đầu côn";
+            string content = load.IsEmpty ? "" : " · đang chứa " + load.Describe();
+            MolUi.Info(this, $"{Model} đặt {VolumeText} · {tip}{content}. Cầm lên rồi lăn chuột để chỉnh thể tích; trỏ vào hộp đầu côn để gắn, vào ống để hút / nhả, vào thùng rác đầu côn để thải.");
         }
     }
 
-    /// <summary>
-    /// 5.4.2. Hộp 96 đầu côn tiệt trùng (trạng thái 96 lỗ) — mã: hop_dau_con
-    /// </summary>
     [DisallowMultipleComponent]
-    public class TipBox : MonoBehaviour, IInteractable
+    public class TipBox : MonoBehaviour, IInteractable, IBioTarget
     {
-        public string tipSizeId = "micropipet_p200"; // micropipet_p10 | micropipet_p200 | micropipet_p1000
-        public int remainingTips = 96;
-        public bool lidOpen = false;
-        public bool autoclaveTapeBlack = true;
-        public float openExposureSec = 0f;
-        public BioHinge lidHinge;
+        public string tipKind = "vang";   // vang: P10 / P200 · xanh: P1000
+        public int remaining = 96;
 
-        public string UseHint => $"Hộp 96 đầu côn ({tipSizeId}) [Còn {remainingTips}/96 côn · Nắp: {(lidOpen ? "MỞ" : "ĐÓNG")} · {(autoclaveTapeBlack ? "Đã hấp vô trùng" : "Chưa hấp")}] · Bấm: mở nắp & gắn đầu côn";
+        public string TargetName => $"Hộp đầu côn {tipKind}";
+        public string UseHint => $"Hộp 96 đầu côn {tipKind} vô trùng (còn {remaining}) · Cầm micropipet rồi bấm vào hộp để gắn đầu côn";
+        public void Use(GameObject user) => MolUi.Say(UseHint);
 
-        public bool TakeOneTip()
+        public bool TakeOne()
         {
-            if (remainingTips <= 0)
-            {
-                BioFeedback.ShowToast("Hộp 96 đầu côn đã hết! Hãy lấy hộp mới từ kho sinh phẩm.", true);
-                return false;
-            }
-            remainingTips--;
+            if (remaining <= 0) { MolUi.Say("Hộp đầu côn đã hết", true); return false; }
+            remaining--;
             return true;
         }
 
-        public void Use(GameObject user)
+        public bool CanApplyTool(BioTool tool, out string prompt)
         {
-            lidOpen = !lidOpen;
-            if (lidHinge != null) lidHinge.SetOpen(lidOpen);
-            BioFeedback.PlayClick();
-            BioFeedback.LogAction("hop_dau_con", lidOpen ? "mo_hop_dau_con" : "dong_hop_dau_con",
-                $"Hộp đầu côn ({tipSizeId}): {(lidOpen ? $"Mở nắp (còn {remainingTips}/96 côn)" : "Đóng nắp giữ vô trùng")}.");
+            prompt = "";
+            var p = MolUi.Pipette(tool);
+            if (p == null) return false;
+            prompt = p.tipAttached ? "Đã có đầu côn (thải đầu côn cũ trước)" : "Ấn micropipet vào hộp để gắn đầu côn";
+            return true;
         }
+
+        public float GetRequiredHoldSeconds(BioTool tool) => 0f;
+        public void OnToolApplyStep(BioTool tool, float dt, float progress01) { }
+        public void OnToolApplyComplete(BioTool tool) => MolUi.Pipette(tool)?.AttachTip(this);
     }
 
-    /// <summary>
-    /// 5.4.2. Thùng rác thải bỏ đầu côn đã dùng — mã: thung_dau_con
-    /// </summary>
     [DisallowMultipleComponent]
-    public class TipWaste : MonoBehaviour, IInteractable
+    public class TipWaste : MonoBehaviour, IInteractable, IBioTarget
     {
-        public int discardedTipsCount = 0;
+        public int count;
+        public string TargetName => "Thùng rác đầu côn";
+        public string UseHint => $"Thùng rác đầu côn ({count} đầu côn đã thải) · Cầm micropipet rồi bấm vào đây để đẩy đầu côn";
+        public void Use(GameObject user) => MolUi.Say(UseHint);
+        public void Receive() => count++;
 
-        public string UseHint => $"Thùng đựng đầu côn đã dùng [Đang chứa {discardedTipsCount} đầu côn] · Đưa micropipet tới và bấm nút đẩy côn";
-
-        public void ReceiveEjectedTip()
+        public bool CanApplyTool(BioTool tool, out string prompt)
         {
-            discardedTipsCount++;
+            prompt = "";
+            var p = MolUi.Pipette(tool);
+            if (p == null || !p.tipAttached) return false;
+            prompt = "Bấm nút đẩy đầu côn";
+            return true;
         }
 
-        public void Use(GameObject user)
-        {
-            ReceiveEjectedTip();
-            BioFeedback.PlayClick();
-            BioFeedback.LogAction("thung_dau_con", "bo_dau_con_da_dung", $"Đã phóng bỏ đầu côn vào hộp thải ({discardedTipsCount} côn).");
-        }
+        public float GetRequiredHoldSeconds(BioTool tool) => 0f;
+        public void OnToolApplyStep(BioTool tool, float dt, float progress01) { }
+        public void OnToolApplyComplete(BioTool tool) => MolUi.Pipette(tool)?.EjectTip(this);
     }
 
-    /// <summary>
-    /// 5.4.3. Ống Eppendorf 1,5 mL & Ống PCR 0,2 mL thành mỏng (nắp bật bản lề) — mã: ong_eppendorf, ong_pcr
-    /// </summary>
+    // =========================================================================
+    // Ống phản ứng (ống PCR 0,2 mL / eppendorf 1,5 mL)
+    // =========================================================================
+
     [DisallowMultipleComponent]
-    public class MicroTube : MonoBehaviour, IInteractable
+    public class MicroTube : MonoBehaviour, IBioTarget
     {
-        public string tubeTypeId = "ong_eppendorf"; // ong_eppendorf | ong_pcr
-        public string labelText = "M1";
-        public bool capOpen = false;
-        public bool dropletsOnWall = false; // Cần ly tâm nhanh (spin down 5 s) để gom xuống đáy
-        public float currentTempC = 25.0f;
+        public string tubeTypeId = "ong_pcr";  // ong_pcr | ong_eppendorf
+        public string labelText = "1";
+        public MolMix mix = new MolMix();
+        public bool amplified;
+        public int pcrCycles;
 
-        // Thành phần Master Mix 25 µL cho ống PCR (5.4.8)
-        public bool hasWater = false;
-        public bool hasBuffer10x = false;
-        public bool hasDntps = false;
-        public bool hasForwardPrimer = false;
-        public bool hasReversePrimer = false;
-        public bool hasTaqPolymerase = false;
-        public bool hasTemplateDna = false;
-        public bool isNegativeControl = false;
+        public float MaxUl => tubeTypeId == "ong_pcr" ? 200f : 1500f;
+        public string TargetName => $"Ống {labelText}";
 
-        public BioSample sample;
-        public BioHinge capHinge;
+        void Start() => Changed();
 
-        void Awake()
+        public bool CanApplyTool(BioTool tool, out string prompt)
         {
-            sample = GetComponent<BioSample>();
-            if (sample == null) sample = gameObject.AddComponent<BioSample>();
+            prompt = "";
+            var p = MolUi.Pipette(tool);
+            if (p == null) return false;
+            if (!p.tipAttached) prompt = "Chưa gắn đầu côn";
+            else if (!p.load.IsEmpty) prompt = $"Nhả {BioFeedback.FormatVi(p.load.TotalUl, "0.0")} µL vào ống {labelText}";
+            else if (mix.IsEmpty) prompt = $"Ống {labelText} đang trống";
+            else prompt = $"Hút {p.VolumeText} từ ống {labelText}";
+            return true;
         }
 
-        public bool IsCompleteMasterMix =>
-            hasWater && hasBuffer10x && hasDntps && hasForwardPrimer && hasReversePrimer && hasTaqPolymerase && (hasTemplateDna || isNegativeControl);
+        public float GetRequiredHoldSeconds(BioTool tool) => 0f;
+        public void OnToolApplyStep(BioTool tool, float dt, float progress01) { }
 
-        public string UseHint => $"Ống {tubeTypeId} [{labelText} · Nắp: {(capOpen ? "MỞ" : "ĐÓNG")} · {BioFeedback.FormatVi(sample != null ? sample.volumeUl : 0f, "0.1")} µL{(dropletsOnWall ? " · Có giọt bám thành (cần spin down!)" : "")}] · Bấm: đóng/mở nắp ('tách')";
-
-        public void PrepareCompletePcrReaction(bool includeTaq = true, bool includePrimers = true, bool includeTemplate = true, bool negativeCtrl = false)
+        public void OnToolApplyComplete(BioTool tool)
         {
-            hasWater = true;
-            hasBuffer10x = true;
-            hasDntps = true;
-            hasForwardPrimer = includePrimers;
-            hasReversePrimer = includePrimers;
-            hasTaqPolymerase = includeTaq;
-            hasTemplateDna = includeTemplate;
-            isNegativeControl = negativeCtrl;
-
-            if (sample != null)
+            var p = MolUi.Pipette(tool);
+            if (p == null || !p.tipAttached) return;
+            if (!p.load.IsEmpty)
             {
-                sample.sampleId = negativeCtrl ? "doi_chung_am_pcr" : "phan_ung_pcr_25ul";
-                sample.sampleName = negativeCtrl ? "Đối chứng âm PCR (Nước)" : "Hỗn hợp PCR 25 µL";
-                sample.volumeUl = 25.0f;
-                sample.volumeMl = 0.025f;
-                sample.dnaFragmentBp = 500;
+                if (mix.TotalUl + p.load.TotalUl > MaxUl) { MolUi.Say($"Ống {labelText} sẽ tràn", true); return; }
+                p.DispenseTube(this);
             }
+            else p.AspirateTube(this);
         }
 
-        public void SpinDown5Seconds()
+        public void Changed()
         {
-            dropletsOnWall = false;
-            BioFeedback.PlayClick();
-            BioFeedback.LogAction(tubeTypeId, "spin_down_gom_giot", $"Đã ly tâm nhanh (spin down 5 s) gom toàn bộ giọt bám thành ống {labelText} xuống đáy.");
+            string kind = tubeTypeId == "ong_pcr" ? "Ống PCR 0,2 mL" : "Ống eppendorf 1,5 mL";
+            MolUi.Info(this, $"{kind} – nhãn \"{labelText}\": {mix.Describe()}{(amplified ? $" · đã chạy PCR {pcrCycles} chu kỳ" : "")}.");
         }
 
-        public void Use(GameObject user)
+        /// <summary>Thiết lập PCR từ đúng thành phần trong ống (công thức chuẩn 20 µL: 10 Master Mix + 1 mồi + 1 khuôn + 8 nước).</summary>
+        public PcrSetup BuildPcrSetup(double annealC, int cycles, bool lidHeated)
         {
-            capOpen = !capOpen;
-            if (capHinge != null) capHinge.SetOpen(capOpen);
-            BioFeedback.PlayClick();
-            BioFeedback.LogAction(tubeTypeId, capOpen ? "mo_nap_ong_micro" : "dong_nap_ong_micro",
-                $"Ống {tubeTypeId} ({labelText}): {(capOpen ? "Bật mở nắp" : "Ấn đóng kín nắp ('tách')")}.");
+            float total = Mathf.Max(0.01f, mix.TotalUl);
+            float mmFrac = mix.Get(MolCodes.MasterMix) / total;     // 0,5 là đúng 1×
+            float primerUl = mix.Get(MolCodes.Primers);
+            float gfpUl = mix.Get(MolCodes.Template);
+            var s = new PcrSetup
+            {
+                hasBuffer = mmFrac >= 0.3f,
+                hasDntp = mmFrac >= 0.3f,
+                hasTaq = mmFrac >= 0.3f,
+                hasPrimers = primerUl / total >= 0.015f,
+                hasTemplate = gfpUl > 0.0001f,          // ADN chuối không mang gen GFP: mồi không có chỗ bám
+                templateCopies = gfpUl * 2.0e5,          // 1 ng/µL plasmid ~ 2·10⁵ bản sao trong vùng mồi bám hiệu quả
+                annealC = annealC,
+                primerTm = 60.0,
+                cycles = cycles,
+                targetBp = DnaCloning.PcrProductBp,
+                lidHeated = lidHeated,
+                enzymeWarmMinutes = 0,
+                productContamination = false,
+            };
+            return s;
         }
     }
 
-    /// <summary>
-    /// 5.4.4 & 5.4.13. Hộp đá lạnh bảo quản sinh phẩm trên bàn (0 – 4 °C) — mã: hop_da
-    /// </summary>
     [DisallowMultipleComponent]
     public class IceBox : MonoBehaviour, IInteractable
     {
-        public float iceTempC = 1.5f;
-        public int tubesOnIceCount = 6;
-
-        public string UseHint => $"Hộp đá vẩy (0 – 4 °C, thực tế {BioFeedback.FormatVi(iceTempC, "0.0")} °C) [Đang giữ lạnh {tubesOnIceCount} ống Taq polymerase, dNTPs & mồi] · Bấm: cắm ống sinh phẩm vào đá";
-
-        public void PlaceTubeOnIce(MicroTube tube)
-        {
-            if (tube != null) tube.currentTempC = iceTempC;
-            tubesOnIceCount++;
-            BioFeedback.PlayClick();
-            BioFeedback.LogAction("hop_da", "cam_ong_vao_hop_da",
-                $"Đã cắm ống sinh phẩm vào hộp đá ({BioFeedback.FormatVi(iceTempC, "0.0")} °C): bảo toàn 100% hoạt tính enzyme Taq polymerase.");
-        }
-
-        public void Use(GameObject user)
-        {
-            PlaceTubeOnIce(null);
-        }
+        public string UseHint => "Khay đá 0 – 4 °C giữ Master Mix (có enzyme Taq), mồi, ADN khuôn. Enzyme để ở nhiệt độ phòng lâu sẽ giảm hoạt tính.";
+        public void Use(GameObject user) => MolUi.Say(UseHint);
     }
 
-    /// <summary>
-    /// 5.4.7. Tủ thao tác tiền PCR (PCR Workstation, đèn UV 15 phút + khóa liên động) — mã: tu_thao_tac_pcr
-    /// </summary>
+    // =========================================================================
+    // Tủ thao tác PCR (tiền PCR)
+    // =========================================================================
+
     [DisallowMultipleComponent]
     public class PcrHoodController : MonoBehaviour, IInteractable
     {
-        public bool uvPreSterilized15Min = false;
-        public bool uvCurrentlyOn = false;
-        public bool sashOpen = false;
-        public bool carriedPostPcrTubeBackwardsMistake = false;
+        public bool uvRunning;
+        public bool sterilized;
+        float uvT;
+        const float UvRealSeconds = 6f;   // 15 phút chiếu UV tua nhanh còn 6 giây
 
-        public string UseHint => $"Tủ thao tác tiền PCR (PCR Hood) [Khử trùng UV 15 phút: {(uvPreSterilized15Min ? "ĐÃ XONG" : "CHƯA")} · Cửa: {(sashOpen ? "MỞ" : "ĐÓNG")}] · Bấm: chiếu UV 15 phút & mở tủ pha Master Mix";
-
-        public void WarnOneWayWorkflowViolation()
-        {
-            carriedPostPcrTubeBackwardsMistake = true;
-            BioFeedback.RecordMistake("tu_thao_tac_pcr", "di_nguoc_luong_1_chieu_hau_pcr_ve_tien_pcr",
-                "Mang ống sản phẩm sau PCR (chứa hàng tỷ bản sao amplicon) ngược về khu Tiền PCR!",
-                "Vi phạm nguyên tắc luồng một chiều (Tiền PCR -> Tách chiết -> Hậu PCR)! Chỉ một hạt khí dung chứa sản phẩm khuếch đại cũng làm nhiễm giếng đối chứng âm (xuất hiện băng giả).");
-        }
+        public string UseHint => uvRunning ? $"Đang chiếu UV khử ADN lạ ({Mathf.RoundToInt(uvT / UvRealSeconds * 15)}/15 phút)…"
+            : sterilized ? "Tủ thao tác PCR đã chiếu UV 15 phút, sạch ADN lạ. Pha hỗn hợp PCR trong tủ." : "Bấm: chiếu UV 15 phút trước khi pha hỗn hợp PCR (phá ADN nhiễm trên bề mặt)";
 
         public void Use(GameObject user)
         {
-            uvCurrentlyOn = false;
-            uvPreSterilized15Min = true;
-            sashOpen = true;
+            if (uvRunning) return;
+            uvRunning = true;
+            uvT = 0;
+            BioFeedback.PlayButton();
+            MolUi.Say("Đóng cửa tủ, bật đèn UV-C 15 phút. Không nhìn trực tiếp vào đèn UV.");
+        }
+
+        void Update()
+        {
+            if (!uvRunning) return;
+            uvT += Time.deltaTime;
+            if (uvT < UvRealSeconds) return;
+            uvRunning = false;
+            sterilized = true;
             BioFeedback.PlaySuccess();
-            BioFeedback.LogAction("tu_thao_tac_pcr", "khu_trung_uv_tu_pcr",
-                "Đã chiếu UV-C 15 phút phá hủy ADN ngoại lai trong tủ thao tác PCR, tự tắt UV khi mở cửa để pha Master Mix an toàn.");
+            MolUi.Say("Đã chiếu UV xong: tắt UV, mở cửa tủ để pha hỗn hợp PCR");
         }
     }
 
-    /// <summary>
-    /// 5.4.9. Máy luân nhiệt PCR 96 giếng (Thermal Cycler) — mã: may_pcr
-    /// Gọi trực tiếp Pcr.PrimerTmWallace, Pcr.SuggestedAnnealingTempC và Pcr.CopiesAfterCycles của Backend.
-    /// </summary>
+    // =========================================================================
+    // Máy PCR (luân nhiệt)
+    // =========================================================================
+
     [DisallowMultipleComponent]
-    public class ThermalCyclerController : MonoBehaviour, IInteractable
+    public class ThermalCyclerController : MonoBehaviour, IInteractable, IBioTarget
     {
-        public bool lidClosed = true;
-        public bool heatedLid105C = true; // Nắp nhiệt 105 °C chống ngưng tụ hơi nước
+        public const int MaxTubes = 8;
+        public readonly List<MicroTube> loaded = new List<MicroTube>();
+        public double annealC = 55.0;
         public int cycles = 30;
-        public double annealingTempC = 55.0;
-        public double optimalTaC = 55.0;
-        public double currentBlockTempC = 25.0;
-        public int targetAmpliconBp = 500;
-        public double lastAmplifiedCopies = 0.0;
+        public bool lidHeated = true;
+        public bool running;
+        public bool finished;
+        public double simSeconds;
+        public float speed = 120f;          // 1 giờ chạy máy ≈ 30 giây thật
+        public string machineName = "Máy PCR";
+        PcrProgram program;
 
-        public readonly List<MicroTube> loadedTubes = new List<MicroTube>();
-        public PcrProgram program = new PcrProgram();
+        public string TargetName => machineName;
+        public string UseHint => running ? $"{machineName}: đang chạy ({Phase})" : $"{machineName} ({loaded.Count} ống) · Bấm: mở màn hình điều khiển";
 
-        void Awake()
+        public string Phase
         {
-            if (program == null) program = new PcrProgram();
-            program.cycler = this;
-            // Tính Tm mẫu mồi 20-mer (10 G/C, 10 A/T): Tm = 4*10 + 2*10 = 60 °C -> Ta gợi ý = 55 °C
-            double tm = Pcr.PrimerMeltingTemp(5, 5, 5, 5);
-            optimalTaC = Pcr.AnnealingTemperature(tm);
-            annealingTempC = optimalTaC;
-        }
-
-        public string UseHint => $"Máy luân nhiệt PCR 96 giếng [Chu trình: {cycles} chu kỳ · Tₐ = {BioFeedback.FormatVi((float)annealingTempC, "0.0")} °C · Nắp nóng 105 °C: {(heatedLid105C ? "BẬT" : "TẮT!")} · Bản sao: {lastAmplifiedCopies:E2}] · Bấm: chạy chương trình PCR";
-
-        public bool RunPcrCycle(MicroTube reactionTube = null)
-        {
-            if (!lidClosed)
+            get
             {
-                BioFeedback.RecordMistake("may_pcr", "chay_pcr_chua_dong_nap",
-                    "Bấm chạy máy PCR khi nắp gia nhiệt chưa đóng khóa!",
-                    "Phải đóng kín và khóa nắp gia nhiệt 105 °C trước khi bắt đầu chu trình nhiệt.");
-                return false;
+                var (phase, cyc, _) = PcrProfile.At(simSeconds, annealC, cycles);
+                return cyc > 0 ? $"chu kỳ {cyc}/{cycles}, {phase}" : phase;
             }
-
-            if (reactionTube != null && !loadedTubes.Contains(reactionTube))
-                loadedTubes.Add(reactionTube);
-
-            double efficiency = 0.92;
-            if (!heatedLid105C)
-            {
-                efficiency *= 0.45;
-                BioFeedback.RecordMistake("may_pcr", "quen_bat_nap_nhiet_105C",
-                    "Quên bật gia nhiệt nắp 105 °C khi chạy PCR!",
-                    "Khi khối nhiệt lên 95 °C, nước trong hỗn hợp phản ứng 25 µL bay hơi và ngưng tụ hết lên nắp ống làm cô đặc muối và giảm mạnh hiệu suất nhân bản.");
-            }
-
-            bool missingReagent = false;
-            if (reactionTube != null)
-            {
-                if (!reactionTube.hasTaqPolymerase || !reactionTube.hasForwardPrimer || !reactionTube.hasReversePrimer || (!reactionTube.hasTemplateDna && !reactionTube.isNegativeControl))
-                {
-                    missingReagent = true;
-                    BioFeedback.RecordMistake("may_pcr", "pha_master_mix_thieu_thanh_phan",
-                        "Hỗn hợp phản ứng PCR bị thiếu thành phần thiết yếu (Taq polymerase / Mồi / Khuôn ADN)!",
-                        "Phản ứng chuỗi polymerase không thể nhân bản đoạn đích nếu thiếu enzyme Taq, cặp mồi đặc hiệu hoặc ADN khuôn — kết quả điện di sẽ KHÔNG có băng sản phẩm.");
-                }
-            }
-
-            bool nonSpecificBands = false;
-            if (annealingTempC < optimalTaC - 6.0)
-            {
-                nonSpecificBands = true;
-                BioFeedback.RecordMistake("may_pcr", "nhiet_do_gan_moi_ta_qua_thap",
-                    $"Đặt nhiệt độ gắn mồi Tₐ = {BioFeedback.FormatVi((float)annealingTempC, "0.0")} °C quá thấp so với mức chuẩn {BioFeedback.FormatVi((float)optimalTaC, "0.0")} °C!",
-                    "Mồi bắt cặp không đặc hiệu vào các vị trí sai trên khuôn ADN, sinh ra nhiều băng phụ (non-specific bands) trên gel điện di.");
-            }
-            else if (annealingTempC > optimalTaC + 8.0)
-            {
-                efficiency = 0.05;
-                BioFeedback.RecordMistake("may_pcr", "nhiet_do_gan_moi_ta_qua_cao",
-                    $"Đặt nhiệt độ gắn mồi Tₐ = {BioFeedback.FormatVi((float)annealingTempC, "0.0")} °C quá cao vượt cả Tm!",
-                    "Cặp mồi không thể gắn vào mạch khuôn ADN nên hầu như không tạo ra sản phẩm PCR.");
-            }
-
-            lastAmplifiedCopies = missingReagent ? 0.0 : Pcr.AmplifiedCopies(1000.0, cycles, efficiency);
-            currentBlockTempC = 4.0; // Kết thúc giữ ở 4 °C
-
-            if (reactionTube != null && reactionTube.sample != null)
-            {
-                reactionTube.sample.dna.Clear();
-                if (!missingReagent && !reactionTube.isNegativeControl && lastAmplifiedCopies > 1e6)
-                {
-                    reactionTube.sample.isAmplifiedByPcr = true;
-                    reactionTube.sample.pcrCyclesCompleted = cycles;
-                    reactionTube.sample.dnaFragmentBp = targetAmpliconBp;
-                    reactionTube.sample.dna.Add(new BioDnaBandInfo { bp = targetAmpliconBp, ng = 85.0, smear = false });
-                    if (nonSpecificBands)
-                    {
-                        reactionTube.sample.dna.Add(new BioDnaBandInfo { bp = 220, ng = 30.0, smear = false });
-                        reactionTube.sample.dna.Add(new BioDnaBandInfo { bp = 850, ng = 25.0, smear = false });
-                    }
-                }
-                else
-                {
-                    reactionTube.sample.isAmplifiedByPcr = false;
-                }
-                reactionTube.sample.SyncToData();
-            }
-
-            if (!missingReagent && !nonSpecificBands && heatedLid105C)
-            {
-                BioFeedback.PlaySuccess();
-                BioFeedback.LogAction("may_pcr", "hoan_tat_chu_trinh_pcr",
-                    $"Hoàn tất {cycles} chu kỳ PCR (95 °C → {BioFeedback.FormatVi((float)annealingTempC, "0")} °C → 72 °C): thu được {lastAmplifiedCopies:E2} bản sao đoạn đích {targetAmpliconBp} bp.");
-            }
-            return !missingReagent;
         }
 
         public void Use(GameObject user)
         {
-            MicroTube tube = loadedTubes.Count > 0 ? loadedTubes[0] : null;
-            if (tube == null)
+            program ??= new PcrProgram { cycler = this };
+            InstrumentScreen.Open(null, program, null);
+        }
+
+        public bool CanApplyTool(BioTool tool, out string prompt)
+        {
+            prompt = "";
+            var tube = tool != null ? tool.GetComponent<MicroTube>() : null;
+            if (tube == null) return false;
+            if (running) prompt = "Máy đang chạy, không mở nắp";
+            else if (tube.tubeTypeId != "ong_pcr") prompt = "Ống 1,5 mL không vừa giếng 0,2 mL của khối nhiệt";
+            else if (loaded.Count >= MaxTubes) prompt = "Khối nhiệt đã đầy";
+            else prompt = $"Đặt ống {tube.labelText} vào khối nhiệt";
+            return true;
+        }
+
+        public float GetRequiredHoldSeconds(BioTool tool) => 0f;
+        public void OnToolApplyStep(BioTool tool, float dt, float progress01) { }
+
+        public void OnToolApplyComplete(BioTool tool)
+        {
+            var tube = tool != null ? tool.GetComponent<MicroTube>() : null;
+            if (tube == null || running || tube.tubeTypeId != "ong_pcr" || loaded.Count >= MaxTubes) return;
+            if (tube.mix.IsEmpty) MolUi.Say($"Ống {tube.labelText} còn trống: vẫn đặt vào nhưng sẽ không có sản phẩm", true);
+            var hand = HandController.Active;
+            if (hand == null || hand.Held == null || hand.Held.gameObject != tube.gameObject) return;
+            hand.ReleaseHeldInto(transform, SlotPosition(loaded.Count), transform.rotation);
+            AddTube(tube);
+        }
+
+        void AddTube(MicroTube tube)
+        {
+            loaded.Add(tube);
+            finished = false;
+            var g = tube.GetComponent<Grabbable>();
+            if (g != null) g.HeldChanged += held => { if (held) RemoveTube(tube); };
+            BioFeedback.PlayClick();
+            MolUi.Say($"Đã đặt ống {tube.labelText} vào {machineName} ({loaded.Count} ống). Bấm vào máy để cài chu trình và chạy.");
+            program?.S?.Done("nap_ong");
+        }
+
+        void RemoveTube(MicroTube tube)
+        {
+            if (!loaded.Remove(tube)) return;
+            for (int i = 0; i < loaded.Count; i++) loaded[i].transform.position = SlotPosition(i);
+        }
+
+        /// <summary>Giếng trên khối nhiệt (nhìn thấy qua nắp mở): hàng ngang ở mặt trên máy.</summary>
+        Vector3 SlotPosition(int i) => transform.TransformPoint(new Vector3(-0.09f + i * 0.026f, 0.233f, -0.04f));
+
+        public void StartRun()
+        {
+            if (running) return;
+            if (loaded.Count == 0) { program?.S?.Say("Chưa có ống nào trong khối nhiệt", 2); return; }
+            running = true;
+            finished = false;
+            simSeconds = 0;
+            BioFeedback.PlayButton();
+            MolUi.MachineStatus("may_pcr", "dang_chay", $"{machineName}: bắt đầu {cycles} chu kỳ", 0f);
+        }
+
+        void Update()
+        {
+            if (!running) return;
+            double total = PcrProfile.TotalSeconds(cycles);
+            int before = PcrProfile.At(simSeconds, annealC, cycles).cycle;
+            simSeconds += Time.deltaTime * speed;
+            int after = PcrProfile.At(simSeconds, annealC, cycles).cycle;
+            if (after != before && after % 5 == 0)
+                MolUi.MachineStatus("may_pcr", "dang_chay", $"{machineName}: chu kỳ {after}/{cycles}", (float)(simSeconds / total));
+            if (simSeconds >= total) Finish();
+        }
+
+        public void SkipToEnd() { if (running) simSeconds = PcrProfile.TotalSeconds(cycles); }
+
+        void Finish()
+        {
+            running = false;
+            finished = true;
+            var sb = new StringBuilder();
+            var bands = new List<DnaBand>();
+            foreach (var tube in loaded)
             {
-                var all = FindObjectsByType<MicroTube>(FindObjectsSortMode.None);
-                if (all.Length > 0)
-                {
-                    tube = all[0];
-                    tube.PrepareCompletePcrReaction(true, true, true, false);
-                }
+                // vết khuôn lọt vào do dùng lại đầu côn (vd ống đối chứng âm) cũng có mặt trong mix và được nhân lên
+                var setup = tube.BuildPcrSetup(annealC, cycles, lidHeated);
+                Pcr.Run(setup, tube.labelText.GetHashCode(), bands);
+                tube.amplified = true;
+                tube.pcrCycles = cycles;
+                foreach (var b in bands) tube.mix.AddBand(new BioDnaBandInfo { bp = b.bp, ng = b.ng, smear = b.smear });
+                tube.Changed();
+                sb.Append($"Ống {tube.labelText}: ").Append(bands.Count == 0 ? "không có sản phẩm" : string.Join(", ", bands.ConvertAll(b => $"{b.bp} bp ({b.ng:0} ng)"))).Append(". ");
             }
-            RunPcrCycle(tube);
+            BioFeedback.PlaySuccess();
+            MolUi.Say($"{machineName} chạy xong, giữ 4 °C. Lấy ống ra để điện di kiểm tra.");
+            MolUi.MachineStatus("may_pcr", "san_sang", $"{machineName}: xong {cycles} chu kỳ. {sb}", 1f);
+            BioFeedback.LogAction("may_pcr", "hoan_tat_pcr", sb.ToString());
+            program?.OnFinished(sb.ToString());
         }
     }
 
-    /// <summary>
-    /// Màn hình vận hành Máy luân nhiệt PCR (5.4.9) — kế thừa InstrumentProgram.
-    /// </summary>
+    /// <summary>Hồ sơ nhiệt PCR: biến tính đầu 95 °C 2 phút → n × (95 °C 30 s → Tₐ 30 s → 72 °C 45 s) → 72 °C 5 phút → giữ 4 °C.</summary>
+    public static class PcrProfile
+    {
+        public const double Init = 120, Den = 30, Ann = 30, Ext = 45, Final = 300;
+
+        public static double TotalSeconds(int cycles) => Init + cycles * (Den + Ann + Ext) + Final;
+
+        public static (string phase, int cycle, double tempC) At(double t, double annealC, int cycles)
+        {
+            if (t < Init) return ("biến tính đầu 95 °C", 0, 95);
+            double c = t - Init, per = Den + Ann + Ext;
+            if (c < cycles * per)
+            {
+                int k = (int)(c / per);
+                double r = c - k * per;
+                if (r < Den) return ("biến tính 95 °C", k + 1, 95);
+                if (r < Den + Ann) return ($"gắn mồi {annealC:0} °C", k + 1, annealC);
+                return ("kéo dài 72 °C", k + 1, 72);
+            }
+            if (c < cycles * per + Final) return ("kéo dài cuối 72 °C", 0, 72);
+            return ("giữ 4 °C", 0, 4);
+        }
+    }
+
+    /// <summary>Màn hình điều khiển máy PCR (bước theo data/may/may_pcr.json).</summary>
     public class PcrProgram : InstrumentProgram
     {
         public override string Code => "may_pcr";
         public ThermalCyclerController cycler;
+        UnityEngine.UI.Button bLid, bRun;
+        string lastResult = "";
 
         public override void Build()
         {
-            if (Doc == null || Doc.Steps.Count == 0)
-                Doc = BioCatalogLoader.LoadMachineDoc(Code);
-
-            S.AddButton("Nắp nhiệt 105 °C", 0, 0, () =>
-            {
-                if (cycler != null) cycler.heatedLid105C = !cycler.heatedLid105C;
-                S.Done("nap_nhiet");
-            });
-
-            S.AddButton("Ta +1 °C", 1, 0, () =>
-            {
-                if (cycler != null) cycler.annealingTempC += 1.0;
-                S.Done("nhiet_do_gan_moi");
-            });
-
-            S.AddButton("Ta -1 °C", 2, 0, () =>
-            {
-                if (cycler != null) cycler.annealingTempC -= 1.0;
-                S.Done("nhiet_do_gan_moi");
-            });
-
-            S.AddButton("Chạy PCR (30 chu kỳ)", 0, 1, () =>
-            {
-                if (cycler != null) cycler.RunPcrCycle();
-                S.Done("chay_pcr");
-            }, true, 2);
-
-            S.SetPlotAxes("CHU TRÌNH NHIỆT PCR THEO THỜI GIAN", "Thời gian (s)", "Nhiệt độ (°C)", "0", "120", "20", "100");
+            S.AddButton("Tₐ −1 °C", 0, 0, () => SetAnneal(-1));
+            S.AddButton("Tₐ gợi ý (Tm − 5)", 1, 0, () => { cycler.annealC = 55; S.Done("cai_dat"); });
+            S.AddButton("Tₐ +1 °C", 2, 0, () => SetAnneal(+1));
+            S.AddButton("Chu kỳ −5", 0, 1, () => SetCycles(-5));
+            S.AddButton("Chu kỳ +5", 2, 1, () => SetCycles(+5));
+            bLid = S.AddButton("", 1, 1, () => { cycler.lidHeated = !cycler.lidHeated; S.Done("cai_dat"); });
+            bRun = S.AddButton("Chạy chu trình", 0, 2, Run, true, 2);
+            S.AddButton("Tua tới cuối", 2, 2, () => cycler.SkipToEnd());
+            S.SetPlotAxes("NHIỆT ĐỘ KHỐI NHIỆT THEO THỜI GIAN", "Thời gian (phút)", "Nhiệt độ (°C)", "0", $"{PcrProfile.TotalSeconds(cycler.cycles) / 60:0}", "0", "100");
+            if (cycler.loaded.Count > 0) S.Done("nap_ong");
+            if (AnyCompleteMix()) S.Done("chuan_bi_mau");
             Refresh();
+        }
+
+        bool AnyCompleteMix()
+        {
+            foreach (var t in cycler.loaded) { var s = t.BuildPcrSetup(55, 30, true); if (s.hasBuffer && s.hasPrimers) return true; }
+            return false;
+        }
+
+        void SetAnneal(int d)
+        {
+            if (cycler.running) return;
+            cycler.annealC = Math.Max(40, Math.Min(72, cycler.annealC + d));
+            S.Done("cai_dat");
+        }
+
+        void SetCycles(int d)
+        {
+            if (cycler.running) return;
+            cycler.cycles = Mathf.Clamp(cycler.cycles + d, 10, 40);
+            S.SetPlotAxes("NHIỆT ĐỘ KHỐI NHIỆT THEO THỜI GIAN", "Thời gian (phút)", "Nhiệt độ (°C)", "0", $"{PcrProfile.TotalSeconds(cycler.cycles) / 60:0}", "0", "100");
+            S.Done("cai_dat");
+        }
+
+        void Run()
+        {
+            if (!S.Require("chay_chu_trinh")) return;
+            if (cycler.loaded.Count == 0) { S.Say("Chưa có ống nào trong khối nhiệt: cầm ống PCR, trỏ vào máy và bấm để đặt ống.", 2); return; }
+            if (!cycler.lidHeated) S.Say("Nắp nhiệt đang tắt: hơi nước sẽ ngưng trên nắp ống, hiệu suất giảm.", 2);
+            cycler.StartRun();
+            S.Done("chay_chu_trinh");
+        }
+
+        public void OnFinished(string summary)
+        {
+            lastResult = summary;
+            if (S != null && InstrumentScreen.IsOpen && S.Program == this)
+            {
+                S.Done("thu_san_pham");
+                S.Say("Xong chu trình. " + summary, 1);
+            }
         }
 
         public override void Refresh()
         {
-            int cyc = cycler != null ? cycler.cycles : 30;
-            double ta = cycler != null ? cycler.annealingTempC : 55.0;
-            double copies = cycler != null ? cycler.lastAmplifiedCopies : 0.0;
-
-            S.SetResults(
-                $"<b>MÁY LUÂN NHIỆT PCR 96 GIẾNG</b>\n" +
-                $"• Chu trình: <b>{cyc} chu kỳ</b> [95 °C -> {BioFeedback.FormatVi((float)ta, "0.0")} °C -> 72 °C]\n" +
-                $"• Nắp gia nhiệt 105 °C: <b>{(cycler == null || cycler.heatedLid105C ? "BẬT (Chuẩn)" : "<color=#FF6666>TẮT!</color>")}</b>\n" +
-                $"• Số bản sao ADN nhân bản: <b>{copies:E2} amplicons</b>\n" +
-                $"• Trạng thái khối nhiệt: <b>{BioFeedback.FormatVi((float)(cycler != null ? cycler.currentBlockTempC : 25.0), "0.0")} °C</b>");
+            InstrumentScreen.SetButton(bLid, cycler.lidHeated ? "Nắp nhiệt 105 °C: BẬT" : "Nắp nhiệt: TẮT", !cycler.running, !cycler.lidHeated);
+            InstrumentScreen.SetButton(bRun, cycler.running ? "Đang chạy…" : "Chạy chu trình", !cycler.running, true);
+            var sb = new StringBuilder();
+            sb.Append($"<b>{cycler.machineName.ToUpperInvariant()}</b>\n");
+            sb.Append($"• Chu trình: 95 °C 2′ → [95 °C 30″ → <b>{cycler.annealC:0} °C</b> 30″ → 72 °C 45″] × <b>{cycler.cycles}</b> → 72 °C 5′ → 4 °C\n");
+            sb.Append($"• Mồi Tm ≈ 60 °C → Tₐ gợi ý 55 °C. Nắp nhiệt: {(cycler.lidHeated ? "105 °C" : "<color=#FF8866>TẮT</color>")}\n");
+            sb.Append(cycler.running ? $"• Đang chạy: <b>{cycler.Phase}</b> ({cycler.simSeconds / 60:0}/{PcrProfile.TotalSeconds(cycler.cycles) / 60:0} phút)\n" : cycler.finished ? "• Đã chạy xong, đang giữ 4 °C\n" : "");
+            sb.Append($"• Ống trong khối nhiệt ({cycler.loaded.Count}):\n");
+            foreach (var t in cycler.loaded) sb.Append($"   – Ống {t.labelText}: {t.mix.Describe()}\n");
+            if (cycler.loaded.Count == 0) sb.Append("   (chưa có — cầm ống PCR, trỏ vào máy rồi bấm)\n");
+            if (!string.IsNullOrEmpty(lastResult)) sb.Append($"• Kết quả: {lastResult}");
+            S.SetResults(sb.ToString());
         }
 
         public override void DrawSchematic(Painter p, float time)
         {
-            p.Clear(new Color32(28, 14, 35, 255));
-            // Vẽ khối 96 giếng và nắp nhiệt
-            p.FillRect(40, 40, 220, 80, new Color32(70, 40, 85, 255));
-            for (int r = 0; r < 4; r++)
-                for (int c = 0; c < 8; c++)
-                    p.Disc(55 + c * 26, 55 + r * 16, 5, new Color32(190, 150, 210, 255));
-            // Nắp nhiệt
-            p.FillRect(35, 125, 230, 20, new Color32(180, 60, 50, 230));
+            p.Clear(new Color(0.06f, 0.07f, 0.1f));
+            double temp = cycler.running ? PcrProfile.At(cycler.simSeconds, cycler.annealC, cycler.cycles).tempC : cycler.finished ? 4 : 25;
+            var hot = Color.Lerp(new Color(0.25f, 0.45f, 0.9f), new Color(0.95f, 0.3f, 0.2f), Mathf.InverseLerp(4, 95, (float)temp));
+            float x0 = 80, y0 = 60, w = 520, h = 150;
+            p.FillRect(x0 - 10, y0 - 10, w + 20, h + 20, new Color(0.3f, 0.32f, 0.36f));
+            p.FillRect(x0, y0, w, h, Color.Lerp(new Color(0.18f, 0.19f, 0.22f), hot, 0.6f));
+            for (int i = 0; i < ThermalCyclerController.MaxTubes; i++)
+            {
+                float cx = x0 + 40 + i * 62, cy = y0 + h / 2;
+                Color c = new Color(0.12f, 0.12f, 0.14f);
+                if (i < cycler.loaded.Count)
+                {
+                    var s = cycler.loaded[i].BuildPcrSetup(cycler.annealC, cycler.cycles, true);
+                    bool ok = s.hasBuffer && s.hasPrimers;
+                    c = ok ? (s.hasTemplate ? new Color(0.3f, 0.85f, 0.4f) : new Color(0.75f, 0.75f, 0.8f)) : new Color(0.95f, 0.6f, 0.2f);
+                }
+                p.Disc(cx, cy, 22, new Color(0.08f, 0.08f, 0.1f));
+                p.Disc(cx, cy, 16, c);
+            }
+            // nắp nhiệt
+            p.FillRect(x0 - 10, y0 + h + 20, w + 20, 26, cycler.lidHeated ? new Color(0.85f, 0.35f, 0.25f) : new Color(0.35f, 0.35f, 0.4f));
+            // nhiệt kế
+            float bar = Mathf.InverseLerp(0, 100, (float)temp);
+            p.FillRect(700, 50, 40, 250, new Color(0.15f, 0.16f, 0.2f));
+            p.FillRect(705, 55, 30, 240 * bar, hot);
+            S.SchemLabel("pcr_t", $"{temp:0} °C", 720, 320, 18, Color.white);
+            S.SchemLabel("pcr_lid", cycler.lidHeated ? "Nắp nhiệt 105 °C" : "Nắp nhiệt tắt", x0 + w / 2, y0 + h + 33, 13, Color.white);
+            S.SchemLabel("pcr_leg", "Xanh lá: đủ thành phần · Xám: đối chứng âm · Cam: thiếu thành phần", 420, 25, 12, new Color(0.75f, 0.8f, 0.85f));
         }
 
         public override void DrawPlot(Painter p)
         {
-            p.Clear(new Color32(20, 10, 25, 255));
-            // Bậc thang chu trình: 95°C (cao) -> 55°C (thấp) -> 72°C (giữa)
-            p.Line(30, 130, 90, 130, new Color32(240, 80, 80, 255), 2); // 95C
-            p.Line(90, 130, 120, 60, new Color32(160, 140, 200, 255), 2);
-            p.Line(120, 60, 180, 60, new Color32(80, 180, 240, 255), 2); // 55C
-            p.Line(180, 60, 200, 95, new Color32(160, 140, 200, 255), 2);
-            p.Line(200, 95, 260, 95, new Color32(80, 220, 140, 255), 2); // 72C
+            InstrumentScreen.PlotFrame(p);
+            double total = PcrProfile.TotalSeconds(cycler.cycles);
+            double shown = cycler.running || cycler.finished ? (cycler.finished ? total : cycler.simSeconds) : total;
+            Vector2 prev = Vector2.zero;
+            var line = cycler.running || cycler.finished ? new Color(1f, 0.55f, 0.3f) : new Color(0.5f, 0.6f, 0.75f);
+            for (int i = 0; i <= 600; i++)
+            {
+                double t = shown * i / 600.0;
+                var pt = InstrumentScreen.Map(p, t, PcrProfile.At(t, cycler.annealC, cycler.cycles).tempC, 0, total, 0, 100);
+                if (i > 0) p.Line(prev.x, prev.y, pt.x, pt.y, line, 2);
+                prev = pt;
+            }
         }
     }
 
-    /// <summary>
-    /// 5.4.11. Bể điện di gel agarose nằm ngang — mã: be_dien_di
-    /// Gọi trực tiếp Electrophoresis.MigrationMm của Backend.
-    /// </summary>
+    // =========================================================================
+    // Đổ gel: lò vi sóng + khay đúc
+    // =========================================================================
+
     [DisallowMultipleComponent]
-    public class GelTankController : MonoBehaviour, IInteractable
+    public class MicrowaveOven : MonoBehaviour, IInteractable, IBioTarget
     {
+        public bool agaroseMelted;
         public float agarosePercent = 1.0f;
-        public bool bufferSubmerged = true;
-        public bool wellsAtCathodeNegative = true; // Giếng phải đặt ở cực âm (đen) để ADN tích điện âm chạy về cực dương (đỏ)
-        public bool lidClosed = true;
-        public bool puncturedWellBottomMistake = false;
-        public bool hasCompletedRun = false;
 
-        public readonly int[] ladderBp = { 100, 250, 500, 750, 1000, 1500 };
-        public readonly List<BioDnaBandInfo> sampleWellBands = new List<BioDnaBandInfo>();
-        public readonly List<float> sampleMigrationMm = new List<float>();
-        public readonly List<float> ladderMigrationMm = new List<float>();
+        public string TargetName => "Lò vi sóng";
+        public string UseHint => agaroseMelted ? $"Bình agarose {BioFeedback.FormatVi(agarosePercent, "0.0")} % đã tan trong suốt (~60 °C). Cầm khay đúc gel rồi bấm vào lò để đổ gel."
+            : "Bấm: đun bình agarose 1 % trong đệm TAE (nắp đậy hờ) đến khi tan trong suốt";
 
-        public string UseHint => $"Bể điện di agarose {BioFeedback.FormatVi(agarosePercent, "0.0")} % [Giếng ở cực: {(wellsAtCathodeNegative ? "Âm (−) đen chuẩn" : "Dương (+) NGƯỢC CỰC!")} · Đã chạy: {(hasCompletedRun ? "XONG" : "Chưa")}] · Bấm: nạp mẫu vào giếng & chạy điện di 100 V – 30 phút";
-
-        public void LoadSampleIntoWell(BioSample sample, bool puncturedWellBottom = false)
+        public void Use(GameObject user)
         {
-            puncturedWellBottomMistake = puncturedWellBottom;
-            if (puncturedWellBottom)
-            {
-                BioFeedback.RecordMistake("be_dien_di", "choc_thung_day_gieng_gel",
-                    "Đưa đầu côn micropipet quá sâu chọc thủng đáy giếng gel agarose!",
-                    "Mẫu ADN rò rỉ xuống dưới đáy bản gel làm băng sau điện di bị mờ nhạt hoặc mất hẳn.");
-            }
-
-            sampleWellBands.Clear();
-            if (sample != null && sample.dna.Count > 0)
-            {
-                sampleWellBands.AddRange(sample.dna);
-            }
-            else
-            {
-                sampleWellBands.Add(new BioDnaBandInfo { bp = 500, ng = 80.0, smear = false });
-            }
-            BioFeedback.PlayClick();
-            BioFeedback.LogAction("be_dien_di", "nap_mau_vao_gieng_gel",
-                $"Đã nạp 5 µL mẫu ADN (trộn đệm nạp xanh bromophenol) vào giếng bản gel agarose {BioFeedback.FormatVi(agarosePercent, "0.0")} %.");
+            if (agaroseMelted) { MolUi.Say(UseHint); return; }
+            agaroseMelted = true;
+            BioFeedback.PlaySuccess();
+            MolUi.Say("Đã đun agarose 1 % tan trong suốt (đun ngắt quãng, lắc đều, nắp đậy hờ để không nổ bình). Để nguội ~60 °C rồi đổ khuôn.");
         }
 
-        public bool RunElectrophoresis(double volts = 100.0, double minutes = 30.0, bool reversedPolarity = false)
+        public bool CanApplyTool(BioTool tool, out string prompt)
         {
-            wellsAtCathodeNegative = !reversedPolarity;
-            if (reversedPolarity)
-            {
-                sampleMigrationMm.Clear();
-                ladderMigrationMm.Clear();
-                hasCompletedRun = false;
-                BioFeedback.RecordMistake("be_dien_di", "cam_nguoc_cuc_dien_di_mat_mau",
-                    "Cắm ngược dây điện cực (đặt giếng ở cực Dương đỏ, chạy về cực Âm đen)!",
-                    "Phân tử ADN mang điện tích âm (do gốc photphat PO₄³⁻) luôn di chuyển về phía cực Dương (+). Đặt giếng ở cực dương làm toàn bộ ADN chạy ngược ra khỏi bản gel vào đệm TAE sau vài phút (mất sạch mẫu)!");
-                return false;
-            }
-
-            if (sampleWellBands.Count == 0)
-            {
-                sampleWellBands.Add(new BioDnaBandInfo { bp = 500, ng = 80.0, smear = false });
-            }
-
-            ladderMigrationMm.Clear();
-            for (int i = 0; i < ladderBp.Length; i++)
-            {
-                double mm = Electrophoresis.MigrationDistanceCm(ladderBp[i], volts, minutes, agarosePercent) * 10.0;
-                ladderMigrationMm.Add((float)mm);
-            }
-
-            sampleMigrationMm.Clear();
-            for (int i = 0; i < sampleWellBands.Count; i++)
-            {
-                double mm = Electrophoresis.MigrationDistanceCm(sampleWellBands[i].bp, volts, minutes, agarosePercent) * 10.0;
-                sampleMigrationMm.Add((float)mm);
-            }
-
-            hasCompletedRun = true;
-            BioFeedback.PlaySuccess();
-            BioFeedback.LogAction("be_dien_di", "chay_dien_di_thanh_cong",
-                $"Đã chạy điện di tại {BioFeedback.FormatVi((float)volts, "0")} V trong {BioFeedback.FormatVi((float)minutes, "0")} phút: băng 500 bp di chuyển {BioFeedback.FormatVi(sampleMigrationMm[0], "0.1")} mm (so với thang chuẩn 100 bp chạy {BioFeedback.FormatVi(ladderMigrationMm[0], "0.1")} mm).");
+            prompt = "";
+            var tray = tool != null ? tool.GetComponent<GelCastingTray>() : null;
+            if (tray == null) return false;
+            prompt = !agaroseMelted ? "Chưa đun agarose (bấm vào lò bằng tay không)" : tray.gelReady ? "Khay đã có gel" : "Đổ agarose vào khay đúc, cắm lược";
             return true;
         }
 
-        public void Use(GameObject user)
+        public float GetRequiredHoldSeconds(BioTool tool) => 0.8f;
+        public void OnToolApplyStep(BioTool tool, float dt, float progress01) { }
+
+        public void OnToolApplyComplete(BioTool tool)
         {
-            RunElectrophoresis(100.0, 30.0, false);
+            var tray = tool != null ? tool.GetComponent<GelCastingTray>() : null;
+            if (tray == null || !agaroseMelted || tray.gelReady) return;
+            tray.Cast(agarosePercent);
         }
     }
 
-    /// <summary>
-    /// 5.4.11. Bộ nguồn điện di (Power Supply, chỉnh V, mA, phút, khóa an toàn điện) — mã: nguon_dien_di
-    /// </summary>
+    [DisallowMultipleComponent]
+    public class GelCastingTray : MonoBehaviour
+    {
+        public bool gelReady;
+        public float agarosePercent = 1.0f;
+        public const int Wells = 8;
+        GameObject gelVisual;
+
+        public void Cast(float pct)
+        {
+            gelReady = true;
+            agarosePercent = pct;
+            if (gelVisual == null)
+            {
+                gelVisual = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                gelVisual.name = "Bản gel đã đông";
+                UnityEngine.Object.Destroy(gelVisual.GetComponent<Collider>());
+                gelVisual.transform.SetParent(transform, false);
+                var vis = transform.Find("Visual");
+                float top = vis != null ? vis.localPosition.y + vis.localScale.y * 0.5f : 0.03f;
+                gelVisual.transform.localPosition = new Vector3(0, top + 0.002f, 0);
+                gelVisual.transform.localScale = new Vector3(0.11f, 0.006f, 0.09f);
+                var r = gelVisual.GetComponent<Renderer>();
+                var shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
+                r.material = new Material(shader) { color = new Color(0.8f, 0.9f, 0.85f, 0.85f) };
+            }
+            BioFeedback.PlaySuccess();
+            MolUi.Info(this, $"Khay đúc có bản gel agarose {BioFeedback.FormatVi(pct, "0.0")} % đã đông, lược 8 giếng đã rút. Cầm khay đặt vào bể điện di (giếng ở phía cực âm – dây đen).");
+            MolUi.Say("Đã đổ gel, chờ đông 20 phút rồi rút lược thẳng đứng: 8 giếng. Đặt gel vào bể điện di.");
+        }
+    }
+
+    // =========================================================================
+    // Bể điện di + bộ nguồn
+    // =========================================================================
+
+    [Serializable]
+    public class GelLane
+    {
+        public string label = "";
+        public List<BioDnaBandInfo> bands = new List<BioDnaBandInfo>();
+        public bool floated;   // không có chất nạp mẫu: mẫu nổi lên khỏi giếng
+    }
+
+    [DisallowMultipleComponent]
+    public class GelTankController : MonoBehaviour, IInteractable, IBioTarget
+    {
+        public bool gelPlaced;
+        public float agarosePercent = 1.0f;
+        public readonly List<GelLane> lanes = new List<GelLane>();
+        public bool running;
+        public bool hasCompletedRun;
+        public double runMinutes;
+        public double volts = 100;
+        public PowerSupplyController psu;
+        const float RealSecondsPer30Min = 12f;
+
+        readonly List<Transform> dyeMarks = new List<Transform>();
+        readonly List<Vector3> dyeHome = new List<Vector3>();
+        Transform gelSlab;
+
+        public string TargetName => "Bể điện di";
+        public string UseHint => !gelPlaced ? "Bể điện di đã có đệm TAE 1×. Cầm khay gel đã đông rồi bấm vào bể để đặt gel."
+            : running ? $"Đang điện di {volts:0} V: {runMinutes:0}/{psu?.timerMinutes ?? 30} phút"
+            : $"Gel {BioFeedback.FormatVi(agarosePercent, "0.0")} % · {lanes.Count}/{GelCastingTray.Wells} giếng đã nạp{(hasCompletedRun ? " · đã chạy xong" : "")}. Cầm micropipet có mẫu rồi bấm vào bể để nạp giếng kế tiếp.";
+
+        void Awake()
+        {
+            gelSlab = transform.Find("Bản gel");
+            foreach (Transform c in transform)
+                if (c.name == "Vạch thuốc nhuộm") { dyeMarks.Add(c); dyeHome.Add(c.localPosition); }
+            if (psu == null) psu = GetComponentInChildren<PowerSupplyController>();
+            ShowGel(false);
+        }
+
+        void ShowGel(bool on)
+        {
+            if (gelSlab != null) gelSlab.gameObject.SetActive(on);
+            foreach (var d in dyeMarks) d.gameObject.SetActive(on && lanes.Count > 0);
+        }
+
+        public void Use(GameObject user) => MolUi.Say(UseHint);
+
+        public bool CanApplyTool(BioTool tool, out string prompt)
+        {
+            prompt = "";
+            if (tool == null) return false;
+            var tray = tool.GetComponent<GelCastingTray>();
+            if (tray != null)
+            {
+                prompt = gelPlaced ? "Bể đã có gel" : !tray.gelReady ? "Khay chưa có gel (đổ agarose ở lò vi sóng trước)" : "Đặt gel vào bể, giếng ở phía cực âm";
+                return true;
+            }
+            var p = MolUi.Pipette(tool);
+            if (p == null) return false;
+            prompt = !gelPlaced ? "Chưa có gel trong bể" : running ? "Đang chạy điện di" : p.load.IsEmpty ? "Đầu côn trống: hút mẫu trước"
+                : lanes.Count >= GelCastingTray.Wells ? "Đã nạp đủ 8 giếng" : $"Nạp {BioFeedback.FormatVi(p.load.TotalUl, "0.0")} µL vào giếng {lanes.Count + 1}";
+            return true;
+        }
+
+        public float GetRequiredHoldSeconds(BioTool tool) => 0f;
+        public void OnToolApplyStep(BioTool tool, float dt, float progress01) { }
+
+        public void OnToolApplyComplete(BioTool tool)
+        {
+            if (tool == null) return;
+            var tray = tool.GetComponent<GelCastingTray>();
+            if (tray != null)
+            {
+                if (gelPlaced || !tray.gelReady) return;
+                var hand = HandController.Active;
+                if (hand == null || hand.Held == null || hand.Held.gameObject != tray.gameObject) return;
+                hand.ReleaseHeldInto(transform, transform.TransformPoint(new Vector3(0, 0.03f, 0.2f)), transform.rotation);
+                tray.gameObject.SetActive(false);  // gel đã nằm trong bể (dùng bản gel của mô hình bể)
+                gelPlaced = true;
+                agarosePercent = tray.agarosePercent;
+                lanes.Clear();
+                hasCompletedRun = false;
+                runMinutes = 0;
+                ShowGel(true);
+                BioFeedback.PlayClick();
+                MolUi.Say("Đã đặt gel vào bể, đệm TAE ngập gel 3 – 5 mm. Nạp thang chuẩn vào giếng 1, mẫu vào các giếng sau.");
+                return;
+            }
+            var p = MolUi.Pipette(tool);
+            if (p == null || !gelPlaced || running || p.load.IsEmpty || lanes.Count >= GelCastingTray.Wells) return;
+            var m = p.DispenseAll();
+            var lane = new GelLane { label = Label(m) };
+            if (!m.HasLoadingDye)
+            {
+                lane.floated = true;
+                BioFeedback.RecordMistake("be_dien_di", "nap_mau_khong_co_chat_nap", "Nạp mẫu không trộn đệm nạp mẫu (loading dye)",
+                    "Mẫu ADN nhẹ hơn đệm nên nổi lên khỏi giếng và trôi mất. Trộn mẫu với đệm nạp mẫu 6× (có glixerol nặng) trước khi nạp.");
+            }
+            else lane.bands.AddRange(m.dna);
+            lanes.Add(lane);
+            hasCompletedRun = false;
+            runMinutes = 0;
+            ShowGel(true);
+            MolUi.Say($"Đã nạp giếng {lanes.Count}: {lane.label}. Nhúng đầu côn vừa chạm miệng giếng, không chọc thủng đáy giếng.");
+        }
+
+        static string Label(MolMix m)
+        {
+            if (m.Get(MolCodes.Ladder) > 0.05f) return "Thang 100 bp";
+            if (m.dna.Count == 0) return $"{BioFeedback.FormatVi(m.TotalUl, "0")} µL mẫu (không có ADN thấy được)";
+            return $"{BioFeedback.FormatVi(m.TotalUl, "0")} µL mẫu ADN";
+        }
+
+        public bool StartRun(double v)
+        {
+            if (!gelPlaced) { MolUi.Say("Chưa có gel trong bể", true); return false; }
+            if (lanes.Count == 0) { MolUi.Say("Chưa nạp giếng nào", true); return false; }
+            volts = v;
+            running = true;
+            if (hasCompletedRun) { runMinutes = 0; hasCompletedRun = false; }
+            MolUi.MachineStatus("be_dien_di", "dang_chay", $"Điện di {v:0} V", 0f);
+            return true;
+        }
+
+        public void StopRun()
+        {
+            if (!running) return;
+            running = false;
+            MolUi.Say($"Đã tắt nguồn sau {runMinutes:0} phút điện di.");
+        }
+
+        void Update()
+        {
+            if (!running) return;
+            double timer = psu != null ? psu.timerMinutes : 30;
+            runMinutes += Time.deltaTime * 30.0 / RealSecondsPer30Min;
+            float f = (float)Math.Min(1.0, Electrophoresis.TrackingDyeDistanceCm(volts, runMinutes) / 6.0);
+            for (int i = 0; i < dyeMarks.Count; i++)
+                dyeMarks[i].localPosition = dyeHome[i] + new Vector3(0.09f * f, 0, 0);  // thuốc nhuộm chạy về cực dương (+x)
+            if (runMinutes >= timer)
+            {
+                runMinutes = timer;
+                running = false;
+                hasCompletedRun = true;
+                if (psu != null) psu.isRunningOutput = false;
+                BioFeedback.PlaySuccess();
+                MolUi.Say($"Điện di xong ({volts:0} V, {timer:0} phút). Tắt nguồn, chuyển gel sang buồng chụp gel.");
+                MolUi.MachineStatus("be_dien_di", "san_sang", $"Điện di xong {volts:0} V {timer:0} phút", 1f);
+            }
+        }
+
+        /// <summary>Quãng đường (cm) của một đoạn ADN trong lần chạy này (âm nghĩa là đã chạy ra khỏi gel).</summary>
+        public double DistanceCm(int bp) => Electrophoresis.MigrationDistanceCm(bp, volts, runMinutes, agarosePercent);
+    }
+
     [DisallowMultipleComponent]
     public class PowerSupplyController : MonoBehaviour, IInteractable, IScrollAdjustable
     {
-        public float voltageV = 100.0f;
-        public float currentMa = 45.0f;
+        public float voltageV = 100f;
         public int timerMinutes = 30;
-        public bool isRunningOutput = false;
+        public bool isRunningOutput;
         public GelTankController connectedTank;
 
-        public string UseHint => $"Bộ nguồn điện di [Điện áp: {BioFeedback.FormatVi(voltageV, "0")} V · Dòng: {BioFeedback.FormatVi(currentMa, "0")} mA · Hẹn giờ: {timerMinutes} phút · {(isRunningOutput ? "ĐANG CẤP NGUỒN" : "NGẮT")}] · Bấm: chạy điện di · Con lăn: chỉnh V";
+        public string UseHint => $"Bộ nguồn điện di {voltageV:0} V · hẹn {timerMinutes} phút · {(isRunningOutput ? "ĐANG CẤP ĐIỆN (bấm để tắt)" : "Bấm: bật nguồn")} · Lăn chuột: chỉnh điện áp";
 
-        public void OpenTankLidWhileRunningMistake()
+        void Start()
         {
-            isRunningOutput = false;
-            BioFeedback.RecordMistake("nguon_dien_di", "mo_nap_be_dien_di_khi_chua_tat_nguon",
-                "Mở nắp bể điện di khi bộ nguồn cao áp (100 V) đang chạy!",
-                "Khóa an toàn tự động ngắt nguồn! Phải luôn bấm TẮT bộ nguồn điện di trước khi tháo nắp bể để tránh điện giật.");
+            if (connectedTank == null) connectedTank = GetComponentInParent<GelTankController>();
         }
 
         public void Use(GameObject user)
         {
-            isRunningOutput = !isRunningOutput;
-            if (isRunningOutput)
-            {
-                if (connectedTank == null)
-                {
-                    var tanks = FindObjectsByType<GelTankController>(FindObjectsSortMode.None);
-                    if (tanks.Length > 0) connectedTank = tanks[0];
-                }
-                if (connectedTank != null)
-                {
-                    connectedTank.RunElectrophoresis(voltageV, timerMinutes, false);
-                }
-            }
-            BioFeedback.PlayClick();
-            BioFeedback.LogAction("nguon_dien_di", isRunningOutput ? "bat_nguon_dien_di" : "tat_nguon_dien_di",
-                $"Bộ nguồn điện di: {(isRunningOutput ? $"Cấp áp {BioFeedback.FormatVi(voltageV, "0")} V trong {timerMinutes} phút" : "Đã tắt nguồn an toàn")}.");
+            if (connectedTank == null) { MolUi.Say("Bộ nguồn chưa nối với bể điện di", true); return; }
+            if (isRunningOutput) { isRunningOutput = false; connectedTank.StopRun(); BioFeedback.PlayButton(); return; }
+            if (!connectedTank.StartRun(voltageV)) return;
+            isRunningOutput = true;
+            BioFeedback.PlayButton();
+            MolUi.Say($"Đậy nắp, nối dây đỏ (+) đỏ, đen (−) đen, bật {voltageV:0} V: bọt khí nhỏ nổi ở điện cực là đúng. ADN chạy từ cực âm về cực dương.");
         }
 
         public void OnScroll(float delta)
         {
-            if (Mathf.Abs(delta) < 0.001f) return;
+            if (isRunningOutput || Mathf.Abs(delta) < 0.001f) return;
             voltageV = Mathf.Clamp(voltageV + Mathf.Sign(delta) * 10f, 50f, 150f);
+            BioFeedback.PlayClick();
+            MolUi.Say($"Điện áp đặt: {voltageV:0} V" + (voltageV > 120 ? " (cao: gel nóng, băng nhòe)" : ""));
         }
     }
 
-    /// <summary>
-    /// 5.4.11. Khay đúc gel agarose + lược tạo giếng (8–12 răng) — mã: khay_duc_gel
-    /// </summary>
-    [DisallowMultipleComponent]
-    public class GelCastingTray : MonoBehaviour, IInteractable
-    {
-        public bool combInserted = true;
-        public bool gelPoured = false;
-        public bool gelSolidified = false;
-        public bool combRemovedWellsReady = false;
+    // =========================================================================
+    // Buồng chụp gel
+    // =========================================================================
 
-        public string UseHint => combRemovedWellsReady
-            ? "Khay đúc gel agarose 1 % [Bản gel đã đông đặc trắng đục nhẹ, đã rút lược tạo 8 giếng sắc nét] · Đặt vào bể điện di"
-            : "Khay đúc gel agarose + lược 8 giếng · Bấm: đổ gel agarose ~55 °C (+ thuốc nhuộm ADN an toàn), chờ đông 20 phút và rút lược";
-
-        public void PourHotAgaroseMistake(float tempC)
-        {
-            if (tempC > 75f)
-            {
-                BioFeedback.RecordMistake("khay_duc_gel", "do_agarose_qua_nong_cong_khay",
-                    $"Đổ dịch agarose đang sôi ({BioFeedback.FormatVi(tempC, "0")} °C) trực tiếp vào khay nhựa acrylic!",
-                    "Nhiệt độ quá cao làm cong vênh khay nhựa và tạo bọt khí. Phải để bình agarose nguội xuống ~55–60 °C rồi mới thêm thuốc nhuộm ADN an toàn và đổ khuôn.");
-            }
-        }
-
-        public void CastAndSolidifyGel()
-        {
-            combInserted = true;
-            gelPoured = true;
-            gelSolidified = true;
-            combRemovedWellsReady = true;
-            BioFeedback.PlaySuccess();
-            BioFeedback.LogAction("khay_duc_gel", "duc_gel_agarose_1_phan_tram",
-                "Đã đổ gel agarose 1 % ở 55 °C có pha thuốc nhuộm ADN an toàn (SYBR Safe), chờ đông đặc 20 phút và rút lược thẳng đứng tạo 8 giếng.");
-        }
-
-        public void Use(GameObject user)
-        {
-            CastAndSolidifyGel();
-        }
-    }
-
-    /// <summary>
-    /// 5.4.11. Lò vi sóng đun chảy agarose — mã: lo_vi_song
-    /// </summary>
-    [DisallowMultipleComponent]
-    public class MicrowaveOven : MonoBehaviour, IInteractable
-    {
-        public bool doorOpen = false;
-        public bool agaroseMeltedClear = false;
-
-        public string UseHint => agaroseMeltedClear
-            ? "Lò vi sóng phòng phân tử [Bình agarose 1 % trong đệm TAE đã tan chảy trong suốt]"
-            : "Lò vi sóng (đun chảy thạch agarose) · Bấm: đun sôi ngắt quãng cho bột agarose tan trong suốt";
-
-        public void BoilSealedBottleMistake()
-        {
-            BioFeedback.RecordMistake("lo_vi_song", "dun_lo_vi_song_van_chat_nap_kin",
-                "Đặt bình chứa thạch agarose vặn chặt nắp kín vào lò vi sóng!",
-                "Áp suất hơi nước tích tụ trong bình kín sẽ gây nổ vỡ bình thủy tinh. Phải nới lỏng nắp hoặc dùng bình tam giác đậy hờ màng chịu nhiệt.");
-        }
-
-        public void Use(GameObject user)
-        {
-            agaroseMeltedClear = true;
-            BioFeedback.PlaySuccess();
-            BioFeedback.LogAction("lo_vi_song", "dun_chay_agarose", "Đã đun lò vi sóng làm tan chảy hoàn toàn agarose 1 % trong đệm TAE thành dung dịch trong suốt.");
-        }
-    }
-
-    /// <summary>
-    /// 5.4.12. Buồng chụp gel (Gel Doc / bàn soi UV-LED xanh 470 nm) — mã: gel_doc
-    /// </summary>
     [DisallowMultipleComponent]
     public class GelDocController : MonoBehaviour, IInteractable
     {
-        public bool doorClosed = true;
-        public bool uvBlueLampOn = false;
-        public int estimatedBp = 500;
-        public string lastSavedGelImagePath = "";
         public GelTankController sourceTank;
-        public GelDocProgram program = new GelDocProgram();
+        public bool captured;
+        GelDocProgram program;
 
-        void Awake()
-        {
-            if (program == null) program = new GelDocProgram();
-            program.gelDoc = this;
-        }
-
-        public string UseHint => $"Buồng chụp và phân tích Gel (Gel Doc) [Cửa: {(doorClosed ? "ĐÓNG" : "MỞ")} · Đèn kích thích: {(uvBlueLampOn ? "BẬT" : "TẮT")} · Băng mẫu ước lượng: ~{estimatedBp} bp] · Bấm: soi & chụp ảnh bản gel";
-
-        public void OpenDoorWhileUvOnSafetyCheck()
-        {
-            doorClosed = false;
-            if (uvBlueLampOn)
-            {
-                uvBlueLampOn = false;
-                BioFeedback.ShowToast("Khóa liên động cửa buồng chụp Gel: Tự động tắt đèn UV 302 nm bảo vệ mắt!");
-                BioFeedback.LogAction("gel_doc", "interlock_tat_uv_gel_doc", "Mở cửa buồng chụp gel -> Khóa liên động tự ngắt đèn UV.");
-            }
-        }
-
-        public int CaptureAndAnalyzeGel()
-        {
-            doorClosed = true;
-            uvBlueLampOn = true;
-            if (sourceTank == null)
-            {
-                var tanks = FindObjectsByType<GelTankController>(FindObjectsSortMode.None);
-                if (tanks.Length > 0) sourceTank = tanks[0];
-            }
-            if (sourceTank != null && sourceTank.sampleWellBands.Count > 0)
-            {
-                estimatedBp = sourceTank.sampleWellBands[0].bp;
-            }
-            else
-            {
-                estimatedBp = 500;
-            }
-            lastSavedGelImagePath = $"gel_{DateTime.Now:yyyyMMdd_HHmmss}_{estimatedBp}bp.png";
-            BioFeedback.PlaySuccess();
-            BioFeedback.LogAction("gel_doc", "chup_va_phan_tich_gel",
-                $"Đã soi và chụp ảnh bản gel điện di ({lastSavedGelImagePath}): Nội suy log(bp) theo thang chuẩn (100..1500 bp) xác định băng sản phẩm PCR ở đúng {estimatedBp} bp, giếng đối chứng âm sạch!");
-            return estimatedBp;
-        }
+        public string UseHint => "Buồng chụp gel (ánh sáng xanh 470 nm + kính lọc cam) · Bấm: mở phần mềm chụp và phân tích gel";
 
         public void Use(GameObject user)
         {
-            CaptureAndAnalyzeGel();
+            if (sourceTank == null)
+            {
+                float best = float.MaxValue;
+                foreach (var t in FindObjectsByType<GelTankController>())
+                {
+                    float d = Vector3.Distance(t.transform.position, transform.position);
+                    if (d < best) { best = d; sourceTank = t; }
+                }
+            }
+            program ??= new GelDocProgram { gelDoc = this };
+            InstrumentScreen.Open(null, program, null);
         }
     }
 
-    /// <summary>
-    /// Màn hình vận hành Buồng chụp Gel (5.4.12) — kế thừa InstrumentProgram.
-    /// </summary>
     public class GelDocProgram : InstrumentProgram
     {
         public override string Code => "gel_doc";
         public GelDocController gelDoc;
+        bool lightOn, imaged;
+        string analysis = "";
+
+        GelTankController Tank => gelDoc != null ? gelDoc.sourceTank : null;
 
         public override void Build()
         {
-            if (Doc == null || Doc.Steps.Count == 0)
-                Doc = BioCatalogLoader.LoadMachineDoc(Code);
-
-            S.AddButton("Đèn UV / Blue LED", 0, 0, () =>
-            {
-                if (gelDoc != null) gelDoc.uvBlueLampOn = !gelDoc.uvBlueLampOn;
-                S.Done("bat_den_uv");
-            });
-
-            S.AddButton("Chụp & Phân tích Gel", 1, 0, () =>
-            {
-                if (gelDoc != null) gelDoc.CaptureAndAnalyzeGel();
-                S.Done("chup_anh_gel");
-            }, true, 2);
-
-            S.SetPlotAxes("SƠ ĐỒ BĂNG ĐIỆN DI GEL AGAROSE (bp)", "Làn chạy", "Kích thước (bp)", "1", "3", "100", "1500");
+            S.AddButton("Bật nguồn buồng chụp", 0, 0, () => S.Done("chuan_bi"));
+            S.AddButton("Đặt gel vào buồng", 1, 0, PlaceGel);
+            S.AddButton("Ánh sáng xanh 470 nm", 2, 0, () => { lightOn = true; S.Done("chon_che_do"); });
+            S.AddButton("Chụp & phân tích", 0, 1, Capture, true, 3);
+            S.SetPlotAxes("ẢNH GEL (giếng ở trên, ADN chạy xuống)", "Giếng 1 → 8", "Quãng đường từ giếng", "1", "8", "xa", "giếng");
             Refresh();
+        }
+
+        void PlaceGel()
+        {
+            if (!S.Require("dat_gel")) return;
+            if (Tank == null || !Tank.gelPlaced) { S.Say("Chưa có gel trong bể điện di.", 2); return; }
+            if (Tank.running) { S.Say("Gel đang chạy điện di: tắt nguồn trước.", 2); return; }
+            if (!Tank.hasCompletedRun) S.Say("Gel chưa chạy điện di xong: các băng còn nằm sát giếng.", 2);
+            S.Done("dat_gel");
+        }
+
+        void Capture()
+        {
+            if (!S.Require("chup_anh")) return;
+            if (Tank == null || !Tank.gelPlaced) { S.Say("Chưa có gel.", 2); return; }
+            if (!lightOn) { S.Say("Chưa bật nguồn sáng kích thích: ảnh tối đen.", 2); return; }
+            imaged = true;
+            gelDoc.captured = true;
+            analysis = Analyze(Tank);
+            S.Done("chup_anh");
+            S.Say("Đã chụp ảnh gel.", 1);
+            BioFeedback.PlaySuccess();
+            BioLabSync.Instance?.RecordExperimentResult("pcr_dien_di", 12, "Phòng SHPT", analysis);
+            MolUi.MachineStatus("gel_doc", "san_sang", "Đã chụp và phân tích gel", 1f);
+        }
+
+        /// <summary>Ước lượng kích thước băng theo thang chuẩn: nội suy tuyến tính log10(bp) theo quãng đường.</summary>
+        public static string Analyze(GelTankController tank)
+        {
+            if (!tank.hasCompletedRun) return "Gel chưa chạy điện di: không đọc được kích thước băng.";
+            GelLane ladder = tank.lanes.Find(l => l.label.StartsWith("Thang") && !l.floated);
+            var sb = new StringBuilder();
+            for (int i = 0; i < tank.lanes.Count; i++)
+            {
+                var lane = tank.lanes[i];
+                sb.Append($"Giếng {i + 1} ({lane.label}): ");
+                if (lane.floated) { sb.Append("trống – mẫu nổi khỏi giếng (thiếu đệm nạp mẫu). "); continue; }
+                if (lane == ladder) { sb.Append("thang chuẩn 100 – 1500 bp. "); continue; }
+                var visible = lane.bands.FindAll(b => b.ng >= 2);
+                if (visible.Count == 0) { sb.Append("không có băng. "); continue; }
+                visible.Sort((a, b) => b.bp.CompareTo(a.bp));
+                for (int k = 0; k < visible.Count; k++)
+                {
+                    double d = tank.DistanceCm(visible[k].bp);
+                    string est = ladder != null ? $"~{EstimateBp(tank, ladder, d):0} bp" : $"{d:0.00} cm (cần thang chuẩn để đọc kích thước)";
+                    sb.Append(k > 0 ? ", " : "").Append(est).Append(visible[k].smear ? " (nhòe)" : "");
+                }
+                sb.Append(". ");
+            }
+            if (ladder == null) sb.Append("Không có giếng thang chuẩn nên không ước lượng được kích thước. ");
+            return sb.ToString();
+        }
+
+        static double EstimateBp(GelTankController tank, GelLane ladder, double d)
+        {
+            // các băng thang theo quãng đường tăng dần (bp giảm dần)
+            var pts = new List<(double d, double logBp)>();
+            foreach (var b in ladder.bands) pts.Add((tank.DistanceCm(b.bp), Math.Log10(b.bp)));
+            pts.Sort((a, b) => a.d.CompareTo(b.d));
+            if (pts.Count < 2) return 0;
+            for (int i = 0; i < pts.Count - 1; i++)
+            {
+                if (d <= pts[i + 1].d || i == pts.Count - 2)
+                {
+                    double t = (d - pts[i].d) / Math.Max(1e-6, pts[i + 1].d - pts[i].d);
+                    double est = Math.Pow(10, pts[i].logBp + t * (pts[i + 1].logBp - pts[i].logBp));
+                    return Math.Round(est / 10.0) * 10.0;
+                }
+            }
+            return 0;
         }
 
         public override void Refresh()
         {
-            int bp = gelDoc != null ? gelDoc.estimatedBp : 500;
-            string file = gelDoc != null ? gelDoc.lastSavedGelImagePath : "(Chưa chụp)";
-
-            S.SetResults(
-                $"<b>BUỒNG CHỤP VÀ PHÂN TÍCH GEL (GEL DOC)</b>\n" +
-                $"• Cửa buồng: <b>{(gelDoc == null || gelDoc.doorClosed ? "ĐÓNG KÍN" : "<color=#FF6666>MỞ!</color>")}</b>\n" +
-                $"• Nguồn sáng kích thích: <b>{(gelDoc != null && gelDoc.uvBlueLampOn ? "BẬT (302 nm / Blue LED)" : "TẮT")}</b>\n" +
-                $"• Băng sản phẩm PCR nội suy: <b>~{bp} bp</b>\n" +
-                $"• Ảnh đã lưu: <b>{file}</b>\n" +
-                $"• Đánh giá: <b>Băng đặc hiệu rõ, đối chứng âm không có vạch (Sạch)</b>");
+            var tank = Tank;
+            var sb = new StringBuilder("<b>BUỒNG CHỤP GEL</b>\n");
+            if (tank == null || !tank.gelPlaced) sb.Append("• Chưa có gel: đổ gel, đặt vào bể, nạp mẫu và chạy điện di trước.\n");
+            else
+            {
+                sb.Append($"• Gel agarose {BioFeedback.FormatVi(tank.agarosePercent, "0.0")} %, {tank.lanes.Count} giếng đã nạp, ");
+                sb.Append(tank.hasCompletedRun ? $"đã chạy {tank.volts:0} V {tank.runMinutes:0} phút\n" : tank.running ? "đang chạy\n" : "chưa chạy\n");
+            }
+            sb.Append($"• Nguồn sáng: {(lightOn ? "xanh lam 470 nm + kính lọc cam (an toàn hơn UV)" : "tắt")}\n");
+            if (imaged) sb.Append("• Phân tích: ").Append(analysis);
+            S.SetResults(sb.ToString());
         }
 
         public override void DrawSchematic(Painter p, float time)
         {
-            p.Clear(new Color32(12, 18, 16, 255));
-            p.FillRect(40, 30, 200, 140, new Color32(28, 40, 36, 255));
-            p.FillRect(115, 170, 50, 25, new Color32(60, 90, 80, 255));
-            p.FillRect(70, 45, 140, 70, new Color32(20, 30, 26, 255));
+            p.Clear(new Color(0.05f, 0.06f, 0.07f));
+            p.FillRect(300, 40, 380, 270, new Color(0.13f, 0.14f, 0.16f));
+            p.FillRect(340, 70, 300, 30, lightOn ? new Color(0.2f, 0.45f, 1f) : new Color(0.15f, 0.17f, 0.22f));
+            p.FillRect(380, 110, 220, 120, new Color(0.75f, 0.85f, 0.8f, 0.35f));
+            p.FillRect(440, 250, 100, 40, new Color(0.95f, 0.55f, 0.15f, 0.7f));
+            S.SchemLabel("gd_cam", "Camera + kính lọc cam", 490, 300, 13, Color.white);
+            S.SchemLabel("gd_gel", "Bản gel", 490, 170, 13, Color.black);
+            S.SchemLabel("gd_led", lightOn ? "Đèn LED xanh 470 nm: BẬT" : "Đèn LED xanh: tắt", 490, 85, 13, Color.white);
         }
 
         public override void DrawPlot(Painter p)
         {
-            p.Clear(new Color32(10, 14, 18, 255));
-            p.FillRect(16, 34, 120, 96, new Color32(18, 28, 24, 255));
-            int[] ladderY = { 46, 58, 72, 86, 102, 118 };
-            for (int i = 0; i < ladderY.Length; i++)
-                p.FillRect(24, ladderY[i], 24, 3, new Color32(80, 220, 140, 255));
-
-            int bp = gelDoc != null ? gelDoc.estimatedBp : 500;
-            if (bp > 0)
+            p.Clear(new Color(0.02f, 0.02f, 0.03f));
+            var tank = Tank;
+            if (tank == null || !tank.gelPlaced || !lightOn) return;
+            int n = GelCastingTray.Wells;
+            float left = 40, right = p.W - 40, topY = p.H - 40, usable = p.H - 90;
+            float laneW = (right - left) / n;
+            double dMax = Math.Max(0.5, tank.DistanceCm(80));
+            for (int i = 0; i < n; i++)
             {
-                p.FillRect(64, 86, 26, 4, new Color32(80, 220, 140, 255));
+                float cx = left + laneW * (i + 0.5f);
+                p.FillRect(cx - laneW * 0.32f, topY, laneW * 0.64f, 8, new Color(0.22f, 0.22f, 0.25f));  // giếng
+                if (i >= tank.lanes.Count) continue;
+                var lane = tank.lanes[i];
+                if (lane.floated) continue;
+                foreach (var b in lane.bands)
+                {
+                    double d = tank.hasCompletedRun || tank.running ? tank.DistanceCm(b.bp) : 0;
+                    float y = topY - 6 - (float)(d / dMax) * usable;
+                    float glow = Mathf.Clamp01((float)(Math.Log10(Math.Max(1, b.ng)) / 2.0));
+                    if (glow <= 0.05f) continue;
+                    var c = Color.Lerp(new Color(0.05f, 0.08f, 0.05f), new Color(0.75f, 1f, 0.75f), glow);
+                    float h = b.smear ? 26 : 5;
+                    p.FillRect(cx - laneW * 0.3f, y - h / 2, laneW * 0.6f, h, c);
+                }
             }
         }
     }
 
-    /// <summary>
-    /// 5.4.14. Thiết bị đo mật độ quang OD600 & độ tinh sạch ADN A260/A280 — mã: may_quang_pho_od600
-    /// </summary>
+    // =========================================================================
+    // Bộ tách chiết ADN chuối (đảo tách chiết)
+    // =========================================================================
+
     [DisallowMultipleComponent]
-    public class Od600Controller : MonoBehaviour, IInteractable
+    public class DnaExtractionKit : MonoBehaviour, IInteractable
     {
-        public bool blankCalibrated = true;
-        public double currentHours = 4.0;
-        public double measuredOd600 = 0.65;
-        public double a260 = 1.20;
-        public double a280 = 0.66;
-        public Od600Program program = new Od600Program();
+        public Transform outputRack;
+        public int step;
+        int made;
 
-        void Awake()
+        static readonly string[] Steps =
         {
-            if (program == null) program = new Od600Program();
-            program.controller = this;
-        }
+            "Nghiền 5 g chuối với 10 mL đệm ly giải (nước rửa bát phá màng tế bào, màng nhân + 1 thìa muối NaCl)",
+            "Ủ dịch nghiền ở bể ổn nhiệt 60 °C trong 10 phút (enzyme phân hủy ADN bị bất hoạt)",
+            "Lọc qua phễu giấy lọc lấy dịch trong vào ống nghiệm",
+            "Rót nhẹ 2 thể tích cồn 90° lạnh theo thành ống: ADN kết tủa thành sợi trắng ở mặt phân cách, quấn bằng đũa thủy tinh",
+        };
 
-        public double EstimatedCellsPerMl => measuredOd600 * 8.0e8;
-        public double DnaConcentrationNgUl => a260 * 50.0;
-        public double PurityRatio260_280 => a280 > 0.001 ? a260 / a280 : 0.0;
-
-        public string UseHint => $"Máy quang phổ đo OD600 / ADN [OD600 = {BioFeedback.FormatVi((float)measuredOd600, "0.00")} (~{EstimatedCellsPerMl:E2} TB/mL) · A260/A280 = {BioFeedback.FormatVi((float)PurityRatio260_280, "0.00")} ({BioFeedback.FormatVi((float)DnaConcentrationNgUl, "0.0")} ng/µL)] · Bấm: đo đường cong sinh trưởng";
-
-        public double MeasureGrowthPointAtHour(double hour, bool forgotBlankMistake = false)
-        {
-            currentHours = hour;
-            blankCalibrated = !forgotBlankMistake;
-            double trueCells = ColonyGrowth.PopulationAtTime(hour, 1.0e6, 1.0e9, 1.0);
-            measuredOd600 = ColonyGrowth.OpticalDensity600(trueCells);
-            if (forgotBlankMistake)
-            {
-                measuredOd600 += 0.38;
-                BioFeedback.RecordMistake("may_quang_pho_od600", "do_od600_quen_tru_mau_trang_blank",
-                    "Đo OD600 dịch nuôi cấy mà QUÊN đo trừ mẫu trắng (Blank) bằng môi trường LB sạch!",
-                    "Môi trường LB có màu vàng hổ phách tự hấp thụ ánh sáng ở 600 nm làm giá trị OD600 bị cộng dồn sai số hệ thống (+0,38 AU).");
-            }
-            else
-            {
-                BioFeedback.PlaySuccess();
-                BioFeedback.LogAction("may_quang_pho_od600", "do_od600_sinh_truong",
-                    $"Đo OD600 tại t = {BioFeedback.FormatVi((float)hour, "0.0")} giờ (đã trừ Blank): OD600 = {BioFeedback.FormatVi((float)measuredOd600, "0.000")} → Mật độ ≈ {trueCells:E2} tế bào/mL.");
-            }
-            return measuredOd600;
-        }
+        public string UseHint => step < Steps.Length ? $"Tách chiết ADN chuối – bước {step + 1}/4: {Steps[step]} · Bấm để làm" : "Đã tách xong ADN chuối · Bấm để làm mẻ mới";
 
         public void Use(GameObject user)
         {
-            double nextH = currentHours >= 8.0 ? 0.5 : currentHours + 1.5;
-            MeasureGrowthPointAtHour(nextH, false);
+            if (step >= Steps.Length) step = 0;
+            MolUi.Say($"Bước {step + 1}: {Steps[step]}");
+            BioFeedback.PlayClick();
+            step++;
+            if (step < Steps.Length) return;
+
+            double ug = DnaExtraction.YieldUg(5.0, "chuoi", true, true, 60.0, -20.0, 2.0);
+            made++;
+            var tube = BioFloor2InteractiveTools.MakeTube(outputRack != null ? outputRack : transform, $"Ống ADN chuối {made}",
+                new Vector3(0, 0, -0.03f + 0.02f * ((made - 1) % 4)), "ong_eppendorf", $"ADN chuối {made}", new Color(0.95f, 0.85f, 0.2f));
+            tube.mix.Add(MolCodes.BananaDna, 100f);
+            tube.Changed();
+            BioFeedback.PlaySuccess();
+            MolUi.Say($"Thu được ~{ug:0} µg ADN thô (sợi trắng). Hòa vào 100 µL nước: ống \"ADN chuối {made}\" ở giá cạnh bộ tách chiết. ADN chuối không có gen GFP: dùng làm khuôn PCR với mồi GFP sẽ không có băng.");
+            BioLabSync.Instance?.RecordExperimentResult("tach_chiet_adn", 10, "Phòng SHPT", $"Tách được ~{ug:0} µg ADN thô từ 5 g chuối");
         }
     }
 
-    /// <summary>
-    /// Chương trình màn hình vận hành Máy đo OD600 — kế thừa InstrumentProgram.
-    /// </summary>
+    // =========================================================================
+    // Máy quang phổ OD600 / ADN và cuvet
+    // =========================================================================
+
+    [DisallowMultipleComponent]
+    public class Od600Controller : MonoBehaviour, IInteractable
+    {
+        public bool blankDone;
+        public double hours = 0.0;
+        public double measuredOd600;
+        public readonly List<Vector2> curve = new List<Vector2>();
+        Od600Program program;
+
+        public double CellsPerMl => measuredOd600 * 8.0e8;
+        public string UseHint => "Máy quang phổ OD600 / ADN · Bấm: mở màn hình đo";
+
+        public void Use(GameObject user)
+        {
+            program ??= new Od600Program { controller = this };
+            InstrumentScreen.Open(null, program, null);
+        }
+
+        /// <summary>Đo dịch E. coli nuôi lắc ở 37 °C sau h giờ (đường cong sinh trưởng ColonyGrowth).</summary>
+        public double MeasureAt(double h)
+        {
+            hours = h;
+            double cells = ColonyGrowth.PopulationAtTime(h, 1.0e6, 1.0e9, 1.0);
+            measuredOd600 = ColonyGrowth.OpticalDensity600(cells) + (blankDone ? 0 : 0.38);
+            curve.Add(new Vector2((float)h, (float)measuredOd600));
+            if (!blankDone)
+                BioFeedback.RecordMistake("may_quang_pho_od600", "quen_do_mau_trang", "Đo OD600 mà chưa đo mẫu trắng (môi trường LB sạch)",
+                    "Môi trường LB màu vàng tự hấp thụ ánh sáng 600 nm: mọi số đo bị cộng thêm khoảng 0,38.");
+            return measuredOd600;
+        }
+    }
+
     public class Od600Program : InstrumentProgram
     {
         public override string Code => "may_do_od600";
@@ -1080,104 +1337,59 @@ namespace Khkt.Demo.Bio
 
         public override void Build()
         {
-            if (Doc == null || Doc.Steps.Count == 0)
-                Doc = BioCatalogLoader.LoadMachineDoc(Code);
-
-            S.AddButton("Đo mẫu trắng (Blank = 0)", 0, 0, () =>
-            {
-                if (controller != null) controller.blankCalibrated = true;
-                S.Done("do_mau_trang");
-                S.Say("Đã zero trừ nền mẫu trắng Blank (A = 0,000).", 1);
-            });
-
-            S.AddButton("Đo điểm OD600 tiếp", 1, 0, () =>
-            {
-                if (controller != null) controller.Use(null);
-                S.Done("do_od600");
-            });
-
-            S.AddButton("Đo ADN A260/A280", 2, 0, () =>
-            {
-                S.Done("do_a260_a280");
-                S.Say("Đã đo mật độ quang hấp thụ A260 và A280.", 1);
-            });
-
-            S.SetPlotAxes("ĐƯỜNG CONG SINH TRƯỞNG VI SINH VẬT (OD600)", "Thời gian (h)", "OD600 (AU)", "0", "8", "0", "1.5");
+            S.AddButton("Bật máy, chọn 600 nm", 0, 0, () => S.Done("bat_may"), false, 2);
+            S.AddButton("Đo mẫu trắng (LB)", 2, 0, () => { if (!S.Require("do_blank")) return; controller.blankDone = true; S.Done("do_blank"); S.Say("Đã chỉnh 0,000 với môi trường LB sạch.", 1); });
+            S.AddButton("Nạp dịch khuẩn vào cuvet", 0, 1, () => { if (!S.Require("chuan_bi_mau")) return; S.Done("chuan_bi_mau"); }, false, 2);
+            S.AddButton("Đo điểm tiếp (+1 giờ)", 0, 2, MeasureNext, true, 2);
+            S.AddButton("Làm lại", 2, 2, () => { controller.curve.Clear(); controller.hours = 0; });
+            S.SetPlotAxes("ĐƯỜNG CONG SINH TRƯỞNG E. coli (37 °C)", "Thời gian (giờ)", "OD600", "0", "12", "0", "2");
             Refresh();
+        }
+
+        void MeasureNext()
+        {
+            if (!S.Require("do_mau")) return;
+            double h = controller.curve.Count == 0 ? 0 : controller.hours + 1;
+            if (h > 12) { S.Say("Đã đo đủ 12 giờ. Bấm Làm lại để đo đường cong mới.", 0); return; }
+            double od = controller.MeasureAt(h);
+            S.Done("do_mau");
+            S.Say($"t = {h:0} giờ: OD600 = {BioFeedback.FormatVi(od, "0.000")}", 1);
         }
 
         public override void Refresh()
         {
-            double od = controller != null ? controller.measuredOd600 : 0.65;
-            double hrs = controller != null ? controller.currentHours : 4.0;
-            double cells = controller != null ? controller.EstimatedCellsPerMl : 5.2e8;
-            double ratio = controller != null ? controller.PurityRatio260_280 : 1.82;
-            double conc = controller != null ? controller.DnaConcentrationNgUl : 60.0;
-
-            S.SetResults(
-                $"<b>MÁY QUANG PHỔ ĐO OD600 & ĐỘ TINH SẠCH ADN</b>\n" +
-                $"• Thời điểm ủ t: <b>{BioFeedback.FormatVi((float)hrs, "0.1")} giờ</b>\n" +
-                $"• Mật độ quang OD600: <b>{BioFeedback.FormatVi((float)od, "0.000")} AU</b>\n" +
-                $"• Mật độ tế bào ước tính: <b>{cells:E2} CFU/mL</b>\n" +
-                $"• Tỷ số A260/A280: <b>{BioFeedback.FormatVi((float)ratio, "0.00")}</b> (Chuẩn: 1,80 – 2,00)\n" +
-                $"• Nồng độ ADN: <b>{BioFeedback.FormatVi((float)conc, "0.0")} ng/µL</b>");
+            S.SetResults("<b>MÁY QUANG PHỔ OD600</b>\n" +
+                $"• Mẫu trắng: {(controller.blankDone ? "đã đo (0,000)" : "<color=#FF8866>chưa đo</color>")}\n" +
+                $"• Điểm cuối: t = {controller.hours:0} giờ, OD600 = {BioFeedback.FormatVi(controller.measuredOd600, "0.000")} (≈ {controller.CellsPerMl:0.0e+0} tế bào/mL)\n" +
+                "• Pha tiềm phát → pha lũy thừa (OD tăng nhanh) → pha cân bằng (OD ~1,2 – 1,5).");
         }
 
         public override void DrawSchematic(Painter p, float time)
         {
-            p.Clear(new Color32(14, 28, 42, 255));
-            p.FillRect(30, 80, 40, 40, new Color32(240, 200, 80, 255));
-            p.FillRect(130, 70, 30, 60, new Color32(100, 180, 220, 200));
-            p.FillRect(220, 80, 40, 40, new Color32(80, 200, 140, 255));
-            p.Line(70, 100, 220, 100, new Color32(255, 230, 100, 240), 3);
+            p.Clear(new Color(0.05f, 0.08f, 0.12f));
+            p.Disc(120, 175, 40, new Color(1f, 0.9f, 0.5f));
+            p.Line(160, 175, 880, 175, new Color(1f, 0.6f, 0.2f, 0.9f), 4);
+            p.FillRect(470, 120, 50, 110, new Color(0.85f, 0.85f, 0.6f, 0.6f));
+            p.FillRect(840, 140, 60, 70, new Color(0.3f, 0.75f, 0.5f));
+            S.SchemLabel("od_l", "Nguồn sáng", 120, 240, 13, Color.white);
+            S.SchemLabel("od_c", "Cuvet 1 cm", 495, 250, 13, Color.white);
+            S.SchemLabel("od_d", "Đầu thu", 870, 230, 13, Color.white);
         }
 
         public override void DrawPlot(Painter p)
         {
-            p.Clear(new Color32(10, 20, 32, 255));
-            for (int x = 40; x < 260; x += 4)
+            InstrumentScreen.PlotFrame(p);
+            foreach (var pt in controller.curve)
             {
-                float t = (x - 40) / 220f;
-                float y = 30 + 130f / (1f + Mathf.Exp(-7f * (t - 0.45f)));
-                p.Disc(x, y, 2.5f, new Color32(75, 195, 145, 255));
+                var m = InstrumentScreen.Map(p, pt.x, pt.y, 0, 12, 0, 2);
+                p.Disc(m.x, m.y, 5, new Color(0.3f, 0.85f, 0.6f));
             }
         }
     }
 
-    /// <summary>
-    /// 5.4.14. Cuvet đo quang 1 cm (2 mặt nhám để cầm, 2 mặt trong suốt cho tia sáng đi qua) — mã: cuvet
-    /// </summary>
     [DisallowMultipleComponent]
-    public class Cuvette : MonoBehaviour, IInteractable
+    public class Cuvette : MonoBehaviour
     {
-        public bool touchedOpticalFaceMistake = false;
-        public bool orientedCorrectlyInBeam = true;
-        public BioSample sample;
-
-        void Awake()
-        {
-            sample = GetComponent<BioSample>();
-            if (sample == null) sample = gameObject.AddComponent<BioSample>();
-        }
-
-        public string UseHint => touchedOpticalFaceMistake
-            ? "Cuvet 1 cm [BỊ DÍNH VÂN TAY MẶT QUANG HỌC — cần lau bằng giấy lau kính]"
-            : "Cuvet đo quang phổ 1 cm (cầm ở 2 mặt nhám có gân) · Bấm: nạp dịch khuẩn & đặt đúng chiều tia sáng";
-
-        public void TouchClearOpticalFaceMistake()
-        {
-            touchedOpticalFaceMistake = true;
-            BioFeedback.RecordMistake("cuvet", "cam_tay_vao_mat_trong_quang_hoc_cuvet",
-                "Cầm ngón tay trực tiếp vào mặt trong suốt (mặt quang học) của cuvet hoặc đặt mặt nhám chắn ngang tia sáng!",
-                "Dấu vân tay và vết mờ làm tán xạ chùm tia đơn sắc 600 nm khiến số đo OD600 tăng giả tạo. Phải luôn cầm cuvet ở 2 mặt nhám và lau sạch mặt trong bằng giấy lau kính.");
-        }
-
-        public void Use(GameObject user)
-        {
-            touchedOpticalFaceMistake = false;
-            orientedCorrectlyInBeam = true;
-            BioFeedback.PlayClick();
-            BioFeedback.LogAction("cuvet", "dat_cuvet_dung_chieu", "Đã cầm cuvet ở mặt nhám và đặt mặt quang học trong suốt vuông góc với chùm tia sáng 600 nm.");
-        }
+        void Start() => MolUi.Info(this, "Cuvet 1 cm: cầm ở hai mặt nhám, hai mặt trong cho tia sáng đi qua. Lau sạch vân tay bằng giấy lau kính trước khi đặt vào máy.");
     }
 }

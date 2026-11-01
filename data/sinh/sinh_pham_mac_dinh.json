@@ -433,6 +433,79 @@
       "so_lo": "KT2024-LY99",
       "han_dung_ngay": -15,
       "cap_an_toan": "BSL-1"
+    },
+    {
+      "id": "sp_plasmid_puc19",
+      "ten": "Plasmid pUC19 (thể truyền 2686 bp, ampR, lacZα) 100 ng/µL",
+      "loai": "kit",
+      "tu": "tu_dong_am20",
+      "ngan": "Hộp ghép gen",
+      "so_luong": 4,
+      "don_vi": "ống 50 µL",
+      "so_lo": "GG2026-PU19",
+      "han_dung_ngay": 365,
+      "cap_an_toan": "BSL-1"
+    },
+    {
+      "id": "sp_enzyme_ecori",
+      "ten": "Enzyme cắt giới hạn EcoRI (G^AATTC) 20 U/µL",
+      "loai": "kit",
+      "tu": "tu_dong_am20",
+      "ngan": "Hộp ghép gen",
+      "so_luong": 2,
+      "don_vi": "ống 100 µL",
+      "so_lo": "GG2026-ECO1",
+      "han_dung_ngay": 365,
+      "cap_an_toan": "BSL-1"
+    },
+    {
+      "id": "sp_enzyme_bamhi",
+      "ten": "Enzyme cắt giới hạn BamHI (G^GATCC) 20 U/µL",
+      "loai": "kit",
+      "tu": "tu_dong_am20",
+      "ngan": "Hộp ghép gen",
+      "so_luong": 2,
+      "don_vi": "ống 100 µL",
+      "so_lo": "GG2026-BAM1",
+      "han_dung_ngay": 365,
+      "cap_an_toan": "BSL-1"
+    },
+    {
+      "id": "sp_ligaza_t4",
+      "ten": "ADN ligaza T4 kèm đệm 10× (ATP, Mg²⁺)",
+      "loai": "kit",
+      "tu": "tu_dong_am20",
+      "ngan": "Hộp ghép gen",
+      "so_luong": 2,
+      "don_vi": "bộ",
+      "so_lo": "GG2026-LIG4",
+      "han_dung_ngay": 365,
+      "cap_an_toan": "BSL-1"
+    },
+    {
+      "id": "sp_te_bao_kha_bien_dh5a",
+      "ten": "Tế bào E. coli DH5α khả biến (chủng không gây bệnh)",
+      "loai": "chung_vi_sinh",
+      "tu": "tu_dong_am20",
+      "ngan": "Hộp ghép gen",
+      "so_luong": 10,
+      "don_vi": "ống 50 µL",
+      "so_lo": "GG2026-DH5A",
+      "han_dung_ngay": 180,
+      "cap_an_toan": "BSL-1",
+      "ma_chung": "e_coli_k12"
+    },
+    {
+      "id": "sp_dia_lb_amp_xgal",
+      "ten": "Đĩa thạch LB + ampicillin 100 µg/mL + X-gal/IPTG",
+      "loai": "moi_truong",
+      "tu": "tu_mat_4",
+      "ngan": "Ngăn đĩa thạch",
+      "so_luong": 20,
+      "don_vi": "đĩa",
+      "so_lo": "GG2026-AXG",
+      "han_dung_ngay": 30,
+      "cap_an_toan": "BSL-1"
     }
   ]
 }

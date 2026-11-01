@@ -32,6 +32,8 @@ namespace Khkt.Demo
         [Tooltip("Vật liệu bóng mờ xem trước chỗ lắp ráp (trong suốt)")]
         public Material ghostMaterial;
 
+        /// <summary>Bàn tay của người chơi cục bộ (thiết bị sinh học gọi để nhận vật đang cầm, ví dụ máy PCR nhận ống).</summary>
+        public static HandController Active { get; private set; }
         public Grabbable Held { get; private set; }
         public Act Current { get; private set; }
         /// <summary>Đang thực hiện thao tác giữ (rót, hút, xả, lắc).</summary>
@@ -71,6 +73,8 @@ namespace Khkt.Demo
         float tilt;
         float heldYaw;  // xoay bộ phận đang cầm (lăn chuột / R E) để chọn chiều khi lắp
         Transform pourStream;
+
+        void Awake() => Active = this;
 
         void Start()
         {
@@ -267,11 +271,18 @@ namespace Khkt.Demo
             if (Held != null && Current != Act.BioKnob && HeldPart == null && mouse != null && !looking)
             {
                 var heldKnob = Held.GetComponentInChildren<BioKnob>();
-                if (heldKnob != null)
+                float scroll = mouse.scroll.ReadValue().y;
+                if (Mathf.Abs(scroll) > 0.01f)
                 {
-                    float scroll = mouse.scroll.ReadValue().y;
-                    if (Mathf.Abs(scroll) > 0.01f) heldKnob.AdjustSteps(scroll > 0 ? 1 : -1);
+                    if (heldKnob != null) heldKnob.AdjustSteps(scroll > 0 ? 1 : -1);
+                    else Held.GetComponent<IScrollAdjustable>()?.OnScroll(scroll);  // micropipet đang cầm: chỉnh µL
                 }
+            }
+            else if (Held == null && hasHit && mouse != null && !looking && Current != Act.BioKnob && Current != Act.Stopcock)
+            {
+                // tay không, trỏ vào thiết bị chỉnh được bằng con lăn (bộ nguồn điện di: V, bể ổn nhiệt: °C...)
+                float scroll = mouse.scroll.ReadValue().y;
+                if (Mathf.Abs(scroll) > 0.01f) hit.collider.GetComponentInParent<IScrollAdjustable>()?.OnScroll(scroll);
             }
             if (released || !down)
             {
@@ -469,6 +480,21 @@ namespace Khkt.Demo
             Held = null;
             g.SetHeld(false);
             socket.Put(g);
+        }
+
+        /// <summary>
+        /// Thiết bị nhận vật đang cầm (máy PCR nhận ống, bể điện di nhận khay gel, trạm ghép gen nhận ống mẫu):
+        /// thả khỏi tay, gắn vào parent ở đúng chỗ. Trả về vật vừa thả (null nếu tay không).
+        /// </summary>
+        public Grabbable ReleaseHeldInto(Transform parent, Vector3 worldPos, Quaternion worldRot)
+        {
+            if (Held == null) return null;
+            var g = Held;
+            Held = null;
+            g.SetHeld(false);
+            g.transform.SetParent(parent, true);
+            g.transform.SetPositionAndRotation(worldPos, worldRot);
+            return g;
         }
 
         public void PlaceOnSurface(Vector3 point)

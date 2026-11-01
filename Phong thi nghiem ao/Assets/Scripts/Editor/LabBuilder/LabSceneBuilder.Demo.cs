@@ -515,7 +515,8 @@ namespace Khkt.EditorTools
         static void AttachSurfaces(Transform root)
         {
             foreach (var t in root.GetComponentsInChildren<Transform>(true))
-                if ((t.name == "Mặt bàn" || t.name.StartsWith("Mặt bàn đoạn") || t.name == "Mặt làm việc") && t.GetComponent<Collider>() != null)
+                if ((t.name == "Mặt bàn" || t.name.StartsWith("Mặt bàn đoạn") || t.name == "Mặt làm việc" || t.name == "Mặt quầy" || t.name == "Mặt đảo")
+                    && t.GetComponent<Collider>() != null)  // "Mặt quầy", "Mặt đảo": quầy và đảo thí nghiệm tầng 2
                     t.gameObject.AddComponent<PlaceSurface>();
         }
 

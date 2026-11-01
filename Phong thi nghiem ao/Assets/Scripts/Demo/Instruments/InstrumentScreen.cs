@@ -100,6 +100,8 @@ namespace Khkt.Demo.Instruments
             program.S = this;
             program.Sample = sample;
             program.Doc = InstrumentData.Instance != null ? InstrumentData.Instance.Doc(program.Code) : new InstrumentDoc { Name = program.Code };
+            // máy sinh học tầng 2: hồ sơ không nằm trong InstrumentData mà đọc từ data/may/<ma>.json
+            if (program.Doc == null || program.Doc.Steps.Count == 0) program.Doc = Khkt.Demo.Bio.BioCatalogLoader.LoadMachineDoc(program.Code);
             DoneSteps.Clear();
             ClearControls();
             foreach (var l in schemLabels.Values) l.gameObject.SetActive(false);

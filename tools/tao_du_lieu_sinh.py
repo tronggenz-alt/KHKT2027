@@ -970,6 +970,79 @@ def tao_sinh_pham():
                 "so_lo": "KT2024-LY99",
                 "han_dung_ngay": -15,  # ĐÃ QUÁ HẠN 15 NGÀY
                 "cap_an_toan": "BSL-1"
+            },
+            {
+                "id": "sp_plasmid_puc19",
+                "ten": "Plasmid pUC19 (thể truyền 2686 bp, ampR, lacZα) 100 ng/µL",
+                "loai": "kit",
+                "tu": "tu_dong_am20",
+                "ngan": "Hộp ghép gen",
+                "so_luong": 4,
+                "don_vi": "ống 50 µL",
+                "so_lo": "GG2026-PU19",
+                "han_dung_ngay": 365,
+                "cap_an_toan": "BSL-1"
+            },
+            {
+                "id": "sp_enzyme_ecori",
+                "ten": "Enzyme cắt giới hạn EcoRI (G^AATTC) 20 U/µL",
+                "loai": "kit",
+                "tu": "tu_dong_am20",
+                "ngan": "Hộp ghép gen",
+                "so_luong": 2,
+                "don_vi": "ống 100 µL",
+                "so_lo": "GG2026-ECO1",
+                "han_dung_ngay": 365,
+                "cap_an_toan": "BSL-1"
+            },
+            {
+                "id": "sp_enzyme_bamhi",
+                "ten": "Enzyme cắt giới hạn BamHI (G^GATCC) 20 U/µL",
+                "loai": "kit",
+                "tu": "tu_dong_am20",
+                "ngan": "Hộp ghép gen",
+                "so_luong": 2,
+                "don_vi": "ống 100 µL",
+                "so_lo": "GG2026-BAM1",
+                "han_dung_ngay": 365,
+                "cap_an_toan": "BSL-1"
+            },
+            {
+                "id": "sp_ligaza_t4",
+                "ten": "ADN ligaza T4 kèm đệm 10× (ATP, Mg²⁺)",
+                "loai": "kit",
+                "tu": "tu_dong_am20",
+                "ngan": "Hộp ghép gen",
+                "so_luong": 2,
+                "don_vi": "bộ",
+                "so_lo": "GG2026-LIG4",
+                "han_dung_ngay": 365,
+                "cap_an_toan": "BSL-1"
+            },
+            {
+                "id": "sp_te_bao_kha_bien_dh5a",
+                "ten": "Tế bào E. coli DH5α khả biến (chủng không gây bệnh)",
+                "loai": "chung_vi_sinh",
+                "tu": "tu_dong_am20",
+                "ngan": "Hộp ghép gen",
+                "so_luong": 10,
+                "don_vi": "ống 50 µL",
+                "so_lo": "GG2026-DH5A",
+                "han_dung_ngay": 180,
+                "cap_an_toan": "BSL-1",
+                "ma_chung": "e_coli_k12"
+            },
+            {
+                "id": "sp_dia_lb_amp_xgal",
+                "ten": "Đĩa thạch LB + ampicillin 100 µg/mL + X-gal/IPTG",
+                "loai": "moi_truong",
+                "tu": "tu_mat_4",
+                "ngan": "Ngăn đĩa thạch",
+                "so_luong": 20,
+                "don_vi": "đĩa",
+                "so_lo": "GG2026-AXG",
+                "han_dung_ngay": 30,
+                "cap_an_toan": "BSL-1"
             }
         ]
     }
@@ -1492,7 +1565,7 @@ def tao_bai_thi_nghiem():
                 "buoc": [
                     {
                         "so": 1,
-                        "mo_ta": "Pha hỗn hợp phản ứng PCR 25 µL trên đá lạnh: 12,5 µL 2X MasterMix + 1 µL mồi xuôi + 1 µL mồi ngược + 2 µL ADN khuôn + 8,5 µL nước.",
+                        "mo_ta": "Trong tủ thao tác PCR, pha mỗi ống 20 µL trên đá bằng micropipet P10 (mỗi thuốc thử một đầu côn mới): 10 µL Master Mix 2X + 1 µL cặp mồi GFP + 1 µL ADN khuôn + 8 µL nước. Ống đối chứng âm thay ADN khuôn bằng nước.",
                         "dieu_kien": {"loai": "the_tich", "ma": "micropipet_p10", "ml_min": 0.001, "ml_max": 0.015}
                     },
                     {
@@ -1521,7 +1594,7 @@ def tao_bai_thi_nghiem():
                         "dieu_kien": {"loai": "trang_thai", "ma": "gel_doc", "ten": "chup_anh_xong", "gia_tri": 1}
                     }
                 ],
-                "ket_qua_mong_doi": "Trên ảnh chụp gel huỳnh quang xuất hiện 1 vạch DNA sáng rõ, sắc nét ở vị trí khoảng 500 bp thẳng hàng với vạch 500 bp của thang chuẩn DNA Ladder; giếng đối chứng âm không có vạch.",
+                "ket_qua_mong_doi": "Trên ảnh chụp gel huỳnh quang xuất hiện 1 vạch ADN sáng rõ ở khoảng 740 bp (gen GFP 720 bp + hai đuôi mồi mang vị trí cắt EcoRI / BamHI), nằm giữa vạch 700 và 800 bp của thang chuẩn; giếng đối chứng âm không có vạch.",
                 "cau_hoi": [
                     {"hoi": "Ba giai đoạn cơ bản của một chu kỳ nhiệt trong phản ứng PCR là gì?", "dap_an": "Biến tính (Denaturation, 94 – 95 °C), Gắn mồi (Annealing, 50 – 60 °C) và Kéo dài (Extension, 72 °C)."},
                     {"hoi": "Tại sao trong điện di gel agarose, các đoạn ADN luôn di chuyển từ cực âm sang cực dương?", "dap_an": "Bộ khung photphat của phân tử ADN chứa nhiều gốc photphat PO4 3- mang điện tích âm ở pH trung tính, nên bị hút về cực dương trong điện trường."},
@@ -1571,6 +1644,49 @@ def tao_bai_thi_nghiem():
                     {"hoi": "Thời gian thế hệ (g) của E. coli K-12 trong điều kiện tối ưu 37 °C là khoảng bao nhiêu phút?", "dap_an": "Khoảng 20 phút."}
                 ],
                 "nguon": "https://openstax.org/books/microbiology/pages/9-1-how-microbes-grow"
+            },
+            {
+                "ma": "ghep_gen_adn_tai_to_hop",
+                "ten": "Ghép gen: tạo ADN tái tổ hợp pUC19 – GFP và chọn dòng khuẩn lạc xanh / trắng",
+                "lop": 12,
+                "sgk": "Sinh học 12 Kết nối tri thức - Bài 4: Công nghệ gen và ứng dụng (quy trình tạo ADN tái tổ hợp, chuyển gen vào tế bào nhận)",
+                "muc_tieu": "Thực hiện được quy trình tạo ADN tái tổ hợp: cắt thể truyền và gen bằng cùng enzyme cắt giới hạn, nối bằng ligaza, biến nạp vào E. coli và chọn dòng bằng ampicillin + X-gal; kiểm tra lại bằng cắt enzyme và điện di.",
+                "dung_cu": ["micropipet_p10", "hop_dau_con", "ong_eppendorf", "hop_da", "khoi_gia_nhiet_kho", "be_on_nhiet", "dia_petri", "tu_am", "be_dien_di", "nguon_dien_di", "gel_doc"],
+                "sinh_pham": ["sp_plasmid_puc19", "sp_enzyme_ecori", "sp_enzyme_bamhi", "sp_ligaza_t4", "sp_te_bao_kha_bien_dh5a", "sp_dia_lb_amp_xgal", "sp_dna_ladder_100bp"],
+                "buoc": [
+                    {
+                        "so": 1,
+                        "mo_ta": "Cắt plasmid pUC19 và sản phẩm PCR gen GFP bằng cùng cặp enzyme EcoRI + BamHI, ủ 37 °C 1 giờ: khung plasmid 2665 bp, gen 726 bp có hai đầu dính khác nhau.",
+                        "dieu_kien": {"loai": "trang_thai", "ma": "tram_ghep_gen", "ten": "cat_gioi_han", "gia_tri": 1}
+                    },
+                    {
+                        "so": 2,
+                        "mo_ta": "Trộn gen : khung theo tỉ lệ 3 : 1, thêm ADN ligaza T4 và đệm (ATP, Mg2+), ủ 16 °C: tạo plasmid tái tổ hợp 3391 bp.",
+                        "dieu_kien": {"loai": "trang_thai", "ma": "tram_ghep_gen", "ten": "noi_ligaza", "gia_tri": 1}
+                    },
+                    {
+                        "so": 3,
+                        "mo_ta": "Biến nạp vào tế bào E. coli khả biến giữ trên đá: sốc nhiệt 42 °C trong 45 giây, đặt lại vào đá, thêm LB và lắc 37 °C 1 giờ.",
+                        "dieu_kien": {"loai": "trang_thai", "ma": "tram_ghep_gen", "ten": "bien_nap", "gia_tri": 1}
+                    },
+                    {
+                        "so": 4,
+                        "mo_ta": "Trải lên đĩa LB + ampicillin + X-gal/IPTG, ủ 37 °C qua đêm; đếm khuẩn lạc trắng (mang gen ghép làm hỏng lacZα) và xanh (plasmid không có gen).",
+                        "dieu_kien": {"loai": "thoi_gian_u", "gio_min": 16.0}
+                    },
+                    {
+                        "so": 5,
+                        "mo_ta": "Chọn khuẩn lạc trắng, tách plasmid, cắt kiểm tra bằng EcoRI + BamHI rồi điện di cạnh thang chuẩn 100 bp.",
+                        "dieu_kien": {"loai": "trang_thai", "ma": "gel_doc", "ten": "chup_anh_xong", "gia_tri": 1}
+                    }
+                ],
+                "ket_qua_mong_doi": "Đĩa có nhiều khuẩn lạc trắng, rất ít khuẩn lạc xanh. Plasmid của khuẩn lạc trắng cắt bằng EcoRI + BamHI cho 2 băng: khoảng 2665 bp (khung pUC19) và 726 bp (gen GFP). Bỏ ligaza thì không có khuẩn lạc; cắt plasmid bằng một enzyme thì phần lớn khuẩn lạc xanh; đĩa thiếu ampicillin thì vi khuẩn mọc kín.",
+                "cau_hoi": [
+                    {"hoi": "Vì sao phải cắt thể truyền và gen cần chuyển bằng cùng một loại enzyme cắt giới hạn?", "dap_an": "Để hai phân tử có các đầu dính bổ sung với nhau, nhờ đó ADN ligaza nối được gen vào thể truyền tạo ADN tái tổ hợp."},
+                    {"hoi": "Vai trò của gen kháng ampicillin và gen lacZα trên plasmid pUC19 là gì?", "dap_an": "Gen kháng ampicillin giúp chọn tế bào đã nhận plasmid (chỉ chúng sống trên đĩa có ampicillin); vùng cắt nằm trong lacZα nên khi gen được ghép vào, lacZα hỏng, khuẩn lạc không phân giải X-gal và có màu trắng."},
+                    {"hoi": "Tại sao dùng hai enzyme khác nhau (EcoRI và BamHI) lại cho nhiều khuẩn lạc trắng hơn dùng một enzyme?", "dap_an": "Hai đầu khung plasmid khác nhau nên không tự nối lại được; chỉ khi có gen chèn vào mới đóng vòng, đồng thời gen được ghép đúng chiều."}
+                ],
+                "nguon": "https://openstax.org/books/biology-2e/pages/17-1-biotechnology"
             }
         ]
     }
