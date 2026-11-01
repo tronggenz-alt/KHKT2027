@@ -3942,7 +3942,11 @@ public class KhktAutoTest : MonoBehaviour
         Log("[phong_adn] Bắt đầu kiểm thử phòng sinh học phân tử / ghép mã ADN");
         adnFail = 0;
         var zs = Khkt.Rendering.ZoneStreamer.Instance;
-        zs?.Keep(this, 900f, new Vector3(6.5f, 4.5f, -6f), new Vector3(5f, 4.5f, 3f), new Vector3(15f, 4.5f, 13f), new Vector3(23f, 4.5f, 11f), new Vector3(23f, 4.5f, 3f));
+        var keepPts = new[] { new Vector3(6.5f, 4.5f, -6f), new Vector3(5f, 4.5f, 3f), new Vector3(15f, 4.5f, 13f), new Vector3(23f, 4.5f, 11f), new Vector3(23f, 4.5f, 3f), new Vector3(20f, 4.5f, -6f) };
+        zs?.Keep(this, 900f, keepPts);
+        // đồ tương tác của khu chưa tải nằm dưới ZoneRoot đang tắt: chờ các khu tầng 2 tải xong rồi mới tìm
+        foreach (var kp in keepPts) yield return Khkt.Rendering.ZoneStreamer.WaitReadyAt(kp, 30f);
+        yield return Frames(10);
         var tang2 = GameObject.Find("Tầng 2");
         AdnCheck(tang2 != null && tang2.GetComponent<Khkt.Demo.Bio.BioFloor2ToolsMarker>() != null, "Tầng 2 đã gắn dụng cụ (BioFloor2ToolsMarker)");
         Vector3 F2(float x, float y, float z) => new Vector3(x, 3.8f + y, z);
@@ -3978,6 +3982,9 @@ public class KhktAutoTest : MonoBehaviour
         Khkt.Demo.Bio.ReagentTube R(string code) => Near<Khkt.Demo.Bio.ReagentTube>(hoodPos, r => r.reagentCode == code);
         Khkt.Demo.Bio.MicroTube T(string label) => FindObjectsByType<Khkt.Demo.Bio.MicroTube>().FirstOrDefault(t => t.labelText == label);
         var t1 = T("1"); var t2 = T("2"); var tn = T("Đ−");
+        Log($"[phong_adn] tủ={(bool)hood} p10={(bool)p10} hộp côn={(bool)tipBox} thùng côn={(bool)waste} ống1={(bool)t1} ống2={(bool)t2} ốngĐ={(bool)tn} MM={(bool)R(Khkt.Demo.Bio.MolCodes.MasterMix)}" +
+            $" · số micropipet={FindObjectsByType<Khkt.Demo.Bio.Micropipette>().Length} (kể cả tắt: {FindObjectsByType<Khkt.Demo.Bio.Micropipette>(FindObjectsInactive.Include).Length}), ống={FindObjectsByType<Khkt.Demo.Bio.MicroTube>(FindObjectsInactive.Include).Length}, thuốc thử={FindObjectsByType<Khkt.Demo.Bio.ReagentTube>(FindObjectsInactive.Include).Length}");
+        foreach (var mp in FindObjectsByType<Khkt.Demo.Bio.Micropipette>(FindObjectsInactive.Include)) Log($"[phong_adn]   pipet {mp.name} {mp.pipetteToolId} {mp.transform.position} active={mp.gameObject.activeInHierarchy}");
         AdnCheck(hood && p10 && tipBox && waste && t1 && t2 && tn && R(Khkt.Demo.Bio.MolCodes.MasterMix), "Tủ PCR có micropipet P10, hộp đầu côn, thùng rác đầu côn, khay thuốc thử, 3 ống PCR");
         if (adnFail > 0 && !(p10 && tipBox && waste && t1)) { Log("[phong_adn] thiếu dụng cụ, dừng"); yield break; }
         AdnCheck(Vector3.Distance(p10.transform.position, hoodPos) < 0.8f && Vector3.Distance(R(Khkt.Demo.Bio.MolCodes.Water).transform.position, hoodPos) < 0.8f,

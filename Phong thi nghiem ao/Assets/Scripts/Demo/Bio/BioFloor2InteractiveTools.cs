@@ -22,8 +22,6 @@ using Khkt.Interaction.Bio;
 
 namespace Khkt.Demo.Bio
 {
-    /// <summary>Dấu đã gắn dụng cụ tầng 2 (tránh gắn lại khi vào Play).</summary>
-    public class BioFloor2ToolsMarker : MonoBehaviour { public int version = 2; }
 
     public static class BioFloor2InteractiveTools
     {
@@ -349,6 +347,8 @@ namespace Khkt.Demo.Bio
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static void AutoInitFloor2ToolsOnPlay()
         {
+            // cảnh đã dựng có dụng cụ (đã lưu thành phần) thì không gắn lại: gắn lúc chạy chỉ dành cho cảnh dựng trước khi có hệ dụng cụ
+            if (UnityEngine.Object.FindAnyObjectByType<BioTool>(FindObjectsInactive.Include) != null) return;
             var tang2 = GameObject.Find("Tầng 2");
             if (tang2 != null) EnsureSpawnAllTools(tang2.transform);
         }

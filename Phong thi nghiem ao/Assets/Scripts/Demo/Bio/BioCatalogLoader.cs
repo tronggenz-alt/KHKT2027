@@ -183,15 +183,6 @@ namespace Khkt.Demo.Bio
     public sealed class BioStockItemEntry : BioReagentStockRecord { }
 
     /// <summary>
-    /// Nhãn định danh mã dụng cụ chuẩn trong dung_cu.json được gắn lên từng GameObject tương tác ở Tầng 2.
-    /// </summary>
-    public class BioToolCatalogTag : MonoBehaviour
-    {
-        public string toolCode = "";
-        public string roomCode = "";
-    }
-
-    /// <summary>
     /// Bộ nạp dữ liệu sinh học Tầng 2 từ thư mục data/sinh/*.json và data/may/*.json.
     /// Cấp dữ liệu chuẩn cho thẻ thông tin EquipmentInfo, màn hình bàn học sinh, ki-ốt tra cứu và 15 bài thí nghiệm.
     /// </summary>
