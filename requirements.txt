@@ -2,6 +2,9 @@ numpy>=2.0
 pyserial>=3.5
 # công cụ thử nghiệm theo dõi bằng webcam (tools/webcam_tracker.py)
 opencv-contrib-python>=4.8
+# nhận diện đầu, mắt và cử chỉ tay MediaPipe (tools/mediapipe_tracker.py)
+mediapipe==1.2.0
+psutil>=7.0
 # máy chủ AI (server/ai)
 fastapi>=0.110
 uvicorn>=0.29
