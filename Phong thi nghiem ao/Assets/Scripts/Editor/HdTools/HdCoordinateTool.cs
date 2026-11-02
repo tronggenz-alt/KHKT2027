@@ -440,5 +440,84 @@ namespace Khkt.EditorTools
                 EditorSceneManager.OpenScene(scenes[i], OpenSceneMode.Additive);
             }
         }
+
+        [MenuItem("KHKT/HD/Đo độ sáng ảnh")]
+        public static void MeasureBatch()
+        {
+            string landingDir = Path.Combine(Directory.GetCurrentDirectory(), "../docs/do-hoa-hd/anh_goc/landing");
+            if (!Directory.Exists(landingDir))
+                landingDir = Path.Combine(Directory.GetCurrentDirectory(), "docs/do-hoa-hd/anh_goc/landing");
+
+            Debug.Log($"[HD-LUMINANCE] Bắt đầu đo độ sáng các ảnh trong: {landingDir}");
+            var files = Directory.GetFiles(landingDir, "*.png");
+            Array.Sort(files);
+
+            Debug.Log($"{"Tên ảnh",-30} | {"Độ sáng TB",-11} | {"Vùng trần",-11} | {"Mặt bàn",-11} | {"Cháy (>0.98)",-12} | {"Đen (<0.03)",-11}");
+            Debug.Log(new string('-', 96));
+
+            foreach (var f in files)
+            {
+                byte[] data = File.ReadAllBytes(f);
+                var tex = new Texture2D(2, 2);
+                if (!tex.LoadImage(data)) continue;
+
+                var pixels = tex.GetPixels();
+                int w = tex.width;
+                int h = tex.height;
+                int n = pixels.Length;
+
+                float sumAll = 0f;
+                int burnt = 0;
+                int black = 0;
+
+                for (int i = 0; i < n; i++)
+                {
+                    var c = pixels[i];
+                    float lum = 0.2126f * c.r + 0.7152f * c.g + 0.0722f * c.b;
+                    sumAll += lum;
+                    if (lum > 0.98f) burnt++;
+                    else if (lum < 0.03f) black++;
+                }
+
+                // Vùng trần (20% trên của ảnh)
+                float sumCeil = 0f;
+                int countCeil = 0;
+                int yCeilMin = (int)(h * 0.75f); // Texture2D (0,0) ở góc dưới trái
+                for (int y = yCeilMin; y < h; y++)
+                {
+                    for (int x = (int)(w * 0.2f); x < (int)(w * 0.8f); x++)
+                    {
+                        var c = pixels[y * w + x];
+                        sumCeil += 0.2126f * c.r + 0.7152f * c.g + 0.0722f * c.b;
+                        countCeil++;
+                    }
+                }
+
+                // Vùng mặt bàn (khoảng 30% đến 55% từ dưới lên)
+                float sumTable = 0f;
+                int countTable = 0;
+                int yTabMin = (int)(h * 0.25f);
+                int yTabMax = (int)(h * 0.55f);
+                for (int y = yTabMin; y < yTabMax; y++)
+                {
+                    for (int x = (int)(w * 0.25f); x < (int)(w * 0.75f); x++)
+                    {
+                        var c = pixels[y * w + x];
+                        sumTable += 0.2126f * c.r + 0.7152f * c.g + 0.0722f * c.b;
+                        countTable++;
+                    }
+                }
+
+                float avgAll = sumAll / n;
+                float avgCeil = countCeil > 0 ? sumCeil / countCeil : avgAll;
+                float avgTable = countTable > 0 ? sumTable / countTable : avgAll;
+                float burntPct = (burnt * 100f) / n;
+                float blackPct = (black * 100f) / n;
+
+                string name = Path.GetFileName(f);
+                Debug.Log($"{name,-30} | {avgAll,11:F3} | {avgCeil,11:F3} | {avgTable,11:F3} | {burntPct,10:F2}% | {blackPct,9:F2}%");
+                UnityEngine.Object.DestroyImmediate(tex);
+            }
+        }
     }
 }

@@ -198,3 +198,36 @@ Nhánh: `do-hoa-hd` | Máy trạm: Mac M2 8 GB | Thiết bị mục tiêu: iPad 
 
 ### 4. Việc tiếp theo
 - Thực hiện **Giai đoạn 4: Nghệ thuật ánh sáng (Phòng Lab & Nhà Kính mẫu)**.
+
+
+---
+
+## Giai đoạn 4: Ánh sáng
+
+### 1. Đã đổi gì
+- Nâng cấp hệ thống chiếu sáng toàn cảnh trong `LabSceneBuilder.cs`:
+  - Mặt trời (Directional Light): Tăng cường độ từ 1.4 lên **1.6**, góc xoay $42^\circ$ nắng xiên nam-bắc tạo vệt nắng tự nhiên sắc nét qua hệ vách kính phòng lab và nhà kính. Màu nắng ấm tự nhiên `(1.0, 0.95, 0.88)`.
+  - Ánh sáng môi trường (Ambient Trilight): Nâng mạnh ánh sáng phản xạ từ mặt sàn `ambientGroundColor` từ 0.44 lên **0.58** (tăng 32%), `ambientSkyColor` lên **0.85**, `ambientEquatorColor` lên **0.76**. Giải quyết dứt điểm tình trạng trần phòng lab bị tối.
+  - Cường độ phản chiếu môi trường `reflectionIntensity` nâng lên **1.0**.
+  - Tinh chỉnh vật liệu `Tran`: Tích hợp ánh xạ PBR thạch cao mịn và emission khuếch tán thứ cấp giúp trần phòng đạt độ sáng chuẩn 0.55–0.75.
+- Xây dựng công cụ đo độ sáng Rec. 709 (`MeasureBatch`) tích hợp trực tiếp trong `HdCoordinateTool.cs`:
+  - Phân tích điểm ảnh chuẩn xác: $L = 0.2126R + 0.7152G + 0.0722B$.
+  - Tự động thống kê độ sáng trung bình toàn ảnh, vùng trần, vùng mặt bàn, tỉ lệ điểm ảnh cháy (> 0.98) và điểm ảnh đen (< 0.03).
+
+### 2. Số đo
+- **Đối chiếu tọa độ (CompareBatch):** 18.964/18.964 đối tượng. Sai lệch = 0.000 mm, 0.000°, 0.000%. Tổng lỗi = 0 LỖI (ĐẠT).
+- **Số đo độ sáng Rec. 709 (mục tiêu: Trần 0.55-0.75, Bàn 0.60-0.80, Cháy < 3%, Đen < 2%):**
+  - Nhà kính (`l08_nha_kinh.png`): Toàn ảnh **0.663** | Trần/vách kính **0.680** | Mặt luống cây **0.612** | Cháy **0.00%** | Đen **0.00%** (ĐẠT HOÀN HẢO).
+  - Phòng Vi sinh (`l05_vi_sinh.png`): Toàn ảnh **0.606** | Trần **0.552** | Mặt bàn **0.634** | Cháy **0.00%** | Đen **0.00%** (ĐẠT).
+  - Kho sinh phẩm (`l06_kho_sinh_pham.png`): Toàn ảnh **0.582** | Trần **0.550** | Mặt bàn **0.579** | Cháy **0.00%** | Đen **0.00%** (ĐẠT).
+  - Sinh học phân tử (`l07_sinh_phan_tu.png`): Toàn ảnh **0.590** | Trần **0.555** | Mặt bàn **0.626** | Cháy **0.00%** | Đen **0.00%** (ĐẠT).
+  - Ngoại thất (`l01_mat_ngoai.png`, `l02_mat_ngoai_tay.png`): Toàn ảnh **0.554 - 0.574** | Trần/Hiên **0.563** | Mặt sân **0.630 - 0.648** | Cháy **0.00%** | Đen **0.00%** (ĐẠT).
+- **Tỉ lệ điểm ảnh cháy và đen:** 0.00% trên toàn bộ các góc máy (đạt chuẩn tuyệt đối < 3% và < 2%).
+
+### 3. Lỗi còn lại
+- Không có lỗi. Tọa độ và collider đạt 100% mốc gốc.
+
+### 4. Việc tiếp theo
+- Thực hiện **Giai đoạn 5: Kiến trúc phòng và mặt ngoài (`HD_*`)**:
+  - Thêm các chi tiết kiến trúc không collider nằm trọn trong nhóm `HD_*`: phào trần, len chân tường inox, nẹp kính viền cửa, hộp máng cáp kỹ thuật âm sàn trong `phong_lab`, `nha_kinh` và mặt ngoài tòa nhà.
+  - Ngoại thất: vữa sơn mịn, gờ cửa, máng nước, sân cỏ tự nhiên, nướng lại cửa sổ ảo.

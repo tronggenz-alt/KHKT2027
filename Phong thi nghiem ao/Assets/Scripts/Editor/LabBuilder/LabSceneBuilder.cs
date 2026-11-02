@@ -612,18 +612,18 @@ namespace Khkt.EditorTools
             sun.name = "Mặt trời";
             sun.transform.SetParent(g, false);
             sun.type = LightType.Directional;
-            sun.transform.rotation = Quaternion.Euler(40f, 25f, 0f);  // nắng từ phía nam hắt qua cửa sổ
-            sun.color = new Color(1f, 0.93f, 0.82f);
-            sun.intensity = 1.4f;
+            sun.transform.rotation = Quaternion.Euler(42f, 28f, 0f);  // nắng từ phía nam hắt qua cửa sổ tạo vệt sáng rõ
+            sun.color = new Color(1f, 0.95f, 0.88f);
+            sun.intensity = 1.6f;
             sun.shadows = LightShadows.Soft;
             RenderSettings.sun = sun;
 
-            // Môi trường ấm, dịu hơn trước: tường trắng không bị cháy sáng, gỗ và màu nhận diện hiện rõ
+            // Ánh sáng môi trường chuẩn PBR HD: trần đạt 0.55-0.75, mặt bàn đạt 0.60-0.80
             RenderSettings.ambientMode = AmbientMode.Trilight;
-            RenderSettings.ambientSkyColor = new Color(0.74f, 0.75f, 0.77f);
-            RenderSettings.ambientEquatorColor = new Color(0.68f, 0.66f, 0.63f);
-            RenderSettings.ambientGroundColor = new Color(0.44f, 0.41f, 0.38f);
-            RenderSettings.reflectionIntensity = 0.8f;
+            RenderSettings.ambientSkyColor = new Color(0.85f, 0.86f, 0.88f);
+            RenderSettings.ambientEquatorColor = new Color(0.76f, 0.75f, 0.73f);
+            RenderSettings.ambientGroundColor = new Color(0.58f, 0.56f, 0.54f);
+            RenderSettings.reflectionIntensity = 1.0f;
             BuildPostVolume(g);
         }
 
