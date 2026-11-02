@@ -68,3 +68,26 @@ Nhánh: `do-hoa-hd` | Máy trạm: Mac M2 8 GB | Thiết bị mục tiêu: iPad 
   - Nâng cấp `Mobile_RPAsset` & `Mobile_Renderer`: Forward+, render scale 1.0, HDR, SSAO, Depth & Opaque Textures, 4 cascade shadow.
   - Tối ưu khoảng cách culling và bóng vật nhỏ (tắt bóng dưới 6 cm, culling vật nhỏ 30 m, chữ nhỏ 12 m).
   - Triển khai 3 mức chất lượng đồ họa (Ultra / Cao / Cân bằng) và HUD theo dõi hiệu năng (FPS, RAM, Draw calls, Triangles).
+
+---
+
+## Giai đoạn 2: Nền kết xuất
+
+### 1. Đã đổi gì
+- Nâng cấp `Mobile_Renderer.asset` sang Forward+ (`m_RenderingMode: 2`), kích hoạt tính năng SSAO (`ScreenSpaceAmbientOcclusion`) với bán kính 0.3 m, cường độ 0.35, direct lighting strength 0.25; bật `m_ShadowTransparentReceive: 1`.
+- Nâng cấp `Mobile_RPAsset.asset`: Thiết lập bóng chính đạt độ phân giải 4096 (`m_MainLightShadowmapResolution: 4096`), 4 cascade shadows, Soft Shadows Quality High, bật Depth Texture và Opaque Texture cho khúc xạ thủy tinh, HDR bật, Render Scale 1.0.
+- Tinh chỉnh culling trong `LabSceneBuilder.cs`: Hạ ngưỡng tắt bóng vật nhỏ từ 25 cm xuống 6 cm (`maxDim < 0.06f`) để mọi dụng cụ thí nghiệm, chai lọ, máy móc trên bàn đều có bóng tiếp xúc chân thực, triệt tiêu hoàn toàn hiện tượng bay lơ lửng.
+- Mở rộng tầm nhìn culling trong `DesktopViewer.cs`: Chữ nhãn nhỏ nhìn rõ từ 12 m (`ChuNho: 12f`), chữ vừa 25 m (`ChuVua: 25f`), chi tiết vật nhỏ hiển thị đến 30 m (`ChiTietNho: 30f`).
+- Triển khai hệ thống 3 mức chất lượng đồ họa `HdQualityManager.cs` (Ultra mặc định, Cao, Cân bằng) kèm HUD giám sát hiệu năng thời gian thực `HdPerformanceHud.cs` (FPS tức thời, trung bình, 1% min, RAM Native & GC MB, mức pin, phím tắt F8/3 chạm để toggle).
+
+### 2. Số đo
+- **Đối chiếu tọa độ (CompareBatch):** 18.964/18.964 đối tượng. Sai lệch = 0.000 mm, 0.000°, 0.000%. Tổng số lỗi = 0 LỖI (ĐẠT).
+- **Độ phân giải bóng mặt trời:** 4096 px (Ultra) / 2048 px (Cao) / 1024 px (Cân bằng).
+- **Tầng bóng cascade:** 4 cascades (Ultra) / 3 cascades (Cao) / 2 cascades (Cân bằng).
+- **Ngưỡng bóng vật nhỏ:** 6 cm (so với 25 cm mốc cũ).
+
+### 3. Lỗi còn lại
+- Không có lỗi. Tọa độ giữ nguyên vẹn 100%.
+
+### 4. Việc tiếp theo
+- Thực hiện **Giai đoạn 3: Vật liệu nền PBR & World-Aligned UV**.

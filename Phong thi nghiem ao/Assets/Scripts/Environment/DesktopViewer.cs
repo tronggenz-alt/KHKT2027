@@ -88,9 +88,10 @@ namespace Khkt.Environment
                 int l = LayerMask.NameToLayer(layer);
                 if (l >= 0) d[l] = dist;
             }
-            Cull("ChuNho", 6f);
-            Cull("ChuVua", 15f);
-            Cull("ChiTietNho", 14f);
+            // Culling distances chuẩn HD: chữ nhỏ rõ đến 12 m, chữ vừa 25 m, chi tiết vật nhỏ hiển thị đến 30 m
+            Cull("ChuNho", 12f);
+            Cull("ChuVua", 25f);
+            Cull("ChiTietNho", 30f);
             cam.layerCullDistances = d;
             cam.layerCullSpherical = true;
         }

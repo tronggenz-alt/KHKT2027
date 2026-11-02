@@ -641,18 +641,17 @@ namespace Khkt.EditorTools
             var tm = profile.Add<Tonemapping>(true);
             tm.mode.Override(TonemappingMode.Neutral);
             var bloom = profile.Add<Bloom>(true);
-            bloom.threshold.Override(1.1f);
-            bloom.intensity.Override(0.25f);
-            bloom.scatter.Override(0.6f);
-            // lọc chất lượng cao: viền sáng của dải LED mịn, không nhấp nháy theo điểm ảnh. Đo trên Iris Xe: không chậm hơn đo được
-            // (66,3 so với 67,0 FPS, trong sai số). Đặt KHKT_BLOOM_HQ=0 để tắt khi đo so sánh.
-            bloom.highQualityFiltering.Override(System.Environment.GetEnvironmentVariable("KHKT_BLOOM_HQ") != "0");
+            bloom.threshold.Override(1.0f);
+            bloom.intensity.Override(0.30f);
+            bloom.scatter.Override(0.65f);
+            // lọc chất lượng cao: viền sáng của dải LED mịn, không nhấp nháy theo điểm ảnh.
+            bloom.highQualityFiltering.Override(true);
             var color = profile.Add<ColorAdjustments>(true);
             color.postExposure.Override(0f);
-            color.contrast.Override(14f);
-            color.saturation.Override(14f);
+            color.contrast.Override(12f);
+            color.saturation.Override(12f);
             var wb = profile.Add<WhiteBalance>(true);
-            wb.temperature.Override(6f);
+            wb.temperature.Override(5f);
             foreach (var c in profile.components) AssetDatabase.AddObjectToAsset(c, profile);
             EditorUtility.SetDirty(profile);
             AssetDatabase.SaveAssets();
@@ -700,7 +699,7 @@ namespace Khkt.EditorTools
                 probe.mode = ReflectionProbeMode.Baked;
                 probe.size = r.size;
                 probe.boxProjection = true;
-                probe.resolution = 128;
+                probe.resolution = 512;
                 probe.hdr = true;
                 string path = $"{Root}/Probes/{r.name}.exr";
                 try
@@ -796,7 +795,8 @@ namespace Khkt.EditorTools
                 }
                 var size = r.bounds.size;
                 float maxDim = Mathf.Max(size.x, Mathf.Max(size.y, size.z));
-                if (maxDim < 0.25f) r.shadowCastingMode = ShadowCastingMode.Off;
+                // Bản HD: chỉ tắt bóng với vật nhỏ hơn 6 cm để cốc, chai, máy trên bàn luôn có bóng tiếp xúc
+                if (maxDim < 0.06f) r.shadowCastingMode = ShadowCastingMode.Off;
                 if (maxDim < 0.2f) r.gameObject.layer = detail;
             }
         }
