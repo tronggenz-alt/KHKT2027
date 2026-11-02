@@ -291,3 +291,68 @@ Nhánh: `do-hoa-hd` | Máy trạm: Mac M2 8 GB | Thiết bị mục tiêu: iPad 
   - Nâng cấp lá cây có chiều sâu, gân lá, normal map, ánh sáng xuyên lá (Subsurface scattering giả lập).
   - Bổ sung pass `DepthOnly` và `DepthNormals` cho `LaCay.shader`.
   - Giữ nguyên toàn bộ logic thí nghiệm sinh học (rong đuôi chó tạo bọt khí, cây quan sát khí khổng).
+
+---
+
+## Giai đoạn 6: Hệ thống cây xanh siêu thực
+
+### 1. Đã đổi gì
+- Nâng cấp toàn diện `LaCay.shader`:
+  - Tích hợp tính toán tán xạ ngược ánh sáng xuyên lá `_Translucency` (Subsurface Scattering giả lập).
+  - Tích hợp bản đồ pháp tuyến gân lá `_BumpMap` (Normal Map) và điều chỉnh độ sâu `_BumpScale`.
+  - Hiệu ứng rung rinh gió nhẹ tự nhiên đa trục theo thời gian thực dựa trên trọng số đỉnh (Vertex Color R) qua các tham số `_WindSpeed`, `_WindStrength`.
+  - Bổ sung 2 Render Pass bắt buộc của URP: `DepthOnly` (hỗ trợ SSAO & Depth Texture) và `DepthNormals` (hỗ trợ SSAO pháp tuyến & đường viền chi tiết).
+- Sinh procedural Normal map gân lá xương cá (pinnate venation) độ phân giải cao 1024x1024 `Normal_LeafVein.png` tại `Assets/Lab/HD/Textures/`.
+- Nâng cấp toàn bộ vật liệu lá cây: `La.mat`, `LaDam.mat`, `LaCayVanPhong.mat`, `T2_LaCay.mat`, `T2_LaCayDam.mat`, `T2_LaCayNon.mat` sang shader `Khkt/Bio/LaCay` với gân lá nổi khối và độ trong xuyên sáng 0.45.
+- Nâng cấp chậu cây và đất hữu cơ:
+  - Chậu gốm nung terracotta: `ChauDat.mat` và `T2_ChauDatNung.mat` áp dụng bộ map `TerracottaClay002` (Albedo, Normal, Mask) với độ nhám và ố nhẹ tự nhiên.
+  - Chậu sứ trắng tráng men bóng cao cấp `ChauSuTrang.mat` (Smoothness 0.94).
+  - Chậu xi măng xám mờ `T2_ChauXam.mat` (Normal Concrete).
+  - Đất ẩm nhà kính và bồn cây `T2_DatAm.mat` áp dụng bộ map `SoilGarden037` hạt đất tơi xốp giàu dinh dưỡng.
+  - Thân cây gỗ sồi tự nhiên `ThanCay.mat` (vân sồi OakWood051).
+  - Đèn LED quang hợp nhà kính `T2_DenTrongCay.mat` phát xạ phổ hồng-tím sinh học 450nm + 660nm.
+- Bảo toàn 100% các bài thí nghiệm cây xanh tương tác (rong đuôi chó tạo bọt khí, cây quan sát thoát hơi nước, cây hướng sáng).
+
+### 2. Số đo
+- **Đối chiếu tọa độ (CompareBatch):** 18.964/18.964 đối tượng gốc. Sai lệch = 0.000 mm, 0.000°, 0.000%. Tổng số lỗi = 0 LỖI (ĐẠT).
+- **Shader Pass:** Đầy đủ 4 pass (ForwardLit, ShadowCaster, DepthOnly, DepthNormals).
+- **Kiểm tra luật 1.1 & 1.2:** ĐẠT.
+
+### 3. Lỗi còn lại
+- Không có lỗi.
+
+### 4. Việc tiếp theo
+- Thực hiện **Giai đoạn 7: Dụng cụ và máy móc trong `phong_lab` và `nha_kinh`**.
+
+
+---
+
+## Giai đoạn 7: Dụng cụ & Máy móc trong phòng lab và nhà kính
+
+### 1. Đã đổi gì
+- **Thủy tinh Borosilicate 3.3 thành dày:**
+  - `CocThuyTinh.mat`, `ThuyTinh.mat`, `HopLamKinh.mat`: Trong suốt tinh khiết cao, ánh xanh nhạt khúc xạ quang học `Color(0.92, 0.98, 1.0, 0.20)`, độ bóng quang học Smoothness 0.98, Normal map `Normal_GlassOptic.png` (0.15f) mô phỏng vi gợn sóng bề mặt thủy tinh quang học.
+  - `NuocCoc.mat`, `MatKhum.mat`, `DungDichPhanUng.mat`: Độ bóng 0.95–0.98, giữ trọn màu sắc phản ứng hóa học và mặt khum căng bề mặt chất lỏng.
+  - `VachChiaBuret.mat`: Vạch chia thể tích sắc nét, anisoLevel 8 chống nhòe khi quan sát gần 30 cm.
+- **Kim loại Inox 304 và nhôm anodized:**
+  - `Inox.mat`, `KimLoaiInox.mat`, `GiaInox.mat`, `KinhHienVi_Inox.mat`, `T2_TuAnToanSinhHoc.mat`, `T2_TuAm.mat`, `T2_BanSoiUV.mat`: Vân chải xước satin dọc theo chiều dài (InoxSatin304), Metallic 0.92–0.95, Smoothness 0.68–0.78 phản xạ môi trường trung thực.
+  - `KhungNhomNFT.mat`, `KhungCuaTuDong.mat`, `T2_NapRanh.mat`: Nhôm anodized chống ăn mòn (Metallic 0.70–0.85, Smoothness 0.55).
+- **Cao su và nhựa phòng thí nghiệm:**
+  - `CaoSuDo.mat`: Quả bóp cao su thiên nhiên đỏ mờ, độ nhám Smoothness 0.35, Normal cao su đúc.
+  - Nhựa PP/ABS: `T2_PipetXanhLa.mat`, `T2_HopXanhLa.mat`, `ThungChuaXanh.mat`, `Khay8C59BF.mat` đạt độ bóng chuẩn nhựa công nghiệp (Smoothness 0.58–0.65).
+- **Máy móc và đèn chỉ thị:**
+  - Thân kính hiển vi quang học `KinhHienVi_Than.mat`: Sơn tĩnh điện sần nhẹ (cast enamel finish), Metallic 0.12, Smoothness 0.42.
+  - Đèn soi hiển vi `KinhHienVi_Den.mat`, `KinhHienVi_LED.mat`: LED phát xạ trắng lạnh cường độ cao (Emission 2.85).
+  - Màn hình số LED xanh ngọc `T2_ManLedXanhLa.mat`: Phát xạ OLED xanh ngọc lục bảo rực rỡ (Emission 3.96).
+  - Đèn LED trạng thái màu hổ phách `LedHoPhach.mat`: Phát xạ màu cam hổ phách ấm áp (Emission 3.24).
+  - Tủ sấy, tủ ấm, máy ly tâm, bàn soi UV được chuẩn hóa vật liệu kim loại & mặt điều khiển.
+
+### 2. Số đo
+- **Đối chiếu tọa độ (CompareBatch):** 18.964/18.964 đối tượng khớp hoàn toàn, sai lệch 0.000 mm, 0.000°, 0.000%. Tổng số lỗi = 0 LỖI (ĐẠT).
+- **Tổng số vật liệu PBR nâng cấp:** 71 vật liệu trọng điểm bao phủ toàn bộ cây xanh, dụng cụ thủy tinh, kim loại, cao su và máy móc.
+
+### 3. Lỗi còn lại
+- Không có lỗi.
+
+### 4. Việc tiếp theo
+- Thực hiện **Giai đoạn 8: Bản mẫu trong Unity & Trên iPad - ĐIỂM DỪNG CHỜ DUYỆT**.
