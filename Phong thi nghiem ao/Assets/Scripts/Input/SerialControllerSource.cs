@@ -1,4 +1,4 @@
-#if NET_4_6
+#if NET_4_6 && !UNITY_IOS
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -286,11 +286,21 @@ namespace Khkt.Input
         public bool logFirmwareMessages = true;
 
         public override bool IsConnected => false;
-        public override string StatusText => "Cổng COM: cần Api Compatibility Level = .NET Framework";
+        public override string StatusText =>
+#if UNITY_IOS
+            "Cổng COM: không hỗ trợ trên iOS";
+#else
+            "Cổng COM: cần Api Compatibility Level = .NET Framework";
+#endif
 
-        void OnEnable() => Debug.LogError(
-            "[Tay cầm] Cần Api Compatibility Level = .NET Framework để đọc cổng COM " +
-            "(Project Settings > Player > Other Settings).");
+        void OnEnable()
+        {
+#if !UNITY_IOS
+            Debug.LogError(
+                "[Tay cầm] Cần Api Compatibility Level = .NET Framework để đọc cổng COM " +
+                "(Project Settings > Player > Other Settings).");
+#endif
+        }
 
         public override void SetVibration(int level) { }
         public override void Pulse(int level, int ms) { }

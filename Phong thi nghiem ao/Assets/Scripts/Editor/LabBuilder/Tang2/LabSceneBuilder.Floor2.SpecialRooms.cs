@@ -1,4 +1,5 @@
 using Khkt.Environment.Tang2;
+using Khkt.Interaction;
 using UnityEngine;
 using static Khkt.EditorTools.LabKit;
 
@@ -439,11 +440,44 @@ namespace Khkt.EditorTools
             NoShadow(Box(block, "Màn số", new Vector3(0, 0.07f, 0.131f), new Vector3(0.1f, 0.03f, 0.004f), bioDisplayRed, false));
             // bộ tách ADN chuối: cốc dịch nghiền, bình cồn lạnh, đũa thủy tinh, ống falcon
             var banana = Group("Bộ tách chiết ADN chuối", isl, new Vector3(0.75f, top, 0.15f));
-            MeshObj(banana, "Cốc dịch nghiền", Beaker("Coc250", 0.035f, 0.1f), Vector3.zero, labGlass);
-            NoShadow(Cyl(banana, "Dịch chuối", new Vector3(0, 0.035f, 0), 0.033f, 0.07f, Mat("T2_DichChuoi", new Color(0.95f, 0.9f, 0.7f, 0.85f), 0.6f, 0, transparent: true)));
-            Bottle(banana, "Cồn 90° lạnh", new Vector3(0.12f, 0, -0.05f), 4);
-            Cyl(banana, "Đũa thủy tinh", new Vector3(-0.1f, 0.01f, 0.05f), 0.003f, 0.2f, labGlass, false, new Vector3(0, 0, 80));
-            TubeRack(banana, new Vector3(0.3f, 0, 0), 5, bioBlueTip);
+            var cocObj = Group("Cốc dịch nghiền", banana, Vector3.zero);
+            MeshObj(cocObj, "Vỏ cốc", Beaker("Coc250", 0.035f, 0.1f), Vector3.zero, labGlass, true);
+            NoShadow(Cyl(cocObj, "Dịch chuối", new Vector3(0, 0.035f, 0), 0.033f, 0.07f, Mat("T2_DichChuoi", new Color(0.95f, 0.9f, 0.7f, 0.85f), 0.6f, 0, transparent: true), false));
+            var cocCol = cocObj.gameObject.AddComponent<CapsuleCollider>();
+            cocCol.center = new Vector3(0, 0.05f, 0);
+            cocCol.radius = 0.035f;
+            cocCol.height = 0.1f;
+            var cocGrab = cocObj.gameObject.AddComponent<Grabbable>();
+            cocGrab.kind = "coc";
+            cocGrab.gripHeightM = 0.05f;
+            cocGrab.massG = 130f;
+
+            var conObj = Group("Cồn 90° lạnh", banana, new Vector3(0.12f, 0, -0.05f));
+            Bottle(conObj, "Vỏ chai", Vector3.zero, 4);
+            var conCol = conObj.gameObject.AddComponent<CapsuleCollider>();
+            conCol.center = new Vector3(0, 0.1f, 0);
+            conCol.radius = 0.038f;
+            conCol.height = 0.2f;
+            var conGrab = conObj.gameObject.AddComponent<Grabbable>();
+            conGrab.kind = "chai_hoa_chat";
+            conGrab.gripHeightM = 0.09f;
+            conGrab.massG = 320f;
+
+            var duaObj = Group("Đũa thủy tinh", banana, new Vector3(-0.1f, 0.01f, 0.05f));
+            Cyl(duaObj, "Thân đũa", new Vector3(0, 0.1f, 0), 0.003f, 0.2f, labGlass);
+            var duaCol = duaObj.gameObject.AddComponent<CapsuleCollider>();
+            duaCol.center = new Vector3(0, 0.1f, 0);
+            duaCol.radius = 0.004f;
+            duaCol.height = 0.2f;
+            var duaGrab = duaObj.gameObject.AddComponent<Grabbable>();
+            duaGrab.kind = "dua_thuy_tinh";
+            duaGrab.gripHeightM = 0.01f;
+            duaGrab.liesOnTable = true;
+            duaGrab.lyingRadiusM = 0.003f;
+            duaGrab.lengthM = 0.2f;
+            duaGrab.massG = 18f;
+
+            TubeRack(banana, new Vector3(0.3f, 0, 0), 5, bioBlueTip, "Giá ống ly tâm tách ADN");
             Info(banana, "Tách chiết ADN chuối", "Nghiền chuối với nước rửa bát + muối (phá màng tế bào, màng nhân), lọc, rót nhẹ cồn lạnh lên trên: ADN kết tủa thành sợi trắng ở mặt phân cách.");
             Spectro(isl, new Vector3(1.55f, top, -0.2f));
             PipetteStation(isl, new Vector3(1.4f, top, 0.25f), 90f);
@@ -687,8 +721,16 @@ namespace Khkt.EditorTools
             Box(pot, "Bao đất", new Vector3(-0.5f, 0.92f, 0), new Vector3(0.35f, 0.2f, 0.45f), bioKraft, false);
             for (int i = 0; i < 3; i++) Plant(pot, new Vector3(0.0f + i * 0.2f, 0.82f, 0.05f), 3, 1f);
             var can = Group("Bình tưới", pot, new Vector3(0.6f, 0, 0));
-            Cyl(can, "Thân bình", new Vector3(0, 0.12f, 0), 0.08f, 0.24f, Mat("T2_BinhTuoi", new Color(0.2f, 0.55f, 0.35f), 0.4f));
+            Cyl(can, "Thân bình", new Vector3(0, 0.12f, 0), 0.08f, 0.24f, Mat("T2_BinhTuoi", new Color(0.2f, 0.55f, 0.35f), 0.4f), true);
             Cyl(can, "Vòi bình", new Vector3(0.12f, 0.2f, 0), 0.012f, 0.25f, Mat("T2_BinhTuoi", new Color(0.2f, 0.55f, 0.35f), 0.4f), false, new Vector3(0, 0, -55));
+            var canCol = can.gameObject.AddComponent<CapsuleCollider>();
+            canCol.center = new Vector3(0, 0.12f, 0);
+            canCol.radius = 0.08f;
+            canCol.height = 0.24f;
+            var canGrab = can.gameObject.AddComponent<Grabbable>();
+            canGrab.kind = "binh_tuoi";
+            canGrab.gripHeightM = 0.12f;
+            canGrab.massG = 220f;
             var sensor = Group("Cảm biến vi khí hậu", gh, new Vector3(RoomSplitX + 0.12f, 1.55f, -4.5f), 90f);
             Box(sensor, "Hộp", Vector3.zero, new Vector3(0.3f, 0.22f, 0.05f), bioWhite, false);
             NoShadow(Box(sensor, "Màn", new Vector3(0, 0.01f, 0.026f), new Vector3(0.24f, 0.12f, 0.004f), bioDisplayGreen, false));

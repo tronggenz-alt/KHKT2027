@@ -46,7 +46,7 @@ namespace Khkt.Demo
             var p = panel.transform;
             Label(p, "Tiêu đề", "Robot trợ lý", 22, Ink, true, TextAnchor.UpperLeft, new Vector2(24, -18), new Vector2(300, 30));
             status = Label(p, "Trạng thái", "", 13, Dim, false, TextAnchor.UpperLeft, new Vector2(26, -50), new Vector2(470, 20));
-            MakeButton(p, "Đóng", "Đóng  T", new Vector2(-110, -18), new Vector2(90, 32), Close, false, 14, new Vector2(1, 1));
+            MakeButton(p, "Đóng", "Đóng  T", new Vector2(-110, -18), new Vector2(100, 44), Close, false, 14, new Vector2(1, 1));
             log = Label(p, "Hội thoại", "", 15, Ink, false, TextAnchor.LowerLeft, new Vector2(24, -78), new Vector2(472, 330));
             log.verticalOverflow = VerticalWrapMode.Truncate;
             string[] quick = { "Hiện tượng vừa rồi là gì?", "Làm mẫu chuẩn độ", "Thí nghiệm mẫu", "Đo pH bình này", "Lấy NaOH ra bàn", "Dọn bàn giúp mình" };
@@ -55,8 +55,8 @@ namespace Khkt.Demo
                 string q = quick[i];
                 MakeButton(p, "Gợi ý", q, new Vector2(24 + (i % 3) * 160, -418 - (i / 3) * 38), new Vector2(152, 32), () => Send(q), false, 13);
             }
-            input = MakeInput(p, "Ô nhập", "Hỏi hoặc ra lệnh cho robot...", new Vector2(24, -500), new Vector2(380, 42), 16);
-            MakeButton(p, "Gửi", "Gửi", new Vector2(414, -500), new Vector2(82, 42), () => Send(input.text), true);
+            input = MakeInput(p, "Ô nhập", "Hỏi hoặc ra lệnh cho robot...", new Vector2(24, -500), new Vector2(380, 44), 16);
+            MakeButton(p, "Gửi", "Gửi", new Vector2(414, -500), new Vector2(82, 44), () => Send(input.text), true);
             panel.SetActive(false);
 
             // Bong bóng lời robot khi khung trò chuyện đang đóng

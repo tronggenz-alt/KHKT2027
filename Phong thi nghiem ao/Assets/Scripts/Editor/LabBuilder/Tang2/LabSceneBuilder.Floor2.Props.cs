@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Khkt.Interaction;
 using UnityEditor;
 using UnityEngine;
 using static Khkt.EditorTools.LabKit;
@@ -305,67 +306,150 @@ namespace Khkt.EditorTools
         // =====================================================================
 
         /// <summary>Chồng đĩa petri có thạch (lật ngược như khi ủ), kind 0: khuẩn lạc kem, 1: vàng, 2: thạch trống.</summary>
-        static void PetriStack(Transform p, Vector3 pos, int count, int kind)
+        static Transform PetriStack(Transform p, Vector3 pos, int count, int kind)
         {
             var g = Group("Chồng đĩa petri", p, pos);
-            var dish = Lathe("T2_DiaPetri", 24, V(0, 0), V(0.045f, 0), V(0.045f, 0.014f), V(0.043f, 0.014f), V(0.043f, 0.002f), V(0, 0.002f));
             for (int i = 0; i < count; i++)
             {
                 float y = i * 0.0155f;
-                NoShadow(MeshObj(g, "Đĩa petri", dish, new Vector3(0, y, 0), bioPetri));
-                NoShadow(Cyl(g, "Thạch", new Vector3(0, y + 0.006f, 0), 0.042f, 0.008f, bioAgar));
-                if (kind == 2) continue;
-                var r = new System.Random(i * 13 + kind * 7 + Mathf.RoundToInt(pos.x * 100 + pos.z * 37));
+                PetriDish(g, count == 1 ? "Đĩa petri" : $"Đĩa petri {i + 1}", new Vector3(0, y, 0), kind, i);
+            }
+            return g;
+        }
+
+        static Transform PetriDish(Transform p, string name, Vector3 localPos, int kind, int seedOffset = 0)
+        {
+            var dish = Group(name, p, localPos);
+            var dishMesh = Lathe("T2_DiaPetri", 24, V(0, 0), V(0.045f, 0), V(0.045f, 0.014f), V(0.043f, 0.014f), V(0.043f, 0.002f), V(0, 0.002f));
+            NoShadow(MeshObj(dish, "Thân đĩa", dishMesh, Vector3.zero, bioPetri, true));
+            NoShadow(Cyl(dish, "Thạch", new Vector3(0, 0.006f, 0), 0.042f, 0.008f, bioAgar, false));
+            if (kind != 2)
+            {
+                var r = new System.Random(seedOffset * 13 + kind * 7 + 101);
                 for (int c = 0; c < 6; c++)
                 {
                     float a = (float)r.NextDouble() * Mathf.PI * 2, d = 0.032f * Mathf.Sqrt((float)r.NextDouble());
                     float s = 0.004f + 0.006f * (float)r.NextDouble();
-                    NoShadow(Ball(g, "Khuẩn lạc", new Vector3(Mathf.Cos(a) * d, y + 0.0105f, Mathf.Sin(a) * d), new Vector3(s, 0.002f, s), kind == 0 ? bioColony : bioColonyYellow));
+                    NoShadow(Ball(dish, "Khuẩn lạc", new Vector3(Mathf.Cos(a) * d, 0.0105f, Mathf.Sin(a) * d), new Vector3(s, 0.002f, s), kind == 0 ? bioColony : bioColonyYellow, false));
                 }
             }
+            var col = dish.gameObject.AddComponent<BoxCollider>();
+            col.center = new Vector3(0, 0.0075f, 0);
+            col.size = new Vector3(0.09f, 0.015f, 0.09f);
+            var gr = dish.gameObject.AddComponent<Grabbable>();
+            gr.kind = "dia_petri";
+            gr.gripHeightM = 0.015f;
+            gr.massG = 45f;
+            gr.liesOnTable = false;
+            return dish;
         }
 
         /// <summary>Giá nhựa có n ống ly tâm / ống nghiệm nắp màu.</summary>
-        static void TubeRack(Transform p, Vector3 pos, int n, Material cap)
+        static Transform TubeRack(Transform p, Vector3 pos, int n, Material cap, string rackName = "Giá ống")
         {
-            var g = Group("Giá ống", p, pos);
+            var g = Group(rackName, p, pos);
             float len = 0.025f * n + 0.02f;
-            Box(g, "Giá", new Vector3(0, 0.02f, 0), new Vector3(0.05f, 0.04f, len), Mat("T2_GiaNhuaTrang", new Color(0.92f, 0.92f, 0.9f), 0.4f), false);
+            Box(g, "Khung giá", new Vector3(0, 0.02f, 0), new Vector3(0.05f, 0.04f, len), Mat("T2_GiaNhuaTrang", new Color(0.92f, 0.92f, 0.9f), 0.4f), true);
+
+            var rackCol = g.gameObject.AddComponent<BoxCollider>();
+            rackCol.center = new Vector3(0, 0.02f, 0);
+            rackCol.size = new Vector3(0.05f, 0.04f, len);
+            var rackGrab = g.gameObject.AddComponent<Grabbable>();
+            rackGrab.kind = "gia_ong";
+            rackGrab.gripHeightM = 0.04f;
+            rackGrab.massG = 80f + n * 15f;
+            rackGrab.lengthM = len;
+
             var tube = Lathe("T2_OngLyTam", 12, V(0, 0), V(0.004f, 0.002f), V(0.007f, 0.012f), V(0.007f, 0.07f), V(0, 0.07f));
             for (int i = 0; i < n; i++)
             {
                 float z = -len / 2 + 0.02f + i * 0.025f;
-                NoShadow(MeshObj(g, "Ống", tube, new Vector3(0, 0.01f, z), translucentPlastic));
-                NoShadow(Cyl(g, "Nắp", new Vector3(0, 0.083f, z), 0.0085f, 0.012f, cap));
+                var socketGo = new GameObject($"Lỗ cắm {i + 1}");
+                socketGo.transform.SetParent(g, false);
+                socketGo.transform.localPosition = new Vector3(0, 0.01f, z);
+                var sock = socketGo.AddComponent<PlaceSocket>();
+                sock.label = $"Lỗ cắm {i + 1}";
+                sock.accepts = new[] { "ong_ly_tam", "ong_nghiem" };
+                var sockTrigger = socketGo.AddComponent<BoxCollider>();
+                sockTrigger.isTrigger = true;
+                sockTrigger.center = new Vector3(0, 0.035f, 0);
+                sockTrigger.size = new Vector3(0.02f, 0.07f, 0.02f);
+                sock.zone = sockTrigger;
+
+                var tubeObj = Group($"Ống ly tâm {i + 1}", g, new Vector3(0, 0.01f, z));
+                NoShadow(MeshObj(tubeObj, "Thân", tube, Vector3.zero, translucentPlastic, true));
+                NoShadow(Cyl(tubeObj, "Nắp", new Vector3(0, 0.073f, 0), 0.0085f, 0.012f, cap, true));
+
+                var tubeCol = tubeObj.gameObject.AddComponent<CapsuleCollider>();
+                tubeCol.center = new Vector3(0, 0.04f, 0);
+                tubeCol.radius = 0.009f;
+                tubeCol.height = 0.085f;
+
+                var tubeGrab = tubeObj.gameObject.AddComponent<Grabbable>();
+                tubeGrab.kind = "ong_ly_tam";
+                tubeGrab.gripHeightM = 0.04f;
+                tubeGrab.liesOnTable = true;
+                tubeGrab.lyingRadiusM = 0.0085f;
+                tubeGrab.lengthM = 0.085f;
+                tubeGrab.massG = 15f;
+
+                sock.Put(tubeGrab);
             }
+            return g;
         }
 
         /// <summary>Giá micropipet 3 cây (P20 vàng, P200 xanh, P1000 xanh dương) + hộp đầu côn.</summary>
-        static void PipetteStation(Transform p, Vector3 pos, float yaw)
+        static Transform PipetteStation(Transform p, Vector3 pos, float yaw)
         {
             var g = Group("Bộ micropipet", p, pos, yaw);
             Box(g, "Giá", new Vector3(-0.05f, 0.15f, 0), new Vector3(0.04f, 0.3f, 0.2f), bioWhite);
             Box(g, "Chân giá", new Vector3(0, 0.005f, 0), new Vector3(0.14f, 0.01f, 0.2f), bioWhite, false);
             var colors = new[] { bioYellowTip, Mat("T2_PipetXanhLa", new Color(0.3f, 0.75f, 0.35f), 0.45f), bioBlueTip };
+            string[] pNames = { "P20", "P200", "P1000" };
             var pip = Lathe("T2_ThanPipet", 12, V(0, 0), V(0.002f, 0.0f), V(0.006f, 0.06f), V(0.012f, 0.08f), V(0.014f, 0.2f), V(0.008f, 0.23f), V(0, 0.23f));
             for (int i = 0; i < 3; i++)
             {
                 float z = -0.06f + i * 0.06f;
-                MeshObj(g, "Micropipet", pip, new Vector3(-0.02f, 0.06f, z), bioWhite);
-                Cyl(g, "Nút đẩy", new Vector3(-0.02f, 0.3f, z), 0.008f, 0.02f, colors[i]);
+                var pipGo = Group($"Micropipet {pNames[i]}", g, new Vector3(-0.02f, 0.06f, z));
+                MeshObj(pipGo, "Thân", pip, Vector3.zero, bioWhite, true);
+                Cyl(pipGo, "Nút đẩy", new Vector3(0, 0.24f, 0), 0.008f, 0.02f, colors[i], true);
+
+                var pipCol = pipGo.gameObject.AddComponent<CapsuleCollider>();
+                pipCol.center = new Vector3(0, 0.12f, 0);
+                pipCol.radius = 0.014f;
+                pipCol.height = 0.26f;
+
+                var gr = pipGo.gameObject.AddComponent<Grabbable>();
+                gr.kind = "pipet";
+                gr.gripHeightM = 0.15f;
+                gr.liesOnTable = true;
+                gr.lyingRadiusM = 0.014f;
+                gr.lengthM = 0.25f;
+                gr.massG = 95f;
             }
             for (int i = 0; i < 2; i++)
             {
-                var box = Group("Hộp đầu côn", g, new Vector3(0.1f, 0, -0.07f + i * 0.14f));
-                Box(box, "Hộp", new Vector3(0, 0.03f, 0), new Vector3(0.08f, 0.06f, 0.12f), i == 0 ? bioYellowTip : bioBlueTip, false);
+                var box = Group($"Hộp đầu côn {(i == 0 ? "vàng" : "xanh")}", g, new Vector3(0.1f, 0, -0.07f + i * 0.14f));
+                Box(box, "Hộp", new Vector3(0, 0.03f, 0), new Vector3(0.08f, 0.06f, 0.12f), i == 0 ? bioYellowTip : bioBlueTip, true);
                 NoShadow(Box(box, "Nắp trong", new Vector3(0, 0.062f, 0), new Vector3(0.08f, 0.004f, 0.12f), translucentPlastic, false));
+
+                var boxCol = box.gameObject.AddComponent<BoxCollider>();
+                boxCol.center = new Vector3(0, 0.032f, 0);
+                boxCol.size = new Vector3(0.08f, 0.065f, 0.12f);
+
+                var gr = box.gameObject.AddComponent<Grabbable>();
+                gr.kind = "hop_dau_con";
+                gr.gripHeightM = 0.035f;
+                gr.massG = 80f;
             }
+            return g;
         }
 
         /// <summary>Bình mẫu ngâm formalin: lọ thủy tinh, nắp đen, mẫu vật bên trong (0 cá, 1 ếch, 2 rắn cuộn, 3 tim, 4 cây non).</summary>
-        static void SpecimenJar(Transform p, Vector3 pos, int kind, float s = 1f)
+        static Transform SpecimenJar(Transform p, Vector3 pos, int kind, float s = 1f)
         {
-            var g = Group("Bình mẫu ngâm", p, pos);
+            string[] names = { "Cá", "Ếch", "Rắn cuộn", "Tim lợn", "Cây non" };
+            var g = Group($"Bình mẫu ngâm {names[Mathf.Clamp(kind, 0, 4)]}", p, pos);
             float r = 0.07f * s, h = 0.24f * s;
             NoShadow(MeshObj(g, "Bình", Lathe("T2_BinhMauNgam", 24, V(0, 0), V(0.07f, 0), V(0.072f, 0.01f), V(0.072f, 0.22f), V(0.064f, 0.235f), V(0.064f, 0.24f), V(0, 0.24f)), Vector3.zero, labGlass, false, null, s));
             NoShadow(Cyl(g, "Dịch ngâm", new Vector3(0, h * 0.43f, 0), r * 0.94f, h * 0.84f, bioFormalin));
@@ -395,39 +479,168 @@ namespace Khkt.EditorTools
                         Ball(g, "Lá", new Vector3(sd * 0.02f * s, h * 0.6f, 0), new Vector3(0.035f, 0.015f, 0.02f) * s, bioLeafLight);
                     break;
             }
+
+            var capCol = g.gameObject.AddComponent<CapsuleCollider>();
+            capCol.center = new Vector3(0, (h + 0.025f * s) * 0.5f, 0);
+            capCol.radius = r;
+            capCol.height = h + 0.025f * s;
+
+            var gr = g.gameObject.AddComponent<Grabbable>();
+            gr.kind = "binh_ngam";
+            gr.gripHeightM = 0.12f * s;
+            gr.massG = 450f * s;
+            gr.liesOnTable = false;
+            return g;
         }
 
         /// <summary>Chai thuốc nhuộm nhỏ giọt (nắp màu, nhãn): xanh methylen, lugol, tím tinh thể, safranin...</summary>
-        static void StainBottle(Transform p, Vector3 pos, Material liquid, string label)
+        static Transform StainBottle(Transform p, Vector3 pos, Material liquid, string label)
         {
             var g = Group("Chai " + label, p, pos);
-            NoShadow(MeshObj(g, "Chai", DropperBottleMesh(), Vector3.zero, amber));
-            Cyl(g, "Nắp nhỏ giọt", new Vector3(0, 0.07f, 0), 0.009f, 0.025f, liquid);
+            NoShadow(MeshObj(g, "Chai", DropperBottleMesh(), Vector3.zero, amber, true));
+            Cyl(g, "Nắp nhỏ giọt", new Vector3(0, 0.07f, 0), 0.009f, 0.025f, liquid, true);
             Box(g, "Nhãn", new Vector3(0.0185f, 0.03f, 0), new Vector3(0.002f, 0.03f, 0.022f), labelPaper, false);
+
+            var col = g.gameObject.AddComponent<CapsuleCollider>();
+            col.center = new Vector3(0, 0.045f, 0);
+            col.radius = 0.02f;
+            col.height = 0.09f;
+
+            var gr = g.gameObject.AddComponent<Grabbable>();
+            gr.kind = "lo_nhuom";
+            gr.gripHeightM = 0.045f;
+            gr.massG = 65f;
+            gr.liesOnTable = false;
+            return g;
         }
 
         /// <summary>Khay inox dụng cụ: kẹp, dao mổ, kim mũi mác, lam kính, lamen.</summary>
-        static void InstrumentTray(Transform p, Vector3 pos, float yaw)
+        static Transform InstrumentTray(Transform p, Vector3 pos, float yaw)
         {
             var g = Group("Khay dụng cụ", p, pos, yaw);
-            Box(g, "Khay", new Vector3(0, 0.006f, 0), new Vector3(0.18f, 0.012f, 0.26f), steel, false);
-            Box(g, "Kẹp", new Vector3(0.04f, 0.015f, -0.02f), new Vector3(0.008f, 0.004f, 0.14f), bioChrome, false, new Vector3(0, 8, 0));
-            Box(g, "Dao mổ", new Vector3(-0.01f, 0.015f, 0.0f), new Vector3(0.01f, 0.004f, 0.15f), bioChrome, false, new Vector3(0, -6, 0));
-            Box(g, "Kim mũi mác", new Vector3(-0.05f, 0.015f, 0.02f), new Vector3(0.006f, 0.004f, 0.13f), bioChrome, false, new Vector3(0, 4, 0));
+            Box(g, "Khay inox", new Vector3(0, 0.006f, 0), new Vector3(0.18f, 0.012f, 0.26f), steel, true);
+            var trayCol = g.gameObject.AddComponent<BoxCollider>();
+            trayCol.center = new Vector3(0, 0.006f, 0);
+            trayCol.size = new Vector3(0.18f, 0.012f, 0.26f);
+            var trayGrab = g.gameObject.AddComponent<Grabbable>();
+            trayGrab.kind = "khay_dung_cu";
+            trayGrab.gripHeightM = 0.01f;
+            trayGrab.massG = 250f;
+
+            // Kẹp
+            var kep = Group("Kẹp y tế", g, new Vector3(0.04f, 0.015f, -0.02f), 8f);
+            Box(kep, "Thân kẹp", Vector3.zero, new Vector3(0.008f, 0.004f, 0.14f), bioChrome, true);
+            var kepCol = kep.gameObject.AddComponent<BoxCollider>();
+            kepCol.size = new Vector3(0.016f, 0.01f, 0.14f);
+            var kepGrab = kep.gameObject.AddComponent<Grabbable>();
+            kepGrab.kind = "kep";
+            kepGrab.gripHeightM = 0.01f;
+            kepGrab.liesOnTable = true;
+            kepGrab.lyingRadiusM = 0.003f;
+            kepGrab.lengthM = 0.14f;
+            kepGrab.massG = 25f;
+
+            // Dao mổ
+            var dao = Group("Dao mổ", g, new Vector3(-0.01f, 0.015f, 0.0f), -6f);
+            Box(dao, "Thân dao", Vector3.zero, new Vector3(0.01f, 0.004f, 0.15f), bioChrome, true);
+            var daoCol = dao.gameObject.AddComponent<BoxCollider>();
+            daoCol.size = new Vector3(0.018f, 0.01f, 0.15f);
+            var daoGrab = dao.gameObject.AddComponent<Grabbable>();
+            daoGrab.kind = "dao_mo";
+            daoGrab.gripHeightM = 0.01f;
+            daoGrab.liesOnTable = true;
+            daoGrab.lyingRadiusM = 0.0035f;
+            daoGrab.lengthM = 0.15f;
+            daoGrab.massG = 30f;
+
+            // Kim mũi mác
+            var kim = Group("Kim mũi mác", g, new Vector3(-0.05f, 0.015f, 0.02f), 4f);
+            Box(kim, "Thân kim", Vector3.zero, new Vector3(0.006f, 0.004f, 0.13f), bioChrome, true);
+            var kimCol = kim.gameObject.AddComponent<BoxCollider>();
+            kimCol.size = new Vector3(0.014f, 0.01f, 0.13f);
+            var kimGrab = kim.gameObject.AddComponent<Grabbable>();
+            kimGrab.kind = "kim_mui_mac";
+            kimGrab.gripHeightM = 0.01f;
+            kimGrab.liesOnTable = true;
+            kimGrab.lyingRadiusM = 0.0025f;
+            kimGrab.lengthM = 0.13f;
+            kimGrab.massG = 15f;
+
+            // 3 lam kính
             for (int i = 0; i < 3; i++)
-                NoShadow(Box(g, "Lam kính", new Vector3(0.0f, 0.0135f + i * 0.0015f, -0.09f), new Vector3(0.026f, 0.0012f, 0.076f), labGlass, false, new Vector3(0, i * 7, 0)));
+            {
+                var lam = Group($"Lam kính {i + 1}", g, new Vector3(0.0f, 0.0135f + i * 0.0015f, -0.09f), i * 7f);
+                NoShadow(Box(lam, "Kính", Vector3.zero, new Vector3(0.026f, 0.0012f, 0.076f), labGlass, true));
+                var lamCol = lam.gameObject.AddComponent<BoxCollider>();
+                lamCol.size = new Vector3(0.026f, 0.006f, 0.076f);
+                var lamGrab = lam.gameObject.AddComponent<Grabbable>();
+                lamGrab.kind = "lam_kinh";
+                lamGrab.gripHeightM = 0.01f;
+                lamGrab.liesOnTable = true;
+                lamGrab.lyingRadiusM = 0.001f;
+                lamGrab.lengthM = 0.076f;
+                lamGrab.massG = 5f;
+            }
+            return g;
         }
 
         /// <summary>Hộp đựng tiêu bản cố định (nắp mở, các tiêu bản xếp đứng).</summary>
-        static void SlideBox(Transform p, Vector3 pos, float yaw, bool info = false)
+        static Transform SlideBox(Transform p, Vector3 pos, float yaw, bool info = false)
         {
             var g = Group("Hộp tiêu bản", p, pos, yaw);
-            Box(g, "Hộp", new Vector3(0, 0.017f, 0), new Vector3(0.1f, 0.034f, 0.2f), Mat("T2_HopTieuBan", new Color(0.25f, 0.2f, 0.16f), 0.35f));
+            Box(g, "Thân hộp", new Vector3(0, 0.017f, 0), new Vector3(0.1f, 0.034f, 0.2f), Mat("T2_HopTieuBan", new Color(0.25f, 0.2f, 0.16f), 0.35f), true);
             Box(g, "Nắp mở", new Vector3(-0.065f, 0.06f, 0), new Vector3(0.006f, 0.09f, 0.2f), Mat("T2_HopTieuBan", new Color(0.25f, 0.2f, 0.16f), 0.35f), false, new Vector3(0, 0, -15));
+
+            var boxCol = g.gameObject.AddComponent<BoxCollider>();
+            boxCol.center = new Vector3(0, 0.017f, 0);
+            boxCol.size = new Vector3(0.1f, 0.034f, 0.2f);
+            var boxGrab = g.gameObject.AddComponent<Grabbable>();
+            boxGrab.kind = "hop_tieu_ban";
+            boxGrab.gripHeightM = 0.02f;
+            boxGrab.massG = 120f;
+
+            string[] slideNames = {
+                "Phế nang phổi", "Nephron thận", "Synapse thần kinh", "Sarcomere cơ vân",
+                "Tế bào viền dạ dày", "Tiểu thùy gan", "Biểu bì hành", "Khí khổng lá",
+                "Phết máu người", "Nấm men bánh mì"
+            };
+
             for (int i = 0; i < 10; i++)
-                NoShadow(Box(g, "Tiêu bản", new Vector3(0.005f, 0.04f, -0.085f + i * 0.019f), new Vector3(0.076f, 0.026f, 0.0012f), labGlass, false));
+            {
+                float z = -0.085f + i * 0.019f;
+                var socketGo = new GameObject($"Khe tiêu bản {i + 1}");
+                socketGo.transform.SetParent(g, false);
+                socketGo.transform.localPosition = new Vector3(0.005f, 0.027f, z);
+                var sock = socketGo.AddComponent<PlaceSocket>();
+                sock.label = $"Khe tiêu bản {i + 1}";
+                sock.accepts = new[] { "tieu_ban", "lam_kinh" };
+                var sockCol = socketGo.AddComponent<BoxCollider>();
+                sockCol.isTrigger = true;
+                sockCol.center = new Vector3(0, 0.013f, 0);
+                sockCol.size = new Vector3(0.08f, 0.03f, 0.018f);
+                sock.zone = sockCol;
+
+                var slide = Group($"Tiêu bản {slideNames[i]}", g, new Vector3(0.005f, 0.027f, z));
+                NoShadow(Box(slide, "Kính", new Vector3(0, 0.013f, 0), new Vector3(0.076f, 0.026f, 0.0012f), labGlass, true));
+                Box(slide, "Nhãn", new Vector3(0.028f, 0.013f, 0.001f), new Vector3(0.018f, 0.022f, 0.0006f), labelPaper, false);
+
+                var slideCol = slide.gameObject.AddComponent<BoxCollider>();
+                slideCol.center = new Vector3(0, 0.013f, 0);
+                slideCol.size = new Vector3(0.076f, 0.026f, 0.006f);
+
+                var slideGrab = slide.gameObject.AddComponent<Grabbable>();
+                slideGrab.kind = "tieu_ban";
+                slideGrab.gripHeightM = 0.01f;
+                slideGrab.liesOnTable = true;
+                slideGrab.lyingRadiusM = 0.0012f;
+                slideGrab.lengthM = 0.076f;
+                slideGrab.massG = 5f;
+
+                sock.Put(slideGrab);
+            }
             if (info) Info(g, "Hộp tiêu bản cố định", "Tiêu bản nhuộm H&E: phế nang phổi, nephron (thận), synapse thần kinh, sarcomere (cơ vân), tế bào viền dạ dày, tiểu thùy gan; tiêu bản biểu bì hành, khí khổng, phết máu, vi khuẩn sữa chua (Gram +), nấm men.",
                  "Cùng 6 cảnh hiển vi của Phòng Lab Sinh học 3D trên web.");
+            return g;
         }
 
         // =====================================================================
@@ -551,6 +764,20 @@ namespace Khkt.EditorTools
             if (kind == 4) Cyl(g, "Thân cây", new Vector3(0, potH + 0.35f * scale, 0), 0.015f * scale, 0.7f * scale, trunk);
             var leaves = MeshObj(g, "Tán lá", m, new Vector3(0, potH * 0.9f + (kind == 4 ? 0.25f * scale : 0), 0), leafMat, false, null, scale);
             if (kind == 2 || kind == 3) NoShadow(leaves);
+
+            if (kind < 4 && scale <= 1.2f)
+            {
+                var col = g.gameObject.AddComponent<CapsuleCollider>();
+                col.center = new Vector3(0, potH * 0.5f, 0);
+                col.radius = potR * 1.05f;
+                col.height = potH;
+
+                var gr = g.gameObject.AddComponent<Grabbable>();
+                gr.kind = "chau_cay";
+                gr.gripHeightM = potH * 0.5f;
+                gr.massG = 250f * scale;
+                gr.liesOnTable = false;
+            }
         }
 
         // =====================================================================

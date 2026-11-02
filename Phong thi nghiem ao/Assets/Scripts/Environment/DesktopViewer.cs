@@ -66,10 +66,12 @@ namespace Khkt.Environment
             ApplyCullDistances();
             viewCam = cameraTransform != null ? cameraTransform.GetComponent<Camera>() : null;
             if (viewCam != null) baseFov = viewCam.fieldOfView;
+#if !UNITY_IOS
             if (FindAnyObjectByType<Khkt.Input.HeadTracking>() == null) gameObject.AddComponent<Khkt.Input.HeadTracking>();
             if (FindAnyObjectByType<Khkt.Input.MediaPipeHandSource>() == null) gameObject.AddComponent<Khkt.Input.MediaPipeHandSource>();
             if (cameraTransform != null && cameraTransform.GetComponent<Khkt.Input.GazeHighlight>() == null)
                 cameraTransform.gameObject.AddComponent<Khkt.Input.GazeHighlight>();
+#endif
         }
 
         /// <summary>
@@ -154,6 +156,15 @@ namespace Khkt.Environment
             yaw += padLook.x * Mathf.Abs(padLook.x) * padTurnSpeed * Time.deltaTime;
             if (!PadInput.LookYUsedByTool)
                 pitch = Mathf.Clamp(pitch - padLook.y * Mathf.Abs(padLook.y) * padTurnSpeed * 0.6f * Time.deltaTime, -80f, 80f);
+            // Vuốt màn hình cảm ứng: cộng thẳng vào yaw / pitch (tuyến tính, không bình phương)
+            Vector2 touchLook = PadInput.LookDelta;
+            if (touchLook.sqrMagnitude > 0f)
+            {
+                yaw += touchLook.x;
+                if (!PadInput.LookYUsedByTool)
+                    pitch = Mathf.Clamp(pitch - touchLook.y, -80f, 80f);
+                PadInput.LookDelta = Vector2.zero;
+            }
             // điều khiển bằng đầu (webcam, F8): quay đầu sang bên nào thì góc nhìn xoay liên tục sang bên đó
             yaw += Khkt.Input.HeadTracking.Turn * headTurnSpeed * Time.deltaTime;
             if (Khkt.Input.HeadTracking.PitchTurn != 0f)
@@ -164,12 +175,21 @@ namespace Khkt.Environment
                 int n = stations.Length;
                 GoTo(stations[((padStation + step) % n + n) % n]);
             }
+            if (PadInput.StationJump >= 0 && stations != null && PadInput.StationJump < stations.Length)
+            {
+                GoTo(stations[PadInput.StationJump]);
+                PadInput.StationJump = -1;
+            }
 
             if (PadInput.SitPressed)  // tay cầm 1 cần: nhấn nút 2 lần
             {
                 seated = !seated;
                 EyeOffset = 0;
             }
+            float eye = (kb != null ? (kb.xKey.isPressed ? 1 : 0) - (kb.zKey.isPressed ? 1 : 0) : 0) + PadInput.EyeAdjustAxis;
+            if (Mathf.Abs(eye) > 0.01f)
+                EyeOffset = Mathf.Clamp(EyeOffset + eye * eyeAdjustSpeed * Time.deltaTime, eyeOffsetRange.x, eyeOffsetRange.y);
+
             Vector2 input = Vector2.zero;
             bool run = PadInput.Shift;
             if (kb != null)
@@ -179,8 +199,6 @@ namespace Khkt.Environment
                     seated = !seated;
                     EyeOffset = 0;
                 }
-                float eye = (kb.xKey.isPressed ? 1 : 0) - (kb.zKey.isPressed ? 1 : 0);
-                EyeOffset = Mathf.Clamp(EyeOffset + eye * eyeAdjustSpeed * Time.deltaTime, eyeOffsetRange.x, eyeOffsetRange.y);
                 for (int i = 0; i < stations.Length && i < 9; i++)
                     if (kb[Key.Digit1 + i].wasPressedThisFrame) GoTo(stations[i]);
                 if (kb.digit0Key.wasPressedThisFrame && stations.Length > 9)  // 0: lần lượt các trạm phụ (bàn giáo viên, khu an toàn)
@@ -231,8 +249,12 @@ namespace Khkt.Environment
             d.y = 0;
             d = d.sqrMagnitude > 1e-4f ? d.normalized : Vector3.back;
             controller.enabled = false;
-            float floorY = target.y >= 3.6f ? 3.8f : 0f;  // vật ở tầng 2 (sàn y = 3,8, cùng ngưỡng với ZoneMap.At)
-            transform.position = new Vector3(target.x, floorY, target.z) + d * dist;
+            Vector3 pos = new Vector3(target.x, target.y + 0.5f, target.z) + d * dist;
+            if (Physics.Raycast(pos, Vector3.down, out var floorHit, 6f, ~0, QueryTriggerInteraction.Ignore))
+                pos.y = floorHit.point.y;
+            else
+                pos.y = target.y >= 3.6f ? 3.8f : 0f;
+            transform.position = pos;
             controller.enabled = true;
             seated = false;
             EyeOffset = 0;

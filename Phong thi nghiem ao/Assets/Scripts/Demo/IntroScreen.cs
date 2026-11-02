@@ -20,8 +20,9 @@ namespace Khkt.Demo
 
         public bool IsOpen { get; private set; }
 
-        GameObject root, home, setup;
-        Text continueText, setupNote;
+        GameObject root, home, setup, settings;
+        Text continueText, setupNote, aiSaveStatus;
+        InputField aiUrlInput;
         bool captured, started;
         string analyte = "HCl", titrant = "NaOH", indicator = "pp";
         float analyteC;
@@ -50,8 +51,23 @@ namespace Khkt.Demo
             Mode(h, 2, "Khám phá phòng lab", "Đi một vòng: bàn thí nghiệm, khu thiết bị phân tích, tủ hút, phòng hóa chất 27 kệ.", "Đi tham quan", StartExplore, false);
             Label(h, "Phím", "<b>Rê chuột</b> nhìn   ·   <b>WASD</b> đi   ·   <b>Chuột trái</b> cầm, dùng   ·   <b>B</b> tra cứu hóa chất   ·   <b>T</b> trợ lý AI   ·   <b>1–9</b> các khu   ·   <b>H</b> trợ giúp   ·   <b>Esc</b> menu",
                   15, Dim, false, TextAnchor.MiddleCenter, new Vector2(0, -630), new Vector2(1180, 30));
-            continueText = MakeButton(h, "Tiếp tục", "Tiếp tục", new Vector2(-190, -40), new Vector2(150, 40), Close, false, 15, new Vector2(1, 1)).GetComponentInChildren<Text>();
+            MakeButton(h, "Cài đặt", "Cài đặt", new Vector2(-360, -40), new Vector2(150, 44), ShowSettings, false, 15, new Vector2(1, 1));
+            continueText = MakeButton(h, "Tiếp tục", "Tiếp tục", new Vector2(-190, -40), new Vector2(150, 44), Close, false, 15, new Vector2(1, 1)).GetComponentInChildren<Text>();
             continueText.transform.parent.gameObject.SetActive(false);
+
+            // ----- Cài đặt hệ thống (máy chủ AI) -----
+            var setImg = Panel(dimRt, "Cài đặt", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(760, 460), glass, 1.1f);
+            settings = setImg.gameObject;
+            var st = settings.transform;
+            Label(st, "Tiêu đề", "Cài đặt hệ thống", 28, Ink, true, TextAnchor.UpperLeft, new Vector2(40, -36), new Vector2(600, 36));
+            Label(st, "Nhãn AI", "Địa chỉ máy chủ AI (mô hình ngôn ngữ & robot):", 16, Dim, true, TextAnchor.UpperLeft, new Vector2(40, -96), new Vector2(680, 24));
+            aiUrlInput = MakeInput(st, "Ô nhập AI URL", "http://127.0.0.1:8000", new Vector2(40, -130), new Vector2(680, 44));
+            aiUrlInput.text = PlayerPrefs.GetString(AiClient.ServerUrlPrefKey, "http://127.0.0.1:8000");
+            Label(st, "Ghi chú AI", "Trên iPad: nhập IP của máy Mac chạy máy chủ trong cùng mạng Wi-Fi\n(ví dụ: http://192.168.1.15:8000). Không có máy chủ, phòng lab vẫn hoạt động bình thường.", 14, Dim, false, TextAnchor.UpperLeft, new Vector2(40, -188), new Vector2(680, 50));
+            aiSaveStatus = Label(st, "Trạng thái", "", 15, Good, false, TextAnchor.UpperLeft, new Vector2(40, -250), new Vector2(680, 30));
+            MakeButton(st, "Lưu", "Lưu cài đặt", new Vector2(40, -300), new Vector2(180, 44), SaveSettings, true, 16);
+            MakeButton(st, "Đóng", "Quay lại", new Vector2(240, -300), new Vector2(150, 44), () => { settings.SetActive(false); home.SetActive(true); }, false, 16);
+            settings.SetActive(false);
 
             // ----- Chọn bài chuẩn độ -----
             var sImg = Panel(dimRt, "Chọn bài chuẩn độ", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(980, 640), glass, 1.1f);
@@ -99,7 +115,7 @@ namespace Khkt.Demo
             {
                 string v = value;
                 float w = Mathf.Max(90, label.Length * 9.5f + 34);
-                var b = MakeButton(p, "Lựa chọn", label, new Vector2(x, y - 28), new Vector2(w, 40), () => pick(v), false, 15);
+                var b = MakeButton(p, "Lựa chọn", label, new Vector2(x, y - 28), new Vector2(w, 44), () => pick(v), false, 15);
                 list.Add((b, v));
                 x += w + 10;
             }
@@ -146,6 +162,7 @@ namespace Khkt.Demo
             root.transform.SetAsLastSibling();
             home.SetActive(true);
             setup.SetActive(false);
+            if (settings != null) settings.SetActive(false);
             continueText.transform.parent.gameObject.SetActive(started);
             UiBridge.SetCapture(ref captured, true);
         }
@@ -156,6 +173,30 @@ namespace Khkt.Demo
             root.SetActive(false);
             UiBridge.SetCapture(ref captured, false);
             started = true;
+        }
+
+        void ShowSettings()
+        {
+            home.SetActive(false);
+            setup.SetActive(false);
+            settings.SetActive(true);
+            if (aiUrlInput != null)
+                aiUrlInput.text = PlayerPrefs.GetString(AiClient.ServerUrlPrefKey, AiClient.Instance != null ? AiClient.Instance.serverUrl : "http://127.0.0.1:8000");
+            if (aiSaveStatus != null) aiSaveStatus.text = "";
+        }
+
+        void SaveSettings()
+        {
+            if (aiUrlInput == null) return;
+            string url = aiUrlInput.text.Trim();
+            if (string.IsNullOrEmpty(url)) url = "http://127.0.0.1:8000";
+            if (AiClient.Instance != null) AiClient.Instance.SetServerUrl(url);
+            else
+            {
+                PlayerPrefs.SetString(AiClient.ServerUrlPrefKey, url);
+                PlayerPrefs.Save();
+            }
+            if (aiSaveStatus != null) aiSaveStatus.text = "✓ Đã lưu máy chủ: " + url;
         }
 
         void ShowSetup()

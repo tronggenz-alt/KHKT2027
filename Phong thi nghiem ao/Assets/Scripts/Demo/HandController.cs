@@ -303,16 +303,33 @@ namespace Khkt.Demo
                 float keys = kb != null ? (kb.upArrowKey.isPressed ? 1 : 0) - (kb.downArrowKey.isPressed ? 1 : 0) : 0;
                 if (!uiOpen) keys = Mathf.Clamp(keys + PadInput.StopcockAxis, -1, 1);
                 if (keys != 0) procedure.buret.AdjustOpening(keys * keyRate * (shift ? 0.25f : 1f) * dt);
-                if (kb != null && kb.spaceKey.wasPressedThisFrame) procedure.buret.Close();
+                if (((kb != null && kb.spaceKey.wasPressedThisFrame) || (!uiOpen && PadInput.CloseStopcockPressed)))
+                {
+                    procedure.buret.Close();
+                    PadInput.CloseStopcockPressed = false;
+                }
             }
             if (((kb != null && kb.qKey.wasPressedThisFrame) || (!uiOpen && PadInput.BackPressed)) && Held != null) ReturnHome();
             if (!uiOpen)
             {
                 bool enter = kb != null && (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame);
                 if (procedure != null && (enter || PadInput.RecordPressed)) procedure.RecordReading();
-                if (kb != null && procedure != null && procedure.Active && kb.rKey.wasPressedThisFrame && HeldPart == null) procedure.NewRun();
+                if (procedure != null && procedure.Active && HeldPart == null && ((kb != null && kb.rKey.wasPressedThisFrame) || PadInput.NewRunPressed))
+                {
+                    procedure.NewRun();
+                    PadInput.NewRunPressed = false;
+                }
                 if (ui != null && ((kb != null && kb.hKey.wasPressedThisFrame) || PadInput.HelpPressed)) ui.ToggleHelp();
-                if (kb != null && ui != null && kb.gKey.wasPressedThisFrame) ui.ToggleGraph();
+                if (ui != null && ((kb != null && kb.gKey.wasPressedThisFrame) || PadInput.ToggleGraphPressed))
+                {
+                    ui.ToggleGraph();
+                    PadInput.ToggleGraphPressed = false;
+                }
+                if (PadInput.NextThemePressed)
+                {
+                    Khkt.Environment.Tang2.BioThemeSwitcher.Instance?.ToggleTheme();
+                    PadInput.NextThemePressed = false;
+                }
             }
 
             // Lắp ráp: xoay bộ phận đang cầm, bóng mờ xem trước chỗ lắp
@@ -321,6 +338,8 @@ namespace Khkt.Demo
                 float turn = 0;
                 if (mouse != null && !looking) turn += Mathf.Sign(mouse.scroll.ReadValue().y) * (Mathf.Abs(mouse.scroll.ReadValue().y) > 0.01f ? 1 : 0);
                 if (kb != null) turn += (kb.rKey.wasPressedThisFrame ? 1 : 0) - (kb.eKey.wasPressedThisFrame ? 1 : 0);
+                turn += PadInput.HeldYawStep;
+                PadInput.HeldYawStep = 0;
                 heldYaw += turn * 15f;
             }
             var fab = Khkt.Assembly.FabricationWorkspace.Instance;
@@ -354,6 +373,23 @@ namespace Khkt.Demo
                 ray = viewCamera.ScreenPointToRay(mouse.position.ReadValue());
             else ray = viewCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f));
             hasHit = Physics.Raycast(ray, out hit, reach, ~0, QueryTriggerInteraction.Collide);
+            if (!hasHit && PadInput.UsingTouch)
+            {
+                // Vì lam kính, kim rất nhỏ, thêm hút ngắm nhẹ chỉ ở chế độ cảm ứng:
+                // tia thẳng không trúng vật cầm được thì SphereCast bán kính khoảng 1,5 cm
+                RaycastHit sphereHit;
+                if (Physics.SphereCast(ray, 0.015f, out sphereHit, reach, ~0, QueryTriggerInteraction.Collide))
+                {
+                    if (sphereHit.collider.GetComponentInParent<Grabbable>() != null ||
+                        sphereHit.collider.GetComponentInParent<PlaceSocket>() != null ||
+                        sphereHit.collider.GetComponentInParent<IDemoUsable>() != null ||
+                        sphereHit.collider.GetComponent<StopcockHandle>() != null)
+                    {
+                        hit = sphereHit;
+                        hasHit = true;
+                    }
+                }
+            }
             lastRay = ray;
         }
 
@@ -451,7 +487,14 @@ namespace Khkt.Demo
                 if (Held.GetComponent<TestPaper>() != null) { Current = Act.PaperTest; return; }
                 if (heldContainer != null) { Current = Act.Pour; return; }
             }
-            if (surface != null) { Current = Act.PlaceSurface; HoverRoot = null; }
+            if (surface != null)
+            {
+                if (hit.normal.y > 0.7f)
+                {
+                    Current = Act.PlaceSurface;
+                    HoverRoot = null;
+                }
+            }
         }
 
         // ---------- Cầm, đặt ----------
@@ -499,17 +542,139 @@ namespace Khkt.Demo
 
         public void PlaceOnSurface(Vector3 point)
         {
-            if (Held == null || !CanPutDown(Held)) return;
+            if (Held == null)
+            {
+                Debug.Log("[PlaceOnSurface-REJECT] Held is null");
+                return;
+            }
+            if (!CanPutDown(Held))
+            {
+                Debug.Log($"[PlaceOnSurface-REJECT] CanPutDown({Held.name}) is false");
+                return;
+            }
+
+            RaycastHit surfaceHit = hit;
+            bool validSurface = hasHit;
+            // Luôn kiểm tra raycast xuống ngay tại điểm point để xác nhận có mặt bàn đỡ bên dưới
+            if (Physics.Raycast(point + Vector3.up * 0.05f, Vector3.down, out var downHit, 0.2f, ~0, QueryTriggerInteraction.Ignore))
+            {
+                surfaceHit = downHit;
+                validSurface = true;
+            }
+            else
+            {
+                validSurface = false;
+            }
+
+            if (!validSurface || surfaceHit.collider == null || surfaceHit.collider.GetComponentInParent<PlaceSurface>() == null)
+            {
+                Debug.Log($"[PlaceOnSurface-REJECT] Không có PlaceSurface tại {point}. validSurface={validSurface}, hitCol={surfaceHit.collider?.name}");
+                procedure?.Say("Không tìm thấy mặt bàn ở vị trí này", LabProcedure.Tone.Warn);
+                return;
+            }
+
+            if (surfaceHit.normal.y <= 0.7f)
+            {
+                Debug.Log($"[PlaceOnSurface-REJECT] normal.y = {surfaceHit.normal.y:0.00} <= 0.7f");
+                procedure?.Say("Không thể đặt vật vào cạnh hoặc mặt nghiêng", LabProcedure.Tone.Warn);
+                return;
+            }
+
             var g = Held;
+            Vector3 placePos = surfaceHit.point; // Dùng chính xác tọa độ tiếp xúc vật lý mặt bàn
+
+            // 1. Kiểm tra ranh giới mặt bàn: điểm đặt phải nằm trọn trong mặt bàn
+            float itemRadius = g.liesOnTable ? g.lengthM * 0.5f : Mathf.Max(0.02f, g.lyingRadiusM > 0 ? g.lyingRadiusM : 0.03f);
+            if (surfaceHit.collider is BoxCollider boxCol)
+            {
+                Vector3 localPoint = boxCol.transform.InverseTransformPoint(placePos);
+                Vector3 halfSize = boxCol.size * 0.5f;
+                float marginX = itemRadius;
+                float marginZ = itemRadius;
+
+                if (halfSize.x > marginX * 1.05f && Mathf.Abs(localPoint.x - boxCol.center.x) > halfSize.x - marginX)
+                {
+                    Debug.Log($"[PlaceOnSurface-REJECT] Quá gần mép bàn X (localX={localPoint.x:0.000}, halfSize.x={halfSize.x:0.000}, marginX={marginX:0.000})");
+                    procedure?.Say("Vị trí quá gần mép bàn", LabProcedure.Tone.Warn);
+                    return;
+                }
+                if (halfSize.z > marginZ * 1.05f && Mathf.Abs(localPoint.z - boxCol.center.z) > halfSize.z - marginZ)
+                {
+                    Debug.Log($"[PlaceOnSurface-REJECT] Quá gần mép bàn Z (localZ={localPoint.z:0.000}, halfSize.z={halfSize.z:0.000}, marginZ={marginZ:0.000})");
+                    procedure?.Say("Vị trí quá gần mép bàn", LabProcedure.Tone.Warn);
+                    return;
+                }
+            }
+
+            // 2. Physics.OverlapBox kiểm tra va chạm với vật đã có
+            Vector3 testPos;
+            Quaternion testRot;
+            Vector3 halfBox;
+
+            if (g.liesOnTable)
+            {
+                Vector3 d = Flat(viewCamera != null ? viewCamera.transform.right : Vector3.right);
+                if (d.sqrMagnitude < 1e-4f) d = Vector3.forward;
+                else d = d.normalized;
+                testPos = placePos + Vector3.up * g.lyingRadiusM;
+                testRot = Quaternion.FromToRotation(Vector3.up, d);
+                halfBox = new Vector3(g.lyingRadiusM, g.lyingRadiusM, g.lengthM * 0.5f);
+            }
+            else
+            {
+                float h = g.gripHeightM > 0 ? g.gripHeightM : 0.08f;
+                testPos = placePos + Vector3.up * (h * 0.5f);
+                testRot = Quaternion.Euler(0, g.HomeRotation.eulerAngles.y + heldYaw, 0);
+                halfBox = new Vector3(itemRadius, h * 0.5f, itemRadius);
+            }
+
+            var overlaps = Physics.OverlapBox(testPos, halfBox * 0.85f, testRot, ~0, QueryTriggerInteraction.Ignore);
+            bool blocked = false;
+            Collider blockedBy = null;
+            foreach (var c in overlaps)
+            {
+                if (c == surfaceHit.collider) continue;
+                if (c.transform.IsChildOf(g.transform)) continue;
+                if (c.isTrigger) continue;
+                if (c is CharacterController || c.GetComponentInParent<Khkt.Environment.DesktopViewer>() != null) continue; // Người chơi không tự cản mình
+                if (c.GetComponentInParent<PlaceSurface>() != null) continue; // mặt bàn / mảnh ghép mặt bàn
+                if (surfaceHit.collider.transform.parent != null && c.transform.IsChildOf(surfaceHit.collider.transform.parent)) continue; // cùng cụm bàn
+                if (c.transform.IsChildOf(surfaceHit.collider.transform.root) && c.GetComponentInParent<Grabbable>() == null && c.GetComponentInParent<IDemoUsable>() == null) continue; // chi tiết kiến trúc bàn/phòng
+                blocked = true;
+                blockedBy = c;
+                break;
+            }
+
+            if (blocked)
+            {
+                Debug.Log($"[PlaceOnSurface-REJECT] Bị vướng {blockedBy?.name} (parent: {blockedBy?.transform.parent?.name}) tại {testPos}");
+                procedure?.Say("Vị trí bị vướng vật khác", LabProcedure.Tone.Warn);
+                return;
+            }
+
+            // 3. Tiến hành đặt vật xuống
             Held = null;
             g.SetHeld(false);
             if (g.liesOnTable)
             {
-                Vector3 d = Flat(viewCamera.transform.right);
-                g.transform.SetPositionAndRotation(point + Vector3.up * g.lyingRadiusM - d * g.lengthM / 2,
+                Vector3 d = Flat(viewCamera != null ? viewCamera.transform.right : Vector3.right);
+                if (d.sqrMagnitude < 1e-4f) d = Vector3.forward;
+                else d = d.normalized;
+                g.transform.SetPositionAndRotation(placePos + Vector3.up * g.lyingRadiusM - d * g.lengthM / 2,
                                                    Quaternion.FromToRotation(Vector3.up, d));
             }
-            else g.transform.SetPositionAndRotation(point + Vector3.up * 0.001f, Quaternion.Euler(0, g.HomeRotation.eulerAngles.y + heldYaw, 0));
+            else
+            {
+                g.transform.SetPositionAndRotation(placePos, Quaternion.Euler(0, g.HomeRotation.eulerAngles.y + heldYaw, 0));
+            }
+
+            int currentZone = Khkt.Rendering.ZoneMap.At(g.transform.position);
+            var zRoot = Khkt.Rendering.ZoneRoot.Of(currentZone);
+            if (zRoot != null && !zRoot.Parked && g.transform.parent != zRoot.transform)
+            {
+                g.transform.SetParent(zRoot.transform, true);
+            }
+
             var part = g.GetComponent<Khkt.Assembly.ApparatusPart>();
             if (part != null) Khkt.Assembly.ApparatusPart.NotifyChanged(part.Root);
         }
@@ -536,8 +701,21 @@ namespace Khkt.Demo
             var g = Held;
             Held = null;
             g.SetHeld(false);
-            if (g.HomeSocket != null && g.HomeSocket.Occupant == null) g.HomeSocket.Put(g);
-            else g.transform.SetPositionAndRotation(g.HomePosition, g.HomeRotation);
+            if (g.HomeSocket != null && g.HomeSocket.Occupant == null)
+            {
+                g.HomeSocket.Put(g);
+            }
+            else
+            {
+                g.transform.SetPositionAndRotation(g.HomePosition, g.HomeRotation);
+                int homeZone = Khkt.Rendering.ZoneMap.At(g.HomePosition);
+                var homeRoot = Khkt.Rendering.ZoneRoot.Of(homeZone);
+                if (homeRoot != null)
+                {
+                    g.transform.SetParent(homeRoot.transform, true);
+                    if (homeRoot.Parked) g.gameObject.SetActive(false);
+                }
+            }
         }
 
         bool CanPutDown(Grabbable g)
@@ -744,6 +922,12 @@ namespace Khkt.Demo
             }
             if (HeldPart != null) Hints.Add(("Lăn chuột / R E", "Xoay bộ phận"));
             if (Held != null && Current != Act.Place) Hints.Add(("Q", "Trả về chỗ cũ"));
+            if (PadInput.UsingTouch)
+            {
+                for (int i = 0; i < Hints.Count; i++)
+                    Hints[i] = (TouchKey(Hints[i].key), Hints[i].text);
+                return;
+            }
             if (PadInput.SingleStick && PadInput.AimFromCenter)
             {
                 // Tay cầm 1 cần: chế độ ĐI chỉ đi lại, chế độ TAY mới thao tác (PadInput)
@@ -774,6 +958,23 @@ namespace Khkt.Demo
                 case "Giữ": return "Giữ cần";
                 case "Shift + Giữ": return "Shift + giữ cần";
                 case "Lăn chuột": return "Cần ↑ ↓";
+                default: return key;
+            }
+        }
+
+        /// <summary>Gợi ý nút cảm ứng trên iPad.</summary>
+        static string TouchKey(string key)
+        {
+            switch (key)
+            {
+                case "Nhấn": return "Chạm";
+                case "Giữ": return "Giữ nút tay";
+                case "Shift + Giữ": return "Chậm + Giữ";
+                case "Lăn chuột": return "Nút vặn";
+                case "↑ ↓": return "Nút vặn";
+                case "Lăn chuột / R E": return "Nút xoay";
+                case "Q": return "Nút trả về";
+                case "Space": return "Đóng khóa";
                 default: return key;
             }
         }

@@ -56,7 +56,7 @@ namespace Khkt.Demo
             var p = panel.transform;
             Label(p, "Tiêu đề", "Tra cứu hóa chất", 24, Ink, true, TextAnchor.UpperLeft, new Vector2(28, -22), new Vector2(500, 34));
             countText = Label(p, "Số kết quả", "", 15, Dim, false, TextAnchor.UpperLeft, new Vector2(30, -58), new Vector2(500, 22));
-            MakeButton(p, "Đóng", "Đóng  Esc", new Vector2(-130, -20), new Vector2(110, 34), Close, false, 15, new Vector2(1, 1));
+            MakeButton(p, "Đóng", "Đóng  Esc", new Vector2(-130, -20), new Vector2(110, 44), Close, false, 15, new Vector2(1, 1));
             input = MakeInput(p, "Ô tìm kiếm", "Tên, công thức, nhóm... (ví dụ: dong sunfat, KMnO4, axit)", new Vector2(28, -88), new Vector2(520, 44));
             for (int i = 0; i < Rows; i++)
             {

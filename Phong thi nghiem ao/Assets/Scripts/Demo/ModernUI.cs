@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Khkt.Interaction;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
@@ -264,7 +264,9 @@ namespace Khkt.Demo
                 ("Q", "Trả dụng cụ về chỗ"), ("Lăn chuột", "Vặn khóa buret"), ("↑ ↓   Space", "Mở, đóng, khóa hẳn"),
                 ("F", "Lắc bình nón"), ("Enter", "Ghi số đọc buret"), ("G", "Đồ thị pH"), ("R", "Làm lượt chuẩn độ mới"),
                 ("Tab   Alt", "Nhìn theo chuột · thả con trỏ"), ("B", "Tra cứu hóa chất"), ("T", "Trợ lý AI"), ("Esc", "Menu, chọn bài"),
+#if !UNITY_IOS
                 ("F8   F9", "Điều khiển bằng đầu qua webcam · căn lại"),
+#endif
             };
             for (int i = 0; i < rows.Length; i++)
             {

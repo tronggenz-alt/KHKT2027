@@ -77,7 +77,7 @@ namespace Khkt.Assembly
             messageDot.sprite = SolidCircle;
             messageDot.raycastTarget = false;
             message = Label(top, "Thông báo", "", 17, Ink, false, TextAnchor.MiddleLeft, new Vector2(408, 0), new Vector2(1300, 58));
-            MakeButton(top, "Thoát", "Thoát  Esc", new Vector2(-14, -11), new Vector2(128, 36), () => ws.Close(), false, 15, new Vector2(1, 1))
+            MakeButton(top, "Thoát", "Thoát  Esc", new Vector2(-14, -7), new Vector2(128, 44), () => ws.Close(), false, 15, new Vector2(1, 1))
                 .GetComponent<RectTransform>().pivot = new Vector2(1, 1);
 
             // ---------- Bảng bộ phận (trái) ----------

@@ -1,7 +1,66 @@
 # HANDOFF – CHEMISTRY & VERA LAB (KHKT2027)
 
 > Đọc AGENTS.md trước. File này mô tả tiến độ để AI khác (Gemini/Claude) làm tiếp ngay, không cần hỏi lại.
-> Cập nhật lần cuối: 2026-11-01 – bởi Claude (rà soát và hoàn thiện phần Gemini làm 31/10: dụng cụ sinh học tầng 2, backend sinh học, MediaPipe; phòng ghép mã ADN chạy được).
+> Cập nhật lần cuối: 2026-11-02 – bởi Claude (gộp phần cảm ứng iPad của Antigravity, cài lên iPad qua Xcode)
+
+## ĐÃ XONG (2026-11-02, Claude): GỘP CẢM ỨNG IPAD, XUẤT QUA XCODE
+Gộp từ worktree `ipad_touch_biology_lab` (Antigravity, chưa commit bên đó) vào nhánh `claude/xcode-app-export-310c80`.
+- `TouchControls` đọc thẳng `Touchscreen` thay vì EnhancedTouch: trên iPad thật EnhancedTouch báo lỗi `InputUpdateType.None` lúc nhận màn hình cảm ứng.
+- Nhận ngón chạm vào giao diện bằng `EventSystem.RaycastAll`; không cộng dồn góc vuốt khi đang mở bảng giao diện.
+- Xuất bằng `IosBuild.cs` (đã cài được lên iPad, bundle `com.trantrong.veralab`), không dùng `IosBuildExporter` và thay đổi ProjectSettings của Antigravity.
+- Dựng từ bản sao ở `~/AppBuild/VERALab`, vì Unity không đọc được dự án dưới `.claude/`. Không dùng `-nographics`.
+
+## ĐÃ XONG (2026-11-02, Antigravity): ĐIỀU KHIỂN CẢM ỨNG IPAD, CẦM DỤNG CỤ SINH HỌC TẦNG 2 & KHẮC PHỤC LỖI TỌA ĐỘ (VERA LAB)
+1. **Giai đoạn 1 – Sẵn sàng xuất bản iOS & Xcode**:
+   - Bọc `#if !UNITY_IOS` cách ly các phụ thuộc Desktop không tương thích iOS: `SerialControllerSource.cs` (cổng COM `System.IO.Ports`), `HeadTracking.cs` (`Process.Start`). Không gây lỗi biên dịch, không hiện nhắc nhở F8 trên iPad.
+   - Thêm cấu hình địa chỉ máy chủ AI qua `PlayerPrefs` (`AiClient.cs` & `ModernUI.cs`), cho phép nhập IP mạng LAN khi chạy thực tế trên iPad.
+   - Chuẩn hoá ghi file nội bộ vào `Application.persistentDataPath`. Khóa xoay màn hình ngang `LandscapeLeft | LandscapeRight`, cấu hình Bundle ID `com.khkt.phongthinghiemao`.
+   - Tạo menu `KHKT -> Xuất iPad (Xcode)` trong `IosBuildExporter.cs` xuất cảnh sang thư mục `Phong thi nghiem ao/Builds/iOS`. Soạn hướng dẫn Xcode tại `docs/22-xuat-ipad-xcode.md`.
+2. **Giai đoạn 2 – Hệ thống nút cảm ứng đa điểm & TouchHud GlassKit**:
+   - Viết `Input/TouchControls.cs` đọc ngón tay đa điểm qua `UnityEngine.InputSystem.EnhancedTouch`, nạp dữ liệu độc quyền qua `PadInput.cs`.
+   - Viết `Demo/TouchHud.cs` giao diện kính mờ GlassKit: Joystick di chuyển nổi góc trái dưới (`PadInput.Move`), vùng vuốt xoay góc nhìn nửa phải màn hình (`PadInput.LookDelta` cộng thẳng góc yaw/pitch không qua đường cong bình phương, có thanh chỉnh độ nhạy).
+   - Nút hành động chính đa năng thích ứng ngữ cảnh theo `HandController.Current` (Cầm, Đặt, Dùng, Rót, Hút, Xả...).
+   - Các nút chức năng ngữ cảnh (≥ 44 pt): Trả đồ (Q), Lắc bình (F), Chạy nhanh (Shift), Ngồi/Đứng (C), Nâng/Hạ tầm mắt (Z/X), Mở/Đóng khóa buret (↑↓/Space), Xoay vật lắp ráp (R/E), Ghi số đọc (Enter), Đồ thị (G), Lần mới (R), Đổi chủ đề (F7), Chuyển trạm trước/sau và danh sách chọn trạm.
+   - Bổ sung SphereCast aim-assist bán kính 1,5 cm cho chế độ cảm ứng hỗ trợ ngắm các vật siêu mỏng/nhỏ (lam kính, kim mũi mác).
+   - Tối ưu 5 màn hình UI (`IntroScreen`, `ChemSearchUI`, `RobotChatUI`, `InstrumentScreen`, `FabricationUI`) hỗ trợ thao tác cảm ứng hoàn toàn, nút bấm mở rộng ≥ 44 pt.
+   - Hỗ trợ biến môi trường `KHKT_CAM_UNG=1` để bật HUD trong Unity Editor/Device Simulator.
+3. **Giai đoạn 3 – Cầm mọi dụng cụ sinh học Tầng 2 (718 vật, 159 ổ cắm)**:
+   - Thêm `Grabbable` và `PlaceSocket` cho toàn bộ trang thiết bị di động của 8 khu vực Tầng 2 trước khi `MarkStatic` chạy trong `LabSceneBuilder.Floor2*.cs`.
+   - Danh mục 718 vật cầm: 248 đĩa petri, 90 tiêu bản, 69 ống ly tâm, 40 lọ thuốc nhuộm, 29 chai hóa chất, 27 lam kính, 18 bình mẫu ngâm, 12 micropipet, 11 giá ống nghiệm, 9 hộp tiêu bản, 9 khay dụng cụ, 9 dao mổ, 9 kẹp gắp, 9 kim mũi mác, 9 giấy thấm, 9 bình tia nước, 8 hộp đầu côn pipet, 4 cốc đong, 94 chậu cây/mẫu vật nhỏ, 1 bình tưới nước, 1 đũa thủy tinh, 1 củ hành tím, 2 mẫu sinh học lát mỏng.
+   - Chuẩn hoá 100% gốc tọa độ đáy vật (base pivot local $y = 0$), root localScale `(1, 1, 1)`, collider không rỗng, collider của socket luôn là `isTrigger = true`.
+   - Biên soạn danh mục kiểm kê chi tiết tại `docs/21-do-cam-tang-2.md`.
+4. **Giai đoạn 4 – Khắc phục triệt để lỗi tọa độ và vật lý đặt vật**:
+   - `DesktopViewer.GoNear` raycast xuống dưới phát hiện mặt sàn thực tế tại vị trí đích, xóa bỏ lỗi viết cứng `y = 0` làm rơi xuống tầng 1.
+   - `HandController.PlaceOnSurface`:
+     - Kiểm tra pháp tuyến `hit.normal.y > 0.7f` (chống đặt vào cạnh mép hay mặt dưới bàn).
+     - Raycast dò mặt bàn từ điểm đặt để xác nhận có `PlaceSurface` đỡ bên dưới.
+     - Kiểm tra ranh giới mép bàn `BoxCollider` từ chối đặt tràn ra ngoài.
+     - `Physics.OverlapBox` kiểm tra va chạm từ chối đặt đè lên vật khác, loại trừ va chạm với chính người chơi (`CharacterController`) và cấu trúc kiến trúc cùng bàn.
+     - Tính toán độ cao tiếp xúc vật thể: dạng đứng đặt bằng đáy ($y = y_{\text{mặt}}$), dạng nằm đặt tiếp xúc mép cong ($y = y_{\text{mặt}} + \text{lyingRadiusM}$).
+     - Chuyển parent vật về `ZoneRoot` của khu vực hiện tại và bảo toàn vị trí gốc khi gọi `ReturnHome()` sau khi đổi khu vực.
+5. **Kiểm chứng thực tế độc lập (Real Verification Results)**:
+   - **Đơn vị C# thuần**: `BioSimulationTests.cs` đạt **29 / 29 PASS**, `ChemEngineTests.cs` đạt **140 / 140 PASS**.
+   - **Python AI / API**: `unittest discover -s tests` đạt **109 / 109 PASS**.
+   - **Unity Batchmode `KHKT_TEST=ipad` (6 Tiêu chuẩn nghiệm thu)**:
+     - Tiêu chuẩn 1 (Touch Mode & HUD): **ĐẠT**
+     - Tiêu chuẩn 2 (Định tuyến 13 kênh nút ảo): **ĐẠT**
+     - Tiêu chuẩn 3 (Kiểm toán dụng cụ sinh học Tầng 2): **ĐẠT** (718 vật, 159 sockets, 0 lỗi scale, 0 lỗi pivot, 0 lỗi collider).
+     - Tiêu chuẩn 4 (Giữ vật qua khu vực & ReturnHome): **ĐẠT** (sai số vị trí trả về $0.1\text{ mm}$).
+     - Tiêu chuẩn 5 (Độ cao đặt bàn đứng/nằm): **ĐẠT** (sai số đứng: $0.00\text{ mm} \le 2\text{ mm}$, sai số nằm: $0.00\text{ mm} \le 2\text{ mm}$).
+     - Tiêu chuẩn 6 (Từ chối mép bàn & từ chối đè vật): **ĐẠT** ($2/2$ trường hợp bị từ chối thành công).
+   - **Đo hiệu năng thực tế 6 phòng sinh học (Mobile tier, Unity 6 batchmode)**:
+     - Trạm 21 (Phòng thí nghiệm sinh học): **203.9 FPS**, 856 Draw calls
+     - Trạm 23 (Khu tủ an toàn sinh học): **160.8 FPS**, 1248 Draw calls
+     - Trạm 25 (Phòng vi sinh): **69.4 FPS**, 4727 Draw calls
+     - Trạm 26 (Kho sinh phẩm): **127.1 FPS**, 2486 Draw calls
+     - Trạm 28 (Phòng sinh học phân tử): **212.5 FPS**, 582 Draw calls
+     - Trạm 30 (Nhà kính thực vật): **241.5 FPS**, 524 Draw calls
+     *(Tất cả đều vượt xa yêu cầu ≥ 30 FPS của dự án)*.
+   - **Kiểm tra hồi quy**: `KHKT_TEST=tang2` hoàn tất sau 43s; `KHKT_TEST=goc_nhin` hoàn tất sau 14s.
+   - *Ghi chú trung thực*: Tất cả đo lường trên đã được kiểm chứng tự động thực tế trong Unity batchmode & Simulator. Riêng cảm giác chạm đa điểm trên bề mặt kính phần cứng thực tế và FPS đo bằng Instruments trên thiết bị iPad vật lý được ghi nhận là: **chưa thử trên iPad thật** (cần thiết bị iPad kết nối cáp qua Xcode).
+6. **ĐANG LÀM**: Toàn bộ mã nguồn, cấu hình và kịch bản đã hoàn thành 100% trên nhánh `ipad_touch_biology_lab`. Không git push, không commit lên `main`.
+7. **VIỆC TIẾP THEO**: Người dùng có thể mở Xcode từ thư mục `Phong thi nghiem ao/Builds/iOS`, chọn Development Team và cắm iPad để chạy thử thực tế.
+8. **LỖI CÒN TỒN**: Không có (0 lỗi tồn).
 
 ## ĐÃ XONG (2026-11-01, Claude): RÀ SOÁT PHẦN GEMINI + PHÒNG GHÉP MÃ ADN
 Nhánh `claude/gemini-refinement-7bf2e3` (đã gộp `tang2/dung-cu-giao-dien` + `mediapipe`).

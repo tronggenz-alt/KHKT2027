@@ -35,9 +35,40 @@ namespace Khkt.Input
         public static bool SingleStick { get { Tick(); return singleStick; } }
         public static StickMode Mode { get { Tick(); return mode; } }
         /// <summary>Lần cuối người chơi dùng tay cầm (không phải chuột): trỏ bằng tâm màn hình, gợi ý ghi tên nút tay cầm.</summary>
-        public static bool AimFromCenter { get { Tick(); return lastPadUse > 0 && lastPadUse >= lastMouseUse; } }
+        public static bool AimFromCenter { get { Tick(); return UsingTouch || (lastPadUse > 0 && lastPadUse >= lastMouseUse); } }
         /// <summary>Tay cầm dùng gần nhất là tay cầm chơi game (đổi tên nút trong gợi ý: A, B, RT...).</summary>
         public static bool UsingGamepad { get { Tick(); return usingGamepad; } }
+
+        /// <summary>Đang dùng điều khiển cảm ứng trên iPad / màn hình cảm ứng.</summary>
+        public static bool UsingTouch { get; set; }
+        /// <summary>Góc xoay trực tiếp từ vuốt màn hình cảm ứng (cộng thẳng vào yaw/pitch).</summary>
+        public static Vector2 LookDelta { get; set; }
+        /// <summary>Nâng / hạ tầm mắt từ nút cảm ứng (+1 nâng, -1 hạ).</summary>
+        public static float EyeAdjustAxis { get; set; }
+        /// <summary>Nhấn nút đóng khóa buret trên cảm ứng (như phím Space).</summary>
+        public static bool CloseStopcockPressed { get; set; }
+        /// <summary>Xoay bộ phận đang lắp ráp ±1 bước từ nút cảm ứng (như R/E / lăn chuột).</summary>
+        public static float HeldYawStep { get; set; }
+        /// <summary>Bật/tắt đồ thị từ menu cảm ứng (như phím G).</summary>
+        public static bool ToggleGraphPressed { get; set; }
+        /// <summary>Lần chuẩn độ mới từ menu cảm ứng (như phím R).</summary>
+        public static bool NewRunPressed { get; set; }
+        /// <summary>Đổi chủ đề từ menu cảm ứng (như phím F7).</summary>
+        public static bool NextThemePressed { get; set; }
+        /// <summary>Chuyển tới trạm chỉ định từ danh sách trạm trên cảm ứng (-1: không chuyển).</summary>
+        public static int StationJump { get; set; } = -1;
+
+        // Đầu vào cảm ứng được TouchControls nạp vào mỗi khung hình
+        public static Vector2 TouchMove;
+        public static bool TouchUse;
+        public static bool TouchShift;
+        public static bool TouchSwirl;
+        public static bool TouchBackPressed;
+        public static bool TouchRecordPressed;
+        public static bool TouchHelpPressed;
+        public static bool TouchSitPressed;
+        public static int TouchStationStep;
+        public static float TouchStopcockAxis;
 
         public static Vector2 Move { get { Tick(); return move; } }
         public static Vector2 Look { get { Tick(); return look; } }
@@ -94,6 +125,19 @@ namespace Khkt.Input
             pressStart = lastTap = runSince = turnSince = -1;
             chord = holdFired = sit = false;
             LookYUsedByTool = AimHasTarget = false;
+            UsingTouch = false;
+            LookDelta = Vector2.zero;
+            EyeAdjustAxis = 0;
+            CloseStopcockPressed = false;
+            HeldYawStep = 0;
+            ToggleGraphPressed = false;
+            NewRunPressed = false;
+            NextThemePressed = false;
+            StationJump = -1;
+            TouchMove = Vector2.zero;
+            TouchUse = TouchShift = TouchSwirl = TouchBackPressed = TouchRecordPressed = TouchHelpPressed = TouchSitPressed = false;
+            TouchStationStep = 0;
+            TouchStopcockAxis = 0;
             ControllerChanged = null;
             Notice = null;
         }
@@ -106,6 +150,13 @@ namespace Khkt.Input
         public static void Pulse(int level, int ms) { if (ControllerConnected) active.Pulse(level, ms); }
         public static void Rumble(int level) { if (ControllerConnected) active.SetVibration(level); }
         public static void Leds(bool green, bool red) { if (ControllerConnected) active.SetLeds(green, red); }
+
+        /// <summary>Ép buộc đọc lại đầu vào ngay lập tức trong khung hình hiện tại (dùng cho kiểm thử).</summary>
+        public static void ForceTick()
+        {
+            tickFrame = -1;
+            Tick();
+        }
 
         static void Tick()
         {
@@ -189,6 +240,30 @@ namespace Khkt.Input
                 if (gp.rightShoulder.wasPressedThisFrame) station = 1;
                 if (gp.leftShoulder.wasPressedThisFrame) station = -1;
                 stopcockAxis = Mathf.Abs(dpad) > 0.5f ? Mathf.Sign(dpad) : 0;
+            }
+
+            if (UsingTouch)
+            {
+                move += TouchMove;
+                use |= TouchUse;
+                shift |= TouchShift;
+                swirl |= TouchSwirl;
+                back |= TouchBackPressed;
+                record |= TouchRecordPressed;
+                help |= TouchHelpPressed;
+                sit |= TouchSitPressed;
+                if (TouchStationStep != 0) station = TouchStationStep;
+                if (Mathf.Abs(TouchStopcockAxis) > 0.01f) stopcockAxis = TouchStopcockAxis;
+                if (TouchMove.sqrMagnitude > 0.01f || TouchUse || TouchShift || TouchSwirl || TouchBackPressed || TouchRecordPressed || TouchHelpPressed || TouchSitPressed || Mathf.Abs(TouchStopcockAxis) > 0.01f || LookDelta.sqrMagnitude > 0.01f)
+                {
+                    padTouched = true;
+                }
+                // Xóa xung bấm một nhịp
+                TouchBackPressed = false;
+                TouchRecordPressed = false;
+                TouchHelpPressed = false;
+                TouchSitPressed = false;
+                TouchStationStep = 0;
             }
             move = Vector2.ClampMagnitude(move, 1f);
             look = Vector2.ClampMagnitude(look, 1f);

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Khkt.Demo.Bio;
 using Khkt.Environment.Tang2;
+using Khkt.Interaction;
 using UnityEngine;
 using static Khkt.EditorTools.LabKit;
 
@@ -186,9 +187,9 @@ namespace Khkt.EditorTools
             StainBottle(shelf, L(-0.36f, 1.15f, -0.7f), bioIodine, "Lugol");
             StainBottle(shelf, L(-0.36f, 1.15f, -0.55f), bioPurpleStain, "Tím tinh thể");
             StainBottle(shelf, L(-0.36f, 1.15f, -0.4f), bioRedStain, "Safranin");
-            Bottle(shelf, "Chai nước cất", L(-0.36f, 1.15f, -0.15f), 1);
-            Bottle(shelf, "Chai NaCl 5 %", L(-0.36f, 1.15f, 0.15f), 4);
-            Bottle(shelf, "Chai glixerol", L(-0.36f, 1.15f, 0.42f), 2);
+            BioBottle(shelf, "Chai nước cất", L(-0.36f, 1.15f, -0.15f), 1);
+            BioBottle(shelf, "Chai NaCl 5 %", L(-0.36f, 1.15f, 0.15f), 4);
+            BioBottle(shelf, "Chai glixerol", L(-0.36f, 1.15f, 0.42f), 2);
             BioBenchScreen(b, number, s);
 
             // 3 chỗ ngồi: kính hiển vi thẳng ghế, hộp tiêu bản, khay dụng cụ, bình tia nước
@@ -201,9 +202,30 @@ namespace Khkt.EditorTools
             }
             SlideBox(b, L(-0.17f, top, -0.45f), 0f, number == 1);
             InstrumentTray(b, L(-0.2f, top, 0.38f), 0f);
-            WashBottle(b, L(-0.24f, top, -1.12f));
+            var wb = Group("Bình tia nước cất", b, L(-0.24f, top, -1.12f));
+            WashBottle(wb, Vector3.zero);
+            var wbCol = wb.gameObject.AddComponent<CapsuleCollider>();
+            wbCol.center = new Vector3(0, 0.1f, 0);
+            wbCol.radius = 0.036f;
+            wbCol.height = 0.2f;
+            var wbg = wb.gameObject.AddComponent<Grabbable>();
+            wbg.kind = "binh_tia";
+            wbg.gripHeightM = 0.1f;
+            wbg.massG = 120f;
+
             PetriStack(b, L(-0.06f, top, -1.15f), 1, 2);
-            Box(b, "Giấy thấm", L(-0.06f, top + 0.004f, -0.6f), new Vector3(0.1f, 0.008f, 0.1f), signWhite, false);
+            var paper = Group("Giấy thấm", b, L(-0.06f, top, -0.6f));
+            Box(paper, "Tập giấy", new Vector3(0, 0.004f, 0), new Vector3(0.1f, 0.008f, 0.1f), signWhite, true);
+            var paperCol = paper.gameObject.AddComponent<BoxCollider>();
+            paperCol.center = new Vector3(0, 0.004f, 0);
+            paperCol.size = new Vector3(0.1f, 0.008f, 0.1f);
+            var pg = paper.gameObject.AddComponent<Grabbable>();
+            pg.kind = "giay_tham";
+            pg.gripHeightM = 0.005f;
+            pg.massG = 15f;
+            pg.liesOnTable = true;
+            pg.lyingRadiusM = 0.004f;
+            pg.lengthM = 0.1f;
 
             if (number == 1)  // bàn 1: co – phản co nguyên sinh (3 cốc: nước cất, NaCl 0,9 %, NaCl 5 %)
             {
@@ -212,20 +234,69 @@ namespace Khkt.EditorTools
                 for (int i = 0; i < 3; i++)
                 {
                     var pos = L(-0.06f, top, 0.0f + i * 0.13f - 0.13f);
-                    MeshObj(set, "Cốc " + lbl[i], Beaker("Coc100", 0.026f, 0.07f), pos, labGlass);
-                    NoShadow(Cyl(set, "Dung dịch", pos + Vector3.up * 0.025f, 0.024f, 0.05f, liquidClear));
-                    Label(set, lbl[i], pos + new Vector3(0.028f, 0.035f, 0), Vector3.right, 0.009f, new Color(0.1f, 0.2f, 0.3f));
+                    var bObj = Group("Cốc " + lbl[i], set, pos);
+                    MeshObj(bObj, "Vỏ cốc", Beaker("Coc100", 0.026f, 0.07f), Vector3.zero, labGlass, true);
+                    NoShadow(Cyl(bObj, "Dung dịch", Vector3.up * 0.025f, 0.024f, 0.05f, liquidClear, false));
+                    Label(bObj, lbl[i], new Vector3(0.028f, 0.035f, 0), Vector3.right, 0.009f, new Color(0.1f, 0.2f, 0.3f));
+                    var bCol = bObj.gameObject.AddComponent<CapsuleCollider>();
+                    bCol.center = new Vector3(0, 0.035f, 0);
+                    bCol.radius = 0.026f;
+                    bCol.height = 0.07f;
+                    var bg = bObj.gameObject.AddComponent<Grabbable>();
+                    bg.kind = "coc";
+                    bg.gripHeightM = 0.04f;
+                    bg.massG = 75f;
                 }
-                Ball(set, "Củ hành tím", L(-0.23f, top + 0.03f, 0.05f), new Vector3(0.07f, 0.06f, 0.07f), Mat("T2_HanhTim", new Color(0.55f, 0.18f, 0.35f), 0.6f));
+                var onionObj = Group("Củ hành tím", set, L(-0.23f, top, 0.05f));
+                Ball(onionObj, "Thân củ", Vector3.up * 0.03f, new Vector3(0.07f, 0.06f, 0.07f), Mat("T2_HanhTim", new Color(0.55f, 0.18f, 0.35f), 0.6f), true);
+                var onionCol = onionObj.gameObject.AddComponent<SphereCollider>();
+                onionCol.center = Vector3.up * 0.03f;
+                onionCol.radius = 0.035f;
+                var og = onionObj.gameObject.AddComponent<Grabbable>();
+                og.kind = "hanh_tim";
+                og.gripHeightM = 0.03f;
+                og.massG = 60f;
             }
             if (number == 4)  // bàn 4: enzyme catalase phân hủy H2O2 (gan, khoai tây sống / luộc)
             {
                 var set = Group("Bộ thí nghiệm catalase", b);
-                TestTubeRack(set, L(-0.1f, top, 0.05f), 0f);
-                Bottle(set, "Chai H₂O₂ 3 %", L(-0.25f, top, -0.05f), 0);
-                Box(set, "Miếng gan", L(-0.25f, top + 0.01f, 0.12f), new Vector3(0.04f, 0.02f, 0.05f), Mat("T2_Gan", new Color(0.42f, 0.12f, 0.1f), 0.6f), false);
-                Box(set, "Lát khoai tây", L(-0.25f, top + 0.006f, 0.22f), new Vector3(0.05f, 0.012f, 0.05f), Mat("T2_KhoaiTay", new Color(0.92f, 0.85f, 0.6f), 0.4f), false);
+                TubeRack(set, L(-0.1f, top, 0.05f), 6, bioOrangeCap, "Giá ống nghiệm catalase");
+                BioBottle(set, "Chai H₂O₂ 3 %", L(-0.25f, top, -0.05f), 0);
+                var gan = Group("Miếng gan", set, L(-0.25f, top, 0.12f));
+                Box(gan, "Miếng", Vector3.up * 0.01f, new Vector3(0.04f, 0.02f, 0.05f), Mat("T2_Gan", new Color(0.42f, 0.12f, 0.1f), 0.6f), true);
+                var ganCol = gan.gameObject.AddComponent<BoxCollider>();
+                ganCol.center = Vector3.up * 0.01f;
+                ganCol.size = new Vector3(0.04f, 0.02f, 0.05f);
+                var gg = gan.gameObject.AddComponent<Grabbable>();
+                gg.kind = "mau_vat";
+                gg.gripHeightM = 0.01f;
+                gg.massG = 20f;
+
+                var khoai = Group("Lát khoai tây", set, L(-0.25f, top, 0.22f));
+                Box(khoai, "Lát", Vector3.up * 0.006f, new Vector3(0.05f, 0.012f, 0.05f), Mat("T2_KhoaiTay", new Color(0.92f, 0.85f, 0.6f), 0.4f), true);
+                var khoaiCol = khoai.gameObject.AddComponent<BoxCollider>();
+                khoaiCol.center = Vector3.up * 0.006f;
+                khoaiCol.size = new Vector3(0.05f, 0.012f, 0.05f);
+                var kg = khoai.gameObject.AddComponent<Grabbable>();
+                kg.kind = "mau_vat";
+                kg.gripHeightM = 0.006f;
+                kg.massG = 15f;
             }
+        }
+
+        static Transform BioBottle(Transform p, string name, Vector3 pos, int type)
+        {
+            var g = Group(name, p, pos);
+            Bottle(g, "Vỏ", Vector3.zero, type);
+            var col = g.gameObject.AddComponent<CapsuleCollider>();
+            col.center = new Vector3(0, 0.1f, 0);
+            col.radius = 0.038f;
+            col.height = 0.2f;
+            var gr = g.gameObject.AddComponent<Grabbable>();
+            gr.kind = "chai_hoa_chat";
+            gr.gripHeightM = 0.09f;
+            gr.massG = 300f;
+            return g;
         }
 
         static void BioBenchScreen(Transform b, int number, int s)

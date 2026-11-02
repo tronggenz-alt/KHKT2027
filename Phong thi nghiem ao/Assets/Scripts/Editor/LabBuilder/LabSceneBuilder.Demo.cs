@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Khkt.Demo;
 using Khkt.Environment;
@@ -485,7 +485,9 @@ namespace Khkt.EditorTools
 
             var glassShader = AssetDatabase.LoadAssetAtPath<Shader>($"{Root}/Shaders/KinhMo.shader");
             g.AddComponent<AiClient>();
+#if !UNITY_IOS
             g.AddComponent<Khkt.Input.SerialControllerSource>().portName = "auto";  // tay cầm cắm USB / Bluetooth (firmware/tay_cam_esp32cam)
+#endif
             g.AddComponent<Khkt.Input.UdpControllerSource>();  // tay cầm Wi-Fi (bản có ADS1115) và công cụ giả lập tools/tay_cam_udp.py
             var viewer = viewerCamera.GetComponentInParent<DesktopViewer>();
             var robot = BuildHumanoid(root, RobotDock);
@@ -508,15 +510,34 @@ namespace Khkt.EditorTools
             intro.ui = ui;
             intro.procedure = proc;
             intro.viewer = viewer;
+
+            // Điều khiển và giao diện cảm ứng cho iPad
+            var touchControls = g.AddComponent<Khkt.Input.TouchControls>();
+            var touchHud = g.AddComponent<TouchHud>();
+            touchHud.hand = hand;
+            touchHud.viewer = viewer;
+            touchHud.procedure = proc;
+            touchHud.glassShader = glassShader;
+            touchHud.touchControls = touchControls;
+            touchControls.hud = touchHud;
+
             PlayerSettings.insecureHttpOption = InsecureHttpOption.AlwaysAllowed;  // máy chủ AI cục bộ http://127.0.0.1
         }
 
         /// <summary>Gắn PlaceSurface cho các mặt bàn để đặt dụng cụ xuống chỗ nào cũng được.</summary>
         static void AttachSurfaces(Transform root)
         {
+            bool IsSurfaceName(string n)
+            {
+                if (string.IsNullOrEmpty(n)) return false;
+                if (n == "Mặt bàn" || n.StartsWith("Mặt bàn đoạn") || n == "Mặt làm việc") return true;
+                if (n == "Mặt quầy" || n == "Mặt đảo" || n == "Mặt lưới" || n == "Mặt gia nhiệt") return true;
+                if (n == "Bàn thao tác inox" || n.StartsWith("Tầng kệ") || n == "Thân pass-box") return true;
+                return false;
+            }
+
             foreach (var t in root.GetComponentsInChildren<Transform>(true))
-                if ((t.name == "Mặt bàn" || t.name.StartsWith("Mặt bàn đoạn") || t.name == "Mặt làm việc" || t.name == "Mặt quầy" || t.name == "Mặt đảo")
-                    && t.GetComponent<Collider>() != null)  // "Mặt quầy", "Mặt đảo": quầy và đảo thí nghiệm tầng 2
+                if (IsSurfaceName(t.name) && t.GetComponent<Collider>() != null && t.GetComponent<PlaceSurface>() == null)
                     t.gameObject.AddComponent<PlaceSurface>();
         }
 
