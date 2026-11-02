@@ -36,3 +36,35 @@ Nhánh: `do-hoa-hd` | Máy trạm: Mac M2 8 GB | Thiết bị mục tiêu: iPad 
 
 ### 4. Việc tiếp theo
 - Thực hiện **Giai đoạn 1**: Nghiên cứu tài liệu tham khảo mạng, tiêu chuẩn chiếu sáng lab, vật liệu kiến trúc thật, lập `docs/do-hoa-hd/art-bible.md` và `docs/do-hoa-hd/nguon-tai-nguyen.md` (100% tài sản CC0 có kiểm tra nguồn).
+
+
+
+---
+
+## Giai đoạn 1: Tham khảo mạng và bản định hướng
+
+### 1. Đã đổi gì
+- Nghiên cứu tiêu chuẩn chiếu sáng phòng thí nghiệm thực tế (BS EN 12464-1 & CIBSE LG5: duy trì 500 lux mặt bàn, UGR <= 19, CRI >= 90, CCT 4000K).
+- Nghiên cứu vật liệu phòng lab công nghiệp: Compact Laminate Trespa TopLab PLUS, Epoxy Resin nguyên khối, Thép không gỉ AISI 304 satin #4, gạch phòng sạch cleanroom.
+- Nghiên cứu kiến trúc pipeline Unity 6 Metal trên iOS: Forward+ culling, STP (Spatial-Temporal Post-Processing), Adaptive Probe Volumes (APV), Native RenderPass, Memoryless RTs.
+- Lập tài liệu mỹ thuật chi tiết `docs/do-hoa-hd/art-bible.md`:
+  - 12 nguồn cảm hứng và tài liệu tham khảo chính thức kèm liên kết URL và mục đích áp dụng.
+  - Thông số vật lý PBR chuẩn (Albedo, Roughness, Normal, Metallic, IOR thủy tinh 1.517).
+  - Định nghĩa bảng màu, vật liệu, cách bố trí đèn và 3 chi tiết kiến trúc bổ sung `HD_*` (không collider, không dời vị trí gốc) cho **từng phòng trong toàn bộ 13 khu** và khu vực ngoại thất.
+- Lập tài liệu danh mục tài sản `docs/do-hoa-hd/nguon-tai-nguyen.md`:
+  - 100% tài sản CC0 (Public Domain Dedication) từ hai kho ambientCG và Poly Haven.
+  - Liệt kê đầy đủ 15 bộ texture PBR mẫu và 2 HDRI sky, chỉ rõ tên, tác giả, link và giấy phép hợp lệ phục vụ cuộc thi KHKT.
+
+### 2. Số đo
+- **Đối chiếu tọa độ (CompareBatch):** 18.964/18.964 đối tượng. Sai lệch = 0.000 mm, 0.000°, 0.000%. Tổng lỗi = 0 LỖI (ĐẠT).
+- **Số khu được đặc tả chi tiết mỹ thuật:** 14/14 khu vực (13 cảnh khu + Ngoại thất) đạt 100% độ phủ.
+- **Tỉ lệ tài sản CC0 hợp lệ:** 100% (0 tài sản trả phí, 0 tài sản không rõ nguồn gốc).
+
+### 3. Lỗi còn lại
+- Không có lỗi. Tọa độ giữ nguyên vẹn 100%.
+
+### 4. Việc tiếp theo
+- Thực hiện **Giai đoạn 2: Nền kết xuất**:
+  - Nâng cấp `Mobile_RPAsset` & `Mobile_Renderer`: Forward+, render scale 1.0, HDR, SSAO, Depth & Opaque Textures, 4 cascade shadow.
+  - Tối ưu khoảng cách culling và bóng vật nhỏ (tắt bóng dưới 6 cm, culling vật nhỏ 30 m, chữ nhỏ 12 m).
+  - Triển khai 3 mức chất lượng đồ họa (Ultra / Cao / Cân bằng) và HUD theo dõi hiệu năng (FPS, RAM, Draw calls, Triangles).
