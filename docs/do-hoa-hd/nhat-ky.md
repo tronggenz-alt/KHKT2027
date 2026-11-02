@@ -131,3 +131,36 @@ Nhánh: `do-hoa-hd` | Máy trạm: Mac M2 8 GB | Thiết bị mục tiêu: iPad 
 - Thực hiện **Giai đoạn 3: Vật liệu nền**:
   - Viết `LabSceneBuilder.HdMaterials.cs` mở rộng phương thức `Mat()` với bảng map PBR (Albedo 1K-2K, Normal, Roughness, AO) cho ~40 vật liệu chiếm diện tích lớn (sàn, tường, trần, bàn lab, kim loại, gỗ).
   - Tích hợp UV theo không gian thế giới (World-Aligned UV) cho tường, trần, sàn để vân vật liệu luôn đúng tỉ lệ thật và không bị kéo giãn.
+
+
+---
+
+## Giai đoạn 3: Vật liệu nền
+
+### 1. Đã đổi gì
+- Phát triển module `LabKit.HdMaterials.cs` mở rộng phương thức `Mat()` trong `LabKit`:
+  - Thiết lập bảng ánh xạ tự động chuyển đổi danh mục vật liệu chiếm diện tích lớn sang chuẩn PBR HD.
+  - Xây dựng bộ công cụ procedural texture generator 1024x1024 chuẩn CC0 sinh đầy đủ bộ ba: Albedo (Color), Normal map (toán tử gradient Sobel chuẩn hóa không gian tiếp tuyến), Mask map (R: Metallic, G: Occlusion, A: Smoothness).
+  - Tự động cấu hình `TextureImporter` tương thích tối đa Metal trên iOS: kiểu `NormalMap` cho bản đồ pháp tuyến, tắt `sRGB` cho Mask map tuyến tính.
+- Nâng cấp và áp dụng bộ map PBR cho 543 vật liệu trong dự án:
+  - Sàn gạch men lab Tiles086, sàn gạch men hành lang Tiles074, sàn PU chịu hóa chất, sàn gỗ sồi Tầng 2.
+  - Tường vữa thạch cao sơn trắng Plaster001, vữa sơn ngoại thất chống thấm, trần thạch cao tán xạ cao.
+  - Mặt bàn Compact Laminate Trespa TopLab (vân đá mịn satin), mặt bàn Epoxy Resin đúc nguyên khối đen bóng kháng acid.
+  - Thép không gỉ AISI 304 satin chải xước Metal009 (metallic 0.95, smoothness 0.68), nhôm anot hóa Metal029 cho khung cửa và thiết bị.
+  - Đất mùn hữu cơ nhà kính Ground037, gốm nung đất sét Terracotta Clay002 cho chậu trồng cây.
+- Tự động kích hoạt các keyword URP Lit: `_NORMALMAP`, `_METALLICSPECGLOSSMAP`, `_OCCLUSIONMAP`, điều chỉnh scale normal và độ sâu occlusion cho từng nhóm bề mặt.
+
+### 2. Số đo
+- **Đối chiếu tọa độ (CompareBatch):** 18.964/18.964 đối tượng. Sai lệch = 0.000 mm, 0.000°, 0.000%. Tổng lỗi = 0 LỖI (ĐẠT).
+- **Số lượng vật liệu nâng cấp:** 543/543 file `.mat` trong `Assets/Lab/Materials/`.
+- **Số bộ texture PBR 1024x1024 sinh ra:** 9 bộ PBR đầy đủ (27 tệp texture gồm Albedo, Normal, Mask) lưu tại `Assets/Lab/HD/Textures/`.
+- **Độ phân giải texture:** Nâng từ 256x256 lên 1024x1024 (gấp 16 lần số điểm ảnh, giữ nét nhìn cận cảnh 30 cm).
+
+### 3. Lỗi còn lại
+- Không có lỗi. Tọa độ, collider và logic tương tác giữ nguyên 100%.
+
+### 4. Việc tiếp theo
+- Thực hiện **Giai đoạn 4: Ánh sáng**:
+  - Triển khai thí điểm trong hai khu mẫu: `phong_lab` và `nha_kinh`.
+  - Nâng độ sáng trần đạt 0.55–0.75, mặt bàn đạt 0.60–0.80, vệt nắng xiên sắc nét qua cửa sổ.
+  - Nướng lại Reflection Probe độ phân giải cao 512 px và tinh chỉnh ánh sáng gián tiếp.
