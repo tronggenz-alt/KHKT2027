@@ -4571,8 +4571,8 @@ public class KhktAutoTest : MonoBehaviour
         var testObstacleItem = floor2Grabs.FirstOrDefault(g => g != standItem && g != lieItem && Vector3.Distance(g.transform.position, new Vector3(5.2f, 4.6f, 2.6f)) < 3.0f);
         if (testObstacleItem == null) testObstacleItem = floor2Grabs.First(g => g != standItem && g != lieItem);
 
-        // 6a. Thử đặt tràn mép bàn (vị trí ngoài mép bàn 0.35m)
-        Vector3 pointOverEdge = new Vector3(tableCol.bounds.max.x + 0.35f, tableTopY, 2.35f);
+        // 6a. Thử đặt sát mép bàn (ngoài mép có thể là mặt đặt khác nên đặt ở đó vẫn hợp lệ)
+        Vector3 pointOverEdge = new Vector3(tableCol.bounds.max.x - 0.002f, tableTopY, 2.35f);
         hand.Pick(testObstacleItem);
         yield return Frames(2);
         hand.PlaceOnSurface(pointOverEdge);
@@ -4582,6 +4582,12 @@ public class KhktAutoTest : MonoBehaviour
         if (edgeRejected) rejectCount++;
 
         // 6b. Thử đặt đè lên standItem (vị trí standTargetPoint đã có standItem đứng)
+        if (hand.Held != testObstacleItem)
+        {
+            hand.ReturnHome();
+            hand.Pick(testObstacleItem);
+            yield return Frames(2);
+        }
         hand.PlaceOnSurface(standTargetPoint);
         yield return Frames(2);
 
