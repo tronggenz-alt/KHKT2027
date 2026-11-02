@@ -40,6 +40,15 @@ public class KhktAutoTest : MonoBehaviour
         cam.targetTexture = rt;
         yield return new WaitForSeconds(1f);
         Log($"Danh mục: {ChemicalCatalog.Instance.Chemicals.Length} chất, lọ trong cảnh: {FindObjectsByType<ChemicalBottle>().Length}, vật chứa phản ứng: {FindObjectsByType<LabContainer>().Count(c => c.reactive)}");
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "do_hoa")
+        {
+            yield return DoHoaTest();
+            Log($"Xong chụp ảnh đồ họa HD sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
         if (Environment.GetEnvironmentVariable("KHKT_TEST") == "landing")
         {
             // ảnh cho trang giới thiệu: khu tầng 2, lõi thang, mặt ngoài, không có bàn tay ảo
@@ -1357,7 +1366,7 @@ public class KhktAutoTest : MonoBehaviour
             return;
         }
         RenderTexture.active = rt;
-        tex.ReadPixels(new Rect(0, 0, 1600, 900), 0, 0);
+        tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
         tex.Apply();
         RenderTexture.active = null;
         c.targetTexture = old;
@@ -3964,7 +3973,7 @@ public class KhktAutoTest : MonoBehaviour
         sc.ScreenCamera.Render();
         sc.ScreenCamera.targetTexture = old;
         RenderTexture.active = rt;
-        tex.ReadPixels(new Rect(0, 0, 1600, 900), 0, 0);
+        tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
         tex.Apply();
         RenderTexture.active = null;
         File.WriteAllBytes(Path.Combine(outDir, name + ".png"), tex.EncodeToPNG());
@@ -4653,6 +4662,128 @@ public class KhktAutoTest : MonoBehaviour
         Log($"[KHKT-PLAY] KẾT QUẢ TỔNG THỂ 6 TIÊU CHUẨN: {(allCriteriaPassed ? "TOÀN BỘ ĐẠT (PASS)" : "CÓ MỤC KHÔNG ĐẠT (FAIL)")}");
     }
 
+    IEnumerator DoHoaTest()
+    {
+        Log("[KHKT-DO-HOA] Bắt đầu chụp bộ ảnh đồ họa HD chuẩn iPad Air M3 (2360x1640, MSAA 4x, PostProcessing Ultra)...");
+
+        // 1. Cấu hình RenderTexture 2360x1640 (màn hình iPad Air M3 Retina)
+        if (rt != null) { cam.targetTexture = null; rt.Release(); }
+        rt = new RenderTexture(2360, 1640, 24, RenderTextureFormat.ARGB32);
+        rt.antiAliasing = 4;
+        rt.Create();
+        tex = new Texture2D(2360, 1640, TextureFormat.RGB24, false);
+        cam.targetTexture = rt;
+
+        // 2. Thiết lập Camera URP cho mức Ultra
+        var uac = cam.GetComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>();
+        if (uac != null)
+        {
+            uac.renderPostProcessing = true;
+            uac.antialiasing = UnityEngine.Rendering.Universal.AntialiasingMode.SubpixelMorphologicalAntiAliasing;
+            uac.antialiasingQuality = UnityEngine.Rendering.Universal.AntialiasingQuality.High;
+        }
+
+        // Tắt bàn tay ảo khi chụp
+        hand.enabled = false;
+        foreach (var r in hand.hand.GetComponentsInChildren<Renderer>()) r.enabled = false;
+        hand.enabled = true;
+
+        // A. 12 GÓC LANDING
+        var landingViews = new (string name, Vector3 pos, Vector3 look)[]
+        {
+            ("l01_mat_ngoai", new Vector3(-9f, 0, 24f), new Vector3(13f, 3.5f, 6f)),
+            ("l02_mat_ngoai_tay", new Vector3(-12f, 0, 2f), new Vector3(10f, 3.5f, 6f)),
+            ("l03_sinh_toan_canh", new Vector3(1.4f, 3.8f, 1.2f), new Vector3(12f, 4.8f, 9f)),
+            ("l04_sinh_ban_hoc_sinh", new Vector3(6f, 3.8f, 4.5f), new Vector3(10f, 4.7f, 8f)),
+            ("l05_vi_sinh", new Vector3(20.8f, 3.8f, 8.3f), new Vector3(25f, 4.9f, 12.5f)),
+            ("l06_kho_sinh_pham", new Vector3(20.8f, 3.8f, 0.9f), new Vector3(25f, 4.9f, 5f)),
+            ("l07_sinh_phan_tu", new Vector3(1.2f, 3.8f, -4.3f), new Vector3(10f, 4.7f, -7.8f)),
+            ("l08_nha_kinh", new Vector3(14.5f, 3.8f, -4.3f), new Vector3(25f, 4.9f, -7.5f)),
+            ("l09_hanh_lang_t2", new Vector3(1f, 3.8f, -1.8f), new Vector3(20f, 5f, -1.8f)),
+            ("l10_thang_bo", new Vector3(29.2f, 0, -0.9f), new Vector3(29.2f, 3.2f, 5.5f)),
+            ("l11_sanh_thang_may", new Vector3(29.6f, 0, -1.45f), new Vector3(27.5f, 1.2f, -1.45f)),
+            ("l12_trong_cabin", new Vector3(28.1f, 0, -1.45f), new Vector3(29.5f, 1.3f, -1.45f)),
+        };
+        foreach (var v in landingViews)
+        {
+            Vector3 d = v.pos - v.look;
+            viewer.GoNear(v.look, d, new Vector2(d.x, d.z).magnitude);
+            float tw = Time.realtimeSinceStartup;
+            while (!Khkt.Rendering.ZoneStreamer.Settled && Time.realtimeSinceStartup - tw < 15f) yield return null;
+            yield return Frames(12);
+            Shot(v.name);
+            Log($"[KHKT-DO-HOA] Đã chụp {v.name}");
+        }
+
+        // B. 24 GÓC NHÌN PHÒNG LAB TẦNG 1 (GOC_NHIN)
+        var gocNhinViews = new (string name, Vector3 pos, Vector3 look)[]
+        {
+            ("01_toan_canh_cua_vao", new Vector3(1.6f, 0, 0.9f), new Vector3(12f, 1.0f, 9f)),
+            ("02_tuong_bang", new Vector3(9.5f, 0, 7.5f), new Vector3(0.2f, 1.5f, 7.5f)),
+            ("03_ban_hoc_sinh", new Vector3(15.5f, 0, 5.0f), new Vector3(6f, 0.9f, 8.5f)),
+            ("04_ban_chuan_do", new Vector3(6.05f, 0, 2.6f), new Vector3(5.2f, 1.0f, 2.6f)),
+            ("05_khu_tong_hop", new Vector3(12.5f, 0, 10.5f), new Vector3(17f, 1.0f, 8.5f)),
+            ("06_tu_hut", new Vector3(16.5f, 0, 11.0f), new Vector3(16.8f, 1.2f, 14.6f)),
+            ("07_loi_vao_kho", new Vector3(16.3f, 0, 5.0f), new Vector3(20.0f, 1.55f, 7.7f)),
+            ("08_kho_ben_trong", new Vector3(21.3f, 0, 2.0f), new Vector3(24.5f, 1.3f, 9f)),
+            ("09_hanh_lang", new Vector3(4.2f, 0, -1.3f), new Vector3(16f, 1.5f, -0.4f)),
+            ("10_phong_may", new Vector3(2.6f, 0, -3.0f), new Vector3(6.75f, 1.0f, -8.4f)),
+            ("11_phong_robot", new Vector3(21.5f, 0, -3.4f), new Vector3(18.5f, 1.0f, -6.5f)),
+            ("12_khu_an_toan", new Vector3(4.5f, 0, 4.0f), new Vector3(0.5f, 1.2f, 1.0f)),
+            ("13_tuong_video_gan", new Vector3(4.6f, 0, 7.5f), new Vector3(0.2f, 1.7f, 7.5f)),
+            ("14_tuong_nha_hoa_hoc", new Vector3(3.2f, 0, 12.6f), new Vector3(0.1f, 1.55f, 12.6f)),
+            ("15_hanh_lang_lich_su", new Vector3(6.6f, 0, -1.95f), new Vector3(6.15f, 1.5f, -0.1f)),
+            ("16_tuong_trien_lam", new Vector3(11.2f, 0, 4.7f), new Vector3(10.6f, 1.45f, 0.1f)),
+            ("17_cua_phong_may", new Vector3(6.7f, 0, -0.45f), new Vector3(6.7f, 1.35f, -2.2f)),
+            ("18_tran_go_hang_ban", new Vector3(18.5f, 0, 5.0f), new Vector3(8f, 2.9f, 7.5f)),
+            ("19_ngan_kinh_che_tao", new Vector3(16.3f, 0, 9.4f), new Vector3(18.6f, 1.1f, 11.6f)),
+            ("20_phong_may_toan_canh", new Vector3(12.2f, 0, -3.0f), new Vector3(2.0f, 1.0f, -6.8f)),
+            ("21_phong_may_sem_xrd", new Vector3(3.4f, 0, -4.4f), new Vector3(0.7f, 1.0f, -4.0f)),
+            ("22_phong_may_tuong_dong", new Vector3(9.4f, 0, -5.2f), new Vector3(13.0f, 0.9f, -5.0f)),
+            ("23_ban_mau_phan_tich", new Vector3(6.75f, 0, -4.0f), new Vector3(6.4f, 0.9f, -5.5f)),
+            ("24_bom_nhiet_luong", new Vector3(6.0f, 0, -3.8f), new Vector3(4.3f, 0.8f, -2.7f)),
+        };
+        foreach (var v in gocNhinViews)
+        {
+            Vector3 d = v.pos - v.look;
+            viewer.GoNear(v.look, d, new Vector2(d.x, d.z).magnitude);
+            float tw = Time.realtimeSinceStartup;
+            while (!Khkt.Rendering.ZoneStreamer.Settled && Time.realtimeSinceStartup - tw < 15f) yield return null;
+            yield return Frames(12);
+            Shot(v.name);
+            Log($"[KHKT-DO-HOA] Đã chụp {v.name}");
+        }
+
+        // C. 8 CẬN CẢNH (30 - 50 cm)
+        var closeUpViews = new (string name, Vector3 pos, Vector3 look)[]
+        {
+            ("c01_thuy_tinh_dung_dich", new Vector3(5.30f, 0.95f, 3.20f), new Vector3(4.96f, 0.85f, 3.04f)),
+            ("c02_vach_chia_buret", new Vector3(5.56f, 1.15f, 1.15f), new Vector3(5.56f, 0.82f, 1.40f)),
+            ("c03_chu_nhan_lo", new Vector3(5.35f, 0.92f, 3.04f), new Vector3(4.997f, 0.88f, 3.04f)),
+            ("c04_canh_ban_inox", new Vector3(19.10f, 0.90f, 11.45f), new Vector3(19.45f, 0.74f, 11.65f)),
+            ("c05_man_hinh_may", new Vector3(1.55f, 1.15f, -4.80f), new Vector3(1.20f, 1.12f, -4.90f)),
+            ("c06_la_cay", new Vector3(3.25f, 0.85f, 16.15f), new Vector3(3.00f, 0.65f, 16.42f)),
+            ("c07_canh_manh_nguoc_sang", new Vector3(16.00f, 1.35f, 9.15f), new Vector3(16.30f, 1.20f, 9.40f)),
+            ("c08_san_nhin_xien", new Vector3(8.00f, 0.35f, 4.60f), new Vector3(8.00f, 0.00f, 5.00f)),
+        };
+        var charCtrl = viewer.GetComponent<CharacterController>();
+        foreach (var v in closeUpViews)
+        {
+            if (charCtrl != null) charCtrl.enabled = false;
+            viewer.transform.position = v.pos;
+            cam.transform.position = v.pos;
+            cam.transform.LookAt(v.look);
+            viewer.LookAt(v.look);
+            float tw = Time.realtimeSinceStartup;
+            while (!Khkt.Rendering.ZoneStreamer.Settled && Time.realtimeSinceStartup - tw < 15f) yield return null;
+            yield return Frames(12);
+            Shot(v.name);
+            Log($"[KHKT-DO-HOA] Đã chụp {v.name}");
+        }
+
+        Log($"[KHKT-DO-HOA] HOÀN TẤT TOÀN BỘ 44 ẢNH ĐỒ HỌA HD!");
+    }
+
     IEnumerator Watchdog()
     {
         yield return new WaitForSecondsRealtime(900f);
@@ -4668,7 +4799,7 @@ public class KhktAutoTest : MonoBehaviour
         if (loupe != null && loupe.Active) loupe.GetComponent<Camera>().Render();
         cam.Render();
         RenderTexture.active = rt;
-        tex.ReadPixels(new Rect(0, 0, 1600, 900), 0, 0);
+        tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
         tex.Apply();
         RenderTexture.active = null;
         File.WriteAllBytes(Path.Combine(outDir, name + ".png"), tex.EncodeToPNG());

@@ -1,0 +1,11 @@
+{
+  "max_pct_hong_tim": 0.001,
+  "max_pct_chay": 3.0,
+  "max_pct_den": 5.0,
+  "min_do_sang": 0.20,
+  "max_do_sang": 0.85,
+  "max_pct_ruc": 3.0,
+  "max_do_bao_hoa": 0.21,
+  "min_do_net": 150.0,
+  "max_muc_quang": 4.5
+}
