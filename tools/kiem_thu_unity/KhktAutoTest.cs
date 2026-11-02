@@ -39,6 +39,42 @@ public class KhktAutoTest : MonoBehaviour
         cam.targetTexture = rt;
         yield return new WaitForSeconds(1f);
         Log($"Danh mục: {ChemicalCatalog.Instance.Chemicals.Length} chất, lọ trong cảnh: {FindObjectsByType<ChemicalBottle>().Length}, vật chứa phản ứng: {FindObjectsByType<LabContainer>().Count(c => c.reactive)}");
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "landing")
+        {
+            // ảnh cho trang giới thiệu: khu tầng 2, lõi thang, mặt ngoài, không có bàn tay ảo
+            hand.enabled = false;
+            foreach (var r in hand.hand.GetComponentsInChildren<Renderer>()) r.enabled = false;
+            hand.enabled = true;
+            var views = new (string name, Vector3 pos, Vector3 look)[]
+            {
+                ("l01_mat_ngoai", new Vector3(-9f, 0, 24f), new Vector3(13f, 3.5f, 6f)),
+                ("l02_mat_ngoai_tay", new Vector3(-12f, 0, 2f), new Vector3(10f, 3.5f, 6f)),
+                ("l03_sinh_toan_canh", new Vector3(1.4f, 3.8f, 1.2f), new Vector3(12f, 4.8f, 9f)),
+                ("l04_sinh_ban_hoc_sinh", new Vector3(6f, 3.8f, 4.5f), new Vector3(10f, 4.7f, 8f)),
+                ("l05_vi_sinh", new Vector3(20.8f, 3.8f, 8.3f), new Vector3(25f, 4.9f, 12.5f)),
+                ("l06_kho_sinh_pham", new Vector3(20.8f, 3.8f, 0.9f), new Vector3(25f, 4.9f, 5f)),
+                ("l07_sinh_phan_tu", new Vector3(1.2f, 3.8f, -4.3f), new Vector3(10f, 4.7f, -7.8f)),
+                ("l08_nha_kinh", new Vector3(14.5f, 3.8f, -4.3f), new Vector3(25f, 4.9f, -7.5f)),
+                ("l09_hanh_lang_t2", new Vector3(1f, 3.8f, -1.8f), new Vector3(20f, 5f, -1.8f)),
+                ("l10_thang_bo", new Vector3(29.2f, 0, -0.9f), new Vector3(29.2f, 3.2f, 5.5f)),
+                ("l11_sanh_thang_may", new Vector3(29.6f, 0, -1.45f), new Vector3(27.5f, 1.2f, -1.45f)),
+                ("l12_trong_cabin", new Vector3(28.1f, 0, -1.45f), new Vector3(29.5f, 1.3f, -1.45f)),
+            };
+            foreach (var v in views)
+            {
+                Vector3 d = v.pos - v.look;
+                viewer.GoNear(v.look, d, new Vector2(d.x, d.z).magnitude);
+                float tw = Time.realtimeSinceStartup;
+                while (!Khkt.Rendering.ZoneStreamer.Settled && Time.realtimeSinceStartup - tw < 15f) yield return null;
+                yield return Frames(14);
+                Shot(v.name);
+            }
+            Log($"Xong ảnh trang giới thiệu sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
         if (Environment.GetEnvironmentVariable("KHKT_TEST") == "goc_nhin")
         {
             hand.enabled = false;  // ảnh phòng không có bàn tay ảo
