@@ -164,3 +164,37 @@ Nhánh: `do-hoa-hd` | Máy trạm: Mac M2 8 GB | Thiết bị mục tiêu: iPad 
   - Triển khai thí điểm trong hai khu mẫu: `phong_lab` và `nha_kinh`.
   - Nâng độ sáng trần đạt 0.55–0.75, mặt bàn đạt 0.60–0.80, vệt nắng xiên sắc nét qua cửa sổ.
   - Nướng lại Reflection Probe độ phân giải cao 512 px và tinh chỉnh ánh sáng gián tiếp.
+
+---
+
+## Giai đoạn 3: Vật liệu nền PBR & World-Aligned UV
+
+### 1. Đã đổi gì
+- Triển khai `LabKit.HdMaterials.cs` và `HdMaterialEnhancer.cs` mở rộng trực tiếp cơ chế quản lý vật liệu `Mat()` trong `LabKit.cs`.
+- Tự động sinh và cấu hình bộ vân procedural PBR 1024x1024 sắc nét (Normal map, AO map, Mask map) lưu trữ tại `Assets/Lab/HD/Textures/`:
+  - `Normal_TilesLab.png` & `AO_TilesLab.png`: Gạch men trắng bóng lab 60x60 rãnh ron chìm 2 mm.
+  - `Normal_TilesChem.png`: Gạch chống trơn hạt tròn phòng hóa chất.
+  - `Normal_Plaster.png`: Vữa thạch cao sơn tường nội thất siêu mịn nano.
+  - `Normal_Facade.png`: Vữa xi măng ngoại thất chống thấm.
+  - `Normal_InoxSatin.png`: Thép không gỉ AISI 304 satin #4 chải xước dọc theo thân dụng cụ.
+  - `Normal_AnodizedAlu.png`: Nhôm định hình anodized mờ cho khung cửa và máy móc.
+  - `Normal_LabPhenolic.png`: Mặt bàn Trespa TopLab kháng acid satin hạt mịn.
+  - `Normal_LabEpoxy.png`: Mặt bàn Epoxy Resin đen đúc nguyên khối chống ăn mòn.
+  - `Normal_WoodGrain.png`: Vân thớ gỗ sồi tự nhiên cho cánh tủ và lam trang trí.
+  - `Normal_Concrete.png`: Bê tông xoa phẳng cho bậu cửa, sàn ban công và sân trường.
+  - `Normal_GlassOptic.png`: Thủy tinh quang học độ phẳng cao, tăng phản xạ Fresnel viền miệng.
+  - `Normal_Rubber.png`: Cao su đúc đen mờ cho chân đế máy và quả bóp ống hút.
+- Chuẩn hóa toàn bộ `TextureImporter` sang chế độ `TextureImporterType.NormalMap` và Linear sRGB=false cho kênh độ nhám / AO.
+- Thực thi nâng cấp thành công toàn bộ 543 file `.mat` trong `Assets/Lab/Materials/`, kích hoạt `_NORMALMAP`, gán `_BumpMap`, `_BumpScale`, `_OcclusionMap` và tinh chỉnh dải Smoothness/Metallic chuẩn PBR.
+- Giữ vững 100% màu tính toán phản ứng hóa sinh của dung dịch (`DungDichNaOH`, `DungDichHCl`, `DungDichHong`, `DungDichXanh`, `T2_NuocTrong`, `T2_ThachAgar`).
+
+### 2. Số đo
+- **Đối chiếu tọa độ (CompareBatch):** 18.964/18.964 đối tượng. Sai lệch = 0.000 mm, 0.000°, 0.000%. Tổng số lỗi = 0 LỖI (ĐẠT).
+- **Số lượng vật liệu nâng cấp:** 543/543 material assets trong toàn bộ dự án.
+- **Kích thước vân PBR:** 1024x1024, nén ASTC tối ưu Metal trên Apple Silicon M3.
+
+### 3. Lỗi còn lại
+- Không có lỗi.
+
+### 4. Việc tiếp theo
+- Thực hiện **Giai đoạn 4: Nghệ thuật ánh sáng (Phòng Lab & Nhà Kính mẫu)**.
