@@ -20,6 +20,7 @@ namespace Khkt.Rendering
 
         public const int Outside = -1;
         public const string SceneFolder = "Assets/Scenes/Khu";
+        public const float F2CorridorZ = -3.6f;
 
         public static readonly Zone[] Zones =
         {
@@ -33,9 +34,9 @@ namespace Khkt.Rendering
             new Zone { id = "phong_sinh", name = "Phòng thí nghiệm sinh học", scene = "Khu_PhongSinh", area = Rect.MinMaxRect(0f, 0f, 20f, 15f), floor = 1 },
             new Zone { id = "phong_vi_sinh", name = "Phòng vi sinh", scene = "Khu_PhongViSinh", area = Rect.MinMaxRect(20f, 7.5f, 27f, 15f), floor = 1 },
             new Zone { id = "kho_sinh_pham", name = "Kho sinh phẩm", scene = "Khu_KhoSinhPham", area = Rect.MinMaxRect(20f, 0f, 27f, 7.5f), floor = 1 },
-            new Zone { id = "hanh_lang_t2", name = "Hành lang tầng 2", scene = "Khu_HanhLangT2", area = Rect.MinMaxRect(0f, -2.2f, 27f, 0f), floor = 1 },
-            new Zone { id = "phong_sinh_phan_tu", name = "Phòng sinh học phân tử", scene = "Khu_SinhPhanTu", area = Rect.MinMaxRect(0f, -9f, 13.5f, -2.2f), floor = 1 },
-            new Zone { id = "nha_kinh", name = "Nhà kính thực vật", scene = "Khu_NhaKinh", area = Rect.MinMaxRect(13.5f, -9f, 27f, -2.2f), floor = 1 },
+            new Zone { id = "hanh_lang_t2", name = "Hành lang tầng 2", scene = "Khu_HanhLangT2", area = Rect.MinMaxRect(0f, F2CorridorZ, 27f, 0f), floor = 1 },
+            new Zone { id = "phong_sinh_phan_tu", name = "Phòng sinh học phân tử", scene = "Khu_SinhPhanTu", area = Rect.MinMaxRect(0f, -9f, 13.5f, F2CorridorZ), floor = 1 },
+            new Zone { id = "nha_kinh", name = "Nhà kính thực vật", scene = "Khu_NhaKinh", area = Rect.MinMaxRect(13.5f, -9f, 27f, F2CorridorZ), floor = 1 },
             new Zone { id = "hanh_lang_dong", name = "Hành lang đông tầng 2", scene = "Khu_HanhLangDong", area = Rect.MinMaxRect(27f, 6f, 30f, 15f), floor = 1 },
             new Zone { id = "loi_thang", name = "Cầu thang và thang máy", scene = "Khu_LoiThang", area = Rect.MinMaxRect(27f, -2.2f, 30f, 6f), floor = -1 },
         };

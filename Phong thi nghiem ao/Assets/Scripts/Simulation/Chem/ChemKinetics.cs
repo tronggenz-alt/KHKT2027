@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Khkt.Simulation.Chem
@@ -58,8 +58,18 @@ namespace Khkt.Simulation.Chem
 
         static readonly HashSet<string> stepIds = new HashSet<string>
         {
-            "H2O2", "Fe(OH)2", "Mn(OH)2", "S2O32-", "AgNH3", "Ag+", "CuPol", "Cu(OH)2", "ninhydrin", "ClO", "Ox",
+            "H2O2", "catalase", "Fe(OH)2", "Mn(OH)2", "S2O32-", "AgNH3", "Ag+", "CuPol", "Cu(OH)2", "ninhydrin", "ClO", "Ox",
         };
+
+        /// <summary>Hệ số hoạt tính tương đối (0..1) của enzyme catalase theo nhiệt độ (°C) và trạng thái đã luộc.</summary>
+        public static double CatalaseActivity(double tempC, bool boiled = false)
+        {
+            if (boiled || tempC < 0 || tempC >= 65) return 0;
+            double diff = tempC - 37.0;
+            double act = Math.Exp(-(diff * diff) / (2.0 * 14.0 * 14.0));
+            if (tempC > 55.0) act *= (65.0 - tempC) / 10.0;
+            return Math.Max(0.0, Math.Min(1.0, act));
+        }
 
         /// <summary>Có cần chạy Step không (để vật chứa đứng yên không tốn công tính).</summary>
         public static bool NeedsStep(Mix mix, double tempC)
@@ -302,13 +312,32 @@ namespace Khkt.Simulation.Chem
                 }
             }
 
-            // H2O2 phân hủy (xúc tác MnO2, Fe3+, đun nóng)
+            // Biến tính enzyme catalase khi đun nóng >= 65 °C
+            double catRaw = b.Get("catalase");
+            if (catRaw > 1e-12 && env.TempC >= 65)
+            {
+                b.Set("catalase", 0);
+                b.Add("catalase_bat_hoat", catRaw);
+                changed = true;
+            }
+
+            // H2O2 phân hủy (xúc tác catalase sinh học, MnO2, Fe3+, đun nóng)
             double h2o2 = b.Get("H2O2");
             if (h2o2 > 1e-10)
             {
                 double k = 0;
                 string cat = null;
-                if (b.Get("MnO2(s)") > 1e-7 || b.Get("MnO2(kt)") > 1e-7) { k += 0.35; cat = "MnO₂"; }
+                double catMol = b.Get("catalase");
+                if (catMol > 1e-12)
+                {
+                    double act = CatalaseActivity(env.TempC, false);
+                    if (act > 0)
+                    {
+                        k += 0.85 * act;
+                        cat = "catalase";
+                    }
+                }
+                if (b.Get("MnO2(s)") > 1e-7 || b.Get("MnO2(kt)") > 1e-7) { k += 0.35; cat ??= "MnO₂"; }
                 if (w.C("Fe3+") > 1e-4) { k += 0.03; cat ??= "Fe³⁺"; }
                 if (w.C("Cu2+") > 1e-3) { k += 0.01; cat ??= "Cu²⁺"; }
                 if (env.TempC > 60) k += 0.01;

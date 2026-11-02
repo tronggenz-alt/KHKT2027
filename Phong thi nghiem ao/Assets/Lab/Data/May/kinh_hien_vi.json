@@ -43,6 +43,11 @@
       "ma": "num_chinh_tho_tinh",
       "ten": "Núm điều chỉnh thô (sơ cấp) và vi cấp đồng trục",
       "chuc_nang": "Nâng hạ bàn kính để lấy nét chính xác; núm vi cấp có độ dịch chuyển 2,5 micromet mỗi vạch."
+    },
+    {
+      "ma": "num_dich_xy",
+      "ten": "Núm điều khiển dịch chuyển sa trượt X - Y",
+      "chuc_nang": "Dịch chuyển lam kính theo trục ngang (X) và dọc (Y) để rà quét tiêu bản một cách có hệ thống."
     }
   ],
   "thong_so": [
@@ -69,6 +74,12 @@
       "gia_tri": "DOF = lambda / NA^2; mô phỏng độ lệch tiêu cự bằng mip bias",
       "loai": "mô phỏng",
       "mo_phong": true
+    },
+    {
+      "ten": "Khoảng dịch chuyển sa trượt X - Y",
+      "gia_tri": "76 x 30 mm",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.olympus-lifescience.com/en/microscopes/upright/cx23/"
     }
   ],
   "quy_trinh": [

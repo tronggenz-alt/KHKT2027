@@ -64,6 +64,12 @@
       "gia_tri": "Tăng trưởng lũy thừa và bão hòa nồng độ enzyme/nucleotide",
       "loai": "mô phỏng",
       "mo_phong": true
+    },
+    {
+      "ten": "Định dạng khay mẫu luân nhiệt",
+      "gia_tri": "Khay 96 giếng cho ống 0,2 mL đơn hoặc dải 8 ống",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.bio-rad.com/en-us/product/t100-thermal-cycler"
     }
   ],
   "quy_trinh": [

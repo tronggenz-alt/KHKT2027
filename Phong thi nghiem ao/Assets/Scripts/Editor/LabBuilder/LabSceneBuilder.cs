@@ -685,9 +685,9 @@ namespace Khkt.EditorTools
                 ("Phòng sinh học", new Vector3(LabX / 2, F2_Y + 1.6f, LabZ / 2), new Vector3(LabX, F2_H, LabZ)),
                 ("Phòng vi sinh", new Vector3((LabX + StoreX) / 2, F2_Y + 1.6f, 11.25f), new Vector3(StoreX - LabX, F2_H, 7.5f)),
                 ("Kho sinh phẩm", new Vector3((LabX + StoreX) / 2, F2_Y + 1.6f, 3.75f), new Vector3(StoreX - LabX, F2_H, 7.5f)),
-                ("Hành lang tầng 2", new Vector3(StoreX / 2, F2_Y + 1.4f, CorridorZ / 2), new Vector3(StoreX, F2_H, -CorridorZ)),
-                ("Sinh học phân tử", new Vector3(RoomSplitX / 2, F2_Y + 1.6f, (WingZ + CorridorZ) / 2), new Vector3(RoomSplitX, F2_H, CorridorZ - WingZ)),
-                ("Nhà kính", new Vector3((RoomSplitX + StoreX) / 2, F2_Y + 2.0f, (WingZ + CorridorZ) / 2), new Vector3(StoreX - RoomSplitX, F2_H + 1.2f, CorridorZ - WingZ)),
+                ("Hành lang tầng 2", new Vector3(StoreX / 2, F2_Y + 1.4f, F2_CorridorZ / 2), new Vector3(StoreX, F2_H, -F2_CorridorZ)),
+                ("Sinh học phân tử", new Vector3(RoomSplitX / 2, F2_Y + 1.6f, (WingZ + F2_CorridorZ) / 2), new Vector3(RoomSplitX, F2_H, F2_CorridorZ - WingZ)),
+                ("Nhà kính", new Vector3((RoomSplitX + StoreX) / 2, F2_Y + 2.0f, (WingZ + F2_CorridorZ) / 2), new Vector3(StoreX - RoomSplitX, F2_H + 1.2f, F2_CorridorZ - WingZ)),
                 ("Lõi thang", new Vector3(28.5f, F2_Y / 2, 1.9f), new Vector3(3f, F2_Y + F2_H, 8.2f)),
             };
             int ok = 0;
@@ -846,15 +846,15 @@ namespace Khkt.EditorTools
             // Trạm dịch chuyển Tầng 2 (20..31) theo bo_cuc_tang2.json
             Station(g, 20, "Toàn cảnh lab sinh học", new Vector3(19.0f, F2_Y, 13.6f), -122, false);
             Station(g, 21, "Bàn kính hiển vi (bàn 1)", new Vector3(6.05f, F2_Y, 2.6f), -90, true);
-            Station(g, 22, "Bàn giáo viên tầng 2", new Vector3(0.95f, F2_Y, 7.5f), 90, false);
+            Station(g, 22, "Bàn giải phẫu số", new Vector3(16.4f, F2_Y, 11.2f), 90, false);
             Station(g, 23, "Tủ an toàn sinh học", new Vector3(6.6f, F2_Y, 13.4f), 0, false);
-            Station(g, 24, "Khu giải phẫu", new Vector3(16.4f, F2_Y, 11.2f), 90, false);
-            Station(g, 25, "Tủ ấm và nồi hấp", new Vector3(16.4f, F2_Y, 5.2f), 90, false);
-            Station(g, 26, "Phòng vi sinh", new Vector3(23.0f, F2_Y, 9.6f), 0, false);
-            Station(g, 27, "Kho sinh phẩm", new Vector3(23.5f, F2_Y, 3.7f), 0, false);
-            Station(g, 28, "Sinh học phân tử – tách chiết, PCR", new Vector3(6.7f, F2_Y, -3.4f), 180, false);
-            Station(g, 29, "Điện di và soi gel", new Vector3(11.2f, F2_Y, -6.0f), 180, false);
-            Station(g, 30, "Nhà kính – quang hợp", new Vector3(19.8f, F2_Y, -3.4f), 180, false);
+            Station(g, 24, "Tủ ấm và nồi hấp", new Vector3(16.4f, F2_Y, 5.2f), 90, false);
+            Station(g, 25, "Phòng vi sinh", new Vector3(23.0f, F2_Y, 9.6f), 0, false);
+            Station(g, 26, "Kho sinh phẩm", new Vector3(23.5f, F2_Y, 3.7f), 0, false);
+            Station(g, 27, "Hành lang tầng 2", new Vector3(13.5f, F2_Y, -1.8f), 90, false);
+            Station(g, 28, "Sinh học phân tử – tách chiết, PCR", new Vector3(6.5f, F2_Y, -4.4f), 180, false);
+            Station(g, 29, "Điện di và soi gel", new Vector3(11.2f, F2_Y, -6.4f), 180, false);
+            Station(g, 30, "Nhà kính – quang hợp", new Vector3(20.2f, F2_Y, -4.4f), 180, false);
             Station(g, 31, "Sảnh thang máy tầng 2", new Vector3(27.8f, F2_Y, -1.5f), 270, false);
 
             var viewer = new GameObject("Người xem (chuột-bàn phím)");

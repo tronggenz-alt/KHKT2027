@@ -27,8 +27,8 @@ Bố cục tầng 2 được dựng chính xác theo bản đồ quy hoạch m�
  z=7.5│ G                                              ┌tủ ấm,hấp┐   ├─── KHO SINH PHẨM ─┼────────┤
       │     ▪bàn1  ▪bàn2  ▪bàn3   (z 2.6)              │ z 3–7.5 │   │ tủ 4°C  tủ −20°C  │ THANG  │
       │ [an toàn]                      cửa→kho         └─────────┘   │ kệ mẫu, mô hình ←cửa│ bộ+máy │
- z=0  └─cửa 1.6–3.2──────────── HÀNH LANG TẦNG 2 (z −2.2..0) ───────┴───────────────────┤ 27..30 │
-z=−2.2├──── SINH HỌC PHÂN TỬ (0..13.5) ─cửa 5.9–7.5┬──── NHÀ KÍNH THỰC VẬT (13.5..27) cửa 19–20.6 ─┘
+ z=0  └─cửa 1.6–3.2──────────── HÀNH LANG TẦNG 2 (z −3.6..0, rộng 3,6 m) ─┴─────────────┤ 27..30 │
+z=−3.6├──── SINH HỌC PHÂN TỬ (0..13.5) ─cửa 5.9–7.5┬──── NHÀ KÍNH THỰC VẬT (13.5..27) cửa 19–20.6 ─┘
       │ tiền PCR │ tách chiết ADN │ PCR · điện di │ mái kính · bàn trồng cây · thủy canh · quang hợp
 z=−9  └──────────┴────────────────┴───────────────┴──────────────────────────────────────────────
       x=0                                         x=13.5                                       x=27
@@ -39,11 +39,11 @@ z=−9  └──────────┴────────────
 | Chỉ số | Mã khu | Tên hiển thị | Tọa độ giới hạn $(x, z)$ | Tầng |
 |:---:|---|---|---|:---:|
 | 5 | `phong_sinh` | Phòng thí nghiệm sinh học | $x \in [0, 20]$, $z \in [0, 15]$ | 2 |
-| 6 | `vi_sinh` | Phòng vi sinh | $x \in [20, 27]$, $z \in [7.5, 15]$ | 2 |
-| 7 | `kho_sinh` | Kho sinh phẩm | $x \in [20, 27]$, $z \in [0, 7.5]$ | 2 |
-| 8 | `hanh_lang_t2` | Hành lang tầng 2 | $x \in [0, 27]$, $z \in [-2.2, 0]$ | 2 |
-| 9 | `sinh_phan_tu` | Sinh học phân tử | $x \in [0, 13.5]$, $z \in [-9, -2.2]$ | 2 |
-| 10 | `nha_kinh` | Nhà kính thực vật | $x \in [13.5, 27]$, $z \in [-9, -2.2]$ | 2 |
+| 6 | `phong_vi_sinh` | Phòng vi sinh | $x \in [20, 27]$, $z \in [7.5, 15]$ | 2 |
+| 7 | `kho_sinh_pham` | Kho sinh phẩm | $x \in [20, 27]$, $z \in [0, 7.5]$ | 2 |
+| 8 | `hanh_lang_t2` | Hành lang tầng 2 | $x \in [0, 27]$, $z \in [-3.6, 0]$ | 2 |
+| 9 | `phong_sinh_phan_tu` | Sinh học phân tử | $x \in [0, 13.5]$, $z \in [-9, -3.6]$ | 2 |
+| 10 | `nha_kinh` | Nhà kính thực vật | $x \in [13.5, 27]$, $z \in [-9, -3.6]$ | 2 |
 | 11 | `hanh_lang_dong`| Hành lang đông tầng 2 | $x \in [27, 30]$, $z \in [6, 15]$ | 2 |
 | 12 | `loi_thang` | Lõi thang bộ & thang máy | $x \in [27, 30]$, $z \in [-2.2, 6]$ | Cả hai (-1) |
 

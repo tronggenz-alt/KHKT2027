@@ -4,3 +4,24 @@ face_detection_yunet_2023mar.onnx
   Giấy phép: MIT (theo kho opencv_zoo).
   Tải ngày 27/10/2026, 232 589 byte, SHA-256 8F2383E4DD3CFBB4553EA8718107FC0423210DC964F9F4280604804ED2552FA4.
   Dùng trong tools/head_tracker.py (điều khiển góc nhìn bằng đầu qua webcam).
+
+face_landmarker.task
+  Mô hình Face Landmarker (478 điểm mặt, 10 điểm tròng mắt, blendshapes, ma trận tư thế 4x4).
+  Nguồn: https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task
+  Giấy phép: Apache 2.0 (Google MediaPipe).
+  Tải ngày 31/10/2026, 3 758 596 byte, SHA-256 64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff.
+  Dùng trong tools/mediapipe_tracker.py (theo dõi đầu, tròng mắt, khoảng cách).
+
+gesture_recognizer.task
+  Mô hình Gesture Recognizer (21 điểm mỗi bàn tay, phân biệt tay trái / phải, nhận dạng 7 cử chỉ dựng sẵn).
+  Nguồn: https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/latest/gesture_recognizer.task
+  Giấy phép: Apache 2.0 (Google MediaPipe).
+  Tải ngày 31/10/2026, 8 373 440 byte, SHA-256 4bbf16c61556637e192ff411a437e4da884325a7daee3bf45ad99596350d75a8.
+  Dùng trong tools/mediapipe_tracker.py (theo dõi vị trí tay, độ sâu, chụm ngón, cử chỉ điều khiển).
+
+hand_landmarker.task
+  Mô hình Hand Landmarker (21 điểm bàn tay).
+  Nguồn: https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/latest/hand_landmarker.task
+  Giấy phép: Apache 2.0 (Google MediaPipe).
+  Tải ngày 31/10/2026, 7 819 105 byte, SHA-256 fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1.
+  Dùng trong so sánh tốc độ với Gesture Recognizer.

@@ -1,0 +1,160 @@
+{
+  "ma": "tram_ghep_gen",
+  "ten": "Trạm ghép gen – tạo ADN tái tổ hợp",
+  "may_mau": "Bộ thực hành ghép gen pUC19 – GFP: enzyme EcoRI / BamHI, ADN ligaza T4, tế bào E. coli DH5α khả biến, bể sốc nhiệt 42 °C, đĩa LB + ampicillin + X-gal/IPTG",
+  "nguyen_ly": [
+    "Enzyme cắt giới hạn (restrictaza) nhận biết trình tự đối xứng đặc hiệu (EcoRI: G^AATTC, BamHI: G^GATCC) và cắt tạo đầu dính 4 nucleotide nhô ra.",
+    "Thể truyền và gen cần chuyển được cắt bằng cùng enzyme nên có đầu dính bổ sung; ADN ligaza nối liên kết phosphodiester giữa chúng tạo ADN tái tổ hợp.",
+    "Cắt bằng hai enzyme khác nhau làm hai đầu khung plasmid không bổ sung nhau: khung không tự đóng vòng và gen được ghép đúng chiều.",
+    "Sốc nhiệt 42 °C làm màng tế bào khả biến tạm thời cho ADN đi vào (biến nạp). Gen kháng ampicillin trên plasmid giúp chọn tế bào đã nhận plasmid.",
+    "Vùng cắt của pUC19 nằm giữa gen lacZα: plasmid không có gen tạo enzyme phân giải X-gal (khuẩn lạc xanh); gen chèn vào làm hỏng lacZα (khuẩn lạc trắng)."
+  ],
+  "cong_thuc": [
+    "Plasmid tái tổ hợp = khung 2665 bp + gen 726 bp = 3391 bp",
+    "Tỉ lệ phân tử gen : khung tối ưu khoảng 3 : 1",
+    "Hiệu suất biến nạp = số khuẩn lạc / µg ADN"
+  ],
+  "bo_phan": [
+    {
+      "ma": "hop_da_enzyme",
+      "ten": "Hộp đá enzyme",
+      "chuc_nang": "Giữ plasmid pUC19, EcoRI, BamHI, HindIII, ADN ligaza T4 và đệm ở 0 – 4 °C để enzyme không mất hoạt tính."
+    },
+    {
+      "ma": "khoi_u",
+      "ten": "Khối ủ cắt – nối",
+      "chuc_nang": "Ủ phản ứng cắt ở 37 °C và phản ứng nối ở 16 – 22 °C."
+    },
+    {
+      "ma": "be_soc_nhiet",
+      "ten": "Bể sốc nhiệt 42 °C",
+      "chuc_nang": "Sốc nhiệt tế bào khả biến 30 – 60 giây để ADN đi qua màng."
+    },
+    {
+      "ma": "dia_chon_loc",
+      "ten": "Đĩa LB + ampicillin + X-gal",
+      "chuc_nang": "Chỉ tế bào mang plasmid mọc được; màu khuẩn lạc cho biết có gen ghép (trắng) hay không (xanh)."
+    },
+    {
+      "ma": "man_hinh",
+      "ten": "Màn hình quy trình",
+      "chuc_nang": "Chọn enzyme, điều kiện nối, biến nạp, cấy; hiển thị sơ đồ plasmid và điện di dự kiến."
+    }
+  ],
+  "thong_so": [
+    {
+      "ten": "Kích thước plasmid pUC19",
+      "gia_tri": "2686 bp",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.addgene.org/50005/"
+    },
+    {
+      "ten": "Trình tự nhận biết EcoRI",
+      "gia_tri": "G^AATTC (đầu dính 5′-AATT)",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.neb.com/en-us/products/r3101-ecori-hf"
+    },
+    {
+      "ten": "Trình tự nhận biết BamHI",
+      "gia_tri": "G^GATCC (đầu dính 5′-GATC)",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.neb.com/en-us/products/r3136-bamhi-hf"
+    },
+    {
+      "ten": "Sốc nhiệt biến nạp",
+      "gia_tri": "42 °C trong 30 – 45 giây, sau đó đặt lại vào đá 2 phút",
+      "loai": "quy trình",
+      "nguon": "https://www.neb.com/en-us/protocols/2012/05/21/high-efficiency-transformation-protocol-c2987h"
+    },
+    {
+      "ten": "Nhiệt độ và thời gian nối bằng T4 ligaza (đầu dính)",
+      "gia_tri": "16 °C qua đêm hoặc 20 – 25 °C trong 10 phút – 1 giờ",
+      "loai": "quy trình",
+      "nguon": "https://www.neb.com/en-us/protocols/0001/01/01/dna-ligation-with-t4-dna-ligase-m0202"
+    },
+    {
+      "ten": "Chiều dài gen GFP",
+      "gia_tri": "720 bp (239 axit amin + mã kết thúc)",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.fpbase.org/protein/egfp/"
+    }
+  ],
+  "quy_trinh": [
+    {
+      "ma": "chuan_bi",
+      "ten": "Chuẩn bị thể truyền và gen",
+      "viec": "Lấy plasmid pUC19 và sản phẩm PCR gen GFP (đã kiểm tra bằng điện di) đặt vào hộp đá; chọn enzyme cắt cho plasmid và cho gen.",
+      "ly_do": "Gen phải có sẵn vị trí cắt ở hai đầu (do đuôi mồi PCR) trùng với vị trí cắt trên plasmid.",
+      "loi": "Chọn enzyme cho gen khác enzyme cho plasmid: đầu dính không khớp, không ghép được."
+    },
+    {
+      "ma": "cat_gioi_han",
+      "ten": "Cắt bằng enzyme giới hạn",
+      "viec": "Ủ plasmid và gen với EcoRI + BamHI trong đệm cắt ở 37 °C 1 giờ.",
+      "ly_do": "Tạo khung plasmid 2665 bp và gen 726 bp có hai đầu dính khác nhau.",
+      "loi": "Quên cắt plasmid: gen không chèn vào được, chỉ có plasmid ban đầu (toàn khuẩn lạc xanh)."
+    },
+    {
+      "ma": "noi_ligaza",
+      "ten": "Nối bằng ADN ligaza",
+      "viec": "Trộn gen : khung theo tỉ lệ 3 : 1, thêm ligaza T4 và đệm (có ATP, Mg²⁺), ủ 16 °C.",
+      "ly_do": "Ligaza tạo liên kết phosphodiester nối các đầu dính đã bắt cặp thành plasmid vòng tái tổ hợp.",
+      "loi": "Quên ligaza hoặc ủ 37 °C: đầu dính không giữ được, gần như không có plasmid vòng."
+    },
+    {
+      "ma": "bien_nap",
+      "ten": "Biến nạp vào E. coli",
+      "viec": "Cho hỗn hợp nối vào tế bào khả biến giữ trên đá, sốc nhiệt 42 °C 45 giây, đặt lại vào đá, thêm LB, lắc 37 °C 1 giờ.",
+      "ly_do": "Sốc nhiệt giúp ADN qua màng; 1 giờ phục hồi để tế bào biểu hiện gen kháng ampicillin.",
+      "loi": "Bỏ sốc nhiệt hoặc để tế bào ấm: rất ít tế bào nhận plasmid."
+    },
+    {
+      "ma": "cay_chon_loc",
+      "ten": "Cấy và chọn dòng",
+      "viec": "Trải lên đĩa LB + ampicillin + X-gal/IPTG, ủ 37 °C qua đêm, đếm khuẩn lạc trắng và xanh.",
+      "ly_do": "Ampicillin chọn tế bào có plasmid; X-gal phân biệt có gen ghép (trắng) hay không (xanh).",
+      "loi": "Đĩa thiếu ampicillin: vi khuẩn mọc kín, không chọn được dòng."
+    },
+    {
+      "ma": "kiem_tra_dong",
+      "ten": "Kiểm tra dòng tái tổ hợp",
+      "viec": "Chọn khuẩn lạc trắng, tách plasmid, cắt bằng EcoRI + BamHI, điện di cạnh thang chuẩn.",
+      "ly_do": "Hai băng 2665 bp và 726 bp chứng tỏ plasmid mang đúng gen GFP.",
+      "loi": "Chọn nhầm khuẩn lạc xanh: chỉ thấy một băng 2686 bp."
+    }
+  ],
+  "an_toan": [
+    "Chỉ dùng chủng E. coli K-12 / DH5α không gây bệnh (BSL-1); thao tác cạnh đèn cồn hoặc trong tủ an toàn sinh học.",
+    "Đĩa, ống, đầu côn đã tiếp xúc vi khuẩn bỏ vào túi hấp hủy, hấp 121 °C trước khi thải.",
+    "Enzyme luôn giữ trên đá, lấy ra dùng xong cất ngay vào tủ −20 °C.",
+    "Ampicillin là kháng sinh: đeo găng tay, không để dính da."
+  ],
+  "thuat_ngu": [
+    {
+      "tu": "Enzyme cắt giới hạn (restrictaza)",
+      "nghia": "Enzyme cắt ADN tại trình tự nhận biết đặc hiệu, thường tạo đầu dính."
+    },
+    {
+      "tu": "ADN ligaza",
+      "nghia": "Enzyme nối hai đoạn ADN bằng liên kết phosphodiester."
+    },
+    {
+      "tu": "Thể truyền (vector)",
+      "nghia": "Phân tử ADN (plasmid, virus) mang gen cần chuyển vào tế bào nhận và nhân lên trong đó."
+    },
+    {
+      "tu": "Biến nạp",
+      "nghia": "Quá trình tế bào vi khuẩn nhận ADN từ môi trường."
+    },
+    {
+      "tu": "Chọn dòng xanh – trắng",
+      "nghia": "Dùng X-gal để phân biệt khuẩn lạc có gen chèn (trắng) và không có gen chèn (xanh)."
+    }
+  ],
+  "cau_hoi_on_tap": [
+    "Vì sao phải dùng cùng một loại enzyme cắt giới hạn để cắt thể truyền và gen cần chuyển?",
+    "Nếu quên bổ sung ADN ligaza, kết quả trên đĩa chọn lọc sẽ như thế nào? Giải thích.",
+    "Gen kháng ampicillin và gen lacZα trên plasmid pUC19 có vai trò gì trong chọn dòng?",
+    "Plasmid của khuẩn lạc trắng cắt bằng EcoRI + BamHI cho những băng nào trên gel? Vì sao?"
+  ]
+}

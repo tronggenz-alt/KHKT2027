@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -12,73 +12,226 @@ using Debug = UnityEngine.Debug;
 
 namespace Khkt.Input
 {
+    public enum TrackingEngine
+    {
+        MediaPipe,
+        YuNet
+    }
+
     /// <summary>
-    /// Điều khiển góc nhìn bằng ĐẦU qua webcam (thử nghiệm):
-    ///  • F8 bật / tắt: Unity tự chạy tools/head_tracker.py (Python + OpenCV, nhận diện mặt YuNet) ở chế độ ngầm và tắt khi
-    ///    thoát; chương trình đó gửi góc quay đầu, khoảng cách (qua độ rộng hai mắt) qua UDP cổng 9051.
-    ///  • Vừa bật (hoặc F9): nhìn thẳng màn hình 2 giây để căn tư thế giữa.
-    ///  • Kiểu lái: quay đầu quá ~30° thì góc nhìn xoay liên tục về phía đó, tới 50° xoay nhanh nhất; nhìn thẳng thì dừng.
-    ///  • Ghé gần webcam thì phóng to (thu hẹp góc nhìn camera, tối đa ×2,5), ngả ra xa thì nhìn rộng ra (tới ×0,8).
-    ///  • Mất mặt quá 0,4 s (quay đi, che mặt): thôi xoay, zoom từ từ về bình thường.
-    /// DesktopViewer cộng Turn vào góc xoay và chia góc nhìn camera cho Zoom, cùng chỗ với chuột và tay cầm.
+    /// Điều khiển góc nhìn bằng ĐẦU, TRÒNG MẮT và khoảng cách qua webcam (MediaPipe / YuNet):
+    ///  • F8 bật / tắt: Unity tự chạy Python ở chế độ ngầm và tắt khi thoát.
+    ///  • F9 căn giữa: nhìn thẳng màn hình 2 giây để ghi nhớ tư thế giữa (yaw, pitch, roll, distance, gaze).
+    ///  • Quay đầu quá ~30° thì góc nhìn xoay liên tục về phía đó; nhìn thẳng thì dừng.
+    ///  • Ghé gần webcam thì phóng to (Zoom), ngả ra xa thì nhìn rộng ra.
+    ///  • Mất mặt quá 0.4 s: thôi xoay, zoom từ từ về 1.0.
+    ///  • Tự động lùi về YuNet (head_tracker.py) nếu MediaPipe gặp lỗi hoặc máy chưa cài gói mediapipe.
     /// </summary>
     public class HeadTracking : MonoBehaviour
     {
         public static HeadTracking Instance { get; private set; }
 
+        public TrackingEngine engine = TrackingEngine.MediaPipe;
         public int port = 9051;
-        [Tooltip("Đường dẫn head_tracker.py; để trống thì tự tìm (thư mục tools cạnh project / cạnh file .exe)")]
+        [Tooltip("Chế độ hiệu năng MediaPipe: muot, can-bang, tiet-kiem")]
+        public string cheDo = "muot";
+        [Tooltip("Đường dẫn thực thi Python; để trống = tự động dò (.venv, python3, python, py)")]
+        public string pythonPath = "";
+        [Tooltip("Đường dẫn file script; để trống = tự tìm trong thư mục tools")]
         public string scriptPath = "";
-        public int cameraIndex = 0;
-        [Header("Kiểu lái")]
-        [Tooltip("Quay đầu dưới góc này thì không xoay (người dùng: 12° nhiễu quá, nâng lên 30°)")]
+        [Tooltip("Webcam: 'may' = tự chọn webcam máy tính (chặn điện thoại), hoặc số thứ tự")]
+        public string cameraIndex = "may";
+
+        public enum FeelPreset
+        {
+            Nhe,    // Nhẹ: vùng chết rộng (35°), xoay đầm, lọc mạnh (smoothingRate 6), lũy thừa 2.0
+            Vua,    // Vừa (mặc định): vùng chết 30°, xoay cân bằng, lọc vừa (smoothingRate 12), lũy thừa 1.5
+            Nhanh   // Nhanh: vùng chết hẹp (20°), xoay nhạy, lọc nhẹ (smoothingRate 20), lũy thừa 1.2
+        }
+
+        [Header("Bộ cảm giác")]
+        [Tooltip("Bộ cảm giác: Nhe (lọc mạnh, xoay đầm), Vua (cân bằng), Nhanh (nhạy bén)")]
+        public FeelPreset feelPreset = FeelPreset.Vua;
+        public float powerCurve = 1.5f;
+
+        [Header("Kiểu lái (Yaw)")]
+        [Tooltip("Quay đầu dưới góc này thì không xoay (vùng chết 30°)")]
         public float deadZoneDeg = 30f;
         public float fullTurnDeg = 50f;
-        [Header("Zoom")]
+        public float smoothingRate = 12f;
+
+        [Header("Cúi / ngẩng (Pitch)")]
+        [Tooltip("Cho phép nhìn lên / xuống khi cúi / ngẩng đầu (tắt mặc định)")]
+        public bool enablePitchLook = false;
+        public float pitchDeadZoneDeg = 15f;
+        public float fullPitchDeg = 35f;
+        public float pitchTurnSpeed = 40f;
+
+        [Header("Zoom & Khoảng cách")]
         [Tooltip("Lệch khoảng cách (tỉ lệ) chưa tính là ghé gần / ngả xa")]
         public float zoomDeadZone = 0.07f;
         public float maxZoom = 2.5f;
         public float minZoom = 0.8f;
         public float calibrateSeconds = 2f;
 
-        // ---- kết quả cho DesktopViewer ----
-        /// <summary>Đang điều khiển bằng đầu (đã bật, đã căn).</summary>
+        // ---- Kết quả tĩnh dùng chung ----
         public static bool Active => Instance != null && Instance.running && Instance.calibrated;
-        /// <summary>Tốc độ xoay -1..1 (dương: sang phải).</summary>
         public static float Turn => Instance != null ? Instance.turn : 0f;
-        /// <summary>Hệ số phóng to (1: bình thường); góc nhìn camera = góc gốc / Zoom.</summary>
+        public static float PitchTurn => Instance != null && Instance.enablePitchLook ? Instance.pitchTurn : 0f;
         public static float Zoom => Instance != null ? Instance.zoom : 1f;
+        public static float Pitch => Instance != null ? Instance.pitchVal : 0f;
+        public static float Roll => Instance != null ? Instance.rollVal : 0f;
+        public static float DistanceCm => Instance != null ? Instance.distCmVal : 0f;
+        public static Vector2 Gaze => Instance != null ? Instance.gazeVal : Vector2.zero;
+        public static bool Blink => Instance != null && Instance.blinkVal;
+        public static string Engine => Instance != null ? Instance.currentEngine.ToString() : "-";
+        public static HandData[] LatestHands => Instance != null ? Instance.latestHands : null;
+
+        public static event Action<HandData[], double> OnHandsReceived;
+        public static event Action<Packet> OnPacketReceived;
+        /// <summary>Chớp mắt hai lần nhanh (Python chạy với --chop-2-lan gửi "xac_nhan": 1).</summary>
+        public static event Action OnDoubleBlink;
+
         public string Status { get; private set; } = "Tắt";
 
         [Serializable]
-        class Packet { public int ok; public float yaw; public float pitch; public float e; public double t; }
+        public class HandData
+        {
+            public string ben;
+            public int ok;
+            public float x;
+            public float y;
+            public float co;
+            public int pinch;
+            public string cu_chi;
+            public float tin;
+        }
+
+        [Serializable]
+        public class Packet
+        {
+            public int ok;
+            public float yaw;
+            public float pitch;
+            public float e;
+            public double t;
+            public string nguon;
+            public float roll;
+            public float dist_cm;
+            public float gaze_x;
+            public float gaze_y;
+            public int blink_l;
+            public int blink_r;
+            public float fps;
+            public int xac_nhan;
+            public string loi;   // Python báo lỗi webcam: khong_thay_webcam_may, da_chan_camera_dien_thoai, webcam_khong_len_hinh...
+            public HandData[] hands;
+
+            /// <summary>
+            /// Về mặc định trước khi đọc gói mới: JsonUtility.FromJsonOverwrite giữ nguyên trường vắng mặt, nên gói YuNet
+            /// (không có dist_cm, hands) sẽ mang theo số cũ của gói MediaPipe trước đó nếu không xóa.
+            /// </summary>
+            public void Reset()
+            {
+                ok = 0; yaw = pitch = e = roll = dist_cm = gaze_x = gaze_y = fps = 0f;
+                t = 0; nguon = null; blink_l = blink_r = xac_nhan = 0; hands = null; loi = null;
+            }
+
+            public void CopyFrom(Packet o)
+            {
+                ok = o.ok; yaw = o.yaw; pitch = o.pitch; e = o.e; t = o.t; nguon = o.nguon; roll = o.roll;
+                dist_cm = o.dist_cm; gaze_x = o.gaze_x; gaze_y = o.gaze_y; blink_l = o.blink_l; blink_r = o.blink_r;
+                fps = o.fps; xac_nhan = o.xac_nhan; hands = o.hands; loi = o.loi;  // mảng hands mỗi gói là mảng mới, dùng chung an toàn
+            }
+        }
 
         Process proc;
         UdpClient udp;
         Thread thread;
         volatile bool listening;
         readonly object gate = new object();
-        Packet last;
-        float lastRecv = -10f;          // Time.realtimeSinceStartup của gói có mặt gần nhất (đặt ở luồng chính)
+
+        // Bộ đệm và tái sử dụng bộ nhớ (GC Alloc = 0)
+        readonly byte[] recvBuffer = new byte[2048];
+        Packet packetWork = new Packet();
+        Packet pPrev = new Packet();
+        Packet pCurr = new Packet();
+        readonly Packet pMain = new Packet();  // bản sao của luồng chính: luồng nghe có thể ghi đè pCurr bất cứ lúc nào
+        bool hasPrev = false;
+        bool hasCurr = false;
+
+        float lastRecv = -10f;
         int packetsSeen, packetsRead;
         volatile int packetsIn;
         bool running, calibrated;
         float calStart;
-        double sumYaw, sumE;
+        double sumYaw, sumPitch, sumRoll, sumE, sumDist, sumGazeX, sumGazeY;
         int calN;
-        float neutralYaw, neutralE;
-        float turn, zoom = 1f, zoomTarget = 1f;
-        string lastError;
 
-        /// <summary>Số gói đã nhận (kể cả gói không thấy mặt) và chương trình nhận diện còn chạy: để kiểm thử.</summary>
+        float neutralYaw, neutralPitch, neutralRoll, neutralE, neutralDist;
+        Vector2 neutralGaze;
+
+        float turn, pitchTurn, zoom = 1f, zoomTarget = 1f;
+        float pitchVal, rollVal, distCmVal;
+        Vector2 gazeVal;
+        bool blinkVal;
+        HandData[] latestHands;
+        string lastError;
+        string lastWebcamError;
+        TrackingEngine currentEngine;
+        bool processPaused = false;
+
         public int PacketsSeen => packetsSeen;
         public bool ProcessRunning => proc != null && !proc.HasExited;
         public string LastError => lastError;
-
-        /// <summary>Đang có mặt trong khung hình (gói ok gần đây).</summary>
         public bool FaceVisible => Time.realtimeSinceStartup - lastRecv < 0.4f;
 
-        void Awake() => Instance = this;
+        void Awake()
+        {
+            Instance = this;
+            currentEngine = engine;
+            ApplyFeelPreset(feelPreset);
+        }
+
+        void OnValidate()
+        {
+            ApplyFeelPreset(feelPreset);
+        }
+
+        public void ApplyFeelPreset(FeelPreset preset)
+        {
+            feelPreset = preset;
+            switch (preset)
+            {
+                case FeelPreset.Nhe:
+                    deadZoneDeg = 35f;
+                    fullTurnDeg = 55f;
+                    smoothingRate = 6f;
+                    powerCurve = 2.0f;
+                    pitchDeadZoneDeg = 18f;
+                    fullPitchDeg = 40f;
+                    zoomDeadZone = 0.10f;
+                    break;
+                case FeelPreset.Vua:
+                    deadZoneDeg = 30f;
+                    fullTurnDeg = 50f;
+                    smoothingRate = 12f;
+                    powerCurve = 1.5f;
+                    pitchDeadZoneDeg = 15f;
+                    fullPitchDeg = 35f;
+                    zoomDeadZone = 0.07f;
+                    break;
+                case FeelPreset.Nhanh:
+                    deadZoneDeg = 20f;
+                    fullTurnDeg = 40f;
+                    smoothingRate = 20f;
+                    powerCurve = 1.2f;
+                    pitchDeadZoneDeg = 10f;
+                    fullPitchDeg = 30f;
+                    zoomDeadZone = 0.05f;
+                    break;
+            }
+        }
 
         void Update()
         {
@@ -86,156 +239,403 @@ namespace Khkt.Input
             if (kb != null && kb.f8Key.wasPressedThisFrame) Toggle();
             if (kb != null && kb.f9Key.wasPressedThisFrame && running) StartCalibration();
 
-            if (running && proc != null && proc.HasExited)
+            if (running && proc != null && proc.HasExited && !processPaused)
             {
-                Say($"Điều khiển bằng đầu: chương trình nhận diện đã dừng{(string.IsNullOrEmpty(lastError) ? "" : " – " + lastError)}");
-                Stop();
+                // Nếu MediaPipe gặp sự cố, tự động lùi về YuNet
+                if (currentEngine == TrackingEngine.MediaPipe)
+                {
+                    Say($"MediaPipe dừng ({lastError ?? "lỗi"}), tự động chuyển về YuNet (head_tracker.py)...");
+                    currentEngine = TrackingEngine.YuNet;
+                    if (!Launch(currentEngine))
+                    {
+                        Stop();
+                    }
+                }
+                else
+                {
+                    Say($"Điều khiển bằng đầu: chương trình đã dừng{(string.IsNullOrEmpty(lastError) ? "" : " – " + lastError)}");
+                    Stop();
+                }
             }
+
             Packet p = null;
             lock (gate)
             {
-                if (packetsIn != packetsRead) { p = last; packetsRead = packetsIn; }
+                if (packetsIn != packetsRead)
+                {
+                    pMain.CopyFrom(pCurr);
+                    p = pMain;
+                    packetsRead = packetsIn;
+                }
             }
-            if (p != null && running) Feed(p);
 
-            if (!FaceVisible || !calibrated) turn = 0;
-            if (!running || !FaceVisible) zoomTarget = 1f;
-            zoom = Mathf.MoveTowards(zoom, zoomTarget, (running && FaceVisible ? 3f : 1f) * Time.unscaledDeltaTime);
+            if (p != null && running)
+            {
+                Feed(p);
+            }
+
+            // Làm mượt góc xoay và zoom theo thời gian (độc lập FPS máy)
+            float dt = Time.unscaledDeltaTime;
+            float smoothFactor = 1f - Mathf.Exp(-smoothingRate * dt);
+
+            if (!FaceVisible || !calibrated)
+            {
+                turn = Mathf.MoveTowards(turn, 0f, 4f * dt);
+                pitchTurn = Mathf.MoveTowards(pitchTurn, 0f, 4f * dt);
+            }
+            if (!running || !FaceVisible)
+            {
+                zoomTarget = 1f;
+            }
+
+            zoom = Mathf.MoveTowards(zoom, zoomTarget, (running && FaceVisible ? 3f : 1f) * dt);
         }
 
-        void Feed(Packet p) => Feed(p.ok != 0, p.yaw, p.e);
-
-        /// <summary>Xử lý một mẫu (luồng chính). Kiểm thử gọi trực tiếp, không cần webcam.</summary>
-        public void Feed(bool ok, float yaw, float e)
+        public void Feed(Packet p)
         {
             if (!running) return;
             packetsSeen++;
-            if (!ok || e <= 0)
+
+            // Chuyển dữ liệu tay cho MediaPipeHandSource
+            latestHands = p.hands;
+            if (p.hands != null)
             {
-                turn = 0;  // chương trình nhận diện báo không thấy mặt: thôi xoay ngay
+                OnHandsReceived?.Invoke(p.hands, p.t);
+            }
+            OnPacketReceived?.Invoke(p);
+            if (p.xac_nhan != 0) OnDoubleBlink?.Invoke();
+
+            if (!string.IsNullOrEmpty(p.loi) && p.loi != lastWebcamError)
+            {
+                lastWebcamError = p.loi;
+                Status = "Lỗi webcam";
+                Say(p.loi == "webcam_khong_len_hinh" ? "Webcam không lên hình: kiểm tra quyền Camera (Cài đặt hệ thống → Quyền riêng tư) hoặc ứng dụng khác đang dùng webcam"
+                    : p.loi == "da_chan_camera_dien_thoai" ? "Đã chặn camera điện thoại: cắm / bật webcam của máy tính"
+                    : p.loi == "khong_thay_webcam_may" ? "Không tìm thấy webcam của máy tính" : "Lỗi webcam: " + p.loi);
+            }
+            if (p.ok == 0 || (p.e <= 0 && p.dist_cm <= 0))
+            {
+                turn = 0;
+                pitchTurn = 0;
                 return;
             }
+
             lastRecv = Time.realtimeSinceStartup;
+
+            // Đọc các thông số bổ sung
+            pitchVal = p.pitch;
+            rollVal = p.roll;
+            distCmVal = p.dist_cm;
+            gazeVal = new Vector2(p.gaze_x, p.gaze_y);
+            blinkVal = (p.blink_l != 0 || p.blink_r != 0);
+
             if (!calibrated)
             {
-                sumYaw += yaw;
-                sumE += e;
+                sumYaw += p.yaw;
+                sumPitch += p.pitch;
+                sumRoll += p.roll;
+                sumE += p.e;
+                sumDist += p.dist_cm;
+                sumGazeX += p.gaze_x;
+                sumGazeY += p.gaze_y;
                 calN++;
+
                 if (Time.realtimeSinceStartup - calStart >= calibrateSeconds && calN >= 10)
                 {
                     neutralYaw = (float)(sumYaw / calN);
+                    neutralPitch = (float)(sumPitch / calN);
+                    neutralRoll = (float)(sumRoll / calN);
                     neutralE = (float)(sumE / calN);
+                    neutralDist = (float)(sumDist / calN);
+                    neutralGaze = new Vector2((float)(sumGazeX / calN), (float)(sumGazeY / calN));
+
                     calibrated = true;
                     Status = "Đang điều khiển";
-                    Say("Đã căn: quay đầu trái / phải để xoay, ghé gần màn hình để phóng to, ngả ra xa để nhìn rộng (F9: căn lại, F8: tắt)");
+                    Say($"Đã căn ({currentEngine}): quay đầu để xoay, ghé gần để phóng to, ngả xa để nhìn rộng (F9 căn lại, F8 tắt)");
                 }
                 return;
             }
-            float dy = Mathf.DeltaAngle(neutralYaw, yaw);
-            float mag = Mathf.Clamp01((Mathf.Abs(dy) - deadZoneDeg) / Mathf.Max(1f, fullTurnDeg - deadZoneDeg));
-            turn = Mathf.Sign(dy) * Mathf.Pow(mag, 1.5f);
-            float r = e / Mathf.Max(1e-5f, neutralE);
-            if (r > 1f + zoomDeadZone) zoomTarget = 1f + Mathf.Clamp01((r - 1f - zoomDeadZone) / 0.4f) * (maxZoom - 1f);
-            else if (r < 1f - zoomDeadZone) zoomTarget = 1f - Mathf.Clamp01((1f - zoomDeadZone - r) / 0.25f) * (1f - minZoom);
-            else zoomTarget = 1f;
+
+            // 1. Tính toán góc lái Yaw
+            float dy = Mathf.DeltaAngle(neutralYaw, p.yaw);
+            float magY = Mathf.Clamp01((Mathf.Abs(dy) - deadZoneDeg) / Mathf.Max(1f, fullTurnDeg - deadZoneDeg));
+            float targetTurn = Mathf.Sign(dy) * Mathf.Pow(magY, powerCurve);
+            turn = Mathf.Lerp(turn, targetTurn, 1f - Mathf.Exp(-smoothingRate * Time.unscaledDeltaTime));
+
+            // 2. Tính toán nhìn lên/xuống Pitch (nếu bật)
+            if (enablePitchLook)
+            {
+                float dp = p.pitch - neutralPitch;
+                float magP = Mathf.Clamp01((Mathf.Abs(dp) - pitchDeadZoneDeg) / Mathf.Max(1f, fullPitchDeg - pitchDeadZoneDeg));
+                pitchTurn = Mathf.Sign(dp) * magP * pitchTurnSpeed;
+            }
+            else
+            {
+                pitchTurn = 0f;
+            }
+
+            // 3. Tính toán Zoom (ưu tiên khoảng cách cm của MediaPipe, fallback sang tỉ lệ e)
+            float ratio = 1f;
+            if (p.dist_cm > 0 && neutralDist > 0)
+            {
+                // Càng lại gần webcam thì dist_cm càng nhỏ -> ratio càng lớn -> phóng to
+                ratio = neutralDist / Mathf.Max(10f, p.dist_cm);
+            }
+            else if (p.e > 0 && neutralE > 0)
+            {
+                ratio = p.e / Mathf.Max(1e-5f, neutralE);
+            }
+
+            if (ratio > 1f + zoomDeadZone)
+            {
+                zoomTarget = 1f + Mathf.Clamp01((ratio - 1f - zoomDeadZone) / 0.4f) * (maxZoom - 1f);
+            }
+            else if (ratio < 1f - zoomDeadZone)
+            {
+                zoomTarget = 1f - Mathf.Clamp01((1f - zoomDeadZone - ratio) / 0.25f) * (1f - minZoom);
+            }
+            else
+            {
+                zoomTarget = 1f;
+            }
         }
 
         public void Toggle()
         {
-            if (running) { Stop(); Say("Điều khiển bằng đầu: TẮT"); }
-            else Begin();
+            if (running)
+            {
+                PauseTracking();
+                Say("Điều khiển bằng đầu: TẮT (tạm dừng)");
+            }
+            else
+            {
+                ResumeTracking();
+            }
         }
 
-        /// <summary>Bật: mở cổng UDP, chạy chương trình nhận diện (launch = false: chỉ nghe, dùng khi tự chạy Python hoặc kiểm thử).</summary>
+        void PauseTracking()
+        {
+            running = false;
+            calibrated = false;
+            turn = 0f;
+            pitchTurn = 0f;
+            zoomTarget = 1f;
+            Status = "Tắt";
+
+            if (currentEngine == TrackingEngine.MediaPipe)
+            {
+                // Gửi lệnh tạm dừng qua UDP cổng điều khiển (9052): tắt webcam nhưng giữ mô hình, bật lại < 1 s
+                GuiLenhDieuKhien("{\"lenh\":\"tam_dung\"}");
+                processPaused = true;
+            }
+            else
+            {
+                // head_tracker.py (YuNet) không nghe lệnh điều khiển: tắt hẳn để nhả webcam
+                try { if (proc != null && !proc.HasExited) proc.Kill(); } catch { }
+                proc = null;
+                processPaused = false;
+            }
+        }
+
+        void ResumeTracking()
+        {
+            if (processPaused && proc != null && !proc.HasExited)
+            {
+                // Bật lại tức thì (< 1s)
+                GuiLenhDieuKhien("{\"lenh\":\"tiep_tuc\"}");
+                processPaused = false;
+                running = true;
+                StartCalibration();
+                Say($"Điều khiển bằng đầu: BẬT LẠI ({currentEngine})");
+                return;
+            }
+
+            currentEngine = engine;
+            Begin(launch: true);
+        }
+
+        void GuiLenhDieuKhien(string jsonCmd)
+        {
+            try
+            {
+                using (var client = new UdpClient())
+                {
+                    byte[] data = Encoding.UTF8.GetBytes(jsonCmd);
+                    client.Send(data, data.Length, "127.0.0.1", port + 1);
+                }
+            }
+            catch { }
+        }
+
         public void Begin(bool launch = true)
         {
             if (running) return;
             lastError = null;
-            try
+
+            if (udp == null)
             {
-                udp = new UdpClient(new IPEndPoint(IPAddress.Loopback, port));
+                try
+                {
+                    udp = new UdpClient(new IPEndPoint(IPAddress.Loopback, port));
+                }
+                catch (Exception ex)
+                {
+                    Say($"Điều khiển bằng đầu: không mở được cổng {port} ({ex.Message})");
+                    return;
+                }
             }
-            catch (Exception ex)
-            {
-                Say($"Điều khiển bằng đầu: không mở được cổng {port} ({ex.Message})");
-                return;
-            }
+
             listening = true;
-            thread = new Thread(Listen) { IsBackground = true, Name = "KhktHeadTracking" };
-            thread.Start();
+            if (thread == null || !thread.IsAlive)
+            {
+                thread = new Thread(Listen) { IsBackground = true, Name = "KhktHeadTracking" };
+                thread.Start();
+            }
+
             running = true;
-            if (launch && !Launch())
+            processPaused = false;
+
+            if (launch && !Launch(currentEngine))
             {
                 Stop();
                 return;
             }
+
             StartCalibration();
         }
 
         public void StartCalibration()
         {
             calibrated = false;
+            lastWebcamError = null;
             calStart = Time.realtimeSinceStartup;
-            sumYaw = sumE = 0;
+            sumYaw = sumPitch = sumRoll = sumE = sumDist = sumGazeX = sumGazeY = 0;
             calN = 0;
             turn = 0;
+            pitchTurn = 0;
             zoomTarget = 1f;
             Status = "Đang căn";
-            Say("Điều khiển bằng đầu: BẬT – nhìn thẳng vào màn hình 2 giây để căn tư thế giữa");
+            Say($"Điều khiển bằng đầu ({currentEngine}): BẬT – nhìn thẳng màn hình 2 giây để căn tư thế");
         }
 
-        bool Launch()
+        bool Launch(TrackingEngine eng)
         {
-            string script = FindScript();
-            if (script == null)
+            string pyExe = FindPython();
+            if (string.IsNullOrEmpty(pyExe))
             {
-                Say("Điều khiển bằng đầu: không tìm thấy tools/head_tracker.py");
+                Say("Không tìm thấy Python (.venv/bin/python, python3, python)");
                 return false;
             }
-            foreach (var exe in new[] { "python", "py" })
+
+            string script = FindScript(eng);
+            if (string.IsNullOrEmpty(script))
+            {
+                Say($"Không tìm thấy file script cho {eng}");
+                return false;
+            }
+
+            try
+            {
+                string args = $"\"{script}\" --cong {port} --cam {cameraIndex} --cha {Process.GetCurrentProcess().Id}";
+                // head_tracker.py (YuNet) không có --che-do: truyền vào làm argparse báo lỗi và đường lùi về YuNet luôn hỏng
+                if (eng == TrackingEngine.MediaPipe) args += $" --che-do {cheDo}";
+                var psi = new ProcessStartInfo(pyExe, args)
+                {
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = true,
+                    StandardErrorEncoding = Encoding.UTF8,
+                    StandardOutputEncoding = Encoding.UTF8,
+                    WorkingDirectory = Path.GetDirectoryName(script),
+                };
+                psi.EnvironmentVariables["PYTHONIOENCODING"] = "utf-8";
+
+                proc = Process.Start(psi);
+                if (proc == null) return false;
+
+                proc.ErrorDataReceived += (_, a) =>
+                {
+                    if (!string.IsNullOrWhiteSpace(a.Data) && !a.Data.Contains("WARN") && !a.Data.Contains("INFO"))
+                    {
+                        lastError = a.Data.Trim();
+                    }
+                };
+                proc.OutputDataReceived += (_, _) => { };
+                proc.BeginErrorReadLine();
+                proc.BeginOutputReadLine();
+
+                Debug.Log($"[KHKT-HEAD] Đã chạy {pyExe} {args}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                lastError = ex.Message;
+                return false;
+            }
+        }
+
+        string FindPython()
+        {
+            if (!string.IsNullOrEmpty(pythonPath) && File.Exists(pythonPath))
+                return Path.GetFullPath(pythonPath);
+
+            var env = System.Environment.GetEnvironmentVariable("KHKT_PYTHON");
+            if (!string.IsNullOrEmpty(env) && File.Exists(env))
+                return Path.GetFullPath(env);
+
+            // Tìm trong repo/.venv
+            var root = Path.GetFullPath(Path.Combine(Application.dataPath, "..", ".."));
+            string venvMac = Path.Combine(root, ".venv", "bin", "python");
+            if (File.Exists(venvMac)) return venvMac;
+
+            string venvWin = Path.Combine(root, ".venv", "Scripts", "python.exe");
+            if (File.Exists(venvWin)) return venvWin;
+
+            // Tìm cạnh file .exe
+            string exeDir = AppDomain.CurrentDomain.BaseDirectory;
+            if (!string.IsNullOrEmpty(exeDir))
+            {
+                string exePyMac = Path.Combine(exeDir, ".venv", "bin", "python");
+                if (File.Exists(exePyMac)) return exePyMac;
+                string exePyWin = Path.Combine(exeDir, ".venv", "Scripts", "python.exe");
+                if (File.Exists(exePyWin)) return exePyWin;
+            }
+
+            // Thử lệnh hệ thống
+            foreach (var cmd in new[] { "python3", "python", "py" })
             {
                 try
                 {
-                    var psi = new ProcessStartInfo(exe, $"\"{script}\" --cong {port} --cam {cameraIndex} --cha {Process.GetCurrentProcess().Id}")
+                    using (var p = Process.Start(new ProcessStartInfo(cmd, "--version") { UseShellExecute = false, CreateNoWindow = true }))
                     {
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                        RedirectStandardError = true,
-                        RedirectStandardOutput = true,
-                        StandardErrorEncoding = Encoding.UTF8,
-                        StandardOutputEncoding = Encoding.UTF8,
-                        WorkingDirectory = Path.GetDirectoryName(script),
-                    };
-                    psi.EnvironmentVariables["PYTHONIOENCODING"] = "utf-8";
-                    proc = Process.Start(psi);
-                    if (proc == null) continue;
-                    proc.ErrorDataReceived += (_, a) => { if (!string.IsNullOrWhiteSpace(a.Data) && !a.Data.Contains("WARN")) lastError = a.Data.Trim(); };
-                    proc.OutputDataReceived += (_, a) => { };
-                    proc.BeginErrorReadLine();
-                    proc.BeginOutputReadLine();
-                    Debug.Log($"[KHKT-DAU] Chạy {exe} {script}");
-                    return true;
+                        p.WaitForExit(1000);
+                        if (p.ExitCode == 0) return cmd;
+                    }
                 }
-                catch (Exception ex)
-                {
-                    lastError = ex.Message;
-                }
+                catch { }
             }
-            Say("Điều khiển bằng đầu: không chạy được Python (cần cài Python + opencv-python)");
-            return false;
+
+            return null;
         }
 
-        string FindScript()
+        string FindScript(TrackingEngine eng)
         {
-            var tried = new System.Collections.Generic.List<string>();
-            if (!string.IsNullOrEmpty(scriptPath)) tried.Add(scriptPath);
-            var env = System.Environment.GetEnvironmentVariable("KHKT_HEAD_TRACKER");
-            if (!string.IsNullOrEmpty(env)) tried.Add(env);
-            // trình soạn thảo: <repo>/Phong thi nghiem ao/Assets → <repo>/tools; bản .exe: <thư mục exe>/PhongThiNghiemAo_Data → <thư mục exe>/tools
-            tried.Add(Path.Combine(Application.dataPath, "..", "..", "tools", "head_tracker.py"));
-            tried.Add(Path.Combine(Application.dataPath, "..", "tools", "head_tracker.py"));
+            string scriptName = (eng == TrackingEngine.MediaPipe) ? "mediapipe_tracker.py" : "head_tracker.py";
+            if (!string.IsNullOrEmpty(scriptPath) && File.Exists(scriptPath))
+                return Path.GetFullPath(scriptPath);
+
+            var tried = new System.Collections.Generic.List<string>
+            {
+                Path.Combine(Application.dataPath, "..", "..", "tools", scriptName),
+                Path.Combine(Application.dataPath, "..", "tools", scriptName),
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tools", scriptName)
+            };
+
             foreach (var p in tried)
+            {
                 if (File.Exists(p)) return Path.GetFullPath(p);
+            }
             return null;
         }
 
@@ -247,17 +647,35 @@ namespace Khkt.Input
                 try
                 {
                     var data = udp.Receive(ref any);
-                    var p = JsonUtility.FromJson<Packet>(Encoding.UTF8.GetString(data));
-                    if (p == null) continue;
+                    if (data == null || data.Length == 0) continue;
+
+                    string json = Encoding.UTF8.GetString(data);
+                    // Dùng FromJsonOverwrite để tái sử dụng instance (đặt lại trước để trường vắng mặt không giữ số cũ)
+                    packetWork.Reset();
+                    JsonUtility.FromJsonOverwrite(json, packetWork);
+
                     lock (gate)
                     {
-                        last = p;
+                        // Swap buffer
+                        var temp = pPrev;
+                        pPrev = pCurr;
+                        pCurr = packetWork;
+                        packetWork = temp;
+
+                        hasPrev = hasCurr;
+                        hasCurr = true;
                         packetsIn++;
                     }
                 }
-                catch (SocketException) { if (!listening) break; }
-                catch (ObjectDisposedException) { break; }
-                catch (Exception) { }
+                catch (SocketException)
+                {
+                    if (!listening) break;
+                }
+                catch (ObjectDisposedException)
+                {
+                    break;
+                }
+                catch { }
             }
         }
 
@@ -266,12 +684,20 @@ namespace Khkt.Input
             running = false;
             calibrated = false;
             listening = false;
+            processPaused = false;
             turn = 0;
+            pitchTurn = 0;
             zoomTarget = 1f;
             Status = "Tắt";
+
             try { udp?.Close(); } catch { }
             udp = null;
-            try { if (proc != null && !proc.HasExited) proc.Kill(); } catch { }
+
+            try
+            {
+                if (proc != null && !proc.HasExited) proc.Kill();
+            }
+            catch { }
             proc = null;
             thread = null;
         }
@@ -282,7 +708,7 @@ namespace Khkt.Input
         static void Say(string s)
         {
             LabMessages.Say(s);
-            Debug.Log("[KHKT-DAU] " + s);
+            Debug.Log("[KHKT-HEAD] " + s);
         }
     }
 }

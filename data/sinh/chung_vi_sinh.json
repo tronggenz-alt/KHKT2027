@@ -1,0 +1,165 @@
+{
+  "phien_ban": 1,
+  "he_so_nhiem": {
+    "mo_ta": "Các hệ số xác suất nhiễm mẫu môi trường trong ContaminationRules (C# thuần)",
+    "mo_phong": true,
+    "thoi_gian_mo_nap_moi_giay": 0.002,
+    "trong_tu_an_toan_chay_tot": 0.02,
+    "kinh_cao_hon_20cm": 4.5,
+    "luoi_hut_bi_chan": 3.0,
+    "chua_rua_tay": 2.5,
+    "khong_bao_ho": 1.8,
+    "mat_ban_chua_sat_khuan": 3.0,
+    "dung_cu_chua_tiet_trung": 15.0,
+    "gan_ngon_lua_den_con": 0.15
+  },
+  "chung_vi_sinh": [
+    {
+      "ma": "e_coli_k12",
+      "ten_khoa_hoc": "Escherichia coli strain K-12 substr. MG1655",
+      "ten": "Vi khuẩn E. coli K-12",
+      "cap_an_toan": "BSL-1",
+      "gram": "am",
+      "hinh_dang": "que",
+      "thoi_gian_the_he_phut": 20.0,
+      "nhiet_do_toi_uu_c": 37.0,
+      "khuan_lac": {
+        "mau": [
+          245,
+          240,
+          225
+        ],
+        "be_mat": "bong",
+        "bo": "tron",
+        "duong_kinh_24h_mm": 1.8
+      },
+      "nguon": "https://www.atcc.org/products/25922"
+    },
+    {
+      "ma": "s_cerevisiae",
+      "ten_khoa_hoc": "Saccharomyces cerevisiae",
+      "ten": "Nấm men bánh mì / bia",
+      "cap_an_toan": "BSL-1",
+      "gram": "khong_ap_dung",
+      "hinh_dang": "nam_men",
+      "thoi_gian_the_he_phut": 90.0,
+      "nhiet_do_toi_uu_c": 30.0,
+      "khuan_lac": {
+        "mau": [
+          255,
+          250,
+          240
+        ],
+        "be_mat": "loi",
+        "bo": "tron",
+        "duong_kinh_24h_mm": 2.2
+      },
+      "nguon": "https://www.atcc.org/products/204508"
+    },
+    {
+      "ma": "l_bulgaricus",
+      "ten_khoa_hoc": "Lactobacillus delbrueckii subsp. bulgaricus",
+      "ten": "Vi khuẩn lên men sữa chua Bulgaricus",
+      "cap_an_toan": "BSL-1",
+      "gram": "duong",
+      "hinh_dang": "que",
+      "thoi_gian_the_he_phut": 55.0,
+      "nhiet_do_toi_uu_c": 42.0,
+      "khuan_lac": {
+        "mau": [
+          240,
+          235,
+          215
+        ],
+        "be_mat": "kho_nhan",
+        "bo": "khong_deu",
+        "duong_kinh_24h_mm": 1.0
+      },
+      "nguon": "https://www.atcc.org/products/11842"
+    },
+    {
+      "ma": "s_thermophilus",
+      "ten_khoa_hoc": "Streptococcus thermophilus",
+      "ten": "Liên cầu khuẩn sữa chua chịu nhiệt",
+      "cap_an_toan": "BSL-1",
+      "gram": "duong",
+      "hinh_dang": "cau",
+      "thoi_gian_the_he_phut": 35.0,
+      "nhiet_do_toi_uu_c": 42.0,
+      "khuan_lac": {
+        "mau": [
+          250,
+          245,
+          230
+        ],
+        "be_mat": "bong",
+        "bo": "tron",
+        "duong_kinh_24h_mm": 1.2
+      },
+      "nguon": "https://www.atcc.org/products/19258"
+    },
+    {
+      "ma": "b_subtilis_168",
+      "ten_khoa_hoc": "Bacillus subtilis subsp. subtilis strain 168",
+      "ten": "Trực khuẩn cỏ Bacillus subtilis",
+      "cap_an_toan": "BSL-1",
+      "gram": "duong",
+      "hinh_dang": "que",
+      "thoi_gian_the_he_phut": 26.0,
+      "nhiet_do_toi_uu_c": 37.0,
+      "khuan_lac": {
+        "mau": [
+          235,
+          230,
+          210
+        ],
+        "be_mat": "kho_nhan",
+        "bo": "khong_deu",
+        "duong_kinh_24h_mm": 3.0
+      },
+      "nguon": "https://www.atcc.org/products/23857"
+    },
+    {
+      "ma": "tap_nam_moc",
+      "ten_khoa_hoc": "Aspergillus sp. (environmental isolate BSL-1)",
+      "ten": "Bào tử nấm mốc không khí",
+      "cap_an_toan": "BSL-1",
+      "gram": "khong_ap_dung",
+      "hinh_dang": "nam_men",
+      "thoi_gian_the_he_phut": 180.0,
+      "nhiet_do_toi_uu_c": 28.0,
+      "khuan_lac": {
+        "mau": [
+          60,
+          90,
+          60
+        ],
+        "be_mat": "kho_nhan",
+        "bo": "khong_deu",
+        "duong_kinh_24h_mm": 4.5
+      },
+      "mo_phong": true
+    },
+    {
+      "ma": "tap_bacillus_khong_khi",
+      "ten_khoa_hoc": "Bacillus megaterium (environmental isolate BSL-1)",
+      "ten": "Trực khuẩn bụi không khí",
+      "cap_an_toan": "BSL-1",
+      "gram": "duong",
+      "hinh_dang": "que",
+      "thoi_gian_the_he_phut": 45.0,
+      "nhiet_do_toi_uu_c": 30.0,
+      "khuan_lac": {
+        "mau": [
+          220,
+          210,
+          180
+        ],
+        "be_mat": "kho_nhan",
+        "bo": "khong_deu",
+        "duong_kinh_24h_mm": 2.8
+      },
+      "mo_phong": true
+    }
+  ]
+}

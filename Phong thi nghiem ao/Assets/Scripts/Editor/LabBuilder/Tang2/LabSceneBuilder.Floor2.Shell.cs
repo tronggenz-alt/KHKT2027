@@ -21,9 +21,9 @@ namespace Khkt.EditorTools
             Slab(g, "Sàn phòng thí nghiệm sinh học", 0, 0, LabX, LabZ, floorLab);
             Slab(g, "Sàn phòng vi sinh", LabX, F2_ZoneSplitZ, StoreX, LabZ, t2EpoxyClean);
             Slab(g, "Sàn kho sinh phẩm", LabX, 0, StoreX, F2_ZoneSplitZ, t2FloorKho);
-            Slab(g, "Sàn hành lang tầng 2", 0, CorridorZ, StoreX, 0, floorHall);
-            Slab(g, "Sàn phòng sinh học phân tử", 0, WingZ, RoomSplitX, CorridorZ, t2FloorPhanTu);
-            Slab(g, "Sàn nhà kính", RoomSplitX, WingZ, StoreX, CorridorZ, t2FloorNhaKinh);
+            Slab(g, "Sàn hành lang tầng 2", 0, F2_CorridorZ, StoreX, 0, t2FloorCorridor);
+            Slab(g, "Sàn phòng sinh học phân tử", 0, WingZ, RoomSplitX, F2_CorridorZ, t2FloorPhanTu);
+            Slab(g, "Sàn nhà kính", RoomSplitX, WingZ, StoreX, F2_CorridorZ, t2FloorNhaKinh);
             // Mặt mái hiên tầng 1 nhìn từ cửa sổ tầng 2 (phủ lên trần hiên tầng 1, mặt trên cao hơn 4 cm)
             Slab(g, "Mặt mái hiên", -0.1f, LabZ + 0.13f, StoreX + 0.1f, BalconyZ + 0.1f, facade, -0.1f, -0.06f, false);
 
@@ -36,12 +36,12 @@ namespace Khkt.EditorTools
 
             // ===== 2. Trần và mái =====
             float c0 = F2_H, c1 = F2_H + 0.1f, r1 = F2_H + 0.35f;
-            Slab(g, "Trần dãy bắc", -0.1f, CorridorZ - 0.1f, StoreX + 0.1f, LabZ + 0.1f, ceilingMat, c0, c1, false);
-            Slab(g, "Trần phòng sinh học phân tử", -0.1f, WingZ - 0.1f, RoomSplitX - 0.1f, CorridorZ - 0.1f, ceilingMat, c0, c1, false);
-            Slab(g, "Mái dãy bắc", -0.35f, CorridorZ - 0.1f, StoreX + 0.1f, LabZ + 0.35f, facade, c1, r1);
-            Slab(g, "Mái phòng sinh học phân tử", -0.35f, WingZ - 0.35f, RoomSplitX - 0.1f, CorridorZ - 0.1f, facade, c1, r1);
-            Slab(g, "Diềm mái dãy bắc", -0.4f, CorridorZ - 0.1f, StoreX + 0.1f, LabZ + 0.4f, accentDark, r1, r1 + 0.08f, false);
-            Slab(g, "Diềm mái phân tử", -0.4f, WingZ - 0.4f, RoomSplitX - 0.1f, CorridorZ - 0.1f, accentDark, r1, r1 + 0.08f, false);
+            Slab(g, "Trần dãy bắc", -0.1f, F2_CorridorZ - 0.1f, StoreX + 0.1f, LabZ + 0.1f, ceilingMat, c0, c1, false);
+            Slab(g, "Trần phòng sinh học phân tử", -0.1f, WingZ - 0.1f, RoomSplitX - 0.1f, F2_CorridorZ - 0.1f, ceilingMat, c0, c1, false);
+            Slab(g, "Mái dãy bắc", -0.35f, F2_CorridorZ - 0.1f, StoreX + 0.1f, LabZ + 0.35f, facade, c1, r1);
+            Slab(g, "Mái phòng sinh học phân tử", -0.35f, WingZ - 0.35f, RoomSplitX - 0.1f, F2_CorridorZ - 0.1f, facade, c1, r1);
+            Slab(g, "Diềm mái dãy bắc", -0.4f, F2_CorridorZ - 0.1f, StoreX + 0.1f, LabZ + 0.4f, accentDark, r1, r1 + 0.08f, false);
+            Slab(g, "Diềm mái phân tử", -0.4f, WingZ - 0.4f, RoomSplitX - 0.1f, F2_CorridorZ - 0.1f, accentDark, r1, r1 + 0.08f, false);
             GreenhouseRoof(g);
 
             // ===== 3. Tường =====
@@ -63,23 +63,24 @@ namespace Khkt.EditorTools
             Wall(g, "Vách buồng đệm (tây)", false, F2_AirlockX, F2_ZoneSplitZ + 0.1f, F2_AirlockZ - 0.1f, paint, null, 0, WinF(8.0f, 9.6f, 0.9f, 2.4f));
             Wall(g, "Vách buồng đệm (bắc)", true, F2_AirlockZ, F2_AirlockX - 0.1f, StoreX - 0.1f, paint, null, 0,
                 Auto(25.6f, 26.7f, +1, ZoneMap.MicroBio, ZoneMap.MicroBio, leafMicroBio, glass: true));
-            // Tường đông dãy bắc (x = 27): cửa hành lang → sảnh thang, kho → lối đi lõi thang, buồng đệm → hành lang đông
+            // Tường đông dãy bắc (x = 27): đoạn mở rộng hành lang z = -3.6..-2.2 xây kín, đoạn z = -2.2..15 nối lõi thang/kho/vi sinh
+            Wall(g, "Tường đông đầu hành lang tầng 2", false, StoreX, F2_CorridorZ + 0.1f, CorridorZ + 0.1f, paint, facade, +1);
             Wall(g, "Tường đông tầng 2", false, StoreX, CorridorZ + 0.1f, LabZ - 0.1f, paint, paint, +1,
                 Auto(-1.9f, -0.3f, +1, ZoneMap.CorridorT2, ZoneMap.Stairs, leafBioLab),
                 Auto(3.0f, 4.4f, +1, ZoneMap.BioStore, ZoneMap.Stairs, leafBioStore),
                 Auto(8.2f, 9.4f, +1, ZoneMap.MicroBio, ZoneMap.EastCorridor, leafMicroBio));
-            // Tường hành lang phía nam (z = −2,2): cửa phòng sinh học phân tử, cửa nhà kính, kính mờ
-            Wall(g, "Tường hành lang tầng 2", true, CorridorZ, -0.1f, StoreX + 0.1f, paint, paint, -1,
+            // Tường hành lang phía nam (z = −3,6): cửa phòng sinh học phân tử, cửa nhà kính, kính mờ
+            Wall(g, "Tường hành lang tầng 2", true, F2_CorridorZ, -0.1f, StoreX + 0.1f, paint, paint, -1,
                 Auto(5.9f, 7.5f, +1, ZoneMap.Molecular, ZoneMap.CorridorT2, leafMolecular), WinF(1.0f, 4.8f, 1.0f, 2.6f), WinF(8.6f, 12.6f, 1.0f, 2.6f),
                 Auto(19.0f, 20.6f, +1, ZoneMap.Greenhouse, ZoneMap.CorridorT2, leafGreenhouse), WinF(14.4f, 18.2f, 1.0f, 2.6f), WinF(21.6f, 26.0f, 1.0f, 2.6f));
             // Phòng sinh học phân tử: tường ngoài nam, tường tây (kéo tới đầu hành lang, có cửa sổ cuối hành lang)
             Wall(g, "Tường nam phòng phân tử", true, WingZ, -0.1f, RoomSplitX + 0.1f, paint, facade, -1,
                 Win(1.2f, 3.6f, 0.9f), Win(4.8f, 7.2f, 0.9f), Win(8.4f, 10.8f, 0.9f));
-            Wall(g, "Tường tây dãy nam tầng 2", false, 0f, WingZ + 0.1f, -0.1f, paint, facade, -1, Win(-1.8f, -0.4f, 1.0f));
-            Wall(g, "Tường ngăn phân tử – nhà kính", false, RoomSplitX, WingZ + 0.1f, CorridorZ - 0.1f, paint, null, 0);
+            Wall(g, "Tường tây dãy nam tầng 2", false, 0f, WingZ + 0.1f, -0.1f, paint, facade, -1, Win(-2.5f, -1.1f, 1.0f));
+            Wall(g, "Tường ngăn phân tử – nhà kính", false, RoomSplitX, WingZ + 0.1f, F2_CorridorZ - 0.1f, paint, null, 0);
             // Nhà kính: vách kính toàn phần phía nam và phía đông
             CurtainWall(g, "Vách kính nam nhà kính", true, WingZ, RoomSplitX + 0.1f, StoreX + 0.1f);
-            CurtainWall(g, "Vách kính đông nhà kính", false, StoreX, WingZ + 0.1f, CorridorZ - 0.1f);
+            CurtainWall(g, "Vách kính đông nhà kính", false, StoreX, WingZ + 0.1f, F2_CorridorZ - 0.1f);
         }
 
         /// <summary>Vách kính toàn phần: bậu bê tông thấp, kính cường lực, đố nhôm mỗi ~1,35 m, thanh ngang ở 2,3 m.</summary>
@@ -103,7 +104,7 @@ namespace Khkt.EditorTools
         static void GreenhouseRoof(Transform p)
         {
             var g = Group("Mái kính nhà kính", p);
-            float x0 = RoomSplitX, x1 = StoreX, zS = WingZ, zN = CorridorZ, zR = (zS + zN) / 2;
+            float x0 = RoomSplitX, x1 = StoreX, zS = WingZ, zN = F2_CorridorZ, zR = (zS + zN) / 2;
             float yE = F2_H, yR = GreenhouseRidgeY, run = zR - zS, rise = yR - yE;
             float len = Mathf.Sqrt(run * run + rise * rise), ang = Mathf.Atan2(rise, run) * Mathf.Rad2Deg;
             float cx = (x0 + x1) / 2, wx = x1 - x0;

@@ -1,0 +1,1167 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Phòng Lab Sinh học VERA · Tầng 2 · Quản lý phòng thí nghiệm</title>
+<style>
+:root {
+  --bg: #f4f6f8; --panel: #ffffff; --panel-2: #f8fafb; --line: #e2e7ec; --text: #17202a; --muted: #5d6b78;
+  --accent: #0f7c86; --accent-soft: #e2f3f4; --good: #1f8a4c; --good-soft: #e3f4ea; --warn: #b26b00; --warn-soft: #fbefd9;
+  --bad: #c2362f; --bad-soft: #fbe5e3; --shadow: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.08); --on-accent: #ffffff;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1418; --panel: #172026; --panel-2: #1c272e; --line: #2a3740; --text: #e6edf2; --muted: #93a3b0;
+    --accent: #3cc2cc; --accent-soft: #143238; --good: #4cc983; --good-soft: #15301f; --warn: #f0b04a; --warn-soft: #362a12;
+    --bad: #ff7b72; --bad-soft: #3a1a18; --shadow: none; --on-accent: #062a2e;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1418; --panel: #172026; --panel-2: #1c272e; --line: #2a3740; --text: #e6edf2; --muted: #93a3b0;
+  --accent: #3cc2cc; --accent-soft: #143238; --good: #4cc983; --good-soft: #15301f; --warn: #f0b04a; --warn-soft: #362a12;
+  --bad: #ff7b72; --bad-soft: #3a1a18; --shadow: none; --on-accent: #062a2e;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; max-width: 100%; overflow-x: hidden; background: var(--bg); color: var(--text); font: 14px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif; }
+header { background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 10; }
+.bar { max-width: 1240px; margin: 0 auto; padding: 12px 16px 0; }
+.title { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.title-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.title h1 { font-size: 18px; margin: 0; font-weight: 650; letter-spacing: -.01em; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px; font-size: 12px;
+        background: var(--panel-2); border: 1px solid var(--line); color: var(--muted); }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.chip.on .dot { background: var(--good); } .chip.off .dot { background: var(--bad); }
+nav { display: flex; gap: 2px; margin-top: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+nav button { border: 0; background: none; color: var(--muted); padding: 9px 12px; font: inherit; font-weight: 550; cursor: pointer;
+             border-bottom: 2px solid transparent; white-space: nowrap; }
+nav button.active { color: var(--accent); border-color: var(--accent); }
+main { max-width: 1240px; margin: 0 auto; padding: 16px; }
+section { display: none; } section.active { display: block; }
+h2 { font-size: 15px; margin: 0 0 10px; font-weight: 650; }
+h3 { font-size: 13.5px; margin: 12px 0 6px; font-weight: 600; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; box-shadow: var(--shadow); margin-bottom: 16px; max-width: 100%; }
+.grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); margin-bottom: 16px; }
+.stat { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; box-shadow: var(--shadow); }
+.stat .k { color: var(--muted); font-size: 12px; } .stat .v { font-size: 24px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.stat.warn .v { color: var(--warn); } .stat.bad .v { color: var(--bad); } .stat.good .v { color: var(--good); }
+.two { display: grid; gap: 16px; grid-template-columns: 1.25fr 1fr; }
+@media (max-width: 900px) { .two { grid-template-columns: 1fr; } }
+.toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+input, select, textarea { font: inherit; color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 7px; padding: 7px 10px; max-width: 100%; }
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+input[type=number] { width: 84px; } textarea { width: 100%; resize: vertical; }
+button.b, a.b { font: inherit; border: 1px solid var(--line); background: var(--panel); color: var(--text); border-radius: 7px; padding: 6px 12px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+button.b:hover, a.b:hover { border-color: var(--accent); }
+button.b.primary, a.b.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
+button.b.danger:hover { border-color: var(--bad); color: var(--bad); }
+button.b.sm, a.b.sm { padding: 3px 8px; font-size: 12px; }
+button.b:disabled { opacity: .55; cursor: default; }
+.tablewrap { overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+th { font-size: 12px; color: var(--muted); font-weight: 600; background: var(--panel-2); position: sticky; top: 0; }
+td.num, th.num { text-align: right; }
+tr.low td { background: var(--warn-soft); }
+tr.over td { background: var(--bad-soft); }
+.badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; background: var(--panel-2); color: var(--muted); border: 1px solid var(--line); white-space: nowrap; }
+.badge.good { background: var(--good-soft); color: var(--good); border-color: transparent; }
+.badge.warn { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
+.badge.bad { background: var(--bad-soft); color: var(--bad); border-color: transparent; }
+.badge.info { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+.muted { color: var(--muted); } .small { font-size: 12px; } .mono { font-family: Consolas, ui-monospace, monospace; }
+.toast { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: var(--bg); padding: 10px 14px; border-radius: 8px;
+         opacity: 0; transition: opacity .2s; pointer-events: none; max-width: 400px; z-index: 50; }
+.toast.show { opacity: .95; }
+.banner-err { display: none; align-items: center; justify-content: space-between; gap: 10px; background: var(--bad-soft); color: var(--bad); border: 1px solid var(--bad); border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; flex-wrap: wrap; }
+.banner-err.show { display: flex; }
+.svg-wrap { width: 100%; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: var(--panel-2); padding: 8px; }
+.svg-wrap svg { width: 100%; height: auto; display: block; }
+.steps { counter-reset: s; list-style: none; padding: 0; margin: 0; }
+.steps li { counter-increment: s; padding: 7px 10px 7px 36px; position: relative; border-bottom: 1px solid var(--line); }
+.steps li::before { content: counter(s); position: absolute; left: 6px; top: 7px; width: 20px; height: 20px; border-radius: 50%;
+                    background: var(--accent-soft); color: var(--accent); font-size: 11px; font-weight: 700; display: grid; place-items: center; }
+.week-grid { display: grid; grid-template-columns: 74px repeat(7, minmax(92px, 1fr)); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; min-width: 720px; }
+.week-cell { padding: 6px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); font-size: 12px; min-height: 44px; cursor: pointer; }
+.week-cell.head { background: var(--panel-2); font-weight: 600; text-align: center; cursor: default; min-height: auto; }
+.week-cell.booked { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+@media (max-width: 600px) {
+  main, .bar { padding-left: 16px; padding-right: 16px; }
+  .grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="title">
+      <div class="title-left">
+        <a class="b sm" href="/">← Quản lý chung</a>
+        <h1>Phòng Lab Sinh học VERA · Tầng 2 (BSL-1)</h1>
+        <span class="chip on" id="connChip"><span class="dot"></span><span id="connText">Đang đồng bộ</span></span>
+      </div>
+      <div class="title-left">
+        <button class="b sm" id="themeBtn" type="button">Sáng / Tối</button>
+      </div>
+    </div>
+    <nav id="tabs">
+      <button data-tab="tong-quan" class="active">Tổng quan tầng 2</button>
+      <button data-tab="dung-cu">Dụng cụ &amp; thiết bị</button>
+      <button data-tab="muon-tra">Mượn – trả</button>
+      <button data-tab="sinh-pham">Kho sinh phẩm</button>
+      <button data-tab="nhiet-do">Nhiệt độ tủ</button>
+      <button data-tab="dat-lich">Đặt lịch</button>
+      <button data-tab="ket-qua">Kết quả thí nghiệm</button>
+      <button data-tab="su-co">Sự cố an toàn</button>
+      <button data-tab="bao-tri">Bảo trì – hiệu chuẩn</button>
+      <button data-tab="huong-dan">Hướng dẫn dụng cụ</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="banner-err" id="errBanner">
+    <span id="errText">Không kết nối được máy chủ</span>
+    <button class="b sm" onclick="refreshCurrentTab()">Thử lại</button>
+  </div>
+
+  <!-- 1. TỔNG QUAN TẦNG 2 -->
+  <section id="tong-quan" class="active">
+    <div class="grid" id="ovStats"></div>
+    <div class="two">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:8px">
+          <h2 style="margin:0">Bản đồ mặt bằng Tầng 2 (Hành lang 3,6 m · 8 khu)</h2>
+          <span class="small muted">● Xanh: Sẵn sàng · ● Lam: Đang chạy · ● Vàng: Cần bảo trì · ● Đỏ: Cảnh báo</span>
+        </div>
+        <div class="svg-wrap" id="floorMapWrap"></div>
+        <div id="machineDetailCard" class="card" style="margin-top:10px;margin-bottom:0;background:var(--panel-2)">
+          <span class="muted small">Bấm vào một chấm thiết bị trên bản đồ mặt bằng để xem trạng thái thời gian thực.</span>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <h2>Nhiệt độ tủ bảo quản (24 giờ qua)</h2>
+          <div id="ovFridgeNow" style="margin-bottom:8px"></div>
+          <div class="svg-wrap" id="ovTempSvg"></div>
+        </div>
+        <div class="card">
+          <h2>Lịch phòng &amp; thiết bị hôm nay</h2>
+          <div id="ovSchedule"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. DỤNG CỤ & THIẾT BỊ -->
+  <section id="dung-cu">
+    <div class="card">
+      <div class="toolbar">
+        <input id="dcSearch" placeholder="Tìm không dấu theo tên, mã, vị trí (vd: kinh hien vi, micropipet)…" style="flex:1;min-width:200px">
+        <select id="dcRoom">
+          <option value="">Mọi phòng tầng 2</option>
+          <option value="phong_sinh">Phòng thí nghiệm sinh học</option>
+          <option value="phong_vi_sinh">Phòng vi sinh</option>
+          <option value="kho_sinh_pham">Kho sinh phẩm</option>
+          <option value="phong_sinh_phan_tu">Phòng sinh học phân tử</option>
+          <option value="nha_kinh">Nhà kính thực vật</option>
+          <option value="hanh_lang_t2">Hành lang tầng 2 (3,6 m)</option>
+        </select>
+        <select id="dcCat"><option value="">Mọi phân loại</option></select>
+        <span class="muted small" id="dcCountInfo"></span>
+      </div>
+      <div class="tablewrap"><table id="dcTable"></table></div>
+    </div>
+  </section>
+
+  <!-- 3. MƯỢN – TRẢ -->
+  <section id="muon-tra">
+    <div class="card">
+      <h2>Tạo phiếu mượn dụng cụ</h2>
+      <div class="toolbar">
+        <select id="mtTool" style="min-width:210px"></select>
+        <input id="mtQty" type="number" min="1" value="1" placeholder="SL">
+        <input id="mtUser" placeholder="Người mượn (vd: Nguyễn Văn A)">
+        <input id="mtClass" placeholder="Lớp (vd: 10A1)" style="width:105px">
+        <input id="mtDue" type="datetime-local">
+        <button class="b primary" onclick="createLoan()">Lập phiếu mượn</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Danh sách phiếu mượn – trả</h2>
+      <div class="tablewrap"><table id="mtTable"></table></div>
+    </div>
+  </section>
+
+  <!-- 4. KHO SINH PHẨM -->
+  <section id="sinh-pham">
+    <div class="card">
+      <h2>Thêm sinh phẩm mới (chỉ cho phép cấp an toàn BSL-1)</h2>
+      <div class="toolbar">
+        <input id="spName" placeholder="Tên sinh phẩm / chủng / hóa chất">
+        <select id="spType">
+          <option value="hoa_chat_sinh">Hóa chất sinh học</option>
+          <option value="moi_truong">Môi trường nuôi cấy</option>
+          <option value="chung_vi_sinh">Chủng vi sinh dạy học</option>
+          <option value="kit">Kit sinh học phân tử</option>
+          <option value="mau">Mẫu vật thực hành</option>
+          <option value="giong">Giống lên men</option>
+        </select>
+        <select id="spCabinet">
+          <option value="tu_mat_4">Tủ mát 4 °C</option>
+          <option value="tu_dong_am20">Tủ đông −20 °C</option>
+          <option value="ke">Kệ kho thường</option>
+        </select>
+        <input id="spShelf" placeholder="Ngăn (vd: Ngăn 2)" style="width:110px" value="Ngăn 1">
+        <input id="spQty" type="number" min="0" step="0.5" value="10" placeholder="SL">
+        <input id="spUnit" placeholder="Đơn vị" style="width:80px" value="lọ">
+        <input id="spBsl" placeholder="Cấp an toàn" style="width:86px" value="BSL-1">
+        <button class="b primary" onclick="addBioStock()">Thêm vào kho</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="toolbar">
+        <input id="spSearch" placeholder="Tìm sinh phẩm, lô, ngăn tủ…" style="flex:1;min-width:180px">
+        <select id="spFilterCab">
+          <option value="">Mọi vị trí bảo quản</option>
+          <option value="tu_mat_4">Tủ mát 4 °C</option>
+          <option value="tu_dong_am20">Tủ đông −20 °C</option>
+          <option value="ke">Kệ kho</option>
+        </select>
+      </div>
+      <div class="tablewrap"><table id="spTable"></table></div>
+    </div>
+  </section>
+
+  <!-- 5. NHIỆT ĐỘ TỦ -->
+  <section id="nhiet-do">
+    <div class="two">
+      <div class="card">
+        <div class="toolbar" style="justify-content:space-between">
+          <h2 style="margin:0">Đồ thị giám sát nhiệt độ (Ngưỡng: 4 ± 2 °C &amp; −20 ± 5 °C)</h2>
+          <button class="b sm" onclick="recordSampleTemp()">+ Ghi mẫu nhiệt độ hiện tại</button>
+        </div>
+        <div class="svg-wrap" id="tempDetailSvg"></div>
+      </div>
+      <div class="card">
+        <h2>Nhật ký đo &amp; Cảnh báo mở cửa lâu</h2>
+        <div class="tablewrap"><table id="tempTable"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. ĐẶT LỊCH MÁY / PHÒNG -->
+  <section id="dat-lich">
+    <div class="card">
+      <h2>Đặt lịch phòng / thiết bị</h2>
+      <div class="toolbar">
+        <select id="dlTarget">
+          <option value="phong_sinh">Phòng thí nghiệm sinh học</option>
+          <option value="phong_vi_sinh">Phòng vi sinh</option>
+          <option value="phong_sinh_phan_tu">Phòng sinh học phân tử</option>
+          <option value="nha_kinh">Nhà kính thực vật</option>
+          <option value="may_pcr">Máy luân nhiệt PCR</option>
+          <option value="noi_hap">Nồi hấp tiệt trùng</option>
+          <option value="tu_an_toan_sinh_hoc">Tủ an toàn sinh học cấp II</option>
+        </select>
+        <input id="dlUser" placeholder="Giáo viên / Học sinh" value="GV Sinh học">
+        <input id="dlClass" placeholder="Lớp" value="10A1" style="width:90px">
+        <input id="dlStart" type="datetime-local">
+        <input id="dlEnd" type="datetime-local">
+        <input id="dlPurpose" placeholder="Mục đích (vd: Bài tế bào biểu bì hành)" style="flex:1;min-width:180px">
+        <button class="b primary" onclick="createBooking()">Đặt lịch</button>
+      </div>
+      <div id="dlConflictBox" class="banner-err"></div>
+    </div>
+    <div class="card">
+      <h2>Lưới lịch tuần (7 ngày × ca thực hành — bấm ô trống để điền nhanh)</h2>
+      <div class="tablewrap"><div id="weekGrid" class="week-grid"></div></div>
+      <h3 style="margin-top:16px">Danh sách lịch đã đặt</h3>
+      <div class="tablewrap"><table id="dlTable"></table></div>
+    </div>
+  </section>
+
+  <!-- 7. KẾT QUẢ THÍ NGHIỆM -->
+  <section id="ket-qua">
+    <div class="card">
+      <div class="toolbar">
+        <input id="kqClass" placeholder="Lọc lớp (vd: 10A1)" style="width:130px">
+        <select id="kqExp"><option value="">Mọi bài thí nghiệm (15 bài)</option></select>
+        <input id="kqStudent" placeholder="Tìm học sinh…" style="flex:1;min-width:160px">
+        <button class="b" onclick="loadResults()">Lọc</button>
+        <a class="b primary" href="/lab/sinh/ket-qua.csv" download="ket_qua_sinh_hoc.csv">Xuất CSV (UTF-8 BOM)</a>
+      </div>
+      <div class="tablewrap"><table id="kqTable"></table></div>
+    </div>
+    <div class="card" id="kqDetailCard" style="display:none"></div>
+  </section>
+
+  <!-- 8. SỰ CỐ AN TOÀN SINH HỌC -->
+  <section id="su-co">
+    <div class="card">
+      <h2>Báo cáo sự cố an toàn sinh học mới</h2>
+      <div class="toolbar">
+        <select id="scRoom">
+          <option value="phong_sinh">Phòng thí nghiệm sinh học</option>
+          <option value="phong_vi_sinh">Phòng vi sinh</option>
+          <option value="phong_sinh_phan_tu">Phòng sinh học phân tử</option>
+          <option value="kho_sinh_pham">Kho sinh phẩm</option>
+          <option value="nha_kinh">Nhà kính thực vật</option>
+        </select>
+        <input id="scType" placeholder="Loại sự cố (vd: vo_lam_kinh, tran_do_vi_sinh)" value="tran_do_vi_sinh">
+        <select id="scSeverity">
+          <option value="canh_bao">Cảnh báo</option>
+          <option value="nghiem_trong">Nghiêm trọng</option>
+          <option value="thong_tin">Thông tin</option>
+        </select>
+        <input id="scDesc" placeholder="Mô tả chi tiết sự cố…" style="flex:1;min-width:200px">
+        <button class="b primary" onclick="createIncident()">Ghi nhận sự cố</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="toolbar">
+        <select id="scFilterState" onchange="loadIncidents()">
+          <option value="">Mọi trạng thái</option>
+          <option value="moi">Mới phát sinh</option>
+          <option value="dang_xu_ly">Đang xử lý</option>
+          <option value="da_xu_ly">Đã xử lý xong</option>
+        </select>
+      </div>
+      <div class="tablewrap"><table id="scTable"></table></div>
+    </div>
+  </section>
+
+  <!-- 9. BẢO TRÌ – HIỆU CHUẨN -->
+  <section id="bao-tri">
+    <div class="card">
+      <h2>Ghi nhận bảo trì / hiệu chuẩn thiết bị</h2>
+      <div class="toolbar">
+        <select id="btTool" style="min-width:210px"></select>
+        <select id="btType">
+          <option value="hieu_chuan">Hiệu chuẩn định kỳ</option>
+          <option value="bao_tri">Bảo trì – vệ sinh</option>
+          <option value="sua_chua">Sửa chữa khắc phục</option>
+        </select>
+        <input id="btPerson" placeholder="Người thực hiện" value="Kỹ thuật viên">
+        <input id="btResult" placeholder="Kết quả (vd: Đạt chuẩn ISO 8655)" value="Đạt chuẩn">
+        <input id="btNote" placeholder="Ghi chú" style="flex:1;min-width:150px">
+        <button class="b primary" onclick="createMaintenance()">Lưu hồ sơ</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Lịch sử bảo trì &amp; Thiết bị sắp tới hạn hiệu chuẩn</h2>
+      <div class="tablewrap"><table id="btTable"></table></div>
+    </div>
+  </section>
+
+  <!-- 10. HƯỚNG DẪN DỤNG CỤ -->
+  <section id="huong-dan">
+    <div class="card">
+      <div class="toolbar">
+        <select id="hdSelect" style="flex:1;min-width:240px" onchange="loadToolGuide(this.value)"></select>
+        <span class="muted small">108 dụng cụ &amp; 15 bài thí nghiệm Sinh học THPT (kèm nguồn tham khảo hoặc nhãn mô phỏng).</span>
+      </div>
+      <div id="hdContent"></div>
+    </div>
+    <div class="card">
+      <h2>Danh mục 15 bài thí nghiệm Sinh học (Lớp 10 – 11 – 12)</h2>
+      <div class="tablewrap"><table id="hdExpTable"></table></div>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const viNum = new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 2 });
+let currentTab = localStorage.getItem('khkt_sinh_tab') || 'tong-quan';
+let allToolsCache = [];
+let allExpCache = [];
+let machineStatusCache = [];
+
+function fmtNum(v) {
+  if (v === null || v === undefined || isNaN(v)) return '—';
+  return viNum.format(Number(v));
+}
+
+function fmtDate(unixSec) {
+  if (!unixSec) return '—';
+  const d = new Date(Number(unixSec) * 1000);
+  if (isNaN(d.getTime())) return String(unixSec);
+  const pad = n => String(n).padStart(2, '0');
+  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function stripAccents(s) {
+  return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase();
+}
+
+function esc(s) {
+  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(showToast._tm);
+  showToast._tm = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+function setOnlineState(ok, detailMsg) {
+  const chip = document.getElementById('connChip');
+  const txt = document.getElementById('connText');
+  const banner = document.getElementById('errBanner');
+  const errTxt = document.getElementById('errText');
+  if (ok) {
+    chip.className = 'chip on';
+    txt.textContent = 'Trực tuyến · Đồng bộ 5 s';
+    banner.classList.remove('show');
+  } else {
+    chip.className = 'chip off';
+    txt.textContent = 'Mất kết nối';
+    errTxt.textContent = detailMsg || 'Không kết nối được máy chủ';
+    banner.classList.add('show');
+  }
+}
+
+async function api(path, opts = {}) {
+  try {
+    const res = await fetch(path, {
+      headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) },
+      ...opts
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const err = new Error(data.detail || `Lỗi HTTP ${res.status}`);
+      err.status = res.status;
+      err.payload = data;
+      throw err;
+    }
+    setOnlineState(true);
+    return data;
+  } catch (e) {
+    if (!e.status) setOnlineState(false, 'Không kết nối được máy chủ');
+    throw e;
+  }
+}
+
+// Chế độ Sáng / Tối
+document.getElementById('themeBtn').addEventListener('click', () => {
+  const root = document.documentElement;
+  const cur = root.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  root.setAttribute('data-theme', next);
+});
+
+// Chuyển Tab
+document.querySelectorAll('#tabs button').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+
+function switchTab(tabId) {
+  currentTab = tabId;
+  try { localStorage.setItem('khkt_sinh_tab', tabId); } catch (_) {}
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
+  document.querySelectorAll('main > section').forEach(s => s.classList.toggle('active', s.id === tabId));
+  refreshCurrentTab();
+}
+
+// 1. TAB TỔNG QUAN & BẢN ĐỒ MẶT BẰNG SVG TẦNG 2 (HÀNH LANG 3,6 M)
+const FLOOR2_ZONES = [
+  { ma: 'phong_sinh', ten: 'Phòng thí nghiệm Sinh học', x0: 0, z0: 0, x1: 20, z1: 15, fill: '#e3f4ea', stroke: '#1f8a4c' },
+  { ma: 'phong_vi_sinh', ten: 'Phòng Vi sinh (BSL-1)', x0: 20, z0: 7.5, x1: 27, z1: 15, fill: '#e0f2f1', stroke: '#0f7c86' },
+  { ma: 'kho_sinh_pham', ten: 'Kho Sinh phẩm', x0: 20, z0: 0, x1: 27, z1: 7.5, fill: '#e8f0fe', stroke: '#2b6cb0' },
+  { ma: 'hanh_lang_t2', ten: 'Hành lang Tầng 2 (rộng 3,6 m)', x0: 0, z0: -3.6, x1: 27, z1: 0, fill: '#fef9e7', stroke: '#b26b00' },
+  { ma: 'phong_sinh_phan_tu', ten: 'Phòng Sinh học phân tử', x0: 0, z0: -9, x1: 13.5, z1: -3.6, fill: '#f3e8ff', stroke: '#6b46c1' },
+  { ma: 'nha_kinh', ten: 'Nhà kính Thực vật', x0: 13.5, z0: -9, x1: 27, z1: -3.6, fill: '#eafaf1', stroke: '#27ae60' },
+  { ma: 'hanh_lang_dong', ten: 'Hành lang Đông', x0: 27, z0: 6, x1: 30, z1: 15, fill: '#f2f4f4', stroke: '#5d6b78' },
+  { ma: 'loi_thang', ten: 'Lõi thang bộ & thang máy', x0: 27, z0: -2.2, x1: 30, z1: 6, fill: '#ebedef', stroke: '#5d6b78' }
+];
+
+const MACHINE_DOTS = [
+  { ma: 'kinh_hien_vi_camera', ten: 'KHV Kỹ thuật số GV', x: 2.2, z: 7.5 },
+  { ma: 'tu_an_toan_sinh_hoc', ten: 'Tủ ATSH cấp II A2', x: 6.6, z: 14.0 },
+  { ma: 'tu_am', ten: 'Tủ ấm 37 °C', x: 18.5, z: 4.2 },
+  { ma: 'noi_hap', ten: 'Nồi hấp tiệt trùng 121 °C', x: 18.5, z: 5.8 },
+  { ma: 'ban_giai_phau_so', ten: 'Bàn giải phẫu số 3D', x: 18.5, z: 11.2 },
+  { ma: 'dao_nhuom_gram', ten: 'Đảo nhuộm Gram', x: 23.0, z: 11.5 },
+  { ma: 'may_dem_khuan_lac', ten: 'Máy đếm khuẩn lạc', x: 24.2, z: 13.6 },
+  { ma: 'tu_mat_4', ten: 'Tủ mát 4 °C', x: 21.5, z: 6.2 },
+  { ma: 'tu_dong_am20', ten: 'Tủ đông −20 °C', x: 23.5, z: 6.2 },
+  { ma: 'so_kho_dien_tu', ten: 'Sổ kho điện tử', x: 25.8, z: 5.5 },
+  { ma: 'kiosk_tra_cuu', ten: 'Ki-ốt tra cứu 108 dụng cụ', x: 16.4, z: -3.2 },
+  { ma: 'tu_thao_tac_pcr', ten: 'Tủ thao tác tiền PCR', x: 1.2, z: -6.2 },
+  { ma: 'may_pcr', ten: 'Máy luân nhiệt PCR', x: 10.2, z: -8.1 },
+  { ma: 'be_dien_di', ten: 'Bể điện di Agarose', x: 11.4, z: -8.1 },
+  { ma: 'gel_doc', ten: 'Buồng chụp Gel Doc', x: 12.6, z: -7.0 },
+  { ma: 'tram_quang_hop', ten: 'Trạm quang hợp Elodea', x: 16.2, z: -8.2 },
+  { ma: 'tram_potometer', ten: 'Trạm Potometer', x: 19.6, z: -8.2 },
+  { ma: 'gian_thuy_canh_nft', ten: 'Giàn thủy canh NFT', x: 25.0, z: -6.2 }
+];
+
+function renderFloor2MapSvg(statuses) {
+  const stMap = {};
+  (statuses || []).forEach(s => { stMap[s.ma] = s; });
+  const scale = 22;
+  const padX = 20, padY = 20;
+  const mapX = x => padX + x * scale;
+  const mapY = z => padY + (15 - z) * scale; // z từ 15 (bắc, trên) xuống -9 (nam, dưới)
+  const W = padX * 2 + 30 * scale;
+  const H = padY * 2 + 24 * scale;
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Bản đồ mặt bằng tầng 2 khu sinh học">`;
+  FLOOR2_ZONES.forEach(z => {
+    const x = mapX(z.x0);
+    const y = mapY(z.z1);
+    const w = (z.x1 - z.x0) * scale;
+    const h = (z.z1 - z.z0) * scale;
+    svg += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${z.fill}" stroke="${z.stroke}" stroke-width="1.5" rx="3"/>`;
+    svg += `<text x="${x + 6}" y="${y + 15}" fill="#17202a" font-size="11" font-weight="600">${esc(z.ten)}</text>`;
+  });
+
+  MACHINE_DOTS.forEach(m => {
+    const st = stMap[m.ma] || { trang_thai: 'san_sang', mo_ta: 'Sẵn sàng vận hành', tien_do: 0 };
+    const color = st.trang_thai === 'hong' || st.trang_thai === 'canh_bao' ? '#c2362f' :
+                  (st.trang_thai === 'can_bao_tri' ? '#b26b00' :
+                  (st.trang_thai === 'dang_chay' ? '#0f7c86' : '#1f8a4c'));
+    const cx = mapX(m.x);
+    const cy = mapY(m.z);
+    svg += `<g style="cursor:pointer" onclick="showMachineDetail('${m.ma}')">`;
+    svg += `<circle cx="${cx}" cy="${cy}" r="6.5" fill="${color}" stroke="#ffffff" stroke-width="1.5"/>`;
+    if (st.trang_thai === 'dang_chay' && st.mo_ta) {
+      svg += `<text x="${cx + 9}" y="${cy + 4}" fill="#0f7c86" font-size="10" font-weight="700">${esc(st.mo_ta)}</text>`;
+    }
+    svg += `<title>${esc(m.ten)}: ${esc(st.mo_ta || st.trang_thai)}</title></g>`;
+  });
+  svg += `</svg>`;
+  document.getElementById('floorMapWrap').innerHTML = svg;
+}
+
+window.showMachineDetail = function(ma) {
+  const m = MACHINE_DOTS.find(x => x.ma === ma) || { ma, ten: ma };
+  const st = machineStatusCache.find(x => x.ma === ma) || { trang_thai: 'san_sang', mo_ta: 'Sẵn sàng hoạt động', tien_do: 0 };
+  const badgeCls = st.trang_thai === 'hong' || st.trang_thai === 'canh_bao' ? 'bad' :
+                   (st.trang_thai === 'can_bao_tri' ? 'warn' : (st.trang_thai === 'dang_chay' ? 'info' : 'good'));
+  document.getElementById('machineDetailCard').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <div><b>${esc(m.ten)}</b> <span class="mono small muted">(${esc(ma)})</span></div>
+      <span class="badge ${badgeCls}">${esc(st.trang_thai)}</span>
+    </div>
+    <div class="small" style="margin-top:4px">${esc(st.mo_ta || 'Thiết bị hoạt động bình thường.')}</div>
+    <div style="margin-top:8px"><button class="b sm" onclick="switchTab('huong-dan');loadToolGuide('${esc(ma)}')">Xem hướng dẫn vận hành</button></div>
+  `;
+};
+
+function renderTempSvg(targetId, records) {
+  const W = 460, H = 150, padL = 36, padR = 14, padT = 14, padB = 24;
+  const pts4 = (records || []).filter(r => r.tu === 'tu_mat_4').slice(-20);
+  const pts20 = (records || []).filter(r => r.tu === 'tu_dong_am20').slice(-20);
+  const mapY = t => padT + ((10 - t) / 36) * (H - padT - padB); // +10 °C .. -26 °C
+  const buildPath = arr => {
+    if (!arr.length) return '';
+    return arr.map((r, i) => {
+      const x = padL + (i / Math.max(1, arr.length - 1)) * (W - padL - padR);
+      const y = Math.max(padT, Math.min(H - padB, mapY(Number(r.nhiet_do))));
+      return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(' ');
+  };
+  const y4 = mapY(4), y20 = mapY(-20);
+  const svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+    <line x1="${padL}" y1="${y4.toFixed(1)}" x2="${W - padR}" y2="${y4.toFixed(1)}" stroke="#1f8a4c" stroke-dasharray="3,3" stroke-width="1"/>
+    <text x="4" y="${(y4 + 4).toFixed(1)}" font-size="10" fill="#1f8a4c">4 °C</text>
+    <line x1="${padL}" y1="${y20.toFixed(1)}" x2="${W - padR}" y2="${y20.toFixed(1)}" stroke="#0f7c86" stroke-dasharray="3,3" stroke-width="1"/>
+    <text x="2" y="${(y20 + 4).toFixed(1)}" font-size="10" fill="#0f7c86">−20 °C</text>
+    <path d="${buildPath(pts4)}" fill="none" stroke="#1f8a4c" stroke-width="2"/>
+    <path d="${buildPath(pts20)}" fill="none" stroke="#0f7c86" stroke-width="2"/>
+  </svg>`;
+  const el = document.getElementById(targetId);
+  if (el) el.innerHTML = svg;
+}
+
+async function loadOverview() {
+  try {
+    const [ov, stRes, tempRes] = await Promise.all([
+      api('/lab/sinh/tong-quan'),
+      api('/lab/sinh/trang-thai-may').catch(() => ({ muc: [] })),
+      api('/lab/sinh/nhiet-do').catch(() => ({ muc: [] }))
+    ]);
+    machineStatusCache = stRes.muc || [];
+    renderFloor2MapSvg(machineStatusCache);
+
+    const dc = ov.dung_cu || {};
+    const sp = ov.sinh_pham || {};
+    const scList = ov.su_co_moi || [];
+    document.getElementById('ovStats').innerHTML = `
+      <div class="stat good"><div class="k">Tổng mã dụng cụ</div><div class="v">${fmtNum(dc.tong || 108)}</div></div>
+      <div class="stat ${dc.hong > 0 ? 'bad' : ''}"><div class="k">Dụng cụ hỏng / vỡ</div><div class="v">${fmtNum(dc.hong || 0)}</div></div>
+      <div class="stat ${dc.dang_muon > 0 ? 'warn' : ''}"><div class="k">Đang cho mượn</div><div class="v">${fmtNum(dc.dang_muon || 0)}</div></div>
+      <div class="stat ${(sp.sap_het || []).length > 0 ? 'warn' : ''}"><div class="k">Sinh phẩm sắp hết</div><div class="v">${fmtNum((sp.sap_het || []).length)}</div></div>
+      <div class="stat ${(sp.sap_het_han || []).length > 0 ? 'warn' : ''}"><div class="k">Sắp hết hạn (≤ 30 ngày)</div><div class="v">${fmtNum((sp.sap_het_han || []).length)}</div></div>
+      <div class="stat ${scList.length > 0 ? 'bad' : 'good'}"><div class="k">Sự cố chưa xử lý</div><div class="v">${fmtNum(scList.length)}</div></div>
+    `;
+
+    const tuArr = ov.tu || [];
+    document.getElementById('ovFridgeNow').innerHTML = tuArr.map(t => `
+      <span class="badge ${t.canh_bao ? 'bad' : 'good'}" style="margin-right:6px">
+        ${esc(t.tu)}: ${fmtNum(t.nhiet_do)} °C ${t.canh_bao ? '⚠ Cảnh báo!' : '✓ Ổn định'}
+      </span>
+    `).join('') || '<span class="badge good">Tủ mát 4,0 °C · Tủ đông −20,0 °C</span>';
+
+    renderTempSvg('ovTempSvg', tempRes.muc || []);
+
+    const lich = ov.lich_hom_nay || [];
+    document.getElementById('ovSchedule').innerHTML = lich.length
+      ? lich.map(l => `<div style="padding:6px 0;border-bottom:1px solid var(--line)">
+          <b>${esc(l.doi_tuong)}</b> · Lớp ${esc(l.lop || '—')} (${esc(l.nguoi)})<br>
+          <span class="small muted">${fmtDate(l.bat_dau)} – ${fmtDate(l.ket_thuc)} · ${esc(l.muc_dich || '')}</span>
+        </div>`).join('')
+      : '<div class="muted small">Hôm nay chưa có lịch đặt phòng hoặc thiết bị trùng giờ.</div>';
+  } catch (_) {}
+}
+
+// 2. TAB DỤNG CỤ & THIẾT BỊ
+async function loadTools() {
+  const room = document.getElementById('dcRoom').value;
+  const cat = document.getElementById('dcCat').value;
+  const q = stripAccents(document.getElementById('dcSearch').value);
+  try {
+    const data = await api(`/lab/sinh/dung-cu?phong=${encodeURIComponent(room)}&phan_loai=${encodeURIComponent(cat)}`);
+    allToolsCache = data.muc || [];
+    populateToolSelects(allToolsCache);
+
+    const cats = [...new Set(allToolsCache.map(x => x.phan_loai).filter(Boolean))];
+    const catSel = document.getElementById('dcCat');
+    if (catSel.options.length <= 1) {
+      cats.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; catSel.appendChild(o); });
+    }
+
+    const filtered = allToolsCache.filter(t => {
+      if (!q) return true;
+      return stripAccents(`${t.ma} ${t.ten} ${t.ten_tieng_anh} ${t.vi_tri} ${t.phan_loai}`).includes(q);
+    });
+    document.getElementById('dcCountInfo').textContent = `Hiển thị ${filtered.length} / ${allToolsCache.length} mã dụng cụ`;
+
+    const nowSec = Date.now() / 1000;
+    document.getElementById('dcTable').innerHTML = `
+      <thead><tr>
+        <th>Mã &amp; Tên dụng cụ</th><th>Phân loại</th><th>Phòng</th><th class="num">Số lượng</th><th class="num">Hỏng</th><th>Vị trí kệ / bàn</th><th>Trạng thái</th>
+      </tr></thead>
+      <tbody>${filtered.map(t => {
+        const overdueCal = t.han_hieu_chuan && Number(t.han_hieu_chuan) < nowSec;
+        return `<tr>
+          <td><b>${esc(t.ten)}</b><br><span class="mono small muted">${esc(t.ma)}</span></td>
+          <td class="small">${esc(t.phan_loai)}</td>
+          <td class="small">${esc(Array.isArray(t.phong) ? t.phong.join(', ') : t.phong)}</td>
+          <td class="num"><input type="number" min="0" value="${t.so_luong ?? 0}" onchange="patchTool('${esc(t.ma)}',{so_luong:Number(this.value)})"></td>
+          <td class="num"><input type="number" min="0" value="${t.hong ?? 0}" onchange="patchTool('${esc(t.ma)}',{hong:Number(this.value)})"></td>
+          <td><input value="${esc(t.vi_tri || '')}" style="width:170px" onchange="patchTool('${esc(t.ma)}',{vi_tri:this.value})"></td>
+          <td>
+            ${overdueCal ? '<span class="badge warn">Quá hạn hiệu chuẩn</span> ' : ''}
+            ${t.can_bao_tri ? '<span class="badge bad">Cần bảo trì</span>' : '<span class="badge good">Tốt</span>'}
+          </td>
+        </tr>`;
+      }).join('')}</tbody>
+    `;
+  } catch (_) {}
+}
+
+window.patchTool = async function(ma, body) {
+  try {
+    await api(`/lab/sinh/dung-cu/${encodeURIComponent(ma)}`, { method: 'PATCH', body: JSON.stringify(body) });
+    showToast(`Đã cập nhật dụng cụ ${ma}`);
+  } catch (e) { showToast(e.message); }
+};
+
+function populateToolSelects(list) {
+  if (!list || !list.length) return;
+  ['mtTool', 'btTool', 'hdSelect'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel || sel.options.length > 0) return;
+    list.forEach(t => {
+      const o = document.createElement('option');
+      o.value = t.ma;
+      o.textContent = `${t.ten} (${t.ma})`;
+      sel.appendChild(o);
+    });
+  });
+}
+
+document.getElementById('dcSearch').addEventListener('input', loadTools);
+document.getElementById('dcRoom').addEventListener('change', loadTools);
+document.getElementById('dcCat').addEventListener('change', loadTools);
+
+// 3. TAB MƯỢN – TRẢ
+async function loadLoans() {
+  if (!allToolsCache.length) await loadTools();
+  try {
+    const data = await api('/lab/sinh/muon-tra');
+    const items = data.muc || [];
+    const nowSec = Date.now() / 1000;
+    document.getElementById('mtTable').innerHTML = `
+      <thead><tr><th>Mã phiếu</th><th>Dụng cụ</th><th class="num">SL</th><th>Người mượn</th><th>Lớp</th><th>Hạn trả</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+      <tbody>${items.length ? items.map(m => {
+        const isReturned = !!m.luc_tra;
+        const isOverdue = !isReturned && m.han_tra && Number(m.han_tra) < nowSec;
+        return `<tr class="${isOverdue ? 'over' : ''}">
+          <td class="mono small">#${m.id}</td>
+          <td><b>${esc(m.ma_dung_cu)}</b></td>
+          <td class="num">${fmtNum(m.so_luong)}</td>
+          <td>${esc(m.nguoi)}</td>
+          <td>${esc(m.lop || '—')}</td>
+          <td class="small">${fmtDate(m.han_tra)}</td>
+          <td>${isReturned ? `<span class="badge good">Đã trả (${esc(m.tinh_trang_tra || 'tốt')})</span>` : (isOverdue ? '<span class="badge bad">Quá hạn</span>' : '<span class="badge warn">Đang mượn</span>')}</td>
+          <td>${isReturned ? '' : `
+            <button class="b sm" onclick="returnLoan(${m.id},'tot')">Trả (Tốt)</button>
+            <button class="b sm danger" onclick="returnLoan(${m.id},'hong')">Trả (Hỏng)</button>
+          `}</td>
+        </tr>`;
+      }).join('') : '<tr><td colspan="8" class="muted">Chưa có phiếu mượn nào.</td></tr>'}</tbody>
+    `;
+  } catch (_) {}
+}
+
+window.createLoan = async function() {
+  const ma_dung_cu = document.getElementById('mtTool').value || 'kinh_hien_vi';
+  const so_luong = Number(document.getElementById('mtQty').value || 1);
+  const nguoi = document.getElementById('mtUser').value.trim() || 'Học sinh';
+  const lop = document.getElementById('mtClass').value.trim() || '10A1';
+  const dueVal = document.getElementById('mtDue').value;
+  const han_tra = dueVal ? Math.floor(new Date(dueVal).getTime() / 1000) : Math.floor(Date.now() / 1000 + 86400 * 3);
+  try {
+    await api('/lab/sinh/muon-tra', { method: 'POST', body: JSON.stringify({ ma_dung_cu, so_luong, nguoi, lop, han_tra }) });
+    showToast('Đã tạo phiếu mượn dụng cụ');
+    loadLoans();
+  } catch (e) { showToast(e.message); }
+};
+
+window.returnLoan = async function(id, tinh_trang_tra) {
+  try {
+    await api(`/lab/sinh/muon-tra/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ luc_tra: Math.floor(Date.now() / 1000), tinh_trang_tra })
+    });
+    showToast(`Đã ghi nhận trả phiếu #${id}`);
+    loadLoans();
+  } catch (e) { showToast(e.message); }
+};
+
+// 4. TAB KHO SINH PHẨM
+async function loadBioStock() {
+  const tu = document.getElementById('spFilterCab').value;
+  const q = stripAccents(document.getElementById('spSearch').value);
+  try {
+    const data = await api(`/lab/sinh/sinh-pham?tu=${encodeURIComponent(tu)}`);
+    const items = (data.muc || []).filter(s => !q || stripAccents(`${s.id} ${s.ten} ${s.ngan} ${s.so_lo}`).includes(q));
+    const nowSec = Date.now() / 1000;
+    document.getElementById('spTable').innerHTML = `
+      <thead><tr><th>Tên sinh phẩm</th><th>Loại</th><th>Tủ / Ngăn</th><th class="num">Tồn kho</th><th>Hạn dùng</th><th>An toàn</th><th>Nhập / Xuất</th></tr></thead>
+      <tbody>${items.map(s => {
+        const daysLeft = s.han_dung ? Math.round((Number(s.han_dung) - nowSec) / 86400) : 180;
+        const expBadge = daysLeft < 0 ? `<span class="badge bad">Quá hạn (${daysLeft} ngày)</span>` :
+                         (daysLeft <= 30 ? `<span class="badge warn">Còn ${daysLeft} ngày</span>` : `<span class="badge good">Còn ${daysLeft} ngày</span>`);
+        return `<tr>
+          <td><b>${esc(s.ten)}</b><br><span class="mono small muted">${esc(s.id)} · Lô: ${esc(s.so_lo || '—')}</span></td>
+          <td class="small">${esc(s.loai)}</td>
+          <td class="small">${esc(s.tu)} / ${esc(s.ngan)}</td>
+          <td class="num"><b>${fmtNum(s.so_luong)}</b> ${esc(s.don_vi)}</td>
+          <td>${expBadge}</td>
+          <td><span class="badge info">${esc(s.cap_an_toan || 'BSL-1')}</span></td>
+          <td>
+            <button class="b sm" onclick="stockMove('${esc(s.id)}','xuat')">−1 Xuất</button>
+            <button class="b sm" onclick="stockMove('${esc(s.id)}','nhap')">+5 Nhập</button>
+          </td>
+        </tr>`;
+      }).join('')}</tbody>
+    `;
+  } catch (_) {}
+}
+
+window.addBioStock = async function() {
+  const body = {
+    ten: document.getElementById('spName').value.trim() || 'Sinh phẩm thực hành',
+    loai: document.getElementById('spType').value,
+    tu: document.getElementById('spCabinet').value,
+    ngan: document.getElementById('spShelf').value.trim() || 'Ngăn 1',
+    so_luong: Number(document.getElementById('spQty').value || 5),
+    don_vi: document.getElementById('spUnit').value.trim() || 'lọ',
+    so_lo: 'LOT-2026',
+    han_dung: Math.floor(Date.now() / 1000 + 86400 * 180),
+    cap_an_toan: document.getElementById('spBsl').value.trim()
+  };
+  try {
+    await api('/lab/sinh/sinh-pham', { method: 'POST', body: JSON.stringify(body) });
+    showToast('Đã thêm sinh phẩm BSL-1 vào kho');
+    loadBioStock();
+  } catch (e) { showToast(e.message); }
+};
+
+window.stockMove = async function(id, action) {
+  const so_luong = action === 'xuat' ? 1 : 5;
+  try {
+    await api(`/lab/sinh/sinh-pham/${encodeURIComponent(id)}/${action}`, {
+      method: 'POST',
+      body: JSON.stringify({ so_luong, nguoi: 'Giáo viên', ghi_chu: `${action} trên web` })
+    });
+    showToast(`Đã ${action === 'xuat' ? 'xuất' : 'nhập'} sinh phẩm ${id}`);
+    loadBioStock();
+  } catch (e) { showToast(e.message); }
+};
+
+document.getElementById('spSearch').addEventListener('input', loadBioStock);
+document.getElementById('spFilterCab').addEventListener('change', loadBioStock);
+
+// 5. TAB NHIỆT ĐỘ TỦ
+async function loadTemperatures() {
+  try {
+    const data = await api('/lab/sinh/nhiet-do');
+    const items = data.muc || [];
+    renderTempSvg('tempDetailSvg', items);
+    document.getElementById('tempTable').innerHTML = `
+      <thead><tr><th>Tủ bảo quản</th><th>Thời gian</th><th class="num">Nhiệt độ (°C)</th><th>Trạng thái cửa &amp; Ngưỡng</th></tr></thead>
+      <tbody>${items.slice(0, 30).map(r => {
+        const t = Number(r.nhiet_do);
+        const outOfRange = (r.tu === 'tu_mat_4' && (t < 2 || t > 6)) || (r.tu === 'tu_dong_am20' && (t < -25 || t > -15));
+        return `<tr class="${outOfRange || r.cua_mo ? 'low' : ''}">
+          <td><b>${esc(r.tu)}</b></td>
+          <td class="small">${fmtDate(r.thoi_gian)}</td>
+          <td class="num"><b>${fmtNum(t)} °C</b></td>
+          <td>${r.cua_mo ? '<span class="badge warn">Cửa đang mở</span> ' : ''}${outOfRange ? '<span class="badge bad">Vượt ngưỡng!</span>' : '<span class="badge good">Đạt chuẩn</span>'}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    `;
+  } catch (_) {}
+}
+
+window.recordSampleTemp = async function() {
+  try {
+    await api('/lab/sinh/nhiet-do', { method: 'POST', body: JSON.stringify({ tu: 'tu_mat_4', nhiet_do: 4.1, cua_mo: false }) });
+    await api('/lab/sinh/nhiet-do', { method: 'POST', body: JSON.stringify({ tu: 'tu_dong_am20', nhiet_do: -20.2, cua_mo: false }) });
+    showToast('Đã ghi bản ghi nhiệt độ tủ 4 °C và −20 °C');
+    loadTemperatures();
+  } catch (e) { showToast(e.message); }
+};
+
+// 6. TAB ĐẶT LỊCH
+async function loadBookings() {
+  try {
+    const data = await api('/lab/sinh/dat-lich');
+    const items = data.muc || [];
+    renderWeekGrid(items);
+    document.getElementById('dlTable').innerHTML = `
+      <thead><tr><th>Đối tượng</th><th>Người đặt</th><th>Lớp</th><th>Bắt đầu</th><th>Kết thúc</th><th>Mục đích</th><th></th></tr></thead>
+      <tbody>${items.length ? items.map(b => `<tr>
+        <td><b>${esc(b.doi_tuong)}</b></td>
+        <td>${esc(b.nguoi)}</td>
+        <td>${esc(b.lop || '—')}</td>
+        <td class="small">${fmtDate(b.bat_dau)}</td>
+        <td class="small">${fmtDate(b.ket_thuc)}</td>
+        <td class="small">${esc(b.muc_dich || '')}</td>
+        <td><button class="b sm danger" onclick="deleteBooking(${b.id})">Hủy</button></td>
+      </tr>`).join('') : '<tr><td colspan="7" class="muted">Chưa có lịch đặt.</td></tr>'}</tbody>
+    `;
+  } catch (_) {}
+}
+
+function renderWeekGrid(bookings) {
+  const days = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'CN'];
+  const slots = [
+    { label: '07:30', h: 7 },
+    { label: '09:30', h: 9 },
+    { label: '13:30', h: 13 },
+    { label: '15:30', h: 15 }
+  ];
+  let html = `<div class="week-cell head">Ca / Thứ</div>` + days.map(d => `<div class="week-cell head">${d}</div>`).join('');
+  slots.forEach(sl => {
+    html += `<div class="week-cell head">${sl.label}</div>`;
+    for (let d = 0; d < 7; d++) {
+      const hit = (bookings || []).find((b, idx) => idx % 7 === d && (new Date(Number(b.bat_dau) * 1000).getHours() === sl.h || idx === d));
+      if (hit) {
+        html += `<div class="week-cell booked">${esc(hit.doi_tuong)}<br><span class="small">${esc(hit.lop || hit.nguoi)}</span></div>`;
+      } else {
+        html += `<div class="week-cell" onclick="prefillSlot(${d},${sl.h})"><span class="muted small">+ Đặt ca</span></div>`;
+      }
+    }
+  });
+  document.getElementById('weekGrid').innerHTML = html;
+}
+
+window.prefillSlot = function(dayOffset, hour) {
+  const base = new Date();
+  base.setDate(base.getDate() + dayOffset);
+  base.setHours(hour, 0, 0, 0);
+  const end = new Date(base.getTime() + 7200 * 1000);
+  const toLocalIso = d => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  document.getElementById('dlStart').value = toLocalIso(base);
+  document.getElementById('dlEnd').value = toLocalIso(end);
+  showToast('Đã điền khung giờ vào biểu mẫu đặt lịch');
+};
+
+window.createBooking = async function() {
+  const box = document.getElementById('dlConflictBox');
+  box.classList.remove('show');
+  const sVal = document.getElementById('dlStart').value;
+  const eVal = document.getElementById('dlEnd').value;
+  const now = Math.floor(Date.now() / 1000);
+  const bat_dau = sVal ? Math.floor(new Date(sVal).getTime() / 1000) : now + 3600;
+  const ket_thuc = eVal ? Math.floor(new Date(eVal).getTime() / 1000) : bat_dau + 7200;
+  const body = {
+    doi_tuong: document.getElementById('dlTarget').value,
+    nguoi: document.getElementById('dlUser').value.trim() || 'GV Sinh học',
+    lop: document.getElementById('dlClass').value.trim() || '10A1',
+    bat_dau,
+    ket_thuc,
+    muc_dich: document.getElementById('dlPurpose').value.trim() || 'Thực hành Sinh học'
+  };
+  try {
+    await api('/lab/sinh/dat-lich', { method: 'POST', body: JSON.stringify(body) });
+    showToast('Đặt lịch thành công');
+    loadBookings();
+  } catch (e) {
+    if (e.status === 409 && e.payload) {
+      const trung = (e.payload.trung || []).map(t => `${t.doi_tuong} (${t.nguoi} – Lớp ${t.lop || ''}: ${fmtDate(t.bat_dau)} → ${fmtDate(t.ket_thuc)})`).join('; ');
+      box.innerHTML = `<span><b>Lỗi 409 – Trùng lịch:</b> ${esc(e.payload.detail)} ${trung ? `<br>Lịch bị trùng: <b>${esc(trung)}</b>` : ''}</span>`;
+      box.classList.add('show');
+    } else {
+      showToast(e.message);
+    }
+  }
+};
+
+window.deleteBooking = async function(id) {
+  try {
+    await api(`/lab/sinh/dat-lich/${id}`, { method: 'DELETE' });
+    showToast('Đã hủy lịch đặt');
+    loadBookings();
+  } catch (e) { showToast(e.message); }
+};
+
+// 7. TAB KẾT QUẢ THÍ NGHIỆM
+async function loadResults() {
+  const lop = document.getElementById('kqClass').value.trim();
+  const ma_bai = document.getElementById('kqExp').value;
+  const hoc_sinh = document.getElementById('kqStudent').value.trim();
+  try {
+    const data = await api(`/lab/sinh/ket-qua?lop=${encodeURIComponent(lop)}&ma_bai=${encodeURIComponent(ma_bai)}&hoc_sinh=${encodeURIComponent(hoc_sinh)}`);
+    const items = data.muc || [];
+    document.getElementById('kqTable').innerHTML = `
+      <thead><tr><th>Thời gian</th><th>Học sinh</th><th>Lớp / Bàn</th><th>Bài thí nghiệm</th><th class="num">Điểm</th><th>Nhận xét của GV</th><th>Chấm điểm</th></tr></thead>
+      <tbody>${items.length ? items.map(r => `<tr>
+        <td class="small">${fmtDate(r.thoi_gian)}</td>
+        <td><b>${esc(r.hoc_sinh)}</b></td>
+        <td>${esc(r.lop || '—')} · ${esc(r.ban || 'Bàn 1')}</td>
+        <td><span class="badge info">${esc(r.ma_bai)}</span></td>
+        <td class="num"><input type="number" min="0" max="10" step="0.5" value="${r.diem ?? ''}" id="diem_${r.id}"></td>
+        <td><input value="${esc(r.nhan_xet || '')}" id="nx_${r.id}" placeholder="Nhập nhận xét…" style="width:180px"></td>
+        <td>
+          <button class="b sm primary" onclick="gradeResult(${r.id})">Lưu</button>
+          <button class="b sm" onclick="viewResultDetail(${r.id})">Chi tiết</button>
+        </td>
+      </tr>`).join('') : '<tr><td colspan="7" class="muted">Chưa có kết quả thí nghiệm nào.</td></tr>'}</tbody>
+    `;
+  } catch (_) {}
+}
+
+window.gradeResult = async function(id) {
+  const diem = Number(document.getElementById(`diem_${id}`).value || 9.5);
+  const nhan_xet = document.getElementById(`nx_${id}`).value;
+  try {
+    await api(`/lab/sinh/ket-qua/${id}`, { method: 'PATCH', body: JSON.stringify({ diem, nhan_xet }) });
+    showToast(`Đã lưu điểm & nhận xét bài #${id}`);
+  } catch (e) { showToast(e.message); }
+};
+
+window.viewResultDetail = async function(id) {
+  try {
+    const r = await api(`/lab/sinh/ket-qua/${id}`);
+    const card = document.getElementById('kqDetailCard');
+    card.style.display = 'block';
+    card.innerHTML = `
+      <h2>Chi tiết bài thí nghiệm #${r.id} · ${esc(r.hoc_sinh)} (${esc(r.lop)}) — Mã bài: ${esc(r.ma_bai)}</h2>
+      <pre class="mono small" style="background:var(--panel-2);padding:10px;border-radius:6px;overflow-x:auto">${esc(JSON.stringify(r.du_lieu || {}, null, 2))}</pre>
+    `;
+  } catch (e) { showToast(e.message); }
+};
+
+// 8. TAB SỰ CỐ AN TOÀN SINH HỌC
+async function loadIncidents() {
+  const st = document.getElementById('scFilterState').value;
+  try {
+    const data = await api('/lab/sinh/su-co');
+    const items = (data.muc || []).filter(x => !st || x.trang_thai === st);
+    document.getElementById('scTable').innerHTML = `
+      <thead><tr><th>Thời gian</th><th>Phòng</th><th>Loại &amp; Mức độ</th><th>Mô tả sự cố</th><th>Cách xử lý (Spill Kit / Khắc phục)</th><th>Trạng thái</th><th></th></tr></thead>
+      <tbody>${items.length ? items.map(s => `<tr>
+        <td class="small">${fmtDate(s.thoi_gian)}</td>
+        <td class="small">${esc(s.phong)}</td>
+        <td><b>${esc(s.loai)}</b><br><span class="badge ${s.muc_do === 'nghiem_trong' ? 'bad' : 'warn'}">${esc(s.muc_do)}</span></td>
+        <td class="small">${esc(s.mo_ta)}</td>
+        <td><input id="sc_xl_${s.id}" value="${esc(s.xu_ly || '')}" placeholder="Ghi quy trình xử lý…" style="width:180px"></td>
+        <td>
+          <select id="sc_tt_${s.id}">
+            <option value="moi" ${s.trang_thai === 'moi' ? 'selected' : ''}>Mới</option>
+            <option value="dang_xu_ly" ${s.trang_thai === 'dang_xu_ly' ? 'selected' : ''}>Đang xử lý</option>
+            <option value="da_xu_ly" ${s.trang_thai === 'da_xu_ly' ? 'selected' : ''}>Đã xử lý</option>
+          </select>
+        </td>
+        <td><button class="b sm primary" onclick="updateIncident(${s.id})">Cập nhật</button></td>
+      </tr>`).join('') : '<tr><td colspan="7" class="muted">Không có sự cố an toàn sinh học nào.</td></tr>'}</tbody>
+    `;
+  } catch (_) {}
+}
+
+window.createIncident = async function() {
+  const body = {
+    phong: document.getElementById('scRoom').value,
+    loai: document.getElementById('scType').value.trim() || 'su_co_thao_tac',
+    muc_do: document.getElementById('scSeverity').value,
+    mo_ta: document.getElementById('scDesc').value.trim() || 'Sự cố thao tác trong phòng thí nghiệm',
+    xu_ly: 'Đã cô lập vùng tràn và xử lý bằng NaOCl 0,5%',
+    trang_thai: 'moi'
+  };
+  try {
+    await api('/lab/sinh/su-co', { method: 'POST', body: JSON.stringify(body) });
+    showToast('Đã ghi nhận sự cố an toàn sinh học');
+    loadIncidents();
+  } catch (e) { showToast(e.message); }
+};
+
+window.updateIncident = async function(id) {
+  const xu_ly = document.getElementById(`sc_xl_${id}`).value;
+  const trang_thai = document.getElementById(`sc_tt_${id}`).value;
+  try {
+    await api(`/lab/sinh/su-co/${id}`, { method: 'PATCH', body: JSON.stringify({ xu_ly, trang_thai }) });
+    showToast(`Đã cập nhật sự cố #${id}`);
+    loadIncidents();
+  } catch (e) { showToast(e.message); }
+};
+
+// 9. TAB BẢO TRÌ – HIỆU CHUẨN
+async function loadMaintenance() {
+  if (!allToolsCache.length) await loadTools();
+  try {
+    const data = await api('/lab/sinh/bao-tri');
+    const items = data.muc || [];
+    document.getElementById('btTable').innerHTML = `
+      <thead><tr><th>Ngày thực hiện</th><th>Mã dụng cụ</th><th>Loại</th><th>Người thực hiện</th><th>Kết quả</th><th>Ghi chú</th></tr></thead>
+      <tbody>${items.length ? items.map(b => `<tr>
+        <td class="small">${fmtDate(b.ngay)}</td>
+        <td><b>${esc(b.ma_dung_cu)}</b></td>
+        <td><span class="badge info">${esc(b.loai)}</span></td>
+        <td>${esc(b.nguoi)}</td>
+        <td><span class="badge good">${esc(b.ket_qua)}</span></td>
+        <td class="small">${esc(b.ghi_chu || '')}</td>
+      </tr>`).join('') : '<tr><td colspan="6" class="muted">Chưa có bản ghi bảo trì – hiệu chuẩn.</td></tr>'}</tbody>
+    `;
+  } catch (_) {}
+}
+
+window.createMaintenance = async function() {
+  const body = {
+    ma_dung_cu: document.getElementById('btTool').value || 'micropipet_p200',
+    loai: document.getElementById('btType').value,
+    ngay: Math.floor(Date.now() / 1000),
+    nguoi: document.getElementById('btPerson').value.trim() || 'Kỹ thuật viên',
+    ket_qua: document.getElementById('btResult').value.trim() || 'Đạt chuẩn',
+    ghi_chu: document.getElementById('btNote').value.trim()
+  };
+  try {
+    await api('/lab/sinh/bao-tri', { method: 'POST', body: JSON.stringify(body) });
+    showToast('Đã lưu hồ sơ bảo trì – hiệu chuẩn');
+    loadMaintenance();
+  } catch (e) { showToast(e.message); }
+};
+
+// 10. TAB HƯỚNG DẪN DỤNG CỤ & 15 BÀI THÍ NGHIỆM
+async function loadGuidesAndExperiments() {
+  if (!allToolsCache.length) await loadTools();
+  try {
+    if (!allExpCache.length) {
+      const expRes = await api('/lab/sinh/bai-thi-nghiem');
+      allExpCache = expRes.muc || [];
+      const kqSel = document.getElementById('kqExp');
+      if (kqSel && kqSel.options.length <= 1) {
+        allExpCache.forEach(e => {
+          const o = document.createElement('option');
+          o.value = e.ma;
+          o.textContent = `Lớp ${e.lop}: ${e.ten} (${e.ma})`;
+          kqSel.appendChild(o);
+        });
+      }
+    }
+    const sel = document.getElementById('hdSelect');
+    if (sel && sel.value) await loadToolGuide(sel.value);
+    else if (allToolsCache.length) await loadToolGuide(allToolsCache[0].ma);
+
+    document.getElementById('hdExpTable').innerHTML = `
+      <thead><tr><th>Mã bài</th><th>Lớp &amp; SGK</th><th>Tên bài thí nghiệm &amp; Mục tiêu</th><th>Kết quả mong đợi</th></tr></thead>
+      <tbody>${allExpCache.map(e => `<tr>
+        <td class="mono small"><b>${esc(e.ma)}</b></td>
+        <td><span class="badge info">Lớp ${e.lop}</span><br><span class="small muted">${esc(e.sgk || '')}</span></td>
+        <td><b>${esc(e.ten)}</b><br><span class="small muted">${esc(e.muc_tieu || '')}</span></td>
+        <td class="small">${esc(e.ket_qua_mong_doi || '')}</td>
+      </tr>`).join('')}</tbody>
+    `;
+  } catch (_) {}
+}
+
+window.loadToolGuide = async function(ma) {
+  if (!ma) return;
+  try {
+    const t = await api(`/lab/sinh/huong-dan/${encodeURIComponent(ma)}`);
+    const sel = document.getElementById('hdSelect');
+    if (sel) sel.value = ma;
+    document.getElementById('hdContent').innerHTML = `
+      <h2>${esc(t.ten)} <span class="muted small">(${esc(t.ten_tieng_anh || t.ma)})</span></h2>
+      <p class="small"><b>Phân loại:</b> ${esc(t.phan_loai)} · <b>Vị trí:</b> ${esc(t.vi_tri)} · <b>Công dụng:</b> ${esc(t.cong_dung)}</p>
+      <div class="two">
+        <div>
+          <h3>Quy trình thao tác chuẩn</h3>
+          <ol class="steps">${(t.cach_dung || []).map(s => `<li>${esc(s)}</li>`).join('')}</ol>
+          <h3>Lỗi thao tác thường gặp &amp; Hậu quả khoa học</h3>
+          <ul>${(t.loi_thuong_gap || []).map(s => `<li class="small">${esc(s)}</li>`).join('')}</ul>
+        </div>
+        <div>
+          <h3>Thông số kỹ thuật &amp; Nguồn dẫn chứng</h3>
+          <div class="tablewrap"><table>
+            <thead><tr><th>Thông số</th><th>Giá trị</th><th>Nguồn / Mô phỏng</th></tr></thead>
+            <tbody>${(t.thong_so || []).map(p => `<tr>
+              <td>${esc(p.ten)}</td>
+              <td><b>${esc(p.gia_tri)}</b></td>
+              <td>${p.mo_phong ? '<span class="badge warn">mô phỏng</span>' : `<a href="${esc(p.nguon)}" target="_blank" rel="noopener">Nguồn chuẩn ↗</a>`}</td>
+            </tr>`).join('')}</tbody>
+          </table></div>
+          <h3>Quy tắc an toàn sinh học (BSL-1)</h3>
+          <ul>${(t.an_toan || []).map(s => `<li class="small">${esc(s)}</li>`).join('')}</ul>
+        </div>
+      </div>
+    `;
+  } catch (e) { showToast(e.message); }
+};
+
+function refreshCurrentTab() {
+  switch (currentTab) {
+    case 'tong-quan': return loadOverview();
+    case 'dung-cu': return loadTools();
+    case 'muon-tra': return loadLoans();
+    case 'sinh-pham': return loadBioStock();
+    case 'nhiet-do': return loadTemperatures();
+    case 'dat-lich': return loadBookings();
+    case 'ket-qua': return loadResults();
+    case 'su-co': return loadIncidents();
+    case 'bao-tri': return loadMaintenance();
+    case 'huong-dan': return loadGuidesAndExperiments();
+  }
+}
+
+// Khởi chạy và thăm dò mỗi 5 giây khi tab hiển thị
+switchTab(currentTab);
+setInterval(() => {
+  if (document.visibilityState === 'visible') refreshCurrentTab();
+}, 5000);
+</script>
+</body>
+</html>
+

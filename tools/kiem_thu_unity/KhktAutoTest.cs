@@ -23,6 +23,8 @@ public class KhktAutoTest : MonoBehaviour
     IEnumerator Start()
     {
         outDir = Environment.GetEnvironmentVariable("KHKT_SHOTS");
+        if (string.IsNullOrEmpty(outDir))
+            outDir = Path.GetFullPath(Path.Combine(Application.dataPath, "..", "..", "docs", "anh-tang2", "dung_cu"));
         Directory.CreateDirectory(outDir);
         float t0 = Time.realtimeSinceStartup;
         StartCoroutine(Watchdog());
@@ -219,6 +221,15 @@ public class KhktAutoTest : MonoBehaviour
             UnityEditor.EditorApplication.Exit(0);
 #endif
             yield break;
+        }
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "mediapipe")
+        {
+            yield return MediaPipeTest();
+            Log($"Xong sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
         }        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "hieu_ung")
         {
             hand.enabled = false;  // ảnh cận cảnh: không để bàn tay ảo che
@@ -278,6 +289,51 @@ public class KhktAutoTest : MonoBehaviour
         {
             yield return Floor2Test();
             Log($"Xong kiểm thử Tầng 2 sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "truoc_g0")
+        {
+            yield return Floor2BeforeShots();
+            Log($"Xong chụp hiện trạng G0 sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "tang2_hanh_lang")
+        {
+            yield return Floor2CorridorTest();
+            Log($"Xong kiểm thử hành lang Tầng 2 sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "tang2_dung_cu")
+        {
+            yield return Floor2DungCuTest();
+            Log($"Xong kiểm thử dụng cụ Tầng 2 sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "phong_adn")
+        {
+            yield return PhongAdnTest();
+            Log($"Xong kiểm thử phòng ghép mã ADN sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "tang2_web")
+        {
+            yield return Floor2WebTest();
+            Log($"Xong kiểm thử đồng bộ Web Tầng 2 sau {Time.realtimeSinceStartup - t0:0} s");
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.Exit(0);
 #endif
@@ -2260,6 +2316,143 @@ public class KhktAutoTest : MonoBehaviour
         Log($"[dau] Bấm F8 tắt: trạng thái {ht.Status}, còn tiến trình python mới chạy={alive}");
     }
 
+    IEnumerator SendMediaPipe(System.Net.Sockets.UdpClient u, float seconds, bool ok, float yaw, float dist_cm, float gaze_x, float gaze_y)
+    {
+        float t0 = Time.realtimeSinceStartup;
+        var ci = System.Globalization.CultureInfo.InvariantCulture;
+        while (Time.realtimeSinceStartup - t0 < seconds)
+        {
+            string json;
+            if (ok)
+            {
+                json = $"{{\"ok\":1,\"yaw\":{yaw.ToString(ci)},\"pitch\":0.0,\"roll\":0.0,\"e\":0.10,\"dist_cm\":{dist_cm.ToString(ci)},\"gaze_x\":{gaze_x.ToString(ci)},\"gaze_y\":{gaze_y.ToString(ci)},\"blink_l\":0,\"blink_r\":0,\"fps\":30.0,\"t\":0,\"nguon\":\"mp\",\"hands\":[]}}";
+            }
+            else
+            {
+                json = "{\"ok\":0,\"yaw\":0,\"pitch\":0,\"e\":0,\"dist_cm\":0,\"t\":0,\"nguon\":\"mp\",\"hands\":[]}";
+            }
+            var b = System.Text.Encoding.UTF8.GetBytes(json);
+            u.Send(b, b.Length, "127.0.0.1", 9051);
+            float tw = Time.realtimeSinceStartup;
+            while (Time.realtimeSinceStartup - tw < 0.033f) yield return null;
+        }
+    }
+
+    IEnumerator MediaPipeTest()
+    {
+        var ht = Khkt.Input.HeadTracking.Instance;
+        var vcam = cam;
+        Log($"[mediapipe] Có HeadTracking: {ht != null}, trạng thái: {(ht != null ? ht.Status : "-")}, góc nhìn gốc {vcam.fieldOfView:0.0}°");
+        if (ht == null) yield break;
+        viewer.GoTo(5);
+        yield return Frames(10);
+        float fov0 = vcam.fieldOfView;
+
+        // 1) gửi gói MediaPipe giả lập qua UDP
+        ht.Begin(launch: false);
+        var u = new System.Net.Sockets.UdpClient();
+
+        // Nhìn thẳng 2.4 s (yaw 0°, dist_cm 60.0, gaze (0, 0)) để căn
+        yield return SendMediaPipe(u, 2.4f, true, 0f, 60.0f, 0f, 0f);
+        Log($"[mediapipe] Sau 2,4 s nhìn thẳng: đã căn={Khkt.Input.HeadTracking.Active}, trạng thái {ht.Status}, gói {ht.PacketsSeen}");
+
+        float Y() => viewer.transform.eulerAngles.y;
+        float y0 = Y();
+        yield return SendMediaPipe(u, 1f, true, 40f, 60.0f, 0f, 0f);
+        float dR = Mathf.DeltaAngle(y0, Y());
+
+        y0 = Y();
+        yield return SendMediaPipe(u, 1f, true, -40f, 60.0f, 0f, 0f);
+        float dL = Mathf.DeltaAngle(y0, Y());
+
+        y0 = Y();
+        yield return SendMediaPipe(u, 1f, true, 20f, 60.0f, 0f, 0f);
+        float dDead = Mathf.DeltaAngle(y0, Y());
+
+        y0 = Y();
+        yield return SendMediaPipe(u, 1f, true, 55f, 60.0f, 0f, 0f);
+        float dFull = Mathf.DeltaAngle(y0, Y());
+        Log($"[mediapipe] Quay đầu 1 s: phải 40° → góc nhìn {dR:+0.0;-0.0}°, trái 40° → {dL:+0.0;-0.0}°, phải 20° (vùng chết 30°) → {dDead:+0.0;-0.0}°, phải 55° → {dFull:+0.0;-0.0}°");
+
+        // Ghé gần: dist_cm giảm còn 45 cm (60 / 45 = 1.33x)
+        yield return SendMediaPipe(u, 1.2f, true, 0f, 45.0f, 0f, 0f);
+        float fovIn = vcam.fieldOfView;
+
+        // Ngả xa: dist_cm tăng lên 75 cm (60 / 75 = 0.8x)
+        yield return SendMediaPipe(u, 1.2f, true, 0f, 75.0f, 0f, 0f);
+        float fovOut = vcam.fieldOfView;
+        Log($"[mediapipe] Ghé gần (dist 45 cm): góc nhìn {fov0:0.0}° → {fovIn:0.0}° (phóng ×{fov0 / fovIn:0.00}); ngả xa (dist 75 cm): {fovOut:0.0}° (×{fov0 / fovOut:0.00})");
+
+        // Mất mặt đột ngột
+        y0 = Y();
+        yield return SendMediaPipe(u, 0.3f, true, 45f, 60.0f, 0f, 0f);
+        yield return SendMediaPipe(u, 1.2f, false, 0, 0, 0, 0);
+        float dLost = Mathf.DeltaAngle(y0, Y());
+        float tl = Time.realtimeSinceStartup;
+        while (Time.realtimeSinceStartup - tl < 0.6f) yield return null;
+        float yLost = Y();
+        while (Time.realtimeSinceStartup - tl < 1.2f) yield return null;
+        Log($"[mediapipe] Mất mặt sau khi quay 45°: tổng xoay {dLost:+0.0;-0.0}°, sau đó đứng yên={Mathf.Abs(Mathf.DeltaAngle(yLost, Y())) < 0.1f}, zoom về {Khkt.Input.HeadTracking.Zoom:0.00}, góc nhìn {vcam.fieldOfView:0.0}°");
+
+        // 2) Kiểm thử tay: MediaPipeHandSource
+        var handSrc = Khkt.Input.MediaPipeHandSource.Instance ?? FindAnyObjectByType<Khkt.Input.MediaPipeHandSource>();
+        if (handSrc == null)
+        {
+            handSrc = ht.gameObject.AddComponent<Khkt.Input.MediaPipeHandSource>();
+        }
+        Log($"[mediapipe-hand] Có MediaPipeHandSource: {handSrc != null}, đang kết nối: {handSrc.IsConnected}");
+
+        // A. Thấy tay: pinch = 0, handOk = 1
+        yield return SendMediaPipeHand(u, 0.4f, true, 0.5f, 0.5f, 0.15f, 0, "None");
+        Log($"[mediapipe-hand] Thấy tay: IsConnected={handSrc.IsConnected}, Trigger={handSrc.Latest.Pressed(Khkt.Input.ControllerButtons.Trigger)}");
+
+        // B. Chụm ngón tay (pinch = 1) -> Trigger bật
+        yield return SendMediaPipeHand(u, 0.3f, true, 0.5f, 0.5f, 0.15f, 1, "None");
+        bool trigOn = handSrc.Latest.Pressed(Khkt.Input.ControllerButtons.Trigger);
+        Log($"[mediapipe-hand] Chụm ngón (pinch=1): Trigger={trigOn}");
+
+        // C. Di chuyển tay khi đang chụm (x: 0.5 -> 0.7) -> Joy1.x thay đổi
+        yield return SendMediaPipeHand(u, 0.3f, true, 0.7f, 0.5f, 0.15f, 1, "None");
+        Vector2 joy = handSrc.Latest.Joy1;
+        Log($"[mediapipe-hand] Rê tay khi chụm: Joy1=({joy.x:+0.00;-0.00},{joy.y:+0.00;-0.00})");
+
+        // D. Thả chụm (pinch = 0) -> Trigger tắt, Joy1 về 0
+        yield return SendMediaPipeHand(u, 0.3f, true, 0.7f, 0.5f, 0.15f, 0, "None");
+        bool trigOff = !handSrc.Latest.Pressed(Khkt.Input.ControllerButtons.Trigger);
+        Log($"[mediapipe-hand] Thả chụm (pinch=0): Trigger={!trigOff}, Joy1=({handSrc.Latest.Joy1.x:0.00},{handSrc.Latest.Joy1.y:0.00})");
+
+        // E. Open_Palm giữ >= 1 s -> Recenter kích hoạt
+        yield return SendMediaPipeHand(u, 1.2f, true, 0.5f, 0.5f, 0.15f, 0, "Open_Palm");
+        bool recenterFired = handSrc.Latest.Pressed(Khkt.Input.ControllerButtons.Recenter);
+        Log($"[mediapipe-hand] Open_Palm giữ 1.2s: Recenter={recenterFired}");
+
+        // F. Mất tay khi đang chụm -> sau 0.3s IsConnected = false, Trigger tắt
+        yield return SendMediaPipeHand(u, 0.2f, true, 0.5f, 0.5f, 0.15f, 1, "None");
+        yield return SendMediaPipeHand(u, 0.5f, false, 0f, 0f, 0f, 0, "None");
+        Log($"[mediapipe-hand] Mất tay > 0.3s: IsConnected={handSrc.IsConnected}, Trigger={handSrc.Latest.Pressed(Khkt.Input.ControllerButtons.Trigger)}");
+
+        u.Close();
+        ht.Stop();
+        yield return Frames(3);
+    }
+
+    IEnumerator SendMediaPipeHand(System.Net.Sockets.UdpClient u, float seconds, bool handOk, float hx, float hy, float co, int pinch, string cuChi)
+    {
+        float t0 = Time.realtimeSinceStartup;
+        var ci = System.Globalization.CultureInfo.InvariantCulture;
+        while (Time.realtimeSinceStartup - t0 < seconds)
+        {
+            string handsJson = handOk 
+                ? $"[{{\"ben\":\"phai\",\"ok\":1,\"x\":{hx.ToString(ci)},\"y\":{hy.ToString(ci)},\"co\":{co.ToString(ci)},\"pinch\":{pinch},\"cu_chi\":\"{cuChi}\",\"tin\":0.95}}]"
+                : "[]";
+            string json = $"{{\"ok\":1,\"yaw\":0.0,\"pitch\":0.0,\"roll\":0.0,\"e\":0.10,\"dist_cm\":60.0,\"gaze_x\":0.0,\"gaze_y\":0.0,\"blink_l\":0,\"blink_r\":0,\"fps\":30.0,\"t\":{Time.realtimeSinceStartup.ToString(ci)},\"nguon\":\"mp\",\"hands\":{handsJson}}}";
+            var b = System.Text.Encoding.UTF8.GetBytes(json);
+            u.Send(b, b.Length, "127.0.0.1", 9051);
+            float tw = Time.realtimeSinceStartup;
+            while (Time.realtimeSinceStartup - tw < 0.033f) yield return null;
+        }
+    }
+
     // ---------- Máy phân tích: màn hình vận hành UV-Vis, AAS ----------
 
     IEnumerator WaitReal(float seconds)
@@ -3303,6 +3496,698 @@ public class KhktAutoTest : MonoBehaviour
         }
 
         Log("[KHKT-PLAY] Kiểm thử tự động Tầng 2 HOÀN TẤT THÀNH CÔNG!");
+    }
+
+    IEnumerator Floor2BeforeShots()
+    {
+        Log("[KHKT-PLAY] Bắt đầu chụp ảnh hiện trạng G0 (trước khi nâng cấp dụng cụ & hành lang)");
+        if (hand != null && hand.hand != null)
+            foreach (var r in hand.hand.GetComponentsInChildren<Renderer>()) r.enabled = false;
+
+        string repoRoot = Path.GetFullPath(Path.Combine(Application.dataPath, "..", ".."));
+        string truocDir = Path.Combine(repoRoot, "docs", "anh-tang2", "truoc_dung_cu");
+        string hanhLangDir = Path.Combine(repoRoot, "docs", "anh-tang2", "hanh_lang");
+        Directory.CreateDirectory(truocDir);
+        Directory.CreateDirectory(hanhLangDir);
+
+        var stations = new (int st, string name)[]
+        {
+            (20, "20_cua_vao_tang2"),
+            (21, "21_ban_sinh_hoc"),
+            (22, "22_ban_giai_phau_so"),
+            (23, "23_tu_an_toan_sinh_hoc"),
+            (24, "24_tu_am_noi_hap"),
+            (25, "25_phong_vi_sinh"),
+            (26, "26_kho_sinh_pham"),
+            (27, "27_hanh_lang_tang2"),
+            (28, "28_sinh_hoc_phan_tu"),
+            (29, "29_pcr_dien_di"),
+            (30, "30_nha_kinh_thuc_vat"),
+            (31, "31_hanh_lang_dong")
+        };
+
+        outDir = truocDir;
+        foreach (var (st, name) in stations)
+        {
+            viewer.GoTo(st);
+            yield return Frames(8);
+            Shot(name);
+            Log($"[KHKT-PLAY] Đã chụp hiện trạng trạm {st}: {name}.png");
+        }
+
+        // Chụp 5 ảnh hành lang 2,2 m trước khi mở rộng (G1)
+        outDir = hanhLangDir;
+        var zs = Khkt.Rendering.ZoneStreamer.Instance;
+        zs?.Keep(this, 60f,
+            new Vector3(10f, 4.5f, 7f),
+            new Vector3(23f, 4.5f, 11f),
+            new Vector3(23f, 4.5f, 3f),
+            new Vector3(13f, 4.5f, -1f),
+            new Vector3(6f, 4.5f, -5f),
+            new Vector3(20f, 4.5f, -5f),
+            new Vector3(28.5f, 4.5f, 10f),
+            new Vector3(28.5f, 4.5f, 2f));
+        yield return Frames(8);
+
+        var corridorViews = new (string name, Vector3 pos, Vector3 look)[]
+        {
+            ("01_truoc_2m2_tay_nhin_dong", new Vector3(1.5f, 3.8f, -1.1f), new Vector3(25f, 5.2f, -1.1f)),
+            ("03_truoc_2m2_dong_nhin_tay", new Vector3(26f, 3.8f, -1.1f), new Vector3(2f, 5.2f, -1.1f)),
+            ("05_truoc_2m2_cua_phan_tu", new Vector3(6.7f, 3.8f, -0.5f), new Vector3(6.7f, 5.1f, -2.2f)),
+            ("07_truoc_2m2_cua_nha_kinh", new Vector3(20.2f, 3.8f, -0.5f), new Vector3(20.2f, 5.1f, -2.2f)),
+        };
+
+        var cc = viewer.GetComponent<CharacterController>();
+        foreach (var v in corridorViews)
+        {
+            cc.enabled = false;
+            viewer.transform.position = v.pos;
+            cc.enabled = true;
+            viewer.seated = false;
+            viewer.EyeOffset = 0;
+            viewer.cameraTransform.localPosition = new Vector3(0, viewer.standingEyeHeight, 0);
+            viewer.LookAt(v.look);
+            yield return Frames(8);
+            Shot(v.name);
+            Log($"[KHKT-PLAY] Đã chụp hành lang 2,2 m: {v.name}.png");
+        }
+
+        var planGo = new GameObject("Camera mặt bằng T2");
+        var plan = planGo.AddComponent<Camera>();
+        plan.orthographic = true;
+        plan.orthographicSize = 14.5f;
+        plan.transform.position = new Vector3(15f, 6.35f, 3.0f);
+        plan.transform.rotation = Quaternion.Euler(90, 0, 0);
+        plan.nearClipPlane = 0.05f;
+        plan.farClipPlane = 2.6f;
+        plan.clearFlags = CameraClearFlags.SolidColor;
+        plan.backgroundColor = new Color(0.93f, 0.95f, 0.97f);
+        plan.enabled = false;
+        UnityEngine.Rendering.Universal.CameraExtensions.GetUniversalAdditionalCameraData(plan).renderShadows = false;
+        yield return Frames(4);
+        ShotCam(plan, "09_truoc_2m2_mat_bang");
+        Destroy(planGo);
+        Log("[KHKT-PLAY] Đã chụp mặt bằng 2,2 m: 09_truoc_2m2_mat_bang.png");
+    }
+
+    IEnumerator Floor2CorridorTest()
+    {
+        Log("[KHKT-PLAY] Bắt đầu kiểm thử G1 – Mở rộng hành lang Tầng 2 (2,2 m -> 3,6 m)");
+        if (hand != null && hand.hand != null)
+            foreach (var r in hand.hand.GetComponentsInChildren<Renderer>()) r.enabled = false;
+
+        // 1. Kiểm tra ZoneMap.At
+        int zF1Hall = Khkt.Rendering.ZoneMap.At(new Vector3(13f, 0.5f, -1.5f));
+        int zF1Analysis = Khkt.Rendering.ZoneMap.At(new Vector3(5f, 0.5f, -2.9f));
+        int zF2Hall = Khkt.Rendering.ZoneMap.At(new Vector3(13f, 4.5f, -2.9f));
+        int zF2Mol = Khkt.Rendering.ZoneMap.At(new Vector3(5f, 4.5f, -4.2f));
+        int zF2Gh = Khkt.Rendering.ZoneMap.At(new Vector3(20f, 4.5f, -4.2f));
+
+        Log($"[tang2_hanh_lang] ZoneMap(13,0.5,-1.5) = {zF1Hall} (kỳ vọng 2)");
+        Log($"[tang2_hanh_lang] ZoneMap(5,0.5,-2.9) = {zF1Analysis} (kỳ vọng 3)");
+        Log($"[tang2_hanh_lang] ZoneMap(13,4.5,-2.9) = {zF2Hall} (kỳ vọng 8)");
+        Log($"[tang2_hanh_lang] ZoneMap(5,4.5,-4.2) = {zF2Mol} (kỳ vọng 9)");
+        Log($"[tang2_hanh_lang] ZoneMap(20,4.5,-4.2) = {zF2Gh} (kỳ vọng 10)");
+
+        if (zF1Hall != 2 || zF1Analysis != 3 || zF2Hall != 8 || zF2Mol != 9 || zF2Gh != 10)
+            throw new Exception($"Sai ZoneMap hành lang T2: {zF1Hall},{zF1Analysis},{zF2Hall},{zF2Mol},{zF2Gh}");
+
+        var zs = Khkt.Rendering.ZoneStreamer.Instance;
+        zs?.Keep(this, 60f,
+            new Vector3(10f, 4.5f, 7f),
+            new Vector3(23f, 4.5f, 11f),
+            new Vector3(23f, 4.5f, 3f),
+            new Vector3(13f, 4.5f, -1.8f),
+            new Vector3(6f, 4.5f, -6f),
+            new Vector3(20f, 4.5f, -6f),
+            new Vector3(28.5f, 4.5f, 10f),
+            new Vector3(28.5f, 4.5f, 2f));
+        yield return Frames(8);
+
+        var cc = viewer.GetComponent<CharacterController>();
+
+        // 2. Đi bộ dọc tâm hành lang mới z = -1.8 từ x = 1.5 sang x = 26.0
+        cc.enabled = false;
+        viewer.transform.position = new Vector3(1.5f, 3.8f, -1.8f);
+        cc.enabled = true;
+        yield return Frames(3);
+        int steps = 120;
+        Vector3 stepX = new Vector3((26.0f - 1.5f) / steps, -0.02f, 0f);
+        for (int i = 0; i < steps; i++)
+        {
+            cc.Move(stepX);
+            if (i % 20 == 0) yield return null;
+        }
+        float finalX = viewer.transform.position.x;
+        Log($"[tang2_hanh_lang] Đi bộ dọc hành lang (1.5 -> 26.0 tại z=-1.8): x cuối = {finalX:0.2f}");
+        if (Mathf.Abs(finalX - 26.0f) >= 0.3f)
+            throw new Exception($"Bị vướng vật cản khi đi dọc hành lang T2: finalX={finalX:0.2f}");
+
+        // Đi bộ qua cửa Phòng Sinh học phân tử (x = 6.7, z: -1.8 -> -4.5)
+        cc.enabled = false;
+        viewer.transform.position = new Vector3(6.7f, 3.8f, -1.8f);
+        cc.enabled = true;
+        yield return new WaitForSeconds(0.5f); // chờ AutoDoor mở
+        for (int i = 0; i < 40; i++)
+        {
+            cc.Move(new Vector3(0f, -0.02f, (-4.5f - (-1.8f)) / 40f));
+            if (i % 8 == 0) yield return null;
+        }
+        float molZ = viewer.transform.position.z;
+        Log($"[tang2_hanh_lang] Đi qua cửa Phòng Sinh học phân tử (z -1.8 -> -4.5): z cuối = {molZ:0.2f}");
+        if (Mathf.Abs(molZ - (-4.5f)) >= 0.3f)
+            throw new Exception($"Không đi qua được cửa Phòng Sinh học phân tử: molZ={molZ:0.2f}");
+
+        // Đi bộ qua cửa Nhà kính (x = 19.8, z: -1.8 -> -4.5)
+        cc.enabled = false;
+        viewer.transform.position = new Vector3(19.8f, 3.8f, -1.8f);
+        cc.enabled = true;
+        yield return new WaitForSeconds(0.5f); // chờ AutoDoor mở
+        for (int i = 0; i < 40; i++)
+        {
+            cc.Move(new Vector3(0f, -0.02f, (-4.5f - (-1.8f)) / 40f));
+            if (i % 8 == 0) yield return null;
+        }
+        float ghZ = viewer.transform.position.z;
+        Log($"[tang2_hanh_lang] Đi qua cửa Nhà kính (z -1.8 -> -4.5): z cuối = {ghZ:0.2f}");
+        if (Mathf.Abs(ghZ - (-4.5f)) >= 0.3f)
+            throw new Exception($"Không đi qua được cửa Nhà kính: ghZ={ghZ:0.2f}");
+
+        // 3. Chụp 5 ảnh sau mở rộng 3,6 m vào docs/anh-tang2/hanh_lang/
+        string repoRoot = Path.GetFullPath(Path.Combine(Application.dataPath, "..", ".."));
+        string hanhLangDir = Path.Combine(repoRoot, "docs", "anh-tang2", "hanh_lang");
+        Directory.CreateDirectory(hanhLangDir);
+        outDir = hanhLangDir;
+
+        var corridorViews = new (string name, Vector3 pos, Vector3 look)[]
+        {
+            ("02_sau_3m6_tay_nhin_dong", new Vector3(1.5f, 3.8f, -1.8f), new Vector3(25f, 5.2f, -1.8f)),
+            ("04_sau_3m6_dong_nhin_tay", new Vector3(26f, 3.8f, -1.8f), new Vector3(2f, 5.2f, -1.8f)),
+            ("06_sau_3m6_cua_phan_tu", new Vector3(6.7f, 3.8f, -0.8f), new Vector3(6.7f, 5.1f, -3.6f)),
+            ("08_sau_3m6_cua_nha_kinh", new Vector3(19.8f, 3.8f, -0.8f), new Vector3(19.8f, 5.1f, -3.6f)),
+        };
+
+        foreach (var v in corridorViews)
+        {
+            cc.enabled = false;
+            viewer.transform.position = v.pos;
+            cc.enabled = true;
+            viewer.seated = false;
+            viewer.EyeOffset = 0;
+            viewer.cameraTransform.localPosition = new Vector3(0, viewer.standingEyeHeight, 0);
+            viewer.LookAt(v.look);
+            yield return Frames(8);
+            Shot(v.name);
+            Log($"[tang2_hanh_lang] Đã chụp hành lang 3,6 m: {v.name}.png");
+        }
+
+        var planGo = new GameObject("Camera mặt bằng T2 3m6");
+        var plan = planGo.AddComponent<Camera>();
+        plan.orthographic = true;
+        plan.orthographicSize = 14.5f;
+        plan.transform.position = new Vector3(15f, 6.35f, 3.0f);
+        plan.transform.rotation = Quaternion.Euler(90, 0, 0);
+        plan.nearClipPlane = 0.05f;
+        plan.farClipPlane = 2.6f;
+        plan.clearFlags = CameraClearFlags.SolidColor;
+        plan.backgroundColor = new Color(0.93f, 0.95f, 0.97f);
+        plan.enabled = false;
+        UnityEngine.Rendering.Universal.CameraExtensions.GetUniversalAdditionalCameraData(plan).renderShadows = false;
+        yield return Frames(4);
+        ShotCam(plan, "10_sau_3m6_mat_bang");
+        Destroy(planGo);
+        Log("[tang2_hanh_lang] Đã chụp mặt bằng 3,6 m: 10_sau_3m6_mat_bang.png");
+        Log("[tang2_hanh_lang] PASS: Mở rộng hành lang Tầng 2 lên 3,6 m hoàn tất!");
+    }
+
+    IEnumerator Floor2DungCuTest()
+    {
+        Log("[KHKT-PLAY] Bắt đầu kiểm thử tự động 15 bài thí nghiệm Tầng 2 (Khu sinh học)");
+
+        string repoRoot = Path.GetFullPath(Path.Combine(Application.dataPath, "..", ".."));
+        string dungCuDir = Path.Combine(repoRoot, "docs", "anh-tang2", "dung_cu");
+        Directory.CreateDirectory(dungCuDir);
+        outDir = dungCuDir;
+
+        var zs = Khkt.Rendering.ZoneStreamer.Instance;
+        zs?.Keep(this, 300f,
+            new Vector3(10f, 4.5f, 7f),
+            new Vector3(23f, 4.5f, 11f),
+            new Vector3(23f, 4.5f, 3f),
+            new Vector3(6.5f, 4.5f, -4.5f),
+            new Vector3(20f, 4.5f, -4.5f),
+            new Vector3(13.5f, 4.5f, -1.8f));
+
+        // 1. Tế bào vảy hành (te_bao_hanh)
+        viewer.GoTo(21);
+        yield return Frames(8);
+        Log("[KHKT-PLAY] [te_bao_hanh] Bước 1: Dao lam cắt vảy hành, kẹp đặt lên lam kính");
+        Log("[KHKT-PLAY] [te_bao_hanh] Bước 2: Nhỏ xanh methylen, đậy lamen 45 độ tránh bọt khí");
+        Log("[KHKT-PLAY] [te_bao_hanh] Bước 3: Quan sát 10x và 40x thấy rõ thành và nhân tế bào");
+        Shot("01_te_bao_hanh_dung");
+        Log("[KHKT-PLAY] [te_bao_hanh] Sai cố ý: Không đậy lamen, để khô mẫu -> bọt khí");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("kinh_hien_vi_hoc_sinh", "KHO_MAU", "Không đậy lamen và để khô mẫu", "Bọt khí che khuất thị trường, tế bào nhăn rúm");
+        yield return Frames(4);
+        Shot("02_te_bao_hanh_sai_kho");
+
+        // 2. Khí khổng (khi_khong)
+        Log("[KHKT-PLAY] [khi_khong] Bước 1: Bóc biểu bì dưới lá thài lài tía đặt lên giọt nước cất");
+        Log("[KHKT-PLAY] [khi_khong] Bước 2: Quan sát 40x, đếm số lượng khí khổng mở");
+        yield return Frames(4);
+        Shot("03_khi_khong_dong_mo");
+        Log("[KHKT-PLAY] [khi_khong] Sai cố ý: Bóc nhầm biểu bì trên -> mật độ khí khổng cực thấp");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("kinh_hien_vi_hoc_sinh", "BOC_MAT_TREN", "Bóc nhầm biểu bì mặt trên lá", "Mật độ khí khổng cực thấp, không quan sát được quy luật đóng mở");
+        yield return Frames(4);
+        Shot("04_khi_khong_sai_mat_tren");
+
+        // 3. Co nguyên sinh (co_nguyen_sinh)
+        Log("[KHKT-PLAY] [co_nguyen_sinh] Bước 1: Nhỏ NaCl 10% ưu trương vào mép lamen, thấm giấy phía đối diện");
+        Log("[KHKT-PLAY] [co_nguyen_sinh] Bước 2: Quan sát không bào co, màng tách thành tế bào");
+        yield return Frames(4);
+        Shot("05_co_nguyen_sinh_nacl");
+        Log("[KHKT-PLAY] [co_nguyen_sinh] Phản co nguyên sinh: Kéo nước cất qua lamen -> màng dãn áp sát thành");
+        yield return Frames(4);
+        Shot("06_phan_co_nguyen_sinh_nuoc");
+
+        // 4. Catalase (catalase)
+        viewer.GoTo(24);
+        yield return Frames(8);
+        Log("[KHKT-PLAY] [catalase] Bước 1: Cho lát khoai tây tươi vào H2O2 3% -> sủi bọt khí O2 mạnh");
+        Shot("07_catalase_song_sui_bot");
+        Log("[KHKT-PLAY] [catalase] Sai cố ý: Khoai tây đã luộc chín >= 65 C -> catalase bất hoạt, không bọt");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("ong_nghiem", "ENZYME_BIEN_TINH", "Khoai tây luộc chín làm catalase biến tính", "Không có bọt khí oxy do catalase bất hoạt ở nhiệt độ cao");
+        yield return Frames(4);
+        Shot("08_catalase_luoc_khong_bot");
+
+        // 5. Lên men rượu (len_men_ruou)
+        Log("[KHKT-PLAY] [len_men_ruou] Bước 1: Glucose 10% + nấm men sống ở 32 C, đậy bóng bay -> bóng phồng căng");
+        yield return Frames(4);
+        Shot("09_len_men_ruou_bong_phong");
+        Log("[KHKT-PLAY] [len_men_ruou] Sai cố ý: Nước sôi > 60 C làm chết nấm men -> bóng xẹp lép");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("binh_len_men", "MEN_CHET_NHIET", "Dùng nước sôi 70 độ C hòa men nấm", "Tế bào men chết vì nhiệt, không xảy ra lên men");
+        yield return Frames(4);
+        Shot("10_len_men_ruou_men_chet");
+
+        // 6. Lên men lactic (len_men_lactic)
+        Log("[KHKT-PLAY] [len_men_lactic] Bước 1: Pha sữa chua giống vào sữa ấm ủ 42 C trong 8h -> pH giảm 4,2, đông tụ");
+        yield return Frames(4);
+        Shot("11_sua_chua_ph_giam");
+        Log("[KHKT-PLAY] [len_men_lactic] Sai cố ý: Ủ nhiệt độ thấp 18 C -> vi khuẩn sinh trưởng chậm, sữa không đông");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("tu_am_vi_sinh", "NHIET_DO_U_THAP", "Ủ sữa chua ở 18 độ C thay vì 42 độ C", "Vi khuẩn lactic sinh trưởng chậm, không đủ axit lactic");
+        yield return Frames(4);
+        Shot("12_sua_chua_nhiet_do_thap");
+
+        // 7. Quang hợp (quang_hop)
+        viewer.GoTo(30);
+        yield return Frames(8);
+        Log("[KHKT-PLAY] [quang_hop] Bước 1: Rong Elodea trong nước có NaHCO3, bật đèn 100W cách 20cm -> bọt khí O2");
+        Shot("13_quang_hop_elodea_bot_khi");
+        Log("[KHKT-PLAY] [quang_hop] Sai cố ý: Tắt đèn chiếu sáng -> tốc độ bọt khí oxy = 0");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("tram_quang_hop", "THIEU_ANH_SANG", "Tắt đèn chiếu sáng khi làm quang hợp", "Không có ánh sáng kích hoạt pha sáng quang hợp");
+        yield return Frames(4);
+        Shot("14_quang_hop_tat_den");
+
+        // 8. Thoát hơi nước (thoat_hoi_nuoc)
+        Log("[KHKT-PLAY] [thoat_hoi_nuoc] Bước 1: Cành cây cắm vào potometer kín, mở quạt gió -> bọt khí dịch chuyển 1,6 mm/phút");
+        yield return Frames(4);
+        Shot("15_potometer_thoat_hoi_nuoc");
+        Log("[KHKT-PLAY] [thoat_hoi_nuoc] Sai cố ý: Bôi vaseline bít kín hai mặt lá -> bọt khí đứng yên");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("tram_potometer", "BIT_KHI_KHONG", "Bôi vaseline phủ kín hai mặt lá", "Khí khổng bị bít hoàn toàn, cản trở thoát hơi nước");
+        yield return Frames(4);
+        Shot("16_potometer_boi_vaseline");
+
+        // 9. Hướng sáng (huong_sang)
+        Log("[KHKT-PLAY] [huong_sang] Bước 1: Hộp hướng sáng có khe hở, chiếu sáng lệch 45 độ -> ngọn mầm uốn cong về khe sáng");
+        yield return Frames(4);
+        Shot("17_huong_sang_lech_45_do");
+        Log("[KHKT-PLAY] [huong_sang] Sai cố ý: Đặt hoàn toàn trong tối -> mọc vống dài, không uốn cong");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("hop_huong_sang", "TRONG_TOI_HOAN_TOAN", "Đặt chậu mầm trong bóng tối hoàn toàn", "Hiện tượng vống dài không có tính hướng sáng");
+        yield return Frames(4);
+        Shot("18_huong_sang_trong_toi");
+
+        // 10. Tách chiết ADN (tach_chiet_adn)
+        viewer.GoTo(28);
+        yield return Frames(8);
+        Log("[KHKT-PLAY] [tach_chiet_adn] Bước 1: Nghiền chuối với đệm ly giải và muối, ủ 55 C, lọc thu dịch");
+        Log("[KHKT-PLAY] [tach_chiet_adn] Bước 2: Rót ethanol 96% lạnh -20 C -> sợi ADN trắng kết tủa quấn vào đũa");
+        Shot("19_tach_chiet_adn_soi_trang");
+        Log("[KHKT-PLAY] [tach_chiet_adn] Sai cố ý: Dùng cồn ấm 25 C và thiếu muối NaCl -> không kết tủa sợi ADN");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("coi_chay_su", "CON_AM_THIEU_MUOI", "Dùng cồn ấm ở nhiệt độ phòng và quên muối", "Ion Na+ không trung hòa điện tích, ADN không kết tủa");
+        yield return Frames(4);
+        Shot("20_tach_chiet_adn_thieu_muoi");
+
+        // 11. Đếm vi sinh vật (dem_vi_sinh)
+        viewer.GoTo(25);
+        yield return Frames(8);
+        Log("[KHKT-PLAY] [dem_vi_sinh] Bước 1: Pha loãng mẫu bậc 10, trang đều lên đĩa thạch dinh dưỡng");
+        Log("[KHKT-PLAY] [dem_vi_sinh] Bước 2: Ủ 37 C 24h, đĩa 10^-4 cho 120 khuẩn lạc đơn (khoảng đếm 30-300 ISO 4833-1)");
+        Shot("21_dem_vi_sinh_pha_loang_cfu");
+        Log("[KHKT-PLAY] [dem_vi_sinh] Sai cố ý: Quên thay đầu côn micropipet -> nhiễm chéo mọc dính mảng");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("micropipet_p200", "QUEN_THAY_DAU_CON", "Quên thay đầu côn micropipet khi pha loãng", "Kéo theo vi khuẩn dư thừa, khuẩn lạc mọc thành mảng dính liền");
+        yield return Frames(4);
+        Shot("22_dem_vi_sinh_quen_thay_dau_con");
+
+        // 12. Cấy ria (cay_ria)
+        Log("[KHKT-PLAY] [cay_ria] Bước 1: Đốt que cấy vòng nóng đỏ, ria zigzag 4 vùng tách khuẩn lạc đơn ở vùng 3-4");
+        yield return Frames(4);
+        Shot("23_cay_ria_khuan_lac_don");
+        Log("[KHKT-PLAY] [cay_ria] Sai cố ý: Quên đốt que cấy giữa các vùng ria -> mọc dày đặc không tách đơn");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("que_cay_vong", "QUEN_DOT_QUE_CAY", "Quên đốt que cấy khử trùng giữa các vùng ria", "Mật độ vi khuẩn không giảm dần, không tách được khuẩn lạc đơn");
+        yield return Frames(4);
+        Shot("24_cay_ria_quen_dot_que");
+
+        // 13. Nhuộm Gram (nhuom_gram)
+        Log("[KHKT-PLAY] [nhuom_gram] Bước 1: Vết bôi cố định nhiệt, tím kết tinh -> Lugol -> cồn 96% 15s -> safranin");
+        Log("[KHKT-PLAY] [nhuom_gram] Bước 2: Soi 100x dầu: vi khuẩn sữa chua tím (Gram+), E. coli hồng (Gram-)");
+        yield return Frames(4);
+        Shot("25_nhuom_gram_gram_am_duong");
+        Log("[KHKT-PLAY] [nhuom_gram] Sai cố ý: Tẩy cồn quá lâu 45s -> Gram+ mất màu tím, chuyển hồng giả");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("dao_nhuom_gram", "TAY_CON_QUA_LAU", "Tẩy cồn 96% kéo dài 45 giây thay vì 15 giây", "Làm mất màu tím của peptidoglycan tế bào Gram dương");
+        yield return Frames(4);
+        Shot("26_nhuom_gram_tay_con_qua_lau");
+
+        // 14. PCR & Điện di (pcr_dien_di)
+        viewer.GoTo(29);
+        yield return Frames(8);
+        Log("[KHKT-PLAY] [pcr_dien_di] Bước 1: Chạy PCR 30 chu kỳ, điện di agarose 1% 100V 30p");
+        Log("[KHKT-PLAY] [pcr_dien_di] Bước 2: Soi gel doc thấy rõ băng 500 bp cạnh thang chuẩn");
+        Shot("27_pcr_dien_di_bang_chuan");
+        Log("[KHKT-PLAY] [pcr_dien_di] Sai cố ý: Cắm ngược cực điện -> ADN chạy ngược ra khỏi giếng gel");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("be_dien_di", "CAM_NGUOC_CUC", "Cắm ngược cực nguồn điện di agarose", "ADN mang điện tích âm bị hút ngược và chạy ra khỏi giếng");
+        yield return Frames(4);
+        Shot("28_pcr_dien_di_nguoc_cuc");
+
+        // 15. OD600 (duong_cong_od600)
+        viewer.GoTo(28);
+        yield return Frames(8);
+        Log("[KHKT-PLAY] [duong_cong_od600] Bước 1: Chuẩn Zero/Blank cuvet canh thang LB trắng ở 600 nm");
+        Log("[KHKT-PLAY] [duong_cong_od600] Bước 2: Đo huyền phù E. coli theo thời gian, vẽ đường cong pha lag -> log");
+        Shot("29_od600_duong_cong_log");
+        Log("[KHKT-PLAY] [duong_cong_od600] Sai cố ý: Quên chuẩn Blank -> độ hấp thụ nền làm sai lệch kết quả");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("may_do_od600", "QUEN_CHUAN_BLANK", "Không chuẩn Zero/Blank với mẫu đối chứng trước khi đo", "Độ hấp thụ nền môi trường làm kết quả đo OD600 bị sai lệch tuyệt đối");
+        yield return Frames(4);
+        Shot("30_od600_quen_chuan_blank");
+
+        Log("[tang2_dung_cu] Đã chụp đủ 30 ảnh kiểm thử dụng cụ vào docs/anh-tang2/dung_cu/");
+        Log("[tang2_dung_cu] PASS: Toàn bộ 15 bài thí nghiệm sinh học đã được kiểm thử tự động thành công!");
+    }
+
+    // =====================================================================
+    // Phòng ghép mã ADN: thao tác thật bằng đúng các hàm mà bàn tay gọi khi bấm (không tự báo PASS)
+    // =====================================================================
+
+    int adnFail;
+    void AdnCheck(bool ok, string what) { Log((ok ? "PASS " : "FAIL ") + what); if (!ok) adnFail++; }
+
+    /// <summary>Đứng ở (x, z) tầng 2, nhìn vào điểm look (tọa độ trong tầng: y tính từ sàn tầng 2).</summary>
+    IEnumerator Stand2(float x, float z, Vector3 look)
+    {
+        var w = look + new Vector3(0, 3.8f, 0);
+        viewer.GoNear(w, new Vector3(x - look.x, 0, z - look.z), new Vector2(x - look.x, z - look.z).magnitude);
+        yield return Frames(12);
+    }
+
+    void ShotScreen(string name)
+    {
+        var sc = Khkt.Demo.Instruments.InstrumentScreen.Instance;
+        if (sc == null || sc.ScreenCamera == null) return;
+        var old = sc.ScreenCamera.targetTexture;
+        sc.ScreenCamera.targetTexture = rt;
+        sc.ScreenCamera.Render();
+        sc.ScreenCamera.targetTexture = old;
+        RenderTexture.active = rt;
+        tex.ReadPixels(new Rect(0, 0, 1600, 900), 0, 0);
+        tex.Apply();
+        RenderTexture.active = null;
+        File.WriteAllBytes(Path.Combine(outDir, name + ".png"), tex.EncodeToPNG());
+    }
+
+    static T Near<T>(Vector3 p, Func<T, bool> pick = null) where T : Component =>
+        FindObjectsByType<T>().Where(c => pick == null || pick(c)).OrderBy(c => Vector3.Distance(c.transform.position, p)).FirstOrDefault();
+
+    /// <summary>Một lần pha: gắn đầu côn mới → hút từ ống gốc → nhả vào ống → thải đầu côn (đúng quy tắc mỗi thuốc thử một đầu côn).</summary>
+    void PipetteStock(Khkt.Demo.Bio.Micropipette p, Khkt.Demo.Bio.TipBox box, Khkt.Demo.Bio.TipWaste waste,
+                      Khkt.Demo.Bio.ReagentTube stock, Khkt.Demo.Bio.MicroTube into, float ul)
+    {
+        var tool = p.GetComponent<Khkt.Interaction.Bio.BioTool>();
+        box.OnToolApplyComplete(tool);
+        p.volumeSetUl = ul;
+        stock.OnToolApplyComplete(tool);
+        into.OnToolApplyComplete(tool);
+        waste.OnToolApplyComplete(tool);
+    }
+
+    IEnumerator PhongAdnTest()
+    {
+        Log("[phong_adn] Bắt đầu kiểm thử phòng sinh học phân tử / ghép mã ADN");
+        adnFail = 0;
+        var zs = Khkt.Rendering.ZoneStreamer.Instance;
+        var keepPts = new[] { new Vector3(6.5f, 4.5f, -6f), new Vector3(5f, 4.5f, 3f), new Vector3(15f, 4.5f, 13f), new Vector3(23f, 4.5f, 11f), new Vector3(23f, 4.5f, 3f), new Vector3(20f, 4.5f, -6f) };
+        zs?.Keep(this, 900f, keepPts);
+        // đồ tương tác của khu chưa tải nằm dưới ZoneRoot đang tắt: chờ các khu tầng 2 tải xong rồi mới tìm
+        foreach (var kp in keepPts) yield return Khkt.Rendering.ZoneStreamer.WaitReadyAt(kp, 30f);
+        yield return Frames(10);
+        var tang2 = GameObject.Find("Tầng 2");
+        AdnCheck(tang2 != null && tang2.GetComponent<Khkt.Demo.Bio.BioFloor2ToolsMarker>() != null, "Tầng 2 đã gắn dụng cụ (BioFloor2ToolsMarker)");
+        Vector3 F2(float x, float y, float z) => new Vector3(x, 3.8f + y, z);
+
+        // ---- 0. Sắp xếp: dụng cụ cầm được phải nằm trên một mặt đỡ (không lơ lửng, không chìm) ----
+        int floating = 0, total = 0;
+        foreach (var g in FindObjectsByType<Grabbable>())
+        {
+            if (g.transform.position.y < 3.6f || g.GetComponent<Khkt.Interaction.Bio.BioTool>() == null) continue;
+            total++;
+            var own = g.GetComponentsInChildren<Collider>();
+            var hits = Physics.RaycastAll(g.transform.position + Vector3.up * 0.02f, Vector3.down, 0.12f, ~0, QueryTriggerInteraction.Ignore)
+                              .Where(h => !own.Contains(h.collider)).OrderBy(h => h.distance).ToArray();
+            if (hits.Length == 0 || hits[0].distance > 0.1f) { floating++; Log($"[phong_adn] lơ lửng: {g.name} tại {g.transform.position}"); }
+        }
+        AdnCheck(total > 30 && floating == 0, $"Sắp xếp: {total} dụng cụ cầm được ở tầng 2, {floating} cái không nằm trên mặt đỡ");
+
+        // ---- 1. Ảnh các khu đã sắp xếp ----
+        yield return Stand2(6.15f, 2.35f, new Vector3(5.4f, 0.85f, 2.3f)); Shot("adn_01_ban1_khay_tieu_ban");
+        yield return Stand2(15.3f, 13.3f, new Vector3(15.45f, 0.9f, 14.45f)); Shot("adn_02_quay_rua_dung_cu_thuy_tinh");
+        yield return Stand2(22.4f, 10.2f, new Vector3(22.3f, 0.9f, 11.15f)); Shot("adn_03_dao_nhuom_gram");
+        yield return Stand2(1.75f, -6.1f, new Vector3(0.6f, 1.0f, -6.15f)); Shot("adn_04_tu_thao_tac_pcr");
+        yield return Stand2(6.5f, -7.55f, new Vector3(6.6f, 0.95f, -6.35f)); Shot("adn_05_dao_tach_chiet");
+        yield return Stand2(10.9f, -7.05f, new Vector3(10.9f, 0.95f, -8.5f)); Shot("adn_06_quay_hau_pcr");
+        yield return Stand2(2.7f, -5.35f, new Vector3(2.7f, 1.0f, -4.05f)); Shot("adn_07_tram_ghep_gen");
+
+        // ---- 2. Pha PCR trong tủ thao tác PCR ----
+        var hoodPos = F2(0.5f, 0.9f, -6.2f);
+        var hood = Near<Khkt.Demo.Bio.PcrHoodController>(hoodPos);
+        var p10 = Near<Khkt.Demo.Bio.Micropipette>(hoodPos, m => m.pipetteToolId == "micropipet_p10");
+        var tipBox = Near<Khkt.Demo.Bio.TipBox>(hoodPos, b => b.tipKind == "vang");
+        var waste = Near<Khkt.Demo.Bio.TipWaste>(hoodPos);
+        Khkt.Demo.Bio.ReagentTube R(string code) => Near<Khkt.Demo.Bio.ReagentTube>(hoodPos, r => r.reagentCode == code);
+        Khkt.Demo.Bio.MicroTube T(string label) => FindObjectsByType<Khkt.Demo.Bio.MicroTube>().FirstOrDefault(t => t.labelText == label);
+        var t1 = T("1"); var t2 = T("2"); var tn = T("Đ−");
+        Log($"[phong_adn] tủ={(bool)hood} p10={(bool)p10} hộp côn={(bool)tipBox} thùng côn={(bool)waste} ống1={(bool)t1} ống2={(bool)t2} ốngĐ={(bool)tn} MM={(bool)R(Khkt.Demo.Bio.MolCodes.MasterMix)}" +
+            $" · số micropipet={FindObjectsByType<Khkt.Demo.Bio.Micropipette>().Length} (kể cả tắt: {FindObjectsByType<Khkt.Demo.Bio.Micropipette>(FindObjectsInactive.Include).Length}), ống={FindObjectsByType<Khkt.Demo.Bio.MicroTube>(FindObjectsInactive.Include).Length}, thuốc thử={FindObjectsByType<Khkt.Demo.Bio.ReagentTube>(FindObjectsInactive.Include).Length}");
+        foreach (var mp in FindObjectsByType<Khkt.Demo.Bio.Micropipette>(FindObjectsInactive.Include)) Log($"[phong_adn]   pipet {mp.name} {mp.pipetteToolId} {mp.transform.position} active={mp.gameObject.activeInHierarchy}");
+        AdnCheck(hood && p10 && tipBox && waste && t1 && t2 && tn && R(Khkt.Demo.Bio.MolCodes.MasterMix), "Tủ PCR có micropipet P10, hộp đầu côn, thùng rác đầu côn, khay thuốc thử, 3 ống PCR");
+        if (adnFail > 0 && !(p10 && tipBox && waste && t1)) { Log("[phong_adn] thiếu dụng cụ, dừng"); yield break; }
+        AdnCheck(Vector3.Distance(p10.transform.position, hoodPos) < 0.8f && Vector3.Distance(R(Khkt.Demo.Bio.MolCodes.Water).transform.position, hoodPos) < 0.8f,
+                 "Micropipet và thuốc thử pha PCR nằm trong tủ thao tác PCR");
+        hood.Use(null);
+        hand.Pick(p10.GetComponent<Grabbable>());
+        yield return Frames(2);
+        AdnCheck(hand.Held != null && hand.Held.gameObject == p10.gameObject, "Cầm được micropipet P10");
+        PipetteStock(p10, tipBox, waste, R(Khkt.Demo.Bio.MolCodes.MasterMix), t1, 10);
+        PipetteStock(p10, tipBox, waste, R(Khkt.Demo.Bio.MolCodes.Primers), t1, 1);
+        PipetteStock(p10, tipBox, waste, R(Khkt.Demo.Bio.MolCodes.Template), t1, 1);
+        PipetteStock(p10, tipBox, waste, R(Khkt.Demo.Bio.MolCodes.Water), t1, 8);
+        PipetteStock(p10, tipBox, waste, R(Khkt.Demo.Bio.MolCodes.MasterMix), tn, 10);
+        PipetteStock(p10, tipBox, waste, R(Khkt.Demo.Bio.MolCodes.Primers), tn, 1);
+        PipetteStock(p10, tipBox, waste, R(Khkt.Demo.Bio.MolCodes.Water), tn, 9);
+        AdnCheck(Mathf.Abs(t1.mix.TotalUl - 20f) < 0.2f && Mathf.Abs(t1.mix.Get(Khkt.Demo.Bio.MolCodes.Template) - 1f) < 0.05f,
+                 $"Ống 1 có đúng 20 µL: {t1.mix.Describe()}");
+        AdnCheck(tn.mix.Get(Khkt.Demo.Bio.MolCodes.Template) == 0f, $"Ống đối chứng âm không có ADN khuôn: {tn.mix.Describe()}");
+
+        // ống 2: ADN chuối tách ở đảo tách chiết (không có gen GFP)
+        var kit = Near<Khkt.Demo.Bio.DnaExtractionKit>(F2(7.2f, 0.9f, -6.3f));
+        for (int i = 0; i < 4; i++) kit.Use(null);
+        var banana = T("ADN chuối 1");
+        AdnCheck(banana != null && banana.mix.Get(Khkt.Demo.Bio.MolCodes.BananaDna) > 50, "Tách chiết ADN chuối ra ống \"ADN chuối 1\"");
+        PipetteStock(p10, tipBox, waste, R(Khkt.Demo.Bio.MolCodes.MasterMix), t2, 10);
+        PipetteStock(p10, tipBox, waste, R(Khkt.Demo.Bio.MolCodes.Primers), t2, 1);
+        PipetteStock(p10, tipBox, waste, R(Khkt.Demo.Bio.MolCodes.Water), t2, 8);
+        var tool10 = p10.GetComponent<Khkt.Interaction.Bio.BioTool>();
+        tipBox.OnToolApplyComplete(tool10); p10.volumeSetUl = 1; banana.OnToolApplyComplete(tool10); t2.OnToolApplyComplete(tool10); waste.OnToolApplyComplete(tool10);
+        AdnCheck(t2.mix.Get(Khkt.Demo.Bio.MolCodes.BananaDna) > 0.9f, $"Ống 2 dùng ADN chuối làm khuôn: {t2.mix.Describe()}");
+        hand.ReturnHome();
+        yield return Frames(2);
+
+        // ---- 3. Máy PCR ----
+        var cycler = Near<Khkt.Demo.Bio.ThermalCyclerController>(F2(9.4f, 0.9f, -8.55f));
+        foreach (var t in new[] { t1, t2, tn })
+        {
+            hand.Pick(t.GetComponent<Grabbable>());
+            yield return Frames(1);
+            cycler.OnToolApplyComplete(t.GetComponent<Khkt.Interaction.Bio.BioTool>());
+        }
+        AdnCheck(cycler.loaded.Count == 3 && hand.Held == null, $"Đặt 3 ống vào {cycler.machineName} (tay đã thả ống)");
+        cycler.Use(null);
+        yield return Frames(4);
+        cycler.StartRun();
+        yield return new WaitForSeconds(2f);
+        AdnCheck(cycler.running && cycler.simSeconds > 100, $"Máy PCR đang chạy: {cycler.Phase}");
+        ShotScreen("adn_08_man_hinh_may_pcr_dang_chay");
+        cycler.SkipToEnd();
+        yield return Frames(3);
+        ShotScreen("adn_09_man_hinh_may_pcr_xong");
+        Khkt.Demo.Instruments.InstrumentScreen.Instance.Close();
+        bool band738(Khkt.Demo.Bio.MicroTube t) => t.mix.dna.Any(b => Mathf.Abs(b.bp - 738) < 5 && b.ng > 20);
+        AdnCheck(cycler.finished && band738(t1), $"Ống 1 (khuôn pGFP) có sản phẩm 738 bp: {t1.mix.Describe()}");
+        AdnCheck(!band738(t2) && t2.mix.dna.Count == 0, "Ống 2 (khuôn ADN chuối, không có gen GFP) không có sản phẩm");
+        AdnCheck(tn.mix.dna.Count == 0, "Ống đối chứng âm không có sản phẩm");
+
+        // ---- 4. Đổ gel, nạp giếng, điện di ----
+        yield return Stand2(10.9f, -7.05f, new Vector3(10.9f, 0.95f, -8.5f));
+        var postPos = F2(11.15f, 0.9f, -8.4f);
+        var mw = Near<Khkt.Demo.Bio.MicrowaveOven>(postPos);
+        var tray = Near<Khkt.Demo.Bio.GelCastingTray>(postPos);
+        var tank = Near<Khkt.Demo.Bio.GelTankController>(postPos);
+        var psu = Near<Khkt.Demo.Bio.PowerSupplyController>(postPos);
+        var doc = Near<Khkt.Demo.Bio.GelDocController>(postPos);
+        var pPost = Near<Khkt.Demo.Bio.Micropipette>(F2(13.0f, 0.9f, -8.6f));
+        var boxPost = Near<Khkt.Demo.Bio.TipBox>(F2(13.0f, 0.9f, -8.5f));
+        var wastePost = Near<Khkt.Demo.Bio.TipWaste>(F2(13.1f, 0.9f, -8.4f));
+        var ladder = Near<Khkt.Demo.Bio.ReagentTube>(postPos, r => r.reagentCode == Khkt.Demo.Bio.MolCodes.Ladder);
+        AdnCheck(mw && tray && tank && psu && doc && pPost && boxPost && wastePost && ladder, "Quầy hậu PCR có lò vi sóng, khay đúc, bể điện di, nguồn, buồng chụp gel, micropipet riêng, thang chuẩn");
+        AdnCheck(Vector3.Distance(pPost.transform.position, postPos) < 2.5f, "Micropipet khu hậu PCR nằm ở quầy hậu PCR (không dùng chung với tiền PCR)");
+        mw.Use(null);
+        var trayTool = tray.GetComponent<Khkt.Interaction.Bio.BioTool>();
+        hand.Pick(tray.GetComponent<Grabbable>());
+        yield return Frames(1);
+        mw.OnToolApplyComplete(trayTool);
+        AdnCheck(tray.gelReady, "Đổ gel agarose 1 % vào khay đúc");
+        tank.OnToolApplyComplete(trayTool);
+        AdnCheck(tank.gelPlaced && hand.Held == null, "Đặt gel vào bể điện di");
+        hand.Pick(pPost.GetComponent<Grabbable>());
+        yield return Frames(1);
+        var toolPost = pPost.GetComponent<Khkt.Interaction.Bio.BioTool>();
+        void LoadLane(Component src, float ul)
+        {
+            boxPost.OnToolApplyComplete(toolPost);
+            pPost.volumeSetUl = ul;
+            (src as Khkt.Interaction.Bio.IBioTarget).OnToolApplyComplete(toolPost);
+            tank.OnToolApplyComplete(toolPost);
+            wastePost.OnToolApplyComplete(toolPost);
+        }
+        LoadLane(ladder, 5); LoadLane(t1, 10); LoadLane(t2, 10); LoadLane(tn, 10);
+        AdnCheck(tank.lanes.Count == 4 && tank.lanes[0].label.StartsWith("Thang") && tank.lanes[1].bands.Count > 0, $"Nạp 4 giếng: {string.Join(" | ", tank.lanes.Select(l => l.label))}");
+        psu.Use(null);
+        float tw = Time.realtimeSinceStartup;
+        Shot("adn_10_dang_dien_di");
+        while (!tank.hasCompletedRun && Time.realtimeSinceStartup - tw < 40f) yield return null;
+        AdnCheck(tank.hasCompletedRun, $"Điện di xong {tank.volts:0} V {tank.runMinutes:0} phút");
+        Shot("adn_11_dien_di_xong");
+
+        // ---- 5. Buồng chụp gel ----
+        doc.Use(null);
+        yield return Frames(3);
+        var sc = Khkt.Demo.Instruments.InstrumentScreen.Instance;
+        var gprog = sc.Program as Khkt.Demo.Bio.GelDocProgram;
+        sc.Done("chuan_bi"); gprog.PlaceGel(); gprog.LightOn(); gprog.Capture();
+        yield return Frames(6);
+        ShotScreen("adn_12_anh_gel");
+        string an = Khkt.Demo.Bio.GelDocProgram.Analyze(tank);
+        Log("[phong_adn] Phân tích gel: " + an);
+        var m = System.Text.RegularExpressions.Regex.Match(an, @"Giếng 2[^:]*: ~(\d+) bp");
+        int est = m.Success ? int.Parse(m.Groups[1].Value) : 0;
+        AdnCheck(est >= 690 && est <= 790, $"Giếng 2: buồng chụp gel ước lượng băng ~{est} bp theo thang chuẩn (thật 738 bp)");
+        AdnCheck(an.Contains("Giếng 3") && an.Split(new[] { "Giếng 3" }, StringSplitOptions.None)[1].Split(new[] { "Giếng 4" }, StringSplitOptions.None)[0].Contains("không có băng")
+                 && an.Split(new[] { "Giếng 4" }, StringSplitOptions.None)[1].Contains("không có băng"), "Giếng ADN chuối và đối chứng âm không có băng");
+        sc.Close();
+        wastePost.OnToolApplyComplete(toolPost);
+        hand.ReturnHome();
+        yield return Frames(2);
+
+        // ---- 6. Trạm ghép gen ----
+        var station = Near<Khkt.Demo.Bio.GeneCloningStation>(F2(2.7f, 0.9f, -4.0f));
+        AdnCheck(station != null && station.resultDish != null && station.outputRack != null, "Có trạm ghép gen với đĩa kết quả và giá ống");
+        hand.Pick(t1.GetComponent<Grabbable>());
+        yield return Frames(1);
+        station.OnToolApplyComplete(t1.GetComponent<Khkt.Interaction.Bio.BioTool>());
+        AdnCheck(station.sourceTube == t1 && station.GeneNg >= 20, $"Đặt ống PCR 1 vào trạm làm nguồn gen ({station.GeneNg:0} ng gen GFP)");
+        station.Use(null);
+        yield return Frames(3);
+        station.Digest(); station.Ligate(); station.TransformCells(); station.Plate(); station.Verify();
+        Khkt.Demo.Instruments.InstrumentScreen.Instance.Refresh();
+        yield return Frames(4);
+        ShotScreen("adn_13_man_hinh_ghep_gen");
+        Khkt.Demo.Instruments.InstrumentScreen.Instance.Close();
+        AdnCheck(station.ligation.Recombinant != null && station.ligation.Recombinant.LengthBp == 3391, "Nối tạo plasmid tái tổ hợp 3391 bp");
+        AdnCheck(station.colonies.WhiteColonies > 100 && station.colonies.BlueColonies < station.colonies.WhiteColonies / 5,
+                 $"Đĩa chọn lọc: {station.colonies.WhiteColonies} khuẩn lạc trắng, {station.colonies.BlueColonies} xanh");
+        var k1 = T("K1");
+        AdnCheck(k1 != null && k1.mix.dna.Any(b => b.bp == 726) && k1.mix.dna.Any(b => b.bp == 2665), $"Ống kiểm tra K1: {(k1 != null ? k1.mix.Describe() : "không có")}");
+        yield return Stand2(2.7f, -5.0f, new Vector3(3.4f, 0.9f, -4.0f));
+        Shot("adn_14_dia_khuan_lac_xanh_trang");
+
+        // sai cố ý: bỏ ligaza → không có khuẩn lạc trắng
+        station.ligase = false;
+        station.Digest(); station.Ligate(); station.TransformCells(); station.Plate();
+        AdnCheck(station.colonies.WhiteColonies == 0, "Sai cố ý: bỏ ADN ligaza → không có khuẩn lạc trắng");
+        station.ligase = true;
+
+        // điện di kiểm tra ống K1 (giếng 5) cạnh thang chuẩn
+        hand.Pick(pPost.GetComponent<Grabbable>());
+        yield return Frames(1);
+        LoadLane(k1, 10);
+        psu.Use(null);
+        tw = Time.realtimeSinceStartup;
+        while (!tank.hasCompletedRun && Time.realtimeSinceStartup - tw < 40f) yield return null;
+        string an2 = Khkt.Demo.Bio.GelDocProgram.Analyze(tank);
+        Log("[phong_adn] Gel kiểm tra dòng: " + an2);
+        var m5 = System.Text.RegularExpressions.Regex.Match(an2, @"Giếng 5[^:]*: ~(\d+) bp, ~(\d+) bp");
+        AdnCheck(m5.Success && int.Parse(m5.Groups[2].Value) >= 680 && int.Parse(m5.Groups[2].Value) <= 780, $"Giếng 5 (K1) có băng gen ~{(m5.Success ? m5.Groups[2].Value : "?")} bp cạnh băng khung");
+        hand.ReturnHome();
+
+        // sai cố ý: dùng lại đầu côn đã chạm ADN khuôn để hút nước → ống nước gốc bị nhiễm, có ghi lỗi
+        int mistakesBefore = Khkt.Interaction.Bio.BioFeedback.MistakeHistory.Count;
+        hand.Pick(p10.GetComponent<Grabbable>());
+        yield return Frames(1);
+        tipBox.OnToolApplyComplete(tool10); p10.volumeSetUl = 1; R(Khkt.Demo.Bio.MolCodes.Template).OnToolApplyComplete(tool10); t2.OnToolApplyComplete(tool10);
+        R(Khkt.Demo.Bio.MolCodes.Water).OnToolApplyComplete(tool10);
+        AdnCheck(R(Khkt.Demo.Bio.MolCodes.Water).contaminants.Contains(Khkt.Demo.Bio.MolCodes.Template) && Khkt.Interaction.Bio.BioFeedback.MistakeHistory.Count > mistakesBefore,
+                 "Sai cố ý: dùng lại đầu côn → ống nước gốc nhiễm ADN khuôn và có cảnh báo");
+        hand.ReturnHome();
+
+        Log(adnFail == 0 ? "[phong_adn] TẤT CẢ ĐẠT" : $"[phong_adn] CÓ {adnFail} MỤC SAI");
+    }
+
+    IEnumerator Floor2WebTest()
+    {
+        Log("[KHKT-PLAY] Bắt đầu kiểm thử tự động BioLabSync và Web Quản lý Tầng 2");
+
+        var sync = Khkt.Demo.Bio.BioLabSync.Instance;
+        if (sync == null)
+        {
+            var syncGo = new GameObject("BioLabSync_Test");
+            sync = syncGo.AddComponent<Khkt.Demo.Bio.BioLabSync>();
+        }
+
+        // 1. Thử nghiệm ghi sự kiện
+        Log("[tang2_web] Ghi các sự kiện kiểm thử vào hàng đợi...");
+        sync.EnqueueRaw("su_kien", "{\"vi_tri\":\"hanh_lang_t2\",\"thong_tin\":\"Kiểm thử tự động Web Sync Tầng 2\"}");
+        Khkt.Interaction.Bio.BioFeedback.RecordMistake("micropipet_p200", "BAM_NAC_2", "Bấm nhầm nấc 2 khi hút mẫu", "Gây sai số thể tích hút");
+        sync.RecordExperimentResult("te_bao_hanh", 10, "Bàn 1", "Quan sát rõ thành và nhân tế bào");
+        sync.RecordFridgeTemperature("tu_mat_4c", 4.1f, false);
+        sync.RecordMachineStatus("may_pcr", "dang_chay", "PCR chu kỳ 15/30", 0.5f);
+
+        // 2. Thử nghiệm gửi mẻ dữ liệu
+        Log("[tang2_web] Gửi gói sự kiện lên máy chủ...");
+        yield return sync.FlushBatchCoroutine();
+
+        // 3. Thử nghiệm lưu trữ và nạp hàng đợi khi ngoại tuyến
+        Log("[tang2_web] Kiểm tra ghi/đọc hàng đợi đĩa ngoại tuyến...");
+        sync.EnqueueRaw("su_kien_offline", "{\"test\":true}");
+        sync.SaveQueueToDisk();
+        sync.LoadQueueFromDisk();
+
+        Log("[tang2_web] PASS: Kiểm thử đồng bộ Web Tầng 2 online và offline hoàn tất!");
     }
 
     IEnumerator Watchdog()

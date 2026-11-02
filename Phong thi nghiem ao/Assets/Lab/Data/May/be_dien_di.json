@@ -64,6 +64,12 @@
       "gia_tri": "Di chuyển tuyến tính theo thời gian và nghịch biến theo log10(bp)",
       "loai": "mô phỏng",
       "mo_phong": true
+    },
+    {
+      "ten": "Số lượng giếng mẫu tối đa trên khay",
+      "gia_tri": "15 giếng / khay lược",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.bio-rad.com/en-us/product/sub-cell-gt-agarose-gel-electrophoresis-systems"
     }
   ],
   "quy_trinh": [

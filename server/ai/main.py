@@ -31,6 +31,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from server.lab import api as lab_api
+from server.lab import sinh_api
 from server.lab import db as lab_db
 from server.lab import keypool
 
@@ -98,6 +99,7 @@ ASSIST_SCHEMA = {
 
 app = FastAPI(title="KHKT - AI phòng thí nghiệm ảo")
 app.include_router(lab_api.router)
+app.include_router(sinh_api.router)
 _cache: dict[str, str] = {}
 WEB_INDEX = ROOT / "server/web/index.html"
 

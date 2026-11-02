@@ -1,4 +1,4 @@
-﻿using Khkt.Input;
+using Khkt.Input;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -67,6 +67,9 @@ namespace Khkt.Environment
             viewCam = cameraTransform != null ? cameraTransform.GetComponent<Camera>() : null;
             if (viewCam != null) baseFov = viewCam.fieldOfView;
             if (FindAnyObjectByType<Khkt.Input.HeadTracking>() == null) gameObject.AddComponent<Khkt.Input.HeadTracking>();
+            if (FindAnyObjectByType<Khkt.Input.MediaPipeHandSource>() == null) gameObject.AddComponent<Khkt.Input.MediaPipeHandSource>();
+            if (cameraTransform != null && cameraTransform.GetComponent<Khkt.Input.GazeHighlight>() == null)
+                cameraTransform.gameObject.AddComponent<Khkt.Input.GazeHighlight>();
         }
 
         /// <summary>
@@ -153,6 +156,8 @@ namespace Khkt.Environment
                 pitch = Mathf.Clamp(pitch - padLook.y * Mathf.Abs(padLook.y) * padTurnSpeed * 0.6f * Time.deltaTime, -80f, 80f);
             // điều khiển bằng đầu (webcam, F8): quay đầu sang bên nào thì góc nhìn xoay liên tục sang bên đó
             yaw += Khkt.Input.HeadTracking.Turn * headTurnSpeed * Time.deltaTime;
+            if (Khkt.Input.HeadTracking.PitchTurn != 0f)
+                pitch = Mathf.Clamp(pitch - Khkt.Input.HeadTracking.PitchTurn * Time.deltaTime, -80f, 80f);
             int step = PadInput.StationStep;
             if (step != 0 && stations.Length > 0)
             {
@@ -226,7 +231,8 @@ namespace Khkt.Environment
             d.y = 0;
             d = d.sqrMagnitude > 1e-4f ? d.normalized : Vector3.back;
             controller.enabled = false;
-            transform.position = new Vector3(target.x, 0, target.z) + d * dist;
+            float floorY = target.y >= 3.6f ? 3.8f : 0f;  // vật ở tầng 2 (sàn y = 3,8, cùng ngưỡng với ZoneMap.At)
+            transform.position = new Vector3(target.x, floorY, target.z) + d * dist;
             controller.enabled = true;
             seated = false;
             EyeOffset = 0;

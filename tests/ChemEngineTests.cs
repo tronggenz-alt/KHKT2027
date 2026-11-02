@@ -532,6 +532,27 @@ static class ChemEngineTests
               "máy cất nước: cất một lần đạt loại 3, hai lần loại 2; để hở nhiều giờ hấp thụ CO₂ tụt xuống loại 3",
               $"{Distiller.Conductivity(1, 500, 0):0.00} / {Distiller.Conductivity(2, 500, 0):0.00} / {Distiller.Conductivity(2, 500, 600):0.00} µS/cm");
 
+        Console.WriteLine("Chất và phản ứng sinh học tầng 2 (xanh methylen, axit lactic, cồn 70%, catalase)");
+        var mbLook = ChemColor.Compute(Mix.Of(("xanh_methylen", 1e-4)), 10, 7, 25);
+        Check(mbLook.Liquid.b > mbLook.Liquid.r * 1.5f, "xanh methylen: dung dịch có màu xanh lam đậm", $"RGB=({mbLook.Liquid.r:0.00},{mbLook.Liquid.g:0.00},{mbLook.Liquid.b:0.00})");
+        Near(Ph(Sol(25, ("axit_lactic", 0.1))), 2.43, 0.05, "axit lactic 0,1 M (Ka = 1,4e-4): pH ≈ 2,43");
+        Check(SpeciesRegistry.IndexOf("con_70") == SpeciesRegistry.IndexOf("C2H5OH") && SpeciesRegistry.IndexOf("con_70") >= 0, "bí danh con_70 trỏ đúng về loài C2H5OH");
+
+        var catOpt = Sol(10, ("H2O2", 0.1), ("catalase", 1e-5));
+        var evCatOpt = Run(catOpt, 5.0, 37);
+        Check(catOpt.b.Get("H2O2") < 0.1 * 0.01 * 0.1 && Has(evCatOpt, "khi:O2:H2O2"),
+              "H2O2 + catalase ở 37 °C: phân hủy > 90% sau 5s và phát sự kiện sủi bọt O₂", $"còn {catOpt.b.Get("H2O2"):G4} mol");
+
+        var catCold = Sol(10, ("H2O2", 0.1), ("catalase", 1e-5));
+        Run(catCold, 5.0, 4);
+        Check(catCold.b.Get("H2O2") > catOpt.b.Get("H2O2") * 5 && catCold.b.Get("H2O2") < 0.001,
+              "H2O2 + catalase ở 4 °C (nước đá): tốc độ phân hủy chậm hơn rõ rệt so với 37 °C", $"còn {catCold.b.Get("H2O2"):G4} mol");
+
+        var catBoiled = Sol(10, ("H2O2", 0.1), ("catalase_bat_hoat", 1e-5));
+        var evBoiled = Run(catBoiled, 5.0, 25);
+        Near(catBoiled.b.Get("H2O2"), 0.001, 1e-6, "H2O2 + catalase đã luộc (bất hoạt) ở 25 °C: không phân hủy");
+        Check(!Has(evBoiled, "khi:O2:H2O2"), "catalase đã luộc: không sinh khí O₂");
+
         Console.WriteLine($"\n{passed} đạt, {failed} sai");
         return failed == 0 ? 0 : 1;
     }

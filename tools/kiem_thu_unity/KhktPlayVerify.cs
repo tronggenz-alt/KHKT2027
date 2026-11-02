@@ -18,6 +18,16 @@ public static class KhktPlayVerify
         EditorApplication.EnterPlaymode();
     }
 
+    /// <summary>Như Run nhưng không dựng lại cảnh (cảnh đã dựng từ lần chạy trước): sửa bài thử rồi chạy lại nhanh.</summary>
+    public static void RunNoBuild()
+    {
+        EditorPrefs.SetInt("ScriptCompilationDuringPlay", 1);
+        EditorSceneManager.OpenScene(LabSceneBuilder.ScenePath);
+        foreach (var s in Object.FindObjectsByType<Khkt.Input.SerialControllerSource>()) Object.DestroyImmediate(s);
+        new GameObject("AutoTest").AddComponent<KhktAutoTest>();
+        EditorApplication.EnterPlaymode();
+    }
+
     public static void BuildBench()
     {
         string outDir = System.Environment.GetEnvironmentVariable("KHKT_BUILD");

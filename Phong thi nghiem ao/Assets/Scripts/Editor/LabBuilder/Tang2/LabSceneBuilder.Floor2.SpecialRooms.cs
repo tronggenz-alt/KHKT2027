@@ -296,22 +296,26 @@ namespace Khkt.EditorTools
         }
 
         // =====================================================================
-        // Hành lang tầng 2 (x 0..27, z −2,2..0)
+        // Hành lang tầng 2 (x 0..27, z −3,6..0)
         // =====================================================================
 
         static void BuildCorridorT2(Transform f2)
         {
             var hall = Group("Hành lang tầng 2", f2);
             var lights = Group("Đèn hành lang", hall);
-            for (float x = 3.5f; x <= 24.6f; x += 4.2f)
-                LedPanel(lights, "Đèn hành lang", x, CorridorZ / 2, 2.2f, 7f);
+            foreach (float x in new[] { 3.5f, 9.5f, 15.5f, 21.5f, 25.5f })
+            {
+                LedPanel(lights, "Đèn hành lang bắc", x, -1.1f, 1.8f, 6.5f, false);
+                LedPanel(lights, "Đèn hành lang nam", x, -2.5f, 1.8f, 6.5f, false);
+                PointLight(lights, "Đèn điểm hành lang", new Vector3(x, F2_H - 0.35f, F2_CorridorZ / 2), 7.5f, 2.2f, new Color(1f, 0.98f, 0.95f));
+            }
             DoorZoneGraphic(hall, 1.6f, 3.2f, 0f, -1, zoneBioLab, "PHÒNG THÍ NGHIỆM SINH HỌC", "BIOLOGY LAB");
-            DoorZoneGraphic(hall, 5.9f, 7.5f, CorridorZ, +1, zoneMolecular, "SINH HỌC PHÂN TỬ", "MOLECULAR BIOLOGY");
-            DoorZoneGraphic(hall, 19.0f, 20.6f, CorridorZ, +1, zoneGreenhouse, "NHÀ KÍNH THỰC VẬT", "GREENHOUSE");
+            DoorZoneGraphic(hall, 5.9f, 7.5f, F2_CorridorZ, +1, zoneMolecular, "SINH HỌC PHÂN TỬ", "MOLECULAR BIOLOGY");
+            DoorZoneGraphic(hall, 19.0f, 20.6f, F2_CorridorZ, +1, zoneGreenhouse, "NHÀ KÍNH THỰC VẬT", "GREENHOUSE");
             var frieze = Group("Dải sọc màu (Quốc tế)", hall);
             frieze.gameObject.AddComponent<ThemeOnly>().theme = LabThemeMode.QuocTe;
             Frieze(frieze, new Vector3(3.6f, 0, -0.104f), new Vector3(StoreX - 0.2f, 0, -0.104f));
-            Frieze(frieze, new Vector3(0.2f, 0, CorridorZ + 0.104f), new Vector3(StoreX - 0.2f, 0, CorridorZ + 0.104f));
+            Frieze(frieze, new Vector3(0.2f, 0, F2_CorridorZ + 0.104f), new Vector3(StoreX - 0.2f, 0, F2_CorridorZ + 0.104f));
 
             // logo trường + tên khu trên tường bắc (giữa cửa phòng sinh học và tường các nhà sinh học)
             SchoolLogo(hall, new Vector3(5.6f, 2.15f, -0.104f), Vector3.back, 2.2f);
@@ -322,19 +326,61 @@ namespace Khkt.EditorTools
             float[] xs = { 9.6f, 11.8f, 14.0f };
             for (int i = 0; i < 3; i++)
                 BiologistPortrait(gal, 4 + i, new Vector3(xs[i], 1.75f, -0.112f), Vector3.back);
-            // bảng tin điện tử liên kết Phòng Lab Sinh học 3D trên web
-            var scr = ScreenUnit(hall, "Màn hình bảng tin", "t2_hanh_lang", new Vector3(13.5f, 1.6f, CorridorZ + 0.12f), Vector3.forward, 1.2f, 0.68f, 10f,
+            // bảng tin điện tử liên kết Phòng Lab Sinh học 3D trên web (áp tường bắc x = 18.0)
+            var scr = ScreenUnit(hall, "Màn hình bảng tin", "t2_hanh_lang", new Vector3(17.6f, 1.6f, -0.12f), Vector3.back, 1.2f, 0.68f, 10f,
                 ("PHÒNG LAB SINH HỌC 3D (WEB)", "Giải phẫu người thật BodyParts3D · 15 cơ quan\nTim · Mạch máu · Phổi · Não · Tủy sống · Thận · Dạ dày\nRuột non · Ruột già · Gan · Tụy · Lách · Xương · Cơ · Da"),
                 ("6 CẢNH HIỂN VI", "Phế nang · Nephron · Synapse · Sarcomere\nTế bào viền dạ dày · Tiểu thùy gan\nTiêu bản ở hộp tiêu bản trên mỗi bàn"),
                 ("LỊCH PHÒNG SINH HỌC", "Sáng: Sinh 10 – tế bào, enzyme\nChiều: Sinh 11 – quang hợp, hô hấp\nCâu lạc bộ KHKT: thứ Bảy"));
             Info(scr.transform, "Bảng tin khu sinh học", "Liên kết Phòng Lab Sinh học 3D trên web: giải phẫu BodyParts3D, 6 cảnh hiển vi, kiến thức 15 cơ quan.");
-            var bench = Group("Ghế băng", hall, new Vector3(10.6f, 0, CorridorZ + 0.32f));
-            Box(bench, "Mặt ghế", new Vector3(0, 0.44f, 0), new Vector3(1.8f, 0.05f, 0.42f), oak);
-            foreach (float x in new[] { -0.8f, 0.8f })
-                Box(bench, "Chân ghế", new Vector3(x, 0.21f, 0), new Vector3(0.05f, 0.42f, 0.38f), darkMetal, false);
-            Plant(hall, new Vector3(0.45f, 0, -1.1f), 4, 0.9f);
-            Plant(hall, new Vector3(17.6f, 0, CorridorZ + 0.35f), 4, 0.9f);
-            Extinguisher(hall, new Vector3(16.5f, 0, -0.25f), Vector3.back);
+
+            // Dãy thiết bị & tiện ích dọc tường nam hành lang (z ≈ -3.35, để trống lối đi giữa rộng 2,9 m)
+            foreach (var (bName, bx) in new[] { ("Ghế băng chờ 1", 2.8f), ("Ghế băng chờ 2", 23.8f) })
+            {
+                var bench = Group(bName, hall, new Vector3(bx, 0, F2_CorridorZ + 0.32f));
+                Box(bench, "Mặt ghế", new Vector3(0, 0.44f, 0), new Vector3(1.8f, 0.05f, 0.42f), oak);
+                Box(bench, "Tựa lưng", new Vector3(0, 0.68f, -0.18f), new Vector3(1.8f, 0.32f, 0.04f), oak, false);
+                foreach (float x in new[] { -0.8f, 0.8f })
+                    Box(bench, "Chân ghế", new Vector3(x, 0.21f, 0), new Vector3(0.05f, 0.42f, 0.38f), darkMetal, false);
+                Info(bench, "Ghế băng chờ hành lang", "Ghế gỗ khung thép dọc hành lang Tầng 2 cho học sinh ngồi chờ trước giờ thực hành.");
+            }
+
+            // Tủ trưng bày tiêu bản hành lang (x = 9.5, sát tường nam)
+            var showCase = Group("Tủ trưng bày tiêu bản", hall, new Vector3(9.5f, 0, F2_CorridorZ + 0.32f));
+            RoundBox(showCase, "Thân tủ", new Vector3(0, 0.95f, 0), new Vector3(1.3f, 1.9f, 0.38f), 0.008f, cabinet);
+            NoShadow(Box(showCase, "Cửa kính trước", new Vector3(0, 1.05f, 0.192f), new Vector3(1.22f, 1.45f, 0.008f), cabinetGlass, false));
+            for (int i = 0; i < 3; i++)
+            {
+                float sy = 0.55f + i * 0.42f;
+                Box(showCase, "Đợt kính", new Vector3(0, sy, 0), new Vector3(1.2f, 0.012f, 0.32f), cabinetGlass, false);
+                for (int k = 0; k < 2; k++)
+                    SpecimenJar(showCase, new Vector3(-0.32f + k * 0.64f, sy + 0.01f, 0), (i * 2 + k) % 5, 0.7f);
+            }
+            Label(showCase, "TỦ TRƯNG BÀY TIÊU BẢN MẪU (1–6)", new Vector3(0, 1.82f, 0.195f), Vector3.forward, 0.028f, new Color(0.1f, 0.38f, 0.22f));
+            Info(showCase, "Tủ trưng bày tiêu bản hành lang", "Trưng bày 6 tiêu bản và mẫu sinh vật cố định tiêu biểu. Bấm chuột trái để chuyển xem từng mẫu tiêu bản.");
+
+            // Kệ tủ đồ cá nhân học sinh (Locker 12 ngăn, x = 11.6, sát tường nam)
+            var locker = Group("Kệ tủ đồ cá nhân", hall, new Vector3(11.6f, 0, F2_CorridorZ + 0.32f));
+            RoundBox(locker, "Khung tủ", new Vector3(0, 0.9f, 0), new Vector3(1.2f, 1.8f, 0.4f), 0.008f, Mat("T2_LockerBody", new Color(0.84f, 0.86f, 0.88f), 0.45f));
+            for (int r = 0; r < 3; r++)
+                for (int c = 0; c < 4; c++)
+                {
+                    float lx = -0.43f + c * 0.286f, ly = 0.38f + r * 0.48f;
+                    Box(locker, $"Cánh ngăn {r * 4 + c + 1}", new Vector3(lx, ly, 0.204f), new Vector3(0.26f, 0.44f, 0.01f), bioWhite, false);
+                    Box(locker, "Tay nắm", new Vector3(lx + 0.09f, ly, 0.214f), new Vector3(0.015f, 0.08f, 0.012f), handleBlue, false);
+                }
+            Info(locker, "Kệ tủ đồ cá nhân (Locker)", "Tủ 12 ngăn cất cặp sách, áo khoác và lấy áo blouse trắng, kính bảo hộ trước khi vào phòng thí nghiệm.");
+
+            // Trạm tra cứu dụng cụ hành lang (Ki-ốt cảm ứng, x = 16.4, sát tường nam)
+            var kiosk = Group("Trạm tra cứu dụng cụ", hall, new Vector3(16.4f, 0, F2_CorridorZ + 0.34f));
+            Box(kiosk, "Đế ki-ốt", new Vector3(0, 0.03f, 0), new Vector3(0.52f, 0.06f, 0.42f), darkMetal);
+            Box(kiosk, "Thân trụ", new Vector3(0, 0.62f, -0.04f), new Vector3(0.36f, 1.12f, 0.22f), bioWhite);
+            NoShadow(Box(kiosk, "Màn cảm ứng", new Vector3(0, 1.24f, 0.02f), new Vector3(0.56f, 0.38f, 0.03f), bioDisplayBlue, false, new Vector3(22, 0, 0)));
+            Label(kiosk, "TRA CỨU 108 DỤNG CỤ\n& 15 THÍ NGHIỆM SINH HỌC", new Vector3(0, 1.25f, 0.042f), Vector3.forward, 0.02f, Color.white);
+            Info(kiosk, "Trạm tra cứu dụng cụ hành lang", "Ki-ốt cảm ứng tra cứu nhanh vị trí 108 dụng cụ và hướng dẫn 15 thí nghiệm Sinh học Tầng 2.");
+
+            Plant(hall, new Vector3(0.45f, 0, F2_CorridorZ / 2), 4, 0.9f);
+            Plant(hall, new Vector3(25.8f, 0, F2_CorridorZ + 0.35f), 4, 0.9f);
+            Extinguisher(hall, new Vector3(14.2f, 0, F2_CorridorZ + 0.22f), Vector3.forward);
             // biển lối thoát trên cửa sang lõi thang
             var exit = Group("Biển lối thoát", hall, new Vector3(StoreX - 0.12f, 2.42f, -1.1f), -90f);
             NoShadow(Box(exit, "Hộp đèn", Vector3.zero, new Vector3(0.42f, 0.16f, 0.04f), Mat("T2_DenThoatHiem", new Color(0.1f, 0.6f, 0.3f), 0.5f, 0, emission: new Color(0.1f, 0.9f, 0.35f)), false));
@@ -342,31 +388,31 @@ namespace Khkt.EditorTools
         }
 
         // =====================================================================
-        // Phòng sinh học phân tử (x 0..13,5, z −9..−2,2)
+        // Phòng sinh học phân tử (x 0..13,5, z −9..−3,6)
         // =====================================================================
 
         static void BuildMolecularRoom(Transform f2)
         {
             var room = Group("Phòng sinh học phân tử", f2);
             var lights = Group("Đèn", room);
-            RoomLights(lights, new[] { 3.4f, 10.1f }, new[] { -5.6f }, 9f, 3.4f);
+            RoomLights(lights, new[] { 3.4f, 10.1f }, new[] { -6.3f }, 9f, 3.4f);
             foreach (float x in new[] { 2.0f, 4.8f, 7.6f, 10.4f })
-                foreach (float z in new[] { -4.0f, -7.2f })
+                foreach (float z in new[] { -4.8f, -7.6f })
                     LedPanel(lights, "Đèn trần", x, z, 2f, 6f, false);
-            // vạch sàn luồng một chiều
+            // vạch sàn luồng một chiều (nằm gọn trong z ∈ [-8.85, -3.75])
             var floorG = Group("Vạch sàn luồng một chiều", room);
-            NoShadow(Box(floorG, "Vùng tiền PCR", new Vector3(2.1f, 0.002f, -5.6f), new Vector3(3.8f, 0.004f, 6.5f), Mat("T2_SanTienPCR", new Color(0.78f, 0.9f, 0.8f), 0.4f), false));
-            NoShadow(Box(floorG, "Vùng hậu PCR", new Vector3(11.2f, 0.002f, -5.6f), new Vector3(4.4f, 0.004f, 6.5f), Mat("T2_SanHauPCR", new Color(0.95f, 0.85f, 0.75f), 0.4f), false));
+            NoShadow(Box(floorG, "Vùng tiền PCR", new Vector3(2.1f, 0.002f, -6.3f), new Vector3(3.8f, 0.004f, 5.1f), Mat("T2_SanTienPCR", new Color(0.78f, 0.9f, 0.8f), 0.4f), false));
+            NoShadow(Box(floorG, "Vùng hậu PCR", new Vector3(11.2f, 0.002f, -6.3f), new Vector3(4.4f, 0.004f, 5.1f), Mat("T2_SanHauPCR", new Color(0.95f, 0.85f, 0.75f), 0.4f), false));
             foreach (var (x, c) in new[] { (4.05f, new Color(0.2f, 0.65f, 0.35f)), (9.0f, new Color(0.95f, 0.5f, 0.15f)) })
-                NoShadow(Box(floorG, "Vạch ranh giới", new Vector3(x, 0.003f, -5.6f), new Vector3(0.06f, 0.004f, 6.5f), Mat("T2_Vach" + ColorUtility.ToHtmlStringRGB(c), c, 0.4f), false));
+                NoShadow(Box(floorG, "Vạch ranh giới", new Vector3(x, 0.003f, -6.3f), new Vector3(0.06f, 0.004f, 5.1f), Mat("T2_Vach" + ColorUtility.ToHtmlStringRGB(c), c, 0.4f), false));
 
             var signs = Group("Biển khu", room);
-            ZoneSign(signs, "TIỀN PCR", new Vector3(2.1f, 2.95f, -5.6f), 90f, 1.6f, "PRE-PCR · CLEAN");
-            ZoneSign(signs, "TÁCH CHIẾT ADN", new Vector3(6.5f, 2.95f, -4.3f), 0f, 2.0f, "DNA EXTRACTION");
-            ZoneSign(signs, "PCR & ĐIỆN DI", new Vector3(11.2f, 2.95f, -5.6f), 90f, 1.8f, "PCR & GEL");
+            ZoneSign(signs, "TIỀN PCR", new Vector3(2.1f, 2.95f, -6.3f), 90f, 1.6f, "PRE-PCR · CLEAN");
+            ZoneSign(signs, "TÁCH CHIẾT ADN", new Vector3(6.5f, 2.95f, -5.0f), 0f, 2.0f, "DNA EXTRACTION");
+            ZoneSign(signs, "PCR & ĐIỆN DI", new Vector3(11.2f, 2.95f, -6.3f), 90f, 1.8f, "PCR & GEL");
 
             // --- Tiền PCR: tủ thao tác PCR (tường tây), quầy pha mix dọc tường nam ---
-            PcrWorkstation(room, new Vector3(0.5f, 0, -5.4f));
+            PcrWorkstation(room, new Vector3(0.5f, 0, -6.2f));
             var pre = LabCounter(room, "Quầy tiền PCR", new Vector3(2.15f, 0, -8.58f), 3.7f, 0.85f);
             PipetteStation(pre, new Vector3(-1.2f, 0.85f, 0.02f), -90f);
             Vortex(pre, new Vector3(-0.4f, 0.85f, 0.05f));
@@ -375,10 +421,10 @@ namespace Khkt.EditorTools
             var ice = Group("Hộp đá", pre, new Vector3(1.3f, 0.85f, 0.05f));
             Box(ice, "Hộp xốp", new Vector3(0, 0.07f, 0), new Vector3(0.22f, 0.14f, 0.3f), signWhite);
             Box(ice, "Đá", new Vector3(0, 0.142f, 0), new Vector3(0.19f, 0.004f, 0.27f), Mat("T2_DaLanh", new Color(0.85f, 0.92f, 0.98f), 0.9f), false);
-            Freezer(room, "Tủ đông −20 °C (tiền PCR)", new Vector3(0.55f, 0, -2.75f), 0.7f, "−20,0 °C", bioWhite);
+            Freezer(room, "Tủ đông −80 °C (tiền PCR)", new Vector3(0.55f, 0, -4.25f), 0.7f, "−80,0 °C", bioWhite);
 
             // --- Tách chiết ADN: đảo giữa phòng ---
-            var isl = Group("Đảo tách chiết ADN", room, new Vector3(6.5f, 0, -5.9f));
+            var isl = Group("Đảo tách chiết ADN", room, new Vector3(6.5f, 0, -6.4f));
             const float top = 0.9f;
             Box(isl, "Chân đế", new Vector3(0, 0.04f, 0), new Vector3(3.6f, 0.08f, 1.0f), darkMetal);
             RoundBox(isl, "Thân đảo", new Vector3(0, 0.47f, 0), new Vector3(3.8f, 0.78f, 1.1f), 0.008f, cabinet);
@@ -412,16 +458,83 @@ namespace Khkt.EditorTools
             GelDoc(post, new Vector3(0.95f, 0.85f, 0.0f));
             Label(room, "KHU HẬU PCR · KHÔNG MANG ĐỒ SANG KHU TIỀN PCR", new Vector3(11.15f, 2.78f, WingZ + 0.104f), Vector3.forward, 0.045f, new Color(0.75f, 0.35f, 0.05f));
 
-            // --- Tường bắc: tủ thấp dưới kính mờ, áo blouse riêng từng khu, bồn rửa ---
-            LabCounter(room, "Tủ thấp tường bắc (tây)", new Vector3(2.7f, 0, -2.6f), 3.2f, 0.85f, 180f);
-            LabCounter(room, "Tủ thấp tường bắc (đông)", new Vector3(10.6f, 0, -2.6f), 3.8f, 0.85f, 180f);
+            // --- Tường bắc (z = -3.6): tủ thấp dưới kính mờ, mô hình ADN, vòi rửa mắt, áo blouse ---
+            GeneCloningStation(LabCounter(room, "Tủ thấp tường bắc (tây)", new Vector3(2.7f, 0, -4.02f), 3.2f, 0.85f, 180f));
+            var northEast = LabCounter(room, "Tủ thấp tường bắc (đông)", new Vector3(10.6f, 0, -4.02f), 3.8f, 0.85f, 180f);
+            DnaModel(northEast, new Vector3(-1.1f, 0.86f, 0), 0.65f);
+            var eyeWash = Group("Vòi rửa mắt khẩn cấp", room, new Vector3(4.85f, 0, -3.95f));
+            Cyl(eyeWash, "Trụ đứng", new Vector3(0, 0.48f, 0), 0.022f, 0.96f, steel);
+            Cyl(eyeWash, "Chậu hứng", new Vector3(0, 0.96f, 0), 0.14f, 0.06f, Mat("T2_ChauRuaMat", new Color(0.95f, 0.78f, 0.12f), 0.5f));
+            foreach (float ex in new[] { -0.05f, 0.05f })
+                Cyl(eyeWash, "Đầu phun", new Vector3(ex, 1.02f, 0), 0.014f, 0.04f, steel, false);
+            Box(eyeWash, "Cần gạt", new Vector3(0.16f, 0.96f, 0), new Vector3(0.08f, 0.015f, 0.04f), bioBiohazard, false);
+            Info(eyeWash, "Vòi rửa mắt khẩn cấp", "Khi hóa chất hoặc mẫu sinh học bắn vào mắt: ấn cần gạt để hai tia nước sạch áp lực thấp rửa mắt liên tục tối thiểu 15 phút.");
             var coats = Group("Móc áo theo khu", room);
-            CoatRack(coats, new Vector3(5.1f, 0, CorridorZ - 0.1f), 180f);
-            CoatRack(coats, new Vector3(RoomSplitX - 0.1f, 0, -3.9f), -90f);
-            NoShadow(Panel(room, "Áp phích cấu trúc ADN", new Vector3(13.395f, 1.8f, -6.4f), Vector3.left, 0.9f, 1.24f, posterBio[3]));
-            Box(room, "Khung áp phích", new Vector3(13.398f, 1.8f, -6.4f), new Vector3(0.004f, 1.3f, 0.96f), darkMetal, false);
+            CoatRack(coats, new Vector3(5.3f, 0, F2_CorridorZ - 0.12f), 180f);
+            CoatRack(coats, new Vector3(RoomSplitX - 0.1f, 0, -5.0f), -90f);
+            NoShadow(Panel(room, "Áp phích cấu trúc ADN", new Vector3(13.395f, 1.8f, -6.6f), Vector3.left, 0.9f, 1.24f, posterBio[3]));
+            Box(room, "Khung áp phích", new Vector3(13.398f, 1.8f, -6.6f), new Vector3(0.004f, 1.3f, 0.96f), darkMetal, false);
             Plant(room, new Vector3(4.45f, 0, -8.5f), 4, 0.9f);
             BiohazardBin(room, new Vector3(8.6f, 0, -8.5f));
+        }
+
+        /// <summary>
+        /// Trạm ghép gen (ADN tái tổ hợp) trên tủ thấp tường bắc: hộp đá enzyme cắt giới hạn + ligaza + plasmid, khối ủ 37 °C,
+        /// bể sốc nhiệt 42 °C, đĩa LB + ampicillin + X-gal (đĩa kết quả mọc khuẩn lạc xanh / trắng lúc chạy), giá ống kết quả,
+        /// màn hình quy trình. Hệ của quầy: mặt trước +z, mặt quầy y = 0,85.
+        /// </summary>
+        static void GeneCloningStation(Transform counter)
+        {
+            const float top = 0.85f;
+            var g = Group("Trạm ghép gen", counter);
+            // màn hình quy trình trên chân đế
+            Box(g, "Đế màn hình", new Vector3(0, top + 0.01f, -0.16f), new Vector3(0.2f, 0.02f, 0.14f), darkMetal);
+            Box(g, "Chân màn hình", new Vector3(0, top + 0.13f, -0.19f), new Vector3(0.04f, 0.22f, 0.03f), darkMetal, false);
+            Box(g, "Viền màn hình", new Vector3(0, top + 0.33f, -0.17f), new Vector3(0.56f, 0.34f, 0.025f), blackPlastic);
+            NoShadow(Box(g, "Màn hình", new Vector3(0, top + 0.33f, -0.156f), new Vector3(0.52f, 0.3f, 0.004f), bioDisplayBlue, false));
+            Label(g, "TRẠM GHÉP GEN\nADN TÁI TỔ HỢP pUC19 – GFP\ncắt → nối → biến nạp → chọn dòng", new Vector3(0, top + 0.33f, -0.152f), Vector3.forward, 0.022f, new Color(0.8f, 0.92f, 1f));
+
+            // hộp đá: plasmid, 3 enzyme cắt giới hạn, ligaza T4, đệm
+            var ice = Group("Hộp đá enzyme", g, new Vector3(-0.9f, top, 0.02f));
+            Box(ice, "Hộp xốp", new Vector3(0, 0.06f, 0), new Vector3(0.24f, 0.12f, 0.3f), signWhite);
+            Box(ice, "Đá", new Vector3(0, 0.122f, 0), new Vector3(0.21f, 0.004f, 0.27f), Mat("T2_DaLanh", new Color(0.85f, 0.92f, 0.98f), 0.9f), false);
+            var caps = new[] { ("Plasmid pUC19", new Color(0.55f, 0.3f, 0.85f)), ("EcoRI", new Color(0.9f, 0.2f, 0.2f)), ("BamHI", new Color(0.2f, 0.75f, 0.3f)),
+                               ("HindIII", new Color(0.95f, 0.8f, 0.15f)), ("Ligaza T4", new Color(0.2f, 0.45f, 0.95f)), ("Đệm 10×", new Color(0.95f, 0.95f, 0.95f)) };
+            for (int i = 0; i < caps.Length; i++)
+            {
+                var pos = new Vector3(-0.05f + (i % 2) * 0.1f, 0.124f, -0.09f + (i / 2) * 0.09f);
+                NoShadow(Cyl(ice, "Ống " + caps[i].Item1, pos + Vector3.up * 0.012f, 0.0055f, 0.024f, translucentPlastic, false));
+                Cyl(ice, "Nắp " + caps[i].Item1, pos + Vector3.up * 0.026f, 0.0065f, 0.005f, Mat("T2_Nap" + ColorUtility.ToHtmlStringRGB(caps[i].Item2), caps[i].Item2, 0.4f), false);
+                Label(ice, caps[i].Item1, pos + new Vector3(0, 0.038f, 0.02f), Vector3.forward, 0.008f, new Color(0.15f, 0.2f, 0.3f));
+            }
+            // khối ủ nhiệt (cắt 37 °C, nối 16 °C)
+            var block = Group("Khối ủ cắt – nối", g, new Vector3(-0.45f, top, 0f));
+            RoundBox(block, "Thân", new Vector3(0, 0.06f, 0), new Vector3(0.22f, 0.12f, 0.26f), 0.01f, bioWhite);
+            NoShadow(Box(block, "Màn số", new Vector3(0, 0.07f, 0.131f), new Vector3(0.1f, 0.03f, 0.004f), bioDisplayRed, false));
+            Label(block, "37,0 °C", new Vector3(0, 0.071f, 0.134f), Vector3.forward, 0.014f, new Color(1f, 0.5f, 0.4f));
+            // bể sốc nhiệt 42 °C
+            WaterBath(g, new Vector3(0.48f, top, -0.02f), 0f, "42,0 °C");
+            // đĩa kết quả (khuẩn lạc mọc lên lúc chạy) + chồng đĩa LB-Amp-X-gal mới
+            var dishG = Group("Đĩa kết quả", g, new Vector3(0.95f, top, 0.1f));
+            var dish = Lathe("T2_DiaPetri", 24, V(0, 0), V(0.045f, 0), V(0.045f, 0.014f), V(0.043f, 0.014f), V(0.043f, 0.002f), V(0, 0.002f));
+            NoShadow(MeshObj(dishG, "Đĩa petri", dish, Vector3.zero, bioPetri));
+            NoShadow(Cyl(dishG, "Thạch LB + Amp + X-gal", new Vector3(0, 0.006f, 0), 0.042f, 0.008f, Mat("T2_ThachXgal", new Color(0.93f, 0.9f, 0.78f, 0.9f), 0.5f, 0, transparent: true)));
+            Label(dishG, "LB + Amp + X-gal", new Vector3(0, 0.002f, 0.05f), Vector3.forward, 0.009f, new Color(0.2f, 0.25f, 0.3f));
+            PetriStack(g, new Vector3(1.15f, top, -0.12f), 3, 2);
+            // chỗ đặt ống sản phẩm PCR mang tới, giá ống kết quả
+            var src = Group("Chỗ đặt ống nguồn gen", g, new Vector3(-0.18f, top + 0.012f, 0.16f));
+            Cyl(src, "Giá đơn", new Vector3(0, -0.006f, 0), 0.015f, 0.012f, Mat("T2_GiaNhuaTrang", new Color(0.92f, 0.92f, 0.9f), 0.4f));
+            Label(g, "ĐẶT ỐNG PCR GEN GFP", new Vector3(-0.18f, top + 0.003f, 0.2f), Vector3.up, 0.01f, new Color(0.3f, 0.3f, 0.35f));
+            var rack = Group("Giá ống kết quả", g, new Vector3(1.38f, top + 0.012f, 0.1f));
+            Box(rack, "Giá", new Vector3(0, -0.002f, 0.008f), new Vector3(0.04f, 0.028f, 0.13f), Mat("T2_GiaNhuaTrang", new Color(0.92f, 0.92f, 0.9f), 0.4f));
+
+            Info(g, "Trạm ghép gen (ADN tái tổ hợp)",
+                "Cắt plasmid pUC19 và gen GFP bằng cùng enzyme cắt giới hạn (EcoRI, BamHI) → nối bằng ADN ligaza → biến nạp vào E. coli bằng sốc nhiệt 42 °C → cấy đĩa LB + ampicillin + X-gal: khuẩn lạc trắng mang gen ghép, xanh không có gen.",
+                "Bấm vào trạm để mở màn hình quy trình. Mang ống PCR gen GFP của em tới, trỏ vào trạm và bấm để dùng làm nguồn gen. Ống plasmid cắt kiểm tra xuất ra giá bên phải: nạp vào gel cạnh thang chuẩn.");
+            var st = g.gameObject.AddComponent<Khkt.Demo.Bio.GeneCloningStation>();
+            st.resultDish = dishG;
+            st.outputRack = rack;
+            st.sourceSlot = src;
         }
 
         /// <summary>Quầy thí nghiệm áp tường dài len, cao top, mặt trước nhìn về +z của nhóm khi yaw = 0 (tường ở −z).</summary>
@@ -544,29 +657,29 @@ namespace Khkt.EditorTools
         }
 
         // =====================================================================
-        // Nhà kính thực vật (x 13,5..27, z −9..−2,2)
+        // Nhà kính thực vật (x 13,5..27, z −9..−3,6)
         // =====================================================================
 
         static void BuildGreenhouse(Transform f2)
         {
             var gh = Group("Nhà kính thực vật", f2);
             var lights = Group("Đèn", gh);
-            RoomLights(lights, new[] { 17.0f, 23.5f }, new[] { -5.6f }, 8f, 2.2f);
+            RoomLights(lights, new[] { 17.0f, 23.5f }, new[] { -6.3f }, 8f, 2.2f);
 
             // 2 dãy bàn trồng cây di động dọc trục x, lối đi giữa x 18,6..21 thẳng cửa vào
-            float[] rowsZ = { -6.6f, -4.6f };
+            float[] rowsZ = { -7.0f, -5.2f };
             for (int r = 0; r < rowsZ.Length; r++)
                 foreach (var (x0, x1) in new[] { (14.6f, 18.4f), (21.2f, 26.2f) })
                     GrowBench(gh, $"Bàn trồng cây {r + 1}", new Vector3((x0 + x1) / 2, 0, rowsZ[r]), x1 - x0, r * 2 + (x0 > 20 ? 1 : 0));
 
-            // giàn thủy canh NFT 3 tầng có đèn LED trồng cây (sát đầu hồi tây)
-            NftRack(gh, new Vector3(13.95f, 0, -5.6f));
+            // giàn thủy canh NFT 3 tầng có đèn LED trồng cây (sát đầu hồi tây, trong khoảng z ∈ [-8.5, -4.1])
+            NftRack(gh, new Vector3(13.95f, 0, -6.3f));
             // trạm thí nghiệm dọc vách kính nam
             PhotosynthesisStation(gh, new Vector3(22.6f, 0, -8.45f));
             PotometerStation(gh, new Vector3(19.8f, 0, -8.45f));
             PhototropismStation(gh, new Vector3(25.3f, 0, -8.45f));
             // bàn sang chậu gần cửa, cảm biến vi khí hậu, rãnh thoát nước
-            var pot = Group("Bàn sang chậu", gh, new Vector3(16.0f, 0, -2.75f));
+            var pot = Group("Bàn sang chậu", gh, new Vector3(16.0f, 0, -4.15f));
             Box(pot, "Mặt bàn", new Vector3(0, 0.8f, 0), new Vector3(1.6f, 0.04f, 0.6f), oak);
             foreach (int sx in new[] { -1, 1 })
                 foreach (int sz in new[] { -1, 1 })
@@ -576,15 +689,15 @@ namespace Khkt.EditorTools
             var can = Group("Bình tưới", pot, new Vector3(0.6f, 0, 0));
             Cyl(can, "Thân bình", new Vector3(0, 0.12f, 0), 0.08f, 0.24f, Mat("T2_BinhTuoi", new Color(0.2f, 0.55f, 0.35f), 0.4f));
             Cyl(can, "Vòi bình", new Vector3(0.12f, 0.2f, 0), 0.012f, 0.25f, Mat("T2_BinhTuoi", new Color(0.2f, 0.55f, 0.35f), 0.4f), false, new Vector3(0, 0, -55));
-            var sensor = Group("Cảm biến vi khí hậu", gh, new Vector3(RoomSplitX + 0.12f, 1.55f, -3.1f), 90f);
+            var sensor = Group("Cảm biến vi khí hậu", gh, new Vector3(RoomSplitX + 0.12f, 1.55f, -4.5f), 90f);
             Box(sensor, "Hộp", Vector3.zero, new Vector3(0.3f, 0.22f, 0.05f), bioWhite, false);
             NoShadow(Box(sensor, "Màn", new Vector3(0, 0.01f, 0.026f), new Vector3(0.24f, 0.12f, 0.004f), bioDisplayGreen, false));
             Label(sensor, "28,5 °C · 72 %\nÁNH SÁNG 18 klx", new Vector3(0, 0.01f, 0.03f), Vector3.forward, 0.018f, new Color(0.6f, 1f, 0.65f));
             Info(sensor, "Cảm biến vi khí hậu nhà kính", "Đo nhiệt độ, độ ẩm, cường độ ánh sáng; tự bật phun sương khi độ ẩm dưới 60 %, kéo rèm che khi nắng quá 40 klx.");
-            NoShadow(Box(gh, "Rãnh thoát nước", new Vector3(19.8f, 0.002f, -5.6f), new Vector3(0.18f, 0.004f, 6.4f), Mat("T2_NapRanh", new Color(0.2f, 0.21f, 0.22f), 0.5f, 0.6f), false));
-            Plant(gh, new Vector3(26.4f, 0, -2.75f), 4, 1.3f, bioPotGrey);
+            NoShadow(Box(gh, "Rãnh thoát nước", new Vector3(19.8f, 0.002f, -6.3f), new Vector3(0.18f, 0.004f, 5.0f), Mat("T2_NapRanh", new Color(0.2f, 0.21f, 0.22f), 0.5f, 0.6f), false));
+            Plant(gh, new Vector3(26.4f, 0, -4.15f), 4, 1.3f, bioPotGrey);
             Plant(gh, new Vector3(14.1f, 0, -8.55f), 0, 1.5f, bioPotGrey);
-            var sign = Group("Biển nhà kính", gh, new Vector3(19.8f, 2.95f, -2.45f));
+            var sign = Group("Biển nhà kính", gh, new Vector3(19.8f, 2.95f, -3.85f));
             Box(sign, "Nền", Vector3.zero, new Vector3(1.8f, 0.28f, 0.03f), Mat("T2_BienNhaKinh", zoneGreenhouse * 0.8f, 0.4f), false);
             Label(sign, "NHÀ KÍNH THỰC VẬT · GREENHOUSE", new Vector3(0, 0, -0.017f), Vector3.back, 0.055f, Color.white);
         }
@@ -617,7 +730,7 @@ namespace Khkt.EditorTools
         static void NftRack(Transform p, Vector3 pos)
         {
             var g = Group("Giàn thủy canh NFT", p, pos);
-            const float len = 5.0f;
+            const float len = 4.4f;
             foreach (float z in new[] { -len / 2, 0f, len / 2 })
                 Box(g, "Khung đứng", new Vector3(0.15f, 1.0f, z), new Vector3(0.04f, 2.0f, 0.04f), alu, false);
             var pvc = Mat("T2_OngNFT", new Color(0.95f, 0.95f, 0.95f), 0.45f);

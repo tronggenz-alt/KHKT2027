@@ -1,0 +1,4382 @@
+{
+  "phien_ban": 1,
+  "dung_cu": [
+    {
+      "ma": "kinh_hien_vi",
+      "ten": "Kính hiển vi quang học hai mắt",
+      "ten_tieng_anh": "Binocular biological microscope",
+      "phan_loai": "Kính hiển vi quang học",
+      "phong": [
+        "phong_sinh",
+        "phong_vi_sinh"
+      ],
+      "so_luong": 29,
+      "vi_tri": "27 máy trên 9 bàn học sinh, 1 bàn giáo viên, 1 đảo nhuộm Gram",
+      "cong_dung": "Quan sát vi thể tế bào, mô học và vi sinh vật ở độ phóng đại 40x - 1000x",
+      "thong_so": [
+        {
+          "ten": "Độ phóng đại quang học",
+          "gia_tri": "40x, 100x, 400x, 1000x (dầu)",
+          "nguon": "https://www.olympus-lifescience.com/en/microscopes/upright/cx23/"
+        },
+        {
+          "ten": "Khẩu độ số vật kính NA",
+          "gia_tri": "4x (0,10); 10x (0,25); 40x (0,65); 100x dầu (1,25)",
+          "nguon": "https://www.olympus-lifescience.com/en/microscopes/upright/cx23/"
+        },
+        {
+          "ten": "Mô phỏng độ sâu trường ảnh và độ mờ lấy nét",
+          "gia_tri": "DOF = lambda / NA^2; lấy nét bằng mip bias",
+          "mo_phong": true
+        }
+      ],
+      "cach_dung": [
+        "Bật đèn LED ở chân kính, chỉnh sáng vừa phải.",
+        "Đặt tiêu bản lên bàn sa trượt, lamen quay lên trên.",
+        "Tìm mẫu ở vật kính 4x/10x bằng ốc sơ cấp rồi tinh chỉnh bằng ốc vi cấp.",
+        "Chuyển sang 40x/100x chỉ dùng ốc vi cấp để lấy nét."
+      ],
+      "loi_thuong_gap": [
+        "Dùng ốc sơ cấp ở vật kính 40x/100x làm đâm vỡ lamen.",
+        "Đặt ngược mặt tiêu bản khiến vật kính 40x không chạm tới tiêu cự.",
+        "Quên nhỏ dầu soi khi dùng vật kính 100x làm ảnh mờ tối."
+      ],
+      "an_toan": [
+        "Cầm kính bằng hai tay (một tay nắm thân kính, một tay đỡ chân đế).",
+        "Lau sạch dầu soi trên vật kính 100x bằng giấy lau kính ngay sau khi dùng."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Demo.Bio.MicroscopeController (nâng cấp)",
+      "may_man_hinh": "kinh_hien_vi",
+      "muc_dac_ta": "5.1.1"
+    },
+    {
+      "ma": "kinh_hien_vi_camera",
+      "ten": "Kính hiển vi kỹ thuật số giáo viên",
+      "ten_tieng_anh": "Teacher digital microscope with HDMI/USB camera",
+      "phan_loai": "Kính hiển vi quang học",
+      "phong": [
+        "phong_sinh"
+      ],
+      "so_luong": 1,
+      "vi_tri": "Bàn giáo viên phòng thí nghiệm sinh học",
+      "cong_dung": "Quan sát tiêu bản mẫu và truyền hình ảnh trực tiếp lên màn hình lớn lớp học",
+      "thong_so": [
+        {
+          "ten": "Độ phân giải camera kỹ thuật số",
+          "gia_tri": "4K UHD / 1080p 60fps",
+          "nguon": "https://www.olympus-lifescience.com/en/camera/color/ep50/"
+        },
+        {
+          "ten": "Cổng xuất tín hiệu video",
+          "gia_tri": "HDMI / Wi-Fi / USB 3.0",
+          "nguon": "https://www.olympus-lifescience.com/en/camera/color/ep50/"
+        }
+      ],
+      "cach_dung": [
+        "Bật kính và camera, kết nối cáp HDMI tới màn hình lớp.",
+        "Đặt tiêu bản mẫu của giáo viên lên bàn sa trượt.",
+        "Lấy nét trên thị kính trước rồi chỉnh nét mịn trên camera."
+      ],
+      "loi_thuong_gap": [
+        "Không đồng bộ độ sáng giữa thị kính và cảm biến camera.",
+        "Dùng vật kính dầu nhưng không lau sạch trước khi cất."
+      ],
+      "an_toan": [
+        "Tắt nguồn camera và nguồn kính khi kết thúc buổi học."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Demo.Bio.MicroscopeController + Khkt.Demo.Bio.MicroscopeCameraProgram",
+      "may_man_hinh": "kinh_hien_vi",
+      "muc_dac_ta": "5.1.2"
+    },
+    {
+      "ma": "lam_kinh",
+      "ten": "Lam kính 75 × 25 mm",
+      "ten_tieng_anh": "Microscope glass slides",
+      "phan_loai": "Dụng cụ thủy tinh tiêu bản",
+      "phong": [
+        "phong_sinh",
+        "phong_vi_sinh"
+      ],
+      "so_luong": 50,
+      "vi_tri": "Hộp đựng trên 9 bàn học sinh và đảo nhuộm",
+      "cong_dung": "Phiến kính phẳng đỡ mẫu vật quan sát dưới kính hiển vi",
+      "thong_so": [
+        {
+          "ten": "Kích thước phiến kính",
+          "gia_tri": "75 x 25 x 1 mm",
+          "nguon": "https://www.thermofisher.com/order/catalog/product/3010-002"
+        },
+        {
+          "ten": "Chất liệu thủy tinh",
+          "gia_tri": "Thủy tinh vôi sô-đa viền mài phẳng",
+          "nguon": "https://www.thermofisher.com/order/catalog/product/3010-002"
+        }
+      ],
+      "cach_dung": [
+        "Cầm lam kính ở hai cạnh bên, lau sạch bụi bằng giấy mềm.",
+        "Nhỏ 1 giọt nước cất hoặc thuốc thử vào giữa lam.",
+        "Đặt mẫu vật vào giọt dịch rồi đậy lamen."
+      ],
+      "loi_thuong_gap": [
+        "Chạm ngón tay vào giữa bề mặt lam để lại dấu vân tay.",
+        "Để dung dịch tràn ra ngoài mép lam làm ướt bàn kính."
+      ],
+      "an_toan": [
+        "Thao tác nhẹ nhàng tránh làm nứt mẻ mép kính sắc nhọn; bỏ lam kính vỡ vào thùng vật sắc nhọn."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.GlassSlide",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.3"
+    },
+    {
+      "ma": "lamen",
+      "ten": "Lamen 22 × 22 mm",
+      "ten_tieng_anh": "Microscope cover slips",
+      "phan_loai": "Dụng cụ thủy tinh tiêu bản",
+      "phong": [
+        "phong_sinh",
+        "phong_vi_sinh"
+      ],
+      "so_luong": 50,
+      "vi_tri": "Hộp nhựa nhỏ cạnh hộp lam kính trên các bàn",
+      "cong_dung": "Lá kính mỏng đậy lên giọt mẫu vật để dàn phẳng và bảo vệ vật kính",
+      "thong_so": [
+        {
+          "ten": "Kích thước lá kính",
+          "gia_tri": "22 x 22 mm, độ dày 0,17 mm (chuẩn số 1.5)",
+          "nguon": "https://www.thermofisher.com/order/catalog/product/12-545-B"
+        },
+        {
+          "ten": "Chiết suất quang học",
+          "gia_tri": "n = 1,515",
+          "nguon": "https://www.thermofisher.com/order/catalog/product/12-545-B"
+        }
+      ],
+      "cach_dung": [
+        "Đặt một cạnh lamen tiếp xúc với giọt dịch ở góc nghiêng 45°.",
+        "Hạ từ từ lamen xuống để bọt khí thoát hết ra ngoài.",
+        "Dùng giấy thấm hút phần dịch tràn ngoài mép."
+      ],
+      "loi_thuong_gap": [
+        "Thả rơi tự do lamen từ trên cao tạo nhiều bọt khí cản trở quan sát.",
+        "Đè mạnh ngón tay làm vỡ lamen nát vụn."
+      ],
+      "an_toan": [
+        "Lá kính rất mỏng dễ vỡ đâm vào tay; dọn mảnh vỡ bằng kẹp, không dùng tay trần."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.CoverSlip",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.3"
+    },
+    {
+      "ma": "kim_mui_mac",
+      "ten": "Kim mũi mác",
+      "ten_tieng_anh": "Dissecting needle / Lance needle",
+      "phan_loai": "Dụng cụ mổ và vi phẫu",
+      "phong": [
+        "phong_sinh"
+      ],
+      "so_luong": 36,
+      "vi_tri": "Ống cắm dụng cụ mổ trên 9 bàn học sinh",
+      "cong_dung": "Tách biểu bì thực vật, gắp chuyển mẫu và hạ lamen tránh bọt khí",
+      "thong_so": [
+        {
+          "ten": "Chất liệu thân và mũi",
+          "gia_tri": "Thép không gỉ 304, cán tròn chống trượt",
+          "nguon": "https://www.fishersci.com/shop/products/dissecting-needles-2/13076"
+        },
+        {
+          "ten": "Chiều dài tổng thể",
+          "gia_tri": "140 mm, đầu mũi mác dẹp sắc",
+          "nguon": "https://www.fishersci.com/shop/products/dissecting-needles-2/13076"
+        }
+      ],
+      "cach_dung": [
+        "Cầm kim như cầm bút.",
+        "Dùng đầu mũi mác đỡ nhẹ một cạnh lamen để hạ từ từ xuống giọt nước.",
+        "Tách nhẹ lớp biểu bì vảy hành đặt lên lam kính."
+      ],
+      "loi_thuong_gap": [
+        "Đâm mũi nhọn vào mặt lam kính làm xước kính.",
+        "Quên rửa sạch nhựa cây hoặc hóa chất bám trên đầu kim."
+      ],
+      "an_toan": [
+        "Đầu kim nhọn có thể đâm thủng da; cắm đầu nhọn vào đế xốp/ống cắm sau khi dùng."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.DissectingNeedle",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.4"
+    },
+    {
+      "ma": "kep_panh",
+      "ten": "Kẹp (panh) mũi nhọn",
+      "ten_tieng_anh": "Fine pointed forceps",
+      "phan_loai": "Dụng cụ mổ và vi phẫu",
+      "phong": [
+        "phong_sinh",
+        "nha_kinh"
+      ],
+      "so_luong": 36,
+      "vi_tri": "Khay dụng cụ mổ trên các bàn và nhà kính",
+      "cong_dung": "Gắp giữ mẫu vật nhỏ, lam kính, lamen và chuyển mô thực vật",
+      "thong_so": [
+        {
+          "ten": "Kích thước và kiểu mũi",
+          "gia_tri": "Chiều dài 125 mm, mũi nhọn thẳng có khía",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-dissecting-forceps-6/08875"
+        },
+        {
+          "ten": "Chất liệu chế tạo",
+          "gia_tri": "Thép không gỉ chống ăn mòn",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-dissecting-forceps-6/08875"
+        }
+      ],
+      "cach_dung": [
+        "Bóp nhẹ thân panh để gắp mẫu vật.",
+        "Dùng gắp mép lamen đặt vào vị trí đậy tiêu bản."
+      ],
+      "loi_thuong_gap": [
+        "Bóp quá mạnh làm nát mẫu biểu bì mỏng manh hoặc vỡ lamen."
+      ],
+      "an_toan": [
+        "Không chọc mũi panh vào người khác; rửa sạch và lau khô sau khi làm việc."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.Forceps",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.4"
+    },
+    {
+      "ma": "dao_lam",
+      "ten": "Dao lam",
+      "ten_tieng_anh": "Carbon steel razor blades",
+      "phan_loai": "Dụng cụ cắt lát mỏng",
+      "phong": [
+        "phong_sinh"
+      ],
+      "so_luong": 20,
+      "vi_tri": "Hộp an toàn trên các bàn học sinh",
+      "cong_dung": "Cắt lát mỏng thân cây, rễ hành, mô gan gà làm tiêu bản hiển vi",
+      "thong_so": [
+        {
+          "ten": "Độ dày lưỡi dao",
+          "gia_tri": "0,1 mm",
+          "nguon": "https://www.fishersci.com/shop/products/gem-single-edge-industrial-blades/12640"
+        },
+        {
+          "ten": "Vật liệu lưỡi",
+          "gia_tri": "Thép carbon tôi cứng phủ chống rỉ",
+          "nguon": "https://www.fishersci.com/shop/products/gem-single-edge-industrial-blades/12640"
+        }
+      ],
+      "cach_dung": [
+        "Giữ mẫu vật vững chắc trên đĩa đồng hồ hoặc tấm kê xốp.",
+        "Lướt nhẹ lưỡi dao theo một hướng dứt khoát để cắt lát thật mỏng.",
+        "Dùng kim mũi mác chuyển lát cắt vào giọt nước."
+      ],
+      "loi_thuong_gap": [
+        "Ấn đè dao xuống thay vì lướt cắt khiến mẫu bị dập nát tế bào.",
+        "Cắt quá dày khiến ánh sáng không xuyên qua được."
+      ],
+      "an_toan": [
+        "Lưỡi dao rất sắc bén; chỉ cầm vào gờ có bọc an toàn; lưỡi cùn bỏ vào thùng rác sắc nhọn."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.RazorBlade",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.4"
+    },
+    {
+      "ma": "keo_nho",
+      "ten": "Kéo nhỏ",
+      "ten_tieng_anh": "Small surgical dissection scissors",
+      "phan_loai": "Dụng cụ mổ và vi phẫu",
+      "phong": [
+        "phong_sinh",
+        "nha_kinh"
+      ],
+      "so_luong": 36,
+      "vi_tri": "Khay dụng cụ mổ trên các bàn học sinh và nhà kính",
+      "cong_dung": "Cắt tỉa lá, cành rong, rễ hành và mẫu vật thí nghiệm",
+      "thong_so": [
+        {
+          "ten": "Chiều dài lưỡi và kéo",
+          "gia_tri": "Kéo dài 115 mm, lưỡi thẳng sắc bén 30 mm",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-dissecting-scissors-2/08940"
+        },
+        {
+          "ten": "Chất liệu thép",
+          "gia_tri": "Inox y tế không gỉ",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-dissecting-scissors-2/08940"
+        }
+      ],
+      "cach_dung": [
+        "Luồn lưỡi kéo dưới gân lá hoặc nhánh cành cần cắt rồi bấm dứt khoát.",
+        "Rửa sạch và lau khô kéo sau khi cắt mẫu sinh học."
+      ],
+      "loi_thuong_gap": [
+        "Dùng kéo cắt dây thép hoặc vật cứng làm mẻ cùn lưỡi kéo."
+      ],
+      "an_toan": [
+        "Chuyển kéo cho người khác bằng cách hướng chuôi cầm về phía đối phương."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.Scissors",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.4"
+    },
+    {
+      "ma": "ong_nho_giot",
+      "ten": "Ống nhỏ giọt",
+      "ten_tieng_anh": "Glass Pasteur dropper with bulb",
+      "phan_loai": "Dụng cụ hút nhả giọt",
+      "phong": [
+        "phong_sinh",
+        "phong_vi_sinh",
+        "phong_sinh_phan_tu",
+        "nha_kinh"
+      ],
+      "so_luong": 60,
+      "vi_tri": "Giá cắm trên 9 bàn và các phòng thí nghiệm",
+      "cong_dung": "Hút và nhỏ từng giọt hóa chất, nước cất, phẩm nhuộm lên lam kính",
+      "thong_so": [
+        {
+          "ten": "Thể tích một giọt chuẩn",
+          "gia_tri": "Khoảng 0,04 – 0,05 mL (20 giọt/mL)",
+          "nguon": "https://www.fishersci.com/shop/products/pasteur-pipets/1367820B"
+        },
+        {
+          "ten": "Chiều dài thân thủy tinh",
+          "gia_tri": "150 mm",
+          "nguon": "https://www.fishersci.com/shop/products/pasteur-pipets/1367820B"
+        }
+      ],
+      "cach_dung": [
+        "Bóp quả bóp cao su trước khi nhúng đầu ống vào dung dịch.",
+        "Thả từ từ quả bóp để hút dung dịch lên thân ống.",
+        "Cầm ống thẳng đứng cách lam kính 1 cm và bóp nhẹ để nhỏ 1 giọt."
+      ],
+      "loi_thuong_gap": [
+        "Cầm nghiêng hoặc chúc ngược ống làm dịch lọt vào quả bóp cao su gây ăn mòn.",
+        "Chạm đầu ống nhỏ giọt vào mẫu làm nhiễm bẩn lọ thuốc thử."
+      ],
+      "an_toan": [
+        "Không dùng chung ống nhỏ giọt giữa các lọ thuốc thử khác nhau."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Interaction.Dropper (có sẵn)",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.5",
+      "stt_thiet_bi_tang_1": 11
+    },
+    {
+      "ma": "lo_thuoc_thu_nho_giot",
+      "ten": "Lọ thuốc thử có ống nhỏ giọt",
+      "ten_tieng_anh": "Reagent dropper bottle (amber glass)",
+      "phan_loai": "Chai lọ chứa hóa chất",
+      "phong": [
+        "phong_sinh"
+      ],
+      "so_luong": 40,
+      "vi_tri": "Khay hóa chất nhuộm giữa mỗi bàn học sinh",
+      "cong_dung": "Đựng các dung dịch thuốc thử thường dùng (xanh methylen, Lugol, NaCl)",
+      "thong_so": [
+        {
+          "ten": "Dung tích lọ",
+          "gia_tri": "30 mL, thủy tinh nâu sẫm cản quang",
+          "nguon": "https://www.fishersci.com/shop/products/dropper-bottles-amber/029924"
+        },
+        {
+          "ten": "Nắp ống nhỏ giọt",
+          "gia_tri": "Nắp ren kèm ống hút thủy tinh đầu bi",
+          "nguon": "https://www.fishersci.com/shop/products/dropper-bottles-amber/029924"
+        }
+      ],
+      "cach_dung": [
+        "Mở nắp lọ, bóp quả cao su hút thuốc thử rồi nhỏ vào mẫu.",
+        "Đậy nắp vặn chặt ngay sau khi dùng."
+      ],
+      "loi_thuong_gap": [
+        "Để lẫn nắp giữa các lọ hóa chất khác nhau làm nhiễm chéo.",
+        "Đặt lọ thuốc thử ở mép bàn dễ bị gạt tay làm đổ."
+      ],
+      "an_toan": [
+        "Thủy tinh nâu bảo vệ thuốc thử nhạy sáng; lau sạch miệng lọ khi bị rớt thuốc thử."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.ReagentDropperBottle",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.5"
+    },
+    {
+      "ma": "giay_tham",
+      "ten": "Giấy thấm",
+      "ten_tieng_anh": "Laboratory blotting paper sheets",
+      "phan_loai": "Vật tư tiêu hao làm tiêu bản",
+      "phong": [
+        "phong_sinh"
+      ],
+      "so_luong": 50,
+      "vi_tri": "Khay giấy trên 9 bàn học sinh và đảo nhuộm",
+      "cong_dung": "Hút dịch thừa quanh lamen và tạo dòng đối lưu hút phẩm nhuộm thấm qua mẫu",
+      "thong_so": [
+        {
+          "ten": "Định lượng giấy",
+          "gia_tri": "120 g/m2, độ thấm hút mao dẫn cao",
+          "nguon": "https://www.fishersci.com/shop/products/whatman-blotting-papers/099285"
+        },
+        {
+          "ten": "Kích thước tập giấy cắt sẵn",
+          "gia_tri": "20 x 70 mm",
+          "nguon": "https://www.fishersci.com/shop/products/whatman-blotting-papers/099285"
+        }
+      ],
+      "cach_dung": [
+        "Cắt dải giấy thấm nhỏ.",
+        "Đặt mép giấy thấm sát vào một cạnh của lamen.",
+        "Ở cạnh đối diện nhỏ phẩm nhuộm để thuốc nhuộm bị hút qua mẫu."
+      ],
+      "loi_thuong_gap": [
+        "Đặt giấy thấm đè lên trên bề mặt lamen làm xê dịch hoặc nứt lamen."
+      ],
+      "an_toan": [
+        "Vứt giấy thấm dính phẩm nhuộm hoặc mẫu sinh học vào thùng rác quy định."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.BlottingPaper",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.6"
+    },
+    {
+      "ma": "giay_lau_kinh",
+      "ten": "Giấy lau kính",
+      "ten_tieng_anh": "Optical lens cleaning tissue",
+      "phan_loai": "Vật tư bảo dưỡng quang học",
+      "phong": [
+        "phong_sinh",
+        "phong_vi_sinh"
+      ],
+      "so_luong": 30,
+      "vi_tri": "Hộp giấy lau trên các bàn kính hiển vi",
+      "cong_dung": "Lau sạch bụi và dầu soi bám trên các thấu kính vật kính, thị kính",
+      "thong_so": [
+        {
+          "ten": "Chất liệu sợi giấy",
+          "gia_tri": "100% sợi xơ thực vật không rụng sợi, không xước thấu kính",
+          "nguon": "https://www.olympus-lifescience.com/en/support/service/cleaning/"
+        },
+        {
+          "ten": "Độ dày và kích thước",
+          "gia_tri": "Tập 50 tờ, 100 x 150 mm",
+          "nguon": "https://www.olympus-lifescience.com/en/support/service/cleaning/"
+        }
+      ],
+      "cach_dung": [
+        "Rút 1 tờ giấy lau kính sạch.",
+        "Thấm 1 giọt cồn ete hoặc dung dịch lau quang học chuyên dụng.",
+        "Lau thấu kính theo đường xoắn ốc từ tâm ra rìa một cách nhẹ nhàng."
+      ],
+      "loi_thuong_gap": [
+        "Dùng giấy ăn, giấy vệ sinh hoặc vạt áo lau thấu kính gây trầy xước lớp phủ chống lóa.",
+        "Lau đi lau lại bằng tờ giấy đã dính dầu bẩn."
+      ],
+      "an_toan": [
+        "Chỉ dùng một lần cho mỗi bề mặt quang học rồi bỏ đi."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.LensTissue",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.6"
+    },
+    {
+      "ma": "dia_dong_ho",
+      "ten": "Đĩa đồng hồ Ø 75 mm",
+      "ten_tieng_anh": "Watch glass Ø 75 mm",
+      "phan_loai": "Dụng cụ thủy tinh hỗ trợ",
+      "phong": [
+        "phong_sinh"
+      ],
+      "so_luong": 40,
+      "vi_tri": "Kệ giá đỡ dụng cụ trên các bàn học sinh",
+      "cong_dung": "Chứa mẫu vật tách chiết, ngâm mẫu trong thuốc thử hoặc che đậy cốc",
+      "thong_so": [
+        {
+          "ten": "Đường kính đĩa",
+          "gia_tri": "Ø 75 mm",
+          "nguon": "https://www.fishersci.com/shop/products/pyrex-watch-glasses-diameter-75mm/02611A"
+        },
+        {
+          "ten": "Chất liệu thủy tinh",
+          "gia_tri": "Borosilicate 3.3 chịu hóa chất và nhiệt độ",
+          "nguon": "https://www.fishersci.com/shop/products/pyrex-watch-glasses-diameter-75mm/02611A"
+        }
+      ],
+      "cach_dung": [
+        "Đặt đĩa lên mặt phẳng bàn, cho mô mẫu (vảy hành, lá cây) vào đĩa.",
+        "Nhỏ dịch đệm hoặc nước cất để giữ mẫu không bị khô."
+      ],
+      "loi_thuong_gap": [
+        "Đun trực tiếp đĩa đồng hồ trên ngọn lửa trần gây nứt vỡ."
+      ],
+      "an_toan": [
+        "Cẩn thận tránh trượt rơi làm mẻ mép thủy tinh."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.WatchGlass",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.7",
+      "stt_thiet_bi_tang_1": 44
+    },
+    {
+      "ma": "coc_co_mo",
+      "ten": "Cốc có mỏ",
+      "ten_tieng_anh": "Glass beaker 100 mL / 250 mL",
+      "phan_loai": "Dụng cụ thủy tinh",
+      "phong": [
+        "phong_sinh",
+        "phong_vi_sinh",
+        "phong_sinh_phan_tu",
+        "nha_kinh"
+      ],
+      "so_luong": 50,
+      "vi_tri": "Tủ đựng thủy tinh và trên bàn học sinh",
+      "cong_dung": "Đựng dung dịch, hòa tan hóa chất, ngâm mẫu vật và pha chế đệm",
+      "thong_so": [
+        {
+          "ten": "Dung tích định mức",
+          "gia_tri": "100 mL và 250 mL có vạch chia độ",
+          "nguon": "https://www.fishersci.com/shop/products/pyrex-low-form-griffin-beakers/02540F"
+        },
+        {
+          "ten": "Khả năng chịu nhiệt",
+          "gia_tri": "Lên tới 250 °C (thủy tinh Borosilicate 3.3)",
+          "nguon": "https://www.fishersci.com/shop/products/pyrex-low-form-griffin-beakers/02540F"
+        }
+      ],
+      "cach_dung": [
+        "Rót dung dịch theo miệng mỏ của cốc.",
+        "Dùng đũa thủy tinh dẫn dòng khi rót chất lỏng."
+      ],
+      "loi_thuong_gap": [
+        "Dùng cốc có mỏ để đo thể tích chính xác thay cho ống đong/pipet."
+      ],
+      "an_toan": [
+        "Khi đun nóng phải lót lưới tản nhiệt dưới đáy cốc."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Interaction.LabContainer (có sẵn)",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.7",
+      "stt_thiet_bi_tang_1": 1
+    },
+    {
+      "ma": "ong_nghiem",
+      "ten": "Ống nghiệm",
+      "ten_tieng_anh": "Glass test tubes Ø 16 x 150 mm",
+      "phan_loai": "Dụng cụ thủy tinh",
+      "phong": [
+        "phong_sinh",
+        "phong_vi_sinh",
+        "phong_sinh_phan_tu",
+        "nha_kinh"
+      ],
+      "so_luong": 200,
+      "vi_tri": "Giá ống nghiệm trên các bàn học sinh",
+      "cong_dung": "Tiến hành các phản ứng sinh hóa định tính (catalase, lên men, xantoprotein)",
+      "thong_so": [
+        {
+          "ten": "Kích thước ống nghiệm",
+          "gia_tri": "Ø 16 mm, chiều dài 150 mm, dung tích ~20 mL",
+          "nguon": "https://www.fishersci.com/shop/products/pyrex-disposable-borosilicate-glass-tubes/14959"
+        },
+        {
+          "ten": "Khả năng chịu sốc nhiệt",
+          "gia_tri": "Borosilicate chịu đun sôi cách thủy",
+          "nguon": "https://www.fishersci.com/shop/products/pyrex-disposable-borosilicate-glass-tubes/14959"
+        }
+      ],
+      "cach_dung": [
+        "Rót hóa chất không quá 1/3 thể tích ống khi đun nóng.",
+        "Kẹp ống nghiệm ở 1/3 phía miệng ống và lắc tròn nhẹ nhàng."
+      ],
+      "loi_thuong_gap": [
+        "Miệng ống nghiệm hướng về phía người khác khi xảy ra phản ứng sôi."
+      ],
+      "an_toan": [
+        "Để ống nghiệm nóng lên giá gỗ hoặc nhựa làm cháy giá."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Interaction.LabContainer (có sẵn)",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.7",
+      "stt_thiet_bi_tang_1": 6
+    },
+    {
+      "ma": "gia_ong_nghiem",
+      "ten": "Giá ống nghiệm",
+      "ten_tieng_anh": "Test tube rack (polypropylene/wooden)",
+      "phan_loai": "Dụng cụ hỗ trợ giữ ống",
+      "phong": [
+        "phong_sinh",
+        "phong_vi_sinh",
+        "phong_sinh_phan_tu",
+        "nha_kinh"
+      ],
+      "so_luong": 30,
+      "vi_tri": "Mỗi bàn học sinh 2 giá và trên đảo nhuộm",
+      "cong_dung": "Giữ ống nghiệm đứng thẳng, phơi khô ống nghiệm sau khi rửa",
+      "thong_so": [
+        {
+          "ten": "Số lượng lỗ cắm",
+          "gia_tri": "24 lỗ Ø 18 mm kèm cọc úp khô",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-polypropylene-test-tube-racks/1480940"
+        },
+        {
+          "ten": "Vật liệu nhựa",
+          "gia_tri": "Polypropylene chịu hấp tiệt trùng 121 °C",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-polypropylene-test-tube-racks/1480940"
+        }
+      ],
+      "cach_dung": [
+        "Cắm ống nghiệm thẳng đứng vào các lỗ định vị.",
+        "Úp ngược ống sau khi rửa sạch lên cọc phơi."
+      ],
+      "loi_thuong_gap": [
+        "Đặt quá nhiều ống nặng lệch một bên làm nghiêng đổ giá."
+      ],
+      "an_toan": [
+        "Vệ sinh khay hứng nước đọng dưới đáy giá định kỳ."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.TubeRackSockets",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.7",
+      "stt_thiet_bi_tang_1": 7
+    },
+    {
+      "ma": "ong_dong",
+      "ten": "Ống đong",
+      "ten_tieng_anh": "Graduated cylinder 50 mL / 100 mL",
+      "phan_loai": "Dụng cụ đo thể tích",
+      "phong": [
+        "phong_sinh",
+        "phong_vi_sinh",
+        "phong_sinh_phan_tu",
+        "nha_kinh"
+      ],
+      "so_luong": 30,
+      "vi_tri": "Kệ dụng cụ đo trên các bàn học sinh",
+      "cong_dung": "Đo lường thể tích chất lỏng phục vụ pha môi trường và dung dịch đệm",
+      "thong_so": [
+        {
+          "ten": "Cấp chính xác đo lường",
+          "gia_tri": "Class B, độ chia 1 mL (ống 100 mL)",
+          "nguon": "https://www.fishersci.com/shop/products/pyrex-graduated-cylinders/08548"
+        },
+        {
+          "ten": "Dải thể tích",
+          "gia_tri": "0 – 100 mL",
+          "nguon": "https://www.fishersci.com/shop/products/pyrex-graduated-cylinders/08548"
+        }
+      ],
+      "cach_dung": [
+        "Đặt ống đong trên mặt phẳng nằm ngang.",
+        "Rót chất lỏng gần vạch cần đo rồi dùng ống nhỏ giọt chỉnh chính xác.",
+        "Đọc thể tích tại đáy mặt khum lõm ngang tầm mắt."
+      ],
+      "loi_thuong_gap": [
+        "Đọc vạch từ trên xuống hoặc từ dưới lên gây sai số thị giác (parallax).",
+        "Dùng đũa thủy tinh khuấy mạnh làm thủng đáy ống đong."
+      ],
+      "an_toan": [
+        "Không sấy nóng hoặc đun ống đong trực tiếp vì làm biến dạng dãn nở vạch đo."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Interaction.LabContainer (có sẵn)",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.7",
+      "stt_thiet_bi_tang_1": 9
+    },
+    {
+      "ma": "dua_thuy_tinh",
+      "ten": "Đũa thủy tinh",
+      "ten_tieng_anh": "Glass stirring rod",
+      "phan_loai": "Dụng cụ hỗ trợ khuấy",
+      "phong": [
+        "phong_sinh",
+        "phong_sinh_phan_tu"
+      ],
+      "so_luong": 50,
+      "vi_tri": "Ống cắm dụng cụ trên các bàn học sinh",
+      "cong_dung": "Khuấy đều dung dịch, hòa tan hóa chất và dẫn dòng chất lỏng",
+      "thong_so": [
+        {
+          "ten": "Kích thước thanh",
+          "gia_tri": "Ø 6 mm, dài 200 mm, hai đầu bo tròn lửa",
+          "nguon": "https://www.fishersci.com/shop/products/pyrex-stirring-rods/14980B"
+        },
+        {
+          "ten": "Vật liệu thủy tinh",
+          "gia_tri": "Thủy tinh đặc chịu lực và hóa chất",
+          "nguon": "https://www.fishersci.com/shop/products/pyrex-stirring-rods/14980B"
+        }
+      ],
+      "cach_dung": [
+        "Cầm đũa khuấy tròn đều theo một chiều trong cốc/bình.",
+        "Áp sát đầu đũa vào miệng cốc khi rót chất lỏng để dẫn dòng không bắn."
+      ],
+      "loi_thuong_gap": [
+        "Gõ mạnh đũa vào đáy hoặc thành cốc gây rạn nứt thủy tinh."
+      ],
+      "an_toan": [
+        "Rửa sạch đũa trước khi chuyển sang cốc hóa chất khác."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.GlassRod",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.7",
+      "stt_thiet_bi_tang_1": 32
+    },
+    {
+      "ma": "den_ban_led",
+      "ten": "Đèn bàn LED",
+      "ten_tieng_anh": "Benchtop flexible LED lamp",
+      "phan_loai": "Thiết bị chiếu sáng bổ trợ",
+      "phong": [
+        "phong_sinh"
+      ],
+      "so_luong": 18,
+      "vi_tri": "2 đèn trên mỗi bàn học sinh bo cạnh",
+      "cong_dung": "Chiếu sáng hội tụ mẫu vật khi mổ vi phẫu, tách biểu bì và làm tiêu bản",
+      "thong_so": [
+        {
+          "ten": "Quang thông chiếu sáng",
+          "gia_tri": "800 lumens, nhiệt độ màu 5000K tự nhiên",
+          "nguon": "https://www.philips.com/c-m-li/desk-lights"
+        },
+        {
+          "ten": "Cổ uốn linh hoạt",
+          "gia_tri": "Góc xoay 360 độ, điều chỉnh độ sáng 3 mức",
+          "nguon": "https://www.philips.com/c-m-li/desk-lights"
+        }
+      ],
+      "cach_dung": [
+        "Bật công tắc, uốn thân đèn hướng chùm sáng vào vùng phẫu thuật mẫu.",
+        "Chỉnh độ sáng vừa phải, tránh hắt chói vào thị kính."
+      ],
+      "loi_thuong_gap": [
+        "Để bóng đèn quá sát mẫu mô sống làm nhiệt độ làm héo mẫu."
+      ],
+      "an_toan": [
+        "Rút phích cắm khi vệ sinh bàn thí nghiệm."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.DeskLamp",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.8"
+    },
+    {
+      "ma": "voi_nuoc_ban",
+      "ten": "Vòi nước đầu bàn",
+      "ten_tieng_anh": "Laboratory benchtop tap and ceramic sink",
+      "phan_loai": "Thiết bị cấp nước rửa",
+      "phong": [
+        "phong_sinh"
+      ],
+      "so_luong": 9,
+      "vi_tri": "Đầu mỗi bàn học sinh phòng thí nghiệm",
+      "cong_dung": "Cấp nước máy rửa dụng cụ và tiếp nhận nước thải thí nghiệm thông thường",
+      "thong_so": [
+        {
+          "ten": "Áp lực cấp nước",
+          "gia_tri": "0,2 – 0,4 MPa, đầu vòi có lưới chống văng",
+          "nguon": "https://www.broen-lab.com/products/valves-fittings/water-fittings/"
+        },
+        {
+          "ten": "Vật liệu chậu rửa",
+          "gia_tri": "Nhựa đúc PP chịu axit kiềm hoặc gốm sứ hóa học",
+          "nguon": "https://www.broen-lab.com/products/valves-fittings/water-fittings/"
+        }
+      ],
+      "cach_dung": [
+        "Mở nhẹ van nước, rửa dụng cụ dưới vòi chảy nhẹ.",
+        "Đóng van vòi nước khi kết thúc buổi thực hành."
+      ],
+      "loi_thuong_gap": [
+        "Đổ chất thải sinh học lây nhiễm hoặc hóa chất độc hại vào chậu rửa."
+      ],
+      "an_toan": [
+        "Không để giấy thấm, rác mẫu vật rơi vào lỗ thoát nước gây tắc ống."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.BenchTap",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.8"
+    },
+    {
+      "ma": "man_hinh_ban",
+      "ten": "Màn hình bàn học sinh",
+      "ten_tieng_anh": "BioBench student digital screen",
+      "phan_loai": "Màn hình hiển thị bàn học sinh",
+      "phong": [
+        "phong_sinh"
+      ],
+      "so_luong": 9,
+      "vi_tri": "Gắn giữa mỗi bàn học sinh",
+      "cong_dung": "Hiển thị hướng dẫn thí nghiệm số, sơ đồ bước thực hiện và nhận xét kết quả",
+      "thong_so": [
+        {
+          "ten": "Kích thước màn hình",
+          "gia_tri": "15.6 inch Full HD cảm ứng chống lóa",
+          "nguon": "https://www.dell.com/en-us/shop/monitors/ar/6487"
+        },
+        {
+          "ten": "Giao diện kết nối",
+          "gia_tri": "Ethernet / Wi-Fi đồng bộ máy chủ lab",
+          "mo_phong": true
+        }
+      ],
+      "cach_dung": [
+        "Chạm vào màn hình để mở bài thí nghiệm cần thực hiện.",
+        "Đọc tiêu chí điều kiện từng bước và bấm đánh dấu khi hoàn thành."
+      ],
+      "loi_thuong_gap": [
+        "Dùng vật sắc nhọn gõ vào màn hình cảm ứng.",
+        "Làm đổ hóa chất hoặc nước lên bề mặt màn hình."
+      ],
+      "an_toan": [
+        "Vệ sinh bằng khăn mềm hơi ẩm, không xịt trực tiếp dung môi lên màn hình."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.BioBenchScreenController",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.9"
+    },
+    {
+      "ma": "coi_chay_su",
+      "ten": "Cối chày sứ",
+      "ten_tieng_anh": "Porcelain mortar and pestle 100 mm",
+      "phan_loai": "Dụng cụ nghiền mẫu",
+      "phong": [
+        "phong_sinh",
+        "phong_sinh_phan_tu"
+      ],
+      "so_luong": 15,
+      "vi_tri": "Tủ dụng cụ phòng sinh và sinh học phân tử",
+      "cong_dung": "Nghiền nát mô thực vật (lá, rễ, củ) và mô động vật (gan gà) để phá vỡ vách tế bào",
+      "thong_so": [
+        {
+          "ten": "Đường kính cối",
+          "gia_tri": "Ø 100 mm, dung tích ~150 mL",
+          "nguon": "https://www.fishersci.com/shop/products/coors-porcelain-mortars-pestles/04360"
+        },
+        {
+          "ten": "Lòng cối và đầu chày",
+          "gia_tri": "Nhám mịn chưa tráng men tăng ma sát nghiền",
+          "nguon": "https://www.fishersci.com/shop/products/coors-porcelain-mortars-pestles/04360"
+        }
+      ],
+      "cach_dung": [
+        "Cắt nhỏ mẫu mô cho vào cối, thêm một ít cát thạch anh sạch nếu cần.",
+        "Cầm chày ấn xoay tròn quanh lòng cối với lực đều đặn cho đến khi mô nát nhuyễn.",
+        "Thêm dịch chiết đệm và nghiền đều."
+      ],
+      "loi_thuong_gap": [
+        "Dùng chày nện đập thẳng xuống đáy cối gây nứt vỡ sứ."
+      ],
+      "an_toan": [
+        "Gốm sứ trơ với hầu hết hóa chất; rửa sạch và tráng nước cất sau khi nghiền."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.MortarPestle",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.11",
+      "stt_thiet_bi_tang_1": 46
+    },
+    {
+      "ma": "pheu_loc",
+      "ten": "Phễu lọc + giấy lọc",
+      "ten_tieng_anh": "Filter funnel with filter paper",
+      "phan_loai": "Dụng cụ lọc tách",
+      "phong": [
+        "phong_sinh",
+        "phong_sinh_phan_tu"
+      ],
+      "so_luong": 25,
+      "vi_tri": "Giá dụng cụ phòng sinh và sinh học phân tử",
+      "cong_dung": "Lọc tách bã tế bào mô thực vật/động vật lấy dịch chiết trong suốt",
+      "thong_so": [
+        {
+          "ten": "Góc nghiêng và đường kính phễu",
+          "gia_tri": "Góc 60°, đường kính miệng Ø 75 mm, cuống dài",
+          "nguon": "https://www.fishersci.com/shop/products/pyrex-60-fluted-funnels/10328"
+        },
+        {
+          "ten": "Giấy lọc định tính tương thích",
+          "gia_tri": "Giấy lọc Whatman No. 1, lỗ lọc 11 µm",
+          "nguon": "https://www.cytivalifesciences.com/en/us/shop/filtration/filter-papers/qualitative-filter-papers-p-05700"
+        }
+      ],
+      "cach_dung": [
+        "Gấp giấy lọc làm tư, mở thành hình nón đặt vừa khít vào lòng phễu.",
+        "Thấm ướt giấy lọc bằng vài giọt nước cất để áp sát thành phễu.",
+        "Rót dịch nghiền vào phễu theo đũa thủy tinh, mức dịch không quá 2/3 giấy."
+      ],
+      "loi_thuong_gap": [
+        "Rót dung dịch vượt quá mép giấy lọc làm bã lọt vào dịch lọc."
+      ],
+      "an_toan": [
+        "Cuống phễu đặt chạm thành cốc hứng để dòng dịch chảy êm, không bắn tóe."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.FilterFunnel",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.11",
+      "stt_thiet_bi_tang_1": 17
+    },
+    {
+      "ma": "lo_dau_soi",
+      "ten": "Lọ dầu soi kính",
+      "ten_tieng_anh": "Immersion oil bottle (synthetic, n = 1.515)",
+      "phan_loai": "Vật tư quang học tiêu hao",
+      "phong": [
+        "phong_sinh",
+        "phong_vi_sinh"
+      ],
+      "so_luong": 10,
+      "vi_tri": "Khay kính hiển vi trên các bàn học sinh và vi sinh",
+      "cong_dung": "Môi trường chiết quang giữa lamen và thấu kính vật kính 100x dầu",
+      "thong_so": [
+        {
+          "ten": "Chiết suất quang học",
+          "gia_tri": "n_e = 1,515 ở 23 °C (chuẩn ISO 8036)",
+          "nguon": "https://www.olympus-lifescience.com/en/microscopes/accessories/oil/"
+        },
+        {
+          "ten": "Độ nhớt động học",
+          "gia_tri": "Khoảng 150 – 500 cSt (loại A tiêu chuẩn)",
+          "nguon": "https://www.olympus-lifescience.com/en/microscopes/accessories/oil/"
+        }
+      ],
+      "cach_dung": [
+        "Sau khi lấy nét ở vật kính 40x, xoay mâm kính sang vị trí giữa 40x và 100x.",
+        "Nhỏ đúng 1 giọt dầu soi lên lamen tại điểm chùm sáng chiếu qua.",
+        "Xoay vật kính 100x vào vị trí, thấu kính chạm nhẹ vào giọt dầu.",
+        "Chỉ dùng ốc vi cấp tinh chỉnh lấy nét."
+      ],
+      "loi_thuong_gap": [
+        "Nhỏ dầu soi khi đang quan sát bằng vật kính khô (4x, 10x, 40x) làm hỏng lớp keo thấu kính.",
+        "Nhỏ quá nhiều dầu chảy tràn ra bàn sa trượt."
+      ],
+      "an_toan": [
+        "Bắt buộc lau sạch thấu kính 100x bằng giấy lau kính ngay sau khi kết thúc quan sát."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.ImmersionOil",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.12"
+    },
+    {
+      "ma": "hop_tieu_ban",
+      "ten": "Hộp tiêu bản cố định",
+      "ten_tieng_anh": "Prepared microscope slide storage box",
+      "phan_loai": "Hộp lưu trữ tiêu bản",
+      "phong": [
+        "phong_sinh"
+      ],
+      "so_luong": 10,
+      "vi_tri": "Tủ đựng tiêu bản và trên mỗi cụm bàn học sinh",
+      "cong_dung": "Chứa bộ tiêu bản cố định nhuộm màu chuẩn (mô học, tế bào học)",
+      "thong_so": [
+        {
+          "ten": "Sức chứa tiêu bản",
+          "gia_tri": "Hộp nhựa ABS có rãnh chứa 25 – 100 lam kính chuẩn",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-microscope-slide-boxes/034481"
+        },
+        {
+          "ten": "Lớp lót chống sốc",
+          "gia_tri": "Xốp mút bảo vệ đáy kèm bảng mục lục đánh số",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-microscope-slide-boxes/034481"
+        }
+      ],
+      "cach_dung": [
+        "Mở nắp hộp theo phương ngang, tra số thứ tự tiêu bản theo bảng mục lục.",
+        "Dùng tay cầm ở hai mép lam kính nhẹ nhàng rút tiêu bản lên.",
+        "Trả tiêu bản về đúng khe rãnh quy định sau khi soi xong."
+      ],
+      "loi_thuong_gap": [
+        "Rút lệch góc làm cọ xát vỡ mép kính tiêu bản.",
+        "Bỏ nhầm vị trí rãnh gây thất lạc tiêu bản."
+      ],
+      "an_toan": [
+        "Đóng chặt nắp hộp sau khi dùng tránh bụi bẩn và ánh sáng làm bay màu phẩm nhuộm."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.SlideBox",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.13"
+    },
+    {
+      "ma": "bang_dieu_khien_lop",
+      "ten": "Bảng điều khiển lớp học",
+      "ten_tieng_anh": "Classroom central control console",
+      "phan_loai": "Thiết bị điều khiển trung tâm",
+      "phong": [
+        "phong_sinh"
+      ],
+      "so_luong": 1,
+      "vi_tri": "Bàn giáo viên phòng thí nghiệm sinh học",
+      "cong_dung": "Điều khiển hệ thống điện bàn học sinh, đèn UV khử khuẩn, chiếu camera và giám sát thí nghiệm",
+      "thong_so": [
+        {
+          "ten": "Màn hình giao diện điều khiển",
+          "gia_tri": "Màn hình cảm ứng trung tâm 21.5 inch",
+          "mo_phong": true
+        },
+        {
+          "ten": "Hệ thống bảo vệ nguồn điện",
+          "gia_tri": "Aptomat chống giật ELCB 30 mA cho 9 bàn học sinh",
+          "nguon": "https://www.se.com/vn/vi/product-category/4800-aptomat-va-cau-dao-chong-giat/"
+        }
+      ],
+      "cach_dung": [
+        "Bật chìa khóa nguồn tổng đầu buổi học.",
+        "Kiểm tra trạng thái đóng cắt điện các bàn học sinh.",
+        "Kích hoạt chế độ giảng dạy hoặc chế độ kiểm tra."
+      ],
+      "loi_thuong_gap": [
+        "Quên ngắt điện tổng khi kết thúc buổi thực hành."
+      ],
+      "an_toan": [
+        "Chỉ giáo viên hoặc kỹ thuật viên phụ trách phòng mới được vận hành bảng điều khiển."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Demo.Bio.ClassroomConsole + Khkt.Demo.Bio.ClassroomProgram",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.14"
+    },
+    {
+      "ma": "tu_an_toan_sinh_hoc",
+      "ten": "Tủ an toàn sinh học cấp II A2",
+      "ten_tieng_anh": "Class II Type A2 Biological Safety Cabinet",
+      "phan_loai": "Thiết bị an toàn vi sinh",
+      "phong": [
+        "phong_sinh",
+        "phong_vi_sinh"
+      ],
+      "so_luong": 4,
+      "vi_tri": "2 tủ phòng sinh học chung, 2 tủ phòng vi sinh",
+      "cong_dung": "Bảo vệ người thao tác, mẫu phẩm và môi trường khi làm việc với vi sinh vật",
+      "thong_so": [
+        {
+          "ten": "Hiệu suất màng lọc HEPA",
+          "gia_tri": "99,99% đối với hạt kích thước 0,3 µm",
+          "nguon": "https://www.thermofisher.com/order/catalog/product/1389"
+        },
+        {
+          "ten": "Vận tốc dòng khí hút mặt trước Inflow",
+          "gia_tri": "0,53 m/s (105 fpm)",
+          "nguon": "https://www.thermofisher.com/order/catalog/product/1389"
+        },
+        {
+          "ten": "Mô phỏng xác suất nhiễm mẫu",
+          "gia_tri": "Tính toán dựa trên chiều cao kính, thời gian purge và tắc lưới hút",
+          "mo_phong": true
+        }
+      ],
+      "cach_dung": [
+        "Bật quạt thổi và đèn huỳnh quang trước 15 phút để làm sạch buồng.",
+        "Nâng kính trượt đến đúng vạch an toàn 20 cm.",
+        "Lau bề mặt inox bằng cồn 70% trước khi đưa vật dụng vào.",
+        "Thao tác chậm rãi ở 1/3 giữa mặt bàn, không che lưới hút khí."
+      ],
+      "loi_thuong_gap": [
+        "Mở kính cao hơn vạch 20 cm làm phá vỡ rèm khí bảo vệ.",
+        "Đưa tay vào ra buồng liên tục và quá nhanh gây xoáy khí nhiễm bẩn.",
+        "Để đồ vật che kín lưới hút khí phía trước."
+      ],
+      "an_toan": [
+        "Tuyệt đối không bật đèn UV khi có người đang làm việc trước tủ."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Demo.Bio.BiosafetyCabinetController + Khkt.Demo.Bio.BscProgram",
+      "may_man_hinh": "tu_an_toan_sinh_hoc",
+      "muc_dac_ta": "5.2.1"
+    },
+    {
+      "ma": "tu_am",
+      "ten": "Tủ ấm vi sinh",
+      "ten_tieng_anh": "Microbiological incubator 37 °C",
+      "phan_loai": "Thiết bị nuôi cấy vi sinh",
+      "phong": [
+        "phong_sinh",
+        "phong_vi_sinh"
+      ],
+      "so_luong": 3,
+      "vi_tri": "Khu tủ ấm phòng sinh và phòng vi sinh",
+      "cong_dung": "Duy trì nhiệt độ tối ưu 37 °C cho vi khuẩn phát triển tạo khuẩn lạc",
+      "thong_so": [
+        {
+          "ten": "Dải nhiệt độ điều khiển",
+          "gia_tri": "Nhiệt độ môi trường +5 °C đến 70 °C",
+          "nguon": "https://www.memmert.com/products/incubators/incubator/IN55/"
+        },
+        {
+          "ten": "Độ ổn định nhiệt độ",
+          "gia_tri": "±0,1 °C ở 37 °C",
+          "nguon": "https://www.memmert.com/products/incubators/incubator/IN55/"
+        },
+        {
+          "ten": "Mô phỏng đường cong sinh trưởng khuẩn lạc",
+          "gia_tri": "Phương trình logistic Verhulst theo thời gian và nhiệt độ",
+          "mo_phong": true
+        }
+      ],
+      "cach_dung": [
+        "Bật nguồn, cài đặt nhiệt độ 37 °C trên màn hình số.",
+        "Chờ tủ đạt nhiệt độ ổn định.",
+        "Xếp đĩa petri thạch úp ngược đáy vào tủ.",
+        "Đóng kín cửa kính bên trong và cửa inox bên ngoài."
+      ],
+      "loi_thuong_gap": [
+        "Đặt đĩa petri ngửa đáy làm nước ngưng tụ trên nắp nhỏ giọt làm nhòe khuẩn lạc.",
+        "Mở cửa tủ quá nhiều lần làm dao động nhiệt độ."
+      ],
+      "an_toan": [
+        "Đảm bảo mẫu cấy an toàn cấp BSL-1; khử trùng tủ định kỳ bằng cồn 70%."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Demo.Bio.IncubatorController + Khkt.Demo.Bio.IncubatorProgram",
+      "may_man_hinh": "tu_am_vi_sinh",
+      "muc_dac_ta": "5.2.4"
+    },
+    {
+      "ma": "noi_hap",
+      "ten": "Nồi hấp tiệt trùng đứng",
+      "ten_tieng_anh": "Vertical laboratory autoclave sterilizer",
+      "phan_loai": "Thiết bị tiệt trùng hơi nước",
+      "phong": [
+        "phong_sinh",
+        "phong_vi_sinh"
+      ],
+      "so_luong": 2,
+      "vi_tri": "Khu nồi hấp phòng sinh và phòng vi sinh",
+      "cong_dung": "Tiệt trùng môi trường dinh dưỡng, dụng cụ thủy tinh và túi hấp hủy ở 121 °C, 1,05 bar",
+      "thong_so": [
+        {
+          "ten": "Nhiệt độ và áp suất tiệt trùng chuẩn",
+          "gia_tri": "121 °C ở áp suất dư 1,05 bar (15 psi)",
+          "nguon": "https://www.cdc.gov/infection-control/hcp/disinfection-sterilization/steam-sterilization.html"
+        },
+        {
+          "ten": "Dung tích buồng hấp",
+          "gia_tri": "50 lít, buồng inox 304 chịu áp lực cao",
+          "nguon": "https://www.fishersci.com/shop/products/tuttnauer-vertical-autoclaves/14350125"
+        },
+        {
+          "ten": "Mô phỏng hiệu quả diệt bào tử",
+          "gia_tri": "Hệ số D121 = 1,8 phút đối với G. stearothermophilus",
+          "mo_phong": true
+        }
+      ],
+      "cach_dung": [
+        "Đổ nước cất ngập thanh nhiệt đáy nồi đến vạch quy định.",
+        "Xếp dụng cụ và chai môi trường (nới lỏng nắp) vào giỏ inox.",
+        "Đóng nắp vặn chặt các bu-lông đối xứng chéo nhau.",
+        "Mở van xả đuổi hết khí lạnh cho tới khi hơi nước phụt đều rồi đóng van.",
+        "Duy trì 121 °C trong 15 – 20 phút rồi ngắt điện, chờ đồng hồ áp suất về 0 mới mở nắp."
+      ],
+      "loi_thuong_gap": [
+        "Mở nắp khi áp suất buồng chưa về 0 bar gây nổ bắn dung dịch sôi cực kỳ nguy hiểm.",
+        "Đóng chặt nắp chai thủy tinh chứa chất lỏng làm nổ vỡ chai khi áp suất tăng.",
+        "Quên đuổi hết không khí làm nhiệt độ thực tế không đạt 121 °C."
+      ],
+      "an_toan": [
+        "Luôn đeo găng tay chịu nhiệt và tấm che mặt khi mở nắp lấy đồ hấp."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Demo.Bio.AutoclaveController + Khkt.Demo.Bio.AutoclaveProgram (có sẵn)",
+      "may_man_hinh": "noi_hap",
+      "muc_dac_ta": "5.2.6"
+    },
+    {
+      "ma": "can_phan_tich",
+      "ten": "Cân phân tích",
+      "ten_tieng_anh": "Analytical balance 4 decimal places (0.1 mg)",
+      "phan_loai": "Thiết bị cân đo chính xác",
+      "phong": [
+        "phong_sinh"
+      ],
+      "so_luong": 4,
+      "vi_tri": "Bàn đá chống rung phòng thí nghiệm sinh học",
+      "cong_dung": "Cân chính xác hóa chất pha đệm, môi trường nuôi cấy và hóa chất sinh học",
+      "thong_so": [
+        {
+          "ten": "Độ đọc và độ chính xác",
+          "gia_tri": "0,0001 g (0,1 mg)",
+          "nguon": "https://www.mt.com/vn/vi/home/products/Laboratory_Weighting_Solutions/Analytical.html"
+        },
+        {
+          "ten": "Tải trọng tối đa",
+          "gia_tri": "220 g",
+          "nguon": "https://www.mt.com/vn/vi/home/products/Laboratory_Weighting_Solutions/Analytical.html"
+        }
+      ],
+      "cach_dung": [
+        "Kiểm tra bọt thủy chuẩn ở giữa vòng tròn cân bằng.",
+        "Đóng cửa kính chắn gió, bấm nút TARE (Zero).",
+        "Cho thuyền cân vào đĩa, bấm TARE về 0.",
+        "Dùng thìa xúc nhẹ hóa chất vào thuyền cân đến khối lượng yêu cầu."
+      ],
+      "loi_thuong_gap": [
+        "Cân khi mở cửa kính làm luồng gió phòng làm nhảy số đo.",
+        "Làm rơi vãi bột hóa chất lên đĩa cân hoặc buồng cân."
+      ],
+      "an_toan": [
+        "Quét sạch buồng cân ngay sau khi thao tác; không cân vật có khối lượng vượt quá tải trọng."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Interaction.BalanceScale (có sẵn)",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.16",
+      "stt_thiet_bi_tang_1": 35
+    },
+    {
+      "ma": "may_do_ph",
+      "ten": "Máy đo pH để bàn",
+      "ten_tieng_anh": "Benchtop digital pH meter with glass electrode",
+      "phan_loai": "Thiết bị đo điện hóa",
+      "phong": [
+        "phong_sinh"
+      ],
+      "so_luong": 4,
+      "vi_tri": "Bàn pha chế hóa chất phòng sinh học",
+      "cong_dung": "Đo và chỉnh pH chính xác của môi trường nuôi cấy, đệm điện di và đệm tách chiết",
+      "thong_so": [
+        {
+          "ten": "Dải đo pH và độ phân giải",
+          "gia_tri": "0,00 – 14,00 pH, độ phân giải 0,01 pH",
+          "nguon": "https://www.thermofisher.com/order/catalog/product/STARA2110"
+        },
+        {
+          "ten": "Bù nhiệt tự động ATC",
+          "gia_tri": "-5,0 đến 105,0 °C",
+          "nguon": "https://www.thermofisher.com/order/catalog/product/STARA2110"
+        }
+      ],
+      "cach_dung": [
+        "Rút điện cực khỏi dung dịch bảo quản 3M KCl, tráng sạch bằng nước cất và thấm khô nhẹ.",
+        "Nhúng điện cực ngập đầu nhật đo trong dung dịch cần đo, khuấy nhẹ.",
+        "Chờ số đo ổn định trên màn hình và đọc giá trị pH."
+      ],
+      "loi_thuong_gap": [
+        "Lau quẹt mạnh đầu điện cực thủy tinh làm hỏng màng cảm biến mỏng.",
+        "Để điện cực bị khô đầu đo ngoài không khí."
+      ],
+      "an_toan": [
+        "Luôn bảo quản điện cực trong lọ dung dịch KCl 3M."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Interaction.MeterProbe (có sẵn)",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.16",
+      "stt_thiet_bi_tang_1": 38
+    },
+    {
+      "ma": "be_on_nhiet",
+      "ten": "Bể ổn nhiệt",
+      "ten_tieng_anh": "Constant temperature circulating water bath",
+      "phan_loai": "Thiết bị ổn nhiệt chất lỏng",
+      "phong": [
+        "phong_sinh",
+        "phong_sinh_phan_tu"
+      ],
+      "so_luong": 3,
+      "vi_tri": "Phòng sinh học chung và phòng sinh học phân tử",
+      "cong_dung": "Ủ ấm phản ứng enzyme (catalase, lysozyme), ủ biến tính và ủ sốc nhiệt",
+      "thong_so": [
+        {
+          "ten": "Dải nhiệt độ vận hành",
+          "gia_tri": "Nhiệt độ phòng +5 °C đến 99 °C",
+          "nguon": "https://www.fishersci.com/shop/products/isotemp-general-purpose-water-baths/11385"
+        },
+        {
+          "ten": "Độ đồng đều nhiệt độ",
+          "gia_tri": "±0,2 °C ở 37 °C",
+          "nguon": "https://www.fishersci.com/shop/products/isotemp-general-purpose-water-baths/11385"
+        }
+      ],
+      "cach_dung": [
+        "Đổ nước cất ngập tối thiểu 2/3 lòng bể.",
+        "Cài đặt nhiệt độ yêu cầu (ví dụ 37 °C hoặc 50 °C).",
+        "Khi nhiệt độ đạt mức cài đặt, đặt giá ống nghiệm chứa mẫu vào bể và đậy nắp."
+      ],
+      "loi_thuong_gap": [
+        "Bật thanh gia nhiệt khi không có nước trong bể gây cháy cháy thanh nhiệt."
+      ],
+      "an_toan": [
+        "Chú ý hơi nước nóng khi mở nắp bể; tắt nguồn khi không sử dụng."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Demo.Bio.WaterBathController",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.4.10"
+    },
+    {
+      "ma": "khoi_gia_nhiet_kho",
+      "ten": "Khối gia nhiệt khô",
+      "ten_tieng_anh": "Digital dry block heater",
+      "phan_loai": "Thiết bị gia nhiệt khô",
+      "phong": [
+        "phong_sinh_phan_tu"
+      ],
+      "so_luong": 2,
+      "vi_tri": "Phòng sinh học phân tử",
+      "cong_dung": "Gia nhiệt chính xác ống eppendorf 1,5 mL trong tách chiết ADN và ủ enzyme",
+      "thong_so": [
+        {
+          "ten": "Dải nhiệt độ",
+          "gia_tri": "Môi trường +5 °C đến 130 °C, độ chính xác ±0,5 °C",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-digital-dry-baths-block-heaters/11710"
+        },
+        {
+          "ten": "Khối nhôm tương thích",
+          "gia_tri": "Block chứa 24 ống eppendorf 1,5 mL",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-digital-dry-baths-block-heaters/11710"
+        }
+      ],
+      "cach_dung": [
+        "Lắp khối nhôm thích hợp vào máy, cắm điện và cài đặt nhiệt độ.",
+        "Đặt ống eppendorf chứa mẫu vào các lỗ khít của khối nhôm."
+      ],
+      "loi_thuong_gap": [
+        "Khối nhôm chưa nguội đã vội tháo lắp bằng tay trần gây bỏng."
+      ],
+      "an_toan": [
+        "Bề mặt khối nhôm rất nóng khi cài đặt >60 °C; tránh chạm tay trực tiếp."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Demo.Bio.DryBlockHeater",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.4.10"
+    },
+    {
+      "ma": "may_vortex",
+      "ten": "Máy lắc vortex",
+      "ten_tieng_anh": "Vortex tube mixer",
+      "phan_loai": "Thiết bị lắc trộn",
+      "phong": [
+        "phong_sinh",
+        "phong_vi_sinh",
+        "phong_sinh_phan_tu"
+      ],
+      "so_luong": 5,
+      "vi_tri": "Phòng sinh học, vi sinh và sinh học phân tử",
+      "cong_dung": "Trộn nhanh và hòa tan đồng nhất chất lỏng trong ống nghiệm, eppendorf",
+      "thong_so": [
+        {
+          "ten": "Tốc độ lắc cực đại",
+          "gia_tri": "2500 rpm, quỹ đạo rung tròn 4,5 mm",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-analog-vortex-mixer/02215365"
+        },
+        {
+          "ten": "Chế độ hoạt động",
+          "gia_tri": "Chạm tự động (Touch) hoặc chạy liên tục (Continuous)",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-analog-vortex-mixer/02215365"
+        }
+      ],
+      "cach_dung": [
+        "Chọn chế độ Touch, ấn nhẹ đáy ống eppendorf hoặc ống nghiệm vào đầu cao su của máy.",
+        "Máy tự động rung xoáy trộn đều dung dịch trong vài giây rồi nhấc ra."
+      ],
+      "loi_thuong_gap": [
+        "Lắc ống nghiệm không đậy nắp hoặc đầy quá 2/3 làm văng bắn chất lỏng ra ngoài."
+      ],
+      "an_toan": [
+        "Đảm bảo ống chứa dung dịch đã được đóng kín nắp trước khi lắc."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.VortexMixer",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.4.5"
+    },
+    {
+      "ma": "may_ly_tam_de_ban",
+      "ten": "Máy ly tâm để bàn",
+      "ten_tieng_anh": "Benchtop laboratory centrifuge",
+      "phan_loai": "Thiết bị phân tách ly tâm",
+      "phong": [
+        "phong_sinh",
+        "phong_sinh_phan_tu"
+      ],
+      "so_luong": 2,
+      "vi_tri": "Phòng sinh học và sinh học phân tử",
+      "cong_dung": "Lắng tách tế bào, kết tủa sinh học và tinh sạch dịch chiết",
+      "thong_so": [
+        {
+          "ten": "Tốc độ ly tâm cực đại",
+          "gia_tri": "4000 rpm, lực ly tâm tương đối RCF ~2600 x g",
+          "nguon": "https://www.eppendorf.com/us-en/eShop-Products/Centrifugation/Benchtop-Centrifuges/Centrifuge-5702-5702-R-5702-RH-p-5702000020"
+        },
+        {
+          "ten": "Rotor tương thích",
+          "gia_tri": "Rotor văng 4 vị trí cho ống 15 mL và 50 mL",
+          "nguon": "https://www.eppendorf.com/us-en/eShop-Products/Centrifugation/Benchtop-Centrifuges/Centrifuge-5702-5702-R-5702-RH-p-5702000020"
+        }
+      ],
+      "cach_dung": [
+        "Nạp dịch vào các ống ly tâm và cân đối trọng chính xác từng cặp đối xứng.",
+        "Đặt các ống đối xứng qua trục rotor.",
+        "Đóng chặt nắp máy, cài đặt tốc độ và thời gian ly tâm, nhấn Start."
+      ],
+      "loi_thuong_gap": [
+        "Không cân đối trọng hoặc xếp ống không đối xứng làm máy rung lắc dữ dội và hỏng trục quay.",
+        "Mở nắp khi rotor chưa dừng quay hẳn."
+      ],
+      "an_toan": [
+        "Máy tự khóa nắp an toàn khi quay; tuyệt đối không cưỡng chế mở nắp khi đang chạy."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Interaction.Centrifuge (có sẵn) + Khkt.Demo.Bio.CentrifugeLoad",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.4.6",
+      "stt_thiet_bi_tang_1": 61
+    },
+    {
+      "ma": "binh_len_men",
+      "ten": "Bình lên men + bóng bay",
+      "ten_tieng_anh": "Fermentation flask with rubber balloon",
+      "phan_loai": "Bộ dụng cụ lên men kỵ khí",
+      "phong": [
+        "phong_sinh"
+      ],
+      "so_luong": 10,
+      "vi_tri": "Bàn thí nghiệm sinh học",
+      "cong_dung": "Thí nghiệm lên men rượu của nấm men từ dung dịch đường và thu khí CO2 phồng bóng",
+      "thong_so": [
+        {
+          "ten": "Dung tích bình tam giác",
+          "gia_tri": "250 mL thủy tinh chịu áp",
+          "nguon": "https://www.fishersci.com/shop/products/pyrex-narrow-mouth-erlenmeyer-flasks/03560"
+        },
+        {
+          "ten": "Bóng bay cao su thu khí",
+          "gia_tri": "Bóng cao su co giãn tốt đường kính phồng tối đa 25 cm",
+          "mo_phong": true
+        }
+      ],
+      "cach_dung": [
+        "Cho dung dịch glucose 10% và huyền phù men bánh mì vào bình tam giác.",
+        "Lồng miệng bóng bay trùm kín cổ bình tam giác và buộc chặt bằng dây cao su.",
+        "Đặt ở nhiệt độ phòng hoặc tủ ấm 30 – 35 °C và theo dõi độ phồng của bóng."
+      ],
+      "loi_thuong_gap": [
+        "Cổ bóng buộc không kín làm rò rỉ khí CO2.",
+        "Cho quá nhiều men và đường làm dịch bọt trào lên bóng."
+      ],
+      "an_toan": [
+        "Khí CO2 sinh ra an toàn; không để bình gần nguồn nhiệt cao."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.FermentationFlask",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.17"
+    },
+    {
+      "ma": "bo_lam_sua_chua",
+      "ten": "Hũ làm sữa chua",
+      "ten_tieng_anh": "Yogurt incubator jar set",
+      "phan_loai": "Bộ dụng cụ làm sữa chua",
+      "phong": [
+        "phong_sinh"
+      ],
+      "so_luong": 10,
+      "vi_tri": "Khu thí nghiệm sinh lý thực hành",
+      "cong_dung": "Lên men lactic sữa tươi bằng vi khuẩn lactic (Lactobacillus bulgaricus)",
+      "thong_so": [
+        {
+          "ten": "Dung tích hũ chứa",
+          "gia_tri": "Hũ thủy tinh 150 mL có nắp vặn kín",
+          "mo_phong": true
+        },
+        {
+          "ten": "Nhiệt độ ủ lên men tối ưu",
+          "gia_tri": "40 – 42 °C trong 6 – 8 giờ",
+          "nguon": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6471617/"
+        }
+      ],
+      "cach_dung": [
+        "Pha sữa chua cái vào sữa tươi ấm (~40 °C), khuấy nhẹ.",
+        "Rót vào các hũ thủy tinh sạch và đậy nắp kín.",
+        "Đặt vào tủ ấm hoặc nồi ủ nhiệt 40 °C trong 6 – 8 giờ."
+      ],
+      "loi_thuong_gap": [
+        "Sữa quá nóng (>50 °C) làm chết men vi khuẩn lactic.",
+        "Nhiệt độ ủ quá lạnh khiến vi khuẩn không hoạt động, sữa bị tách nước."
+      ],
+      "an_toan": [
+        "Đảm bảo vệ sinh hũ sạch sẽ trước khi làm để tránh nhiễm khuẩn tạp."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.YogurtJar",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.18"
+    },
+    {
+      "ma": "ban_giai_phau_so",
+      "ten": "Bàn giải phẫu số",
+      "ten_tieng_anh": "Digital human 3D anatomy interactive table",
+      "phan_loai": "Bàn giải phẫu số tương tác",
+      "phong": [
+        "phong_sinh"
+      ],
+      "so_luong": 1,
+      "vi_tri": "Khu giải phẫu số phòng thí nghiệm sinh học",
+      "cong_dung": "Hiển thị mô hình 3D cơ thể người thực tế, tương tác bóc tách 4 lớp (Da, Cơ, Nội tạng, Xương)",
+      "thong_so": [
+        {
+          "ten": "Kích thước màn hình cảm ứng",
+          "gia_tri": "Màn hình 85 inch 4K tương tác đa điểm",
+          "nguon": "https://www.anatomage.com/table/"
+        },
+        {
+          "ten": "Dữ liệu mô phỏng giải phẫu",
+          "gia_tri": "Dữ liệu BodyParts3D (DBCLS CC BY 4.0) có nhịp tim 72 bpm, phổi thở 16 bpm",
+          "mo_phong": true
+        }
+      ],
+      "cach_dung": [
+        "Chạm vào màn hình để xoay và phóng to thu nhỏ mô hình cơ thể người.",
+        "Dùng thanh trượt chuyển đổi giữa các lớp: Da, Cơ, Nội tạng, Xương.",
+        "Chạm vào từng cơ quan để xem tên, chú thích giải phẫu và chức năng sinh lý."
+      ],
+      "loi_thuong_gap": [
+        "Đè vật nặng lên mặt kính cảm ứng.",
+        "Làm đổ nước lên bề mặt bàn."
+      ],
+      "an_toan": [
+        "Vận hành bằng ngón tay sạch, tắt nguồn màn hình khi không sử dụng."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Demo.Bio.DigitalAnatomyTable (nâng cấp)",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.19"
+    },
+    {
+      "ma": "bo_xuong_gia",
+      "ten": "Bộ xương trên giá bánh xe",
+      "ten_tieng_anh": "Full-size human skeleton model on roller stand",
+      "phan_loai": "Mô hình giải phẫu trực quan",
+      "phong": [
+        "phong_sinh"
+      ],
+      "so_luong": 1,
+      "vi_tri": "Cạnh bàn giải phẫu số phòng thí nghiệm sinh học",
+      "cong_dung": "Quan sát trực quan toàn bộ hệ xương người THPT (206 xương) và các khớp vận động",
+      "thong_so": [
+        {
+          "ten": "Chiều cao mô hình",
+          "gia_tri": "170 cm (kích thước thật 1:1)",
+          "nguon": "https://www.3bscientific.com/us/stan-the-standard-skeleton-model-on-pelvic-mounted-5-foot-roller-stand-a10-3b-scientific,p_13_40.html"
+        },
+        {
+          "ten": "Vật liệu chế tạo",
+          "gia_tri": "Nhựa PVC đúc chi tiết cao, gắn trên giá 5 bánh xe đẩy",
+          "nguon": "https://www.3bscientific.com/us/stan-the-standard-skeleton-model-on-pelvic-mounted-5-foot-roller-stand-a10-3b-scientific,p_13_40.html"
+        }
+      ],
+      "cach_dung": [
+        "Đẩy nhẹ nhàng giá bánh xe di chuyển mô hình đến vị trí quan sát.",
+        "Khảo sát các khớp: khớp động (khuỷu tay, gối), khớp bán động (cột sống), khớp bất động (sọ)."
+      ],
+      "loi_thuong_gap": [
+        "Bẻ hoặc uốn cong khớp vượt quá biên độ tự nhiên làm gãy chốt nối."
+      ],
+      "an_toan": [
+        "Khóa phanh bánh xe khi đặt mô hình đứng yên."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.SkeletonStand",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.19"
+    },
+    {
+      "ma": "quay_rua_tay",
+      "ten": "Quầy rửa tay vòi cảm ứng",
+      "ten_tieng_anh": "Touchless sensor hand wash station with soap dispenser",
+      "phan_loai": "Trạm an toàn vệ sinh",
+      "phong": [
+        "phong_sinh",
+        "hanh_lang_t2"
+      ],
+      "so_luong": 4,
+      "vi_tri": "Phòng sinh học và hành lang tầng 2",
+      "cong_dung": "Rửa sạch và sát khuẩn tay trước và sau khi thực hành sinh học",
+      "thong_so": [
+        {
+          "ten": "Cảm biến vòi phun",
+          "gia_tri": "Hồng ngoại tự động đóng mở vòi không chạm",
+          "nguon": "https://www.toto.com/en/products/faucets/sensor/"
+        },
+        {
+          "ten": "Bình cấp xà phòng",
+          "gia_tri": "Bình tạo bọt cảm ứng tự động dung tích 1000 mL",
+          "nguon": "https://www.toto.com/en/products/faucets/sensor/"
+        }
+      ],
+      "cach_dung": [
+        "Đưa tay dưới vòi cảm biến để làm ướt tay.",
+        "Lấy xà phòng sát khuẩn, chà sạch các kẽ ngón tay tối thiểu 20 giây theo quy trình Bộ Y tế.",
+        "Đưa tay vào vòi nước xả sạch bọt và lau khô bằng khăn sạch."
+      ],
+      "loi_thuong_gap": [
+        "Vội vàng không rửa đủ 20 giây khiến vi khuẩn tồn lưu."
+      ],
+      "an_toan": [
+        "Rửa tay bắt buộc trước khi rời khỏi khu vực phòng thí nghiệm vi sinh."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.HandWashStation",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.20"
+    },
+    {
+      "ma": "bon_rua_mat",
+      "ten": "Bồn rửa mắt khẩn cấp",
+      "ten_tieng_anh": "Emergency eyewash station",
+      "phan_loai": "Thiết bị an toàn khẩn cấp",
+      "phong": [
+        "phong_sinh"
+      ],
+      "so_luong": 2,
+      "vi_tri": "Cạnh cửa phòng sinh học và phòng vi sinh",
+      "cong_dung": "Rửa trôi khẩn cấp hóa chất hoặc sinh phẩm bắn vào mắt",
+      "thong_so": [
+        {
+          "ten": "Lưu lượng nước phun",
+          "gia_tri": "Tối thiểu 1,5 L/phút (chuẩn ANSI/ISEA Z358.1)",
+          "nguon": "https://www.osha.gov/laws-regs/standardinterpretations/2009-04-14"
+        },
+        {
+          "ten": "Cơ chế kích hoạt",
+          "gia_tri": "Van gạt tay kích hoạt ngay trong 1 giây và duy trì mở",
+          "nguon": "https://www.osha.gov/laws-regs/standardinterpretations/2009-04-14"
+        }
+      ],
+      "cach_dung": [
+        "Đẩy mạnh cần gạt tay để mở vòi phun.",
+        "Cúi đầu vào giữa hai dòng nước, dùng ngón tay mở to hai mí mắt.",
+        "Rửa liên tục tối thiểu 15 phút."
+      ],
+      "loi_thuong_gap": [
+        "Nhắm tịt mắt khi rửa khiến hóa chất ứ đọng trong mi mắt."
+      ],
+      "an_toan": [
+        "Kiểm tra xả thử vòi mỗi tuần một lần; đưa nạn nhân đến trạm y tế sau khi sơ cứu."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Demo.Bio.EyeWashStation",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.20",
+      "stt_thiet_bi_tang_1": 54
+    },
+    {
+      "ma": "bo_xu_ly_tran",
+      "ten": "Bộ xử lý tràn đổ sinh học",
+      "ten_tieng_anh": "Biological spill response kit",
+      "phan_loai": "Bộ dụng cụ xử lý sự cố tràn đổ",
+      "phong": [
+        "phong_sinh",
+        "phong_vi_sinh"
+      ],
+      "so_luong": 3,
+      "vi_tri": "Tủ an toàn phòng sinh và phòng vi sinh",
+      "cong_dung": "Xử lý và khử nhiễm khẩn cấp khi tràn đổ dịch vi sinh hoặc hóa chất sinh học",
+      "thong_so": [
+        {
+          "ten": "Dung dịch khử khuẩn",
+          "gia_tri": "Chai xịt dung dịch tẩy trùng chứa Clo 0,5% (5000 ppm)",
+          "nguon": "https://www.cdc.gov/infection-control/hcp/disinfection-sterilization/chemical-disinfectants.html"
+        },
+        {
+          "ten": "Vật tư trong bộ kit",
+          "gia_tri": "Khăn thấm thấm hút cao, găng tay nitrile, xẻng hót và kẹp nhựa",
+          "nguon": "https://www.fishersci.com/shop/products/spill-kit-biohazard/191300062"
+        }
+      ],
+      "cach_dung": [
+        "Mặc đồ bảo hộ (găng, kính).",
+        "Phủ khăn giấy thấm lên vùng tràn để ngăn loang rộng.",
+        "Đổ dung dịch khử khuẩn từ ngoài rìa vào tâm, chờ 20 phút.",
+        "Thu gom khăn thấm vào túi nguy hại sinh học."
+      ],
+      "loi_thuong_gap": [
+        "Dùng chổi quét trực tiếp dịch tràn tạo bụi khí dung lây nhiễm."
+      ],
+      "an_toan": [
+        "Báo ngay cho giáo viên phụ trách khi có sự cố tràn đổ vi sinh."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.SpillKit",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.21"
+    },
+    {
+      "ma": "thung_rac_nguy_hai",
+      "ten": "Thùng rác nguy hại sinh học",
+      "ten_tieng_anh": "Biohazard waste bin with foot pedal",
+      "phan_loai": "Thùng chứa rác y tế - sinh học",
+      "phong": [
+        "phong_sinh",
+        "phong_vi_sinh",
+        "phong_sinh_phan_tu",
+        "nha_kinh"
+      ],
+      "so_luong": 6,
+      "vi_tri": "Bố trí ở mọi phòng thí nghiệm tầng 2",
+      "cong_dung": "Chứa chất thải rắn có nguy cơ lây nhiễm sinh học (đĩa petri, găng tay, khăn lau nhiễm)",
+      "thong_so": [
+        {
+          "ten": "Biểu tượng cảnh báo",
+          "gia_tri": "Màu vàng có logo cảnh báo nguy hại sinh học chuẩn quốc tế",
+          "nguon": "https://www.cdc.gov/biosafety/publications/bmbl5/BMBL.pdf"
+        },
+        {
+          "ten": "Cơ cấu đóng mở",
+          "gia_tri": "Bàn đạp chân mở nắp không dùng tay, dung tích 30 lít",
+          "nguon": "https://www.fishersci.com/shop/products/justrite-biohazard-waste-cans/19044234"
+        }
+      ],
+      "cach_dung": [
+        "Dùng chân đạp bàn đạp mở nắp.",
+        "Bỏ chất thải sinh học vào túi vàng lót bên trong thùng rồi thả chân đóng nắp."
+      ],
+      "loi_thuong_gap": [
+        "Dùng tay mở nắp thùng rác gây nhiễm bẩn tay."
+      ],
+      "an_toan": [
+        "Buộc kín miệng túi và đem hấp tiệt trùng trước khi tiêu hủy."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.BiohazardBin",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.21"
+    },
+    {
+      "ma": "thung_vat_sac",
+      "ten": "Thùng vật sắc nhọn",
+      "ten_tieng_anh": "Sharps disposal container",
+      "phan_loai": "Thùng chứa vật sắc nhọn",
+      "phong": [
+        "phong_sinh",
+        "phong_vi_sinh",
+        "phong_sinh_phan_tu",
+        "nha_kinh"
+      ],
+      "so_luong": 6,
+      "vi_tri": "Đặt trên bàn tại mọi phòng thí nghiệm tầng 2",
+      "cong_dung": "Thu gom dao lam, kim mũi mác cùn, lamen vỡ, đầu côn dính mẫu",
+      "thong_so": [
+        {
+          "ten": "Vật liệu vỏ thùng",
+          "gia_tri": "Nhựa polypropylene dày chống đâm thủng và chống rò rỉ",
+          "nguon": "https://www.fda.gov/medical-devices/safely-using-sharps-needles-and-syringes-home-work-and-travel/sharps-disposal-containers"
+        },
+        {
+          "ten": "Khóa miệng thùng",
+          "gia_tri": "Nắp sập một chiều ngăn vật rơi ngược ra ngoài",
+          "nguon": "https://www.fda.gov/medical-devices/safely-using-sharps-needles-and-syringes-home-work-and-travel/sharps-disposal-containers"
+        }
+      ],
+      "cach_dung": [
+        "Thả trực tiếp vật sắc nhọn vào miệng thùng.",
+        "Không dùng tay ấn ép rác xuống."
+      ],
+      "loi_thuong_gap": [
+        "Bỏ vật sắc nhọn vào túi rác nylon thông thường làm rách túi đâm vào chân người dọn."
+      ],
+      "an_toan": [
+        "Khi rác đạt 3/4 thể tích thùng, đóng khóa chốt nắp vĩnh viễn và chuyển đi hấp hủy."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.SharpsBin",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.21"
+    },
+    {
+      "ma": "binh_chua_chay",
+      "ten": "Bình chữa cháy",
+      "ten_tieng_anh": "CO2 / ABC dry chemical fire extinguisher",
+      "phan_loai": "Thiết bị phòng cháy chữa cháy",
+      "phong": [
+        "phong_sinh",
+        "phong_vi_sinh",
+        "phong_sinh_phan_tu",
+        "nha_kinh"
+      ],
+      "so_luong": 6,
+      "vi_tri": "Treo tường cạnh cửa thoát hiểm tại mọi phòng",
+      "cong_dung": "Dập tắt đám cháy ban đầu (thiết bị điện, dung môi hữu cơ cồn, vật liệu rắn)",
+      "thong_so": [
+        {
+          "ten": "Loại chất chữa cháy",
+          "gia_tri": "Khí CO2 3 kg hoặc Bột khô ABC 4 kg",
+          "nguon": "https://www.nfpa.org/codes-and-standards/all-codes-and-standards/list-of-codes-and-standards/detail?code=10"
+        },
+        {
+          "ten": "Áp suất thử nghiệm",
+          "gia_tri": "250 bar (bình CO2)",
+          "nguon": "https://www.nfpa.org/codes-and-standards/all-codes-and-standards/list-of-codes-and-standards/detail?code=10"
+        }
+      ],
+      "cach_dung": [
+        "Rút chốt hãm an toàn.",
+        "Hướng loa phun vào gốc ngọn lửa.",
+        "Bóp cò van và quét loa phun qua lại."
+      ],
+      "loi_thuong_gap": [
+        "Cầm tay vào loa phun của bình CO2 gây bỏng lạnh âm 79 °C."
+      ],
+      "an_toan": [
+        "Kiểm tra đồng hồ áp suất định kỳ, đảm bảo kim chỉ vạch xanh."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "thẻ thông tin (Khkt.Demo.Bio.EquipmentInfo, có sẵn)",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.21",
+      "stt_thiet_bi_tang_1": 57
+    },
+    {
+      "ma": "tu_so_cuu",
+      "ten": "Tủ sơ cứu",
+      "ten_tieng_anh": "Wall-mounted first aid cabinet",
+      "phan_loai": "Tủ y tế sơ cấp cứu",
+      "phong": [
+        "phong_sinh"
+      ],
+      "so_luong": 2,
+      "vi_tri": "Treo tường phòng thí nghiệm sinh học và vi sinh",
+      "cong_dung": "Chứa bông băng, gạc vô trùng, thuốc sát trùng vết thương, băng cá nhân",
+      "thong_so": [
+        {
+          "ten": "Tiêu chuẩn trang bị",
+          "gia_tri": "Tiêu chuẩn tủ sơ cứu cơ sở y tế lao động (OSHA/ANSI Z308.1)",
+          "nguon": "https://www.osha.gov/medical-first-aid"
+        },
+        {
+          "ten": "Chất liệu vỏ tủ",
+          "gia_tri": "Kim loại sơn tĩnh điện màu trắng có chữ thập đỏ",
+          "nguon": "https://www.osha.gov/medical-first-aid"
+        }
+      ],
+      "cach_dung": [
+        "Mở tủ lấy bông gạc và dung dịch sát khuẩn povidone iod khi có vết đứt tay.",
+        "Băng ép cầm máu vết thương và báo cáo giáo viên."
+      ],
+      "loi_thuong_gap": [
+        "Tự ý dùng thuốc uống khi chưa có chỉ định của cán bộ y tế."
+      ],
+      "an_toan": [
+        "Kiểm tra hạn dùng của thuốc sát trùng và bông băng định kỳ."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Demo.Bio.FirstAidCabinet",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.21"
+    },
+    {
+      "ma": "do_bao_ho",
+      "ten": "Đồ bảo hộ (áo, găng, kính)",
+      "ten_tieng_anh": "PPE station (Lab coats, nitrile gloves, safety glasses)",
+      "phan_loai": "Trang thiết bị bảo hộ cá nhân",
+      "phong": [
+        "phong_sinh",
+        "phong_vi_sinh",
+        "hanh_lang_t2"
+      ],
+      "so_luong": 4,
+      "vi_tri": "Lối vào phòng sinh học, vi sinh và hành lang tầng 2",
+      "cong_dung": "Bảo vệ da, mắt và quần áo học sinh khỏi hóa chất nhuộm và vi sinh vật",
+      "thong_so": [
+        {
+          "ten": "Chất liệu áo choàng",
+          "gia_tri": "Vải cotton/poly chống thấm nhẹ, cổ bẻ dài tay có cúc bấm",
+          "nguon": "https://www.cdc.gov/niosh/npptl/topics/protectiveclothing/"
+        },
+        {
+          "ten": "Găng tay bảo hộ",
+          "gia_tri": "Găng tay cao su nitrile không bột, chống thấm hóa chất",
+          "nguon": "https://www.cdc.gov/niosh/npptl/topics/protectiveclothing/"
+        }
+      ],
+      "cach_dung": [
+        "Mặc áo choàng cài kín cúc trước khi vào phòng.",
+        "Đeo kính bảo hộ và mang găng tay nitrile vừa cỡ tay.",
+        "Tháo găng lột ngược từ trong ra ngoài và bỏ vào thùng rác nguy hại sinh học."
+      ],
+      "loi_thuong_gap": [
+        "Mặc áo bảo hộ ra khỏi khuôn viên phòng thí nghiệm đi vào khu căng tin."
+      ],
+      "an_toan": [
+        "Không chạm tay đeo găng đã dính mẫu vào điện thoại, tay nắm cửa hoặc mặt."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.PpeStation",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.1.21"
+    },
+    {
+      "ma": "den_con",
+      "ten": "Đèn cồn",
+      "ten_tieng_anh": "Glass alcohol spirit lamp 150 mL",
+      "phan_loai": "Thiết bị tạo nhiệt vô trùng",
+      "phong": [
+        "phong_sinh",
+        "phong_vi_sinh"
+      ],
+      "so_luong": 20,
+      "vi_tri": "Bàn làm việc phòng vi sinh và phòng sinh học",
+      "cong_dung": "Khử trùng que cấy kim loại bằng ngọn lửa và tạo vùng vô trùng bán kính 15 – 20 cm",
+      "thong_so": [
+        {
+          "ten": "Dung tích bầu đèn",
+          "gia_tri": "150 mL thủy tinh đúc chịu nhiệt",
+          "nguon": "https://www.fishersci.com/shop/products/alcohol-burners-glass/04260"
+        },
+        {
+          "ten": "Nhiên liệu cồn",
+          "gia_tri": "Cồn ethanol hoặc cồn công nghiệp 90 – 96%",
+          "nguon": "https://www.fishersci.com/shop/products/alcohol-burners-glass/04260"
+        }
+      ],
+      "cach_dung": [
+        "Rót cồn khoảng 2/3 bầu đèn, chỉnh bấc nhô lên 3 – 4 mm.",
+        "Dùng que diêm hoặc bật lửa châm ngọn lửa.",
+        "Khử trùng que cấy ở phần ngọn lửa nóng nhất (vùng không màu phía trên).",
+        "Tắt đèn bằng cách chụp nắp chụp từ phía bên cạnh vào."
+      ],
+      "loi_thuong_gap": [
+        "Thổi ngọn lửa đèn cồn bằng miệng làm ngọn lửa tạt ngược gây cháy.",
+        "Rót thêm cồn khi đèn đang cháy."
+      ],
+      "an_toan": [
+        "Nếu đèn cồn bị đổ gây cháy lan, dùng khăn ẩm hoặc bình chữa cháy dập ngay."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Interaction.HeatSource (có sẵn) + Khkt.Demo.Bio.SpiritLamp",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.2.2",
+      "stt_thiet_bi_tang_1": 21
+    },
+    {
+      "ma": "que_cay_vong",
+      "ten": "Que cấy vòng",
+      "ten_tieng_anh": "Inoculating loop (Nichrome wire Ø 2 mm)",
+      "phan_loai": "Dụng cụ cấy vi sinh",
+      "phong": [
+        "phong_vi_sinh"
+      ],
+      "so_luong": 30,
+      "vi_tri": "Giá cắm que cấy phòng vi sinh",
+      "cong_dung": "Chuyển cấy vi sinh vật, ria cấy phân lập đơn khuẩn lạc trên đĩa thạch",
+      "thong_so": [
+        {
+          "ten": "Đường kính vòng cấy",
+          "gia_tri": "Ø 2 – 3 mm, dung tích giữ mẫu ~1 – 5 µL",
+          "nguon": "https://www.fishersci.com/shop/products/nichrome-inoculating-loops/13086"
+        },
+        {
+          "ten": "Vật liệu dây kim loại",
+          "gia_tri": "Hợp kim Niken-Crom (Nichrome) đốt đỏ nhanh nguội",
+          "nguon": "https://www.fishersci.com/shop/products/nichrome-inoculating-loops/13086"
+        }
+      ],
+      "cach_dung": [
+        "Đốt que cấy trên ngọn lửa đèn cồn từ gốc đến ngọn cho tới khi dây đỏ rực.",
+        "Làm nguội que cấy ở phần thạch sạch không có khuẩn lạc.",
+        "Chạm nhẹ đầu vòng vào khuẩn lạc để lấy mẫu.",
+        "Ria cấy nhẹ nhàng trên mặt thạch theo đường dích dắc."
+      ],
+      "loi_thuong_gap": [
+        "Cầm que cấy còn nóng chạm vào khuẩn lạc làm chết vi khuẩn.",
+        "Đè mạnh làm rách nát bề mặt thạch đĩa petri."
+      ],
+      "an_toan": [
+        "Luôn tiệt trùng đốt đỏ que cấy trước và sau mỗi lần thao tác."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.InoculatingLoop",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.2.3"
+    },
+    {
+      "ma": "que_cay_thang",
+      "ten": "Que cấy thẳng",
+      "ten_tieng_anh": "Straight inoculating needle (Nichrome wire)",
+      "phan_loai": "Dụng cụ cấy vi sinh",
+      "phong": [
+        "phong_vi_sinh"
+      ],
+      "so_luong": 20,
+      "vi_tri": "Giá cắm que cấy phòng vi sinh",
+      "cong_dung": "Cấy đâm sâu vào ống thạch đứng để khảo sát hô hấp kỵ khí hoặc cấy chích điểm",
+      "thong_so": [
+        {
+          "ten": "Chiều dài dây kim loại",
+          "gia_tri": "Dây Nichrome thẳng dài 70 mm",
+          "nguon": "https://www.fishersci.com/shop/products/nichrome-inoculating-needles/13087"
+        },
+        {
+          "ten": "Đường kính dây",
+          "gia_tri": "0,5 mm",
+          "nguon": "https://www.fishersci.com/shop/products/nichrome-inoculating-needles/13087"
+        }
+      ],
+      "cach_dung": [
+        "Đốt đỏ tiệt trùng toàn bộ chiều dài kim trên ngọn lửa, để nguội.",
+        "Chạm đầu kim vào mẫu vi khuẩn.",
+        "Đâm thẳng một đường chính giữa cột thạch đứng xuống 2/3 đáy rồi rút thẳng ra."
+      ],
+      "loi_thuong_gap": [
+        "Rút kim xiên vẹo làm nứt vỡ cột thạch."
+      ],
+      "an_toan": [
+        "Đốt tiệt trùng lại kim sau khi cấy."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.InoculatingLoop (chế độ thẳng)",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.2.3"
+    },
+    {
+      "ma": "que_trang",
+      "ten": "Que trang thủy tinh",
+      "ten_tieng_anh": "L-shaped glass cell spreader",
+      "phan_loai": "Dụng cụ gạt trang tế bào",
+      "phong": [
+        "phong_vi_sinh"
+      ],
+      "so_luong": 20,
+      "vi_tri": "Hộp ống cắm ngâm cồn phòng vi sinh",
+      "cong_dung": "Trang đều dịch huyền phù vi khuẩn lên khắp bề mặt đĩa thạch để đếm khuẩn lạc",
+      "thong_so": [
+        {
+          "ten": "Kích thước thanh gạt",
+          "gia_tri": "Dạng chữ L, thanh gạt ngang 40 mm, cán dài 150 mm",
+          "nguon": "https://www.fishersci.com/shop/products/l-shaped-cell-spreaders/08772"
+        },
+        {
+          "ten": "Chất liệu thủy tinh",
+          "gia_tri": "Thủy tinh Borosilicate chịu đốt cồn khử trùng",
+          "nguon": "https://www.fishersci.com/shop/products/l-shaped-cell-spreaders/08772"
+        }
+      ],
+      "cach_dung": [
+        "Nhúng đầu que trang vào cồn 70%, đưa qua ngọn lửa đèn cồn để cồn cháy hết.",
+        "Chờ que trang nguội trong 10 giây.",
+        "Nhỏ 0,1 mL dịch vi khuẩn lên mặt đĩa thạch.",
+        "Dùng thanh gạt xoay nhẹ nhàng đĩa petri để dịch dàn đều."
+      ],
+      "loi_thuong_gap": [
+        "Nhúng que trang còn nóng đỏ vào lọ cồn làm bốc cháy lọ cồn."
+      ],
+      "an_toan": [
+        "Đợi cồn cháy hết tự nhiên, không vẩy que trang làm bắn cồn đang cháy."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.CellSpreader",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.2.3"
+    },
+    {
+      "ma": "que_cay_nhua",
+      "ten": "Que cấy nhựa dùng một lần",
+      "ten_tieng_anh": "Disposable sterile plastic inoculating loops (10 µL)",
+      "phan_loai": "Dụng cụ cấy dùng một lần",
+      "phong": [
+        "phong_vi_sinh"
+      ],
+      "so_luong": 15,
+      "vi_tri": "Ngăn kéo tủ thao tác vi sinh",
+      "cong_dung": "Cấy vi khuẩn định lượng và cấy an toàn trong tủ an toàn sinh học (không dùng lửa)",
+      "thong_so": [
+        {
+          "ten": "Dung tích vòng cấy chuẩn",
+          "gia_tri": "10 µL định lượng (tiệt trùng bằng tia Gamma)",
+          "nguon": "https://www.fishersci.com/shop/products/disposable-inoculating-loops-needles/1496030"
+        },
+        {
+          "ten": "Vật liệu nhựa",
+          "gia_tri": "Polystyrene dẻo mềm không làm xước thạch",
+          "nguon": "https://www.fishersci.com/shop/products/disposable-inoculating-loops-needles/1496030"
+        }
+      ],
+      "cach_dung": [
+        "Xé túi vô trùng, cầm vào cán que cấy nhựa.",
+        "Lấy sinh khối vi khuẩn và ria cấy lên mặt đĩa petri.",
+        "Bỏ que vào thùng rác nguy hại sinh học sau khi dùng."
+      ],
+      "loi_thuong_gap": [
+        "Đưa que cấy nhựa vào ngọn lửa đèn cồn làm chảy nhựa sinh khói độc."
+      ],
+      "an_toan": [
+        "Chỉ dùng một lần duy nhất cho mỗi chủng mẫu."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.InoculatingLoop (chế độ nhựa)",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.2.3"
+    },
+    {
+      "ma": "dia_petri",
+      "ten": "Đĩa petri Ø 90 mm",
+      "ten_tieng_anh": "Plastic sterile Petri dish Ø 90 x 15 mm",
+      "phan_loai": "Dụng cụ nuôi cấy thạch",
+      "phong": [
+        "phong_vi_sinh",
+        "phong_sinh"
+      ],
+      "so_luong": 150,
+      "vi_tri": "Tủ đựng vật tư phòng vi sinh và tủ ấm",
+      "cong_dung": "Chứa môi trường thạch dinh dưỡng để nuôi cấy và phân lập khuẩn lạc vi sinh vật",
+      "thong_so": [
+        {
+          "ten": "Kích thước đĩa",
+          "gia_tri": "Đường kính Ø 90 mm, chiều cao 15 mm, có 3 gờ thông khí",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-disposable-petri-dishes-with-clear-lid/0875712"
+        },
+        {
+          "ten": "Độ trong suốt quang học",
+          "gia_tri": "Polystyrene trong suốt tiệt trùng chuẩn EO",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-disposable-petri-dishes-with-clear-lid/0875712"
+        }
+      ],
+      "cach_dung": [
+        "Đổ môi trường thạch ấm (~45 – 50 °C) vào đĩa khoảng 15 – 20 mL trong điều kiện vô trùng.",
+        "Chờ thạch đông hoàn toàn.",
+        "Ghi nhãn ở đáy đĩa, úp ngược đáy khi ủ trong tủ ấm."
+      ],
+      "loi_thuong_gap": [
+        "Mở toang nắp đĩa ra ngoài không khí làm nhiễm nấm mốc từ môi trường."
+      ],
+      "an_toan": [
+        "Ghi chú thông tin ở đáy đĩa thạch, không ghi trên nắp vì nắp có thể bị xoay hoặc đổi lẫn."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.PetriDish",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.2.5",
+      "stt_thiet_bi_tang_1": 45
+    },
+    {
+      "ma": "ong_canh_thang",
+      "ten": "Ống canh thang",
+      "ten_tieng_anh": "Nutrient broth culture tube with screw cap",
+      "phan_loai": "Dụng cụ nuôi cấy lỏng",
+      "phong": [
+        "phong_vi_sinh"
+      ],
+      "so_luong": 80,
+      "vi_tri": "Giá ống nghiệm phòng vi sinh",
+      "cong_dung": "Nuôi cấy tăng sinh khối vi sinh vật trong môi trường lỏng",
+      "thong_so": [
+        {
+          "ten": "Dung tích ống",
+          "gia_tri": "15 mL, nắp vặn kín có đệm cao su",
+          "nguon": "https://www.fishersci.com/shop/products/borosilicate-glass-culture-tubes-screw-caps/1495937A"
+        },
+        {
+          "ten": "Môi trường lỏng bên trong",
+          "gia_tri": "Canh thang dinh dưỡng Nutrient Broth / LB",
+          "nguon": "https://www.fishersci.com/shop/products/borosilicate-glass-culture-tubes-screw-caps/1495937A"
+        }
+      ],
+      "cach_dung": [
+        "Mở nắp ống gần ngọn lửa đèn cồn, hơ nhẹ miệng ống.",
+        "Dùng que cấy chuyển vi khuẩn vào dịch lỏng.",
+        "Hơ lại miệng ống, vặn nắp vừa phải (nới 1/4 vòng nếu nuôi hiếu khí)."
+      ],
+      "loi_thuong_gap": [
+        "Vặn nắp quá chặt khi nuôi vi khuẩn hiếu khí làm vi khuẩn thiếu oxy không phát triển."
+      ],
+      "an_toan": [
+        "Tránh lắc mạnh làm tràn dịch chạm nắp ống."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.BrothTube",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.2.5"
+    },
+    {
+      "ma": "ong_thach_nghieng",
+      "ten": "Ống thạch nghiêng",
+      "ten_tieng_anh": "Agar slant culture tube",
+      "phan_loai": "Dụng cụ giữ giống vi sinh",
+      "phong": [
+        "phong_vi_sinh"
+      ],
+      "so_luong": 80,
+      "vi_tri": "Giá ống nghiệm và tủ lạnh 4 °C",
+      "cong_dung": "Bảo quản giống vi sinh vật thuần chủng trong thời gian ngắn (1 – 3 tháng)",
+      "thong_so": [
+        {
+          "ten": "Góc nghiêng mặt thạch",
+          "gia_tri": "Góc nghiêng ~30° tạo diện tích bề mặt lớn",
+          "mo_phong": true
+        },
+        {
+          "ten": "Dung tích ống thủy tinh",
+          "gia_tri": "Ống nghiệm thủy tinh trung tính 16 x 150 mm",
+          "nguon": "https://www.fishersci.com/shop/products/borosilicate-glass-culture-tubes-screw-caps/1495937A"
+        }
+      ],
+      "cach_dung": [
+        "Dùng que cấy vòng lấy khuẩn lạc thuần.",
+        "Ria đường dích dắc từ đáy mặt nghiêng lên trên đỉnh.",
+        "Nuôi trong tủ ấm 37 °C cho khuẩn mọc rồi chuyển vào tủ mát 4 °C bảo quản."
+      ],
+      "loi_thuong_gap": [
+        "Đâm thủng mặt thạch nghiêng khi cấy."
+      ],
+      "an_toan": [
+        "Ghi rõ tên chủng và ngày cấy giống trên thân ống."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.BrothTube (chế độ thạch nghiêng)",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.2.5"
+    },
+    {
+      "ma": "dao_nhuom_gram",
+      "ten": "Đảo nhuộm Gram",
+      "ten_tieng_anh": "Gram staining sink station",
+      "phan_loai": "Trạm nhuộm vi sinh",
+      "phong": [
+        "phong_vi_sinh"
+      ],
+      "so_luong": 1,
+      "vi_tri": "Khu trung tâm phòng vi sinh",
+      "cong_dung": "Nhuộm phân biệt vi khuẩn Gram dương và Gram âm bằng bộ 4 thuốc thử",
+      "thong_so": [
+        {
+          "ten": "Bộ giá đỡ lam kính",
+          "gia_tri": "Giá inox ngang trên bồn xả nước cất",
+          "mo_phong": true
+        },
+        {
+          "ten": "Bộ hóa chất nhuộm",
+          "gia_tri": "Tinh thể tím Crystal Violet, Lugol I-KI, Cồn 96% tẩy màu, Safranin",
+          "nguon": "https://www.cdc.gov/labtraining/docs/job-aids/gram-stain/Gram_Stain_Job_Aid.pdf"
+        }
+      ],
+      "cach_dung": [
+        "Cố định vết bôi tế bào bằng nhiệt nhẹ trên ngọn lửa đèn cồn.",
+        "Phủ Crystal Violet 1 phút, rửa nước.",
+        "Phủ Lugol 1 phút, rửa nước.",
+        "Tẩy cồn 96% trong 15 – 30 giây cho tới khi hết dòng màu tím, rửa nước ngay.",
+        "Nhuộm bổ sung Safranin 1 phút, rửa nước, thấm khô."
+      ],
+      "loi_thuong_gap": [
+        "Tẩy cồn quá lâu làm vi khuẩn Gram dương mất màu thành hồng.",
+        "Tẩy cồn quá ngắn làm vi khuẩn Gram âm vẫn giữ màu tím.",
+        "Vết bôi quá dày làm thuốc nhuộm không ngấm đều."
+      ],
+      "an_toan": [
+        "Đeo găng tay tránh dính phẩm nhuộm vào da."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.GramStainStation",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.2.8"
+    },
+    {
+      "ma": "binh_tia_con",
+      "ten": "Bình tia cồn 70 %",
+      "ten_tieng_anh": "Ethanol 70% wash bottle 500 mL",
+      "phan_loai": "Bình xịt khử trùng",
+      "phong": [
+        "phong_sinh",
+        "phong_vi_sinh",
+        "phong_sinh_phan_tu",
+        "nha_kinh"
+      ],
+      "so_luong": 15,
+      "vi_tri": "Bố trí tại mọi phòng thí nghiệm",
+      "cong_dung": "Sát trùng mặt bàn làm việc, tủ an toàn sinh học và găng tay",
+      "thong_so": [
+        {
+          "ten": "Dung tích bình",
+          "gia_tri": "500 mL nhựa LDPE dẻo có vòi cong",
+          "nguon": "https://www.fishersci.com/shop/products/bel-art-sp-scienceware-safety-labeled-wash-bottles-ethanol/0340911A"
+        },
+        {
+          "ten": "Nồng độ cồn",
+          "gia_tri": "Ethanol 70% v/v (nồng độ diệt khuẩn tối ưu)",
+          "nguon": "https://www.cdc.gov/infection-control/hcp/disinfection-sterilization/chemical-disinfectants.html"
+        }
+      ],
+      "cach_dung": [
+        "Bóp nhẹ thân bình để xịt cồn lên bề mặt bàn cần lau.",
+        "Dùng khăn giấy lau sạch bề mặt theo một chiều."
+      ],
+      "loi_thuong_gap": [
+        "Xịt cồn gần ngọn lửa đèn cồn đang cháy gây bùng lửa."
+      ],
+      "an_toan": [
+        "Cồn 70% dễ bắt lửa; bảo quản xa nguồn nhiệt và tia lửa điện."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Interaction.WashBottle (có sẵn)",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.2.9",
+      "stt_thiet_bi_tang_1": 42
+    },
+    {
+      "ma": "binh_tia_nuoc",
+      "ten": "Bình tia nước cất",
+      "ten_tieng_anh": "Distilled water wash bottle 500 mL",
+      "phan_loai": "Bình tia nước cất",
+      "phong": [
+        "phong_sinh",
+        "phong_vi_sinh",
+        "phong_sinh_phan_tu",
+        "nha_kinh"
+      ],
+      "so_luong": 15,
+      "vi_tri": "Bố trí tại mọi phòng thí nghiệm",
+      "cong_dung": "Tráng rửa tiêu bản hiển vi, tráng điện cực pH và rửa dụng cụ",
+      "thong_so": [
+        {
+          "ten": "Dung tích bình",
+          "gia_tri": "500 mL nhựa LDPE màu trắng tự nhiên",
+          "nguon": "https://www.fishersci.com/shop/products/nalgene-wash-bottles/0340916"
+        },
+        {
+          "ten": "Độ tinh khiết nước",
+          "gia_tri": "Nước cất 1 lần / 2 lần độ dẫn điện < 2 µS/cm",
+          "nguon": "https://www.fishersci.com/shop/products/nalgene-wash-bottles/0340916"
+        }
+      ],
+      "cach_dung": [
+        "Bóp thân bình để phun tia nước rửa nhẹ nhàng mẫu vật hoặc rửa trôi phẩm nhuộm dư."
+      ],
+      "loi_thuong_gap": [
+        "Nhầm lẫn giữa bình cồn và bình nước cất (kiểm tra nhãn ghi trên bình)."
+      ],
+      "an_toan": [
+        "Luôn dùng nước cất sạch, không đổ nước máy vào bình."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Interaction.WashBottle (có sẵn)",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.2.9",
+      "stt_thiet_bi_tang_1": 42
+    },
+    {
+      "ma": "may_dem_khuan_lac",
+      "ten": "Máy đếm khuẩn lạc",
+      "ten_tieng_anh": "Digital colony counter with magnifying glass",
+      "phan_loai": "Thiết bị đếm vi sinh",
+      "phong": [
+        "phong_vi_sinh"
+      ],
+      "so_luong": 2,
+      "vi_tri": "Bàn kiểm nghiệm phòng vi sinh",
+      "cong_dung": "Đếm chính xác số lượng khuẩn lạc mọc trên đĩa petri thạch",
+      "thong_so": [
+        {
+          "ten": "Độ phóng đại kính lúp",
+          "gia_tri": "Kính lúp quang học phóng đại 1,5x – 3x tích hợp đèn LED nền",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-colony-counter/14350110"
+        },
+        {
+          "ten": "Dải đếm số kỹ thuật số",
+          "gia_tri": "0 – 999 khuẩn lạc có âm báo bíp xác nhận",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-colony-counter/14350110"
+        }
+      ],
+      "cach_dung": [
+        "Đặt đĩa petri lên bàn lưới phát sáng của máy.",
+        "Dùng bút cảm ứng chấm nhẹ lên nắp/đáy đĩa tại vị trí từng khuẩn lạc.",
+        "Mỗi lần chấm máy phát tiếng bíp và cộng 1 vào màn hình hiển thị số."
+      ],
+      "loi_thuong_gap": [
+        "Đếm trùng một khuẩn lạc hai lần hoặc bỏ sót khuẩn lạc nhỏ."
+      ],
+      "an_toan": [
+        "Chọn đĩa có số lượng khuẩn lạc trong khoảng đếm được 30 – 300."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Demo.Bio.ColonyCounterController",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.2.10"
+    },
+    {
+      "ma": "den_uv_tran",
+      "ten": "Đèn UV diệt khuẩn trần",
+      "ten_tieng_anh": "Ceiling UV-C germicidal lamp 30W (254 nm)",
+      "phan_loai": "Thiết bị khử trùng không gian",
+      "phong": [
+        "phong_vi_sinh"
+      ],
+      "so_luong": 4,
+      "vi_tri": "Lắp trần phòng vi sinh và buồng đệm",
+      "cong_dung": "Khử trùng không khí và bề mặt phòng vi sinh trước và sau buổi làm việc",
+      "thong_so": [
+        {
+          "ten": "Bước sóng bức xạ UV-C",
+          "gia_tri": "253,7 nm (bước sóng phá hủy DNA vi sinh vật mạnh nhất)",
+          "nguon": "https://www.cdc.gov/infection-control/hcp/disinfection-sterilization/other-methods.html"
+        },
+        {
+          "ten": "Công suất phát bức xạ",
+          "gia_tri": "30W bóng thạch anh",
+          "nguon": "https://www.cdc.gov/infection-control/hcp/disinfection-sterilization/other-methods.html"
+        }
+      ],
+      "cach_dung": [
+        "Bật công tắc hẹn giờ bật đèn UV 30 phút trước ca làm việc khi phòng không có người.",
+        "Hết thời gian đèn tự tắt, mở cửa thông gió 5 phút trước khi vào phòng."
+      ],
+      "loi_thuong_gap": [
+        "Ở lại trong phòng khi đèn UV đang bật."
+      ],
+      "an_toan": [
+        "Tia UV-C cực kỳ nguy hại cho mắt và da; phòng có chuông cảnh báo và khóa liên động khi bật đèn."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Demo.Bio.UvCeilingLamp",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.2.11"
+    },
+    {
+      "ma": "buong_dem",
+      "ten": "Buồng đệm cửa liên động",
+      "ten_tieng_anh": "Airlock interlock doors system",
+      "phan_loai": "Hệ thống kiểm soát áp suất và cách ly",
+      "phong": [
+        "phong_vi_sinh"
+      ],
+      "so_luong": 1,
+      "vi_tri": "Lối vào phòng vi sinh",
+      "cong_dung": "Ngăn ngừa không khí ô nhiễm và vi sinh vật xâm nhập từ hành lang vào phòng sạch",
+      "thong_so": [
+        {
+          "ten": "Cơ chế khóa liên động",
+          "gia_tri": "Khóa điện từ ngăn mở đồng thời hai cửa",
+          "mo_phong": true
+        },
+        {
+          "ten": "Thời gian thanh lọc",
+          "gia_tri": "30 giây làm sạch không khí qua màng lọc",
+          "mo_phong": true
+        }
+      ],
+      "cach_dung": [
+        "Mở cửa thứ nhất vào buồng đệm, cửa đóng hoàn toàn.",
+        "Đổi giày/áo bảo hộ trong buồng đệm.",
+        "Mở cửa thứ hai bước vào phòng vi sinh."
+      ],
+      "loi_thuong_gap": [
+        "Cố tình giật mở đồng thời hai cửa làm mất chênh áp buồng sạch."
+      ],
+      "an_toan": [
+        "Luôn chờ đèn tín hiệu xanh báo cửa được phép mở."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Demo.Bio.AirlockInterlock",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.2.12"
+    },
+    {
+      "ma": "pass_box",
+      "ten": "Pass-box hai cửa",
+      "ten_tieng_anh": "Two-door dynamic pass-box with UV lamp",
+      "phan_loai": "Hộp truyền mẫu sạch",
+      "phong": [
+        "phong_sinh",
+        "phong_vi_sinh"
+      ],
+      "so_luong": 1,
+      "vi_tri": "Gắn trên tường ngăn giữa phòng sinh học và phòng vi sinh",
+      "cong_dung": "Chuyển dụng cụ, đĩa mẫu giữa hai phòng mà không làm xáo trộn không khí",
+      "thong_so": [
+        {
+          "ten": "Hệ thống tiệt trùng tích hợp",
+          "gia_tri": "Đèn UV khử khuẩn tự động khi đóng hai cửa",
+          "nguon": "https://www.escoglobal.com/products/pass-boxes"
+        },
+        {
+          "ten": "Kích thước buồng truyền",
+          "gia_tri": "Inox 304, kích thước 600 x 600 x 600 mm",
+          "nguon": "https://www.escoglobal.com/products/pass-boxes"
+        }
+      ],
+      "cach_dung": [
+        "Mở cửa phía phòng sinh, đặt vật phẩm vào trong pass-box và đóng cửa.",
+        "Bật khử trùng UV (nếu cần).",
+        "Người ở phòng vi sinh mở cửa phía trong để lấy vật phẩm ra."
+      ],
+      "loi_thuong_gap": [
+        "Mở đồng thời hai bên cửa làm bụi bẩn và bào tử lọt qua."
+      ],
+      "an_toan": [
+        "Đảm bảo khóa liên động cơ/điện hoạt động bình thường."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Demo.Bio.PassBoxController",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.2.12"
+    },
+    {
+      "ma": "bo_ong_pha_loang",
+      "ten": "Bộ 6 ống pha loãng",
+      "ten_tieng_anh": "Serial dilution test tube rack set (6 tubes)",
+      "phan_loai": "Bộ dụng cụ pha loãng bậc 10",
+      "phong": [
+        "phong_vi_sinh"
+      ],
+      "so_luong": 10,
+      "vi_tri": "Bàn thao tác phòng vi sinh",
+      "cong_dung": "Pha loãng huyền phù vi sinh vật theo nấc bậc 10 (từ 10^-1 đến 10^-6) để đếm vi sinh",
+      "thong_so": [
+        {
+          "ten": "Thể tích nước sinh lý mỗi ống",
+          "gia_tri": "9,0 mL dung dịch NaCl 0,9% vô trùng",
+          "nguon": "https://www.iso.org/standard/53612.html"
+        },
+        {
+          "ten": "Hệ số pha loãng",
+          "gia_tri": "Bậc 10 liên tiếp (1,0 mL dịch vào 9,0 mL đệm)",
+          "nguon": "https://www.iso.org/standard/53612.html"
+        }
+      ],
+      "cach_dung": [
+        "Hút 1,0 mL dịch gốc vào ống 1 (10^-1), lắc vortex đều.",
+        "Thay đầu côn mới, hút 1,0 mL từ ống 1 sang ống 2 (10^-2), lắc đều.",
+        "Lặp lại liên tiếp đến ống 6 (10^-6)."
+      ],
+      "loi_thuong_gap": [
+        "Không thay đầu côn giữa các nấc pha loãng làm sai số thừa nồng độ cực lớn."
+      ],
+      "an_toan": [
+        "Ghi nhãn rõ độ pha loãng trên từng ống nghiệm tránh nhầm lẫn."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.DilutionTubeSet",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.2.13"
+    },
+    {
+      "ma": "tui_hap_huy",
+      "ten": "Túi hấp hủy",
+      "ten_tieng_anh": "Autoclavable biohazard disposal bags",
+      "phan_loai": "Vật tư xử lý tiêu hủy an toàn",
+      "phong": [
+        "phong_vi_sinh"
+      ],
+      "so_luong": 5,
+      "vi_tri": "Tủ vật tư phòng vi sinh",
+      "cong_dung": "Thu gom đĩa thạch vi sinh đã cấy để tiệt trùng tiêu hủy trong nồi hấp trước khi thải bỏ",
+      "thong_so": [
+        {
+          "ten": "Khả năng chịu nhiệt độ",
+          "gia_tri": "Polypropylene chịu nhiệt 134 °C",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-autoclavable-biohazard-bags/0182602"
+        },
+        {
+          "ten": "Dung tích túi",
+          "gia_tri": "30 lít, có vạch chỉ thị tiệt trùng đổi màu",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-autoclavable-biohazard-bags/0182602"
+        }
+      ],
+      "cach_dung": [
+        "Bỏ các đĩa petri vi sinh đã sử dụng vào túi.",
+        "Buộc lỏng miệng túi để hơi nước thấu qua khi hấp.",
+        "Đặt vào nồi hấp 121 °C trong 30 phút."
+      ],
+      "loi_thuong_gap": [
+        "Buộc quá chặt kín mít khiến hơi nước không vào trong tiêu diệt vi khuẩn."
+      ],
+      "an_toan": [
+        "Chỉ vứt bỏ rác sau khi vạch chỉ thị nhiệt đã chuyển sang màu đen chứng nhận tiệt trùng."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.AutoclaveBag",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.2.14"
+    },
+    {
+      "ma": "tu_mat_4",
+      "ten": "Tủ mát 4 °C hai cánh kính",
+      "ten_tieng_anh": "Laboratory refrigerator 4 °C (double glass door)",
+      "phan_loai": "Thiết bị bảo quản lạnh",
+      "phong": [
+        "kho_sinh_pham"
+      ],
+      "so_luong": 2,
+      "vi_tri": "Kho sinh phẩm",
+      "cong_dung": "Bảo quản môi trường nuôi cấy pha sẵn, đĩa thạch, vi khuẩn giữ giống ngắn hạn",
+      "thong_so": [
+        {
+          "ten": "Dải nhiệt độ cài đặt",
+          "gia_tri": "+2 °C đến +8 °C, mặc định 4 °C",
+          "nguon": "https://www.thermofisher.com/order/catalog/product/TSX2304GA"
+        },
+        {
+          "ten": "Thể tích buồng chứa",
+          "gia_tri": "600 lít, cửa kính 2 cánh có đèn LED",
+          "nguon": "https://www.thermofisher.com/order/catalog/product/TSX2304GA"
+        }
+      ],
+      "cach_dung": [
+        "Mở cửa lấy sinh phẩm cần dùng và đóng cửa ngay.",
+        "Kiểm tra nhiệt độ trên màn hình hiển thị ngoài tủ."
+      ],
+      "loi_thuong_gap": [
+        "Mở cửa tủ quá lâu làm nhiệt độ tăng quá 8 °C kích hoạt còi cảnh báo."
+      ],
+      "an_toan": [
+        "Không để thức ăn đồ uống của người trong tủ bảo quản sinh phẩm."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Demo.Bio.FridgeController",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.3.1"
+    },
+    {
+      "ma": "tu_dong_am20",
+      "ten": "Tủ đông −20 °C",
+      "ten_tieng_anh": "Laboratory deep freezer -20 °C",
+      "phan_loai": "Thiết bị đông sâu bảo quản",
+      "phong": [
+        "kho_sinh_pham",
+        "phong_sinh_phan_tu"
+      ],
+      "so_luong": 2,
+      "vi_tri": "Kho sinh phẩm và phòng sinh học phân tử",
+      "cong_dung": "Bảo quản enzyme PCR (Taq polymerase), dNTPs, DNA ladder, mẫu ADN/ARN",
+      "thong_so": [
+        {
+          "ten": "Dải nhiệt độ vận hành",
+          "gia_tri": "-15 °C đến -25 °C, mặc định -20 °C",
+          "nguon": "https://www.thermofisher.com/order/catalog/product/TSX2320FA"
+        },
+        {
+          "ten": "Thể tích buồng",
+          "gia_tri": "600 lít, cửa kín chống đóng tuyết",
+          "nguon": "https://www.thermofisher.com/order/catalog/product/TSX2320FA"
+        }
+      ],
+      "cach_dung": [
+        "Mở tủ lấy hộp hóa chất và chuyển ngay vào hộp đá.",
+        "Hạn chế mở cửa tủ đông."
+      ],
+      "loi_thuong_gap": [
+        "Để enzyme ở nhiệt độ phòng làm mất hoạt tính xúc tác."
+      ],
+      "an_toan": [
+        "Đeo găng tay cách nhiệt khi sắp xếp đồ trong tủ đông lâu."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Demo.Bio.FridgeController (chế độ đông)",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.3.2"
+    },
+    {
+      "ma": "ke_mau",
+      "ten": "Kệ inox mẫu ngâm",
+      "ten_tieng_anh": "Stainless steel specimen shelving unit",
+      "phan_loai": "Kệ lưu trữ mẫu vật",
+      "phong": [
+        "kho_sinh_pham"
+      ],
+      "so_luong": 4,
+      "vi_tri": "Kho sinh phẩm",
+      "cong_dung": "Lưu trữ mẫu vật ngâm formol/cồn (động vật, thực vật) và hộp tiêu bản hiển vi",
+      "thong_so": [
+        {
+          "ten": "Chất liệu kệ",
+          "gia_tri": "Inox 304 5 tầng chịu tải 150 kg/tầng",
+          "mo_phong": true
+        },
+        {
+          "ten": "Gờ chống rơi",
+          "gia_tri": "Thanh chắn an toàn cao 5 cm ở mỗi tầng",
+          "mo_phong": true
+        }
+      ],
+      "cach_dung": [
+        "Xếp các bình mẫu ngâm nặng ở tầng dưới, mẫu nhẹ ở tầng trên.",
+        "Định kỳ kiểm tra mức dung dịch ngâm bảo quản."
+      ],
+      "loi_thuong_gap": [
+        "Xếp bình mẫu quá mép kệ không có gờ chắn."
+      ],
+      "an_toan": [
+        "Bình ngâm formol nếu bị nứt vỡ phải xử lý thông gió ngay."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.SpecimenShelf",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.3.3"
+    },
+    {
+      "ma": "mo_hinh_day_hoc",
+      "ten": "Mô hình ADN / tế bào / bán thân",
+      "ten_tieng_anh": "Biological teaching anatomical and molecular models",
+      "phan_loai": "Mô hình trực quan dạy học",
+      "phong": [
+        "kho_sinh_pham"
+      ],
+      "so_luong": 6,
+      "vi_tri": "Kho sinh phẩm và phòng sinh học",
+      "cong_dung": "Giảng dạy cấu trúc phân tử ADN xoắn kép, cấu trúc tế bào nhân thực và giải phẫu nội tạng",
+      "thong_so": [
+        {
+          "ten": "Mô hình phân tử ADN",
+          "gia_tri": "Mô hình xoắn kép B-DNA 14 cặp bazơ tháo lắp được",
+          "nguon": "https://www.3bscientific.com/us/dna-model-w19700-3b-scientific,p_13_763.html"
+        },
+        {
+          "ten": "Mô hình tế bào thực vật/động vật",
+          "gia_tri": "Nhựa màu phóng đại 10.000 lần hiển thị các bào quan",
+          "nguon": "https://www.3bscientific.com/us/plant-cell-model-w42514-3b-scientific,p_13_765.html"
+        }
+      ],
+      "cach_dung": [
+        "Tháo lắp từng cặp nucleotide theo đúng nguyên tắc bổ sung A-T, G-X.",
+        "Quan sát cấu trúc rãnh lớn và rãnh nhỏ của chuỗi xoắn kép."
+      ],
+      "loi_thuong_gap": [
+        "Bẻ khớp nối mô hình làm gãy chốt nhựa."
+      ],
+      "an_toan": [
+        "Bảo quản nơi khô ráo, tránh ánh nắng trực tiếp làm giòn nhựa."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.TeachingModel",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.3.3"
+    },
+    {
+      "ma": "so_kho_dien_tu",
+      "ten": "Sổ kho điện tử",
+      "ten_tieng_anh": "Electronic stock kiosk and inventory management screen",
+      "phan_loai": "Thiết bị quản trị kho số",
+      "phong": [
+        "kho_sinh_pham"
+      ],
+      "so_luong": 1,
+      "vi_tri": "Cạnh cửa ra vào kho sinh phẩm",
+      "cong_dung": "Tra cứu tồn kho, hạn sử dụng, quét mã nhập xuất sinh phẩm và hóa chất",
+      "thong_so": [
+        {
+          "ten": "Màn hình giao diện ki-ốt",
+          "gia_tri": "Màn hình cảm ứng công nghiệp 19 inch tích hợp đầu đọc mã vạch",
+          "mo_phong": true
+        },
+        {
+          "ten": "Cơ sở dữ liệu kết nối",
+          "gia_tri": "Đồng bộ SQLite server/lab/sinh_db.py",
+          "mo_phong": true
+        }
+      ],
+      "cach_dung": [
+        "Chạm màn hình hoặc quét mã vạch trên lọ sinh phẩm.",
+        "Nhập số lượng xuất hoặc nhập kho, ghi tên người nhận.",
+        "Kiểm tra danh sách sinh phẩm sắp hết hoặc sắp hết hạn."
+      ],
+      "loi_thuong_gap": [
+        "Xuất kho nhưng không quét ghi nhận vào sổ làm lệch tồn kho."
+      ],
+      "an_toan": [
+        "Đảm bảo thông tin cập nhật chính xác thời gian thực."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.StockKiosk + Khkt.Demo.Bio.StockProgram",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.3.4"
+    },
+    {
+      "ma": "micropipet_p10",
+      "ten": "Micropipet P10 (0,5 – 10 µL)",
+      "ten_tieng_anh": "Single-channel micropipette P10 (0.5 – 10 µL)",
+      "phan_loai": "Dụng cụ phân phối chất lỏng siêu nhỏ",
+      "phong": [
+        "phong_sinh_phan_tu",
+        "phong_vi_sinh"
+      ],
+      "so_luong": 6,
+      "vi_tri": "Giá treo pipet quầy tiền PCR",
+      "cong_dung": "Hút nhả chính xác thể tích mẫu ADN, mồi primers và enzyme Taq polymerase (0,5 – 10 µL)",
+      "thong_so": [
+        {
+          "ten": "Dải thể tích danh định",
+          "gia_tri": "0,5 – 10 µL, vạch chia 0,01 µL",
+          "nguon": "https://www.eppendorf.com/us-en/eShop-Products/Liquid-Handling/Manual-Pipettes/Research-plus-p-3123000012"
+        },
+        {
+          "ten": "Sai số cho phép theo ISO 8655",
+          "gia_tri": "Sai số hệ thống ±1,0%, sai số ngẫu nhiên ±0,4% tại 10 µL",
+          "nguon": "https://www.iso.org/standard/63836.html"
+        },
+        {
+          "ten": "Mô phỏng sai số góc nghiêng và nấc bấm",
+          "gia_tri": "Hút nấc 2 quá thể tích, nghiêng >20° tăng sai số",
+          "mo_phong": true
+        }
+      ],
+      "cach_dung": [
+        "Cài đặt thể tích bằng núm xoay, không vượt quá dải 0,5 – 10 µL.",
+        "Cắm chặt đầu côn trắng 10 µL.",
+        "Ấn piston đến nấc 1, nhúng đầu côn ngập 1 – 2 mm trong dung dịch thẳng đứng.",
+        "Thả từ từ piston để hút chất lỏng.",
+        "Chạm đầu côn vào thành ống đích, ấn piston đến nấc 1 rồi nấc 2 để nhả cạn dịch.",
+        "Bấm nút đẩy loại bỏ đầu côn vào thùng rác."
+      ],
+      "loi_thuong_gap": [
+        "Ấn piston đến nấc 2 trước khi hút làm hút quá thể tích 10 – 20%.",
+        "Thả nhanh piston làm dịch bắn vào thân trong pipet gây ăn mòn.",
+        "Vặn núm chỉnh thể tích vượt quá 10 µL làm gãy trục ren."
+      ],
+      "an_toan": [
+        "Luôn cắm pipet thẳng đứng trên giá treo, không đặt nằm ngang khi đầu côn có dung dịch."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Demo.Bio.Micropipette",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.4.1",
+      "stt_thiet_bi_tang_1": 12
+    },
+    {
+      "ma": "micropipet_p200",
+      "ten": "Micropipet P200 (20 – 200 µL)",
+      "ten_tieng_anh": "Single-channel micropipette P200 (20 – 200 µL)",
+      "phan_loai": "Dụng cụ phân phối chất lỏng",
+      "phong": [
+        "phong_sinh_phan_tu",
+        "phong_vi_sinh"
+      ],
+      "so_luong": 8,
+      "vi_tri": "Giá treo pipet phòng SHPT và phòng vi sinh",
+      "cong_dung": "Hút nhả dung dịch đệm PCR, nước không nuclease, đệm nạp mẫu (20 – 200 µL)",
+      "thong_so": [
+        {
+          "ten": "Dải thể tích danh định",
+          "gia_tri": "20 – 200 µL, vạch chia 0,2 µL",
+          "nguon": "https://www.eppendorf.com/us-en/eShop-Products/Liquid-Handling/Manual-Pipettes/Research-plus-p-3123000012"
+        },
+        {
+          "ten": "Sai số theo ISO 8655",
+          "gia_tri": "Sai số hệ thống ±0,6%, sai số ngẫu nhiên ±0,2% tại 200 µL",
+          "nguon": "https://www.iso.org/standard/63836.html"
+        }
+      ],
+      "cach_dung": [
+        "Chỉnh thể tích, cắm đầu côn vàng 200 µL.",
+        "Ấn nấc 1, hút mẫu thẳng đứng.",
+        "Nhả mẫu ở nấc 2 vào thành ống."
+      ],
+      "loi_thuong_gap": [
+        "Nghiêng pipet > 30° khi hút làm thể tích hút thiếu.",
+        "Không thay đầu côn khi đổi dung dịch."
+      ],
+      "an_toan": [
+        "Bảo dưỡng hiệu chuẩn định kỳ 1 năm/lần."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Demo.Bio.Micropipette",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.4.1",
+      "stt_thiet_bi_tang_1": 12
+    },
+    {
+      "ma": "micropipet_p1000",
+      "ten": "Micropipet P1000 (100 – 1000 µL)",
+      "ten_tieng_anh": "Single-channel micropipette P1000 (100 – 1000 µL)",
+      "phan_loai": "Dụng cụ phân phối chất lỏng",
+      "phong": [
+        "phong_sinh_phan_tu",
+        "phong_vi_sinh"
+      ],
+      "so_luong": 6,
+      "vi_tri": "Giá treo pipet phòng SHPT và vi sinh",
+      "cong_dung": "Hút nhả thể tích đệm tách chiết, cồn 70%, hóa chất ly giải tế bào (100 – 1000 µL)",
+      "thong_so": [
+        {
+          "ten": "Dải thể tích danh định",
+          "gia_tri": "100 – 1000 µL, vạch chia 1 µL",
+          "nguon": "https://www.eppendorf.com/us-en/eShop-Products/Liquid-Handling/Manual-Pipettes/Research-plus-p-3123000012"
+        },
+        {
+          "ten": "Sai số theo ISO 8655",
+          "gia_tri": "Sai số hệ thống ±0,6%, sai số ngẫu nhiên ±0,2% tại 1000 µL",
+          "nguon": "https://www.iso.org/standard/63836.html"
+        }
+      ],
+      "cach_dung": [
+        "Chỉnh thể tích, cắm đầu côn xanh 1000 µL.",
+        "Hút chậm rãi tránh sủi bọt khí trong đầu côn.",
+        "Nhả dịch dứt khoát."
+      ],
+      "loi_thuong_gap": [
+        "Thả piston đột ngột khiến thể tích lớn sục ngược vào buồng pit-tông."
+      ],
+      "an_toan": [
+        "Đảm bảo đầu côn cắm kín khít trước khi hút."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Demo.Bio.Micropipette",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.4.1",
+      "stt_thiet_bi_tang_1": 12
+    },
+    {
+      "ma": "hop_dau_con",
+      "ten": "Hộp đầu côn (trắng / vàng / xanh)",
+      "ten_tieng_anh": "Pipette tip box (white 10 µL, yellow 200 µL, blue 1000 µL)",
+      "phan_loai": "Hộp chứa đầu côn vô trùng",
+      "phong": [
+        "phong_sinh_phan_tu",
+        "phong_vi_sinh"
+      ],
+      "so_luong": 24,
+      "vi_tri": "Bàn thao tác SHPT và vi sinh",
+      "cong_dung": "Chứa các đầu côn micropipet vô trùng có lọc / không lọc",
+      "thong_so": [
+        {
+          "ten": "Quy cách hộp",
+          "gia_tri": "Hộp 96 vị trí bằng nhựa PP chịu hấp 121 °C",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-sureone-pipette-tips/02681433"
+        },
+        {
+          "ten": "Phân loại theo màu",
+          "gia_tri": "Trắng (10 µL), Vàng (200 µL), Xanh lam (1000 µL)",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-sureone-pipette-tips/02681433"
+        }
+      ],
+      "cach_dung": [
+        "Mở nắp hộp, cắm thẳng trục micropipet vào đầu côn và ấn nhẹ dứt khoát.",
+        "Đóng nắp hộp ngay sau khi lấy đầu côn."
+      ],
+      "loi_thuong_gap": [
+        "Để nắp hộp mở lâu ngoài không khí gây bụi bẩn và nhiễm nuclease."
+      ],
+      "an_toan": [
+        "Hấp tiệt trùng hộp đầu côn định kỳ."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.TipBox",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.4.2"
+    },
+    {
+      "ma": "thung_dau_con",
+      "ten": "Thùng rác đầu côn",
+      "ten_tieng_anh": "Benchtop pipette tip waste bin",
+      "phan_loai": "Thùng chứa đầu côn đã dùng",
+      "phong": [
+        "phong_sinh_phan_tu",
+        "phong_vi_sinh"
+      ],
+      "so_luong": 6,
+      "vi_tri": "Đặt cạnh giá pipet trên mỗi bàn thao tác",
+      "cong_dung": "Hứng nhận các đầu côn sau khi bấm nút đẩy thải bỏ",
+      "thong_so": [
+        {
+          "ten": "Cơ cấu miệng thùng",
+          "gia_tri": "Miệng phễu chống văng ngược có nắp đậy",
+          "mo_phong": true
+        },
+        {
+          "ten": "Vật liệu",
+          "gia_tri": "Nhựa chịu hóa chất và chất tẩy rửa",
+          "mo_phong": true
+        }
+      ],
+      "cach_dung": [
+        "Hướng đầu pipet vào miệng thùng và bấm nút ejector đẩy đầu côn rơi vào."
+      ],
+      "loi_thuong_gap": [
+        "Bắn đầu côn ra ngoài mặt bàn làm nhiễm bẩn khu vực thí nghiệm."
+      ],
+      "an_toan": [
+        "Đổ rác đầu côn vào thùng rác nguy hại sinh học cuối buổi."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.TipWaste",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.4.2"
+    },
+    {
+      "ma": "ong_eppendorf",
+      "ten": "Ống eppendorf 1,5 mL",
+      "ten_tieng_anh": "Microcentrifuge tubes 1.5 mL (Eppendorf tubes)",
+      "phan_loai": "Ống nghiệm ly tâm nhỏ",
+      "phong": [
+        "phong_sinh_phan_tu"
+      ],
+      "so_luong": 20,
+      "vi_tri": "Hộp vật tư phòng sinh học phân tử",
+      "cong_dung": "Đựng mẫu sinh học trong quá trình tách chiết ADN, lắng ly tâm và ủ nhiệt",
+      "thong_so": [
+        {
+          "ten": "Dung tích ống",
+          "gia_tri": "1,5 mL có nắp khóa an toàn (Safe-Lock)",
+          "nguon": "https://www.eppendorf.com/us-en/eShop-Products/Tubes-Plates/Tubes/Eppendorf-Tubes-3810X-p-0030125150"
+        },
+        {
+          "ten": "Chịu lực ly tâm",
+          "gia_tri": "Lên tới 25.000 x g",
+          "nguon": "https://www.eppendorf.com/us-en/eShop-Products/Tubes-Plates/Tubes/Eppendorf-Tubes-3810X-p-0030125150"
+        }
+      ],
+      "cach_dung": [
+        "Dùng bút ghi nhãn viết mã mẫu lên nắp phẳng hoặc thân nhám của ống.",
+        "Đóng chặt nắp nghe tiếng tách trước khi ủ nhiệt hoặc ly tâm."
+      ],
+      "loi_thuong_gap": [
+        "Nắp đóng không chặt bị bật tung khi gia nhiệt ở 65 – 95 °C làm bay hơi mẫu."
+      ],
+      "an_toan": [
+        "Mở nắp cẩn thận tránh làm bắn giọt vi thể (aerosol)."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.MicroTube",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.4.3"
+    },
+    {
+      "ma": "ong_pcr",
+      "ten": "Ống PCR 0,2 mL (đơn, dải 8)",
+      "ten_tieng_anh": "Thin-wall PCR tubes 0.2 mL (individual and 8-strip)",
+      "phan_loai": "Ống phản ứng PCR",
+      "phong": [
+        "phong_sinh_phan_tu"
+      ],
+      "so_luong": 25,
+      "vi_tri": "Hộp vật tư trong tủ thao tác PCR",
+      "cong_dung": "Chứa hỗn hợp phản ứng PCR (mẫu ADN, mồi, Taq, dNTPs, đệm)",
+      "thong_so": [
+        {
+          "ten": "Độ mỏng thành ống",
+          "gia_tri": "Thành ống siêu mỏng và đồng đều giúp truyền nhiệt tối ưu",
+          "nguon": "https://www.bio-rad.com/en-us/product/0-2-ml-individual-pcr-tubes"
+        },
+        {
+          "ten": "Quy cách ống",
+          "gia_tri": "Dung tích 0,2 mL, nắp vòm hoặc nắp phẳng quang học trong suốt",
+          "nguon": "https://www.bio-rad.com/en-us/product/0-2-ml-individual-pcr-tubes"
+        }
+      ],
+      "cach_dung": [
+        "Ghi nhãn số thứ tự trên nắp ống.",
+        "Nạp 20 – 50 µL hỗn hợp phản ứng vào đáy ống.",
+        "Ấn chặt nắp và ly tâm spindown lắng dịch xuống đáy."
+      ],
+      "loi_thuong_gap": [
+        "Chạm ngón tay vào lòng nắp ống làm nhiễm enzyme nuclease phá hủy ADN."
+      ],
+      "an_toan": [
+        "Đảm bảo ống chịu được nắp gia nhiệt 105 °C của máy PCR."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.MicroTube (chế độ PCR)",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.4.3"
+    },
+    {
+      "ma": "gia_ong_eppendorf",
+      "ten": "Giá ống eppendorf",
+      "ten_tieng_anh": "Microcentrifuge tube rack (80 / 96 wells)",
+      "phan_loai": "Giá cắm ống eppendorf",
+      "phong": [
+        "phong_sinh_phan_tu"
+      ],
+      "so_luong": 12,
+      "vi_tri": "Bàn làm việc phòng sinh học phân tử",
+      "cong_dung": "Giữ thẳng đứng các ống eppendorf 1,5 mL trong quá trình tách chiết",
+      "thong_so": [
+        {
+          "ten": "Số giếng cắm",
+          "gia_tri": "80 giếng đánh số ma trận tọa độ chữ-số",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-microtube-racks/05541"
+        },
+        {
+          "ten": "Vật liệu nhựa",
+          "gia_tri": "Polypropylene bền hóa chất",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-microtube-racks/05541"
+        }
+      ],
+      "cach_dung": [
+        "Cắm các ống eppendorf theo thứ tự sơ đồ mẫu đã lập."
+      ],
+      "loi_thuong_gap": [
+        "Xếp lộn xộn không ghi chép tọa độ giếng làm nhầm mẫu."
+      ],
+      "an_toan": [
+        "Đặt trên mặt phẳng chắc chắn, vệ sinh bằng cồn 70% định kỳ."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.TubeRackSockets",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.4.4"
+    },
+    {
+      "ma": "gia_ong_pcr",
+      "ten": "Giá ống PCR 96 lỗ",
+      "ten_tieng_anh": "96-well cold aluminium PCR tube rack",
+      "phan_loai": "Giá giữ lạnh ống PCR 96 giếng",
+      "phong": [
+        "phong_sinh_phan_tu"
+      ],
+      "so_luong": 6,
+      "vi_tri": "Đặt trên hộp đá phòng SHPT",
+      "cong_dung": "Giữ lạnh các ống PCR 0,2 mL ở 0 – 4 °C trong lúc pha hóa chất phản ứng",
+      "thong_so": [
+        {
+          "ten": "Chất liệu khối giá",
+          "gia_tri": "Hợp kim nhôm dẫn nhiệt siêu nhanh hoặc gel làm lạnh giữ nhiệt",
+          "nguon": "https://www.bio-rad.com/en-us/product/pcr-cooler"
+        },
+        {
+          "ten": "Định dạng giếng",
+          "gia_tri": "96 giếng (8 x 12) cho ống đơn hoặc dải 8 ống",
+          "nguon": "https://www.bio-rad.com/en-us/product/pcr-cooler"
+        }
+      ],
+      "cach_dung": [
+        "Đặt giá nhôm lên hộp đá 15 phút trước khi pha mẫu.",
+        "Cắm các ống PCR vào giếng để duy trì nhiệt độ lạnh bảo vệ enzyme Taq."
+      ],
+      "loi_thuong_gap": [
+        "Pha hóa chất PCR trên bàn ở nhiệt độ phòng làm Taq phân hủy dNTPs trước chu kỳ."
+      ],
+      "an_toan": [
+        "Tránh để đá tan ngập làm ướt nắp ống mẫu."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.TubeRackSockets",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.4.4"
+    },
+    {
+      "ma": "hop_da",
+      "ten": "Hộp đá",
+      "ten_tieng_anh": "Crushed ice box with lid",
+      "phan_loai": "Hộp xốp / nhựa giữ đá lạnh",
+      "phong": [
+        "phong_sinh_phan_tu"
+      ],
+      "so_luong": 4,
+      "vi_tri": "Bàn pha hóa chất phòng SHPT",
+      "cong_dung": "Chứa đá bào vụn giữ lạnh các sinh phẩm nhạy cảm nhiệt độ",
+      "thong_so": [
+        {
+          "ten": "Vật liệu cách nhiệt",
+          "gia_tri": "Xốp polyurethane mật độ cao có nắp đậy kín",
+          "nguon": "https://www.fishersci.com/shop/products/magic-touch-ice-buckets/11676"
+        },
+        {
+          "ten": "Dung tích",
+          "gia_tri": "2,5 lít chứa đá vụn",
+          "nguon": "https://www.fishersci.com/shop/products/magic-touch-ice-buckets/11676"
+        }
+      ],
+      "cach_dung": [
+        "Lấy đá bào từ máy làm đá đổ đầy hộp.",
+        "Cắm chìm đáy các ống hóa chất hoặc giá PCR vào trong đá."
+      ],
+      "loi_thuong_gap": [
+        "Đá tan thành nước làm ống eppendorf nổi trôi lật đổ."
+      ],
+      "an_toan": [
+        "Đậy nắp hộp khi không thao tác để kéo dài thời gian giữ lạnh."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.IceBox",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.4.13"
+    },
+    {
+      "ma": "may_ly_tam_mini",
+      "ten": "Máy ly tâm mini",
+      "ten_tieng_anh": "Mini microcentrifuge (spindown)",
+      "phan_loai": "Máy ly tâm nhanh để bàn",
+      "phong": [
+        "phong_sinh_phan_tu"
+      ],
+      "so_luong": 4,
+      "vi_tri": "Bàn pha hóa chất PCR và tách chiết ADN",
+      "cong_dung": "Quay ly tâm nhanh 5 – 10 giây lắng giọt bắn bám trên thành ống xuống đáy",
+      "thong_so": [
+        {
+          "ten": "Tốc độ quay cố định",
+          "gia_tri": "6000 rpm (lực ly tâm tương đối RCF ~2000 x g)",
+          "nguon": "https://www.eppendorf.com/us-en/eShop-Products/Centrifugation/Microcentrifuges/MiniSpin-MiniSpin-plus-p-5452000010"
+        },
+        {
+          "ten": "Rotor kép",
+          "gia_tri": "Rotor 8 vị trí cho ống 1,5 mL và rotor dải 8 ống PCR 0,2 mL",
+          "nguon": "https://www.eppendorf.com/us-en/eShop-Products/Centrifugation/Microcentrifuges/MiniSpin-MiniSpin-plus-p-5452000010"
+        }
+      ],
+      "cach_dung": [
+        "Đặt 2 ống đối xứng nhau trong rotor.",
+        "Đậy nắp trong suốt, máy tự khởi động quay nhanh.",
+        "Mở chốt nắp, máy tự phanh dừng lại."
+      ],
+      "loi_thuong_gap": [
+        "Đặt 1 ống đơn lẻ không có ống đối trọng gây rung lắc và mòn trục."
+      ],
+      "an_toan": [
+        "Chờ máy dừng hẳn mới đưa ngón tay vào lấy ống."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Interaction.Centrifuge (có sẵn) + Khkt.Demo.Bio.CentrifugeLoad",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.4.6",
+      "stt_thiet_bi_tang_1": 61
+    },
+    {
+      "ma": "tu_thao_tac_pcr",
+      "ten": "Tủ thao tác PCR",
+      "ten_tieng_anh": "PCR clean air workstation with UV lamp",
+      "phan_loai": "Tủ thao tác tiền PCR",
+      "phong": [
+        "phong_sinh_phan_tu"
+      ],
+      "so_luong": 1,
+      "vi_tri": "Khu tiền PCR phòng SHPT",
+      "cong_dung": "Khu vực thao tác vô trùng tránh tạp nhiễm chéo sản phẩm khuếch đại vào mẫu sạch",
+      "thong_so": [
+        {
+          "ten": "Hệ thống khử khuẩn UV",
+          "gia_tri": "Đèn UV 254 nm hẹn giờ tự động diệt vết DNA tồn dư",
+          "nguon": "https://www.airscience.com/purair-pcr-laminar-flow-cabinets"
+        },
+        {
+          "ten": "Dòng khí thổi đứng",
+          "gia_tri": "Dòng khí sạch qua màng lọc HEPA cấp ISO Class 4",
+          "nguon": "https://www.airscience.com/purair-pcr-laminar-flow-cabinets"
+        }
+      ],
+      "cach_dung": [
+        "Bật đèn UV 20 phút trước khi làm việc, sau đó tắt UV bật quạt thổi.",
+        "Pha các thành phần master mix trong tủ."
+      ],
+      "loi_thuong_gap": [
+        "Mang sản phẩm PCR đã nhân bản vào trong tủ tiền PCR gây tạp nhiễm."
+      ],
+      "an_toan": [
+        "Kính chắn tia UV bảo vệ người thao tác."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Demo.Bio.PcrHoodController",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.4.7"
+    },
+    {
+      "ma": "may_pcr",
+      "ten": "Máy PCR (luân nhiệt)",
+      "ten_tieng_anh": "Thermal cycler with 96-well block",
+      "phan_loai": "Máy luân nhiệt chuỗi phản ứng polymerase",
+      "phong": [
+        "phong_sinh_phan_tu"
+      ],
+      "so_luong": 2,
+      "vi_tri": "Phòng sinh học phân tử",
+      "cong_dung": "Khuếch đại đoạn trình tự ADN mục tiêu qua chu kỳ nhiệt biến tính, gắn mồi và kéo dài",
+      "thong_so": [
+        {
+          "ten": "Dải nhiệt độ khối mẫu",
+          "gia_tri": "4,0 – 99,9 °C, tốc độ nâng nhiệt 4,0 °C/giây",
+          "nguon": "https://www.bio-rad.com/en-us/product/t100-thermal-cycler"
+        },
+        {
+          "ten": "Nhiệt độ nắp gia nhiệt chống ngưng tụ",
+          "gia_tri": "105 °C",
+          "nguon": "https://www.bio-rad.com/en-us/product/t100-thermal-cycler"
+        },
+        {
+          "ten": "Mô phỏng động học bản sao DNA",
+          "gia_tri": "N(n) = N0 * (1 + E)^n với hiệu ứng bão hòa plateau",
+          "mo_phong": true
+        }
+      ],
+      "cach_dung": [
+        "Mở nắp máy, đặt các ống PCR vào các giếng của khối nhiệt.",
+        "Đóng nắp ép sát ống và vặn khóa nắp gia nhiệt.",
+        "Cài đặt chương trình chu kỳ nhiệt trên màn hình cảm ứng: Biến tính 95 °C (30s) -> Gắn mồi Ta (30s) -> Kéo dài 72 °C (1 phút/kb) x 30 chu kỳ.",
+        "Nhấn Run bắt đầu chạy."
+      ],
+      "loi_thuong_gap": [
+        "Quên hạ nắp gia nhiệt 105 °C làm hơi nước bốc lên đọng nắp ống, thể tích phản ứng bị cô đặc."
+      ],
+      "an_toan": [
+        "Mở nắp khi máy đang ở chu kỳ nhiệt cao có thể bị bỏng hơi."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Demo.Bio.ThermalCyclerController + Khkt.Demo.Bio.PcrProgram",
+      "may_man_hinh": "may_pcr",
+      "muc_dac_ta": "5.4.9"
+    },
+    {
+      "ma": "be_dien_di",
+      "ten": "Bể điện di agarose",
+      "ten_tieng_anh": "Horizontal agarose gel electrophoresis submarine tank",
+      "phan_loai": "Bể điện di gel nằm ngang",
+      "phong": [
+        "phong_sinh_phan_tu"
+      ],
+      "so_luong": 3,
+      "vi_tri": "Bàn điện di phòng sinh học phân tử",
+      "cong_dung": "Phân tách các phân tử ADN theo kích thước kích thước (bp) trên gel agarose trong điện trường",
+      "thong_so": [
+        {
+          "ten": "Kích thước khay gel tương thích",
+          "gia_tri": "Khay đúc 7 x 10 cm và 15 x 10 cm chất liệu UVT",
+          "nguon": "https://www.bio-rad.com/en-us/product/sub-cell-gt-agarose-gel-electrophoresis-systems"
+        },
+        {
+          "ten": "Điện cực",
+          "gia_tri": "Điện cực sợi bạch kim nguyên chất chống ăn mòn điện hóa",
+          "nguon": "https://www.bio-rad.com/en-us/product/sub-cell-gt-agarose-gel-electrophoresis-systems"
+        },
+        {
+          "ten": "Mô phỏng độ dịch chuyển vạch DNA",
+          "gia_tri": "Vận tốc tỉ lệ nghịch log10(bp), nồng độ gel và điện thế",
+          "mo_phong": true
+        }
+      ],
+      "cach_dung": [
+        "Đặt khay gel agarose vào bể sao cho các giếng nằm ở phía cực âm (cực màu đen).",
+        "Đổ đệm 1x TAE ngập mặt gel khoảng 2 – 3 mm.",
+        "Dùng pipet tra mẫu ADN đã trộn đệm tải vào các giếng.",
+        "Đậy nắp an toàn và cắm dây điện cực vào bộ nguồn."
+      ],
+      "loi_thuong_gap": [
+        "Cắm ngược điện cực khiến ADN (tích điện âm) chạy ngược ra ngoài gel vào đệm."
+      ],
+      "an_toan": [
+        "Điện áp cao có nguy cơ giật; chỉ bật nguồn điện khi nắp bể đã đóng kín."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Demo.Bio.GelTankController",
+      "may_man_hinh": "be_dien_di",
+      "muc_dac_ta": "5.4.11"
+    },
+    {
+      "ma": "nguon_dien_di",
+      "ten": "Bộ nguồn điện di",
+      "ten_tieng_anh": "Electrophoresis power supply unit (0 – 300 V)",
+      "phan_loai": "Bộ nguồn điện một chiều cao áp",
+      "phong": [
+        "phong_sinh_phan_tu"
+      ],
+      "so_luong": 3,
+      "vi_tri": "Bàn điện di phòng SHPT",
+      "cong_dung": "Cung cấp điện áp một chiều ổn định (V, mA) duy trì điện trường trong bể điện di",
+      "thong_so": [
+        {
+          "ten": "Dải điện áp ngõ ra",
+          "gia_tri": "10 – 300 V DC, dòng điện tối đa 400 mA",
+          "nguon": "https://www.bio-rad.com/en-us/product/powerpac-basic-power-supply"
+        },
+        {
+          "ten": "Chế độ cài đặt",
+          "gia_tri": "Điện áp không đổi (Constant Voltage) có hẹn giờ tự ngắt",
+          "nguon": "https://www.bio-rad.com/en-us/product/powerpac-basic-power-supply"
+        }
+      ],
+      "cach_dung": [
+        "Cắm dây cực dương (đỏ) và cực âm (đen) tương ứng từ bể vào bộ nguồn.",
+        "Cài đặt điện áp (ví dụ 100 V) và thời gian (ví dụ 45 phút).",
+        "Bấm Run và quan sát bọt khí nổi lên tại hai thanh điện cực trong bể."
+      ],
+      "loi_thuong_gap": [
+        "Chạy điện áp quá cao (> 120 V với gel 1%) làm nóng chảy gel biến dạng vạch ADN."
+      ],
+      "an_toan": [
+        "Tự động ngắt điện khi phát hiện rò rỉ dòng hoặc đoản mạch."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Demo.Bio.PowerSupplyController",
+      "may_man_hinh": "be_dien_di",
+      "muc_dac_ta": "5.4.11"
+    },
+    {
+      "ma": "khay_duc_gel",
+      "ten": "Khay đúc gel + lược",
+      "ten_tieng_anh": "Agarose gel casting tray with combs",
+      "phan_loai": "Khay đúc gel và lược tạo giếng",
+      "phong": [
+        "phong_sinh_phan_tu"
+      ],
+      "so_luong": 6,
+      "vi_tri": "Khu chuẩn bị gel phòng SHPT",
+      "cong_dung": "Đúc bản gel agarose có độ dày và giếng nạp mẫu đồng đều",
+      "thong_so": [
+        {
+          "ten": "Kích thước khay",
+          "gia_tri": "7 x 10 cm, vật liệu UVT truyền qua tia cực tím",
+          "nguon": "https://www.bio-rad.com/en-us/product/sub-cell-gt-agarose-gel-electrophoresis-systems"
+        },
+        {
+          "ten": "Lược tạo giếng",
+          "gia_tri": "Lược 8 giếng và 15 giếng, độ dày răng 1,5 mm (thể tích giếng 20 – 30 µL)",
+          "nguon": "https://www.bio-rad.com/en-us/product/sub-cell-gt-agarose-gel-electrophoresis-systems"
+        }
+      ],
+      "cach_dung": [
+        "Chặn kín hai đầu khay đúc bằng gioăng cao su hoặc băng dính dán mép.",
+        "Cắm lược tạo giếng vào khe khay cách đáy 1 mm.",
+        "Rót dung dịch agarose 1% đã nguội bớt (~50 – 55 °C) vào khay.",
+        "Chờ gel đông đục (khoảng 20 – 30 phút), rút lược thẳng đứng lên."
+      ],
+      "loi_thuong_gap": [
+        "Rót agarose khi còn sôi > 70 °C làm cong vênh khay đúc nhựa.",
+        "Rút lược khi gel chưa đông hẳn làm rách nát vách giếng."
+      ],
+      "an_toan": [
+        "Không dùng cồn nồng độ cao để lau khay nhựa acrylic UVT vì có thể làm mờ bề mặt."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.GelCastingTray",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.4.11"
+    },
+    {
+      "ma": "lo_vi_song",
+      "ten": "Lò vi sóng nhỏ (đun agarose)",
+      "ten_tieng_anh": "Laboratory microwave oven for agarose melting",
+      "phan_loai": "Thiết bị đun nóng vi sóng",
+      "phong": [
+        "phong_sinh_phan_tu"
+      ],
+      "so_luong": 1,
+      "vi_tri": "Khu đúc gel phòng SHPT",
+      "cong_dung": "Đun sôi hòa tan hoàn toàn bột agarose trong đệm TAE",
+      "thong_so": [
+        {
+          "ten": "Công suất vi sóng",
+          "gia_tri": "800W, có đĩa xoay thủy tinh",
+          "nguon": "https://www.panasonic.com/vn/consumer/kitchen-appliances/microwaves/"
+        },
+        {
+          "ten": "Chế độ hẹn giờ",
+          "gia_tri": "Cài đặt theo phút/giây",
+          "mo_phong": true
+        }
+      ],
+      "cach_dung": [
+        "Cho bột agarose và đệm 1x TAE vào bình tam giác (thể tích dịch < 1/2 bình).",
+        "Đặt nắp đậy lỏng miệng bình (không vặn chặt).",
+        "Quay vi sóng ở công suất trung bình 1 – 2 phút, ngắt quãng lắc nhẹ cho tan trong suốt."
+      ],
+      "loi_thuong_gap": [
+        "Đậy nắp bình quá chặt gây nổ bình thủy tinh trong lò vi sóng.",
+        "Đun quá sôi làm trào dung dịch agarose ra đĩa xoay."
+      ],
+      "an_toan": [
+        "Đeo găng tay cách nhiệt khi cầm bình tam giác nóng ra khỏi lò vi sóng."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.MicrowaveOven",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.4.11"
+    },
+    {
+      "ma": "gel_doc",
+      "ten": "Buồng chụp gel",
+      "ten_tieng_anh": "Gel documentation and imaging system",
+      "phan_loai": "Hệ thống chụp ảnh gel huỳnh quang",
+      "phong": [
+        "phong_sinh_phan_tu"
+      ],
+      "so_luong": 1,
+      "vi_tri": "Phòng sinh học phân tử",
+      "cong_dung": "Chụp ảnh ghi nhận và phân tích các vạch ADN huỳnh quang sau điện di",
+      "thong_so": [
+        {
+          "ten": "Bước sóng kích thích UV trung",
+          "gia_tri": "302 nm",
+          "nguon": "https://www.bio-rad.com/en-us/product/gel-doc-ez-system"
+        },
+        {
+          "ten": "Bước sóng kích thích Blue LED",
+          "gia_tri": "470 nm",
+          "nguon": "https://www.bio-rad.com/en-us/product/gel-doc-ez-system"
+        },
+        {
+          "ten": "Độ phân giải camera",
+          "gia_tri": "1,4 megapixel cảm biến CCD độ nhạy cao",
+          "nguon": "https://www.bio-rad.com/en-us/product/gel-doc-ez-system"
+        },
+        {
+          "ten": "Mô phỏng huỳnh quang",
+          "gia_tri": "Cường độ huỳnh quang tỷ lệ khối lượng DNA trong vạch",
+          "mo_phong": true
+        }
+      ],
+      "cach_dung": [
+        "Bật nguồn buồng chụp, lau khay chụp bằng giấy mềm ẩm.",
+        "Đặt khay gel vào giữa buồng chụp, đóng kín cửa.",
+        "Chọn chế độ chiếu sáng (UV 302 nm hoặc Blue LED 470 nm).",
+        "Chỉnh thời gian phơi sáng trên màn hình và bấm Capture lưu ảnh."
+      ],
+      "loi_thuong_gap": [
+        "Khay chụp bẩn dính vết huỳnh quang tạp.",
+        "Thời gian phơi sáng quá dài làm cháy sáng bão hòa vạch."
+      ],
+      "an_toan": [
+        "Khóa liên động tự động ngắt đèn UV khi mở cửa buồng chụp."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Demo.Bio.GelDocController + Khkt.Demo.Bio.GelDocProgram",
+      "may_man_hinh": "gel_doc",
+      "muc_dac_ta": "5.4.12"
+    },
+    {
+      "ma": "may_quang_pho_od600",
+      "ten": "Máy quang phổ OD600 / ADN",
+      "ten_tieng_anh": "UV-Vis spectrophotometer / OD600 meter",
+      "phan_loai": "Máy quang phổ phân tích",
+      "phong": [
+        "phong_sinh_phan_tu"
+      ],
+      "so_luong": 2,
+      "vi_tri": "Phòng sinh học phân tử",
+      "cong_dung": "Đo mật độ quang OD600 tế bào vi sinh vật và đo nồng độ, độ tinh sạch ADN (A260/A280)",
+      "thong_so": [
+        {
+          "ten": "Dải bước sóng quang phổ",
+          "gia_tri": "200 – 830 nm",
+          "nguon": "https://www.eppendorf.com/us-en/eShop-Products/Cell-Analysis/Spectrophotometry/BioSpectrometer-basic-p-PF-24750"
+        },
+        {
+          "ten": "Độ chính xác bước sóng",
+          "gia_tri": "±1 nm, độ phân giải khe phổ 5 nm",
+          "nguon": "https://www.eppendorf.com/us-en/eShop-Products/Cell-Analysis/Spectrophotometry/BioSpectrometer-basic-p-PF-24750"
+        },
+        {
+          "ten": "Mô phỏng đo OD600",
+          "gia_tri": "1 OD600 ≈ 8 * 10^8 tế bào/mL",
+          "mo_phong": true
+        }
+      ],
+      "cach_dung": [
+        "Bật nguồn máy, chọn chế độ đo OD600 hoặc nồng độ ADN A260.",
+        "Nạp mẫu trắng Blank vào cuvet đo zero nền.",
+        "Lau 2 mặt trong suốt của cuvet mẫu và đặt vào ngăn đo, đóng nắp buồng đo.",
+        "Bấm Measure đọc kết quả."
+      ],
+      "loi_thuong_gap": [
+        "Chạm vân tay lên mặt quang học truyền sáng của cuvet làm sai số trắc quang.",
+        "Quên đo mẫu trắng môi trường."
+      ],
+      "an_toan": [
+        "Dung dịch vi sinh sau khi đo phải bỏ vào thùng rác nguy hại."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Interaction.Spectrophotometer (có sẵn) + Khkt.Demo.Bio.Od600Program",
+      "may_man_hinh": "may_do_od600",
+      "muc_dac_ta": "5.4.14"
+    },
+    {
+      "ma": "cuvet",
+      "ten": "Cuvet 1 cm",
+      "ten_tieng_anh": "Standard 1 cm optical cuvettes",
+      "phan_loai": "Cuvet đo quang",
+      "phong": [
+        "phong_sinh_phan_tu"
+      ],
+      "so_luong": 40,
+      "vi_tri": "Hộp cuvet phòng sinh học phân tử",
+      "cong_dung": "Chứa mẫu chất lỏng đưa vào buồng đo của máy quang phổ",
+      "thong_so": [
+        {
+          "ten": "Chiều dài đường truyền quang",
+          "gia_tri": "10 mm (1 cm chuẩn)",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-disposable-cuvettes/14385938"
+        },
+        {
+          "ten": "Vật liệu cuvet",
+          "gia_tri": "Polystyrene (cho khả kiến/OD600) hoặc thạch anh UV (cho A260)",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-disposable-cuvettes/14385938"
+        }
+      ],
+      "cach_dung": [
+        "Chỉ cầm vào hai mặt nhám bên cạnh của cuvet.",
+        "Nạp dung dịch tối thiểu 1/2 thể tích cuvet.",
+        "Lau sạch hai mặt bóng trong suốt trước khi đặt vào máy."
+      ],
+      "loi_thuong_gap": [
+        "Dùng cuvet nhựa thông thường đo bước sóng UV 260 nm (nhựa hấp thụ mạnh tia UV)."
+      ],
+      "an_toan": [
+        "Rửa sạch bằng nước cất ngay sau khi đo, không dùng cọ kim loại làm xước mặt quang học."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.Cuvette",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.4.14"
+    },
+    {
+      "ma": "tram_quang_hop",
+      "ten": "Trạm quang hợp rong đuôi chó",
+      "ten_tieng_anh": "Elodea photosynthesis demonstration rig",
+      "phan_loai": "Trạm thí nghiệm quang hợp",
+      "phong": [
+        "nha_kinh"
+      ],
+      "so_luong": 4,
+      "vi_tri": "Nhà kính thực vật",
+      "cong_dung": "Đo tốc độ quang hợp của cành rong đuôi chó qua số lượng bọt khí O2 thải ra theo cường độ sáng",
+      "thong_so": [
+        {
+          "ten": "Nguồn sáng điều chỉnh",
+          "gia_tri": "Đèn LED quang hợp 40W có thước đo khoảng cách 5 – 50 cm",
+          "mo_phong": true
+        },
+        {
+          "ten": "Dung dịch cấp CO2",
+          "gia_tri": "Dung dịch NaHCO3 0,5% làm nguồn cung cấp CO2",
+          "nguon": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6471617/"
+        },
+        {
+          "ten": "Mô phỏng tốc độ bọt khí",
+          "gia_tri": "Phương trình Michaelis-Menten theo cường độ sáng trừ điểm bù",
+          "mo_phong": true
+        }
+      ],
+      "cach_dung": [
+        "Cắt vát cuống cành rong đuôi chó khỏe dưới nước.",
+        "Cắm cành rong chúc cuống lên trên trong ống nghiệm chứa NaHCO3 0,5%.",
+        "Đặt đèn ở các khoảng cách khác nhau (10 cm, 20 cm, 30 cm).",
+        "Đếm số bọt khí O2 thoát ra từ vết cắt cuống rong trong mỗi phút."
+      ],
+      "loi_thuong_gap": [
+        "Dùng nước đun sôi để nguội hết khí CO2 khiến rong không quang hợp tạo bọt.",
+        "Vết cắt dập nát làm bọt khí bị tắc."
+      ],
+      "an_toan": [
+        "Khí O2 sinh ra làm que đóm tàn đỏ bùng cháy."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.PhotosynthesisRig",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.5.1"
+    },
+    {
+      "ma": "que_dom",
+      "ten": "Que đóm",
+      "ten_tieng_anh": "Wooden glowing splints for oxygen test",
+      "phan_loai": "Vật tư kiểm tra khí O2",
+      "phong": [
+        "nha_kinh",
+        "phong_sinh"
+      ],
+      "so_luong": 10,
+      "vi_tri": "Nhà kính và phòng sinh học",
+      "cong_dung": "Thử nghiệm khí oxy sinh ra từ quang hợp hoặc phản ứng phân hủy H2O2 bằng que đóm còn tàn đỏ",
+      "thong_so": [
+        {
+          "ten": "Kích thước que gỗ",
+          "gia_tri": "Thanh gỗ thông mỏng dài 200 mm",
+          "mo_phong": true
+        },
+        {
+          "ten": "Hiện tượng bùng cháy",
+          "gia_tri": "Tàn đóm đỏ bùng cháy thành ngọn lửa khi nồng độ O2 > 30%",
+          "nguon": "https://chem.libretexts.org/Bookshelves/Ancillary_Materials/Demos_Techniques_and_Experiments/General_Chemistry_Labs/Test_for_Gases"
+        }
+      ],
+      "cach_dung": [
+        "Đốt que gỗ cháy thành ngọn lửa rồi thổi tắt sao cho đầu que còn tàn đóm đỏ.",
+        "Đưa ngay que tàn đỏ vào miệng ống nghiệm chứa khí O2."
+      ],
+      "loi_thuong_gap": [
+        "Đưa que còn ngọn lửa to vào ống nghiệm."
+      ],
+      "an_toan": [
+        "Dập tắt que sau khi thử bằng cách nhúng vào cốc nước."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.GlowingSplint",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.5.1"
+    },
+    {
+      "ma": "tram_potometer",
+      "ten": "Trạm thoát hơi nước (potometer)",
+      "ten_tieng_anh": "Ganong potometer transpiration rig",
+      "phan_loai": "Trạm thí nghiệm thoát hơi nước",
+      "phong": [
+        "nha_kinh"
+      ],
+      "so_luong": 4,
+      "vi_tri": "Nhà kính thực vật",
+      "cong_dung": "Đo tốc độ thoát hơi nước của cành cây qua độ dịch chuyển bọt khí trong ống mao dẫn",
+      "thong_so": [
+        {
+          "ten": "Ống mao dẫn định lượng",
+          "gia_tri": "Ống mao quản thủy tinh đường kính trong 1 mm có vạch chia 0,01 mL",
+          "nguon": "https://www.carolina.com/plant-growth-development/ganongs-potometer/173000.pr"
+        },
+        {
+          "ten": "Mô phỏng thoát hơi nước",
+          "gia_tri": "Tốc độ dịch chuyển bọt khí theo gió, ánh sáng, độ ẩm và khí khổng",
+          "mo_phong": true
+        }
+      ],
+      "cach_dung": [
+        "Cắt cành cây tươi dưới nước để tránh bọt khí lọt vào mạch gỗ.",
+        "Cắm chặt cành cây vào nút cao su của potometer, bôi vaseline chống rò rỉ khí.",
+        "Tạo 1 bọt khí nhỏ ở đầu ống mao quản.",
+        "Ghi nhận quãng đường bọt khí dịch chuyển (mm) sau mỗi khoảng thời gian dưới các điều kiện gió, sáng."
+      ],
+      "loi_thuong_gap": [
+        "Bị hở khí ở vết cắm cành cây khiến bọt khí không dịch chuyển."
+      ],
+      "an_toan": [
+        "Thủy tinh mỏng, tránh làm rơi vỡ; lau sạch vaseline sau khi thí nghiệm."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.PotometerRig",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.5.2"
+    },
+    {
+      "ma": "hop_huong_sang",
+      "ten": "Hộp thí nghiệm hướng sáng",
+      "ten_tieng_anh": "Phototropism demonstration box with unilateral slit",
+      "phan_loai": "Hộp thí nghiệm hướng động",
+      "phong": [
+        "nha_kinh"
+      ],
+      "so_luong": 4,
+      "vi_tri": "Nhà kính thực vật",
+      "cong_dung": "Quan sát hiện tượng tính hướng sáng của ngọn cây mầm đậu uốn cong về phía khe sáng",
+      "thong_so": [
+        {
+          "ten": "Kích thước hộp",
+          "gia_tri": "Hộp kín chắn sáng 30 x 30 x 40 cm sơn đen lòng trong",
+          "mo_phong": true
+        },
+        {
+          "ten": "Khe sáng chiếu đơn hướng",
+          "gia_tri": "Khe hở rộng 2 cm có cửa trượt điều chỉnh",
+          "mo_phong": true
+        },
+        {
+          "ten": "Mô phỏng góc uốn cong",
+          "gia_tri": "Góc uốn cong theo thời gian và hướng chiếu sáng của hormone auxin",
+          "mo_phong": true
+        }
+      ],
+      "cach_dung": [
+        "Đặt chậu cây mầm hạt đậu 3 – 5 ngày tuổi vào giữa hộp.",
+        "Mở khe sáng một bên thành hộp và hướng khe về phía nguồn sáng.",
+        "Quan sát góc uốn cong của thân mầm sau 24 – 48 giờ."
+      ],
+      "loi_thuong_gap": [
+        "Để ánh sáng lọt vào từ các khe hở khác làm sai lệch phản ứng hướng sáng."
+      ],
+      "an_toan": [
+        "Để nơi thoáng mát, không để nước tràn vào đáy hộp."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.PhototropismBox",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.5.3"
+    },
+    {
+      "ma": "gian_thuy_canh_nft",
+      "ten": "Giàn thủy canh NFT",
+      "ten_tieng_anh": "Nutrient Film Technique (NFT) hydroponic rack system",
+      "phan_loai": "Giàn thủy canh hồi lưu",
+      "phong": [
+        "nha_kinh"
+      ],
+      "so_luong": 1,
+      "vi_tri": "Nhà kính thực vật",
+      "cong_dung": "Nuôi trồng cây rau xà lách, cây thí nghiệm trong môi trường dinh dưỡng khoáng không dùng đất",
+      "thong_so": [
+        {
+          "ten": "Số tầng giàn",
+          "gia_tri": "Giàn 3 tầng ống nhựa uPVC chuyên dụng 54 rọ trồng",
+          "mo_phong": true
+        },
+        {
+          "ten": "Bơm hồi lưu tuần hoàn",
+          "gia_tri": "Bơm chìm 25W lưu lượng 1500 L/h có hẹn giờ timer",
+          "nguon": "https://www.fao.org/plant-production-protection/water-efficient-agriculture/hydroponics/en/"
+        }
+      ],
+      "cach_dung": [
+        "Pha dung dịch dinh dưỡng Knop hoặc Hoagland vào thùng chứa đáy.",
+        "Bật bơm tuần hoàn tạo màng mỏng dung dịch chảy qua đáy rọ rễ.",
+        "Kiểm tra và bổ sung nước dinh dưỡng hàng ngày."
+      ],
+      "loi_thuong_gap": [
+        "Để dung dịch cạn làm cháy bơm chìm."
+      ],
+      "an_toan": [
+        "Đảm bảo an toàn điện cho bơm chìm và các mối nối."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Demo.Bio.NftRackController",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.5.4"
+    },
+    {
+      "ma": "may_do_ec_ph",
+      "ten": "Máy đo EC / pH cầm tay",
+      "ten_tieng_anh": "Handheld waterproof EC / TDS / pH meter",
+      "phan_loai": "Thiết bị đo dinh dưỡng cầm tay",
+      "phong": [
+        "nha_kinh"
+      ],
+      "so_luong": 3,
+      "vi_tri": "Nhà kính thực vật",
+      "cong_dung": "Đo độ dẫn điện EC (độ mặn/nồng độ ion dinh dưỡng) và pH của dung dịch thủy canh",
+      "thong_so": [
+        {
+          "ten": "Dải đo độ dẫn điện EC",
+          "gia_tri": "0 – 20 mS/cm, độ chính xác ±2%",
+          "nguon": "https://www.hannainst.com/hi9813-6-groline-portable-meter.html"
+        },
+        {
+          "ten": "Dải đo pH",
+          "gia_tri": "0,0 – 14,0 pH, bù nhiệt tự động",
+          "nguon": "https://www.hannainst.com/hi9813-6-groline-portable-meter.html"
+        }
+      ],
+      "cach_dung": [
+        "Bật nguồn máy, nhúng đầu đo ngập trong dung dịch thủy canh.",
+        "Khuấy nhẹ và chờ số đo ổn định trên màn hình LCD."
+      ],
+      "loi_thuong_gap": [
+        "Không rửa sạch đầu đo sau khi nhúng dung dịch phân bón đậm đặc."
+      ],
+      "an_toan": [
+        "Bảo quản đầu đo pH luôn ẩm bằng nắp chứa dung dịch bảo quản."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Interaction.MeterProbe (có sẵn)",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.5.4",
+      "stt_thiet_bi_tang_1": 76
+    },
+    {
+      "ma": "binh_tuoi",
+      "ten": "Bình tưới",
+      "ten_tieng_anh": "Fine spray watering can with rose head",
+      "phan_loai": "Dụng cụ tưới cây",
+      "phong": [
+        "nha_kinh"
+      ],
+      "so_luong": 4,
+      "vi_tri": "Khu bồn trồng cây nhà kính",
+      "cong_dung": "Tưới nước giữ ẩm cho cây thực nghiệm trong chậu đất và cây mô hình",
+      "thong_so": [
+        {
+          "ten": "Dung tích bình",
+          "gia_tri": "2,0 lít nhựa đúc nhẹ tay cầm tiện dụng",
+          "mo_phong": true
+        },
+        {
+          "ten": "Đầu vòi phun",
+          "gia_tri": "Đầu sen tưới tia mịn tránh xới đất bầu cây",
+          "mo_phong": true
+        }
+      ],
+      "cach_dung": [
+        "Đổ nước sạch vào bình, nghiêng vòi tưới nhẹ quanh gốc cây."
+      ],
+      "loi_thuong_gap": [
+        "Tưới dòng nước quá mạnh làm xói trôi đất rễ mầm non."
+      ],
+      "an_toan": [
+        "Đổ hết nước thừa sau khi tưới, không để rêu mốc phát triển trong bình."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.WateringCan",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.5.5"
+    },
+    {
+      "ma": "cam_bien_vi_khi_hau",
+      "ten": "Cảm biến vi khí hậu",
+      "ten_tieng_anh": "Microclimate temperature and relative humidity data logger",
+      "phan_loai": "Thiết bị quan trắc môi trường",
+      "phong": [
+        "nha_kinh"
+      ],
+      "so_luong": 4,
+      "vi_tri": "Lắp đặt tại 4 góc nhà kính thực vật",
+      "cong_dung": "Ghi nhận liên tục nhiệt độ, độ ẩm không khí và cường độ sáng trong nhà kính",
+      "thong_so": [
+        {
+          "ten": "Dải đo nhiệt độ và độ ẩm",
+          "gia_tri": "-20 đến 70 °C (±0,3 °C), 0 đến 100% RH (±2% RH)",
+          "nguon": "https://www.onsetcomp.com/products/data-loggers/mx1101"
+        },
+        {
+          "ten": "Kết nối dữ liệu",
+          "gia_tri": "Bluetooth Low Energy truyền dữ liệu về web quản lý",
+          "nguon": "https://www.onsetcomp.com/products/data-loggers/mx1101"
+        }
+      ],
+      "cach_dung": [
+        "Treo cảm biến ở độ cao ngang tán lá cây, tránh ánh nắng chiếu trực tiếp.",
+        "Dữ liệu tự động truyền về hệ thống giám sát."
+      ],
+      "loi_thuong_gap": [
+        "Làm ướt nước trực tiếp vào khe thông khí cảm biến."
+      ],
+      "an_toan": [
+        "Không để nước bắn trực tiếp vào đầu đo cảm biến."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.ClimateSensor",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.5.5"
+    },
+    {
+      "ma": "he_phun_suong",
+      "ten": "Hệ phun sương",
+      "ten_tieng_anh": "High-pressure ultrasonic greenhouse misting system",
+      "phan_loai": "Hệ thống tạo ẩm và làm mát",
+      "phong": [
+        "nha_kinh"
+      ],
+      "so_luong": 1,
+      "vi_tri": "Đường ống gắn trần nhà kính",
+      "cong_dung": "Tăng độ ẩm tương đối và hạ nhiệt độ nhà kính khi trời nắng nóng",
+      "thong_so": [
+        {
+          "ten": "Kích thước hạt sương",
+          "gia_tri": "Hạt sương siêu mịn 5 – 10 µm bay hơi làm mát tức thì",
+          "nguon": "https://www.fao.org/3/t0451e/T0451E06.htm"
+        },
+        {
+          "ten": "Áp lực phun",
+          "gia_tri": "Bơm áp lực cao 70 bar, vòi phun bằng đồng mạ niken",
+          "nguon": "https://www.fao.org/3/t0451e/T0451E06.htm"
+        }
+      ],
+      "cach_dung": [
+        "Hệ thống hoạt động tự động theo cảm biến độ ẩm hoặc bật van tay khi cần làm mát."
+      ],
+      "loi_thuong_gap": [
+        "Béc phun bị nghẹt cặn canxi do dùng nước chưa qua lọc."
+      ],
+      "an_toan": [
+        "Kiểm tra van áp suất định kỳ."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Demo.Bio.MistSystem",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.5.5"
+    },
+    {
+      "ma": "bo_sang_chau",
+      "ten": "Bộ sang chậu",
+      "ten_tieng_anh": "Plant repotting kit (trowel, pruner, potting soil scoop)",
+      "phan_loai": "Bộ dụng cụ sang chậu cây",
+      "phong": [
+        "nha_kinh"
+      ],
+      "so_luong": 4,
+      "vi_tri": "Bàn trồng cây nhà kính",
+      "cong_dung": "Chăm sóc, sang chậu và chuẩn bị cây mẫu cho các bài thí nghiệm",
+      "thong_so": [
+        {
+          "ten": "Dụng cụ trong bộ",
+          "gia_tri": "Xẻng làm vườn nhỏ, cào xới đất mini, kéo bấm cành",
+          "mo_phong": true
+        },
+        {
+          "ten": "Chất liệu",
+          "gia_tri": "Hợp kim nhôm đúc cán bọc cao su êm ái",
+          "mo_phong": true
+        }
+      ],
+      "cach_dung": [
+        "Dùng xẻng nhỏ bứng nhẹ bầu rễ cây mầm chuyển sang chậu mới.",
+        "Bổ sung đất dinh dưỡng và tưới nước giữ ẩm."
+      ],
+      "loi_thuong_gap": [
+        "Làm đứt cụt rễ cọc của cây mầm."
+      ],
+      "an_toan": [
+        "Rửa sạch đất bám trên dụng cụ sau khi làm vườn."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.PottingKit",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.5.5"
+    },
+    {
+      "ma": "man_hinh_bang_tin",
+      "ten": "Màn hình bảng tin hành lang",
+      "ten_tieng_anh": "Corridor digital announcement board",
+      "phan_loai": "Màn hình thông tin hành lang",
+      "phong": [
+        "hanh_lang_t2"
+      ],
+      "so_luong": 2,
+      "vi_tri": "Hành lang tầng 2 (khu trung tâm và hành lang đông)",
+      "cong_dung": "Thông báo lịch thực hành của các lớp, quy định an toàn sinh học và sự cố",
+      "thong_so": [
+        {
+          "ten": "Kích thước màn hình",
+          "gia_tri": "55 inch 4K chống lóa công nghiệp 24/7",
+          "nguon": "https://www.samsung.com/us/business/displays/direct-lit-led/qmr-series/"
+        },
+        {
+          "ten": "Kết nối",
+          "gia_tri": "Ethernet hiển thị dữ liệu từ GET /lab/sinh/tong-quan",
+          "mo_phong": true
+        }
+      ],
+      "cach_dung": [
+        "Màn hình tự động cập nhật lịch thực hành hôm nay và cảnh báo nhiệt độ tủ."
+      ],
+      "loi_thuong_gap": [
+        "Mất kết nối mạng khiến thông tin không được đồng bộ thời gian thực."
+      ],
+      "an_toan": [
+        "Không dùng vật nhọn chọc vào màn hình; lau bằng khăn mềm khô."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.CorridorBoard",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.6"
+    },
+    {
+      "ma": "kiosk_tra_cuu",
+      "ten": "Ki-ốt tra cứu dụng cụ",
+      "ten_tieng_anh": "Interactive tools and specimen look-up kiosk",
+      "phan_loai": "Ki-ốt tra cứu thông tin",
+      "phong": [
+        "hanh_lang_t2"
+      ],
+      "so_luong": 1,
+      "vi_tri": "Hành lang tầng 2 gần cầu thang",
+      "cong_dung": "Học sinh tự tra cứu sơ đồ phòng lab, cách sử dụng 108 dụng cụ và hồ sơ vi sinh",
+      "thong_so": [
+        {
+          "ten": "Giao diện tra cứu",
+          "gia_tri": "Màn hình cảm ứng đứng 32 inch giao diện web thân thiện",
+          "mo_phong": true
+        },
+        {
+          "ten": "Cơ sở dữ liệu tích hợp",
+          "gia_tri": "Toàn bộ danh mục dung_cu.json và may/*.json",
+          "mo_phong": true
+        }
+      ],
+      "cach_dung": [
+        "Chạm tìm kiếm tên dụng cụ hoặc quét mã để xem video hướng dẫn và quy tắc an toàn."
+      ],
+      "loi_thuong_gap": [
+        "Thao tác gõ mạnh liên tục khi máy đang tải dữ liệu."
+      ],
+      "an_toan": [
+        "Tắt nguồn khi vệ sinh lau chùi bề mặt ki-ốt."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.ToolKiosk",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.6"
+    },
+    {
+      "ma": "tu_trung_bay",
+      "ten": "Tủ trưng bày mẫu vật",
+      "ten_tieng_anh": "Glass display cabinet for biological specimens",
+      "phan_loai": "Tủ trưng bày mẫu vật",
+      "phong": [
+        "hanh_lang_t2"
+      ],
+      "so_luong": 3,
+      "vi_tri": "Dọc hành lang đông tầng 2",
+      "cong_dung": "Trưng bày các tiêu bản mẫu ngâm sinh học, mô hình tiến hóa và cấu trúc sinh giới",
+      "thong_so": [
+        {
+          "ten": "Kích thước tủ",
+          "gia_tri": "Tủ kính cường lực khung nhôm 4 tầng có đèn LED chiếu sáng",
+          "mo_phong": true
+        },
+        {
+          "ten": "Khóa an toàn",
+          "gia_tri": "Khóa kính an toàn bảo vệ mẫu vật quý",
+          "mo_phong": true
+        }
+      ],
+      "cach_dung": [
+        "Khách tham quan quan sát mẫu vật qua lớp kính bảo vệ."
+      ],
+      "loi_thuong_gap": [
+        "Tựa mạnh vào cửa kính."
+      ],
+      "an_toan": [
+        "Khóa kính cẩn thận, không đè tựa người vào mặt kính cường lực."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.DisplayCabinet",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.6"
+    },
+    {
+      "ma": "tu_do_ca_nhan",
+      "ten": "Tủ đồ cá nhân",
+      "ten_tieng_anh": "Student personal locker cabinet",
+      "phan_loai": "Tủ để đồ cá nhân",
+      "phong": [
+        "hanh_lang_t2"
+      ],
+      "so_luong": 2,
+      "vi_tri": "Hành lang tầng 2 trước cửa vào phòng thí nghiệm",
+      "cong_dung": "Để cặp xách, ba lô, áo khoác ngoài và đồ cá nhân của học sinh trước khi vào lab",
+      "thong_so": [
+        {
+          "ten": "Số ngăn tủ",
+          "gia_tri": "24 ngăn có khóa riêng biệt",
+          "mo_phong": true
+        },
+        {
+          "ten": "Chất liệu vỏ",
+          "gia_tri": "Thép tấm sơn tĩnh điện chống rỉ",
+          "mo_phong": true
+        }
+      ],
+      "cach_dung": [
+        "Học sinh cất ba lô, đồ đạc cá nhân vào ngăn tủ, khóa lại và giữ chìa khóa trước khi vào phòng thực hành."
+      ],
+      "loi_thuong_gap": [
+        "Mang ba lô cồng kềnh vào phòng lab gây vướng víu va quẹt đổ vỡ dụng cụ."
+      ],
+      "an_toan": [
+        "Tự bảo quản chìa khóa ngăn tủ, không để thức ăn thừa qua đêm trong tủ."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.Locker",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.6"
+    },
+    {
+      "ma": "dong_ho_bam_gio",
+      "ten": "Đồng hồ bấm giờ để bàn",
+      "ten_tieng_anh": "Digital benchtop laboratory timer / stopwatch",
+      "phan_loai": "Đồng hồ đếm thời gian",
+      "phong": [
+        "phong_sinh",
+        "phong_vi_sinh",
+        "phong_sinh_phan_tu",
+        "nha_kinh"
+      ],
+      "so_luong": 15,
+      "vi_tri": "Bố trí trên bàn ở mọi phòng thí nghiệm",
+      "cong_dung": "Đo đếm thời gian chính xác cho các bước nhuộm Gram, ủ enzyme, thời gian ly tâm",
+      "thong_so": [
+        {
+          "ten": "Dải đếm thời gian",
+          "gia_tri": "Đếm xuôi / đếm ngược lên đến 99 giờ 59 phút 59 giây",
+          "nguon": "https://www.fishersci.com/shop/products/traceable-three-channel-timer/1464981"
+        },
+        {
+          "ten": "Độ chính xác thời gian",
+          "gia_tri": "Độ chính xác 0,01 giây có âm báo chuông to",
+          "nguon": "https://www.fishersci.com/shop/products/traceable-three-channel-timer/1464981"
+        }
+      ],
+      "cach_dung": [
+        "Bấm nút cài đặt phút và giây cần đếm ngược.",
+        "Bấm Start bắt đầu đếm.",
+        "Khi hết giờ đồng hồ kêu bíp bíp, bấm Stop tắt chuông."
+      ],
+      "loi_thuong_gap": [
+        "Quên bấm Start làm quá thời gian nhuộm tẩy cồn Gram."
+      ],
+      "an_toan": [
+        "Không để rơi vào nước, thay pin định kỳ khi màn hình mờ."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.BenchTimer",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.7"
+    },
+    {
+      "ma": "but_ghi_nhan",
+      "ten": "Bút ghi nhãn",
+      "ten_tieng_anh": "Waterproof fine laboratory marker pen",
+      "phan_loai": "Bút lông dầu ghi nhãn",
+      "phong": [
+        "phong_sinh",
+        "phong_vi_sinh",
+        "phong_sinh_phan_tu",
+        "nha_kinh"
+      ],
+      "so_luong": 25,
+      "vi_tri": "Khay dụng cụ ở mọi phòng thí nghiệm",
+      "cong_dung": "Ghi chú thông tin mẫu vật, mã nhóm, ngày giờ lên đĩa petri, ống eppendorf, lam kính",
+      "thong_so": [
+        {
+          "ten": "Đặc tính mực viết",
+          "gia_tri": "Mực cồn kháng nước, chống phai khi đông lạnh -20 °C",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-lab-markers/13382400"
+        },
+        {
+          "ten": "Cỡ ngòi bút",
+          "gia_tri": "Ngòi kim siêu nhỏ 0,5 mm viết nét mảnh trên nắp ống nhỏ",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-lab-markers/13382400"
+        }
+      ],
+      "cach_dung": [
+        "Viết rõ ràng mã số mẫu lên nắp hoặc thành nhựa nhám của ống nghiệm/đĩa petri.",
+        "Đậy chặt nắp bút sau khi viết tránh khô mực."
+      ],
+      "loi_thuong_gap": [
+        "Dùng cồn 70% lau chùi trực tiếp lên chữ viết (cồn có thể hòa tan mực dầu)."
+      ],
+      "an_toan": [
+        "Đậy chặt nắp sau khi viết; mực cồn dễ bay hơi và dễ bắt lửa."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Demo.Bio.LabelPen",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.7"
+    },
+    {
+      "ma": "nhiet_ke",
+      "ten": "Nhiệt kế",
+      "ten_tieng_anh": "Laboratory glass thermometer (-10 to 110 °C)",
+      "phan_loai": "Nhiệt kế đo nhiệt độ chất lỏng",
+      "phong": [
+        "phong_sinh",
+        "nha_kinh"
+      ],
+      "so_luong": 15,
+      "vi_tri": "Phòng sinh học và nhà kính",
+      "cong_dung": "Đo nhiệt độ bể ổn nhiệt, nước ấm làm sữa chua, nhiệt độ môi trường thí nghiệm",
+      "thong_so": [
+        {
+          "ten": "Dải nhiệt độ đo",
+          "gia_tri": "-10 °C đến +110 °C, vạch chia 1 °C",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-traceable-total-immersion-thermometers/150411B"
+        },
+        {
+          "ten": "Chất lỏng chỉ thị",
+          "gia_tri": "Cồn đỏ an toàn không dùng thủy ngân độc hại",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-traceable-total-immersion-thermometers/150411B"
+        }
+      ],
+      "cach_dung": [
+        "Nhúng bầu nhiệt kế ngập trong dung dịch cần đo.",
+        "Chờ cột chất lỏng dừng dâng/hạ và đọc nhiệt độ ngang tầm mắt."
+      ],
+      "loi_thuong_gap": [
+        "Dùng nhiệt kế làm đũa khuấy dung dịch gây gãy vỡ ống thủy tinh."
+      ],
+      "an_toan": [
+        "Không nhúng nhiệt kế lạnh đột ngột vào nước sôi tránh sốc nhiệt nứt vỡ."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Demo.Bio.Thermometer",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.7",
+      "stt_thiet_bi_tang_1": 36
+    },
+    {
+      "ma": "giay_chi_thi_ph",
+      "ten": "Giấy chỉ thị pH",
+      "ten_tieng_anh": "Universal pH indicator test paper strips (pH 1 – 14)",
+      "phan_loai": "Giấy đo pH vạn năng",
+      "phong": [
+        "phong_sinh"
+      ],
+      "so_luong": 20,
+      "vi_tri": "Khay hóa chất phòng sinh học",
+      "cong_dung": "Kiểm tra nhanh độ pH của dịch nuôi cấy, dịch lên men và mẫu nước",
+      "thong_so": [
+        {
+          "ten": "Dải đo pH và bảng màu",
+          "gia_tri": "Dải đo pH 1 – 14 với 4 dải màu so sánh chuẩn",
+          "nguon": "https://www.fishersci.com/shop/products/whatman-universal-ph-indicator-strips/0987618"
+        },
+        {
+          "ten": "Độ nhạy",
+          "gia_tri": "Độ chia 1 đơn vị pH",
+          "nguon": "https://www.fishersci.com/shop/products/whatman-universal-ph-indicator-strips/0987618"
+        }
+      ],
+      "cach_dung": [
+        "Dùng đũa thủy tinh chấm 1 giọt dung dịch lên dải giấy thử.",
+        "Chờ 5 giây cho giấy đổi màu.",
+        "So sánh màu của giấy với bảng màu chuẩn trên vỏ hộp để đọc giá trị pH."
+      ],
+      "loi_thuong_gap": [
+        "Nhúng cả tập giấy thử trực tiếp vào lọ dung dịch mẫu làm nhiễm bẩn dung dịch."
+      ],
+      "an_toan": [
+        "Bảo quản nơi khô ráo, tránh ánh sáng trực tiếp và hơi axit/kiềm trong không khí."
+      ],
+      "hieu_chuan_ngay": 0,
+      "thanh_phan_unity": "Khkt.Interaction.TestPaper (có sẵn)",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.7",
+      "stt_thiet_bi_tang_1": 37
+    },
+    {
+      "ma": "may_khuay_tu_gia_nhiet",
+      "ten": "Máy khuấy từ gia nhiệt",
+      "ten_tieng_anh": "Magnetic stirrer with hotplate",
+      "phan_loai": "Thiết bị khuấy gia nhiệt",
+      "phong": [
+        "phong_sinh",
+        "phong_sinh_phan_tu"
+      ],
+      "so_luong": 4,
+      "vi_tri": "Bàn pha chế phòng sinh học và SHPT",
+      "cong_dung": "Khuấy hòa tan các chất khó tan và đun nóng dung dịch đệm bằng con cá từ",
+      "thong_so": [
+        {
+          "ten": "Tốc độ khuấy",
+          "gia_tri": "100 – 1500 rpm điều khiển vô cấp",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-isotemp-hotplate-stirrers/1110049SH"
+        },
+        {
+          "ten": "Nhiệt độ mặt gia nhiệt",
+          "gia_tri": "Mặt gốm ceramic chịu nhiệt tối đa 380 °C",
+          "nguon": "https://www.fishersci.com/shop/products/fisherbrand-isotemp-hotplate-stirrers/1110049SH"
+        }
+      ],
+      "cach_dung": [
+        "Thả con cá từ sạch vào cốc chứa dung dịch.",
+        "Đặt cốc vào giữa mặt bếp gia nhiệt.",
+        "Bật núm khuấy tăng tốc độ từ từ cho đến khi hình thành phễu xoáy vừa phải.",
+        "Bật núm nhiệt nếu cần đun nóng."
+      ],
+      "loi_thuong_gap": [
+        "Tăng tốc độ đột ngột làm con cá từ nhảy loạn xạ bắn dung dịch ra ngoài."
+      ],
+      "an_toan": [
+        "Mặt bếp gốm rất nóng sau khi gia nhiệt; có đèn cảnh báo nhiệt dư bảo vệ."
+      ],
+      "hieu_chuan_ngay": 365,
+      "thanh_phan_unity": "Khkt.Interaction.MagneticStirrer (có sẵn)",
+      "may_man_hinh": null,
+      "muc_dac_ta": "5.7",
+      "stt_thiet_bi_tang_1": 40
+    }
+  ]
+}
