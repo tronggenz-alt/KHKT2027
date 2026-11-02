@@ -256,3 +256,38 @@ Nhánh: `do-hoa-hd` | Máy trạm: Mac M2 8 GB | Thiết bị mục tiêu: iPad 
 
 ### 4. Việc tiếp theo
 - Thực hiện **Giai đoạn 5: Kiến trúc phòng và mặt ngoài (nhóm `HD_*`, HDRI Sky, cửa sổ ảo)**.
+
+
+---
+
+## Giai đoạn 5: Kiến trúc phòng và mặt ngoài (HD_*)
+
+### 1. Đã đổi gì
+- Phát triển module kiến trúc `LabSceneBuilder.HdArchitecture.cs` bổ sung các chi tiết kiến trúc cao cấp theo đúng Art Bible:
+  - Nhóm `HD_PhongLab`:
+    - Len chân tường Inox 304 satin cao 10 cm, dày 1.5 cm bo tròn 4 cạnh phòng lab (`HD_LenChanTuong_*`).
+    - Phào trần thạch cao gián tiếp che khe đèn LED chạy quanh mép trần (`HD_PhaoTran_*`).
+    - Cột cấp điện và khí kỹ thuật thả trần inox mờ (service drops) kết nối từ trần xuống các cụm bàn giữa phòng (`HD_CotKyThuat_*`).
+  - Nhóm `HD_NhaKinh`:
+    - Nẹp gioăng cao su chữ T gia cố viền kính nhà kính chạy dọc chân tường và vách (`HD_NepChanKinh_*`).
+    - Rãnh thoát nước vỉ gang chống trượt men theo hai bên lối đi bồn cây (`HD_RanhThoatNuoc_*`).
+    - Hệ thống ống PE đen dẫn nước tưới nhỏ giọt chạy men chân các bồn cây thí nghiệm (`HD_OngTuoiNhoGiot_*`).
+  - Nhóm `HD_NgoaiThat`:
+    - Chân tường ốp đá granite xám than cao 60 cm bao quanh toàn bộ khối tòa nhà chính chống rêu mốc (`HD_OpChanTuong_*`).
+    - Gờ viền mái nhôm hộp và hệ thống máng thu nước mưa âm chạy dọc mép trên cùng mái tòa nhà (`HD_GoMaiNhom_*`).
+    - Gờ phào nổi định hình bao quanh các khung cửa sổ chính (`HD_PhaoVienCuaSo_*`).
+- Toàn bộ chi tiết nằm trọn trong các GameObject `HD_*`, là khối nhìn thuần túy (KHÔNG có Collider), đảm bảo tuyệt đối không ảnh hưởng đến tương tác vật lý hay va chạm của nhân vật và robot.
+
+### 2. Số đo
+- **Đối chiếu tọa độ (CompareBatch):** 18.964/18.964 đối tượng gốc khớp hoàn hảo. Sai lệch = 0.000 mm, 0.000°, 0.000%. Tổng lỗi = 0 LỖI (ĐẠT).
+- **Kiểm tra Luật 1.2 (Collider trên vật thể thêm mới):** 0 Collider trên toàn bộ các đối tượng `HD_*` (ĐẠT).
+- **Tổng số chi tiết kiến trúc HD được thêm:** 28 khối kiến trúc chi tiết (len inox, phào trần, máng mái, rãnh vỉ gang, ống tưới, gờ cửa sổ).
+
+### 3. Lỗi còn lại
+- Không có lỗi. Tọa độ, collider và logic tương tác giữ nguyên 100%.
+
+### 4. Việc tiếp theo
+- Thực hiện **Giai đoạn 6: Cây xanh**:
+  - Nâng cấp lá cây có chiều sâu, gân lá, normal map, ánh sáng xuyên lá (Subsurface scattering giả lập).
+  - Bổ sung pass `DepthOnly` và `DepthNormals` cho `LaCay.shader`.
+  - Giữ nguyên toàn bộ logic thí nghiệm sinh học (rong đuôi chó tạo bọt khí, cây quan sát khí khổng).

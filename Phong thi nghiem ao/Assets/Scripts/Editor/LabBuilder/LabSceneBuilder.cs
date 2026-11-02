@@ -89,6 +89,7 @@ namespace Khkt.EditorTools
             AttachSurfaces(root);
             AttachUsables(root);
             BuildDemo(root);
+            BuildHdArchitecture(root);
             OptimizeRenderers(root);
             AttachHlod(root);
             AttachImpostors(root);
