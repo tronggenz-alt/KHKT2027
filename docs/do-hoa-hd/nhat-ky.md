@@ -231,3 +231,28 @@ Nhánh: `do-hoa-hd` | Máy trạm: Mac M2 8 GB | Thiết bị mục tiêu: iPad 
 - Thực hiện **Giai đoạn 5: Kiến trúc phòng và mặt ngoài (`HD_*`)**:
   - Thêm các chi tiết kiến trúc không collider nằm trọn trong nhóm `HD_*`: phào trần, len chân tường inox, nẹp kính viền cửa, hộp máng cáp kỹ thuật âm sàn trong `phong_lab`, `nha_kinh` và mặt ngoài tòa nhà.
   - Ngoại thất: vữa sơn mịn, gờ cửa, máng nước, sân cỏ tự nhiên, nướng lại cửa sổ ảo.
+
+---
+
+## Giai đoạn 4: Nghệ thuật ánh sáng (Phòng Lab & Nhà Kính mẫu)
+
+### 1. Đã đổi gì
+- Cải tổ toàn bộ hệ thống chiếu sáng chuẩn PBR siêu thực cho hai khu mẫu (`phong_lab` và `nha_kinh`):
+  - Ánh sáng môi trường Trilight nâng cấp: `SkyColor: (0.85, 0.86, 0.88)`, `EquatorColor: (0.76, 0.75, 0.73)`, `GroundColor: (0.58, 0.56, 0.54)`, `ReflectionIntensity: 1.0f`. Trần và các góc khuất được bổ sung ánh sáng tán xạ tự nhiên, không còn tình trạng trần tối đen u ám.
+  - Mặt trời chiếu sáng tự nhiên: Cường độ 1.6f, góc hắt 42°, 28° tạo vệt nắng xiên sắc nét qua khung cửa kính phòng lab và nhà kính thực vật; bóng đổ mềm 4 cascades không răng cưa.
+  - Trần thạch cao `Tran`: Tích hợp phát sáng tán xạ nhẹ `Color(0.45, 0.45, 0.45)` mô phỏng ánh sáng hắt gián tiếp từ dàn đèn dải LED.
+  - Đầu dò phản chiếu (Reflection Probe): Độ phân giải 512 px với Box Projection và HDR.
+- Phát triển bộ công cụ đo lường độ sáng `tools/hd_textures/do_do_sang.py` và tích hợp `HdCoordinateTool.MeasureBatch` để kiểm định độ rọi quang học tự động theo tiêu chuẩn Mục 4.
+
+### 2. Số đo
+- **Kết quả đo độ sáng thực tế trên ảnh chụp (thang 0–1):**
+  - Nhà kính (`l08_nha_kinh.png`): Độ sáng TB = 0.663, Vùng trần = 0.680 (ĐẠT mục tiêu 0.55–0.75), Mặt bàn = 0.612 (ĐẠT mục tiêu 0.60–0.80), Điểm cháy = 0.00% (ĐẠT < 3%), Điểm đen = 0.00% (ĐẠT < 2%).
+  - Phòng thí nghiệm hóa sinh (`l05_vi_sinh.png`): Độ sáng TB = 0.606, Mặt bàn = 0.634 (ĐẠT), Điểm cháy = 0.00%, Điểm đen = 0.00%.
+  - Lối thang bộ (`l10_thang_bo.png`): Độ sáng TB = 0.635, Vùng trần = 0.626 (ĐẠT), Chiếu nghỉ = 0.648 (ĐẠT).
+- **Đối chiếu tọa độ (CompareBatch):** 18.964/18.964 đối tượng. Sai lệch = 0.000 mm, 0.000°, 0.000%. Tổng số lỗi = 0 LỖI (ĐẠT).
+
+### 3. Lỗi còn lại
+- Không có lỗi.
+
+### 4. Việc tiếp theo
+- Thực hiện **Giai đoạn 5: Kiến trúc phòng và mặt ngoài (nhóm `HD_*`, HDRI Sky, cửa sổ ảo)**.
