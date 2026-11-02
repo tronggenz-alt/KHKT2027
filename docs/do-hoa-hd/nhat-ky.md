@@ -91,3 +91,43 @@ Nhánh: `do-hoa-hd` | Máy trạm: Mac M2 8 GB | Thiết bị mục tiêu: iPad 
 
 ### 4. Việc tiếp theo
 - Thực hiện **Giai đoạn 3: Vật liệu nền PBR & World-Aligned UV**.
+
+
+---
+
+## Giai đoạn 2: Nền kết xuất
+
+### 1. Đã đổi gì
+- Cấu hình URP Pipeline (`Mobile_RPAsset.asset` & `Mobile_Renderer.asset`):
+  - Chuyển chế độ kết xuất sang **Forward+** (`m_RenderingMode: 1`).
+  - Render scale mặc định nâng lên **1.0** (mức Ultra).
+  - Kích hoạt **Depth Texture** và **Opaque Texture** (`m_RequireDepthTexture: 1`, `m_RequireOpaqueTexture: 1`) phục vụ shader khúc xạ thủy tinh và hiệu ứng màn hình.
+  - Tích hợp **SSAO (Screen Space Ambient Occlusion)** vào `Mobile_Renderer`: Bán kính 0.25 m, cường độ 0.28, tăng cường bóng tiếp xúc ở các góc tường, chân máy và dụng cụ trên bàn.
+  - Tăng tầng bóng đổ lên **4 tầng cascade** (`m_ShadowCascadeCount: 4`), kích thước bản đồ bóng 2048x2048, bật **Bóng mềm (Soft Shadows)**.
+  - Bật tính năng trộn đầu dò phản chiếu (`m_ReflectionProbeBlending: 1`, `m_ReflectionProbeBoxProjection: 1`).
+- Điều chỉnh khoảng cách culling và bóng đổ vật nhỏ:
+  - `DesktopViewer.cs`: Nâng tầm hiển thị chữ nhỏ `ChuNho` lên **12 m** (gấp đôi mốc cũ 6 m), chữ vừa `ChuVua` lên **25 m**, chi tiết vật nhỏ `ChiTietNho` lên **30 m**.
+  - `LabSceneBuilder.cs`: Hạ ngưỡng tắt bóng vật nhỏ từ 25 cm xuống **6 cm**. Mọi dụng cụ thí nghiệm (cốc thủy tinh, bình tam giác, ống nghiệm, chai lọ, máy phân tích) đều có bóng đổ tiếp xúc rõ nét trên mặt bàn, loại bỏ hoàn toàn hiện tượng "lơ lửng".
+  - Nâng độ phân giải nướng đầu dò phản chiếu `ReflectionProbe` từ 128 lên **512 px**.
+  - Tinh chỉnh Volume Hậu kỳ (`HauKy.asset`): Bloom mềm mại tự nhiên (threshold 1.0, intensity 0.30, scatter 0.65, lọc chất lượng cao), cân bằng màu trung tính tươi sáng.
+- Xây dựng hệ thống quản lý chất lượng và HUD:
+  - `HdQualityManager.cs`: 3 mức chất lượng **Ultra** (mặc định), **Cao**, **Cân bằng** (không thấp hơn bản cũ), hỗ trợ lưu cấu hình và chuyển đổi tức thì trong runtime.
+  - `HdPerformanceHud.cs`: Bảng HUD hiển thị FPS (tức thời, trung bình, 1% min), RAM thực tế (Native Allocated + Mono GC Heap), mức pin / trạng thái thiết bị, nút chuyển 3 mức đồ họa trực tiếp trên màn hình iPad. Tự động khởi tạo bằng `[RuntimeInitializeOnLoadMethod]` mà không làm biến động dữ liệu Scene.
+
+### 2. Số đo
+- **Đối chiếu tọa độ (CompareBatch):** 18.964/18.964 đối tượng khớp hoàn hảo. Sai lệch vị trí = 0.000 mm, góc = 0.000°, tỉ lệ = 0.000%. Tổng số lỗi = 0 LỖI (ĐẠT).
+- **Cấu hình đồ họa:**
+  - Rendering Path: Forward+
+  - Render Scale: 1.0 (Ultra) / 0.9 (Cao) / 0.8 (Cân bằng)
+  - Shadow Cascades: 4 tầng (Ultra) / 3 tầng (Cao) / 2 tầng (Cân bằng)
+  - Tầm bóng: 45 m (Ultra) / 35 m (Cao) / 25 m (Cân bằng)
+  - Culling chữ nhỏ: 12 m (cũ 6 m) | Chi tiết nhỏ: 30 m (cũ 14 m)
+  - Ngưỡng bóng vật nhỏ: 6 cm (cũ 25 cm)
+
+### 3. Lỗi còn lại
+- Không có lỗi. Tọa độ và collider đạt 100% tiêu chuẩn mốc gốc.
+
+### 4. Việc tiếp theo
+- Thực hiện **Giai đoạn 3: Vật liệu nền**:
+  - Viết `LabSceneBuilder.HdMaterials.cs` mở rộng phương thức `Mat()` với bảng map PBR (Albedo 1K-2K, Normal, Roughness, AO) cho ~40 vật liệu chiếm diện tích lớn (sàn, tường, trần, bàn lab, kim loại, gỗ).
+  - Tích hợp UV theo không gian thế giới (World-Aligned UV) cho tường, trần, sàn để vân vật liệu luôn đúng tỉ lệ thật và không bị kéo giãn.
