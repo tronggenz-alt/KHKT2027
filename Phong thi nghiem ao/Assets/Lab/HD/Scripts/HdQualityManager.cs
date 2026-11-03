@@ -28,9 +28,30 @@ namespace Khkt.Rendering.HD
 
         const string PrefKey = "VERA_HD_QUALITY_TIER";
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        public static void ConfigureTargetFrameRate()
+        {
+            QualitySettings.vSyncCount = 0;
+            int refreshRate = 60;
+            try
+            {
+                var ratio = Screen.currentResolution.refreshRateRatio;
+                if (ratio.denominator > 0)
+                    refreshRate = Mathf.RoundToInt((float)ratio.numerator / ratio.denominator);
+            }
+            catch
+            {
+                refreshRate = 60;
+            }
+            if (refreshRate <= 0) refreshRate = 60;
+            Application.targetFrameRate = Mathf.Min(90, refreshRate);
+            Debug.Log($"[VERA Lab HD] Cấu hình targetFrameRate = {Application.targetFrameRate} FPS (Màn hình: {refreshRate} Hz, vSync = 0)");
+        }
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static void InitHdSystem()
         {
+            ConfigureTargetFrameRate();
             if (Instance == null)
             {
                 var go = new GameObject("HD_RuntimeController");
@@ -49,6 +70,8 @@ namespace Khkt.Rendering.HD
             }
             Instance = this;
             DontDestroyOnLoad(gameObject);
+
+            ConfigureTargetFrameRate();
 
             int saved = PlayerPrefs.GetInt(PrefKey, (int)HdQualityTier.Ultra);
             SetTier((HdQualityTier)saved, false);

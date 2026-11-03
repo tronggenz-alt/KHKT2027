@@ -91,11 +91,21 @@ namespace Khkt.EditorTools
         /// </summary>
         static bool IsFloor2Dynamic(Transform t)
         {
+            if (t.GetComponent<Khkt.Interaction.Grabbable>() != null ||
+                t.GetComponent<Khkt.Interaction.LabContainer>() != null) return true;
+
             foreach (var mb in t.GetComponents<MonoBehaviour>())
             {
                 if (mb == null) continue;
-                string ns = mb.GetType().Namespace ?? "";
                 if (mb is Khkt.Environment.Tang2.ThemeOnly) continue;
+                if (mb is Khkt.Demo.EquipmentInfo || mb is Khkt.Demo.Bio.BioToolCatalogTag) continue;
+                if (mb is Khkt.Demo.Bio.DisplayCabinet || mb is Khkt.Demo.Bio.SpecimenShelf ||
+                    mb is Khkt.Demo.Bio.Locker || mb is Khkt.Demo.Bio.SkeletonStand ||
+                    mb is Khkt.Demo.Bio.CorridorBoard || mb is Khkt.Demo.Bio.PpeStation ||
+                    mb is Khkt.Demo.Bio.FirstAidCabinet || mb is Khkt.Demo.Bio.TeachingModel ||
+                    mb is Khkt.Demo.Bio.UvCeilingLamp) continue;
+
+                string ns = mb.GetType().Namespace ?? "";
                 if (ns.StartsWith("Khkt.Environment.Tang2") || ns.StartsWith("Khkt.Demo.Bio") || ns.StartsWith("Khkt.Interaction.Bio")) return true;
             }
             return false;

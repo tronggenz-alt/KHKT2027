@@ -28,6 +28,9 @@ namespace Khkt.Rendering.HD
         float minFps = 60f;
         float frameTimeMs = 16.6f;
 
+        string currentZoneName = "Toàn viện";
+        int currentZoneIdx = -1;
+
         long totalAllocatedMemoryMb = 0;
         long gcMemoryMb = 0;
 
@@ -90,6 +93,11 @@ namespace Khkt.Rendering.HD
                 currentFps = frameCount / timeAccum;
                 frameTimeMs = (timeAccum / frameCount) * 1000f;
 
+                // Xác định khu vực hiện tại để đo thời gian khung hình theo khu
+                Vector3 viewerPos = Camera.main != null ? Camera.main.transform.position : Vector3.zero;
+                currentZoneIdx = ZoneMap.At(viewerPos);
+                currentZoneName = (currentZoneIdx >= 0 && currentZoneIdx < ZoneMap.Zones.Length) ? ZoneMap.Zones[currentZoneIdx].name : "Toàn viện";
+
                 // Tính toán min FPS trong lịch sử gần nhất
                 float min = 999f;
                 float sum = 0f;
@@ -124,7 +132,7 @@ namespace Khkt.Rendering.HD
             GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(scale, scale, 1.0f));
 
             float w = 270f;
-            float h = 180f;
+            float h = 195f;
             float x = (Screen.width / scale) - w - 15f;
             float y = 15f;
 
@@ -138,11 +146,12 @@ namespace Khkt.Rendering.HD
             }
             GUILayout.EndHorizontal();
 
-            // FPS và Frame time
+            // FPS và Frame time theo khu vực
             Color fpsColor = currentFps >= 55f ? Color.green : (currentFps >= 30f ? Color.yellow : Color.red);
             var prevColor = GUI.color;
             GUI.color = fpsColor;
-            GUILayout.Label($"FPS: {currentFps:0.0} (Avg: {avgFps:0.0} | 1% Min: {minFps:0.0}) - {frameTimeMs:0.1} ms", textStyle);
+            GUILayout.Label($"FPS: {currentFps:0.0} (Avg: {avgFps:0.0} | 1% Min: {minFps:0.0})", textStyle);
+            GUILayout.Label($"Khu vực: {currentZoneName} · {frameTimeMs:0.1} ms", textStyle);
             GUI.color = prevColor;
 
             // Bộ nhớ RAM

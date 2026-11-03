@@ -325,10 +325,13 @@ namespace Khkt.EditorTools
         /// <summary>Đánh dấu tĩnh để Unity gộp lô vẽ (static batching), trừ các nhánh có tên trong skip.</summary>
         public static void MarkStatic(Transform t, Func<Transform, bool> skip)
         {
-            if (skip(t)) return;
-            GameObjectUtility.SetStaticEditorFlags(t.gameObject,
-                StaticEditorFlags.BatchingStatic | StaticEditorFlags.OccludeeStatic | StaticEditorFlags.OccluderStatic
-                | StaticEditorFlags.ReflectionProbeStatic);  // đầu dò phản chiếu nướng sẵn chỉ chụp vật tĩnh
+            if (t.name == "Khu chế tạo mẫu" || t.name == "Thư viện linh kiện") return;
+            if (!skip(t))
+            {
+                GameObjectUtility.SetStaticEditorFlags(t.gameObject,
+                    StaticEditorFlags.BatchingStatic | StaticEditorFlags.OccludeeStatic | StaticEditorFlags.OccluderStatic
+                    | StaticEditorFlags.ReflectionProbeStatic);  // đầu dò phản chiếu nướng sẵn chỉ chụp vật tĩnh
+            }
             foreach (Transform c in t) MarkStatic(c, skip);
         }
     }

@@ -93,9 +93,9 @@ namespace Khkt.EditorTools
             AttachHlod(root);
             AttachImpostors(root);
 
-            // Dụng cụ cầm được, có thẻ thông tin hay có hiệu ứng không gộp lô tĩnh (để di chuyển và viền sáng được)
+            // Dụng cụ cầm được, có hoạt cảnh di chuyển hay hiệu ứng không gộp lô tĩnh (để di chuyển và tương tác được)
             MarkStatic(root, t => t.name == WorkshopName || t.name == PartLibraryName || t.name.StartsWith("Cánh quạt") || t.name == "Bộ chuẩn độ" || t.name == "Ngọn lửa" || t.name == "Hệ thống demo"
-                                  || t.GetComponent<Khkt.Demo.EquipmentInfo>() != null || t.GetComponent<Khkt.Interaction.Grabbable>() != null
+                                  || t.GetComponent<Khkt.Interaction.Grabbable>() != null
                                   || t.GetComponent<Khkt.Interaction.LabContainer>() != null || t.name == "Trạm" || t.name.StartsWith("Người xem")
                                   || t.name.StartsWith("Màn hình") || t.name == "Robot trợ lý" || t.GetComponent<Khkt.Demo.LabScreen>() != null
                                   || t.GetComponent<UvScroll>() != null || t.GetComponent<Khkt.Rendering.AutoDoor>() != null
