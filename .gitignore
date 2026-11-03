@@ -57,3 +57,5 @@ Phong thi nghiem ao/Assets/Scripts/AutoTest/
 Phong thi nghiem ao/Assets/Scripts/AutoTest.meta
 Phong thi nghiem ao/Assets/Scripts/Editor/KhktPlayVerify.*
 Phong thi nghiem ao/Assets/Scripts/Editor/HdTools/HdMaterialEnhancer.cs.meta
+
+.venv/

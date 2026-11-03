@@ -1,0 +1,895 @@
+[
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "AO_TilesLab.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/AO_TilesLab.png",
+    "ratio": 168226.6912205356,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": []
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "AlumAnodized029_Albedo.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/AlumAnodized029_Albedo.png",
+    "ratio": 0.0,
+    "is_intentional": false,
+    "has_stripes": false,
+    "materials_used": [
+      "KhungCuaTuDong",
+      "T2_NapRanh"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "AlumAnodized029_Mask.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/AlumAnodized029_Mask.png",
+    "ratio": 0.0,
+    "is_intentional": false,
+    "has_stripes": false,
+    "materials_used": [
+      "KhungCuaTuDong",
+      "T2_NapRanh"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "AlumAnodized029_Normal.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/AlumAnodized029_Normal.png",
+    "ratio": 812863.2821065814,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": [
+      "KhungCuaTuDong",
+      "T2_NapRanh"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "EpoxyResinDark_Albedo.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/EpoxyResinDark_Albedo.png",
+    "ratio": 0.0,
+    "is_intentional": false,
+    "has_stripes": false,
+    "materials_used": [
+      "MatBanEpoxy"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "EpoxyResinDark_Mask.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/EpoxyResinDark_Mask.png",
+    "ratio": 0.0,
+    "is_intentional": false,
+    "has_stripes": false,
+    "materials_used": [
+      "MatBanEpoxy"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "EpoxyResinDark_Normal.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/EpoxyResinDark_Normal.png",
+    "ratio": 819155.07820518,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": [
+      "MatBanEpoxy"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "InoxSatin304_Albedo.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/InoxSatin304_Albedo.png",
+    "ratio": 43523559827.68417,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": [
+      "Inox"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "InoxSatin304_Mask.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/InoxSatin304_Mask.png",
+    "ratio": 0.0,
+    "is_intentional": false,
+    "has_stripes": false,
+    "materials_used": [
+      "Inox"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "InoxSatin304_Normal.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/InoxSatin304_Normal.png",
+    "ratio": 228276854035.98056,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": [
+      "Inox"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "Normal_AnodizedAlu.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/Normal_AnodizedAlu.png",
+    "ratio": 11.423446551750505,
+    "is_intentional": false,
+    "has_stripes": false,
+    "materials_used": [
+      "KhungNhomNFT",
+      "NhomKhung"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "Normal_Concrete.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/Normal_Concrete.png",
+    "ratio": 15.668444871297336,
+    "is_intentional": true,
+    "has_stripes": false,
+    "materials_used": [
+      "KhopNham",
+      "T2_ChauXam"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "Normal_Facade.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/Normal_Facade.png",
+    "ratio": 9.451925199122018,
+    "is_intentional": false,
+    "has_stripes": false,
+    "materials_used": []
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "Normal_GlassOptic.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/Normal_GlassOptic.png",
+    "ratio": 6.509362138339173,
+    "is_intentional": false,
+    "has_stripes": false,
+    "materials_used": [
+      "ChauSuTrang",
+      "CocThuyTinh",
+      "HopLamKinh",
+      "ThuyTinh"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "Normal_InoxSatin.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/Normal_InoxSatin.png",
+    "ratio": 600.0958507829829,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": [
+      "KinhHienVi_Inox",
+      "T2_BanSoiUV"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "Normal_LabEpoxy.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/Normal_LabEpoxy.png",
+    "ratio": 9.789710882856237,
+    "is_intentional": false,
+    "has_stripes": false,
+    "materials_used": []
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "Normal_LabPhenolic.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/Normal_LabPhenolic.png",
+    "ratio": 9.621816523894891,
+    "is_intentional": false,
+    "has_stripes": false,
+    "materials_used": [
+      "CanhCuaKho",
+      "CanhCuaLab",
+      "CanhCuaPhongMay",
+      "CanhCuaPhongRobot",
+      "NhuaMo"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "Normal_LeafVein.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/Normal_LeafVein.png",
+    "ratio": 5728.692171123177,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": [
+      "La",
+      "LaCayVanPhong",
+      "LaDam",
+      "T2_LaCay",
+      "T2_LaCayDam",
+      "T2_LaCayNon"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "Normal_LeafVeins.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/Normal_LeafVeins.png",
+    "ratio": 144.2928661204555,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": []
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "Normal_Plaster.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/Normal_Plaster.png",
+    "ratio": 11.520941052167041,
+    "is_intentional": false,
+    "has_stripes": false,
+    "materials_used": [
+      "KinhHienVi_Than"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "Normal_Rubber.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/Normal_Rubber.png",
+    "ratio": 9.622918812596795,
+    "is_intentional": false,
+    "has_stripes": false,
+    "materials_used": [
+      "CaoSu",
+      "CaoSuDo",
+      "MatGheCam",
+      "MatGheVang",
+      "MatGheXanhCom",
+      "MatGheXanhNgoc",
+      "MatGheXanhTroi"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "Normal_TilesChem.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/Normal_TilesChem.png",
+    "ratio": 239.87760715262957,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": [
+      "T2_SanNhaKinh"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "Normal_TilesLab.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/Normal_TilesLab.png",
+    "ratio": 270.8564496790858,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": [
+      "T2_SanHanhLangT2"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "Normal_WoodGrain.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/Normal_WoodGrain.png",
+    "ratio": 166.45384132907014,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": [
+      "Go",
+      "GoSoi",
+      "ThanCay"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "OakWood051_Albedo.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/OakWood051_Albedo.png",
+    "ratio": 32547.846839237838,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": []
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "OakWood051_Mask.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/OakWood051_Mask.png",
+    "ratio": 0.0,
+    "is_intentional": false,
+    "has_stripes": false,
+    "materials_used": [
+      "CanhTu"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "OakWood051_Normal.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/OakWood051_Normal.png",
+    "ratio": 17076.730918238456,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": [
+      "CanhTu"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "PlasterWall001_Albedo.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/PlasterWall001_Albedo.png",
+    "ratio": 11082.616359385642,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": [
+      "ThanTu",
+      "Tran",
+      "TuongNgoai",
+      "TuongSon"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "PlasterWall001_Mask.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/PlasterWall001_Mask.png",
+    "ratio": 0.0,
+    "is_intentional": false,
+    "has_stripes": false,
+    "materials_used": [
+      "ThanTu",
+      "Tran",
+      "TuongNgoai",
+      "TuongSon"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "PlasterWall001_Normal.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/PlasterWall001_Normal.png",
+    "ratio": 371715.63198230835,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": [
+      "ThanTu",
+      "Tran",
+      "TuongNgoai",
+      "TuongSon"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "SoilGarden037_Albedo.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/SoilGarden037_Albedo.png",
+    "ratio": 26604.828685038945,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": []
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "SoilGarden037_Mask.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/SoilGarden037_Mask.png",
+    "ratio": 0.0,
+    "is_intentional": false,
+    "has_stripes": false,
+    "materials_used": []
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "SoilGarden037_Normal.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/SoilGarden037_Normal.png",
+    "ratio": 147942.8542849598,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": []
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "TerracottaClay002_Albedo.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/TerracottaClay002_Albedo.png",
+    "ratio": 19933.038020444532,
+    "is_intentional": true,
+    "has_stripes": false,
+    "materials_used": []
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "TerracottaClay002_Mask.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/TerracottaClay002_Mask.png",
+    "ratio": 0.0,
+    "is_intentional": true,
+    "has_stripes": false,
+    "materials_used": [
+      "ChauDat",
+      "T2_ChauDatNung"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "TerracottaClay002_Normal.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/TerracottaClay002_Normal.png",
+    "ratio": 321193.8388989705,
+    "is_intentional": true,
+    "has_stripes": false,
+    "materials_used": [
+      "ChauDat",
+      "T2_ChauDatNung"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "TilesLab086_Albedo.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/TilesLab086_Albedo.png",
+    "ratio": 9109.881740529854,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": []
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "TilesLab086_Mask.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/TilesLab086_Mask.png",
+    "ratio": 6389418.479087943,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": [
+      "SanBanCong",
+      "SanHanhLang",
+      "SanPhongHoaChat",
+      "SanPhongLab"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "TilesLab086_Normal.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/TilesLab086_Normal.png",
+    "ratio": 5001207.046205887,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": [
+      "SanBanCong",
+      "SanHanhLang",
+      "SanPhongHoaChat",
+      "SanPhongLab"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "TrespaTopLab_Albedo.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/TrespaTopLab_Albedo.png",
+    "ratio": 14590.753161336872,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": [
+      "MatBanPhenolic"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "TrespaTopLab_Mask.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/TrespaTopLab_Mask.png",
+    "ratio": 0.0,
+    "is_intentional": false,
+    "has_stripes": false,
+    "materials_used": [
+      "MatBanPhenolic"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/HD/Textures",
+    "filename": "TrespaTopLab_Normal.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures/TrespaTopLab_Normal.png",
+    "ratio": 847878.3386894434,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": [
+      "MatBanPhenolic"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "BanGhim.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/BanGhim.png",
+    "ratio": 55.576735698255355,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": [
+      "BangGhimBan"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "BangLo.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/BangLo.png",
+    "ratio": 5.8322366087076345,
+    "is_intentional": false,
+    "has_stripes": false,
+    "materials_used": [
+      "BangGiaTreo"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "BangTuanHoan.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/BangTuanHoan.png",
+    "ratio": 2050.485709497013,
+    "is_intentional": true,
+    "has_stripes": false,
+    "materials_used": [
+      "BangTuanHoan"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "BeTong.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/BeTong.png",
+    "ratio": 46.60870179270423,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": [
+      "SanBeTong",
+      "T2_SanNhaKinh"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "ChanDungMau.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/ChanDungMau.png",
+    "ratio": 118.37098631042413,
+    "is_intentional": true,
+    "has_stripes": false,
+    "materials_used": [
+      "ChanDungTam"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "Co.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/Co.png",
+    "ratio": 36.861660195896974,
+    "is_intentional": true,
+    "has_stripes": false,
+    "materials_used": [
+      "NenCo"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "CoVietNam.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/CoVietNam.png",
+    "ratio": 150.81740206992865,
+    "is_intentional": true,
+    "has_stripes": false,
+    "materials_used": [
+      "Co"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "GHS0.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/GHS0.png",
+    "ratio": 45.10628102264602,
+    "is_intentional": true,
+    "has_stripes": false,
+    "materials_used": [
+      "GHS0"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "GHS1.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/GHS1.png",
+    "ratio": 95.91885229136646,
+    "is_intentional": true,
+    "has_stripes": false,
+    "materials_used": [
+      "GHS1"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "GHS2.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/GHS2.png",
+    "ratio": 35.849485312116606,
+    "is_intentional": true,
+    "has_stripes": false,
+    "materials_used": [
+      "GHS2"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "GHS3.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/GHS3.png",
+    "ratio": 110.83895395544394,
+    "is_intentional": true,
+    "has_stripes": false,
+    "materials_used": [
+      "GHS3"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "GachLatSan.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/GachLatSan.png",
+    "ratio": 300.8540602825461,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": []
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "GachLatSan60.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/GachLatSan60.png",
+    "ratio": 186.58392958719108,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": [
+      "SanBanCong",
+      "SanHanhLang",
+      "SanPhongHoaChat",
+      "SanPhongLab",
+      "T2_SanHanhLangDong",
+      "T2_SanHanhLangT2",
+      "T2_SanKho",
+      "T2_SanPhanTu"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "LamGoSoi.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/LamGoSoi.png",
+    "ratio": 41353.515487000564,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": [
+      "OpLamGo"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "LuoiBanAo.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/LuoiBanAo.png",
+    "ratio": 100.70117399918529,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": [
+      "MatBanAo"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "MachDien.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/MachDien.png",
+    "ratio": 134.01740954122394,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": [
+      "DaiMachDien13",
+      "DaiMachDien27",
+      "DaiMachDien39",
+      "DaiMachDien53",
+      "TuongNhanXanh"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "NenManHinh.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/NenManHinh.png",
+    "ratio": 41202.35128395124,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": [
+      "NoiDungManHinh"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "Poster0.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/Poster0.png",
+    "ratio": 254.14911062395302,
+    "is_intentional": true,
+    "has_stripes": false,
+    "materials_used": [
+      "Poster0"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "Poster1.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/Poster1.png",
+    "ratio": 64.13541791218209,
+    "is_intentional": true,
+    "has_stripes": false,
+    "materials_used": [
+      "Poster1"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "Poster2.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/Poster2.png",
+    "ratio": 85.96326386204119,
+    "is_intentional": true,
+    "has_stripes": false,
+    "materials_used": [
+      "Poster2"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "Poster3.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/Poster3.png",
+    "ratio": 287.3097016920552,
+    "is_intentional": true,
+    "has_stripes": false,
+    "materials_used": [
+      "Poster3"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "Poster4.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/Poster4.png",
+    "ratio": 69.01064565974814,
+    "is_intentional": true,
+    "has_stripes": false,
+    "materials_used": [
+      "Poster4"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "Poster5.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/Poster5.png",
+    "ratio": 88.06851604294293,
+    "is_intentional": true,
+    "has_stripes": false,
+    "materials_used": [
+      "Poster5"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "Poster6.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/Poster6.png",
+    "ratio": 224.6184488993514,
+    "is_intentional": true,
+    "has_stripes": false,
+    "materials_used": [
+      "Poster6"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "SanLoiDi.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/SanLoiDi.png",
+    "ratio": 365.75649490499455,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": [
+      "VachDanHuong"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "SocMau.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/SocMau.png",
+    "ratio": 19318.750824707164,
+    "is_intentional": true,
+    "has_stripes": false,
+    "materials_used": [
+      "DaiSocMau"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "T2_AnhGel.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/T2_AnhGel.png",
+    "ratio": 133.64698806440248,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": [
+      "T2_ManHinhAnhGel"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "T2_ApPhichADN.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/T2_ApPhichADN.png",
+    "ratio": 319.67653901980304,
+    "is_intentional": true,
+    "has_stripes": false,
+    "materials_used": [
+      "T2_ApPhichADN"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "T2_ApPhichCaySuSong.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/T2_ApPhichCaySuSong.png",
+    "ratio": 258.5970156472789,
+    "is_intentional": true,
+    "has_stripes": false,
+    "materials_used": [
+      "T2_ApPhichCaySuSong"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "T2_ApPhichChuKy.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/T2_ApPhichChuKy.png",
+    "ratio": 230.92901661238014,
+    "is_intentional": true,
+    "has_stripes": false,
+    "materials_used": [
+      "T2_ApPhichChuKy"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "T2_ApPhichTeBao.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/T2_ApPhichTeBao.png",
+    "ratio": 153.73561716477337,
+    "is_intentional": true,
+    "has_stripes": false,
+    "materials_used": [
+      "T2_ApPhichTeBao"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "T2_BieuTuongBiohazard.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/T2_BieuTuongBiohazard.png",
+    "ratio": 54.1060926315845,
+    "is_intentional": true,
+    "has_stripes": false,
+    "materials_used": [
+      "T2_BienBiohazard"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "T2_ManGiaiPhau.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/T2_ManGiaiPhau.png",
+    "ratio": 1884.8664614499949,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": [
+      "T2_ManHinhGiaiPhau"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "VachBuret.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/VachBuret.png",
+    "ratio": 4263.254863189729,
+    "is_intentional": true,
+    "has_stripes": false,
+    "materials_used": [
+      "VachChiaBuret"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "VanGoSoi.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/VanGoSoi.png",
+    "ratio": 401.9610813996977,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": [
+      "CanhTu",
+      "T2_ToiGian_GoSoi",
+      "T2_ToiGian_MatGhe"
+    ]
+  },
+  {
+    "folder": "Assets/Lab/Textures",
+    "filename": "VanGoTran.png",
+    "path": "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Textures/VanGoTran.png",
+    "ratio": 401.9610813996977,
+    "is_intentional": false,
+    "has_stripes": true,
+    "materials_used": [
+      "TamTranGo"
+    ]
+  }
+]
