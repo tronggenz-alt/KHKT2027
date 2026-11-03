@@ -17,7 +17,9 @@ namespace Khkt.Rendering.HD
     {
         public static HdPerformanceHud Instance { get; private set; }
 
-        public bool ShowHud = true;
+        public bool ShowHud = false;
+
+        bool threeFingerGestureActive = false;
 
         float updateInterval = 0.4f;
         float timeAccum = 0f;
@@ -62,19 +64,37 @@ namespace Khkt.Rendering.HD
                 ShowHud = !ShowHud;
             }
 
-            // Chạm 3 ngón tay cùng lúc trên màn hình iPad để toggle HUD
-            var screen = UnityEngine.InputSystem.Touchscreen.current;
-            if (screen != null)
+            // Chạm 3 ngón tay cùng lúc trên màn hình iPad để bật/tắt HUD
+            bool threeFingerTap = false;
+            if (UnityEngine.Input.touchCount >= 3)
             {
-                int pressedCount = 0;
-                foreach (var t in screen.touches)
+                threeFingerTap = true;
+            }
+            else
+            {
+                var screen = UnityEngine.InputSystem.Touchscreen.current;
+                if (screen != null)
                 {
-                    if (t.isInProgress) pressedCount++;
+                    int pressedCount = 0;
+                    foreach (var t in screen.touches)
+                    {
+                        if (t.isInProgress) pressedCount++;
+                    }
+                    if (pressedCount >= 3) threeFingerTap = true;
                 }
-                if (pressedCount >= 3 && Time.frameCount % 30 == 0)
+            }
+
+            if (threeFingerTap)
+            {
+                if (!threeFingerGestureActive)
                 {
                     ShowHud = !ShowHud;
+                    threeFingerGestureActive = true;
                 }
+            }
+            else
+            {
+                threeFingerGestureActive = false;
             }
 
             timeAccum += Time.unscaledDeltaTime;
@@ -133,8 +153,9 @@ namespace Khkt.Rendering.HD
 
             float w = 270f;
             float h = 195f;
-            float x = (Screen.width / scale) - w - 15f;
-            float y = 15f;
+            // Dời sang góc trên bên trái để không che nút Menu và Trợ giúp ở góc trên bên phải
+            float x = 20f;
+            float y = 20f;
 
             GUILayout.BeginArea(new Rect(x, y, w, h), boxStyle);
 
