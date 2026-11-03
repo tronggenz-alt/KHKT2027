@@ -330,7 +330,7 @@ namespace Khkt.EditorTools
                 float z = tL * length;
 
                 // Biên dạng chiếc lá: thon ở cuống, nở rộng tự nhiên ở 1/3 thân lá, thon nhọn ở chóp
-                float wCurve = Mathf.Pow(Mathf.Sin(tL * Mathf.PI), 0.7f) * Mathf.Lerp(1.15f, 0.85f, tL);
+                float wCurve = Mathf.Pow(Mathf.Max(0f, Mathf.Sin(tL * Mathf.PI)), 0.7f) * Mathf.Lerp(1.15f, 0.85f, tL);  // Sin(PI) của float hơi âm: Pow ra NaN
                 float curW = width * wCurve;
                 float droop = curvature * tL * tL;
 
