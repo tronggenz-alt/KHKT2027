@@ -14,14 +14,14 @@ namespace Khkt.EditorTools
     /// </summary>
     public static class IosBuild
     {
-        const string DisplayName = "VERA Lab HD";
-        const string BundleId = "com.trantrong.veralab.hd";
+        const string DisplayName = "VERA Lab";
+        const string BundleId = "com.trantrong.veralab";
         const string TeamId = "29263U3K84";  // nhóm cá nhân trong Xcode (Settings > Accounts)
         const string MeshPath = "Assets/Lab/Tang2/GiaiPhau/BP3D2_xuong.asset";
 
         [MenuItem("KHKT/Xuất iPad (Xcode)", priority = 100)]
-        public static void Device() => Run(iOSSdkVersion.DeviceSDK, "Builds/iOS_HD");
-        public static void Simulator() => Run(iOSSdkVersion.SimulatorSDK, "Builds/iOS_HD-Simulator");
+        public static void Device() => Run(iOSSdkVersion.DeviceSDK, "Builds/iOS");
+        public static void Simulator() => Run(iOSSdkVersion.SimulatorSDK, "Builds/iOS-Simulator");
 
         static void Run(iOSSdkVersion sdk, string outDir)
         {

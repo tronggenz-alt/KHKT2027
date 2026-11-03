@@ -131,7 +131,7 @@ namespace Khkt.Rendering.HD
             GUILayout.BeginArea(new Rect(x, y, w, h), boxStyle);
 
             GUILayout.BeginHorizontal();
-            GUILayout.Label("VERA LAB HD - PERFORMANCE", titleStyle);
+            GUILayout.Label("VERA LAB - PERFORMANCE", titleStyle);
             if (GUILayout.Button("✕", GUILayout.Width(24), GUILayout.Height(18)))
             {
                 ShowHud = false;
