@@ -339,17 +339,17 @@ namespace Khkt.Demo
             helpText = helpBtn.GetComponentInChildren<Text>();
 
             // Cụm đổi trạm: ◀ Đổi khu thí nghiệm ▶ (nút cao 65)
-            var stBox = Panel(safeAreaRect, "StationBar", new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -20), new Vector2(320, 65), glassMat);
+            var stBox = Panel(safeAreaRect, "StationBar", new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -20), new Vector2(356, 75), glassMat);
             var sp = stBox.transform;
-            MakeTapTextButton(sp, "Trạm trước", "◀", new Vector2(6, 4), new Vector2(54, 55), () =>
+            MakeTapTextButton(sp, "Trạm trước", "◀", new Vector2(6, 5), new Vector2(66, 65), () =>
             {
                 PadInput.TouchStationStep = -1;
             });
-            MakeTapTextButton(sp, "Chọn trạm", "Đổi khu thí nghiệm", new Vector2(68, 4), new Vector2(184, 55), () =>
+            MakeTapTextButton(sp, "Chọn trạm", "Đổi khu thí nghiệm", new Vector2(78, 5), new Vector2(200, 65), () =>
             {
                 stationPanel.SetActive(!stationPanel.activeSelf);
             });
-            MakeTapTextButton(sp, "Trạm sau", "▶", new Vector2(260, 4), new Vector2(54, 55), () =>
+            MakeTapTextButton(sp, "Trạm sau", "▶", new Vector2(284, 5), new Vector2(66, 65), () =>
             {
                 PadInput.TouchStationStep = 1;
             });
@@ -357,34 +357,34 @@ namespace Khkt.Demo
 
         void BuildMenuPanel()
         {
-            var menuBox = Panel(safeAreaRect, "MenuPanel", new Vector2(1, 1), new Vector2(1, 1), new Vector2(-40, -115), new Vector2(300, 310), glassMat, 1.2f);
+            var menuBox = Panel(safeAreaRect, "MenuPanel", new Vector2(1, 1), new Vector2(1, 1), new Vector2(-40, -115), new Vector2(300, 360), glassMat, 1.2f);
             menuPanel = menuBox.gameObject;
             var mp = menuBox.transform;
 
             Label(mp, "Title", "TÙY CHỌN NHANH", 16, Accent, true, TextAnchor.UpperLeft, new Vector2(16, -14), new Vector2(260, 24));
 
             string gStr = PadInput.UsingTouch ? "Đồ thị pH" : "Đồ thị pH (G)";
-            MakeTapTextButton(mp, "Đồ thị", gStr, new Vector2(16, -46), new Vector2(268, 54), () =>
+            MakeTapTextButton(mp, "Đồ thị", gStr, new Vector2(16, -46), new Vector2(268, 65), () =>
             {
                 PadInput.ToggleGraphPressed = true;
                 menuPanel.SetActive(false);
             });
 
             string rStr = PadInput.UsingTouch ? "Lượt chuẩn độ mới" : "Làm lượt chuẩn độ mới (R)";
-            MakeTapTextButton(mp, "Lần mới", rStr, new Vector2(16, -108), new Vector2(268, 54), () =>
+            MakeTapTextButton(mp, "Lần mới", rStr, new Vector2(16, -118), new Vector2(268, 65), () =>
             {
                 PadInput.NewRunPressed = true;
                 menuPanel.SetActive(false);
             });
 
             string f7Str = PadInput.UsingTouch ? "Đổi giao diện lab" : "Đổi chủ đề phòng lab (F7)";
-            MakeTapTextButton(mp, "Đổi chủ đề", f7Str, new Vector2(16, -170), new Vector2(268, 54), () =>
+            MakeTapTextButton(mp, "Đổi chủ đề", f7Str, new Vector2(16, -190), new Vector2(268, 65), () =>
             {
                 PadInput.NextThemePressed = true;
             });
 
-            sensText = Label(mp, "SensLabel", "Độ nhạy vuốt nhìn: 0.18", 13, Dim, false, TextAnchor.UpperLeft, new Vector2(16, -232), new Vector2(268, 20));
-            var sRt = Rect(mp, "Slider", new Vector2(0, 1), new Vector2(0, 1), new Vector2(16, -256), new Vector2(268, 30));
+            sensText = Label(mp, "SensLabel", "Độ nhạy vuốt nhìn: 0.18", 13, Dim, false, TextAnchor.UpperLeft, new Vector2(16, -266), new Vector2(268, 20));
+            var sRt = Rect(mp, "Slider", new Vector2(0, 1), new Vector2(0, 1), new Vector2(16, -292), new Vector2(268, 30));
             sensSlider = sRt.gameObject.AddComponent<Slider>();
             sensSlider.minValue = 0.05f;
             sensSlider.maxValue = 0.40f;
@@ -400,12 +400,12 @@ namespace Khkt.Demo
 
         void BuildStationPanel()
         {
-            var box = Panel(safeAreaRect, "StationPanel", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(560, 480), glassMat, 1.2f);
+            var box = Panel(safeAreaRect, "StationPanel", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(600, 560), glassMat, 1.2f);
             stationPanel = box.gameObject;
             var bp = box.transform;
 
             Label(bp, "Title", "CHỌN KHU THÍ NGHIỆM", 18, Accent, true, TextAnchor.UpperLeft, new Vector2(24, -18), new Vector2(340, 28));
-            MakeTapTextButton(bp, "Đóng", "✕", new Vector2(494, -12), new Vector2(54, 50), () => stationPanel.SetActive(false));
+            MakeTapTextButton(bp, "Đóng", "✕", new Vector2(520, -10), new Vector2(66, 65), () => stationPanel.SetActive(false));
 
             string[] stNames = {
                 "1. Bàn chuẩn độ 1", "2. Bàn chuẩn độ 2", "3. Bàn chuẩn độ 3", "4. Bàn chuẩn độ 4",
@@ -416,9 +416,9 @@ namespace Khkt.Demo
             for (int i = 0; i < stNames.Length; i++)
             {
                 int idx = i;
-                float x = 24 + (i % 2) * 260;
-                float y = -62 - (i / 2) * 64;
-                MakeTapTextButton(bp, "Trạm_" + i, stNames[i], new Vector2(x, y), new Vector2(248, 54), () =>
+                float x = 24 + (i % 2) * 280;
+                float y = -64 - (i / 2) * 76;
+                MakeTapTextButton(bp, "Trạm_" + i, stNames[i], new Vector2(x, y), new Vector2(266, 66), () =>
                 {
                     PadInput.StationJump = idx;
                     stationPanel.SetActive(false);

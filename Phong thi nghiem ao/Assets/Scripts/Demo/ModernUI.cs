@@ -258,7 +258,7 @@ namespace Khkt.Demo
             Label(chip.transform, "Chữ", chipHelpText, 16, Dim, false, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(150, 44));
             var img = Panel(root, "Trợ giúp", new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(20, 0), new Vector2(820, 650), glassMat, 1.3f);
             helpPanel = img.gameObject;
-            MakeButton(img.transform, "Đóng trợ giúp", "✕", new Vector2(750, -14), new Vector2(50, 44), () => helpPanel.SetActive(false));
+            MakeButton(img.transform, "Đóng trợ giúp", "✕", new Vector2(740, -10), new Vector2(66, 65), () => helpPanel.SetActive(false));
             
             bool usingTouch = Khkt.Input.PadInput.UsingTouch;
             string titleLeft = usingTouch ? "Điều khiển cảm ứng iPad" : "Điều khiển bàn phím & chuột";
