@@ -1,0 +1,37 @@
+{
+  "01_goc": {
+    "mean_lum": 0.5448,
+    "pct_den_below_0.05": 0.039,
+    "pct_toi_below_0.15": 4.951,
+    "std_lum": 0.1769,
+    "diff_from_goc_255": 0.0
+  },
+  "02_tat_ssao": {
+    "mean_lum": 0.5303,
+    "pct_den_below_0.05": 0.0,
+    "pct_toi_below_0.15": 0.001,
+    "std_lum": 0.1408,
+    "diff_from_goc_255": 33.91
+  },
+  "03_tat_sun": {
+    "mean_lum": 0.6005,
+    "pct_den_below_0.05": 0.0,
+    "pct_toi_below_0.15": 0.608,
+    "std_lum": 0.1247,
+    "diff_from_goc_255": 34.21
+  },
+  "04_tat_add": {
+    "mean_lum": 0.518,
+    "pct_den_below_0.05": 0.0,
+    "pct_toi_below_0.15": 1.018,
+    "std_lum": 0.149,
+    "diff_from_goc_255": 30.18
+  },
+  "05_bias": {
+    "mean_lum": 0.518,
+    "pct_den_below_0.05": 0.0,
+    "pct_toi_below_0.15": 1.018,
+    "std_lum": 0.149,
+    "diff_from_goc_255": 30.18
+  }
+}

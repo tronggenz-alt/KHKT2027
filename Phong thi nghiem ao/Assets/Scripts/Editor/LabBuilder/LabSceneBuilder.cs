@@ -618,8 +618,8 @@ namespace Khkt.EditorTools
             sun.color = new Color(1f, 0.95f, 0.88f);
             sun.intensity = 1.6f;
             sun.shadows = LightShadows.Soft;
-            sun.shadowBias = 0.05f;
-            sun.shadowNormalBias = 0.2f;
+            sun.shadowBias = 0.025f;
+            sun.shadowNormalBias = 0.12f;
             RenderSettings.sun = sun;
 
             // Ánh sáng môi trường chuẩn PBR HD: trần đạt 0.55-0.75, mặt bàn đạt 0.60-0.80
