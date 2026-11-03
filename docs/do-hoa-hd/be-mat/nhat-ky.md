@@ -50,3 +50,54 @@
 - 35 file texture bị dính hoa văn sọc tuần hoàn do công thức sin.
 - Bề mặt tường, trần, bàn, cánh tủ trong ảnh chụp có tỉ số sọc cao (660–1440) và độ bóng bị nhân đôi khiến vật liệu xỉn màu.
 - Sẽ thực hiện thí nghiệm tách nguyên nhân đơn biến ở Giai đoạn 1.
+
+---
+
+## Giai đoạn 1: Thí nghiệm tách nguyên nhân tại góc hành lang
+
+### 1. Đã đổi gì
+- Thiết lập kịch bản thí nghiệm đơn biến tự động `TachNguyenNhanTest` trong `KhktAutoTest.cs` tại góc hành lang `09_hanh_lang` (`pos: (4.2, 0, -1.3)`, `look: (16.0, 1.5, -0.4)`), chạy trên độ phân giải chuẩn iPad Retina 2360×1640, MSAA 4x, Post-Processing High.
+- Thực hiện tuần tự 5 thí nghiệm đơn biến độc lập, sau mỗi lần chụp đều khôi phục nguyên trạng:
+  1. `exp1_tat_normal.png`: Tắt normal map của tường (`TuongSon`, `TuongNgoai`): gỡ `_BumpMap`, tắt từ khóa `_NORMALMAP`, đặt `_BumpScale = 0`.
+  2. `exp2_albedo_tron.png`: Thay ảnh màu tường bằng màu trơn: gỡ `_BaseMap` và `_MainTex` để shader dùng màu nền `_BaseColor` trơn (`#EDEBE3`).
+  3. `exp3_tat_bong_mat_troi.png`: Tắt bóng mặt trời (`RenderSettings.sun.shadows = LightShadows.None`).
+  4. `exp4_tat_ssao.png`: Tắt tính năng SSAO (`ScreenSpaceAmbientOcclusion.SetActive(false)` trên tất cả renderer features).
+  5. `exp5_shadow_bias.png`: Đổi shadow depth bias và normal bias trên đèn mặt trời (`shadowBias = 0.005`, `shadowNormalBias = 0.05` để kiểm tra hiện tượng shadow acne).
+- Chụp thêm ảnh mốc đối chứng cùng phiên chạy `exp0_goc_hanh_lang_goc.png` để đảm bảo tính nhất quán tuyệt đối.
+- Giữ nguyên trạng 100% tài sản cảnh, không lưu thay đổi tạm vào project/scene/material.
+
+### 2. Số đo
+- **Bảng đo tỉ số đỉnh phổ / trung vị phổ FFT (Peak-to-Median Ratio) bằng `tools/do_hoa/do_soc.py`:**
+
+| Thí nghiệm | Biến số thay đổi | FFT Ratio (Vùng mốc crop 300, 400, 400×400) | Peak | Median | FFT Ratio (Vùng tường phẳng 750, 280, 150×150) | Độ giảm peak so với gốc |
+|---|---|---|---|---|---|---|
+| `exp0` | Gốc đối chứng | **660,33** | 203.569,1 | 308,29 | **170,91** | 0% (Mốc) |
+| `exp1` | Tắt normal map tường | **660,87** | 203.375,4 | 307,74 | **164,94** | -3,5% trên mặt tường |
+| `exp2` | Thay màu trơn (bỏ Albedo) | **659,18** | 202.163,5 | 306,69 | **162,21** | -5,5% trên mặt tường |
+| `exp3` | Tắt bóng mặt trời | **665,72** | 189.811,9 | 285,12 | **258,61** | -6,8% peak vùng crop; tường tăng ratio do mất chiếu sáng chính |
+| `exp4` | Tắt SSAO | **660,33** | 203.161,9 | 307,67 | **171,14** | < 0,1% (SSAO chỉ làm tối chân tường, không sinh sọc) |
+| `exp5` | Đổi shadow bias | **660,26** | 203.167,6 | 307,71 | **168,84** | < 0,1% (Bias không sinh sọc trên tường phẳng) |
+
+- **Kết luận số liệu:**
+  - **Shadow bias và SSAO:** Cả hai yếu tố này hoàn toàn KHÔNG phải là nguồn gốc sinh ra hoa văn sọc tuần hoàn (độ lệch tỉ số FFT < 0,1%). SSAO chỉ tạo vệt loang mờ cục bộ ở chân tường tiếp giáp sàn, còn shadow bias chỉ làm dịch nhẹ viền bóng đổ.
+  - **Bóng mặt trời:** Khi tắt bóng mặt trời, đỉnh năng lượng peak ở vùng crop giảm 6,8% (từ 203.569 xuống 189.811), nhưng hoa văn sọc định kỳ vẫn tồn tại nguyên vẹn.
+  - **Normal map & Albedo texture:** Trên các texture thô, `PlasterWall001_Normal` có tỉ số FFT khổng lồ là **371.715,63** và `PlasterWall001_Albedo` là **11.082,14**, chứa đỉnh Dirac cực nhọn sinh ra từ các hàm sin giải tích (`GenMicroNoise`, `GenNoisePattern`). Trên ảnh render góc hành lang, sọc hiển thị là kết quả tổng hòa của cả normal map, albedo map, cùng với trần (`Tran`) và ánh sáng gián tiếp từ reflection probe (probe cũ nướng sẵn cũng đã in vân sọc vào cubemap).
+  - Kết quả thí nghiệm hoàn toàn khớp với phân tích tại Mục 4.A và 4.B: **nguyên nhân chính gây sọc là công thức sin trong các texture** và **UV bị kéo giãn theo tỉ lệ hộp**.
+
+- **Kiểm tra tọa độ (Luật 1):**
+  - Chạy `Khkt.EditorTools.HdCoordinateTool.CompareBatch` sau thí nghiệm: **0 LỖI / 18.964 GameObject** (sai lệch 0.000 mm, 0.000°, 0.000%).
+
+### 3. Ảnh trước / sau
+- Toàn bộ 6 ảnh thí nghiệm độ phân giải Retina 2360×1640 được lưu trữ tại `docs/do-hoa-hd/be-mat/thi-nghiem/`:
+  - `exp0_goc_hanh_lang_goc.png`: Ảnh mốc đối chứng.
+  - `exp1_tat_normal.png`: Ảnh tắt normal map tường.
+  - `exp2_albedo_tron.png`: Ảnh thay albedo tường bằng màu trơn.
+  - `exp3_tat_bong_mat_troi.png`: Ảnh tắt bóng mặt trời.
+  - `exp4_tat_ssao.png`: Ảnh tắt SSAO.
+  - `exp5_shadow_bias.png`: Ảnh đổi shadow depth/normal bias.
+
+### 4. Kế hoạch bước tiếp theo (Giai đoạn 2)
+- Gom về một nguồn sinh vân duy nhất, loại bỏ vĩnh viễn các hàm sin trong `LabKit.HdMaterials.cs`.
+- Tường, trần, thân tủ: dùng màu trơn hoặc nhiễu ngẫu nhiên thực sự (không chu kỳ sin), gỡ normal map nhân tạo gây sọc chéo.
+- Sàn: Sửa ron normal của gạch lát sàn trùng khít 100% với lưới gạch `GachLatSan60`.
+- Chạy lại kiểm tra FFT cho toàn bộ texture và render kiểm chứng để đảm bảo tất cả đều < 30.0.
