@@ -654,9 +654,71 @@ namespace Khkt.Demo.Bio
                 _ => "5: Màn chắn sáng (Iris)"
             };
             double cellUm = ComputeMeasuredCellSizeUm();
+            string keyGuide = Khkt.Input.PadInput.UsingTouch
+                ? "Chạm nút để đổi núm vặn hoặc điều chỉnh, [✕ Thoát] để rời thị kính"
+                : "Phím 1..5 đổi núm, Con lăn vặn, M: Thước trắc vi, N: Chú thích, Esc: Thoát";
             string footer = $"Phóng đại: {BioFeedback.FormatVi(CurrentMagnification, "0")}× | Thị trường: {BioFeedback.FormatVi(CurrentFovMm, "0.##")} mm | Kích thước tế bào đo được: ~{BioFeedback.FormatVi(cellUm, "0")} µm\n" +
-                            $"Đang chọn [{knobName}] (Phím 1..5 đổi núm, Con lăn vặn, M: Thước trắc vi, N: Chú thích, Esc: Thoát)";
-            GUI.Box(new Rect((Screen.width - 760f) * 0.5f, Screen.height - 68f, 760f, 52f), footer, hudStyle);
+                            $"Đang chọn [{knobName}] ({keyGuide})";
+            GUI.Box(new Rect((Screen.width - 760f) * 0.5f, Screen.height - 72f, 760f, 56f), footer, hudStyle);
+
+            if (Khkt.Input.PadInput.UsingTouch)
+            {
+                float btnW = 110f, btnH = 46f;
+                float startX = (Screen.width - 5 * (btnW + 8f)) * 0.5f;
+                float topY = 20f;
+                string[] kNames = { "Ốc sơ cấp", "Ốc vi cấp", "Dịch mẫu", "Độ sáng", "Màn chắn" };
+                for (int ki = 0; ki < 5; ki++)
+                {
+                    if (GUI.Button(new Rect(startX + ki * (btnW + 8f), topY, btnW, btnH), kNames[ki]))
+                    {
+                        selectedEyepieceKnob = ki + 1;
+                        BioFeedback.PlayClick();
+                    }
+                }
+
+                // Nút vặn - và + lớn bên phải
+                if (GUI.Button(new Rect(Screen.width - 150f, Screen.height * 0.5f - 60f, 130f, 54f), "▲ Tăng (+)"))
+                {
+                    ApplyEyepieceAdjustment(1);
+                }
+                if (GUI.Button(new Rect(Screen.width - 150f, Screen.height * 0.5f + 14f, 130f, 54f), "▼ Giảm (-)"))
+                {
+                    ApplyEyepieceAdjustment(-1);
+                }
+
+                // Nút thước trắc vi và chú thích
+                if (GUI.Button(new Rect(20f, topY, 110f, btnH), showMicrometerReticle ? "Ẩn thước" : "Hiện thước"))
+                {
+                    showMicrometerReticle = !showMicrometerReticle;
+                    texDirty = true;
+                    BioFeedback.PlayClick();
+                }
+                if (GUI.Button(new Rect(138f, topY, 110f, btnH), showAnnotations ? "Ẩn nhãn" : "Hiện nhãn"))
+                {
+                    showAnnotations = !showAnnotations;
+                    BioFeedback.PlayClick();
+                }
+
+                // Nút thoát thị kính
+                if (GUI.Button(new Rect(Screen.width - 130f, topY, 110f, btnH), "✕ Thoát"))
+                {
+                    ToggleEyepieceView();
+                }
+            }
+        }
+
+        void ApplyEyepieceAdjustment(int dir)
+        {
+            switch (selectedEyepieceKnob)
+            {
+                case 1: AdjustCoarseFocus(dir * 0.1f); break;
+                case 2: AdjustFineFocus(dir * 2f); break;
+                case 3: AdjustStageXY(dir * 0.5f, 0f); break;
+                case 4: brightness = Mathf.Clamp01(brightness + dir * 0.05f); texDirty = true; break;
+                case 5: irisOpen = Mathf.Clamp01(irisOpen + dir * 0.05f); texDirty = true; break;
+            }
+            RenderViewportIfNeeded(false);
+            BioFeedback.PlayClick();
         }
     }
 }

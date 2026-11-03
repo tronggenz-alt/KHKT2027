@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Khkt.Environment;
+using Khkt.Input;
 using Khkt.Interaction;
 using Khkt.Simulation;
 using UnityEngine;
@@ -46,17 +47,18 @@ namespace Khkt.Demo
             var p = panel.transform;
             Label(p, "Tiêu đề", "Robot trợ lý", 22, Ink, true, TextAnchor.UpperLeft, new Vector2(24, -18), new Vector2(300, 30));
             status = Label(p, "Trạng thái", "", 13, Dim, false, TextAnchor.UpperLeft, new Vector2(26, -50), new Vector2(470, 20));
-            MakeButton(p, "Đóng", "Đóng  T", new Vector2(-110, -18), new Vector2(100, 44), Close, false, 14, new Vector2(1, 1));
+            string closeChatLabel = PadInput.UsingTouch ? "Đóng ✕" : "Đóng  T";
+            MakeButton(p, "Đóng", closeChatLabel, new Vector2(-120, -18), new Vector2(110, 48), Close, false, 14, new Vector2(1, 1));
             log = Label(p, "Hội thoại", "", 15, Ink, false, TextAnchor.LowerLeft, new Vector2(24, -78), new Vector2(472, 330));
             log.verticalOverflow = VerticalWrapMode.Truncate;
             string[] quick = { "Hiện tượng vừa rồi là gì?", "Làm mẫu chuẩn độ", "Thí nghiệm mẫu", "Đo pH bình này", "Lấy NaOH ra bàn", "Dọn bàn giúp mình" };
             for (int i = 0; i < quick.Length; i++)
             {
                 string q = quick[i];
-                MakeButton(p, "Gợi ý", q, new Vector2(24 + (i % 3) * 160, -418 - (i / 3) * 38), new Vector2(152, 32), () => Send(q), false, 13);
+                MakeButton(p, "Gợi ý", q, new Vector2(24 + (i % 3) * 160, -418 - (i / 3) * 44), new Vector2(152, 40), () => Send(q), false, 13);
             }
-            input = MakeInput(p, "Ô nhập", "Hỏi hoặc ra lệnh cho robot...", new Vector2(24, -500), new Vector2(380, 44), 16);
-            MakeButton(p, "Gửi", "Gửi", new Vector2(414, -500), new Vector2(82, 44), () => Send(input.text), true);
+            input = MakeInput(p, "Ô nhập", "Hỏi hoặc ra lệnh cho robot...", new Vector2(24, -506), new Vector2(366, 48), 16);
+            MakeButton(p, "Gửi", "Gửi", new Vector2(400, -506), new Vector2(96, 48), () => Send(input.text), true);
             panel.SetActive(false);
 
             // Bong bóng lời robot khi khung trò chuyện đang đóng
@@ -68,7 +70,10 @@ namespace Khkt.Demo
             bubbleText = Label(bubble, "Chữ", "", 15, Ink, false, TextAnchor.UpperLeft, new Vector2(18, -30), new Vector2(424, 60));
 
             if (LabRobot.Instance != null) LabRobot.Instance.Spoke += OnRobotSpoke;
-            Add("Robot", "Chào bạn! Mình làm mẫu chuẩn độ, 10 thí nghiệm mẫu, đo pH, đun, lắc, ly tâm, phân tích mẫu, mang hóa chất, dọn bàn, xử lý sự cố. Nhấn T để trò chuyện.");
+            string introChat = PadInput.UsingTouch
+                ? "Chào bạn! Mình làm mẫu chuẩn độ, thí nghiệm mẫu, đo pH, đun, lắc, ly tâm, phân tích mẫu, mang hóa chất, dọn bàn, xử lý sự cố. Chạm biểu tượng Robot để trò chuyện."
+                : "Chào bạn! Mình làm mẫu chuẩn độ, 10 thí nghiệm mẫu, đo pH, đun, lắc, ly tâm, phân tích mẫu, mang hóa chất, dọn bàn, xử lý sự cố. Nhấn T để trò chuyện.";
+            Add("Robot", introChat);
         }
 
         void OnDestroy()

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Khkt.Environment;
+using Khkt.Environment.Tang2;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -8,8 +9,11 @@ using static Khkt.Demo.GlassKit;
 namespace Khkt.Demo
 {
     /// <summary>
-    /// Màn hình giới thiệu và menu (Esc): chọn Thí nghiệm tự do, Chuẩn độ (tự chọn chất cần chuẩn, dung dịch chuẩn,
-    /// chỉ thị, nồng độ) hoặc Khám phá phòng lab. Chuẩn độ là tự nguyện: chế độ tự do vẫn có sẵn bộ chuẩn độ.
+    /// Màn hình giới thiệu, chọn chế độ và cài đặt hệ thống VERA Lab HD (Giai đoạn 5):
+    ///   • Cập nhật thương hiệu toàn diện: VERA Lab Hóa - Sinh 2 tầng, 720 hóa chất, 108 dụng cụ, 14 máy.
+    ///   • Hướng dẫn cảm ứng chuyên biệt cho iPad (loại bỏ phím chuột WASD, Esc khi chạy touch).
+    ///   • Bổ sung tùy chọn Cài đặt: Âm thanh giao diện, Giảm chuyển động (Reduced Motion), Giảm độ trong suốt kính.
+    ///   • 100% nút bấm đạt chuẩn Apple Touch Target (>= 44x44 pt).
     /// </summary>
     public class IntroScreen : MonoBehaviour
     {
@@ -21,7 +25,8 @@ namespace Khkt.Demo
         public bool IsOpen { get; private set; }
 
         GameObject root, home, setup, settings;
-        Text continueText, setupNote, aiSaveStatus;
+        Text continueText, setupNote, aiSaveStatus, guideText;
+        Text soundStatusText, motionStatusText, transStatusText;
         InputField aiUrlInput;
         bool captured, started;
         string analyte = "HCl", titrant = "NaOH", indicator = "pp";
@@ -38,84 +43,162 @@ namespace Khkt.Demo
             root = dimRt.gameObject;
 
             // ----- Trang chính -----
-            var hImg = Panel(dimRt, "Trang chính", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 0), new Vector2(1180, 700), glass, 1.1f);
+            var hImg = Panel(dimRt, "Trang chính", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 0), new Vector2(1200, 720), glass, 1.1f);
             home = hImg.gameObject;
             var h = home.transform;
-            Label(h, "Nhãn", "KHKT · TRƯỜNG THPT", 15, Accent, true, TextAnchor.UpperLeft, new Vector2(60, -48), new Vector2(600, 24));
-            Label(h, "Tên", "Phòng thí nghiệm Hóa học ảo", 46, Ink, true, TextAnchor.UpperLeft, new Vector2(56, -76), new Vector2(1000, 64));
-            Label(h, "Mô tả", "Thực hành an toàn với 720 hóa chất và 80 dụng cụ trong phòng lab 300 m². Mọi phản ứng được tính bằng bộ máy hóa học "
-                                 + "(pH, kết tủa, khí, oxi hóa - khử, màu); robot AI chú thích hiện tượng và giúp xử lý sự cố.", 18, Dim, false, TextAnchor.UpperLeft,
-                  new Vector2(60, -150), new Vector2(1060, 60));
-            Mode(h, 0, "Thí nghiệm tự do", "Tự lấy hóa chất trong kho, tự trộn, đun, đo. Bộ chuẩn độ vẫn bày sẵn nếu muốn làm.", "Bắt đầu", StartFree, true);
-            Mode(h, 1, "Chuẩn độ", "Tự chọn chất cần chuẩn, dung dịch chuẩn, chỉ thị, nồng độ ẩn hay biết trước. Có chấm kết quả.", "Chọn bài", ShowSetup, false);
-            Mode(h, 2, "Khám phá phòng lab", "Đi một vòng: bàn thí nghiệm, khu thiết bị phân tích, tủ hút, phòng hóa chất 27 kệ.", "Đi tham quan", StartExplore, false);
-            Label(h, "Phím", "<b>Rê chuột</b> nhìn   ·   <b>WASD</b> đi   ·   <b>Chuột trái</b> cầm, dùng   ·   <b>B</b> tra cứu hóa chất   ·   <b>T</b> trợ lý AI   ·   <b>1–9</b> các khu   ·   <b>H</b> trợ giúp   ·   <b>Esc</b> menu",
-                  15, Dim, false, TextAnchor.MiddleCenter, new Vector2(0, -630), new Vector2(1180, 30));
-            MakeButton(h, "Cài đặt", "Cài đặt", new Vector2(-360, -40), new Vector2(150, 44), ShowSettings, false, 15, new Vector2(1, 1));
-            continueText = MakeButton(h, "Tiếp tục", "Tiếp tục", new Vector2(-190, -40), new Vector2(150, 44), Close, false, 15, new Vector2(1, 1)).GetComponentInChildren<Text>();
+            Label(h, "Nhãn", "KHKT · DỰ ÁN NGHIÊN CỨU KHOA HỌC KỸ THUẬT QUỐC GIA", 14, Accent, true, TextAnchor.UpperLeft, new Vector2(60, -42), new Vector2(700, 24));
+            Label(h, "Tên", "VERA Lab — Phòng Thí nghiệm Hóa học & Sinh học Ảo", 38, Ink, true, TextAnchor.UpperLeft, new Vector2(56, -68), new Vector2(1080, 54));
+            Label(h, "Mô tả", "Thực hành khoa học an toàn với 720 hóa chất, 108 dụng cụ sinh học và 14 máy phân tích trong tòa nhà 2 tầng 600 m². Mọi phản ứng hóa - sinh được mô phỏng toán lý chính xác; robot AI hỗ trợ thời gian thực.",
+                  16, Dim, false, TextAnchor.UpperLeft, new Vector2(60, -128), new Vector2(1080, 50));
+
+            Mode(h, 0, "Thí nghiệm tự do", "Tự lấy hóa chất trong kho, pha chế, đun, đo. Bộ chuẩn độ sẵn sàng.", "Bắt đầu", StartFree, true);
+            Mode(h, 1, "Chuẩn độ", "Tự chọn mẫu, dung dịch chuẩn, chỉ thị, nồng độ ẩn hay biết trước.", "Chọn bài", ShowSetup, false);
+            Mode(h, 2, "Khám phá phòng lab", "Tham quan 13 khu: phòng thí nghiệm, tủ hút, kho hóa chất, sinh học tầng 2.", "Tham quan", StartExplore, false);
+
+            guideText = Label(h, "Phím", GetControlGuidanceText(), 15, Dim, false, TextAnchor.MiddleCenter, new Vector2(0, -640), new Vector2(1180, 32));
+
+            MakeButton(h, "Cài đặt", "Cài đặt", new Vector2(-360, -36), new Vector2(160, 54), ShowSettings, false, 15, new Vector2(1, 1));
+            continueText = MakeButton(h, "Tiếp tục", "Tiếp tục", new Vector2(-180, -36), new Vector2(160, 54), Close, false, 15, new Vector2(1, 1)).GetComponentInChildren<Text>();
             continueText.transform.parent.gameObject.SetActive(false);
 
-            // ----- Cài đặt hệ thống (máy chủ AI) -----
-            var setImg = Panel(dimRt, "Cài đặt", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(760, 460), glass, 1.1f);
+            // ----- Cài đặt hệ thống (iPad & AI) -----
+            var setImg = Panel(dimRt, "Cài đặt", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(800, 560), glass, 1.1f);
             settings = setImg.gameObject;
             var st = settings.transform;
-            Label(st, "Tiêu đề", "Cài đặt hệ thống", 28, Ink, true, TextAnchor.UpperLeft, new Vector2(40, -36), new Vector2(600, 36));
-            Label(st, "Nhãn AI", "Địa chỉ máy chủ AI (mô hình ngôn ngữ & robot):", 16, Dim, true, TextAnchor.UpperLeft, new Vector2(40, -96), new Vector2(680, 24));
-            aiUrlInput = MakeInput(st, "Ô nhập AI URL", "http://127.0.0.1:8000", new Vector2(40, -130), new Vector2(680, 44));
-            aiUrlInput.text = PlayerPrefs.GetString(AiClient.ServerUrlPrefKey, "http://127.0.0.1:8000");
-            Label(st, "Ghi chú AI", "Trên iPad: nhập IP của máy Mac chạy máy chủ trong cùng mạng Wi-Fi\n(ví dụ: http://192.168.1.15:8000). Không có máy chủ, phòng lab vẫn hoạt động bình thường.", 14, Dim, false, TextAnchor.UpperLeft, new Vector2(40, -188), new Vector2(680, 50));
-            aiSaveStatus = Label(st, "Trạng thái", "", 15, Good, false, TextAnchor.UpperLeft, new Vector2(40, -250), new Vector2(680, 30));
-            MakeButton(st, "Lưu", "Lưu cài đặt", new Vector2(40, -300), new Vector2(180, 44), SaveSettings, true, 16);
-            MakeButton(st, "Đóng", "Quay lại", new Vector2(240, -300), new Vector2(150, 44), () => { settings.SetActive(false); home.SetActive(true); }, false, 16);
+            Label(st, "Tiêu đề", "Cài đặt & Tùy chọn iPad", 26, Ink, true, TextAnchor.UpperLeft, new Vector2(40, -32), new Vector2(700, 36));
+
+            // Tùy chọn 1: Âm thanh giao diện
+            Label(st, "Nhãn Âm thanh", "Âm thanh phản hồi nút bấm:", 16, Dim, true, TextAnchor.UpperLeft, new Vector2(40, -84), new Vector2(440, 26));
+            soundStatusText = Label(st, "Trạng thái âm thanh", NutHieuUng.SoundEnabled ? "Đang bật" : "Đã tắt", 15, NutHieuUng.SoundEnabled ? Good : Dim, false, TextAnchor.MiddleLeft, new Vector2(500, -84), new Vector2(120, 26));
+            MakeButton(st, "ToggleSound", "Bật / Tắt", new Vector2(-40, -74), new Vector2(140, 48), ToggleSound, false, 15, new Vector2(1, 1));
+
+            // Tùy chọn 2: Giảm chuyển động
+            Label(st, "Nhãn Chuyển động", "Giảm chuyển động (Reduced Motion):", 16, Dim, true, TextAnchor.UpperLeft, new Vector2(40, -144), new Vector2(440, 26));
+            motionStatusText = Label(st, "Trạng thái motion", ReducedMotion.IsEnabled ? "Đang bật" : "Đã tắt", 15, ReducedMotion.IsEnabled ? Good : Dim, false, TextAnchor.MiddleLeft, new Vector2(500, -144), new Vector2(120, 26));
+            MakeButton(st, "ToggleMotion", "Bật / Tắt", new Vector2(-40, -134), new Vector2(140, 48), ToggleMotion, false, 15, new Vector2(1, 1));
+
+            // Tùy chọn 3: Giảm trong suốt
+            Label(st, "Nhãn Kính mờ", "Giảm trong suốt (nền đặc chống lóa):", 16, Dim, true, TextAnchor.UpperLeft, new Vector2(40, -204), new Vector2(440, 26));
+            transStatusText = Label(st, "Trạng thái kính", GlassKit.ReducedTransparency ? "Đang bật" : "Đã tắt", 15, GlassKit.ReducedTransparency ? Good : Dim, false, TextAnchor.MiddleLeft, new Vector2(500, -204), new Vector2(120, 26));
+            MakeButton(st, "ToggleTrans", "Bật / Tắt", new Vector2(-40, -194), new Vector2(140, 48), ToggleTransparency, false, 15, new Vector2(1, 1));
+
+            // Tùy chọn 4: Địa chỉ máy chủ AI
+            Label(st, "Nhãn AI", "Địa chỉ máy chủ AI (trợ lý & robot):", 16, Dim, true, TextAnchor.UpperLeft, new Vector2(40, -264), new Vector2(700, 24));
+            aiUrlInput = MakeInput(st, "Ô nhập AI URL", "http://127.0.0.1:8000", new Vector2(40, -298), new Vector2(540, 48));
+            MakeButton(st, "Lưu AI", "Lưu", new Vector2(600, -298), new Vector2(140, 48), SaveSettings, true, 16);
+            aiSaveStatus = Label(st, "Trạng thái AI", "", 14, Good, false, TextAnchor.UpperLeft, new Vector2(40, -354), new Vector2(700, 24));
+
+            MakeButton(st, "Đóng cài đặt", "Quay lại", new Vector2(-40, -480), new Vector2(160, 54), CloseSettings, false, 16, new Vector2(1, 1));
             settings.SetActive(false);
 
-            // ----- Chọn bài chuẩn độ -----
-            var sImg = Panel(dimRt, "Chọn bài chuẩn độ", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(980, 640), glass, 1.1f);
+            // ----- Bảng chọn bài chuẩn độ -----
+            var sImg = Panel(dimRt, "Chọn bài", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1100, 680), glass, 1.1f);
             setup = sImg.gameObject;
             var s = setup.transform;
-            Label(s, "Tên", "Bài chuẩn độ của bạn", 32, Ink, true, TextAnchor.UpperLeft, new Vector2(48, -36), new Vector2(800, 44));
-            Label(s, "Mô tả", "Chọn chất cần xác định nồng độ, dung dịch chuẩn trên buret và chất chỉ thị. Pipet lấy 25,00 ml mẫu.", 16, Dim, false, TextAnchor.UpperLeft,
-                  new Vector2(50, -86), new Vector2(880, 24));
-            Chips(s, "analyte", "Chất cần chuẩn (trong cốc)", -128, new[] { ("HCl", "HCl"), ("H₂SO₄", "H2SO4"), ("HNO₃", "HNO3"), ("CH₃COOH", "CH3COOH"), ("H₂C₂O₄", "H2C2O4"), ("NaOH", "NaOH"), ("KOH", "KOH"), ("NH₃", "NH3"), ("FeSO₄", "FeSO4") },
-                  v => { analyte = v; AutoPick(); });
-            Chips(s, "titrant", "Dung dịch chuẩn (trên buret)", -218, new[] { ("NaOH 0,1 M", "NaOH"), ("HCl 0,1 M", "HCl"), ("KMnO₄ 0,02 M", "KMnO4") }, v => { titrant = v; AutoPick(); });
-            Chips(s, "indicator", "Chất chỉ thị", -308, new[] { ("Phenolphtalein", "pp"), ("Metyl da cam", "mo"), ("Bromothymol xanh", "btb") }, v => { indicator = v; Refresh(); });
-            Chips(s, "conc", "Nồng độ mẫu", -398, new[] { ("Ẩn (ngẫu nhiên)", "0"), ("0,05 M", "0.05"), ("0,1 M", "0.1"), ("0,2 M", "0.2") },
-                  v => { analyteC = float.Parse(v, System.Globalization.CultureInfo.InvariantCulture); Refresh(); });
-            setupNote = Label(s, "Ghi chú", "", 15, Warn, false, TextAnchor.UpperLeft, new Vector2(50, -490), new Vector2(880, 44));
-            MakeButton(s, "Bắt đầu", "Bắt đầu chuẩn độ", new Vector2(50, -560), new Vector2(260, 48), StartTitration, true, 17);
-            MakeButton(s, "Quay lại", "Quay lại", new Vector2(326, -560), new Vector2(150, 48), () => { setup.SetActive(false); home.SetActive(true); }, false, 16);
+            Label(s, "Tiêu đề", "Chọn bài chuẩn độ", 28, Ink, true, TextAnchor.UpperLeft, new Vector2(40, -32), new Vector2(500, 36));
+            Label(s, "Gợi ý", "Dung dịch chuẩn và chỉ thị sẽ tự động đổi theo chất cần chuẩn, hoặc tự chỉnh theo ý muốn.", 15, Dim, false,
+                  TextAnchor.UpperLeft, new Vector2(40, -70), new Vector2(960, 24));
+
+            Row(s, "Chất cần chuẩn", -106, "analyte", new[] {
+                ("HCl", "Axit clohiđric (mạnh)"),
+                ("CH3COOH", "Axit axetic (yếu)"),
+                ("H2SO4", "Axit sunfuric (2 nấc)"),
+                ("H2C2O4", "Axit oxalic (2 nấc)"),
+                ("NaOH", "Natri hiđroxit (mạnh)"),
+                ("NH3", "Amoniac (yếu)"),
+                ("FeSO4", "Sắt(II) sunfat (oxi hóa - khử)")
+            }, a => { analyte = a; AutoPick(); });
+
+            Row(s, "Dung dịch chuẩn (buret)", -216, "titrant", new[] {
+                ("NaOH", "NaOH 0,1 M"),
+                ("HCl", "HCl 0,1 M"),
+                ("KMnO4", "KMnO₄ 0,02 M (tự chỉ thị)")
+            }, t => { titrant = t; Refresh(); });
+
+            Row(s, "Chỉ thị màu", -326, "indicator", new[] {
+                ("pp", "Phenolphtalein (pH 8,2 – 10,0)"),
+                ("mo", "Metyl da cam (pH 3,1 – 4,4)")
+            }, i => { indicator = i; Refresh(); });
+
+            Row(s, "Nồng độ mẫu", -436, "conc", new[] {
+                ("0.1", "0,100 M (biết trước)"),
+                ("0.05", "0,050 M (biết trước)"),
+                ("0.2", "0,200 M (biết trước)"),
+                ("0", "Ẩn — học sinh tự xác định")
+            }, c => { analyteC = float.Parse(c, System.Globalization.CultureInfo.InvariantCulture); Refresh(); });
+
+            setupNote = Label(s, "Ghi chú bài", "", 15, Accent, false, TextAnchor.UpperLeft, new Vector2(40, -538), new Vector2(1000, 50));
+            MakeButton(s, "Quay lại", "Quay lại", new Vector2(40, -600), new Vector2(160, 54), ShowHome, false, 16);
+            MakeButton(s, "Bắt đầu bài", "Vào thí nghiệm", new Vector2(-40, -600), new Vector2(200, 54), StartTitration, true, 16, new Vector2(1, 1));
             setup.SetActive(false);
+
             Refresh();
-
-            if (showOnStart && !Application.isBatchMode) Open(); else root.SetActive(false);
+            if (showOnStart) Open();
+            else root.SetActive(false);
         }
 
-        void Mode(Transform p, int i, string title, string desc, string button, System.Action act, bool primary)
+        string GetControlGuidanceText()
         {
-            var glassLight = Glass(ui.glassShader != null ? ui.glassShader : Shader.Find("Khkt/KinhMo"), light: true);
-            var card = Panel(p, "Thẻ " + title, new Vector2(0, 1), new Vector2(0, 1), new Vector2(60 + i * 360, -240), new Vector2(340, 340), glassLight, 1.4f);
-            var bar = Rect(card.transform, "Vạch màu", new Vector2(0, 1), new Vector2(0, 1), new Vector2(26, -28), new Vector2(46, 6));
-            var bi = bar.gameObject.AddComponent<Image>();
-            bi.sprite = Solid;
-            bi.type = Image.Type.Sliced;
-            bi.pixelsPerUnitMultiplier = 10;
-            bi.color = i == 0 ? Good : i == 1 ? Accent : Warn;
-            Label(card.transform, "Tên chế độ", title, 26, Ink, true, TextAnchor.UpperLeft, new Vector2(26, -48), new Vector2(290, 70));
-            Label(card.transform, "Mô tả chế độ", desc, 16, Dim, false, TextAnchor.UpperLeft, new Vector2(26, -128), new Vector2(290, 120));
-            MakeButton(card.transform, "Nút " + title, button, new Vector2(26, -270), new Vector2(288, 46), act, primary, 17);
-        }
-
-        void Chips(Transform p, string key, string title, float y, (string label, string value)[] opts, System.Action<string> pick)
-        {
-            Label(p, "Nhóm " + key, title, 15, Dim, true, TextAnchor.UpperLeft, new Vector2(50, y), new Vector2(600, 22));
-            var list = new List<(Button, string)>();
-            float x = 50;
-            foreach (var (label, value) in opts)
+            if (Khkt.Input.PadInput.UsingTouch)
             {
-                string v = value;
-                float w = Mathf.Max(90, label.Length * 9.5f + 34);
-                var b = MakeButton(p, "Lựa chọn", label, new Vector2(x, y - 28), new Vector2(w, 44), () => pick(v), false, 15);
+                return "Cảm ứng iPad: Vuốt nửa trái để di chuyển  ·  Vuốt nửa phải xoay góc nhìn  ·  Chạm nút tròn TAY để thao tác  ·  Menu ☰ ở góc trên";
+            }
+            return "<b>Rê chuột</b> nhìn   ·   <b>WASD</b> đi   ·   <b>Chuột trái</b> cầm, dùng   ·   <b>B</b> tra cứu hóa chất   ·   <b>T</b> trợ lý AI   ·   <b>1–9</b> các khu   ·   <b>H</b> trợ giúp   ·   <b>Esc</b> menu";
+        }
+
+        void ToggleSound()
+        {
+            NutHieuUng.SoundEnabled = !NutHieuUng.SoundEnabled;
+            if (soundStatusText != null)
+            {
+                soundStatusText.text = NutHieuUng.SoundEnabled ? "Đang bật" : "Đã tắt";
+                soundStatusText.color = NutHieuUng.SoundEnabled ? Good : Dim;
+            }
+        }
+
+        void ToggleMotion()
+        {
+            ReducedMotion.IsEnabled = !ReducedMotion.IsEnabled;
+            if (motionStatusText != null)
+            {
+                motionStatusText.text = ReducedMotion.IsEnabled ? "Đang bật" : "Đã tắt";
+                motionStatusText.color = ReducedMotion.IsEnabled ? Good : Dim;
+            }
+        }
+
+        void ToggleTransparency()
+        {
+            GlassKit.ReducedTransparency = !GlassKit.ReducedTransparency;
+            if (transStatusText != null)
+            {
+                transStatusText.text = GlassKit.ReducedTransparency ? "Đang bật" : "Đã tắt";
+                transStatusText.color = GlassKit.ReducedTransparency ? Good : Dim;
+            }
+        }
+
+        void Mode(Transform p, int col, string title, string desc, string action, System.Action onClick, bool primary)
+        {
+            float x = 60 + col * 366;
+            var box = Panel(p, "Cột " + col, new Vector2(0, 1), new Vector2(0, 1), new Vector2(x, -210), new Vector2(346, 390),
+                            Glass(ui.glassShader != null ? ui.glassShader : Shader.Find("Khkt/KinhMo"), light: true), 1.3f);
+            var b = box.transform;
+            Label(b, "Số", "0" + (col + 1), 14, Accent, true, TextAnchor.UpperLeft, new Vector2(24, -22), new Vector2(60, 20));
+            Label(b, "Tên", title, 22, Ink, true, TextAnchor.UpperLeft, new Vector2(24, -48), new Vector2(296, 30));
+            Label(b, "Mô tả", desc, 15, Dim, false, TextAnchor.UpperLeft, new Vector2(24, -88), new Vector2(296, 200));
+            MakeButton(b, "Nút", action, new Vector2(24, -316), new Vector2(298, 54), onClick, primary, 16);
+        }
+
+        void Row(Transform p, string label, float y, string key, (string val, string text)[] items, System.Action<string> onPick)
+        {
+            Label(p, "Nhãn " + key, label, 16, Dim, true, TextAnchor.UpperLeft, new Vector2(40, y), new Vector2(900, 22));
+            float x = 40;
+            var list = new List<(Button, string)>();
+            foreach (var (val, text) in items)
+            {
+                string v = val;
+                float w = Mathf.Max(Width(Label(p, "Tạm", text, 14, Ink, false, TextAnchor.MiddleCenter, Vector2.zero, Vector2.zero), text) + 32, 100);
+                Destroy(p.Find("Tạm").gameObject);
+                var b = MakeButton(p, "Nút " + val, text, new Vector2(x, y - 28), new Vector2(w, 48), () => onPick(v), false, 14);
                 list.Add((b, v));
                 x += w + 10;
             }
@@ -163,6 +246,7 @@ namespace Khkt.Demo
             home.SetActive(true);
             setup.SetActive(false);
             if (settings != null) settings.SetActive(false);
+            if (guideText != null) guideText.text = GetControlGuidanceText();
             continueText.transform.parent.gameObject.SetActive(started);
             UiBridge.SetCapture(ref captured, true);
         }
@@ -183,6 +267,27 @@ namespace Khkt.Demo
             if (aiUrlInput != null)
                 aiUrlInput.text = PlayerPrefs.GetString(AiClient.ServerUrlPrefKey, AiClient.Instance != null ? AiClient.Instance.serverUrl : "http://127.0.0.1:8000");
             if (aiSaveStatus != null) aiSaveStatus.text = "";
+            if (soundStatusText != null)
+            {
+                soundStatusText.text = NutHieuUng.SoundEnabled ? "Đang bật" : "Đã tắt";
+                soundStatusText.color = NutHieuUng.SoundEnabled ? Good : Dim;
+            }
+            if (motionStatusText != null)
+            {
+                motionStatusText.text = ReducedMotion.IsEnabled ? "Đang bật" : "Đã tắt";
+                motionStatusText.color = ReducedMotion.IsEnabled ? Good : Dim;
+            }
+            if (transStatusText != null)
+            {
+                transStatusText.text = GlassKit.ReducedTransparency ? "Đang bật" : "Đã tắt";
+                transStatusText.color = GlassKit.ReducedTransparency ? Good : Dim;
+            }
+        }
+
+        void CloseSettings()
+        {
+            settings.SetActive(false);
+            home.SetActive(true);
         }
 
         void SaveSettings()
@@ -199,6 +304,12 @@ namespace Khkt.Demo
             if (aiSaveStatus != null) aiSaveStatus.text = "✓ Đã lưu máy chủ: " + url;
         }
 
+        void ShowHome()
+        {
+            setup.SetActive(false);
+            home.SetActive(true);
+        }
+
         void ShowSetup()
         {
             home.SetActive(false);
@@ -210,7 +321,10 @@ namespace Khkt.Demo
             procedure.Stop();
             Close();
             viewer.GoTo(2);
-            LabMessages.Say("Thí nghiệm tự do: nhấn B để tìm hóa chất, T để hỏi robot", LabMessages.Tone.Good);
+            string msg = Khkt.Input.PadInput.UsingTouch
+                ? "Thí nghiệm tự do: chạm Menu hoặc các nút cảm ứng để thao tác"
+                : "Thí nghiệm tự do: nhấn B để tìm hóa chất, T để hỏi robot";
+            LabMessages.Say(msg, LabMessages.Tone.Good);
         }
 
         void StartExplore()
@@ -218,7 +332,10 @@ namespace Khkt.Demo
             procedure.Stop();
             Close();
             viewer.GoTo(9);
-            LabMessages.Say("Nhấn 1–9 để tới từng khu, WASD để đi bộ", LabMessages.Tone.Info);
+            string msg = Khkt.Input.PadInput.UsingTouch
+                ? "Chạm thanh trạm trên cùng để chuyển khu thí nghiệm nhanh"
+                : "Nhấn 1–9 để tới từng khu, WASD để đi bộ";
+            LabMessages.Say(msg, LabMessages.Tone.Info);
         }
 
         void StartTitration()

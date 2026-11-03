@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Khkt.Environment;
+using Khkt.Input;
 using Khkt.Interaction;
 using Khkt.Simulation;
 using UnityEngine;
@@ -56,18 +57,19 @@ namespace Khkt.Demo
             var p = panel.transform;
             Label(p, "Tiêu đề", "Tra cứu hóa chất", 24, Ink, true, TextAnchor.UpperLeft, new Vector2(28, -22), new Vector2(500, 34));
             countText = Label(p, "Số kết quả", "", 15, Dim, false, TextAnchor.UpperLeft, new Vector2(30, -58), new Vector2(500, 22));
-            MakeButton(p, "Đóng", "Đóng  Esc", new Vector2(-130, -20), new Vector2(110, 44), Close, false, 15, new Vector2(1, 1));
-            input = MakeInput(p, "Ô tìm kiếm", "Tên, công thức, nhóm... (ví dụ: dong sunfat, KMnO4, axit)", new Vector2(28, -88), new Vector2(520, 44));
+            string closeLabel = PadInput.UsingTouch ? "Đóng ✕" : "Đóng  Esc";
+            MakeButton(p, "Đóng", closeLabel, new Vector2(-130, -20), new Vector2(120, 50), Close, false, 15, new Vector2(1, 1));
+            input = MakeInput(p, "Ô tìm kiếm", "Tên, công thức, nhóm... (ví dụ: dong sunfat, KMnO4, axit)", new Vector2(28, -88), new Vector2(520, 48));
             for (int i = 0; i < Rows; i++)
             {
                 int k = i;
-                var b = MakeButton(p, "Kết quả", "", new Vector2(28, -146 - i * 52), new Vector2(520, 46), () => Select(k), false, 15);
+                var b = MakeButton(p, "Kết quả", "", new Vector2(28, -146 - i * 54), new Vector2(520, 50), () => Select(k), false, 15);
                 var t = b.GetComponentInChildren<Text>();
                 t.alignment = TextAnchor.UpperLeft;
-                t.rectTransform.anchoredPosition = new Vector2(14, -5);
+                t.rectTransform.anchoredPosition = new Vector2(14, -6);
                 t.rectTransform.sizeDelta = new Vector2(490, 22);
                 t.font = Semibold;
-                var info = Label(b.transform, "Vị trí", "", 13, Dim, false, TextAnchor.UpperLeft, new Vector2(14, -25), new Vector2(490, 20));
+                var info = Label(b.transform, "Vị trí", "", 13, Dim, false, TextAnchor.UpperLeft, new Vector2(14, -27), new Vector2(490, 20));
                 rows.Add((b, t, info));
             }
             detail = Rect(p, "Chi tiết", new Vector2(0, 1), new Vector2(0, 1), new Vector2(574, -88), new Vector2(380, 520)).gameObject;
@@ -75,9 +77,9 @@ namespace Khkt.Demo
             detailTitle = Label(d, "Tên chất", "", 22, Ink, true, TextAnchor.UpperLeft, Vector2.zero, new Vector2(370, 60));
             detailInfo = Label(d, "Thông tin", "", 15, Dim, false, TextAnchor.UpperLeft, new Vector2(0, -70), new Vector2(370, 170));
             detailLocation = Label(d, "Vị trí chi tiết", "", 17, Accent, true, TextAnchor.UpperLeft, new Vector2(0, -250), new Vector2(370, 60));
-            MakeButton(d, "Chỉ vị trí", "Chỉ vị trí trên kệ", new Vector2(0, -330), new Vector2(370, 44), () => Mark(selected, true), true);
-            MakeButton(d, "Đi tới kệ", "Đi tới kệ", new Vector2(0, -384), new Vector2(180, 44), () => GoTo(selected));
-            MakeButton(d, "Robot mang ra bàn", "Robot mang ra bàn", new Vector2(190, -384), new Vector2(180, 44), () => Bring(selected));
+            MakeButton(d, "Chỉ vị trí", "Chỉ vị trí trên kệ", new Vector2(0, -330), new Vector2(370, 50), () => Mark(selected, true), true);
+            MakeButton(d, "Đi tới kệ", "Đi tới kệ", new Vector2(0, -388), new Vector2(180, 50), () => GoTo(selected));
+            MakeButton(d, "Robot mang ra bàn", "Robot mang ra bàn", new Vector2(190, -388), new Vector2(180, 50), () => Bring(selected));
             detail.SetActive(false);
             panel.SetActive(false);
 

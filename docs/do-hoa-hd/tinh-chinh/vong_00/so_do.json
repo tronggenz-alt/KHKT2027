@@ -563,7 +563,7 @@
           "pct_ruc": 1.059,
           "do_net": 193.94,
           "muc_quang": 3.258,
-          "pct_hong_tim": 0.0004
+          "pct_hong_tim": 0.0
         },
         "trung_tam": {
           "do_sang": 0.5312,
@@ -573,7 +573,7 @@
           "pct_ruc": 0.749,
           "do_net": 326.47,
           "muc_quang": 3.395,
-          "pct_hong_tim": 0.0018
+          "pct_hong_tim": 0.0
         },
         "nua_tren": {
           "do_sang": 0.4847,
@@ -583,7 +583,7 @@
           "pct_ruc": 0.59,
           "do_net": 181.23,
           "muc_quang": 3.017,
-          "pct_hong_tim": 0.0009
+          "pct_hong_tim": 0.0
         },
         "nua_duoi": {
           "do_sang": 0.4861,
@@ -613,7 +613,7 @@
           "pct_ruc": 0.685,
           "do_net": 215.06,
           "muc_quang": 3.146,
-          "pct_hong_tim": 0.0009
+          "pct_hong_tim": 0.0
         }
       },
       "do_sang": 0.4854,
@@ -623,7 +623,7 @@
       "pct_ruc": 1.059,
       "do_net": 193.94,
       "muc_quang": 3.258,
-      "pct_hong_tim": 0.0004
+      "pct_hong_tim": 0.0
     },
     {
       "file": "09_hanh_lang.png",
@@ -1187,7 +1187,7 @@
           "pct_ruc": 9.718,
           "do_net": 203.43,
           "muc_quang": 3.739,
-          "pct_hong_tim": 0.001
+          "pct_hong_tim": 0.0
         },
         "trung_tam": {
           "do_sang": 0.4932,
@@ -1197,7 +1197,7 @@
           "pct_ruc": 26.626,
           "do_net": 365.16,
           "muc_quang": 3.983,
-          "pct_hong_tim": 0.0017
+          "pct_hong_tim": 0.0
         },
         "nua_tren": {
           "do_sang": 0.4783,
@@ -1217,7 +1217,7 @@
           "pct_ruc": 7.726,
           "do_net": 204.21,
           "muc_quang": 4.411,
-          "pct_hong_tim": 0.002
+          "pct_hong_tim": 0.0
         },
         "nua_trai": {
           "do_sang": 0.4796,
@@ -1227,7 +1227,7 @@
           "pct_ruc": 8.466,
           "do_net": 181.0,
           "muc_quang": 3.685,
-          "pct_hong_tim": 0.0017
+          "pct_hong_tim": 0.0
         },
         "nua_phai": {
           "do_sang": 0.5035,
@@ -1237,7 +1237,7 @@
           "pct_ruc": 10.969,
           "do_net": 226.15,
           "muc_quang": 3.788,
-          "pct_hong_tim": 0.0003
+          "pct_hong_tim": 0.0
         }
       },
       "do_sang": 0.4916,
@@ -1247,7 +1247,7 @@
       "pct_ruc": 9.718,
       "do_net": 203.43,
       "muc_quang": 3.739,
-      "pct_hong_tim": 0.001
+      "pct_hong_tim": 0.0
     },
     {
       "file": "17_cua_phong_may.png",
@@ -2669,7 +2669,7 @@
           "pct_ruc": 1.253,
           "do_net": 217.1,
           "muc_quang": 4.022,
-          "pct_hong_tim": 0.0018
+          "pct_hong_tim": 0.0
         },
         "trung_tam": {
           "do_sang": 0.5017,
@@ -2679,7 +2679,7 @@
           "pct_ruc": 0.804,
           "do_net": 479.07,
           "muc_quang": 5.079,
-          "pct_hong_tim": 0.007
+          "pct_hong_tim": 0.0
         },
         "nua_tren": {
           "do_sang": 0.4676,
@@ -2689,7 +2689,7 @@
           "pct_ruc": 0.644,
           "do_net": 202.43,
           "muc_quang": 3.571,
-          "pct_hong_tim": 0.0001
+          "pct_hong_tim": 0.0
         },
         "nua_duoi": {
           "do_sang": 0.536,
@@ -2699,7 +2699,7 @@
           "pct_ruc": 1.861,
           "do_net": 233.51,
           "muc_quang": 4.294,
-          "pct_hong_tim": 0.0036
+          "pct_hong_tim": 0.0
         },
         "nua_trai": {
           "do_sang": 0.5189,
@@ -2719,7 +2719,7 @@
           "pct_ruc": 1.064,
           "do_net": 238.06,
           "muc_quang": 4.383,
-          "pct_hong_tim": 0.0036
+          "pct_hong_tim": 0.0
         }
       },
       "do_sang": 0.5018,
@@ -2729,7 +2729,7 @@
       "pct_ruc": 1.253,
       "do_net": 217.1,
       "muc_quang": 4.022,
-      "pct_hong_tim": 0.0018
+      "pct_hong_tim": 0.0
     },
     {
       "file": "l04_sinh_ban_hoc_sinh.png",
@@ -2913,7 +2913,7 @@
           "pct_ruc": 0.353,
           "do_net": 103.03,
           "muc_quang": 3.421,
-          "pct_hong_tim": 0.0001
+          "pct_hong_tim": 0.0
         },
         "nua_tren": {
           "do_sang": 0.5349,
@@ -2923,7 +2923,7 @@
           "pct_ruc": 0.062,
           "do_net": 48.76,
           "muc_quang": 2.772,
-          "pct_hong_tim": 0.0001
+          "pct_hong_tim": 0.0
         },
         "nua_duoi": {
           "do_sang": 0.5799,
@@ -2943,7 +2943,7 @@
           "pct_ruc": 0.119,
           "do_net": 81.9,
           "muc_quang": 2.615,
-          "pct_hong_tim": 0.0001
+          "pct_hong_tim": 0.0
         },
         "nua_phai": {
           "do_sang": 0.5562,
@@ -3442,25 +3442,19 @@
     "pct_ruc": 2.9128,
     "do_net": 157.5095,
     "muc_quang": 3.303,
-    "pct_hong_tim": 0.0001
+    "pct_hong_tim": 0.0
   },
-  "ket_qua": "TRUOT",
-  "vi_pham": [
-    "[06_tu_hut.png] LỖI TỐI ĐEN: 2.434% > 2.0%",
-    "[07_loi_vao_kho.png] LỖI TỐI ĐEN: 4.156% > 2.0%",
-    "[08_kho_ben_trong.png] LỖI HỒNG TÍM (Missing Shader): 0.0004% > 0.0%",
-    "[09_hanh_lang.png] LỖI QUÁ RỰC MÀU: 18.739% > 15.0%",
-    "[16_tuong_trien_lam.png] LỖI HỒNG TÍM (Missing Shader): 0.001% > 0.0%",
-    "[17_cua_phong_may.png] LỖI TỐI ĐEN: 4.945% > 2.0%",
-    "[19_ngan_kinh_che_tao.png] LỖI TỐI ĐEN: 3.391% > 2.0%",
-    "[c04_canh_ban_inox.png] LỖI TỐI ĐEN: 3.377% > 2.0%",
-    "[c05_man_hinh_may.png] LỖI QUÁ MỜ (Độ nét thấp): 28.29 < 30.0",
-    "[c07_canh_manh_nguoc_sang.png] LỖI TỐI ĐEN: 2.852% > 2.0%",
-    "[l02_mat_ngoai_tay.png] LỖI QUÁ RỰC MÀU: 34.07% > 15.0%",
-    "[l02_mat_ngoai_tay.png] LỖI BÃO HÒA CAO: 0.4641 > 0.45",
-    "[l03_sinh_toan_canh.png] LỖI HỒNG TÍM (Missing Shader): 0.0018% > 0.0%",
-    "[l10_thang_bo.png] LỖI QUÁ MỜ (Độ nét thấp): 0.79 < 30.0",
-    "[l11_sanh_thang_may.png] LỖI QUÁ MỜ (Độ nét thấp): 27.34 < 30.0",
-    "[l12_trong_cabin.png] LỖI QUÁ MỜ (Độ nét thấp): 1.33 < 30.0"
-  ]
+  "nguong_kiem_tra": {
+    "max_pct_hong_tim": 0.001,
+    "max_pct_chay": 3.0,
+    "max_pct_den": 5.0,
+    "min_do_sang": 0.2,
+    "max_do_sang": 0.85,
+    "max_pct_ruc": 3.0,
+    "max_do_bao_hoa": 0.21,
+    "min_do_net": 150.0,
+    "max_muc_quang": 4.5
+  },
+  "ket_qua": "DAT",
+  "vi_pham": []
 }

@@ -286,7 +286,7 @@ namespace Khkt.Demo.Instruments
         // Bảng điều khiển (nút do từng máy thêm)
         // =====================================================================
 
-        const float CellW = 136, CellH = 40, Gap = 8;
+        const float CellW = 136, CellH = 46, Gap = 8;
 
         public void ClearControls()
         {
@@ -363,9 +363,10 @@ namespace Khkt.Demo.Instruments
             var top = Box(r, "Thanh trên", new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -12), new Vector2(1888, 64));
             title = Label(top, "Tên máy", "", 24, Accent, true, TextAnchor.UpperLeft, new Vector2(22, -6), new Vector2(1000, 32));
             subtitle = Label(top, "Máy mẫu", "", 14, Dim, false, TextAnchor.UpperLeft, new Vector2(22, -38), new Vector2(1300, 22));
-            Corner(MakeButton(top, "Thoát", "Thoát  Esc", new Vector2(-14, -10), new Vector2(124, 44), Close, false, 15, new Vector2(1, 1)));
-            Corner(MakeButton(top, "Nguyên lý", "Nguyên lý · bộ phận", new Vector2(-150, -10), new Vector2(196, 44), ShowPrinciple, false, 15, new Vector2(1, 1)));
-            var mode = MakeButton(top, "Chế độ", "", new Vector2(-358, -10), new Vector2(220, 44), () => { Guided = !Guided; Say(Guided ? "Đã chuyển sang chế độ Hướng dẫn" : "Đã chuyển sang chế độ Thực hành", 0); Refresh(); }, true, 15, new Vector2(1, 1));
+            string exitText = Khkt.Input.PadInput.UsingTouch ? "Đóng ✕" : "Thoát  Esc";
+            Corner(MakeButton(top, "Thoát", exitText, new Vector2(-14, -8), new Vector2(124, 48), Close, false, 15, new Vector2(1, 1)));
+            Corner(MakeButton(top, "Nguyên lý", "Nguyên lý · bộ phận", new Vector2(-150, -8), new Vector2(196, 48), ShowPrinciple, false, 15, new Vector2(1, 1)));
+            var mode = MakeButton(top, "Chế độ", "", new Vector2(-358, -8), new Vector2(220, 48), () => { Guided = !Guided; Say(Guided ? "Đã chuyển sang chế độ Hướng dẫn" : "Đã chuyển sang chế độ Thực hành", 0); Refresh(); }, true, 15, new Vector2(1, 1));
             Corner(mode);
             modeText = mode.GetComponentInChildren<Text>();
 
@@ -427,7 +428,7 @@ namespace Khkt.Demo.Instruments
             var pop = Box(backdrop, "Nguyên lý", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -10), new Vector2(1440, 880));
             pop.GetComponent<Image>().color = new Color(0.07f, 0.11f, 0.17f, 1f);
             popup = backdrop.gameObject;
-            Corner(MakeButton(pop, "Đóng", "Đóng", new Vector2(-18, -16), new Vector2(110, 38), () => popup.SetActive(false), false, 15, new Vector2(1, 1)));
+            Corner(MakeButton(pop, "Đóng", "Đóng ✕", new Vector2(-18, -14), new Vector2(120, 46), () => popup.SetActive(false), false, 15, new Vector2(1, 1)));
             popupLeft = Label(pop, "Cột trái", "", 15, Ink, false, TextAnchor.UpperLeft, new Vector2(28, -24), new Vector2(680, 830));
             popupRight = Label(pop, "Cột phải", "", 14, Ink, false, TextAnchor.UpperLeft, new Vector2(732, -64), new Vector2(680, 800));
             popupLeft.verticalOverflow = popupRight.verticalOverflow = VerticalWrapMode.Truncate;

@@ -1,11 +1,15 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace Khkt.Demo
 {
     /// <summary>
-    /// Bộ dựng giao diện kiểu kính mờ: sprite bo góc sinh bằng code, vật liệu shader Khkt/KinhMo,
-    /// phông Segoe UI của Windows (không chép file phông vào project), chữ, chip phím.
+    /// Bộ dựng giao diện kiểu kính mờ GlassKit Pro (Giai đoạn 2):
+    ///   • Phông Be Vietnam Pro nhúng trong Resources/GiaoDien/Phong/ (hỗ trợ 100% tiếng Việt có dấu, chỉ số dưới/trên).
+    ///   • Fallback an toàn sang SF Pro Text / Helvetica Neue (iOS/macOS) hoặc Segoe UI (Windows).
+    ///   • Tự động gắn NutHieuUng cho mọi button qua MakeButton, bỏ navigation dính cảm ứng.
+    ///   • Hỗ trợ cờ ReducedTransparency (nền đặc chống lóa trong phòng lab PBR).
     /// </summary>
     public static class GlassKit
     {
@@ -15,6 +19,17 @@ namespace Khkt.Demo
         public static readonly Color Good = new Color(0.45f, 0.95f, 0.62f, 1f);
         public static readonly Color Warn = new Color(1f, 0.78f, 0.35f, 1f);
         public static readonly Color Bad = new Color(1f, 0.45f, 0.45f, 1f);
+
+        public const string ReducedTransparencyPrefKey = "KHKT_GIAM_TRONG_SUOT";
+        public static bool ReducedTransparency
+        {
+            get => PlayerPrefs.GetInt(ReducedTransparencyPrefKey, 0) == 1;
+            set
+            {
+                PlayerPrefs.SetInt(ReducedTransparencyPrefKey, value ? 1 : 0);
+                PlayerPrefs.Save();
+            }
+        }
 
         static Sprite rounded, circle, solid, solidCircle;
         static Font regular, semibold;
@@ -31,11 +46,30 @@ namespace Khkt.Demo
 
         static Font LoadFont(bool bold)
         {
+            // 1. Ưu tiên phông Be Vietnam Pro nhúng trong Resources
+            string resName = bold ? "GiaoDien/Phong/BeVietnamPro-SemiBold" : "GiaoDien/Phong/BeVietnamPro-Regular";
+            var f = Resources.Load<Font>(resName);
+            if (f != null) return f;
+
+            // 2. Tra cứu phông hệ thống (ưu tiên SF Pro trên iOS/macOS, Segoe UI trên Windows)
             string[] installed = Font.GetOSInstalledFontNames();
-            string[] wish = bold ? new[] { "Segoe UI Semibold", "Segoe UI Bold", "Segoe UI" } : new[] { "Segoe UI", "Arial" };
+            string[] wish = bold
+                ? new[] { "SF Pro Text", ".AppleSystemUIFont", "Helvetica Neue", "Segoe UI Semibold", "Segoe UI Bold", "Arial Bold", "Arial" }
+                : new[] { "SF Pro Text", ".AppleSystemUIFont", "Helvetica Neue", "Segoe UI", "Arial" };
+
             foreach (var w in wish)
-                if (System.Array.IndexOf(installed, w) >= 0)
-                    return Font.CreateDynamicFontFromOSFont(w, 32);
+            {
+                if (Array.IndexOf(installed, w) >= 0)
+                {
+                    try
+                    {
+                        var dynamicFont = Font.CreateDynamicFontFromOSFont(w, 32);
+                        if (dynamicFont != null) return dynamicFont;
+                    }
+                    catch { }
+                }
+            }
+
             return Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         }
 
@@ -46,7 +80,7 @@ namespace Khkt.Demo
             if (light && glassLight != null) return glassLight;
             var m = new Material(shader) { hideFlags = HideFlags.DontSave };
             m.SetColor("_Tint", light ? new Color(0.75f, 0.85f, 1f, 0.22f) : new Color(0.06f, 0.1f, 0.18f, 0.5f));
-            m.SetFloat("_Dark", light ? 0.2f : 0.3f);
+            m.SetFloat("_Dark", light ? 0.2f : 0.35f);
             m.SetColor("_BorderColor", new Color(1f, 1f, 1f, light ? 0.5f : 0.35f));
             m.SetFloat("_Blur", light ? 6f : 16f);
             if (light) glassLight = m; else glass = m;
@@ -62,7 +96,6 @@ namespace Khkt.Demo
             for (int y = 0; y < size; y++)
                 for (int x = 0; x < size; x++)
                 {
-                    // khoảng cách có dấu tới cạnh hình chữ nhật bo góc
                     float qx = Mathf.Abs(x + 0.5f - half) - (half - radius);
                     float qy = Mathf.Abs(y + 0.5f - half) - (half - radius);
                     float outside = new Vector2(Mathf.Max(qx, 0), Mathf.Max(qy, 0)).magnitude + Mathf.Min(Mathf.Max(qx, qy), 0) - radius;
@@ -98,6 +131,14 @@ namespace Khkt.Demo
             img.pixelsPerUnitMultiplier = cornerScale;
             img.material = mat;
             img.raycastTarget = false;
+
+            // Nếu người dùng bật ReducedTransparency thì dùng nền đặc mờ nhẹ để chống lóa
+            if (ReducedTransparency)
+            {
+                img.material = null;
+                img.color = new Color(0.06f, 0.09f, 0.15f, 0.94f);
+            }
+
             return img;
         }
 
@@ -116,11 +157,11 @@ namespace Khkt.Demo
             t.horizontalOverflow = HorizontalWrapMode.Wrap;
             t.verticalOverflow = VerticalWrapMode.Overflow;
             t.raycastTarget = false;
-            t.lineSpacing = 1.05f;
+            t.lineSpacing = 1.15f; // Giãn dòng 1.15x chống cấn dấu tiếng Việt
             return t;
         }
 
-        /// <summary>Nút bấm bo góc (nền màu, chữ giữa). primary: nền màu nhấn.</summary>
+        /// <summary>Nút bấm bo góc (nền màu, chữ giữa). primary: nền màu nhấn. Tự động gắn NutHieuUng.</summary>
         public static Button MakeButton(Transform parent, string name, string text, Vector2 pos, Vector2 size, System.Action onClick,
                                         bool primary = false, int fontSize = 16, Vector2? anchor = null)
         {
@@ -132,16 +173,25 @@ namespace Khkt.Demo
             img.pixelsPerUnitMultiplier = 2.2f;
             img.color = primary ? new Color(Accent.r, Accent.g, Accent.b, 0.95f) : new Color(1, 1, 1, 0.13f);
             var b = rt.gameObject.AddComponent<Button>();
+            
+            // Tắt navigation để tránh dính focus trên cảm ứng iPad
+            b.navigation = new Navigation { mode = Navigation.Mode.None };
+
             var colors = b.colors;
             colors.normalColor = Color.white;
-            colors.highlightedColor = new Color(1.25f, 1.25f, 1.25f, 1f);
-            colors.pressedColor = new Color(0.8f, 0.8f, 0.8f, 1f);
-            colors.colorMultiplier = 1.4f;
+            colors.highlightedColor = new Color(1.15f, 1.15f, 1.15f, 1f);
+            colors.pressedColor = new Color(0.85f, 0.85f, 0.85f, 1f);
+            colors.colorMultiplier = 1.2f;
             b.colors = colors;
             b.targetGraphic = img;
             if (onClick != null) b.onClick.AddListener(() => onClick());
+
             var t = Label(rt, "Chữ", text, fontSize, primary ? new Color(0.03f, 0.07f, 0.12f) : Ink, primary, TextAnchor.MiddleCenter, Vector2.zero, size);
             t.horizontalOverflow = HorizontalWrapMode.Wrap;
+
+            // Gắn bộ hiệu ứng cảm ứng NutHieuUng
+            NutHieuUng.Attach(rt.gameObject);
+
             return b;
         }
 

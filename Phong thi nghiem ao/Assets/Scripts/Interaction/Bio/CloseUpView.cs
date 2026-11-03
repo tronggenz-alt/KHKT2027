@@ -125,9 +125,17 @@ namespace Khkt.Interaction.Bio
                 };
             }
 
-            float w = 520f, h = 34f;
+            float w = 560f, h = 44f;
+            string exitHint = Khkt.Input.PadInput.UsingTouch ? "Chạm [✕ Thoát] để lùi ra" : "[Esc] để lùi ra";
             GUI.Box(new Rect((Screen.width - w) * 0.5f, 16f, w, h),
-                $"Góc nhìn cận cảnh: {currentTitle}  ·  [Esc] để lùi ra", barStyle);
+                $"Góc nhìn cận cảnh: {currentTitle}  ·  {exitHint}", barStyle);
+            if (Khkt.Input.PadInput.UsingTouch)
+            {
+                if (GUI.Button(new Rect((Screen.width + w) * 0.5f + 10f, 16f, 100f, h), "✕ Thoát"))
+                {
+                    Exit();
+                }
+            }
         }
     }
 }

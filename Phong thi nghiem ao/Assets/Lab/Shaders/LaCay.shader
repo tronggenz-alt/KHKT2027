@@ -5,7 +5,7 @@ Shader "Khkt/Bio/LaCay"
         _BaseMap ("Texture lá cây", 2D) = "white" {}
         _BumpMap ("Bản đồ gân lá (Normal)", 2D) = "bump" {}
         _BumpScale ("Độ sâu gân lá", Range(0.0, 2.0)) = 1.0
-        _BaseColor ("Màu lá", Color) = (0.28, 0.55, 0.22, 1.0)
+        _BaseColor ("Màu lá", Color) = (0.20, 0.36, 0.18, 1.0)
         _Translucency ("Độ xuyên sáng lá (SSS)", Range(0.0, 1.0)) = 0.45
         _Cutoff ("Ngưỡng Alpha Clip", Range(0.0, 1.0)) = 0.5
         _WindSpeed ("Tốc độ gió", Float) = 2.4
@@ -114,12 +114,12 @@ Shader "Khkt/Bio/LaCay"
 
                 float NdotL = saturate(dot(normalWS, mainLight.direction));
                 // Ánh sáng xuyên lá (Subsurface Scattering giả lập tự nhiên khi nhìn ngược nắng)
-                float backLight = saturate(dot(-normalWS, mainLight.direction)) * _Translucency;
+                float backLight = saturate(dot(-normalWS, mainLight.direction)) * _Translucency * 0.45;
                 float shadowAtten = mainLight.shadowAttenuation;
 
                 float3 directLight = (NdotL + backLight) * mainLight.color * shadowAtten;
-                // Ánh sáng môi trường dịu nhẹ xanh tươi
-                float3 ambient = half3(0.32, 0.35, 0.30);
+                // Ánh sáng môi trường dịu nhẹ xanh tươi, kiềm chế
+                float3 ambient = half3(0.14, 0.16, 0.12);
 
                 return half4(texColor.rgb * (directLight + ambient), 1.0);
             }

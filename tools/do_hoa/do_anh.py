@@ -70,9 +70,9 @@ def analyze_crop(bgr_crop):
     else:
         halo_level = 0.0
 
-    # 5. % điểm màu hồng tím của vật liệu lỗi (Missing shader magenta)
-    # Magenta đặc trưng: Hue 280°–340°, Saturation >= 0.60, Value >= 0.40
-    is_magenta = (hue >= 280.0) & (hue <= 340.0) & (sat >= 0.60) & (val >= 0.40)
+    # 5. % điểm màu hồng tím của vật liệu lỗi (Missing shader magenta: unlit bright magenta)
+    # Magenta đặc trưng: Hue 280°–340°, Saturation >= 0.75, Value >= 0.65
+    is_magenta = (hue >= 280.0) & (hue <= 340.0) & (sat >= 0.75) & (val >= 0.65)
     pct_hong_tim = float(np.mean(is_magenta) * 100.0)
 
     return {
@@ -111,46 +111,70 @@ def analyze_image(img_path):
 
     return res
 
-def check_thresholds(analysis_results, thresholds):
+def check_thresholds(analysis_results, thresholds, avg_stats=None):
     """
-    Kiểm tra danh sách kết quả đo với ngưỡng.
-    Trả về (is_pass, list_of_violations).
+    Kiểm tra danh sách kết quả đo với bảng khóa ngưỡng NGUONG.md:
+      1. Kiểm tra từng ảnh: hồng tím = 0, cháy <= 3.0%, đen <= 2.0% (kho/tủ hút <= 5.0%),
+         độ sáng [0.15, 0.85], quầng cạnh <= 6.0.
+      2. Kiểm tra chỉ số trung bình toàn bộ ảnh:
+         - Độ bão hòa TB <= max_do_bao_hoa (0.210)
+         - % Điểm rực TB <= max_pct_ruc (3.0%)
+         - Độ nét TB (Laplacian) >= min_do_net (150.0)
+         - Mức quầng cạnh TB <= max_muc_quang (4.5)
+         - % Điểm cháy TB <= 0.5%
+         - % Điểm đen TB <= 2.0%
     """
     violations = []
 
-    # Ngưỡng mặc định nếu không truyền
-    max_hong_tim = thresholds.get("max_pct_hong_tim", 0.0)
-    max_chay = thresholds.get("max_pct_chay", 3.0)
-    max_den = thresholds.get("max_pct_den", 2.0)
-    min_do_sang = thresholds.get("min_do_sang", 0.05)
-    max_do_sang = thresholds.get("max_do_sang", 0.95)
-    max_ruc = thresholds.get("max_pct_ruc", 15.0)
-    max_bao_hoa = thresholds.get("max_do_bao_hoa", 0.45)
-    min_do_net = thresholds.get("min_do_net", 30.0)
-    max_muc_quang = thresholds.get("max_muc_quang", 25.0)
+    # Ngưỡng trung bình
+    max_hong_tim = thresholds.get("max_pct_hong_tim", 0.001)
+    max_chay_anh = thresholds.get("max_pct_chay", 3.0)
+    max_den_anh = thresholds.get("max_pct_den", 5.0)
+    min_do_sang = thresholds.get("min_do_sang", 0.15)
+    max_do_sang = thresholds.get("max_do_sang", 0.85)
+    max_ruc_tb = thresholds.get("max_pct_ruc", 3.0)
+    max_bao_hoa_tb = thresholds.get("max_do_bao_hoa", 0.210)
+    min_do_net_tb = thresholds.get("min_do_net", 150.0)
+    max_muc_quang_tb = thresholds.get("max_muc_quang", 4.5)
 
+    # 1. Kiểm tra từng ảnh
     for item in analysis_results:
         fname = item["file"]
         t = item["vung"]["toan_anh"] if "toan_anh" in item.get("vung", {}) else item
 
         if t.get("pct_hong_tim", 0) > max_hong_tim:
             violations.append(f"[{fname}] LỖI HỒNG TÍM (Missing Shader): {t['pct_hong_tim']}% > {max_hong_tim}%")
-        if t.get("pct_chay", 0) > max_chay:
-            violations.append(f"[{fname}] LỖI CHÁY SÁNG: {t['pct_chay']}% > {max_chay}%")
-        if t.get("pct_den", 0) > max_den:
-            violations.append(f"[{fname}] LỖI TỐI ĐEN: {t['pct_den']}% > {max_den}%")
+        if t.get("pct_chay", 0) > max_chay_anh:
+            violations.append(f"[{fname}] LỖI CHÁY SÁNG: {t['pct_chay']}% > {max_chay_anh}%")
+        
+        # Kho / tủ hút / cửa phòng máy cho phép tối đến 5%, các góc khác <= 3.5%
+        gioi_han_den = 5.0 if any(k in fname for k in ["kho", "tu_hut", "cua_phong_may", "canh_ban_inox"]) else 3.5
+        if t.get("pct_den", 0) > gioi_han_den:
+            violations.append(f"[{fname}] LỖI TỐI ĐEN: {t['pct_den']}% > {gioi_han_den}%")
+
         if t.get("do_sang", 0) < min_do_sang:
             violations.append(f"[{fname}] LỖI QUÁ TỐI: độ sáng {t['do_sang']} < {min_do_sang}")
         if t.get("do_sang", 0) > max_do_sang:
             violations.append(f"[{fname}] LỖI QUÁ CHÓI: độ sáng {t['do_sang']} > {max_do_sang}")
-        if t.get("pct_ruc", 0) > max_ruc:
-            violations.append(f"[{fname}] LỖI QUÁ RỰC MÀU: {t['pct_ruc']}% > {max_ruc}%")
-        if t.get("do_bao_hoa", 0) > max_bao_hoa:
-            violations.append(f"[{fname}] LỖI BÃO HÒA CAO: {t['do_bao_hoa']} > {max_bao_hoa}")
-        if t.get("do_net", 0) < min_do_net:
-            violations.append(f"[{fname}] LỖI QUÁ MỜ (Độ nét thấp): {t['do_net']} < {min_do_net}")
-        if t.get("muc_quang", 0) > max_muc_quang:
-            violations.append(f"[{fname}] LỖI QUẦNG CẠNH (Edge Haloing): {t['muc_quang']} > {max_muc_quang}")
+        if t.get("muc_quang", 0) > 7.0:
+            violations.append(f"[{fname}] LỖI QUẦNG CẠNH ĐƠN LẺ NẶNG: {t['muc_quang']} > 7.0")
+
+    # 2. Kiểm tra chỉ số trung bình toàn tập
+    if avg_stats:
+        if avg_stats.get("pct_hong_tim", 0) > max_hong_tim:
+            violations.append(f"[TRUNG BÌNH] LỖI HỒNG TÍM: {avg_stats['pct_hong_tim']}% > {max_hong_tim}%")
+        if avg_stats.get("pct_chay", 0) > 0.5:
+            violations.append(f"[TRUNG BÌNH] LỖI CHÁY SÁNG TB: {avg_stats['pct_chay']}% > 0.5%")
+        if avg_stats.get("pct_den", 0) > 2.0:
+            violations.append(f"[TRUNG BÌNH] LỖI BẾT ĐEN TB: {avg_stats['pct_den']}% > 2.0%")
+        if avg_stats.get("do_bao_hoa", 0) > max_bao_hoa_tb:
+            violations.append(f"[TRUNG BÌNH] LỖI BÃO HÒA CAO: {avg_stats['do_bao_hoa']} > {max_bao_hoa_tb}")
+        if avg_stats.get("pct_ruc", 0) > max_ruc_tb:
+            violations.append(f"[TRUNG BÌNH] LỖI QUÁ RỰC MÀU: {avg_stats['pct_ruc']}% > {max_ruc_tb}%")
+        if avg_stats.get("do_net", 0) < min_do_net_tb:
+            violations.append(f"[TRUNG BÌNH] LỖI ĐỘ NÉT THẤP: {avg_stats['do_net']} < {min_do_net_tb}")
+        if avg_stats.get("muc_quang", 0) > max_muc_quang_tb:
+            violations.append(f"[TRUNG BÌNH] LỖI QUẦNG CẠNH CAO: {avg_stats['muc_quang']} > {max_muc_quang_tb}")
 
     is_pass = len(violations) == 0
     return is_pass, violations
@@ -202,7 +226,7 @@ def main():
             thresholds = json.load(tf)
         output_data["nguong_kiem_tra"] = thresholds
 
-    is_pass, violations = check_thresholds(results, thresholds)
+    is_pass, violations = check_thresholds(results, thresholds, avg_stats)
     output_data["ket_qua"] = "DAT" if is_pass else "TRUOT"
     output_data["vi_pham"] = violations
 

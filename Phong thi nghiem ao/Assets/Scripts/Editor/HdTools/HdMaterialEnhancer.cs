@@ -253,7 +253,9 @@ namespace Khkt.EditorTools
 
             // 4. Kim loại (Inox 304 satin #4, Nhôm anodized)
             Enhance("Inox", m => {
-                SetNormal(m, normInox, 0.65f);
+                SetNormal(m, normInox, 0.75f);
+                m.SetTextureScale("_BumpMap", new Vector2(8, 8));
+                m.SetTextureScale("_BaseMap", new Vector2(8, 8));
                 m.SetFloat("_Smoothness", 0.72f);
                 m.SetFloat("_Metallic", 0.95f);
             }, ref count);

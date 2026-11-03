@@ -233,7 +233,8 @@ namespace Khkt.Demo
             var gRt = Rect(img.transform, "Đồ thị", new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -136), new Vector2(GraphW, GraphH));
             var gImg = gRt.gameObject.AddComponent<RawImage>();
             resultNotes = Label(img.transform, "Ghi chú", "", 15, Dim, false, TextAnchor.UpperLeft, new Vector2(28, -318), new Vector2(464, 120));
-            Label(img.transform, "Làm lại", "R  làm lượt mới", 14, Dim, false, TextAnchor.LowerRight, new Vector2(300, -440), new Vector2(194, 22));
+            string redoLabel = Khkt.Input.PadInput.UsingTouch ? "Lượt chuẩn độ mới" : "R  làm lượt mới";
+            Label(img.transform, "Làm lại", redoLabel, 14, Dim, false, TextAnchor.LowerRight, new Vector2(300, -440), new Vector2(194, 22));
             graphTex = new Texture2D(GraphW, GraphH, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear, hideFlags = HideFlags.DontSave };
             gImg.texture = graphTex;
             resultPanel.SetActive(false);
@@ -252,12 +253,35 @@ namespace Khkt.Demo
 
         void BuildHelp()
         {
-            var chip = Panel(root, "Nút trợ giúp", new Vector2(0, 0), new Vector2(0, 0), new Vector2(20, 24), new Vector2(150, 40), glassMat, 2f);
-            Label(chip.transform, "Chữ", "<b>H</b>   Trợ giúp", 16, Dim, false, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(150, 40));
+            var chip = Panel(root, "Nút trợ giúp", new Vector2(0, 0), new Vector2(0, 0), new Vector2(20, 24), new Vector2(150, 44), glassMat, 2f);
+            string chipHelpText = Khkt.Input.PadInput.UsingTouch ? "<b>?</b>   Trợ giúp" : "<b>H</b>   Trợ giúp";
+            Label(chip.transform, "Chữ", chipHelpText, 16, Dim, false, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(150, 44));
             var img = Panel(root, "Trợ giúp", new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(20, 0), new Vector2(820, 650), glassMat, 1.3f);
             helpPanel = img.gameObject;
-            Label(img.transform, "Tiêu đề", "Điều khiển", 20, Ink, true, TextAnchor.UpperLeft, new Vector2(24, -18), new Vector2(360, 30));
-            var rows = new (string k, string v)[]
+            MakeButton(img.transform, "Đóng trợ giúp", "✕", new Vector2(750, -14), new Vector2(50, 44), () => helpPanel.SetActive(false));
+            
+            bool usingTouch = Khkt.Input.PadInput.UsingTouch;
+            string titleLeft = usingTouch ? "Điều khiển cảm ứng iPad" : "Điều khiển bàn phím & chuột";
+            Label(img.transform, "Tiêu đề", titleLeft, 20, Ink, true, TextAnchor.UpperLeft, new Vector2(24, -18), new Vector2(360, 30));
+            var rows = usingTouch ? new (string k, string v)[]
+            {
+                ("Vuốt nửa trái", "Cần di chuyển nổi (đi lại)"),
+                ("Vuốt nửa phải", "Xoay góc nhìn camera"),
+                ("Nút TAY", "Chạm: cầm, đặt, bấm máy"),
+                ("Giữ nút TAY", "Rót dung dịch, hút pipet, xả"),
+                ("Nút Trả về", "Đặt dụng cụ đang cầm về chỗ"),
+                ("Nút Lắc", "Giữ để lắc bình nón"),
+                ("Nút Chậm", "Bật/tắt bước chậm để ngắm"),
+                ("Ngồi / Đứng", "Hạ thấp góc nhìn quan sát"),
+                ("Mắt ▲  ▼", "Nâng, hạ tầm mắt ngang vạch"),
+                ("Mở +  Đóng -", "Vặn mở / đóng khóa buret"),
+                ("Khóa buret", "Khóa chặt vòi buret"),
+                ("Ghi số đọc", "Ghi thể tích buret vào bảng"),
+                ("Menu ☰", "Đồ thị pH, lượt mới, độ nhạy"),
+                ("Đổi trạm", "Chuyển nhanh tới 12 trạm lab"),
+                ("Trợ lý AI", "Chạm biểu tượng Robot để hỏi"),
+                ("Tra cứu", "Chạm máy tra cứu tìm hóa chất"),
+            } : new (string k, string v)[]
             {
                 ("Rê chuột", "Nhìn quanh"), ("W A S D", "Đi lại"), ("C", "Ngồi / đứng"), ("Z  X", "Hạ / nâng tầm mắt"),
                 ("← →  PgUp PgDn", "Xoay, ngẩng bằng phím"), ("1 – 9   0", "Đến các khu"), ("Chuột trái", "Cầm, đặt, dùng"), ("Giữ chuột trái", "Rót, hút, xả, lắc"),
@@ -276,9 +300,24 @@ namespace Khkt.Demo
                 Label(img.transform, "Việc", rows[i].v, 15, Dim, false, TextAnchor.MiddleLeft, new Vector2(190, y), new Vector2(210, 24));
             }
 
-            // Cột phải: tay cầm ESP32-CAM 1 cần (docs/09-tay-cam-esp32-cam.md) và tay cầm chơi game Xbox / PlayStation
-            Label(img.transform, "Tiêu đề tay cầm", "Tay cầm joystick  ·  Xbox", 20, Ink, true, TextAnchor.UpperLeft, new Vector2(424, -18), new Vector2(370, 30));
-            var padRows = new (string k, string v)[]
+            // Cột phải: Thao tác lab trên iPad hoặc tay cầm joystick trên PC
+            string titleRight = usingTouch ? "Thao tác phòng lab & thiết bị" : "Tay cầm joystick  ·  Xbox";
+            Label(img.transform, "Tiêu đề tay cầm", titleRight, 20, Ink, true, TextAnchor.UpperLeft, new Vector2(424, -18), new Vector2(370, 30));
+            var padRows = usingTouch ? new (string k, string v)[]
+            {
+                ("Kính hiển vi", "Chạm máy, chạm kính soi mẫu"),
+                ("Máy phân tích", "Chạm màn hình 14 máy"),
+                ("Tủ hút khí độc", "Đóng mở kính, kẹp giữ bình"),
+                ("Kho hóa chất", "Tra cứu số kệ, hàng, ngăn"),
+                ("Cân điện tử", "Đặt bình, trừ bì, cân mẫu"),
+                ("Máy khuấy từ", "Bật núm nhiệt, núm khuấy"),
+                ("Buret chuẩn độ", "Chỉnh giọt, đổi màu chỉ thị"),
+                ("Khu sinh học", "Tầng 2: PCR, điện di, vi sinh"),
+                ("Ghép gen", "Tách chiết DNA, biến nạp"),
+                ("Nhà kính", "Nuôi cấy mô, quang hợp cây"),
+                ("Cài đặt chung", "Bật tắt âm, giảm chuyển động"),
+                ("Giao diện kính", "Tùy chọn giảm trong suốt"),
+            } : new (string k, string v)[]
             {
                 ("ĐI: cần ↑ ↓", "Tiến, lùi (đẩy mạnh: nhanh)"), ("ĐI: cần ← →", "Quay mặt trái, phải"),
                 ("ĐI: cần chéo", "Vừa đi vừa rẽ"), ("ĐI: ↑ hết cỡ 1 s", "Chạy nhanh"),
