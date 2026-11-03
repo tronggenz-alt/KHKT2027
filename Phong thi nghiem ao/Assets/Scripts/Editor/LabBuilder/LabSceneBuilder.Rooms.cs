@@ -470,9 +470,26 @@ namespace Khkt.EditorTools
             var g = Group("Chậu cây", p, pos);
             var potMesh = Lathe("ChauCay", 24, V(0, 0), V(0.13f, 0), V(0.13f, 0), V(0.17f, 0.3f), V(0.19f, 0.31f), V(0.19f, 0.34f), V(0, 0.34f));
             MeshObj(g, "Chậu", potMesh, Vector3.zero, pot, true);
-            Ball(g, "Tán lá", new Vector3(0, 0.6f, 0), new Vector3(0.45f, 0.5f, 0.45f), foliage);
-            Ball(g, "Tán lá", new Vector3(0.1f, 0.78f, 0.05f), new Vector3(0.3f, 0.35f, 0.3f), foliageDark);
-            Ball(g, "Tán lá", new Vector3(-0.1f, 0.72f, -0.06f), new Vector3(0.28f, 0.3f, 0.28f), foliage);
+
+            // 1. Đất trong chậu
+            Cyl(g, "Đất", new Vector3(0, 0.32f, 0), 0.17f, 0.02f, pot);
+
+            // 2. Thân cây
+            Cyl(g, "Thân cây", new Vector3(0, 0.44f, 0), 0.012f, 0.22f, trunk);
+
+            // 3. Tán lá chi tiết với LOD
+            var m0 = ModernPlantMesh("T1_PottedPlant_LOD0", false);
+            var m1 = ModernPlantMesh("T1_PottedPlant_LOD1", true);
+
+            var canopy0 = MeshObj(g, "Tán lá", m0, new Vector3(0, 0.42f, 0), foliage, false, null, 0.65f);
+            var canopy1 = MeshObj(g, "Tán lá (LOD1)", m1, new Vector3(0, 0.42f, 0), foliageDark, false, null, 0.65f);
+
+            var lodGroup = g.gameObject.AddComponent<LODGroup>();
+            var lods = new LOD[2];
+            lods[0] = new LOD(0.25f, new Renderer[] { canopy0.GetComponent<Renderer>() });
+            lods[1] = new LOD(0.04f, new Renderer[] { canopy1.GetComponent<Renderer>() });
+            lodGroup.SetLODs(lods);
+            lodGroup.RecalculateBounds();
         }
 
         static void BuildOutdoor(Transform root)

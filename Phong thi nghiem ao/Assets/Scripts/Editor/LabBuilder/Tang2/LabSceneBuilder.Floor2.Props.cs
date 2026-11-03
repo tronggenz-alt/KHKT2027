@@ -714,29 +714,32 @@ namespace Khkt.EditorTools
 
         static readonly Dictionary<string, Mesh> plantMeshes = new Dictionary<string, Mesh>();
 
-        /// <summary>Lưới cây: count lá cong xếp hoa thị quanh trục, mỗi tầng xoay góc vàng, lá ngoài ngả ra, lá trong dựng đứng.</summary>
-        static Mesh PlantMesh(string name, int count, float leafLen, float leafW, float height, float droop)
+        /// <summary>Lưới cây: count lá cong xếp hoa thị quanh trục, mỗi tầng xoay góc vàng, lá ngoài ngả ra, lá trong dựng đứng. Hỗ trợ LOD.</summary>
+        static Mesh PlantMesh(string name, int count, float leafLen, float leafW, float height, float droop, bool isLod = false)
         {
-            if (plantMeshes.TryGetValue(name, out var cached) && cached != null) return cached;
-            var leaf = LeafMesh("T2_La_" + name, leafLen, leafW, droop);
+            string key = isLod ? name + "_LOD1" : name;
+            if (plantMeshes.TryGetValue(key, out var cached) && cached != null) return cached;
+
+            int actualCount = isLod ? Mathf.Max(3, count / 2) : count;
+            var leaf = LeafMesh("T2_La_" + key, leafLen, leafW, droop, isLod);
             var combine = new List<CombineInstance>();
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < actualCount; i++)
             {
-                float t = (float)i / Mathf.Max(1, count - 1);
+                float t = (float)i / Mathf.Max(1, actualCount - 1);
                 float yaw = i * 137.5f, pitch = Mathf.Lerp(-70f, -15f, t), y = height * (1f - t) * 0.8f;
                 var m = Matrix4x4.TRS(new Vector3(0, y, 0), Quaternion.Euler(0, yaw, 0) * Quaternion.Euler(pitch, 0, 0), Vector3.one * Mathf.Lerp(0.75f, 1.1f, t));
                 combine.Add(new CombineInstance { mesh = leaf, transform = m });
             }
-            string path = $"{RootT2}/Meshes/T2_Cay_{name}.asset";
+            string path = $"{RootT2}/Meshes/T2_Cay_{key}.asset";
             var mesh = AssetDatabase.LoadAssetAtPath<Mesh>(path);
             bool isNew = mesh == null;
-            if (isNew) mesh = new Mesh { name = "T2_Cay_" + name };
+            if (isNew) mesh = new Mesh { name = "T2_Cay_" + key };
             else mesh.Clear();
             mesh.CombineMeshes(combine.ToArray(), true, true);
             mesh.RecalculateBounds();
             if (isNew) AssetDatabase.CreateAsset(mesh, path);
             else EditorUtility.SetDirty(mesh);
-            plantMeshes[name] = mesh;
+            plantMeshes[key] = mesh;
             return mesh;
         }
 
@@ -750,20 +753,53 @@ namespace Khkt.EditorTools
             var pot = Lathe($"T2_Chau{kind}", 20, V(0, 0), V(potR * 0.75f, 0), V(potR * 0.78f, 0.01f), V(potR, potH * 0.92f), V(potR * 1.06f, potH * 0.95f), V(potR * 1.06f, potH), V(potR * 0.95f, potH), V(0, potH * 0.85f));
             MeshObj(g, "Chậu", pot, Vector3.zero, potMat ?? (kind == 4 ? potWhite : bioTerracotta), kind == 4);
             Cyl(g, "Đất", new Vector3(0, potH * 0.86f, 0), potR * 0.92f, 0.01f, bioSoil);
-            Mesh m;
+            Mesh m0, m1;
             Material leafMat;
             switch (kind)
             {
-                case 0: m = PlantMesh("Mon", 9, 0.3f, 0.2f, 0.25f, 0.06f); leafMat = bioLeaf; break;
-                case 1: m = PlantMesh("DuongXi", 14, 0.32f, 0.07f, 0.12f, 0.1f); leafMat = bioLeafDark; break;
-                case 2: m = PlantMesh("XaLach", 12, 0.1f, 0.08f, 0.05f, 0.02f); leafMat = bioLeafLight; break;
-                case 3: m = PlantMesh("DauNon", 6, 0.06f, 0.04f, 0.12f, 0.01f); leafMat = bioLeafLight; break;
-                default: m = PlantMesh("CayCao", 18, 0.34f, 0.12f, 0.9f, 0.08f); leafMat = bioLeaf; break;
+                case 0:
+                    m0 = PlantMesh("Mon", 9, 0.3f, 0.2f, 0.25f, 0.06f, false);
+                    m1 = PlantMesh("Mon", 9, 0.3f, 0.2f, 0.25f, 0.06f, true);
+                    leafMat = bioLeaf;
+                    break;
+                case 1:
+                    m0 = PlantMesh("DuongXi", 14, 0.32f, 0.07f, 0.12f, 0.1f, false);
+                    m1 = PlantMesh("DuongXi", 14, 0.32f, 0.07f, 0.12f, 0.1f, true);
+                    leafMat = bioLeafDark;
+                    break;
+                case 2:
+                    m0 = PlantMesh("XaLach", 12, 0.1f, 0.08f, 0.05f, 0.02f, false);
+                    m1 = PlantMesh("XaLach", 12, 0.1f, 0.08f, 0.05f, 0.02f, true);
+                    leafMat = bioLeafLight;
+                    break;
+                case 3:
+                    m0 = PlantMesh("DauNon", 6, 0.06f, 0.04f, 0.12f, 0.01f, false);
+                    m1 = PlantMesh("DauNon", 6, 0.06f, 0.04f, 0.12f, 0.01f, true);
+                    leafMat = bioLeafLight;
+                    break;
+                default:
+                    m0 = PlantMesh("CayCao", 18, 0.34f, 0.12f, 0.9f, 0.08f, false);
+                    m1 = PlantMesh("CayCao", 18, 0.34f, 0.12f, 0.9f, 0.08f, true);
+                    leafMat = bioLeaf;
+                    break;
             }
             if (kind == 3) Cyl(g, "Thân non", new Vector3(0, potH + 0.06f * scale, 0), 0.003f, 0.12f * scale, bioLeafLight);
             if (kind == 4) Cyl(g, "Thân cây", new Vector3(0, potH + 0.35f * scale, 0), 0.015f * scale, 0.7f * scale, trunk);
-            var leaves = MeshObj(g, "Tán lá", m, new Vector3(0, potH * 0.9f + (kind == 4 ? 0.25f * scale : 0), 0), leafMat, false, null, scale);
-            if (kind == 2 || kind == 3) NoShadow(leaves);
+            var leafPos = new Vector3(0, potH * 0.9f + (kind == 4 ? 0.25f * scale : 0), 0);
+            var leaves0 = MeshObj(g, "Tán lá", m0, leafPos, leafMat, false, null, scale);
+            var leaves1 = MeshObj(g, "Tán lá (LOD1)", m1, leafPos, leafMat, false, null, scale);
+            if (kind == 2 || kind == 3)
+            {
+                NoShadow(leaves0);
+                NoShadow(leaves1);
+            }
+
+            var lodGroup = g.gameObject.AddComponent<LODGroup>();
+            var lods = new LOD[2];
+            lods[0] = new LOD(0.20f, new Renderer[] { leaves0.GetComponent<Renderer>() });
+            lods[1] = new LOD(0.04f, new Renderer[] { leaves1.GetComponent<Renderer>() });
+            lodGroup.SetLODs(lods);
+            lodGroup.RecalculateBounds();
 
             if (kind < 4 && scale <= 1.2f)
             {
