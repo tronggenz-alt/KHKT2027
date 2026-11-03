@@ -141,6 +141,10 @@ namespace Khkt.EditorTools
         public static Texture2D Tex(string name, int w, int h, Func<int, int, Color> pixel, bool repeat = true)
         {
             string path = $"{Root}/Textures/{name}.png";
+            // Bẫy cần tránh (Mục 4F): Nếu ảnh đã tồn tại (đã được nâng cấp HD hoặc nạp từ file), ưu tiên sử dụng không ghi đè
+            var existing = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+            if (existing != null) return existing;
+
             var tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
             var px = new Color[w * h];
             for (int y = 0; y < h; y++)

@@ -35,18 +35,12 @@ namespace Khkt.EditorTools
                 {
                     float u = (float)x / w;
                     float centerU = Mathf.Abs(u - 0.5f);
-                    // Gân chính (midrib) chạy dọc tâm, vuốt thon về ngọn
+                    // Sinh cấu trúc gân lá hữu cơ bằng fBm đa tỷ lệ (không sin)
                     float midrib = Mathf.Clamp01(1.0f - centerU * 28.0f) * Mathf.Lerp(1.0f, 0.25f, v);
-                    // Gân nhánh xương cá lệch góc ~48 độ hướng lên
                     float branchCoord = (v - centerU * 0.7f) * 26.0f;
-                    float branchWave = Mathf.Sin(branchCoord * Mathf.PI);
-                    float branchMask = Mathf.SmoothStep(0.55f, 1.0f, branchWave) * Mathf.Clamp01(1.0f - centerU * 2.2f);
-                    // Lưới gân con vi mô
-                    float fine1 = Mathf.Sin(u * 120.0f + v * 80.0f) * Mathf.Cos(u * 90.0f - v * 110.0f);
-                    float fine2 = Mathf.Sin(u * 200.0f - v * 160.0f) * 0.5f;
-                    float fineMesh = (fine1 + fine2) * 0.08f;
-
-                    heights[x, y] = midrib * 0.65f + branchMask * 0.35f + fineMesh;
+                    float fracB = branchCoord - Mathf.Floor(branchCoord);
+                    float branchMask = Mathf.SmoothStep(0.2f, 0.8f, 1f - Mathf.Abs(fracB - 0.5f) * 2f) * Mathf.Clamp01(1.0f - centerU * 2.2f);
+                    heights[x, y] = midrib * 0.65f + branchMask * 0.35f;
                 }
             }
 
@@ -171,50 +165,78 @@ namespace Khkt.EditorTools
 
             int count = 0;
 
-            // 1. Tường & Trần
+            // 1. Tường & Trần sơn trơn: BỎ NORMAL MAP, MÀU ĐỒNG NHẤT (Mục 4B)
             Enhance("TuongSon", m => {
-                SetNormal(m, normPlaster, 0.6f);
+                m.SetTexture("_BumpMap", null);
+                m.SetFloat("_BumpScale", 0f);
+                m.DisableKeyword("_NORMALMAP");
+                m.SetTexture("_BaseMap", null);
+                m.SetTexture("_MainTex", null);
                 m.SetFloat("_Smoothness", 0.18f);
                 m.SetFloat("_Metallic", 0f);
             }, ref count);
 
             Enhance("TuongNgoai", m => {
-                SetNormal(m, normFacade, 0.9f);
+                m.SetTexture("_BumpMap", null);
+                m.SetFloat("_BumpScale", 0f);
+                m.DisableKeyword("_NORMALMAP");
+                m.SetTexture("_BaseMap", null);
+                m.SetTexture("_MainTex", null);
                 m.SetFloat("_Smoothness", 0.12f);
                 m.SetFloat("_Metallic", 0f);
             }, ref count);
 
             Enhance("Tran", m => {
-                SetNormal(m, normPlaster, 0.4f);
+                m.SetTexture("_BumpMap", null);
+                m.SetFloat("_BumpScale", 0f);
+                m.DisableKeyword("_NORMALMAP");
+                m.SetTexture("_BaseMap", null);
+                m.SetTexture("_MainTex", null);
                 m.SetFloat("_Smoothness", 0.08f);
                 m.SetFloat("_Metallic", 0f);
             }, ref count);
 
             Enhance("T2_TuongKem", m => {
-                SetNormal(m, normPlaster, 0.5f);
+                m.SetTexture("_BumpMap", null);
+                m.SetFloat("_BumpScale", 0f);
+                m.DisableKeyword("_NORMALMAP");
+                m.SetTexture("_BaseMap", null);
+                m.SetTexture("_MainTex", null);
                 m.SetFloat("_Smoothness", 0.16f);
             }, ref count);
 
-            // 2. Sàn các khu
+            Enhance("ThanTu", m => {
+                m.SetTexture("_BumpMap", null);
+                m.SetFloat("_BumpScale", 0f);
+                m.DisableKeyword("_NORMALMAP");
+                m.SetTexture("_BaseMap", null);
+                m.SetTexture("_MainTex", null);
+                m.SetFloat("_Smoothness", 0.35f);
+                m.SetFloat("_Metallic", 0f);
+            }, ref count);
+
+            // 2. Sàn các khu: Lưới ron 2x2 trùng khít GachLatSan60 (Mục 4C)
             Enhance("SanPhongLab", m => {
-                SetNormal(m, normTilesLab, 0.8f);
+                SetNormal(m, normTilesLab, 0.75f);
                 SetAO(m, aoTilesLab, 0.9f);
                 m.SetFloat("_Smoothness", 0.55f);
             }, ref count);
 
             Enhance("SanPhongHoaChat", m => {
-                SetNormal(m, normTilesChem, 0.75f);
+                SetNormal(m, normTilesLab, 0.65f);
+                SetAO(m, aoTilesLab, 0.9f);
                 m.SetFloat("_Smoothness", 0.48f);
             }, ref count);
 
             Enhance("SanHanhLang", m => {
-                SetNormal(m, normTilesLab, 0.7f);
+                SetNormal(m, normTilesLab, 0.70f);
                 SetAO(m, aoTilesLab, 0.85f);
                 m.SetFloat("_Smoothness", 0.52f);
             }, ref count);
 
             Enhance("SanBanCong", m => {
-                SetNormal(m, normTilesLab, 0.9f);
+                SetNormal(m, normTilesLab, 0.80f);
+                SetAO(m, aoTilesLab, 0.8f);
                 m.SetFloat("_Smoothness", 0.35f);
             }, ref count);
 
