@@ -162,6 +162,7 @@ namespace Khkt.EditorTools
             var terraMask = AssetDatabase.LoadAssetAtPath<Texture2D>($"{HdTexDir}/TerracottaClay002_Mask.png");
 
             var shaderLaCay = Shader.Find("Khkt/Bio/LaCay");
+            var shaderThuyTinh = Shader.Find("Khkt/HD/ThuyTinhHD");
 
             int count = 0;
 
@@ -419,19 +420,55 @@ namespace Khkt.EditorTools
             Enhance("ThungChuaXanh", m => { m.SetFloat("_Smoothness", 0.58f); m.SetFloat("_Metallic", 0.05f); }, ref count);
             Enhance("Khay8C59BF", m => { m.SetFloat("_Smoothness", 0.62f); m.SetFloat("_Metallic", 0.05f); }, ref count);
 
-            // 8. Thủy tinh Borosilicate 3.3, Mặt khum & Kính quang học (Giai đoạn 7)
+            // 8. Thủy tinh Borosilicate 3.3, Mặt khum & Kính quang học (Giai đoạn 7 & Mục 3)
             Enhance("ThuyTinh", m => {
-                SetNormal(m, normGlass, 0.15f);
-                m.SetFloat("_Smoothness", 0.98f);
-                m.SetFloat("_Metallic", 0f);
-                m.SetColor("_BaseColor", new Color(0.92f, 0.98f, 1.0f, 0.18f));
+                if (shaderThuyTinh != null)
+                {
+                    m.shader = shaderThuyTinh;
+                    m.SetColor("_BaseColor", new Color(0.95f, 0.98f, 1.0f, 0.12f));
+                    m.SetColor("_EdgeColor", new Color(0.55f, 0.72f, 0.85f, 0.65f));
+                    m.SetFloat("_F0", 0.04f);
+                    m.SetFloat("_FresnelPower", 4.2f);
+                    m.SetFloat("_RefractDistort", 0.028f);
+                    m.SetFloat("_Dispersion", 0.006f);
+                    m.SetFloat("_Smoothness", 0.98f);
+                    m.SetFloat("_SpecIntensity", 2.2f);
+                    m.SetFloat("_Absorption", 1.6f);
+                    m.SetFloat("_ShadowStrength", 0.18f);
+                    m.renderQueue = 3010;
+                }
+                else
+                {
+                    SetNormal(m, normGlass, 0.15f);
+                    m.SetFloat("_Smoothness", 0.98f);
+                    m.SetFloat("_Metallic", 0f);
+                    m.SetColor("_BaseColor", new Color(0.92f, 0.98f, 1.0f, 0.18f));
+                }
             }, ref count);
 
             Enhance("CocThuyTinh", m => {
-                SetNormal(m, normGlass, 0.15f);
-                m.SetFloat("_Smoothness", 0.98f);
-                m.SetFloat("_Metallic", 0f);
-                m.SetColor("_BaseColor", new Color(0.92f, 0.98f, 1.0f, 0.20f));
+                if (shaderThuyTinh != null)
+                {
+                    m.shader = shaderThuyTinh;
+                    m.SetColor("_BaseColor", new Color(0.95f, 0.98f, 1.0f, 0.12f));
+                    m.SetColor("_EdgeColor", new Color(0.55f, 0.72f, 0.85f, 0.65f));
+                    m.SetFloat("_F0", 0.04f);
+                    m.SetFloat("_FresnelPower", 4.2f);
+                    m.SetFloat("_RefractDistort", 0.028f);
+                    m.SetFloat("_Dispersion", 0.006f);
+                    m.SetFloat("_Smoothness", 0.98f);
+                    m.SetFloat("_SpecIntensity", 2.2f);
+                    m.SetFloat("_Absorption", 1.6f);
+                    m.SetFloat("_ShadowStrength", 0.18f);
+                    m.renderQueue = 3010;
+                }
+                else
+                {
+                    SetNormal(m, normGlass, 0.15f);
+                    m.SetFloat("_Smoothness", 0.98f);
+                    m.SetFloat("_Metallic", 0f);
+                    m.SetColor("_BaseColor", new Color(0.92f, 0.98f, 1.0f, 0.20f));
+                }
             }, ref count);
 
             Enhance("MatKhum", m => {

@@ -111,6 +111,27 @@ namespace Khkt.EditorTools
         {
             InitHdMaterialCatalog();
 
+            if (name == "ThuyTinh" || name == "CocThuyTinh")
+            {
+                var glassShader = Shader.Find("Khkt/HD/ThuyTinhHD");
+                if (glassShader != null)
+                {
+                    m.shader = glassShader;
+                    m.SetColor("_BaseColor", new Color(0.95f, 0.98f, 1.0f, 0.12f));
+                    m.SetColor("_EdgeColor", new Color(0.55f, 0.72f, 0.85f, 0.65f));
+                    m.SetFloat("_F0", 0.04f);
+                    m.SetFloat("_FresnelPower", 4.2f);
+                    m.SetFloat("_RefractDistort", 0.028f);
+                    m.SetFloat("_Dispersion", 0.006f);
+                    m.SetFloat("_Smoothness", 0.98f);
+                    m.SetFloat("_SpecIntensity", 2.2f);
+                    m.SetFloat("_Absorption", 1.6f);
+                    m.SetFloat("_ShadowStrength", 0.18f);
+                    m.renderQueue = 3010;
+                }
+                return;
+            }
+
             if (hdMaterialMap.TryGetValue(name, out var data))
             {
                 // 1. Normal Map
