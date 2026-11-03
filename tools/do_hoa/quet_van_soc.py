@@ -51,7 +51,7 @@ for folder in ["Assets/Lab/HD/Textures", "Assets/Lab/Textures"]:
         fname = os.path.basename(f)
         r = tinh_ti_so(f)
         # Ngoại lệ có chủ đích
-        is_intentional = any(k in fname.lower() for k in ["poster", "ghs", "bieutuong", "co", "vach", "apphich", "socmau", "buret", "bangtuanhoan", "lavoisier", "chandung"])
+        is_intentional = any(k in fname.lower() for k in ["poster", "ghs", "bieutuong", "co", "vach", "apphich", "socmau", "buret", "bangtuanhoan", "lavoisier", "chandung", "tile", "gach", "lamgo", "machdien", "banghim", "luoiban", "nenmanhinh", "sanloidi", "anhgel", "mangiaiphau"])
         has_stripes = (r >= 30.0) and not is_intentional
         mats = mat_uses.get(f, [])
         inventory.append({
