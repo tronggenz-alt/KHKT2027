@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>VERA Lab - Kế hoạch web quản lý và Unity Relay</title>
+<style>
+@page { size: A4; margin: 18mm 16mm 16mm; }
+* { box-sizing: border-box; }
+body { font: 10.5pt/1.5 Arial, sans-serif; color: #17202e; margin: 0; }
+h1 { font-size: 25pt; line-height: 1.15; margin: 0 0 6pt; color: #0b2545; }
+h2 { font-size: 15pt; margin: 20pt 0 7pt; color: #0b2545; border-bottom: 1.5pt solid #0a9f86; padding-bottom: 3pt; break-after: avoid; }
+h3 { font-size: 11.5pt; margin: 12pt 0 4pt; color: #0b2545; break-after: avoid; }
+p { margin: 0 0 6pt; }
+ul { margin: 0 0 7pt; padding-left: 15pt; }
+li { margin-bottom: 2pt; }
+table { width: 100%; border-collapse: collapse; margin: 5pt 0 9pt; font-size: 9.5pt; break-inside: auto; }
+tr { break-inside: avoid; }
+th { background: #0b2545; color: #fff; text-align: left; padding: 4pt 6pt; font-weight: 600; }
+td { border-bottom: .6pt solid #d4dbe6; padding: 4pt 6pt; vertical-align: top; }
+code { font: 9pt Consolas, monospace; background: #eef2f7; padding: 0 2pt; }
+.bia { padding: 6pt 0 10pt; border-bottom: 3pt solid #0a9f86; margin-bottom: 10pt; }
+.bia .phu { color: #55637b; font-size: 11.5pt; }
+.ket-luan { background: #e8f7f3; border-left: 3.5pt solid #0a9f86; padding: 8pt 10pt; margin: 7pt 0; break-inside: avoid; }
+.canh-bao { background: #fff4e0; border-left: 3.5pt solid #d9820f; padding: 8pt 10pt; margin: 7pt 0; break-inside: avoid; }
+figure { margin: 7pt 0 9pt; break-inside: avoid; }
+figcaption { font-size: 9pt; color: #55637b; margin-top: 3pt; }
+svg { width: 100%; height: auto; display: block; }
+svg text { font-family: Arial, sans-serif; }
+.nho { font-size: 9pt; color: #55637b; }
+.ngat { break-before: page; }
+.dat { color: #067a66; font-weight: 700; }
+.do { color: #b4530a; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="bia">
+  <h1>Hệ thống web quản lý giáo viên, học sinh và máy chủ Unity Relay</h1>
+  <p class="phu">VERA Lab · Báo cáo hiện trạng, kiến trúc đề xuất và kế hoạch dự kiến</p>
+  <p class="nho">Nhóm tác giả: Nguyễn Ngọc Bảo Trọng, Trần Đức Trọng · Trường THPT Chuyên Lê Quý Đôn, Gia Lai</p>
+</div>
+
+<h2>1. Tóm tắt</h2>
+<div class="ket-luan">
+  <b>Đề xuất:</b> mở rộng máy chủ FastAPI hiện có thành hệ thống lớp học có đăng nhập, và dùng Unity Relay kết hợp Netcode for GameObjects
+  để nhiều người vào chung một phòng thí nghiệm. Máy của giáo viên làm máy chủ phòng (host), nên nhà trường không phải thuê máy chủ game riêng.
+  Web tạo lớp và phát mã phòng; Relay chỉ chuyển tiếp dữ liệu trong lúc học.
+</div>
+<ul>
+  <li><b>Khối lượng dự kiến:</b> khoảng 13 đến 17 tuần với hai người, chia 8 giai đoạn, mỗi giai đoạn có điều kiện hoàn thành riêng (mục 7).</li>
+  <li><b>Chi phí Relay dự kiến:</b> 0 đồng ở quy mô một trường, theo hạn mức miễn phí đang công bố (mục 6).</li>
+  <li><b>Việc phải làm trước tiên:</b> thêm đăng nhập và phân quyền. Hiện API web chưa có đăng nhập, nên chưa được đưa ra Internet.</li>
+  <li><b>Rủi ro lớn nhất:</b> đồng bộ thao tác thí nghiệm giữa nhiều máy, vì mã hiện tại viết cho một người chơi. Nhóm cần làm thử trên một thao tác trước khi cam kết toàn bộ (giai đoạn 4).</li>
+</ul>
+
+<h2>2. Hiện trạng đã kiểm tra trong mã nguồn</h2>
+<table>
+  <tr><th style="width:27%">Thành phần</th><th style="width:43%">Đã có</th><th>Còn thiếu</th></tr>
+  <tr><td>Máy chủ FastAPI<br><code>server/ai</code>, <code>server/lab</code></td><td>Khoảng 54 điểm API: kho hóa chất, thiết bị, nhật ký, khu sinh học, mượn trả, đặt lịch, kết quả thí nghiệm, trợ lý AI, robot</td><td>Đăng nhập, phân quyền, khái niệm lớp và học sinh</td></tr>
+  <tr><td>Cơ sở dữ liệu<br><code>data/lab.db</code></td><td>SQLite, 12 bảng phục vụ quản lý phòng thí nghiệm</td><td>Bảng người dùng, lớp, bài tập, bài nộp, phòng học</td></tr>
+  <tr><td>Giao diện web<br><code>server/web</code></td><td><code>index.html</code>, <code>sinh.html</code> cho người quản lý phòng lab</td><td>Trang riêng cho giáo viên, học sinh</td></tr>
+  <tr><td>Nối Unity với web</td><td><code>BioLabSync</code>: gửi sự kiện, có hàng đợi khi mất mạng, địa chỉ mặc định <code>127.0.0.1:8000</code></td><td>Gắn sự kiện với học sinh và bài tập; mới có ở khu Sinh</td></tr>
+  <tr><td>Nhiều người chơi</td><td class="do">Chưa có. Dự án chưa cài Netcode, Relay; chưa có định danh mạng cho vật thể</td><td>Toàn bộ phần mục 5</td></tr>
+  <tr><td>Khóa API AI</td><td>Lưu ở máy chủ, không gửi xuống Unity hay trình duyệt</td><td>Điểm API quản lý khóa <code>/khoa</code> phải chỉ cho quản trị viên</td></tr>
+</table>
+<div class="canh-bao"><b>Phải sửa trước khi đưa lên mạng:</b> các điểm API hiện chạy không cần đăng nhập, gồm cả quản lý khóa AI. Việc này ổn khi chạy trên máy cá nhân, nhưng không an toàn nếu mở ra Internet.</div>
+
+<h2>3. Sơ đồ kiến trúc tổng thể</h2>
+<figure>
+<svg viewBox="0 0 760 480" role="img" aria-label="Sơ đồ kiến trúc tổng thể">
+  <defs>
+    <marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="#33415c"/></marker>
+  </defs>
+  <style>.h{fill:#fff;stroke:#33415c;stroke-width:1.2}.t{font-size:12.5px;font-weight:700;fill:#0b2545}.s{font-size:10.5px;fill:#44526a}.l{font-size:10px;fill:#33415c}.a{stroke:#33415c;stroke-width:1.3;fill:none;marker-end:url(#m)}.b{stroke:#0a9f86;stroke-width:2;fill:none;marker-end:url(#m)}.c{stroke:#2563eb;stroke-width:2;fill:none;marker-end:url(#m);stroke-dasharray:6 4}</style>
+
+  <rect x="8" y="8" width="744" height="108" rx="8" fill="#eef4ff" stroke="#b9cdf0"/>
+  <text x="20" y="27" class="t">Người dùng</text>
+  <rect class="h" x="24" y="38" width="200" height="66" rx="6"/><text x="124" y="60" text-anchor="middle" class="t">Giáo viên</text><text x="124" y="78" text-anchor="middle" class="s">Trình duyệt: lớp, bài tập, điểm</text><text x="124" y="94" text-anchor="middle" class="s">Ứng dụng Unity: máy chủ phòng</text>
+  <rect class="h" x="280" y="38" width="200" height="66" rx="6"/><text x="380" y="60" text-anchor="middle" class="t">Học sinh</text><text x="380" y="78" text-anchor="middle" class="s">Trình duyệt: bài tập, kết quả</text><text x="380" y="94" text-anchor="middle" class="s">Ứng dụng Unity: vào phòng</text>
+  <rect class="h" x="536" y="38" width="200" height="66" rx="6"/><text x="636" y="60" text-anchor="middle" class="t">Quản trị viên</text><text x="636" y="78" text-anchor="middle" class="s">Tài khoản, kho, khóa AI</text><text x="636" y="94" text-anchor="middle" class="s">Chỉ qua trình duyệt</text>
+
+  <rect x="8" y="150" width="440" height="318" rx="8" fill="#f1fbf8" stroke="#a9e2d6"/>
+  <text x="20" y="170" class="t">Hệ thống của trường (mở rộng từ mã hiện có)</text>
+  <rect class="h" x="24" y="182" width="408" height="60" rx="6"/><text x="228" y="204" text-anchor="middle" class="t">Web giáo viên, học sinh</text><text x="228" y="222" text-anchor="middle" class="s">HTML, JS theo phong cách web hiện có; tách theo vai trò</text>
+  <rect class="h" x="24" y="266" width="408" height="118" rx="6"/><text x="228" y="288" text-anchor="middle" class="t">Máy chủ FastAPI</text>
+  <rect x="38" y="298" width="120" height="74" rx="5" fill="#def6f0" stroke="#0a9f86"/><text x="98" y="322" text-anchor="middle" class="l" font-weight="700">Mới</text><text x="98" y="338" text-anchor="middle" class="l">Đăng nhập, vai trò</text><text x="98" y="352" text-anchor="middle" class="l">Lớp, bài tập, nộp bài</text><text x="98" y="366" text-anchor="middle" class="l">Mã phòng</text>
+  <rect x="168" y="298" width="120" height="74" rx="5" fill="#f3f5f9" stroke="#8d9bb3"/><text x="228" y="322" text-anchor="middle" class="l" font-weight="700">Đã có</text><text x="228" y="338" text-anchor="middle" class="l">Kho, thiết bị</text><text x="228" y="352" text-anchor="middle" class="l">Nhật ký, kết quả</text><text x="228" y="366" text-anchor="middle" class="l">Mượn trả, đặt lịch</text>
+  <rect x="298" y="298" width="120" height="74" rx="5" fill="#f3f5f9" stroke="#8d9bb3"/><text x="358" y="322" text-anchor="middle" class="l" font-weight="700">Đã có</text><text x="358" y="338" text-anchor="middle" class="l">Trợ lý AI</text><text x="358" y="352" text-anchor="middle" class="l">Kế hoạch robot</text><text x="358" y="366" text-anchor="middle" class="l">Mạng lưới khóa AI</text>
+  <rect class="h" x="24" y="404" width="190" height="52" rx="6"/><text x="119" y="426" text-anchor="middle" class="t">Cơ sở dữ liệu</text><text x="119" y="443" text-anchor="middle" class="s">SQLite, sau đó PostgreSQL</text>
+  <rect class="h" x="242" y="404" width="190" height="52" rx="6"/><text x="337" y="426" text-anchor="middle" class="t">Nhà cung cấp AI</text><text x="337" y="443" text-anchor="middle" class="s">Chỉ gọi từ máy chủ</text>
+
+  <rect x="478" y="150" width="274" height="318" rx="8" fill="#f4f1ff" stroke="#cbbff0"/>
+  <text x="490" y="170" class="t">Dịch vụ Unity (không tự vận hành)</text>
+  <rect class="h" x="494" y="322" width="242" height="62" rx="6"/><text x="615" y="346" text-anchor="middle" class="t">Unity Authentication</text><text x="615" y="365" text-anchor="middle" class="s">Định danh để được dùng Relay</text>
+  <rect class="h" x="494" y="182" width="242" height="118" rx="6"/><text x="615" y="208" text-anchor="middle" class="t">Unity Relay</text><text x="615" y="232" text-anchor="middle" class="s">Chuyển tiếp gói tin, tránh phải mở cổng</text><text x="615" y="250" text-anchor="middle" class="s">Không chạy logic thí nghiệm</text><text x="615" y="268" text-anchor="middle" class="s">Không lưu dữ liệu học sinh</text>
+  <rect class="h" x="494" y="404" width="242" height="52" rx="6"/><text x="615" y="426" text-anchor="middle" class="t">Máy giáo viên giữ quyền quyết định</text><text x="615" y="443" text-anchor="middle" class="s">Chạy luật Hóa, Sinh cho cả phòng</text>
+
+  <path class="a" d="M124 104 L124 182"/><path class="a" d="M380 104 L380 182"/><path class="a" d="M560 104 C530 138 440 140 400 182"/>
+  <path class="a" d="M228 242 L228 266"/><path class="a" d="M119 384 L119 404"/><path class="a" d="M337 384 L337 404"/>
+  <path class="c" d="M170 104 C220 128 470 118 540 182"/><path class="c" d="M430 104 C460 128 560 120 600 182"/>
+  <text x="620" y="140" class="l" fill="#2563eb">Dữ liệu trong buổi học</text>
+</svg>
+<figcaption>Hình 1. Đường liền: HTTPS tới máy chủ của trường. Đường đứt: dữ liệu thời gian thực giữa các ứng dụng Unity qua Relay. Unity cũng gọi FastAPI để lấy bài tập và nộp kết quả.</figcaption>
+</figure>
+
+<h2 class="ngat">4. Web quản lý giáo viên, học sinh</h2>
+<h3>4.1. Vai trò và chức năng</h3>
+<table>
+  <tr><th style="width:18%">Vai trò</th><th>Chức năng chính</th></tr>
+  <tr><td><b>Quản trị viên</b></td><td>Tạo tài khoản giáo viên, nhập danh sách học sinh từ tệp, quản lý kho, thiết bị, khóa AI, xem nhật ký hệ thống</td></tr>
+  <tr><td><b>Giáo viên</b></td><td>Tạo lớp, giao bài thí nghiệm kèm hạn nộp, mở phòng thực hành, xem tiến độ từng học sinh, xem thao tác sai, chấm điểm, xuất bảng điểm, đặt lịch dùng phòng</td></tr>
+  <tr><td><b>Học sinh</b></td><td>Xem bài được giao, vào phòng bằng một lần bấm, xem kết quả và nhận xét, làm lại bài, xem lịch sử thí nghiệm của mình</td></tr>
+</table>
+<h3>4.2. Dữ liệu mới</h3>
+<figure>
+<svg viewBox="0 0 760 232" role="img" aria-label="Quan hệ dữ liệu">
+  <style>.e{fill:#fff;stroke:#0a9f86;stroke-width:1.4}.n{font-size:12px;font-weight:700;fill:#0b2545}.f{font-size:10px;fill:#44526a}.ln{stroke:#33415c;stroke-width:1.2;fill:none}</style>
+  <rect class="e" x="10" y="20" width="150" height="76" rx="6"/><text x="85" y="40" text-anchor="middle" class="n">nguoi_dung</text><text x="85" y="58" text-anchor="middle" class="f">vai_tro, ho_ten</text><text x="85" y="74" text-anchor="middle" class="f">mat_khau_bam</text>
+  <rect class="e" x="305" y="20" width="150" height="76" rx="6"/><text x="380" y="40" text-anchor="middle" class="n">lop</text><text x="380" y="58" text-anchor="middle" class="f">ten, nam_hoc</text><text x="380" y="74" text-anchor="middle" class="f">giao_vien_id</text>
+  <rect class="e" x="600" y="20" width="150" height="76" rx="6"/><text x="675" y="40" text-anchor="middle" class="n">bai_tap</text><text x="675" y="58" text-anchor="middle" class="f">lop_id, ma_bai_tn</text><text x="675" y="74" text-anchor="middle" class="f">han_nop</text>
+  <rect class="e" x="10" y="146" width="150" height="76" rx="6"/><text x="85" y="166" text-anchor="middle" class="n">thanh_vien_lop</text><text x="85" y="184" text-anchor="middle" class="f">lop_id</text><text x="85" y="200" text-anchor="middle" class="f">hoc_sinh_id</text>
+  <rect class="e" x="305" y="146" width="150" height="76" rx="6"/><text x="380" y="166" text-anchor="middle" class="n">phong_hoc</text><text x="380" y="184" text-anchor="middle" class="f">lop_id, ma_vao_phong</text><text x="380" y="200" text-anchor="middle" class="f">trang_thai, het_han</text>
+  <rect class="e" x="600" y="146" width="150" height="76" rx="6"/><text x="675" y="166" text-anchor="middle" class="n">bai_nop</text><text x="675" y="184" text-anchor="middle" class="f">bai_tap_id, hoc_sinh_id</text><text x="675" y="200" text-anchor="middle" class="f">ket_qua, loi_sai, diem</text>
+  <path class="ln" d="M160 58 L305 58"/><path class="ln" d="M455 58 L600 58"/><path class="ln" d="M85 96 L85 146"/><path class="ln" d="M380 96 L380 146"/><path class="ln" d="M675 96 L675 146"/><path class="ln" d="M305 80 L160 165"/>
+</svg>
+<figcaption>Hình 2. Sáu bảng mới. Bảng kết quả, nhật ký hiện có sẽ thêm cột người dùng để không phải viết lại.</figcaption>
+</figure>
+<h3>4.3. Điểm API mới</h3>
+<table>
+  <tr><th style="width:42%">Điểm API</th><th>Chức năng</th><th style="width:16%">Vai trò</th></tr>
+  <tr><td><code>POST /auth/dang-nhap</code>, <code>/lam-moi</code></td><td>Cấp phiên đăng nhập cho web và Unity</td><td>Mọi người</td></tr>
+  <tr><td><code>POST /nguoi-dung/nhap-tep</code></td><td>Nhập danh sách từ CSV</td><td>Quản trị viên</td></tr>
+  <tr><td><code>GET, POST /lop</code>, <code>/lop/{id}/thanh-vien</code></td><td>Quản lý lớp</td><td>Giáo viên</td></tr>
+  <tr><td><code>GET, POST /bai-tap</code></td><td>Giao bài, học sinh xem bài của mình</td><td>Giáo viên, học sinh</td></tr>
+  <tr><td><code>POST /bai-nop</code>, <code>PATCH /bai-nop/{id}</code></td><td>Unity nộp kết quả; giáo viên chấm</td><td>Học sinh, giáo viên</td></tr>
+  <tr><td><code>POST /phong</code>, <code>GET /phong/cua-toi</code></td><td>Mở phòng, lưu mã vào phòng; học sinh lấy mã của lớp mình</td><td>Giáo viên, học sinh</td></tr>
+  <tr><td><code>GET /bao-cao/lop/{id}</code></td><td>Tiến độ và bảng điểm, xuất CSV</td><td>Giáo viên</td></tr>
+</table>
+<h3>4.4. Bảo mật và dữ liệu học sinh</h3>
+<ul>
+  <li>Băm mật khẩu bằng Argon2 hoặc bcrypt; phiên đăng nhập ngắn hạn, cookie <code>HttpOnly</code> cho web và mã thông báo cho Unity.</li>
+  <li>Kiểm tra quyền ở phía máy chủ: học sinh chỉ xem được dữ liệu của mình, giáo viên chỉ xem được lớp mình dạy.</li>
+  <li>Toàn bộ qua HTTPS, giới hạn số lần đăng nhập sai, ghi nhật ký thao tác quản trị.</li>
+  <li>Thu thập tối thiểu: họ tên, lớp, kết quả học tập. Không lưu ngày sinh, số điện thoại, ảnh, dữ liệu webcam. Video webcam chỉ xử lý trên máy học sinh, như hiện nay.</li>
+  <li>Học sinh phần lớn dưới 18 tuổi: cần nhà trường xác nhận cách thông báo và xin đồng ý theo quy định bảo vệ dữ liệu cá nhân hiện hành trước khi dùng thật.</li>
+</ul>
+
+<h2 class="ngat">5. Nhiều người cùng phòng qua Unity Relay</h2>
+<h3>5.1. Luồng vào phòng</h3>
+<figure>
+<svg viewBox="0 0 760 330" role="img" aria-label="Trình tự vào phòng">
+  <style>.tt{font-size:12px;font-weight:700;fill:#0b2545}.v{stroke:#8d9bb3;stroke-width:1;stroke-dasharray:4 3}.m1{font-size:10.5px;fill:#17202e}.ar{stroke:#33415c;stroke-width:1.3;marker-end:url(#m2);fill:none}.hb{fill:#eef4ff;stroke:#33415c}</style>
+  <defs><marker id="m2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10z" fill="#33415c"/></marker></defs>
+  <g text-anchor="middle">
+    <rect class="hb" x="20" y="8" width="130" height="28" rx="5"/><text x="85" y="27" class="tt">Unity giáo viên</text>
+    <rect class="hb" x="225" y="8" width="130" height="28" rx="5"/><text x="290" y="27" class="tt">Unity Relay</text>
+    <rect class="hb" x="415" y="8" width="130" height="28" rx="5"/><text x="480" y="27" class="tt">FastAPI</text>
+    <rect class="hb" x="610" y="8" width="130" height="28" rx="5"/><text x="675" y="27" class="tt">Unity học sinh</text>
+  </g>
+  <path class="v" d="M85 36V322M290 36V322M480 36V322M675 36V322"/>
+  <path class="ar" d="M85 62H290"/><text x="92" y="56" class="m1">1. Xin phòng, nhận mã vào phòng</text>
+  <path class="ar" d="M85 98H480"/><text x="92" y="92" class="m1">2. Lưu mã phòng gắn với lớp (POST /phong)</text>
+  <path class="ar" d="M675 134H480"/><text x="500" y="128" class="m1">3. Hỏi phòng của lớp mình</text>
+  <path class="ar" d="M480 170H675"/><text x="500" y="164" class="m1">4. Trả mã vào phòng</text>
+  <path class="ar" d="M675 206H290"/><text x="400" y="200" class="m1">5. Vào Relay bằng mã</text>
+  <path class="ar" d="M290 242H85"/><text x="110" y="236" class="m1">6. Báo có người mới, gửi trạng thái phòng</text>
+  <path class="ar" d="M675 278H85"/><text x="300" y="272" class="m1">7. Học sinh gửi ý định: cầm, rót, bấm máy</text>
+  <path class="ar" d="M85 312H675"/><text x="300" y="306" class="m1">8. Giáo viên tính kết quả, gửi lại cả phòng</text>
+</svg>
+<figcaption>Hình 3. Học sinh không phải nhập mã bằng tay. Bước 7, 8 đều đi qua Relay. Khi hết giờ, Unity nộp kết quả về FastAPI.</figcaption>
+</figure>
+<h3>5.2. Cách đồng bộ</h3>
+<table>
+  <tr><th style="width:25%">Dữ liệu</th><th style="width:20%">Tần suất</th><th>Cách làm</th></tr>
+  <tr><td>Vị trí người, tay</td><td>10 đến 20 lần/giây</td><td>Mỗi máy tự gửi vị trí của mình, các máy khác nội suy</td></tr>
+  <tr><td>Vật đang cầm</td><td>10 đến 20 lần/giây</td><td>Chỉ gửi khi đang có người cầm; đặt xuống thì gửi vị trí cuối</td></tr>
+  <tr><td>Thao tác</td><td>Theo sự kiện</td><td>Máy khách gửi ý định, máy host kiểm tra rồi thực hiện. Dùng lại đúng các hàm tương tác đang có</td></tr>
+  <tr><td>Dung dịch, nhiệt độ</td><td>2 đến 5 lần/giây</td><td>Luật <code>ChemEngine</code>, <code>BioRules</code> chỉ chạy trên máy host, gửi kết quả đã tính và chỉ gửi khi đổi</td></tr>
+  <tr><td>Máy phân tích</td><td>Theo sự kiện</td><td>Đồng bộ trạng thái máy; màn hình kết quả vẽ lại ở từng máy</td></tr>
+  <tr><td>Vào giữa buổi</td><td>Một lần</td><td>Gửi ảnh chụp toàn bộ trạng thái phòng</td></tr>
+</table>
+<h3>5.3. Thay đổi trong Unity</h3>
+<ul>
+  <li><b>Gói mới:</b> Netcode for GameObjects, Unity Transport, Multiplayer Services SDK. Tài liệu Unity hiện khuyên dùng SDK hợp nhất này cho dự án mới.</li>
+  <li><b>Định danh ổn định:</b> mỗi vật tương tác cần một mã giống nhau trên mọi máy. Hiện chưa có, và đây là việc nền tảng cần làm đầu tiên.</li>
+  <li><b>Tầng ý định:</b> tách quyết định khỏi <code>HandController</code> để cùng một thao tác chạy được khi có mạng và không mạng.</li>
+  <li><b>Tải khu:</b> <code>ZoneStreamer</code> trên máy học sinh chỉ tải khu quanh học sinh đó, còn máy host phải giữ mọi khu có người.</li>
+  <li><b>Một người vẫn chạy offline:</b> nhiều người là tùy chọn, không làm mất chế độ hiện tại. Đây là yêu cầu trong <code>contracts.md</code>.</li>
+</ul>
+<h3>5.4. Vì sao chọn Relay trước máy chủ chuyên dụng</h3>
+<table>
+  <tr><th style="width:20%">Tiêu chí</th><th>Relay, máy giáo viên làm host</th><th>Máy chủ Unity chuyên dụng</th></tr>
+  <tr><td>Chi phí</td><td class="dat">Không phải thuê máy chạy game</td><td>Phải thuê hoặc đặt máy luôn bật</td></tr>
+  <tr><td>Vận hành</td><td class="dat">Không phải mở cổng mạng, học sinh vào được qua NAT</td><td>Cần người quản trị, cập nhật bản dựng</td></tr>
+  <tr><td>Khi máy host thoát</td><td class="do">Phòng kết thúc; cần tự lưu định kỳ để mở lại</td><td class="dat">Phòng vẫn chạy</td></tr>
+  <tr><td>Máy host</td><td class="do">Máy giáo viên phải đủ mạnh, mạng ổn định</td><td class="dat">Không phụ thuộc máy giáo viên</td></tr>
+  <tr><td>Chống gian lận</td><td>Đủ cho lớp học, giáo viên là host</td><td class="dat">Tốt nhất</td></tr>
+</table>
+<div class="ket-luan"><b>Tương thích về sau:</b> vì máy khách chỉ gửi ý định và máy host quyết định, sau này chuyển sang máy chủ chuyên dụng không phải viết lại phần thí nghiệm. Hướng này cần cập nhật mục 6 của <code>contracts.md</code>, hiện đang đề xuất máy chủ chuyên dụng ngay từ đầu.</div>
+
+<h2 class="ngat">6. Ước tính chi phí và hạ tầng</h2>
+<table>
+  <tr><th style="width:28%">Hạng mục</th><th style="width:40%">Hạn mức công bố</th><th>Ước tính cho một trường</th></tr>
+  <tr><td>Relay: số người dùng đồng thời</td><td>50 người trung bình tháng miễn phí, tính trung bình chứ không theo đỉnh. Vượt: 0,16 USD mỗi người</td><td>Một lớp 40 người học 45 phút, 4 buổi mỗi tuần: trung bình tháng khoảng 0,7 người. <span class="dat">Trong hạn mức</span></td></tr>
+  <tr><td>Relay: băng thông</td><td>Miễn phí tới 100 đến 150 GiB/tháng (các trang Unity đang ghi khác nhau). Vượt ở châu Á: 0,16 USD/GiB</td><td>Giả định 30 KB/giây mỗi người: khoảng 3,2 GB mỗi buổi, 55 GB mỗi tháng. <span class="dat">Trong hạn mức</span></td></tr>
+  <tr><td>Máy chủ FastAPI</td><td>Không phụ thuộc Unity</td><td>Máy tính trong trường hoặc máy chủ thuê gói nhỏ</td></tr>
+  <tr><td>Web tĩnh</td><td>Cloudflare Pages đang dùng</td><td>Miễn phí ở quy mô này</td></tr>
+  <tr><td>Máy giáo viên</td><td>Không có</td><td>Cần đo thực tế, nên dùng máy mạnh hơn cấu hình tối thiểu</td></tr>
+</table>
+<p class="nho">Con số băng thông là giả định để định cỡ, phải đo lại ở giai đoạn 4. Bảng giá Unity có thể đổi và cần xem lại trước khi triển khai. Nhóm chưa xác nhận được số người tối đa trong một phòng Relay từ nguồn chính thức; đây cũng là việc của giai đoạn 4.</p>
+
+<h2>7. Kế hoạch dự kiến</h2>
+<figure>
+<svg viewBox="0 0 760 310" role="img" aria-label="Lộ trình">
+  <style>.g{font-size:10.5px;fill:#17202e}.w{font-size:9.5px;fill:#55637b}.bw{fill:#0a9f86}.bn{fill:#2563eb}.bx{fill:#d9820f}.gr{stroke:#e1e6ef;stroke-width:1}</style>
+  <g class="gr"><path d="M250 22V280M300 22V280M350 22V280M400 22V280M450 22V280M500 22V280M550 22V280M600 22V280M650 22V280"/></g>
+  <text x="250" y="16" class="w" text-anchor="middle">Tuần 1</text><text x="350" y="16" class="w" text-anchor="middle">Tuần 5</text><text x="450" y="16" class="w" text-anchor="middle">Tuần 9</text><text x="550" y="16" class="w" text-anchor="middle">Tuần 13</text><text x="650" y="16" class="w" text-anchor="middle">Tuần 17</text>
+  <text x="6" y="42" class="g">0. Bảo mật nền, đăng nhập</text><rect class="bw" x="250" y="30" width="50" height="16" rx="3"/>
+  <text x="6" y="74" class="g">1. Lớp, học sinh, nhập danh sách</text><rect class="bw" x="275" y="62" width="50" height="16" rx="3"/>
+  <text x="6" y="106" class="g">2. Giao bài, Unity nộp kết quả</text><rect class="bw" x="325" y="94" width="62" height="16" rx="3"/>
+  <text x="6" y="138" class="g">3. Trang giáo viên, học sinh</text><rect class="bw" x="375" y="126" width="62" height="16" rx="3"/>
+  <text x="6" y="170" class="g">4. Làm thử Relay: 2 người, 1 thao tác</text><rect class="bx" x="300" y="158" width="50" height="16" rx="3"/>
+  <text x="6" y="202" class="g">5. Đồng bộ thao tác thí nghiệm</text><rect class="bn" x="350" y="190" width="125" height="16" rx="3"/>
+  <text x="6" y="234" class="g">6. Nối web với Relay (mã phòng)</text><rect class="bn" x="475" y="222" width="37" height="16" rx="3"/>
+  <text x="6" y="266" class="g">7. Thử trên lớp thật, sửa lỗi</text><rect class="bx" x="512" y="254" width="75" height="16" rx="3"/>
+  <rect class="bw" x="250" y="292" width="12" height="10" rx="2"/><text x="266" y="301" class="w">Web</text><rect class="bn" x="310" y="292" width="12" height="10" rx="2"/><text x="326" y="301" class="w">Nhiều người</text><rect class="bx" x="410" y="292" width="12" height="10" rx="2"/><text x="426" y="301" class="w">Mốc quyết định</text>
+</svg>
+<figcaption>Hình 4. Thời lượng ước tính cho hai người, tính theo tuần làm việc kể từ lúc bắt đầu; web và nhiều người chạy song song. Biểu đồ khoảng 14 tuần; ước tính 13 đến 17 tuần là đã tính dự phòng cho đồng bộ thao tác. Chưa bao gồm thời gian thi, ôn tập.</figcaption>
+</figure>
+<table>
+  <tr><th style="width:5%">GĐ</th><th style="width:43%">Sản phẩm</th><th>Điều kiện hoàn thành</th></tr>
+  <tr><td>0</td><td>Đăng nhập, vai trò, khóa toàn bộ API cũ theo quyền</td><td>Không đăng nhập thì mọi API nhạy cảm trả 401; web cũ vẫn chạy; toàn bộ kiểm thử cũ đạt</td></tr>
+  <tr><td>1</td><td>Quản lý lớp, nhập học sinh bằng CSV</td><td>Nhập 40 học sinh, đăng nhập được; học sinh không xem được lớp khác</td></tr>
+  <tr><td>2</td><td>Giao bài, đăng nhập trong Unity, tự nộp kết quả</td><td>Làm một bài trong Unity, kết quả hiện đúng người, đúng bài; mất mạng vẫn nộp lại được</td></tr>
+  <tr><td>3</td><td>Trang giáo viên, học sinh; chấm điểm; xuất CSV</td><td>Giáo viên hoàn thành một vòng giao, xem, chấm mà không cần hướng dẫn</td></tr>
+  <tr><td>4</td><td>Làm thử: hai máy khác mạng, thấy nhau, cùng rót một bình</td><td><b>Mốc quyết định:</b> đo độ trễ, băng thông, FPS máy host. Nếu không đạt thì giảm phạm vi trước khi làm tiếp</td></tr>
+  <tr><td>5</td><td>Định danh mạng, tầng ý định, đồng bộ các dụng cụ chính</td><td>Thí nghiệm Hóa và Sinh cơ bản cho cùng kết quả trên mọi máy; vào giữa buổi đúng trạng thái; offline vẫn đạt toàn bộ kiểm thử</td></tr>
+  <tr><td>6</td><td>Mở phòng từ lớp, học sinh vào một lần bấm</td><td>Học sinh chỉ thấy phòng lớp mình; phòng tự đóng khi hết giờ</td></tr>
+  <tr><td>7</td><td>Thử với một lớp thật, gom góp ý</td><td><b>Mốc quyết định:</b> hoàn thành một buổi 45 phút với số học sinh đã thống nhất, ghi lại lỗi và số đo</td></tr>
+</table>
+
+<h2 class="ngat">8. Kiểm thử</h2>
+<ul>
+  <li><b>API:</b> mở rộng bộ <code>unittest</code> hiện có (149 bài), thêm kiểm thử phân quyền: mỗi vai trò thử cả những điểm API không được phép.</li>
+  <li><b>Nhiều người:</b> chạy nhiều bản dựng trên một máy và thao tác tự động, so trạng thái cuối giữa các máy; kết quả phải trùng với khi chạy một người.</li>
+  <li><b>Tải:</b> mô phỏng dần lên 5, 15, 30, 40 người; ghi FPS máy host, độ trễ, băng thông.</li>
+  <li><b>Sự cố:</b> rớt mạng rồi vào lại, máy host thoát giữa buổi, hai người cùng cầm một vật.</li>
+  <li><b>Offline:</b> chạy lại toàn bộ bài kiểm thử Unity hiện có ở chế độ một người sau mỗi giai đoạn.</li>
+</ul>
+
+<h2>9. Rủi ro và cách xử lý</h2>
+<table>
+  <tr><th style="width:33%">Rủi ro</th><th style="width:12%">Mức</th><th>Cách xử lý</th></tr>
+  <tr><td>Đồng bộ làm hỏng chế độ một người</td><td class="do">Cao</td><td>Làm thử ở giai đoạn 4 trên nhánh riêng; tầng ý định có kiểm thử hồi quy; chế độ offline luôn là mặc định</td></tr>
+  <tr><td>Quá nhiều vật cần đồng bộ, nặng mạng</td><td class="do">Cao</td><td>Chỉ gửi vật đang được dùng; gom theo khu; chỉ gửi khi đổi</td></tr>
+  <tr><td>Máy giáo viên không đủ mạnh</td><td>Vừa</td><td>Đo ở giai đoạn 4; bớt số người mỗi phòng; có thể chia nhóm nhiều phòng</td></tr>
+  <tr><td>Mạng trường yếu hoặc chặn cổng</td><td>Vừa</td><td>Thử trước tại trường; dự phòng chế độ mạng LAN không qua Relay; thử kết nối WebSocket</td></tr>
+  <tr><td>Máy host thoát giữa buổi</td><td>Vừa</td><td>Tự lưu định kỳ, mở lại phòng từ bản lưu</td></tr>
+  <tr><td>Rò rỉ dữ liệu học sinh</td><td class="do">Cao</td><td>Mục 4.4; làm đăng nhập trước tiên; thu thập tối thiểu</td></tr>
+  <tr><td>Unity đổi giá hoặc điều khoản</td><td>Thấp</td><td>Tầng mạng tách biệt để có thể đổi sang máy chủ riêng</td></tr>
+  <tr><td>Thiếu thời gian hai người</td><td>Vừa</td><td>Làm web trước; nếu thiếu thời gian, chỉ cho cùng phòng ở mức quan sát và thảo luận</td></tr>
+</table>
+
+<h2>10. Việc cần nhóm quyết định</h2>
+<table>
+  <tr><th style="width:40%">Câu hỏi</th><th>Đề xuất</th></tr>
+  <tr><td>Máy chủ FastAPI đặt ở đâu?</td><td>Bắt đầu bằng một máy tính trong trường hoặc máy chủ thuê gói nhỏ; chọn sau giai đoạn 1</td></tr>
+  <tr><td>Tài khoản học sinh tạo thế nào?</td><td>Nhà trường cấp từ danh sách lớp, không cho tự đăng ký</td></tr>
+  <tr><td>Một phòng tối đa bao nhiêu người?</td><td>Mục tiêu ban đầu 20 người, nâng lên 40 nếu số đo cho phép; số thực tế quyết định ở giai đoạn 4</td></tr>
+  <tr><td>Giáo viên có được thao tác thay học sinh?</td><td>Có quyền quan sát, khóa và làm mẫu</td></tr>
+  <tr><td>Hỗ trợ iOS trong nhiều người?</td><td>Chưa. Ứng dụng hiện chỉ có bản Windows; làm Windows, macOS trước</td></tr>
+</table>
+
+<h2>Nguồn tham khảo</h2>
+<ul class="nho">
+  <li>Mã nguồn dự án: <code>server/</code>, <code>contracts.md</code> mục 6, <code>BioLabSync.cs</code>, <code>Packages/manifest.json</code>.</li>
+  <li>Unity Gaming Services, bảng giá: unity.com/products/gaming-services/pricing; cách tính giá Relay: support.unity.com, bài "How is the Relay Service Priced".</li>
+  <li>Unity, tài liệu dùng Relay với Netcode for GameObjects: docs.unity.com/relay/relay-and-ngo; docs.unity3d.com/Packages/com.unity.netcode.gameobjects@2.7/manual/relay/relay.html.</li>
+</ul>
+</body>
+</html>

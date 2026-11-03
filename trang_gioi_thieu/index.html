@@ -2,654 +2,1099 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>VERA Lab</title>
-<meta name="description" content="VERA Lab: phòng thí nghiệm thực tế ảo Hóa – Sinh tích hợp AI, kết quả được tính từ chính mẫu học sinh đã pha.">
+<meta name="description" content="VERA Lab: tòa nhà thí nghiệm ảo Hóa – Sinh tích hợp AI. Tự do đi lại, tự tay làm thí nghiệm và dùng thiết bị hiện đại ngay trên máy tính.">
+<meta property="og:title" content="VERA Lab">
+<meta property="og:description" content="Tòa nhà thí nghiệm Hóa – Sinh tích hợp AI, ngay trên máy tính của bạn.">
+<meta property="og:image" content="anh/hero.jpg">
+<meta name="theme-color" content="#05080f">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%2305080f'/%3E%3Cpath d='M10 10l10 21 10-21' fill='none' stroke='%2338e8ff' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 <style>
-/* Bố cục: màn hình máy đo (nền mực, vạch phổ) mở đầu, rồi các trang kiểu báo cáo khoa học có đánh số hình và bảng. */
 :root {
-  color-scheme: light;
-  --muc: #0c1f2b;
-  --muc-2: #15303f;
-  --giay: #f4f7f6;
-  --trang: #ffffff;
-  --chu: #142631;
-  --phu: #51646f;
-  --vach: #d5dfdf;
-  --ngoc: #0f8b84;
-  --ngoc-sang: #5fe0d2;
-  --cam: #c8561e;
-  --tren-muc: #e8f1f0;
-  --tren-muc-phu: #9db4bd;
-  --serif: "Newsreader", "Noto Serif", Georgia, serif;
-  --sans: "Be Vietnam Pro", "Segoe UI", system-ui, sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
-  --pho: linear-gradient(90deg, #7a2fd0 0%, #2f55e0 18%, #12a6c9 34%, #27b35a 50%, #e3d11f 64%, #ee7d1b 80%, #d6242a 100%);
+  --nen: #05080f;
+  --nen-2: #090e19;
+  --kinh: rgba(255,255,255,.04);
+  --kinh-2: rgba(255,255,255,.07);
+  --vien: rgba(255,255,255,.1);
+  --chu: #eef3fb;
+  --phu: #98a7bd;
+  --dien: #38e8ff;
+  --hoa: #6ea2ff;
+  --sinh: #2ee6b4;
+  --tim: #9b8cff;
+  --cam: #ffbe5c;
+  --chuyen: linear-gradient(100deg, #38e8ff, #6ea2ff 55%, #9b8cff);
+  --bo: 18px;
+  --le: clamp(16px, 4vw, 88px);
+  --mono: "JetBrains Mono", ui-monospace, monospace;
 }
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 64px; }
-body { margin: 0; background: var(--giay); color: var(--chu); font: 400 17px/1.65 var(--sans); }
-img { display: block; max-width: 100%; height: auto; }
+html { scroll-behavior: smooth; scroll-padding-top: 76px; -webkit-text-size-adjust: 100%; background: var(--nen); }
+body { margin: 0; background: var(--nen); color: var(--chu); font: 400 clamp(17px, .92vw, 21px)/1.62 "Be Vietnam Pro", system-ui, sans-serif; overflow-x: hidden; overflow-x: clip; }
+img { display: block; max-width: 100%; }
 a { color: inherit; }
-:focus-visible { outline: 2px solid var(--ngoc-sang); outline-offset: 3px; }
-.khung { width: min(1180px, 100%); margin-inline: auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3, p, figure { margin: 0; }
+button { font: inherit; color: inherit; }
+canvas { display: block; }
+:focus-visible { outline: 2px solid var(--dien); outline-offset: 3px; border-radius: 6px; }
+.khung { width: 100%; padding: 0 var(--le); }
+.muc { padding: clamp(72px, 10vw, 136px) 0; position: relative; }
+.muc.luoi::before { content: ""; position: absolute; inset: 0; pointer-events: none; background-image: linear-gradient(rgba(255,255,255,.028) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.028) 1px, transparent 1px); background-size: 56px 56px; -webkit-mask-image: radial-gradient(70% 60% at 50% 40%, #000, transparent); mask-image: radial-gradient(70% 60% at 50% 40%, #000, transparent); }
+.muc > .khung { position: relative; }
+.mo-muc { max-width: clamp(320px, 52vw, 1040px); margin-bottom: clamp(34px, 5vw, 60px); }
+.mo-muc.giua { margin-left: auto; margin-right: auto; text-align: center; }
+.the-muc { display: inline-flex; align-items: center; gap: 9px; font: 500 13px var(--mono); color: var(--dien); margin-bottom: 14px; }
+.the-muc::before { content: ""; width: 22px; height: 1px; background: var(--dien); box-shadow: 0 0 8px var(--dien); }
+h2 { font-size: clamp(30px, 3.6vw, 68px); line-height: 1.13; font-weight: 700; letter-spacing: -.026em; text-wrap: balance; }
+.mo-muc p { color: var(--phu); font-size: clamp(17px, 1.05vw, 22px); margin-top: 16px; text-wrap: pretty; }
+.chu-chuyen { background: var(--chuyen); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
-.thanh { position: sticky; top: 0; z-index: 20; background: var(--muc); color: var(--tren-muc); border-bottom: 1px solid var(--muc-2); }
-.thanh::after { content: ""; display: block; height: 2px; background: var(--pho); transform-origin: left; transform: scaleX(var(--tien-do, 0)); }
-.thanh .khung { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 54px; }
-.logo { font: 500 15px var(--mono); letter-spacing: .08em; text-decoration: none; white-space: nowrap; }
-.menu { display: flex; gap: 22px; font-size: 14px; }
-.menu a { color: var(--tren-muc-phu); text-decoration: none; white-space: nowrap; }
+/* Thanh trên */
+.tien-do { position: fixed; top: 0; left: 0; height: 2px; width: 100%; background: var(--chuyen); transform-origin: 0 50%; transform: scaleX(0); z-index: 60; box-shadow: 0 0 10px rgba(56,232,255,.8); }
+.thanh { position: fixed; top: 0; left: 0; right: 0; z-index: 50; transition: background .3s, border-color .3s; border-bottom: 1px solid transparent; }
+.thanh.cuon { background: rgba(5,8,15,.76); -webkit-backdrop-filter: blur(16px) saturate(1.4); backdrop-filter: blur(16px) saturate(1.4); border-color: var(--vien); }
+.thanh .khung { display: flex; align-items: center; gap: 22px; height: 66px; }
+.nhan-hieu { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; text-decoration: none; letter-spacing: -.01em; white-space: nowrap; }
+.nhan-hieu svg { width: 30px; height: 30px; filter: drop-shadow(0 0 7px rgba(56,232,255,.65)); }
+.menu { display: flex; gap: 20px; margin-left: auto; font-size: 14.5px; }
+.menu a { text-decoration: none; color: #c5d0e0; white-space: nowrap; transition: color .2s; }
 .menu a:hover { color: #fff; }
+.nut { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 26px; border-radius: 10px; font-weight: 600; font-size: 16px; text-decoration: none; border: 1px solid transparent; cursor: pointer; white-space: nowrap; transition: transform .2s, box-shadow .25s, background .2s; }
+.nut.chinh { background: var(--chuyen); color: #04101b; }
+.nut.chinh:hover { transform: translateY(-2px); box-shadow: 0 0 34px rgba(56,232,255,.5); }
+.nut.phu { background: var(--kinh); border-color: rgba(255,255,255,.24); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.nut.phu:hover { background: var(--kinh-2); transform: translateY(-2px); }
+.thanh .nut { min-height: 40px; padding: 0 18px; font-size: 14.5px; }
 
-.mo-dau { background: var(--muc); color: var(--tren-muc); overflow: hidden; }
-.mo-dau .khung { padding-block: 64px 0; }
-.nhan { font: 500 13px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
-.mo-dau .nhan { color: var(--ngoc-sang); margin: 0 0 18px; }
-h1 { font: 400 clamp(42px, 7.2vw, 88px)/1.04 var(--serif); letter-spacing: -.015em; margin: 0; max-width: 15ch; text-wrap: balance; }
-.mo-dau p.dan { font-size: clamp(17px, 1.7vw, 20px); color: var(--tren-muc-phu); max-width: 60ch; margin: 26px 0 0; }
-.tac-gia { font-size: 15px; color: var(--tren-muc-phu); margin: 18px 0 0; }
-#pho { display: block; width: 100%; height: clamp(170px, 24vw, 280px); margin-top: 36px; }
-.chu-pho { font: 400 13px/1.5 var(--mono); color: var(--tren-muc-phu); margin: 4px 0 0; padding-bottom: 30px; }
+/* Mở đầu */
+#mo-dau { position: relative; height: 210vh; height: 210svh; }
+.md-dinh { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: #000; }
+.md-anh { position: absolute; inset: 0; }
+.md-anh img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1.8s ease; }
+.md-anh img.hien { opacity: .62; }
+.md-anh::after { content: ""; position: absolute; inset: 0; background: linear-gradient(95deg, rgba(5,8,15,.94) 8%, rgba(5,8,15,.66) 46%, rgba(5,8,15,.5)), linear-gradient(0deg, var(--nen), transparent 26%); }
+#c-toa { position: absolute; inset: 0; width: 100%; height: 100%; mix-blend-mode: screen; }
+.nhan-3d { position: absolute; left: 0; top: 0; z-index: 2; opacity: 0; pointer-events: none; font: 500 13px var(--mono); padding: 5px 11px; border-radius: 7px; background: rgba(5,8,15,.74); border: 1px solid currentColor; white-space: nowrap; }
+.md-chu { position: absolute; z-index: 3; inset: 0; display: flex; align-items: center; pointer-events: none; }
+.md-chu a, .md-chu button { pointer-events: auto; }
+.md-trong { max-width: clamp(320px, 47vw, 920px); padding-top: 44px; }
+.logo-truong { display: inline-flex; background: #fff; border-radius: 12px; padding: 7px 13px; box-shadow: 0 8px 34px rgba(0,0,0,.4); }
+.logo-truong img { height: clamp(40px, 5.6vh, 54px); width: auto; }
+h1 { font-size: clamp(38px, 4.9vw, 96px); line-height: 1.06; font-weight: 800; letter-spacing: -.034em; margin: clamp(18px, 3vh, 30px) 0 clamp(14px, 2vh, 20px); text-wrap: balance; }
+.md-dan { color: #d3dcea; font-size: clamp(17px, 1.15vw, 23px); margin-bottom: clamp(20px, 3.2vh, 30px); text-wrap: pretty; }
+.md-nut { display: flex; flex-wrap: wrap; gap: 12px; }
+.len { transform: translateY(22px); animation: len .9s cubic-bezier(.2,.8,.2,1) forwards; animation-delay: var(--tre, 0s); }
+@keyframes len { to { transform: none; } }
+.goi-y { position: absolute; z-index: 3; right: var(--le); bottom: 24px; display: flex; align-items: center; gap: 10px; font: 500 12.5px var(--mono); color: #c5d0e0; }
+.goi-y i { width: 22px; height: 34px; border: 1px solid rgba(255,255,255,.4); border-radius: 12px; position: relative; }
+.goi-y i::after { content: ""; position: absolute; left: 50%; top: 5px; width: 3px; height: 7px; margin-left: -1.5px; border-radius: 2px; background: var(--dien); animation: cuon 1.7s infinite; }
+@keyframes cuon { to { transform: translateY(13px); opacity: 0; } }
 
-.so-lieu { background: var(--trang); border-bottom: 1px solid var(--vach); }
-.so-lieu dl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; }
-.so-lieu dl > div { padding: 26px 20px 26px 0; }
-.so-lieu dl > div + div { border-left: 1px solid var(--vach); padding-left: 24px; }
-.so-lieu dt { font: 400 clamp(34px, 4.6vw, 52px)/1 var(--serif); color: var(--chu); font-variant-numeric: lining-nums; }
-.so-lieu dd { margin: 8px 0 0; font-size: 14.5px; color: var(--phu); line-height: 1.4; }
+/* Dải số */
+.so-lieu { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(6, 1fr); border-block: 1px solid var(--vien); background: var(--nen-2); }
+.o-so { padding: clamp(22px, 3vw, 34px) 10px; text-align: center; border-left: 1px solid var(--vien); }
+.o-so:first-child { border-left: 0; }
+.o-so b { display: block; font: 500 clamp(28px, 3.1vw, 42px)/1.15 var(--mono); letter-spacing: -.03em; background: var(--chuyen); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.o-so span { color: var(--phu); font-size: 14px; }
 
-section { padding-block: clamp(56px, 8vw, 104px); }
-section.trang { background: var(--trang); }
-.muc-so { color: var(--ngoc); margin: 0 0 10px; }
-h2 { font: 400 clamp(30px, 4vw, 46px)/1.12 var(--serif); letter-spacing: -.01em; margin: 0 0 18px; max-width: 22ch; text-wrap: balance; }
-h3 { font: 600 18px/1.35 var(--sans); margin: 0 0 6px; }
-p { margin: 0 0 14px; }
-.van { max-width: 64ch; color: var(--phu); }
-.hai-cot { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(28px, 5vw, 64px); align-items: start; }
-.hai-cot > * { min-width: 0; }
+/* Thẻ kính */
+.the { position: relative; background: var(--kinh); border: 1px solid var(--vien); border-radius: var(--bo); padding: 28px; overflow: hidden; transition: border-color .3s, transform .3s; }
+.the::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .3s; background: radial-gradient(340px circle at var(--x, 50%) var(--y, 50%), rgba(56,232,255,.13), transparent 70%); }
+.the:hover { border-color: rgba(56,232,255,.4); }
+.the:hover::before { opacity: 1; }
+.the h3 { font-size: clamp(20px, 1.2vw, 24px); font-weight: 700; margin-bottom: 8px; }
+.the p { color: var(--phu); font-size: clamp(16px, .88vw, 19px); }
+.bieu { width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; background: rgba(56,232,255,.1); color: var(--dien); border: 1px solid rgba(56,232,255,.26); margin-bottom: 18px; }
+.bieu svg { width: 24px; height: 24px; }
+.ba-cot { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.hai-cot { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: clamp(28px, 5vw, 72px); align-items: center; margin-bottom: clamp(40px, 5vw, 66px); }
+.hai-cot .mo-muc { margin: 0; }
+.doi-anh { position: relative; padding: 0 11% 13% 0; perspective: 1200px; }
+.doi-anh img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-radius: var(--bo); border: 1px solid var(--vien); box-shadow: 0 30px 80px rgba(0,0,0,.55); transform: rotateY(-7deg) rotateX(2deg); transition: transform .8s cubic-bezier(.2,.8,.2,1); }
+.doi-anh img + img { position: absolute; right: 0; bottom: 0; width: 54%; transform: translateZ(50px) rotateY(-7deg) rotateX(2deg); }
+.doi-anh:hover img { transform: rotateY(-2deg); }
+.doi-anh:hover img + img { transform: translateZ(70px) rotateY(-2deg); }
 
-figure { margin: 0; }
-.mo-anh { display: block; width: 100%; padding: 0; border: 0; background: var(--vach); cursor: zoom-in; overflow: hidden; }
-.mo-anh img { width: 100%; transition: transform .7s cubic-bezier(.2, .7, .2, 1); }
-.mo-anh:hover img { transform: scale(1.025); }
-figcaption { font-size: 14px; line-height: 1.5; color: var(--phu); margin-top: 9px; }
-figcaption b { font: 500 13px var(--mono); color: var(--chu); margin-right: 6px; }
-.anh-lon { margin-top: 36px; }
+/* Quy trình */
+.bon-buoc { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; counter-reset: b; position: relative; }
+.bon-buoc .the { padding: 24px; }
+.bon-buoc .so { font: 500 13px var(--mono); color: var(--dien); margin-bottom: 26px; display: flex; align-items: center; gap: 8px; }
+.bon-buoc .so::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(56,232,255,.5), transparent); }
 
-.ly-do { list-style: none; margin: 0; padding: 0; display: grid; gap: 20px; }
-.ly-do li { padding-top: 14px; border-top: 1px solid var(--vach); }
-.ly-do p { color: var(--phu); margin: 0; font-size: 16px; }
+/* Tính năng */
+.tinh-nang { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: clamp(28px, 5vw, 76px); }
+.buoc { min-height: 66vh; display: flex; flex-direction: column; justify-content: center; opacity: .26; transition: opacity .4s; }
+.buoc.hien { opacity: 1; }
+.buoc .so { font: 500 13px var(--mono); color: var(--dien); margin-bottom: 10px; }
+.buoc h3 { font-size: clamp(24px, 2.6vw, 33px); line-height: 1.2; font-weight: 700; letter-spacing: -.018em; margin-bottom: 10px; }
+.buoc p { color: var(--phu); }
+.nhan-nho { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; padding: 0; list-style: none; }
+.nhan-nho li { font-size: 13.5px; padding: 4px 11px; border-radius: 7px; background: var(--kinh); border: 1px solid var(--vien); color: #d3dcea; }
+.ghim-ngoai { position: sticky; top: 96px; align-self: start; perspective: 1400px; }
+.man-ghim { position: relative; aspect-ratio: 16 / 10; transform-style: preserve-3d; }
+.man-ghim > figure { position: absolute; inset: 0; border-radius: var(--bo); overflow: hidden; border: 1px solid rgba(255,255,255,.18); background: #000; opacity: 0; transform: translateZ(-160px) rotateY(16deg); transition: opacity .55s, transform .85s cubic-bezier(.2,.8,.2,1); box-shadow: 0 30px 90px rgba(0,0,0,.6), 0 0 70px rgba(56,232,255,.12); }
+.man-ghim > figure.hien { opacity: 1; transform: none; }
+.man-ghim img { width: 100%; height: 100%; object-fit: cover; }
+.khung-goc::before, .khung-goc::after { content: ""; position: absolute; width: 22px; height: 22px; z-index: 2; pointer-events: none; border: 2px solid var(--dien); filter: drop-shadow(0 0 5px var(--dien)); }
+.khung-goc::before { left: -9px; top: -9px; border-right: 0; border-bottom: 0; }
+.khung-goc::after { right: -9px; bottom: -9px; border-left: 0; border-top: 0; }
+.anh-nho { display: none; }
+#dau-nen { width: 118%; max-width: none; animation: quet 7s ease-in-out infinite alternate; }
+@keyframes quet { to { transform: translateX(-15%); } }
+.webcam { position: absolute; right: 16px; bottom: 16px; width: 112px; height: 84px; border-radius: 12px; background: rgba(5,8,15,.84); border: 1px solid var(--dien); display: grid; place-items: center; }
+.webcam svg { width: 56px; height: 56px; color: var(--dien); animation: dau 7s ease-in-out infinite alternate; }
+@keyframes dau { from { transform: translateX(-8px) rotate(-8deg); } to { transform: translateX(8px) rotate(8deg); } }
 
-.mat-bang { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(24px, 4vw, 48px); margin-top: 32px; }
-.mat-bang > * { min-width: 0; }
-.chon-tang { display: inline-flex; border: 1px solid var(--chu); margin-bottom: 14px; }
-.chon-tang button { font: 500 14px var(--sans); padding: 8px 18px; border: 0; background: transparent; color: var(--chu); cursor: pointer; }
-.chon-tang button[aria-pressed="true"] { background: var(--chu); color: #fff; }
-#ban-ve { width: 100%; height: auto; display: block; background: var(--trang); border: 1px solid var(--vach); }
-#ban-ve rect.phong { fill: #e6eeee; stroke: var(--chu); stroke-width: .07; cursor: pointer; transition: fill .2s; }
-#ban-ve rect.phong:hover { fill: #bfe6e1; }
-#ban-ve rect.phong.chon { fill: var(--ngoc); }
-#ban-ve text { font: 400 .62px var(--sans); fill: var(--chu); pointer-events: none; }
-#ban-ve text.chon { fill: #fff; }
-#ban-ve text.truc { font: 400 .55px var(--mono); fill: var(--phu); }
-.the-phong h3 { font: 400 28px/1.15 var(--serif); margin: 0 0 8px; }
+/* Mặt bằng 3D */
+.chon-tang { display: inline-flex; gap: 4px; padding: 4px; border-radius: 10px; background: var(--kinh); border: 1px solid var(--vien); margin-bottom: 16px; max-width: 100%; }
+.chon-tang button { border: 0; background: none; min-height: 42px; padding: 0 17px; border-radius: 7px; cursor: pointer; font-weight: 600; font-size: 15px; color: var(--phu); transition: background .25s, color .25s; }
+.chon-tang button[aria-pressed="true"] { background: var(--chuyen); color: #04101b; }
+.quy-hoach { display: grid; grid-template-columns: minmax(0, 1.34fr) minmax(0, 1fr); gap: 16px; align-items: stretch; }
+.khung-plan { position: relative; border: 1px solid var(--vien); border-radius: var(--bo); background: radial-gradient(70% 70% at 50% 45%, #0d1a2e, var(--nen-2)); overflow: hidden; min-height: clamp(460px, 34vw, 720px); }
+#c-plan { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; touch-action: pan-y; }
+#c-plan.dang-keo { cursor: grabbing; }
+.goi-y-keo { position: absolute; left: 14px; top: 12px; font: 500 12.5px var(--mono); color: var(--phu); pointer-events: none; }
+.ds-phong { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.ds-phong button { border: 1px solid var(--vien); background: var(--kinh); min-height: 38px; padding: 0 12px; border-radius: 8px; cursor: pointer; font-size: 14px; color: #c5d0e0; transition: border-color .2s, color .2s, background .2s; }
+.ds-phong button:hover { border-color: var(--dien); }
+.ds-phong button[aria-pressed="true"] { background: rgba(56,232,255,.14); border-color: var(--dien); color: #fff; }
+.the-phong { border: 1px solid var(--vien); border-radius: var(--bo); overflow: hidden; background: var(--kinh); display: flex; flex-direction: column; }
+.the-phong .khung-anh { aspect-ratio: 16 / 10; overflow: hidden; background: #0d1626; }
+.the-phong img { width: 100%; height: 100%; object-fit: cover; animation: mo-anh .6s ease; }
+@keyframes mo-anh { from { opacity: 0; transform: scale(1.05); } }
+.the-phong .chu { padding: 20px 22px 24px; }
+.the-phong .tang { font: 500 12.5px var(--mono); color: var(--dien); margin-bottom: 6px; }
+.the-phong h3 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
 .the-phong p { color: var(--phu); font-size: 16px; }
-.the-phong img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--vach); margin-bottom: 14px; }
 
-.dung-sai { background: var(--muc); color: var(--tren-muc); }
-.dung-sai .muc-so { color: var(--ngoc-sang); }
-.dung-sai .van { color: var(--tren-muc-phu); }
-.cong-tac { display: inline-flex; border: 1px solid var(--tren-muc-phu); margin: 14px 0 26px; }
-.cong-tac button { font: 500 14px var(--sans); padding: 10px 18px; border: 0; background: transparent; color: var(--tren-muc); cursor: pointer; }
-.cong-tac button[aria-pressed="true"] { background: var(--tren-muc); color: var(--muc); }
-.may-do { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--muc-2); border-bottom: 1px solid var(--muc-2); }
-.may-do > div { padding: 20px 18px 20px 0; min-width: 0; }
-.may-do > div + div { border-left: 1px solid var(--muc-2); padding-left: 20px; }
-.may-do span { display: block; font: 400 13px/1.4 var(--mono); color: var(--tren-muc-phu); }
-.may-do strong { display: block; font: 400 clamp(30px, 4.4vw, 50px)/1.1 var(--serif); margin-top: 8px; font-variant-numeric: lining-nums; }
-.ket-luan { margin: 20px 0 0; font-size: 17px; max-width: 62ch; }
-.ket-luan.xau { color: #ffb48a; }
-.ket-luan.tot { color: var(--ngoc-sang); }
+/* Khu lab */
+.dau-khu { display: grid; grid-template-columns: minmax(0, 1fr) clamp(170px, 24vw, 420px); gap: 22px; align-items: center; margin-bottom: 22px; }
+.dau-khu h2 span { color: var(--mau); text-shadow: 0 0 30px color-mix(in srgb, var(--mau) 45%, transparent); }
+.dau-khu p { color: var(--phu); margin-top: 12px; max-width: 660px; }
+.tang-so { font: 500 13px var(--mono); color: var(--mau); display: block; margin-bottom: 10px; }
+.danh-so { display: flex; gap: 30px; margin-top: 18px; }
+.danh-so b { display: block; font: 500 30px/1.15 var(--mono); color: var(--mau); }
+.danh-so span { font-size: 14px; color: var(--phu); }
+.khung-3d-nho { aspect-ratio: 1; width: 100%; max-height: 380px; }
+.khung-3d-nho canvas { width: 100%; height: 100%; }
+.bento { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: clamp(150px, 15.4vw, 400px); gap: 12px; perspective: 1600px; }
+.anh-the { position: relative; border-radius: 14px; overflow: hidden; border: 1px solid var(--vien); padding: 0; background: #0d1626; cursor: zoom-in; text-align: left; display: block; width: 100%; height: 100%; transition: transform .35s cubic-bezier(.2,.8,.2,1), border-color .3s, box-shadow .3s; transform: rotateX(var(--rx, 0)) rotateY(var(--ry, 0)); }
+.anh-the:hover { border-color: var(--mau); box-shadow: 0 18px 50px rgba(0,0,0,.6), 0 0 26px color-mix(in srgb, var(--mau) 26%, transparent); z-index: 2; }
+.anh-the.to { grid-column: span 2; grid-row: span 2; }
+.anh-the.rong { grid-column: span 2; }
+.anh-the img { width: 100%; height: 100%; object-fit: cover; transition: transform .7s cubic-bezier(.2,.8,.2,1); }
+.anh-the:hover img, .anh-the:focus-visible img { transform: scale(1.06); }
+.anh-the::after { content: ""; position: absolute; inset: 50% 0 0; background: linear-gradient(transparent, rgba(3,6,12,.9)); }
+.anh-the span { position: absolute; left: 14px; right: 14px; bottom: 10px; z-index: 1; font-weight: 600; font-size: 15px; color: #fff; }
+.chip-bai { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 0; padding: 0; list-style: none; }
+.chip-bai li { font-size: 14px; padding: 5px 12px; border-radius: 8px; background: var(--kinh); border: 1px solid var(--vien); color: #d3dcea; }
+.thiet-bi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.o-tb { background: var(--kinh); border: 1px solid var(--vien); border-radius: 14px; padding: 18px; transition: border-color .3s, transform .3s; }
+.o-tb:hover { border-color: var(--dien); transform: translateY(-3px); }
+.o-tb small { display: block; font: 500 12px var(--mono); color: var(--mau, var(--dien)); margin-bottom: 8px; }
+.o-tb b { display: block; font-weight: 600; margin-bottom: 3px; }
+.o-tb span { color: var(--phu); font-size: 14.5px; }
 
-.luoi-anh { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 28px 24px; margin-top: 36px; }
-.luoi-anh figure { min-width: 0; }
-.c7 { grid-column: span 7; } .c5 { grid-column: span 5; } .c6 { grid-column: span 6; } .c4 { grid-column: span 4; }
+/* Tay cầm */
+#tay-cam { position: relative; height: 460vh; height: 460svh; background: radial-gradient(60% 45% at 62% 50%, #0f2036 0%, var(--nen) 72%); }
+.tc-dinh { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
+#c-drop { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: pan-y; cursor: grab; }
+#c-drop.dang-keo { cursor: grabbing; }
+#tc-cham, #tc-duong { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; opacity: 0; transition: opacity .4s; }
+#tc-cham.hien, #tc-duong.hien { opacity: 1; }
+#tc-duong line { stroke: rgba(56,232,255,.5); stroke-width: 1; }
+.cham-dot { position: absolute; left: -4.5px; top: -4.5px; width: 9px; height: 9px; border-radius: 50%; background: var(--dien); box-shadow: 0 0 10px var(--dien), 0 0 0 4px rgba(56,232,255,.22); }
+.cham-nhan { position: absolute; left: 0; top: -13px; font: 500 12.5px var(--mono); white-space: nowrap; line-height: 26px; padding: 0 9px; border-radius: 6px; background: rgba(5,8,15,.88); border: 1px solid rgba(56,232,255,.45); }
+.tc-chu { position: absolute; inset: 0; pointer-events: none; }
+.tc-chu .khung { height: 100%; position: relative; }
+.buoc-tc { position: absolute; left: var(--le); top: 50%; width: min(560px, 38%); transform: translateY(calc(-50% + 26px)); opacity: 0; transition: opacity .18s, transform .2s; }
+.buoc-tc.hien { opacity: 1; transform: translateY(-50%); transition: opacity .45s .18s, transform .6s .18s cubic-bezier(.2,.8,.2,1); }
+.buoc-tc h2 { font-size: clamp(28px, 3.4vw, 44px); }
+.buoc-tc p { color: #bcc8da; margin-top: 12px; }
+.tc-thong-so { display: grid; grid-template-columns: repeat(3, auto); justify-content: start; gap: 8px 26px; margin-top: 18px; }
+.tc-thong-so b { display: block; font: 500 21px/1.2 var(--mono); }
+.tc-thong-so span { font-size: 13.5px; color: var(--phu); }
+.tc-duoi { position: absolute; left: var(--le); right: var(--le); bottom: 22px; display: flex; align-items: center; gap: 14px; font: 500 12.5px var(--mono); color: var(--phu); }
+.tc-ray { flex: 1; height: 2px; background: var(--vien); overflow: hidden; }
+.tc-ray i { display: block; height: 100%; background: var(--chuyen); transform-origin: 0 50%; transform: scaleX(0); }
+.tc-tai { position: absolute; left: 62%; top: 50%; transform: translate(-50%, -50%); font: 500 13px var(--mono); color: var(--phu); }
+.da-tai .tc-tai, .loi-tai .tc-tai { display: none; }
 
-.nhom-may { columns: 2; column-gap: 40px; margin: 22px 0 0; padding: 0; list-style: none; font-size: 15.5px; }
-.nhom-may li { break-inside: avoid; padding: 7px 0; border-top: 1px solid var(--vach); display: flex; justify-content: space-between; gap: 14px; }
-.nhom-may span { color: var(--phu); text-align: right; }
+/* Điểm mới */
+.chong { display: grid; gap: 22px; }
+.the-chong { position: sticky; top: calc(84px + var(--i) * 12px); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); min-height: 340px; border-radius: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,.15); background: #0c1321; box-shadow: 0 -14px 40px rgba(0,0,0,.5); transform-origin: 50% 0; }
+.the-chong .noi-dung { padding: clamp(24px, 3.4vw, 44px); display: flex; flex-direction: column; justify-content: center; }
+.the-chong .so { font: 500 13px var(--mono); color: var(--dien); margin-bottom: 10px; }
+.the-chong h3 { font-size: clamp(23px, 2.5vw, 31px); line-height: 1.22; font-weight: 700; letter-spacing: -.014em; margin-bottom: 10px; }
+.the-chong p { color: var(--phu); }
+.the-chong img { width: 100%; height: 100%; object-fit: cover; }
 
-.bang-cuon { overflow-x: auto; margin-top: 26px; }
-table { border-collapse: collapse; width: 100%; font-size: 15.5px; min-width: 620px; }
-caption { caption-side: top; text-align: left; font-size: 14px; color: var(--phu); padding-bottom: 10px; }
-caption b { font: 500 13px var(--mono); color: var(--chu); margin-right: 6px; }
-th { text-align: left; font-weight: 600; border-top: 2px solid var(--chu); border-bottom: 1px solid var(--chu); padding: 9px 14px 9px 0; }
-td { padding: 9px 14px 9px 0; border-bottom: 1px solid var(--vach); font-variant-numeric: tabular-nums lining-nums; vertical-align: top; }
-tr:last-child td { border-bottom: 2px solid var(--chu); }
-td.so { font-family: var(--mono); font-size: 14.5px; white-space: nowrap; }
-.chu-thich { font-size: 14px; color: var(--phu); margin-top: 12px; max-width: 70ch; }
+/* Kiến trúc */
+.tang-kt { display: grid; gap: 10px; perspective: 1200px; }
+.lop { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 18px; align-items: center; padding: 18px 22px; border-radius: 14px; background: var(--kinh); border: 1px solid var(--vien); position: relative; overflow: hidden; }
+.lop::after { content: ""; position: absolute; top: 0; bottom: 0; width: 120px; left: -120px; background: linear-gradient(90deg, transparent, rgba(56,232,255,.13), transparent); animation: luot 5s linear infinite; animation-delay: var(--tre, 0s); }
+@keyframes luot { to { left: 110%; } }
+.lop b { font-weight: 600; }
+.lop div { color: var(--phu); font-size: 15.5px; }
+.lop small { display: block; margin-top: 3px; font: 500 12.5px var(--mono); color: #7f8fa8; }
 
-.cong-nghe { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px 32px; margin-top: 30px; }
-.cong-nghe > div { border-top: 1px solid var(--chu); padding-top: 12px; min-width: 0; }
-.cong-nghe p { color: var(--phu); font-size: 15.5px; margin: 0; }
+/* Hiệu suất */
+.hieu-suat { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+.do { display: grid; gap: 20px; margin-top: 18px; }
+.dong-do .ten { display: flex; justify-content: space-between; gap: 12px; font-size: 15.5px; margin-bottom: 7px; }
+.dong-do .ten span { color: var(--phu); }
+.dong-do .ten b { font: 500 15px var(--mono); white-space: nowrap; }
+.ray { height: 8px; border-radius: 5px; background: rgba(255,255,255,.08); overflow: hidden; }
+.ray i { display: block; height: 100%; width: var(--w); border-radius: 5px; background: var(--chuyen); box-shadow: 0 0 14px rgba(56,232,255,.6); transform-origin: 0 50%; transform: scaleX(0); transition: transform 1.3s cubic-bezier(.2,.8,.2,1); }
+.hien .ray i { transform: none; }
+.ghi-chu { color: var(--phu); font-size: 14px; margin-top: 16px; }
+.he-dh { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 18px; }
+.o-hdh { display: flex; flex-direction: column; align-items: center; gap: 10px; background: rgba(255,255,255,.035); border: 1px solid var(--vien); border-radius: 14px; padding: 22px 10px 12px; text-align: center; transition: border-color .3s, transform .3s; }
+.o-hdh:hover { transform: translateY(-3px); border-color: var(--dien); }
+.o-hdh svg { width: 42px; height: 42px; }
+.o-hdh b { font-weight: 600; }
+.nut-tai { width: 100%; min-height: 44px; border: 0; border-radius: 9px; background: var(--chuyen); color: #04101b; font-weight: 600; font-size: 15px; cursor: pointer; transition: box-shadow .25s; }
+.nut-tai:hover { box-shadow: 0 0 22px rgba(56,232,255,.5); }
+.thong-bao { position: fixed; left: 50%; bottom: 24px; z-index: 70; transform: translate(-50%, 16px); opacity: 0; pointer-events: none; background: #101a2c; border: 1px solid var(--dien); padding: 10px 18px; border-radius: 10px; font-size: 15px; transition: opacity .25s, transform .25s; white-space: nowrap; }
+.thong-bao.hien { opacity: 1; transform: translate(-50%, 0); }
+.cuon-bang { grid-column: 1 / -1; overflow-x: auto; background: var(--kinh); border: 1px solid var(--vien); border-radius: var(--bo); padding: 8px 24px; }
+.cau-hinh { width: 100%; min-width: 620px; border-collapse: collapse; font-size: 15.5px; }
+.cau-hinh th, .cau-hinh td { text-align: left; padding: 13px 16px 13px 0; border-bottom: 1px solid var(--vien); vertical-align: top; }
+.cau-hinh tr:last-child td { border-bottom: 0; }
+.cau-hinh th { color: var(--phu); font-weight: 500; font-size: 14px; }
+.cau-hinh td:first-child { font-weight: 600; white-space: nowrap; }
 
-.lo-trinh { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(24px, 5vw, 64px); margin-top: 24px; }
-.lo-trinh ul { margin: 0; padding-left: 18px; color: var(--phu); font-size: 16px; }
-.lo-trinh li { margin-bottom: 7px; }
+/* Lộ trình */
+.lo-trinh { position: relative; max-width: 780px; margin: 0 auto; padding-left: 44px; }
+.lo-trinh::before, .duong-sang { content: ""; position: absolute; left: 13px; top: 8px; bottom: 8px; width: 2px; border-radius: 2px; }
+.lo-trinh::before { background: var(--vien); }
+.duong-sang { background: linear-gradient(180deg, var(--dien), var(--hoa), var(--tim)); transform-origin: 50% 0; transform: scaleY(0); box-shadow: 0 0 14px rgba(56,232,255,.8); }
+.moc { position: relative; padding-bottom: 42px; }
+.moc:last-child { padding-bottom: 0; }
+.moc::before { content: ""; position: absolute; left: -37px; top: 7px; width: 14px; height: 14px; border-radius: 50%; background: var(--nen); border: 2px solid rgba(255,255,255,.28); transition: background .4s, border-color .4s, box-shadow .4s; }
+.moc.sang-len::before { background: var(--dien); border-color: var(--dien); box-shadow: 0 0 16px var(--dien); }
+.tt { display: inline-block; font: 500 12.5px var(--mono); padding: 3px 10px; border-radius: 6px; margin-bottom: 10px; }
+.tt.co { color: #06281f; background: var(--sinh); }
+.tt.dang { color: #071a3d; background: var(--hoa); }
+.tt.sau { color: #d3dcea; background: rgba(255,255,255,.1); }
+.moc h3 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+.moc ul { margin: 0; padding: 0; list-style: none; color: var(--phu); }
+.moc li { padding: 3px 0 3px 18px; position: relative; }
+.moc li::before { content: ""; position: absolute; left: 0; top: .8em; width: 7px; height: 2px; background: var(--dien); }
 
-footer { background: var(--muc); color: var(--tren-muc-phu); font-size: 15px; }
-footer::before { content: ""; display: block; height: 3px; background: var(--pho); }
-footer .khung { padding-block: 40px; display: flex; flex-wrap: wrap; gap: 12px 40px; justify-content: space-between; }
-footer strong { color: var(--tren-muc); font-weight: 500; }
-
-dialog { border: 0; padding: 0; background: transparent; max-width: 96vw; max-height: 94vh; }
-dialog::backdrop { background: rgba(6, 16, 22, .9); }
-dialog img { max-width: 96vw; max-height: 86vh; width: auto; margin: auto; }
-dialog p { color: #e8f1f0; font-size: 14px; margin: 10px 2px 0; }
-dialog button { position: fixed; top: 14px; right: 16px; font: 500 14px var(--sans); padding: 8px 14px; background: #fff; color: var(--chu); border: 0; cursor: pointer; }
-
-.hien { animation: hien .8s cubic-bezier(.2, .7, .2, 1) both; }
-@keyframes hien { from { opacity: .25; transform: translateY(18px); } to { opacity: 1; transform: none; } }
-
-@media (max-width: 860px) {
-  .menu { display: none; }
-  .hai-cot, .mat-bang, .lo-trinh { grid-template-columns: minmax(0, 1fr); }
-  .so-lieu dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .so-lieu dl > div:nth-child(3) { border-left: 0; padding-left: 0; }
-  .so-lieu dl > div:nth-child(n+3) { border-top: 1px solid var(--vach); }
-  .c7, .c5, .c6, .c4 { grid-column: span 12; }
-  .cong-nghe { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .nhom-may { columns: 1; }
+/* Màn rộng: lộ trình nằm ngang, câu hỏi hai cột, tận dụng hết bề ngang */
+@media (min-width: 1200px) {
+  .lo-trinh { max-width: none; padding: 34px 0 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 32px; }
+  .lo-trinh::before, .duong-sang { left: 0; right: 0; top: 6px; bottom: auto; width: auto; height: 2px; }
+  .duong-sang { transform-origin: 0 50%; transform: scaleX(0); }
+  .moc { padding-bottom: 0; }
+  .moc::before { left: 0; top: -34px; }
+  .hoi-dap { max-width: none; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
 }
-@media (max-width: 520px) {
-  .may-do { grid-template-columns: minmax(0, 1fr); }
-  .may-do > div + div { border-left: 0; padding-left: 0; border-top: 1px solid var(--muc-2); }
-  .cong-nghe { grid-template-columns: minmax(0, 1fr); }
+
+/* Câu hỏi */
+.hoi-dap { max-width: 900px; margin: 0 auto; display: grid; gap: 10px; }
+details { background: var(--kinh); border: 1px solid var(--vien); border-radius: 12px; transition: border-color .3s; }
+details[open] { border-color: rgba(56,232,255,.4); }
+summary { cursor: pointer; list-style: none; padding: 16px 48px 16px 20px; font-weight: 600; position: relative; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: "+"; position: absolute; right: 20px; top: 13px; font: 500 22px var(--mono); color: var(--dien); transition: transform .3s; }
+details[open] summary::after { transform: rotate(45deg); }
+details p { padding: 0 20px 18px; color: var(--phu); }
+
+/* Kết và chân trang */
+.ket { position: relative; overflow: hidden; text-align: center; padding: clamp(84px, 12vw, 150px) 0; }
+.ket > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .28; }
+.ket::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, var(--nen), rgba(5,8,15,.42) 45%, var(--nen)); }
+.ket .khung { position: relative; z-index: 1; }
+.ket p { color: #d3dcea; max-width: 620px; margin: 14px auto 26px; font-size: 18px; }
+footer { border-top: 1px solid var(--vien); color: var(--phu); padding: 48px 0 28px; font-size: 15px; background: #04060c; }
+.chan { display: grid; grid-template-columns: minmax(0, 1.5fr) repeat(2, minmax(0, 1fr)); gap: 32px; }
+.chan .nhan-hieu { color: #fff; margin-bottom: 10px; }
+.chan h3 { color: #fff; font-size: 15px; font-weight: 600; margin-bottom: 10px; }
+.chan ul { margin: 0; padding: 0; list-style: none; }
+.chan li { padding: 3px 0; }
+.chan li a { text-decoration: none; }
+.chan li a:hover { color: #fff; }
+.chan .logo-truong { margin-top: 14px; box-shadow: none; }
+.chan .logo-truong img { height: 40px; }
+.ban-quyen { margin-top: 32px; padding-top: 18px; border-top: 1px solid var(--vien); font-size: 14px; }
+
+/* Xem ảnh lớn */
+dialog { border: 0; padding: 0; background: none; max-width: min(1200px, 94vw); color: #fff; }
+dialog::backdrop { background: rgba(2,4,8,.93); }
+dialog img { width: 100%; max-height: 82vh; object-fit: contain; border-radius: 12px; }
+dialog p { text-align: center; margin-top: 10px; font-weight: 600; }
+.dong { position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; border-radius: 50%; border: 0; background: rgba(5,9,18,.78); color: #fff; cursor: pointer; font-size: 22px; }
+
+/* Hiện dần */
+.dan { opacity: 0; transform: translateY(26px); transition: opacity .8s cubic-bezier(.2,.8,.2,1), transform .8s cubic-bezier(.2,.8,.2,1); transition-delay: var(--tre, 0s); }
+.dan.hien { opacity: 1; transform: none; }
+
+/* Không có WebGL hoặc không tải được thư viện 3D */
+.khong-3d #c-toa, .khong-3d #c-drop, .khong-3d .khung-3d-nho, .khong-3d .tc-tai, .khong-3d .tc-duoi { display: none; }
+.khong-3d #mo-dau { height: 100vh; height: 100svh; }
+.khong-3d #tay-cam { height: auto; }
+.khong-3d .tc-dinh { position: static; height: auto; overflow: visible; padding: 80px 0; }
+.khong-3d .tc-chu { position: static; }
+.khong-3d .buoc-tc { position: static; width: auto; opacity: 1; transform: none; margin-bottom: 40px; }
+.khong-3d .khung-plan { display: none; }
+.khong-3d .quy-hoach { grid-template-columns: 1fr; }
+
+@media (max-width: 1100px) { .menu { gap: 14px; font-size: 13.5px; } }
+@media (max-width: 960px) {
+  .menu { display: none; }
+  .thanh .nut { margin-left: auto; }
+  #mo-dau { height: 100vh; height: 100svh; }
+  .md-chu { align-items: flex-end; padding-bottom: 72px; }
+  .mo-muc, .md-trong { max-width: 100%; }
+  .md-trong { padding-top: 0; }
+  .md-anh::after { background: linear-gradient(180deg, rgba(5,8,15,.5), rgba(5,8,15,.2) 34%, rgba(5,8,15,.96) 62%, var(--nen)); }
+  .goi-y, .nhan-3d { display: none; }
+  .so-lieu { grid-template-columns: repeat(3, 1fr); }
+  .o-so { border-top: 1px solid var(--vien); }
+  .o-so:nth-child(-n+3) { border-top: 0; }
+  .o-so:nth-child(4) { border-left: 0; }
+  .ba-cot, .hieu-suat, .quy-hoach, .hai-cot, .tinh-nang, .chan { grid-template-columns: 1fr; }
+  .bon-buoc { grid-template-columns: repeat(2, 1fr); }
+  .ghim-ngoai { display: none; }
+  .buoc { min-height: 0; opacity: 1; margin-bottom: 44px; }
+  .buoc:last-child { margin-bottom: 0; }
+  .anh-nho { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-radius: 14px; margin-bottom: 16px; border: 1px solid var(--vien); }
+  .khung-plan { min-height: 340px; aspect-ratio: 1; }
+  .bento { grid-template-columns: repeat(2, 1fr); grid-auto-rows: clamp(118px, 33vw, 240px); }
+  .thiet-bi { grid-template-columns: repeat(2, 1fr); }
+  .the-chong { grid-template-columns: 1fr; position: relative; top: auto; min-height: 0; }
+  .the-chong img { aspect-ratio: 16 / 9; grid-row: 1; height: auto; }
+  .lop { grid-template-columns: 1fr; gap: 4px; }
+  .dau-khu { grid-template-columns: minmax(0, 1fr) 120px; }
+  .buoc-tc { top: auto; bottom: 56px; left: var(--le); right: var(--le); width: auto; transform: translateY(26px); }
+  .buoc-tc.hien { transform: none; }
+  .buoc-tc p { font-size: 15.5px; margin-top: 8px; }
+  .tc-tai { left: 50%; top: 30%; }
+  #tay-cam { background: radial-gradient(90% 40% at 50% 30%, #0f2036, var(--nen) 74%); }
+  .tc-chu::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 52%; background: linear-gradient(transparent, rgba(5,8,15,.92) 34%); z-index: -1; }
+  #tc-cham, #tc-duong { display: none; }
+}
+@media (max-width: 480px) {
+  .thiet-bi, .bon-buoc { grid-template-columns: 1fr; }
+  .chon-tang button { padding: 0 10px; font-size: 14px; }
+  .tc-thong-so { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .hien { animation: none; }
-  .mo-anh img { transition: none; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  .dan, .len { opacity: 1; transform: none; }
+  #dau-nen { width: 100%; }
 }
 </style>
 </head>
 <body>
+<div class="tien-do" id="tien-do"></div>
 
-<nav class="thanh" aria-label="Mục lục">
+<header class="thanh" id="thanh">
   <div class="khung">
-    <a class="logo" href="#dau">VERA LAB</a>
-    <div class="menu">
-      <a href="#toa-nha">Tòa nhà</a>
-      <a href="#dung-sai">Đúng và sai</a>
-      <a href="#may">Máy phân tích</a>
-      <a href="#sinh">Sinh học</a>
-      <a href="#ai">AI và robot</a>
-      <a href="#kiem-chung">Kiểm chứng</a>
-    </div>
-  </div>
-</nav>
-
-<header class="mo-dau" id="dau">
-  <div class="khung">
-    <p class="nhan">Virtual Experiment &amp; Reality-based AI Lab</p>
-    <h1>Phòng thí nghiệm nơi làm sai cũng học được</h1>
-    <p class="dan">VERA Lab là tòa nhà thí nghiệm ảo hai tầng cho môn Hóa và Sinh. Học sinh đi lại bằng góc nhìn thứ nhất, tự pha mẫu, tự vận hành máy. Kết quả được tính từ chính mẫu đã pha, nên pha sai sẽ đo ra sai.</p>
-    <p class="tac-gia">Dự án Khoa học kỹ thuật của Nguyễn Ngọc Bảo Trọng và Trần Đức Trọng</p>
-    <canvas id="pho" role="img" aria-label="Phổ cộng hưởng từ proton của rượu nghi pha metanol: vạch ba của nhóm CH3 etanol ở 1,17 ppm, vạch đơn metanol ở 3,34 ppm, vạch bốn của nhóm CH2 etanol ở 3,65 ppm."></canvas>
-    <p class="chu-pho">Phổ ¹H-NMR 60 MHz của rượu nghi pha metanol, dạng màn hình máy trong VERA Lab. Vạch metanol nằm sát vạch bốn của etanol.</p>
+    <a class="nhan-hieu" href="#dau" aria-label="VERA Lab, về đầu trang">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#38e8ff"/><stop offset="1" stop-color="#6ea2ff"/></linearGradient></defs><path d="M20 2.5 35.2 11.2v17.6L20 37.5 4.8 28.8V11.2z" fill="none" stroke="url(#g)" stroke-width="2.6" stroke-linejoin="round"/><path d="M12.5 13 20 28l7.5-15" fill="none" stroke="url(#g)" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      VERA Lab
+    </a>
+    <nav class="menu" aria-label="Các mục">
+      <a href="#gioi-thieu">Giới thiệu</a>
+      <a href="#tinh-nang">Tính năng</a>
+      <a href="#quy-hoach">Các phòng</a>
+      <a href="#lab-hoa">Lab Hóa</a>
+      <a href="#lab-sinh">Lab Sinh</a>
+      <a href="#tay-cam">Tay cầm</a>
+      <a href="#diem-moi">Điểm mới</a>
+      <a href="#hieu-suat">Tải về</a>
+      <a href="#lo-trinh">Lộ trình</a>
+    </nav>
+    <a class="nut chinh" href="#quy-hoach">Tham quan</a>
   </div>
 </header>
 
-<div class="so-lieu">
-  <div class="khung">
-    <dl>
-      <div><dt>720</dt><dd>hóa chất xếp trên kệ, tra cứu được</dd></div>
-      <div><dt>14</dt><dd>máy Hóa học có màn hình vận hành riêng</dd></div>
-      <div><dt>108</dt><dd>dụng cụ trong khu Sinh học</dd></div>
-      <div><dt>16</dt><dd>bài thí nghiệm Sinh học theo chương trình 2018</dd></div>
-    </dl>
+<main id="dau">
+<section id="mo-dau">
+  <div class="md-dinh">
+    <div class="md-anh" id="md-anh">
+      <img class="hien" src="anh/hero.jpg" alt="Phòng thí nghiệm Hóa trong VERA Lab" fetchpriority="high">
+      <img src="anh/hero_sinh.jpg" alt="Phòng thí nghiệm Sinh trong VERA Lab">
+    </div>
+    <canvas id="c-toa" aria-label="Mô hình 3D tòa nhà VERA Lab" role="img"></canvas>
+    <div class="nhan-3d" id="nhan-t1" style="color:var(--hoa)">Tầng 1 · Hóa học</div>
+    <div class="nhan-3d" id="nhan-t2" style="color:var(--sinh)">Tầng 2 · Sinh học</div>
+    <div class="md-chu" id="md-chu">
+      <div class="khung"><div class="md-trong">
+        <div class="logo-truong len"><img src="anh/logo_lqd.png" alt="Trường THPT Chuyên Lê Quý Đôn, Gia Lai" width="640" height="171"></div>
+        <h1 class="len" style="--tre:.12s">Cả một <span class="chu-chuyen">tòa nhà thí nghiệm</span>, ngay trên máy tính</h1>
+        <p class="md-dan len" style="--tre:.26s">VERA Lab là phòng thí nghiệm ảo Hóa – Sinh tích hợp AI. Tự do đi lại, tự tay làm thí nghiệm và dùng những thiết bị hiện đại mà nhiều trường chưa có.</p>
+        <div class="md-nut len" style="--tre:.4s">
+          <a class="nut chinh" href="#tinh-nang">Xem tính năng</a>
+          <a class="nut phu" href="#lab-sinh">Xem các phòng lab</a>
+        </div>
+      </div></div>
+    </div>
+    <div class="goi-y" aria-hidden="true">Cuộn để tách tầng <i></i></div>
   </div>
+</section>
+
+<div class="so-lieu dan">
+  <div class="o-so"><b data-dem="2">2</b><span>tầng Hóa và Sinh</span></div>
+  <div class="o-so"><b data-dem="13">13</b><span>khu chức năng</span></div>
+  <div class="o-so"><b data-dem="720">720</b><span>hóa chất</span></div>
+  <div class="o-so"><b data-dem="108">108</b><span>dụng cụ sinh học</span></div>
+  <div class="o-so"><b data-dem="14">14</b><span>máy phân tích</span></div>
+  <div class="o-so"><b data-dem="16">16</b><span>bài thí nghiệm Sinh</span></div>
 </div>
 
-<section>
-  <div class="khung hai-cot">
-    <div>
-      <p class="nhan muc-so">Vì sao cần</p>
-      <h2>Thực hành quan trọng, nhưng khó tổ chức đủ</h2>
-    </div>
-    <ul class="ly-do">
-      <li><h3>Hóa chất đắt và có nguy cơ</h3><p>Nhiều thí nghiệm dễ gây tai nạn, nên trên lớp thường chỉ được xem giáo viên làm.</p></li>
-      <li><h3>Máy phân tích nằm ngoài tầm với</h3><p>GC-MS, NMR, SEM, PCR hiếm khi có ở trường phổ thông.</p></li>
-      <li><h3>Không được phép làm sai</h3><p>Học sinh ít khi thấy một thao tác sai dẫn đến kết quả sai như thế nào, trong khi đó chính là cách hiểu quy trình.</p></li>
-    </ul>
-  </div>
+<section class="muc luoi" id="gioi-thieu">
   <div class="khung">
-    <figure class="anh-lon" data-so="1">
-      <button class="mo-anh" type="button"><img src="anh/tang1_toan_canh.jpg" width="1500" height="781" loading="lazy" alt="Toàn cảnh phòng thí nghiệm Hóa học tầng 1 với trần gỗ và các hàng bàn"></button>
-      <figcaption>Phòng thí nghiệm Hóa học ở tầng 1, ảnh chụp trực tiếp từ phần mềm.</figcaption>
-    </figure>
+    <div class="hai-cot">
+      <div class="mo-muc dan">
+        <span class="the-muc">Giới thiệu dự án</span>
+        <h2>Thực hành thoải mái, không lo đổ vỡ hay nguy hiểm</h2>
+        <p>Hóa chất có thể đắt hoặc độc, thiết bị hiện đại không phải trường nào cũng có, và trong giờ thực hành thật học sinh ít có cơ hội được làm sai. VERA Lab đưa toàn bộ không gian thí nghiệm lên máy tính để học sinh làm đi làm lại đến khi thành thạo.</p>
+      </div>
+      <div class="doi-anh dan" style="--tre:.1s">
+        <img src="anh/sinh_lab.jpg" alt="Phòng thí nghiệm Sinh" loading="lazy">
+        <img src="anh/hoa_giang.jpg" alt="Bàn giáo viên phòng Hóa" loading="lazy">
+      </div>
+    </div>
+    <div class="ba-cot">
+      <article class="the dan">
+        <div class="bieu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11.5V16c0 1.5 3 3 6 3s6-1.5 6-3v-4.5"/></svg></div>
+        <h3>Cho học sinh</h3>
+        <p>Làm thí nghiệm trước và sau giờ học, luyện tới khi thành thạo, thử cả thao tác sai để hiểu vì sao phải làm đúng.</p>
+      </article>
+      <article class="the dan" style="--tre:.1s">
+        <div class="bieu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></div>
+        <h3>Cho giáo viên</h3>
+        <p>Minh họa những thí nghiệm khó tổ chức trên lớp, theo dõi kho, thiết bị và nhật ký qua trang web quản lý.</p>
+      </article>
+      <article class="the dan" style="--tre:.2s">
+        <div class="bieu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V8l7-4 7 4v13"/><path d="M10 21v-6h4v6"/></svg></div>
+        <h3>Cho nhà trường</h3>
+        <p>Bổ sung trải nghiệm về thiết bị và kỹ thuật chưa có điều kiện trang bị. VERA Lab đi cùng giờ thực hành thật, không thay thế.</p>
+      </article>
+    </div>
   </div>
 </section>
 
-<section class="trang" id="toa-nha">
+<section class="muc" style="background:var(--nen-2)">
   <div class="khung">
-    <p class="nhan muc-so">Tòa nhà</p>
-    <h2>Hai tầng, mười ba khu, đi lại như tòa nhà thật</h2>
-    <p class="van">Tầng 1 là khu Hóa học, tầng 2 là khu Sinh học, nối với nhau bằng cầu thang và thang máy có cabin chạy thật. Từng khu được tải khi cần và giữ nguyên hiện trạng khi quay lại. Bấm vào một phòng trên bản vẽ để xem.</p>
-    <div class="mat-bang">
+    <div class="mo-muc dan">
+      <span class="the-muc">Một buổi trong VERA Lab</span>
+      <h2>Từ cửa phòng tới kết quả, trong bốn bước</h2>
+    </div>
+    <div class="bon-buoc">
+      <div class="the dan"><div class="so">BƯỚC 1</div><h3>Vào phòng</h3><p>Đi bộ trong tòa nhà hoặc dịch chuyển nhanh tới trạm cần làm.</p></div>
+      <div class="the dan" style="--tre:.08s"><div class="so">BƯỚC 2</div><h3>Chuẩn bị</h3><p>Tìm hóa chất, lấy dụng cụ, hoặc nhờ robot mang tới bàn.</p></div>
+      <div class="the dan" style="--tre:.16s"><div class="so">BƯỚC 3</div><h3>Thực hành</h3><p>Tự tay thao tác, hỏi trợ lý AI khi chưa rõ quy trình.</p></div>
+      <div class="the dan" style="--tre:.24s"><div class="so">BƯỚC 4</div><h3>Xem kết quả</h3><p>Kết quả tính theo đúng việc bạn đã làm. Sai thì làm lại, không mất gì.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="muc luoi" id="tinh-nang">
+  <div class="khung">
+    <div class="mo-muc dan">
+      <span class="the-muc">Tính năng</span>
+      <h2>Vào lab, nhìn quanh và bắt tay làm</h2>
+    </div>
+    <div class="tinh-nang">
+      <div id="cac-buoc">
+        <article class="buoc">
+          <img class="anh-nho" src="anh/sinh_hanhlang.jpg" alt="" loading="lazy">
+          <div class="so">01 / ĐI LẠI</div>
+          <h3>Đi lại tự do như ở trường thật</h3>
+          <p>Nhìn bằng góc nhìn thứ nhất, đi qua cửa tự động, lên tầng bằng cầu thang hoặc thang máy. Cần nhanh thì dịch chuyển thẳng tới từng trạm.</p>
+        </article>
+        <article class="buoc">
+          <img class="anh-nho" src="anh/sinh_hienvi.jpg" alt="" loading="lazy">
+          <div class="so">02 / THÍ NGHIỆM</div>
+          <h3>Tự tay làm thí nghiệm</h3>
+          <p>Cầm dụng cụ, rót, pha, đun và quan sát hiện tượng. Mỗi kết quả phụ thuộc vào chính thao tác của bạn, không phải đoạn phim dựng sẵn.</p>
+          <ul class="nhan-nho"><li>16 bài thí nghiệm Sinh</li><li>720 hóa chất tra cứu được</li><li>Bám chương trình GDPT 2018</li></ul>
+        </article>
+        <article class="buoc">
+          <img class="anh-nho" src="anh/hoa_may.jpg" alt="" loading="lazy">
+          <div class="so">03 / THIẾT BỊ</div>
+          <h3>Dùng thử thiết bị hiện đại</h3>
+          <p>Mỗi máy có màn hình vận hành riêng, chế độ Hướng dẫn và Thực hành. Học sinh làm quen với quy trình trước khi gặp máy thật.</p>
+          <ul class="nhan-nho"><li>Kính hiển vi điện tử</li><li>Máy PCR</li><li>Máy sắc ký khí</li><li>Máy nhiễu xạ tia X</li></ul>
+        </article>
+        <article class="buoc">
+          <img class="anh-nho" src="anh/ui_laprap.jpg" alt="" loading="lazy">
+          <div class="so">04 / LẮP RÁP</div>
+          <h3>Tự lắp bộ dụng cụ của riêng mình</h3>
+          <p>Chọn trong khoảng 40 loại bộ phận và ghép lại trên giao diện 3D. Bộ dụng cụ xuất hiện ngay trên bàn thí nghiệm bạn chọn và chạy đúng theo cách bạn đã nối.</p>
+        </article>
+        <article class="buoc">
+          <img class="anh-nho" src="anh/robot.jpg" alt="" loading="lazy">
+          <div class="so">05 / AI</div>
+          <h3>Trợ lý AI và robot luôn bên cạnh</h3>
+          <p>Hỏi cách dùng máy, nhờ robot đi lấy hóa chất hoặc làm giúp một bước. Robot chỉ làm những bước đã qua kiểm tra an toàn.</p>
+        </article>
+        <article class="buoc">
+          <img class="anh-nho" src="anh/hoa_lab.jpg" alt="" loading="lazy">
+          <div class="so">06 / ĐIỀU KHIỂN</div>
+          <h3>Điều khiển bằng webcam, không cần kính VR</h3>
+          <p>Quay đầu để nhìn quanh, ghé lại gần để phóng to, dùng cử chỉ tay để thao tác. Chuột và bàn phím vẫn dùng bình thường nếu bạn thích.</p>
+        </article>
+        <article class="buoc">
+          <img class="anh-nho" src="anh/ui_web.jpg" alt="" loading="lazy">
+          <div class="so">07 / QUẢN LÝ</div>
+          <h3>Trang web quản lý cho giáo viên</h3>
+          <p>Xem kho hóa chất, thiết bị, lịch sử mượn trả và nhật ký thí nghiệm trên trình duyệt, cả ở khu Hóa và khu Sinh.</p>
+        </article>
+      </div>
+      <div class="ghim-ngoai" aria-hidden="true"><div class="man-ghim khung-goc" id="man-ghim">
+        <figure class="hien"><img src="anh/sinh_hanhlang.jpg" alt=""></figure>
+        <figure><img src="anh/sinh_hienvi.jpg" alt="" loading="lazy"></figure>
+        <figure><img src="anh/hoa_may.jpg" alt="" loading="lazy"></figure>
+        <figure><img src="anh/ui_laprap.jpg" alt="" loading="lazy"></figure>
+        <figure><img src="anh/robot.jpg" alt="" loading="lazy"></figure>
+        <figure><img id="dau-nen" src="anh/hoa_lab.jpg" alt="" loading="lazy">
+          <div class="webcam"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="24" cy="18" r="10"/><path d="M8 44c1-10 8-14 16-14s15 4 16 14"/></svg></div>
+        </figure>
+        <figure><img src="anh/ui_web.jpg" alt="" loading="lazy"></figure>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section class="muc" id="quy-hoach" style="background:var(--nen-2)">
+  <div class="khung">
+    <div class="mo-muc dan">
+      <span class="the-muc">Quy hoạch các phòng</span>
+      <h2>Hai tầng, mỗi khu một vai trò</h2>
+      <p>Bấm vào từng phòng trên mô hình 3D để xem nơi đó có gì. Kéo sang ngang để xoay.</p>
+    </div>
+    <div class="chon-tang" role="group" aria-label="Chọn tầng">
+      <button type="button" id="t1" aria-pressed="true">Tầng 1 · Hóa học</button>
+      <button type="button" id="t2" aria-pressed="false">Tầng 2 · Sinh học</button>
+    </div>
+    <div class="quy-hoach dan">
       <div>
-        <div class="chon-tang" role="group" aria-label="Chọn tầng">
-          <button type="button" id="t1" aria-pressed="true">Tầng 1 · Hóa học</button>
-          <button type="button" id="t2" aria-pressed="false">Tầng 2 · Sinh học</button>
-        </div>
-        <svg id="ban-ve" viewBox="-1.6 -1.6 33.2 27.4" role="group" aria-label="Mặt bằng tầng, đơn vị mét"></svg>
-        <p class="chu-thich">Mặt bằng đúng tỉ lệ theo tọa độ của phần mềm, đơn vị mét.</p>
+        <div class="khung-plan"><canvas id="c-plan" role="img" aria-label="Mô hình 3D mặt bằng tầng đang chọn"></canvas><div class="goi-y-keo">KÉO ĐỂ XOAY</div></div>
+        <div class="ds-phong" id="ds-phong" role="group" aria-label="Chọn phòng"></div>
       </div>
       <div class="the-phong" aria-live="polite">
-        <img id="phong-anh" src="anh/tang1_toan_canh.jpg" alt="">
-        <h3 id="phong-ten"></h3>
-        <p id="phong-mo-ta"></p>
-      </div>
-    </div>
-    <div class="luoi-anh">
-      <figure class="c7" data-so="2">
-        <button class="mo-anh" type="button"><img src="anh/mat_ngoai.jpg" width="1180" height="660" loading="lazy" alt="Mặt ngoài tòa nhà hai tầng nhìn từ sân"></button>
-        <figcaption>Mặt ngoài tòa nhà hai tầng.</figcaption>
-      </figure>
-      <figure class="c5" data-so="3">
-        <button class="mo-anh" type="button"><img src="anh/thang_may.jpg" width="1500" height="781" loading="lazy" alt="Sảnh thang máy với bảng nút và màn hình số tầng"></button>
-        <figcaption>Sảnh thang máy: bảng nút và màn hình báo vị trí cabin.</figcaption>
-      </figure>
-    </div>
-  </div>
-</section>
-
-<section class="dung-sai" id="dung-sai">
-  <div class="khung">
-    <p class="nhan muc-so">Đúng và sai</p>
-    <h2>Cùng một máy, khác một thao tác</h2>
-    <p class="van">Với nồi hấp, đồng hồ áp suất có thể đánh lừa người dùng. Nếu không đuổi hết khí trước khi đóng van, đồng hồ vẫn chỉ đủ áp nhưng bên trong không đủ nóng. VERA Lab tính nhiệt độ từ bảng hơi nước IAPWS-IF97, nên hiện tượng này xảy ra đúng như ngoài đời.</p>
-    <div class="cong-tac" role="group" aria-label="Chọn thao tác">
-      <button type="button" id="q-dung" aria-pressed="true">Đuổi khí đúng quy trình</button>
-      <button type="button" id="q-sai" aria-pressed="false">Không đuổi khí</button>
-    </div>
-    <div class="may-do">
-      <div><span>Đồng hồ áp suất</span><strong id="v-ap">1,05 bar</strong></div>
-      <div><span>Nhiệt độ thực trong buồng</span><strong id="v-nhiet">120,8 °C</strong></div>
-      <div><span>Vi sinh vật giảm</span><strong id="v-log">8,5 bậc log</strong></div>
-    </div>
-    <p class="ket-luan tot" id="v-kl">Đạt tiệt trùng.</p>
-    <p class="chu-thich" style="color:var(--tren-muc-phu)">Số liệu từ bài kiểm thử tự động của phần mềm.</p>
-  </div>
-</section>
-
-<section id="may">
-  <div class="khung">
-    <p class="nhan muc-so">Máy phân tích</p>
-    <h2>Mỗi máy là một màn hình vận hành riêng</h2>
-    <p class="van">Bấm vào máy, cảnh 3D tạm dừng và màn hình vận hành mở ra, gồm quy trình từng bước, sơ đồ bên trong máy có hoạt cảnh, đồ thị và phần phân tích chuyên sâu. Chế độ Hướng dẫn chặn thao tác sai và giải thích lý do. Chế độ Thực hành để học sinh tự làm và tự nhận hậu quả.</p>
-    <div class="luoi-anh">
-      <figure class="c6" data-so="4">
-        <button class="mo-anh" type="button"><img src="anh/nmr.jpg" loading="lazy" alt="Màn hình vận hành máy NMR với tín hiệu FID và phổ"></button>
-        <figcaption>¹H-NMR: tín hiệu FID, phổ và định lượng metanol trong rượu.</figcaption>
-      </figure>
-      <figure class="c6" data-so="5">
-        <button class="mo-anh" type="button"><img src="anh/xrd.jpg" loading="lazy" alt="Màn hình vận hành máy nhiễu xạ tia X với giản đồ của kết tủa"></button>
-        <figcaption>XRD: giản đồ nhiễu xạ của kết tủa trắng, nhận ra barit BaSO₄.</figcaption>
-      </figure>
-      <figure class="c5" data-so="6">
-        <button class="mo-anh" type="button"><img src="anh/phong_may.jpg" width="1500" height="781" loading="lazy" alt="Toàn cảnh phòng máy phân tích"></button>
-        <figcaption>Phòng máy phân tích ở tầng 1.</figcaption>
-      </figure>
-      <div class="c7" style="min-width:0">
-        <ul class="nhom-may">
-          <li>UV-Vis, AAS <span>Beer – Lambert, đường chuẩn</span></li>
-          <li>FTIR <span>giao thoa đồ, trừ phổ nước</span></li>
-          <li>GC-MS, HPLC <span>thời gian lưu, phổ khối</span></li>
-          <li>Chuẩn độ điện thế <span>đồ thị Gran</span></li>
-          <li>XRD <span>Bragg, Scherrer</span></li>
-          <li>SEM-EDS <span>ảnh tinh thể, phổ tia X</span></li>
-          <li>¹H-NMR <span>FID, tách vạch, qNMR</span></li>
-          <li>Bom nhiệt lượng <span>Regnault – Pfaundler</span></li>
-          <li>Tủ sấy, lò nung <span>khối lượng không đổi</span></li>
-          <li>Máy cất nước, nồi hấp <span>IAPWS-IF97</span></li>
-        </ul>
+        <div class="khung-anh"><img id="phong-anh" alt=""></div>
+        <div class="chu"><div class="tang" id="phong-tang"></div><h3 id="phong-ten"></h3><p id="phong-mo-ta"></p></div>
       </div>
     </div>
   </div>
 </section>
 
-<section class="trang">
-  <div class="khung hai-cot">
-    <div>
-      <p class="nhan muc-so">Lắp ráp tự do</p>
-      <h2>Tự nối bộ dụng cụ, rồi cho nó chạy</h2>
-      <p class="van">Khu chế tạo có khoảng 40 loại bộ phận với khớp nối chuẩn. Học sinh tự lắp bộ chưng cất, hồi lưu, thu khí, lọc hay chiết. Bộ dụng cụ chạy theo đúng cách đã nối: hơi đi theo ống, khí sục vào dung dịch, hệ kín thì áp suất tăng.</p>
-      <figure data-so="7" style="margin-top:22px">
-        <button class="mo-anh" type="button"><img src="anh/kho_hoa_chat.jpg" width="1500" height="781" loading="lazy" alt="Kho hóa chất với các kệ theo nhóm"></button>
-        <figcaption>Kho hóa chất: 720 chất xếp theo nhóm trên kệ.</figcaption>
-      </figure>
-    </div>
-    <figure data-so="8">
-      <button class="mo-anh" type="button"><img src="anh/lap_rap.jpg" loading="lazy" alt="Giao diện lắp ráp 3D với bảng bộ phận và bảng kiểm tra"></button>
-      <figcaption>Giao diện lắp ráp 3D: bảng bộ phận, bàn lắp và bảng kiểm tra hệ kín, hệ hở.</figcaption>
-    </figure>
-  </div>
-</section>
-
-<section id="sinh">
+<section class="muc luoi" id="lab-hoa" style="--mau:var(--hoa)">
   <div class="khung">
-    <p class="nhan muc-so">Sinh học</p>
-    <h2>Từ tế bào hành đến ghép gen</h2>
-    <p class="van">Tầng 2 có các bài từ quan sát tế bào, khí khổng, catalase, lên men, quang hợp đến nhuộm Gram, cấy ria, PCR, điện di và ghép gen. Vi sinh vật chỉ dùng chủng dạy học cấp an toàn sinh học BSL-1, và AI từ chối các yêu cầu vượt cấp này.</p>
-    <div class="luoi-anh">
-      <figure class="c7" data-so="9">
-        <button class="mo-anh" type="button"><img src="anh/tang2_toan_canh.jpg" width="1500" height="781" loading="lazy" alt="Toàn cảnh phòng thí nghiệm sinh học tầng 2"></button>
-        <figcaption>Phòng thí nghiệm Sinh học ở tầng 2.</figcaption>
-      </figure>
-      <figure class="c5" data-so="10">
-        <button class="mo-anh" type="button"><img src="anh/ghep_gen.jpg" loading="lazy" alt="Màn hình trạm ghép gen tạo ADN tái tổ hợp"></button>
-        <figcaption>Trạm ghép gen: cắt, nối và biến nạp ADN tái tổ hợp.</figcaption>
-      </figure>
-      <figure class="c4" data-so="11">
-        <button class="mo-anh" type="button"><img src="anh/khuan_lac.jpg" width="1500" height="781" loading="lazy" alt="Bàn sinh học phân tử với đĩa khuẩn lạc xanh trắng"></button>
-        <figcaption>Chọn dòng khuẩn lạc xanh và trắng. Bỏ ligaza thì không có khuẩn lạc trắng.</figcaption>
-      </figure>
-      <figure class="c4" data-so="12">
-        <button class="mo-anh" type="button"><img src="anh/vi_sinh.jpg" width="1500" height="781" loading="lazy" alt="Phòng vi sinh với tủ an toàn sinh học"></button>
-        <figcaption>Phòng vi sinh có tủ an toàn sinh học và tủ ấm.</figcaption>
-      </figure>
-      <figure class="c4" data-so="13">
-        <button class="mo-anh" type="button"><img src="anh/nha_kinh.jpg" width="1500" height="781" loading="lazy" alt="Nhà kính với các chậu cây"></button>
-        <figcaption>Nhà kính thực vật cho các bài quang hợp, thoát hơi nước, hướng sáng.</figcaption>
-      </figure>
-    </div>
-  </div>
-</section>
-
-<section class="trang" id="ai">
-  <div class="khung hai-cot">
-    <figure data-so="14">
-      <button class="mo-anh" type="button"><img src="anh/robot.jpg" width="1500" height="781" loading="lazy" alt="Robot trợ lý hình người trong hành lang"></button>
-      <figcaption>Robot trợ lý thực hiện kế hoạch do AI lập.</figcaption>
-    </figure>
-    <div>
-      <p class="nhan muc-so">AI và điều khiển</p>
-      <h2>AI bị ràng buộc bởi quy trình</h2>
-      <p class="van">Trợ lý AI đọc hồ sơ quy trình của từng máy trước khi trả lời. Khi được giao việc, AI lập kế hoạch từ các kỹ năng có sẵn của robot, và một bộ kiểm tra loại bước sai hoặc mất an toàn trước khi robot làm.</p>
-      <p class="van">Webcam thường cũng đủ để điều khiển: quay đầu để xoay góc nhìn, ghé gần để phóng to, dùng cử chỉ tay qua MediaPipe. Tay cầm tự chế "Halo" dùng ESP32 đang trong giai đoạn đặt linh kiện.</p>
-    </div>
-  </div>
-  <div class="khung">
-    <figure class="anh-lon" data-so="15">
-      <button class="mo-anh" type="button"><img src="anh/hanh_lang_t2.jpg" width="1500" height="781" loading="lazy" alt="Hành lang tầng 2 với các cửa theo màu từng khu"></button>
-      <figcaption>Hành lang tầng 2: mỗi khu một màu cửa, dễ nhận biết khi đi bằng góc nhìn thứ nhất.</figcaption>
-    </figure>
-  </div>
-</section>
-
-<section id="kiem-chung">
-  <div class="khung">
-    <p class="nhan muc-so">Kiểm chứng</p>
-    <h2>Đối chiếu kết quả với giá trị đã biết</h2>
-    <p class="van">Các bài tự động thao tác như học sinh, gồm cả cố ý làm sai, rồi so kết quả với đáp án hoặc số liệu tham chiếu.</p>
-    <div class="bang-cuon">
-      <table>
-        <caption><b>Bảng 1.</b> Một số kết quả từ bài kiểm thử tự động</caption>
-        <thead><tr><th>Thí nghiệm</th><th>VERA Lab</th><th>Đối chiếu</th></tr></thead>
-        <tbody>
-          <tr><td>Nhiệt đốt cháy glucozơ, bom nhiệt lượng</td><td class="so">15570 J/g</td><td class="so">15569 J/g (NIST)</td></tr>
-          <tr><td>Nồng độ giấm, chuẩn độ điện thế</td><td class="so">0,8301 mol/L</td><td class="so">0,8300 mol/L (đáp án)</td></tr>
-          <tr><td>Metanol trong rượu, GC-MS</td><td class="so">1602 mg/L</td><td class="so">1602 mg/L (đáp án)</td></tr>
-          <tr><td>Khối lượng còn lại khi nung đá vôi 900 °C</td><td class="so">56,0 %</td><td class="so">56,0 % (lý thuyết CaO)</td></tr>
-          <tr><td>Thành phần BaSO₄, EDS: O / S / Ba</td><td class="so">66,7 / 16,7 / 16,6 %</td><td class="so">66,7 / 16,7 / 16,7 %</td></tr>
-          <tr><td>Bộ kiểm thử mô phỏng C# và Python</td><td class="so">147 và 149 bài đạt</td><td class="so">0 bài sai</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="chu-thich">Bảng này cho thấy mô hình tính đúng trong phạm vi các bài. Đây là mô phỏng ở mức giáo dục, chưa phải đánh giá hiệu quả dạy học.</p>
-
-    <div class="cong-nghe">
-      <div><h3>Đồ họa 3D</h3><p>Unity 6, URP. Toàn bộ cảnh dựng bằng code, tải và gỡ từng khu, giữ nguyên trạng thái.</p></div>
-      <div><h3>Mô phỏng</h3><p>C# thuần, chạy và kiểm thử được ngoài Unity. Dữ liệu có dẫn nguồn.</p></div>
-      <div><h3>Thị giác máy tính</h3><p>Python, OpenCV, MediaPipe, YuNet, truyền sang Unity qua UDP.</p></div>
-      <div><h3>Máy chủ và AI</h3><p>FastAPI, SQLite. Nhiều nhà cung cấp AI, khóa chỉ nằm ở máy chủ.</p></div>
-      <div><h3>Phần cứng</h3><p>ESP32, cảm biến BMI160, joystick, cò Hall SS49E, vỏ in 3D.</p></div>
-      <div><h3>Nền tảng</h3><p>Windows và macOS.</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="trang">
-  <div class="khung">
-    <p class="nhan muc-so">Trạng thái</p>
-    <h2>Đã có gì, còn thiếu gì</h2>
-    <div class="lo-trinh">
+    <div class="dau-khu dan">
       <div>
-        <h3>Đã chạy được</h3>
-        <ul>
-          <li>Khu Hóa học: thí nghiệm, chuẩn độ, 14 máy, lắp ráp tự do</li>
-          <li>Khu Sinh học: 108 dụng cụ, 16 bài thí nghiệm, trạm ghép gen</li>
-          <li>Trợ lý AI, robot, web quản lý</li>
-          <li>Điều khiển đầu và tay bằng webcam</li>
-        </ul>
+        <span class="tang-so">TẦNG 1</span>
+        <h2>Lab <span>Hóa học</span></h2>
+        <p>Từ bàn thí nghiệm của học sinh, kho hóa chất đến phòng máy phân tích, khu chế tạo dụng cụ và khu robot.</p>
+        <div class="danh-so"><div><b>720</b><span>hóa chất</span></div><div><b>14</b><span>máy phân tích</span></div><div><b>40</b><span>loại bộ phận lắp ráp</span></div></div>
       </div>
+      <div class="khung-3d-nho" aria-hidden="true"><canvas id="c-phan-tu"></canvas></div>
+    </div>
+    <div class="bento dan" id="bento-hoa"></div>
+  </div>
+</section>
+
+<section class="muc luoi" id="lab-sinh" style="--mau:var(--sinh);background:var(--nen-2)">
+  <div class="khung">
+    <div class="dau-khu dan">
       <div>
-        <h3>Chưa làm</h3>
-        <ul>
-          <li>Máy chủ nhiều người cùng vào một phòng</li>
-          <li>Bàn lập trình khối lệnh ở phòng robot</li>
-          <li>Firmware tay cầm Halo</li>
-          <li>AI chạy cục bộ, hệ thống cho giáo viên và học sinh</li>
-          <li>Khảo sát hiệu quả dạy học trên học sinh thật</li>
-        </ul>
+        <span class="tang-so">TẦNG 2</span>
+        <h2>Lab <span>Sinh học</span></h2>
+        <p>Sáu khu chức năng, từ quan sát tế bào dưới kính hiển vi đến tách chiết ADN, nuôi cấy vi sinh và nhà kính thực vật.</p>
+        <div class="danh-so"><div><b>108</b><span>dụng cụ</span></div><div><b>16</b><span>bài thí nghiệm</span></div><div><b>6</b><span>khu chức năng</span></div></div>
+      </div>
+      <div class="khung-3d-nho" aria-hidden="true"><canvas id="c-adn"></canvas></div>
+    </div>
+    <div class="bento dan" id="bento-sinh"></div>
+    <ul class="chip-bai dan" aria-label="Một số bài thí nghiệm sinh học">
+      <li>Quan sát tế bào</li><li>Khí khổng</li><li>Co nguyên sinh</li><li>Lên men</li><li>Quang hợp</li><li>Tách chiết ADN</li><li>Nhuộm Gram</li><li>Cấy vi sinh</li><li>PCR và điện di</li><li>Ghép gen</li>
+    </ul>
+  </div>
+</section>
+
+<section class="muc">
+  <div class="khung">
+    <div class="mo-muc dan">
+      <span class="the-muc">Thiết bị nổi bật</span>
+      <h2>Những thứ không phải trường nào cũng có</h2>
+    </div>
+    <div class="thiet-bi dan">
+      <div class="o-tb" style="--mau:var(--hoa)"><small>HÓA</small><b>Kính hiển vi điện tử</b><span>Nhìn cấu trúc rất nhỏ của mẫu</span></div>
+      <div class="o-tb" style="--mau:var(--sinh)"><small>SINH</small><b>Máy PCR và điện di</b><span>Khuếch đại và quan sát ADN</span></div>
+      <div class="o-tb" style="--mau:var(--hoa)"><small>HÓA</small><b>Máy sắc ký khí</b><span>Tách chất trong hỗn hợp</span></div>
+      <div class="o-tb" style="--mau:var(--sinh)"><small>SINH</small><b>Trạm ghép gen</b><span>Tìm hiểu kỹ thuật di truyền</span></div>
+      <div class="o-tb" style="--mau:var(--hoa)"><small>HÓA</small><b>Máy nhiễu xạ tia X</b><span>Nhận biết chất rắn trong mẫu</span></div>
+      <div class="o-tb" style="--mau:var(--sinh)"><small>SINH</small><b>Kính hiển vi quang học</b><span>Quan sát tế bào, khí khổng</span></div>
+      <div class="o-tb" style="--mau:var(--hoa)"><small>HÓA</small><b>Nồi hấp tiệt trùng</b><span>Làm đúng quy trình mới đạt</span></div>
+      <div class="o-tb" style="--mau:var(--tim)"><small>AI</small><b>Robot hình người</b><span>Trợ lý làm theo yêu cầu bằng lời</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="tay-cam" aria-label="Tay cầm VERA Drop">
+  <div class="tc-dinh">
+    <canvas id="c-drop" role="img" aria-label="Mô hình 3D tay cầm VERA Drop, cuộn để tách rời"></canvas>
+    <svg id="tc-duong" aria-hidden="true"></svg>
+    <div id="tc-cham" aria-hidden="true"></div>
+    <div class="tc-tai" aria-hidden="true">ĐANG TẢI MÔ HÌNH 3D…</div>
+    <div class="tc-chu">
+      <div class="khung">
+        <div class="buoc-tc hien">
+          <span class="the-muc">Phần cứng tự thiết kế</span>
+          <h2>Tay cầm <span class="chu-chuyen">VERA Drop</span></h2>
+          <p>Tay cầm dáng giọt nước do nhóm tự thiết kế, gọn trong lòng bàn tay, để thao tác trong lab tự nhiên hơn chuột và bàn phím.</p>
+          <div class="tc-thong-so">
+            <div><b>58 × 42</b><span>mm rộng, sâu</span></div>
+            <div><b>104</b><span>mm chiều cao</span></div>
+            <div><b>7</b><span>chi tiết in 3D</span></div>
+          </div>
+        </div>
+        <div class="buoc-tc">
+          <span class="the-muc">Tháo rời</span>
+          <h2>Thiết kế để in và tự lắp</h2>
+          <p>Thân chia làm hai nửa bắt vít, nên xưởng in 3D thông thường đều làm được. Có thêm thanh móc dây đeo cổ tay và dòng chữ khắc "VERA LAB - Le Quy Don".</p>
+        </div>
+        <div class="buoc-tc">
+          <span class="the-muc">Bên trong</span>
+          <h2>Linh kiện phổ thông, dễ mua</h2>
+          <p>Mạch ESP32 truyền không dây, cảm biến chuyển động BMI160, joystick, cò bóp dùng cảm biến Hall, pin LiPo sạc qua cổng USB-C.</p>
+        </div>
+        <div class="buoc-tc">
+          <span class="the-muc">Trạng thái</span>
+          <h2>Bản thiết kế đã xong, sắp lắp thử</h2>
+          <p>Đây là mô hình 3D của chính bản thiết kế dùng để in. Nhóm đang chuẩn bị linh kiện, phần mềm cho tay cầm là bước tiếp theo.</p>
+        </div>
+      </div>
+    </div>
+    <div class="tc-duoi" aria-hidden="true"><span>KÉO ĐỂ XOAY</span><div class="tc-ray"><i id="tc-tien-do"></i></div><span>CUỘN ĐỂ TÁCH RỜI</span></div>
+  </div>
+</section>
+
+<section class="muc luoi" id="diem-moi" style="background:var(--nen-2)">
+  <div class="khung">
+    <div class="mo-muc dan">
+      <span class="the-muc">Điểm mới và sáng tạo</span>
+      <h2>Không chỉ xem. <span class="chu-chuyen">Làm, sai, rồi hiểu.</span></h2>
+    </div>
+    <div class="chong" id="chong">
+      <article class="the-chong" style="--i:0">
+        <div class="noi-dung"><div class="so">01</div><h3>Mỗi lần làm là một kết quả riêng</h3><p>Kết quả được tính từ đúng những gì bạn đã pha và thao tác, không phát lại video. Hai bạn làm khác nhau sẽ thấy kết quả khác nhau.</p></div>
+        <img src="anh/sinh_ban.jpg" alt="Khu bàn học sinh phòng Sinh" loading="lazy">
+      </article>
+      <article class="the-chong" style="--i:1">
+        <div class="noi-dung"><div class="so">02</div><h3>Làm sai vẫn an toàn, và có hậu quả thật</h3><p>Bỏ qua một bước trong quy trình thì thí nghiệm hỏng đúng như ngoài đời. Bài học nhớ lâu mà không ai gặp nguy hiểm.</p></div>
+        <img src="anh/sinh_visinh.jpg" alt="Phòng vi sinh" loading="lazy">
+      </article>
+      <article class="the-chong" style="--i:2">
+        <div class="noi-dung"><div class="so">03</div><h3>Tự do lắp ráp, không theo khuôn</h3><p>Bạn tự chọn, tự nối, và bộ dụng cụ chạy đúng theo cách đã nối, kể cả khi nối sai.</p></div>
+        <img src="anh/hoa_chetao.jpg" alt="Khu chế tạo dụng cụ" loading="lazy">
+      </article>
+      <article class="the-chong" style="--i:3">
+        <div class="noi-dung"><div class="so">04</div><h3>Robot AI có giới hạn an toàn</h3><p>Robot nhận yêu cầu bằng lời và tự lập kế hoạch từng bước, nhưng mỗi bước phải qua bộ kiểm tra trước khi thực hiện.</p></div>
+        <img src="anh/robot.jpg" alt="Robot trợ lý" loading="lazy">
+      </article>
+      <article class="the-chong" style="--i:4">
+        <div class="noi-dung"><div class="so">05</div><h3>Nhập vai bằng thiết bị rẻ</h3><p>Webcam thường đã đủ để quay đầu nhìn quanh, thêm tay cầm tự chế thay cho kính VR đắt tiền.</p></div>
+        <img src="anh/sinh_nhakinh.jpg" alt="Nhà kính thực vật" loading="lazy">
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="muc">
+  <div class="khung">
+    <div class="mo-muc dan">
+      <span class="the-muc">Bên dưới hệ thống</span>
+      <h2>Năm lớp công nghệ làm nên VERA Lab</h2>
+    </div>
+    <div class="tang-kt">
+      <div class="lop dan"><b>Không gian 3D</b><div>Tòa nhà hai tầng, chỉ tải phòng đang cần.<small>Unity 6, URP</small></div></div>
+      <div class="lop dan" style="--tre:.6s"><b>Mô phỏng</b><div>Bộ máy tính kết quả từ thao tác của từng học sinh.<small>C#, có kiểm thử tự động</small></div></div>
+      <div class="lop dan" style="--tre:1.2s"><b>Trí tuệ nhân tạo</b><div>Trợ lý trả lời theo quy trình máy, robot lập kế hoạch có kiểm tra an toàn.<small>Python, FastAPI, nhiều nhà cung cấp AI</small></div></div>
+      <div class="lop dan" style="--tre:1.8s"><b>Điều khiển tự nhiên</b><div>Theo dõi đầu và tay qua webcam, tay cầm không dây tự chế.<small>MediaPipe, OpenCV, ESP32</small></div></div>
+      <div class="lop dan" style="--tre:2.4s"><b>Quản lý</b><div>Kho, thiết bị, nhật ký thí nghiệm trên trình duyệt.<small>Web, SQLite</small></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="muc luoi" id="hieu-suat" style="background:var(--nen-2)">
+  <div class="khung">
+    <div class="mo-muc dan">
+      <span class="the-muc">Hiệu suất và tương thích</span>
+      <h2>Chạy mượt trên <span class="chu-chuyen">laptop thông dụng</span></h2>
+      <p>Không cần card đồ họa rời. Ứng dụng chỉ tải phòng bạn đang đứng và các phòng sát cửa, nên một tòa nhà lớn vẫn nhẹ máy.</p>
+    </div>
+    <div class="hieu-suat">
+      <div class="the dan">
+        <h3>Đo trên laptop Intel Iris Xe, 1080p</h3>
+        <div class="do">
+          <div class="dong-do"><div class="ten"><span>Khi đi trong khu Hóa</span><b>60–70 FPS</b></div><div class="ray"><i style="--w:72%"></i></div></div>
+          <div class="dong-do"><div class="ten"><span>Chỗ nặng nhất</span><b>~47 FPS</b></div><div class="ray"><i style="--w:52%"></i></div></div>
+          <div class="dong-do"><div class="ten"><span>Giao diện lắp ráp dụng cụ</span><b>~87 FPS</b></div><div class="ray"><i style="--w:96%"></i></div></div>
+        </div>
+        <p class="ghi-chu">Số đo ở khu Hóa. Số đo khu Sinh sẽ được công bố sau khi đo xong.</p>
+      </div>
+      <div class="the dan" style="--tre:.1s">
+        <h3>Hệ điều hành</h3>
+        <div class="he-dh">
+          <div class="o-hdh">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg>
+            <b>Windows</b>
+            <button type="button" class="nut-tai">Tải về</button>
+          </div>
+          <div class="o-hdh">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
+            <b>macOS</b>
+            <button type="button" class="nut-tai">Tải về</button>
+          </div>
+          <div class="o-hdh">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
+            <b>iOS</b>
+            <button type="button" class="nut-tai">Tải về</button>
+          </div>
+        </div>
+        <p class="ghi-chu">Webcam và tay cầm là tùy chọn. Chỉ cần chuột và bàn phím là dùng được.</p>
+      </div>
+      <div class="cuon-bang dan" tabindex="0" role="region" aria-label="Bảng cấu hình đề nghị">
+        <table class="cau-hinh">
+          <thead><tr><th>Mức máy</th><th>Cấu hình</th><th>Trải nghiệm</th></tr></thead>
+          <tbody>
+            <tr><td>Máy cũ</td><td>Card Intel UHD 620</td><td>Khoảng 30 FPS theo ước tính, nên chọn mức đồ họa thấp</td></tr>
+            <tr><td>Tối thiểu</td><td>Core i5 thế hệ 11 hoặc Ryzen 5 5500U, card tích hợp, RAM 8 GB</td><td>Mượt ở 1080p (đã đo trên Iris Xe)</td></tr>
+            <tr><td>Khuyến nghị</td><td>GTX 1650, RTX 3050 hoặc RX 6500 XT</td><td>Trên 100 FPS theo ước tính</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 </section>
+
+<section class="muc" id="lo-trinh">
+  <div class="khung">
+    <div class="mo-muc giua dan">
+      <span class="the-muc">Phát triển dự kiến</span>
+      <h2>Từng tầng, từng môn</h2>
+    </div>
+    <div class="lo-trinh" id="lo-trinh-duong">
+      <div class="duong-sang" id="duong-sang"></div>
+      <div class="moc">
+        <span class="tt co">Đã hoàn thành</span>
+        <h3>Lab Hóa và lab Sinh</h3>
+        <ul><li>Tầng 1: phòng thí nghiệm, kho hóa chất, máy phân tích, khu chế tạo, robot</li><li>Tầng 2: phòng sinh học, vi sinh, sinh học phân tử, kho sinh phẩm, nhà kính</li><li>Trợ lý AI, điều khiển bằng webcam, trang web quản lý</li><li>Bản thiết kế 3D tay cầm VERA Drop</li></ul>
+      </div>
+      <div class="moc">
+        <span class="tt dang">Đang làm</span>
+        <h3>Thêm cách điều khiển, thêm nền tảng</h3>
+        <ul><li>In, lắp và viết phần mềm cho tay cầm VERA Drop</li><li>Bản cài cho macOS</li><li>Bàn lập trình khối lệnh ở phòng robot</li></ul>
+      </div>
+      <div class="moc">
+        <span class="tt sau">Dự kiến</span>
+        <h3>Học cùng nhau</h3>
+        <ul><li>Nhiều người cùng vào một phòng thí nghiệm</li><li>Hệ thống lớp học cho giáo viên và học sinh</li><li>AI chạy ngay trên máy</li></ul>
+      </div>
+      <div class="moc">
+        <span class="tt sau">Dự kiến</span>
+        <h3>Mở rộng và đánh giá</h3>
+        <ul><li>Tầng mới cho môn Vật lý</li><li>Hỗ trợ kính thực tế ảo</li><li>Khảo sát hiệu quả với học sinh tại trường</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="muc" style="background:var(--nen-2)">
+  <div class="khung">
+    <div class="mo-muc giua dan">
+      <span class="the-muc">Câu hỏi thường gặp</span>
+      <h2>Điều bạn có thể muốn biết</h2>
+    </div>
+    <div class="hoi-dap dan">
+      <details><summary>Có cần kính thực tế ảo không?</summary><p>Không. VERA Lab chạy trên màn hình máy tính thường, điều khiển bằng chuột và bàn phím. Webcam và tay cầm là tùy chọn.</p></details>
+      <details><summary>VERA Lab có thay thế giờ thực hành thật không?</summary><p>Không. VERA Lab giúp học sinh chuẩn bị và ôn lại, còn kỹ năng cầm nắm ngoài đời vẫn cần giờ thực hành thật.</p></details>
+      <details><summary>Có cần kết nối mạng không?</summary><p>Phần trợ lý AI và robot lập kế hoạch cần kết nối tới máy chủ. Nhóm đang hướng tới AI chạy ngay trên máy.</p></details>
+      <details><summary>Kết quả thí nghiệm có chính xác không?</summary><p>Mô phỏng ở mức phục vụ dạy học: đúng về hiện tượng và gần đúng về số liệu trong phạm vi các bài. Nhóm chạy kiểm thử tự động để đối chiếu với đáp án.</p></details>
+      <details><summary>Các thí nghiệm sinh học có an toàn không?</summary><p>Trong ứng dụng chỉ dùng các chủng dạy học ở cấp an toàn thấp nhất, và trợ lý AI từ chối các yêu cầu vượt mức này.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="ket">
+  <img src="anh/ngoai.jpg" alt="" loading="lazy">
+  <div class="khung dan">
+    <h2>Mở cửa là <span class="chu-chuyen">bắt đầu thí nghiệm</span></h2>
+    <p>VERA Lab là dự án khoa học kỹ thuật của học sinh Trường THPT Chuyên Lê Quý Đôn, Gia Lai.</p>
+    <a class="nut chinh" href="#quy-hoach">Tham quan các phòng</a>
+  </div>
+</section>
+</main>
 
 <footer>
   <div class="khung">
-    <div><strong>VERA Lab</strong> · Virtual Experiment &amp; Reality-based AI Lab</div>
-    <div>Nguyễn Ngọc Bảo Trọng · Trần Đức Trọng</div>
+    <div class="chan">
+      <div>
+        <a class="nhan-hieu" href="#dau">VERA Lab</a>
+        <div>Virtual Experiment &amp; Reality-based AI Lab</div>
+        <div class="logo-truong"><img src="anh/logo_lqd.png" alt="Trường THPT Chuyên Lê Quý Đôn, Gia Lai" width="640" height="171" loading="lazy"></div>
+      </div>
+      <div>
+        <h3>Sản phẩm</h3>
+        <ul><li><a href="#tinh-nang">Tính năng</a></li><li><a href="#lab-hoa">Lab Hóa</a></li><li><a href="#lab-sinh">Lab Sinh</a></li><li><a href="#tay-cam">Tay cầm VERA Drop</a></li><li><a href="#hieu-suat">Tải về</a></li></ul>
+      </div>
+      <div>
+        <h3>Nhóm tác giả</h3>
+        <ul><li>Nguyễn Ngọc Bảo Trọng</li><li>Trần Đức Trọng</li></ul>
+      </div>
+    </div>
+    <div class="ban-quyen">Ảnh các phòng được chụp trực tiếp trong ứng dụng. Mô hình tòa nhà và tay cầm được dựng 3D ngay trên trang.</div>
   </div>
 </footer>
 
+<div class="thong-bao" id="thong-bao" role="status"></div>
+
 <dialog id="xem" aria-label="Xem ảnh lớn">
-  <button type="button" id="dong">Đóng</button>
-  <img id="xem-anh" alt="">
-  <p id="xem-chu"></p>
+  <button class="dong" type="button" id="dong-xem" aria-label="Đóng">×</button>
+  <img id="xem-anh" alt=""><p id="xem-chu"></p>
 </dialog>
 
 <script>
 (function () {
-  var giam = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var A = 'anh/';
+  var yenTinh = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Đánh số hình theo thứ tự trên trang
-  document.querySelectorAll('figure[data-so]').forEach(function (f) {
-    var c = f.querySelector('figcaption');
-    var b = document.createElement('b');
-    b.textContent = 'Hình ' + f.dataset.so + '.';
-    c.insertBefore(b, c.firstChild);
+  // Ảnh nền mở đầu luân phiên lab Hóa và lab Sinh
+  var nen = [].slice.call(document.querySelectorAll('#md-anh img')), nenHien = 0;
+  if (!yenTinh) setInterval(function () {
+    nenHien = 1 - nenHien;
+    nen.forEach(function (n, j) { n.classList.toggle('hien', j === nenHien); });
+  }, 6500);
+
+  // Nút tải: chưa có tệp phát hành
+  var tb = document.getElementById('thong-bao'), henTb = null;
+  document.querySelectorAll('.nut-tai').forEach(function (b) {
+    b.addEventListener('click', function () {
+      tb.textContent = 'Bản tải sắp ra mắt';
+      tb.classList.add('hien');
+      clearTimeout(henTb);
+      henTb = setTimeout(function () { tb.classList.remove('hien'); }, 2200);
+    });
   });
 
-  // Phổ 1H-NMR: etanol CH3 1,17 ppm (ba), CH2 3,65 ppm (bốn), metanol 3,34 ppm; 60 MHz, J = 7 Hz
-  var J = 7 / 60;
-  var vach = [
-    [1.17 - J, 1], [1.17, 2], [1.17 + J, 1],
-    [3.65 - 1.5 * J, .34], [3.65 - .5 * J, 1], [3.65 + .5 * J, 1], [3.65 + 1.5 * J, .34],
-    [3.34, .55], [0, .28]
-  ];
-  var cv = document.getElementById('pho'), g = cv.getContext('2d');
-  var mau = { vach: '#5fe0d2', truc: '#9db4bd', luoi: 'rgba(157,180,189,.16)' };
-  function tinh(ppm) {
-    var y = 0, w = .012;
-    vach.forEach(function (v) { var d = ppm - v[0]; y += v[1] * w * w / (d * d + w * w); });
-    return y;
+  // Thư viện ảnh
+  function bento(id, ds) {
+    var goc = document.getElementById(id);
+    ds.forEach(function (a) {
+      var n = document.createElement('button');
+      n.type = 'button';
+      n.className = 'anh-the ' + (a[2] || '');
+      n.dataset.anh = a[0];
+      n.dataset.chu = a[1];
+      n.setAttribute('aria-label', 'Xem lớn: ' + a[1]);
+      var im = document.createElement('img');
+      im.src = A + a[0] + '.jpg'; im.alt = a[1]; im.loading = 'lazy';
+      var s = document.createElement('span'); s.textContent = a[1];
+      n.appendChild(im); n.appendChild(s);
+      goc.appendChild(n);
+    });
   }
-  function ve(tiLe) {
-    var r = window.devicePixelRatio || 1, W = cv.clientWidth, H = cv.clientHeight;
-    if (cv.width !== Math.round(W * r)) { cv.width = Math.round(W * r); cv.height = Math.round(H * r); }
-    g.setTransform(r, 0, 0, r, 0, 0);
-    g.clearRect(0, 0, W, H);
-    var day = H - 26, tren = 10, pMax = 5, pMin = -.3;
-    var X = function (p) { return (pMax - p) / (pMax - pMin) * W; };
-    g.font = '12px "IBM Plex Mono", monospace'; g.textAlign = 'center'; g.fillStyle = mau.truc;
-    for (var p = 0; p <= 5; p++) {
-      g.strokeStyle = mau.luoi; g.beginPath(); g.moveTo(X(p), tren); g.lineTo(X(p), day); g.stroke();
-      g.fillText(String(p), X(p), H - 6);
-    }
-    g.textAlign = 'left'; g.fillText('δ (ppm)', 2, H - 6);
-    g.strokeStyle = mau.truc; g.beginPath(); g.moveTo(0, day); g.lineTo(W, day); g.stroke();
-    var n = Math.floor(W * Math.min(1, tiLe));
-    g.strokeStyle = mau.vach; g.lineWidth = 1.4; g.beginPath();
-    for (var x = 0; x <= n; x++) {
-      var ppm = pMax - x / W * (pMax - pMin);
-      var y = day - Math.min(1, tinh(ppm) / 2.1) * (day - tren);
-      if (x === 0) g.moveTo(x, y); else g.lineTo(x, y);
-    }
-    g.stroke(); g.lineWidth = 1;
-    if (tiLe >= 1) {
-      g.fillStyle = '#e8f1f0'; g.textAlign = 'center';
-      g.fillText('CH₂ etanol', X(3.65) - 44, tren + 40);
-      g.fillText('metanol', X(3.34) + 34, day - .3 * (day - tren));
-      g.fillText('CH₃ etanol', X(1.17), tren + 8 > 20 ? tren + 8 : 20);
-      g.fillText('DSS', X(0), day - .2 * (day - tren));
-    } else if (n > 0) {
-      g.strokeStyle = 'rgba(95,224,210,.5)'; g.beginPath(); g.moveTo(n, tren); g.lineTo(n, day); g.stroke();
-    }
-  }
-  function chay() {
-    if (giam) { ve(1); return; }
-    var t0 = null, lau = 2600;
-    function b(t) { if (t0 === null) t0 = t; var k = (t - t0) / lau; ve(k); if (k < 1) requestAnimationFrame(b); }
-    requestAnimationFrame(b);
-  }
-  ve(1);
-  chay();
-  window.addEventListener('resize', function () { ve(1); });
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (giam) ve(1); });
+  bento('bento-hoa', [
+    ['hoa_lab', 'Phòng thí nghiệm Hóa', 'to'], ['hoa_giang', 'Bàn giáo viên và màn hình'], ['hoa_kho', 'Phòng hóa chất'],
+    ['hoa_may', 'Phòng máy phân tích', 'rong'], ['hoa_robot', 'Phòng tự động hóa và robot'], ['hoa_tonghop', 'Khu đun nóng và tổng hợp'],
+    ['hoa_chetao', 'Khu chế tạo dụng cụ'], ['hoa_nhakhoahoc', 'Tường các nhà hóa học'], ['ngoai', 'Mặt ngoài tòa nhà', 'rong']
+  ]);
+  bento('bento-sinh', [
+    ['sinh_lab', 'Phòng thí nghiệm Sinh', 'to'], ['sinh_hienvi', 'Bàn kính hiển vi'], ['sinh_ban', 'Khu bàn học sinh'],
+    ['sinh_visinh', 'Phòng vi sinh', 'rong'], ['sinh_phantu', 'Phòng sinh học phân tử'], ['sinh_tachchiet', 'Đảo tách chiết ADN'],
+    ['sinh_pcr', 'Tủ thao tác PCR'], ['sinh_dienhi', 'Khu PCR và điện di'], ['sinh_ghepgen', 'Trạm ghép gen', 'rong'],
+    ['sinh_nhakinh', 'Nhà kính thực vật', 'to'], ['sinh_quanghop', 'Trạm quang hợp'], ['sinh_kho', 'Kho sinh phẩm'],
+    ['sinh_nhuom', 'Đảo nhuộm Gram'], ['sinh_thinghiem', 'Quầy rửa dụng cụ'], ['sinh_hanhlang', 'Hành lang tầng 2', 'rong'], ['thang', 'Sảnh thang máy', 'rong']
+  ]);
+  var xem = document.getElementById('xem');
+  document.addEventListener('click', function (e) {
+    var n = e.target.closest ? e.target.closest('.anh-the') : null;
+    if (n) {
+      document.getElementById('xem-anh').src = A + n.dataset.anh + '.jpg';
+      document.getElementById('xem-anh').alt = n.dataset.chu;
+      document.getElementById('xem-chu').textContent = n.dataset.chu;
+      xem.showModal();
+    } else if (e.target === xem) xem.close();
+  });
+  document.getElementById('dong-xem').addEventListener('click', function () { xem.close(); });
 
-  // Mặt bằng theo tọa độ ZoneMap: x là x, z là chiều đứng trên bản vẽ
-  var A = 'anh/';
-  var TANG = {
+  // Bảng phòng dùng chung với cảnh 3D: r là [x0, z0, x1, z1] theo mét, lấy từ bảng khu của ứng dụng
+  var TANG = window.VERA_TANG = {
     1: [
-      { ten: 'Phòng thí nghiệm', r: [0, 0, 20, 15], anh: 'tang1_toan_canh', ta: 'Phòng chính của khu Hóa học: bàn học sinh, bàn chuẩn độ, bàn đun, tủ hút, khu an toàn và ngăn kính chế tạo dụng cụ.' },
-      { ten: 'Hóa chất', r: [20, 0, 27, 15], anh: 'kho_hoa_chat', ta: 'Kho 720 hóa chất xếp theo nhóm trên kệ. Tra cứu trong phần mềm sẽ dẫn tới đúng vị trí.' },
-      { ten: 'Hành lang', r: [0, -2.2, 27, 0], anh: null, ta: 'Nối phòng thí nghiệm với dãy phòng phía nam, có dải lịch sử hóa học dọc tường.' },
-      { ten: 'Phòng máy phân tích', r: [0, -9, 13.5, -2.2], anh: 'phong_may', ta: 'Nơi đặt các máy phân tích, từ UV-Vis, AAS đến XRD, SEM và NMR. Mỗi máy có màn hình vận hành riêng.' },
-      { ten: 'Tự động hóa & robot', r: [13.5, -9, 27, -2.2], anh: 'robot', ta: 'Phòng tự động hóa với cobot và máy in 3D. Robot trợ lý có thể đi khắp tầng 1 để lấy và rót hóa chất.' },
-      { ten: 'Thang', r: [27, -2.2, 30, 6], anh: 'thang_may', ta: 'Lõi thang chung hai tầng: cầu thang bộ một vế và thang máy có cabin chạy thật.' }
+      { ten: 'Phòng thí nghiệm Hóa', k: 'lab', r: [0, 0, 20, 15], anh: 'hoa_lab', ta: 'Không gian chính với các cụm bàn học sinh, bàn giáo viên có màn hình lớn, tủ hút, khu đun nóng và ngăn kính chế tạo dụng cụ.' },
+      { ten: 'Phòng hóa chất', k: 'kho', r: [20, 0, 27, 15], anh: 'hoa_kho', ta: 'Kệ chứa 720 hóa chất. Tra cứu tên chất là được dẫn tới đúng vị trí trên kệ.' },
+      { ten: 'Hành lang', k: '', r: [0, -2.2, 27, 0], anh: 'hoa_hanhlang', ta: 'Trục nối các phòng, trưng bày lịch sử hóa học, có cửa tự động ở từng phòng.' },
+      { ten: 'Phòng máy phân tích', k: 'may', r: [0, -9, 13.5, -2.2], anh: 'hoa_may', ta: '14 thiết bị hiện đại, mỗi máy có màn hình vận hành và hướng dẫn riêng.' },
+      { ten: 'Phòng robot', k: 'robot', r: [13.5, -9, 27, -2.2], anh: 'hoa_robot', ta: 'Khu dành cho robot và các thiết bị tự động hóa.' },
+      { ten: 'Lõi thang', k: 'thang', r: [27, -2.2, 30, 6], anh: 'thang', ta: 'Cầu thang và thang máy nối hai tầng.' }
     ],
     2: [
-      { ten: 'Phòng sinh học', r: [0, 0, 20, 15], anh: 'tang2_toan_canh', ta: 'Bàn học sinh với kính hiển vi và khay tiêu bản, nơi làm các bài quan sát tế bào, catalase, lên men.' },
-      { ten: 'Vi sinh', r: [20, 7.5, 27, 15], anh: 'vi_sinh', ta: 'Tủ an toàn sinh học, tủ ấm và nồi hấp. Chỉ dùng chủng dạy học cấp BSL-1.' },
-      { ten: 'Kho sinh phẩm', r: [20, 0, 27, 7.5], anh: null, ta: 'Tủ mát, tủ đông, mẫu vật và thuốc thử cho khu Sinh học.' },
-      { ten: 'Hành lang tầng 2', r: [0, -3.6, 27, 0], anh: 'hanh_lang_t2', ta: 'Hành lang rộng 3,6 m nối các khu, mỗi khu một màu cửa.' },
-      { ten: 'Sinh học phân tử', r: [0, -9, 13.5, -3.6], anh: 'khuan_lac', ta: 'Tách chiết ADN, PCR, điện di và trạm ghép gen.' },
-      { ten: 'Nhà kính', r: [13.5, -9, 27, -3.6], anh: 'nha_kinh', ta: 'Cây trồng cho các bài quang hợp, thoát hơi nước và hướng sáng.' },
-      { ten: 'Hành lang đông', r: [27, 6, 30, 15], anh: null, ta: 'Hành lang nối lõi thang với khu vi sinh và kho sinh phẩm.' },
-      { ten: 'Thang', r: [27, -2.2, 30, 6], anh: 'thang_may', ta: 'Lõi thang chung hai tầng: cầu thang bộ một vế và thang máy có cabin chạy thật.' }
+      { ten: 'Phòng thí nghiệm Sinh', k: 'sinh', r: [0, 0, 20, 15], anh: 'sinh_lab', ta: 'Phòng chính của tầng 2, nơi làm các bài quan sát tế bào, enzyme, quang hợp và lên men.' },
+      { ten: 'Phòng vi sinh', k: 'visinh', r: [20, 7.5, 27, 15], anh: 'sinh_visinh', ta: 'Tủ cấy, nồi hấp và các bài nuôi cấy, nhuộm, đếm vi khuẩn, chỉ dùng chủng an toàn cho dạy học.' },
+      { ten: 'Kho sinh phẩm', k: 'khosp', r: [20, 0, 27, 7.5], anh: 'sinh_kho', ta: 'Nơi lưu mẫu vật, sinh phẩm và các tủ bảo quản.' },
+      { ten: 'Hành lang tầng 2', k: '', r: [0, -3.6, 27, 0], anh: 'sinh_hanhlang', ta: 'Trục nối các phòng trên tầng 2.' },
+      { ten: 'Phòng sinh học phân tử', k: 'phantu', r: [0, -9, 13.5, -3.6], anh: 'sinh_phantu', ta: 'Tách chiết ADN, PCR, điện di và trạm ghép gen.' },
+      { ten: 'Nhà kính thực vật', k: 'kinh', r: [13.5, -9, 27, -3.6], anh: 'sinh_nhakinh', ta: 'Khu trồng cây, nơi làm các bài về quang hợp và thực vật.' },
+      { ten: 'Hành lang đông', k: '', r: [27, 6, 30, 15], anh: 'sinh_hanhlang', ta: 'Lối nối lõi thang với phòng vi sinh và kho sinh phẩm.' },
+      { ten: 'Lõi thang', k: 'thang', r: [27, -2.2, 30, 6], anh: 'thang', ta: 'Cầu thang và thang máy nối hai tầng.' }
     ]
   };
-  var svg = document.getElementById('ban-ve'), NS = 'http://www.w3.org/2000/svg';
-  var tangHien = 1;
-  function el(ten, thuocTinh, chu) {
-    var e = document.createElementNS(NS, ten);
-    for (var k in thuocTinh) e.setAttribute(k, thuocTinh[k]);
-    if (chu) e.textContent = chu;
-    return e;
-  }
-  function veTang(t, iChon) {
-    tangHien = t;
-    while (svg.firstChild) svg.removeChild(svg.firstChild);
-    // z dương lên trên bản vẽ: y = 15 - z
-    TANG[t].forEach(function (p, i) {
-      var x0 = p.r[0], z0 = p.r[1], x1 = p.r[2], z1 = p.r[3];
-      var chon = i === iChon;
-      var hop = el('rect', { 'class': 'phong' + (chon ? ' chon' : ''), x: x0, y: 15 - z1, width: x1 - x0, height: z1 - z0, tabindex: 0, role: 'button', 'aria-label': p.ten });
-      hop.addEventListener('click', function () { veTang(t, i); });
-      hop.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); veTang(t, i); } });
-      svg.appendChild(hop);
-      var doc = x1 - x0 < 4;
-      var tx = (x0 + x1) / 2, ty = 15 - (z0 + z1) / 2;
-      var nhan = el('text', { x: tx, y: ty + .2, 'text-anchor': 'middle', 'class': chon ? 'chon' : '' }, p.ten);
-      if (doc) nhan.setAttribute('transform', 'rotate(-90 ' + tx + ' ' + ty + ')');
-      svg.appendChild(nhan);
-    });
-    svg.appendChild(el('text', { x: 0, y: 25.2, 'class': 'truc' }, '0 m'));
-    svg.appendChild(el('text', { x: 30, y: 25.2, 'class': 'truc', 'text-anchor': 'end' }, '30 m'));
-    var p = TANG[t][iChon];
-    document.getElementById('phong-ten').textContent = p.ten;
-    document.getElementById('phong-mo-ta').textContent = p.ta;
-    var a = document.getElementById('phong-anh');
-    a.hidden = !p.anh;
-    if (p.anh) { a.src = A + p.anh + '.jpg'; a.alt = p.ten; }
-  }
-  function chonTang(t) {
+  var dsPhong = document.getElementById('ds-phong');
+  function chon(t, i) {
+    var p = TANG[t][i];
+    window.VERA_PHONG = { t: t, i: i };
     document.getElementById('t1').setAttribute('aria-pressed', t === 1);
     document.getElementById('t2').setAttribute('aria-pressed', t === 2);
-    veTang(t, 0);
-  }
-  document.getElementById('t1').addEventListener('click', function () { chonTang(1); });
-  document.getElementById('t2').addEventListener('click', function () { chonTang(2); });
-  veTang(1, 0);
-
-  // So sánh nồi hấp, số từ bài kiểm thử may4
-  var QT = {
-    dung: { ap: '1,05 bar', nhiet: '120,8 °C', log: '8,5 bậc log', kl: 'Đạt tiệt trùng.', lop: 'tot' },
-    sai: { ap: '1,05 bar', nhiet: '94,0 °C', log: '0 bậc log', kl: 'Đồng hồ vẫn báo đủ áp, nhưng không khí còn trong buồng làm nhiệt độ thấp. Không tiệt trùng được.', lop: 'xau' }
-  };
-  function chonQt(k) {
-    var q = QT[k];
-    document.getElementById('v-ap').textContent = q.ap;
-    document.getElementById('v-nhiet').textContent = q.nhiet;
-    document.getElementById('v-log').textContent = q.log;
-    var kl = document.getElementById('v-kl');
-    kl.textContent = q.kl; kl.className = 'ket-luan ' + q.lop;
-    document.getElementById('q-dung').setAttribute('aria-pressed', k === 'dung');
-    document.getElementById('q-sai').setAttribute('aria-pressed', k === 'sai');
-  }
-  document.getElementById('q-dung').addEventListener('click', function () { chonQt('dung'); });
-  document.getElementById('q-sai').addEventListener('click', function () { chonQt('sai'); });
-
-  // Xem ảnh lớn
-  var hop = document.getElementById('xem');
-  document.querySelectorAll('.mo-anh').forEach(function (b) {
-    b.setAttribute('aria-label', 'Xem ảnh lớn');
-    b.addEventListener('click', function () {
-      var i = b.querySelector('img'), f = b.closest('figure');
-      document.getElementById('xem-anh').src = i.src;
-      document.getElementById('xem-anh').alt = i.alt;
-      document.getElementById('xem-chu').textContent = f.querySelector('figcaption').textContent;
-      hop.showModal();
+    document.getElementById('phong-tang').textContent = t === 1 ? 'TẦNG 1 · HÓA HỌC' : 'TẦNG 2 · SINH HỌC';
+    document.getElementById('phong-ten').textContent = p.ten;
+    document.getElementById('phong-mo-ta').textContent = p.ta;
+    var cu = document.getElementById('phong-anh'), moi = cu.cloneNode(false);
+    moi.src = A + p.anh + '.jpg'; moi.alt = p.ten;
+    cu.parentNode.replaceChild(moi, cu);
+    dsPhong.innerHTML = '';
+    TANG[t].forEach(function (q, j) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.textContent = q.ten; b.setAttribute('aria-pressed', j === i);
+      b.addEventListener('click', function () { chon(t, j); });
+      dsPhong.appendChild(b);
     });
-  });
-  document.getElementById('dong').addEventListener('click', function () { hop.close(); });
-  hop.addEventListener('click', function (e) { if (e.target === hop) hop.close(); });
+    window.dispatchEvent(new CustomEvent('vera:da-chon', { detail: { t: t, i: i } }));
+  }
+  window.addEventListener('vera:chon', function (e) { chon(e.detail.t, e.detail.i); });
+  document.getElementById('t1').addEventListener('click', function () { chon(1, 0); });
+  document.getElementById('t2').addEventListener('click', function () { chon(2, 0); });
+  chon(1, 0);
 
-  // Thanh phổ đánh dấu tiến độ đọc; khối hiện dần khi cuộn tới
-  var thanh = document.querySelector('.thanh');
-  function tienDo() {
-    var d = document.documentElement, m = d.scrollHeight - d.clientHeight;
-    thanh.style.setProperty('--tien-do', m > 0 ? (d.scrollTop / m).toFixed(4) : 0);
+  // Hiện dần và đếm số khi cuộn tới
+  function dem(b) {
+    var dich = +b.dataset.dem, t0 = null;
+    function buoc(t) {
+      if (t0 === null) t0 = t;
+      var k = Math.min(1, (t - t0) / 1300);
+      b.textContent = Math.round(dich * (1 - Math.pow(1 - k, 3)));
+      if (k < 1) requestAnimationFrame(buoc);
+    }
+    requestAnimationFrame(buoc);
   }
-  window.addEventListener('scroll', tienDo, { passive: true });
-  tienDo();
-  if (!giam && 'IntersectionObserver' in window) {
-    var io = new IntersectionObserver(function (ds) {
+  if ('IntersectionObserver' in window && !yenTinh) {
+    var hien = new IntersectionObserver(function (ds) {
       ds.forEach(function (d) {
-        if (d.isIntersecting && d.boundingClientRect.top > 0) d.target.classList.add('hien');
-        if (d.isIntersecting) io.unobserve(d.target);
+        if (!d.isIntersecting) return;
+        d.target.classList.add('hien');
+        d.target.querySelectorAll('[data-dem]').forEach(dem);
+        hien.unobserve(d.target);
       });
-    }, { rootMargin: '0px 0px -6% 0px' });
-    document.querySelectorAll('section figure, section h2, .may-do, .cong-nghe > div, .bang-cuon').forEach(function (e) { io.observe(e); });
+    }, { threshold: .1, rootMargin: '0px 0px -5% 0px' });
+    document.querySelectorAll('.dan').forEach(function (n) { hien.observe(n); });
+  } else {
+    document.querySelectorAll('.dan').forEach(function (n) { n.classList.add('hien'); });
   }
+
+  // Tính năng: bước nào ở giữa màn hình thì đổi ảnh ghim
+  var cacBuoc = [].slice.call(document.querySelectorAll('.buoc'));
+  var hinh = [].slice.call(document.querySelectorAll('#man-ghim > figure'));
+  function chonBuoc(i) {
+    cacBuoc.forEach(function (b, j) { b.classList.toggle('hien', j === i); });
+    hinh.forEach(function (h, j) { h.classList.toggle('hien', j === i); });
+  }
+  chonBuoc(0);
+
+  // Thẻ sáng theo con trỏ, ảnh nghiêng 3D theo con trỏ
+  document.addEventListener('pointermove', function (e) {
+    if (!e.target.closest) return;
+    var t = e.target.closest('.the');
+    if (t) {
+      var r = t.getBoundingClientRect();
+      t.style.setProperty('--x', (e.clientX - r.left) + 'px');
+      t.style.setProperty('--y', (e.clientY - r.top) + 'px');
+    }
+    var a = e.target.closest('.anh-the');
+    if (a && !yenTinh) {
+      var q = a.getBoundingClientRect();
+      a.style.setProperty('--ry', (((e.clientX - q.left) / q.width - .5) * 10).toFixed(2) + 'deg');
+      a.style.setProperty('--rx', ((.5 - (e.clientY - q.top) / q.height) * 10).toFixed(2) + 'deg');
+    }
+  }, { passive: true });
+  document.addEventListener('pointerout', function (e) {
+    var a = e.target.closest ? e.target.closest('.anh-the') : null;
+    if (a && !a.contains(e.relatedTarget)) { a.style.setProperty('--ry', '0deg'); a.style.setProperty('--rx', '0deg'); }
+  });
+
+  // Hiệu ứng theo vị trí cuộn
+  var tienDo = document.getElementById('tien-do'), thanh = document.getElementById('thanh'), moDau = document.getElementById('mo-dau'), mdChu = document.getElementById('md-chu');
+  var duong = document.getElementById('duong-sang'), loTrinh = document.getElementById('lo-trinh-duong'), moc = [].slice.call(document.querySelectorAll('.moc'));
+  var theChong = [].slice.call(document.querySelectorAll('.the-chong'));
+  var cho = false;
+  function kep(x) { return Math.max(0, Math.min(1, x)); }
+  function capNhat() {
+    cho = false;
+    var y = window.scrollY, H = window.innerHeight, rong = window.innerWidth >= 961;
+    var tong = document.documentElement.scrollHeight - H;
+    tienDo.style.transform = 'scaleX(' + (tong > 0 ? y / tong : 0) + ')';
+    thanh.classList.toggle('cuon', y > 40);
+    if (rong && !yenTinh) {
+      var k = kep(y / Math.max(1, moDau.offsetHeight - H));
+      mdChu.style.opacity = 1 - kep(k * 2.2);
+      mdChu.style.transform = 'translateY(' + (-k * 90) + 'px)';
+      theChong.forEach(function (t, i) {
+        var sau = theChong[i + 1];
+        if (!sau) return;
+        var phu = kep(1 - (sau.getBoundingClientRect().top - t.getBoundingClientRect().top) / t.offsetHeight);
+        t.style.transform = 'scale(' + (1 - phu * .04) + ')';
+      });
+    } else {
+      mdChu.style.opacity = '';
+      mdChu.style.transform = '';
+      theChong.forEach(function (t) { t.style.transform = ''; });
+    }
+    if (rong) {
+      var iGan = 0, gan = 1e9;
+      cacBuoc.forEach(function (b, i) {
+        var r = b.getBoundingClientRect(), d = Math.abs(r.top + r.height / 2 - H / 2);
+        if (d < gan) { gan = d; iGan = i; }
+      });
+      if (!cacBuoc[iGan].classList.contains('hien')) chonBuoc(iGan);
+    }
+    var rL = loTrinh.getBoundingClientRect();
+    if (window.innerWidth >= 1200) {
+      var mN = kep((H * .85 - rL.top) / (H * .55));
+      duong.style.transform = 'scaleX(' + mN + ')';
+      moc.forEach(function (m, i) { m.classList.toggle('sang-len', mN > i / moc.length); });
+    } else {
+      duong.style.transform = 'scaleY(' + kep((H * .62 - rL.top) / rL.height) + ')';
+      moc.forEach(function (m) {
+        m.classList.toggle('sang-len', m.getBoundingClientRect().top + 14 < H * .62);
+      });
+    }
+  }
+  function yeuCau() { if (!cho) { cho = true; requestAnimationFrame(capNhat); } }
+  window.addEventListener('scroll', yeuCau, { passive: true });
+  window.addEventListener('resize', yeuCau);
+  capNhat();
 })();
+</script>
+<script type="module" src="canh3d.js"></script>
+<script>
+  // Thư viện 3D không tải được thì hiện bản không 3D
+  window.addEventListener('load', function () {
+    setTimeout(function () {
+      if (!document.documentElement.classList.contains('co-3d')) document.documentElement.classList.add('khong-3d');
+    }, 6000);
+  });
 </script>
 </body>
 </html>
