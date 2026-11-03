@@ -37,7 +37,8 @@ public static class KhktPlayVerify
         var scene = EditorSceneManager.OpenScene(LabSceneBuilder.ScenePath);
         new GameObject("Benchmark").AddComponent<KhktBenchmark>();
         EditorSceneManager.SaveScene(scene);
-        var report = BuildPipeline.BuildPlayer(new[] { LabSceneBuilder.ScenePath }, System.IO.Path.Combine(outDir, "PhongThiNghiemAo.exe"),
+        var scenes = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Select(System.Linq.Enumerable.Where(EditorBuildSettings.scenes, s => s.enabled), s => s.path));
+        var report = BuildPipeline.BuildPlayer(scenes, System.IO.Path.Combine(outDir, "PhongThiNghiemAo.exe"),
                                                BuildTarget.StandaloneWindows64, BuildOptions.None);
         Debug.Log($"[KHKT-BUILD] {report.summary.result} {report.summary.totalSize / 1048576} MB {report.summary.totalTime}");
         EditorApplication.Exit(report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded ? 0 : 1);

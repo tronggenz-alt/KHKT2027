@@ -41,6 +41,9 @@ namespace Khkt.Rendering
         public Vector3 Center => transform.position;
         public Vector3 Normal => transform.forward;
 
+        /// <summary>Điểm này (chân người / robot) có cùng tầng với cửa không. Hai tầng trùng mặt bằng nên phải xét cả độ cao.</summary>
+        public bool OnSameFloor(Vector3 p) => Mathf.Abs(p.y - Center.y) < 2.5f;
+
         float open, lastNear = -99f;
         Vector3[] closed;
         MaterialPropertyBlock mpb;
@@ -106,9 +109,9 @@ namespace Khkt.Rendering
         {
             if (viewer == null) viewer = FindAnyObjectByType<DesktopViewer>();
             float r2 = sensorRadius * sensorRadius;
-            if (viewer != null && FlatSqr(viewer.transform.position - Center) < r2) return true;
+            if (viewer != null && OnSameFloor(viewer.transform.position) && FlatSqr(viewer.transform.position - Center) < r2) return true;
             var bot = LabRobot.Instance;
-            return bot != null && FlatSqr(bot.transform.position - Center) < r2;
+            return bot != null && OnSameFloor(bot.transform.position) && FlatSqr(bot.transform.position - Center) < r2;
         }
 
         static float FlatSqr(Vector3 v) => v.x * v.x + v.z * v.z;
@@ -121,7 +124,7 @@ namespace Khkt.Rendering
         {
             foreach (var d in All)
             {
-                if (d.open > 0.9f) continue;
+                if (d.open > 0.9f || !d.OnSameFloor(from)) continue;
                 Vector3 n = d.Normal, c = d.Center;
                 float a = Vector3.Dot(from - c, n), b = Vector3.Dot(to - c, n);
                 if (a * b >= 0f || Mathf.Abs(a) > 1.1f) continue;

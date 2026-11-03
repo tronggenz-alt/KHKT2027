@@ -620,9 +620,9 @@ namespace Khkt.EditorTools
 
             // Môi trường ấm, dịu hơn trước: tường trắng không bị cháy sáng, gỗ và màu nhận diện hiện rõ
             RenderSettings.ambientMode = AmbientMode.Trilight;
-            RenderSettings.ambientSkyColor = new Color(0.74f, 0.75f, 0.77f);
-            RenderSettings.ambientEquatorColor = new Color(0.68f, 0.66f, 0.63f);
-            RenderSettings.ambientGroundColor = new Color(0.44f, 0.41f, 0.38f);
+            RenderSettings.ambientSkyColor = new Color(0.77f, 0.78f, 0.80f);
+            RenderSettings.ambientEquatorColor = new Color(0.71f, 0.69f, 0.66f);
+            RenderSettings.ambientGroundColor = new Color(0.46f, 0.43f, 0.40f);
             RenderSettings.reflectionIntensity = 0.8f;
             BuildPostVolume(g);
         }
@@ -726,6 +726,9 @@ namespace Khkt.EditorTools
             if (!AssetDatabase.IsValidFolder($"{parent}/{name}")) AssetDatabase.CreateFolder(parent, name);
         }
 
+        /// <summary>Đèn nối tiếp nhau nên tầm với xa chỉ tốn công tính (mỗi điểm ảnh lặp qua mọi đèn với tới nó) mà hầu như không thêm sáng.</summary>
+        static float LightRangeScale => float.TryParse(System.Environment.GetEnvironmentVariable("KHKT_DEN_K"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float k) ? k : 0.55f;
+
         static Light PointLight(Transform p, string name, Vector3 pos, float range, float intensity, Color color)
         {
             var go = new GameObject(name);
@@ -733,7 +736,7 @@ namespace Khkt.EditorTools
             go.transform.localPosition = pos;
             var l = go.AddComponent<Light>();
             l.type = LightType.Point;
-            l.range = range;
+            l.range = range * LightRangeScale;
             l.intensity = intensity;
             l.color = color;
             l.shadows = LightShadows.None;
@@ -879,7 +882,7 @@ namespace Khkt.EditorTools
             // SMAA: khử răng cưa theo cạnh, sắc nét hơn FXAA và không làm mờ / không gây hạt như TAA, vẫn nhẹ cho card tích hợp
             // Đo 3 vòng trên Iris Xe: SMAA cao 66,3 · SMAA vừa 67,0 · FXAA 66,9 FPS (trong sai số) nên chọn SMAA cao (đẹp nhất)
             camData.antialiasing = AntialiasingMode.SubpixelMorphologicalAntiAliasing;
-            camData.antialiasingQuality = AntialiasingQuality.High;
+            camData.antialiasingQuality = AntialiasingQuality.Medium;  // đo trên Iris Xe: High tốn hơn mà nhìn không khác
             switch (System.Environment.GetEnvironmentVariable("KHKT_AA"))  // đo so sánh: fxaa, smaa_med
             {
                 case "fxaa": camData.antialiasing = AntialiasingMode.FastApproximateAntialiasing; break;

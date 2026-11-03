@@ -781,6 +781,7 @@ namespace Khkt.EditorTools
             var bub = g.gameObject.AddComponent<ElodeaBubbles>();
             bub.lampTransform = lamp;
             bub.stemOrigin = stem;
+            bub.bubbleMaterial = Mat("T2_BotO2", new Color(0.9f, 0.97f, 1f), 0.8f);
             Label(table, "QUANG HỢP THẢI O₂ · RONG ĐUÔI CHÓ", new Vector3(0, top - 0.06f, 0.301f), Vector3.forward, 0.025f, new Color(0.1f, 0.3f, 0.12f));
             Info(g, "Thí nghiệm quang hợp thải O₂", "Rong đuôi chó dưới ánh đèn thải bọt khí O₂ thu vào ống nghiệm úp. Đèn càng gần (ánh sáng càng mạnh) bọt càng nhiều, tới khi đạt bão hòa ánh sáng.",
                  "Đếm số bọt mỗi phút ở các khoảng cách 10, 20, 30 cm. Cường độ sáng giảm theo bình phương khoảng cách.");

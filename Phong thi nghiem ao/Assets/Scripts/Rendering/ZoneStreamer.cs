@@ -47,6 +47,7 @@ namespace Khkt.Rendering
         readonly bool[] need = new bool[ZoneMap.Zones.Length];
         readonly Dictionary<object, (float until, Vector3[] points)> keeps = new Dictionary<object, (float, Vector3[])>();
         readonly List<object> expired = new List<object>();
+        readonly List<Light>[] zoneLights = new List<Light>[ZoneMap.Zones.Length];
         bool started;
         Transform strayRoot;
         CanvasGroup overlay;
@@ -82,6 +83,7 @@ namespace Khkt.Rendering
             }
             SceneManager.sceneLoaded += OnSceneLoaded;
             SceneManager.sceneUnloaded += OnSceneUnloaded;
+            CollectLights();
 
             // Khu cần ngay lúc đầu: tải đồng bộ (xong trước khung hình đầu tiên được vẽ)
             ComputeNeed();
@@ -106,7 +108,29 @@ namespace Khkt.Rendering
                 if (need[z] || !streaming) { lastNeeded[z] = Time.time; continue; }
                 Park(z);
                 if (state[z] == State.Loaded) Unload(z);
+                else SetLights(z, false);
             }
+        }
+
+        /// <summary>
+        /// Đèn trần nằm ở cảnh lõi nên luôn được tính cho mọi điểm ảnh trong tầm với, kể cả đèn của khu chưa tải (xuyên trần,
+        /// xuyên tường vì đèn điểm không đổ bóng). Gom theo khu để khu chưa tải không tốn gì, đèn ngoài khu (hiên, sân) giữ nguyên.
+        /// </summary>
+        void CollectLights()
+        {
+            for (int z = 0; z < N; z++) zoneLights[z] = new List<Light>();
+            if (!streaming) return;
+            foreach (var l in FindObjectsByType<Light>(FindObjectsInactive.Include))
+            {
+                if (l.type == LightType.Directional || l.transform.position.y < -1f || l.GetComponentInParent<ZoneRoot>(true) != null) continue;
+                int z = ZoneMap.At(l.transform.position);
+                if (z >= 0) zoneLights[z].Add(l);
+            }
+        }
+
+        void SetLights(int z, bool on)
+        {
+            foreach (var l in zoneLights[z]) if (l != null) l.enabled = on;
         }
 
         void OnDestroy()
@@ -147,8 +171,8 @@ namespace Khkt.Rendering
                 else if (v.y < 3.6f) { need[ZoneMap.Lab] = true; need[ZoneMap.Store] = true; }  // ngoài hiên tầng 1: nhìn qua cửa sổ vào trong
                 foreach (var d in AutoDoor.All)
                 {
+                    if (!d.OnSameFloor(v)) continue;  // không nạp trước cửa ở tầng khác
                     Vector3 dv = d.Center - v;
-                    if (Mathf.Abs(dv.y) > 2.5f) continue;  // không nạp trước cửa ở tầng khác
                     if (dv.x * dv.x + dv.z * dv.z > preloadRadius * preloadRadius) continue;
                     Mark(d.zoneA);
                     Mark(d.zoneB);
@@ -233,6 +257,7 @@ namespace Khkt.Rendering
         {
             state[z] = State.Loading;
             loadStarted[z] = Time.realtimeSinceStartup;
+            SetLights(z, true);
             Application.backgroundLoadingPriority = loadPriority;
             var op = SceneManager.LoadSceneAsync(ZoneMap.Zones[z].scene, LoadSceneMode.Additive);
             if (op == null)
@@ -249,6 +274,7 @@ namespace Khkt.Rendering
             var scene = SceneManager.GetSceneByName(ZoneMap.Zones[z].scene);
             if (!scene.isLoaded) { state[z] = State.Unloaded; return; }
             state[z] = State.Unloading;
+            SetLights(z, false);
             SceneManager.UnloadSceneAsync(scene);
         }
 
