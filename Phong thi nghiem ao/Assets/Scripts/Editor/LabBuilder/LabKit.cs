@@ -167,7 +167,6 @@ namespace Khkt.EditorTools
                 importer.SaveAndReimport();
             }
             return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
-            return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
         }
 
         // ---------- Khối ----------

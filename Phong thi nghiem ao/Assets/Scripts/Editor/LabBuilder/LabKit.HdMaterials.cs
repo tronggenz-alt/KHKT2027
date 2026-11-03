@@ -49,46 +49,47 @@ namespace Khkt.EditorTools
 
             hdMaterialMap.Clear();
 
-            // 1. Tường & Trần sơn trơn: BỎ NORMAL MAP, BỎ MASK, MÀU TRƠN ĐỒNG NHẤT (Mục 4B)
-            RegisterMap("TuongSon", null, null, null, 0f, 1.0f, 0.18f, 0.0f);
-            RegisterMap("TuongNgoai", null, null, null, 0f, 1.0f, 0.12f, 0.0f);
-            RegisterMap("Tran", null, null, null, 0f, 1.0f, 0.08f, 0.0f);
-            RegisterMap("ThanTu", null, null, null, 0f, 1.0f, 0.35f, 0.0f);
-            RegisterMap("T2_TuongKem", null, null, null, 0f, 1.0f, 0.16f, 0.0f);
+            // 1. Tường & Trần sơn trơn: BỎ NORMAL MAP, BỎ MASK, MÀU TRƠN ĐỒNG NHẤT (Mục 4B, GĐ3)
+            RegisterMap("TuongSon", null, null, null, 0f, 1.0f, 0.40f, 0.0f);
+            RegisterMap("TuongNgoai", null, null, null, 0f, 1.0f, 0.35f, 0.0f);
+            RegisterMap("Tran", null, null, null, 0f, 1.0f, 0.12f, 0.0f);
+            RegisterMap("ThanTu", null, null, null, 0f, 1.0f, 0.50f, 0.0f);
+            RegisterMap("T2_TuongKem", null, null, null, 0f, 1.0f, 0.38f, 0.0f);
 
-            // 2. Sàn phòng lab & hành lang: Lưới 2x2 viên trùng khít 100% GachLatSan60 (Mục 4C)
-            RegisterMap("SanPhongLab", null, normTiles, maskTiles, 0.75f, 0.9f, 0.55f, 0.0f);
-            RegisterMap("SanPhongHoaChat", null, normTiles, maskTiles, 0.65f, 0.9f, 0.48f, 0.0f);
-            RegisterMap("SanHanhLang", null, normTiles, maskTiles, 0.70f, 0.9f, 0.52f, 0.0f);
-            RegisterMap("SanBanCong", null, normTiles, maskTiles, 0.80f, 0.8f, 0.35f, 0.0f);
-            RegisterMap("T2_SanHanhLangT2", null, normTiles, maskTiles, 0.70f, 0.9f, 0.50f, 0.0f);
-            RegisterMap("T2_SanHanhLangDong", null, normTiles, maskTiles, 0.70f, 0.9f, 0.50f, 0.0f);
-            RegisterMap("T2_SanKho", null, normTiles, maskTiles, 0.65f, 0.9f, 0.48f, 0.0f);
-            RegisterMap("T2_SanPhanTu", null, normTiles, maskTiles, 0.70f, 0.9f, 0.52f, 0.0f);
+            // 2. Sàn phòng lab & hành lang: Lưới 2x2 viên trùng khít 100% GachLatSan60 (Mục 4C, GĐ3)
+            // Đặt Smoothness = 1.0f để kênh Alpha của maskTiles (mặt gạch 0.70, ron 0.25) điều khiển trực tiếp
+            RegisterMap("SanPhongLab", null, normTiles, maskTiles, 0.75f, 0.9f, 1.0f, 0.0f);
+            RegisterMap("SanPhongHoaChat", null, normTiles, maskTiles, 0.65f, 0.9f, 1.0f, 0.0f);
+            RegisterMap("SanHanhLang", null, normTiles, maskTiles, 0.70f, 0.9f, 1.0f, 0.0f);
+            RegisterMap("SanBanCong", null, normTiles, maskTiles, 0.80f, 0.8f, 1.0f, 0.0f);
+            RegisterMap("T2_SanHanhLangT2", null, normTiles, maskTiles, 0.70f, 0.9f, 1.0f, 0.0f);
+            RegisterMap("T2_SanHanhLangDong", null, normTiles, maskTiles, 0.70f, 0.9f, 1.0f, 0.0f);
+            RegisterMap("T2_SanKho", null, normTiles, maskTiles, 0.65f, 0.9f, 1.0f, 0.0f);
+            RegisterMap("T2_SanPhanTu", null, normTiles, maskTiles, 0.70f, 0.9f, 1.0f, 0.0f);
 
             // 3. Mặt bàn thí nghiệm (Phenolic Compact Laminate & Epoxy Resin đen đúc khối)
-            RegisterMap("MatBanPhenolic", null, normPhenolic, null, 0.5f, 1.0f, 0.42f, 0.0f);
-            RegisterMap("MatBanEpoxy", null, normEpoxy, null, 0.3f, 1.0f, 0.62f, 0.0f);
-            RegisterMap("T2_BanSinhHoc", null, normPhenolic, null, 0.5f, 1.0f, 0.40f, 0.0f);
+            RegisterMap("MatBanPhenolic", null, normPhenolic, null, 0.5f, 1.0f, 0.60f, 0.0f);
+            RegisterMap("MatBanEpoxy", null, normEpoxy, null, 0.3f, 1.0f, 0.80f, 0.0f);
+            RegisterMap("T2_BanSinhHoc", null, normPhenolic, null, 0.5f, 1.0f, 0.60f, 0.0f);
 
             // 4. Gỗ tự nhiên (Cánh tủ, sàn gỗ, lam gỗ)
-            RegisterMap("CanhTu", null, normWood, null, 0.5f, 0.95f, 0.36f, 0.0f);
-            RegisterMap("Go", null, normWood, null, 0.5f, 0.9f, 0.35f, 0.0f);
-            RegisterMap("GoSoi", null, normWood, null, 0.5f, 0.9f, 0.35f, 0.0f);
-            RegisterMap("T2_SanGo", null, normWood, null, 0.5f, 0.9f, 0.45f, 0.0f);
+            RegisterMap("CanhTu", null, normWood, null, 0.5f, 0.95f, 0.50f, 0.0f);
+            RegisterMap("Go", null, normWood, null, 0.5f, 0.9f, 0.45f, 0.0f);
+            RegisterMap("GoSoi", null, normWood, null, 0.5f, 0.9f, 0.48f, 0.0f);
+            RegisterMap("T2_SanGo", null, normWood, null, 0.5f, 0.9f, 0.50f, 0.0f);
 
             // 5. Kim loại: Thép không gỉ 304 satin & Nhôm Anodized mờ
             RegisterMap("Inox", null, normInox, null, 0.45f, 1.0f, 0.68f, 0.95f);
             RegisterMap("KimLoaiInox", null, normInox, null, 0.45f, 1.0f, 0.68f, 0.95f);
             RegisterMap("GiaInox", null, normInox, null, 0.45f, 1.0f, 0.68f, 0.95f);
-            RegisterMap("ChanGhe", null, normInox, null, 0.3f, 1.0f, 0.75f, 0.98f);
-            RegisterMap("KinhHienVi_Inox", null, normInox, null, 0.4f, 1.0f, 0.70f, 0.95f);
-            RegisterMap("T2_TuAnToanSinhHoc", null, normInox, null, 0.45f, 1.0f, 0.65f, 0.95f);
-            RegisterMap("T2_TuAm", null, normInox, null, 0.45f, 1.0f, 0.65f, 0.95f);
-            RegisterMap("T2_BanSoiUV", null, normInox, null, 0.45f, 1.0f, 0.65f, 0.95f);
-            RegisterMap("KhungCuaTuDong", null, normAlu, null, 0.35f, 1.0f, 0.50f, 0.85f);
-            RegisterMap("NhomKhung", null, normAlu, null, 0.35f, 1.0f, 0.55f, 0.70f);
-            RegisterMap("T2_NapRanh", null, normAlu, null, 0.5f, 0.8f, 0.30f, 0.65f);
+            RegisterMap("ChanGhe", null, normInox, null, 0.3f, 1.0f, 0.72f, 0.96f);
+            RegisterMap("KinhHienVi_Inox", null, normInox, null, 0.4f, 1.0f, 0.68f, 0.95f);
+            RegisterMap("T2_TuAnToanSinhHoc", null, normInox, null, 0.45f, 1.0f, 0.68f, 0.95f);
+            RegisterMap("T2_TuAm", null, normInox, null, 0.45f, 1.0f, 0.68f, 0.95f);
+            RegisterMap("T2_BanSoiUV", null, normInox, null, 0.45f, 1.0f, 0.68f, 0.95f);
+            RegisterMap("KhungCuaTuDong", null, normAlu, null, 0.35f, 1.0f, 0.55f, 0.88f);
+            RegisterMap("NhomKhung", null, normAlu, null, 0.35f, 1.0f, 0.55f, 0.85f);
+            RegisterMap("T2_NapRanh", null, normAlu, null, 0.5f, 0.8f, 0.35f, 0.65f);
 
             // 6. Đất hữu cơ & Gốm nung Terracotta nhà kính
             RegisterMap("T2_DatAm", null, normSoil, null, 0.8f, 0.85f, 0.15f, 0.0f);
