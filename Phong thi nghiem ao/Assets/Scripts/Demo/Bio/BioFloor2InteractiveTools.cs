@@ -23,7 +23,7 @@ using Khkt.Interaction.Bio;
 namespace Khkt.Demo.Bio
 {
 
-    public static class BioFloor2InteractiveTools
+    public static partial class BioFloor2InteractiveTools
     {
         // =====================================================================
         // Vật liệu
@@ -375,6 +375,7 @@ namespace Khkt.Demo.Bio
             if (hall != null) SetupCorridor(hall);
             if (mol != null) SetupMolecular(mol);
             if (green != null) SetupGreenhouse(green);
+            SetupFreeLab(tang2, bio, micro, store, mol);
 
             if (tang2.GetComponent<BioLabSync>() == null) tang2.gameObject.AddComponent<BioLabSync>();
             tang2.gameObject.AddComponent<BioFloor2ToolsMarker>();

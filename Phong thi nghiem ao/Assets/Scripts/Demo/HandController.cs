@@ -353,11 +353,22 @@ namespace Khkt.Demo
             else if (mouse != null && !Khkt.Environment.DesktopViewer.MouseLook && !PadInput.AimFromCenter)
                 ray = viewCamera.ScreenPointToRay(mouse.position.ReadValue());
             else ray = viewCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f));
-            hasHit = Physics.Raycast(ray, out hit, reach, ~0, QueryTriggerInteraction.Collide);
+            // tia không được dừng ở thân người chơi: cúi nhìn vật gần trên bàn thì tia đi qua khối thân ngay dưới mắt
+            int n = Physics.RaycastNonAlloc(ray, rayHits, reach, ~0, QueryTriggerInteraction.Collide);
+            hasHit = false;
+            float nearest = float.MaxValue;
+            for (int i = 0; i < n; i++)
+            {
+                if (rayHits[i].collider is CharacterController || rayHits[i].distance >= nearest) continue;
+                nearest = rayHits[i].distance;
+                hit = rayHits[i];
+                hasHit = true;
+            }
             lastRay = ray;
         }
 
         Ray lastRay;
+        readonly RaycastHit[] rayHits = new RaycastHit[16];
 
         void Decide()
         {

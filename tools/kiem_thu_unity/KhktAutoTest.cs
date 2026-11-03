@@ -59,6 +59,16 @@ public class KhktAutoTest : MonoBehaviour
                 ("l10_thang_bo", new Vector3(29.2f, 0, -0.9f), new Vector3(29.2f, 3.2f, 5.5f)),
                 ("l11_sanh_thang_may", new Vector3(29.6f, 0, -1.45f), new Vector3(27.5f, 1.2f, -1.45f)),
                 ("l12_trong_cabin", new Vector3(28.1f, 0, -1.45f), new Vector3(29.5f, 1.3f, -1.45f)),
+                ("s01_kinh_hien_vi", new Vector3(7.4f, 3.8f, 2.35f), new Vector3(5.2f, 4.7f, 2.3f)),
+                ("s02_quay_rua", new Vector3(15.3f, 3.8f, 11.2f), new Vector3(15.45f, 4.8f, 14.45f)),
+                ("s03_dao_nhuom", new Vector3(24.2f, 3.8f, 9.0f), new Vector3(22.3f, 4.7f, 11.15f)),
+                ("s04_tu_pcr", new Vector3(3.6f, 3.8f, -6.1f), new Vector3(0.6f, 4.8f, -6.15f)),
+                ("s05_dao_tach_chiet", new Vector3(6.5f, 3.8f, -8.5f), new Vector3(6.6f, 4.75f, -6.35f)),
+                ("s06_khu_pcr", new Vector3(10.9f, 3.8f, -5.0f), new Vector3(10.9f, 4.75f, -8.5f)),
+                ("s07_ghep_gen", new Vector3(2.7f, 3.8f, -6.6f), new Vector3(2.7f, 4.8f, -4.05f)),
+                ("s08_quang_hop", new Vector3(22.6f, 3.8f, -5.6f), new Vector3(22.6f, 4.5f, -8.45f)),
+                ("s09_sinh_nhin_tay", new Vector3(18.5f, 3.8f, 13f), new Vector3(8f, 4.9f, 4f)),
+                ("s10_kho_tu", new Vector3(25.6f, 3.8f, 6.6f), new Vector3(21.5f, 4.7f, 2f)),
             };
             foreach (var v in views)
             {
@@ -69,6 +79,10 @@ public class KhktAutoTest : MonoBehaviour
                 yield return Frames(14);
                 Shot(v.name);
             }
+            var botAnh = LabRobot.Instance;
+            viewer.GoNear(botAnh.transform.position + Vector3.up * 1.2f, botAnh.transform.forward, 1.9f);
+            yield return Frames(14);
+            Shot("l13_robot");
             Log($"Xong ảnh trang giới thiệu sau {Time.realtimeSinceStartup - t0:0} s");
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.Exit(0);
@@ -307,6 +321,31 @@ public class KhktAutoTest : MonoBehaviour
         {
             yield return ZoneTest();
             Log($"Xong sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "khu_tang")
+        {
+            yield return ZoneFloorTest();
+            Log($"Xong sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "kiem_ke_sinh")
+        {
+            yield return BioAudit();
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "sinh_tu_do")
+        {
+            yield return BioFreeTest();
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.Exit(0);
 #endif
@@ -3338,6 +3377,448 @@ public class KhktAutoTest : MonoBehaviour
             }
         }
         Log($"[khu] {tag}: đi xong sau {Time.realtimeSinceStartup - t0:0.0} s, đứng chờ cửa lâu nhất {maxStuck:0.0} s, đang tải [{LoadedZones()}]");
+    }
+
+    // ---- Lab sinh tự do: mọi thao tác đi qua bàn tay thật (tia trỏ, giữ chuột), không gọi tắt, thứ tự do người học tự chọn ----
+    int bioFails, bioPass;
+    void Kq(bool ok, string name, string detail = "")
+    {
+        if (ok) bioPass++; else bioFails++;
+        Log($"[sinh_tu_do] {(ok ? "đạt" : "SAI")} {name}{(detail != null && detail.Length > 0 ? " · " + detail : "")}");
+    }
+
+    IEnumerator Aim(Transform t)
+    {
+        var b = new Bounds(t.position, Vector3.zero);
+        foreach (var c in t.GetComponentsInChildren<Collider>()) { if (c.enabled) b.Encapsulate(c.bounds); }
+        // đứng về phía trống giữa phòng, cách vật đủ xa để tầng giá trên không che
+        var mid = Khkt.Rendering.ZoneMap.At(b.center);
+        var rc = mid >= 0 ? Khkt.Rendering.ZoneMap.Zones[mid].area.center : new Vector2(b.center.x + 1, b.center.z);
+        var side = new Vector3(rc.x - b.center.x, 0, rc.y - b.center.z).normalized;
+        viewer.GoNear(b.center, side + Vector3.up * 0.4f, 1.1f);
+        hand.OverrideAimPoint = b.center;
+        yield return Frames(3);
+        if (bioAimLog++ < 6 && Physics.Raycast(new Ray(cam.transform.position, (b.center - cam.transform.position).normalized), out var rh, 5f, ~0, QueryTriggerInteraction.Collide)) Log($"[sinh_tu_do] trỏ {t.name}: trúng {rh.collider.name} cách {rh.distance:0.00} m, mắt {cam.transform.position}, đích {b.center}, thao tác {hand.Current}, UI {Khkt.Environment.DesktopViewer.UiCapture}");
+    }
+
+    int bioAimLog;
+    /// <summary>Trỏ vào vật, giữ chuột trong secs giây (bàn tay tự quyết định làm gì theo vật đang cầm).</summary>
+    IEnumerator Do(Transform t, float secs = 0.15f)
+    {
+        yield return Aim(t);
+        hand.OverrideHold = true;
+        yield return new WaitForSeconds(secs);
+        hand.OverrideHold = false;
+        yield return Frames(2);
+    }
+
+    IEnumerator Grab(Component c)
+    {
+        var g = c.GetComponent<Grabbable>();
+        if (hand.Held != null && hand.Held != g) Put();
+        if (hand.Held != g) hand.Pick(g);
+        yield return Frames(2);
+    }
+
+    int stageN;
+    Transform bioBench;
+
+    void Put()
+    {
+        if (hand.Held == null) return;
+        var top = bioBench.position + new Vector3(0.05f, 0.82f, -0.75f + (stageN % 14) * 0.11f);
+        stageN++;
+        hand.ReleaseHeldInto(hand.Held.transform.parent, top, Quaternion.identity);
+    }
+
+    Khkt.Interaction.Bio.BioVessel StockOf(string id) => FindObjectsByType<Khkt.Interaction.Bio.BioVessel>().Where(v => v.isStock && v.stockId == id).OrderBy(v => (v.transform.position - bioBench.position).sqrMagnitude).FirstOrDefault();
+    Khkt.Interaction.Bio.BioDispenser Disp(string item) => FindObjectsByType<Khkt.Interaction.Bio.BioDispenser>().Where(d => d.itemName.Contains(item)).OrderBy(d => (d.transform.position - bioBench.position).sqrMagnitude).FirstOrDefault();
+
+    Khkt.Interaction.Bio.BioVessel NewVessel(string item, string lbl)
+    {
+        var go = Disp(item).Spawn(false);
+        var v = go.GetComponent<Khkt.Interaction.Bio.BioVessel>();
+        v.label = lbl;
+        hand.Pick(go.GetComponent<Grabbable>());
+        Put();
+        return v;
+    }
+
+    T NewTool<T>(string item) where T : Component
+    {
+        var go = Disp(item).Spawn(false);
+        hand.Pick(go.GetComponent<Grabbable>());
+        Put();
+        return go.GetComponent<T>();
+    }
+
+    /// <summary>Cầm bình held rồi trỏ vào bình target, giữ chuột: lấy từ chai gốc hoặc rót sang nhau.</summary>
+    IEnumerator PourWith(Khkt.Interaction.Bio.BioVessel held, Khkt.Interaction.Bio.BioVessel target, float secs)
+    {
+        yield return Grab(held);
+        yield return Do(target.transform, secs);
+        Put();
+        yield return Frames(1);
+    }
+
+    IEnumerator Run(float seconds)
+    {
+        float t0 = Time.realtimeSinceStartup;
+        while (Time.realtimeSinceStartup - t0 < seconds) yield return null;
+    }
+
+    IEnumerator BioFreeTest()
+    {
+        viewer.GoTo(21);
+        yield return Frames(10);
+        float tw = Time.realtimeSinceStartup;
+        while (!Khkt.Rendering.ZoneStreamer.Settled && Time.realtimeSinceStartup - tw < 20f) yield return null;
+        yield return new WaitForSeconds(0.5f);
+        var room = FindObjectsByType<Transform>().First(x => x.name == "Phòng thí nghiệm sinh học");
+        bioBench = Khkt.Demo.Bio.BioFloor2InteractiveTools.FindNamed(room, "Bàn sinh học 3");
+        var all = FindObjectsByType<Khkt.Interaction.Bio.BioVessel>(FindObjectsInactive.Include);
+        var disp = FindObjectsByType<Khkt.Interaction.Bio.BioDispenser>(FindObjectsInactive.Include);
+        Kq(all.Count(v => v.isStock) >= 39, "có đủ sinh phẩm dạng vật thật", $"{all.Count(v => v.isStock)} chai, khay");
+        Kq(disp.Length >= 20, "mỗi bàn có hộp cấp dụng cụ", $"{disp.Length} hộp");
+        Kq(all.Where(v => v.isStock).Select(v => v.stockId).Distinct().Count() >= 38, "sinh phẩm không thiếu loại");
+        if (all.Count(v => v.isStock) == 0) { Log($"[sinh_tu_do] CÓ {bioFails} LỖI"); yield break; }
+        var waterStock = StockOf(Khkt.Simulation.Bio.BioMatterDb.Water);
+        viewer.GoNear(waterStock.transform.position + Vector3.up * 0.3f, new Vector3(1, 0.3f, 0.6f), 1.8f);
+        yield return Frames(10);
+        Shot("s01_gia_sinh_pham");
+        viewer.GoNear(bioBench.position + Vector3.up * 0.9f, new Vector3(1, 0.7f, 0.2f), 1.3f);
+        yield return Frames(10);
+        Shot("s02_ban_co_bo_dung_cu");
+
+        // Bàn tay thật: tay không trỏ vào hộp cấp là "dùng", bấm thì có ống trên tay
+        var dTube = Disp("ống nghiệm");
+        yield return Aim(dTube.transform);
+        Kq(hand.Current == HandController.Act.Use, "tay không trỏ vào hộp cấp hiện thao tác Dùng", hand.Current.ToString());
+        hand.OverrideHold = true; yield return Frames(3); hand.OverrideHold = false; yield return Frames(2);
+        Kq(hand.Held != null && hand.Held.GetComponent<Khkt.Interaction.Bio.BioVessel>() != null, "bấm hộp cấp thì có ống nghiệm trên tay");
+        Put();
+
+        // 1) Catalase: mô trước, H2O2 sau
+        var liver = StockOf(Khkt.Simulation.Bio.BioMatterDb.Liver);
+        var h2o2 = StockOf(Khkt.Simulation.Bio.BioMatterDb.H2O2);
+        var forceps = FindObjectsByType<Khkt.Demo.Bio.Forceps>().First();
+        var tube1 = NewVessel("ống nghiệm", "Ống gan");
+        yield return Grab(forceps);
+        yield return Aim(liver.transform);
+        Kq(hand.Current == HandController.Act.BioTarget, "cầm kẹp trỏ khay gan: bàn tay nhận ra thao tác", hand.Current.ToString());
+        yield return Do(liver.transform, 1.0f);
+        Kq(!string.IsNullOrEmpty(forceps.carriedMatter), "kẹp gắp được mô gan từ khay", forceps.carriedMatter);
+        yield return Do(tube1.transform, 0.15f);
+        Kq(tube1.mix.Has(Khkt.Simulation.Bio.BioMatterDb.Liver), "thả mô vào ống", tube1.mix.Describe());
+        Put();
+        yield return PourWith(tube1, h2o2, 1.6f);
+        yield return Run(1.5f);
+        Kq(tube1.mix.o2Ml > 0.1, "gan + H2O2: sinh O2, sủi bọt", $"O2 {tube1.mix.o2Ml:0.0} mL, bọt {tube1.mix.foam:0.00}");
+        var splint = FindObjectsByType<Khkt.Demo.Bio.GlowingSplint>().FirstOrDefault();
+        if (splint != null)
+        {
+            yield return Grab(splint);
+            yield return Do(tube1.transform, 0.15f);
+            Kq(splint.burstIntoFlame, "tàn đóm bùng cháy trong ống có O2");
+            Put();
+        }
+        viewer.GoNear(tube1.transform.position, new Vector3(0.6f, 0.4f, 0), 0.35f);
+        yield return Frames(6);
+        Shot("s03_catalase_sui_bot");
+
+        // 2) Đảo thứ tự: H2O2 trước, mô sau, vẫn ra kết quả như nhau
+        var tube2 = NewVessel("ống nghiệm", "Ống đảo thứ tự");
+        yield return PourWith(tube2, h2o2, 1.0f);
+        yield return Grab(forceps);
+        yield return Do(liver.transform, 1.0f);
+        yield return Do(tube2.transform, 0.15f);
+        Put();
+        yield return Run(1.5f);
+        Kq(tube2.mix.o2Ml > 0.1, "đảo thứ tự (H2O2 trước, mô sau) vẫn phản ứng", $"O2 {tube2.mix.o2Ml:0.0} mL");
+
+        // 3) Mô đã đun sôi: enzyme chết nên không ra bọt
+        var tube3 = NewVessel("ống nghiệm", "Ống mô đun sôi");
+        yield return Grab(forceps);
+        yield return Do(liver.transform, 1.0f);
+        yield return Do(tube3.transform, 0.15f);
+        Put();
+        tube3.TemperatureC = 95f;
+        yield return Run(0.6f);
+        Kq(tube3.mix.catalaseDead, "đun 95 °C làm catalase biến tính");
+        tube3.TemperatureC = 30f;
+        yield return PourWith(tube3, h2o2, 1.0f);
+        yield return Run(1f);
+        Kq(tube3.mix.o2Ml < 0.01, "mô đã đun: không sủi bọt", $"O2 {tube3.mix.o2Ml:0.00} mL");
+
+        // 4) Lugol gặp tinh bột, một giọt đúng 0,05 mL; Lugol với nước thì không tím
+        var potato = StockOf(Khkt.Simulation.Bio.BioMatterDb.Potato);
+        var lugol = StockOf(Khkt.Simulation.Bio.BioMatterDb.Lugol);
+        var cup = NewVessel("cốc", "Cốc tinh bột");
+        yield return PourWith(cup, potato, 0.8f);
+        var drop = NewTool<Khkt.Interaction.Bio.BioDropper>("ống nhỏ giọt");
+        yield return Grab(drop);
+        yield return Do(lugol.transform, 0.15f);
+        Kq(!drop.IsEmpty, "ống nhỏ giọt hút Lugol từ chai");
+        yield return Do(cup.transform, 0.15f);
+        yield return Run(0.5f);
+        Kq(cup.mix.iodineStarch, "Lugol + khoai tây: xanh tím", cup.mix.Describe());
+        double oneDrop = cup.mix.Of(Khkt.Simulation.Bio.BioMatterDb.Lugol);
+        Kq(oneDrop > 0.03 && oneDrop < 0.07, "một lần bấm đúng một giọt", $"{oneDrop:0.000} mL");
+        viewer.GoNear(cup.transform.position, new Vector3(0.6f, 0.5f, 0), 0.4f);
+        yield return Frames(6);
+        Shot("s04_lugol_tinh_bot");
+        var cup2 = NewVessel("cốc", "Cốc nước");
+        yield return PourWith(cup2, waterStock, 1f);
+        yield return Grab(drop);
+        yield return Do(cup2.transform, 0.15f);
+        yield return Run(0.3f);
+        Kq(!cup2.mix.iodineStarch, "Lugol + nước: không có màu tím");
+        Put();
+
+        // 5) Chai gốc không nhận lại
+        double before = waterStock.mix.Of(Khkt.Simulation.Bio.BioMatterDb.Water);
+        yield return PourWith(cup2, waterStock, 0.6f);
+        Kq(waterStock.mix.Of(Khkt.Simulation.Bio.BioMatterDb.Water) <= before, "chai gốc không tăng thêm");
+
+        // 6) Làm tiêu bản: thiếu rạch bị từ chối, làm đúng thì có lam đủ mẫu và nhuộm
+        var onion = StockOf(Khkt.Simulation.Bio.BioMatterDb.Onion);
+        yield return Grab(forceps);
+        yield return Do(onion.transform, 1.0f);
+        Kq(string.IsNullOrEmpty(forceps.carriedMatter), "chưa rạch vảy hành thì không bóc được biểu bì");
+        var blade = FindObjectsByType<Khkt.Demo.Bio.RazorBlade>().First();
+        yield return Grab(blade);
+        yield return Do(onion.transform, 1.7f);
+        Kq(onion.scored, "dao lam rạch vảy hành");
+        var slide = NewTool<Khkt.Demo.Bio.GlassSlide>("lam kính");
+        slide.transform.position = bioBench.position + new Vector3(0.33f, 0.82f, 0.28f);  // chỗ trống giữa hai kính hiển vi
+        var d2 = NewTool<Khkt.Interaction.Bio.BioDropper>("ống nhỏ giọt");
+        yield return Grab(d2);
+        yield return Do(waterStock.transform, 0.15f);
+        yield return Do(slide.transform, 0.15f);
+        Kq(slide.hasWaterDrop, "nhỏ giọt nước lên lam");
+        yield return Grab(forceps);
+        yield return Do(onion.transform, 1.0f);
+        Kq(!string.IsNullOrEmpty(forceps.carriedMatter), "đã rạch thì bóc được biểu bì");
+        yield return Do(slide.transform, 0.15f);
+        Kq(slide.sample != null && slide.sample.sampleId == "bieu_bi_vay_hanh", "đặt biểu bì lên lam", slide.sample != null ? slide.sample.sampleId : "");
+        var d3 = NewTool<Khkt.Interaction.Bio.BioDropper>("ống nhỏ giọt");
+        yield return Grab(d3);
+        yield return Do(StockOf(Khkt.Simulation.Bio.BioMatterDb.Methylene).transform, 0.15f);
+        yield return Do(slide.transform, 0.15f);
+        Kq(slide.sample != null && slide.sample.stainId == "xanh_methylen", "nhỏ xanh methylen từ chai thật lên lam", slide.sample != null ? slide.sample.stainId : "");
+        var d4 = NewTool<Khkt.Interaction.Bio.BioDropper>("ống nhỏ giọt");
+        var salt = StockOf(Khkt.Simulation.Bio.BioMatterDb.Nacl10);
+        yield return Grab(d4);
+        yield return Do(salt.transform, 0.15f);
+        yield return Do(slide.transform, 0.15f);
+        Kq(slide.plasmolysisFraction > 0.1f, "nhỏ NaCl 10 %: tế bào co nguyên sinh", $"{slide.plasmolysisFraction * 100:0} %");
+        Put();
+        // đưa lam tự làm lên kính hiển vi trên bàn
+        var scope = FindObjectsByType<Khkt.Demo.Bio.MicroscopeController>().OrderBy(k => (k.transform.position - bioBench.position).sqrMagnitude).FirstOrDefault();
+        if (scope != null)
+        {
+            yield return Grab(slide);
+            yield return Do(scope.transform, 0.2f);
+            Kq(scope.mountedSlide == slide, "đặt lam tự làm lên kính hiển vi", scope.mountedSlide != null ? scope.mountedSlide.name : "chưa đặt");
+            if (hand.Held != null) Put();
+        }
+
+        // 7) Tủ ấm: men + đường + nước; men đã đun không sinh khí
+        var yeast = StockOf(Khkt.Simulation.Bio.BioMatterDb.Yeast);
+        var sugar = StockOf(Khkt.Simulation.Bio.BioMatterDb.Glucose);
+        var fa = NewVessel("cốc", "Cốc men sống");
+        yield return PourWith(fa, waterStock, 3f);
+        yield return PourWith(fa, sugar, 1f);
+        yield return PourWith(fa, yeast, 0.4f);
+        var fb = NewVessel("cốc", "Cốc men đun");
+        yield return PourWith(fb, waterStock, 3f);
+        yield return PourWith(fb, sugar, 1f);
+        yield return PourWith(fb, yeast, 0.4f);
+        fb.TemperatureC = 90f;
+        yield return Run(0.5f);
+        Kq(fb.mix.yeastDead, "đun 90 °C giết nấm men");
+        double co2Before = fb.mix.co2Ml;
+        var inc = FindObjectsByType<Khkt.Demo.Bio.IncubatorController>().OrderBy(i => (i.transform.position - bioBench.position).sqrMagnitude).FirstOrDefault();
+        Kq(inc != null, "có tủ ấm đang hoạt động");
+        if (inc != null)
+        {
+            yield return Grab(fa);
+            hand.ReleaseHeldInto(fa.transform.parent, inc.transform.position + Vector3.up * 0.1f, Quaternion.identity);
+            yield return Grab(fb);
+            hand.ReleaseHeldInto(fb.transform.parent, inc.transform.position + new Vector3(0.1f, 0.1f, 0), Quaternion.identity);
+            yield return Run(4f);
+            Kq(fa.TemperatureC > 27f, "đặt vào tủ ấm thì bình ấm lên thật", $"{fa.TemperatureC:0.0} °C");
+            Kq(fa.mix.co2Ml > 1, "men sống trong tủ ấm: sinh CO2", $"{fa.mix.co2Ml:0} mL");
+            Kq(fb.mix.co2Ml <= co2Before + 0.001, "men đã chết: không sinh thêm khí", $"{fb.mix.co2Ml:0.0} mL");
+        }
+
+        // 8) Tách ADN: thiếu xà phòng thì không ra sợi ADN
+        var banana = StockOf(Khkt.Simulation.Bio.BioMatterDb.Banana);
+        var soap = StockOf(Khkt.Simulation.Bio.BioMatterDb.Soap);
+        var eth = StockOf(Khkt.Simulation.Bio.BioMatterDb.ColdEthanol);
+        var ca = NewVessel("cốc", "Cốc chuối đủ");
+        yield return PourWith(ca, banana, 0.8f);
+        yield return Grab(blade);
+        yield return Do(ca.transform, 1.7f);
+        Kq(ca.mix.ground, "thái nhỏ mô chuối trong cốc");
+        yield return PourWith(ca, waterStock, 1f);
+        yield return PourWith(ca, soap, 0.3f);
+        yield return PourWith(ca, salt, 0.3f);
+        yield return Run(8f);
+        Kq(ca.mix.lysis > 0.4, "xà phòng + muối phá màng tế bào", $"{ca.mix.lysis:0.00}");
+        ca.TemperatureC = 5f;
+        yield return PourWith(ca, eth, 0.6f);
+        yield return Run(0.5f);
+        Kq(ca.mix.dnaThreads > 0.2, "cồn lạnh kết tủa sợi ADN", $"{ca.mix.dnaThreads:0.00}");
+        var cb = NewVessel("cốc", "Cốc chuối thiếu xà phòng");
+        yield return PourWith(cb, banana, 0.8f);
+        yield return PourWith(cb, waterStock, 1f);
+        yield return PourWith(cb, eth, 0.6f);
+        yield return Run(1f);
+        Kq(cb.mix.dnaThreads < 0.01, "thiếu xà phòng: không có sợi ADN");
+
+        // 9) Vi sinh sống không được đổ vào bồn
+        var broth = StockOf(Khkt.Simulation.Bio.BioMatterDb.Broth);
+        var ecoli = StockOf(Khkt.Simulation.Bio.BioMatterDb.EColi);
+        var sink = FindObjectsByType<Khkt.Demo.Bio.HandWashStation>().FirstOrDefault();
+        if (broth != null && ecoli != null && sink != null)
+        {
+            var ce = NewVessel("cốc", "Cốc nuôi");
+            yield return PourWith(ce, broth, 0.6f);
+            yield return PourWith(ce, ecoli, 0.3f);
+            double tot = ce.mix.Total;
+            var drain = sink.GetComponent<Khkt.Interaction.Bio.BioDrain>();
+            Kq(drain != null, "bồn rửa đã nhận được bình");
+            if (drain != null)
+            {
+                yield return Grab(ce);
+                drain.OnToolApplyComplete(ce.GetComponent<Khkt.Interaction.Bio.BioTool>());
+                Kq(ce.mix.Total >= tot - 1e-6, "canh khuẩn sống: bồn rửa từ chối");
+                Put();
+            }
+        }
+        hand.OverrideAimPoint = null;
+        Log($"[sinh_tu_do] {bioPass} đạt, {bioFails} sai");
+        Log(bioFails == 0 ? "[sinh_tu_do] TẤT CẢ ĐẠT" : $"[sinh_tu_do] CÓ {bioFails} LỖI");
+    }
+
+    // Kiểm kê: mỗi mã dụng cụ trong danh mục có vật nào trong cảnh, vật đó thao tác được bằng cách nào
+    IEnumerator BioAudit()
+    {
+        var zs = Khkt.Rendering.ZoneStreamer.Instance;
+        zs.streaming = false;
+        yield return new WaitForSecondsRealtime(1f);
+        float t0 = Time.realtimeSinceStartup;
+        while (!Khkt.Rendering.ZoneStreamer.Settled && Time.realtimeSinceStartup - t0 < 40f) yield return null;
+        var tags = FindObjectsByType<Khkt.Demo.Bio.BioToolCatalogTag>(FindObjectsInactive.Include);
+        var rows = new System.Collections.Generic.List<string> { "ma,so_vat,cam_duoc,tool,dich,nut,ban_le,nut_xoay,dung,con_lan,chua_dung_dich,mau,khong_collider,ten_vat,thanh_phan" };
+        var catalog = System.IO.File.ReadAllText("D:/KHKT 11 du phong/data/sinh/dung_cu.json");
+        var codes = new System.Collections.Generic.List<string>();
+        foreach (System.Text.RegularExpressions.Match mt in System.Text.RegularExpressions.Regex.Matches(catalog, @"""ma""\s*:\s*""([a-z0-9_]+)""")) codes.Add(mt.Groups[1].Value);
+        var groups = tags.GroupBy(t => t.toolCode).ToDictionary(g => g.Key, g => g.ToList());
+        foreach (var c in codes.Concat(groups.Keys.Except(codes)))
+        {
+            groups.TryGetValue(c, out var list);
+            list ??= new System.Collections.Generic.List<Khkt.Demo.Bio.BioToolCatalogTag>();
+            int Count<T>() => list.Count(t => t.GetComponentInChildren<T>(true) != null || t.GetComponentInParent<T>(true) != null);
+            int noCol = list.Count(t => t.GetComponentInChildren<Collider>(true) == null);
+            rows.Add($"{c},{list.Count},{Count<Grabbable>()},{Count<Khkt.Interaction.Bio.BioTool>()},{Count<Khkt.Interaction.Bio.IBioTarget>()},{Count<Khkt.Interaction.Bio.BioButton>()},{Count<Khkt.Interaction.Bio.BioHinge>()},{Count<Khkt.Interaction.Bio.BioKnob>()},{Count<Khkt.Demo.IDemoUsable>()},{Count<Khkt.Interaction.Bio.IScrollAdjustable>()},{Count<LabContainer>()},{Count<Khkt.Interaction.Bio.BioSample>()},{noCol},{(list.Count > 0 ? list[0].name.Replace(',', ' ') : "")},{string.Join("+", list.SelectMany(t => t.GetComponents<MonoBehaviour>()).Where(m => m != null).Select(m => m.GetType().Name).Where(n => n != "BioToolCatalogTag" && n != "EquipmentInfo" && n != "Grabbable").Distinct())}");
+        }
+        // Mọi vật tầng 2 có thành phần tương tác nhưng không gắn mã: liệt kê theo kiểu để biết còn gì
+        var kinds = new System.Collections.Generic.SortedDictionary<string, int>();
+        foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include))
+        {
+            if (mb == null || mb.transform.position.y < 3.6f) continue;
+            string ns = mb.GetType().Namespace ?? "";
+            if (!ns.Contains("Bio")) continue;
+            string k = mb.GetType().Name;
+            kinds[k] = kinds.TryGetValue(k, out int n) ? n + 1 : 1;
+        }
+        string outDir = Environment.GetEnvironmentVariable("KHKT_SHOTS");
+        System.IO.File.WriteAllLines(System.IO.Path.Combine(outDir, "kiem_ke_dung_cu.csv"), rows, new System.Text.UTF8Encoding(false));
+        System.IO.File.WriteAllLines(System.IO.Path.Combine(outDir, "kiem_ke_kieu.csv"), kinds.Select(kv => kv.Key + "," + kv.Value), new System.Text.UTF8Encoding(false));
+        Log($"[kiem_ke] {codes.Count} mã, {tags.Length} vật có thẻ, {kinds.Count} kiểu thành phần");
+    }
+
+    // Đứng ngay dưới / ngay trên cửa của tầng khác: cửa đó không được mở, khu của nó không được tải, robot không bị nó chặn
+    IEnumerator ZoneFloorTest()
+    {
+        var zs = Khkt.Rendering.ZoneStreamer.Instance;
+        if (zs == null) { Log("[khu_tang] KHÔNG có ZoneStreamer trong cảnh"); yield break; }
+        var map = Khkt.Rendering.ZoneMap.Zones;
+        var doors = Khkt.Rendering.AutoDoor.All.ToList();
+        var upper = doors.Where(d => d.Center.y >= 3.6f).ToList();
+        var lower = doors.Where(d => d.Center.y < 3.6f).ToList();
+        Log($"[khu_tang] Cửa tầng 1: {lower.Count}, cửa tầng 2: {upper.Count}");
+        int fails = 0;
+        viewer.GoTo(2);
+        yield return Frames(5);
+        yield return new WaitForSecondsRealtime(zs.unloadDelayS + 1.5f);
+        Log($"[khu_tang] Ở bàn 2: đang tải [{LoadedZones()}]");
+
+        // 1) Tầng 1, đứng ngay dưới từng cửa tầng 2
+        foreach (var d in upper)
+        {
+            Vector3 c = d.Center;
+            viewer.transform.position = new Vector3(c.x, 0f, c.z);
+            yield return new WaitForSecondsRealtime(0.25f);
+            var wrong = Enumerable.Range(0, map.Length).Where(z => map[z].floor == 1 && zs.IsLoaded(z)).Select(z => map[z].name).ToList();
+            if (wrong.Count > 0 || d.IsAnyOpen)
+            {
+                fails++;
+                Log($"[khu_tang] SAI dưới \"{d.doorName}\": mở={d.IsAnyOpen}, tải nhầm [{string.Join(", ", wrong)}]");
+            }
+        }
+        Log($"[khu_tang] Đi dưới mọi cửa tầng 2: đang tải [{LoadedZones()}], lỗi tích lũy {fails}");
+
+        // 2) Robot ở tầng 1 đi ngang dưới cửa tầng 2 không bị cửa đó chặn (chọn cửa không trùng vị trí với cửa tầng 1)
+        foreach (var d in upper.Where(u => lower.All(l => Vector2.Distance(new Vector2(l.Center.x, l.Center.z), new Vector2(u.Center.x, u.Center.z)) > 3f)))
+        {
+            Vector3 c = d.Center, n = d.Normal * 0.3f;
+            Vector3 below = new Vector3(c.x, 0f, c.z), same = c;
+            bool blockedBelow = Khkt.Rendering.AutoDoor.Blocks(below - n, below + n);
+            bool blockedSame = Khkt.Rendering.AutoDoor.Blocks(same - n, same + n);
+            if (blockedBelow || !blockedSame)
+            {
+                fails++;
+                Log($"[khu_tang] SAI chặn robot ở \"{d.doorName}\": tầng dưới chặn={blockedBelow}, cùng tầng chặn={blockedSame}");
+            }
+        }
+
+        // 3) Đối chứng: lên đúng tầng 2 thì cửa vẫn mở và khu vẫn tải
+        var door = upper.First(u => u.zoneA >= 0 && u.zoneB >= 0);
+        viewer.transform.position = door.Center;
+        float tw = Time.realtimeSinceStartup;
+        while (!door.IsOpen && Time.realtimeSinceStartup - tw < 20f) yield return null;
+        bool upOk = door.IsOpen && zs.IsLoaded(door.zoneA) && zs.IsLoaded(door.zoneB);
+        if (!upOk) fails++;
+        Log($"[khu_tang] Đứng ở \"{door.doorName}\" (tầng 2): mở={door.IsOpen}, hai khu đã tải={upOk}");
+        yield return new WaitForSecondsRealtime(zs.unloadDelayS + 1.5f);
+
+        // 4) Tầng 2, đứng ngay trên từng cửa tầng 1 (robot đứng yên, khu robot đang đứng được phép tải)
+        LabRobot.Instance.enabled = false;
+        zs.Release(LabRobot.Instance);
+        viewer.transform.position = door.Center;
+        yield return new WaitForSecondsRealtime(zs.unloadDelayS + 7f);
+        int botZone = Khkt.Rendering.ZoneMap.At(LabRobot.Instance.transform.position);
+        foreach (var d in lower)
+        {
+            Vector3 c = d.Center;
+            viewer.transform.position = new Vector3(c.x, 3.8f, c.z);
+            yield return new WaitForSecondsRealtime(0.25f);
+            botZone = Khkt.Rendering.ZoneMap.At(LabRobot.Instance.transform.position);
+            // robot đứng cạnh cửa thì cửa đó mở và tải hai khu là đúng
+            var nearBot = lower.Where(o => { var dv = o.Center - LabRobot.Instance.transform.position; dv.y = 0; return dv.magnitude < o.sensorRadius + 0.3f; }).ToList();
+            var wrong = Enumerable.Range(0, map.Length).Where(z => map[z].floor == 0 && z != botZone && zs.IsLoaded(z) && !nearBot.Any(o => o.zoneA == z || o.zoneB == z)).Select(z => map[z].name).ToList();
+            if (d.IsAnyOpen && !nearBot.Contains(d)) wrong.Add("cửa mở");
+            if (wrong.Count > 0)
+            {
+                fails++;
+                Log($"[khu_tang] SAI trên \"{d.doorName}\": [{string.Join(", ", wrong)}] (robot ở {Khkt.Rendering.ZoneMap.Name(botZone)})");
+            }
+        }
+        Log($"[khu_tang] Đi trên mọi cửa tầng 1: đang tải [{LoadedZones()}]");
+        Log(fails == 0 ? "[khu_tang] TẤT CẢ ĐẠT" : $"[khu_tang] CÓ {fails} LỖI");
     }
 
     IEnumerator ZoneTest()

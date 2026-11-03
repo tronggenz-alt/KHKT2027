@@ -13,7 +13,7 @@ namespace Khkt.Demo.Bio
     /// 5.2.2. Đèn cồn thủy tinh (tạo vùng vô trùng hình nón bán kính ~ 10–15 cm) — mã: den_con
     /// </summary>
     [DisallowMultipleComponent]
-    public class SpiritLamp : MonoBehaviour, IInteractable
+    public class SpiritLamp : MonoBehaviour, IInteractable, IBioTarget
     {
         public bool capRemoved = false;
         public bool isLit = false;
@@ -49,6 +49,33 @@ namespace Khkt.Demo.Bio
         public void Use(GameObject user)
         {
             SetLit(!isLit);
+        }
+
+        // Cầm dụng cụ trỏ vào ngọn lửa: khử trùng que cấy, hơ nóng bình đang cầm
+        public string TargetName => "Đèn cồn";
+
+        public bool CanApplyTool(BioTool tool, out string prompt)
+        {
+            prompt = "";
+            if (tool == null) return false;
+            if (!isLit) { prompt = "Châm đèn cồn trước (tay không, bấm vào đèn)"; return true; }
+            if (tool.GetComponent<InoculatingLoop>() != null) { prompt = "Đốt đỏ que cấy (giữ chuột)"; return true; }
+            if (tool.GetComponent<BioVessel>() != null) { prompt = "Hơ nóng bình trên ngọn lửa (giữ chuột)"; return true; }
+            return false;
+        }
+
+        public float GetRequiredHoldSeconds(BioTool tool) => tool != null && isLit ? 2f : 0f;
+
+        public void OnToolApplyStep(BioTool tool, float dt, float progress01)
+        {
+            var v = tool != null && isLit ? tool.GetComponent<BioVessel>() : null;
+            if (v != null) v.TemperatureC = Mathf.Min(100f, v.TemperatureC + 12f * dt * 25f / Mathf.Max(5f, (float)v.mix.Total + 5f));
+        }
+
+        public void OnToolApplyComplete(BioTool tool)
+        {
+            if (tool == null || !isLit) return;
+            tool.GetComponent<InoculatingLoop>()?.FlameSterilize();
         }
     }
 }

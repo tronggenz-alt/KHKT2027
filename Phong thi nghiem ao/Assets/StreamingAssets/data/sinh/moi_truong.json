@@ -1,0 +1,171 @@
+{
+  "phien_ban": 1,
+  "moi_truong": [
+    {
+      "ma": "pca",
+      "ten": "Thạch đếm khuẩn lạc PCA (Plate Count Agar)",
+      "loai": "thach",
+      "thanh_phan": [
+        {
+          "chat": "Tryptone",
+          "g_l": 5.0
+        },
+        {
+          "chat": "Cao men (Yeast extract)",
+          "g_l": 2.5
+        },
+        {
+          "chat": "Glucose",
+          "g_l": 1.0
+        },
+        {
+          "chat": "Thạch agar",
+          "g_l": 15.0
+        }
+      ],
+      "mau": [
+        245,
+        235,
+        195
+      ],
+      "do_trong": 0.85,
+      "ph": 7.0,
+      "nguon": "https://www.fda.gov/food/laboratory-methods-food/bam-media-m124-plate-count-agar-standard-methods"
+    },
+    {
+      "ma": "thach_dinh_duong",
+      "ten": "Thạch dinh dưỡng NA (Nutrient Agar)",
+      "loai": "thach",
+      "thanh_phan": [
+        {
+          "chat": "Peptone",
+          "g_l": 5.0
+        },
+        {
+          "chat": "Cao thịt (Beef extract)",
+          "g_l": 3.0
+        },
+        {
+          "chat": "NaCl",
+          "g_l": 5.0
+        },
+        {
+          "chat": "Thạch agar",
+          "g_l": 15.0
+        }
+      ],
+      "mau": [
+        235,
+        220,
+        175
+      ],
+      "do_trong": 0.8,
+      "ph": 6.8,
+      "nguon": "https://www.fda.gov/food/laboratory-methods-food/bam-media-m112-nutrient-agar"
+    },
+    {
+      "ma": "lb_agar",
+      "ten": "Thạch Luria-Bertani (LB Agar)",
+      "loai": "thach",
+      "thanh_phan": [
+        {
+          "chat": "Tryptone",
+          "g_l": 10.0
+        },
+        {
+          "chat": "Cao men",
+          "g_l": 5.0
+        },
+        {
+          "chat": "NaCl",
+          "g_l": 10.0
+        },
+        {
+          "chat": "Thạch agar",
+          "g_l": 15.0
+        }
+      ],
+      "mau": [
+        240,
+        225,
+        180
+      ],
+      "do_trong": 0.82,
+      "ph": 7.0,
+      "nguon": "https://cshprotocols.cshlp.org/content/2006/1/pdb.rec8141"
+    },
+    {
+      "ma": "sabouraud",
+      "ten": "Thạch Sabouraud Dextrose Agar (SDA cho nấm men)",
+      "loai": "thach",
+      "thanh_phan": [
+        {
+          "chat": "Mycological peptone",
+          "g_l": 10.0
+        },
+        {
+          "chat": "Dextrose (Glucose)",
+          "g_l": 40.0
+        },
+        {
+          "chat": "Thạch agar",
+          "g_l": 15.0
+        }
+      ],
+      "mau": [
+        250,
+        235,
+        170
+      ],
+      "do_trong": 0.88,
+      "ph": 5.6,
+      "nguon": "https://www.fda.gov/food/laboratory-methods-food/bam-media-m136-sabouraud-dextrose-agar"
+    },
+    {
+      "ma": "canh_lb",
+      "ten": "Canh thang dinh dưỡng Luria-Bertani (LB Broth)",
+      "loai": "long",
+      "thanh_phan": [
+        {
+          "chat": "Tryptone",
+          "g_l": 10.0
+        },
+        {
+          "chat": "Cao men",
+          "g_l": 5.0
+        },
+        {
+          "chat": "NaCl",
+          "g_l": 10.0
+        }
+      ],
+      "mau": [
+        230,
+        215,
+        150
+      ],
+      "do_trong": 0.95,
+      "ph": 7.0,
+      "nguon": "https://cshprotocols.cshlp.org/content/2006/1/pdb.rec8141"
+    },
+    {
+      "ma": "nuoc_muoi_sinh_ly",
+      "ten": "Dung dịch nước muối sinh lý vô trùng (NaCl 0,9%)",
+      "loai": "long",
+      "thanh_phan": [
+        {
+          "chat": "NaCl",
+          "g_l": 9.0
+        }
+      ],
+      "mau": [
+        250,
+        250,
+        255
+      ],
+      "do_trong": 1.0,
+      "ph": 7.0,
+      "nguon": "https://www.pharmacopeia.cn/"
+    }
+  ]
+}
