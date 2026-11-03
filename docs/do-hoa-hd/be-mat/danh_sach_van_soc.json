@@ -389,7 +389,10 @@
     "ratio": 0.0,
     "is_intentional": true,
     "has_stripes": false,
-    "materials_used": []
+    "materials_used": [
+      "ChauDat",
+      "T2_ChauDatNung"
+    ]
   },
   {
     "folder": "Assets/Lab/HD/Textures",
