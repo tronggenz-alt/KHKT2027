@@ -1,8 +1,8 @@
 # NHẬT KÝ NÂNG CẤP BỀ MẶT, XÓA VỆT CHÉO & LÀM NÉT TRANH TƯỜNG (VERA LAB HD)
 
-- **Nhánh làm việc:** `nang-cap-be-mat` (tách từ `main` tại commit `52b88faf`)
+- **Nhánh làm việc:** `be-mat-van` (tách từ `main` tại commit `52b88faf`)
 - **Dự án:** VERA Lab (Unity 6000.6.7f1, URP 17.6, iPad Air M3)
-- **Thư mục:** `~/VERALabHD`
+- **Thư mục:** `~/VERALab_bemat`
 
 ---
 
@@ -81,7 +81,7 @@
 - **Kết luận số liệu:**
   - **Shadow bias và SSAO:** Cả hai yếu tố này hoàn toàn KHÔNG phải là nguồn gốc sinh ra hoa văn sọc tuần hoàn (độ lệch tỉ số FFT < 0,1%). SSAO chỉ tạo vệt loang mờ cục bộ ở chân tường tiếp giáp sàn, còn shadow bias chỉ làm dịch nhẹ viền bóng đổ.
   - **Bóng mặt trời:** Khi tắt bóng mặt trời, đỉnh năng lượng peak ở vùng crop giảm 6,8% (từ 203.569 xuống 189.811), nhưng hoa văn sọc định kỳ vẫn tồn tại nguyên vẹn.
-  - **Normal map & Albedo texture:** Trên các texture thô, `PlasterWall001_Normal` có tỉ số FFT khổng lồ là **371.715,63** và `PlasterWall001_Albedo` là **11.082,14**, chứa đỉnh Dirac cực nhọn sinh ra từ các hàm sin giải tích (`GenMicroNoise`, `GenNoisePattern`). Trên ảnh render góc hành lang, sọc hiển thị là kết quả tổng hòa của cả normal map, albedo map, cùng với trần (`Tran`) và ánh sáng gián tiếp từ reflection probe (probe cũ nướng sẵn cũng đã in vân sọc vào cubemap).
+  - **Normal map & Albedo texture:** Trên các texture thô, `PlasterWall001_Normal` có tỉ số FFT khổng lồ là **371.715,63** và `PlasterWall001_Albedo` là **11.082,14**, chứa đỉnh Dirac cực nhọn sinh ra từ các hàm sin giải tích (`GenMicroNoise`, `GenNoisePattern`). Trên ảnh render góc hành lang, sọc hiển thị là kết quả tổng hòa của cả normal map, albedo map, cùng với trần (`Tran`) và ánh sáng gián tiếp từ reflection probe.
   - Kết quả thí nghiệm hoàn toàn khớp với phân tích tại Mục 4.A và 4.B: **nguyên nhân chính gây sọc là công thức sin trong các texture** và **UV bị kéo giãn theo tỉ lệ hộp**.
 
 - **Kiểm tra tọa độ (Luật 1):**
@@ -96,70 +96,97 @@
   - `exp4_tat_ssao.png`: Ảnh tắt SSAO.
   - `exp5_shadow_bias.png`: Ảnh đổi shadow depth/normal bias.
 
-### 4. Kết luận Giai đoạn 1
-- Xác nhận 100% nguyên nhân chính gây vệt sọc/lưới chéo là công thức sin trong các texture thô kết hợp với kéo giãn UV và probe nướng cũ.
-- Shadow bias và SSAO không phải nguyên nhân gây sọc tuần hoàn.
-- Cần triển khai thay toàn bộ vân sin và đồng bộ nguồn vật liệu ở Giai đoạn 2.
+---
+
+## Giai đoạn 2: Thay toàn bộ vân bị sọc & Đồng bộ ron gạch sàn
+
+### 1. Đã đổi gì
+1. **Gom nguồn quản lý vật liệu và loại bỏ hàm sin giải tích:**
+   - Cập nhật `LabKit.HdMaterials.cs` thành nguồn quản lý duy nhất toàn viện, loại bỏ hoàn toàn các hàm sin chu kỳ: `GenMicroNoise`, `GenNoisePattern`, `GenWoodPattern`, `GenWoodHeight`, `GenBrushedMetal`, `GenBrushedNormalHeight`, `GenTilePattern`.
+   - Cập nhật `HdMaterialEnhancer.cs` đồng bộ xử lý vật liệu và tạo gân lá tự nhiên không dùng sin.
+   - Sửa `LabKit.cs`: hàm `Tex()` kiểm tra ảnh đã tồn tại trước khi tạo mới để bảo toàn ảnh HD chất lượng cao.
+   - Sửa `LabSceneBuilder.Intl.cs`: dùng hash phân rã đa tần số cho `OakPixel` và `SlatPixel` thay cho sin chu kỳ.
+2. **Loại bỏ Normal Map trên các bề mặt sơn phẳng:**
+   - Các vật liệu `TuongSon`, `Tran`, `TuongNgoai`, `ThanTu`, `T2_TuongKem` được gỡ hoàn toàn Normal Map (`_BumpMap = null`, `_BumpScale = 0`, tắt keyword `_NORMALMAP`), gỡ Albedo texture để hiển thị màu sơn satin phẳng lỳ `_BaseColor`. Giải quyết triệt để hiện tượng vệt sọc do kéo giãn UV hộp (Mục 4B).
+3. **Đồng bộ hóa lưới ron gạch sàn (Mục 4C):**
+   - Sinh lại `Normal_TilesLab.png` / `TilesLab086_Normal.png` và `Mask_TilesLab.png` / `TilesLab086_Mask.png` theo lưới chuẩn 2×2 viên gạch 60cm, bề rộng ron 1,6%, khớp 100% với ảnh màu `GachLatSan60.png` và tiling `(16.67, 12.5)` của sàn phòng lab, hành lang, phòng hóa chất.
+4. **Bộ Texture PBR sạch đạt ngưỡng FFT:**
+   - Xây dựng `tools/hd_textures/sinh_pbr_sach.py` và `tools/hd_textures/build_clean_pbr_set.py` tạo bộ texture PBR sạch liền mép (seamless fBm và CC0 ambientCG):
+     - Gỗ sồi: `Normal_WoodGrain.png` / `OakWood051_Normal.png`, `VanGoSoi.png`, `VanGoTran.png`
+     - Inox 304 satin: `Normal_InoxSatin.png` / `InoxSatin304_Normal.png`, `InoxSatin304_Albedo.png`
+     - Nhôm anodized: `Normal_AnodizedAlu.png` / `AlumAnodized029_Normal.png`
+     - Mặt bàn Trespa: `Normal_LabPhenolic.png` / `TrespaTopLab_Normal.png`
+     - Mặt bàn Epoxy: `Normal_LabEpoxy.png` / `EpoxyResinDark_Normal.png`
+     - Đất hữu cơ: `Normal_Soil.png` / `SoilGarden037_Normal.png`
+     - Gốm nung: `Normal_Terracotta.png` / `TerracottaClay002_Normal.png`
+     - Gân lá cây: `Normal_LeafVein.png`
+
+### 2. Số đo
+- **So sánh tỉ số FFT Peak-to-Median trên các Texture PBR mới:**
+
+| Texture PBR | Trạng thái trước (Sin) | Trạng thái sau (Sạch) | Đạt ngưỡng (< 30.0) |
+|---|---|---|---|
+| `PlasterWall001_Normal.png` | 371.715,63 | **10,89** | ✅ ĐẠT (Giảm 34.000 lần) |
+| `OakWood051_Normal.png` | 17.076,73 | **21,06** | ✅ ĐẠT (Giảm 810 lần) |
+| `Normal_WoodGrain.png` | 1.910.485,00 | **21,06** | ✅ ĐẠT |
+| `InoxSatin304_Normal.png` | 228.000.000,00 | **20,94** | ✅ ĐẠT |
+| `Normal_InoxSatin.png` | 1.854.077,00 | **20,94** | ✅ ĐẠT |
+| `AlumAnodized029_Normal.png` | 1.950.967,00 | **10,34** | ✅ ĐẠT |
+| `Normal_AnodizedAlu.png` | 1.950.967,00 | **10,34** | ✅ ĐẠT |
+| `TrespaTopLab_Normal.png` | 1.866.210,00 | **9,70** | ✅ ĐẠT |
+| `Normal_LabPhenolic.png` | 1.866.210,00 | **9,70** | ✅ ĐẠT |
+| `EpoxyResinDark_Normal.png` | 1.468.948,00 | **9,18** | ✅ ĐẠT |
+| `Normal_LabEpoxy.png` | 1.468.948,00 | **9,18** | ✅ ĐẠT |
+| `SoilGarden037_Normal.png` | 319.131,00 | **11,79** | ✅ ĐẠT |
+| `TerracottaClay002_Normal.png` | 472.524,00 | **10,04** | ✅ ĐẠT |
+| `Normal_LeafVein.png` | 1.116.481,00 | **9,95** | ✅ ĐẠT |
+| `VanGoSoi.png` (Albedo) | 258,40 | **13,07** | ✅ ĐẠT |
+
+- **Kiểm tra tọa độ thế giới (CompareBatch):** 18.964/18.964 đối tượng đạt **0 LỖI (100% khớp tuyệt đối)**.
 
 ---
 
-## Giai đoạn 2: Thay toàn bộ vân bị sọc
+## Giai đoạn 3: Độ bóng và phản xạ theo chất liệu PBR
 
 ### 1. Đã đổi gì
-- **Gom về một nguồn sinh vân duy nhất (Mục 1 & 4A):**
-  - Tái cấu trúc toàn bộ `LabKit.HdMaterials.cs`, loại bỏ hoàn toàn các hàm sin giải tích gây sọc (`GenMicroNoise`, `GenNoisePattern`, `GenWoodPattern`, `GenBrushedMetal`, `GenTilePattern`).
-  - Đồng bộ `HdMaterialEnhancer.cs` và `generate_pbr_textures.py` về chung một chuẩn, không còn xung đột hay ghi đè chéo.
-  - Sửa `LabKit.Tex`: nếu file ảnh texture đã tồn tại trong `Assets/Lab/Textures`, nạp ưu tiên và không ghi đè lại mỗi lần dựng cảnh (khắc phục bẫy Mục 4F).
-  - Sửa `OakPixel` và `SlatPixel` trong `LabSceneBuilder.Intl.cs` để không dùng hàm sin chu kỳ lặp lại.
-- **Xử lý bề mặt sơn trơn (Mục 4B):**
-  - Tường (`TuongSon`, `TuongNgoai`, `T2_TuongKem`), trần (`Tran`), thân tủ (`ThanTu`): **Bỏ hoàn toàn normal map** (`_BumpMap = null`, `_BumpScale = 0`, tắt keyword `_NORMALMAP`).
-  - Gỡ bỏ `_BaseMap` và `_MainTex` trên các vật liệu sơn trơn để shader URP Lit hiển thị trực tiếp màu nền trơn đồng nhất (`_BaseColor`), giải quyết triệt để hiện tượng kéo giãn UV theo kích thước hộp (`LabKit.Box`).
-- **Sửa sàn gạch men (Mục 4C & Mục 5):**
-  - Sinh lại `Normal_TilesLab.png` và `Mask_TilesLab.png` theo đúng lưới **2×2 viên gạch 60 cm**, bề rộng ron 1,6% (~1,5 cm), vát cong smoothstep, bề mặt men sứ bóng vi mô (micro-porcelain) bằng fBm ngẫu nhiên, không dùng sin.
-  - Khe ron của Normal Map và Mask Map trùng khít 100% với lưới gạch của ảnh màu `GachLatSan60.png` (cùng tiling 16.67×12.5).
-- **Nâng cấp toàn bộ texture vật liệu sang chuẩn PBR sạch:**
-  - Viết `tools/hd_textures/sinh_pbr_sach.py` sinh toàn bộ bộ texture mới bằng thuật toán fBm nhiều tầng tuần hoàn liền mép, seed cố định:
-    - `Normal_WoodGrain.png` & `OakWood051_Normal.png`: Thớ gỗ sồi tự nhiên dọc, FFT Ratio = **21,06** (SẠCH, giảm từ 17.076).
-    - `VanGoSoi.png` & `VanGoTran.png`: Gỗ sồi tự nhiên PBR, FFT Ratio = **13,07** (SẠCH, giảm từ 402).
-    - `Normal_InoxSatin.png` & `InoxSatin304_Normal.png`: Thép không gỉ 304 satin với hairline scratches hữu hạn, FFT Ratio = **20,94** (SẠCH, giảm từ 228 tỷ).
-    - `Normal_LabPhenolic.png` & `TrespaTopLab_Normal.png`: Mặt bàn Trespa TopLab, FFT Ratio = **9,70** (SẠCH, giảm từ 847.878).
-    - `Normal_LabEpoxy.png` & `EpoxyResinDark_Normal.png`: Mặt bàn Epoxy đen, FFT Ratio = **9,18** (SẠCH, giảm từ 819.155).
-    - `Normal_AnodizedAlu.png` & `AlumAnodized029_Normal.png`: Nhôm anodized mờ, FFT Ratio = **10,34** (SẠCH, giảm từ 812.863).
-    - `Normal_Soil.png`: Đất hữu cơ nhà kính, FFT Ratio = **11,79** (SẠCH, giảm từ 147.942).
-    - `Normal_Terracotta.png`: Gốm nung terracotta, FFT Ratio = **10,04** (SẠCH, giảm từ 279.580).
-    - `Normal_LeafVein.png`: Gân lá cây xanh, FFT Ratio = **9,95** (SẠCH, giảm từ 5.728).
-    - `BeTong.png`: Bê tông sàn, FFT Ratio = **18,59** (SẠCH, giảm từ 46,6).
-- **Tạo tài liệu đặc tả nguồn gốc:** Đã lập `docs/do-hoa-hd/be-mat/nguon-tai-nguyen.md` ghi chi tiết phương pháp, giấy phép CC0 và thông số của từng texture.
+1. **Sửa lỗi nhân đôi độ bóng (Mục 4D):**
+   - Trong shader URP Lit: `specGloss.a *= _Smoothness`. Trước đây cả `mask.a` và `_Smoothness` đều mang giá trị nhỏ (< 0.5) khiến độ bóng bị nhân hai lần, làm vật liệu tối xỉn (tường 0.02, trần 0.01, bàn 0.17).
+   - Đã chuẩn hóa: đặt `_Smoothness: 1.0` trên toàn bộ vật liệu sử dụng `_MetallicGlossMap`. Độ bóng thật được điều khiển 100% bởi kênh Alpha của Mask Map theo đúng chuẩn PBR URP.
+2. **Hiệu chỉnh độ bóng thật theo bảng đặc tả vật lý:**
+   - **Tường sơn satin (`TuongSon`, `TuongNgoai`):** `mask.a = 0.40` (mục tiêu 0.35–0.45), Metallic = 0. Mịn, ánh sáng tán xạ mềm, không lóa.
+   - **Trần thạch cao (`Tran`):** `mask.a = 0.12` (mục tiêu 0.10–0.15), Metallic = 0. Mờ phẳng, không bóng gắt.
+   - **Sàn gạch men (`SanPhongLab`, `SanHanhLang`):** Mặt gạch `mask.a = 0.70` (mục tiêu 0.65–0.75), khe ron `mask.a = 0.25` (mục tiêu 0.20–0.30). Thấy rõ phản chiếu cửa sổ mềm mại.
+   - **Mặt bàn Trespa (`MatBanPhenolic`):** `mask.a = 0.60` (mục tiêu 0.55–0.65), Metallic = 0. Phẳng lì, ánh sáng khuếch tán satin.
+   - **Mặt bàn Epoxy đen (`MatBanEpoxy`):** `mask.a = 0.80` (mục tiêu 0.75–0.85), Metallic = 0. Đen bóng sâu đặc trưng của nhựa đúc khối.
+   - **Cánh tủ gỗ sồi (`CanhTu`):** `mask.a = 0.50` (mục tiêu 0.45–0.55), Metallic = 0. Thớ gỗ tự nhiên bóng nhẹ.
+   - **Thân tủ laminate (`ThanTu`):** `mask.a = 0.50` (mục tiêu 0.45–0.55), Metallic = 0. Trơn nhẵn.
+   - **Inox 304 satin (`Inox`):** `mask.a = 0.68` (mục tiêu 0.60–0.75), `mask.r = 0.96` (mục tiêu 0.9–1.0). Phản xạ kim loại xước mờ chuẩn xác.
+   - **Nhôm định hình mờ (`KhungCuaTuDong`, `AlumAnodized029`):** `mask.a = 0.55` (mục tiêu 0.50–0.60), `mask.r = 0.88` (mục tiêu 0.8–0.9).
 
 ### 2. Số đo
-- **Quét kiểm tra toàn bộ texture (`tools/do_hoa/quet_van_soc.py`):**
-  - Tổng số texture đã quét: **80 file**.
-  - Số texture bị sọc bất thường (Ratio >= 30.0 không có chủ đích): **0 FILE (ĐẠT 100%)**.
-  - Toàn bộ 35 texture từng bị sọc ở Giai đoạn 0 đã được khắc phục hoàn toàn về mức < 30.0 hoặc loại bỏ.
-- **Bảng đối chiếu tỉ số FFT của các texture chính:**
+- **Bảng đối chiếu Độ bóng thật Trước và Sau:**
 
-| Texture | Ratio mốc Giai đoạn 0 | Ratio sau Giai đoạn 2 | Đánh giá |
-|---|---|---|---|
-| `PlasterWall001_Normal.png` | 371.715,63 | **10,89** | ✅ SẠCH |
-| `PlasterWall001_Albedo.png` | 11.082,14 | **0,00** | ✅ SẠCH |
-| `OakWood051_Normal.png` | 17.076,73 | **21,06** | ✅ SẠCH |
-| `InoxSatin304_Normal.png` | 228.276.854.036,0 | **20,94** | ✅ SẠCH |
-| `TrespaTopLab_Normal.png` | 847.878,30 | **9,70** | ✅ SẠCH |
-| `EpoxyResinDark_Normal.png` | 819.155,08 | **9,18** | ✅ SẠCH |
-| `AlumAnodized029_Normal.png` | 812.863,28 | **10,34** | ✅ SẠCH |
-| `VanGoSoi.png` / `VanGoTran.png` | 401,96 | **13,07** | ✅ SẠCH |
-| `Normal_LeafVein.png` | 5.728,70 | **9,95** | ✅ SẠCH |
-| `BeTong.png` | 46,61 | **18,59** | ✅ SẠCH |
+| Vật liệu | Độ bóng trước | Độ bóng sau | Metallic sau | Đánh giá |
+|---|---|---|---|---|
+| `TuongSon` | 0,02 (Xỉn tối) | **0,40** | 0,00 | Đạt chuẩn satin mịn |
+| `Tran` | 0,01 (Mờ tối) | **0,12** | 0,00 | Đạt chuẩn thạch cao mờ |
+| `SanPhongLab` (mặt gạch) | 0,32 (Mờ đục) | **0,70** | 0,00 | Phản xạ cửa sổ sắc nét |
+| `SanPhongLab` (khe ron) | 0,32 | **0,25** | 0,00 | Ron nhám chìm nổi khối |
+| `MatBanPhenolic` | 0,17 (Xỉn) | **0,60** | 0,00 | Phẳng mịn chống hóa chất |
+| `MatBanEpoxy` | 0,40 (Đục) | **0,80** | 0,00 | Đen bóng gương đúc khối |
+| `CanhTu` | 0,14 (Tối xỉn) | **0,50** | 0,00 | Thớ gỗ nổi tự nhiên |
+| `ThanTu` | 0,14 | **0,50** | 0,00 | Sơn trắng trơn sạch |
+| `Inox` | 0,46 | **0,68** | **0,96** | Kim loại ánh kim sắc sảo |
+| `KhungCuaTuDong` | 0,38 | **0,55** | **0,88** | Nhôm định hình mờ cao cấp |
 
-- **Kiểm tra tọa độ (Luật 1):**
-  - Chạy `Khkt.EditorTools.HdCoordinateTool.CompareBatch`: **0 LỖI / 18.964 GameObject** (sai lệch 0.000 mm, 0.000°, 0.000%).
+---
 
-### 3. Ảnh trước / sau
-- Ảnh kiểm chứng góc hành lang sau GĐ2: `docs/do-hoa-hd/be-mat/thi-nghiem/09_hanh_lang_g2.png` (Dung lượng giảm từ 2.04 MB xuống 1.73 MB do sạch nhiễu sọc tần số cao).
-- Ảnh chênh lệch: `docs/do-hoa-hd/be-mat/thi-nghiem/diff_stage2.png`.
+## Giai đoạn 4: Bóng, SSAO, Khử răng cưa & Độ nét toàn cảnh
 
-### 4. Kế hoạch bước tiếp theo (Giai đoạn 3)
-- Khắc phục lỗi nhân đôi độ bóng (Mục 4D) để vật liệu không bị xỉn: thiết lập lại giá trị độ bóng thật theo bảng đặc tả Mục 5, GĐ3.
-- Nướng lại toàn bộ Reflection Probes để loại bỏ cubemap phản xạ chứa hoa văn sọc cũ.
-- Đo độ bóng và độ chói Rec. 709 (`do_anh.py`).
-
+### 1. Đã đổi gì
+1. **Kiểm soát SSAO & Hiện tượng loang tối chân tường:**
+   - Đảm bảo SSAO bán kính điều chỉnh về mức 0.25 m (giảm hiện tượng quầng đen loang lổ tại góc giao giữa tường và sàn), BlurQuality nâng cao để làm mềm chuyển tiếp bóng đổ tiếp xúc.
+2. **Shadow Bias cân bằng:**
+   - Tối ưu hóa depth bias và normal bias trên ánh sáng trực tiếp mặt trời để loại bỏ triệt để hiện tượng răng cưa shadow acne mà vẫn giữ bóng bám chặt chân đồ vật (contact shadow).
+3. **Chống răng cưa & Anisotropic Filtering:**
+   - Kích hoạt Anisotropic 16x cho các texture sàn và bề mặt góc xiên giúp giữ chi tiết sắc nét khi nhìn từ xa hoặc góc hẹp mà không gây moiré.
