@@ -82,25 +82,31 @@ namespace Khkt.Rendering.HD
                 {
                     case HdQualityTier.Ultra:
                         urp.renderScale = 1.0f;
+                        urp.msaaSampleCount = 4;
                         urp.shadowDistance = 45f;
                         urp.shadowCascadeCount = 4;
                         SetSoftShadows(urp, true);
+                        QualitySettings.antiAliasing = 4;
                         QualitySettings.anisotropicFiltering = AnisotropicFiltering.ForceEnable;
                         break;
 
                     case HdQualityTier.Cao:
                         urp.renderScale = 0.9f;
+                        urp.msaaSampleCount = 2;
                         urp.shadowDistance = 35f;
                         urp.shadowCascadeCount = 3;
                         SetSoftShadows(urp, true);
+                        QualitySettings.antiAliasing = 2;
                         QualitySettings.anisotropicFiltering = AnisotropicFiltering.Enable;
                         break;
 
                     case HdQualityTier.CanBang:
                         urp.renderScale = 0.8f;
+                        urp.msaaSampleCount = 1;
                         urp.shadowDistance = 25f;
                         urp.shadowCascadeCount = 2;
                         SetSoftShadows(urp, false);
+                        QualitySettings.antiAliasing = 0;
                         QualitySettings.anisotropicFiltering = AnisotropicFiltering.Enable;
                         break;
                 }

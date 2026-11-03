@@ -80,9 +80,13 @@ namespace Khkt.EditorTools
 
         public static void ConfigureTextureImporters()
         {
-            if (!Directory.Exists(HdTexDir)) return;
+            var searchDirs = new List<string>();
+            if (Directory.Exists(HdTexDir)) searchDirs.Add(HdTexDir);
+            if (Directory.Exists("Assets/Lab/Textures")) searchDirs.Add("Assets/Lab/Textures");
+            if (Directory.Exists("Assets/Lab/NhaHoaHoc")) searchDirs.Add("Assets/Lab/NhaHoaHoc");
+            if (Directory.Exists("Assets/Lab/Logo")) searchDirs.Add("Assets/Lab/Logo");
 
-            string[] guids = AssetDatabase.FindAssets("t:Texture2D", new[] { HdTexDir });
+            string[] guids = AssetDatabase.FindAssets("t:Texture2D", searchDirs.ToArray());
             bool changed = false;
 
             foreach (var guid in guids)
@@ -93,30 +97,64 @@ namespace Khkt.EditorTools
 
                 string filename = Path.GetFileNameWithoutExtension(path);
                 bool isNormal = filename.StartsWith("Normal_") || filename.EndsWith("_Normal");
-
+                bool isHdDir = path.StartsWith(HdTexDir);
                 bool needUpdate = false;
-                if (isNormal && importer.textureType != TextureImporterType.NormalMap)
+
+                // 1. Cấu hình Normal map / Albedo / Mask
+                if (isHdDir)
                 {
-                    importer.textureType = TextureImporterType.NormalMap;
-                    needUpdate = true;
+                    if (isNormal && importer.textureType != TextureImporterType.NormalMap)
+                    {
+                        importer.textureType = TextureImporterType.NormalMap;
+                        needUpdate = true;
+                    }
+                    else if (!isNormal && importer.textureType != TextureImporterType.Default)
+                    {
+                        importer.textureType = TextureImporterType.Default;
+                        importer.sRGBTexture = !filename.Contains("Mask") && !filename.Contains("AO_");
+                        needUpdate = true;
+                    }
+
+                    if (importer.maxTextureSize > 1024)
+                    {
+                        importer.maxTextureSize = 1024;
+                        needUpdate = true;
+                    }
+
+                    if (importer.wrapMode != TextureWrapMode.Repeat)
+                    {
+                        importer.wrapMode = TextureWrapMode.Repeat;
+                        needUpdate = true;
+                    }
                 }
-                else if (!isNormal && importer.textureType != TextureImporterType.Default)
+
+                // 2. Lọc dị hướng 16x toàn diện cho sàn, bàn, tường và đồ vật
+                if (importer.anisoLevel != 16)
                 {
-                    importer.textureType = TextureImporterType.Default;
-                    importer.sRGBTexture = !filename.Contains("Mask") && !filename.Contains("AO_");
+                    importer.anisoLevel = 16;
                     needUpdate = true;
                 }
 
-                if (importer.maxTextureSize > 1024)
-                {
-                    importer.maxTextureSize = 1024;
-                    needUpdate = true;
-                }
+                // 3. Mipmap tối ưu: tranh ảnh, bảng tuần hoàn, vạch chia buret và nhãn lọ không bị mờ
+                bool isTextOrChart = filename.Contains("BangTuanHoan") || filename.Contains("VachBuret") ||
+                                     filename.Contains("BangLo") || filename.StartsWith("Poster") ||
+                                     filename.StartsWith("GHS") || filename.StartsWith("T2_ApPhich") ||
+                                     filename.Contains("ManGiaiPhau") || filename.Contains("AnhGel") ||
+                                     filename.Contains("MachDien") || filename.Contains("Logo") ||
+                                     path.Contains("NhaHoaHoc");
 
-                if (importer.wrapMode != TextureWrapMode.Repeat)
+                if (isTextOrChart)
                 {
-                    importer.wrapMode = TextureWrapMode.Repeat;
-                    needUpdate = true;
+                    if (Mathf.Abs(importer.mipMapBias - (-0.5f)) > 0.01f)
+                    {
+                        importer.mipMapBias = -0.5f;
+                        needUpdate = true;
+                    }
+                    if (!importer.mipmapEnabled)
+                    {
+                        importer.mipmapEnabled = true;
+                        needUpdate = true;
+                    }
                 }
 
                 if (needUpdate)
