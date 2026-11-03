@@ -89,7 +89,6 @@ namespace Khkt.EditorTools
             AttachSurfaces(root);
             AttachUsables(root);
             BuildDemo(root);
-            BuildHdArchitecture(root);
             OptimizeRenderers(root);
             AttachHlod(root);
             AttachImpostors(root);
@@ -108,6 +107,7 @@ namespace Khkt.EditorTools
 
             // Tách phần tĩnh của từng khu ra cảnh riêng (tải / gỡ cộng dồn lúc chạy), đồ tương tác ở lại cảnh lõi
             var zoneScenes = SplitIntoZones(scene, root);
+            BuildHdArchitecture(root);
             EditorSceneManager.SetActiveScene(scene);
             EditorSceneManager.SaveScene(scene, ScenePath);
             int total = root.GetComponentsInChildren<Transform>(true).Length, zoneObjects = 0;
