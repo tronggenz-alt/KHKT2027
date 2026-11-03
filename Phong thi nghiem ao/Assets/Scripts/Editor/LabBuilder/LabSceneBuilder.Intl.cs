@@ -217,7 +217,7 @@ namespace Khkt.EditorTools
                 float x = x0 + 0.42f + i * 0.81f;
                 float y = 1.74f + (i % 2 == 0 ? 0.03f : -0.03f);
                 int v = i;
-                var m = Mat("Poster" + i, Color.white, 0.2f, 0, Tex("Poster" + i, 128, 176, (px, py) => PosterPixel(v, px, py), repeat: false));
+                var m = Mat("Poster" + i, Color.white, 0.35f, 0, Tex("Poster" + i, 128, 176, (px, py) => PosterPixel(v, px, py), repeat: false));
                 NoShadow(Panel(g, "Poster " + titles[i].en, new Vector3(x, y, zf + 0.024f), Vector3.forward, 0.62f, 0.85f, m));
                 Label(g, titles[i].vi, new Vector3(x, y + 0.36f, zf + 0.026f), Vector3.forward, 0.032f, Color.white);
                 Label(g, titles[i].en, new Vector3(x, y + 0.315f, zf + 0.026f), Vector3.forward, 0.022f, new Color(1f, 1f, 1f, 0.85f));

@@ -57,10 +57,10 @@ namespace Khkt.EditorTools
             bioWater = Mat("T2_NuocTrong", new Color(0.72f, 0.88f, 0.95f, 0.3f), 0.95f, 0, transparent: true);
             posterBio = new[]
             {
-                Mat("T2_ApPhichTeBao", Color.white, 0.2f, 0, Tex("T2_ApPhichTeBao", 256, 352, CellPosterPixel, repeat: false)),
-                Mat("T2_ApPhichChuKy", Color.white, 0.2f, 0, Tex("T2_ApPhichChuKy", 256, 352, CycleTexPixel, repeat: false)),
-                Mat("T2_ApPhichCaySuSong", Color.white, 0.2f, 0, Tex("T2_ApPhichCaySuSong", 256, 352, TreeOfLifePixel, repeat: false)),
-                Mat("T2_ApPhichADN", Color.white, 0.2f, 0, Tex("T2_ApPhichADN", 256, 352, DnaPosterPixel, repeat: false)),
+                Mat("T2_ApPhichTeBao", Color.white, 0.35f, 0, Tex("T2_ApPhichTeBao", 256, 352, CellPosterPixel, repeat: false)),
+                Mat("T2_ApPhichChuKy", Color.white, 0.35f, 0, Tex("T2_ApPhichChuKy", 256, 352, CycleTexPixel, repeat: false)),
+                Mat("T2_ApPhichCaySuSong", Color.white, 0.35f, 0, Tex("T2_ApPhichCaySuSong", 256, 352, TreeOfLifePixel, repeat: false)),
+                Mat("T2_ApPhichADN", Color.white, 0.35f, 0, Tex("T2_ApPhichADN", 256, 352, DnaPosterPixel, repeat: false)),
             };
         }
 

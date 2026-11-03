@@ -137,29 +137,36 @@ namespace Khkt.EditorTools
 
         // ---------- Ảnh vân ----------
 
-        /// <summary>Sinh ảnh từ hàm điểm ảnh, lưu PNG vào Assets/Lab/Textures và trả về asset đã nhập.</summary>
+        /// <summary>Sinh ảnh từ hàm điểm ảnh hoặc nạp ảnh đã vẽ sẵn.
+        /// Nếu file PNG đã tồn tại trên đĩa (đã được vẽ trước ở độ phân giải cao), giữ nguyên file đó,
+        /// KHÔNG ghi đè bằng ảnh độ phân giải thấp. Thiết lập Aniso 16, Trilinear để đạt độ nét tối đa.</summary>
         public static Texture2D Tex(string name, int w, int h, Func<int, int, Color> pixel, bool repeat = true)
         {
             string path = $"{Root}/Textures/{name}.png";
-            // Bẫy cần tránh (Mục 4F): Nếu ảnh đã tồn tại (đã được nâng cấp HD hoặc nạp từ file), ưu tiên sử dụng không ghi đè
-            var existing = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
-            if (existing != null) return existing;
-
-            var tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
-            var px = new Color[w * h];
-            for (int y = 0; y < h; y++)
-                for (int x = 0; x < w; x++)
-                    px[y * w + x] = pixel(x, y);
-            tex.SetPixels(px);
-            tex.Apply();
-            File.WriteAllBytes(path, tex.EncodeToPNG());
-            Object.DestroyImmediate(tex);
-            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+            bool exists = File.Exists(path);
+            if (!exists)
+            {
+                var tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
+                var px = new Color[w * h];
+                for (int y = 0; y < h; y++)
+                    for (int x = 0; x < w; x++)
+                        px[y * w + x] = pixel(x, y);
+                tex.SetPixels(px);
+                tex.Apply();
+                File.WriteAllBytes(path, tex.EncodeToPNG());
+                Object.DestroyImmediate(tex);
+                AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+            }
             var importer = (TextureImporter)AssetImporter.GetAtPath(path);
-            importer.wrapMode = repeat ? TextureWrapMode.Repeat : TextureWrapMode.Clamp;
-            importer.mipmapEnabled = true;
-            importer.anisoLevel = 4;
-            importer.SaveAndReimport();
+            if (importer != null)
+            {
+                importer.wrapMode = repeat ? TextureWrapMode.Repeat : TextureWrapMode.Clamp;
+                importer.mipmapEnabled = true;
+                importer.filterMode = FilterMode.Trilinear;
+                importer.anisoLevel = 16;
+                importer.SaveAndReimport();
+            }
+            return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
             return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
         }
 
@@ -235,7 +242,7 @@ namespace Khkt.EditorTools
             g.transform.localRotation = Quaternion.LookRotation(-facing, Vector3.up);
             var tm = g.AddComponent<TextMesh>();
             tm.font = font;
-            tm.fontSize = 64;
+            tm.fontSize = 256;
             tm.characterSize = letterHeight * 10f / tm.fontSize;
             tm.anchor = TextAnchor.MiddleCenter;
             tm.alignment = TextAlignment.Center;
