@@ -264,7 +264,7 @@ namespace Khkt.Demo
                 ("Q", "Trả dụng cụ về chỗ"), ("Lăn chuột", "Vặn khóa buret"), ("↑ ↓   Space", "Mở, đóng, khóa hẳn"),
                 ("F", "Lắc bình nón"), ("Enter", "Ghi số đọc buret"), ("G", "Đồ thị pH"), ("R", "Làm lượt chuẩn độ mới"),
                 ("Tab   Alt", "Nhìn theo chuột · thả con trỏ"), ("B", "Tra cứu hóa chất"), ("T", "Trợ lý AI"), ("Esc", "Menu, chọn bài"),
-                ("F8   F9", "Điều khiển bằng đầu qua webcam · căn lại"),
+                ("F8  F9  F12", "Đầu qua webcam · xem mô phỏng · căn lại"),
             };
             for (int i = 0; i < rows.Length; i++)
             {
@@ -383,7 +383,7 @@ namespace Khkt.Demo
 
         void UpdateHints()
         {
-            int n = hand != null ? Mathf.Min(hand.Hints.Count, hintItems.Count) : 0;
+            int n = hand != null && !ClassRules.HideHelp ? Mathf.Min(hand.Hints.Count, hintItems.Count) : 0;
             hintBar.gameObject.SetActive(n > 0);
             if (n == 0) return;
             float x = 14;

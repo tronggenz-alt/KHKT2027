@@ -95,6 +95,11 @@ namespace Khkt.Demo
 
         public void Open()
         {
+            if (ClassRules.ChatLocked)
+            {
+                LabMessages.Say(ClassRules.Exam ? "Đang kiểm tra: trợ lý robot tạm khóa" : "Giáo viên đã tắt trợ lý robot", LabMessages.Tone.Warn);
+                return;
+            }
             IsOpen = true;
             panel.SetActive(true);
             UiBridge.SetCapture(ref captured, true);

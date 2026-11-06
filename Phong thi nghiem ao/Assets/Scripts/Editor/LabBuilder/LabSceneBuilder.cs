@@ -120,14 +120,17 @@ namespace Khkt.EditorTools
                 BakeOcclusion(System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Prepend(zoneScenes, scene)));
                 EditorSceneManager.SaveOpenScenes();
             }
+            BuildMenuScene();
             AddToBuildSettings();
             AssetDatabase.SaveAssets();
+            EditorSceneManager.OpenScene(ScenePath);
             Debug.Log($"[KHKT] Đã dựng {ScenePath}: {total + zoneObjects} đối tượng ({total} ở cảnh lõi, {zoneObjects} ở {zoneScenes.Length} cảnh khu).");
         }
 
         static void AddToBuildSettings()
         {
-            var paths = new System.Collections.Generic.List<string> { ScenePath };
+            // màn hình chính đứng đầu: đây là cảnh bản .exe mở trước
+            var paths = new System.Collections.Generic.List<string> { MenuScenePath, ScenePath };
             for (int z = 0; z < Khkt.Rendering.ZoneMap.Zones.Length; z++) paths.Add(Khkt.Rendering.ZoneMap.ScenePath(z));
             var list = new System.Collections.Generic.List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
             list.RemoveAll(s => paths.Contains(s.path));

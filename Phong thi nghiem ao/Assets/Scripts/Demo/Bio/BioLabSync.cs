@@ -11,6 +11,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 using Khkt.Interaction.Bio;
+using Khkt.Menu;
 
 namespace Khkt.Demo.Bio
 {
@@ -29,6 +30,8 @@ namespace Khkt.Demo.Bio
 
         public const int MaxQueueSize = 500;
         public string serverUrl = "http://127.0.0.1:8000";
+        bool serverUrlFromEnv;
+        string BaseUrl => serverUrlFromEnv ? serverUrl.TrimEnd('/') : GameSession.ServerUrl;
         public bool syncDisabledByEnv = false;
         public bool lastRequestSucceeded = false;
         public int totalEventsSent = 0;
@@ -71,7 +74,8 @@ namespace Khkt.Demo.Bio
             Instance = this;
 
             string envUrl = System.Environment.GetEnvironmentVariable("KHKT_SERVER_URL");
-            if (!string.IsNullOrEmpty(envUrl)) serverUrl = envUrl.TrimEnd('/');
+            serverUrlFromEnv = !string.IsNullOrEmpty(envUrl);
+            if (serverUrlFromEnv) serverUrl = envUrl.TrimEnd('/');
 
             string envWebSinh = System.Environment.GetEnvironmentVariable("KHKT_WEB_SINH");
             syncDisabledByEnv = (envWebSinh == "0");
@@ -286,7 +290,7 @@ namespace Khkt.Demo.Bio
             jsonSb.Append("]}");
 
             string payload = jsonSb.ToString();
-            string url = serverUrl.TrimEnd('/') + "/lab/sinh/su-kien";
+            string url = BaseUrl + "/lab/sinh/su-kien";
 
             using (var req = new UnityWebRequest(url, "POST"))
             {
@@ -295,8 +299,10 @@ namespace Khkt.Demo.Bio
                 req.downloadHandler = new DownloadHandlerBuffer();
                 req.SetRequestHeader("Content-Type", "application/json");
                 req.timeout = 4;
+                AccountClient.Authorize(req);
 
                 yield return req.SendWebRequest();
+                AccountClient.CheckExpired(req);
 
                 if (req.result == UnityWebRequest.Result.Success && req.responseCode >= 200 && req.responseCode < 300)
                 {
@@ -328,11 +334,13 @@ namespace Khkt.Demo.Bio
             if (syncDisabledByEnv || requestInFlight) yield break;
             requestInFlight = true;
 
-            string url = serverUrl.TrimEnd('/') + "/lab/sinh/tong-quan";
+            string url = BaseUrl + "/lab/sinh/tong-quan";
             using (var req = UnityWebRequest.Get(url))
             {
                 req.timeout = 4;
+                AccountClient.Authorize(req);
                 yield return req.SendWebRequest();
+                AccountClient.CheckExpired(req);
                 if (req.result == UnityWebRequest.Result.Success)
                 {
                     lastRequestSucceeded = true;

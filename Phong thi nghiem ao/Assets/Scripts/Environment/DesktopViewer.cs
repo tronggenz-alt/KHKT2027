@@ -67,6 +67,8 @@ namespace Khkt.Environment
             viewCam = cameraTransform != null ? cameraTransform.GetComponent<Camera>() : null;
             if (viewCam != null) baseFov = viewCam.fieldOfView;
             if (FindAnyObjectByType<Khkt.Input.HeadTracking>() == null) gameObject.AddComponent<Khkt.Input.HeadTracking>();
+            if (FindAnyObjectByType<Khkt.Demo.PresentationClient>() == null) gameObject.AddComponent<Khkt.Demo.PresentationClient>();
+            if (FindAnyObjectByType<Khkt.Input.TrackingViewer>() == null) gameObject.AddComponent<Khkt.Input.TrackingViewer>();
             if (FindAnyObjectByType<Khkt.Input.MediaPipeHandSource>() == null) gameObject.AddComponent<Khkt.Input.MediaPipeHandSource>();
             if (cameraTransform != null && cameraTransform.GetComponent<Khkt.Input.GazeHighlight>() == null)
                 cameraTransform.gameObject.AddComponent<Khkt.Input.GazeHighlight>();

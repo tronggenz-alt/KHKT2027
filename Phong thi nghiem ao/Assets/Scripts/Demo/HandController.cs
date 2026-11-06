@@ -470,6 +470,12 @@ namespace Khkt.Demo
         public void Pick(Grabbable g)
         {
             if (g == null || Held != null) return;
+            var bottle = g.GetComponent<ChemicalBottle>();
+            if (bottle != null && ClassRules.IsLocked(bottle.stt))
+            {
+                LabMessages.Say("Giáo viên đã khóa hóa chất này", LabMessages.Tone.Warn);
+                return;
+            }
             var buret = g.GetComponent<BuretStopcock>();
             if (buret != null && buret.HasLiquid && g.Socket != null && g.Socket.mountsBuret)
             {

@@ -272,6 +272,15 @@ public class KhktAutoTest : MonoBehaviour
 #endif
             yield break;
         }
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "tracking_f9")
+        {
+            yield return TrackingF9Test();
+            Log($"Xong sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
         if (Environment.GetEnvironmentVariable("KHKT_TEST") == "mediapipe")
         {
             yield return MediaPipeTest();
@@ -2411,6 +2420,112 @@ public class KhktAutoTest : MonoBehaviour
             float tw = Time.realtimeSinceStartup;
             while (Time.realtimeSinceStartup - tw < 0.033f) yield return null;
         }
+    }
+
+    // Gửi đồng thời gói số liệu (9051) và gói điểm mốc (9053) như tracker thật
+    IEnumerator SendF9(System.Net.Sockets.UdpClient u, string pkt, string lm, float seconds = 0.5f)
+    {
+        float t0 = Time.realtimeSinceStartup;
+        var a = pkt != null ? System.Text.Encoding.UTF8.GetBytes(pkt) : null;
+        var b = lm != null ? System.Text.Encoding.UTF8.GetBytes(lm) : null;
+        while (Time.realtimeSinceStartup - t0 < seconds)
+        {
+            if (a != null) u.Send(a, a.Length, "127.0.0.1", 9051);
+            if (b != null) u.Send(b, b.Length, "127.0.0.1", 9053);
+            float tw = Time.realtimeSinceStartup;
+            while (Time.realtimeSinceStartup - tw < 0.033f) yield return null;
+        }
+    }
+
+    int f9Pass, f9Fail;
+    void F9Check(string name, bool ok, string detail = "")
+    {
+        if (ok) f9Pass++; else f9Fail++;
+        Log($"[f9] {(ok ? "ĐẠT" : "HỎNG")}: {name} {detail}");
+    }
+
+    IEnumerator TrackingF9Test()
+    {
+        var ht = Khkt.Input.HeadTracking.Instance;
+        var tv = Khkt.Input.TrackingViewer.Instance;
+        F9Check("có HeadTracking và TrackingViewer", ht != null && tv != null);
+        if (ht == null || tv == null) yield break;
+        var file = Environment.GetEnvironmentVariable("KHKT_F9_DATA");
+        var lines = File.ReadAllLines(file);
+        var scenes = new Dictionary<string, (string pkt, string lm)>();
+        foreach (var l in lines)
+        {
+            var p = l.Split('\t');
+            scenes[p[0]] = (p[1], p[2]);
+        }
+        viewer.GoTo(5);
+        yield return Frames(10);
+
+        // 1) Chưa có tracker: bảng phải nói rõ cần nhấn F8
+        tv.SetOpen(true);
+        yield return Frames(20);
+        F9Check("mở bảng khi tracker tắt thì nhắc F8", tv.IsOpen && tv.Notice.Contains("F8"), tv.Notice);
+        Shot("f9_chua_bat");
+        ht.Begin(launch: false);
+        var u = new System.Net.Sockets.UdpClient();
+
+        float NoseX() => (tv.HeadRotation * new Vector3(0, 0, -1)).x;
+        float NoseY() => (tv.HeadRotation * new Vector3(0, 0, -1)).y;
+        float TopX() => (tv.HeadRotation * Vector3.up).x;
+
+        // 2) Điểm mốc thật từ MediaPipe trên ảnh chân dung
+        foreach (var name in new[] { "dalton", "dalton_lat", "lavoisier", "curie", "faraday" })
+        {
+            var s = scenes[name];
+            yield return SendF9(u, s.pkt, s.lm, 0.6f);
+            var pk = JsonUtility.FromJson<Khkt.Input.HeadTracking.Packet>(s.pkt);
+            F9Check($"{name}: hình nộm quay đúng chiều yaw {pk.yaw:0}", Mathf.Abs(pk.yaw) < 5 || Mathf.Sign(NoseX()) == Mathf.Sign(pk.yaw), $"mũi x={NoseX():0.00}");
+            F9Check($"{name}: pitch, roll đúng chiều", (Mathf.Abs(pk.pitch) < 5 || Mathf.Sign(NoseY()) == -Mathf.Sign(pk.pitch)) && (Mathf.Abs(pk.roll) < 5 || Mathf.Sign(TopX()) == Mathf.Sign(pk.roll)));
+            F9Check($"{name}: góc khớp điểm mốc", tv.Readout.Contains("khớp điểm mốc"));
+            Shot("f9_" + name);
+            tv.StageCamera.Render();
+            RenderTexture.active = tv.StageCamera.targetTexture;
+            var st = new Texture2D(960, 720, TextureFormat.RGB24, false);
+            st.ReadPixels(new Rect(0, 0, 960, 720), 0, 0);
+            st.Apply();
+            RenderTexture.active = null;
+            File.WriteAllBytes(Path.Combine(outDir, "f9_san_khau_" + name + ".png"), st.EncodeToPNG());
+            Destroy(st);
+        }
+
+        // 3) Gói sai dấu phải bị bắt (đúng lỗi yaw ngược đã gặp)
+        var d = scenes["dalton"];
+        yield return SendF9(u, d.pkt.Replace("\"yaw\": ", "\"yaw\": -"), d.lm, 0.5f);
+        F9Check("yaw sai dấu thì báo ngược chiều", tv.Readout.Contains("ngược chiều"));
+        Shot("f9_sai_dau");
+
+        // 4) Chớp mắt, hướng nhìn, tay, chụm (dữ liệu tổng hợp vì không có ảnh tay)
+        var h = scenes["tay_phai_ben_trai_anh"];
+        yield return SendF9(u, h.pkt, h.lm, 0.5f);
+        F9Check("tay ở bên trái ảnh hiện bên phải bảng", tv.HandCenter("phai").x > 0.2f, $"x={tv.HandCenter("phai").x:0.00}");
+        F9Check("tay trái ở bên phải ảnh hiện bên trái bảng", tv.HandCenter("trai").x < -0.2f, $"x={tv.HandCenter("trai").x:0.00}");
+        F9Check("hiện cử chỉ và chụm", tv.Readout.Contains("Pointing_Up") && tv.Readout.Contains("chụm"));
+        F9Check("chớp mắt trái, nhìn phải hiện trong số liệu", tv.Readout.Contains("Mắt trái  <color=#FFC860>nhắm") && tv.Readout.Contains("Nhìn  phải"));
+        Shot("f9_tay");
+
+        // 5) Mất mặt, mất tay
+        yield return SendF9(u, scenes["khong_mat"].pkt, scenes["khong_mat"].lm, 0.5f);
+        F9Check("mất mặt thì báo không thấy", tv.Readout.Contains("Không thấy mặt"));
+        F9Check("mất tay thì bỏ khung xương", tv.HandCenter("phai") == Vector3.zero);
+
+        // 6) Đóng bảng: sân khấu tắt, camera tắt, cổng được trả; mở lại vẫn nhận
+        int before = tv.LandmarkPackets;
+        tv.SetOpen(false);
+        F9Check("đóng bảng tắt camera phụ", !tv.StageCamera.enabled);
+        yield return SendF9(u, d.pkt, d.lm, 0.2f);
+        F9Check("đóng bảng thì không nhận điểm mốc", tv.LandmarkPackets == before);
+        tv.SetOpen(true);
+        yield return SendF9(u, d.pkt, d.lm, 0.3f);
+        F9Check("mở lại nhận tiếp", tv.LandmarkPackets > before);
+        tv.SetOpen(false);
+
+        u.Close();
+        Log($"[f9] Tổng: đạt {f9Pass}, hỏng {f9Fail}");
     }
 
     IEnumerator MediaPipeTest()

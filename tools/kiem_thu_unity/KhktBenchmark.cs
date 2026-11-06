@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -14,8 +14,72 @@ public class KhktBenchmark : MonoBehaviour
 {
     const float Warm = 1.5f, Measure = 4f;
 
+    // Bảng F9 trong bản .exe thật: shader, số liệu, và chi phí khung hình khi mở / đóng
+    IEnumerator F9(DesktopViewer viewer, string dir, string dataFile)
+    {
+        var log = new StringBuilder();
+        var ht = Khkt.Input.HeadTracking.Instance;
+        var tv = Khkt.Input.TrackingViewer.Instance;
+        viewer.GoTo(5);
+        yield return new WaitForSecondsRealtime(2f);
+        var scenes = new Dictionary<string, string[]>();
+        foreach (var l in File.ReadAllLines(dataFile)) { var p = l.Split('\t'); scenes[p[0]] = p; }
+        var u = new System.Net.Sockets.UdpClient();
+        IEnumerator Send(string[] s, float sec)
+        {
+            var a = Encoding.UTF8.GetBytes(s[1]);
+            var b = Encoding.UTF8.GetBytes(s[2]);
+            float t0 = Time.realtimeSinceStartup;
+            while (Time.realtimeSinceStartup - t0 < sec)
+            {
+                u.Send(a, a.Length, "127.0.0.1", 9051);
+                u.Send(b, b.Length, "127.0.0.1", 9053);
+                yield return null;
+            }
+        }
+        IEnumerator Fps(string name, string[] s)
+        {
+            int n = 0;
+            float t0 = Time.realtimeSinceStartup;
+            var a = Encoding.UTF8.GetBytes(s[1]);
+            var b = Encoding.UTF8.GetBytes(s[2]);
+            while (Time.realtimeSinceStartup - t0 < 5f)
+            {
+                u.Send(a, a.Length, "127.0.0.1", 9051);
+                u.Send(b, b.Length, "127.0.0.1", 9053);
+                n++;
+                yield return null;
+            }
+            log.AppendLine($"{name}: {n / 5f:0.0} FPS, {5000f / n:0.00} ms");
+        }
+        ht.Begin(launch: false);
+        yield return Send(scenes["faraday"], 2.5f);
+        for (int r = 0; r < 2; r++)
+        {
+            yield return Fps("dong", scenes["faraday"]);
+            tv.SetOpen(true);
+            yield return Send(scenes["faraday"], 1f);
+            yield return Fps("mo", scenes["faraday"]);
+            tv.SetOpen(false);
+            yield return null;
+        }
+        tv.SetOpen(true);
+        foreach (var name in new[] { "dalton", "tay_phai_ben_trai_anh" })
+        {
+            yield return Send(scenes[name], 1f);
+            log.AppendLine($"--- {name}: goi={tv.LandmarkPackets}");
+            log.AppendLine(tv.Readout);
+            ScreenCapture.CaptureScreenshot(Path.Combine(dir, "f9_exe_" + name + ".png"));
+            yield return Send(scenes[name], 0.3f);
+        }
+        tv.SetOpen(false);
+        u.Close();
+        File.WriteAllText(Path.Combine(dir, "f9_exe.txt"), log.ToString());
+    }
+
     IEnumerator Start()
     {
+        if (Arg("-khkt-demo") != null) yield break;  // chi choi thu, khong do
         string outFile = Arg("-khkt-bench") ?? Path.Combine(Application.persistentDataPath, "bench.csv");
         QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = -1;
@@ -23,6 +87,7 @@ public class KhktBenchmark : MonoBehaviour
         yield return null;
         if (intro != null) intro.Close();
         var viewer = FindAnyObjectByType<DesktopViewer>();
+        if (Arg("-khkt-f9") != null) { yield return F9(viewer, Arg("-khkt-f9"), Arg("-khkt-f9-data")); Application.Quit(); yield break; }
         if (Arg("-khkt-phan-tich") != null) { yield return Sweep(viewer, Arg("-khkt-phan-tich")); Application.Quit(); yield break; }
         var sb = new StringBuilder();
         sb.AppendLine($"# {SystemInfo.processorType} | {SystemInfo.processorCount} luồng | RAM {SystemInfo.systemMemorySize} MB | {SystemInfo.graphicsDeviceName} ({SystemInfo.graphicsMemorySize} MB, {SystemInfo.graphicsDeviceType}) | {Screen.width}x{Screen.height} | chất lượng {QualitySettings.names[QualitySettings.GetQualityLevel()]}");

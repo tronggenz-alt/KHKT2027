@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/ManHinhChinh.unity
+    guid: 8ac10c6e4ed100f49b4a3d35f6e897fe
+  - enabled: 1
     path: Assets/Scenes/PhongThiNghiem.unity
     guid: acb7eaba858e75649bccb0d98f6e0a9e
   - enabled: 1

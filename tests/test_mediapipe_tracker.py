@@ -150,8 +150,8 @@ class MediaPipeTinhTest(unittest.TestCase):
         for y_deg in [-30.0, -15.0, 15.0, 30.0]:
             m = tao_ma_tran_quay_gia(yaw_deg=y_deg)
             y_calc, _, _, _ = mt.tinh_tu_the_dau(m)
-            self.assertAlmostEqual(y_calc, y_deg, delta=1.0, msg=f"yaw {y_deg}°")
-            self.assertEqual(math.copysign(1, y_calc), math.copysign(1, y_deg))
+            self.assertAlmostEqual(y_calc, -y_deg, delta=1.0, msg=f"yaw {y_deg}°")
+            self.assertEqual(math.copysign(1, y_calc), -math.copysign(1, y_deg))
 
         # 3. Cúi / ngẩng (pitch)
         for p_deg in [-20.0, 20.0]:
@@ -477,6 +477,41 @@ class ChonCameraTest(unittest.TestCase):
         # Khung tiếp theo: về False
         t += 0.03
         self.assertFalse(detector.cap_nhat(0, 0, t))
+
+
+class TestDauTuAnhThat(unittest.TestCase):
+    def test_yaw_duong_khi_quay_sang_phai_nguoi_dung(self):
+        """Ma trận MediaPipe xuất từ chân dung Dalton: mũi lệch hẳn về bên trái ảnh, tức quay sang phải."""
+        m = np.array([
+            [0.8216, 0.1556, -0.5484, 7.2189],
+            [-0.2431, 0.9658, -0.0903, 19.9923],
+            [0.5156, 0.2075, 0.8313, -80.002],
+            [0.0, 0.0, 0.0, 1.0],
+        ])
+        yaw, pitch, roll, _ = mt.tinh_tu_the_dau(m)
+        self.assertAlmostEqual(yaw, 31.0, delta=1.5)
+        self.assertGreater(pitch, 0.0)  # trán gần camera hơn cằm: đang cúi
+        self.assertLess(roll, 0.0)      # mắt phải của người cao hơn: nghiêng sang trái
+
+
+class TestDiemMoc(unittest.TestCase):
+    def test_du_diem_va_dung_thu_tu(self):
+        mat = [(i / 1000.0, 0.5, -0.01) for i in range(478)]
+        tay = [("phai", [(0.1, 0.2, 0.0)] * 21), ("trai", [(0.3, 0.4, 0.0)] * 5)]
+        g = mt.dong_goi_diem_moc(mat, tay, 4 / 3, 1.5)
+        self.assertEqual(len(mt.DIEM_MAT_RUT_GON), 112)
+        self.assertEqual(len(g["mat"]), 112 * 3)
+        self.assertEqual(g["mat"][:3], [10, 500, -10])              # chỉ số đầu là điểm 10
+        self.assertEqual(g["mat"][111 * 3], 4)                      # chỉ số cuối là chóp mũi 4
+        self.assertEqual(g["mat"][28 * 3], 234)                     # má phải người dùng
+        self.assertEqual(g["mat"][8 * 3], 454)                      # má trái người dùng
+        self.assertEqual([x["ben"] for x in g["tay"]], ["phai"])    # tay thiếu điểm thì bỏ
+        self.assertEqual(len(g["tay"][0]["d"]), 63)
+
+    def test_khong_co_mat(self):
+        g = mt.dong_goi_diem_moc(None, [], 1.0)
+        self.assertEqual(g["mat"], [])
+        self.assertEqual(g["tay"], [])
 
 
 if __name__ == "__main__":
