@@ -182,3 +182,19 @@ Tài liệu này dành cho Claude Code của thành viên mới. Đọc hết tr
 - Claude Code bên kia chỉ được chạy `git push` vào nhánh của mình. Không tự gộp PR.
 - Không đưa lên kho: khóa API, `.env`, `Library/`, `Temp/`, bản build, tệp lớn hơn 50 MB.
 - Ảnh trong tài liệu chỉ dùng ảnh tự chụp từ dự án hoặc ảnh phạm vi công cộng.
+
+## 11. Hiện trạng và lưu ý (07/11/2026)
+
+- **Đã có:**
+  - App mở vào màn hình chính (`Assets/Scripts/Menu`), đăng nhập bằng API `server/` `/auth/*`, có chế độ dùng thử.
+  - Phòng học chung qua Unity Relay hoặc LAN (`Assets/Scripts/Network`, Netcode 2.13.3).
+  - Lớp học từ web qua `POST /app/nhip` (`PresentationClient`, `ClassRules`). Chi tiết ở docs/25, docs/26.
+- **Phòng học chung mới đồng bộ** người và vật đang cầm, **chưa** đồng bộ dung dịch, phản ứng, máy phân tích. Thêm đồng bộ thì máy mở phòng tính, máy khác chỉ nhận kết quả.
+- **Mật khẩu thử** ở `data/tai_khoan_mau_mat_khau.json` (git bỏ qua). Không chép mật khẩu vào tệp được commit.
+- **Kho đang công khai** (mục 10 ghi riêng tư là sai). Không commit khóa API.
+- **Bài thử Unity** chạy trong bản sao `D:\KHKT_kiem_thu`:
+  - `KhktMenuTest` (`KHKT_TEST=man_hinh_chinh`);
+  - `KhktNetTest` (3 bản .exe);
+  - `KhktSlideTest` (`KHKT_TEST=trinh_chieu`, cùng `tools/kiem_thu_unity/giao_vien_thu.py`, cần máy chủ ở cổng 8000).
+- **Tay cầm BMI160** (ESP32, SDA 21, SCL 22): `firmware/tay_cam_bmi160`, xem bằng `python tools/xem_bmi160.py COM8`. Yaw vẫn trôi khi xoay liên tục vì không có la bàn.
+- **Nhiều phiên dùng chung một thư mục:** chỉ stage tệp của mình theo tên.
