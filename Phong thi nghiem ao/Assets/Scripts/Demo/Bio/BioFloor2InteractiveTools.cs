@@ -129,9 +129,9 @@ namespace Khkt.Demo.Bio
             if (grabbable)
             {
                 var g = Ensure<Grabbable>(go);
-                g.kind = "dung_cu_sinh";
-                g.gripHeightM = grip;
-                g.massG = 80f;
+                if (string.IsNullOrEmpty(g.kind) || g.kind == "dung_cu") g.kind = "dung_cu_sinh";
+                if (g.gripHeightM <= 0f) g.gripHeightM = grip;
+                if (g.massG <= 0f) g.massG = 80f;
             }
             return Ensure<T>(go);
         }
@@ -208,9 +208,9 @@ namespace Khkt.Demo.Bio
         {
             var go = NewTool(room, anchor, name, local + new Vector3(0, radius, 0), 0, catalogId);
             go.transform.rotation = (anchor ?? room).rotation * Quaternion.FromToRotation(Vector3.up, Vector3.right);
-            Part(go, "Thân", PrimitiveType.Cylinder, new Vector3(0, 0, 0), new Vector3(radius * 2, length * 0.35f, radius * 2), mat, c);
+            Cyl(go, "Thân", 0, radius, length * 0.7f, mat, c);
             if (tipMat != null)
-                Part(go, "Đầu", PrimitiveType.Cylinder, new Vector3(0, length * 0.42f, 0), new Vector3(radius * 1.6f, length * 0.08f, radius * 1.6f), tipMat, tipColor ?? c);
+                Cyl(go, "Đầu", length * 0.7f, radius * 0.8f, length * 0.16f, tipMat, tipColor ?? c);
             MakeGrabbable(go, 0.02f, true, length, radius);
             return go;
         }
@@ -233,7 +233,16 @@ namespace Khkt.Demo.Bio
             bt.toolId = tubeType;
             bt.kind = BioToolKind.EppendorfTube;
             bt.displayName = $"Ống {label}";
-            MakeGrabbable(go, h * 0.7f);
+            var g = MakeGrabbable(go, h * 0.7f);
+            g.kind = "ong_ly_tam";
+            var lc = go.AddComponent<LabContainer>();
+            lc.label = $"Ống {label}";
+            lc.capacityMl = pcr ? 0.2f : 1.5f;
+            lc.bottomRadiusM = r;
+            var mouthGo = new GameObject("Miệng");
+            mouthGo.transform.SetParent(go.transform, false);
+            mouthGo.transform.localPosition = new Vector3(0, h, 0);
+            lc.mouth = mouthGo.transform;
             var tube = go.AddComponent<MicroTube>();
             tube.tubeTypeId = tubeType;
             tube.labelText = label;
@@ -319,23 +328,27 @@ namespace Khkt.Demo.Bio
             for (int i = 0; i < kids.Count; i++)
             {
                 var c = kids[i];
-                if (c.name == "Micropipet" && k < ids.Length)
+                if (c.name.StartsWith("Micropipet") && k < ids.Length)
                 {
                     if (i + 1 < kids.Count && kids[i + 1].name == "Nút đẩy") kids[i + 1].SetParent(c, true);  // nút đi theo thân khi cầm
+                    bool hadCol = c.GetComponent<Collider>() != null;
                     var mp = Bind<Micropipette>(c, ids[k], grabbable: true, grip: 0.15f);
-                    FitBoxCollider(c.gameObject, false);
+                    if (!hadCol) FitBoxCollider(c.gameObject, false);
                     mp.ConfigureRangeById(ids[k]);
                     Ensure<BioTool>(c.gameObject).kind = BioToolKind.Micropipette;
                     c.name = $"Micropipet {ids[k].Replace("micropipet_", "").ToUpperInvariant()}";
                     k++;
                 }
             }
-            var boxes = FindAllNamed(station, "Hộp đầu côn");
-            for (int i = 0; i < boxes.Count; i++)
+            foreach (Transform t in station)
             {
-                var tb = Bind<TipBox>(boxes[i], "hop_dau_con");
-                tb.tipKind = i == 0 ? "vang" : "xanh";
-                SetInfoTitle(boxes[i].gameObject, $"Hộp đầu côn {(i == 0 ? "vàng (P10, P200)" : "xanh (P1000)")}");
+                if (t.name.StartsWith("Hộp đầu côn"))
+                {
+                    bool isBlue = t.name.Contains("xanh");
+                    var tb = Bind<TipBox>(t, "hop_dau_con");
+                    tb.tipKind = isBlue ? "xanh" : "vang";
+                    SetInfoTitle(t.gameObject, $"Hộp đầu côn {(isBlue ? "xanh (P1000)" : "vàng (P10, P200)")}");
+                }
             }
             if (!string.IsNullOrEmpty(wasteName)) MakeTipWaste(room, station, wasteLocal, wasteName);
         }
@@ -347,9 +360,11 @@ namespace Khkt.Demo.Bio
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static void AutoInitFloor2ToolsOnPlay()
         {
+            var tang2 = GameObject.Find("Tầng 2");
+            if (tang2 != null && tang2.GetComponent<BioLabProcedure>() == null)
+                tang2.AddComponent<BioLabProcedure>();
             // cảnh đã dựng có dụng cụ (đã lưu thành phần) thì không gắn lại: gắn lúc chạy chỉ dành cho cảnh dựng trước khi có hệ dụng cụ
             if (UnityEngine.Object.FindAnyObjectByType<BioTool>(FindObjectsInactive.Include) != null) return;
-            var tang2 = GameObject.Find("Tầng 2");
             if (tang2 != null) EnsureSpawnAllTools(tang2.transform);
         }
 
@@ -377,6 +392,7 @@ namespace Khkt.Demo.Bio
             if (green != null) SetupGreenhouse(green);
 
             if (tang2.GetComponent<BioLabSync>() == null) tang2.gameObject.AddComponent<BioLabSync>();
+            if (tang2.GetComponent<BioLabProcedure>() == null) tang2.gameObject.AddComponent<BioLabProcedure>();
             tang2.gameObject.AddComponent<BioFloor2ToolsMarker>();
         }
 
@@ -515,11 +531,16 @@ namespace Khkt.Demo.Bio
                 const float top = 0.88f;
                 var beaker = NewTool(bio, wash, "Cốc có mỏ 100 mL", new Vector3(0.1f, top, -0.2f), 0, "coc_co_mo");
                 Cyl(beaker, "Cốc", 0, 0.026f, 0.07f, "CocThuyTinh", Glass);
-                MakeGrabbable(beaker, 0.05f);
+                var bg = MakeGrabbable(beaker, 0.05f);
+                bg.kind = "coc";
                 var bc = beaker.AddComponent<LabContainer>();
                 bc.label = "Cốc có mỏ 100 mL";
                 bc.capacityMl = 100f;
                 bc.bottomRadiusM = 0.026f;
+                var bMouth = new GameObject("Miệng");
+                bMouth.transform.SetParent(beaker.transform, false);
+                bMouth.transform.localPosition = new Vector3(0, 0.07f, 0);
+                bc.mouth = bMouth.transform;
                 var cyl = NewTool(bio, wash, "Ống đong 50 mL", new Vector3(-0.1f, top, -0.2f), 0, "ong_dong");
                 Cyl(cyl, "Đế", 0, 0.025f, 0.008f, "ThuyTinh", Glass);
                 Cyl(cyl, "Ống", 0.008f, 0.012f, 0.17f, "ThuyTinh", Glass);
@@ -528,6 +549,10 @@ namespace Khkt.Demo.Bio
                 cc.label = "Ống đong 50 mL";
                 cc.capacityMl = 50f;
                 cc.bottomRadiusM = 0.012f;
+                var cMouth = new GameObject("Miệng");
+                cMouth.transform.SetParent(cyl.transform, false);
+                cMouth.transform.localPosition = new Vector3(0, 0.178f, 0);
+                cc.mouth = cMouth.transform;
                 var watch = NewTool(bio, wash, "Đĩa đồng hồ Ø 75 mm", new Vector3(0.15f, top, 0.0f), 0, "dia_dong_ho");
                 Cyl(watch, "Đĩa", 0, 0.037f, 0.006f, "ThuyTinh", Glass);
                 MakeGrabbable(watch, 0.004f);
@@ -560,11 +585,16 @@ namespace Khkt.Demo.Bio
                 {
                     var tt = NewTool(bio, wash, $"Ống nghiệm {i + 1}", new Vector3(0.0f, top, -1.04f + i * 0.06f), 0, "ong_nghiem");
                     Cyl(tt, "Ống", 0, 0.009f, 0.15f, "ThuyTinh", Glass);
-                    MakeGrabbable(tt, 0.1f);
+                    var ttg = MakeGrabbable(tt, 0.1f);
+                    ttg.kind = "ong_nghiem";
                     var tc = tt.AddComponent<LabContainer>();
                     tc.label = $"Ống nghiệm {i + 1}";
                     tc.capacityMl = 20f;
                     tc.bottomRadiusM = 0.009f;
+                    var ttMouth = new GameObject("Miệng");
+                    ttMouth.transform.SetParent(tt.transform, false);
+                    ttMouth.transform.localPosition = new Vector3(0, 0.15f, 0);
+                    tc.mouth = ttMouth.transform;
                 }
             }
         }
@@ -702,7 +732,28 @@ namespace Khkt.Demo.Bio
             var pre = FindNamed(mol, "Quầy tiền PCR");
             Bind<VortexMixer>(pre, "Máy lắc vortex", "may_vortex");
             Bind<CentrifugeLoad>(pre, "Máy ly tâm", "may_ly_tam_mini");
-            Bind<IceBox>(pre, "Hộp đá", "hop_da");
+            var preIce = Bind<IceBox>(pre, "Hộp đá", "hop_da");
+            if (preIce != null)
+            {
+                var stockSpecs = new (string name, string label, Color col, int bp)[]
+                {
+                    ("Ống Plasmid pUC19", "pUC19", new Color(0.55f, 0.30f, 0.85f), 2686),
+                    ("Ống Gen GFP", "Gen GFP", new Color(0.20f, 0.85f, 0.40f), 720),
+                    ("Ống Gen Insulin", "Gen Insulin", new Color(0.25f, 0.65f, 0.95f), 330),
+                    ("Ống Enzyme EcoRI", "EcoRI", new Color(0.90f, 0.22f, 0.22f), 0),
+                    ("Ống Enzyme BamHI", "BamHI", new Color(0.20f, 0.75f, 0.35f), 0),
+                    ("Ống Enzyme T4 DNA Ligase", "T4 Ligase", new Color(0.20f, 0.45f, 0.95f), 0),
+                    ("Ống Master Mix PCR", "Master Mix", new Color(0.95f, 0.55f, 0.15f), 0)
+                };
+                for (int i = 0; i < stockSpecs.Length; i++)
+                {
+                    var sp = stockSpecs[i];
+                    Vector3 localOnIce = new Vector3(-0.045f + (i % 2) * 0.09f, 0.142f, -0.09f + (i / 2) * 0.06f);
+                    var stTube = MakeTube(mol, sp.name, mol.InverseTransformPoint(preIce.transform.TransformPoint(localOnIce)), "ong_eppendorf", sp.label, sp.col);
+                    if (sp.bp > 0)
+                        stTube.mix.AddBand(new BioDnaBandInfo { bp = sp.bp, ng = 120, smear = false });
+                }
+            }
             BindPipetteStation(FindNamed(pre, "Bộ micropipet"), mol, "Thùng rác đầu côn (quầy tiền PCR)", new Vector3(0.12f, 0f, 0.22f));
             var f80 = Bind<FridgeController>(mol, "Tủ đông −80 °C (tiền PCR)", "tu_dong_am20");
             if (f80 != null) { f80.fridgeId = "tu_am_sau_80_phan_tu"; f80.isDeepFreezer = true; f80.setTempC = -80f; SetInfoTitle(f80.gameObject, "Tủ đông −80 °C (tiền PCR)"); }
@@ -802,6 +853,27 @@ namespace Khkt.Demo.Bio
             var photoTable = photo != null ? FindNamed(photo, "Bàn thí nghiệm") : null;
             if (photoTable != null)
                 Stick(green, photoTable, "Que đóm thử khí O₂", new Vector3(0.22f, 0.8f, 0.18f), "que_dom", 0.2f, 0.003f, "Ban", new Color(0.6f, 0.4f, 0.2f), "NhuaDo", new Color(0.3f, 0.1f, 0.05f)).AddComponent<GlowingSplint>();
+            var poto = FindNamed(green, "Thí nghiệm thoát hơi nước (potometer)");
+            var potoTable = poto != null ? FindNamed(poto, "Bàn thí nghiệm") : null;
+            if (potoTable != null)
+            {
+                var oldCobalt = potoTable.Find("Giấy coban clorua");
+                if (oldCobalt != null) UnityEngine.Object.DestroyImmediate(oldCobalt.gameObject);
+                var cob = NewTool(green, potoTable, "Tập giấy tẩm CoCl₂", new Vector3(0.3f, 0.8f, 0.12f), 0, "giay_chi_thi_cocl2");
+                BoxPart(cob, "Giay CoCl2", new Vector3(0, 0.003f, 0), new Vector3(0.08f, 0.006f, 0.06f), "T2_GiayCoban", new Color(0.35f, 0.5f, 0.85f));
+                var gr = MakeGrabbable(cob, 0.006f);
+                gr.kind = "giay_chi_thi";
+                var tp = cob.AddComponent<TestPaper>();
+                tp.kind = TestPaper.Kind.CobaltChloride;
+                tp.dryColor = new Color(0.3f, 0.45f, 0.85f);
+                var bt = cob.AddComponent<BioTool>();
+                bt.kind = BioToolKind.CobaltPaper;
+                bt.toolDisplayName = "Giấy tẩm CoCl₂";
+                bt.toolId = "giay_cocl2";
+                var info = cob.AddComponent<EquipmentInfo>();
+                info.title = "Giấy tẩm CoCl₂";
+                info.description = "Giấy tẩm coban(II) clorua khô màu xanh da trời, đổi sang màu hồng khi gặp hơi nước thoát ra từ mặt lá.";
+            }
             if (pot != null)
             {
                 var pen = Stick(green, pot, "Bút đo EC / pH thủy canh", new Vector3(-0.2f, 0.82f, 0.2f), "may_do_ec_ph", 0.16f, 0.008f, "NhuaXanh", new Color(0.15f, 0.35f, 0.8f));

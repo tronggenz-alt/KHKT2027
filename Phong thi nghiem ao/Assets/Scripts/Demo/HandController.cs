@@ -312,12 +312,26 @@ namespace Khkt.Demo
             if (((kb != null && kb.qKey.wasPressedThisFrame) || (!uiOpen && PadInput.BackPressed)) && Held != null) ReturnHome();
             if (!uiOpen)
             {
+                bool onFloor2 = viewCamera != null && viewCamera.transform.position.y > 3.0f;
+                var bioProc = onFloor2 ? Khkt.Demo.Bio.BioLabProcedure.Instance : null;
                 bool enter = kb != null && (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame);
-                if (procedure != null && (enter || PadInput.RecordPressed)) procedure.RecordReading();
-                if (procedure != null && procedure.Active && HeldPart == null && ((kb != null && kb.rKey.wasPressedThisFrame) || PadInput.NewRunPressed))
+                if (enter || PadInput.RecordPressed)
                 {
-                    procedure.NewRun();
-                    PadInput.NewRunPressed = false;
+                    if (bioProc != null && bioProc.Active) bioProc.RecordReading();
+                    else if (procedure != null) procedure.RecordReading();
+                }
+                if (HeldPart == null && ((kb != null && kb.rKey.wasPressedThisFrame) || PadInput.NewRunPressed))
+                {
+                    if (bioProc != null && bioProc.Active)
+                    {
+                        bioProc.NewRun();
+                        PadInput.NewRunPressed = false;
+                    }
+                    else if (procedure != null && procedure.Active)
+                    {
+                        procedure.NewRun();
+                        PadInput.NewRunPressed = false;
+                    }
                 }
                 if (ui != null && ((kb != null && kb.hKey.wasPressedThisFrame) || PadInput.HelpPressed)) ui.ToggleHelp();
                 if (ui != null && ((kb != null && kb.gKey.wasPressedThisFrame) || PadInput.ToggleGraphPressed))

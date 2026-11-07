@@ -91,6 +91,9 @@ namespace Khkt.EditorTools
         /// </summary>
         static bool IsFloor2Dynamic(Transform t)
         {
+            if (t.name == "Nắp đèn cồn" || t.GetComponent<Khkt.Interaction.PlaceSocket>() != null
+                || t.GetComponent<Khkt.Demo.IDemoUsable>() != null || t.GetComponent<Khkt.Interaction.HeatSource>() != null)
+                return true;
             foreach (var mb in t.GetComponents<MonoBehaviour>())
             {
                 if (mb == null) continue;

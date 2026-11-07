@@ -14,13 +14,18 @@ namespace Khkt.Demo.Bio
     [DisallowMultipleComponent]
     public class GlassSlide : MonoBehaviour, IInteractable, IBioTarget
     {
+        public string slideId = "";
         public string labelText = "Chưa ghi nhãn";
         public bool hasWaterDrop = false;
         public int dropCount = 0;
         public string reagentInDrop = "nuoc_cat";
         public float saltMolarity = 0f; // M NaCl / sucrose cho bài co nguyên sinh (Osmosis)
+        public float naclPercent = 0f;
         public bool isCracked = false;
         public float plasmolysisFraction = 0f;
+        public bool hasBlottedSalt = false;
+        public bool hasBlottedWater = false;
+        public bool hasAirBubbles => sample != null && sample.hasAirBubbles;
 
         public BioSample sample;
         public Transform dropVisual;
@@ -77,25 +82,30 @@ namespace Khkt.Demo.Bio
         {
             hasWaterDrop = true;
             dropCount++;
-            reagentInDrop = reagentId;
+            reagentInDrop = reagentId ?? "nuoc_cat";
             saltMolarity = molarity;
+            if (molarity > 0f || reagentInDrop.Contains("nacl"))
+                naclPercent = molarity > 0f ? Mathf.Round(molarity * 5.844f * 10f) / 10f : 5f;
+            else if (reagentInDrop == "nuoc_cat")
+                naclPercent = 0f;
             if (sample != null)
             {
                 sample.volumeUl += 50f;
-                if (reagentId.Contains("methylen") || reagentId.Contains("lugol"))
+                if (reagentInDrop.Contains("methylen") || reagentInDrop.Contains("lugol") || reagentInDrop.Contains("tim") || reagentInDrop.Contains("safranin"))
                 {
-                    sample.stainId = reagentId;
+                    sample.stainId = reagentInDrop;
                     sample.stainName = reagentName;
                     sample.hasExcessStain = dropCount > 2;
                 }
-                if (molarity > 0f)
+                if (molarity > 0f || naclPercent >= 2f)
                 {
-                    double psiPi = Khkt.Simulation.Bio.Osmosis.SolutePotentialMpa(1.0, molarity, 25.0);
-                    plasmolysisFraction = (float)(Khkt.Simulation.Bio.Osmosis.PlasmolysisPercentage(molarity) / 100.0);
+                    double m = molarity > 0f ? molarity : 0.86;
+                    double psiPi = Khkt.Simulation.Bio.Osmosis.SolutePotentialMpa(1.0, m, 25.0);
+                    plasmolysisFraction = (float)(Khkt.Simulation.Bio.Osmosis.PlasmolysisPercentage(m) / 100.0);
                     BioFeedback.LogAction("lam_kinh", "co_nguyen_sinh",
-                        $"Nhỏ dung dịch {BioFeedback.FormatVi(molarity, "0.00")} M (Ψπ = {BioFeedback.FormatVi((float)psiPi, "0.00")} MPa) → tỷ lệ co nguyên sinh = {BioFeedback.FormatVi(plasmolysisFraction * 100f, "0")}%");
+                        $"Nhỏ dung dịch {BioFeedback.FormatVi((float)m, "0.00")} M (Ψπ = {BioFeedback.FormatVi((float)psiPi, "0.00")} MPa) → tỷ lệ co nguyên sinh = {BioFeedback.FormatVi(plasmolysisFraction * 100f, "0")}%");
                 }
-                else if (reagentId == "nuoc_cat" && plasmolysisFraction > 0f)
+                else if (reagentInDrop == "nuoc_cat" && plasmolysisFraction > 0f)
                 {
                     plasmolysisFraction = 0f;
                     BioFeedback.LogAction("lam_kinh", "phan_co_nguyen_sinh", "Nhỏ nước cất kéo qua lamen → tế bào hút nước trương trở lại (phản co nguyên sinh)!");
@@ -174,7 +184,19 @@ namespace Khkt.Demo.Bio
                     break;
                 case BioToolKind.BlottingPaper:
                     BioTransfer.BlotSlideExcess(sample);
-                    if (reagentInDrop == "nuoc_cat") plasmolysisFraction = 0f;
+                    if (naclPercent >= 2f || saltMolarity > 0.2f || (reagentInDrop != null && reagentInDrop.Contains("nacl")))
+                    {
+                        hasBlottedSalt = true;
+                        plasmolysisFraction = Mathf.Max(plasmolysisFraction, 0.72f);
+                    }
+                    else if (reagentInDrop == "nuoc_cat")
+                    {
+                        if (hasBlottedSalt) hasBlottedWater = true;
+                        plasmolysisFraction = 0f;
+                    }
+                    break;
+                case BioToolKind.WashBottle:
+                    AddDrop("nuoc_cat", "Nước cất", 0f);
                     break;
                 case BioToolKind.ImmersionOilBottle:
                     sample.hasImmersionOil = true;
@@ -196,4 +218,7 @@ namespace Khkt.Demo.Bio
             }
         }
     }
+
+    /// <summary>Biệt danh tương thích cho tiêu bản / lam kính sinh học (BioSlide : GlassSlide).</summary>
+    public class BioSlide : GlassSlide { }
 }

@@ -553,6 +553,28 @@ static class ChemEngineTests
         Near(catBoiled.b.Get("H2O2"), 0.001, 1e-6, "H2O2 + catalase đã luộc (bất hoạt) ở 25 °C: không phân hủy");
         Check(!Has(evBoiled, "khi:O2:H2O2"), "catalase đã luộc: không sinh khí O₂");
 
+        Console.WriteLine("Ghép ADN tái tổ hợp (DnaSplicing: EcoRI, BamHI, HindIII, SmaI, T4 DNA Ligase)");
+        var ecoEnd = Khkt.Simulation.Bio.DnaSplicing.GetStickyEnd("EcoRI");
+        var bamEnd = Khkt.Simulation.Bio.DnaSplicing.GetStickyEnd("BamHI");
+        var smaEnd = Khkt.Simulation.Bio.DnaSplicing.GetStickyEnd("SmaI");
+        Check(Khkt.Simulation.Bio.DnaSplicing.AreEndsCompatible(ecoEnd, Khkt.Simulation.Bio.DnaSplicing.GetStickyEnd("EcoRI")), "EcoRI + EcoRI tương thích đầu dính AATT");
+        Check(!Khkt.Simulation.Bio.DnaSplicing.AreEndsCompatible(ecoEnd, bamEnd), "EcoRI (AATT) + BamHI (GATC) lệch đầu dính");
+        Check(Khkt.Simulation.Bio.DnaSplicing.AreEndsCompatible(smaEnd, Khkt.Simulation.Bio.DnaSplicing.GetStickyEnd("SmaI")), "SmaI + SmaI tương thích đầu bằng (blunt end)");
+
+        var pucVec = Khkt.Simulation.Bio.DnaSplicing.Digest(Khkt.Simulation.Bio.DnaSplicing.CreateVector("pUC19"), "EcoRI", "BamHI");
+        var gfpIns = Khkt.Simulation.Bio.DnaSplicing.Digest(Khkt.Simulation.Bio.DnaSplicing.CreateTargetGene("GFP"), "EcoRI", "BamHI");
+        var recGfp = Khkt.Simulation.Bio.DnaSplicing.Ligate(pucVec, gfpIns, true);
+        Check(recGfp != null && recGfp.TotalLengthBp == 3406 && recGfp.HasAntibioticResistance && recGfp.IsLacZDisrupted,
+              "Ghép pUC19 (2686 bp) + GFP (720 bp) tạo pUC19-GFP 3406 bp, kháng AmpR, bất hoạt lacZα (khuẩn lạc trắng)");
+
+        var insGene = Khkt.Simulation.Bio.DnaSplicing.Digest(Khkt.Simulation.Bio.DnaSplicing.CreateTargetGene("Insulin"), "EcoRI", "BamHI");
+        var recIns = Khkt.Simulation.Bio.DnaSplicing.Ligate(pucVec, insGene, true);
+        Check(recIns != null && recIns.TotalLengthBp == 3016, "Ghép pUC19 (2686 bp) + Insulin cDNA (330 bp) tạo pUC19-Insulin 3016 bp");
+
+        var mismatchGene = Khkt.Simulation.Bio.DnaSplicing.Digest(Khkt.Simulation.Bio.DnaSplicing.CreateTargetGene("GFP"), "HindIII", "HindIII");
+        Check(Khkt.Simulation.Bio.DnaSplicing.Ligate(pucVec, mismatchGene, true) == null, "Lệch đầu dính (EcoRI/BamHI vs HindIII) -> không ghép được");
+        Check(Khkt.Simulation.Bio.DnaSplicing.Ligate(pucVec, gfpIns, false) == null, "Thiếu T4 DNA Ligase -> không nối được liên kết phosphodiester");
+
         Console.WriteLine($"\n{passed} đạt, {failed} sai");
         return failed == 0 ? 0 : 1;
     }

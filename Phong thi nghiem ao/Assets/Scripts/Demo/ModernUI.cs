@@ -369,6 +369,20 @@ namespace Khkt.Demo
             UpdateToast();
             UpdateHints();
             UpdateCard();
+            bool onFloor2 = viewCamera != null && viewCamera.transform.position.y > 3.0f;
+            var bioProc = onFloor2 ? Khkt.Demo.Bio.BioLabProcedure.Instance : null;
+            if (bioProc != null && bioProc.Active)
+            {
+                if (!stepBar.activeSelf) stepBar.SetActive(true);
+                if (loupePanel.activeSelf) loupePanel.SetActive(false);
+                if (dataPanel.activeSelf) dataPanel.SetActive(false);
+                if (graphPanel.activeSelf) graphPanel.SetActive(false);
+                UpdateBioStepper(bioProc);
+                bool showBioResult = bioProc.LastResult.HasValue;
+                if (resultPanel.activeSelf != showBioResult) resultPanel.SetActive(showBioResult);
+                if (showBioResult) UpdateBioResult(bioProc.LastResult.Value);
+                return;
+            }
             if (procedure == null) return;
             if (stepBar.activeSelf != procedure.Active) stepBar.SetActive(procedure.Active);
             if (!procedure.Active)
@@ -401,6 +415,22 @@ namespace Khkt.Demo
                 bool current = (int)procedure.Current == i;
                 var (dot, num, lab) = steps[i];
                 lab.text = procedure.StepNames[i];
+                dot.color = done ? new Color(Good.r, Good.g, Good.b, 0.9f) : current ? Accent : new Color(1, 1, 1, 0.14f);
+                num.text = done ? "✓" : (i + 1).ToString();
+                num.color = done || current ? new Color(0.04f, 0.07f, 0.12f) : Dim;
+                lab.color = current ? Ink : done ? new Color(Good.r, Good.g, Good.b, 0.85f) : Dim;
+                lab.font = current ? Semibold : Regular;
+            }
+        }
+
+        void UpdateBioStepper(Khkt.Demo.Bio.BioLabProcedure bioProc)
+        {
+            for (int i = 0; i < steps.Count && i < bioProc.Done.Length; i++)
+            {
+                bool done = bioProc.Done[i];
+                bool current = (int)bioProc.Current == i;
+                var (dot, num, lab) = steps[i];
+                lab.text = bioProc.StepNames != null && i < bioProc.StepNames.Length ? bioProc.StepNames[i] : $"Bước {i + 1}";
                 dot.color = done ? new Color(Good.r, Good.g, Good.b, 0.9f) : current ? Accent : new Color(1, 1, 1, 0.14f);
                 num.text = done ? "✓" : (i + 1).ToString();
                 num.color = done || current ? new Color(0.04f, 0.07f, 0.12f) : Dim;
@@ -607,6 +637,21 @@ namespace Khkt.Demo
             if (r.notMixedWell) notes.Add("Lắc bình chưa đều khi nhỏ");
             if (notes.Count == 0) notes.Add("Thao tác chuẩn: đúng vạch, đủ chỉ thị, dừng đúng giọt");
             resultNotes.text = "•  " + string.Join("\n•  ", notes.GetRange(0, Mathf.Min(4, notes.Count)));
+        }
+
+        void UpdateBioResult(Khkt.Demo.Bio.BioLabProcedure.BioResult r)
+        {
+            resultTitle.text = r.scenario == Khkt.Demo.Bio.BioLabProcedure.Scenario.OnionPlasmolysis
+                ? "Kết quả · Co & Phản co nguyên sinh"
+                : "Kết quả · Ghép ADN tái tổ hợp pUC19-GFP";
+            resultBig.text = r.headline;
+            resultSub.text = r.subline;
+            resultBadge.text = r.badgeText;
+            resultBadgeBg.color = r.score >= 90 ? Good : r.score >= 70 ? Warn : Bad;
+            if (r.notes != null && r.notes.Count > 0)
+                resultNotes.text = "•  " + string.Join("\n•  ", r.notes.GetRange(0, Mathf.Min(4, r.notes.Count)));
+            else
+                resultNotes.text = "•  Hoàn thành bài thực hành Sinh học.";
         }
 
         void DrawGraph()

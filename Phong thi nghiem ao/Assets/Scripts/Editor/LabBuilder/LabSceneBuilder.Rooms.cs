@@ -509,12 +509,16 @@ namespace Khkt.EditorTools
             var g = Group(name, p);
             float x0 = -sx / 2, x1 = sx / 2, z0 = -sz / 2, z1 = sz / 2;
             float hx0 = hc.x - hs.x / 2, hx1 = hc.x + hs.x / 2, hz0 = hc.y - hs.y / 2, hz1 = hc.y + hs.y / 2;
-            void Piece(float a, float b, float c, float d)
+            void Piece(float a, float b, float c, float d, bool mainPiece = false)
             {
                 if (b - a > 0.001f && d - c > 0.001f)
-                    Box(g, "Mặt bàn", new Vector3((a + b) / 2, y - 0.02f, (c + d) / 2), new Vector3(b - a, 0.04f, d - c), epoxy);
+                {
+                    var go = Box(g, "Mặt bàn", new Vector3((a + b) / 2, y - 0.02f, (c + d) / 2), new Vector3(b - a, 0.04f, d - c), epoxy);
+                    if (!mainPiece && go.TryGetComponent<BoxCollider>(out var bc))
+                        bc.size = new Vector3(0.999f, 1f, 0.999f);
+                }
             }
-            Piece(x0, x1, z0, hz0);
+            Piece(x0, x1, z0, hz0, true);
             Piece(x0, x1, hz1, z1);
             Piece(x0, hx0, hz0, hz1);
             Piece(hx1, x1, hz0, hz1);

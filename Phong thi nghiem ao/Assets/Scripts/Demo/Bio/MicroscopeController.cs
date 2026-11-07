@@ -2,6 +2,7 @@ using System.Collections;
 using System.IO;
 using Khkt.Demo.Instruments;
 using Khkt.Environment;
+using Khkt.Interaction;
 using Khkt.Interaction.Bio;
 using Khkt.Simulation.Bio;
 using UnityEngine;
@@ -17,7 +18,11 @@ namespace Khkt.Demo.Bio
     public class MicroscopeController : MonoBehaviour, IDemoUsable, IBioTarget
     {
         public Transform nosepiece;
+        public Transform stage;
         public Transform stageTransform;
+        public PlaceSocket stageSocket;
+        public Transform xyKnob;
+        public Transform condenser;
         public Transform slideClipTransform;
         public Transform eyepieceTarget;
         public int currentObjectiveIndex;  // 0 = 4×, 1 = 10×, 2 = 40×, 3 = 100× dầu
@@ -93,6 +98,18 @@ namespace Khkt.Demo.Bio
 
         void Awake()
         {
+            if (stageTransform == null && stage != null) stageTransform = stage;
+            if (stage == null && stageTransform != null) stage = stageTransform;
+            if (stageSocket == null) stageSocket = GetComponentInChildren<PlaceSocket>(true);
+            if (stageSocket != null)
+            {
+                stageSocket.Changed += OnStageSocketChanged;
+                if (stageSocket.Occupant != null)
+                {
+                    var gs = stageSocket.Occupant.GetComponent<GlassSlide>();
+                    if (gs != null) mountedSlide = gs;
+                }
+            }
             if (slideSample == null)
             {
                 slideSample = GetComponent<BioSample>();
@@ -106,6 +123,42 @@ namespace Khkt.Demo.Bio
             RecalculateFocusOffset();
         }
 
+        void Start()
+        {
+            if (isTeacherCamera)
+                RenderViewportIfNeeded(true);
+        }
+
+        void OnStageSocketChanged(Grabbable occupant)
+        {
+            if (occupant != null)
+            {
+                var gs = occupant.GetComponent<GlassSlide>();
+                if (gs != null) MountSlide(gs);
+            }
+            else
+            {
+                mountedSlide = null;
+                texDirty = true;
+                RenderViewportIfNeeded(true);
+            }
+        }
+
+        public static readonly (string id, string title)[] StandardSlides =
+        {
+            ("bieu_bi_hanh", "1. Biểu bì vảy hành tím (Allium cepa)"),
+            ("co_nguyen_sinh", "2. Co & Phản co nguyên sinh (NaCl 5%)"),
+            ("nguyen_phan_re_hanh", "3. Nguyên phân chóp rễ hành (Allium cepa)"),
+            ("khi_khong_la_thao", "4. Khí khổng lá thài lài tía (Tradescantia)"),
+            ("vi_khuan_gram", "5. Vi khuẩn nhuộm Gram (+/-)"),
+            ("nam_men", "6. Nấm men Saccharomyces cerevisiae nảy chồi"),
+            ("tb_niem_mac_mieng", "7. Tế bào niêm mạc miệng người"),
+            ("tb_co_van", "8. Mô cơ vân (vân ngang sáng – tối)"),
+            ("tb_than_kinh", "9. Nơron thần kinh đa cực"),
+            ("tieu_ban_mau", "10. Tiêu bản máu người (hồng cầu & bạch cầu)"),
+            ("ecoli_gfp", "11. Khuẩn lạc E. coli pUC19-GFP phát huỳnh quang")
+        };
+
         public void Use()
         {
             var kb = Keyboard.current;
@@ -114,18 +167,34 @@ namespace Khkt.Demo.Bio
                 ToggleEyepieceView();
                 return;
             }
-            if (isTeacherCamera && kb != null && kb.cKey.isPressed)
+            if (kb != null && kb.cKey.isPressed)
             {
                 OpenTeacherCameraProgram();
                 return;
             }
-            CycleObjective();
+            OpenTeacherCameraProgram();
         }
 
         public void OpenTeacherCameraProgram()
         {
-            var prog = new MicroscopeCameraProgram(this);
+            var prog = new MicroscopeProgram(this);
             InstrumentScreen.Open(null, prog, null);
+        }
+
+        public void SetObjective(int index)
+        {
+            index = Mathf.Clamp(index, 0, Objectives.Length - 1);
+            if (index == currentObjectiveIndex) return;
+            int prev = currentObjectiveIndex;
+            currentObjectiveIndex = index;
+            CheckObjectiveSafety(prev, currentObjectiveIndex);
+            BioFeedback.PlayClick();
+            texDirty = true;
+            RenderViewportIfNeeded(true);
+            if (gameObject.activeInHierarchy)
+                StartCoroutine(Turn());
+            else if (nosepiece != null)
+                nosepiece.localRotation = Quaternion.Euler(0, currentObjectiveIndex * 90f, 0);
         }
 
         public void ToggleEyepieceView()
@@ -277,31 +346,35 @@ namespace Khkt.Demo.Bio
 
         public void CleanObjectiveWithLensTissue() => CleanOilWithLensTissue();
 
-        public void CycleObjective()
+        void CheckObjectiveSafety(int prev, int next)
         {
-            if (turning) return;
-            int prev = currentObjectiveIndex;
-            currentObjectiveIndex = (currentObjectiveIndex + 1) % Objectives.Length;
-
-            if (prev == 3 && currentObjectiveIndex == 2 && oilApplied)
+            if (prev == 3 && next == 2 && oilApplied)
             {
                 objective40xOilDirty = true;
                 BioFeedback.RecordMistake("kinh_hien_vi", "vat_kinh_40x_dinh_dau",
                     "Quay từ vật kính 100× có dầu về vật kính 40× khi chưa lau sạch dầu soi!",
                     "Vật kính 40× là vật kính khô, nếu quệt vào giọt dầu soi trên lamen sẽ làm lem thấu kính khiến ảnh mờ đục. Cần dùng giấy lau kính lau sạch.");
             }
-            if (currentObjectiveIndex == 3 && !oilApplied)
+            if (next == 3 && !oilApplied)
             {
                 BioFeedback.RecordMistake("kinh_hien_vi", "vat_kinh_100x_thieu_dau",
                     "Chuyển sang vật kính 100× (vòng trắng) nhưng CHƯA nhỏ dầu soi immersion!",
                     "Khi không có dầu soi (n = 1,515) nối giữa lamen và vật kính 100×, tia sáng bị phản xạ toàn phần ở khe không khí (n = 1,0) làm ảnh tối và mờ nhòe.");
             }
-            if (currentObjectiveIndex >= 2 && slideSample != null && !slideSample.hasCoverslip)
+            if (next >= 2 && slideSample != null && !slideSample.hasCoverslip)
             {
                 BioFeedback.RecordMistake("kinh_hien_vi", "soi_40x_khong_day_lamen",
                     "Chuyển sang vật kính 40× khi tiêu bản chưa đậy lamen!",
                     "Khoảng cách làm việc của vật kính 40× rất ngắn, không đậy lamen sẽ làm đầu vật kính chạm trực tiếp vào giọt nước/thuốc nhuộm.");
             }
+        }
+
+        public void CycleObjective()
+        {
+            if (turning) return;
+            int prev = currentObjectiveIndex;
+            currentObjectiveIndex = (currentObjectiveIndex + 1) % Objectives.Length;
+            CheckObjectiveSafety(prev, currentObjectiveIndex);
 
             BioFeedback.PlayClick();
             texDirty = true;
@@ -460,12 +533,28 @@ namespace Khkt.Demo.Bio
             float lightGain = lampOn ? brightness * Mathf.Lerp(0.4f, 1.25f, irisOpen) * Mathf.Lerp(0.5f, 1.15f, condenserHeight) : 0.04f;
             if (isOil && !oilApplied) lightGain *= 0.38f;
 
-            bool stainedBlue = slideSample != null && (slideSample.stainId.Contains("methylen") || activeSlideCode.Contains("xanh"));
-            bool stainedGramPos = activeSlideCode.Contains("sua_chua") || activeSlideCode.Contains("subtilis");
-            bool stainedGramNeg = activeSlideCode.Contains("ecoli") || activeSlideCode.Contains("e_coli");
+            bool stainedBlue = slideSample != null && (slideSample.stainId.Contains("methylen") || activeSlideCode.Contains("xanh") || activeSlideCode.Contains("niem_mac"));
+            bool stainedGramPos = activeSlideCode.Contains("sua_chua") || activeSlideCode.Contains("subtilis") || activeSlideCode.Contains("gram");
+            bool stainedGramNeg = activeSlideCode.Contains("ecoli") || activeSlideCode.Contains("e_coli") || activeSlideCode.Contains("gram");
             bool isStomata = activeSlideCode.Contains("thai_lai") || activeSlideCode.Contains("khi_khong");
             bool hasBubbles = slideSample != null && slideSample.hasAirBubbles;
             bool isCracked = slideSample != null && slideSample.isCoverslipCracked;
+
+            float plasmo = 0f;
+            if (mountedSlide != null)
+            {
+                plasmo = mountedSlide.plasmolysisFraction;
+                if (plasmo <= 0.01f && mountedSlide.naclPercent > 0.9f)
+                    plasmo = (float)Osmosis.PlasmolysisFraction(Osmosis.NaClPercentToMolar(mountedSlide.naclPercent));
+            }
+            else if (slideSample != null && slideSample.concentrationPct > 1.2f)
+            {
+                plasmo = (float)Osmosis.PlasmolysisFraction(Osmosis.NaClPercentToMolar(slideSample.concentrationPct));
+            }
+            else if (activeSlideCode.Contains("co_nguyen_sinh"))
+            {
+                plasmo = (float)Osmosis.PlasmolysisFraction(Osmosis.NaClPercentToMolar(5.0));
+            }
 
             float scale = (float)mag / 10f;
             float cx = TexSize * 0.5f, cy = TexSize * 0.5f, rMax = TexSize * 0.47f;
@@ -485,11 +574,12 @@ namespace Khkt.Demo.Bio
                     float u = (dx / rMax) / Mathf.Max(0.4f, scale) + stageX * 0.04f;
                     float v = (dy / rMax) / Mathf.Max(0.4f, scale) + stageY * 0.04f;
 
-                    Color c = SampleSpecimenColor(u, v, stainedBlue, isStomata, stainedGramPos, stainedGramNeg);
+                    Color c = SampleSpecimenColor(activeSlideCode, u, v, stainedBlue, isStomata, stainedGramPos, stainedGramNeg, plasmo);
                     // Độ mờ lấy nét theo DOF
                     if (blur > 0.15f)
                     {
-                        Color avg = stainedBlue ? new Color(0.72f, 0.82f, 0.94f) : new Color(0.88f, 0.84f, 0.90f);
+                        Color avg = activeSlideCode.Contains("gfp") ? new Color(0.04f, 0.14f, 0.06f)
+                                  : stainedBlue ? new Color(0.72f, 0.82f, 0.94f) : new Color(0.88f, 0.84f, 0.90f);
                         c = Color.Lerp(c, avg, Mathf.Clamp01(blur * 0.32f));
                     }
 
@@ -523,33 +613,145 @@ namespace Khkt.Demo.Bio
             viewportTex.SetPixels32(pixelBuf);
             viewportTex.Apply(false);
 
-            if (isTeacherCamera && cameraStreaming && teacherScreenRenderer != null)
+            if (isTeacherCamera && cameraStreaming)
             {
-                var mpb = new MaterialPropertyBlock();
-                teacherScreenRenderer.GetPropertyBlock(mpb);
-                mpb.SetTexture("_BaseMap", viewportTex);
-                teacherScreenRenderer.SetPropertyBlock(mpb);
+                if (teacherScreenRenderer == null)
+                {
+                    var wallScreen = Khkt.Demo.LabScreen.Find("t2_tuong_video_2");
+                    if (wallScreen != null) teacherScreenRenderer = wallScreen.surface;
+                }
+                if (teacherScreenRenderer != null)
+                {
+                    var mpb = new MaterialPropertyBlock();
+                    teacherScreenRenderer.GetPropertyBlock(mpb);
+                    mpb.SetTexture("_BaseMap", viewportTex);
+                    mpb.SetTexture("_EmissionMap", viewportTex);
+                    teacherScreenRenderer.SetPropertyBlock(mpb);
+                }
             }
         }
 
-        static Color SampleSpecimenColor(float u, float v, bool stainedBlue, bool isStomata, bool gramPos, bool gramNeg)
+        public static Color SampleSpecimenColor(string code, float u, float v, bool stainedBlue, bool isStomata, bool gramPos, bool gramNeg, float plasmo = 0f)
         {
+            code ??= "bieu_bi_hanh";
+
+            // 11. Khuẩn lạc / tế bào E. coli mang pUC19-GFP phát huỳnh quang xanh lục (509 nm)
+            if (code.Contains("gfp"))
+            {
+                float gx = Mathf.Repeat(u * 12f, 1f) - 0.5f;
+                float gy = Mathf.Repeat(v * 12f, 1f) - 0.5f;
+                float r2 = (gx * gx) / 0.045f + (gy * gy) / 0.012f;
+                if (r2 < 1f) return Color.Lerp(new Color(0.18f, 1.0f, 0.42f), new Color(0.06f, 0.48f, 0.18f), r2);
+                return new Color(0.03f, 0.07f, 0.05f);
+            }
+
+            // 5. Vi khuẩn nhuộm Gram (+/-)
             if (gramPos || gramNeg)
             {
+                int cellIdx = Mathf.Abs(Mathf.FloorToInt(u * 14f) + Mathf.FloorToInt(v * 14f));
                 float gx = Mathf.Repeat(u * 14f, 1f) - 0.5f;
                 float gy = Mathf.Repeat(v * 14f, 1f) - 0.5f;
                 bool rod = Mathf.Abs(gx) < 0.22f && Mathf.Abs(gy) < 0.08f;
-                if (rod) return gramPos ? new Color(0.36f, 0.14f, 0.68f) : new Color(0.88f, 0.28f, 0.45f);
+                if (rod)
+                {
+                    bool usePos = gramPos && (!gramNeg || (cellIdx % 2 == 0));
+                    return usePos ? new Color(0.36f, 0.14f, 0.68f) : new Color(0.88f, 0.28f, 0.45f);
+                }
                 return new Color(0.95f, 0.95f, 0.96f);
             }
 
-            // Lưới tế bào biểu bì lục giác kéo dài
+            // 6. Nấm men Saccharomyces cerevisiae nảy chồi
+            if (code.Contains("nam_men"))
+            {
+                float gx = Mathf.Repeat(u * 8f, 1f) - 0.45f;
+                float gy = Mathf.Repeat(v * 8f, 1f) - 0.45f;
+                float mother = gx * gx * 1.4f + gy * gy;
+                float bud = (gx - 0.22f) * (gx - 0.22f) + (gy - 0.18f) * (gy - 0.18f);
+                if (mother < 0.065f || bud < 0.022f)
+                {
+                    if (mother < 0.015f) return new Color(0.92f, 0.90f, 0.82f); // không bào
+                    return new Color(0.76f, 0.72f, 0.58f);
+                }
+                return new Color(0.94f, 0.94f, 0.92f);
+            }
+
+            // 7. Tế bào niêm mạc miệng người
+            if (code.Contains("niem_mac"))
+            {
+                float gx = Mathf.Repeat(u * 5f, 1f) - 0.5f;
+                float gy = Mathf.Repeat(v * 5f, 1f) - 0.5f;
+                float r = gx * gx * 1.2f + gy * gy * 0.9f;
+                if (r < 0.012f) return new Color(0.08f, 0.20f, 0.62f); // nhân bắt màu xanh đậm
+                if (r < 0.14f) return new Color(0.68f, 0.82f, 0.95f);  // tế bào chất đa diện
+                return new Color(0.94f, 0.96f, 0.99f);
+            }
+
+            // 8. Mô cơ vân (vân ngang sáng - tối)
+            if (code.Contains("co_van"))
+            {
+                float fiberY = Mathf.Repeat(v * 5f, 1f);
+                if (fiberY < 0.08f || fiberY > 0.92f) return new Color(0.94f, 0.90f, 0.92f);
+                float striation = Mathf.Sin(u * 95f) * 0.5f + 0.5f;
+                return Color.Lerp(new Color(0.68f, 0.22f, 0.36f), new Color(0.92f, 0.58f, 0.68f), striation);
+            }
+
+            // 9. Nơron thần kinh đa cực
+            if (code.Contains("than_kinh"))
+            {
+                float gx = Mathf.Repeat(u * 3.5f, 1f) - 0.5f;
+                float gy = Mathf.Repeat(v * 3.5f, 1f) - 0.5f;
+                float r = Mathf.Sqrt(gx * gx + gy * gy);
+                float ang = Mathf.Atan2(gy, gx);
+                float star = 0.14f + 0.06f * Mathf.Cos(ang * 5f);
+                if (r < 0.045f) return new Color(0.18f, 0.12f, 0.38f); // nhân nơron
+                if (r < star || (Mathf.Abs(gy) < 0.018f && gx > 0f)) return new Color(0.45f, 0.28f, 0.68f); // thân sao + sợi trục
+                return new Color(0.93f, 0.91f, 0.96f);
+            }
+
+            // 10. Tiêu bản máu người (hồng cầu & bạch cầu)
+            if (code.Contains("tieu_ban_mau") || code.Contains("hong_cau"))
+            {
+                int idx = Mathf.Abs(Mathf.FloorToInt(u * 10f) * 7 + Mathf.FloorToInt(v * 10f) * 13);
+                float gx = Mathf.Repeat(u * 10f, 1f) - 0.5f;
+                float gy = Mathf.Repeat(v * 10f, 1f) - 0.5f;
+                float r = Mathf.Sqrt(gx * gx + gy * gy);
+                if (idx % 11 == 0)
+                {
+                    if (r < 0.16f) return new Color(0.32f, 0.16f, 0.58f); // nhân múi bạch cầu
+                    if (r < 0.28f) return new Color(0.76f, 0.72f, 0.88f);
+                }
+                else if (r < 0.22f)
+                {
+                    return r < 0.09f ? new Color(0.92f, 0.52f, 0.56f) : new Color(0.84f, 0.22f, 0.28f); // hồng cầu lõm 2 mặt
+                }
+                return new Color(0.96f, 0.95f, 0.95f);
+            }
+
+            // 3. Nguyên phân chóp rễ hành (Allium cepa)
+            if (code.Contains("nguyen_phan"))
+            {
+                float cU = u * 7f, cV = v * 7f;
+                float fU = Mathf.Repeat(cU, 1f), fV = Mathf.Repeat(cV, 1f);
+                if (fU < 0.06f || fU > 0.94f || fV < 0.06f || fV > 0.94f)
+                    return new Color(0.48f, 0.28f, 0.36f);
+                int phase = Mathf.Abs(Mathf.FloorToInt(cU) * 3 + Mathf.FloorToInt(cV) * 5) % 4;
+                float du = fU - 0.5f, dv = fV - 0.5f;
+                if (phase == 1 && Mathf.Abs(dv) < 0.07f && Mathf.Abs(du) < 0.28f)
+                    return new Color(0.28f, 0.06f, 0.18f); // Kỳ giữa: NST xếp 1 hàng mặt phẳng xích đạo
+                if (phase == 2 && (Mathf.Abs(dv - 0.16f) < 0.06f || Mathf.Abs(dv + 0.16f) < 0.06f) && Mathf.Abs(du) < 0.24f)
+                    return new Color(0.28f, 0.06f, 0.18f); // Kỳ sau: NST phân li về 2 cực
+                if (du * du + dv * dv < 0.05f)
+                    return new Color(0.42f, 0.12f, 0.26f); // Kỳ đầu / nhân
+                return new Color(0.93f, 0.84f, 0.88f);
+            }
+
+            // 1, 2, 4. Lưới tế bào biểu bì vảy hành tím / Co nguyên sinh / Khí khổng
             float cellU = u * 4.5f;
             float cellV = v * 9.0f + (Mathf.FloorToInt(cellU) % 2) * 0.5f;
             float fu = Mathf.Repeat(cellU, 1f);
             float fv = Mathf.Repeat(cellV, 1f);
 
-            // Vách tế bào (Cell wall)
+            // Vách tế bào (Cell wall) cố định
             if (fu < 0.07f || fu > 0.93f || fv < 0.08f || fv > 0.92f)
                 return stainedBlue ? new Color(0.20f, 0.36f, 0.62f) : new Color(0.42f, 0.26f, 0.38f);
 
@@ -562,13 +764,28 @@ namespace Khkt.Demo.Bio
                 if (sr < 0.22f) return new Color(0.24f, 0.66f, 0.28f); // Tế bào hạt đậu
             }
 
+            // Co nguyên sinh (Osmosis.PlasmolysisFraction): khối nguyên sinh chất co tròn tách khỏi thành tế bào
+            if (plasmo > 0.02f)
+            {
+                float pu = (fu - 0.5f) / Mathf.Lerp(0.46f, 0.22f, plasmo);
+                float pv = (fv - 0.5f) / Mathf.Lerp(0.46f, 0.25f, plasmo);
+                float pr2 = pu * pu + pv * pv;
+                if (pr2 > 1.0f)
+                    return new Color(0.95f, 0.96f, 0.98f); // Khoảng trống dung dịch muối ưu trương giữa thành và màng
+                if (pr2 > 0.88f)
+                    return new Color(0.48f, 0.22f, 0.42f); // Màng sinh chất co lại
+            }
+
             // Nhân tế bào (Nucleus)
             float nu = fu - 0.36f, nv = fv - 0.48f;
             if (nu * nu + nv * nv < 0.022f)
                 return stainedBlue ? new Color(0.08f, 0.22f, 0.68f) : new Color(0.62f, 0.36f, 0.52f);
 
-            // Không bào chứa anthocyanin hoặc tế bào chất
-            return stainedBlue ? new Color(0.78f, 0.88f, 0.97f) : new Color(0.91f, 0.78f, 0.88f);
+            // Không bào chứa anthocyanin (đậm hơn khi co nguyên sinh do mất nước)
+            Color vacuole = stainedBlue ? new Color(0.78f, 0.88f, 0.97f) : new Color(0.91f, 0.78f, 0.88f);
+            if (plasmo > 0.02f)
+                vacuole = Color.Lerp(vacuole, new Color(0.68f, 0.28f, 0.58f), plasmo * 0.75f);
+            return vacuole;
         }
 
         void Update()
