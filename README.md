@@ -8,10 +8,10 @@ Thành phần chính:
   - 720 hóa chất xếp kệ, bộ máy hóa học tính phản ứng thật;
   - chuẩn độ, phòng máy phân tích, lắp ráp dụng cụ tự do kèm mạng dòng chảy;
   - robot trợ lý theo kế hoạch AI.
-- **Tay cầm tự chế V2 "Halo":**
+- **Tay cầm tự chế "VERA Arc":**
   - ESP32 DevKitC 38 chân + cảm biến chuyển động BMI160 + joystick KY-023 + cò analog bằng cảm biến Hall SS49E;
-  - vòng halo huỳnh quang để webcam (OpenCV) đo xa gần và vị trí tay;
-  - vỏ in 3D. Xem [docs/15](docs/15-tay-cam-v2-halo.md).
+  - 81 × 71 × 123 mm, vòng tròn có logo, pin vuông 9V trong cán, 4 cổng mở rộng GPIO, thân 2 nửa bắt vít;
+  - vỏ in 3D, đã có gói gửi in, chưa in thử. Xem [docs/24](docs/24-tay-cam-vera-arc.md).
 - **Theo dõi đầu & cử chỉ tay bằng webcam (MediaPipe):** 478 điểm mặt 3D, đo khoảng cách cm thật, hướng nhìn gaze, cử chỉ tay ảo (`MediaPipeHandSource`: pinch, palm, fist, thumb up), HUD F11. Tự động lùi về YuNet nếu thiếu MediaPipe. Xem [docs/20](docs/20-mediapipe.md).
 - **Web quản lý:** kho hóa chất, thiết bị, nhật ký; mạng lưới khóa AI.
 
@@ -25,7 +25,9 @@ Thành phần chính:
 
 | Tài liệu | Nội dung |
 | --- | --- |
-| [docs/15-tay-cam-v2-halo.md](docs/15-tay-cam-v2-halo.md) | **Tay cầm V2 "Halo"**: ESP32 38 chân + BMI160 + joystick + cò analog Hall; vòng halo cho OpenCV đo xa gần; 7 file STL in 3D, 5 bản vẽ 2D, sơ đồ đấu nối |
+| [docs/24-tay-cam-vera-arc.md](docs/24-tay-cam-vera-arc.md) | **Tay cầm "VERA Arc"**: ESP32 38 chân + BMI160 + joystick + cò analog Hall + pin vuông 9V; 4 cổng mở rộng GPIO; gói 8 file STL, sơ đồ đấu nối, thứ tự lắp |
+| [docs/22-tay-cam-vera-drop.md](docs/22-tay-cam-vera-drop.md) | Tay cầm "VERA Drop", bản trước của VERA Arc: dáng giọt nước, pin LiPo, 7 file STL, 6 bản vẽ 2D |
+| [docs/15-tay-cam-v2-halo.md](docs/15-tay-cam-v2-halo.md) | Tay cầm V2 "Halo", bản trước của VERA Drop. Phần giải thích cò Hall và OpenCV vẫn dùng được |
 | [docs/20-mediapipe.md](docs/20-mediapipe.md) | **Theo dõi đầu & cử chỉ tay MediaPipe** (F8, F10, F11): MediaPipe 1.2.0 (478 điểm mặt 3D, cử chỉ tay ảo `MediaPipeHandSource`, đo khoảng cách tròng mắt cm, hướng nhìn gaze, 3 bộ cảm giác, trễ < 20 ms, CPU 0%) |
 | [docs/16-dieu-khien-bang-dau.md](docs/16-dieu-khien-bang-dau.md) | **Điều khiển góc nhìn bằng đầu qua webcam** (bản cũ YuNet): Cơ chế dự phòng khi máy thiếu MediaPipe |
 | [docs/05-unity.md](docs/05-unity.md) | Cảnh phòng thí nghiệm (mặt bằng, phím xem thử), cài đặt Unity |
@@ -101,6 +103,6 @@ python tools/mediapipe_tracker.py --hien
 | Phòng lab hóa học 3D | Chạy được bằng chuột – bàn phím: chuẩn độ, thí nghiệm định tính, tra cứu 720 hóa chất, robot trợ lý, lắp ráp và gia công bộ dụng cụ, mạng dòng chảy. Có bài chạy tự động kiểm tra từng phần |
 | Phòng máy phân tích | Cả 14 máy (UV-Vis, AAS, FTIR, GC-MS, HPLC, chuẩn độ điện thế, XRD, SEM-EDS, NMR, bom nhiệt lượng, tủ sấy, lò nung, máy cất nước, nồi hấp) có màn hình vận hành như máy thật, quy trình Hướng dẫn / Thực hành, phân tích chuyên sâu (docs/17 – 19). AI trợ lý hướng dẫn theo đúng quy trình máy |
 | Tay cầm V2 "Halo" | Đã có thiết kế 3D, bản vẽ, sơ đồ đấu nối. Đang đặt linh kiện, **firmware cho ESP32 + BMI160 chưa viết** |
-| Theo dõi đầu & cử chỉ tay (MediaPipe) | Hoàn thành, chạy cực mượt (F8: đầu, F10: tay, F11: HUD, F9: căn lại). Trễ xử lý ~16 ms, CPU 0%, tự lùi về YuNet nếu thiếu MediaPipe (docs/20) |
+| Theo dõi đầu & cử chỉ tay (MediaPipe) | Hoàn thành, chạy cực mượt (F8: đầu, F10: tay, F11: HUD, F9: mô phỏng tracking, F12: căn lại). Trễ xử lý ~16 ms, CPU 0%, tự lùi về YuNet nếu thiếu MediaPipe (docs/20) |
 | Bản chạy | Windows (.exe). Bản macOS cần cài thêm mô-đun Mac Build Support cho Unity |
 | Đã xong (Tầng 2) | Khu sinh học Tầng 2 (108 dụng cụ tương tác mượt, 15 bài thí nghiệm SGK 2018, hành lang 3,6 m, web quản lý sinh.html, đồng bộ BioLabSync, kiểm soát an toàn BSL-1) |

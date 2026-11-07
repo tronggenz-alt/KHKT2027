@@ -1,0 +1,135 @@
+[
+ {
+  "ma": "than_phai",
+  "ten": "Thân, nửa phải (có chữ)",
+  "mau": "#eef2f4",
+  "tach": [
+   0.0,
+   -36.0,
+   0.0
+  ],
+  "cach_in": "mặt ghép xuống bàn, đỡ bên trong",
+  "kich_thuoc": [
+   58.1,
+   77.0,
+   20.0
+  ],
+  "cm3": 8.3,
+  "gam_pla": 9.5,
+  "loi": "NoError"
+ },
+ {
+  "ma": "than_trai",
+  "ten": "Thân, nửa trái (có hốc vít)",
+  "mau": "#eef2f4",
+  "tach": [
+   0.0,
+   44.0,
+   0.0
+  ],
+  "cach_in": "mặt ghép xuống bàn, đỡ bên trong",
+  "kich_thuoc": [
+   58.1,
+   77.0,
+   20.0
+  ],
+  "cm3": 9.1,
+  "gam_pla": 10.4,
+  "loi": "NoError"
+ },
+ {
+  "ma": "vong",
+  "ten": "Vòng sáng",
+  "mau": "#18c8e6",
+  "tach": [
+   -4.5,
+   0.0,
+   25.6
+  ],
+  "cach_in": "phẳng, nằm trên bàn",
+  "kich_thuoc": [
+   55.1,
+   41.3,
+   4.0
+  ],
+  "cm3": 1.0,
+  "gam_pla": 1.2,
+  "loi": "NoError"
+ },
+ {
+  "ma": "nap",
+  "ten": "Nắp đầu",
+  "mau": "#15191d",
+  "tach": [
+   -9.0,
+   0.0,
+   51.2
+  ],
+  "cach_in": "mặt đỉnh xuống bàn",
+  "kich_thuoc": [
+   54.9,
+   42.2,
+   32.8
+  ],
+  "cm3": 7.6,
+  "gam_pla": 8.6,
+  "loi": "NoError"
+ },
+ {
+  "ma": "chen",
+  "ten": "Chén lõm joystick",
+  "mau": "#3a444b",
+  "tach": [
+   -13.2,
+   0.0,
+   74.8
+  ],
+  "cach_in": "mặt lớn xuống bàn",
+  "kich_thuoc": [
+   30.0,
+   30.0,
+   7.5
+  ],
+  "cm3": 0.7,
+  "gam_pla": 0.8,
+  "loi": "NoError"
+ },
+ {
+  "ma": "co",
+  "ten": "Cò Hall",
+  "mau": "#1b2329",
+  "tach": [
+   46.0,
+   0.0,
+   -6.0
+  ],
+  "cach_in": "nằm nghiêng, mặt bên xuống bàn",
+  "kich_thuoc": [
+   11.9,
+   26.3,
+   15.6
+  ],
+  "cm3": 1.5,
+  "gam_pla": 1.7,
+  "loi": "NoError"
+ },
+ {
+  "ma": "thanh",
+  "ten": "Thanh móc dây",
+  "mau": "#1b2329",
+  "tach": [
+   -34.0,
+   0.0,
+   -8.0
+  ],
+  "cach_in": "dựng đứng",
+  "kich_thuoc": [
+   4.0,
+   4.0,
+   12.5
+  ],
+  "cm3": 0.1,
+  "gam_pla": 0.1,
+  "loi": "NoError"
+ }
+]

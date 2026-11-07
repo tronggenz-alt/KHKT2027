@@ -1,0 +1,114 @@
+[
+ {
+  "file": "than",
+  "ten": "Thân, gồm 2 nửa trong 1 file",
+  "so_luong": 1,
+  "mau": "Trắng",
+  "kich_thuoc": [
+   163.2,
+   105.3,
+   34.6
+  ],
+  "gam_pla": 33.2,
+  "cach_in": "mặt ghép xuống bàn, đỡ bên trong",
+  "loi": "NoError"
+ },
+ {
+  "file": "vong",
+  "ten": "Vòng tròn có logo",
+  "so_luong": 1,
+  "mau": "Xanh ngọc huỳnh quang",
+  "kich_thuoc": [
+   56.4,
+   71.0,
+   11.0
+  ],
+  "gam_pla": 6.3,
+  "cach_in": "dựng đứng trên mép sau, không cần vật đỡ",
+  "loi": "NoError"
+ },
+ {
+  "file": "day_tren",
+  "ten": "Đáy trên (mặt tối bầu dục)",
+  "so_luong": 1,
+  "mau": "Đen",
+  "kich_thuoc": [
+   68.1,
+   46.5,
+   19.3
+  ],
+  "gam_pla": 6.8,
+  "cach_in": "mặt đỉnh xuống bàn",
+  "loi": "NoError"
+ },
+ {
+  "file": "day_duoi",
+  "ten": "Đáy dưới (nắp khoang pin)",
+  "so_luong": 1,
+  "mau": "Đen",
+  "kich_thuoc": [
+   33.5,
+   22.6,
+   2.5
+  ],
+  "gam_pla": 1.4,
+  "cach_in": "nằm phẳng, gai khóa hướng lên",
+  "loi": "NoError"
+ },
+ {
+  "file": "co",
+  "ten": "Cò",
+  "so_luong": 1,
+  "mau": "Bạc hoặc xám",
+  "kich_thuoc": [
+   13.8,
+   25.7,
+   15.6
+  ],
+  "gam_pla": 3.0,
+  "cach_in": "nằm nghiêng, mặt bên xuống bàn, đỡ dưới tay cò",
+  "loi": "NoError"
+ },
+ {
+  "file": "chen",
+  "ten": "Chén lục giác quanh joystick",
+  "so_luong": 1,
+  "mau": "Xanh ngọc huỳnh quang",
+  "kich_thuoc": [
+   29.4,
+   34.0,
+   7.1
+  ],
+  "gam_pla": 0.8,
+  "cach_in": "mặt lớn xuống bàn",
+  "loi": "NoError"
+ },
+ {
+  "file": "thanh",
+  "ten": "Ống thanh móc dây",
+  "so_luong": 3,
+  "mau": "Đen",
+  "kich_thuoc": [
+   4.0,
+   4.0,
+   12.5
+  ],
+  "gam_pla": 0.1,
+  "cach_in": "dựng đứng",
+  "loi": "NoError"
+ },
+ {
+  "file": "nut_phu",
+  "ten": "Nắp nút phụ",
+  "so_luong": 4,
+  "mau": "Bạc hoặc xám",
+  "kich_thuoc": [
+   8.6,
+   8.6,
+   5.1
+  ],
+  "gam_pla": 0.9,
+  "cach_in": "in 4 cái, mặt gờ xuống bàn",
+  "loi": "NoError"
+ }
+]

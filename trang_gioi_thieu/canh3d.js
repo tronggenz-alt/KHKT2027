@@ -1,4 +1,4 @@
-// Các cảnh 3D của trang: tòa nhà hologram, mặt bằng bấm được, tay cầm VERA Drop, phân tử, ADN
+// Các cảnh 3D của trang: tòa nhà hologram, mặt bằng bấm được, tay cầm VERA Arc, phân tử, ADN
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -24,6 +24,7 @@ function lap(now) {
 }
 
 function dangKy(canvas, khoiTao) {
+  if (!canvas) return;
   const c = { hien: false, ve: () => {} };
   let daTao = false;
   const io = new IntersectionObserver(d => {
@@ -137,10 +138,11 @@ function dungToa({ fillManh = .05, tuongTac = false } = {}) {
 
 // ---------------------------------------------------------------- mở đầu: tòa nhà hologram
 function canhMoDau(c) {
-  const canvas = document.getElementById('c-toa'), khu = document.getElementById('mo-dau');
+  const canvas = document.getElementById('c-toa');
   const r = taoRenderer(canvas, { alpha: false, dpr: 1.5 });
-  r.setClearColor(0x000000, 1);
   const scene = new THREE.Scene();
+  // Đặt nền trên scene: setClearColor bị đổi màu hai lần khi vẽ qua EffectComposer
+  scene.background = new THREE.Color(0x0a0c10);
   const cam = new THREE.PerspectiveCamera(36, 1, .1, 200);
   const toa = dungToa({ fillManh: .012 }); scene.add(toa.goc);
 
@@ -186,10 +188,16 @@ function canhMoDau(c) {
   theoKichThuoc(canvas, (w, h) => {
     r.setSize(w, h, false);
     cam.aspect = w / h;
-    if (dienThoai()) cam.setViewOffset(w, h, 0, h * .24, w, h); else cam.setViewOffset(w, h, -w * .23, h * .01, w, h);
     cam.updateProjectionMatrix();
     if (comp) { comp.setSize(w, h); bloom.setSize(w / 2, h / 2); }
   });
+
+  // Nút chọn cảnh ở trang điều khiển việc tách tầng, xem ảnh thì dừng vẽ
+  let ke = 0, tachDich = 0, dung = false, yawKeo = 0;
+  function nhanCanh(d) { tachDich = d.tach ? 1 : 0; dung = !!d.anh; }
+  if (window.VERA_CANH) nhanCanh(window.VERA_CANH);
+  addEventListener('vera:canh', e => nhanCanh(e.detail));
+  keoQuay(canvas, d => { yawKeo += d; });
 
   // Nhãn hai tầng bám theo mô hình
   const nhan = [document.getElementById('nhan-t1'), document.getElementById('nhan-t2')];
@@ -199,16 +207,16 @@ function canhMoDau(c) {
 
   let dem = 0, tong = 0, daDo = false;
   c.ve = (t, dt) => {
+    if (dung) return;
     if (!daDo && dt > 0) {
       dem++; if (dem > 12) tong += dt;
       if (dem === 90) { daDo = true; const tb = tong / 78; if (tb > .036) { comp = null; r.setPixelRatio(tb > .08 ? .7 : 1); r.setSize(canvas.clientWidth, canvas.clientHeight, false); } window.VERA_KHUNG_MS = Math.round(tb * 1000); }
     }
-    const rk = khu.getBoundingClientRect(), tb = khu.offsetHeight - innerHeight;
-    const k = tb > 10 ? kep(-rk.top / tb) : 0, ke = em(kep(k * 1.25));
+    ke += (tachDich - ke) * (yenTinh ? 1 : Math.min(1, dt * 3.2));
     px.cx += (px.x - px.cx) * .05; px.cy += (px.y - px.cy) * .05;
     const tach = ke * 6.2;
     toa.tang[2].g.position.y = Y_TANG[2] + tach;
-    const yaw = (yenTinh ? .7 : t * .09 + .55) + ke * .9 + px.cx * .5, dai = (dienThoai() ? 96 : 66) - ke * 2;
+    const yaw = (yenTinh ? .7 : t * .09 + .55) + ke * .9 + px.cx * .5 + yawKeo, dai = Math.max(54, 62 / Math.min(1.2, cam.aspect)) - ke * 2;
     const cao = 22 - ke * 8 + px.cy * -5;
     cam.position.set(Math.sin(yaw) * dai, cao + tach * .4, Math.cos(yaw) * dai);
     cam.lookAt(0, 3.6 + tach * .45, 0);
@@ -234,7 +242,7 @@ function canhMoDau(c) {
       P.set(0, y, -9).project(cam);
       const w = canvas.clientWidth, h = canvas.clientHeight;
       n.style.transform = `translate(${(P.x * .5 + .5) * w}px,${(-P.y * .5 + .5) * h}px) translate(-50%,-100%)`;
-      n.style.opacity = kep((k - .28) * 4) * ((-P.y * .5 + .5) * h > 76 ? 1 : 0);
+      n.style.opacity = kep((ke - .4) * 4) * ((-P.y * .5 + .5) * h > 40 ? 1 : 0);
     });
     if (comp) comp.render(dt); else r.render(scene, cam);
   };
@@ -293,9 +301,9 @@ function canhMatBang(c) {
   };
 }
 
-// ---------------------------------------------------------------- tay cầm VERA Drop
+// ---------------------------------------------------------------- tay cầm VERA Arc
 function canhTayCam(c) {
-  const canvas = document.getElementById('c-drop'), khu = document.getElementById('tay-cam');
+  const canvas = document.getElementById('c-arc');
   const r = taoRenderer(canvas, { dpr: 1.75 });
   r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.05;
   const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(30, 1, .01, 50);
@@ -307,7 +315,7 @@ function canhTayCam(c) {
   const den3 = new THREE.DirectionalLight(0x8a7bff, 1.6); den3.position.set(4, -2, -4); scene.add(den3);
 
   const truc = new THREE.Group(); scene.add(truc);
-  const goc = new THREE.Group(); goc.rotation.x = -Math.PI / 2; goc.scale.setScalar(.01); goc.position.y = -.52; truc.add(goc);
+  const goc = new THREE.Group(); goc.rotation.x = -Math.PI / 2; goc.scale.setScalar(.01); goc.position.set(-.03, -.613, 0); truc.add(goc);
 
   // Bệ vòng tròn dưới tay cầm
   const be = new THREE.Group(); be.position.y = -.68; scene.add(be);
@@ -315,9 +323,7 @@ function canhTayCam(c) {
     const v = new THREE.Mesh(new THREE.RingGeometry(rd - .005, rd, 96), new THREE.MeshBasicMaterial({ color: 0x38e8ff, transparent: true, opacity: op, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false }));
     v.rotation.x = -Math.PI / 2; be.add(v);
   }
-  const hao = new THREE.Sprite(new THREE.SpriteMaterial({ map: diemTron(), color: 0x18c8e6, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false }));
-  hao.scale.setScalar(1.3); truc.add(hao);
-
+  // Vòng và chén in bằng nhựa huỳnh quang, chỉ nổi màu chứ không tự sáng
   const VL = {
     than_phai: { color: '#eef2f4', roughness: .36, clearcoat: .7, clearcoatRoughness: .35 },
     than_trai: { color: '#eef2f4', roughness: .36, clearcoat: .7, clearcoatRoughness: .35 },
@@ -325,14 +331,17 @@ function canhTayCam(c) {
     chu: { color: '#15191d', roughness: .6 },
     vit: { color: '#aab4ba', roughness: .3, metalness: .9 },
     nap: { color: '#101418', roughness: .22, metalness: .2, clearcoat: 1, clearcoatRoughness: .12 },
-    co: { color: '#15191d', roughness: .32, metalness: .25, clearcoat: .5 },
-    chen: { color: '#3a444b', roughness: .42, metalness: .65 },
+    nap_pin: { color: '#15191d', roughness: .4, metalness: .15 },
+    co: { color: '#aab4ba', roughness: .32, metalness: .7 },
+    nut_phu: { color: '#aab4ba', roughness: .32, metalness: .7 },
+    chen: { color: '#18c8e6', roughness: .42, clearcoat: .4 },
+    vong: { color: '#18c8e6', roughness: .42, clearcoat: .4 },
     ky023: { color: '#15191d', roughness: .45, metalness: .2 },
-    vong: { color: '#02242e', roughness: .3, emissive: '#00b4e0', emissiveIntensity: 1.6 }
+    pin9v: { color: '#2b2f34', roughness: .5, metalness: .2 }
   };
   const vat = {}, ds = [], VO = ['than_phai', 'than_trai', 'chu'];
   let xong = false;
-  Promise.all([fetch('mo_hinh/drop.json').then(x => x.json()), fetch('mo_hinh/drop.bin').then(x => x.arrayBuffer())]).then(([tt, buf]) => {
+  Promise.all([fetch('mo_hinh/arc.json').then(x => x.json()), fetch('mo_hinh/arc.bin').then(x => x.arrayBuffer())]).then(([tt, buf]) => {
     for (const p of tt) {
       const g = new THREE.BufferGeometry();
       const ib = new THREE.InterleavedBuffer(new Int16Array(buf, p.v[0], p.v[1] * 5), 5);
@@ -357,10 +366,10 @@ function canhTayCam(c) {
   theoKichThuoc(canvas, (w, h) => { r.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); });
   let yawKeo = 0; keoQuay(canvas, d => { yawKeo += d; });
 
-  const buoc = [...document.querySelectorAll('.buoc-tc')], thanh = document.getElementById('tc-tien-do');
   const CHAM = [
     ['ky023', 'Joystick', 0, 0, 0], ['co', 'Cò bóp cảm biến Hall', 0, 0, 0], ['esp32', 'ESP32 không dây', 0, 0, 0],
-    ['bmi160', 'Cảm biến chuyển động', 0, 0, 0], ['pin', 'Pin LiPo', 0, 0, 0], ['tp4056', 'Sạc USB-C', 0, 0, 0]
+    ['bmi160', 'Cảm biến chuyển động', 0, 0, 0], ['pin9v', 'Pin vuông 9V', 0, 0, 0], ['ha_ap', 'Mạch hạ áp MP1584', 0, 0, 0],
+    ['nut6x6', '4 cổng mở rộng', 0, 0, 0]
   ].map(a => {
     const hop = document.getElementById('tc-cham');
     const dot = document.createElement('i'); dot.className = 'cham-dot';
@@ -371,26 +380,22 @@ function canhTayCam(c) {
     return { ma: a[0], dot, nh, ln, x: 0, y: 0 };
   });
   const P = new THREE.Vector3();
-  let bHien = -1;
+  // Mỗi nút chọn ứng với một mốc trên trục tháo rời: nguyên khối, tách, mở vỏ, ráp lại
+  const MOC = [.1, .42, .65, .95];
+  let p = MOC[window.VERA_BUOC_TC || 0], pDich = p;
+  addEventListener('vera:tay-cam', e => { pDich = MOC[e.detail]; });
 
   c.ve = (t, dt) => {
-    const b = khu.getBoundingClientRect(), tb = khu.offsetHeight - innerHeight;
-    const p = tb > 10 ? kep(-b.top / tb) : 0;
-    if (thanh) thanh.style.transform = `scaleX(${p})`;
-    const i = p < .24 ? 0 : p < .52 ? 1 : p < .78 ? 2 : 3;
-    if (i !== bHien) { bHien = i; buoc.forEach((n, j) => n.classList.toggle('hien', j === i)); khu.dataset.buoc = i; }
-
+    p += (pDich - p) * (yenTinh ? 1 : Math.min(1, dt * 2.4));
     const ke = em(kep((p - .2) / .2)) * (1 - em(kep((p - .74) / .16)));
     const mo = em(kep((p - .46) / .12)) * (1 - em(kep((p - .72) / .1)));
     const xoay = (yenTinh ? .5 : t * .22) + p * Math.PI * 2.2 + yawKeo;
     truc.rotation.y = xoay;
     truc.position.y = (yenTinh ? 0 : Math.sin(t * .9) * .018);
     const hep = dienThoai();
-    const gan = (hep ? 3.9 : 3.15) + ke * (hep ? 2.9 : 2.3) - em(kep((p - .82) / .16)) * .75;
+    const gan = (hep ? 4.6 : 3.9) + ke * (hep ? 3.4 : 2.9) - em(kep((p - .82) / .16)) * .75;
     cam.position.set(0, .34 + em(kep((p - .82) / .16)) * .28, gan);
-    cam.lookAt(0, (hep ? -.32 : 0) + ke * .3, 0);
-    if (!hep) { const w = canvas.clientWidth, h = canvas.clientHeight; cam.setViewOffset(w, h, -w * .17, 0, w, h); }
-    else cam.clearViewOffset();
+    cam.lookAt(0, (hep ? -.1 : 0) + ke * .3, 0);
     be.rotation.y = -t * .15;
 
     if (xong) {
@@ -401,12 +406,7 @@ function canhTayCam(c) {
           o.mat.transparent = a < .995; o.mat.depthWrite = a > .6; o.mat.opacity = a;
         }
       }
-      const v = vat.vong;
-      v.mat.emissiveIntensity = 1.4 + Math.sin(t * 2.2) * .35;
       goc.updateMatrixWorld();
-      P.copy(v.m.position).add(v.tam).applyMatrix4(goc.matrixWorld);
-      hao.position.copy(P).sub(truc.position); hao.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), -truc.rotation.y);
-      hao.material.opacity = .22 + Math.sin(t * 2.2) * .05;
       const w = canvas.clientWidth, h = canvas.clientHeight;
       document.getElementById('tc-cham').classList.toggle('hien', mo > .55);
       document.getElementById('tc-duong').classList.toggle('hien', mo > .55);
@@ -503,11 +503,12 @@ try {
   if (!thu) throw new Error('webgl');
   dangKy(document.getElementById('c-toa'), canhMoDau);
   dangKy(document.getElementById('c-plan'), canhMatBang);
-  dangKy(document.getElementById('c-drop'), canhTayCam);
+  dangKy(document.getElementById('c-arc'), canhTayCam);
   canhNho('c-phan-tu', dungPhanTu);
   canhNho('c-adn', dungAdn);
   document.documentElement.classList.add('co-3d');
   requestAnimationFrame(lap);
 } catch (e) {
   document.documentElement.classList.add('khong-3d');
+  dispatchEvent(new Event('vera:khong-3d'));
 }

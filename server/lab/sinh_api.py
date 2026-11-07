@@ -8,13 +8,14 @@ import csv
 import io
 import time
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, Callable, List, Optional
 
-from fastapi import APIRouter, HTTPException, Query, Response
+from fastapi import APIRouter, HTTPException, Query, Request, Response
 from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel, Field
 
-from . import sinh_db
+from . import sinh_db, tai_khoan, truc_tiep
+from .lop_api import o_csv
 
 router = APIRouter()
 
@@ -121,7 +122,7 @@ class KetQuaCreate(BaseModel):
 
 
 class KetQuaPatch(BaseModel):
-    diem: Optional[float] = None
+    diem: Optional[float] = Field(default=None, ge=0, le=10)
     nhan_xet: Optional[str] = None
     du_lieu: Optional[Any] = None
 
@@ -166,9 +167,15 @@ class SuKienBatch(BaseModel):
 # ENDPOINTS /lab/sinh
 # ==============================================================================
 
+def _la_giao_vien(request: Request) -> bool:
+    nd = request.state.nguoi_dung
+    return bool(nd) and nd["vai_tro"] == "giao_vien"
+
+
 @router.get("/lab/sinh/tong-quan")
-def get_tong_quan() -> dict:
-    return sinh_db.get_tong_quan()
+def get_tong_quan(request: Request) -> dict:
+    # Unity chỉ dùng để biết máy chủ còn sống; tồn kho, sự cố, người đặt lịch chỉ giáo viên xem
+    return sinh_db.get_tong_quan() if _la_giao_vien(request) else {"ket_noi": True}
 
 
 @router.get("/lab/sinh/dung-cu")
@@ -267,8 +274,10 @@ def post_nhiet_do(body: NhietDoCreate) -> dict:
 
 
 @router.get("/lab/sinh/dat-lich")
-def get_dat_lich(doi_tuong: str = Query("", description="Lọc theo đối tượng")) -> dict:
+def get_dat_lich(request: Request, doi_tuong: str = Query("", description="Lọc theo đối tượng")) -> dict:
     items = sinh_db.list_dat_lich(doi_tuong=doi_tuong)
+    if not _la_giao_vien(request):  # học sinh xem được lịch nhưng không cần biết tên người đặt
+        items = [{k: v for k, v in x.items() if k != "nguoi"} for x in items]
     return {"muc": items, "tong": len(items)}
 
 
@@ -332,22 +341,33 @@ def patch_muon_tra(id: int, body: MuonTraPatch) -> dict:
     return res
 
 
+def _trong_pham_vi(request: Request) -> Callable[[dict], bool]:
+    """Kết quả gắn với học sinh chỉ giáo viên của học sinh đó xem được; kết quả không gắn tài khoản (dùng thử, bản cũ) giáo viên nào cũng xem được."""
+    cua_toi = tai_khoan.hoc_sinh_cua_giao_vien(request.state.nguoi_dung["id"])
+    return lambda k: k["hoc_sinh_id"] is None or k["hoc_sinh_id"] in cua_toi
+
+
+def _ket_qua_duoc_xem(id: int, request: Request) -> dict:
+    item = sinh_db.get_ket_qua_by_id(id)
+    if not item or not _trong_pham_vi(request)(item):
+        raise HTTPException(status_code=404, detail=f"Không tìm thấy kết quả id={id}")
+    return item
+
+
 @router.get("/lab/sinh/ket-qua")
 def get_ket_qua(
+    request: Request,
     lop: str = Query("", description="Lọc theo lớp"),
     ma_bai: str = Query("", description="Lọc theo mã bài thí nghiệm"),
     hoc_sinh: str = Query("", description="Lọc theo tên học sinh"),
 ) -> dict:
-    items = sinh_db.list_ket_qua(lop=lop, ma_bai=ma_bai, hoc_sinh=hoc_sinh)
+    items = list(filter(_trong_pham_vi(request), sinh_db.list_ket_qua(lop=lop, ma_bai=ma_bai, hoc_sinh=hoc_sinh)))
     return {"muc": items, "tong": len(items)}
 
 
 @router.get("/lab/sinh/ket-qua/{id}")
-def get_ket_qua_item(id: int) -> dict:
-    item = sinh_db.get_ket_qua_by_id(id)
-    if not item:
-        raise HTTPException(status_code=404, detail=f"Không tìm thấy kết quả id={id}")
-    return item
+def get_ket_qua_item(id: int, request: Request) -> dict:
+    return _ket_qua_duoc_xem(id, request)
 
 
 @router.post("/lab/sinh/ket-qua")
@@ -356,22 +376,20 @@ def post_ket_qua(body: KetQuaCreate) -> dict:
 
 
 @router.patch("/lab/sinh/ket-qua/{id}")
-def patch_ket_qua(id: int, body: KetQuaPatch) -> dict:
-    res = sinh_db.patch_ket_qua(id, body.model_dump(exclude_unset=True))
-    if not res:
-        raise HTTPException(status_code=404, detail=f"Không tìm thấy kết quả id={id}")
-    return res
+def patch_ket_qua(id: int, body: KetQuaPatch, request: Request) -> dict:
+    _ket_qua_duoc_xem(id, request)
+    return sinh_db.patch_ket_qua(id, body.model_dump(exclude_unset=True))
 
 
 @router.get("/lab/sinh/ket-qua.csv")
-def get_ket_qua_csv() -> Response:
+def get_ket_qua_csv(request: Request) -> Response:
     """Xuất danh sách kết quả thực hành ra định dạng CSV UTF-8 có BOM."""
-    items = sinh_db.list_ket_qua()
+    items = filter(_trong_pham_vi(request), sinh_db.list_ket_qua())
     output = io.StringIO()
     writer = csv.writer(output)
     writer.writerow(["ID", "Học sinh", "Lớp", "Bàn", "Mã bài", "Thời gian", "Điểm", "Nhận xét", "Dữ liệu JSON"])
     for r in items:
-        writer.writerow([
+        writer.writerow([o_csv(x) for x in (
             r.get("id", ""),
             r.get("hoc_sinh", ""),
             r.get("lop", ""),
@@ -381,7 +399,7 @@ def get_ket_qua_csv() -> Response:
             r.get("diem", ""),
             r.get("nhan_xet", ""),
             r.get("du_lieu", ""),
-        ])
+        )])
 
     csv_text = output.getvalue()
     # Thêm ký tự UTF-8 BOM (\xef\xbb\xbf) để Excel trên Windows/macOS mở không bị lỗi font tiếng Việt
@@ -426,6 +444,13 @@ def post_bao_tri(body: BaoTriCreate) -> dict:
     return sinh_db.add_bao_tri(body.model_dump())
 
 
+@router.get("/lab/sinh/huong-dan")
+def get_ds_huong_dan() -> dict:
+    """Danh sách dụng cụ có hướng dẫn, chỉ phần tĩnh: học sinh không xem được tồn kho ở /lab/sinh/dung-cu."""
+    items = [{"ma": d["ma"], "ten": d["ten"], "phan_loai": d["phan_loai"]} for d in sinh_db.get_all_static_dung_cu()]
+    return {"muc": items, "tong": len(items)}
+
+
 @router.get("/lab/sinh/huong-dan/{ma}")
 def get_huong_dan(ma: str) -> dict:
     static = sinh_db.get_static_dung_cu(ma)
@@ -434,9 +459,21 @@ def get_huong_dan(ma: str) -> dict:
     return static
 
 
+def _bai_cho_hoc_sinh(bai: dict) -> dict:
+    """Bỏ đáp án, kết quả mong đợi và điều kiện chấm từng bước."""
+    return {
+        "ma": bai["ma"], "ten": bai["ten"], "lop": bai["lop"], "sgk": bai["sgk"], "muc_tieu": bai["muc_tieu"],
+        "dung_cu": bai["dung_cu"], "nguon": bai["nguon"],
+        "buoc": [{"so": b["so"], "mo_ta": b["mo_ta"]} for b in bai["buoc"]],
+        "cau_hoi": [{"hoi": c["hoi"]} for c in bai["cau_hoi"]],
+    }
+
+
 @router.get("/lab/sinh/bai-thi-nghiem")
-def get_bai_thi_nghiem() -> dict:
+def get_bai_thi_nghiem(request: Request) -> dict:
     items = sinh_db.get_all_static_bai_thi_nghiem()
+    if not _la_giao_vien(request):
+        items = [_bai_cho_hoc_sinh(b) for b in items]
     return {"muc": items, "tong": len(items)}
 
 
@@ -491,9 +528,22 @@ def get_trang_thai_may() -> dict:
     return {"muc": muc, "tong": len(muc)}
 
 
-def _ap_su_kien(loai: str, dl: dict, t: float) -> None:
+def _ket_qua_theo_nguoi_gui(dl: dict, nd: dict | None) -> dict:
+    """Chỉ giáo viên được ghi điểm. Kết quả từ tài khoản học sinh lấy tên, lớp từ tài khoản, không tin dữ liệu gửi lên."""
+    dl = {**dl, "hoc_sinh_id": None}  # gắn với tài khoản nào chỉ do máy chủ quyết định
+    if nd and nd["vai_tro"] == "giao_vien":
+        return dl
+    dl.update(diem=None, nhan_xet="")
+    if nd:
+        lop = [l["ten"] for l in tai_khoan.cong_khai(nd)["lop"]]
+        dl.update(hoc_sinh=nd["ho_ten"], hoc_sinh_id=nd["id"], lop=dl.get("lop") if dl.get("lop") in lop else (lop[0] if lop else "Chưa vào lớp"))
+    return dl
+
+
+def _ap_su_kien(loai: str, dl: dict, t: float, nd: dict | None = None) -> None:
     """Ghi một sự kiện Unity gửi lên theo bảng 'Loại sự kiện' (HOP_DONG_GIAO_DIEN_BACKEND.md mục 5)."""
     if loai == "su_co":
+        truc_tiep.ghi_su_kien(nd, dl.get("muc_do", ""), dl.get("mo_ta", ""), "", t)
         sinh_db.add_su_co({
             "phong": dl.get("phong", "phong_sinh"),
             "loai": dl.get("loai", "su_kien_lab"),
@@ -538,7 +588,11 @@ def _ap_su_kien(loai: str, dl: dict, t: float) -> None:
     elif loai == "trang_thai_may":
         ghi_trang_thai_may(dl.get("ma", ""), dl.get("trang_thai", "san_sang"), dl.get("mo_ta", ""), float(dl.get("tien_do", 0.0)), t)
     elif loai in ("ket_qua_tn", "ket_qua"):
+        dl = _ket_qua_theo_nguoi_gui(dl, nd)
+        ten_bai = {b["ma"]: b["ten"] for b in sinh_db.get_all_static_bai_thi_nghiem()}
+        truc_tiep.ghi_su_kien(nd, "", "Nộp kết quả: " + ten_bai.get(dl.get("ma_bai"), str(dl.get("ma_bai"))), "", t)
         sinh_db.add_ket_qua({
+            "hoc_sinh_id": dl.get("hoc_sinh_id"),
             "hoc_sinh": dl.get("hoc_sinh", "Học sinh"),
             "lop": dl.get("lop", "Lớp"),
             "ban": dl.get("ban", ""),
@@ -553,13 +607,13 @@ def _ap_su_kien(loai: str, dl: dict, t: float) -> None:
 
 
 @router.post("/lab/sinh/su-kien")
-def post_su_kien(batch: SuKienBatch) -> dict:
+def post_su_kien(batch: SuKienBatch, request: Request) -> dict:
     nhan = 0
     loi = []
     for i, item in enumerate(batch.su_kien):
         try:
             dl = item.du_lieu if isinstance(item.du_lieu, dict) else {}
-            _ap_su_kien(item.loai, dl, item.thoi_gian or time.time())
+            _ap_su_kien(item.loai, dl, item.thoi_gian or time.time(), request.state.nguoi_dung)
             nhan += 1
         except Exception as e:
             loi.append({"chi_so": i, "ly_do": str(e)})

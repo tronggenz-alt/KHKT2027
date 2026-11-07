@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Điều khiển buổi học · VERA Lab</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="/tinh/vera.css">
+<script src="/tinh/phien.js"></script>
+<style>
+@media (max-width: 480px) { .thanh .nhan-hieu { display: none; } }
+.bo-cuc { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); align-items: start; margin-top: 16px; }
+.cot { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+.chon-che-do { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.chon-che-do label { display: block; padding: 12px; border: 2px solid var(--vien); border-radius: var(--bo-nho); cursor: pointer; }
+.chon-che-do label:has(input:checked) { border-color: var(--nhan); background: var(--nhan-nhat); }
+.chon-che-do input { accent-color: var(--nhan); }
+.chon-che-do b { font-weight: 600; }
+.chon-che-do small { display: block; margin-top: 4px; color: var(--phu); font-size: 13.5px; }
+.dong-ho { font: 700 34px/1.2 Consolas, ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+.dang-kiem-tra { padding: 10px 12px; margin-bottom: 12px; border-radius: var(--bo-nho); background: var(--vang-nhat); color: var(--vang); font-weight: 500; }
+.nut-robot { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr)); margin-bottom: 14px; }
+.nut-robot .nut { padding: 0 8px; }
+.hang-gui { display: grid; gap: 8px; grid-template-columns: minmax(0, 1fr) auto; align-items: end; margin-top: 12px; }
+.hang-gui .o { margin-top: 0; }
+.ds-loai { display: grid; gap: 4px 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); margin-bottom: 12px; }
+.ds-loai label { display: flex; align-items: center; gap: 8px; min-height: 36px; font-size: 15px; }
+.ds-loai input { width: 18px; height: 18px; accent-color: var(--nhan); flex: none; }
+.ds-loai small { color: var(--phu); }
+.the-chat { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; min-height: 8px; }
+.the-chat button { display: inline-flex; gap: 6px; align-items: center; padding: 3px 8px; border: 1px solid var(--vien-dam); border-radius: var(--bo-nho); background: var(--nen-2); font-size: 14px; cursor: pointer; }
+.the-chat button:hover { border-color: var(--do); }
+.so-khoa { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.goi-y { position: relative; }
+.ds-goi-y { display: grid; margin-top: 4px; border: 1px solid var(--vien); border-radius: var(--bo-nho); overflow: hidden; }
+.ds-goi-y button { padding: 8px 10px; border: 0; border-top: 1px solid var(--vien); background: var(--nen); text-align: left; cursor: pointer; font-size: 14.5px; }
+.ds-goi-y button:first-child { border-top: 0; }
+.ds-goi-y button:hover { background: var(--nen-2); }
+</style>
+</head>
+<body>
+<header class="thanh">
+  <div class="khung">
+    <a class="nhan-hieu" href="/giao-vien">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2.5 35.2 11.2v17.6L20 37.5 4.8 28.8V11.2z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/><path d="M12.5 13 20 28l7.5-15" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      VERA Lab
+    </a>
+    <a class="quay-lai" href="/giao-vien">← Trang chủ</a>
+    <div class="nguoi">
+      <span class="ten" data-ten-nguoi></span>
+      <button class="nut phu nho" data-dang-xuat>Đăng xuất</button>
+    </div>
+  </div>
+</header>
+<main class="khung">
+  <div class="dong-chinh">
+    <div>
+      <h1>Điều khiển buổi học</h1>
+      <p class="phu-chu" id="so-may" style="margin-top: 4px">Đang tải…</p>
+    </div>
+    <label class="o" style="margin-top: 0; min-width: min(100%, 260px)"><span>Lớp</span><select id="chon-lop"></select></label>
+  </div>
+  <p class="bao" id="bao-chung" role="alert" hidden></p>
+  <section class="the" id="chua-co-lop" hidden style="margin-top: 16px">
+    <p class="phu-chu">Bạn chưa có lớp nào. Hãy <a href="/giao-vien#lop">tạo lớp</a> trước.</p>
+  </section>
+
+  <div class="bo-cuc" id="noi-dung" hidden>
+    <div class="cot">
+      <section class="the">
+        <h2>Chế độ</h2>
+        <div class="dang-kiem-tra" id="dang-kiem-tra" hidden></div>
+        <div class="chon-che-do">
+          <label><input type="radio" name="che_do" value="luyen_tap" checked> <b>Luyện tập</b><small>Học sinh dùng được trợ lý AI và robot.</small></label>
+          <label><input type="radio" name="che_do" value="kiem_tra"> <b>Kiểm tra</b><small>Tắt trợ lý AI, gợi ý và robot của học sinh.</small></label>
+        </div>
+        <label class="o" id="o-phut"><span>Thời gian làm bài (phút, để trống nếu không giới hạn)</span><input id="phut" type="number" min="0" max="300" inputmode="numeric"></label>
+        <button class="nut chinh" id="ap-dung" style="margin-top: 12px">Áp dụng cho lớp</button>
+      </section>
+
+      <section class="the">
+        <h2>Robot trong phòng</h2>
+        <label class="o" style="margin-top: 0; margin-bottom: 12px"><span>Gửi tới</span><select id="gui-toi"></select></label>
+        <div class="nut-robot">
+          <button class="nut phu" data-hanh-dong="tat_lua">Tắt mọi nguồn lửa</button>
+          <button class="nut phu" data-hanh-dong="bat_tu_hut">Bật tủ hút</button>
+          <button class="nut phu" data-hanh-dong="don_ban">Dọn bàn</button>
+        </div>
+        <div class="hang-gui">
+          <label class="o"><span>Làm mẫu thí nghiệm</span><select id="chon-mau"></select></label>
+          <button class="nut chinh" id="lam-mau">Làm mẫu</button>
+        </div>
+        <div class="hang-gui">
+          <label class="o"><span>Robot nói</span><input id="cau-noi" maxlength="300" autocomplete="off" placeholder="Ví dụ: Các em quan sát màu dung dịch"></label>
+          <button class="nut phu" id="noi">Nói</button>
+        </div>
+        <div class="goi-y" style="margin-top: 12px">
+          <label class="o" style="margin-top: 0"><span>Lấy hóa chất ra bàn</span><input id="tim-lay" autocomplete="off" placeholder="Tên, công thức hoặc vị trí kệ"></label>
+          <div class="ds-goi-y" id="goi-y-lay" hidden></div>
+        </div>
+        <p class="phu-chu" id="lenh-cuoi" style="margin-top: 12px"></p>
+        <p class="bao" id="bao-robot" role="alert" hidden></p>
+      </section>
+    </div>
+
+    <section class="the">
+      <h2>Khóa hóa chất</h2>
+      <p class="phu-chu" style="margin-bottom: 12px"><span class="so-khoa" id="so-khoa">0</span> / <span id="tong-chat">720</span> chất đang khóa với học sinh trong lớp này</p>
+      <div class="ds-loai" id="ds-loai"></div>
+      <div class="goi-y">
+        <label class="o"><span>Cho phép riêng các chất bài này cần</span><input id="tim-ngoai-le" autocomplete="off" placeholder="Tên, công thức hoặc vị trí kệ"></label>
+        <div class="ds-goi-y" id="goi-y-ngoai-le" hidden></div>
+        <div class="the-chat" id="ds-ngoai-le"></div>
+      </div>
+      <div class="goi-y">
+        <label class="o"><span>Khóa thêm chất khác</span><input id="tim-khoa-them" autocomplete="off" placeholder="Tên, công thức hoặc vị trí kệ"></label>
+        <div class="ds-goi-y" id="goi-y-khoa-them" hidden></div>
+        <div class="the-chat" id="ds-khoa-them"></div>
+      </div>
+      <button class="nut chinh" id="luu-khoa" style="margin-top: 14px">Lưu danh sách khóa</button>
+      <p class="bao" id="bao-khoa" role="status" hidden></p>
+    </section>
+  </div>
+</main>
+<script>
+const { esc } = Phien;
+const $ = (id) => document.getElementById(id);
+const lopId = () => Number($("chon-lop").value);
+let tt = null;           // trạng thái máy chủ
+let ngoaiLe = [], khoaThem = [];
+let daNapBieuMau = false;   // biểu mẫu chỉ đổ từ máy chủ lúc mở, để không xóa thứ giáo viên đang chọn dở
+
+const cheDoChon = () => document.querySelector("input[name=che_do]:checked").value;
+
+function veChip(id, ds, xoa) {
+  $(id).innerHTML = ds.map((c) => `<button type="button" data-stt="${c.stt}" title="Bỏ khỏi danh sách">${esc(c.ten)} ✕</button>`).join("");
+  $(id).querySelectorAll("button").forEach((b) => b.addEventListener("click", () => xoa(Number(b.dataset.stt))));
+}
+const veNgoaiLe = () => veChip("ds-ngoai-le", ngoaiLe, (s) => { ngoaiLe = ngoaiLe.filter((c) => c.stt !== s); veNgoaiLe(); });
+const veKhoaThem = () => veChip("ds-khoa-them", khoaThem, (s) => { khoaThem = khoaThem.filter((c) => c.stt !== s); veKhoaThem(); });
+
+function capNhatDongHo() {
+  if (!tt) return;
+  const dang = tt.che_do === "kiem_tra";
+  $("dang-kiem-tra").hidden = !dang;
+  if (!dang) return;
+  const conLai = tt.het_gio ? Math.max(0, Math.round(tt.het_gio - Date.now() / 1000 - lechGio)) : null;
+  $("dang-kiem-tra").textContent = conLai === null
+    ? "Lớp đang làm bài kiểm tra, không giới hạn thời gian."
+    : conLai > 0 ? `Lớp đang làm bài kiểm tra, còn ${Math.floor(conLai / 60)} phút ${String(conLai % 60).padStart(2, "0")} giây.` : "Đã hết giờ làm bài. Lớp vẫn ở chế độ Kiểm tra cho tới khi bạn đổi.";
+}
+let lechGio = 0;
+
+function ve(moi) {
+  tt = moi;
+  lechGio = moi.may_chu_luc - Date.now() / 1000;
+  $("so-may").textContent = `${moi.may_dang_mo}/${moi.so_hoc_sinh} máy đang mở app`;
+  $("so-khoa").textContent = moi.so_chat_khoa;
+  $("tong-chat").textContent = moi.tong_so_chat;
+  const lenh = moi.lenh_robot_cuoi;
+  $("lenh-cuoi").textContent = lenh ? `Lệnh gần nhất: ${lenh.noi_dung} · ${lenh.da_nhan} máy đã nhận` : "";
+  const gui = $("gui-toi");
+  if (gui.options.length !== moi.hoc_sinh.length + 1) {
+    const chon = gui.value;
+    gui.innerHTML = `<option value="">Cả lớp</option>` + moi.hoc_sinh.map((h) => `<option value="${h.id}">${esc(h.ho_ten)}</option>`).join("");
+    gui.value = chon;
+  }
+  if (!daNapBieuMau) {
+    daNapBieuMau = true;
+    document.querySelector(`input[name=che_do][value=${moi.che_do}]`).checked = true;
+    $("chon-mau").innerHTML = moi.thi_nghiem_mau.map((m) => `<option value="${esc(m.khoa)}">${esc(m.ten)}</option>`).join("");
+    $("ds-loai").innerHTML = moi.loai_nguy_hiem.map((l) => `<label><input type="checkbox" value="${esc(l.ma)}" ${moi.khoa_loai.includes(l.ma) ? "checked" : ""}> ${esc(l.ten)} <small>(${l.so_chat} chất)</small></label>`).join("");
+    ngoaiLe = moi.ngoai_le;
+    khoaThem = moi.khoa_them;
+    veNgoaiLe();
+    veKhoaThem();
+  }
+  capNhatDongHo();
+}
+
+async function nap() {
+  if (!lopId() || document.hidden) return;
+  try {
+    ve(await Phien.json(`/api/lop/${lopId()}/buoi-hoc`));
+    $("bao-chung").hidden = true;
+  } catch (loi) {
+    $("bao-chung").textContent = Phien.loiChu(loi);
+    $("bao-chung").hidden = false;
+  }
+}
+
+const trangThaiGui = (che_do, phut) => ({
+  che_do, phut,
+  khoa_loai: [...document.querySelectorAll("#ds-loai input:checked")].map((o) => o.value),
+  ngoai_le: ngoaiLe.map((c) => c.stt),
+  khoa_them: khoaThem.map((c) => c.stt),
+});
+
+$("ap-dung").addEventListener("click", async () => {
+  const che_do = cheDoChon();
+  if (che_do === "kiem_tra" && !confirm("Chuyển lớp sang Kiểm tra? Học sinh sẽ mất trợ lý AI và robot ngay trong lúc đang làm.")) return;
+  try {
+    ve(await Phien.gui(`/api/lop/${lopId()}/buoi-hoc`, "POST", trangThaiGui(che_do, Number($("phut").value || 0))));
+    $("phut").value = "";
+  } catch (loi) { alert(Phien.loiChu(loi)); }
+});
+
+$("luu-khoa").addEventListener("click", async () => {
+  const bao = $("bao-khoa");
+  try {
+    // Giữ nguyên chế độ và đồng hồ đang chạy: máy chủ chỉ nhận số phút nên tính lại phần còn lại
+    const conPhut = tt.het_gio ? Math.ceil(Math.max(0, tt.het_gio - Date.now() / 1000 - lechGio) / 60) : 0;
+    ve(await Phien.gui(`/api/lop/${lopId()}/buoi-hoc`, "POST", trangThaiGui(tt.che_do, conPhut)));
+    bao.textContent = "Đã lưu";
+    bao.classList.add("xong");
+  } catch (loi) {
+    bao.textContent = Phien.loiChu(loi);
+    bao.classList.remove("xong");
+  }
+  bao.hidden = false;
+});
+
+async function raLenh(body) {
+  const bao = $("bao-robot");
+  bao.hidden = true;
+  try {
+    const gui = $("gui-toi").value;
+    await Phien.gui(`/api/lop/${lopId()}/robot`, "POST", { ...body, hoc_sinh_id: gui ? Number(gui) : null });
+    await nap();
+  } catch (loi) {
+    bao.textContent = Phien.loiChu(loi);
+    bao.hidden = false;
+  }
+}
+document.querySelectorAll("[data-hanh-dong]").forEach((n) => n.addEventListener("click", () => raLenh({ hanh_dong: n.dataset.hanhDong })));
+$("lam-mau").addEventListener("click", () => raLenh({ hanh_dong: "lam_mau", khoa: $("chon-mau").value }));
+$("noi").addEventListener("click", async () => {
+  const o = $("cau-noi");
+  if (!o.value.trim()) { o.focus(); return; }
+  await raLenh({ hanh_dong: "noi", loi: o.value });
+  o.value = "";
+});
+
+// Ô tìm hóa chất: gõ tên, chọn trong danh sách gợi ý
+function ganTim(oId, dsId, khiChon) {
+  const o = $(oId), ds = $(dsId);
+  let hen = null;
+  o.addEventListener("input", () => {
+    clearTimeout(hen);
+    hen = setTimeout(async () => {
+      if (o.value.trim().length < 2) { ds.hidden = true; return; }
+      const kq = await Phien.json(`/api/hoa-chat?q=${encodeURIComponent(o.value)}&moi_trang=6`);
+      ds.innerHTML = kq.ds.map((c) => `<button type="button" data-stt="${c.stt}" data-ten="${esc(c.ten)}">${esc(c.ten)}${c.cong_thuc ? ` · ${esc(c.cong_thuc)}` : ""}${c.nguy_hiem.length ? " ⚠" : ""}</button>`).join("") || `<button type="button" disabled>Không tìm thấy</button>`;
+      ds.hidden = false;
+    }, 200);
+  });
+  ds.addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-stt]");
+    if (!b) return;
+    khiChon({ stt: Number(b.dataset.stt), ten: b.dataset.ten });
+    o.value = "";
+    ds.hidden = true;
+  });
+}
+ganTim("tim-lay", "goi-y-lay", (c) => raLenh({ hanh_dong: "lay_hoa_chat", stt: c.stt }));
+ganTim("tim-ngoai-le", "goi-y-ngoai-le", (c) => { if (!ngoaiLe.some((x) => x.stt === c.stt)) ngoaiLe.push(c); veNgoaiLe(); });
+ganTim("tim-khoa-them", "goi-y-khoa-them", (c) => { if (!khoaThem.some((x) => x.stt === c.stt)) khoaThem.push(c); veKhoaThem(); });
+
+$("chon-lop").addEventListener("change", () => {
+  daNapBieuMau = false;
+  $("gui-toi").innerHTML = "";
+  $("bao-khoa").hidden = true;
+  nap();
+});
+
+(async () => {
+  try {
+    const lop = await Phien.json("/api/lop");
+    if (!lop.length) { $("chua-co-lop").hidden = false; $("so-may").textContent = ""; return; }
+    $("chon-lop").innerHTML = lop.map((l) => `<option value="${l.id}">${esc(l.ten)}</option>`).join("");
+    $("noi-dung").hidden = false;
+    await nap();
+    setInterval(nap, 2000);
+    setInterval(capNhatDongHo, 1000);
+  } catch (loi) {
+    $("bao-chung").textContent = Phien.loiChu(loi);
+    $("bao-chung").hidden = false;
+  }
+})();
+</script>
+</body>
+</html>

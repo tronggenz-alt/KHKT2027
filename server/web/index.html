@@ -3,27 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Quản lý phòng thí nghiệm</title>
+<link rel="icon" href="data:,">
+<title>Phòng Hóa · VERA Lab</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<script src="/tinh/phien.js"></script>
 <style>
 :root {
-  --bg: #f4f6f8; --panel: #ffffff; --panel-2: #f8fafb; --line: #e2e7ec; --text: #17202a; --muted: #5d6b78;
-  --accent: #0f7c86; --accent-soft: #e2f3f4; --good: #1f8a4c; --good-soft: #e3f4ea; --warn: #b26b00; --warn-soft: #fbefd9;
-  --bad: #c2362f; --bad-soft: #fbe5e3; --shadow: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.08); --on-accent: #ffffff;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0f1418; --panel: #172026; --panel-2: #1c272e; --line: #2a3740; --text: #e6edf2; --muted: #93a3b0;
-    --accent: #3cc2cc; --accent-soft: #143238; --good: #4cc983; --good-soft: #15301f; --warn: #f0b04a; --warn-soft: #362a12;
-    --bad: #ff7b72; --bad-soft: #3a1a18; --shadow: none; --on-accent: #062a2e;
-  }
+  --bg: #f5f5f7; --panel: #ffffff; --panel-2: #f5f5f7; --line: #d9d9de; --text: #1d1d1f; --muted: #5c5d66;
+  --accent: #0b63d1; --accent-soft: #e8f1fd; --good: #0b7a5b; --good-soft: #e3f4ee; --warn: #8f5600; --warn-soft: #fbefd9;
+  --bad: #b3261e; --bad-soft: #fbeaea; --shadow: none; --on-accent: #ffffff;
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.5 "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif; }
 header { background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; }
 .bar { max-width: 1240px; margin: 0 auto; padding: 12px 20px 0; }
 .title { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .title h1 { font-size: 18px; margin: 0; font-weight: 650; letter-spacing: -.01em; }
-.chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px; font-size: 12px;
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 6px; font-size: 12px;
         background: var(--panel-2); border: 1px solid var(--line); color: var(--muted); }
 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
 .chip.on .dot { background: var(--good); } .chip.off .dot { background: var(--bad); }
@@ -41,20 +37,23 @@ h2 { font-size: 15px; margin: 0 0 10px; font-weight: 650; }
 .stat.warn .v { color: var(--warn); } .stat.bad .v { color: var(--bad); } .stat.good .v { color: var(--good); }
 .two { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; } @media (max-width: 860px) { .two { grid-template-columns: 1fr; } }
 .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
-input, select, textarea { font: inherit; color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 7px; padding: 7px 10px; }
+input, select, textarea { font: inherit; color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 7px 10px; }
 input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
 input[type=number] { width: 84px; } textarea { width: 100%; resize: vertical; }
-button.b { font: inherit; border: 1px solid var(--line); background: var(--panel); color: var(--text); border-radius: 7px; padding: 6px 12px; cursor: pointer; }
+button.b { font: inherit; border: 1px solid var(--line); background: var(--panel); color: var(--text); border-radius: 6px; padding: 6px 12px; cursor: pointer; }
 button.b:hover { border-color: var(--accent); } button.b.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
 button.b.danger:hover { border-color: var(--bad); color: var(--bad); } button.b.sm { padding: 3px 8px; font-size: 12px; }
 button.b:disabled { opacity: .55; cursor: default; }
+a.b { display: inline-block; border: 1px solid var(--line); background: var(--panel); color: var(--text); border-radius: 6px; padding: 3px 8px; font-size: 12px; text-decoration: none; white-space: nowrap; }
+a.b:hover { border-color: var(--accent); }
+.tai-khoan { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 .tablewrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
 th { font-size: 12px; color: var(--muted); font-weight: 600; background: var(--panel-2); position: sticky; top: 0; }
 td.num, th.num { text-align: right; }
 tr.low td { background: var(--warn-soft); }
-.badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; background: var(--panel-2); color: var(--muted); border: 1px solid var(--line); white-space: nowrap; }
+.badge { display: inline-block; padding: 1px 8px; border-radius: 6px; font-size: 12px; background: var(--panel-2); color: var(--muted); border: 1px solid var(--line); white-space: nowrap; }
 .badge.good { background: var(--good-soft); color: var(--good); border-color: transparent; }
 .badge.warn { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
 .badge.bad { background: var(--bad-soft); color: var(--bad); border-color: transparent; }
@@ -70,12 +69,12 @@ tr.low td { background: var(--warn-soft); }
 .form { display: grid; gap: 10px; grid-template-columns: 150px 1fr 160px 150px 90px auto; align-items: end; }
 @media (max-width: 960px) { .form { grid-template-columns: 1fr 1fr; } }
 .form label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
-.answer { white-space: pre-wrap; background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 12px; min-height: 48px; }
+.answer { white-space: pre-wrap; background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 12px; min-height: 48px; }
 .steps { counter-reset: s; list-style: none; padding: 0; margin: 0; }
 .steps li { counter-increment: s; padding: 8px 10px 8px 40px; position: relative; border-bottom: 1px solid var(--line); }
 .steps li::before { content: counter(s); position: absolute; left: 8px; top: 8px; width: 22px; height: 22px; border-radius: 50%;
                     background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 700; display: grid; place-items: center; }
-.toast { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: var(--bg); padding: 10px 14px; border-radius: 8px;
+.toast { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: var(--bg); padding: 10px 14px; border-radius: 6px;
          opacity: 0; transition: opacity .2s; pointer-events: none; max-width: 420px; }
 .toast.show { opacity: .95; }
 .explain { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
@@ -83,14 +82,26 @@ tr.low td { background: var(--warn-soft); }
 .prov { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); margin-bottom: 16px; }
 .prov .card { margin: 0; }
 @media (max-width: 600px) { main, .bar { padding-left: 12px; padding-right: 12px; } .grow { grid-template-columns: 110px 1fr 30px; } }
+select, input { max-width: 100%; }
+@media (max-width: 600px) {
+  header { position: static; }
+  .title h1 { order: 2; flex-basis: 100%; font-size: 16px; }
+  .chip { order: 3; }
+  .tai-khoan [data-ten-nguoi] { display: none; }
+}
 </style>
 </head>
 <body>
 <header>
   <div class="bar">
     <div class="title">
-      <h1>Phòng thí nghiệm ảo · Quản lý</h1>
+      <a class="b" href="/giao-vien">← Trang chủ</a>
+      <h1>Phòng Lab Hóa học VERA · Tầng 1</h1>
       <span class="chip" id="aiChip"><span class="dot"></span><span id="aiText">Đang kiểm tra AI…</span></span>
+      <div class="tai-khoan">
+        <span class="muted small" data-ten-nguoi></span>
+        <button class="b sm" data-dang-xuat>Đăng xuất</button>
+      </div>
     </div>
     <nav id="tabs">
       <button data-tab="tong-quan" class="active">Tổng quan</button>
@@ -504,7 +515,8 @@ async function showMachine() {
     <h3>Câu hỏi ôn tập</h3><ol>${li(d.cau_hoi_on_tap)}</ol>`;
 }
 
-// ---------------- Khởi động ----------------health(); setInterval(health, 30000);
+// ---------------- Khởi động ----------------
+health(); setInterval(health, 30000);
 // tự làm mới các trang chỉ để xem (không làm mới trang có ô đang sửa)
 setInterval(() => { const a = document.querySelector("main section.active")?.id; if (a === "nhat-ky" || a === "tong-quan") loaders[a](); }, 15000);
 const start = location.hash.slice(1);

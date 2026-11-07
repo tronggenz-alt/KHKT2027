@@ -98,7 +98,8 @@ CREATE TABLE IF NOT EXISTS ket_qua_tn (
     thoi_gian REAL NOT NULL,
     du_lieu TEXT NOT NULL DEFAULT '{}',
     diem REAL,
-    nhan_xet TEXT DEFAULT ''
+    nhan_xet TEXT DEFAULT '',
+    hoc_sinh_id INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS su_co_sinh (
@@ -157,6 +158,9 @@ def connect() -> sqlite3.Connection:
             _conn = sqlite3.connect(DB_PATH, check_same_thread=False)
             _conn.row_factory = sqlite3.Row
             _conn.executescript(SCHEMA)
+            # CSDL tạo trước khi có tài khoản: bản ghi cũ để trống hoc_sinh_id
+            if "hoc_sinh_id" not in {r[1] for r in _conn.execute("PRAGMA table_info(ket_qua_tn)")}:
+                _conn.execute("ALTER TABLE ket_qua_tn ADD COLUMN hoc_sinh_id INTEGER")
             _seed(_conn)
         return _conn
 
@@ -269,6 +273,11 @@ def get_static_dung_cu(ma: str) -> dict | None:
     return _DUNG_CU_CACHE.get(ma)
 
 
+def get_all_static_dung_cu() -> list[dict]:
+    _load_static_catalogs()
+    return list(_DUNG_CU_CACHE.values())
+
+
 def get_all_static_bai_thi_nghiem() -> list[dict]:
     _load_static_catalogs()
     return _BAI_THI_NGHIEM_CACHE
@@ -320,6 +329,7 @@ def get_tong_quan() -> dict:
 
     # Sự cố mới
     su_co_moi = query("SELECT * FROM su_co_sinh WHERE trang_thai IN ('moi', 'dang_xu_ly') ORDER BY thoi_gian DESC LIMIT 10")
+    so_su_co_moi = query("SELECT COUNT(*) AS n FROM su_co_sinh WHERE trang_thai IN ('moi', 'dang_xu_ly')")[0]["n"]
 
     # Lịch hôm nay (bắt đầu trong ngày hoặc kéo dài qua ngày hôm nay)
     start_of_day = now - (now % 86400)
@@ -344,6 +354,7 @@ def get_tong_quan() -> dict:
         },
         "tu": tu_status,
         "su_co_moi": su_co_moi,
+        "so_su_co_moi": so_su_co_moi,
         "lich_hom_nay": lich_hom_nay,
     }
 
@@ -632,6 +643,17 @@ def list_ket_qua(lop: str = "", ma_bai: str = "", hoc_sinh: str = "") -> list[di
     return query(f"SELECT * FROM ket_qua_tn {where} ORDER BY thoi_gian DESC", tuple(args))
 
 
+def list_ket_qua_theo_hoc_sinh(hoc_sinh_ids: list[int], ma_bai: str = "") -> list[dict]:
+    if not hoc_sinh_ids:
+        return []
+    dieu_kien = f"hoc_sinh_id IN ({','.join('?' * len(hoc_sinh_ids))})"
+    args = list(hoc_sinh_ids)
+    if ma_bai:
+        dieu_kien += " AND ma_bai = ?"
+        args.append(ma_bai)
+    return query(f"SELECT * FROM ket_qua_tn WHERE {dieu_kien} ORDER BY thoi_gian DESC", tuple(args))
+
+
 def get_ket_qua_by_id(id: int) -> dict | None:
     rows = query("SELECT * FROM ket_qua_tn WHERE id=?", (id,))
     return rows[0] if rows else None
@@ -645,8 +667,8 @@ def add_ket_qua(item: dict) -> dict:
         du_lieu = json.dumps(du_lieu, ensure_ascii=False)
     diem = float(item["diem"]) if "diem" in item and item["diem"] is not None else None
     cur = execute(
-        "INSERT INTO ket_qua_tn (hoc_sinh, lop, ban, ma_bai, thoi_gian, du_lieu, diem, nhan_xet) VALUES (?,?,?,?,?,?,?,?)",
-        (item["hoc_sinh"], item["lop"], item.get("ban", ""), item["ma_bai"], now, du_lieu, diem, item.get("nhan_xet", "")),
+        "INSERT INTO ket_qua_tn (hoc_sinh, lop, ban, ma_bai, thoi_gian, du_lieu, diem, nhan_xet, hoc_sinh_id) VALUES (?,?,?,?,?,?,?,?,?)",
+        (item["hoc_sinh"], item["lop"], item.get("ban", ""), item["ma_bai"], now, du_lieu, diem, item.get("nhan_xet", ""), item.get("hoc_sinh_id")),
     )
     return query("SELECT * FROM ket_qua_tn WHERE id=?", (cur.lastrowid,))[0]
 

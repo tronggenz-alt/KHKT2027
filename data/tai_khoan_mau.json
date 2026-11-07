@@ -1,0 +1,16 @@
+{
+  "_ghi_chu": "Danh sách tài khoản THỬ cho máy cục bộ, không có mật khẩu vì repo công khai. Lệnh `python -m server.lab.quan_tri nap-mau` sinh mật khẩu và mã lớp ngẫu nhiên, ghi vào data/tai_khoan_mau_mat_khau.json (git bỏ qua).",
+  "giao_vien": [
+    { "ten_dang_nhap": "gv.thu1", "ho_ten": "Giáo viên Thử Một" },
+    { "ten_dang_nhap": "gv.thu2", "ho_ten": "Giáo viên Thử Hai" }
+  ],
+  "hoc_sinh": [
+    { "ten_dang_nhap": "hs.thu1", "ho_ten": "Học sinh Thử Một" },
+    { "ten_dang_nhap": "hs.thu2", "ho_ten": "Học sinh Thử Hai" },
+    { "ten_dang_nhap": "hs.thu3", "ho_ten": "Học sinh Thử Ba" }
+  ],
+  "lop": [
+    { "ten": "Lớp thử A", "nam_hoc": "2026-2027", "giao_vien": "gv.thu1", "hoc_sinh": ["hs.thu1", "hs.thu2"] },
+    { "ten": "Lớp thử B", "nam_hoc": "2026-2027", "giao_vien": "gv.thu2", "hoc_sinh": ["hs.thu3"] }
+  ]
+}

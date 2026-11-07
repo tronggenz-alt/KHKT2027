@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Học sinh · VERA Lab</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="/tinh/vera.css">
+<script src="/tinh/phien.js"></script>
+</head>
+<body>
+<header class="thanh">
+  <div class="khung">
+    <a class="nhan-hieu" href="/hoc-sinh">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2.5 35.2 11.2v17.6L20 37.5 4.8 28.8V11.2z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/><path d="M12.5 13 20 28l7.5-15" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      VERA Lab
+    </a>
+    <div class="nguoi">
+      <span class="ten" data-ten-nguoi></span>
+      <button class="nut phu nho" data-dang-xuat>Đăng xuất</button>
+    </div>
+  </div>
+</header>
+<main class="khung">
+  <section class="tab" id="tab-lop"><p class="phu-chu">Đang tải…</p></section>
+  <section class="tab" id="tab-ket-qua"><p class="phu-chu">Đang tải…</p></section>
+  <section class="tab" id="tab-bai"><p class="phu-chu">Đang tải…</p></section>
+  <section class="tab" id="tab-may"><p class="phu-chu">Đang tải…</p></section>
+  <section class="tab" id="tab-dung-cu"><p class="phu-chu">Đang tải…</p></section>
+  <section class="tab" id="tab-lich"><p class="phu-chu">Đang tải…</p></section>
+  <section class="tab" id="tab-tai-khoan"><p class="phu-chu">Đang tải…</p></section>
+</main>
+<script>
+const { esc } = Phien;
+const dsChu = (a, the = "ul") => `<${the}>${(a || []).map((x) => `<li>${esc(x)}</li>`).join("")}</${the}>`;
+// Cùng danh sách với ô chọn khi giáo viên đặt lịch (sinh.html, #dlTarget)
+const TEN_DOI_TUONG = {
+  phong_sinh: "Phòng thí nghiệm sinh học", phong_vi_sinh: "Phòng vi sinh", phong_sinh_phan_tu: "Phòng sinh học phân tử", nha_kinh: "Nhà kính thực vật",
+  may_pcr: "Máy luân nhiệt PCR", noi_hap: "Nồi hấp tiệt trùng", tu_an_toan_sinh_hoc: "Tủ an toàn sinh học cấp II",
+};
+
+function bangThongSo(ds) {
+  if (!ds?.length) return "";
+  const nguon = (t) => {
+    if (t.mo_phong) return "mô phỏng";
+    return /^https?:\/\//.test(t.nguon || "") ? `<a href="${esc(t.nguon)}" target="_blank" rel="noopener">${esc(t.loai || "nguồn")}</a>` : "";
+  };
+  return `<h3>Thông số</h3><div class="cuon"><table class="bang"><tr><th>Thông số</th><th>Giá trị</th><th>Nguồn</th></tr>
+    ${ds.map((t) => `<tr><td>${esc(t.ten)}</td><td>${esc(t.gia_tri)}</td><td>${nguon(t)}</td></tr>`).join("")}</table></div>`;
+}
+
+// Một tab tra cứu: chọn một mục trong danh sách, phần dưới hiện tài liệu của mục đó
+function tabTraCuu(khung, tieuDe, nhanChon, ds, veTaiLieu) {
+  khung.innerHTML = `
+    <h1>${esc(tieuDe)}</h1>
+    <section class="the">
+      <label class="o" style="margin-top: 0"><span>${esc(nhanChon)}</span>
+        <select>${ds.map((d) => `<option value="${esc(d.ma)}">${esc(d.ten)}</option>`).join("")}</select>
+      </label>
+    </section>
+    <section class="the tai-lieu" aria-live="polite"><p class="phu-chu">Đang tải…</p></section>`;
+  const chon = khung.querySelector("select"), noiDung = khung.querySelector(".tai-lieu");
+  const hien = async () => {
+    const ma = chon.value;
+    try {
+      const html = await veTaiLieu(ma);
+      if (chon.value === ma) noiDung.innerHTML = html;
+    } catch (loi) {
+      noiDung.innerHTML = `<p class="bao">${esc(loi.message)}</p>`;
+    }
+  };
+  chon.addEventListener("change", hien);
+  return hien();
+}
+
+Phien.ganTab({
+  "lop": async (khung) => {
+    // Hôm nay của học sinh: bài tiếp theo, tiến độ, ôn câu hỏi. Mọi số lấy từ API.
+    const [nd, bai, kq, lich] = await Promise.all([Phien.san, Phien.json("/lab/sinh/bai-thi-nghiem"), Phien.json("/api/toi/ket-qua"), Phien.json("/lab/sinh/dat-lich")]);
+    const ds = bai.muc, lam = new Map(kq.map((k) => [k.ma_bai, k]));
+    const tiep = ds.find((b) => !lam.has(b.ma)) || ds[0];
+    const ANH = { te_bao_hanh: "sinh_hienvi", khi_khong: "sinh_hienvi", co_nguyen_sinh: "sinh_hienvi", quang_hop: "sinh_quanghop", thoat_hoi_nuoc: "sinh_nhakinh", huong_sang: "sinh_nhakinh",
+      tach_chiet_adn: "sinh_tachchiet", dem_vi_sinh: "sinh_visinh", cay_ria: "sinh_visinh", duong_cong_od600: "sinh_visinh", nhuom_gram: "sinh_nhuom", pcr_dien_di: "sinh_dienhi", ghep_gen_adn_tai_to_hop: "sinh_ghepgen" };
+    const phanTram = Math.round(lam.size / Math.max(1, ds.length) * 100);
+    const sapToi = lich.muc.filter((l) => l.ket_thuc > Date.now() / 1000).length;
+    const theoLop = {};
+    for (const b of ds) (theoLop[b.lop] = theoLop[b.lop] || []).push(b);
+    khung.innerHTML = `
+      <p class="hn-chao">Chào ${esc(nd.ho_ten)}${nd.lop.length ? ` · ${nd.lop.map((l) => esc(l.ten)).join(", ")}` : " · Bạn chưa thuộc lớp nào, hãy nhờ giáo viên thêm vào lớp"}</p>
+      <section class="hs-dau" style="background-image:url('/tinh/anh/${ANH[tiep.ma] || "sinh_thinghiem"}.jpg')">
+        <div class="vong" style="--t:${phanTram}"><div><b>${lam.size}/${ds.length}</b><span>bài đã làm</span></div></div>
+        <small>${lam.size ? "Bài tiếp theo" : "Bắt đầu với"} · Lớp ${tiep.lop}</small>
+        <h1>${esc(tiep.ten)}</h1>
+        <p>${esc(tiep.muc_tieu)}</p>
+        <div class="hop"><span>${tiep.buoc.length} bước</span><span>${tiep.dung_cu.length} dụng cụ</span><span>${tiep.cau_hoi.length} câu hỏi</span><span>Làm trong ứng dụng VERA Lab</span></div>
+      </section>
+      <div class="hs-luoi">
+        <section class="the"><h2>Hành trình ${ds.length} bài Sinh học</h2><div class="hanh-trinh">${Object.keys(theoLop).sort().map((l) => `
+          <div class="ht-lop"><h3>Lớp ${l}</h3><ol>${theoLop[l].map((b) => {
+            const k = lam.get(b.ma);
+            return `<li class="${k ? "xong" : ""} ${b.ma === tiep.ma ? "tiep" : ""}"><span class="ht-nut">${k ? "✓" : ""}</span><span>${esc(b.ten)}</span>${k?.diem != null ? `<b>${String(k.diem).replace(".", ",")}</b>` : k ? `<small>chờ chấm</small>` : ""}</li>`;
+          }).join("")}</ol></div>`).join("")}</div></section>
+        <div class="hs-phu">
+          <section class="the"><h2>Ôn nhanh trước khi vào phòng</h2><div id="the-on"></div></section>
+          <section class="the"><h2>Sắp tới</h2><p class="phu-chu">${sapToi ? `${sapToi} lịch dùng phòng sắp tới. <a href="#lich">Xem lịch</a>` : "Chưa có lịch dùng phòng nào sắp tới."}</p>
+            <p class="phu-chu" style="margin-top:6px">${kq.filter((k) => k.diem != null).length} bài đã có điểm. <a href="#ket-qua">Xem kết quả</a></p></section>
+        </div>
+      </div>`;
+    const cau = ds.flatMap((b) => (b.cau_hoi || []).map((c) => ({ ...c, bai: b.ten })));
+    const noi = khung.querySelector("#the-on");
+    let i = Math.max(0, cau.findIndex((c) => c.bai === tiep.ten)), mo = false;
+    const ve = () => {
+      const c = cau[i];
+      noi.innerHTML = `<button type="button" class="the-on ${mo ? "lat" : ""}" aria-live="polite"><small>${mo ? "Đáp án" : esc(c.bai)}</small><b>${esc(mo ? c.dap_an : c.hoi)}</b><span>${mo ? "" : "Chạm để xem đáp án"}</span></button>
+        <div class="the-duoi"><span>Câu ${i + 1} / ${cau.length}</span><button type="button" class="nut phu nho">Câu khác →</button></div>`;
+      noi.querySelector(".the-on").onclick = () => { mo = !mo; ve(); };
+      noi.querySelector(".the-duoi button").onclick = () => { i = (i + 7) % cau.length; mo = false; ve(); };
+    };
+    if (cau.length) ve(); else noi.innerHTML = `<p class="phu-chu">Chưa có câu hỏi.</p>`;
+  },
+  "ket-qua": async (khung) => {
+    const ds = await Phien.json("/api/toi/ket-qua");
+    khung.innerHTML = `
+      <h1>Kết quả của tôi</h1>
+      ${ds.length ? `<div class="ds-ket-qua">${ds.map((k) => `
+        <section class="the">
+          <div class="dong-chinh">
+            <div><p class="ket-qua-bai">${esc(k.ten_bai)}</p><span class="phu-chu">${esc(k.lop)} · ${Phien.gio(k.thoi_gian)}</span></div>
+            ${k.diem === null ? `<span class="nhan cho">Chưa chấm</span>` : `<div class="diem-to">${esc(k.diem)}<span class="phu-chu">/10</span></div>`}
+          </div>
+          ${k.tom_tat ? `<p class="phu-chu" style="margin-top: 8px">${esc(k.tom_tat)}</p>` : ""}
+          ${k.nhan_xet ? `<p style="margin-top: 8px"><b>Nhận xét:</b> ${esc(k.nhan_xet)}</p>` : ""}
+        </section>`).join("")}</div>`
+        : `<section class="the"><p class="phu-chu">Chưa có kết quả. Hãy đăng nhập trong ứng dụng VERA Lab rồi làm một bài, kết quả sẽ hiện ở đây.</p></section>`}`;
+  },
+  "bai": async (khung) => {
+    const [bai, dc] =await Promise.all([Phien.json("/lab/sinh/bai-thi-nghiem"), Phien.json("/lab/sinh/huong-dan")]);
+    const tenDungCu = Object.fromEntries(dc.muc.map((d) => [d.ma, d.ten]));
+    khung.innerHTML = `
+      <h1>Bài thí nghiệm Sinh học</h1>
+      <section class="the">
+        ${bai.muc.map((b) => `
+          <details class="ban-mo">
+            <summary>${esc(b.ten)}<span>Lớp ${esc(b.lop)}</span></summary>
+            <div class="tai-lieu">
+              <small>${esc(b.sgk)}</small>
+              <h3>Mục tiêu</h3><p>${esc(b.muc_tieu)}</p>
+              <h3>Dụng cụ</h3><p>${b.dung_cu.map((m) => esc(tenDungCu[m] || m)).join(", ")}</p>
+              <h3>Các bước</h3><ol>${b.buoc.map((s) => `<li>${esc(s.mo_ta)}</li>`).join("")}</ol>
+              <h3>Câu hỏi</h3>${dsChu(b.cau_hoi.map((c) => c.hoi), "ol")}
+            </div>
+          </details>`).join("")}
+      </section>`;
+  },
+  "may": async (khung) => {
+    const ds = await Phien.json("/may");
+    await tabTraCuu(khung, "Hướng dẫn máy", "Chọn máy", ds, async (ma) => {
+      const d = await Phien.json("/may/" + encodeURIComponent(ma));
+      return `
+        <h2>${esc(d.ten)}</h2><small>Máy mẫu: ${esc(d.may_mau)}</small>
+        <h3>Nguyên lý</h3>${dsChu(d.nguyen_ly)}
+        <h3>Quy trình vận hành</h3><ol>${d.quy_trinh.map((s) => `<li><b>${esc(s.ten)}:</b> ${esc(s.viec)}${s.ly_do ? `<small>Vì sao: ${esc(s.ly_do)}</small>` : ""}${s.loi ? `<small class="loi">Lỗi hay gặp: ${esc(s.loi)}</small>` : ""}</li>`).join("")}</ol>
+        <h3>An toàn</h3>${dsChu(d.an_toan)}
+        <h3>Bộ phận</h3><div class="cuon"><table class="bang"><tr><th>Bộ phận</th><th>Chức năng</th></tr>${d.bo_phan.map((b) => `<tr><td>${esc(b.ten)}</td><td>${esc(b.chuc_nang)}</td></tr>`).join("")}</table></div>
+        ${bangThongSo(d.thong_so)}
+        <h3>Câu hỏi ôn tập</h3>${dsChu(d.cau_hoi_on_tap, "ol")}`;
+    });
+  },
+  "dung-cu": async (khung) => {
+    const ds = (await Phien.json("/lab/sinh/huong-dan")).muc.sort((a, b) => a.ten.localeCompare(b.ten, "vi"));
+    await tabTraCuu(khung, "Hướng dẫn dụng cụ", "Chọn dụng cụ", ds, async (ma) => {
+      const d = await Phien.json("/lab/sinh/huong-dan/" + encodeURIComponent(ma));
+      return `
+        <h2>${esc(d.ten)}</h2><small>${esc(d.phan_loai)}</small>
+        <h3>Công dụng</h3><p>${esc(d.cong_dung)}</p>
+        <h3>Cách dùng</h3>${dsChu(d.cach_dung, "ol")}
+        <h3>Lỗi hay gặp</h3>${dsChu(d.loi_thuong_gap)}
+        <h3>An toàn</h3>${dsChu(d.an_toan)}
+        ${bangThongSo(d.thong_so)}`;
+    });
+  },
+  "lich": async (khung) => {
+    const bayGio = Date.now() / 1000;
+    const [lich, dc] = await Promise.all([Phien.json("/lab/sinh/dat-lich"), Phien.json("/lab/sinh/huong-dan")]);
+    const ds = lich.muc.filter((l) => l.ket_thuc > bayGio).sort((a, b) => a.bat_dau - b.bat_dau);
+    const tenThietBi = Object.fromEntries(dc.muc.map((d) => [d.ma, d.ten]));
+    const gio =(t) => new Date(t * 1000).toLocaleString("vi-VN", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit" });
+    khung.innerHTML = `
+      <h1>Lịch phòng sắp tới</h1>
+      <section class="the">
+        ${ds.length
+          ? `<div class="cuon"><table class="bang"><tr><th>Phòng, thiết bị</th><th>Lớp</th><th>Bắt đầu</th><th>Kết thúc</th><th>Mục đích</th></tr>
+             ${ds.map((l) => `<tr><td>${esc(TEN_DOI_TUONG[l.doi_tuong] || l.doi_tuong)}</td><td>${esc(l.lop)}</td><td>${gio(l.bat_dau)}</td><td>${gio(l.ket_thuc)}</td><td>${esc(l.muc_dich)}</td></tr>`).join("")}</table></div>`
+          : `<p class="phu-chu">Chưa có lịch nào sắp tới.</p>`}
+      </section>`;
+  },
+  "tai-khoan": Phien.theTaiKhoan,
+}, ["lop", "ket-qua"]);
+</script>
+</body>
+</html>

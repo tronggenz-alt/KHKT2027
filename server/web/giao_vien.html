@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Giáo viên · VERA Lab</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="/tinh/vera.css">
+<script src="/tinh/phien.js"></script>
+<script src="/tinh/ban_do.js"></script>
+<script src="/tinh/hom_nay.js"></script>
+</head>
+<body>
+<header class="thanh">
+  <div class="khung">
+    <a class="nhan-hieu" href="/giao-vien">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2.5 35.2 11.2v17.6L20 37.5 4.8 28.8V11.2z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/><path d="M12.5 13 20 28l7.5-15" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      VERA Lab
+    </a>
+    <div class="nguoi">
+      <span class="ten" data-ten-nguoi></span>
+      <button class="nut phu nho" data-dang-xuat>Đăng xuất</button>
+    </div>
+  </div>
+</header>
+<main class="khung">
+  <section class="tab" id="tab-tong-quan"><p class="phu-chu">Đang tải…</p></section>
+  <section class="tab" id="tab-lop"><p class="phu-chu">Đang tải…</p></section>
+  <section class="tab" id="tab-ket-qua"><p class="phu-chu">Đang tải…</p></section>
+  <section class="tab" id="tab-tai-khoan"><p class="phu-chu">Đang tải…</p></section>
+</main>
+<script>
+const { esc } = Phien;
+
+Phien.ganTab({
+  "tong-quan": (khung) => HomNay.ve(khung),
+  "lop": veDanhSachLop,
+  "ket-qua": veKetQua,
+  "tai-khoan": Phien.theTaiKhoan,
+}, ["tong-quan", "ket-qua"]);
+
+// ---------------- Lớp học ----------------
+let lopDangChon = null;  // lớp đang xem ở tab Kết quả; bấm "Xem kết quả" từ một lớp thì chọn sẵn lớp đó
+
+function baoLoi(khung, loi) {
+  const bao = khung.querySelector(".bao");
+  bao.classList.remove("xong");
+  bao.textContent = Phien.loiChu(loi);
+  bao.hidden = false;
+}
+
+async function veDanhSachLop(khung) {
+  const ds = await Phien.json("/api/lop");
+  khung.innerHTML = `
+    <h1>Lớp học</h1>
+    <section class="the">
+      <h2>Tạo lớp mới</h2>
+      <form id="f-tao-lop" novalidate>
+        <div class="hang-o">
+          <label class="o"><span>Tên lớp</span><input name="ten" maxlength="60" autocomplete="off" placeholder="Ví dụ: 10A1"></label>
+          <label class="o"><span>Năm học</span><input name="nam_hoc" maxlength="20" autocomplete="off" placeholder="Ví dụ: 2026-2027"></label>
+          <button class="nut chinh">Tạo lớp</button>
+        </div>
+        <p class="bao" role="alert" hidden></p>
+      </form>
+    </section>
+    <section class="the">
+      <h2>Lớp của tôi</h2>
+      ${ds.length ? `<ul class="ds-dong">${ds.map((l) => `
+        <li class="dong-chinh">
+          <div><b>${esc(l.ten)}</b> <span class="nhan ${l.ma_lop_mo ? "mo" : ""}">${l.ma_lop_mo ? "Mã lớp đang mở" : "Mã lớp đã đóng"}</span><br><span class="phu-chu">${l.nam_hoc ? esc(l.nam_hoc) + " · " : ""}${l.so_hoc_sinh} học sinh</span></div>
+          <button class="nut phu nho" data-mo-lop="${l.id}">Mở lớp</button>
+        </li>`).join("")}</ul>` : `<p class="phu-chu">Bạn chưa có lớp nào. Hãy tạo lớp đầu tiên ở trên.</p>`}
+    </section>`;
+  const form = khung.querySelector("#f-tao-lop");
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const g = Object.fromEntries(new FormData(form));
+    try {
+      const lop = await Phien.gui("/api/lop", "POST", g);
+      await veLop(khung, lop.id);
+    } catch (loi) {
+      baoLoi(form, loi);
+    }
+  });
+  khung.querySelectorAll("[data-mo-lop]").forEach((n) => n.addEventListener("click", () => veLop(khung, Number(n.dataset.moLop))));
+}
+
+async function veLop(khung, lopId) {
+  const [ds, hs] = await Promise.all([Phien.json("/api/lop"), Phien.json(`/api/lop/${lopId}/hoc-sinh`)]);
+  const lop = ds.find((l) => l.id === lopId);
+  khung.innerHTML = `
+    <p><a class="quay-lai" href="#lop" id="ve-ds">← Các lớp</a></p>
+    <div class="dong-chinh">
+      <h1>${esc(lop.ten)}</h1>
+      <div class="nhom-nut">
+        <button class="nut phu nho" id="doi-ten">Đổi tên</button>
+        <button class="nut phu nho" id="xem-kq">Xem kết quả</button>
+      </div>
+    </div>
+    ${lop.nam_hoc ? `<p class="phu-chu">Năm học ${esc(lop.nam_hoc)}</p>` : ""}
+    <section class="the">
+      <h2>Mã lớp</h2>
+      <div class="dong-chinh">
+        <div><span class="ma-lop">${esc(lop.ma_lop)}</span> <span class="nhan ${lop.ma_lop_mo ? "mo" : ""}">${lop.ma_lop_mo ? "Đang mở" : "Đã đóng"}</span></div>
+        <button class="nut phu nho" id="dong-mo">${lop.ma_lop_mo ? "Đóng mã" : "Mở lại mã"}</button>
+      </div>
+      <p class="phu-chu" style="margin-top: 8px">Khi mã đang mở, học sinh dùng mã này để tự tạo tài khoản và vào lớp. Đóng mã sau khi cả lớp đã vào.</p>
+    </section>
+    <section class="the">
+      <h2>Thêm học sinh</h2>
+      <form id="f-them" novalidate>
+        <label class="o" style="margin-top: 0"><span>Dán danh sách, mỗi dòng một học sinh</span>
+          <textarea name="danh_sach" spellcheck="false" placeholder="Nguyễn Văn An&#10;Trần Thị Bình, tran.binh"></textarea>
+          <small>Chỉ có họ tên thì máy tự đặt tên đăng nhập. Học sinh đã có tài khoản: ghi họ tên, tên đăng nhập để đưa vào lớp, mật khẩu giữ nguyên.</small>
+        </label>
+        <p class="bao" role="alert" hidden></p>
+        <button class="nut chinh" style="margin-top: 14px">Thêm vào lớp</button>
+      </form>
+    </section>
+    <div id="mat-khau-tam"></div>
+    <section class="the">
+      <h2>Học sinh (${hs.length})</h2>
+      ${hs.length ? `<ul class="ds-dong">${hs.map((h) => `
+        <li class="dong-chinh">
+          <div><b>${esc(h.ho_ten)}</b><br><span class="phu-chu">${esc(h.ten_dang_nhap)}</span>${h.phai_doi_mat_khau ? ` <span class="nhan cho">Chưa đổi mật khẩu tạm</span>` : ""}</div>
+          <div class="nhom-nut">
+            <button class="nut phu nho" data-dat-lai="${h.id}" data-ten="${esc(h.ho_ten)}">Đặt lại mật khẩu</button>
+            <button class="nut phu nho nguy" data-go="${h.id}" data-ten="${esc(h.ho_ten)}">Gỡ khỏi lớp</button>
+          </div>
+        </li>`).join("")}</ul>` : `<p class="phu-chu">Lớp chưa có học sinh.</p>`}
+    </section>`;
+  scrollTo(0, 0);
+
+  khung.querySelector("#ve-ds").addEventListener("click", (e) => { e.preventDefault(); veDanhSachLop(khung); });
+  khung.querySelector("#xem-kq").addEventListener("click", () => { lopDangChon = lopId; location.hash = "#ket-qua"; });
+  khung.querySelector("#doi-ten").addEventListener("click", async () => {
+    const ten = prompt("Tên lớp mới", lop.ten);
+    if (ten === null || ten.trim() === lop.ten) return;
+    try {
+      await Phien.gui(`/api/lop/${lopId}`, "PATCH", { ten });
+      await veLop(khung, lopId);
+    } catch (loi) { alert(Phien.loiChu(loi)); }
+  });
+  khung.querySelector("#dong-mo").addEventListener("click", async () => {
+    try {
+      await Phien.gui(`/api/lop/${lopId}`, "PATCH", { ma_lop_mo: !lop.ma_lop_mo });
+      await veLop(khung, lopId);
+    } catch (loi) { alert(Phien.loiChu(loi)); }
+  });
+
+  const form = khung.querySelector("#f-them");
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const nut = form.querySelector("button");
+    nut.disabled = true;
+    try {
+      const kq = await Phien.gui(`/api/lop/${lopId}/hoc-sinh`, "POST", { danh_sach: form.elements.danh_sach.value });
+      await veLop(khung, lopId);
+      hienMatKhauTam(khung, kq.tao, kq.them, kq.loi);
+    } catch (loi) {
+      baoLoi(form, loi);
+      nut.disabled = false;
+    }
+  });
+  khung.querySelectorAll("[data-dat-lai]").forEach((n) => n.addEventListener("click", async () => {
+    if (!confirm(`Đặt lại mật khẩu của ${n.dataset.ten}? Mật khẩu cũ sẽ không dùng được nữa và học sinh phải đăng nhập lại.`)) return;
+    try {
+      const m = await Phien.gui(`/api/lop/${lopId}/hoc-sinh/${n.dataset.datLai}/dat-lai-mat-khau`, "POST");
+      await veLop(khung, lopId);
+      hienMatKhauTam(khung, [m], [], []);
+    } catch (loi) { alert(Phien.loiChu(loi)); }
+  }));
+  khung.querySelectorAll("[data-go]").forEach((n) => n.addEventListener("click", async () => {
+    if (!confirm(`Gỡ ${n.dataset.ten} khỏi lớp? Tài khoản và kết quả đã có vẫn được giữ.`)) return;
+    try {
+      await Phien.gui(`/api/lop/${lopId}/hoc-sinh/${n.dataset.go}`, "DELETE");
+      await veLop(khung, lopId);
+    } catch (loi) { alert(Phien.loiChu(loi)); }
+  }));
+}
+
+// Mật khẩu tạm chỉ có ở đây, ngay sau khi tạo; máy chủ không lưu nên không xem lại được
+function hienMatKhauTam(khung, tao, them, loi) {
+  const cho = khung.querySelector("#mat-khau-tam");
+  cho.innerHTML = `
+    <section class="the">
+      ${tao.length ? `
+        <h2>Mật khẩu tạm</h2>
+        <p class="canh-bao-chu">Danh sách này chỉ hiện một lần. Hãy tải về hoặc chép lại rồi đưa cho từng học sinh. Học sinh phải đổi mật khẩu ở lần đăng nhập đầu.</p>
+        <div class="cuon"><table class="bang"><tr><th>Họ tên</th><th>Tên đăng nhập</th><th>Mật khẩu tạm</th></tr>
+          ${tao.map((t) => `<tr><td>${esc(t.ho_ten)}</td><td>${esc(t.ten_dang_nhap)}</td><td class="mat-khau">${esc(t.mat_khau_tam)}</td></tr>`).join("")}
+        </table></div>
+        <p style="margin-top: 12px"><button class="nut phu nho" id="tai-mk">Tải danh sách (CSV)</button></p>` : ""}
+      ${them.length ? `<h2 ${tao.length ? 'style="margin-top: 18px"' : ""}>Đã có tài khoản, vừa vào lớp</h2><ul class="ds-dong">${them.map((t) => `<li>${esc(t.ho_ten)} · <span class="phu-chu">${esc(t.ten_dang_nhap)}</span></li>`).join("")}</ul>` : ""}
+      ${loi.length ? `<h2 ${tao.length || them.length ? 'style="margin-top: 18px"' : ""}>Dòng chưa thêm được</h2><ul class="ds-dong">${loi.map((l) => `<li><b>${esc(l.dong)}</b><br><span class="phu-chu">${esc(l.ly_do)}</span></li>`).join("")}</ul>` : ""}
+    </section>`;
+  cho.scrollIntoView({ block: "center" });
+  cho.querySelector("#tai-mk")?.addEventListener("click", () => {
+    // Dấu ' trước ô bắt đầu bằng = + - @ để Excel không coi là công thức
+    const o = (s) => { const c = /^[=+\-@]/.test(s) ? "'" + s : s; return `"${c.replaceAll('"', '""')}"`; };
+    const dong = [["Họ tên", "Tên đăng nhập", "Mật khẩu tạm"], ...tao.map((t) => [t.ho_ten, t.ten_dang_nhap, t.mat_khau_tam])];
+    const tep = new Blob(["﻿" + dong.map((d) => d.map(o).join(",")).join("\r\n")], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(tep);
+    a.download = "mat_khau_tam.csv";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+}
+
+// ---------------- Kết quả theo lớp ----------------
+async function veKetQua(khung) {
+  const ds = await Phien.json("/api/lop");
+  if (!ds.length) {
+    khung.innerHTML = `<h1>Kết quả</h1><section class="the"><p class="phu-chu">Bạn chưa có lớp nào. Hãy tạo lớp ở tab Lớp học.</p></section>`;
+    return;
+  }
+  if (!ds.some((l) => l.id === lopDangChon)) lopDangChon = ds[0].id;
+  khung.innerHTML = `
+    <div class="dong-chinh"><h1>Kết quả thí nghiệm</h1><a class="nut phu nho" id="xuat-csv">Xuất CSV</a></div>
+    <section class="the">
+      <div class="hang-o">
+        <label class="o"><span>Lớp</span><select id="chon-lop">${ds.map((l) => `<option value="${l.id}" ${l.id === lopDangChon ? "selected" : ""}>${esc(l.ten)}</option>`).join("")}</select></label>
+        <label class="o"><span>Bài</span><select id="chon-bai"><option value="">Mọi bài</option></select></label>
+      </div>
+    </section>
+    <div class="ds-ket-qua" id="ds-kq"><p class="phu-chu">Đang tải…</p></div>`;
+  const chonLop = khung.querySelector("#chon-lop"), chonBai = khung.querySelector("#chon-bai"), noi = khung.querySelector("#ds-kq");
+
+  const hien = async (doiLop) => {
+    lopDangChon = Number(chonLop.value);
+    khung.querySelector("#xuat-csv").href = `/api/lop/${lopDangChon}/ket-qua.csv`;
+    const moi = doiLop ? await Phien.json(`/api/lop/${lopDangChon}/ket-qua`) : null;
+    if (moi) {
+      const cacBai = [...new Map(moi.map((k) => [k.ma_bai, k.ten_bai])).entries()];
+      chonBai.innerHTML = `<option value="">Mọi bài</option>` + cacBai.map(([ma, ten]) => `<option value="${esc(ma)}">${esc(ten)}</option>`).join("");
+    }
+    const kq = moi ?? await Phien.json(`/api/lop/${lopDangChon}/ket-qua?ma_bai=${encodeURIComponent(chonBai.value)}`);
+    noi.innerHTML = kq.length ? kq.map((k) => `
+      <form class="the" data-kq="${k.id}" novalidate>
+        <div class="dong-chinh"><b>${esc(k.ho_ten)}</b><span class="phu-chu">${Phien.gio(k.thoi_gian)}</span></div>
+        <p class="ket-qua-bai">${esc(k.ten_bai)}</p>
+        ${k.tom_tat ? `<p class="phu-chu">${esc(k.tom_tat)}</p>` : ""}
+        <div class="cham">
+          <label class="o"><span>Điểm</span><input name="diem" type="number" min="0" max="10" step="0.25" inputmode="decimal" value="${k.diem ?? ""}"></label>
+          <label class="o"><span>Nhận xét</span><input name="nhan_xet" maxlength="500" value="${esc(k.nhan_xet)}"></label>
+          <button class="nut phu">Lưu</button>
+        </div>
+        <p class="bao" role="status" hidden></p>
+      </form>`).join("") : `<section class="the"><p class="phu-chu">Chưa có kết quả. Kết quả hiện ở đây khi học sinh đã đăng nhập trong ứng dụng và làm xong một bài.</p></section>`;
+    noi.querySelectorAll("form[data-kq]").forEach((f) => f.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const nut = f.querySelector("button"), diem = f.elements.diem.value;
+      nut.disabled = true;
+      try {
+        await Phien.gui(`/lab/sinh/ket-qua/${f.dataset.kq}`, "PATCH", { diem: diem === "" ? null : Number(diem), nhan_xet: f.elements.nhan_xet.value });
+        const bao = f.querySelector(".bao");
+        bao.textContent = "Đã lưu";
+        bao.classList.add("xong");
+        bao.hidden = false;
+      } catch (loi) {
+        baoLoi(f, loi.message === "Không tải được dữ liệu" ? new Error("Điểm phải từ 0 đến 10") : loi);
+      }
+      nut.disabled = false;
+    }));
+  };
+  chonLop.addEventListener("change", () => hien(true));
+  chonBai.addEventListener("change", () => hien(false));
+  await hien(true);
+}
+</script>
+</body>
+</html>

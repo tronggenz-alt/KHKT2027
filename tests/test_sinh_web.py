@@ -10,7 +10,8 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 
 from server.ai.main import app
-from server.lab import sinh_db
+from server.lab import db, sinh_db
+from tests.ho_tro_dang_nhap import dang_nhap_giao_vien
 
 
 class TestSinhWeb(unittest.TestCase):
@@ -18,10 +19,13 @@ class TestSinhWeb(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.db_path = Path(self.tmp.name) / "test_sinh_web.db"
         sinh_db.reset_for_tests(self.db_path)
+        db.reset_for_tests(self.db_path)
         self.client = TestClient(app)
+        dang_nhap_giao_vien(self.client)
 
     def tearDown(self):
         sinh_db.reset_for_tests(Path(self.tmp.name) / "khac.db")
+        db.reset_for_tests(Path(self.tmp.name) / "khac.db")
         self.tmp.cleanup()
 
     def test_01_sinh_page(self):
