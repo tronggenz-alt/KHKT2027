@@ -15,6 +15,11 @@ namespace Khkt.Demo
     public class AiClient : MonoBehaviour
     {
         [Tooltip("Địa chỉ máy chủ AI (uvicorn server.ai.main:app --port 8000)")]
+        public string serverUrl
+        {
+            get => GameSession.ServerUrl;
+            set => GameSession.ServerUrl = value;
+        }
         public float timeoutS = 25f;
         const float PlanTimeoutS = 90f;  // kế hoạch robot dài; máy chủ thử mô hình mạnh trước, lỗi thì chuyển mô hình khác (tối đa 80 s)
 
