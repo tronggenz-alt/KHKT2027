@@ -89,7 +89,6 @@ namespace Khkt.EditorTools
             AttachSurfaces(root);
             AttachUsables(root);
             BuildDemo(root);
-            BuildHdArchitecture(root);
             OptimizeRenderers(root);
             AttachHlod(root);
             AttachImpostors(root);
@@ -110,6 +109,7 @@ namespace Khkt.EditorTools
 
             // Tách phần tĩnh của từng khu ra cảnh riêng (tải / gỡ cộng dồn lúc chạy), đồ tương tác ở lại cảnh lõi
             var zoneScenes = SplitIntoZones(scene, root);
+            BuildHdArchitecture(root);
             EditorSceneManager.SetActiveScene(scene);
             EditorSceneManager.SaveScene(scene, ScenePath);
             int total = root.GetComponentsInChildren<Transform>(true).Length, zoneObjects = 0;
@@ -218,12 +218,13 @@ namespace Khkt.EditorTools
             // kính trong hơn: kính vẽ hai mặt nên độ đục cộng đôi; đục quá thì phòng bên kia trông như có sương mù
             windowGlass = Mat("KinhCuaSo", new Color(0.55f, 0.7f, 0.8f, 0.06f), 0.95f, 0, transparent: true);
             cabinetGlass = Mat("KinhTu", new Color(0.7f, 0.8f, 0.85f, 0.06f), 0.7f, 0, transparent: true);
-            // Kính vách / cửa sổ / tủ: tắt phản chiếu môi trường. Có đầu dò phản chiếu, mặt kính in cả căn phòng trắng lên
-            // thành một lớp mờ như sương, nhìn sang phòng bên kia không rõ. Vẫn giữ điểm sáng của đèn trên kính.
+            // Kính vách / cửa sổ / tủ: tắt phản chiếu môi trường và đốm chói specular (Mục 4E).
             foreach (var m in new[] { windowGlass, cabinetGlass })
             {
                 m.SetFloat("_EnvironmentReflections", 0f);
                 m.EnableKeyword("_ENVIRONMENTREFLECTIONS_OFF");
+                m.SetFloat("_SpecularHighlights", 0f);
+                m.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
                 EditorUtility.SetDirty(m);
             }
             labGlass = Mat("ThuyTinh", new Color(0.85f, 0.95f, 1f, 0.22f), 0.95f, 0, transparent: true);
@@ -622,6 +623,8 @@ namespace Khkt.EditorTools
             sun.color = new Color(1f, 0.95f, 0.88f);
             sun.intensity = 1.6f;
             sun.shadows = LightShadows.Soft;
+            sun.shadowBias = 0.025f;
+            sun.shadowNormalBias = 0.12f;
             RenderSettings.sun = sun;
 
             // Ánh sáng môi trường chuẩn PBR HD: trần đạt 0.55-0.75, mặt bàn đạt 0.60-0.80

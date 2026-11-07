@@ -17,7 +17,9 @@ namespace Khkt.Rendering.HD
     {
         public static HdPerformanceHud Instance { get; private set; }
 
-        public bool ShowHud = true;
+        public bool ShowHud = false;
+
+        bool threeFingerGestureActive = false;
 
         float updateInterval = 0.4f;
         float timeAccum = 0f;
@@ -27,6 +29,9 @@ namespace Khkt.Rendering.HD
         float avgFps = 60f;
         float minFps = 60f;
         float frameTimeMs = 16.6f;
+
+        string currentZoneName = "Toàn viện";
+        int currentZoneIdx = -1;
 
         long totalAllocatedMemoryMb = 0;
         long gcMemoryMb = 0;
@@ -59,19 +64,37 @@ namespace Khkt.Rendering.HD
                 ShowHud = !ShowHud;
             }
 
-            // Chạm 3 ngón tay cùng lúc trên màn hình iPad để toggle HUD
-            var screen = UnityEngine.InputSystem.Touchscreen.current;
-            if (screen != null)
+            // Chạm 3 ngón tay cùng lúc trên màn hình iPad để bật/tắt HUD
+            bool threeFingerTap = false;
+            if (UnityEngine.Input.touchCount >= 3)
             {
-                int pressedCount = 0;
-                foreach (var t in screen.touches)
+                threeFingerTap = true;
+            }
+            else
+            {
+                var screen = UnityEngine.InputSystem.Touchscreen.current;
+                if (screen != null)
                 {
-                    if (t.isInProgress) pressedCount++;
+                    int pressedCount = 0;
+                    foreach (var t in screen.touches)
+                    {
+                        if (t.isInProgress) pressedCount++;
+                    }
+                    if (pressedCount >= 3) threeFingerTap = true;
                 }
-                if (pressedCount >= 3 && Time.frameCount % 30 == 0)
+            }
+
+            if (threeFingerTap)
+            {
+                if (!threeFingerGestureActive)
                 {
                     ShowHud = !ShowHud;
+                    threeFingerGestureActive = true;
                 }
+            }
+            else
+            {
+                threeFingerGestureActive = false;
             }
 
             timeAccum += Time.unscaledDeltaTime;
@@ -89,6 +112,11 @@ namespace Khkt.Rendering.HD
             {
                 currentFps = frameCount / timeAccum;
                 frameTimeMs = (timeAccum / frameCount) * 1000f;
+
+                // Xác định khu vực hiện tại để đo thời gian khung hình theo khu
+                Vector3 viewerPos = Camera.main != null ? Camera.main.transform.position : Vector3.zero;
+                currentZoneIdx = ZoneMap.At(viewerPos);
+                currentZoneName = (currentZoneIdx >= 0 && currentZoneIdx < ZoneMap.Zones.Length) ? ZoneMap.Zones[currentZoneIdx].name : "Toàn viện";
 
                 // Tính toán min FPS trong lịch sử gần nhất
                 float min = 999f;
@@ -124,9 +152,10 @@ namespace Khkt.Rendering.HD
             GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(scale, scale, 1.0f));
 
             float w = 270f;
-            float h = 180f;
-            float x = (Screen.width / scale) - w - 15f;
-            float y = 15f;
+            float h = 195f;
+            // Dời sang góc trên bên trái để không che nút Menu và Trợ giúp ở góc trên bên phải
+            float x = 20f;
+            float y = 20f;
 
             GUILayout.BeginArea(new Rect(x, y, w, h), boxStyle);
 
@@ -138,11 +167,12 @@ namespace Khkt.Rendering.HD
             }
             GUILayout.EndHorizontal();
 
-            // FPS và Frame time
+            // FPS và Frame time theo khu vực
             Color fpsColor = currentFps >= 55f ? Color.green : (currentFps >= 30f ? Color.yellow : Color.red);
             var prevColor = GUI.color;
             GUI.color = fpsColor;
-            GUILayout.Label($"FPS: {currentFps:0.0} (Avg: {avgFps:0.0} | 1% Min: {minFps:0.0}) - {frameTimeMs:0.1} ms", textStyle);
+            GUILayout.Label($"FPS: {currentFps:0.0} (Avg: {avgFps:0.0} | 1% Min: {minFps:0.0})", textStyle);
+            GUILayout.Label($"Khu vực: {currentZoneName} · {frameTimeMs:0.1} ms", textStyle);
             GUI.color = prevColor;
 
             // Bộ nhớ RAM

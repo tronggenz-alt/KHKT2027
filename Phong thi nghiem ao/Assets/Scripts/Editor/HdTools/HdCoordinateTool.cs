@@ -353,6 +353,9 @@ namespace Khkt.EditorTools
             string lower = rec.path.ToLowerInvariant();
             if (lower.Contains("probe") || lower.Contains("volume") || lower.Contains("đèn") || lower.Contains("mặt trời") || lower.Contains("sun"))
                 return true;
+            // Ngoại lệ ràng buộc 1: mục làm chi tiết cây được thêm hoặc bớt lưới con, gốc của cây và chậu không được đổi
+            if ((lower.Contains("cây xanh") || lower.Contains("chậu cây")) && !lower.EndsWith("chậu") && !lower.EndsWith("cây xanh") && !lower.EndsWith("chậu cây"))
+                return true;
             return false;
         }
 

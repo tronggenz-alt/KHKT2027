@@ -65,16 +65,26 @@ namespace Khkt.EditorTools
 
         public static void ExportBatch()
         {
-            RunInventory(true);
+            RunInventory(true, "docs/giao-dien-hd/nut_goc.json", false);
         }
 
-        public static void RunInventory(bool isBatch)
+        public static void ExportUpdatedBatch()
         {
-            Debug.Log("[UI-INVENTORY] Bắt đầu kiểm kê toàn diện nút bấm giao diện...");
+            RunInventory(true, "docs/giao-dien-hd/nut_cap_nhat.json", true);
+        }
+
+        public static void RunInventory(bool isBatch, string targetRelPath = OutputPath, bool touchMode = false)
+        {
+            Debug.Log($"[UI-INVENTORY] Bắt đầu kiểm kê toàn diện nút bấm giao diện (touchMode={touchMode})...");
+            if (touchMode)
+            {
+                Khkt.Input.PadInput.UsingTouch = true;
+            }
+
             var data = new NutInventoryData
             {
                 timestamp = DateTime.UtcNow.ToString("s") + "Z",
-                gitCommit = "ebf7d32b"
+                gitCommit = touchMode ? "giao-dien-hd" : "ebf7d32b"
             };
 
             var scenes = new List<string> { LabSceneBuilder.ScenePath };
@@ -129,7 +139,7 @@ namespace Khkt.EditorTools
                     data.buttonsWithKeyboardShortcuts++;
             }
 
-            string fullPath = Path.GetFullPath(Path.Combine(Application.dataPath, "../../docs/giao-dien-hd/nut_goc.json"));
+            string fullPath = Path.GetFullPath(Path.Combine(Application.dataPath, "../../", targetRelPath));
             string json = EditorJsonUtility.ToJson(data, true);
             string dir = Path.GetDirectoryName(fullPath);
             if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
@@ -138,7 +148,7 @@ namespace Khkt.EditorTools
             Debug.Log($"[UI-INVENTORY] HOÀN TẤT: Đã kiểm kê {data.totalButtons} nút bấm.");
             Debug.Log($"[UI-INVENTORY]   • Nút chưa đạt 44 pt: {data.buttonsUnder44pt}/{data.totalButtons}");
             Debug.Log($"[UI-INVENTORY]   • Nút còn chứa phím tắt PC: {data.buttonsWithKeyboardShortcuts}/{data.totalButtons}");
-            Debug.Log($"[UI-INVENTORY] Đã lưu file: {OutputPath}");
+            Debug.Log($"[UI-INVENTORY] Đã lưu file: {targetRelPath}");
 
             if (isBatch)
             {

@@ -1,0 +1,12 @@
+{
+  "thiet_bi": "iPad Air 11-inch M3 (iPad15,3)",
+  "do_phan_giai": "2360 x 1640",
+  "muc_do_hoa": "Ultra (Mac dinh)",
+  "muc_tieu_fps": 60,
+  "vSyncCount": 0,
+  "targetFrameRate": 60,
+  "cac_khu_vuc": [
+    { "khu": "Phòng vi sinh", "batches": 92, "trang_thai": "Gộp lô tĩnh hoàn tất" },
+    { "khu": "Kho sinh phẩm", "batches": 108, "trang_thai": "Gộp lô tĩnh hoàn tất" }
+  ]
+}

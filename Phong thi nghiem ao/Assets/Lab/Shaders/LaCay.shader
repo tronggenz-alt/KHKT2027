@@ -6,7 +6,7 @@ Shader "Khkt/Bio/LaCay"
         _BumpMap ("Bản đồ gân lá (Normal)", 2D) = "bump" {}
         _BumpScale ("Độ sâu gân lá", Range(0.0, 2.0)) = 1.0
         _BaseColor ("Màu lá", Color) = (0.20, 0.36, 0.18, 1.0)
-        _Translucency ("Độ xuyên sáng lá (SSS)", Range(0.0, 1.0)) = 0.45
+        _Translucency ("Độ xuyên sáng lá (SSS)", Range(0.0, 1.0)) = 0.5
         _Cutoff ("Ngưỡng Alpha Clip", Range(0.0, 1.0)) = 0.5
         _WindSpeed ("Tốc độ gió", Float) = 2.4
         _WindStrength ("Biên độ rung gió (m)", Float) = 0.035
@@ -17,6 +17,29 @@ Shader "Khkt/Bio/LaCay"
         Tags { "RenderType" = "TransparentCutout" "Queue" = "AlphaTest" "RenderPipeline" = "UniversalPipeline" }
         LOD 200
         Cull Off
+
+        HLSLINCLUDE
+        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+
+        CBUFFER_START(UnityPerMaterial)
+            float4 _BaseMap_ST;
+            float4 _BaseColor;
+            float _BumpScale;
+            float _Translucency;
+            float _Cutoff;
+            float _WindSpeed;
+            float _WindStrength;
+        CBUFFER_END
+
+        void ApplyLeafWind(inout float3 posOS, float weight, float time)
+        {
+            float t = time * _WindSpeed;
+            float swayX = sin(t + posOS.x * 3.0 + posOS.z * 2.0) * _WindStrength * weight;
+            float swayY = cos(t * 1.3 + posOS.z * 2.5) * (_WindStrength * 0.35) * weight;
+            float swayZ = sin(t * 0.8 + posOS.y * 3.0) * (_WindStrength * 0.50) * weight;
+            posOS += float3(swayX, swayY, swayZ);
+        }
+        ENDHLSL
 
         // 1. Pass UniversalForward (kết xuất chính nhận PBR, bóng đổ và xuyên sáng)
         Pass
@@ -31,7 +54,6 @@ Shader "Khkt/Bio/LaCay"
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
             #pragma multi_compile _ _ADDITIONAL_LIGHTS
             #pragma multi_compile_fragment _ _SHADOWS_SOFT
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
             struct Attributes
@@ -60,16 +82,6 @@ Shader "Khkt/Bio/LaCay"
             TEXTURE2D(_BumpMap);
             SAMPLER(sampler_BumpMap);
 
-            CBUFFER_START(UnityPerMaterial)
-                float4 _BaseMap_ST;
-                float4 _BaseColor;
-                float _BumpScale;
-                float _Translucency;
-                float _Cutoff;
-                float _WindSpeed;
-                float _WindStrength;
-            CBUFFER_END
-
             Varyings vert(Attributes input)
             {
                 Varyings output;
@@ -77,12 +89,7 @@ Shader "Khkt/Bio/LaCay"
                 UNITY_TRANSFER_INSTANCE_ID(input, output);
 
                 float3 posOS = input.positionOS.xyz;
-                float weight = input.color.r;
-                float time = _Time.y * _WindSpeed;
-                float swayX = sin(time + posOS.x * 3.0 + posOS.z * 2.0) * _WindStrength * weight;
-                float swayY = cos(time * 1.3 + posOS.z * 2.5) * (_WindStrength * 0.4) * weight;
-                float swayZ = sin(time * 0.8 + posOS.y * 3.0) * (_WindStrength * 0.6) * weight;
-                posOS += float3(swayX, swayY, swayZ);
+                ApplyLeafWind(posOS, input.color.r, _Time.y);
 
                 VertexPositionInputs vertexInput = GetVertexPositionInputs(posOS);
                 VertexNormalInputs normalInput = GetVertexNormalInputs(input.normalOS, input.tangentOS);
@@ -96,32 +103,57 @@ Shader "Khkt/Bio/LaCay"
                 return output;
             }
 
-            half4 frag(Varyings input) : SV_Target
+            half4 frag(Varyings input, bool isFrontFace : SV_IsFrontFace) : SV_Target
             {
                 UNITY_SETUP_INSTANCE_ID(input);
                 half4 texColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv) * _BaseColor;
                 clip(texColor.a - _Cutoff);
 
+                // Pháp tuyến 2 mặt: khi vẽ mặt sau, đảo chiều pháp tuyến hình học
+                float3 geomNormalWS = normalize(input.normalWS);
+                #if !defined(SHADER_API_GLES)
+                if (!isFrontFace) geomNormalWS = -geomNormalWS;
+                #endif
+
                 // Tính toán Normal Map gân lá
                 half3 normalTS = UnpackNormalScale(SAMPLE_TEXTURE2D(_BumpMap, sampler_BumpMap, input.uv), _BumpScale);
-                float3 bitangent = cross(input.normalWS, input.tangentWS.xyz) * input.tangentWS.w;
-                float3 normalWS = TransformTangentToWorld(normalTS, half3x3(input.tangentWS.xyz, bitangent, input.normalWS));
+                float3 bitangent = cross(geomNormalWS, input.tangentWS.xyz) * input.tangentWS.w;
+                float3 normalWS = TransformTangentToWorld(normalTS, half3x3(input.tangentWS.xyz, bitangent, geomNormalWS));
                 normalWS = normalize(normalWS);
 
                 // Bóng đổ thời gian thực
                 float4 shadowCoord = TransformWorldToShadowCoord(input.positionWS);
                 Light mainLight = GetMainLight(shadowCoord);
-
-                float NdotL = saturate(dot(normalWS, mainLight.direction));
-                // Ánh sáng xuyên lá (Subsurface Scattering giả lập tự nhiên khi nhìn ngược nắng)
-                float backLight = saturate(dot(-normalWS, mainLight.direction)) * _Translucency * 0.45;
                 float shadowAtten = mainLight.shadowAttenuation;
 
-                float3 directLight = (NdotL + backLight) * mainLight.color * shadowAtten;
-                // Ánh sáng môi trường dịu nhẹ xanh tươi, kiềm chế
-                float3 ambient = half3(0.14, 0.16, 0.12);
+                float3 viewDirWS = normalize(GetCameraPositionWS() - input.positionWS);
+                float NdotL = saturate(dot(normalWS, mainLight.direction));
 
-                return half4(texColor.rgb * (directLight + ambient), 1.0);
+                // 1. Ánh sáng xuyên lá (Subsurface Scattering giả lập tự nhiên khi nhìn ngược nắng)
+                float backLight = saturate(dot(-normalWS, mainLight.direction));
+                float forwardScatter = saturate(dot(-viewDirWS, mainLight.direction));
+                float sssAmount = (backLight * 0.65 + pow(forwardScatter, 3.0) * 0.35) * _Translucency;
+                half3 sssColor = half3(0.55, 0.88, 0.20) * sssAmount * mainLight.color * (0.35 + 0.65 * shadowAtten);
+
+                // 2. Độ bóng nhẹ của lớp sáp biểu bì (cuticle sheen)
+                float3 halfVec = normalize(mainLight.direction + viewDirWS);
+                float NdotH = saturate(dot(normalWS, halfVec));
+                float spec = pow(NdotH, 28.0) * 0.25 * shadowAtten;
+                half3 specColor = spec * mainLight.color;
+
+                // 3. Đa sắc độ lá: xanh non (ngọn lá) vs xanh thẫm (gốc) từ vertex color G, B
+                half3 leafAlbedo = texColor.rgb;
+                half3 youngTint = half3(1.15, 1.25, 0.85);
+                half3 matureTint = half3(0.85, 0.95, 0.80);
+                leafAlbedo *= lerp(matureTint, youngTint, input.color.g);
+                leafAlbedo *= (0.92 + input.color.b * 0.16);
+
+                // 4. Kết hợp ánh sáng trực tiếp, xuyên sáng và môi trường
+                float3 directLight = NdotL * mainLight.color * shadowAtten + sssColor;
+                float3 ambient = SampleSH(normalWS) * 0.45 + half3(0.10, 0.14, 0.08);
+
+                half3 finalRGB = leafAlbedo * (directLight + ambient) + specColor;
+                return half4(finalRGB, 1.0);
             }
             ENDHLSL
         }
@@ -141,7 +173,6 @@ Shader "Khkt/Bio/LaCay"
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile_instancing
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
 
             struct Attributes
@@ -163,16 +194,6 @@ Shader "Khkt/Bio/LaCay"
             TEXTURE2D(_BaseMap);
             SAMPLER(sampler_BaseMap);
 
-            CBUFFER_START(UnityPerMaterial)
-                float4 _BaseMap_ST;
-                float4 _BaseColor;
-                float _BumpScale;
-                float _Translucency;
-                float _Cutoff;
-                float _WindSpeed;
-                float _WindStrength;
-            CBUFFER_END
-
             Varyings vert(Attributes input)
             {
                 Varyings output;
@@ -180,9 +201,7 @@ Shader "Khkt/Bio/LaCay"
                 UNITY_TRANSFER_INSTANCE_ID(input, output);
 
                 float3 posOS = input.positionOS.xyz;
-                float weight = input.color.r;
-                float time = _Time.y * _WindSpeed;
-                posOS.x += sin(time + posOS.x * 3.0) * _WindStrength * weight;
+                ApplyLeafWind(posOS, input.color.r, _Time.y);
 
                 float3 positionWS = TransformObjectToWorld(posOS);
                 float3 normalWS = TransformObjectToWorldNormal(input.normalOS);
@@ -215,7 +234,6 @@ Shader "Khkt/Bio/LaCay"
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile_instancing
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
             struct Attributes
             {
@@ -235,16 +253,6 @@ Shader "Khkt/Bio/LaCay"
             TEXTURE2D(_BaseMap);
             SAMPLER(sampler_BaseMap);
 
-            CBUFFER_START(UnityPerMaterial)
-                float4 _BaseMap_ST;
-                float4 _BaseColor;
-                float _BumpScale;
-                float _Translucency;
-                float _Cutoff;
-                float _WindSpeed;
-                float _WindStrength;
-            CBUFFER_END
-
             Varyings vert(Attributes input)
             {
                 Varyings output;
@@ -252,9 +260,7 @@ Shader "Khkt/Bio/LaCay"
                 UNITY_TRANSFER_INSTANCE_ID(input, output);
 
                 float3 posOS = input.positionOS.xyz;
-                float weight = input.color.r;
-                float time = _Time.y * _WindSpeed;
-                posOS.x += sin(time + posOS.x * 3.0) * _WindStrength * weight;
+                ApplyLeafWind(posOS, input.color.r, _Time.y);
 
                 output.positionCS = TransformObjectToHClip(posOS);
                 output.uv = TRANSFORM_TEX(input.uv, _BaseMap);
@@ -284,7 +290,6 @@ Shader "Khkt/Bio/LaCay"
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile_instancing
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
             struct Attributes
             {
@@ -306,16 +311,6 @@ Shader "Khkt/Bio/LaCay"
             TEXTURE2D(_BaseMap);
             SAMPLER(sampler_BaseMap);
 
-            CBUFFER_START(UnityPerMaterial)
-                float4 _BaseMap_ST;
-                float4 _BaseColor;
-                float _BumpScale;
-                float _Translucency;
-                float _Cutoff;
-                float _WindSpeed;
-                float _WindStrength;
-            CBUFFER_END
-
             Varyings vert(Attributes input)
             {
                 Varyings output;
@@ -323,9 +318,7 @@ Shader "Khkt/Bio/LaCay"
                 UNITY_TRANSFER_INSTANCE_ID(input, output);
 
                 float3 posOS = input.positionOS.xyz;
-                float weight = input.color.r;
-                float time = _Time.y * _WindSpeed;
-                posOS.x += sin(time + posOS.x * 3.0) * _WindStrength * weight;
+                ApplyLeafWind(posOS, input.color.r, _Time.y);
 
                 output.positionCS = TransformObjectToHClip(posOS);
                 output.uv = TRANSFORM_TEX(input.uv, _BaseMap);
@@ -333,12 +326,17 @@ Shader "Khkt/Bio/LaCay"
                 return output;
             }
 
-            half4 frag(Varyings input) : SV_Target
+            half4 frag(Varyings input, bool isFrontFace : SV_IsFrontFace) : SV_Target
             {
                 UNITY_SETUP_INSTANCE_ID(input);
                 half4 texColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv) * _BaseColor;
                 clip(texColor.a - _Cutoff);
-                return half4(NormalizeNormalPerPixel(input.normalWS), 0.0);
+
+                float3 nWS = NormalizeNormalPerPixel(input.normalWS);
+                #if !defined(SHADER_API_GLES)
+                if (!isFrontFace) nWS = -nWS;
+                #endif
+                return half4(nWS, 0.0);
             }
             ENDHLSL
         }

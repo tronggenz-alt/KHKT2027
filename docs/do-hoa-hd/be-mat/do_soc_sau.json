@@ -1,0 +1,401 @@
+{
+  "threshold": 30.0,
+  "results": [
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/01_toan_canh_cua_vao.png",
+      "name": "01_toan_canh_cua_vao.png",
+      "ratio": 7437.500145550345,
+      "peak": 5682233.162356806,
+      "median": 763.9977211539225,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/02_tuong_bang.png",
+      "name": "02_tuong_bang.png",
+      "ratio": 5431.461397076306,
+      "peak": 3857710.8391987258,
+      "median": 710.252831994898,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/03_ban_hoc_sinh.png",
+      "name": "03_ban_hoc_sinh.png",
+      "ratio": 5919.949364786868,
+      "peak": 4641394.286442929,
+      "median": 784.0260110993079,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/04_ban_chuan_do.png",
+      "name": "04_ban_chuan_do.png",
+      "ratio": 9108.68765361806,
+      "peak": 4456654.358562762,
+      "median": 489.2751324831572,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/05_khu_tong_hop.png",
+      "name": "05_khu_tong_hop.png",
+      "ratio": 6905.81922482129,
+      "peak": 5005468.112358176,
+      "median": 724.818873667903,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/06_tu_hut.png",
+      "name": "06_tu_hut.png",
+      "ratio": 10428.827773339051,
+      "peak": 5523057.242138029,
+      "median": 529.5952107055839,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/07_loi_vao_kho.png",
+      "name": "07_loi_vao_kho.png",
+      "ratio": 7621.002424566971,
+      "peak": 5752924.603057147,
+      "median": 754.8776765161338,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/08_kho_ben_trong.png",
+      "name": "08_kho_ben_trong.png",
+      "ratio": 7001.878842779067,
+      "peak": 4744014.625571703,
+      "median": 677.5345206657089,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/09_hanh_lang.png",
+      "name": "09_hanh_lang.png",
+      "ratio": 6561.942546281001,
+      "peak": 4475352.6690248335,
+      "median": 682.0164360469191,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/10_phong_may.png",
+      "name": "10_phong_may.png",
+      "ratio": 6204.248079059292,
+      "peak": 4435733.1251260955,
+      "median": 714.9509607837301,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/11_phong_robot.png",
+      "name": "11_phong_robot.png",
+      "ratio": 7357.8191942316635,
+      "peak": 5318303.973055291,
+      "median": 722.8098207619893,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/12_khu_an_toan.png",
+      "name": "12_khu_an_toan.png",
+      "ratio": 7917.30480906969,
+      "peak": 4798531.109157857,
+      "median": 606.0813906749823,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/13_tuong_video_gan.png",
+      "name": "13_tuong_video_gan.png",
+      "ratio": 6734.591665981032,
+      "peak": 5155999.386802307,
+      "median": 765.5994071295909,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/14_tuong_nha_hoa_hoc.png",
+      "name": "14_tuong_nha_hoa_hoc.png",
+      "ratio": 9614.88417490317,
+      "peak": 6590330.297798325,
+      "median": 685.4300247219095,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/15_hanh_lang_lich_su.png",
+      "name": "15_hanh_lang_lich_su.png",
+      "ratio": 7118.271049247504,
+      "peak": 6947739.173999785,
+      "median": 976.0430764522616,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/16_tuong_trien_lam.png",
+      "name": "16_tuong_trien_lam.png",
+      "ratio": 6830.7220754886075,
+      "peak": 4921957.576370283,
+      "median": 720.5618266865152,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/17_cua_phong_may.png",
+      "name": "17_cua_phong_may.png",
+      "ratio": 8925.502550423156,
+      "peak": 5835389.793007803,
+      "median": 653.7883732543321,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/18_tran_go_hang_ban.png",
+      "name": "18_tran_go_hang_ban.png",
+      "ratio": 7907.970801981551,
+      "peak": 6404467.577184795,
+      "median": 809.8749650796519,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/19_ngan_kinh_che_tao.png",
+      "name": "19_ngan_kinh_che_tao.png",
+      "ratio": 7035.958328306776,
+      "peak": 4845966.348907501,
+      "median": 688.7429007845386,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/20_phong_may_toan_canh.png",
+      "name": "20_phong_may_toan_canh.png",
+      "ratio": 7469.7348319741095,
+      "peak": 4977000.264708918,
+      "median": 666.288747403754,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/21_phong_may_sem_xrd.png",
+      "name": "21_phong_may_sem_xrd.png",
+      "ratio": 6761.461406534733,
+      "peak": 4104525.7716090227,
+      "median": 607.0471344515132,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/22_phong_may_tuong_dong.png",
+      "name": "22_phong_may_tuong_dong.png",
+      "ratio": 7154.701798213496,
+      "peak": 4099603.963912062,
+      "median": 572.99438599442,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/23_ban_mau_phan_tich.png",
+      "name": "23_ban_mau_phan_tich.png",
+      "ratio": 9218.145012728322,
+      "peak": 5200688.451200959,
+      "median": 564.1795007485475,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/24_bom_nhiet_luong.png",
+      "name": "24_bom_nhiet_luong.png",
+      "ratio": 7823.746012660787,
+      "peak": 4759263.620480984,
+      "median": 608.3100873547099,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/c01_thuy_tinh_dung_dich.png",
+      "name": "c01_thuy_tinh_dung_dich.png",
+      "ratio": 6549.890260995638,
+      "peak": 3794676.0488620005,
+      "median": 579.3495612275616,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/c02_vach_chia_buret.png",
+      "name": "c02_vach_chia_buret.png",
+      "ratio": 8188.99119818756,
+      "peak": 4201272.770605819,
+      "median": 513.0391117594291,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/c03_chu_nhan_lo.png",
+      "name": "c03_chu_nhan_lo.png",
+      "ratio": 8436.665669613578,
+      "peak": 5145047.793880785,
+      "median": 609.8437457735688,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/c04_canh_ban_inox.png",
+      "name": "c04_canh_ban_inox.png",
+      "ratio": 6129.809462824401,
+      "peak": 6665650.94961703,
+      "median": 1087.4156839590305,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/c05_man_hinh_may.png",
+      "name": "c05_man_hinh_may.png",
+      "ratio": 7327.036940199367,
+      "peak": 3695485.545198091,
+      "median": 504.36289256981246,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/c06_la_cay.png",
+      "name": "c06_la_cay.png",
+      "ratio": 6372.481934488454,
+      "peak": 4046871.1892337613,
+      "median": 635.0541642602391,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/c07_canh_manh_nguoc_sang.png",
+      "name": "c07_canh_manh_nguoc_sang.png",
+      "ratio": 6364.929668479483,
+      "peak": 4541972.15063556,
+      "median": 713.5934546244471,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/c08_san_nhin_xien.png",
+      "name": "c08_san_nhin_xien.png",
+      "ratio": 9096.219294206598,
+      "peak": 5309434.083773784,
+      "median": 583.6967988518496,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/l01_mat_ngoai.png",
+      "name": "l01_mat_ngoai.png",
+      "ratio": 7108.542752407646,
+      "peak": 4258826.83285027,
+      "median": 599.1139085907207,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/l02_mat_ngoai_tay.png",
+      "name": "l02_mat_ngoai_tay.png",
+      "ratio": 8912.240030463838,
+      "peak": 4332237.279169759,
+      "median": 486.0997082969235,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/l03_sinh_toan_canh.png",
+      "name": "l03_sinh_toan_canh.png",
+      "ratio": 7214.318716781057,
+      "peak": 5291546.722544106,
+      "median": 733.4783685344286,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/l04_sinh_ban_hoc_sinh.png",
+      "name": "l04_sinh_ban_hoc_sinh.png",
+      "ratio": 6025.515421260139,
+      "peak": 4370935.150009917,
+      "median": 725.4043586922812,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/l05_vi_sinh.png",
+      "name": "l05_vi_sinh.png",
+      "ratio": 7253.330719582011,
+      "peak": 4413837.840097514,
+      "median": 608.5256567867262,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/l06_kho_sinh_pham.png",
+      "name": "l06_kho_sinh_pham.png",
+      "ratio": 7773.839672898155,
+      "peak": 5045718.760866314,
+      "median": 649.0639083256895,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/l07_sinh_phan_tu.png",
+      "name": "l07_sinh_phan_tu.png",
+      "ratio": 7946.604914137629,
+      "peak": 5112241.233721318,
+      "median": 643.3239463744795,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/l08_nha_kinh.png",
+      "name": "l08_nha_kinh.png",
+      "ratio": 6210.739212692132,
+      "peak": 4472629.383626511,
+      "median": 720.1444514727386,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/l09_hanh_lang_t2.png",
+      "name": "l09_hanh_lang_t2.png",
+      "ratio": 7934.022742048984,
+      "peak": 4539094.255735888,
+      "median": 572.1050220337929,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/l10_thang_bo.png",
+      "name": "l10_thang_bo.png",
+      "ratio": 8590.144880987402,
+      "peak": 3975950.5322268475,
+      "median": 462.8502297954172,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/l11_sanh_thang_may.png",
+      "name": "l11_sanh_thang_may.png",
+      "ratio": 7522.330526399456,
+      "peak": 4684301.83519235,
+      "median": 622.7194908117465,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    },
+    {
+      "file": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/sau/l12_trong_cabin.png",
+      "name": "l12_trong_cabin.png",
+      "ratio": 6780.826293863067,
+      "peak": 5621776.108369913,
+      "median": 829.0694768851472,
+      "has_stripes": true,
+      "status": "CÓ SỌC"
+    }
+  ]
+}
