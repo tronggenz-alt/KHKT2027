@@ -368,8 +368,6 @@ namespace Khkt.Demo
             procedure.Begin(LabProcedure.Config.Make(analyte, titrant, indicator, analyteC));
             Close();
             viewer.GoTo(1);
-=======
->>>>>>> origin/main
         }
 
         void Update()
