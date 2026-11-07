@@ -18,6 +18,8 @@ namespace Khkt.Demo.Bio
         public float volumeSetUl = 10f;
         public bool tipAttached;
         public MolMix load = new MolMix();
+        /// <summary>Dịch hút từ bình thường (BioVessel), tách khỏi hỗn hợp phản ứng PCR.</summary>
+        public readonly Khkt.Simulation.Bio.BioMix genericLoad = new Khkt.Simulation.Bio.BioMix();
         /// <summary>Mọi chất đầu côn hiện tại đã chạm vào (để phát hiện dùng lại đầu côn gây nhiễm chéo).</summary>
         public readonly HashSet<string> tipHistory = new HashSet<string>();
 

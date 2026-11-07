@@ -56,10 +56,11 @@ namespace Khkt.Demo
             LastAi = null;
             History.Add($"{e.Title}{(e.Equation != null ? " (" + e.Equation + ")" : "")} trong {c.label}");
             if (History.Count > 12) History.RemoveAt(0);
-            var card = Show(e, c);
+            // Kiểm tra hoặc giáo viên tắt AI: không hiện chú thích; nhật ký và robot xử lý sự cố vẫn chạy
+            var card = ClassRules.HideHelp ? null : Show(e, c);
             AiClient.Instance?.Log(e.Severity >= Severity.Warning ? "su_co" : "hien_tuong", e.Title, $"{e.Equation} · {c.label}: {c.Total.Describe(5)}", e.Severity.ToString());
             if (e.Severity >= Severity.Warning && LabRobot.Instance != null) LabRobot.Instance.HandleIncident(c, e);
-            RequestAi(card, c, e);
+            if (card != null) RequestAi(card, c, e);
         }
 
         Card Show(ChemEvent e, LabContainer c)

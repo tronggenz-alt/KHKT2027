@@ -418,6 +418,51 @@ static class BioSimulationTests
         DnaCloning.ToBands(new List<DnaMolecule> { DnaCloning.Pu19() }, 100, bands);
         Check(bands.Count == 1 && bands[0].bp < 2686, "Plasmid vòng siêu xoắn chưa cắt chạy nhanh hơn đoạn thẳng cùng kích thước");
 
+        // BIOMIX: kết quả chỉ phụ thuộc thành phần và nhiệt độ, không phụ thuộc thứ tự
+        Console.WriteLine("\n[BioMix] Thao tác tự do:");
+        var ev = new List<string>();
+        BioMix Run(BioMix mm, double tC, double secs, double scale = 60)
+        {
+            for (double s = 0; s < secs; s += 0.2) BioRules.Step(mm, tC, 0.2, scale, ev);
+            return mm;
+        }
+        var ab = new BioMix(); ab.Add(BioMatterDb.Liver, 1); ab.Add(BioMatterDb.H2O2, 5); Run(ab, 25, 3);
+        var ba = new BioMix(); ba.Add(BioMatterDb.H2O2, 5); ba.Add(BioMatterDb.Liver, 1); Run(ba, 25, 3);
+        Check(ab.o2Ml > 0.5 && Math.Abs(ab.o2Ml - ba.o2Ml) < 1e-9, "Catalase: đảo thứ tự cho kết quả như nhau");
+        var cooked = new BioMix(); cooked.Add(BioMatterDb.Liver, 1); Run(cooked, 95, 1); cooked.Add(BioMatterDb.H2O2, 5); Run(cooked, 25, 3);
+        Check(cooked.catalaseDead && cooked.o2Ml == 0, "Catalase: mô đã đun sôi không sinh O2, nguội lại cũng không");
+        var mergeA = new BioMix(); mergeA.Add(BioMatterDb.H2O2, 5);
+        var mergeB = new BioMix(); mergeB.Merge(mergeA); mergeB.Add(BioMatterDb.Liver, 1); Run(mergeB, 25, 3);
+        Check(mergeB.o2Ml > 0.5, "Thêm mô sống vào bình chỉ có H2O2 vẫn phản ứng");
+        var starch = new BioMix(); starch.Add(BioMatterDb.Potato, 5); starch.Add(BioMatterDb.Lugol, 0.05); Run(starch, 25, 0.4);
+        Check(starch.iodineStarch, "Lugol + khoai tây: xanh tím");
+        Run(starch, 80, 0.4);
+        Check(!starch.iodineStarch, "Đun nóng làm mất màu xanh tím");
+        Run(starch, 25, 0.4);
+        Check(starch.iodineStarch, "Nguội lại màu xanh tím hiện lại");
+        var plain = new BioMix(); plain.Add(BioMatterDb.Water, 5); plain.Add(BioMatterDb.Lugol, 0.05); Run(plain, 25, 0.4);
+        Check(!plain.iodineStarch, "Lugol + nước: không tím");
+        var yeast = new BioMix(); yeast.Add(BioMatterDb.Water, 50); yeast.Add(BioMatterDb.Glucose, 5); yeast.Add(BioMatterDb.Yeast, 1); Run(yeast, 37, 4, 1800);
+        var cold = new BioMix(); cold.Add(BioMatterDb.Water, 50); cold.Add(BioMatterDb.Glucose, 5); cold.Add(BioMatterDb.Yeast, 1); Run(cold, 4, 4, 1800);
+        var dead = new BioMix(); dead.Add(BioMatterDb.Water, 50); dead.Add(BioMatterDb.Glucose, 5); dead.Add(BioMatterDb.Yeast, 1); Run(dead, 90, 0.4); Run(dead, 37, 4, 1800);
+        Check(yeast.co2Ml > cold.co2Ml && dead.co2Ml == 0, "Lên men: 37 °C nhanh hơn 4 °C, men đun chết không sinh CO2", $"{yeast.co2Ml:0} / {cold.co2Ml:0} / {dead.co2Ml:0}");
+        var yogurt = new BioMix(); yogurt.Add(BioMatterDb.Milk, 90); yogurt.Add(BioMatterDb.YogurtStarter, 10); Run(yogurt, 42, 15, 1800);
+        var hotMilk = new BioMix(); hotMilk.Add(BioMatterDb.Milk, 90); hotMilk.Add(BioMatterDb.YogurtStarter, 10); Run(hotMilk, 70, 15, 1800);
+        Check(yogurt.yogurt >= 1 && BioRules.Ph(yogurt) < 5 && hotMilk.yogurt < 0.1, "Sữa chua: 42 °C đông, pH giảm; 70 °C không đông");
+        var dna = new BioMix(); dna.Add(BioMatterDb.Banana, 5); dna.ground = true; dna.Add(BioMatterDb.Water, 10); dna.Add(BioMatterDb.Soap, 1); dna.Add(BioMatterDb.Nacl10, 1); Run(dna, 25, 15); dna.Add(BioMatterDb.ColdEthanol, 10); Run(dna, 5, 0.4);
+        var noSoap = new BioMix(); noSoap.Add(BioMatterDb.Banana, 5); noSoap.ground = true; noSoap.Add(BioMatterDb.Water, 10); noSoap.Add(BioMatterDb.ColdEthanol, 10); Run(noSoap, 5, 15);
+        Check(dna.dnaThreads > 0.5 && noSoap.dnaThreads == 0, "Tách ADN: đủ xà phòng + muối mới có sợi ADN");
+        var bact = new BioMix(); bact.Add(BioMatterDb.Broth, 10); bact.Add(BioMatterDb.EColi, 0.001); Run(bact, 37, 6, 1800);
+        var bactCold = new BioMix(); bactCold.Add(BioMatterDb.Broth, 10); bactCold.Add(BioMatterDb.EColi, 0.001); Run(bactCold, 4, 6, 1800);
+        Check(bact.od > 0.3 && bactCold.od < 0.1, "Vi khuẩn: 37 °C đục, 4 °C gần như không lớn", $"{bact.od:0.00} / {bactCold.od:0.00}");
+        var agar = new BioMix(); agar.Add(BioMatterDb.Agarose, 1); agar.Add(BioMatterDb.Tae, 100); Run(agar, 25, 0.4);
+        Check(!agar.agaroseMelted, "Agarose chưa đun thì chưa tan");
+        Run(agar, 95, 0.4); Run(agar, 30, 0.4);
+        Check(agar.gelSet, "Đun tan rồi nguội thành gel");
+        var part = new BioMix(); part.Add(BioMatterDb.Water, 10); part.Add(BioMatterDb.Potato, 5);
+        var liquidOnly = part.TakeLiquid(1);
+        Check(liquidOnly.Of(BioMatterDb.Potato) == 0 && Math.Abs(liquidOnly.Total - 1) < 1e-9, "Ống nhỏ giọt không hút được mô");
+
         Console.WriteLine($"\nKết quả: {passed} đạt, {failed} lỗi.");
         return failed == 0 ? 0 : 1;
     }

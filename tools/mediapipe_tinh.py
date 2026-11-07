@@ -64,7 +64,8 @@ def tinh_tu_the_dau(mat_4x4: np.ndarray) -> tuple[float, float, float, float]:
     rot = mat[:3, :3]
     angles = cv2.RQDecomp3x3(rot)[0]
     pitch = float(angles[0])
-    yaw = float(angles[1])
+    # Ma trận của MediaPipe quay đầu sang phải người dùng cho góc Y âm (đã đo trên ảnh thật)
+    yaw = -float(angles[1])
     roll = float(angles[2])
     dist_z_cm = float(abs(mat[2, 3]))
 
@@ -336,6 +337,48 @@ class BoLocCuChi:
             self.cu_chi_chot[ben] = ten_cu_chi
 
         return self.cu_chi_chot.get(ben, "")
+
+
+# Điểm mốc mặt gửi cho bảng F9, theo thứ tự này: viền mặt, mắt trái, mắt phải,
+# tròng trái, tròng phải, mày trái, mày phải, môi, sống mũi (trái / phải là của người dùng)
+DIEM_MAT_RUT_GON: tuple[int, ...] = (
+    10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397, 365, 379, 378, 400, 377,
+    152, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234, 127, 162, 21, 54, 103, 67, 109,
+    263, 249, 390, 373, 374, 380, 381, 382, 362, 398, 384, 385, 386, 387, 388, 466,
+    33, 7, 163, 144, 145, 153, 154, 155, 133, 173, 157, 158, 159, 160, 161, 246,
+    474, 475, 476, 477,
+    469, 470, 471, 472,
+    276, 283, 282, 295, 285,
+    46, 53, 52, 65, 55,
+    61, 146, 91, 181, 84, 17, 314, 405, 321, 375, 291, 409, 270, 269, 267, 0, 37, 39, 40, 185,
+    168, 6, 197, 195, 5, 4,
+)
+
+
+def _phang_diem(diem: Any, chi_so: Any = None) -> list[int]:
+    """[x0, y0, z0, x1, ...] nhân 1000 thành số nguyên để gói tin gọn."""
+    ra: list[int] = []
+    for i in (chi_so if chi_so is not None else range(len(diem))):
+        p = diem[i]
+        x, y, z = (p.x, p.y, p.z) if hasattr(p, "x") else (p[0], p[1], p[2])
+        ra += [int(round(float(x) * 1000)), int(round(float(y) * 1000)), int(round(float(z) * 1000))]
+    return ra
+
+
+def dong_goi_diem_moc(
+    mat: Any,
+    tay: list[tuple[str, Any]],
+    ti_le: float,
+    t: float = 0.0,
+) -> dict[str, Any]:
+    """Gói điểm mốc thô (chưa lọc) cho bảng F9. mat: 478 điểm hoặc None; tay: [(ben, 21 điểm)]."""
+    co_mat = mat is not None and len(mat) >= 478
+    return {
+        "t": round(float(t), 4),
+        "ti_le": round(float(ti_le), 4),
+        "mat": _phang_diem(mat, DIEM_MAT_RUT_GON) if co_mat else [],
+        "tay": [{"ben": str(ben), "d": _phang_diem(d)} for ben, d in tay if len(d) == 21],
+    }
 
 
 def tao_goi_udp(

@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Đăng nhập · VERA Lab</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="/tinh/vera.css">
+<style>
+body { min-height: 100vh; min-height: 100dvh; background: radial-gradient(52% 62% at 70% 48%, rgba(56, 214, 196, .13), transparent 72%) no-repeat, var(--san); }
+.dn { display: grid; grid-template-columns: minmax(0, 440px) minmax(0, 1fr); align-items: center; gap: clamp(16px, 3vw, 48px); min-height: 100vh; min-height: 100dvh; padding: clamp(16px, 3vw, 40px) clamp(16px, 5vw, 72px); }
+.cot-form { position: relative; z-index: 1; display: grid; gap: 16px; }
+.cot-form .nhan-hieu { font-size: 20px; }
+.cot-form .nhan-hieu svg { width: 30px; height: 30px; }
+.the { padding: clamp(20px, 2.400vw, 28px); border-radius: 18px; background: rgba(11, 18, 28, .86); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+.the h1 { font-size: 26px; line-height: 1.200; }
+.the > form > .phu-chu { margin-top: 6px; }
+.chon { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; padding: 3px; margin-bottom: 20px; border-radius: var(--bo); background: var(--nen-o); border: 1px solid var(--vien); }
+.chon button { min-height: 40px; border: 0; border-radius: var(--bo-nho); background: none; color: var(--phu); font-size: 14.500px; font-weight: 600; cursor: pointer; }
+.chon button[aria-selected="true"] { background: var(--nen-3); color: var(--chu); }
+form .nut { margin-top: 18px; }
+.chan { margin-top: 16px; text-align: center; font-size: 14px; color: var(--phu); }
+.chan button { border: 0; padding: 0; background: none; color: var(--nhan); font-size: inherit; cursor: pointer; text-decoration: underline; }
+.nguon { font-size: 13px; color: var(--mo); }
+.cot-ve { min-width: 0; }
+.cot-ve h2 { max-width: 22ch; margin: 0 0 4px; font-size: clamp(24px, 2.600vw, 38px); line-height: 1.120; font-weight: 700; letter-spacing: -.022em; text-wrap: balance; }
+.cot-ve p { max-width: 54ch; color: var(--phu); font-size: 15px; }
+#ban-do { margin-top: 8px; animation: troi 9s ease-in-out infinite alternate; }
+@keyframes troi { from { transform: translateY(-6px); } to { transform: translateY(6px); } }
+@media (prefers-reduced-motion: reduce) { #ban-do { animation: none; } }
+@media (max-width: 900px) {
+  .dn { grid-template-columns: minmax(0, 1fr); align-content: start; align-items: start; padding-block: 16px 24px; gap: 12px; }
+  .cot-ve { order: -1; }
+  .cot-ve h2, .cot-ve p { display: none; }
+  #ban-do { margin: 44px -6px -6px; animation: none; }
+  .cot-form { display: contents; }
+  .cot-form .nhan-hieu { order: -2; }
+  .cot-ve { order: -1; margin-top: -44px; }
+}
+</style>
+</head>
+<body>
+<main class="dn">
+  <div class="cot-form">
+  <span class="nhan-hieu">
+    <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2.5 35.2 11.2v17.6L20 37.5 4.8 28.8V11.2z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/><path d="M12.5 13 20 28l7.5-15" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    VERA Lab
+  </span>
+
+  <div class="the" id="khung" hidden>
+    <div class="chon" role="tablist" id="chon">
+      <button type="button" role="tab" id="tab-vao" aria-selected="true" aria-controls="f-vao">Đăng nhập</button>
+      <button type="button" role="tab" id="tab-ky" aria-selected="false" aria-controls="f-ky">Tạo tài khoản</button>
+    </div>
+
+    <form id="f-vao" novalidate>
+      <h1>Trang quản lý VERA Lab</h1>
+      <p class="phu-chu">Dành cho giáo viên và học sinh.</p>
+      <label class="o"><span>Tên đăng nhập</span><input name="ten_dang_nhap" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
+      <label class="o"><span>Mật khẩu</span><input name="mat_khau" type="password" autocomplete="current-password" required></label>
+      <p class="bao" role="alert" hidden></p>
+      <button class="nut chinh rong">Đăng nhập</button>
+      <p class="chan">Quên mật khẩu? Nhờ giáo viên đặt lại.</p>
+    </form>
+
+    <form id="f-ky" novalidate hidden>
+      <h1>Tạo tài khoản học sinh</h1>
+      <p class="phu-chu">Cần mã lớp do giáo viên đưa.</p>
+      <label class="o"><span>Mã lớp</span><input name="ma_lop" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="16" required></label>
+      <label class="o"><span>Họ và tên</span><input name="ho_ten" autocomplete="name" maxlength="80" required></label>
+      <label class="o"><span>Tên đăng nhập</span><input name="ten_dang_nhap" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="32" required><small>3 đến 32 ký tự: chữ không dấu, số, dấu chấm, gạch nối, gạch dưới.</small></label>
+      <label class="o"><span>Mật khẩu</span><input name="mat_khau" type="password" autocomplete="new-password" required><small>Ít nhất 8 ký tự.</small></label>
+      <p class="bao" role="alert" hidden></p>
+      <button class="nut chinh rong">Tạo tài khoản</button>
+    </form>
+
+    <form id="f-doi" novalidate hidden>
+      <h1>Đổi mật khẩu</h1>
+      <p class="phu-chu">Đây là mật khẩu tạm. Hãy đặt mật khẩu của riêng bạn trước khi tiếp tục.</p>
+      <input name="ten" type="text" autocomplete="username" hidden>
+      <label class="o"><span>Mật khẩu hiện tại</span><input name="mat_khau_cu" type="password" autocomplete="current-password" required></label>
+      <label class="o"><span>Mật khẩu mới</span><input name="mat_khau_moi" type="password" autocomplete="new-password" required><small>Ít nhất 8 ký tự.</small></label>
+      <label class="o"><span>Nhập lại mật khẩu mới</span><input name="nhap_lai" type="password" autocomplete="new-password" required></label>
+      <p class="bao" role="alert" hidden></p>
+      <button class="nut chinh rong">Lưu mật khẩu mới</button>
+      <p class="chan"><button type="button" id="thoat">Đăng xuất</button></p>
+    </form>
+  </div>
+  <p class="nguon">Trường THPT Chuyên Lê Quý Đôn, Gia Lai</p>
+  </div>
+  <div class="cot-ve">
+    <h2>Phòng thí nghiệm ảo Hóa và Sinh</h2>
+    <p>Giáo viên quản lý lớp, phòng và kết quả. Học sinh xem bài, ôn tập và điểm của mình.</p>
+    <div id="ban-do" aria-hidden="true"></div>
+  </div>
+</main>
+<script src="/tinh/ban_do.js"></script>
+<script>
+BanDo.ve(document.getElementById("ban-do"));
+const thamSo = new URLSearchParams(location.search);
+const $ = (id) => document.getElementById(id);
+
+function trangTiep(nd) {
+  const tiep = thamSo.get("tiep") || "";
+  // chỉ chuyển trong cùng máy chủ, chặn địa chỉ dạng //trang-la hoặc /\trang-la
+  if (/^\/(?![\/\\])/.test(tiep)) return tiep;
+  return nd.vai_tro === "giao_vien" ? "/giao-vien" : "/hoc-sinh";
+}
+
+async function goi(duong, body) {
+  const r = await fetch(duong, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(typeof data.detail === "string" ? data.detail : "Thông tin chưa hợp lệ, xem lại các ô đã điền");
+  return data;
+}
+
+function hien(form) {
+  for (const f of ["f-vao", "f-ky", "f-doi"]) $(f).hidden = f !== form;
+  $("chon").hidden = form === "f-doi";
+  $("tab-vao").setAttribute("aria-selected", form === "f-vao");
+  $("tab-ky").setAttribute("aria-selected", form === "f-ky");
+  $("khung").hidden = false;
+}
+
+function moDoiMatKhau(nd) {
+  $("f-doi").elements.ten.value = nd.ten_dang_nhap;
+  hien("f-doi");
+  $("f-doi").elements.mat_khau_cu.focus();
+}
+
+function khiXong(data) {
+  if (data.nguoi_dung.phai_doi_mat_khau) moDoiMatKhau(data.nguoi_dung);
+  else location.replace(trangTiep(data.nguoi_dung));
+}
+
+function ganForm(form, xuLy) {
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const bao = form.querySelector(".bao"), nut = form.querySelector(".nut");
+    const giaTri = Object.fromEntries(new FormData(form));
+    for (const o of form.querySelectorAll("input[required]")) {
+      if (!o.value.trim()) { bao.textContent = "Hãy điền đủ các ô"; bao.hidden = false; o.focus(); return; }
+    }
+    bao.hidden = true;
+    nut.disabled = true;
+    try {
+      await xuLy(giaTri);
+    } catch (loi) {
+      bao.textContent = loi.message === "Failed to fetch" ? "Không kết nối được máy chủ" : loi.message;
+      bao.hidden = false;
+    }
+    nut.disabled = false;
+  });
+}
+
+ganForm($("f-vao"), async (g) => khiXong(await goi("/auth/dang-nhap", g)));
+ganForm($("f-ky"), async (g) => khiXong(await goi("/auth/dang-ky", g)));
+ganForm($("f-doi"), async (g) => {
+  if (g.mat_khau_moi !== g.nhap_lai) throw new Error("Hai lần nhập mật khẩu mới không khớp");
+  const nd = await goi("/auth/doi-mat-khau", { mat_khau_cu: g.mat_khau_cu, mat_khau_moi: g.mat_khau_moi });
+  location.replace(trangTiep(nd));
+});
+
+$("tab-vao").addEventListener("click", () => hien("f-vao"));
+$("tab-ky").addEventListener("click", () => hien("f-ky"));
+$("thoat").addEventListener("click", async () => {
+  await goi("/auth/dang-xuat", {}).catch(() => {});
+  $("f-doi").reset();
+  hien("f-vao");
+});
+
+(async () => {
+  const r = await fetch("/auth/toi").catch(() => null);
+  if (r && r.ok) {
+    const nd = await r.json();
+    if (nd.phai_doi_mat_khau) return moDoiMatKhau(nd);
+    return location.replace(trangTiep(nd));
+  }
+  hien("f-vao");
+  $("f-vao").elements.ten_dang_nhap.focus();
+})();
+</script>
+</body>
+</html>

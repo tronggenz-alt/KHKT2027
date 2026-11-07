@@ -24,7 +24,9 @@ namespace Khkt.Demo.Bio
         public void Use(GameObject user)
         {
             currentTempC = targetTempC;
-            tubesInFloatingRack++;
+            tubesInFloatingRack = 0;
+            foreach (var v in FindObjectsByType<BioVessel>())
+                if ((v.transform.position - transform.position).sqrMagnitude < 0.2f) tubesInFloatingRack++;
             BioFeedback.PlayClick();
             BioFeedback.LogAction("be_on_nhiet", "u_mau_be_on_nhiet",
                 $"Đã ủ mẫu trong giá nổi bể ổn nhiệt ở {BioFeedback.FormatVi(currentTempC, "0.0")} °C.");

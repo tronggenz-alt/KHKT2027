@@ -162,7 +162,14 @@ namespace Khkt.Demo.Bio
             switch (tool.kind)
             {
                 case BioToolKind.StainDropper:
-                    AddDrop(tool.reagentOrSampleId, tool.reagentDisplayName);
+                    var dropper = tool.GetComponent<BioDropper>();
+                    if (dropper != null)
+                    {
+                        if (dropper.IsEmpty) { BioFeedback.ShowToast("Ống nhỏ giọt đang trống: hút dung dịch từ chai trước", true); break; }
+                        AddDrop(tool.reagentOrSampleId, tool.reagentDisplayName, dropper.SlideMolarity);
+                        dropper.TakeDrop();
+                    }
+                    else AddDrop(tool.reagentOrSampleId, tool.reagentDisplayName);
                     break;
                 case BioToolKind.Forceps:
                     if (!hasWaterDrop)

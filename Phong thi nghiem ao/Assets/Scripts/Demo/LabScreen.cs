@@ -11,7 +11,8 @@ namespace Khkt.Demo
     ///      PowerPoint ra ảnh rồi thả vào đó, mở game là có (slide đứng trước các trang có sẵn).
     ///   2. Trang có sẵn do trình dựng cảnh soạn: tiêu đề + nội dung, có thể kèm ảnh nền.
     ///   3. Camera trực tiếp (ví dụ camera trên bàn giáo viên): chỉ chụp liveFps lần/giây và chỉ khi màn hình đang được nhìn thấy.
-    ///   4. Trang thảo luận do chương trình khác đẩy vào (ShowText, ShowImage) - chỗ để web quản lý đẩy nội dung sau này.
+    ///   4. Trang thảo luận do chương trình khác đẩy vào (ShowText, ShowImage).
+    ///   5. Giáo viên trình chiếu từ web (Present, PresentationClient): đè lên các nguồn trên tới khi tắt.
     /// Bấm vào màn hình (IDemoUsable) để sang trang; không ai bấm thì tự chuyển sau autoAdvanceS giây.
     /// </summary>
     public class LabScreen : MonoBehaviour, IDemoUsable
@@ -47,12 +48,14 @@ namespace Khkt.Demo
         public static IEnumerable<LabScreen> All => registry.Values;
 
         public int PageIndex { get; private set; }
-        public Page Current => pages.Count > 0 ? pages[PageIndex] : null;
-        public string UseHint => "Màn hình: trang sau";
+        public Page Current => presented ?? (pages.Count > 0 ? pages[PageIndex] : null);
+        public bool IsPresenting => presented != null;
+        public string UseHint => IsPresenting ? "Màn hình: giáo viên đang trình chiếu" : "Màn hình: trang sau";
 
         Material mat;
         RenderTexture liveRt;
         float liveTimer, autoTimer, pauseAuto;
+        Page presented;
         readonly List<Texture2D> loadedSlides = new List<Texture2D>();
 
         void Awake()
@@ -95,6 +98,7 @@ namespace Khkt.Demo
 
         public void Use()
         {
+            if (IsPresenting) return;  // giáo viên đang chiếu: học sinh không đổi trang được
             pauseAuto = 60f;  // người xem tự chuyển trang: thôi tự chuyển 1 phút
             Show(PageIndex + 1);
         }
@@ -104,7 +108,32 @@ namespace Khkt.Demo
             if (pages.Count == 0) return;
             PageIndex = ((index % pages.Count) + pages.Count) % pages.Count;
             autoTimer = 0;
-            var p = pages[PageIndex];
+            if (!IsPresenting) Apply(pages[PageIndex]);
+        }
+
+        /// <summary>Hiện nội dung giáo viên đẩy, không thêm vào danh sách trang. Gọi lại để thay nội dung đang chiếu.</summary>
+        public void Present(Page p)
+        {
+            presented = p;
+            Apply(p);
+        }
+
+        /// <summary>Tắt trình chiếu, màn hình về trang đang có.</summary>
+        public void EndPresentation()
+        {
+            if (!IsPresenting) return;
+            presented = null;
+            autoTimer = 0;
+            if (pages.Count > 0) Apply(pages[PageIndex]);
+            else if (mat != null)
+            {
+                mat.SetTexture(BaseMapId, background);
+                mat.SetTexture(EmissionMapId, background);
+            }
+        }
+
+        void Apply(Page p)
+        {
             Texture tex = p.live ? EnsureLive() : p.image != null ? p.image : background;
             if (mat != null)
             {
@@ -162,6 +191,7 @@ namespace Khkt.Demo
 
         void Update()
         {
+            if (IsPresenting) return;  // không tự chuyển trang trong lúc chiếu
             float dt = Time.unscaledDeltaTime;
             var p = Current;
             if (p != null && p.live && surface != null && surface.isVisible)

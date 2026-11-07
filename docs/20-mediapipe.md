@@ -42,7 +42,8 @@ Nâng cấp hệ thống điều khiển tự nhiên qua webcam máy tính nhằ
 | Phím | Chức năng | Mô tả chi tiết |
 |---|---|---|
 | **`F8`** | **Bật / Tắt theo dõi đầu** | Bật webcam và khởi động tiến trình nhận diện nền. Khi tắt, camera lập tức ngắt đèn qua lệnh UDP `tam_dung` (bảo đảm riêng tư) và bật lại tức thì $< 0.5\text{ s}$ khi bấm lại |
-| **`F9`** | **Căn lại tư thế giữa** | Đặt lại vị trí trung lập cho đầu (Yaw=0, Pitch=0), khoảng cách chuẩn và tâm ánh nhìn |
+| **`F9`** | **Mô phỏng tracking** | Bảng dựng lại người dùng từ số liệu tracking, như soi gương: hình nộm theo số game dùng, lưới xanh và khung xương tay từ điểm mốc thô (cổng 9053, chỉ gửi lúc bảng mở). |
+| **`F12`** | **Căn lại tư thế giữa** | Đặt lại vị trí trung lập cho đầu (Yaw=0, Pitch=0), khoảng cách chuẩn và tâm ánh nhìn |
 | **`F10`** | **Bật / Tắt theo dõi tay** | Cho phép hoặc chặn bàn tay ảo `MediaPipeHandSource` can thiệp vào bộ điều khiển chung |
 | **`F11`** | **Bật / Tắt HUD MediaPipe** | Hiển thị bảng thông tin góc trên màn hình: trạng thái webcam, FPS, độ trễ, mặt, tay, cử chỉ |
 
@@ -180,8 +181,8 @@ Trong Inspector component `HeadTracking`, thuộc tính **Feel Preset** cho phé
    $$\text{angles} = \text{RQDecomp3x3}(R)$$
    Quy ước dấu được chuẩn hóa trùng khớp hoàn toàn với quy ước điều khiển của `head_tracker.py`:
    - $\text{Yaw} = -\text{angles}_y$ (quay đầu sang phải $\to$ dương).
-   - $\text{Pitch} = \text{angles}_x$ (ngửa đầu lên $\to$ dương).
-   - $\text{Roll} = -\text{angles}_z$ (nghiêng đầu sang phải $\to$ dương).
+   - $\text{Pitch} = \text{angles}_x$ (cúi đầu xuống $\to$ dương).
+   - $\text{Roll} = \text{angles}_z$ (nghiêng đầu sang phải $\to$ dương).
 
 2. **Khoảng cách thực tế theo tròng mắt ($d_{\text{iris}}$):**
    Đường kính tròng mắt người có kích thước vật lý gần như cố định ở mức $11,7\text{ mm}$ ($1,17\text{ cm}$). Dựa trên 4 mốc vành tròng mắt trái (474, 475, 476, 477) và phải (469, 470, 471, 472):
@@ -416,7 +417,7 @@ Còn tồn:
 - Xử lý zoom bằng `dist_cm` theo tỉ lệ so với lúc căn (fallback `e` cũ), giữ giới hạn $\times 0.8 \dots \times 2.5$ và vùng chết.
 - Thêm tùy chọn `enablePitchTurn` (cúi / ngẩng đầu) tắt mặc định với vùng chết riêng.
 - Viết lớp `GazeHighlight.cs` tô viền vật trong vùng nhìn thô $3 \times 3$ quanh tâm màn hình (tắt mặc định, bật bằng ô trong Inspector).
-- Phím F9 căn lại toàn bộ tư thế đầu, khoảng cách và tâm ánh nhìn.
+- Phím F12 căn lại toàn bộ tư thế đầu, khoảng cách và tâm ánh nhìn.
 - Làm mượt 60–144 fps: double-buffering nội suy giữa hai gói gần nhất, lọc hàm mũ $1 - \exp(-k \cdot dt)$ với `Time.unscaledDeltaTime`, `JsonUtility.FromJsonOverwrite` tái sử dụng bộ đệm byte (0 GC Alloc mỗi khung hình).
 - Thao tác F8 gửi lệnh `tam_dung` / `tiep_tuc` qua UDP cổng 9052 giúp bật/tắt camera ngay lập tức.
 - Tích hợp `DesktopViewer.cs` nhận `HeadTracking.PitchTurn` và gắn `GazeHighlight`.

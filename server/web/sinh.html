@@ -5,32 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:,">
 <title>Phòng Lab Sinh học VERA · Tầng 2 · Quản lý phòng thí nghiệm</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<script src="/tinh/phien.js"></script>
 <style>
 :root {
-  --bg: #f4f6f8; --panel: #ffffff; --panel-2: #f8fafb; --line: #e2e7ec; --text: #17202a; --muted: #5d6b78;
-  --accent: #0f7c86; --accent-soft: #e2f3f4; --good: #1f8a4c; --good-soft: #e3f4ea; --warn: #b26b00; --warn-soft: #fbefd9;
-  --bad: #c2362f; --bad-soft: #fbe5e3; --shadow: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.08); --on-accent: #ffffff;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0f1418; --panel: #172026; --panel-2: #1c272e; --line: #2a3740; --text: #e6edf2; --muted: #93a3b0;
-    --accent: #3cc2cc; --accent-soft: #143238; --good: #4cc983; --good-soft: #15301f; --warn: #f0b04a; --warn-soft: #362a12;
-    --bad: #ff7b72; --bad-soft: #3a1a18; --shadow: none; --on-accent: #062a2e;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0f1418; --panel: #172026; --panel-2: #1c272e; --line: #2a3740; --text: #e6edf2; --muted: #93a3b0;
-  --accent: #3cc2cc; --accent-soft: #143238; --good: #4cc983; --good-soft: #15301f; --warn: #f0b04a; --warn-soft: #362a12;
-  --bad: #ff7b72; --bad-soft: #3a1a18; --shadow: none; --on-accent: #062a2e;
+  --bg: #f5f5f7; --panel: #ffffff; --panel-2: #f5f5f7; --line: #d9d9de; --text: #1d1d1f; --muted: #5c5d66;
+  --accent: #0b63d1; --accent-soft: #e8f1fd; --good: #0b7a5b; --good-soft: #e3f4ee; --warn: #8f5600; --warn-soft: #fbefd9;
+  --bad: #b3261e; --bad-soft: #fbeaea; --shadow: none; --on-accent: #ffffff;
 }
 * { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; max-width: 100%; overflow-x: hidden; background: var(--bg); color: var(--text); font: 14px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif; }
+html, body { margin: 0; padding: 0; max-width: 100%; overflow-x: hidden; background: var(--bg); color: var(--text); font: 14px/1.5 "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif; }
 header { background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 10; }
 .bar { max-width: 1240px; margin: 0 auto; padding: 12px 16px 0; }
 .title { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .title-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .title h1 { font-size: 18px; margin: 0; font-weight: 650; letter-spacing: -.01em; }
-.chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px; font-size: 12px;
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 6px; font-size: 12px;
         background: var(--panel-2); border: 1px solid var(--line); color: var(--muted); }
 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
 .chip.on .dot { background: var(--good); } .chip.off .dot { background: var(--bad); }
@@ -50,10 +40,10 @@ h3 { font-size: 13.5px; margin: 12px 0 6px; font-weight: 600; }
 .two { display: grid; gap: 16px; grid-template-columns: 1.25fr 1fr; }
 @media (max-width: 900px) { .two { grid-template-columns: 1fr; } }
 .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
-input, select, textarea { font: inherit; color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 7px; padding: 7px 10px; max-width: 100%; }
+input, select, textarea { font: inherit; color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 7px 10px; max-width: 100%; }
 input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
 input[type=number] { width: 84px; } textarea { width: 100%; resize: vertical; }
-button.b, a.b { font: inherit; border: 1px solid var(--line); background: var(--panel); color: var(--text); border-radius: 7px; padding: 6px 12px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+button.b, a.b { font: inherit; border: 1px solid var(--line); background: var(--panel); color: var(--text); border-radius: 6px; padding: 6px 12px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
 button.b:hover, a.b:hover { border-color: var(--accent); }
 button.b.primary, a.b.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
 button.b.danger:hover { border-color: var(--bad); color: var(--bad); }
@@ -66,7 +56,7 @@ th { font-size: 12px; color: var(--muted); font-weight: 600; background: var(--p
 td.num, th.num { text-align: right; }
 tr.low td { background: var(--warn-soft); }
 tr.over td { background: var(--bad-soft); }
-.badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; background: var(--panel-2); color: var(--muted); border: 1px solid var(--line); white-space: nowrap; }
+.badge { display: inline-block; padding: 1px 8px; border-radius: 6px; font-size: 12px; background: var(--panel-2); color: var(--muted); border: 1px solid var(--line); white-space: nowrap; }
 .badge.good { background: var(--good-soft); color: var(--good); border-color: transparent; }
 .badge.warn { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
 .badge.bad { background: var(--bad-soft); color: var(--bad); border-color: transparent; }
@@ -91,6 +81,14 @@ tr.over td { background: var(--bad-soft); }
   main, .bar { padding-left: 16px; padding-right: 16px; }
   .grid { grid-template-columns: repeat(2, 1fr); }
 }
+select, input { max-width: 100%; }
+@media (max-width: 600px) {
+  header { position: static; }
+  .bar { position: relative; }
+  .title h1 { flex-basis: 100%; font-size: 16px; }
+  .title > .title-left:last-child { position: absolute; right: 16px; top: 12px; }
+  [data-ten-nguoi] { display: none; }
+}
 </style>
 </head>
 <body>
@@ -98,12 +96,14 @@ tr.over td { background: var(--bad-soft); }
   <div class="bar">
     <div class="title">
       <div class="title-left">
-        <a class="b sm" href="/">← Quản lý chung</a>
+        <a class="b sm" href="/giao-vien">← Trang chủ</a>
+        <a class="b sm" href="/hoa">Phòng Hóa</a>
         <h1>Phòng Lab Sinh học VERA · Tầng 2 (BSL-1)</h1>
         <span class="chip on" id="connChip"><span class="dot"></span><span id="connText">Đang đồng bộ</span></span>
       </div>
       <div class="title-left">
-        <button class="b sm" id="themeBtn" type="button">Sáng / Tối</button>
+        <span class="muted small" data-ten-nguoi></span>
+        <button class="b sm" type="button" data-dang-xuat>Đăng xuất</button>
       </div>
     </div>
     <nav id="tabs">
@@ -448,14 +448,6 @@ async function api(path, opts = {}) {
   }
 }
 
-// Chế độ Sáng / Tối
-document.getElementById('themeBtn').addEventListener('click', () => {
-  const root = document.documentElement;
-  const cur = root.getAttribute('data-theme');
-  const next = cur === 'dark' ? 'light' : 'dark';
-  root.setAttribute('data-theme', next);
-});
-
 // Chuyển Tab
 document.querySelectorAll('#tabs button').forEach(btn => {
   btn.addEventListener('click', () => switchTab(btn.dataset.tab));
@@ -600,7 +592,7 @@ async function loadOverview() {
       <div class="stat ${dc.dang_muon > 0 ? 'warn' : ''}"><div class="k">Đang cho mượn</div><div class="v">${fmtNum(dc.dang_muon || 0)}</div></div>
       <div class="stat ${(sp.sap_het || []).length > 0 ? 'warn' : ''}"><div class="k">Sinh phẩm sắp hết</div><div class="v">${fmtNum((sp.sap_het || []).length)}</div></div>
       <div class="stat ${(sp.sap_het_han || []).length > 0 ? 'warn' : ''}"><div class="k">Sắp hết hạn (≤ 30 ngày)</div><div class="v">${fmtNum((sp.sap_het_han || []).length)}</div></div>
-      <div class="stat ${scList.length > 0 ? 'bad' : 'good'}"><div class="k">Sự cố chưa xử lý</div><div class="v">${fmtNum(scList.length)}</div></div>
+      <div class="stat ${ov.so_su_co_moi > 0 ? 'bad' : 'good'}"><div class="k">Sự cố chưa xử lý</div><div class="v">${fmtNum(ov.so_su_co_moi)}</div></div>
     `;
 
     const tuArr = ov.tu || [];

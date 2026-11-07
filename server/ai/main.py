@@ -2,7 +2,7 @@
 
     pip install -r requirements.txt          (thêm `pip install anthropic` để dùng Claude)
     uvicorn server.ai.main:app --host 127.0.0.1 --port 8000
-    mở http://127.0.0.1:8000                 web quản lý: kho hóa chất, thiết bị, nhật ký, mạng lưới khóa AI
+    mở http://127.0.0.1:8000                 đăng nhập; giáo viên quản lý kho hóa chất, thiết bị, nhật ký, mạng lưới khóa AI
 
 Unity gửi ngữ cảnh do bộ máy hóa học tính (chất trong bình, pH, nhiệt độ, hiện tượng vừa xảy ra). AI chỉ
 DIỄN GIẢI, trò chuyện và lập kế hoạch cho robot; AI không quyết định phản ứng. Khóa API chỉ nằm trên máy chủ.
@@ -14,6 +14,11 @@ DIỄN GIẢI, trò chuyện và lập kế hoạch cho robot; AI không quyết
     POST /tro-ly                (bản cũ) trả lời + danh sách hành động đơn giản
     POST /hoi, GET /the-thong-tin/{id}   thẻ thông tin phản ứng soạn sẵn
     /api/...                    web quản lý (server/lab/api.py)
+    /auth/...                   đăng nhập, phân quyền cho mọi đường dẫn trên (server/lab/dang_nhap.py)
+    /api/lop/..., /api/toi/...  lớp, học sinh, kết quả theo lớp (server/lab/lop_api.py)
+    /api/bai-giang              trình chiếu từ web lên màn hình trong app (server/lab/trinh_chieu.py)
+    /app/nhip, /api/lop/{id}/truc-tiep   app báo trạng thái, giáo viên theo dõi và nhắn tin (server/lab/truc_tiep.py)
+    /api/lop/{id}/buoi-hoc, /robot       chế độ Kiểm tra, khóa hóa chất, lệnh robot từ web (server/lab/buoi_hoc.py)
 
 Chọn nhà cung cấp: xem server/ai/providers/__init__.py (mạng lưới khóa Groq/DeepSeek/Gemini → Claude → OpenAI).
 """
@@ -26,12 +31,12 @@ import re
 import unicodedata
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from server.lab import api as lab_api
-from server.lab import sinh_api
+from server.lab import buoi_hoc, dang_nhap, lop_api, sinh_api, trinh_chieu, truc_tiep
 from server.lab import db as lab_db
 from server.lab import keypool
 
@@ -100,11 +105,16 @@ ASSIST_SCHEMA = {
 app = FastAPI(title="KHKT - AI phòng thí nghiệm ảo")
 app.include_router(lab_api.router)
 app.include_router(sinh_api.router)
+app.include_router(lop_api.router)
+app.include_router(trinh_chieu.router)
+app.include_router(truc_tiep.router)
+app.include_router(buoi_hoc.router)
+dang_nhap.cai_dat(app)
 _cache: dict[str, str] = {}
 WEB_INDEX = ROOT / "server/web/index.html"
 
 
-@app.get("/", include_in_schema=False)
+@app.get("/hoa", include_in_schema=False)
 def web_quan_ly() -> FileResponse:
     return FileResponse(WEB_INDEX, media_type="text/html; charset=utf-8")
 
@@ -304,8 +314,10 @@ class KeHoach(BaseModel):
 # ---------------------------------------------------------------------------
 
 @app.get("/suc-khoe")
-def suc_khoe() -> dict:
+def suc_khoe(request: Request) -> dict:
     p = providers.pick()
+    if request.state.nguoi_dung is None and not dang_nhap.tu_may_nay(request):
+        return {"ok": p is not None, "nha_cung_cap": "", "mo_hinh": ""}
     return {"ok": p is not None, "nha_cung_cap": p.NAME if p else "khong", "mo_hinh": p.model_name() if p else ""}
 
 
@@ -330,7 +342,9 @@ def the_thong_tin(phan_ung_id: str) -> dict:
 
 
 @app.post("/hoi", response_model=TraLoi)
-async def hoi(req: CauHoi) -> TraLoi:
+async def hoi(req: CauHoi, request: Request) -> TraLoi:
+    if buoi_hoc.ai_bi_tat(request.state.nguoi_dung):
+        return TraLoi(tra_loi=buoi_hoc.LOI_AI_TAT, nguon="khoa")
     key = hashlib.sha256(req.model_dump_json().encode()).hexdigest()
     if key in _cache:
         return TraLoi(tra_loi=_cache[key], nguon="cache")
@@ -352,7 +366,9 @@ async def hoi(req: CauHoi) -> TraLoi:
 
 
 @app.post("/chu-thich", response_model=ChuThich)
-async def chu_thich(req: ChuThichYeuCau) -> ChuThich:
+async def chu_thich(req: ChuThichYeuCau, request: Request) -> ChuThich:
+    if buoi_hoc.ai_bi_tat(request.state.nguoi_dung):
+        return ChuThich(giai_thich="", nguon="khoa")  # giải thích hiện tượng cũng là gợi ý
     fact = req.model_dump(exclude_none=True)
     key = hashlib.sha256(json.dumps([req.tieu_de, req.phuong_trinh, sorted(req.thanh_phan)], ensure_ascii=False).encode()).hexdigest()
     if key in _cache:
@@ -393,7 +409,10 @@ def resolve_actions(raw: list[dict]) -> list[HanhDong]:
 
 
 @app.post("/tro-ly", response_model=TroLyTraLoi)
-async def tro_ly(req: TroLyYeuCau) -> TroLyTraLoi:
+async def tro_ly(req: TroLyYeuCau, request: Request) -> TroLyTraLoi:
+    nd = request.state.nguoi_dung
+    if buoi_hoc.ai_bi_tat(nd):
+        return TroLyTraLoi(tra_loi=buoi_hoc.LOI_AI_TAT, nguon="khoa")
     p = providers.pick()
     if p is None:
         return TroLyTraLoi(tra_loi="Máy chủ chưa cấu hình mô hình AI; robot dùng lệnh cơ bản.", nguon="khong")
@@ -404,12 +423,32 @@ async def tro_ly(req: TroLyYeuCau) -> TroLyTraLoi:
         data = await p.structured(SYSTEM_ASSIST, user, ASSIST_SCHEMA, 1500)
     except Exception as e:  # mạng, khóa API, từ chối: Unity tự chuyển sang hiểu lệnh tại chỗ
         return TroLyTraLoi(tra_loi=ai_error(e), nguon="loi")
-    return TroLyTraLoi(tra_loi=data.get("tra_loi", ""), hanh_dong=resolve_actions(data.get("hanh_dong", [])), nguon=p.NAME)
+    tra_loi, hanh_dong = data.get("tra_loi", ""), resolve_actions(data.get("hanh_dong", []))
+    khoa = buoi_hoc.hoa_chat_bi_khoa(nd)
+    duoc = [a for a in hanh_dong if not (a.loai == "mang_hoa_chat" and a.stt in khoa)]
+    if len(duoc) < len(hanh_dong):
+        tra_loi = (tra_loi + " Hóa chất này đang bị giáo viên khóa nên mình không mang ra được.").strip()
+    return TroLyTraLoi(tra_loi=tra_loi, hanh_dong=duoc, nguon=p.NAME)
+
+
+def _bo_buoc_hoa_chat_khoa(steps: list[dict], khoa: set[int]) -> tuple[list[dict], list[str]]:
+    """Bỏ từ bước đầu tiên đụng tới hóa chất đang khóa trở đi: các bước sau thường cần chính chất đó."""
+    if not khoa:
+        return steps, []
+    for i, s in enumerate(steps):
+        dung = {s["stt"]} | {int(v.split(":", 1)[1]) for v in (s["doi_tuong"], s["dich"]) if v.startswith("hoa_chat:") and v.split(":", 1)[1].isdigit()}
+        if dung & khoa:
+            ten = lab_db.CHEM_BY_STT.get(next(iter(dung & khoa)), {}).get("ten", "hóa chất")
+            return steps[:i], [f"bước {i + 1}: {ten} đang bị giáo viên khóa, dừng kế hoạch tại đây"]
+    return steps, []
 
 
 @app.post("/robot/ke-hoach", response_model=KeHoach)
-async def robot_ke_hoach(req: KeHoachYeuCau) -> KeHoach:
+async def robot_ke_hoach(req: KeHoachYeuCau, request: Request) -> KeHoach:
     """Mô hình lập kế hoạch trên ảnh chụp cảnh; máy chủ kiểm tra từng bước trước khi gửi cho robot."""
+    nd = request.state.nguoi_dung
+    if buoi_hoc.ai_bi_tat(nd):
+        return KeHoach(tra_loi=buoi_hoc.LOI_AI_TAT, nguon="khoa")
     p = providers.pick()
     if p is None:
         return KeHoach(tra_loi="Máy chủ chưa cấu hình mô hình AI; robot dùng lệnh cơ bản.", nguon="khong")
@@ -422,10 +461,15 @@ async def robot_ke_hoach(req: KeHoachYeuCau) -> KeHoach:
     except Exception as e:  # mọi nhà cung cấp đều lỗi: Unity tự chuyển sang hiểu lệnh tại chỗ
         return KeHoach(tra_loi=ai_error(e), nguon="loi")
     steps, dropped = validate(data.get("ke_hoach") or [], {v.id for v in req.the_gioi.vat}, find_chemical)
+    steps, bi_khoa = _bo_buoc_hoa_chat_khoa(steps, buoi_hoc.hoa_chat_bi_khoa(nd))
+    dropped += bi_khoa
     try:
         summary = " → ".join(s["ky_nang"] + (f"({s['doi_tuong']})" if s["doi_tuong"] else "") for s in steps)
         lab_db.log("robot", "Lệnh robot: " + req.cau_hoi[:200], (summary or "chỉ trả lời") + ("\nBỏ: " + "; ".join(dropped) if dropped else ""),
                    "Warning" if dropped else "Info", p.NAME)
     except Exception:
         pass  # nhật ký không được làm hỏng lệnh robot
-    return KeHoach(tra_loi=str(data.get("tra_loi") or ""), ke_hoach=[BuocKeHoach(**s) for s in steps], bo_qua=dropped, nguon=p.NAME)
+    tra_loi = str(data.get("tra_loi") or "")
+    if bi_khoa:
+        tra_loi = (tra_loi + " " + bi_khoa[0]).strip()
+    return KeHoach(tra_loi=tra_loi, ke_hoach=[BuocKeHoach(**s) for s in steps], bo_qua=dropped, nguon=p.NAME)

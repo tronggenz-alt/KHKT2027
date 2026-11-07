@@ -1,0 +1,198 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 820" width="1180" height="820"><style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&amp;family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap');
+.paper{fill:var(--sheet,#fbfcfa);stroke:var(--rule,#c8d2d0);stroke-width:1}
+.ln{fill:none;stroke:var(--ink,#18272c);stroke-width:1.4;stroke-linejoin:round}
+.thin{fill:none;stroke:var(--ink,#18272c);stroke-width:.7}
+.hid{fill:none;stroke:var(--ink-2,#5d6e72);stroke-width:.8;stroke-dasharray:4 3}
+.ctr{fill:none;stroke:var(--ink-2,#5d6e72);stroke-width:.6;stroke-dasharray:14 3 2 3}
+.dim{fill:none;stroke:var(--dim,#0a6b8a);stroke-width:.75}
+.dimt{fill:var(--dim,#0a6b8a);font:500 11.5px 'JetBrains Mono',ui-monospace,monospace}
+.arr{fill:var(--dim,#0a6b8a)}
+.t{fill:var(--ink,#18272c);font:500 12.5px 'Be Vietnam Pro','Segoe UI',sans-serif}
+.tb{fill:var(--ink,#18272c);font:700 12.5px 'Be Vietnam Pro','Segoe UI',sans-serif}
+.ts{fill:var(--ink-2,#5d6e72);font:400 11px 'Be Vietnam Pro','Segoe UI',sans-serif}
+.tw{fill:var(--warn,#b4471a);font:600 11.5px 'Be Vietnam Pro','Segoe UI',sans-serif}
+.h{fill:var(--ink,#18272c);font:700 17px 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.06em}
+.hs{fill:var(--ink-2,#5d6e72);font:600 12px 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.08em}
+.pvc{fill:var(--pvc,#dde5e3);stroke:var(--ink,#18272c);stroke-width:1.4}
+.pvc2{fill:var(--pvc2,#c9d4d1);stroke:var(--ink,#18272c);stroke-width:1.4}
+.mica{fill:var(--mica,rgba(110,180,210,.35));stroke:var(--ink,#18272c);stroke-width:1.1}
+.cut{fill:url(#gach);stroke:var(--ink,#18272c);stroke-width:1.2}
+.gach{stroke:var(--ink,#18272c);stroke-width:.7}
+.pcbk{fill:#2a3036;stroke:var(--ink,#18272c);stroke-width:1}
+.pcbb{fill:#2563a6;stroke:var(--ink,#18272c);stroke-width:1}
+.pcbt{fill:#0f7c86;stroke:var(--ink,#18272c);stroke-width:1}
+.pcbr{fill:#c0392b;stroke:var(--ink,#18272c);stroke-width:1}
+.phip{fill:#c9a066;stroke:var(--ink,#18272c);stroke-width:1}
+.kim{fill:#aab3b8;stroke:var(--ink,#18272c);stroke-width:1}
+.dong{fill:#c99a3b;stroke:var(--ink,#18272c);stroke-width:1}
+.nhua{fill:#4a5257;stroke:var(--ink,#18272c);stroke-width:1}
+.ledx{fill:#22b573;stroke:var(--ink,#18272c);stroke-width:.8}
+.ledd{fill:#e0362c;stroke:var(--ink,#18272c);stroke-width:.8}
+.pin{fill:#3b4a52;stroke:var(--ink,#18272c);stroke-width:1}
+.hand{fill:var(--hand,#e9b98f);stroke:var(--hand-ln,#9c5f37);stroke-width:1.3}
+.handln{fill:none;stroke:var(--hand-ln,#9c5f37);stroke-width:1.1}
+.fig{fill:none;stroke:var(--fig,#a9bcc0);stroke-linecap:round;stroke-linejoin:round}
+.figf{fill:var(--fig,#a9bcc0)}
+.zone{fill:var(--ok,#2f7d4f);fill-opacity:.16;stroke:var(--ok,#2f7d4f);stroke-width:1;stroke-dasharray:5 3}
+.zonet{fill:var(--ok,#2f7d4f);font:600 11.5px 'Be Vietnam Pro','Segoe UI',sans-serif}
+.box{fill:none;stroke:var(--ink-2,#5d6e72);stroke-width:1;stroke-dasharray:7 4}
+.mod{fill:var(--sheet,#fbfcfa);stroke:var(--ink,#18272c);stroke-width:1.4}
+.modh{fill:var(--pvc,#dde5e3)}
+.dot{fill:var(--ink,#18272c)}
+.ball{fill:var(--sheet,#fbfcfa);stroke:var(--ink,#18272c);stroke-width:1.1}
+.ballt{fill:var(--ink,#18272c);font:700 11px 'JetBrains Mono',ui-monospace,monospace}
+.warnbox{fill:var(--warn,#b4471a);fill-opacity:.1;stroke:var(--warn,#b4471a);stroke-width:1}
+.cable{fill:none;stroke:var(--gnd,#2b3135);stroke-linecap:round}
+.wire{fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.gnd{stroke:var(--gnd,#2b3135)}
+</style><defs><marker id="m32" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M0,1.5 L10,5 L0,8.5 z" class="arr"/></marker><pattern id="gach" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" class="gach"/></pattern></defs>
+<style>
+.vo{fill:var(--pvc,#dde5e3);stroke:var(--ink,#18272c);stroke-width:1.1;fill-rule:evenodd}
+.toi{fill:#2a3238;stroke:var(--ink,#18272c);stroke-width:1;fill-rule:evenodd}
+.hl{fill:var(--halo,#11b5d4);stroke:var(--ink,#18272c);stroke-width:1;fill-rule:evenodd}
+.vien{fill:none;stroke:var(--ink,#18272c);stroke-width:1.6;stroke-linejoin:round}
+.cutv{fill:url(#gach);stroke:var(--ink,#18272c);stroke-width:1.1;fill-rule:evenodd}
+.lkf{stroke:var(--ink,#18272c);stroke-width:.8;fill-rule:evenodd}
+.chart{fill:none;stroke:var(--dim,#0a6b8a);stroke-width:2.2}
+.grid{fill:none;stroke:var(--rule,#c8d2d0);stroke-width:.7}
+.tay{fill:var(--hand,#e9b98f);fill-opacity:.55;stroke:var(--hand-ln,#9c5f37);stroke-width:1.1}
+.cam{fill:var(--ink-2,#5d6e72)}
+.tia{fill:none;stroke:var(--halo,#11b5d4);stroke-width:1;stroke-dasharray:5 4}
+.code{fill:var(--ink,#18272c);font:500 12px 'JetBrains Mono',ui-monospace,monospace}
+
+.trang{fill:#f4f7f8;stroke:var(--ink,#18272c);stroke-width:1.1;fill-rule:evenodd}
+.nhat{fill:#dfe7e9;stroke:var(--ink-2,#5d6e72);stroke-width:.6;fill-rule:evenodd}
+.chu{fill:#15191d;fill-rule:evenodd}
+.day{fill:none;stroke:#b4471a;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+</style>
+<rect x="6" y="6" width="1168" height="808" rx="4" class="paper" />
+<rect x="14" y="14" width="1152" height="792" class="thin" />
+<rect x="626" y="732" width="540" height="74" class="ln" />
+<line x1="626" y1="762" x2="1036" y2="762" class="thin" />
+<line x1="1036" y1="732" x2="1036" y2="806" class="thin" />
+<line x1="1036" y1="762" x2="1166" y2="762" class="thin" />
+<line x1="1036" y1="784" x2="1166" y2="784" class="thin" />
+<text x="636" y="753" class="h" text-anchor="start" >TAY CẦM VERA DROP · BỐ TRÍ LINH KIỆN</text>
+<text x="636" y="779" class="ts" text-anchor="start" >Cắt dọc từng nửa thân và cắt ngang tại z = 40</text>
+<text x="636" y="797" class="ts" text-anchor="start" >Đơn vị: mm · VERA Lab, Lê Quý Đôn · 02/11/2026</text>
+<text x="1046" y="745" class="hs" text-anchor="start" >BẢN VẼ SỐ</text>
+<text x="1046" y="759" class="tb" text-anchor="start" >TCD-02</text>
+<text x="1046" y="777" class="ts" text-anchor="start" >Tay cầm VERA Drop</text>
+<text x="1046" y="799" class="ts" text-anchor="start" >Chiếu góc thứ nhất</text>
+<text x="50" y="46" class="h" text-anchor="start" >A–A · NỬA TRÁI</text>
+<text x="50" y="62" class="ts" text-anchor="start" >cắt tại y = +1, nhìn từ sườn phải</text>
+<path d="M195.2,178 L187.6,134.7 L163.9,138.9 L157.5,102.6 L189,97.1 L185.6,77.4 L106.8,91.3 L110.3,111 L141.8,105.4 L148.2,141.7 L124.5,145.8 L132.2,189.2 Z M231.8,178.1 L230.6,171.8 L96.7,195.4 L97.8,201.7 Z" class="lkf" style="fill:#30353a;fill-opacity:.92"/>
+<path d="M150,478 L190,478 L190,258 L78,258 L78,478 L118,478 L118,482 L150,482 Z" class="lkf" style="fill:#1d2b33;fill-opacity:.92"/>
+<path d="M160,328 L108,328 L108,400 L160,400 Z" class="lkf" style="fill:#7b4fd6;fill-opacity:.92"/>
+<path d="M198,238 L192,238 L192,243 L170,243 L170,245 L192,245 L192,250 L198,250 Z" class="lkf" style="fill:#c0392b;fill-opacity:.92"/>
+<path d="M259.3,208.6 L261.6,199.6 L263.4,192 L255.9,193.3 L254.4,199.6 L252.1,208.6 L250.5,214 L257.7,214 Z M198,250.8 L190.8,250.8 L190.8,237.2 L198,237.2 L198,230.4 L192,230.4 L192,223.2 L198,223.2 L198,218 L182,218 L182,256 L198,256 Z M66.9,268.4 L66.2,268.2 L65.6,267.9 L65,267.6 L64.5,267.1 L64,266.6 L63.7,266 L63.4,265.4 L63.2,264.7 L63.2,264 L63.2,263.3 L63.4,262.6 L63.7,262 L64,261.4 L64.5,260.9 L65,260.4 L65.6,260.1 L66.2,259.8 L66.9,259.6 L67.6,259.6 L68.3,259.6 L69,259.8 L69.6,260.1 L70.2,260.4 L70.7,260.9 L71.2,261.4 L71.5,262 L71.8,262.6 L72,263.3 L72,264 L72,264.7 L71.8,265.4 L71.5,266 L71.2,266.6 L70.7,267.1 L70.2,267.6 L69.6,267.9 L69,268.2 L68.3,268.4 L67.6,268.4 Z M207.3,344.4 L206.6,344.2 L206,343.9 L205.4,343.6 L204.9,343.1 L204.4,342.6 L204.1,342 L203.8,341.4 L203.6,340.7 L203.6,340 L203.6,339.3 L203.8,338.6 L204.1,338 L204.4,337.4 L204.9,336.9 L205.4,336.4 L206,336.1 L206.6,335.8 L207.3,335.6 L208,335.6 L208.7,335.6 L209.4,335.8 L210,336.1 L210.6,336.4 L211.1,336.9 L211.6,337.4 L211.9,338 L212.2,338.6 L212.4,339.3 L212.4,340 L212.4,340.7 L212.2,341.4 L211.9,342 L211.6,342.6 L211.1,343.1 L210.6,343.6 L210,343.9 L209.4,344.2 L208.7,344.4 L208,344.4 Z M65.3,384.4 L64.6,384.2 L64,383.9 L63.4,383.6 L62.9,383.1 L62.4,382.6 L62.1,382 L61.8,381.4 L61.6,380.7 L61.6,380 L61.6,379.3 L61.8,378.6 L62.1,378 L62.4,377.4 L62.9,376.9 L63.4,376.4 L64,376.1 L64.6,375.8 L65.3,375.6 L66,375.6 L66.7,375.6 L67.4,375.8 L68,376.1 L68.6,376.4 L69.1,376.9 L69.6,377.4 L69.9,378 L70.2,378.6 L70.4,379.3 L70.4,380 L70.4,380.7 L70.2,381.4 L69.9,382 L69.6,382.6 L69.1,383.1 L68.6,383.6 L68,383.9 L67.4,384.2 L66.7,384.4 L66,384.4 Z M207.3,460.4 L206.6,460.2 L206,459.9 L205.4,459.6 L204.9,459.1 L204.4,458.6 L204.1,458 L203.8,457.4 L203.6,456.7 L203.6,456 L203.6,455.3 L203.8,454.6 L204.1,454 L204.4,453.4 L204.9,452.9 L205.4,452.4 L206,452.1 L206.6,451.8 L207.3,451.6 L208,451.6 L208.7,451.6 L209.4,451.8 L210,452.1 L210.6,452.4 L211.1,452.9 L211.6,453.4 L211.9,454 L212.2,454.6 L212.4,455.3 L212.4,456 L212.4,456.7 L212.2,457.4 L211.9,458 L211.6,458.6 L211.1,459.1 L210.6,459.6 L210,459.9 L209.4,460.2 L208.7,460.4 L208,460.4 Z M209.4,497.8 L210.9,496.7 L212.7,495.3 L215.7,493 L216.8,492 L217.8,490.9 L218.8,489.6 L219.8,488 L222.8,482.6 L223.8,480.5 L224.7,478.1 L225.6,475.2 L226.4,471.9 L227,468 L227.6,463.5 L228,458.5 L228.4,453.1 L228.6,447.2 L229,434.4 L229.6,412 L229.8,365.4 L230,356.4 L230.2,348 L230.9,332.7 L231.8,318.5 L232.6,308 L225.4,308 L224.5,318.5 L224,327.2 L208,327.2 L206,327.4 L204,327.8 L202.2,328.6 L200.5,329.6 L199,331 L197.6,332.5 L196.6,334.2 L195.8,336 L195.4,338 L195.2,340 L195.4,342 L195.8,344 L196.6,345.8 L197.6,347.5 L199,349 L200.5,350.4 L202.2,351.4 L204,352.2 L206,352.6 L208,352.8 L222.8,352.8 L222.6,365.4 L222.3,412 L222.2,420 L221.5,443.2 L208,443.2 L206,443.4 L204,443.8 L202.2,444.6 L200.5,445.6 L199,447 L197.6,448.5 L196.6,450.2 L195.8,452 L195.4,454 L195.2,456 L195.4,458 L195.8,460 L196.6,461.8 L197.6,463.5 L199,465 L200.5,466.4 L202.2,467.4 L204,468.2 L206,468.6 L208,468.8 L219.6,468.8 L219.1,471.9 L218.3,475.2 L217.4,478.1 L216.5,480.5 L215.5,482.6 L212.5,488 L211.6,489.6 L210.5,490.9 L209.5,492 L208.7,492.8 L79.3,492.8 L78.5,492 L77.5,490.9 L76.4,489.6 L75.5,488 L72.5,482.6 L71.5,480.5 L70.6,478.1 L69.7,475.2 L68.9,471.9 L68.2,468 L67.7,463.5 L67.2,458.5 L66.9,453.1 L66.6,447.2 L66.2,434.4 L65.7,412 L65.5,389.6 L67.5,389.5 L69,389.1 L70.4,388.6 L71.6,387.8 L72.8,386.8 L73.8,385.6 L74.6,384.4 L75.1,383 L75.5,381.5 L75.6,380 L75.5,378.5 L75.1,377 L74.6,375.6 L73.8,374.4 L72.8,373.2 L71.6,372.2 L70.4,371.4 L69,370.9 L67.5,370.5 L65.4,370.4 L65.3,356.4 L65,348 L64.3,332.7 L63.5,318.5 L63,311.7 L61.2,292 L59.8,273.6 L67.6,273.6 L69.1,273.5 L70.6,273.1 L72,272.6 L73.2,271.8 L74.4,270.8 L75.4,269.6 L76.2,268.4 L76.7,267 L77.1,265.5 L77.2,264 L77.1,262.5 L76.7,261 L76.2,259.6 L75.4,258.4 L74.4,257.2 L73.2,256.2 L72,255.4 L70.6,254.9 L69.1,254.5 L67.6,254.4 L59,254.4 L58.9,249.6 L58.9,244 L59.2,228 L52,229.3 L51.7,244 L51.6,249.6 L51.8,255.2 L52,261.1 L52.6,273.1 L54,292 L55.7,311.7 L56.2,318.5 L57.1,332.7 L57.8,348 L58,356.4 L58.2,365.4 L58.4,412 L58.6,420 L59.2,441 L59.6,453.1 L60,458.5 L60.4,463.5 L61,468 L61.6,471.9 L62.4,475.2 L63.3,478.1 L64.2,480.5 L65.2,482.6 L68.2,488 L69.2,489.6 L70.2,490.9 L71.2,492 L72.3,493 L75.3,495.3 L77.1,496.7 L78.6,497.8 L82.3,500 L205.7,500 Z" class="cutv" />
+<path d="M265.9,175.3 L266.1,172 L266.1,168.3 L266,164.6 L265.7,161 L265.3,157.5 L264.9,154 L264.4,150.6 L263.8,147.3 L263,144 L262.2,140.8 L261.3,137.5 L260.3,134.4 L259.2,131.2 L258,128.2 L256.8,125.3 L255.5,122.6 L254.2,120 L252.9,117.6 L251.6,115.3 L250.2,113.2 L248.8,111.2 L247.4,109.4 L245.8,107.5 L244.1,105.8 L242.2,104 L240.3,102.3 L238.3,100.6 L236.2,99 L234,97.5 L231.7,96 L229.2,94.6 L226.6,93.3 L225.4,92.7 L209.8,95.5 L210.8,101.4 L210.3,102.7 L229.4,99.3 L231.1,100.6 L233.1,102.3 L235,104 L236.8,105.8 L238.6,107.5 L240.1,109.4 L241.6,111.2 L243,113.2 L244.4,115.3 L245.7,117.6 L247,120 L248.3,122.6 L249.6,125.3 L250.8,128.2 L252,131.2 L253.1,134.4 L254.1,137.5 L255,140.8 L255.8,144 L256.5,147.3 L257.2,150.6 L257.7,154 L258.1,157.5 L258.5,161 L258.8,164.6 L258.9,168.3 L258.9,172 L258.6,176.6 Z M65.8,239 L65.9,233.2 L66.7,207.2 L59.9,208.4 L60.2,199.6 L60.5,179.5 L60.6,175.8 L61,168.3 L61.5,161 L61.9,157.5 L62.3,154 L62.8,150.6 L63.5,147.3 L64.2,144 L65,140.8 L65.9,137.5 L66.9,134.4 L68,131.2 L69.5,127.5 L92.2,123.5 L91.3,122.4 L90.2,116.5 L65.3,120.9 L63.2,125.3 L62,128.2 L60.8,131.2 L59.7,134.4 L58.7,137.5 L57.8,140.8 L57,144 L56.2,147.3 L55.6,150.6 L55.1,154 L54.7,157.5 L54.3,161 L53.6,172 L53.3,179.5 L53,195.4 L52.5,213 L60.8,211.5 L60.4,223 L60,240.1 Z" class="toi" />
+<path d="M263.4,192 L264.4,187.2 L265,183.4 L265.5,179.5 L265.9,175.3 L258.6,176.6 L258.3,179.5 L257.8,183.4 L257.1,187.2 L255.9,193.3 Z M59.2,228 L59.8,211.7 L52.5,213 L52,229.3 Z" class="hl" />
+<path d="M224.5,214.4 L223.8,214.2 L223.2,213.9 L222.6,213.6 L222.1,213.1 L221.6,212.6 L221.3,212 L221,211.4 L220.8,210.7 L220.8,210 L220.8,209.3 L221,208.6 L221.3,208 L221.6,207.4 L222.1,206.9 L222.6,206.4 L223.2,206.1 L223.8,205.8 L224.5,205.6 L225.2,205.6 L225.9,205.6 L226.6,205.8 L227.2,206.1 L227.8,206.4 L228.3,206.9 L228.8,207.4 L229.1,208 L229.4,208.6 L229.6,209.3 L229.6,210 L229.6,210.7 L229.4,211.4 L229.1,212 L228.8,212.6 L228.3,213.1 L227.8,213.6 L227.2,213.9 L226.6,214.2 L225.9,214.4 L225.2,214.4 Z M226,223.2 L236,223.2 L236,230.4 L226,230.4 Z M233.5,298.5 L234.1,294 L231.8,294 L231.8,290 L234.8,290 L235.6,285.6 L237,279.2 L237.3,278 L235.2,278 L235.2,274 L238.4,274 L240.5,267 L242.1,262 L240.1,262 L240.1,258 L244.3,258 L244.3,255.4 L246.3,249.6 L255,223 L257.1,216 L247.5,216 L247.3,216.8 L234,216.8 L234,212.6 L234.3,211.4 L234.4,210 L234.3,208.6 L234,207.2 L233.4,205.8 L232.6,204.6 L231.7,203.5 L230.6,202.6 L229.4,201.8 L228,201.2 L226.6,200.9 L225.2,200.8 L223.8,200.9 L222.4,201.2 L221,201.8 L219.8,202.6 L218.7,203.5 L217.8,204.6 L217,205.8 L216.4,207.2 L216.1,208.6 L216,210 L216,216.8 L214.8,216.8 L214.8,236 L220,236 L220,234.6 L236.2,234.6 L236.2,253.4 L224,253.4 L224,261.4 L232.7,261.4 L230.9,267 L229,273.1 L227.4,279.2 L225.9,285.6 L224.7,292 L223.9,298.5 L223.1,306 L232.8,306 Z" class="toi" />
+<path d="M210,101.5 L209,95.6 L205,96.3 L199.2,119.2 L200.7,127.5 Z M108.2,135.3 L95,115.7 L91,116.4 L92.1,122.3 L109.7,143.6 Z" class="nhat" />
+<text x="330" y="46" class="h" text-anchor="start" >B–B · NỬA PHẢI</text>
+<text x="330" y="62" class="ts" text-anchor="start" >cắt tại y = −1, nhìn từ sườn phải</text>
+<path d="M475.2,178 L467.6,134.7 L443.9,138.9 L437.5,102.6 L469,97.1 L465.6,77.4 L386.8,91.3 L390.3,111 L421.8,105.4 L428.2,141.7 L404.5,145.8 L412.2,189.2 Z M511.8,178.1 L510.6,171.8 L376.7,195.4 L377.8,201.7 Z" class="lkf" style="fill:#30353a;fill-opacity:.92"/>
+<path d="M474,230 L374,230 L374,390 L474,390 Z" class="lkf" style="fill:#8a9aa3;fill-opacity:.92"/>
+<path d="M432,491.2 L450,491.2 L450,391.2 L378,391.2 L378,491.2 L396,491.2 L396,492 L432,492 Z" class="lkf" style="fill:#2563a6;fill-opacity:.92"/>
+<path d="M474.8,487.2 L487.6,487.2 L487.6,473.2 L454,473.2 L454,487.2 L466.8,487.2 L466.8,498 L474.8,498 Z" class="lkf" style="fill:#3b4a52;fill-opacity:.92"/>
+<path d="M539.3,208.6 L541.6,199.6 L543.4,192 L535.9,193.3 L534.4,199.6 L532.1,208.6 L530.5,214 L537.7,214 Z M347.1,267.4 L346.6,267.2 L346,267 L345.6,266.8 L345.2,266.4 L344.8,266 L344.6,265.6 L344.4,265 L344.2,264.5 L344.2,264 L344.2,263.5 L344.4,263 L344.6,262.4 L344.8,262 L345.2,261.6 L345.6,261.2 L346,261 L346.6,260.8 L347.1,260.6 L347.6,260.6 L348.1,260.6 L348.6,260.8 L349.2,261 L349.6,261.2 L350,261.6 L350.4,262 L350.6,262.4 L350.8,263 L351,263.5 L351,264 L351,264.5 L350.8,265 L350.6,265.6 L350.4,266 L350,266.4 L349.6,266.8 L349.2,267 L348.6,267.2 L348.1,267.4 L347.6,267.4 Z M487.5,343.4 L487,343.2 L486.4,343 L486,342.8 L485.6,342.4 L485.2,342 L485,341.6 L484.8,341 L484.6,340.5 L484.6,340 L484.6,339.5 L484.8,339 L485,338.4 L485.2,338 L485.6,337.6 L486,337.2 L486.4,337 L487,336.8 L487.5,336.6 L488,336.6 L488.5,336.6 L489,336.8 L489.6,337 L490,337.2 L490.4,337.6 L490.8,338 L491,338.4 L491.2,339 L491.4,339.5 L491.4,340 L491.4,340.5 L491.2,341 L491,341.6 L490.8,342 L490.4,342.4 L490,342.8 L489.6,343 L489,343.2 L488.5,343.4 L488,343.4 Z M345.5,383.4 L345,383.2 L344.4,383 L344,382.8 L343.6,382.4 L343.2,382 L343,381.6 L342.8,381 L342.6,380.5 L342.6,380 L342.6,379.5 L342.8,379 L343,378.4 L343.2,378 L343.6,377.6 L344,377.2 L344.4,377 L345,376.8 L345.5,376.6 L346,376.6 L346.5,376.6 L347,376.8 L347.6,377 L348,377.2 L348.4,377.6 L348.8,378 L349,378.4 L349.2,379 L349.4,379.5 L349.4,380 L349.4,380.5 L349.2,381 L349,381.6 L348.8,382 L348.4,382.4 L348,382.8 L347.6,383 L347,383.2 L346.5,383.4 L346,383.4 Z M487.5,459.4 L487,459.2 L486.4,459 L486,458.8 L485.6,458.4 L485.2,458 L485,457.6 L484.8,457 L484.6,456.5 L484.6,456 L484.6,455.5 L484.8,455 L485,454.4 L485.2,454 L485.6,453.6 L486,453.2 L486.4,453 L487,452.8 L487.5,452.6 L488,452.6 L488.5,452.6 L489,452.8 L489.6,453 L490,453.2 L490.4,453.6 L490.8,454 L491,454.4 L491.2,455 L491.4,455.5 L491.4,456 L491.4,456.5 L491.2,457 L491,457.6 L490.8,458 L490.4,458.4 L490,458.8 L489.6,459 L489,459.2 L488.5,459.4 L488,459.4 Z M489.4,497.8 L490.9,496.7 L492.7,495.3 L495.7,493 L496.8,492 L497.8,490.9 L498.8,489.6 L499.8,488 L502.8,482.6 L503.8,480.5 L504.7,478.1 L505.6,475.2 L506.4,471.9 L507,468 L507.6,463.5 L508,458.5 L508.4,453.1 L508.6,447.2 L509,434.4 L509.6,412 L509.8,365.4 L510,356.4 L510.2,348 L510.9,332.7 L511.8,318.5 L512.6,308 L505.4,308 L504.5,318.5 L504,327.2 L488,327.2 L486,327.4 L484,327.8 L482.2,328.6 L480.5,329.6 L479,331 L477.6,332.5 L476.6,334.2 L475.8,336 L475.4,338 L475.2,340 L475.4,342 L475.8,344 L476.6,345.8 L477.6,347.5 L479,349 L480.5,350.4 L482.2,351.4 L484,352.2 L486,352.6 L488,352.8 L502.8,352.8 L502.6,365.4 L502.3,412 L502.2,420 L501.5,443.2 L488,443.2 L486,443.4 L484,443.8 L482.2,444.6 L480.5,445.6 L479,447 L477.6,448.5 L476.6,450.2 L475.8,452 L475.4,454 L475.2,456 L475.4,458 L475.8,460 L476.6,461.8 L477.6,463.5 L479,465 L480.5,466.4 L482.2,467.4 L484,468.2 L486,468.6 L488,468.8 L499.6,468.8 L499.1,471.9 L498.3,475.2 L497.4,478.1 L496.5,480.5 L495.5,482.6 L492.5,488 L491.6,489.6 L490.5,490.9 L489.5,492 L488.7,492.8 L359.3,492.8 L358.5,492 L357.5,490.9 L356.4,489.6 L355.5,488 L352.5,482.6 L351.5,480.5 L350.6,478.1 L349.7,475.2 L348.9,471.9 L348.2,468 L347.7,463.5 L347.2,458.5 L346.9,453.1 L346.6,447.2 L346.2,434.4 L345.7,412 L345.5,389.6 L347.5,389.5 L349,389.1 L350.4,388.6 L351.6,387.8 L352.8,386.8 L353.8,385.6 L354.6,384.4 L355.1,383 L355.5,381.5 L355.6,380 L355.5,378.5 L355.1,377 L354.6,375.6 L353.8,374.4 L352.8,373.2 L351.6,372.2 L350.4,371.4 L349,370.9 L347.5,370.5 L345.4,370.4 L345.3,356.4 L345,348 L344.3,332.7 L343.5,318.5 L343,311.7 L341.2,292 L339.8,273.6 L347.6,273.6 L349.1,273.5 L350.6,273.1 L352,272.6 L353.2,271.8 L354.4,270.8 L355.4,269.6 L356.2,268.4 L356.7,267 L357.1,265.5 L357.2,264 L357.1,262.5 L356.7,261 L356.2,259.6 L355.4,258.4 L354.4,257.2 L353.2,256.2 L352,255.4 L350.6,254.9 L349.1,254.5 L347.6,254.4 L339,254.4 L338.9,249.6 L338.9,244 L339.2,228 L332,229.3 L331.7,244 L331.6,249.6 L331.8,255.2 L332,261.1 L332.6,273.1 L334,292 L335.7,311.7 L336.2,318.5 L337.1,332.7 L337.8,348 L338,356.4 L338.2,365.4 L338.4,412 L338.6,420 L339.2,441 L339.6,453.1 L340,458.5 L340.4,463.5 L341,468 L341.6,471.9 L342.4,475.2 L343.3,478.1 L344.2,480.5 L345.2,482.6 L348.2,488 L349.2,489.6 L350.2,490.9 L351.2,492 L352.3,493 L355.3,495.3 L357.1,496.7 L358.6,497.8 L362.3,500 L485.7,500 Z" class="cutv" />
+<path d="M545.9,175.3 L546.1,172 L546.1,168.3 L546,164.6 L545.7,161 L545.3,157.5 L544.9,154 L544.4,150.6 L543.8,147.3 L543,144 L542.2,140.8 L541.3,137.5 L540.3,134.4 L539.2,131.2 L538,128.2 L536.8,125.3 L535.5,122.6 L534.2,120 L532.9,117.6 L531.6,115.3 L530.2,113.2 L528.8,111.2 L527.4,109.4 L525.8,107.5 L524.1,105.8 L522.2,104 L520.3,102.3 L518.3,100.6 L516.2,99 L514,97.5 L511.7,96 L509.2,94.6 L506.6,93.3 L505.4,92.7 L489.8,95.5 L490.8,101.4 L490.3,102.7 L509.4,99.3 L511.1,100.6 L513.1,102.3 L515,104 L516.8,105.8 L518.6,107.5 L520.1,109.4 L521.6,111.2 L523,113.2 L524.4,115.3 L525.7,117.6 L527,120 L528.3,122.6 L529.6,125.3 L530.8,128.2 L532,131.2 L533.1,134.4 L534.1,137.5 L535,140.8 L535.8,144 L536.5,147.3 L537.2,150.6 L537.7,154 L538.1,157.5 L538.5,161 L538.8,164.6 L538.9,168.3 L538.9,172 L538.6,176.6 Z M345.8,239 L346.2,223 L346.7,207.2 L339.9,208.4 L340.2,199.6 L340.5,179.5 L340.6,175.8 L341,168.3 L341.5,161 L341.9,157.5 L342.3,154 L342.8,150.6 L343.5,147.3 L344.2,144 L345,140.8 L345.9,137.5 L346.9,134.4 L348,131.2 L349.5,127.5 L372.2,123.5 L371.3,122.4 L370.2,116.5 L345.3,120.9 L343.2,125.3 L342,128.2 L340.8,131.2 L339.7,134.4 L338.7,137.5 L337.8,140.8 L337,144 L336.2,147.3 L335.6,150.6 L335.1,154 L334.7,157.5 L334.3,161 L334,164.6 L333.4,175.8 L333.2,183.4 L333,195.4 L332.5,213 L340.8,211.5 L340.4,223 L340,240.1 Z" class="toi" />
+<path d="M543.4,192 L544.4,187.2 L545,183.4 L545.5,179.5 L545.9,175.3 L538.6,176.6 L538.3,179.5 L537.8,183.4 L537.1,187.2 L535.9,193.3 Z M339.2,228 L339.8,211.7 L332.5,213 L332,229.3 Z" class="hl" />
+<path d="M504.5,214.4 L503.8,214.2 L503.2,213.9 L502.6,213.6 L502.1,213.1 L501.6,212.6 L501.3,212 L501,211.4 L500.8,210.7 L500.8,210 L500.8,209.3 L501,208.6 L501.3,208 L501.6,207.4 L502.1,206.9 L502.6,206.4 L503.2,206.1 L503.8,205.8 L504.5,205.6 L505.2,205.6 L505.9,205.6 L506.6,205.8 L507.2,206.1 L507.8,206.4 L508.3,206.9 L508.8,207.4 L509.1,208 L509.4,208.6 L509.6,209.3 L509.6,210 L509.6,210.7 L509.4,211.4 L509.1,212 L508.8,212.6 L508.3,213.1 L507.8,213.6 L507.2,213.9 L506.6,214.2 L505.9,214.4 L505.2,214.4 Z M513.5,298.5 L514.1,294 L511.8,294 L511.8,290 L514.8,290 L515.6,285.6 L517,279.2 L517.3,278 L515.2,278 L515.2,274 L518.4,274 L520.5,267 L522.1,262 L520.1,262 L520.1,258 L523.4,258 L526.3,249.6 L535,223 L537.1,216 L527.5,216 L527.3,216.8 L514,216.8 L514,212.6 L514.3,211.4 L514.4,210 L514.3,208.6 L514,207.2 L513.4,205.8 L512.6,204.6 L511.7,203.5 L510.6,202.6 L509.4,201.8 L508,201.2 L506.6,200.9 L505.2,200.8 L503.8,200.9 L502.4,201.2 L501,201.8 L499.8,202.6 L498.7,203.5 L497.8,204.6 L497,205.8 L496.4,207.2 L496.1,208.6 L496,210 L496,216.8 L494.8,216.8 L494.8,236 L504,236 L504,254.5 L515,254.5 L510.9,267 L509,273.1 L507.4,279.2 L505.9,285.6 L504.7,292 L503.9,298.5 L503.1,306 L512.8,306 Z" class="toi" />
+<path d="M490,101.5 L489,95.6 L485,96.3 L479.2,119.2 L480.7,127.5 Z M388.2,135.3 L375,115.7 L371,116.4 L372.1,122.3 L389.7,143.6 Z" class="nhat" />
+<circle cx="134" cy="440" r="8.5" class="ball" />
+<text x="134" y="444" class="ballt" text-anchor="middle" >1</text>
+<circle cx="44" cy="552" r="8.5" class="ball" />
+<text x="44" y="556" class="ballt" text-anchor="middle" >1</text>
+<text x="58" y="556" class="ts" text-anchor="start" >ESP32 DevKitC 38 chân, cổng micro-USB xuống đáy</text>
+<circle cx="134" cy="364" r="8.5" class="ball" />
+<text x="134" y="368" class="ballt" text-anchor="middle" >2</text>
+<circle cx="44" cy="576" r="8.5" class="ball" />
+<text x="44" y="580" class="ballt" text-anchor="middle" >2</text>
+<text x="58" y="580" class="ts" text-anchor="start" >BMI160, dán trên vỏ module ESP32</text>
+<circle cx="184" cy="244" r="8.5" class="ball" />
+<text x="184" y="248" class="ballt" text-anchor="middle" >3</text>
+<circle cx="44" cy="600" r="8.5" class="ball" />
+<text x="44" y="604" class="ballt" text-anchor="middle" >3</text>
+<text x="58" y="604" class="ts" text-anchor="start" >Hall SS49E, trong hốc vách đế</text>
+<circle cx="164.2" cy="139.6" r="8.5" class="ball" />
+<text x="164.2" y="143.6" class="ballt" text-anchor="middle" >4</text>
+<circle cx="44" cy="624" r="8.5" class="ball" />
+<text x="44" y="628" class="ballt" text-anchor="middle" >4</text>
+<text x="58" y="628" class="ts" text-anchor="start" >Joystick KY-023, bắt vào 4 trụ của nắp</text>
+<circle cx="424" cy="310" r="8.5" class="ball" />
+<text x="424" y="314" class="ballt" text-anchor="middle" >5</text>
+<circle cx="374" cy="552" r="8.5" class="ball" />
+<text x="374" y="556" class="ballt" text-anchor="middle" >5</text>
+<text x="388" y="556" class="ts" text-anchor="start" >Pin LiPo 1000 mAh 40 × 25 × 9</text>
+<circle cx="414" cy="441.6" r="8.5" class="ball" />
+<text x="414" y="445.6" class="ballt" text-anchor="middle" >6</text>
+<circle cx="374" cy="576" r="8.5" class="ball" />
+<text x="374" y="580" class="ballt" text-anchor="middle" >6</text>
+<text x="388" y="580" class="ts" text-anchor="start" >Mạch sạc TP4056 USB-C, cổng xuống đáy</text>
+<circle cx="470.8" cy="485.6" r="8.5" class="ball" />
+<text x="470.8" y="489.6" class="ballt" text-anchor="middle" >7</text>
+<circle cx="374" cy="600" r="8.5" class="ball" />
+<text x="374" y="604" class="ballt" text-anchor="middle" >7</text>
+<text x="388" y="604" class="ts" text-anchor="start" >Công tắc trượt, cần ló qua lỗ đáy</text>
+<circle cx="518" cy="268" r="8.5" class="ball" />
+<text x="518" y="272" class="ballt" text-anchor="middle" >8</text>
+<circle cx="374" cy="624" r="8.5" class="ball" />
+<text x="374" y="628" class="ballt" text-anchor="middle" >8</text>
+<text x="388" y="628" class="ts" text-anchor="start" >Cò Hall, trục Ø2 qua 2 tai</text>
+<text x="40" y="672" class="ts" text-anchor="start" >Phần gạch chéo là vỏ thân tại mặt cắt, chỗ nhô vào trong là trụ vít. Màu đậm là linh kiện chiếu từ phía sau mặt cắt.</text>
+<text x="40" y="690" class="ts" text-anchor="start" >Dây từ joystick và Hall đi dọc lưng ESP32 xuống. Gờ nắp lồng xuống thân để khóa miệng 2 nửa.</text>
+<text x="700" y="46" class="h" text-anchor="start" >C–C · CẮT NGANG TẠI z = 40</text>
+<text x="700" y="62" class="ts" text-anchor="start" >nhìn từ trên; thứ tự xếp chồng theo chiều y</text>
+<path d="M879.5,294.3 L888,293.7 L896.4,292.7 L904.7,291.3 L912.8,289.5 L920.8,287.3 L928.5,284.8 L936,281.8 L943.3,278.6 L950.2,275 L956.8,271 L963,266.8 L968.8,262.3 L974.2,257.5 L979.2,252.5 L983.7,247.3 L987.7,241.8 L991.2,236.2 L994.2,230.4 L996.6,224.5 L998.6,218.4 L1000,212.4 L1000.8,206.2 L1001.1,200 L1000.8,193.8 L1000,187.6 L998.6,181.6 L996.6,175.5 L994.2,169.6 L991.2,163.8 L987.7,158.2 L983.7,152.7 L979.6,148 L979.6,169.4 L982,169.4 L984,173.1 L986.4,179 L973.6,179 L973.6,200 L972.1,200 L972.1,242 L961.9,242 L961.9,200 L960.4,200 L960.4,179 L947.8,179 L947.8,248 L968.7,248 L965.6,250.9 L960.7,255.2 L955.4,259.2 L949.7,262.9 L943.6,266.4 L937.3,269.6 L930.6,272.5 L923.7,275.1 L916.7,277.3 L909.3,279.3 L901.9,280.9 L894.3,282.1 L886.6,283 L878.8,283.5 L871,283.7 L863.2,283.5 L855.4,283 L847.7,282.1 L840.1,280.9 L832.7,279.3 L825.3,277.3 L818.3,275.1 L811.4,272.5 L804.7,269.6 L798.4,266.4 L792.3,262.9 L786.6,259.2 L781.3,255.2 L776.4,250.9 L771.8,246.5 L767.7,241.9 L764,237 L760.8,232 L758,226.9 L755.8,221.7 L754,216.3 L752.7,210.9 L752,205.5 L751.7,200 L752,194.5 L752.7,189.1 L754,183.7 L755.8,178.3 L758,173.1 L760,169.4 L787,169.4 L787,157.4 L768.3,157.4 L771.8,153.5 L776.4,149.1 L781.3,144.8 L786.6,140.8 L792.3,137.1 L798.4,133.6 L804.7,130.4 L811.4,127.5 L818.3,124.9 L825.3,122.7 L832.7,120.7 L840.1,119.1 L847.7,117.9 L855.4,117 L863.2,116.5 L871,116.3 L878.8,116.5 L886.6,117 L894.3,117.9 L901.9,119.1 L909.3,120.7 L916.7,122.7 L923.7,124.9 L930.6,127.5 L937.3,130.4 L943.6,133.6 L949.7,137.1 L954.4,140.2 L954.4,127.5 L950.2,125 L943.3,121.4 L936,118.2 L928.5,115.2 L920.8,112.7 L912.8,110.5 L904.7,108.7 L896.4,107.3 L888,106.3 L879.5,105.7 L871,105.5 L862.5,105.7 L854,106.3 L845.6,107.3 L837.3,108.7 L829.2,110.5 L821.2,112.7 L813.5,115.2 L806,118.2 L798.7,121.4 L791.8,125 L785.2,129 L779,133.2 L773.2,137.7 L767.8,142.5 L762.8,147.5 L758.3,152.7 L754.3,158.2 L750.8,163.8 L747.8,169.6 L745.4,175.5 L743.4,181.6 L742,187.6 L741.2,193.8 L740.9,200 L741.2,206.2 L742,212.4 L743.4,218.4 L745.4,224.5 L747.8,230.4 L750.8,236.2 L754.3,241.8 L758.3,247.3 L762.8,252.5 L767.8,257.5 L773.2,262.3 L779,266.8 L785.2,271 L791.8,275 L798.7,278.6 L806,281.8 L813.5,284.8 L821.2,287.3 L829.2,289.5 L837.3,291.3 L845.6,292.7 L854,293.7 L862.5,294.3 L871,294.5 Z M954.4,157.4 L931,157.4 L931,169.4 L954.4,169.4 Z" class="cutv" />
+<path d="M788.2,179 L923.8,179 L923.8,194 L938.8,194 L938.8,179 L940,179 L940,169.4 L910,169.4 L910,150.2 L802,150.2 L802,169.4 L772,169.4 L772,179 L773.2,179 L773.2,194 L788.2,194 Z" class="lkf" style="fill:#1d2b33"/>
+<path d="M895,140.6 L817,140.6 L817,150.2 L895,150.2 Z" class="lkf" style="fill:#7b4fd6"/>
+<path d="M946,202.4 L796,202.4 L796,256.4 L946,256.4 Z" class="lkf" style="fill:#8a9aa3"/>
+<path d="M971.8,179 L978.4,179 L978.4,170.6 L955.6,170.6 L955.6,179 L962.2,179 L962.2,239 L971.8,239 Z" class="lkf" style="fill:#aab4ba"/>
+<circle cx="856" cy="145.4" r="1.8" class="dot" />
+<line x1="856" y1="145.4" x2="800" y2="97.4" class="thin" />
+<text x="796" y="101.4" class="t" text-anchor="end" >BMI160</text>
+<circle cx="856" cy="174.2" r="1.8" class="dot" />
+<line x1="856" y1="174.2" x2="986" y2="78.2" class="thin" />
+<text x="990" y="82.2" class="t" text-anchor="start" >ESP32</text>
+<circle cx="868" cy="230" r="1.8" class="dot" />
+<line x1="868" y1="230" x2="828" y2="304" class="thin" />
+<text x="824" y="308" class="t" text-anchor="end" >pin</text>
+<circle cx="958" cy="163.4" r="1.8" class="dot" />
+<line x1="958" y1="163.4" x2="1014" y2="113.4" class="thin" />
+<text x="1018" y="117.4" class="t" text-anchor="start" >gờ đỡ</text>
+<circle cx="967" cy="212" r="1.8" class="dot" />
+<line x1="967" y1="212" x2="1025" y2="252" class="thin" />
+<text x="1029" y="256" class="t" text-anchor="start" >trụ vít V2</text>
+<text x="700" y="350" class="hs" text-anchor="start" >XẾP CHỒNG THEO CHIỀU Y TẠI z = 40</text>
+<text x="990" y="350" class="hs" text-anchor="end" >y (mm)</text>
+<text x="1110" y="350" class="hs" text-anchor="end" >khe tới lớp sau</text>
+<text x="700" y="372" class="ts" text-anchor="start" >Vách nửa phải, mặt trong</text>
+<text x="990" y="372" class="dimt" text-anchor="end" >−14,0</text>
+<text x="1110" y="372" class="dimt" text-anchor="end" >4,6</text>
+<text x="700" y="392" class="ts" text-anchor="start" >Pin, mặt ngoài</text>
+<text x="990" y="392" class="dimt" text-anchor="end" >−9,4</text>
+<text x="1110" y="392" class="dimt" text-anchor="end" >liền khối</text>
+<text x="700" y="412" class="ts" text-anchor="start" >Pin, mặt trong</text>
+<text x="990" y="412" class="dimt" text-anchor="end" >−0,4</text>
+<text x="1110" y="412" class="dimt" text-anchor="end" >1,4</text>
+<text x="700" y="432" class="ts" text-anchor="start" >Chân header cắt ngắn, đầu chân</text>
+<text x="990" y="432" class="dimt" text-anchor="end" >+1,0</text>
+<text x="1110" y="432" class="dimt" text-anchor="end" >liền khối</text>
+<text x="700" y="452" class="ts" text-anchor="start" >Mạch ESP32, mặt dưới</text>
+<text x="990" y="452" class="dimt" text-anchor="end" >+3,5</text>
+<text x="1110" y="452" class="dimt" text-anchor="end" >liền khối</text>
+<text x="700" y="472" class="ts" text-anchor="start" >Mạch ESP32, mặt trên</text>
+<text x="990" y="472" class="dimt" text-anchor="end" >+5,1</text>
+<text x="1110" y="472" class="dimt" text-anchor="end" >liền khối</text>
+<text x="700" y="492" class="ts" text-anchor="start" >Module WROOM, mặt trên</text>
+<text x="990" y="492" class="dimt" text-anchor="end" >+8,3</text>
+<text x="1110" y="492" class="dimt" text-anchor="end" >liền khối</text>
+<text x="700" y="512" class="ts" text-anchor="start" >BMI160, mặt trên</text>
+<text x="990" y="512" class="dimt" text-anchor="end" >+9,9</text>
+<text x="1110" y="512" class="dimt" text-anchor="end" >4,1</text>
+<text x="700" y="532" class="ts" text-anchor="start" >Vách nửa trái, mặt trong</text>
+<text x="990" y="532" class="dimt" text-anchor="end" >+14,0</text>
+<text x="700" y="554" class="ts" text-anchor="start" >Khe pin ↔ chân header dùng để lót xốp 1 mm; xốp này ép ESP32 vào gờ.</text>
+</svg>

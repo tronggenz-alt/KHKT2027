@@ -1,0 +1,171 @@
+{
+  "ma": "xrd",
+  "ten": "Nhiễu xạ tia X dạng bột (XRD) để bàn",
+  "may_mau": "Rigaku MiniFlex 600 (ống tia X anot Cu, goniomet θ/2θ đứng bán kính 150 mm, detector dải silic) (thông số lấy theo máy mẫu; trên vỏ máy trong phòng lab ảo dùng tên chung)",
+  "nguyen_ly": [
+    "Chất rắn kết tinh có các mặt nguyên tử song song cách đều nhau một khoảng d. Tia X có bước sóng cỡ khoảng cách nguyên tử (Cu Kα: λ = 1,5406 Å) phản xạ trên các lớp mặt đó và chỉ tăng cường nhau khi thỏa định luật Bragg: nλ = 2d·sinθ.",
+    "Máy quay ống tia X và detector quanh mẫu bột (góc 2θ từ khoảng 10° đến 80°). Mỗi họ mặt mạng cho một pic ở góc 2θ riêng; tập hợp vị trí và cường độ pic là \"dấu vân tay\" của từng pha tinh thể.",
+    "So các pic đo được với thẻ chuẩn của từng khoáng / hợp chất (d, cường độ tương đối) để biết mẫu gồm những pha nào: NaCl và KCl cùng là muối trắng nhưng d khác nhau nên pic ở góc khác nhau.",
+    "Chất vô định hình (keo hiđroxit, đường thủy tinh) không có mặt mạng đều đặn nên chỉ cho một bướu rộng, không có pic nhọn.",
+    "Tinh thể càng nhỏ thì pic càng rộng (phương trình Scherrer: L = 0,9λ / (β·cosθ)); từ độ rộng pic ước lượng được kích thước tinh thể cỡ nanomet."
+  ],
+  "cong_thuc": [
+    "nλ = 2d·sinθ",
+    "λ(Cu Kα₁) = 1,5406 Å",
+    "L = 0,9λ / (β·cosθ)"
+  ],
+  "bo_phan": [
+    {
+      "ma": "ong_tia_x",
+      "ten": "Ống tia X anot đồng",
+      "chuc_nang": "Electron từ sợi đốt được tăng tốc (40 kV) đập vào anot Cu, phát tia X đặc trưng Cu Kα."
+    },
+    {
+      "ma": "khe_phan_ky",
+      "ten": "Khe phân kỳ, khe Soller",
+      "chuc_nang": "Giới hạn độ mở và độ phân kỳ của chùm tia tới mẫu."
+    },
+    {
+      "ma": "gia_mau",
+      "ten": "Giá mẫu bột",
+      "chuc_nang": "Bột mẫu nghiền mịn ép phẳng, mặt mẫu phải ngang mặt giá."
+    },
+    {
+      "ma": "goniomet",
+      "ten": "Goniomet θ/2θ",
+      "chuc_nang": "Quay ống tia X và detector đối xứng quanh mẫu để quét góc 2θ."
+    },
+    {
+      "ma": "loc_kbeta",
+      "ten": "Bộ lọc Ni (khử Cu Kβ)",
+      "chuc_nang": "Hấp thụ bớt vạch Kβ để pic chỉ còn do Kα."
+    },
+    {
+      "ma": "detector",
+      "ten": "Detector dải silic",
+      "chuc_nang": "Đếm photon tia X nhiễu xạ ở từng góc."
+    },
+    {
+      "ma": "cua_khoa",
+      "ten": "Cửa che chắn có khóa liên động",
+      "chuc_nang": "Cửa mở thì màn chắn tia X tự đóng: không thể phát tia khi cửa mở."
+    }
+  ],
+  "thong_so": [
+    {
+      "ten": "Ống tia X",
+      "gia_tri": "anot Cu, 40 kV, 15 mA (600 W)",
+      "loai": "điển hình",
+      "nguon": "https://nano.ceitec.cz/rigaku-miniflex600-miniflex/"
+    },
+    {
+      "ten": "Goniomet",
+      "gia_tri": "θ/2θ đứng, bán kính 150 mm",
+      "loai": "điển hình",
+      "nguon": "https://nano.ceitec.cz/rigaku-miniflex600-miniflex/"
+    },
+    {
+      "ten": "Detector",
+      "gia_tri": "D/teX Ultra (dải silic)",
+      "loai": "điển hình",
+      "nguon": "https://rigaku.com/products/x-ray-diffraction-and-scattering/xrd/ppc-uk-miniflex"
+    },
+    {
+      "ten": "Thẻ chuẩn 7 pha (d, cường độ 7 vạch mạnh nhất)",
+      "gia_tri": "halit NaCl, sylvit KCl, AgCl, canxit CaCO₃, thạch anh SiO₂, barit BaSO₄, thạch cao CaSO₄·2H₂O",
+      "loai": "tra cứu",
+      "nguon": "https://www.handbookofmineralogy.org/"
+    },
+    {
+      "ten": "Độ rộng pic do máy, nền tán xạ, kích thước tinh thể của mẫu",
+      "gia_tri": "ước lượng",
+      "loai": "mô phỏng",
+      "mo_phong": true
+    }
+  ],
+  "quy_trinh": [
+    {
+      "ma": "bat_may",
+      "ten": "Bật máy, làm ấm ống tia X",
+      "viec": "Bật nước làm mát / máy; nâng dần cao áp và dòng ống lên 40 kV, 15 mA.",
+      "ly_do": "Nâng từ từ (aging) để ống tia X không bị sốc nhiệt, kéo dài tuổi thọ.",
+      "loi": "Đo khi ống chưa ổn định: cường độ trôi."
+    },
+    {
+      "ma": "chuan_bi_mau",
+      "ten": "Chuẩn bị mẫu bột",
+      "viec": "Lọc lấy kết tủa hoặc cô cạn dung dịch, sấy khô, nghiền mịn trong cối mã não, ép phẳng vào giá mẫu.",
+      "ly_do": "Hạt mịn, định hướng ngẫu nhiên thì cường độ pic mới đúng; mặt mẫu phải ngang mặt giá.",
+      "loi": "Không nghiền: cường độ pic sai (định hướng ưu tiên). Mặt mẫu cao hơn giá: pic lệch góc."
+    },
+    {
+      "ma": "dat_mau",
+      "ten": "Đặt mẫu, đóng cửa",
+      "viec": "Đặt giá mẫu vào goniomet, đóng cửa che chắn.",
+      "ly_do": "Khóa liên động chỉ cho mở màn chắn tia X khi cửa đã đóng.",
+      "loi": "Cửa mở: máy không cho phát tia."
+    },
+    {
+      "ma": "dat_thong_so",
+      "ten": "Đặt thông số quét",
+      "viec": "Chọn khoảng 2θ (10 – 80°), bước 0,02°, tốc độ quét.",
+      "ly_do": "Quét chậm thì số đếm nhiều, nhiễu ít.",
+      "loi": "Quét quá nhanh: pic nhỏ lẫn trong nhiễu."
+    },
+    {
+      "ma": "quet",
+      "ten": "Quét",
+      "viec": "Mở màn chắn, goniomet quay, detector ghi cường độ theo 2θ.",
+      "ly_do": "Detector đếm photon tia X ở từng góc; pic xuất hiện ở góc thỏa định luật Bragg.",
+      "loi": ""
+    },
+    {
+      "ma": "xu_ly",
+      "ten": "Tìm pha, phân tích",
+      "viec": "Tìm pic, tính d theo Bragg, so thẻ chuẩn (search-match); ước lượng tỉ lệ pha, kích thước tinh thể.",
+      "ly_do": "Mỗi pha có bộ d riêng.",
+      "loi": "Chỉ so một pic: dễ nhầm pha."
+    },
+    {
+      "ma": "ket_thuc",
+      "ten": "Hạ cao áp, lấy mẫu ra",
+      "viec": "Hạ cao áp và dòng về mức chờ, mở cửa lấy mẫu.",
+      "ly_do": "Để ống ở mức chờ kéo dài tuổi thọ.",
+      "loi": ""
+    }
+  ],
+  "an_toan": [
+    "Tia X ion hóa: không tháo che chắn, không vô hiệu khóa liên động cửa.",
+    "Bột mẫu độc (muối bạc, bari...): nghiền trong tủ hút, đeo găng.",
+    "Cao áp 40 kV bên trong máy: không mở vỏ."
+  ],
+  "thuat_ngu": [
+    {
+      "tu": "2θ",
+      "nghia": "Góc giữa tia tới kéo dài và tia nhiễu xạ; trục hoành của giản đồ XRD."
+    },
+    {
+      "tu": "Khoảng cách mặt mạng d",
+      "nghia": "Khoảng cách giữa các lớp nguyên tử song song (Å); tính từ góc pic theo định luật Bragg."
+    },
+    {
+      "tu": "Pha",
+      "nghia": "Một chất rắn có cấu trúc tinh thể xác định (ví dụ canxit và aragonit cùng là CaCO₃ nhưng khác pha)."
+    },
+    {
+      "tu": "Vô định hình",
+      "nghia": "Chất rắn không có trật tự tinh thể xa; giản đồ chỉ có bướu rộng."
+    },
+    {
+      "tu": "Search-match",
+      "nghia": "So giản đồ đo với thư viện thẻ chuẩn để tìm pha."
+    }
+  ],
+  "cau_hoi_on_tap": [
+    "Pic mạnh nhất của NaCl ở d = 2,821 Å. Tính góc 2θ với tia Cu Kα (λ = 1,5406 Å).",
+    "Vì sao NaCl và KCl cùng màu trắng, cùng cấu trúc mà XRD vẫn phân biệt được?",
+    "Kết tủa Cu(OH)₂ mới tạo cho giản đồ không có pic nhọn. Vì sao?",
+    "Pic càng rộng thì tinh thể càng lớn hay càng nhỏ?",
+    "Vì sao máy không cho phát tia X khi cửa đang mở?"
+  ]
+}

@@ -1,0 +1,142 @@
+{
+  "ma": "may_cat_nuoc",
+  "ten": "Máy cất nước hai lần – nước dùng cho phân tích",
+  "may_mau": "Máy cất nước hai lần bằng thủy tinh, dây đốt thạch anh, kèm máy đo độ dẫn điện (trên vỏ máy trong phòng lab ảo dùng tên chung)",
+  "nguyen_ly": [
+    "Đun sôi nước máy: hơi nước bay lên, các muối hòa tan (Ca²⁺, Mg²⁺, Na⁺, Cl⁻, HCO₃⁻...) không bay hơi nên ở lại bình đun. Hơi nước ngưng tụ ở sinh hàn thành nước cất.",
+    "Cất lần hai: lấy nước cất lần một đun cất lại, loại thêm các giọt nước cuốn theo hơi, nên nước tinh khiết hơn.",
+    "Độ tinh khiết kiểm tra bằng độ dẫn điện: ion càng ít thì nước dẫn điện càng kém. Nước máy khoảng vài trăm µS/cm, nước cất hai lần dưới 1 µS/cm.",
+    "Nước cất để ngoài không khí hấp thụ CO₂ (CO₂ + H₂O ⇌ H⁺ + HCO₃⁻): độ dẫn tăng dần, pH giảm về khoảng 5,6. Vì vậy nước loại 1, 2 phải dùng ngay sau khi điều chế.",
+    "Bỏ phần nước cất đầu tiên (rửa đường ống) và không cất cạn bình (cặn bám, cháy dây đốt)."
+  ],
+  "cong_thuc": [
+    "κ = Σ λᵢ·cᵢ (độ dẫn tỉ lệ nồng độ ion)",
+    "TDS (mg/L) ≈ 0,64 × κ (µS/cm) (ước lượng nước ngọt)"
+  ],
+  "bo_phan": [
+    {
+      "ma": "binh_dun_1",
+      "ten": "Bình đun lần một",
+      "chuc_nang": "Đun sôi nước máy; cặn muối ở lại."
+    },
+    {
+      "ma": "sinh_han_1",
+      "ten": "Sinh hàn lần một",
+      "chuc_nang": "Ngưng tụ hơi thành nước cất lần một."
+    },
+    {
+      "ma": "binh_dun_2",
+      "ten": "Bình đun lần hai",
+      "chuc_nang": "Đun lại nước cất lần một."
+    },
+    {
+      "ma": "sinh_han_2",
+      "ten": "Sinh hàn lần hai",
+      "chuc_nang": "Ngưng tụ thành nước cất hai lần."
+    },
+    {
+      "ma": "day_dot",
+      "ten": "Dây đốt thạch anh",
+      "chuc_nang": "Đun nước; có ngắt nhiệt khi cạn nước."
+    },
+    {
+      "ma": "do_dan",
+      "ten": "Đầu đo độ dẫn điện",
+      "chuc_nang": "Đo độ dẫn của nước ra (µS/cm ở 25 °C)."
+    },
+    {
+      "ma": "binh_chua",
+      "ten": "Bình chứa nước cất có nắp lọc CO₂",
+      "chuc_nang": "Chứa nước cất, hạn chế hấp thụ CO₂."
+    }
+  ],
+  "thong_so": [
+    {
+      "ten": "Phân loại nước phòng thí nghiệm",
+      "gia_tri": "TCVN 4851:1989 (ISO 3696:1987): 3 loại",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://hethongphapluat.com/tieu-chuan-viet-nam-tcvn-4851-1989-iso-3696-1987-ve-nuoc-dung-de-phan-tich-trong-phong-thi-nghiem.html"
+    },
+    {
+      "ten": "Độ dẫn điện tối đa ở 25 °C",
+      "gia_tri": "loại 1: 0,1 µS/cm; loại 2: 1,0 µS/cm; loại 3: 5,0 µS/cm",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://casrai.org/guides/type-1-water-laboratory-water-grades"
+    },
+    {
+      "ten": "Nước máy, hiệu suất loại ion của từng lần cất, tốc độ hấp thụ CO₂",
+      "gia_tri": "nước máy 320 µS/cm; mỗi lần cất còn khoảng 0,5% ion cuốn theo; bão hòa CO₂ khoảng 1,0 µS/cm",
+      "loai": "mô phỏng",
+      "mo_phong": true
+    }
+  ],
+  "quy_trinh": [
+    {
+      "ma": "cap_nuoc",
+      "ten": "Mở nước làm mát, nước cấp",
+      "viec": "Mở nước làm mát sinh hàn và nước cấp vào bình đun.",
+      "ly_do": "Không có nước làm mát thì hơi không ngưng tụ, thoát ra ngoài.",
+      "loi": "Bật đun khi chưa có nước: cháy dây đốt."
+    },
+    {
+      "ma": "bat_dun",
+      "ten": "Bật đun",
+      "viec": "Bật dây đốt hai bình đun.",
+      "ly_do": "Nước sôi tạo hơi; muối hòa tan ở lại bình đun.",
+      "loi": ""
+    },
+    {
+      "ma": "bo_phan_dau",
+      "ten": "Bỏ phần nước cất đầu",
+      "viec": "Bỏ khoảng 200 – 500 mL đầu tiên.",
+      "ly_do": "Rửa đường ống, sinh hàn sau thời gian không dùng.",
+      "loi": "Lấy ngay phần đầu: độ dẫn cao."
+    },
+    {
+      "ma": "kiem_tra",
+      "ten": "Đo độ dẫn điện nước ra",
+      "viec": "Đo độ dẫn, so tiêu chuẩn loại nước cần dùng.",
+      "ly_do": "Biết nước đạt loại mấy.",
+      "loi": ""
+    },
+    {
+      "ma": "lay_nuoc",
+      "ten": "Lấy nước cất, đậy kín",
+      "viec": "Hứng nước vào bình chứa sạch, đậy kín; dùng sớm.",
+      "ly_do": "Để lâu nước hút CO₂, độ dẫn tăng.",
+      "loi": "Để hở nhiều giờ: không còn đạt loại 2."
+    },
+    {
+      "ma": "ket_thuc",
+      "ten": "Tắt đun, xả cặn",
+      "viec": "Tắt dây đốt, để nguội, xả nước đặc trong bình đun, khóa nước làm mát.",
+      "ly_do": "Cặn tích tụ làm cháy dây đốt, bẩn nước lần sau.",
+      "loi": ""
+    }
+  ],
+  "an_toan": [
+    "Bình đun và hơi nước rất nóng.",
+    "Không để cạn nước khi đang đun.",
+    "Kiểm tra nước làm mát chảy đều trong suốt thời gian cất."
+  ],
+  "thuat_ngu": [
+    {
+      "tu": "Độ dẫn điện (µS/cm)",
+      "nghia": "Khả năng dẫn điện của dung dịch, tỉ lệ với lượng ion hòa tan."
+    },
+    {
+      "tu": "Nước loại 1, 2, 3",
+      "nghia": "Ba mức độ tinh khiết theo TCVN 4851 (ISO 3696); loại 1 tinh khiết nhất."
+    },
+    {
+      "tu": "TDS",
+      "nghia": "Tổng chất rắn hòa tan (mg/L)."
+    }
+  ],
+  "cau_hoi_on_tap": [
+    "Vì sao nước cất có độ dẫn điện thấp hơn nước máy rất nhiều?",
+    "Vì sao nước cất để lâu ngoài không khí có pH khoảng 5,6?",
+    "Vì sao phải bỏ phần nước cất đầu tiên?",
+    "Nước có độ dẫn 0,8 µS/cm đạt loại mấy theo TCVN 4851?"
+  ]
+}

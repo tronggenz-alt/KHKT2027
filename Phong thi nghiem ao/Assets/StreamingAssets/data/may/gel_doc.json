@@ -1,0 +1,121 @@
+{
+  "ma": "gel_doc",
+  "ten": "Hệ thống chụp ảnh và tài liệu hóa gel điện di (Gel Doc)",
+  "may_mau": "Bio-Rad Gel Doc EZ System, buồng tối tích hợp cảm biến CCD 1,4 megapixel, nguồn sáng UV 302 nm và ánh sáng xanh Blue LED 470 nm",
+  "nguyen_ly": [
+    "Phát hiện huỳnh quang của các chất nhuộm axit nucleic (như Ethidium Bromide, GelGreen, GelRed, SYBR Safe) liên kết xen vào giữa các cặp bazơ của chuỗi xoắn kép DNA/RNA khi được kích thích bởi bức xạ tử ngoại UV (~302 nm) hoặc ánh sáng xanh lam (~470 nm).",
+    "Chất huỳnh quang hấp thụ photon năng lượng cao và tái phát xạ photon năng lượng thấp hơn (bước sóng dài hơn trong vùng khả kiến: xanh lục ~530 nm hoặc cam đỏ ~605 nm), được ghi lại qua thấu kính quang học có kính lọc tương ứng tới cảm biến hình ảnh số.",
+    "Cường độ tín hiệu huỳnh quang của từng vạch DNA trên ảnh tỷ lệ tuyến tính với khối lượng DNA trong vạch (ng), cho phép định lượng nồng độ và xác định kích thước đoạn DNA bằng cách so sánh vị trí di chuyển với thang chuẩn DNA Ladder (log10 bp)."
+  ],
+  "cong_thuc": [
+    "I_fluor = k * m_DNA",
+    "d_migration = -a * log10(bp) + b"
+  ],
+  "bo_phan": [
+    {
+      "ma": "buong_toi",
+      "ten": "Buồng tối quang học kín",
+      "chuc_nang": "Ngăn ánh sáng tạp từ môi trường xung quanh lọt vào làm giảm tỷ lệ tín hiệu trên nhiễu (SNR)."
+    },
+    {
+      "ma": "khay_mau_uv_blue",
+      "ten": "Khay trượt chứa gel UV/Blue LED",
+      "chuc_nang": "Bề mặt truyền xạ tia tử ngoại UV 302 nm và ánh sáng xanh 470 nm kích thích huỳnh quang."
+    },
+    {
+      "ma": "camera_ccd",
+      "ten": "Camera kỹ thuật số độ nhạy cao 1,4 MP",
+      "chuc_nang": "Thu nhận photon phát xạ từ vạch gel qua kính lọc quang học 530 nm / 605 nm."
+    },
+    {
+      "ma": "khoa_lien_dong_uv",
+      "ten": "Khóa an toàn liên động cửa buồng",
+      "chuc_nang": "Tự động ngắt nguồn phát tia UV ngay khi mở cửa để bảo vệ mắt và da người dùng."
+    },
+    {
+      "ma": "man_hinh_dieu_khien",
+      "ten": "Màn hình giao diện vận hành",
+      "chuc_nang": "Hiển thị ảnh thời gian thực, điều chỉnh thời gian phơi sáng và xuất ảnh phân tích."
+    }
+  ],
+  "thong_so": [
+    {
+      "ten": "Bước sóng kích thích UV trung",
+      "gia_tri": "302 nm",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.bio-rad.com/en-us/product/gel-doc-ez-system"
+    },
+    {
+      "ten": "Bước sóng kích thích Blue LED",
+      "gia_tri": "470 nm",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.bio-rad.com/en-us/product/gel-doc-ez-system"
+    },
+    {
+      "ten": "Độ phân giải cảm biến camera",
+      "gia_tri": "1,4 megapixel (1392 x 1040 pixel)",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.bio-rad.com/en-us/product/gel-doc-ez-system"
+    },
+    {
+      "ten": "Mô phỏng cường độ huỳnh quang vạch DNA",
+      "gia_tri": "Cường độ tỷ lệ khối lượng DNA (ng) và bão hòa ở 50 ng",
+      "loai": "mô phỏng",
+      "mo_phong": true
+    }
+  ],
+  "quy_trinh": [
+    {
+      "ma": "chuan_bi",
+      "ten": "Bật nguồn buồng chụp",
+      "viec": "Bật công tắc nguồn Gel Doc, lau sạch khay chứa gel bằng khăn mềm thấm cồn 70% hoặc nước cất.",
+      "ly_do": "Đảm bảo buồng chụp sạch nền, tránh bụi bẩn phát huỳnh quang giả trên ảnh.",
+      "loi": "Khay gel dính bẩn: xuất hiện vệt sáng tạp làm sai lệch phân tích vạch."
+    },
+    {
+      "ma": "dat_gel",
+      "ten": "Đặt khay gel vào buồng",
+      "viec": "Chuyển gel agarose sau điện di vào giữa khay chụp, đẩy khay vào buồng và đóng kín cửa.",
+      "ly_do": "Mẫu nằm đúng tâm quang trường của camera và kích hoạt công tắc an toàn liên động.",
+      "loi": "Cửa đóng chưa khít: khóa liên động không cho phép bật đèn phát tia UV."
+    },
+    {
+      "ma": "chon_che_do",
+      "ten": "Chọn nguồn sáng và bộ lọc",
+      "viec": "Chọn chế độ UV 302 nm (cho EtBr, GelRed) hoặc Blue LED 470 nm (cho GelGreen, SYBR Safe).",
+      "ly_do": "Khớp bước sóng kích thích tối ưu với chất nhuộm huỳnh quang đã nạp trong gel.",
+      "loi": "Chọn sai bộ lọc: tín hiệu huỳnh quang bị suy giảm mạnh hoặc không thấy vạch."
+    },
+    {
+      "ma": "chup_anh",
+      "ten": "Chỉnh phơi sáng và chụp ảnh",
+      "viec": "Điều chỉnh thời gian phơi sáng (exposure) để vạch rõ nét, không bị lóa trắng bão hòa, nhấn Capture.",
+      "ly_do": "Thu nhận ảnh số có dải động tối ưu để đối chiếu với thang chuẩn DNA Ladder.",
+      "loi": "Thời gian phơi sáng quá ngắn khiến vạch mờ, hoặc quá dài làm bão hòa không định lượng được."
+    }
+  ],
+  "an_toan": [
+    "Tia cực tím UV-B (302 nm) có thể gây bỏng giác mạc và tổn thương da nghiêm trọng; không bao giờ vô hiệu hóa khóa liên động.",
+    "Khi cần cắt gel trực tiếp dưới ánh sáng UV, bắt buộc phải đeo kính bảo hộ chống tia cực tím chuyên dụng và tấm chắn UV.",
+    "Thuốc nhuộm Ethidium Bromide là chất xen cặp gây đột biến gen mạnh; phải mang găng tay nitrile khi thao tác."
+  ],
+  "thuat_ngu": [
+    {
+      "tu": "DNA Ladder",
+      "nghia": "Thang chuẩn phân tử chứa các đoạn DNA có kích thước xác định (bp) dùng làm mốc so sánh."
+    },
+    {
+      "tu": "Khóa liên động (Interlock)",
+      "nghia": "Cơ chế an toàn tự động ngắt điện nguồn đèn UV khi mở cửa buồng chụp."
+    },
+    {
+      "tu": "GelGreen",
+      "nghia": "Thuốc nhuộm axit nucleic an toàn huỳnh quang xanh lục, kích thích tối ưu bằng ánh sáng xanh 470 nm."
+    }
+  ],
+  "cau_hoi_on_tap": [
+    "Nguyên lý cơ bản giúp phát hiện vạch DNA trên gel agarose trong buồng chụp Gel Doc là gì?",
+    "Tại sao vạch DNA chứa nhiều bản sao hơn lại cho tín hiệu huỳnh quang sáng hơn?",
+    "Tác dụng của khóa an toàn liên động cửa buồng đối với nguồn sáng cực tím UV là gì?"
+  ]
+}

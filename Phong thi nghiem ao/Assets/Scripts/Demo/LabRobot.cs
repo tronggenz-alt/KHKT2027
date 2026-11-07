@@ -502,6 +502,7 @@ namespace Khkt.Demo
 
         IEnumerator Fetch(int stt, Res r)
         {
+            if (ClassRules.IsLocked(stt)) { r.ok = false; r.why = "Giáo viên đã khóa hóa chất này"; yield break; }
             var search = ChemSearchUI.Instance;
             var b = search != null ? search.FindBottle(stt) : null;
             if (b == null) { r.ok = false; r.why = "không tìm thấy lọ trong kho"; yield break; }

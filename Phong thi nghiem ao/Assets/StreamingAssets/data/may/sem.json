@@ -1,0 +1,182 @@
+{
+  "ma": "sem",
+  "ten": "Kính hiển vi điện tử quét (SEM) để bàn kèm phổ EDS",
+  "may_mau": "Hitachi TM4000Plus II (súng điện tử sợi W, 5 – 20 kV) kèm đầu dò EDS (thông số lấy theo máy mẫu; trên vỏ máy trong phòng lab ảo dùng tên chung)",
+  "nguyen_ly": [
+    "Súng điện tử phát chùm electron, được tăng tốc (5 – 20 kV) và hội tụ bằng thấu kính từ thành một điểm rất nhỏ trên mặt mẫu. Cuộn quét lái điểm này quét từng dòng như màn hình ti vi.",
+    "Ở mỗi điểm, mẫu phát electron thứ cấp (SE, cho ảnh địa hình bề mặt) và electron tán xạ ngược (BSE, nguyên tố nặng sáng hơn). Cường độ tín hiệu theo vị trí quét tạo thành ảnh phóng đại hàng chục nghìn lần.",
+    "Cột electron phải ở chân không: electron va vào khí sẽ bị tán xạ. Mẫu không dẫn điện (muối, đường) tích điện làm ảnh chói, nhòe; phải phủ một lớp vàng / cacbon mỏng hoặc dùng chế độ chân không thấp.",
+    "Electron cũng bắn bật electron lớp trong của nguyên tử; khi electron lớp ngoài nhảy vào lấp chỗ trống, nguyên tử phát tia X có năng lượng đặc trưng cho từng nguyên tố (Cu Kα 8,05 keV, Cl Kα 2,62 keV...). Đầu dò EDS đo năng lượng các tia X này để biết mẫu gồm nguyên tố nào và tỉ lệ bao nhiêu.",
+    "Hình dạng tinh thể nhìn thấy (lập phương của NaCl, hình mặt thoi của canxit, kim / tấm của thạch cao) cùng với phổ EDS giúp nhận biết chất rắn."
+  ],
+  "cong_thuc": [
+    "E(Kα) ≈ 10,2 eV·(Z − 1)² (định luật Moseley, gần đúng)",
+    "Độ phóng đại = kích thước ảnh / kích thước vùng quét"
+  ],
+  "bo_phan": [
+    {
+      "ma": "sung",
+      "ten": "Súng điện tử (sợi W)",
+      "chuc_nang": "Sợi vonfram nung nóng phát electron; cao áp tăng tốc chùm electron."
+    },
+    {
+      "ma": "thau_kinh",
+      "ten": "Thấu kính từ hội tụ và vật kính",
+      "chuc_nang": "Hội tụ chùm electron thành điểm nhỏ trên mẫu; chỉnh tiêu cự (lấy nét)."
+    },
+    {
+      "ma": "cuon_quet",
+      "ten": "Cuộn quét",
+      "chuc_nang": "Lái chùm electron quét theo dòng trên vùng mẫu; vùng càng nhỏ thì phóng đại càng lớn."
+    },
+    {
+      "ma": "buong_mau",
+      "ten": "Buồng mẫu chân không",
+      "chuc_nang": "Chứa đế mẫu; được hút chân không trước khi bật chùm."
+    },
+    {
+      "ma": "det_bse",
+      "ten": "Detector electron tán xạ ngược (BSE)",
+      "chuc_nang": "Ảnh tương phản theo nguyên tử khối: vùng nguyên tố nặng sáng hơn."
+    },
+    {
+      "ma": "det_se",
+      "ten": "Detector electron thứ cấp (SE)",
+      "chuc_nang": "Ảnh địa hình bề mặt rõ nét."
+    },
+    {
+      "ma": "eds",
+      "ten": "Đầu dò EDS (silic trôi)",
+      "chuc_nang": "Đo năng lượng tia X đặc trưng: phân tích nguyên tố."
+    },
+    {
+      "ma": "bom",
+      "ten": "Bơm chân không",
+      "chuc_nang": "Hút không khí khỏi cột và buồng mẫu."
+    }
+  ],
+  "thong_so": [
+    {
+      "ten": "Điện áp gia tốc",
+      "gia_tri": "5, 10, 15, 20 kV",
+      "loai": "điển hình",
+      "nguon": "https://hitachi-hightech.com/id/en/products/microscopes/sem-tem-stem/tabletop-microscopes/tm4000ii.html"
+    },
+    {
+      "ten": "Độ phóng đại",
+      "gia_tri": "10× – 100 000× (ảnh chụp)",
+      "loai": "điển hình",
+      "nguon": "https://hitachi-hightech.com/id/en/products/microscopes/sem-tem-stem/tabletop-microscopes/tm4000ii.html"
+    },
+    {
+      "ten": "Nguồn electron",
+      "gia_tri": "sợi vonfram dạng hộp, căn sẵn tâm",
+      "loai": "điển hình",
+      "nguon": "https://hitachi-hightech.com/id/en/products/microscopes/sem-tem-stem/tabletop-microscopes/tm4000ii.html"
+    },
+    {
+      "ten": "Năng lượng vạch tia X (Kα, Lα, Mα)",
+      "gia_tri": "theo X-Ray Data Booklet (bảng 1-2)",
+      "loai": "tra cứu",
+      "nguon": "https://xdb.lbl.gov/Section1/Table_1-2.pdf"
+    },
+    {
+      "ten": "Hình dạng, cỡ hạt tinh thể của từng pha; độ nhạy EDS theo nguyên tố",
+      "gia_tri": "ước lượng",
+      "loai": "mô phỏng",
+      "mo_phong": true
+    }
+  ],
+  "quy_trinh": [
+    {
+      "ma": "chuan_bi_mau",
+      "ten": "Chuẩn bị mẫu",
+      "viec": "Lọc / cô cạn lấy chất rắn, sấy khô, rắc lên băng dính cacbon trên đế nhôm.",
+      "ly_do": "Mẫu ướt bay hơi trong chân không làm hỏng chân không, ảnh nhòe.",
+      "loi": "Đưa mẫu ướt vào: máy không đạt chân không."
+    },
+    {
+      "ma": "phu_vang",
+      "ten": "Phủ vàng (mẫu không dẫn điện)",
+      "viec": "Phủ một lớp vàng dày vài nm bằng máy phún xạ.",
+      "ly_do": "Mẫu cách điện tích điện tích, ảnh chói và trôi.",
+      "loi": "Không phủ: ảnh có vệt sáng, nhòe (hiệu ứng tích điện). Nhớ trừ pic Au trong phổ EDS."
+    },
+    {
+      "ma": "hut_chan_khong",
+      "ten": "Đặt mẫu, hút chân không",
+      "viec": "Đặt đế mẫu vào buồng, đóng, hút chân không.",
+      "ly_do": "Electron chỉ đi thẳng trong chân không.",
+      "loi": ""
+    },
+    {
+      "ma": "bat_chum",
+      "ten": "Bật chùm electron",
+      "viec": "Chọn điện áp gia tốc (15 kV cho ảnh + EDS), bật sợi đốt.",
+      "ly_do": "Điện áp phải lớn hơn khoảng 2 lần năng lượng vạch tia X cần đo.",
+      "loi": "5 kV: không kích thích được vạch Cu K (8 keV)."
+    },
+    {
+      "ma": "lay_net",
+      "ten": "Lấy nét, chỉnh độ sáng – tương phản",
+      "viec": "Chỉnh tiêu cự đến khi cạnh hạt sắc nét; chỉnh sáng / tương phản.",
+      "ly_do": "Chùm electron phải hội tụ đúng mặt mẫu thì ảnh mới sắc nét.",
+      "loi": "Ảnh mờ do chưa lấy nét."
+    },
+    {
+      "ma": "chup_anh",
+      "ten": "Chụp ảnh ở các độ phóng đại",
+      "viec": "Chụp ở độ phóng đại thấp (toàn cảnh) rồi cao (chi tiết tinh thể), có thanh tỉ lệ.",
+      "ly_do": "Ảnh phóng đại thấp cho thấy toàn cảnh, phóng đại cao cho thấy hình dạng tinh thể; thanh tỉ lệ để đo kích thước.",
+      "loi": ""
+    },
+    {
+      "ma": "eds",
+      "ten": "Phân tích EDS",
+      "viec": "Thu phổ tia X, nhận diện pic, định lượng % nguyên tử.",
+      "ly_do": "Biết thành phần nguyên tố của hạt đang nhìn.",
+      "loi": "Gán nhầm pic Au (lớp phủ) hay C (băng dính) là thành phần mẫu."
+    },
+    {
+      "ma": "ket_thuc",
+      "ten": "Tắt chùm, xả chân không, lấy mẫu",
+      "viec": "Tắt sợi đốt, xả khí buồng mẫu, lấy đế mẫu ra.",
+      "ly_do": "Mở buồng khi sợi đốt còn nóng làm cháy sợi.",
+      "loi": ""
+    }
+  ],
+  "an_toan": [
+    "Chùm electron sinh tia X bên trong máy: không mở buồng khi đang bật chùm.",
+    "Máy phủ vàng dùng cao áp và khí argon: làm theo hướng dẫn của máy phủ.",
+    "Bột mẫu độc: rắc mẫu trong tủ hút, thổi bột thừa trước khi đưa vào máy."
+  ],
+  "thuat_ngu": [
+    {
+      "tu": "SE",
+      "nghia": "Electron thứ cấp: năng lượng thấp, cho ảnh địa hình bề mặt."
+    },
+    {
+      "tu": "BSE",
+      "nghia": "Electron tán xạ ngược: cho ảnh tương phản theo nguyên tử khối."
+    },
+    {
+      "tu": "EDS",
+      "nghia": "Phổ tán sắc năng lượng tia X: phân tích nguyên tố."
+    },
+    {
+      "tu": "Hiệu ứng tích điện",
+      "nghia": "Mẫu cách điện giữ electron, ảnh chói và trôi."
+    },
+    {
+      "tu": "Thanh tỉ lệ",
+      "nghia": "Đoạn thẳng ghi độ dài thật (µm) trên ảnh, để đo kích thước hạt."
+    }
+  ],
+  "cau_hoi_on_tap": [
+    "Vì sao SEM phải làm việc trong chân không?",
+    "Vì sao mẫu muối, đường phải phủ vàng trước khi chụp? Phủ vàng thì phổ EDS có thêm pic gì?",
+    "Vạch Cu Kα ở 8,05 keV. Dùng điện áp gia tốc 5 kV có thấy vạch này không?",
+    "Tinh thể NaCl và canxit nhìn dưới SEM khác nhau thế nào?",
+    "Phổ EDS của kết tủa trắng có pic Ba và S. Kết tủa đó có thể là chất gì?"
+  ]
+}

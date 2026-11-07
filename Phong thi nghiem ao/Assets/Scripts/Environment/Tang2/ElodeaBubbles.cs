@@ -12,6 +12,8 @@ namespace Khkt.Environment.Tang2
     {
         public Transform lampTransform;
         public Transform stemOrigin;
+        [Tooltip("Vật liệu bọt do trình dựng cảnh gán (bản .exe không có sẵn shader tìm theo tên nếu cảnh không dùng tới)")]
+        public Material bubbleMaterial;
         public float lampPowerWatts = 60f;
         public float riseSpeed = 0.06f;
         public float riseHeight = 0.13f;
@@ -27,6 +29,7 @@ namespace Khkt.Environment.Tang2
         void Start()
         {
             if (stemOrigin == null) { enabled = false; return; }
+            if (shared == null) shared = bubbleMaterial;
             if (shared == null)
             {
                 // Unlit có thể bị lược khỏi bản dựng (iOS) vì không vật liệu nào trong cảnh dùng
@@ -54,6 +57,7 @@ namespace Khkt.Environment.Tang2
 
         void Update()
         {
+            if (bubbles == null) { enabled = false; return; }
             if (cam == null && Camera.main != null) cam = Camera.main.transform;
             if (cam != null && (cam.position - stemOrigin.position).sqrMagnitude > activeDistance * activeDistance) return;
             float dt = Time.deltaTime;

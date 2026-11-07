@@ -1,11 +1,15 @@
 """Kiểm thử máy chủ AI với nhà cung cấp giả (không gọi mạng, không cần khóa API)."""
 
+import tempfile
 import types
 import unittest
+from pathlib import Path
 
 from fastapi.testclient import TestClient
 
 from server.ai import main
+from server.lab import db
+from tests.ho_tro_dang_nhap import dang_nhap_giao_vien
 
 
 def fake_provider(structured_reply=None, text_reply="Giải thích thử."):
@@ -25,12 +29,17 @@ def fake_provider(structured_reply=None, text_reply="Giải thích thử."):
 
 class AiServerTest(unittest.TestCase):
     def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        db.reset_for_tests(Path(self.tmp.name) / "lab.db")
         self.client = TestClient(main.app)
+        dang_nhap_giao_vien(self.client)
         self._pick = main.providers.pick
         main._cache.clear()
 
     def tearDown(self):
         main.providers.pick = self._pick
+        db.reset_for_tests(Path(self.tmp.name) / "khac.db")
+        self.tmp.cleanup()
 
     def test_khong_co_ai(self):
         main.providers.pick = lambda: None

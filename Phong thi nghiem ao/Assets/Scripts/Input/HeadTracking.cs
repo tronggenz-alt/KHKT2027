@@ -21,7 +21,7 @@ namespace Khkt.Input
     /// <summary>
     /// Điều khiển góc nhìn bằng ĐẦU, TRÒNG MẮT và khoảng cách qua webcam (MediaPipe / YuNet):
     ///  • F8 bật / tắt: Unity tự chạy Python ở chế độ ngầm và tắt khi thoát.
-    ///  • F9 căn giữa: nhìn thẳng màn hình 2 giây để ghi nhớ tư thế giữa (yaw, pitch, roll, distance, gaze).
+    ///  • F12 căn giữa: nhìn thẳng màn hình 2 giây để ghi nhớ tư thế giữa (yaw, pitch, roll, distance, gaze).
     ///  • Quay đầu quá ~30° thì góc nhìn xoay liên tục về phía đó; nhìn thẳng thì dừng.
     ///  • Ghé gần webcam thì phóng to (Zoom), ngả ra xa thì nhìn rộng ra.
     ///  • Mất mặt quá 0.4 s: thôi xoay, zoom từ từ về 1.0.
@@ -237,7 +237,7 @@ namespace Khkt.Input
         {
             var kb = Keyboard.current;
             if (kb != null && kb.f8Key.wasPressedThisFrame) Toggle();
-            if (kb != null && kb.f9Key.wasPressedThisFrame && running) StartCalibration();
+            if (kb != null && kb.f12Key.wasPressedThisFrame && running) StartCalibration();
 
             if (running && proc != null && proc.HasExited && !processPaused)
             {
@@ -453,6 +453,9 @@ namespace Khkt.Input
             currentEngine = engine;
             Begin(launch: true);
         }
+
+        /// <summary>Gửi lệnh JSON cho tracker qua cổng điều khiển.</summary>
+        public void SendControl(string jsonCmd) => GuiLenhDieuKhien(jsonCmd);
 
         void GuiLenhDieuKhien(string jsonCmd)
         {
@@ -704,6 +707,13 @@ namespace Khkt.Input
 
         void OnDisable() => Stop();
         void OnApplicationQuit() => Stop();
+
+        // về màn hình chính thì cảnh lab bị gỡ: phải tắt Python, trả cổng UDP cho lần vào sau
+        void OnDestroy()
+        {
+            Stop();
+            if (Instance == this) Instance = null;
+        }
 
         static void Say(string s)
         {

@@ -1,0 +1,145 @@
+{
+  "ma": "tu_say",
+  "ten": "Tủ sấy – xác định độ ẩm và chất khô bằng phương pháp khối lượng",
+  "may_mau": "Tủ sấy đối lưu 40 – 250 °C kèm cân phân tích 0,1 mg và bình hút ẩm (quy trình theo các TCVN xác định độ ẩm; trên vỏ máy trong phòng lab ảo dùng tên chung)",
+  "nguyen_ly": [
+    "Sấy mẫu ở khoảng 105 °C: nước (và chất dễ bay hơi) bay hơi hết, phần còn lại là chất khô. Độ ẩm = khối lượng mất đi / khối lượng mẫu ban đầu.",
+    "Sấy đến khối lượng không đổi: sấy, làm nguội, cân; sấy tiếp, cân lại, đến khi hai lần cân liên tiếp chênh nhau không quá giới hạn (cỡ 1 mg).",
+    "Phải làm nguội trong bình hút ẩm có chất hút ẩm (silica gel): để ngoài không khí thì mẫu khô hút lại hơi nước, khối lượng tăng; cân lúc còn nóng thì dòng khí nóng bốc lên làm cân chỉ thiếu.",
+    "Dung dịch, nước quả: độ ẩm rất cao (80 – 99%); chất khô gồm đường, axit hữu cơ, muối khoáng."
+  ],
+  "cong_thuc": [
+    "Độ ẩm (%) = (m₁ − m₂) / (m₁ − m₀) × 100",
+    "Chất khô (%) = 100 − độ ẩm",
+    "m₀: chén; m₁: chén + mẫu; m₂: chén + mẫu đã sấy"
+  ],
+  "bo_phan": [
+    {
+      "ma": "buong",
+      "ten": "Buồng sấy có quạt đối lưu",
+      "chuc_nang": "Giữ nhiệt độ đồng đều, thổi hơi ẩm ra ngoài qua lỗ thông khí."
+    },
+    {
+      "ma": "bo_dieu_khien",
+      "ten": "Bộ điều khiển nhiệt độ",
+      "chuc_nang": "Đặt nhiệt độ và thời gian sấy; cảm biến Pt100 đo nhiệt độ buồng."
+    },
+    {
+      "ma": "chen",
+      "ten": "Chén cân có nắp",
+      "chuc_nang": "Đựng mẫu; đậy nắp khi làm nguội và cân."
+    },
+    {
+      "ma": "binh_hut_am",
+      "ten": "Bình hút ẩm (silica gel)",
+      "chuc_nang": "Làm nguội mẫu khô mà không hút ẩm trở lại."
+    },
+    {
+      "ma": "can",
+      "ten": "Cân phân tích 0,1 mg",
+      "chuc_nang": "Cân chén, chén + mẫu trước và sau khi sấy."
+    }
+  ],
+  "thong_so": [
+    {
+      "ten": "Nhiệt độ sấy",
+      "gia_tri": "(105 ± 2) °C, đến khối lượng không đổi",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://luatvietnam.vn/cong-nghiep/tieu-chuan-quoc-gia-tcvn-13887-3-2023-nhien-lieu-sinh-hoc-ran-xac-dinh-ham-luong-am-phan-3-290005-d3.html"
+    },
+    {
+      "ten": "Làm nguội",
+      "gia_tri": "trong bình hút ẩm 20 – 45 phút đến nhiệt độ phòng",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://thuvienphapluat.vn/TCVN/Nong-nghiep/TCVN-4048-2011-chat-luong-dat-phuong-phap-xac-dinh-do-am-cua-dat-he-so-kho-kiet-902134.aspx"
+    },
+    {
+      "ten": "Tiêu chí khối lượng không đổi trong lab ảo",
+      "gia_tri": "hai lần cân liên tiếp chênh không quá 1 mg",
+      "loai": "mô phỏng",
+      "mo_phong": true
+    },
+    {
+      "ten": "Tốc độ bay hơi, lượng ẩm hút lại khi để ngoài, sai số cân lúc nóng",
+      "gia_tri": "ước lượng",
+      "loai": "mô phỏng",
+      "mo_phong": true
+    }
+  ],
+  "quy_trinh": [
+    {
+      "ma": "bat_may",
+      "ten": "Bật tủ sấy, đặt 105 °C",
+      "viec": "Bật tủ, đặt 105 °C, chờ nhiệt độ ổn định.",
+      "ly_do": "Sấy ở nhiệt độ không đúng làm sai độ ẩm.",
+      "loi": ""
+    },
+    {
+      "ma": "can_chen",
+      "ten": "Sấy và cân chén rỗng (m₀)",
+      "viec": "Sấy chén, làm nguội trong bình hút ẩm, cân.",
+      "ly_do": "Chén cũng hút ẩm; phải biết khối lượng chén khô.",
+      "loi": ""
+    },
+    {
+      "ma": "can_mau",
+      "ten": "Cho mẫu vào chén, cân (m₁)",
+      "viec": "Lấy chính xác một lượng mẫu, cân chén + mẫu.",
+      "ly_do": "Cần khối lượng mẫu ban đầu chính xác để tính độ ẩm.",
+      "loi": ""
+    },
+    {
+      "ma": "say",
+      "ten": "Sấy mẫu",
+      "viec": "Sấy chén mẫu (mở nắp) ở 105 °C.",
+      "ly_do": "Nước bay hơi hết ở 105 °C; chất hữu cơ chưa bị phân hủy.",
+      "loi": "Nhiệt độ quá cao: đường bị cháy, mất thêm khối lượng."
+    },
+    {
+      "ma": "lam_nguoi_can",
+      "ten": "Làm nguội trong bình hút ẩm, cân (m₂)",
+      "viec": "Đậy nắp, làm nguội trong bình hút ẩm rồi cân.",
+      "ly_do": "Cân lúc nóng: khí nóng bốc lên làm số cân nhỏ hơn; để ngoài: mẫu hút ẩm.",
+      "loi": "Cân ngay khi lấy ra tủ, hoặc làm nguội ngoài không khí."
+    },
+    {
+      "ma": "khoi_luong_khong_doi",
+      "ten": "Sấy lại đến khối lượng không đổi",
+      "viec": "Sấy thêm, làm nguội, cân lại đến khi hai lần cân chênh không quá 1 mg.",
+      "ly_do": "Đảm bảo nước đã bay hơi hết.",
+      "loi": "Chỉ cân một lần: có thể chưa khô hết."
+    },
+    {
+      "ma": "ket_qua",
+      "ten": "Tính độ ẩm, chất khô",
+      "viec": "Tính độ ẩm (%) và hàm lượng chất khô.",
+      "ly_do": "So độ ẩm với tiêu chuẩn của sản phẩm.",
+      "loi": ""
+    }
+  ],
+  "an_toan": [
+    "Dùng kẹp chén và găng chịu nhiệt khi lấy chén nóng.",
+    "Không sấy chất dễ cháy, dễ bay hơi (dung môi hữu cơ) trong tủ sấy thường.",
+    "Bình hút ẩm có nắp nặng: trượt nắp sang bên, không nhấc thẳng."
+  ],
+  "thuat_ngu": [
+    {
+      "tu": "Khối lượng không đổi",
+      "nghia": "Khi sấy thêm mà khối lượng hầu như không giảm nữa (chênh không quá giới hạn)."
+    },
+    {
+      "tu": "Chất khô",
+      "nghia": "Phần còn lại sau khi sấy hết nước."
+    },
+    {
+      "tu": "Bình hút ẩm",
+      "nghia": "Bình kín có chất hút ẩm, để làm nguội mẫu khô."
+    }
+  ],
+  "cau_hoi_on_tap": [
+    "Vì sao phải làm nguội mẫu trong bình hút ẩm trước khi cân?",
+    "Vì sao phải sấy đến khối lượng không đổi chứ không sấy một lần?",
+    "Chén rỗng 25,1234 g; chén + mẫu 35,1234 g; sau sấy 26,0034 g. Tính độ ẩm và chất khô.",
+    "Vì sao không sấy nước quả ở 150 °C cho nhanh?"
+  ]
+}

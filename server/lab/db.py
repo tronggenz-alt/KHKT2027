@@ -5,6 +5,10 @@ Bảng:
     thiet_bi    số lượng, tình trạng từng thiết bị (theo data/chem/thiet_bi.json)
     nhat_ky     nhật ký: hiện tượng, sự cố từ phòng lab ảo, ghi chú của giáo viên, nhập/xuất kho
     khoa_api    mạng lưới khóa API (Groq, DeepSeek, Gemini...) - chỉ nằm trên máy này
+    nguoi_dung, phien, lop, thanh_vien_lop, gioi_han_sai    tài khoản giáo viên, học sinh (server/lab/tai_khoan.py)
+    bai_giang, trinh_chieu    bài giảng và trang đang chiếu của từng lớp (server/lab/trinh_chieu.py), ảnh ở data/bai_giang/
+    su_kien_hoc_sinh, lenh_app, chu_y_lop    theo dõi trực tiếp (server/lab/truc_tiep.py); vị trí học sinh không lưu ở đây, chỉ trong bộ nhớ
+    buoi_hoc    chế độ Luyện tập, Kiểm tra và hóa chất bị khóa của từng lớp (server/lab/buoi_hoc.py)
 
 Danh mục (tên, công thức, vị trí kệ) vẫn đọc từ JSON; CSDL chỉ giữ phần thay đổi theo thời gian.
 """
@@ -45,6 +49,44 @@ CREATE TABLE IF NOT EXISTS khoa_api (
     so_lan_loi INTEGER NOT NULL DEFAULT 0, nghi_den REAL NOT NULL DEFAULT 0, dung_luc REAL NOT NULL DEFAULT 0,
     tre_ms REAL NOT NULL DEFAULT 0, tao_luc REAL
 );
+CREATE TABLE IF NOT EXISTS nguoi_dung (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, ten_dang_nhap TEXT NOT NULL UNIQUE, ho_ten TEXT NOT NULL,
+    vai_tro TEXT NOT NULL CHECK (vai_tro IN ('giao_vien', 'hoc_sinh')), mat_khau_bam TEXT NOT NULL,
+    phai_doi_mat_khau INTEGER NOT NULL DEFAULT 0, tao_luc REAL NOT NULL
+);
+CREATE TABLE IF NOT EXISTS phien (
+    ma_bam TEXT PRIMARY KEY, nguoi_dung_id INTEGER NOT NULL, kieu TEXT NOT NULL, tao_luc REAL NOT NULL, het_han REAL NOT NULL
+);
+CREATE TABLE IF NOT EXISTS lop (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, ten TEXT NOT NULL, nam_hoc TEXT DEFAULT '', giao_vien_id INTEGER NOT NULL,
+    ma_lop TEXT NOT NULL UNIQUE, ma_lop_mo INTEGER NOT NULL DEFAULT 1, tao_luc REAL NOT NULL
+);
+CREATE TABLE IF NOT EXISTS thanh_vien_lop (
+    lop_id INTEGER NOT NULL, hoc_sinh_id INTEGER NOT NULL, them_luc REAL NOT NULL, PRIMARY KEY (lop_id, hoc_sinh_id)
+);
+CREATE TABLE IF NOT EXISTS gioi_han_sai (
+    khoa TEXT PRIMARY KEY, so_lan INTEGER NOT NULL, lan_cuoi REAL NOT NULL, khoa_den REAL NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS bai_giang (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, giao_vien_id INTEGER NOT NULL, ten TEXT NOT NULL, so_trang INTEGER NOT NULL, tao_luc REAL NOT NULL
+);
+CREATE TABLE IF NOT EXISTS trinh_chieu (
+    lop_id INTEGER PRIMARY KEY, phien_ban INTEGER NOT NULL, loai TEXT NOT NULL, bai_id INTEGER, trang INTEGER NOT NULL DEFAULT 1,
+    tieu_de TEXT DEFAULT '', noi_dung TEXT DEFAULT '', man_hinh TEXT DEFAULT '', dem_nguoc_den REAL NOT NULL DEFAULT 0, cap_nhat REAL NOT NULL
+);
+CREATE TABLE IF NOT EXISTS su_kien_hoc_sinh (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, hoc_sinh_id INTEGER NOT NULL, thoi_gian REAL NOT NULL, muc_do TEXT NOT NULL, tieu_de TEXT NOT NULL, chi_tiet TEXT DEFAULT ''
+);
+CREATE TABLE IF NOT EXISTS lenh_app (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, lop_id INTEGER NOT NULL, hoc_sinh_id INTEGER, loai TEXT NOT NULL, noi_dung TEXT DEFAULT '', ke_hoach TEXT DEFAULT '', tao_luc REAL NOT NULL
+);
+CREATE TABLE IF NOT EXISTS chu_y_lop (
+    lop_id INTEGER PRIMARY KEY, noi_dung TEXT DEFAULT '', tu_luc REAL NOT NULL
+);
+CREATE TABLE IF NOT EXISTS buoi_hoc (
+    lop_id INTEGER PRIMARY KEY, che_do TEXT NOT NULL, het_gio REAL NOT NULL DEFAULT 0, khoa_loai TEXT NOT NULL DEFAULT '[]',
+    ngoai_le TEXT NOT NULL DEFAULT '[]', khoa_them TEXT NOT NULL DEFAULT '[]', phien_ban INTEGER NOT NULL, cap_nhat REAL NOT NULL
+);
 """
 
 _lock = threading.Lock()
@@ -71,6 +113,9 @@ def connect() -> sqlite3.Connection:
             _conn = sqlite3.connect(DB_PATH, check_same_thread=False)
             _conn.row_factory = sqlite3.Row
             _conn.executescript(SCHEMA)
+            # CSDL tạo trước khi có lệnh robot từ web
+            if "ke_hoach" not in {r[1] for r in _conn.execute("PRAGMA table_info(lenh_app)")}:
+                _conn.execute("ALTER TABLE lenh_app ADD COLUMN ke_hoach TEXT DEFAULT ''")
             _seed(_conn)
         return _conn
 

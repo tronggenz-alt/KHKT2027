@@ -16,6 +16,10 @@ marker_*.png
 # CSDL web quản lý (tồn kho, nhật ký, khóa API thật) - không đưa lên git
 data/lab.db
 data/lab.db-*
+# Mật khẩu, mã lớp của tài khoản thử do `quan_tri nap-mau` sinh ra
+data/tai_khoan_mau_mat_khau.json
+# Ảnh bài giảng giáo viên tải lên trang trình chiếu
+data/bai_giang/
 
 # Unity: thêm
 Phong thi nghiem ao/.vs/

@@ -9,5 +9,11 @@ psutil>=7.0
 fastapi>=0.110
 uvicorn>=0.29
 httpx>=0.27
+# băm mật khẩu tài khoản giáo viên, học sinh (server/lab/tai_khoan.py)
+argon2-cffi>=23.1
+# trình chiếu: tải PDF, ảnh lên web (server/lab/trinh_chieu.py)
+pypdfium2>=4.30
+pillow>=10.0
+python-multipart>=0.0.9
 # AI đám mây Claude cho máy chủ AI (tùy chọn; khóa ANTHROPIC_API_KEY chỉ đặt trên máy chủ)
 anthropic

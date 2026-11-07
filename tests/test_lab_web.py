@@ -13,6 +13,7 @@ from fastapi.testclient import TestClient
 
 from server.ai import main, providers, robot_plan
 from server.lab import db, keypool
+from tests.ho_tro_dang_nhap import dang_nhap_giao_vien
 
 
 def ok_reply(text="OK"):
@@ -305,9 +306,10 @@ class LabApiTest(TempDb):
     def setUp(self):
         super().setUp()
         self.client = TestClient(main.app)
+        dang_nhap_giao_vien(self.client)
 
     def test_trang_web(self):
-        r = self.client.get("/")
+        r = self.client.get("/hoa")
         self.assertEqual(r.status_code, 200)
         self.assertIn("Mạng lưới khóa AI", r.text)
 
@@ -454,6 +456,7 @@ class RobotEndpointTest(TempDb):
     def setUp(self):
         super().setUp()
         self.client = TestClient(main.app)
+        dang_nhap_giao_vien(self.client)
         self._pick = main.providers.pick
 
     def tearDown(self):

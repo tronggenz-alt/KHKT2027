@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 820" width="1180" height="820"><style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&amp;family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap');
+.paper{fill:var(--sheet,#fbfcfa);stroke:var(--rule,#c8d2d0);stroke-width:1}
+.ln{fill:none;stroke:var(--ink,#18272c);stroke-width:1.4;stroke-linejoin:round}
+.thin{fill:none;stroke:var(--ink,#18272c);stroke-width:.7}
+.hid{fill:none;stroke:var(--ink-2,#5d6e72);stroke-width:.8;stroke-dasharray:4 3}
+.ctr{fill:none;stroke:var(--ink-2,#5d6e72);stroke-width:.6;stroke-dasharray:14 3 2 3}
+.dim{fill:none;stroke:var(--dim,#0a6b8a);stroke-width:.75}
+.dimt{fill:var(--dim,#0a6b8a);font:500 11.5px 'JetBrains Mono',ui-monospace,monospace}
+.arr{fill:var(--dim,#0a6b8a)}
+.t{fill:var(--ink,#18272c);font:500 12.5px 'Be Vietnam Pro','Segoe UI',sans-serif}
+.tb{fill:var(--ink,#18272c);font:700 12.5px 'Be Vietnam Pro','Segoe UI',sans-serif}
+.ts{fill:var(--ink-2,#5d6e72);font:400 11px 'Be Vietnam Pro','Segoe UI',sans-serif}
+.tw{fill:var(--warn,#b4471a);font:600 11.5px 'Be Vietnam Pro','Segoe UI',sans-serif}
+.h{fill:var(--ink,#18272c);font:700 17px 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.06em}
+.hs{fill:var(--ink-2,#5d6e72);font:600 12px 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.08em}
+.pvc{fill:var(--pvc,#dde5e3);stroke:var(--ink,#18272c);stroke-width:1.4}
+.pvc2{fill:var(--pvc2,#c9d4d1);stroke:var(--ink,#18272c);stroke-width:1.4}
+.mica{fill:var(--mica,rgba(110,180,210,.35));stroke:var(--ink,#18272c);stroke-width:1.1}
+.cut{fill:url(#gach);stroke:var(--ink,#18272c);stroke-width:1.2}
+.gach{stroke:var(--ink,#18272c);stroke-width:.7}
+.pcbk{fill:#2a3036;stroke:var(--ink,#18272c);stroke-width:1}
+.pcbb{fill:#2563a6;stroke:var(--ink,#18272c);stroke-width:1}
+.pcbt{fill:#0f7c86;stroke:var(--ink,#18272c);stroke-width:1}
+.pcbr{fill:#c0392b;stroke:var(--ink,#18272c);stroke-width:1}
+.phip{fill:#c9a066;stroke:var(--ink,#18272c);stroke-width:1}
+.kim{fill:#aab3b8;stroke:var(--ink,#18272c);stroke-width:1}
+.dong{fill:#c99a3b;stroke:var(--ink,#18272c);stroke-width:1}
+.nhua{fill:#4a5257;stroke:var(--ink,#18272c);stroke-width:1}
+.ledx{fill:#22b573;stroke:var(--ink,#18272c);stroke-width:.8}
+.ledd{fill:#e0362c;stroke:var(--ink,#18272c);stroke-width:.8}
+.pin{fill:#3b4a52;stroke:var(--ink,#18272c);stroke-width:1}
+.hand{fill:var(--hand,#e9b98f);stroke:var(--hand-ln,#9c5f37);stroke-width:1.3}
+.handln{fill:none;stroke:var(--hand-ln,#9c5f37);stroke-width:1.1}
+.fig{fill:none;stroke:var(--fig,#a9bcc0);stroke-linecap:round;stroke-linejoin:round}
+.figf{fill:var(--fig,#a9bcc0)}
+.zone{fill:var(--ok,#2f7d4f);fill-opacity:.16;stroke:var(--ok,#2f7d4f);stroke-width:1;stroke-dasharray:5 3}
+.zonet{fill:var(--ok,#2f7d4f);font:600 11.5px 'Be Vietnam Pro','Segoe UI',sans-serif}
+.box{fill:none;stroke:var(--ink-2,#5d6e72);stroke-width:1;stroke-dasharray:7 4}
+.mod{fill:var(--sheet,#fbfcfa);stroke:var(--ink,#18272c);stroke-width:1.4}
+.modh{fill:var(--pvc,#dde5e3)}
+.dot{fill:var(--ink,#18272c)}
+.ball{fill:var(--sheet,#fbfcfa);stroke:var(--ink,#18272c);stroke-width:1.1}
+.ballt{fill:var(--ink,#18272c);font:700 11px 'JetBrains Mono',ui-monospace,monospace}
+.warnbox{fill:var(--warn,#b4471a);fill-opacity:.1;stroke:var(--warn,#b4471a);stroke-width:1}
+.cable{fill:none;stroke:var(--gnd,#2b3135);stroke-linecap:round}
+.wire{fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.gnd{stroke:var(--gnd,#2b3135)}
+</style><defs><marker id="m34" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M0,1.5 L10,5 L0,8.5 z" class="arr"/></marker><pattern id="gach" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" class="gach"/></pattern></defs>
+<style>
+.vo{fill:var(--pvc,#dde5e3);stroke:var(--ink,#18272c);stroke-width:1.1;fill-rule:evenodd}
+.toi{fill:#2a3238;stroke:var(--ink,#18272c);stroke-width:1;fill-rule:evenodd}
+.hl{fill:var(--halo,#11b5d4);stroke:var(--ink,#18272c);stroke-width:1;fill-rule:evenodd}
+.vien{fill:none;stroke:var(--ink,#18272c);stroke-width:1.6;stroke-linejoin:round}
+.cutv{fill:url(#gach);stroke:var(--ink,#18272c);stroke-width:1.1;fill-rule:evenodd}
+.lkf{stroke:var(--ink,#18272c);stroke-width:.8;fill-rule:evenodd}
+.chart{fill:none;stroke:var(--dim,#0a6b8a);stroke-width:2.2}
+.grid{fill:none;stroke:var(--rule,#c8d2d0);stroke-width:.7}
+.tay{fill:var(--hand,#e9b98f);fill-opacity:.55;stroke:var(--hand-ln,#9c5f37);stroke-width:1.1}
+.cam{fill:var(--ink-2,#5d6e72)}
+.tia{fill:none;stroke:var(--halo,#11b5d4);stroke-width:1;stroke-dasharray:5 4}
+.code{fill:var(--ink,#18272c);font:500 12px 'JetBrains Mono',ui-monospace,monospace}
+
+.trang{fill:#f4f7f8;stroke:var(--ink,#18272c);stroke-width:1.1;fill-rule:evenodd}
+.nhat{fill:#dfe7e9;stroke:var(--ink-2,#5d6e72);stroke-width:.6;fill-rule:evenodd}
+.chu{fill:#15191d;fill-rule:evenodd}
+.day{fill:none;stroke:#b4471a;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+</style>
+<rect x="6" y="6" width="1168" height="808" rx="4" class="paper" />
+<rect x="14" y="14" width="1152" height="792" class="thin" />
+<rect x="626" y="732" width="540" height="74" class="ln" />
+<line x1="626" y1="762" x2="1036" y2="762" class="thin" />
+<line x1="1036" y1="732" x2="1036" y2="806" class="thin" />
+<line x1="1036" y1="762" x2="1166" y2="762" class="thin" />
+<line x1="1036" y1="784" x2="1166" y2="784" class="thin" />
+<text x="636" y="753" class="h" text-anchor="start" >CÒ ANALOG BẰNG CẢM BIẾN HALL</text>
+<text x="636" y="779" class="ts" text-anchor="start" >Bóp cò → nam châm lại gần SS49E → điện áp ra tăng</text>
+<text x="636" y="797" class="ts" text-anchor="start" >Đơn vị: mm · VERA Lab, Lê Quý Đôn · 02/11/2026</text>
+<text x="1046" y="745" class="hs" text-anchor="start" >BẢN VẼ SỐ</text>
+<text x="1046" y="759" class="tb" text-anchor="start" >TCD-04</text>
+<text x="1046" y="777" class="ts" text-anchor="start" >Tay cầm VERA Drop</text>
+<text x="1046" y="799" class="ts" text-anchor="start" >Chiếu góc thứ nhất</text>
+<text x="40" y="46" class="h" text-anchor="start" >CHI TIẾT CÒ, CẮT TẠI y = 3 (QUA TÂM NAM CHÂM)</text>
+<text x="40" y="62" class="ts" text-anchor="start" >nét liền: nhả cò · nét đứt: bóp hết, cò quay 15,5° tới khi vấu chạm vách</text>
+<clipPath id="kc34"><rect x="40" y="80" width="440" height="440"/></clipPath><g clip-path="url(#kc34)">
+<path d="M270.6,155.4 L273.7,144 L279.1,122.4 L280.9,114.5 L261.8,117.8 L258.2,133 L252.2,155.4 L248.1,169.6 L266.4,169.6 Z M102,227 L120,227 L120,223 L105,223 L105,179 L80,179 L80,236 L102,236 Z M-207.7,304.9 L-209.4,304.5 L-211,303.8 L-212.5,302.9 L-213.8,301.8 L-214.9,300.5 L-215.8,299 L-216.5,297.4 L-216.9,295.7 L-217,294 L-216.9,292.3 L-216.5,290.6 L-215.8,289 L-214.9,287.5 L-213.8,286.2 L-212.5,285.1 L-211,284.2 L-209.4,283.5 L-207.7,283.1 L-206,283 L-204.3,283.1 L-202.6,283.5 L-201,284.2 L-199.5,285.1 L-198.2,286.2 L-197.1,287.5 L-196.2,289 L-195.5,290.6 L-195.1,292.3 L-195,294 L-195.1,295.7 L-195.5,297.4 L-196.2,299 L-197.1,300.5 L-198.2,301.8 L-199.5,302.9 L-201,303.8 L-202.6,304.5 L-204.3,304.9 L-206,305 Z M143.3,494.9 L141.6,494.5 L140,493.8 L138.5,492.9 L137.2,491.8 L136.1,490.5 L135.2,489 L134.5,487.4 L134.1,485.7 L134,484 L134.1,482.3 L134.5,480.6 L135.2,479 L136.1,477.5 L137.2,476.2 L138.5,475.1 L140,474.2 L141.6,473.5 L143.3,473.1 L145,473 L146.7,473.1 L148.4,473.5 L150,474.2 L151.5,475.1 L152.8,476.2 L153.9,477.5 L154.8,479 L155.5,480.6 L155.9,482.3 L156,484 L155.9,485.7 L155.5,487.4 L154.8,489 L153.9,490.5 L152.8,491.8 L151.5,492.9 L150,493.8 L148.4,494.5 L146.7,494.9 L145,495 Z M-211.7,594.9 L-213.4,594.5 L-215,593.8 L-216.5,592.9 L-217.8,591.8 L-218.9,590.5 L-219.8,589 L-220.5,587.4 L-220.9,585.7 L-221,584 L-220.9,582.3 L-220.5,580.6 L-219.8,579 L-218.9,577.5 L-217.8,576.2 L-216.5,575.1 L-215,574.2 L-213.4,573.5 L-211.7,573.1 L-210,573 L-208.3,573.1 L-206.6,573.5 L-205,574.2 L-203.5,575.1 L-202.2,576.2 L-201.1,577.5 L-200.2,579 L-199.5,580.6 L-199.1,582.3 L-199,584 L-199.1,585.7 L-199.5,587.4 L-200.2,589 L-201.1,590.5 L-202.2,591.8 L-203.5,592.9 L-205,593.8 L-206.6,594.5 L-208.3,594.9 L-210,595 Z M143.3,784.9 L141.6,784.5 L140,783.8 L138.5,782.9 L137.2,781.8 L136.1,780.5 L135.2,779 L134.5,777.4 L134.1,775.7 L134,774 L134.1,772.3 L134.5,770.6 L135.2,769 L136.1,767.5 L137.2,766.2 L138.5,765.1 L140,764.2 L141.6,763.5 L143.3,763.1 L145,763 L146.7,763.1 L148.4,763.5 L150,764.2 L151.5,765.1 L152.8,766.2 L153.9,767.5 L154.8,769 L155.5,770.6 L155.9,772.3 L156,774 L155.9,775.7 L155.5,777.4 L154.8,779 L153.9,780.5 L152.8,781.8 L151.5,782.9 L150,783.8 L148.4,784.5 L146.7,784.9 L145,785 Z M144,878.5 L147.9,875.7 L152.4,872.2 L160.1,866.5 L162.7,864.1 L165.4,861.3 L168,858 L170.4,854 L178,840.5 L180.5,835.2 L182.9,829.2 L185.1,822.1 L187.1,813.8 L188.8,804 L190.2,792.8 L191.3,780.3 L192.2,766.8 L192.9,752.1 L194,719.9 L195.4,664.1 L196,547.6 L196.4,525 L197,504 L198.7,465.7 L200.9,430.2 L203.1,403.4 L184.4,403.4 L182.2,430.2 L180.8,452 L145,452 L140,452.4 L135.1,453.6 L130.5,455.5 L126.2,458.1 L122.4,461.4 L119.1,465.2 L116.5,469.5 L114.6,474.1 L113.4,479 L113,484 L113.4,489 L114.6,493.9 L116.5,498.5 L119.1,502.8 L122.4,506.6 L126.2,509.9 L130.5,512.5 L135.1,514.4 L140,515.6 L145,516 L177.9,516 L177.3,547.6 L176.8,642.3 L176.5,671 L176,690.5 L174.5,742 L145,742 L140,742.4 L135.1,743.6 L130.5,745.5 L126.2,748.1 L122.4,751.4 L119.1,755.2 L116.5,759.5 L114.6,764.1 L113.4,769 L113,774 L113.4,779 L114.6,783.9 L116.5,788.5 L119.1,792.8 L122.4,796.6 L126.2,799.9 L130.5,802.5 L135.1,804.4 L140,805.6 L145,806 L169.6,806 L168.2,813.8 L166.2,822.1 L164,829.2 L161.6,835.2 L159.1,840.5 L151.6,854 L149.1,858 L146.5,861.3 L143.9,864.1 L141.8,866 L-171.8,866 L-173.9,864.1 L-176.5,861.3 L-179.1,858 L-181.6,854 L-189.1,840.5 L-191.6,835.2 L-194,829.2 L-196.2,822.1 L-198.2,813.8 L-199.9,804 L-201.3,792.8 L-202.4,780.3 L-203.4,766.8 L-204.1,752.1 L-205.4,713.4 L-206.6,664.1 L-206.9,607.8 L-202.6,606.8 L-199.1,605.4 L-195.9,603.4 L-193,601 L-190.6,598.1 L-188.6,594.9 L-187.2,591.4 L-186.3,587.8 L-186,584 L-186.3,580.2 L-187.2,576.6 L-188.6,573.1 L-190.6,569.9 L-193,567 L-195.9,564.6 L-199.1,562.6 L-202.6,561.2 L-206.2,560.3 L-207.2,560.2 L-207.6,525 L-208.2,504 L-210,465.7 L-212.2,430.2 L-213.5,413.3 L-218.1,364 L-221.6,318 L-206,318 L-202.2,317.7 L-198.6,316.8 L-195.1,315.4 L-191.9,313.4 L-189,311 L-186.6,308.1 L-184.6,304.9 L-183.2,301.4 L-182.3,297.8 L-182,294 L-182.3,290.2 L-183.2,286.6 L-184.6,283.1 L-186.6,279.9 L-189,277 L-191.9,274.6 L-195.1,272.6 L-198.6,271.2 L-202.2,270.3 L-206,270 L-224,270 L-224.3,257.9 L-224.3,244 L-223.6,203.4 L-242.1,206.7 L-242.7,244 L-242.7,257.9 L-242.4,272.1 L-241.9,286.7 L-240.2,316.7 L-236.7,364 L-232.2,413.3 L-230.9,430.2 L-228.7,465.7 L-227,504 L-226.4,525 L-226,547.6 L-225.4,664.1 L-225,684 L-223.5,736.5 L-222.2,766.8 L-221.3,780.3 L-220.2,792.8 L-218.8,804 L-217.1,813.8 L-215.1,822.1 L-212.9,829.2 L-210.5,835.2 L-208,840.5 L-200.4,854 L-197.9,858 L-195.4,861.3 L-192.7,864.1 L-190.1,866.5 L-175.9,877.2 L-164.6,884 L134.6,884 Z M120,261 L102,261 L102,252 L80,252 L80,274 L120,274 Z" class="cutv" />
+<path d="M186.3,169.9 L184.6,169.5 L183,168.8 L181.5,167.9 L180.2,166.8 L179.1,165.5 L178.2,164 L177.5,162.4 L177.1,160.7 L177,159 L177.1,157.3 L177.5,155.6 L178.2,154 L179.1,152.5 L180.2,151.2 L181.5,150.1 L183,149.2 L184.6,148.5 L186.3,148.1 L188,148 L189.7,148.1 L191.4,148.5 L193,149.2 L194.5,150.1 L195.8,151.2 L196.9,152.5 L197.8,154 L198.5,155.6 L198.9,157.3 L199,159 L198.9,160.7 L198.5,162.4 L197.8,164 L196.9,165.5 L195.8,166.8 L194.5,167.9 L193,168.8 L191.4,169.5 L189.7,169.9 L188,170 Z M205.3,380.3 L206.8,369 L204.4,369 L204.4,359 L208.4,359 L210.5,347.9 L214.1,332.1 L215,329 L213.1,329 L213.1,319 L217.7,319 L223,301.5 L226,292 L235.8,292 L235.8,289 L225.3,289 L225.3,279 L235.8,279 L235.8,263.2 L242.3,244 L259.6,191.5 L264.7,175.4 L240.2,175.4 L241.2,172 L210,172 L210,165.6 L210.7,162.6 L211,159 L210.7,155.4 L209.9,151.9 L208.5,148.6 L206.6,145.5 L204.3,142.7 L201.5,140.4 L198.4,138.5 L195.1,137.1 L191.6,136.3 L188,136 L184.4,136.3 L180.9,137.1 L177.6,138.5 L174.5,140.4 L171.7,142.7 L169.4,145.5 L167.5,148.6 L166.1,151.9 L165.3,155.4 L165,159 L165,176 L162,176 L162,224 L175,224 L175,213 L190,213 L190,179 L215,179 L215,213 L215.5,213 L215.5,275 L185,275 L185,292 L201.4,292 L198.2,301.5 L193.6,316.7 L189.3,332.1 L185.6,347.9 L182.6,364 L180.4,380.3 L178.6,397.6 L203.6,397.6 Z" class="toi" />
+<path d="M183.4,169 L181.9,168.2 L180.6,167.1 L179.4,165.8 L178.4,164.4 L177.7,162.9 L177.2,161.2 L177,159.5 L177,157.7 L177.4,156.1 L178,154.4 L178.8,152.9 L179.9,151.6 L181.2,150.4 L182.6,149.4 L184.1,148.7 L185.8,148.2 L187.5,148 L189.3,148 L190.9,148.4 L192.6,149 L194.1,149.8 L195.4,150.9 L196.6,152.2 L197.6,153.6 L198.3,155.1 L198.8,156.8 L199,158.5 L199,160.3 L198.6,161.9 L198,163.6 L197.2,165.1 L196.1,166.4 L194.8,167.6 L193.4,168.6 L191.9,169.3 L190.2,169.8 L188.5,170 L186.7,170 L185.1,169.6 Z" class="hid" />
+<path d="M145.5,376.9 L150,366.4 L147.7,365.7 L150.4,356.1 L154.2,357.2 L159.2,347 L166.9,332.8 L168.6,330 L166.8,329.5 L169.4,319.9 L173.9,321.1 L183.6,305.7 L189.1,297.3 L198.5,299.9 L199.3,297 L189.2,294.2 L191.9,284.6 L202,287.4 L206.2,272.2 L217.6,255.4 L248.3,209.5 L257.5,195.3 L233.9,188.8 L235.8,185.7 L205.7,177.4 L207.4,171.2 L208.9,168.5 L210.2,165.1 L210.8,161.6 L211,158 L210.5,154.5 L209.5,151 L208.1,147.6 L206,144.7 L203.5,142 L200.7,139.8 L197.5,138.1 L194.1,136.8 L190.6,136.2 L187,136 L183.5,136.5 L180,137.5 L176.6,138.9 L173.7,141 L171,143.5 L168.8,146.3 L167.1,149.5 L165.8,152.9 L161.3,169.2 L158.4,168.4 L145.6,214.7 L158.1,218.2 L161,207.6 L175.5,211.6 L184.6,178.8 L208.7,185.5 L199.6,218.3 L200.1,218.4 L183.5,278.1 L154.1,270 L149.6,286.4 L165.4,290.7 L159.7,299 L151.3,312.5 L143,326.2 L135.2,340.4 L128,355.1 L121.5,370.2 L115.2,386.4 L139.3,393.1 Z" class="hid" />
+<path d="M215,214 L185,214 L185,274 L215,274 Z" class="lkf" style="fill:#9aa3a8"/>
+<path d="M120,229 L105,229 L105,241.5 L50,241.5 L50,246.5 L105,246.5 L105,259 L120,259 Z" class="lkf" style="fill:#c0392b"/>
+<path d="M105,201 L113.5,184 L121.9,218 L130.4,184 L138.8,218 L147.3,184 L155.8,218 L164.2,184 L172.7,218 L181.2,184 L189.6,218 L198.1,184 L206.5,218 L215,201" class="ln" style="stroke-width:1.2"/>
+<circle cx="188" cy="159" r="10" class="ball" />
+</g>
+<rect x="40" y="80" width="440" height="440" class="thin" />
+<line x1="120" y1="248" x2="185" y2="248" class="dim" marker-start="url(#m34)" marker-end="url(#m34)"/>
+<text x="152.5" y="244" class="dimt" text-anchor="middle" >6,5</text>
+<circle cx="200" cy="234" r="1.8" class="dot" />
+<line x1="200" y1="234" x2="520" y2="120" class="thin" />
+<text x="524" y="124" class="t" text-anchor="start" >nam châm N35 Ø6 × 3</text>
+<circle cx="113" cy="254" r="1.8" class="dot" />
+<line x1="113" y1="254" x2="200" y2="534" class="thin" />
+<text x="196" y="538" class="t" text-anchor="middle" >SS49E, mặt có chữ hướng về nam châm</text>
+<circle cx="150" cy="201" r="1.8" class="dot" />
+<line x1="150" y1="201" x2="520" y2="150" class="thin" />
+<text x="524" y="154" class="t" text-anchor="start" >lò xo nén Ø4, dài ≈ 12</text>
+<circle cx="188" cy="159" r="1.8" class="dot" />
+<line x1="188" y1="159" x2="520" y2="180" class="thin" />
+<text x="524" y="184" class="t" text-anchor="start" >trục thép Ø2</text>
+<circle cx="208" cy="344" r="1.8" class="dot" />
+<line x1="208" y1="344" x2="520" y2="210" class="thin" />
+<text x="524" y="214" class="t" text-anchor="start" >chỗ đặt ngón trỏ</text>
+<text x="580" y="236" class="hs" text-anchor="start" >ĐIỆN ÁP RA SS49E THEO ĐỘ BÓP CÒ (ƯỚC TÍNH)</text>
+<line x1="580" y1="490" x2="1080" y2="490" class="grid" />
+<text x="572" y="494" class="dimt" text-anchor="end" >1,6</text>
+<line x1="580" y1="430" x2="1080" y2="430" class="grid" />
+<text x="572" y="434" class="dimt" text-anchor="end" >1,7</text>
+<line x1="580" y1="370" x2="1080" y2="370" class="grid" />
+<text x="572" y="374" class="dimt" text-anchor="end" >1,8</text>
+<line x1="580" y1="310" x2="1080" y2="310" class="grid" />
+<text x="572" y="314" class="dimt" text-anchor="end" >1,9</text>
+<line x1="580" y1="250" x2="1080" y2="250" class="grid" />
+<text x="572" y="254" class="dimt" text-anchor="end" >2,0</text>
+<line x1="580" y1="250" x2="580" y2="490" class="grid" />
+<text x="580" y="508" class="dimt" text-anchor="middle" >0%</text>
+<line x1="680" y1="250" x2="680" y2="490" class="grid" />
+<text x="680" y="508" class="dimt" text-anchor="middle" >20%</text>
+<line x1="780" y1="250" x2="780" y2="490" class="grid" />
+<text x="780" y="508" class="dimt" text-anchor="middle" >40%</text>
+<line x1="880" y1="250" x2="880" y2="490" class="grid" />
+<text x="880" y="508" class="dimt" text-anchor="middle" >60%</text>
+<line x1="980" y1="250" x2="980" y2="490" class="grid" />
+<text x="980" y="508" class="dimt" text-anchor="middle" >80%</text>
+<line x1="1080" y1="250" x2="1080" y2="490" class="grid" />
+<text x="1080" y="508" class="dimt" text-anchor="middle" >100%</text>
+<text x="830" y="528" class="ts" text-anchor="middle" >độ bóp cò (0% = nhả, 100% = vấu chạm vách)</text>
+<text x="540" y="370" class="ts" text-anchor="middle" transform="rotate(-90 540 370)" >điện áp ra (V)</text>
+<path d="M580,331.9 L585,330.9 L590,330 L595,329 L600,328 L605,327 L610,326 L615,325 L620,324 L625,323 L630,321.9 L635,320.9 L640,319.8 L645,318.7 L650,317.7 L655,316.6 L660,315.5 L665,314.4 L670,313.2 L675,312.1 L680,311 L685,309.8 L690,308.6 L695,307.5 L700,306.3 L705,305.1 L710,303.9 L715,302.6 L720,301.4 L725,300.1 L730,298.9 L735,297.6 L740,296.3 L745,295 L750,293.7 L755,292.4 L760,291 L765,289.7 L770,288.3 L775,286.9 L780,285.6 L785,284.1 L790,282.7 L795,281.3 L800,279.8 L805,278.4 L810,276.9 L815,275.4 L820,273.9 L825,272.4 L830,270.8 L835,269.3 L840,267.7 L845,266.1 L850,264.5 L855,262.9 L860,261.3 L865,259.6 L870,258 L875,256.3 L880,254.6 L885,252.9 L890,251.1 L895,249.4 L900,247.6 L905,245.8 L910,244 L915,242.2 L920,240.4 L925,238.5 L930,236.6 L935,234.7 L940,232.8 L945,230.9 L950,228.9 L955,226.9 L960,224.9 L965,222.9 L970,220.9 L975,218.8 L980,216.7 L985,214.6 L990,212.5 L995,210.4 L1000,208.2 L1005,206 L1010,203.8 L1015,201.6 L1020,199.3 L1025,197 L1030,194.7 L1035,192.4 L1040,190 L1045,187.7 L1050,185.3 L1055,182.8 L1060,180.4 L1065,177.9 L1070,175.4 L1075,172.9 L1080,170.4" class="chart" />
+<circle cx="580" cy="331.9" r="4" class="dot" />
+<text x="588" y="351.9" class="ts" text-anchor="start" >1,86 V · 232 G · khe 7 mm</text>
+<circle cx="1080" cy="170.4" r="4" class="dot" />
+<text x="1072" y="158.4" class="ts" text-anchor="end" >2,13 V · 525 G · khe 4,7 mm</text>
+<text x="580" y="552" class="t" text-anchor="start" >ESP32 (ADC 12 bit, 11 dB) đọc ≈ 2462 → 2817, tức khoảng 356 mức.</text>
+<text x="580" y="570" class="ts" text-anchor="start" >Lấy trung bình 8 mẫu để giảm nhiễu ADC, rồi đổi ra 0–100%.</text>
+<text x="580" y="588" class="ts" text-anchor="start" >Mô hình: nam châm trụ N35 (Br ≈ 1,2 T); SS49E ≈ 0,92 mV/G ở 3,3 V. Đây là ước tính, chưa đo.</text>
+<text x="40" y="640" class="hs" text-anchor="start" >KHI LẮP VÀ LẬP TRÌNH</text>
+<text x="40" y="662" class="ts" text-anchor="start" >Lúc khởi động đọc mức nhả làm min, bóp hết một lần lấy max: % = (đọc − min) / (max − min). Lật nam châm thì điện áp giảm.</text>
+<text x="40" y="680" class="ts" text-anchor="start" >Khe hẹp nhất còn 3,58 mm nên SS49E chưa bão hòa. Nếu tầm đọc quá hẹp khi đo thật, có thể dùng nam châm dày hơn.</text>
+</svg>

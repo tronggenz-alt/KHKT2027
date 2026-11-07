@@ -1,0 +1,63 @@
+{
+  "ma": "gc_ms",
+  "ten": "Sắc ký khí ghép khối phổ (GC-MS) tứ cực đơn",
+  "may_mau": "Shimadzu GCMS-QP2020 NX, cột mao quản 5% phenyl (kiểu DB-5 / HP-5MS) 30 m × 0,25 mm × 0,25 µm (thông số lấy theo máy mẫu; trên vỏ máy trong phòng lab ảo dùng tên chung)",
+  "nguyen_ly": [
+    "Mẫu được bơm vào buồng bơm mẫu nóng (250 °C) và hóa hơi; khí mang heli đẩy hơi mẫu vào cột mao quản dài 30 m có lớp pha tĩnh mỏng phủ thành trong. Chế độ chia dòng (split) chỉ cho một phần nhỏ vào cột để cột không quá tải.",
+    "Mỗi chất phân bố giữa khí mang và pha tĩnh. Chất sôi thấp, ít tương tác ra trước; chất sôi cao, tương tác mạnh ra sau. Lò cột tăng nhiệt độ theo chương trình để chất sôi cao cũng ra kịp, pic gọn.",
+    "Chỉ số lưu Kovats (RI) so thời gian lưu của chất với dãy n-ankan: n-hexan có RI = 600, n-octan 800. RI ít phụ thuộc máy nên dùng để nhận diện chất cùng với phổ khối.",
+    "Ra khỏi cột, phân tử vào nguồn ion: chùm electron 70 eV bắn bật electron tạo ion phân tử M⁺, ion này vỡ thành các mảnh. Bộ lọc tứ cực cho từng tỉ số khối lượng / điện tích m/z đi qua, detector nhân electron đếm ion.",
+    "Sắc ký đồ ion tổng (TIC) cho biết có bao nhiêu chất và lượng (diện tích pic). Phổ khối của mỗi pic (pic cơ bản, ion phân tử, mảnh) đem so với thư viện phổ (NIST) để biết đó là chất gì."
+  ],
+  "cong_thuc": ["RI = 100·[n + (t − tₙ)/(tₙ₊₁ − tₙ)]", "k = (t_R − t_M)/t_M", "R_s = 2(t₂ − t₁)/(w₁ + w₂)", "c = (diện tích − b)/a"],
+  "bo_phan": [
+    {"ma": "binh_khi", "ten": "Bình khí mang heli", "chuc_nang": "Khí trơ đẩy mẫu qua cột với lưu lượng ổn định (khoảng 1 mL/phút)."},
+    {"ma": "buong_bom", "ten": "Buồng bơm mẫu (injector) có chia dòng", "chuc_nang": "Hóa hơi mẫu ở 250 °C; chia dòng, chỉ cho một phần vào cột."},
+    {"ma": "cot", "ten": "Cột mao quản 30 m", "chuc_nang": "Tách các chất theo độ bay hơi và tương tác với pha tĩnh 5% phenyl."},
+    {"ma": "lo_cot", "ten": "Lò cột", "chuc_nang": "Giữ và tăng nhiệt độ cột theo chương trình (ví dụ 40 °C giữ 2 phút, tăng 10 °C/phút)."},
+    {"ma": "duong_dan", "ten": "Đường dẫn nóng sang MS", "chuc_nang": "Đưa chất ra khỏi cột vào buồng chân không của khối phổ, không cho ngưng tụ."},
+    {"ma": "nguon_ion", "ten": "Nguồn ion EI 70 eV", "chuc_nang": "Dây tóc phát electron 70 eV bắn phá phân tử, tạo ion phân tử và mảnh."},
+    {"ma": "tu_cuc", "ten": "Bộ lọc khối tứ cực", "chuc_nang": "Bốn thanh điện cực với điện áp một chiều + xoay chiều: mỗi lúc chỉ cho một m/z đi qua; quét nhanh cả dải."},
+    {"ma": "detector", "ten": "Detector nhân electron", "chuc_nang": "Khuếch đại tín hiệu mỗi ion tới thành dòng điện đo được."},
+    {"ma": "bom_chan_khong", "ten": "Bơm chân không (bơm turbo)", "chuc_nang": "Giữ chân không cao để ion bay tới detector không va chạm khí."}
+  ],
+  "thong_so": [
+    {"ten": "Dải khối lượng", "gia_tri": "m/z 1,5 – 1090", "loai": "điển hình", "nguon": "https://ssi.shimadzu.com/products/gas-chromatography-mass-spectrometry/gcms-qp2020-nx.html"},
+    {"ten": "Tốc độ quét tối đa", "gia_tri": "20 000 u/giây", "loai": "điển hình", "nguon": "https://ssi.shimadzu.com/products/gas-chromatography-mass-spectrometry/gcms-qp2020-nx.html"},
+    {"ten": "Nguồn ion", "gia_tri": "EI (có thể đổi sang CI)", "loai": "điển hình", "nguon": "https://ssi.shimadzu.com/products/gas-chromatography-mass-spectrometry/gcms-qp2020-nx.html"},
+    {"ten": "Phổ khối EI và chỉ số lưu RI trên cột 5% phenyl của các chất trong thư viện", "gia_tri": "theo NIST Chemistry WebBook (xem data/may/tinh_chat/gc_ms.json)", "loai": "tra cứu", "nguon": "https://webbook.nist.gov/chemistry/"},
+    {"ten": "Giới hạn metanol trong rượu", "gia_tri": "100 mg/L cồn 100° (QCVN 6-3:2010/BYT; từ 01/01/2027 thay bằng QCVN 30:2026/BCT)", "loai": "văn bản", "nguon": "https://thanhtra.com.vn/y-te-8CCF74D5E/buoc-dau-xac-dinh-nguyen-nhan-vu-ngo-doc-thuc-pham-tai-lai-chau-CEEE4289.html"},
+    {"ten": "Mô hình thời gian lưu theo chương trình nhiệt", "gia_tri": "ln k tuyến tính theo RI, ΔH(CH₂) ≈ 4,5 kJ/mol; t_M = 1,37 phút", "loai": "mô phỏng", "mo_phong": true},
+    {"ten": "Hệ số đáp ứng của từng chất ở detector", "gia_tri": "ước lượng", "loai": "mô phỏng", "mo_phong": true}
+  ],
+  "quy_trinh": [
+    {"ma": "bat_khi", "ten": "Mở khí mang, kiểm tra rò", "viec": "Mở bình heli, đặt lưu lượng 1 mL/phút; kiểm tra rò khí (tỉ lệ m/z 28 : 32 của không khí).", "ly_do": "Không khí lọt vào làm cháy dây tóc, hỏng cột, phổ có nền N₂ (28), O₂ (32) lớn.", "loi": "Bật MS khi chưa có khí mang / còn rò: máy báo chân không kém."},
+    {"ma": "chan_khong", "ten": "Bật MS, hút chân không", "viec": "Bật bơm chân không, chờ đạt chân không cao.", "ly_do": "Ion chỉ bay tới detector được khi gần như không có khí cản.", "loi": "Bật dây tóc khi chân không chưa đạt: cháy dây tóc."},
+    {"ma": "tune", "ten": "Hiệu chỉnh khối (auto tune)", "viec": "Chạy auto tune bằng chất chuẩn PFTBA.", "ly_do": "Hiệu chỉnh thang m/z và độ nhạy cho đúng.", "loi": "Không tune: m/z có thể lệch, phổ khó so thư viện."},
+    {"ma": "phuong_phap", "ten": "Đặt phương pháp", "viec": "Chọn nhiệt độ đầu và tốc độ tăng nhiệt của lò, tỉ lệ chia dòng, dải quét m/z, thời gian trễ dung môi.", "ly_do": "Chất dễ bay hơi (metanol, etanol) ra rất sớm: cần nhiệt độ đầu thấp và trễ dung môi ngắn.", "loi": "Lò bắt đầu nóng quá: pic đầu dồn lại, không tách. Trễ dung môi dài quá: mất pic chất ra sớm."},
+    {"ma": "day_chuan", "ten": "Chạy dãy chuẩn", "viec": "Bơm các chuẩn đã biết nồng độ, dựng đường chuẩn diện tích pic theo nồng độ.", "ly_do": "Diện tích pic tỉ lệ với lượng chất vào cột.", "loi": "Chuẩn quá đặc: pic quá tải, đường chuẩn cong."},
+    {"ma": "chay_mau", "ten": "Bơm mẫu, chạy sắc ký", "viec": "Bơm 1 µL mẫu, chạy hết chương trình nhiệt.", "ly_do": "Thu sắc ký đồ TIC và phổ khối của từng pic.", "loi": "Mẫu có cặn, muối: làm bẩn buồng bơm mẫu."},
+    {"ma": "nhan_dien", "ten": "Nhận diện pic, định lượng", "viec": "So phổ khối từng pic với thư viện, đối chiếu RI; tính nồng độ theo đường chuẩn.", "ly_do": "Chất được xác nhận khi phổ khớp thư viện và RI khớp.", "loi": "Chỉ dựa vào thời gian lưu: dễ nhầm chất ra cùng lúc."},
+    {"ma": "ket_thuc", "ten": "Làm sạch cột, chờ máy", "viec": "Nâng lò lên nhiệt độ cao vài phút (nung cột), để máy ở chế độ chờ.", "ly_do": "Đẩy hết chất sôi cao còn trong cột.", "loi": ""}
+  ],
+  "an_toan": [
+    "Bình khí nén phải được xích cố định; mở van từ từ.",
+    "Buồng bơm mẫu, lò cột, đường dẫn rất nóng (tới 300 °C): không chạm khi đang chạy.",
+    "Mẫu chứa metanol rất độc: không ngửi, không nếm; làm trong tủ hút."
+  ],
+  "thuat_ngu": [
+    {"tu": "Thời gian lưu t_R", "nghia": "Thời gian từ lúc bơm mẫu tới khi chất ra khỏi cột (đỉnh pic)."},
+    {"tu": "Chỉ số lưu RI (Kovats)", "nghia": "Vị trí của chất so với dãy n-ankan; n-ankan CₙH₂ₙ₊₂ có RI = 100n."},
+    {"tu": "TIC", "nghia": "Sắc ký đồ ion tổng: tổng số ion đếm được theo thời gian."},
+    {"tu": "Pic cơ bản", "nghia": "Mảnh có cường độ lớn nhất trong phổ khối (đặt = 100%)."},
+    {"tu": "Ion phân tử M⁺", "nghia": "Ion của cả phân tử mất một electron; m/z bằng khối lượng mol."},
+    {"tu": "Trễ dung môi", "nghia": "Khoảng đầu không bật dây tóc để dung môi ra hết, bảo vệ dây tóc."}
+  ],
+  "cau_hoi_on_tap": [
+    "Vì sao metanol ra khỏi cột trước etanol, etanol trước isoamyl axetat?",
+    "Phổ khối của etanol có pic cơ bản m/z 31. Mảnh này là gì?",
+    "Làm sao phân biệt metanol và etanol nếu chúng ra gần nhau?",
+    "Rượu có 1600 mg metanol trong 1 L, độ cồn 30°. So với giới hạn 100 mg/L cồn 100° thì gấp bao nhiêu lần?",
+    "Vì sao phải đặt nhiệt độ đầu của lò thấp khi phân tích chất dễ bay hơi?"
+  ]
+}

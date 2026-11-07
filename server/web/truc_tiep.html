@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Theo dõi trực tiếp · VERA Lab</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="/tinh/vera.css">
+<script src="/tinh/phien.js"></script>
+<style>
+.bo-cuc { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); margin-top: 16px; }
+@media (min-width: 1000px) { .bo-cuc { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); align-items: start; } }
+.cot { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+.hai-tang { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
+.tang-ten { font-size: 14px; font-weight: 600; color: var(--phu); margin-bottom: 4px; }
+.so-do { display: block; width: 100%; height: auto; background: var(--nen-2); border-radius: var(--bo-nho); }
+.so-do rect { fill: var(--nen-3); stroke: var(--vien-dam); stroke-width: .08; }
+.so-do rect.co-nguoi { fill: var(--nhan-nhat); }
+.so-do text.khu { font-size: .78px; fill: var(--phu); pointer-events: none; }
+.cham { cursor: pointer; transition: transform 1.8s linear; }
+.cham circle { fill: var(--nhan); stroke: var(--san); stroke-width: .16; }
+.cham text { font-size: .85px; font-weight: 700; fill: var(--tren-nhan); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.cham.canh-bao circle { fill: var(--vang); }
+.cham.nguy-hiem circle { fill: var(--do); animation: nhay 1s ease-in-out infinite; }
+.cham.chon circle { stroke: var(--chu); stroke-width: .24; }
+@keyframes nhay { 50% { opacity: .55; } }
+@media (prefers-reduced-motion: reduce) { .cham { transition: none; } .cham.nguy-hiem circle { animation: none; } }
+
+.bao-dong { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 14px; margin-top: 16px; border-radius: var(--bo-nho); background: var(--do-nen); color: #fff; font-weight: 500; overflow-wrap: anywhere; }
+.bao-dong.canh-bao { background: #8f5600; }
+.bao-dong button { flex: none; min-height: 34px; padding: 0 12px; border: 1px solid rgba(255, 255, 255, .6); border-radius: var(--bo-nho); background: none; color: #fff; cursor: pointer; }
+.chu-y { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; }
+.chu-y.dang-bat { color: var(--do); font-weight: 600; }
+.nut.do-nen { background: var(--do-nen); color: #fff; }
+.nut.do-nen:hover { background: #b3261e; }
+.ds-su-kien { display: grid; gap: 8px; max-height: 420px; overflow-y: auto; }
+.su-kien { padding: 8px 10px; border-left: 3px solid var(--vien-dam); background: var(--nen-2); border-radius: 0 var(--bo-nho) var(--bo-nho) 0; font-size: 14.5px; overflow-wrap: anywhere; }
+.su-kien.canh_bao { border-color: var(--vang); }
+.su-kien.nguy_hiem { border-color: var(--do); background: var(--do-nhat); }
+.su-kien b { font-weight: 600; }
+.su-kien small { color: var(--phu); font-size: 13px; }
+.ds-hs { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); }
+.the-hs { padding: 12px; border: 1px solid var(--vien); border-radius: var(--bo-nho); background: var(--nen); text-align: left; cursor: pointer; font: inherit; overflow-wrap: anywhere; }
+.the-hs:hover { border-color: var(--vien-dam); }
+.the-hs.chon { border-color: var(--nhan); box-shadow: 0 0 0 1px var(--nhan); }
+.the-hs.tat { opacity: .55; }
+.the-hs b { display: block; font-weight: 600; }
+.the-hs small { display: block; color: var(--phu); font-size: 13.5px; }
+.gui-tin { display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 560px) { .gui-tin { grid-template-columns: 170px minmax(0, 1fr) auto; align-items: end; } }
+.gui-tin .o { margin-top: 0; }
+</style>
+</head>
+<body>
+<header class="thanh">
+  <div class="khung">
+    <a class="nhan-hieu" href="/giao-vien">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2.5 35.2 11.2v17.6L20 37.5 4.8 28.8V11.2z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/><path d="M12.5 13 20 28l7.5-15" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      VERA Lab
+    </a>
+    <a class="quay-lai" href="/giao-vien">← Trang chủ</a>
+    <div class="nguoi">
+      <span class="ten" data-ten-nguoi></span>
+      <button class="nut phu nho" data-dang-xuat>Đăng xuất</button>
+    </div>
+  </div>
+</header>
+<main class="khung">
+  <div class="dong-chinh">
+    <div>
+      <h1>Theo dõi trực tiếp</h1>
+      <p class="phu-chu" id="so-may" style="margin-top: 4px">Đang tải…</p>
+    </div>
+    <label class="o" style="margin-top: 0; min-width: min(100%, 260px)"><span>Lớp</span><select id="chon-lop"></select></label>
+  </div>
+  <p class="bao" id="bao-chung" role="alert" hidden></p>
+  <div class="bao-dong" id="bao-dong" role="alert" hidden><span id="bao-dong-chu"></span><button type="button" id="dong-bao">Đã biết</button></div>
+
+  <section class="the" id="chua-co-lop" hidden style="margin-top: 16px">
+    <p class="phu-chu">Bạn chưa có lớp nào. Hãy <a href="/giao-vien#lop">tạo lớp</a> trước.</p>
+  </section>
+
+  <div class="bo-cuc" id="noi-dung" hidden>
+    <div class="cot">
+      <section class="the">
+        <div class="chu-y" id="khung-chu-y">
+          <div id="chu-chu-y">Cả lớp đang làm bài bình thường.</div>
+          <button class="nut do-nen" id="nut-chu-y">Tất cả chú ý</button>
+        </div>
+      </section>
+      <section class="the">
+        <h2>Sơ đồ phòng</h2>
+        <div class="hai-tang">
+          <div><p class="tang-ten">Tầng 1, khu Hóa</p><svg class="so-do" id="tang-1" viewBox="-0.5 -0.5 31 25" role="img" aria-label="Sơ đồ tầng 1"></svg></div>
+          <div><p class="tang-ten">Tầng 2, khu Sinh</p><svg class="so-do" id="tang-2" viewBox="-0.5 -0.5 31 25" role="img" aria-label="Sơ đồ tầng 2"></svg></div>
+        </div>
+      </section>
+      <section class="the">
+        <h2>Học sinh</h2>
+        <div class="ds-hs" id="ds-hs"></div>
+      </section>
+    </div>
+    <div class="cot">
+      <section class="the">
+        <h2>Gửi thông báo vào app</h2>
+        <form class="gui-tin" id="f-tin" novalidate>
+          <label class="o"><span>Gửi tới</span><select id="gui-toi"></select></label>
+          <label class="o"><span>Nội dung</span><input id="noi-dung-tin" maxlength="300" autocomplete="off" placeholder="Ví dụ: Nhớ đeo kính bảo hộ"></label>
+          <button class="nut chinh">Gửi</button>
+        </form>
+        <p class="phu-chu" id="ket-qua-tin" style="margin-top: 8px"></p>
+        <p class="bao" id="bao-tin" role="alert" hidden></p>
+      </section>
+      <section class="the">
+        <div class="dong-chinh" style="margin-bottom: 10px">
+          <h2 style="margin-bottom: 0">Đang xảy ra</h2>
+          <label class="phu-chu"><input type="checkbox" id="chi-loi"> Chỉ cảnh báo</label>
+        </div>
+        <div class="ds-su-kien" id="ds-su-kien" aria-live="polite"></div>
+      </section>
+    </div>
+  </div>
+</main>
+<script>
+const { esc } = Phien;
+const $ = (id) => document.getElementById(id);
+const SVG = "http://www.w3.org/2000/svg";
+let hocSinhChon = null;
+let sauId = 0;
+let daNapLanDau = false;   // sự kiện có sẵn lúc mở trang không báo động lại
+let suKien = [];
+let dangChuY = false;
+const chamCua = new Map();  // học sinh -> phần tử chấm trên sơ đồ
+
+const lopId = () => Number($("chon-lop").value);
+
+// Khu hẹp trên sơ đồ không đủ chỗ cho tên đầy đủ
+const TEN_NGAN = { kho_hoa_chat: "Hóa chất", phong_vi_sinh: "Vi sinh", kho_sinh_pham: "Sinh phẩm", hanh_lang_dong: "HL đông", loi_thang: "Thang" };
+
+function veSoDo(khu) {
+  for (const tang of [1, 2]) {
+    const svg = $("tang-" + tang);
+    svg.innerHTML = khu.filter((k) => k.tang === tang || k.tang === 0).map((k) => {
+      const rong = k.x1 - k.x0, cao = k.z1 - k.z0;
+      return `<rect data-khu="${esc(k.ma)}" x="${k.x0}" y="${15 - k.z1}" width="${rong}" height="${cao}" rx=".2"><title>${esc(k.ten)}</title></rect>` +
+             `<text class="khu" x="${k.x0 + .4}" y="${15 - k.z1 + 1.1}">${esc(TEN_NGAN[k.ma] ?? k.ten)}</text>`;
+    }).join("");
+  }
+}
+
+const chuCai = (ten) => (ten.trim().split(/\s+/).pop() || "?")[0].toUpperCase();
+
+function veCham(ds) {
+  const con = new Set();
+  document.querySelectorAll(".so-do rect.co-nguoi").forEach((r) => r.classList.remove("co-nguoi"));
+  for (const h of ds) {
+    if (!h.dang_mo || h.x === null || !h.tang) continue;
+    con.add(h.id);
+    let g = chamCua.get(h.id);
+    if (!g) {
+      g = document.createElementNS(SVG, "g");
+      g.innerHTML = `<title></title><circle r="1"></circle><text></text>`;
+      g.addEventListener("click", () => chonHocSinh(h.id));
+      chamCua.set(h.id, g);
+    }
+    const svg = $("tang-" + h.tang);
+    if (g.parentNode !== svg) svg.append(g);
+    g.querySelector("text").textContent = chuCai(h.ho_ten);
+    g.querySelector("title").textContent = `${h.ho_ten}: ${h.ten_khu || "chưa rõ vị trí"}`;
+    g.setAttribute("class", "cham" + (h.so_nguy_hiem ? " nguy-hiem" : h.so_canh_bao ? " canh-bao" : "") + (h.id === hocSinhChon ? " chon" : ""));
+    g.style.transform = `translate(${Math.min(30, Math.max(0, h.x))}px, ${Math.min(24, Math.max(0, 15 - h.z))}px)`;
+    if (h.khu) svg.querySelector(`rect[data-khu="${h.khu}"]`)?.classList.add("co-nguoi");
+  }
+  for (const [id, g] of chamCua) if (!con.has(id)) { g.remove(); chamCua.delete(id); }
+}
+
+function veHocSinh(ds) {
+  $("ds-hs").innerHTML = ds.length ? ds.map((h) => {
+    const loi = [h.so_nguy_hiem ? `${h.so_nguy_hiem} nguy hiểm` : "", h.so_canh_bao ? `${h.so_canh_bao} cảnh báo` : ""].filter(Boolean).join(" · ");
+    return `<button type="button" class="the-hs ${h.dang_mo ? "" : "tat"} ${h.id === hocSinhChon ? "chon" : ""}" data-hs="${h.id}">
+      <b>${esc(h.ho_ten)}</b>
+      <small>${h.dang_mo ? esc(h.ten_khu || "Đang mở app") : "Chưa mở app"}</small>
+      ${h.dang_cam ? `<small>Đang cầm: ${esc(h.dang_cam)}</small>` : ""}
+      ${h.dang_lam ? `<small>${esc(h.dang_lam)}</small>` : ""}
+      ${loi ? `<small style="color: var(--do)">${loi} trong 3 giờ qua</small>` : ""}
+    </button>`;
+  }).join("") : `<p class="phu-chu">Lớp chưa có học sinh.</p>`;
+}
+
+function veGuiToi(ds) {
+  const chon = $("gui-toi"), truoc = hocSinhChon ?? "";
+  if (chon.options.length !== ds.length + 1) {
+    chon.innerHTML = `<option value="">Cả lớp</option>` + ds.map((h) => `<option value="${h.id}">${esc(h.ho_ten)}</option>`).join("");
+  }
+  if (document.activeElement !== chon) chon.value = truoc;
+}
+
+function veSuKien() {
+  const chiLoi = $("chi-loi").checked;
+  const ds = suKien.filter((k) => !chiLoi || k.muc_do !== "thong_tin").slice(-40).reverse();
+  $("ds-su-kien").innerHTML = ds.length ? ds.map((k) => `
+    <div class="su-kien ${k.muc_do}">
+      <b>${esc(k.ho_ten)}</b> <small>${new Date(k.thoi_gian * 1000).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</small><br>
+      ${esc(k.tieu_de)}${k.chi_tiet ? `<br><small>${esc(k.chi_tiet)}</small>` : ""}
+    </div>`).join("") : `<p class="phu-chu">Chưa có sự kiện nào. Sự kiện hiện ở đây khi học sinh đăng nhập trong app và làm thí nghiệm.</p>`;
+}
+
+function baoDong(k) {
+  $("bao-dong-chu").textContent = `${k.ho_ten}: ${k.tieu_de}`;
+  $("bao-dong").classList.toggle("canh-bao", k.muc_do !== "nguy_hiem");
+  $("bao-dong").hidden = false;
+  navigator.vibrate?.(k.muc_do === "nguy_hiem" ? [200, 100, 200] : 150);
+}
+
+function ve(tt) {
+  $("bao-chung").hidden = true;
+  $("so-may").textContent = `${tt.may_dang_mo}/${tt.so_hoc_sinh} máy đang mở app`;
+  dangChuY = tt.chu_y.bat;
+  $("khung-chu-y").classList.toggle("dang-bat", dangChuY);
+  $("chu-chu-y").textContent = dangChuY
+    ? `Đang yêu cầu chú ý: ${tt.chu_y.noi_dung} · ${tt.chu_y.may_da_khoa}/${tt.may_dang_mo} máy đã khóa`
+    : "Cả lớp đang làm bài bình thường.";
+  $("nut-chu-y").textContent = dangChuY ? "Cho làm tiếp" : "Tất cả chú ý";
+  $("nut-chu-y").classList.toggle("do-nen", !dangChuY);
+  $("nut-chu-y").classList.toggle("chinh", dangChuY);
+  veCham(tt.hoc_sinh);
+  veHocSinh(tt.hoc_sinh);
+  veGuiToi(tt.hoc_sinh);
+  const tb = tt.thong_bao_cuoi;
+  $("ket-qua-tin").textContent = tb ? `Tin gần nhất tới ${tb.gui_toi}: "${tb.noi_dung}" · ${tb.da_nhan} máy đã hiện` : "";
+  if (tt.su_kien.length) {
+    if (daNapLanDau) {
+      const moi = [...tt.su_kien].reverse().find((k) => k.muc_do !== "thong_tin");
+      if (moi) baoDong(moi);
+    }
+    suKien.push(...tt.su_kien);
+    sauId = tt.su_kien[tt.su_kien.length - 1].id;
+    veSuKien();
+  }
+  daNapLanDau = true;
+}
+
+async function nap() {
+  if (!lopId() || document.hidden) return;
+  try {
+    ve(await Phien.json(`/api/lop/${lopId()}/truc-tiep?sau_id=${sauId}`));
+  } catch (loi) {
+    $("bao-chung").textContent = Phien.loiChu(loi);
+    $("bao-chung").hidden = false;
+  }
+}
+
+function chonHocSinh(id) {
+  hocSinhChon = hocSinhChon === id ? null : id;
+  $("gui-toi").value = hocSinhChon ?? "";
+  nap();
+}
+
+$("ds-hs").addEventListener("click", (e) => {
+  const the = e.target.closest("[data-hs]");
+  if (the) chonHocSinh(Number(the.dataset.hs));
+});
+$("gui-toi").addEventListener("change", () => { hocSinhChon = $("gui-toi").value ? Number($("gui-toi").value) : null; nap(); });
+$("chi-loi").addEventListener("change", veSuKien);
+$("dong-bao").addEventListener("click", () => { $("bao-dong").hidden = true; });
+$("chon-lop").addEventListener("change", () => {
+  sauId = 0; suKien = []; daNapLanDau = false; hocSinhChon = null;
+  $("gui-toi").innerHTML = "";
+  $("bao-dong").hidden = true;
+  veSuKien();
+  nap();
+});
+$("nut-chu-y").addEventListener("click", async () => {
+  let noi_dung = "";
+  if (!dangChuY) {
+    noi_dung = prompt("Nội dung hiện trên màn hình học sinh, các em sẽ tạm dừng thao tác:", "Tất cả chú ý lên giáo viên");
+    if (noi_dung === null) return;
+  }
+  try {
+    await Phien.gui(`/api/lop/${lopId()}/chu-y`, "POST", { bat: !dangChuY, noi_dung });
+    await nap();
+  } catch (loi) {
+    alert(Phien.loiChu(loi));
+  }
+});
+$("f-tin").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const o = $("noi-dung-tin"), bao = $("bao-tin");
+  bao.hidden = true;
+  if (!o.value.trim()) { bao.textContent = "Hãy nhập nội dung"; bao.hidden = false; return; }
+  try {
+    await Phien.gui(`/api/lop/${lopId()}/thong-bao`, "POST", { noi_dung: o.value, hoc_sinh_id: $("gui-toi").value ? Number($("gui-toi").value) : null });
+    o.value = "";
+    await nap();
+  } catch (loi) {
+    bao.textContent = Phien.loiChu(loi);
+    bao.hidden = false;
+  }
+});
+
+(async () => {
+  try {
+    const lop = await Phien.json("/api/lop");
+    if (!lop.length) { $("chua-co-lop").hidden = false; $("so-may").textContent = ""; return; }
+    $("chon-lop").innerHTML = lop.map((l) => `<option value="${l.id}">${esc(l.ten)}</option>`).join("");
+    veSoDo(await Phien.json("/api/mat-bang"));
+    $("noi-dung").hidden = false;
+    veSuKien();
+    await nap();
+    setInterval(nap, 2000);
+  } catch (loi) {
+    $("bao-chung").textContent = Phien.loiChu(loi);
+    $("bao-chung").hidden = false;
+  }
+})();
+</script>
+</body>
+</html>

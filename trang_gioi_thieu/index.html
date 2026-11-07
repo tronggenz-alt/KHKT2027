@@ -2,654 +2,695 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>VERA Lab</title>
-<meta name="description" content="VERA Lab: phòng thí nghiệm thực tế ảo Hóa – Sinh tích hợp AI, kết quả được tính từ chính mẫu học sinh đã pha.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VERA Lab · Dự án Khoa học Kỹ thuật</title>
+<meta name="description" content="VERA Lab là dự án khoa học kỹ thuật của học sinh Trường THPT Chuyên Lê Quý Đôn, Gia Lai: tòa nhà thí nghiệm ảo Hóa – Sinh tích hợp AI, đi cùng giờ thực hành thật.">
+<meta property="og:title" content="VERA Lab · Dự án Khoa học Kỹ thuật">
+<meta property="og:description" content="Tòa nhà thí nghiệm ảo Hóa – Sinh tích hợp AI của học sinh Trường THPT Chuyên Lê Quý Đôn, Gia Lai.">
+<meta property="og:image" content="anh/hero.jpg">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%230b63d1'/%3E%3Cpath d='M10 10l10 21 10-21' fill='none' stroke='%23fff' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
-<style>
-/* Bố cục: màn hình máy đo (nền mực, vạch phổ) mở đầu, rồi các trang kiểu báo cáo khoa học có đánh số hình và bảng. */
-:root {
-  color-scheme: light;
-  --muc: #0c1f2b;
-  --muc-2: #15303f;
-  --giay: #f4f7f6;
-  --trang: #ffffff;
-  --chu: #142631;
-  --phu: #51646f;
-  --vach: #d5dfdf;
-  --ngoc: #0f8b84;
-  --ngoc-sang: #5fe0d2;
-  --cam: #c8561e;
-  --tren-muc: #e8f1f0;
-  --tren-muc-phu: #9db4bd;
-  --serif: "Newsreader", "Noto Serif", Georgia, serif;
-  --sans: "Be Vietnam Pro", "Segoe UI", system-ui, sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
-  --pho: linear-gradient(90deg, #7a2fd0 0%, #2f55e0 18%, #12a6c9 34%, #27b35a 50%, #e3d11f 64%, #ee7d1b 80%, #d6242a 100%);
-}
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 64px; }
-body { margin: 0; background: var(--giay); color: var(--chu); font: 400 17px/1.65 var(--sans); }
-img { display: block; max-width: 100%; height: auto; }
-a { color: inherit; }
-:focus-visible { outline: 2px solid var(--ngoc-sang); outline-offset: 3px; }
-.khung { width: min(1180px, 100%); margin-inline: auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
-
-.thanh { position: sticky; top: 0; z-index: 20; background: var(--muc); color: var(--tren-muc); border-bottom: 1px solid var(--muc-2); }
-.thanh::after { content: ""; display: block; height: 2px; background: var(--pho); transform-origin: left; transform: scaleX(var(--tien-do, 0)); }
-.thanh .khung { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 54px; }
-.logo { font: 500 15px var(--mono); letter-spacing: .08em; text-decoration: none; white-space: nowrap; }
-.menu { display: flex; gap: 22px; font-size: 14px; }
-.menu a { color: var(--tren-muc-phu); text-decoration: none; white-space: nowrap; }
-.menu a:hover { color: #fff; }
-
-.mo-dau { background: var(--muc); color: var(--tren-muc); overflow: hidden; }
-.mo-dau .khung { padding-block: 64px 0; }
-.nhan { font: 500 13px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
-.mo-dau .nhan { color: var(--ngoc-sang); margin: 0 0 18px; }
-h1 { font: 400 clamp(42px, 7.2vw, 88px)/1.04 var(--serif); letter-spacing: -.015em; margin: 0; max-width: 15ch; text-wrap: balance; }
-.mo-dau p.dan { font-size: clamp(17px, 1.7vw, 20px); color: var(--tren-muc-phu); max-width: 60ch; margin: 26px 0 0; }
-.tac-gia { font-size: 15px; color: var(--tren-muc-phu); margin: 18px 0 0; }
-#pho { display: block; width: 100%; height: clamp(170px, 24vw, 280px); margin-top: 36px; }
-.chu-pho { font: 400 13px/1.5 var(--mono); color: var(--tren-muc-phu); margin: 4px 0 0; padding-bottom: 30px; }
-
-.so-lieu { background: var(--trang); border-bottom: 1px solid var(--vach); }
-.so-lieu dl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; }
-.so-lieu dl > div { padding: 26px 20px 26px 0; }
-.so-lieu dl > div + div { border-left: 1px solid var(--vach); padding-left: 24px; }
-.so-lieu dt { font: 400 clamp(34px, 4.6vw, 52px)/1 var(--serif); color: var(--chu); font-variant-numeric: lining-nums; }
-.so-lieu dd { margin: 8px 0 0; font-size: 14.5px; color: var(--phu); line-height: 1.4; }
-
-section { padding-block: clamp(56px, 8vw, 104px); }
-section.trang { background: var(--trang); }
-.muc-so { color: var(--ngoc); margin: 0 0 10px; }
-h2 { font: 400 clamp(30px, 4vw, 46px)/1.12 var(--serif); letter-spacing: -.01em; margin: 0 0 18px; max-width: 22ch; text-wrap: balance; }
-h3 { font: 600 18px/1.35 var(--sans); margin: 0 0 6px; }
-p { margin: 0 0 14px; }
-.van { max-width: 64ch; color: var(--phu); }
-.hai-cot { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(28px, 5vw, 64px); align-items: start; }
-.hai-cot > * { min-width: 0; }
-
-figure { margin: 0; }
-.mo-anh { display: block; width: 100%; padding: 0; border: 0; background: var(--vach); cursor: zoom-in; overflow: hidden; }
-.mo-anh img { width: 100%; transition: transform .7s cubic-bezier(.2, .7, .2, 1); }
-.mo-anh:hover img { transform: scale(1.025); }
-figcaption { font-size: 14px; line-height: 1.5; color: var(--phu); margin-top: 9px; }
-figcaption b { font: 500 13px var(--mono); color: var(--chu); margin-right: 6px; }
-.anh-lon { margin-top: 36px; }
-
-.ly-do { list-style: none; margin: 0; padding: 0; display: grid; gap: 20px; }
-.ly-do li { padding-top: 14px; border-top: 1px solid var(--vach); }
-.ly-do p { color: var(--phu); margin: 0; font-size: 16px; }
-
-.mat-bang { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(24px, 4vw, 48px); margin-top: 32px; }
-.mat-bang > * { min-width: 0; }
-.chon-tang { display: inline-flex; border: 1px solid var(--chu); margin-bottom: 14px; }
-.chon-tang button { font: 500 14px var(--sans); padding: 8px 18px; border: 0; background: transparent; color: var(--chu); cursor: pointer; }
-.chon-tang button[aria-pressed="true"] { background: var(--chu); color: #fff; }
-#ban-ve { width: 100%; height: auto; display: block; background: var(--trang); border: 1px solid var(--vach); }
-#ban-ve rect.phong { fill: #e6eeee; stroke: var(--chu); stroke-width: .07; cursor: pointer; transition: fill .2s; }
-#ban-ve rect.phong:hover { fill: #bfe6e1; }
-#ban-ve rect.phong.chon { fill: var(--ngoc); }
-#ban-ve text { font: 400 .62px var(--sans); fill: var(--chu); pointer-events: none; }
-#ban-ve text.chon { fill: #fff; }
-#ban-ve text.truc { font: 400 .55px var(--mono); fill: var(--phu); }
-.the-phong h3 { font: 400 28px/1.15 var(--serif); margin: 0 0 8px; }
-.the-phong p { color: var(--phu); font-size: 16px; }
-.the-phong img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--vach); margin-bottom: 14px; }
-
-.dung-sai { background: var(--muc); color: var(--tren-muc); }
-.dung-sai .muc-so { color: var(--ngoc-sang); }
-.dung-sai .van { color: var(--tren-muc-phu); }
-.cong-tac { display: inline-flex; border: 1px solid var(--tren-muc-phu); margin: 14px 0 26px; }
-.cong-tac button { font: 500 14px var(--sans); padding: 10px 18px; border: 0; background: transparent; color: var(--tren-muc); cursor: pointer; }
-.cong-tac button[aria-pressed="true"] { background: var(--tren-muc); color: var(--muc); }
-.may-do { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--muc-2); border-bottom: 1px solid var(--muc-2); }
-.may-do > div { padding: 20px 18px 20px 0; min-width: 0; }
-.may-do > div + div { border-left: 1px solid var(--muc-2); padding-left: 20px; }
-.may-do span { display: block; font: 400 13px/1.4 var(--mono); color: var(--tren-muc-phu); }
-.may-do strong { display: block; font: 400 clamp(30px, 4.4vw, 50px)/1.1 var(--serif); margin-top: 8px; font-variant-numeric: lining-nums; }
-.ket-luan { margin: 20px 0 0; font-size: 17px; max-width: 62ch; }
-.ket-luan.xau { color: #ffb48a; }
-.ket-luan.tot { color: var(--ngoc-sang); }
-
-.luoi-anh { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 28px 24px; margin-top: 36px; }
-.luoi-anh figure { min-width: 0; }
-.c7 { grid-column: span 7; } .c5 { grid-column: span 5; } .c6 { grid-column: span 6; } .c4 { grid-column: span 4; }
-
-.nhom-may { columns: 2; column-gap: 40px; margin: 22px 0 0; padding: 0; list-style: none; font-size: 15.5px; }
-.nhom-may li { break-inside: avoid; padding: 7px 0; border-top: 1px solid var(--vach); display: flex; justify-content: space-between; gap: 14px; }
-.nhom-may span { color: var(--phu); text-align: right; }
-
-.bang-cuon { overflow-x: auto; margin-top: 26px; }
-table { border-collapse: collapse; width: 100%; font-size: 15.5px; min-width: 620px; }
-caption { caption-side: top; text-align: left; font-size: 14px; color: var(--phu); padding-bottom: 10px; }
-caption b { font: 500 13px var(--mono); color: var(--chu); margin-right: 6px; }
-th { text-align: left; font-weight: 600; border-top: 2px solid var(--chu); border-bottom: 1px solid var(--chu); padding: 9px 14px 9px 0; }
-td { padding: 9px 14px 9px 0; border-bottom: 1px solid var(--vach); font-variant-numeric: tabular-nums lining-nums; vertical-align: top; }
-tr:last-child td { border-bottom: 2px solid var(--chu); }
-td.so { font-family: var(--mono); font-size: 14.5px; white-space: nowrap; }
-.chu-thich { font-size: 14px; color: var(--phu); margin-top: 12px; max-width: 70ch; }
-
-.cong-nghe { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px 32px; margin-top: 30px; }
-.cong-nghe > div { border-top: 1px solid var(--chu); padding-top: 12px; min-width: 0; }
-.cong-nghe p { color: var(--phu); font-size: 15.5px; margin: 0; }
-
-.lo-trinh { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(24px, 5vw, 64px); margin-top: 24px; }
-.lo-trinh ul { margin: 0; padding-left: 18px; color: var(--phu); font-size: 16px; }
-.lo-trinh li { margin-bottom: 7px; }
-
-footer { background: var(--muc); color: var(--tren-muc-phu); font-size: 15px; }
-footer::before { content: ""; display: block; height: 3px; background: var(--pho); }
-footer .khung { padding-block: 40px; display: flex; flex-wrap: wrap; gap: 12px 40px; justify-content: space-between; }
-footer strong { color: var(--tren-muc); font-weight: 500; }
-
-dialog { border: 0; padding: 0; background: transparent; max-width: 96vw; max-height: 94vh; }
-dialog::backdrop { background: rgba(6, 16, 22, .9); }
-dialog img { max-width: 96vw; max-height: 86vh; width: auto; margin: auto; }
-dialog p { color: #e8f1f0; font-size: 14px; margin: 10px 2px 0; }
-dialog button { position: fixed; top: 14px; right: 16px; font: 500 14px var(--sans); padding: 8px 14px; background: #fff; color: var(--chu); border: 0; cursor: pointer; }
-
-.hien { animation: hien .8s cubic-bezier(.2, .7, .2, 1) both; }
-@keyframes hien { from { opacity: .25; transform: translateY(18px); } to { opacity: 1; transform: none; } }
-
-@media (max-width: 860px) {
-  .menu { display: none; }
-  .hai-cot, .mat-bang, .lo-trinh { grid-template-columns: minmax(0, 1fr); }
-  .so-lieu dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .so-lieu dl > div:nth-child(3) { border-left: 0; padding-left: 0; }
-  .so-lieu dl > div:nth-child(n+3) { border-top: 1px solid var(--vach); }
-  .c7, .c5, .c6, .c4 { grid-column: span 12; }
-  .cong-nghe { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .nhom-may { columns: 1; }
-}
-@media (max-width: 520px) {
-  .may-do { grid-template-columns: minmax(0, 1fr); }
-  .may-do > div + div { border-left: 0; padding-left: 0; border-top: 1px solid var(--muc-2); }
-  .cong-nghe { grid-template-columns: minmax(0, 1fr); }
-}
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  .hien { animation: none; }
-  .mo-anh img { transition: none; }
-}
-</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="kieu.css">
+<script>document.documentElement.classList.add('js');</script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 </head>
 <body>
+<a class="bo-qua" href="#noi-dung" id="bo-qua">Bỏ qua tới nội dung</a>
 
-<nav class="thanh" aria-label="Mục lục">
+<header class="thanh">
   <div class="khung">
-    <a class="logo" href="#dau">VERA LAB</a>
-    <div class="menu">
-      <a href="#toa-nha">Tòa nhà</a>
-      <a href="#dung-sai">Đúng và sai</a>
-      <a href="#may">Máy phân tích</a>
-      <a href="#sinh">Sinh học</a>
-      <a href="#ai">AI và robot</a>
-      <a href="#kiem-chung">Kiểm chứng</a>
-    </div>
-  </div>
-</nav>
-
-<header class="mo-dau" id="dau">
-  <div class="khung">
-    <p class="nhan">Virtual Experiment &amp; Reality-based AI Lab</p>
-    <h1>Phòng thí nghiệm nơi làm sai cũng học được</h1>
-    <p class="dan">VERA Lab là tòa nhà thí nghiệm ảo hai tầng cho môn Hóa và Sinh. Học sinh đi lại bằng góc nhìn thứ nhất, tự pha mẫu, tự vận hành máy. Kết quả được tính từ chính mẫu đã pha, nên pha sai sẽ đo ra sai.</p>
-    <p class="tac-gia">Dự án Khoa học kỹ thuật của Nguyễn Ngọc Bảo Trọng và Trần Đức Trọng</p>
-    <canvas id="pho" role="img" aria-label="Phổ cộng hưởng từ proton của rượu nghi pha metanol: vạch ba của nhóm CH3 etanol ở 1,17 ppm, vạch đơn metanol ở 3,34 ppm, vạch bốn của nhóm CH2 etanol ở 3,65 ppm."></canvas>
-    <p class="chu-pho">Phổ ¹H-NMR 60 MHz của rượu nghi pha metanol, dạng màn hình máy trong VERA Lab. Vạch metanol nằm sát vạch bốn của etanol.</p>
+    <a class="nhan-hieu" href="#/gioi-thieu" aria-label="VERA Lab, về trang giới thiệu">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2.5 35.2 11.2v17.6L20 37.5 4.8 28.8V11.2z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/><path d="M12.5 13 20 28l7.5-15" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      VERA Lab
+    </a>
+    <nav class="menu" id="menu" aria-label="Các mục của trang">
+      <a href="#/gioi-thieu">Giới thiệu</a>
+      <a href="#/thuc-trang">Thực trạng</a>
+      <a href="#/san-pham">Sản phẩm</a>
+      <a href="#/tham-quan">Tham quan</a>
+      <a href="#/cong-nghe">Công nghệ</a>
+      <a href="#/kiem-chung">Kiểm chứng</a>
+    </nav>
+    <a class="nut phu nho" href="/quan-ly">Đăng nhập</a>
+    <a class="nut chinh nho" href="#/tai-ve">Tải về</a>
   </div>
 </header>
 
-<div class="so-lieu">
-  <div class="khung">
-    <dl>
-      <div><dt>720</dt><dd>hóa chất xếp trên kệ, tra cứu được</dd></div>
-      <div><dt>14</dt><dd>máy Hóa học có màn hình vận hành riêng</dd></div>
-      <div><dt>108</dt><dd>dụng cụ trong khu Sinh học</dd></div>
-      <div><dt>16</dt><dd>bài thí nghiệm Sinh học theo chương trình 2018</dd></div>
-    </dl>
-  </div>
-</div>
+<main id="noi-dung" tabindex="-1">
 
-<section>
-  <div class="khung hai-cot">
-    <div>
-      <p class="nhan muc-so">Vì sao cần</p>
-      <h2>Thực hành quan trọng, nhưng khó tổ chức đủ</h2>
-    </div>
-    <ul class="ly-do">
-      <li><h3>Hóa chất đắt và có nguy cơ</h3><p>Nhiều thí nghiệm dễ gây tai nạn, nên trên lớp thường chỉ được xem giáo viên làm.</p></li>
-      <li><h3>Máy phân tích nằm ngoài tầm với</h3><p>GC-MS, NMR, SEM, PCR hiếm khi có ở trường phổ thông.</p></li>
-      <li><h3>Không được phép làm sai</h3><p>Học sinh ít khi thấy một thao tác sai dẫn đến kết quả sai như thế nào, trong khi đó chính là cách hiểu quy trình.</p></li>
-    </ul>
-  </div>
+<section class="tab" id="gioi-thieu" data-ten="Giới thiệu" aria-labelledby="h-gioi-thieu">
   <div class="khung">
-    <figure class="anh-lon" data-so="1">
-      <button class="mo-anh" type="button"><img src="anh/tang1_toan_canh.jpg" width="1500" height="781" loading="lazy" alt="Toàn cảnh phòng thí nghiệm Hóa học tầng 1 với trần gỗ và các hàng bàn"></button>
-      <figcaption>Phòng thí nghiệm Hóa học ở tầng 1, ảnh chụp trực tiếp từ phần mềm.</figcaption>
-    </figure>
+    <div class="mo-dau">
+      <div>
+        <div class="dau-du-an">
+          <img src="anh/logo_lqd.png" alt="Trường THPT Chuyên Lê Quý Đôn, Gia Lai" width="640" height="171">
+          <span class="huy-hieu">Dự án Khoa học Kỹ thuật</span>
+        </div>
+        <h1 id="h-gioi-thieu" tabindex="-1">Để mỗi học sinh đều được tự tay làm thí nghiệm</h1>
+        <p class="dan">VERA Lab là dự án khoa học kỹ thuật của học sinh Trường THPT Chuyên Lê Quý Đôn, Gia Lai. Nhóm xây dựng một tòa nhà thí nghiệm ảo Hóa – Sinh tích hợp AI, chạy trên máy tính thông dụng, để học sinh tập trước và tập lại bên cạnh giờ thực hành thật.</p>
+        <div class="nhom-nut">
+          <a class="nut chinh" href="#/thuc-trang">Vì sao có dự án này</a>
+          <a class="nut phu" href="#/tham-quan">Tham quan phòng lab</a>
+        </div>
+      </div>
+      <figure class="san-khau" id="san-khau" data-che="toa">
+        <img class="anh-hoa" src="anh/hero.jpg" alt="Phòng thí nghiệm Hóa, ảnh chụp trong ứng dụng VERA Lab" loading="lazy">
+        <img class="anh-sinh" src="anh/hero_sinh.jpg" alt="Phòng thí nghiệm Sinh, ảnh chụp trong ứng dụng VERA Lab" loading="lazy">
+        <canvas id="c-toa" role="img" aria-label="Mô hình 3D tòa nhà VERA Lab, kéo sang ngang để xoay"></canvas>
+        <div class="nhan-3d" id="nhan-t1" style="color:#7fb2ff">Tầng 1 · Hóa học</div>
+        <div class="nhan-3d" id="nhan-t2" style="color:#5fe0bd">Tầng 2 · Sinh học</div>
+        <figcaption class="chu-canh" id="chu-canh">Mô hình 3D dựng từ mặt bằng của ứng dụng. Kéo để xoay.</figcaption>
+        <div class="chon-canh" id="chon-canh" role="group" aria-label="Chọn nội dung hiển thị">
+          <button type="button" data-che="toa" aria-pressed="true">Tòa nhà</button>
+          <button type="button" data-che="tach" aria-pressed="false">Tách tầng</button>
+          <button type="button" data-che="hoa" aria-pressed="false">Lab Hóa</button>
+          <button type="button" data-che="sinh" aria-pressed="false">Lab Sinh</button>
+        </div>
+      </figure>
+    </div>
+
+    <dl class="phieu" aria-label="Thông tin dự án">
+      <div><dt>Đề tài</dt><dd>Hệ thống trải nghiệm phòng thí nghiệm thực tế ảo Hóa – Sinh tích hợp AI trong dạy học</dd></div>
+      <div><dt>Tác giả</dt><dd>Nguyễn Ngọc Bảo Trọng<br>Trần Đức Trọng</dd></div>
+      <div><dt>Đơn vị</dt><dd>Trường THPT Chuyên Lê Quý Đôn, Gia Lai</dd></div>
+      <div><dt>Hình thức</dt><dd>Dự án Khoa học Kỹ thuật của học sinh trung học</dd></div>
+    </dl>
+
+    <div class="doan">
+      <h2>Dự án trong bốn ý</h2>
+      <div class="bon-y">
+        <a class="the-y" href="#/thuc-trang"><small>Vấn đề</small><p>Cấp THPT cả nước còn thiếu 5.328 phòng học bộ môn. Thiết bị dạy học tối thiểu mới đáp ứng 58,9% nhu cầu (số liệu 2023).</p><span class="lien-ket">Xem thực trạng</span></a>
+        <a class="the-y" href="#/san-pham"><small>Giải pháp</small><p>Học sinh đi lại trong tòa nhà 3D và tự tay thao tác. Kết quả được tính từ chính việc đã làm, không phát lại video.</p><span class="lien-ket">Xem sản phẩm</span></a>
+        <a class="the-y" href="#/tham-quan"><small>Trải nghiệm</small><p>Mặt bằng 3D bấm được, xem từng phòng bằng ảnh chụp trực tiếp trong ứng dụng.</p><span class="lien-ket">Tham quan</span></a>
+        <a class="the-y" href="#/kiem-chung"><small>Kiểm chứng</small><p>Đối chiếu kết quả mô phỏng với đáp án và giá trị tham chiếu. Phần chưa làm được ghi rõ.</p><span class="lien-ket">Xem kiểm chứng</span></a>
+      </div>
+    </div>
+
+    <div class="so-lieu" aria-label="Quy mô hệ thống">
+      <div><b>2</b><span>tầng Hóa và Sinh</span></div>
+      <div><b>13</b><span>khu chức năng</span></div>
+      <div><b>720</b><span>hóa chất</span></div>
+      <div><b>108</b><span>dụng cụ sinh học</span></div>
+      <div><b>14</b><span>máy phân tích</span></div>
+      <div><b>16</b><span>bài thí nghiệm Sinh</span></div>
+    </div>
   </div>
 </section>
 
-<section class="trang" id="toa-nha">
+<section class="tab" id="thuc-trang" data-ten="Thực trạng" aria-labelledby="h-thuc-trang">
+  <div class="khung dau-tab">
+    <p class="the-muc">Thực trạng</p>
+    <h1 id="h-thuc-trang" tabindex="-1">Học sinh cần được làm thí nghiệm. Nhiều trường chưa đủ điều kiện.</h1>
+    <p class="dan">Thực hành là phần cốt lõi của môn Hóa và Sinh. Dưới đây là những gì báo chí và các nghiên cứu ở Việt Nam đã ghi nhận, từ tỉnh Gia Lai đến cả nước.</p>
+  </div>
+
   <div class="khung">
-    <p class="nhan muc-so">Tòa nhà</p>
-    <h2>Hai tầng, mười ba khu, đi lại như tòa nhà thật</h2>
-    <p class="van">Tầng 1 là khu Hóa học, tầng 2 là khu Sinh học, nối với nhau bằng cầu thang và thang máy có cabin chạy thật. Từng khu được tải khi cần và giữ nguyên hiện trạng khi quay lại. Bấm vào một phòng trên bản vẽ để xem.</p>
-    <div class="mat-bang">
-      <div>
-        <div class="chon-tang" role="group" aria-label="Chọn tầng">
-          <button type="button" id="t1" aria-pressed="true">Tầng 1 · Hóa học</button>
-          <button type="button" id="t2" aria-pressed="false">Tầng 2 · Sinh học</button>
+    <figure class="trich">
+      <blockquote>“Hóa chất được cấp không sử dụng, để lâu hết hạn”</blockquote>
+      <figcaption>VietnamPlus, tường thuật kết luận thanh tra tại 8 trường có cấp THPT ở tỉnh Gia Lai, 01/10/2026.<a class="cc" href="#nguon-1" aria-label="Nguồn 1">1</a></figcaption>
+    </figure>
+
+    <div class="bon-so">
+      <div class="o-so"><b>5.328</b><p>phòng học bộ môn cấp THPT còn thiếu</p><small>Cả nước, năm học 2022–2023<a class="cc" href="#nguon-3" aria-label="Nguồn 3">3</a></small></div>
+      <div class="o-so"><b>58,9%</b><p>thiết bị dạy học tối thiểu cấp THPT đáp ứng nhu cầu</p><small>Cả nước, năm học 2022–2023<a class="cc" href="#nguon-3" aria-label="Nguồn 3">3</a></small></div>
+      <div class="o-so"><b>27,7%</b><p>giáo viên Hóa thường xuyên dùng thí nghiệm khi dạy bài mới</p><small>Khảo sát 285 giáo viên, giảng viên, 2021<a class="cc" href="#nguon-5" aria-label="Nguồn 5">5</a></small></div>
+      <div class="o-so"><b>72%</b><p>trường THPT chưa có phòng thí nghiệm riêng</p><small>Khảo sát ở Hà Nội, công bố 2019<a class="cc" href="#nguon-6" aria-label="Nguồn 6">6</a></small></div>
+    </div>
+
+    <div class="doan">
+      <h2>Từng bước, từ bài báo đến câu hỏi nghiên cứu</h2>
+      <div class="cau-chuyen" data-nhom-tab>
+        <div class="ds-chuong" role="tablist" aria-label="Các bước của thực trạng" aria-orientation="vertical">
+          <button type="button" role="tab" id="t-c1" aria-controls="c1" aria-selected="true"><i>1</i>Ngay tại Gia Lai</button>
+          <button type="button" role="tab" id="t-c2" aria-controls="c2" aria-selected="false" tabindex="-1"><i>2</i>Trên cả nước</button>
+          <button type="button" role="tab" id="t-c3" aria-controls="c3" aria-selected="false" tabindex="-1"><i>3</i>Trong giờ học</button>
+          <button type="button" role="tab" id="t-c4" aria-controls="c4" aria-selected="false" tabindex="-1"><i>4</i>Khi làm thật có rủi ro</button>
+          <button type="button" role="tab" id="t-c5" aria-controls="c5" aria-selected="false" tabindex="-1"><i>5</i>Trường đã tìm đến mô phỏng</button>
         </div>
-        <svg id="ban-ve" viewBox="-1.6 -1.6 33.2 27.4" role="group" aria-label="Mặt bằng tầng, đơn vị mét"></svg>
-        <p class="chu-thich">Mặt bằng đúng tỉ lệ theo tọa độ của phần mềm, đơn vị mét.</p>
+
+        <div>
+          <article class="chuong" role="tabpanel" id="c1" aria-labelledby="t-c1" tabindex="0">
+            <h3>Thanh tra ở Gia Lai ghi nhận trường thiếu phòng bộ môn, hóa chất để đến hết hạn</h3>
+            <p>Cuối tháng 9/2026, Thanh tra tỉnh Gia Lai công bố kết luận tại 8 trường có cấp THPT. Theo VietnamPlus, một số trường còn thiếu phòng học bộ môn và nhân viên thiết bị. Trong phần nói về thiết bị, vật tư dạy học, bài báo cũng nêu hóa chất được cấp nhưng không dùng, để lâu đến hết hạn.<a class="cc" href="#nguon-1" aria-label="Nguồn 1">1</a></p>
+            <p>Trước đó, hai kết luận khác tại 45 trường trong tỉnh ghi nhận tình trạng thiếu phòng chức năng và thiết bị dạy học.<a class="cc" href="#nguon-2" aria-label="Nguồn 2">2</a></p>
+            <p class="nhan-dinh"><b>Nhóm nhận định:</b> có vật tư chưa chắc đã có giờ thực hành. Còn cần người chuẩn bị và điều kiện tổ chức.</p>
+            <div class="cac-nguon">
+              <a class="the-nguon" href="https://www.vietnamplus.vn/tinh-gia-lai-kien-nghi-thu-hoi-hon-450-trieu-dong-chi-sai-tai-8-truong-hoc-post1139516.vnp" target="_blank" rel="noopener"><b>VietnamPlus</b><span>Tỉnh Gia Lai kiến nghị thu hồi hơn 450 triệu đồng chi sai tại 8 trường học</span><small>01/10/2026</small></a>
+              <a class="the-nguon" href="https://thanhtra.com.vn/ket-luan-thanh-tra-E17BD7A25/thanh-tra-chi-ra-nhung-lo-hong-tai-45-truong-hoc-o-gia-lai-cc618bf53.html" target="_blank" rel="noopener"><b>Báo Thanh tra</b><span>Thanh tra chỉ ra những “lỗ hổng” tại 45 trường học ở Gia Lai</span><small>10/09/2026</small></a>
+            </div>
+            <button type="button" class="sang-chuong" data-sang="1">Tiếp theo: Trên cả nước</button>
+          </article>
+
+          <article class="chuong" role="tabpanel" id="c2" aria-labelledby="t-c2" tabindex="0" hidden>
+            <h3>Cả nước còn thiếu hàng nghìn phòng học bộ môn ở cấp THPT</h3>
+            <p>Một bài tổng hợp trên Tạp chí Thiết bị Giáo dục nêu: để thực hiện Chương trình Giáo dục phổ thông 2018, cấp THPT còn thiếu 5.328 phòng học bộ môn, thiết bị dạy học tối thiểu mới đáp ứng 58,9% nhu cầu.<a class="cc" href="#nguon-3" aria-label="Nguồn 3">3</a></p>
+            <p>Ở Hà Tĩnh, đoàn giám sát của Ủy ban MTTQ tỉnh ghi nhận phòng thí nghiệm thực hành còn thiếu so với quy định.<a class="cc" href="#nguon-4" aria-label="Nguồn 4">4</a></p>
+            <p class="gioi-han">Số liệu thuộc năm học 2022–2023. Nhóm chưa tìm được số liệu toàn quốc mới hơn, cũng chưa có số liệu riêng cho phòng Hóa và Sinh.</p>
+            <div class="cac-nguon">
+              <a class="the-nguon" href="https://vjol.info.vn/tctbgd/article/download/86486/73583" target="_blank" rel="noopener"><b>Tạp chí Thiết bị Giáo dục</b><span>Ưu tiên đầu tư nâng cấp cơ sở vật chất, mua sắm trang thiết bị trường học đáp ứng yêu cầu Chương trình GDPT 2018</span><small>Số 286, 4/2023</small></a>
+              <a class="the-nguon" href="https://daidoanket.vn/nhan-dien-ton-tai-cua-chuong-trinh-giao-duc-pho-thong-2018-o-ha-tinh-bai-1-vuot-kho-de-doi-moi-nhung-loi-mon-cu-van-ton-tai-10241003.html" target="_blank" rel="noopener"><b>Báo Đại Đoàn Kết</b><span>Nhận diện tồn tại của Chương trình GDPT 2018 ở Hà Tĩnh, Bài 1</span><small>03/01/2023</small></a>
+            </div>
+            <button type="button" class="sang-chuong" data-sang="2">Tiếp theo: Trong giờ học</button>
+          </article>
+
+          <article class="chuong" role="tabpanel" id="c3" aria-labelledby="t-c3" tabindex="0" hidden>
+            <h3>Giáo viên muốn cho làm thí nghiệm nhiều hơn, nhưng vướng nhiều việc</h3>
+            <p>Trong khảo sát 285 giảng viên và giáo viên Hóa ở nhiều tỉnh thành, chỉ 27,7% thường xuyên dùng thí nghiệm khi dạy bài mới. Trở ngại lớn nhất là không có cán bộ chuyên trách phòng thí nghiệm và chế độ đãi ngộ cho công tác thực hành. Nhiều ý kiến nêu thêm: ít kinh phí mua hóa chất, một phòng thực hành cho nhiều lớp, mất nhiều thời gian chuẩn bị và dọn dẹp.<a class="cc" href="#nguon-5" aria-label="Nguồn 5">5</a></p>
+            <p>Ở Hà Nội, một khảo sát về dạy thực hành ghi nhận 72% trường THPT chưa có phòng thí nghiệm riêng. 98% giáo viên cho rằng cần tăng thời gian cho học sinh làm thí nghiệm, còn học sinh mong muốn nhất là được quan sát và tự làm nhiều thí nghiệm hơn.<a class="cc" href="#nguon-6" aria-label="Nguồn 6">6</a></p>
+            <p class="gioi-han">Khảo sát 285 giáo viên thực hiện qua phiếu trực tuyến. Khảo sát ở Hà Nội chỉ thuộc một địa phương. Cả hai không đại diện cho toàn quốc.</p>
+            <div class="cac-nguon">
+              <a class="the-nguon" href="https://jos.hueuni.edu.vn/index.php/hujos-ssh/article/download/6340/1458/26788" target="_blank" rel="noopener"><b>Tạp chí Khoa học Đại học Huế</b><span>Thực trạng sử dụng thí nghiệm nhằm phát triển năng lực cho học sinh trong dạy học Hóa học ở trường THPT</span><small>Tập 130, số 6E, 2021</small></a>
+              <a class="the-nguon" href="https://js.vnu.edu.vn/ER/article/view/4195/3873" target="_blank" rel="noopener"><b>Tạp chí Khoa học ĐHQG Hà Nội</b><span>Thiết kế thí nghiệm trong dạy học chương I, Sinh học 10</span><small>Tập 35, số 1, 2019</small></a>
+            </div>
+            <button type="button" class="sang-chuong" data-sang="3">Tiếp theo: Khi làm thật có rủi ro</button>
+          </article>
+
+          <article class="chuong" role="tabpanel" id="c4" aria-labelledby="t-c4" tabindex="0" hidden>
+            <h3>Làm thật cần được chuẩn bị, vì một thao tác sai có thể gây tai nạn</h3>
+            <p>Báo Sài Gòn Giải Phóng điểm lại 3 vụ tai nạn liên quan đến giờ thí nghiệm, tổng cộng 8 học sinh bị thương: nổ ống nghiệm ở Nghệ An (2/2019), bỏng cồn ở Cần Thơ (1/2018) và nổ trong phòng thí nghiệm hóa ở Hà Nội (1/2017). Bài báo dẫn ý kiến cho rằng nguyên nhân đến từ sự chủ quan và thiếu giám sát quy trình.<a class="cc" href="#nguon-7" aria-label="Nguồn 7">7</a></p>
+            <p>Giáo viên trong khảo sát năm 2021 cũng cho biết kỹ năng thực hành của học sinh còn yếu, thao tác có khi thiếu an toàn.<a class="cc" href="#nguon-5" aria-label="Nguồn 5">5</a></p>
+            <p class="nhan-dinh"><b>Nhóm nhận định:</b> điều này không có nghĩa nên tránh thí nghiệm thật. Học sinh cần một nơi để tập trước, nơi làm sai không ai bị thương.</p>
+            <p class="gioi-han">Các vụ việc diễn ra từ 2017 đến 2019. Nhóm chưa có thống kê chung về tai nạn thí nghiệm ở trường học.</p>
+            <div class="cac-nguon">
+              <a class="the-nguon" href="https://www.sggp.org.vn/de-phong-su-co-tai-phong-thi-nghiem-sinh-hoa-post510865.html" target="_blank" rel="noopener"><b>Báo Sài Gòn Giải Phóng</b><span>Đề phòng sự cố tại phòng thí nghiệm sinh - hóa</span><small>07/03/2019</small></a>
+            </div>
+            <button type="button" class="sang-chuong" data-sang="4">Tiếp theo: Trường đã tìm đến mô phỏng</button>
+          </article>
+
+          <article class="chuong" role="tabpanel" id="c5" aria-labelledby="t-c5" tabindex="0" hidden>
+            <h3>Một số trường đã tự tìm đến mô phỏng để bù chỗ thiếu</h3>
+            <p>Thiếu thiết bị, một trường THPT ở Hà Giang cho học sinh thực hành nhiều bài qua mô phỏng.<a class="cc" href="#nguon-8" aria-label="Nguồn 8">8</a> Một trường THPT ở Thừa Thiên - Huế dùng thiết bị ảo, mô phỏng trên máy tính để bù chỗ thiếu.<a class="cc" href="#nguon-9" aria-label="Nguồn 9">9</a> Ba trường THCS ở TP Lào Cai thống nhất mỗi trường hoàn thiện ít nhất 10 thí nghiệm ảo, đồng thời báo cáo một số học liệu số không tương thích với máy tính của trường và khó cài đặt.<a class="cc" href="#nguon-10" aria-label="Nguồn 10">10</a></p>
+            <p>Về hiệu quả, một phân tích tổng hợp quốc tế ghi nhận phòng thí nghiệm ảo có mức tác động trung bình tới kết quả học tập (g = 0,587).<a class="cc" href="#nguon-11" aria-label="Nguồn 11">11</a> Ở Việt Nam, một nghiên cứu với sinh viên ngành Hóa cho thấy nhóm xem thêm VR hiểu rõ hơn các bộ phận của máy phân tích.<a class="cc" href="#nguon-12" aria-label="Nguồn 12">12</a></p>
+            <p class="nhan-dinh"><b>Nhóm nhận định:</b> nghiên cứu của Đại học Huế vẫn xem thí nghiệm thật giữ vai trò chính.<a class="cc" href="#nguon-5" aria-label="Nguồn 5">5</a> Vì vậy công cụ ảo nên đi cùng giờ thực hành thật, cho học sinh tự thao tác và chạy được trên máy sẵn có.</p>
+            <div class="cac-nguon">
+              <a class="the-nguon" href="https://daidoanket.vn/go-kho-trang-thiet-bi-day-hoc-10262707.html" target="_blank" rel="noopener"><b>Báo Đại Đoàn Kết</b><span>Gỡ khó trang thiết bị dạy học</span><small>29/09/2023</small></a>
+              <a class="the-nguon" href="https://baolaocai.vn/nang-cao-hieu-qua-quan-ly-va-su-dung-thiet-bi-do-dung-day-hoc-pho-thong-post388986.html" target="_blank" rel="noopener"><b>Báo Lào Cai</b><span>Nâng cao hiệu quả quản lý và sử dụng thiết bị, đồ dùng dạy học phổ thông</span><small>24/08/2024</small></a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="cau-hoi">
+      <p class="the-muc">Câu hỏi nghiên cứu</p>
+      <blockquote>Có thể xây dựng một phòng thí nghiệm ảo Hóa – Sinh chạy trên máy tính thông dụng, trong đó kết quả được tính từ chính thao tác của học sinh, để các em tập trước và tập lại khi điều kiện thực hành ở trường còn hạn chế không?</blockquote>
+      <p class="the-muc muc-tieu-dau">Mục tiêu của nhóm</p>
+      <ol class="muc-tieu">
+        <li>Cho học sinh thực hành an toàn, lặp lại không giới hạn, không tốn hóa chất.</li>
+        <li>Cho học sinh làm quen quy trình vận hành của máy phân tích hiện đại.</li>
+        <li>Có trợ lý AI và robot hướng dẫn đúng theo quy trình của từng thiết bị.</li>
+        <li>Điều khiển tự nhiên hơn chuột và bàn phím, bằng webcam và tay cầm tự chế giá rẻ.</li>
+      </ol>
+      <div class="nhom-nut">
+        <a class="nut chinh" href="#/san-pham">Xem giải pháp</a>
+        <a class="nut phu" href="#/kiem-chung">Xem cách kiểm chứng</a>
+      </div>
+    </div>
+
+    <div class="doan">
+      <details class="nguon" id="danh-muc-nguon">
+        <summary>Tất cả nguồn đã dẫn (12)</summary>
+        <ol class="ds-nguon">
+          <li id="nguon-1"><span>Sỹ Thắng, <a href="https://www.vietnamplus.vn/tinh-gia-lai-kien-nghi-thu-hoi-hon-450-trieu-dong-chi-sai-tai-8-truong-hoc-post1139516.vnp" target="_blank" rel="noopener">Tỉnh Gia Lai kiến nghị thu hồi hơn 450 triệu đồng chi sai tại 8 trường học</a>, VietnamPlus, 01/10/2026.</span></li>
+          <li id="nguon-2"><span>Ngàn Sâu, <a href="https://thanhtra.com.vn/ket-luan-thanh-tra-E17BD7A25/thanh-tra-chi-ra-nhung-lo-hong-tai-45-truong-hoc-o-gia-lai-cc618bf53.html" target="_blank" rel="noopener">Thanh tra chỉ ra những “lỗ hổng” tại 45 trường học ở Gia Lai</a>, Báo Thanh tra, 10/09/2026.</span></li>
+          <li id="nguon-3"><span>Đặng Thị Loan, <a href="https://vjol.info.vn/tctbgd/article/download/86486/73583" target="_blank" rel="noopener">Ưu tiên đầu tư nâng cấp cơ sở vật chất, mua sắm trang thiết bị trường học đáp ứng yêu cầu Chương trình Giáo dục phổ thông 2018</a>, Tạp chí Thiết bị Giáo dục, số 286, 4/2023.</span></li>
+          <li id="nguon-4"><span>Hạnh Nguyên, <a href="https://daidoanket.vn/nhan-dien-ton-tai-cua-chuong-trinh-giao-duc-pho-thong-2018-o-ha-tinh-bai-1-vuot-kho-de-doi-moi-nhung-loi-mon-cu-van-ton-tai-10241003.html" target="_blank" rel="noopener">Nhận diện tồn tại của Chương trình Giáo dục phổ thông 2018 ở Hà Tĩnh, Bài 1: Vượt khó để đổi mới nhưng lối mòn cũ vẫn tồn tại</a>, Báo Đại Đoàn Kết, 03/01/2023.</span></li>
+          <li id="nguon-5"><span>Đặng Thị Thuận An, Nguyễn Thị Phương Linh, Lê Trọng Dũng, <a href="https://jos.hueuni.edu.vn/index.php/hujos-ssh/article/download/6340/1458/26788" target="_blank" rel="noopener">Thực trạng sử dụng thí nghiệm nhằm phát triển năng lực cho học sinh trong dạy học Hóa học ở trường Trung học Phổ thông</a>, Tạp chí Khoa học Đại học Huế: Khoa học Xã hội và Nhân văn, tập 130, số 6E, 2021, tr. 217–228.</span></li>
+          <li id="nguon-6"><span>Nguyễn Thị Thúy Quỳnh, Hoàng Thu Hà, <a href="https://js.vnu.edu.vn/ER/article/view/4195/3873" target="_blank" rel="noopener">Thiết kế thí nghiệm trong dạy học chương I - thành phần hóa học của tế bào, Sinh học 10</a>, Tạp chí Khoa học ĐHQG Hà Nội: Nghiên cứu Giáo dục, tập 35, số 1, 2019, tr. 48–54.</span></li>
+          <li id="nguon-7"><span>Bích Hạnh, <a href="https://www.sggp.org.vn/de-phong-su-co-tai-phong-thi-nghiem-sinh-hoa-post510865.html" target="_blank" rel="noopener">Đề phòng sự cố tại phòng thí nghiệm sinh - hóa</a>, Báo Sài Gòn Giải Phóng, 07/03/2019.</span></li>
+          <li id="nguon-8"><span>Lâm An, <a href="https://daidoanket.vn/go-kho-trang-thiet-bi-day-hoc-10262707.html" target="_blank" rel="noopener">Gỡ khó trang thiết bị dạy học</a>, Báo Đại Đoàn Kết, 29/09/2023.</span></li>
+          <li id="nguon-9"><span>Nhóm PV, <a href="https://www.sggp.org.vn/chong-chenh-doi-moi-giao-duc-pho-thong-bai-2-khong-bot-co-got-nen-ho-post655810.html" target="_blank" rel="noopener">Chông chênh đổi mới giáo dục phổ thông, Bài 2: Không bột có gột nên hồ?</a>, Báo Sài Gòn Giải Phóng, 21/10/2022.</span></li>
+          <li id="nguon-10"><span>Kim Thoa, <a href="https://baolaocai.vn/nang-cao-hieu-qua-quan-ly-va-su-dung-thiet-bi-do-dung-day-hoc-pho-thong-post388986.html" target="_blank" rel="noopener">Nâng cao hiệu quả quản lý và sử dụng thiết bị, đồ dùng dạy học phổ thông</a>, Báo Lào Cai, 24/08/2024.</span></li>
+          <li id="nguon-11"><span>Marc Lancer Santos, Maricar Prudente, <a href="https://www.ijiet.org/vol12/1598-IJIET-3079.pdf" target="_blank" rel="noopener">Effectiveness of Virtual Laboratories in Science Education: A Meta-Analysis</a>, International Journal of Information and Education Technology, tập 12, số 2, 2022.</span></li>
+          <li id="nguon-12"><span>Tạ Thị Thảo và cộng sự, <a href="https://vjol.info.vn/tctbgd/article/view/88378" target="_blank" rel="noopener">Ứng dụng công nghệ thực tế ảo và thực tế ảo tăng cường trong dạy học thiết bị phân tích cho sinh viên đại học ngành Hóa học</a>, Tạp chí Thiết bị Giáo dục, số 295, 8/2023. Một đồng tác giả thuộc công ty thực tế ảo.</span></li>
+        </ol>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section class="tab" id="san-pham" data-ten="Sản phẩm" aria-labelledby="h-san-pham">
+  <div class="khung dau-tab">
+    <p class="the-muc">Sản phẩm</p>
+    <h1 id="h-san-pham" tabindex="-1">Vào lab, nhìn quanh và bắt tay làm</h1>
+    <p class="dan">VERA Lab đưa không gian thí nghiệm lên máy tính để học sinh làm đi làm lại đến khi thành thạo. Chọn một tính năng để xem chi tiết.</p>
+  </div>
+  <div class="khung">
+    <div class="cau-chuyen kham-pha" data-nhom-tab>
+      <div class="ds-chuong" role="tablist" aria-label="Các tính năng" aria-orientation="vertical">
+        <button type="button" role="tab" id="t-p1" aria-controls="p1" aria-selected="true">Đi lại tự do</button>
+        <button type="button" role="tab" id="t-p2" aria-controls="p2" aria-selected="false" tabindex="-1">Tự tay thí nghiệm</button>
+        <button type="button" role="tab" id="t-p3" aria-controls="p3" aria-selected="false" tabindex="-1">Thiết bị hiện đại</button>
+        <button type="button" role="tab" id="t-p4" aria-controls="p4" aria-selected="false" tabindex="-1">Lắp bộ dụng cụ riêng</button>
+        <button type="button" role="tab" id="t-p5" aria-controls="p5" aria-selected="false" tabindex="-1">Trợ lý AI và robot</button>
+        <button type="button" role="tab" id="t-p6" aria-controls="p6" aria-selected="false" tabindex="-1">Điều khiển bằng webcam</button>
+        <button type="button" role="tab" id="t-p7" aria-controls="p7" aria-selected="false" tabindex="-1">Web quản lý cho giáo viên</button>
+      </div>
+      <div>
+        <article class="chuong" role="tabpanel" id="p1" aria-labelledby="t-p1" tabindex="0">
+          <img src="anh/sinh_hanhlang.jpg" alt="Hành lang tầng 2 trong VERA Lab" loading="lazy">
+          <h3>Đi lại tự do như ở trường thật</h3>
+          <p>Nhìn bằng góc nhìn thứ nhất, đi qua cửa tự động, lên tầng bằng cầu thang hoặc thang máy. Cần nhanh thì dịch chuyển thẳng tới từng trạm.</p>
+        </article>
+        <article class="chuong" role="tabpanel" id="p2" aria-labelledby="t-p2" tabindex="0" hidden>
+          <img src="anh/sinh_hienvi.jpg" alt="Bàn kính hiển vi trong phòng Sinh" loading="lazy">
+          <h3>Tự tay làm thí nghiệm</h3>
+          <p>Cầm dụng cụ, rót, pha, đun và quan sát hiện tượng. Ở lab Sinh, trong bình có gì do học sinh đưa vào, kết quả tính theo thành phần, nhiệt độ và thời gian.</p>
+          <ul class="nhan-nho"><li>16 bài thí nghiệm Sinh</li><li>720 hóa chất tra cứu được</li><li>Bám chương trình GDPT 2018</li></ul>
+        </article>
+        <article class="chuong" role="tabpanel" id="p3" aria-labelledby="t-p3" tabindex="0" hidden>
+          <img src="anh/hoa_may.jpg" alt="Phòng máy phân tích" loading="lazy">
+          <h3>Dùng thử thiết bị hiện đại</h3>
+          <p>Mỗi máy có màn hình vận hành riêng, chế độ Hướng dẫn và Thực hành. Học sinh làm quen với quy trình trước khi gặp máy thật.</p>
+          <ul class="nhan-nho"><li>Kính hiển vi điện tử</li><li>Máy PCR</li><li>Máy sắc ký khí</li><li>Máy nhiễu xạ tia X</li></ul>
+        </article>
+        <article class="chuong" role="tabpanel" id="p4" aria-labelledby="t-p4" tabindex="0" hidden>
+          <img src="anh/ui_laprap.jpg" alt="Giao diện lắp ráp dụng cụ 3D" loading="lazy">
+          <h3>Tự lắp bộ dụng cụ của riêng mình</h3>
+          <p>Chọn trong khoảng 40 loại bộ phận và ghép lại trên giao diện 3D. Bộ dụng cụ xuất hiện ngay trên bàn thí nghiệm bạn chọn và chạy đúng theo cách bạn đã nối.</p>
+        </article>
+        <article class="chuong" role="tabpanel" id="p5" aria-labelledby="t-p5" tabindex="0" hidden>
+          <img src="anh/robot.jpg" alt="Robot trợ lý trong VERA Lab" loading="lazy">
+          <h3>Trợ lý AI và robot luôn bên cạnh</h3>
+          <p>Hỏi cách dùng máy, nhờ robot đi lấy hóa chất hoặc làm giúp một bước. Robot chỉ làm những bước đã qua kiểm tra an toàn.</p>
+        </article>
+        <article class="chuong" role="tabpanel" id="p6" aria-labelledby="t-p6" tabindex="0" hidden>
+          <img src="anh/hoa_lab.jpg" alt="Phòng thí nghiệm Hóa nhìn từ góc người dùng" loading="lazy">
+          <h3>Điều khiển bằng webcam, không cần kính VR</h3>
+          <p>Quay đầu để nhìn quanh, ghé lại gần để phóng to, dùng cử chỉ tay để thao tác. Chuột và bàn phím vẫn dùng bình thường nếu bạn thích.</p>
+        </article>
+        <article class="chuong" role="tabpanel" id="p7" aria-labelledby="t-p7" tabindex="0" hidden>
+          <img src="anh/ui_web.jpg" alt="Trang web quản lý của VERA Lab" loading="lazy">
+          <h3>Trang web quản lý cho giáo viên</h3>
+          <p>Xem kho hóa chất, thiết bị, lịch sử mượn trả và nhật ký thí nghiệm trên trình duyệt, cả ở khu Hóa và khu Sinh.</p>
+        </article>
+      </div>
+    </div>
+
+    <div class="doan">
+      <h2>Từ cửa phòng tới kết quả, trong bốn bước</h2>
+      <ol class="cac-buoc">
+        <li><h3>Vào phòng</h3><p>Đi bộ trong tòa nhà hoặc dịch chuyển nhanh tới trạm cần làm.</p></li>
+        <li><h3>Chuẩn bị</h3><p>Tìm hóa chất, lấy dụng cụ, hoặc nhờ robot mang tới bàn.</p></li>
+        <li><h3>Thực hành</h3><p>Tự tay thao tác, hỏi trợ lý AI khi chưa rõ quy trình.</p></li>
+        <li><h3>Xem kết quả</h3><p>Kết quả tính theo đúng việc bạn đã làm. Sai thì làm lại, không mất gì.</p></li>
+      </ol>
+    </div>
+
+    <div class="doan">
+      <h2>Điểm mới và sáng tạo</h2>
+      <ol class="dong-ke">
+        <li><i>1</i><b>Mỗi lần làm là một kết quả riêng</b><p>Kết quả được tính từ đúng những gì bạn đã pha và thao tác, không phát lại video. Hai bạn làm khác nhau sẽ thấy kết quả khác nhau.</p></li>
+        <li><i>2</i><b>Làm sai vẫn an toàn, và có hậu quả thật</b><p>Bỏ qua một bước trong quy trình thì thí nghiệm hỏng đúng như ngoài đời. Bài học nhớ lâu mà không ai gặp nguy hiểm.</p></li>
+        <li><i>3</i><b>Tự do lắp ráp, không theo khuôn</b><p>Bạn tự chọn, tự nối, và bộ dụng cụ chạy đúng theo cách đã nối, kể cả khi nối sai.</p></li>
+        <li><i>4</i><b>Robot AI có giới hạn an toàn</b><p>Robot nhận yêu cầu bằng lời và tự lập kế hoạch từng bước, nhưng mỗi bước phải qua bộ kiểm tra trước khi thực hiện.</p></li>
+        <li><i>5</i><b>Nhập vai bằng thiết bị rẻ</b><p>Webcam thường đã đủ để quay đầu nhìn quanh, thêm tay cầm tự chế thay cho kính VR đắt tiền.</p></li>
+      </ol>
+      <p class="gioi-han">Các điểm trên là đặc điểm của hệ thống. Nhóm chưa khảo sát đối chiếu có hệ thống với các phần mềm thí nghiệm ảo khác.</p>
+    </div>
+
+    <div class="doan">
+      <h2>VERA Lab dành cho ai</h2>
+      <div class="ba-cot">
+        <div class="the-tho"><h3>Học sinh</h3><p>Làm thí nghiệm trước và sau giờ học, luyện tới khi thành thạo, thử cả thao tác sai để hiểu vì sao phải làm đúng.</p></div>
+        <div class="the-tho"><h3>Giáo viên</h3><p>Minh họa những thí nghiệm khó tổ chức trên lớp, theo dõi kho, thiết bị và nhật ký qua trang web quản lý.</p></div>
+        <div class="the-tho"><h3>Nhà trường</h3><p>Bổ sung trải nghiệm về thiết bị và kỹ thuật chưa có điều kiện trang bị. VERA Lab đi cùng giờ thực hành thật, không thay thế.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tab" id="tham-quan" data-ten="Tham quan" aria-labelledby="h-tham-quan">
+  <div class="khung dau-tab">
+    <p class="the-muc">Tham quan</p>
+    <h1 id="h-tham-quan" tabindex="-1">Hai tầng, mỗi khu một vai trò</h1>
+    <p class="dan">Chọn tầng, rồi bấm vào từng phòng trên mô hình 3D để xem nơi đó có gì. Kéo sang ngang để xoay.</p>
+  </div>
+  <div class="khung" data-nhom-tab id="nhom-tang">
+    <div class="ds-ngang" role="tablist" aria-label="Chọn tầng">
+      <button type="button" role="tab" id="t1" aria-controls="tang-1" aria-selected="true">Tầng 1 · Hóa học</button>
+      <button type="button" role="tab" id="t2" aria-controls="tang-2" aria-selected="false" tabindex="-1">Tầng 2 · Sinh học</button>
+    </div>
+    <div class="quy-hoach">
+      <div>
+        <div class="khung-plan"><canvas id="c-plan" role="img" aria-label="Mô hình 3D mặt bằng tầng đang chọn"></canvas><div class="goi-y-keo">Bấm vào phòng để xem, kéo để xoay</div></div>
+        <div class="ds-phong" id="ds-phong" role="group" aria-label="Chọn phòng"></div>
       </div>
       <div class="the-phong" aria-live="polite">
-        <img id="phong-anh" src="anh/tang1_toan_canh.jpg" alt="">
-        <h3 id="phong-ten"></h3>
-        <p id="phong-mo-ta"></p>
+        <div class="khung-anh"><img id="phong-anh" alt=""></div>
+        <div class="chu"><div class="tang" id="phong-tang"></div><h3 id="phong-ten"></h3><p id="phong-mo-ta"></p></div>
       </div>
     </div>
-    <div class="luoi-anh">
-      <figure class="c7" data-so="2">
-        <button class="mo-anh" type="button"><img src="anh/mat_ngoai.jpg" width="1180" height="660" loading="lazy" alt="Mặt ngoài tòa nhà hai tầng nhìn từ sân"></button>
-        <figcaption>Mặt ngoài tòa nhà hai tầng.</figcaption>
-      </figure>
-      <figure class="c5" data-so="3">
-        <button class="mo-anh" type="button"><img src="anh/thang_may.jpg" width="1500" height="781" loading="lazy" alt="Sảnh thang máy với bảng nút và màn hình số tầng"></button>
-        <figcaption>Sảnh thang máy: bảng nút và màn hình báo vị trí cabin.</figcaption>
-      </figure>
+
+    <div role="tabpanel" id="tang-1" aria-labelledby="t1">
+      <div class="tom-tang">
+        <div>
+          <h2>Lab Hóa học</h2>
+          <p>Từ bàn thí nghiệm của học sinh, kho hóa chất đến phòng máy phân tích, khu chế tạo dụng cụ và khu robot.</p>
+          <div class="danh-so"><div><b>720</b><span>hóa chất</span></div><div><b>14</b><span>máy phân tích</span></div><div><b>40</b><span>loại bộ phận lắp ráp</span></div></div>
+        </div>
+        <div class="khung-3d-nho" aria-hidden="true"><canvas id="c-phan-tu"></canvas></div>
+      </div>
+      <div class="thu-vien" id="thu-vien-hoa"></div>
+    </div>
+    <div role="tabpanel" id="tang-2" aria-labelledby="t2" hidden>
+      <div class="tom-tang">
+        <div>
+          <h2>Lab Sinh học</h2>
+          <p>Sáu khu chức năng, từ quan sát tế bào dưới kính hiển vi đến tách chiết ADN, nuôi cấy vi sinh và nhà kính thực vật.</p>
+          <div class="danh-so"><div><b>108</b><span>dụng cụ</span></div><div><b>16</b><span>bài thí nghiệm</span></div><div><b>6</b><span>khu chức năng</span></div></div>
+        </div>
+        <div class="khung-3d-nho" aria-hidden="true"><canvas id="c-adn"></canvas></div>
+      </div>
+      <div class="thu-vien" id="thu-vien-sinh"></div>
+      <ul class="chip-bai" aria-label="Một số bài thí nghiệm sinh học">
+        <li>Quan sát tế bào</li><li>Khí khổng</li><li>Co nguyên sinh</li><li>Lên men</li><li>Quang hợp</li><li>Tách chiết ADN</li><li>Nhuộm Gram</li><li>Cấy vi sinh</li><li>PCR và điện di</li><li>Ghép gen</li>
+      </ul>
     </div>
   </div>
-</section>
-
-<section class="dung-sai" id="dung-sai">
   <div class="khung">
-    <p class="nhan muc-so">Đúng và sai</p>
-    <h2>Cùng một máy, khác một thao tác</h2>
-    <p class="van">Với nồi hấp, đồng hồ áp suất có thể đánh lừa người dùng. Nếu không đuổi hết khí trước khi đóng van, đồng hồ vẫn chỉ đủ áp nhưng bên trong không đủ nóng. VERA Lab tính nhiệt độ từ bảng hơi nước IAPWS-IF97, nên hiện tượng này xảy ra đúng như ngoài đời.</p>
-    <div class="cong-tac" role="group" aria-label="Chọn thao tác">
-      <button type="button" id="q-dung" aria-pressed="true">Đuổi khí đúng quy trình</button>
-      <button type="button" id="q-sai" aria-pressed="false">Không đuổi khí</button>
-    </div>
-    <div class="may-do">
-      <div><span>Đồng hồ áp suất</span><strong id="v-ap">1,05 bar</strong></div>
-      <div><span>Nhiệt độ thực trong buồng</span><strong id="v-nhiet">120,8 °C</strong></div>
-      <div><span>Vi sinh vật giảm</span><strong id="v-log">8,5 bậc log</strong></div>
-    </div>
-    <p class="ket-luan tot" id="v-kl">Đạt tiệt trùng.</p>
-    <p class="chu-thich" style="color:var(--tren-muc-phu)">Số liệu từ bài kiểm thử tự động của phần mềm.</p>
-  </div>
-</section>
-
-<section id="may">
-  <div class="khung">
-    <p class="nhan muc-so">Máy phân tích</p>
-    <h2>Mỗi máy là một màn hình vận hành riêng</h2>
-    <p class="van">Bấm vào máy, cảnh 3D tạm dừng và màn hình vận hành mở ra, gồm quy trình từng bước, sơ đồ bên trong máy có hoạt cảnh, đồ thị và phần phân tích chuyên sâu. Chế độ Hướng dẫn chặn thao tác sai và giải thích lý do. Chế độ Thực hành để học sinh tự làm và tự nhận hậu quả.</p>
-    <div class="luoi-anh">
-      <figure class="c6" data-so="4">
-        <button class="mo-anh" type="button"><img src="anh/nmr.jpg" loading="lazy" alt="Màn hình vận hành máy NMR với tín hiệu FID và phổ"></button>
-        <figcaption>¹H-NMR: tín hiệu FID, phổ và định lượng metanol trong rượu.</figcaption>
-      </figure>
-      <figure class="c6" data-so="5">
-        <button class="mo-anh" type="button"><img src="anh/xrd.jpg" loading="lazy" alt="Màn hình vận hành máy nhiễu xạ tia X với giản đồ của kết tủa"></button>
-        <figcaption>XRD: giản đồ nhiễu xạ của kết tủa trắng, nhận ra barit BaSO₄.</figcaption>
-      </figure>
-      <figure class="c5" data-so="6">
-        <button class="mo-anh" type="button"><img src="anh/phong_may.jpg" width="1500" height="781" loading="lazy" alt="Toàn cảnh phòng máy phân tích"></button>
-        <figcaption>Phòng máy phân tích ở tầng 1.</figcaption>
-      </figure>
-      <div class="c7" style="min-width:0">
-        <ul class="nhom-may">
-          <li>UV-Vis, AAS <span>Beer – Lambert, đường chuẩn</span></li>
-          <li>FTIR <span>giao thoa đồ, trừ phổ nước</span></li>
-          <li>GC-MS, HPLC <span>thời gian lưu, phổ khối</span></li>
-          <li>Chuẩn độ điện thế <span>đồ thị Gran</span></li>
-          <li>XRD <span>Bragg, Scherrer</span></li>
-          <li>SEM-EDS <span>ảnh tinh thể, phổ tia X</span></li>
-          <li>¹H-NMR <span>FID, tách vạch, qNMR</span></li>
-          <li>Bom nhiệt lượng <span>Regnault – Pfaundler</span></li>
-          <li>Tủ sấy, lò nung <span>khối lượng không đổi</span></li>
-          <li>Máy cất nước, nồi hấp <span>IAPWS-IF97</span></li>
-        </ul>
+    <div class="doan">
+      <h2>Những thứ không phải trường nào cũng có</h2>
+      <div class="thiet-bi">
+        <div class="o-tb" style="--mau:var(--hoa)"><small>Hóa</small><b>Kính hiển vi điện tử</b><span>Nhìn cấu trúc rất nhỏ của mẫu</span></div>
+        <div class="o-tb" style="--mau:var(--sinh)"><small>Sinh</small><b>Máy PCR và điện di</b><span>Khuếch đại và quan sát ADN</span></div>
+        <div class="o-tb" style="--mau:var(--hoa)"><small>Hóa</small><b>Máy sắc ký khí</b><span>Tách chất trong hỗn hợp</span></div>
+        <div class="o-tb" style="--mau:var(--sinh)"><small>Sinh</small><b>Trạm ghép gen</b><span>Tìm hiểu kỹ thuật di truyền</span></div>
+        <div class="o-tb" style="--mau:var(--hoa)"><small>Hóa</small><b>Máy nhiễu xạ tia X</b><span>Nhận biết chất rắn trong mẫu</span></div>
+        <div class="o-tb" style="--mau:var(--sinh)"><small>Sinh</small><b>Kính hiển vi quang học</b><span>Quan sát tế bào, khí khổng</span></div>
+        <div class="o-tb" style="--mau:var(--hoa)"><small>Hóa</small><b>Nồi hấp tiệt trùng</b><span>Làm đúng quy trình mới đạt</span></div>
+        <div class="o-tb" style="--mau:var(--tim)"><small>AI</small><b>Robot hình người</b><span>Trợ lý làm theo yêu cầu bằng lời</span></div>
       </div>
     </div>
   </div>
 </section>
 
-<section class="trang">
-  <div class="khung hai-cot">
-    <div>
-      <p class="nhan muc-so">Lắp ráp tự do</p>
-      <h2>Tự nối bộ dụng cụ, rồi cho nó chạy</h2>
-      <p class="van">Khu chế tạo có khoảng 40 loại bộ phận với khớp nối chuẩn. Học sinh tự lắp bộ chưng cất, hồi lưu, thu khí, lọc hay chiết. Bộ dụng cụ chạy theo đúng cách đã nối: hơi đi theo ống, khí sục vào dung dịch, hệ kín thì áp suất tăng.</p>
-      <figure data-so="7" style="margin-top:22px">
-        <button class="mo-anh" type="button"><img src="anh/kho_hoa_chat.jpg" width="1500" height="781" loading="lazy" alt="Kho hóa chất với các kệ theo nhóm"></button>
-        <figcaption>Kho hóa chất: 720 chất xếp theo nhóm trên kệ.</figcaption>
-      </figure>
-    </div>
-    <figure data-so="8">
-      <button class="mo-anh" type="button"><img src="anh/lap_rap.jpg" loading="lazy" alt="Giao diện lắp ráp 3D với bảng bộ phận và bảng kiểm tra"></button>
-      <figcaption>Giao diện lắp ráp 3D: bảng bộ phận, bàn lắp và bảng kiểm tra hệ kín, hệ hở.</figcaption>
-    </figure>
+<section class="tab" id="cong-nghe" data-ten="Công nghệ" aria-labelledby="h-cong-nghe">
+  <div class="khung dau-tab">
+    <p class="the-muc">Công nghệ</p>
+    <h1 id="h-cong-nghe" tabindex="-1">Bên dưới hệ thống</h1>
+    <p class="dan">Chọn một chủ đề để xem VERA Lab hoạt động thế nào, từ cách tính kết quả đến tay cầm do nhóm tự thiết kế.</p>
   </div>
-</section>
-
-<section id="sinh">
-  <div class="khung">
-    <p class="nhan muc-so">Sinh học</p>
-    <h2>Từ tế bào hành đến ghép gen</h2>
-    <p class="van">Tầng 2 có các bài từ quan sát tế bào, khí khổng, catalase, lên men, quang hợp đến nhuộm Gram, cấy ria, PCR, điện di và ghép gen. Vi sinh vật chỉ dùng chủng dạy học cấp an toàn sinh học BSL-1, và AI từ chối các yêu cầu vượt cấp này.</p>
-    <div class="luoi-anh">
-      <figure class="c7" data-so="9">
-        <button class="mo-anh" type="button"><img src="anh/tang2_toan_canh.jpg" width="1500" height="781" loading="lazy" alt="Toàn cảnh phòng thí nghiệm sinh học tầng 2"></button>
-        <figcaption>Phòng thí nghiệm Sinh học ở tầng 2.</figcaption>
-      </figure>
-      <figure class="c5" data-so="10">
-        <button class="mo-anh" type="button"><img src="anh/ghep_gen.jpg" loading="lazy" alt="Màn hình trạm ghép gen tạo ADN tái tổ hợp"></button>
-        <figcaption>Trạm ghép gen: cắt, nối và biến nạp ADN tái tổ hợp.</figcaption>
-      </figure>
-      <figure class="c4" data-so="11">
-        <button class="mo-anh" type="button"><img src="anh/khuan_lac.jpg" width="1500" height="781" loading="lazy" alt="Bàn sinh học phân tử với đĩa khuẩn lạc xanh trắng"></button>
-        <figcaption>Chọn dòng khuẩn lạc xanh và trắng. Bỏ ligaza thì không có khuẩn lạc trắng.</figcaption>
-      </figure>
-      <figure class="c4" data-so="12">
-        <button class="mo-anh" type="button"><img src="anh/vi_sinh.jpg" width="1500" height="781" loading="lazy" alt="Phòng vi sinh với tủ an toàn sinh học"></button>
-        <figcaption>Phòng vi sinh có tủ an toàn sinh học và tủ ấm.</figcaption>
-      </figure>
-      <figure class="c4" data-so="13">
-        <button class="mo-anh" type="button"><img src="anh/nha_kinh.jpg" width="1500" height="781" loading="lazy" alt="Nhà kính với các chậu cây"></button>
-        <figcaption>Nhà kính thực vật cho các bài quang hợp, thoát hơi nước, hướng sáng.</figcaption>
-      </figure>
+  <div class="khung" data-nhom-tab>
+    <div class="ds-ngang" role="tablist" aria-label="Các chủ đề công nghệ">
+      <button type="button" role="tab" id="t-n1" aria-controls="n1" aria-selected="true">Kiến trúc</button>
+      <button type="button" role="tab" id="t-n2" aria-controls="n2" aria-selected="false" tabindex="-1">Mô phỏng</button>
+      <button type="button" role="tab" id="t-n3" aria-controls="n3" aria-selected="false" tabindex="-1">AI và robot</button>
+      <button type="button" role="tab" id="t-n4" aria-controls="n4" aria-selected="false" tabindex="-1">Webcam</button>
+      <button type="button" role="tab" id="t-n5" aria-controls="n5" aria-selected="false" tabindex="-1">Tay cầm</button>
     </div>
-  </div>
-</section>
 
-<section class="trang" id="ai">
-  <div class="khung hai-cot">
-    <figure data-so="14">
-      <button class="mo-anh" type="button"><img src="anh/robot.jpg" width="1500" height="781" loading="lazy" alt="Robot trợ lý hình người trong hành lang"></button>
-      <figcaption>Robot trợ lý thực hiện kế hoạch do AI lập.</figcaption>
-    </figure>
-    <div>
-      <p class="nhan muc-so">AI và điều khiển</p>
-      <h2>AI bị ràng buộc bởi quy trình</h2>
-      <p class="van">Trợ lý AI đọc hồ sơ quy trình của từng máy trước khi trả lời. Khi được giao việc, AI lập kế hoạch từ các kỹ năng có sẵn của robot, và một bộ kiểm tra loại bước sai hoặc mất an toàn trước khi robot làm.</p>
-      <p class="van">Webcam thường cũng đủ để điều khiển: quay đầu để xoay góc nhìn, ghé gần để phóng to, dùng cử chỉ tay qua MediaPipe. Tay cầm tự chế "Halo" dùng ESP32 đang trong giai đoạn đặt linh kiện.</p>
+    <div class="mo-con" role="tabpanel" id="n1" aria-labelledby="t-n1" tabindex="0">
+      <h2>Năm lớp công nghệ làm nên VERA Lab</h2>
+      <p>Mỗi lớp đảm nhận một việc riêng, nên có thể sửa và kiểm thử từng phần.</p>
+      <ul class="lop">
+        <li><b>Không gian 3D</b><p>Tòa nhà hai tầng, chỉ tải phòng đang cần.</p><span>Unity 6, URP</span></li>
+        <li><b>Mô phỏng</b><p>Bộ máy tính kết quả từ thao tác của từng học sinh.</p><span>C#, có kiểm thử tự động</span></li>
+        <li><b>Trí tuệ nhân tạo</b><p>Trợ lý trả lời theo quy trình máy, robot lập kế hoạch có kiểm tra an toàn.</p><span>Python, FastAPI, nhiều nhà cung cấp AI</span></li>
+        <li><b>Điều khiển tự nhiên</b><p>Theo dõi đầu và tay qua webcam, tay cầm không dây tự chế.</p><span>MediaPipe, OpenCV, ESP32</span></li>
+        <li><b>Quản lý</b><p>Kho, thiết bị, nhật ký thí nghiệm trên trình duyệt.</p><span>Web, SQLite</span></li>
+      </ul>
     </div>
-  </div>
-  <div class="khung">
-    <figure class="anh-lon" data-so="15">
-      <button class="mo-anh" type="button"><img src="anh/hanh_lang_t2.jpg" width="1500" height="781" loading="lazy" alt="Hành lang tầng 2 với các cửa theo màu từng khu"></button>
-      <figcaption>Hành lang tầng 2: mỗi khu một màu cửa, dễ nhận biết khi đi bằng góc nhìn thứ nhất.</figcaption>
-    </figure>
-  </div>
-</section>
 
-<section id="kiem-chung">
-  <div class="khung">
-    <p class="nhan muc-so">Kiểm chứng</p>
-    <h2>Đối chiếu kết quả với giá trị đã biết</h2>
-    <p class="van">Các bài tự động thao tác như học sinh, gồm cả cố ý làm sai, rồi so kết quả với đáp án hoặc số liệu tham chiếu.</p>
-    <div class="bang-cuon">
-      <table>
-        <caption><b>Bảng 1.</b> Một số kết quả từ bài kiểm thử tự động</caption>
-        <thead><tr><th>Thí nghiệm</th><th>VERA Lab</th><th>Đối chiếu</th></tr></thead>
-        <tbody>
-          <tr><td>Nhiệt đốt cháy glucozơ, bom nhiệt lượng</td><td class="so">15570 J/g</td><td class="so">15569 J/g (NIST)</td></tr>
-          <tr><td>Nồng độ giấm, chuẩn độ điện thế</td><td class="so">0,8301 mol/L</td><td class="so">0,8300 mol/L (đáp án)</td></tr>
-          <tr><td>Metanol trong rượu, GC-MS</td><td class="so">1602 mg/L</td><td class="so">1602 mg/L (đáp án)</td></tr>
-          <tr><td>Khối lượng còn lại khi nung đá vôi 900 °C</td><td class="so">56,0 %</td><td class="so">56,0 % (lý thuyết CaO)</td></tr>
-          <tr><td>Thành phần BaSO₄, EDS: O / S / Ba</td><td class="so">66,7 / 16,7 / 16,6 %</td><td class="so">66,7 / 16,7 / 16,7 %</td></tr>
-          <tr><td>Bộ kiểm thử mô phỏng C# và Python</td><td class="so">147 và 149 bài đạt</td><td class="so">0 bài sai</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="chu-thich">Bảng này cho thấy mô hình tính đúng trong phạm vi các bài. Đây là mô phỏng ở mức giáo dục, chưa phải đánh giá hiệu quả dạy học.</p>
-
-    <div class="cong-nghe">
-      <div><h3>Đồ họa 3D</h3><p>Unity 6, URP. Toàn bộ cảnh dựng bằng code, tải và gỡ từng khu, giữ nguyên trạng thái.</p></div>
-      <div><h3>Mô phỏng</h3><p>C# thuần, chạy và kiểm thử được ngoài Unity. Dữ liệu có dẫn nguồn.</p></div>
-      <div><h3>Thị giác máy tính</h3><p>Python, OpenCV, MediaPipe, YuNet, truyền sang Unity qua UDP.</p></div>
-      <div><h3>Máy chủ và AI</h3><p>FastAPI, SQLite. Nhiều nhà cung cấp AI, khóa chỉ nằm ở máy chủ.</p></div>
-      <div><h3>Phần cứng</h3><p>ESP32, cảm biến BMI160, joystick, cò Hall SS49E, vỏ in 3D.</p></div>
-      <div><h3>Nền tảng</h3><p>Windows và macOS.</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="trang">
-  <div class="khung">
-    <p class="nhan muc-so">Trạng thái</p>
-    <h2>Đã có gì, còn thiếu gì</h2>
-    <div class="lo-trinh">
-      <div>
-        <h3>Đã chạy được</h3>
-        <ul>
-          <li>Khu Hóa học: thí nghiệm, chuẩn độ, 14 máy, lắp ráp tự do</li>
-          <li>Khu Sinh học: 108 dụng cụ, 16 bài thí nghiệm, trạm ghép gen</li>
-          <li>Trợ lý AI, robot, web quản lý</li>
-          <li>Điều khiển đầu và tay bằng webcam</li>
-        </ul>
-      </div>
-      <div>
-        <h3>Chưa làm</h3>
-        <ul>
-          <li>Máy chủ nhiều người cùng vào một phòng</li>
-          <li>Bàn lập trình khối lệnh ở phòng robot</li>
-          <li>Firmware tay cầm Halo</li>
-          <li>AI chạy cục bộ, hệ thống cho giáo viên và học sinh</li>
-          <li>Khảo sát hiệu quả dạy học trên học sinh thật</li>
-        </ul>
+    <div class="mo-con" role="tabpanel" id="n2" aria-labelledby="t-n2" tabindex="0" hidden>
+      <h2>Kết quả được tính, không phát lại video</h2>
+      <p>Mô hình ở mức phục vụ dạy học: đúng về hiện tượng và gần đúng về số liệu trong phạm vi các bài.</p>
+      <ol class="cac-buoc">
+        <li><h3>Học sinh thao tác</h3><p>Rót, pha, đun, nối dụng cụ theo cách của mình, đúng hay sai đều được.</p></li>
+        <li><h3>Hệ thống ghi thành phần</h3><p>Mỗi bình lưu có chất gì, bao nhiêu, ở nhiệt độ nào, trong bao lâu.</p></li>
+        <li><h3>Mô hình tính hiện tượng</h3><p>Phản ứng, màu sắc, bay hơi được tính từ đúng lượng và thứ tự học sinh đã làm.</p></li>
+        <li><h3>Máy đọc mẫu của học sinh</h3><p>Máy phân tích tính tín hiệu từ chính mẫu trong ống, mẫu pha sai sẽ ra kết quả sai.</p></li>
+      </ol>
+      <div class="doan">
+        <h2>Làm sai thì sao?</h2>
+        <div class="ba-cot">
+          <div class="the-tho"><h3>Nồi hấp không đuổi khí</h3><p>Đồng hồ vẫn báo đủ áp, nhưng nhiệt độ không đủ nên mẫu không được tiệt trùng.</p></div>
+          <div class="the-tho"><h3>Bỏ enzyme ADN ligaza</h3><p>Không có khuẩn lạc trắng, đúng như khi ghép gen thất bại ngoài đời.</p></div>
+          <div class="the-tho"><h3>Tách ADN thiếu cồn lạnh</h3><p>Thiếu xà phòng, muối hoặc cồn lạnh thì không thu được sợi ADN.</p></div>
+        </div>
       </div>
     </div>
+
+    <div class="mo-con" role="tabpanel" id="n3" aria-labelledby="t-n3" tabindex="0" hidden>
+      <div class="hai-cot">
+        <img class="anh-vua" src="anh/robot.jpg" alt="Robot trợ lý trong VERA Lab" loading="lazy">
+        <div class="cot-chu">
+          <h2>AI đề xuất, bộ kiểm tra quyết định</h2>
+          <p>Robot không tự do hành động theo mọi câu trả lời của AI.</p>
+          <ol class="cac-buoc">
+            <li><div><h3>Nhận yêu cầu bằng lời</h3><p>Học sinh hỏi cách dùng máy hoặc nhờ robot làm một việc.</p></div></li>
+            <li><div><h3>Đưa bối cảnh vào câu hỏi</h3><p>Máy chủ thêm cảnh hiện tại và quy trình của thiết bị.</p></div></li>
+            <li><div><h3>AI lập kế hoạch</h3><p>Kết quả là các bước thuộc những kỹ năng robot có sẵn.</p></div></li>
+            <li><div><h3>Bộ kiểm tra duyệt từng bước</h3><p>Bước sai hoặc mất an toàn bị loại trước khi robot thực hiện.</p></div></li>
+          </ol>
+          <p class="gioi-han">Trong lab Sinh chỉ dùng chủng dạy học cấp an toàn thấp nhất (BSL-1), AI từ chối yêu cầu vượt mức này. Phần AI hiện cần kết nối mạng tới máy chủ.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="mo-con" role="tabpanel" id="n4" aria-labelledby="t-n4" tabindex="0" hidden>
+      <div class="hai-cot">
+        <div class="dem-webcam">
+          <img src="anh/hoa_lab.jpg" alt="Góc nhìn trong phòng Hóa xoay theo chuyển động đầu" loading="lazy">
+          <div class="webcam" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="24" cy="18" r="10"/><path d="M8 44c1-10 8-14 16-14s15 4 16 14"/></svg></div>
+        </div>
+        <div class="cot-chu">
+          <h2>Webcam thường thay cho kính VR</h2>
+          <p>Quay đầu để xoay góc nhìn, ghé lại gần để phóng to, dùng cử chỉ tay để thao tác.</p>
+          <ol class="cac-buoc">
+            <li><div><h3>Đọc hình từ webcam</h3><p>Chương trình Python đọc hình ảnh ngay trên máy.</p></div></li>
+            <li><div><h3>Tìm điểm trên mặt và tay</h3><p>MediaPipe tìm 478 điểm trên mặt và các điểm bàn tay.</p></div></li>
+            <li><div><h3>Lọc rung</h3><p>Bộ lọc One Euro làm chuyển động mượt hơn.</p></div></li>
+            <li><div><h3>Gửi sang ứng dụng</h3><p>Unity đổi các số này thành góc nhìn, độ phóng và cử chỉ.</p></div></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <div class="mo-con" role="tabpanel" id="n5" aria-labelledby="t-n5" tabindex="0" hidden>
+      <div class="khu-tay-cam">
+        <div id="tay-cam">
+          <canvas id="c-arc" role="img" aria-label="Mô hình 3D tay cầm VERA Arc, kéo sang ngang để xoay"></canvas>
+          <svg id="tc-duong" aria-hidden="true"></svg>
+          <div id="tc-cham" aria-hidden="true"></div>
+          <div class="tc-tai" aria-hidden="true">Đang tải mô hình 3D…</div>
+          <div class="chon-canh" id="chon-tay-cam" role="group" aria-label="Chọn phần cần xem của tay cầm">
+            <button type="button" data-buoc="0" aria-pressed="true">Nguyên khối</button>
+            <button type="button" data-buoc="1" aria-pressed="false">Tháo rời</button>
+            <button type="button" data-buoc="2" aria-pressed="false">Bên trong</button>
+            <button type="button" data-buoc="3" aria-pressed="false">Trạng thái</button>
+          </div>
+        </div>
+        <div>
+          <div class="buoc-tc">
+            <p class="the-muc">Phần cứng tự thiết kế</p>
+            <h3>Tay cầm VERA Arc</h3>
+            <p>Tay cầm do nhóm tự thiết kế, để thao tác trong lab tự nhiên hơn chuột và bàn phím. Vòng tròn nhỏ ngả ra sau mang logo và chữ VERA LAB. Chén quanh joystick hình lục giác, cùng hình với logo.</p>
+            <div class="tc-thong-so">
+              <div><b>81 × 71 × 123</b><span>mm, cả vòng và cò</span></div>
+              <div><b>≈ 137 g</b><span>có pin, ước tính</span></div>
+              <div><b>8</b><span>file STL để in 3D</span></div>
+            </div>
+          </div>
+          <div class="buoc-tc" hidden>
+            <p class="the-muc">Tháo rời</p>
+            <h3>Thiết kế để in và tự lắp</h3>
+            <p>Thân gồm hai nửa bắt vít, phù hợp để gửi xưởng in 3D. Pin thay từ đáy, đẩy nắp là mở, không cần tua vít. Có thanh móc dây đeo cổ tay ở đáy cán.</p>
+          </div>
+          <div class="buoc-tc" hidden>
+            <p class="the-muc">Bên trong</p>
+            <h3>Linh kiện phổ thông, dễ mua</h3>
+            <p>Mạch ESP32 truyền không dây, cảm biến chuyển động BMI160, joystick, cò bóp dùng cảm biến Hall, pin vuông 9V và mạch hạ áp MP1584. Bốn cổng mở rộng cho phép gắn thêm nút bấm hoặc cảm biến.</p>
+          </div>
+          <div class="buoc-tc" hidden>
+            <p class="the-muc">Trạng thái</p>
+            <h3>Đã có gói in, chưa lắp thử</h3>
+            <p>Đây là mô hình 3D của chính bản thiết kế dùng để in. Phần mềm kiểm tra va chạm trên mô hình đã đạt, nhưng nhóm chưa in thử, chưa cân thật và chưa viết xong phần mềm cho tay cầm.</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
+
+<section class="tab" id="kiem-chung" data-ten="Kiểm chứng" aria-labelledby="h-kiem-chung">
+  <div class="khung dau-tab">
+    <p class="the-muc">Kiểm chứng</p>
+    <h1 id="h-kiem-chung" tabindex="-1">Đã kiểm tra gì, còn thiếu gì</h1>
+    <p class="dan">Nhóm tách rõ ba việc: mô hình có tính đúng không, ứng dụng có chạy được trên máy thông dụng không, và học sinh có học tốt hơn không. Hai việc đầu đã đo, việc thứ ba chưa làm.</p>
+  </div>
+  <div class="khung">
+    <div class="ba-cot">
+      <div class="the-tho"><span class="nhan-tt xong">Đã đối chiếu</span><h3>Mô hình tính đúng</h3><p>Kết quả mô phỏng khớp đáp án và giá trị tham chiếu trong các bài đã đối chiếu.</p></div>
+      <div class="the-tho"><span class="nhan-tt xong">Đã đo</span><h3>Chạy trên laptop không có card rời</h3><p>Đo bằng bản .exe trên laptop Intel Iris Xe, độ phân giải 1920 × 1080.</p></div>
+      <div class="the-tho"><span class="nhan-tt chua">Chưa làm</span><h3>Hiệu quả dạy học</h3><p>Chưa khảo sát trên học sinh thật. Đây là việc đã có trong lộ trình của nhóm.</p></div>
+    </div>
+
+    <div class="doan" data-nhom-tab>
+    <div class="ds-ngang" role="tablist" aria-label="Các phần của kiểm chứng">
+      <button type="button" role="tab" id="t-k1" aria-controls="k1" aria-selected="true">Đối chiếu số liệu</button>
+      <button type="button" role="tab" id="t-k2" aria-controls="k2" aria-selected="false" tabindex="-1">Hiệu năng</button>
+      <button type="button" role="tab" id="t-k3" aria-controls="k3" aria-selected="false" tabindex="-1">Hạn chế</button>
+      <button type="button" role="tab" id="t-k4" aria-controls="k4" aria-selected="false" tabindex="-1">Lộ trình</button>
+      <button type="button" role="tab" id="t-k5" aria-controls="k5" aria-selected="false" tabindex="-1">Câu hỏi thường gặp</button>
+    </div>
+
+    <div class="mo-con" role="tabpanel" id="k1" aria-labelledby="t-k1" tabindex="0">
+      <h2>Kết quả mô phỏng so với giá trị đối chiếu</h2>
+      <p>Số liệu lấy từ bài kiểm thử tự động. Bài kiểm thử thao tác đúng và cố ý thao tác sai, rồi đối chiếu kết quả.</p>
+      <div class="cuon-bang" tabindex="0" role="region" aria-label="Bảng đối chiếu kết quả mô phỏng">
+        <table class="bang">
+          <thead><tr><th>Thí nghiệm</th><th>Kết quả mô phỏng</th><th>Giá trị đối chiếu</th></tr></thead>
+          <tbody>
+            <tr><td>Nhiệt đốt cháy glucozơ</td><td>15570 J/g</td><td>15569 J/g (NIST)</td></tr>
+            <tr><td>Chuẩn độ giấm</td><td>0,8301 mol/L</td><td>0,8300 mol/L (đáp án)</td></tr>
+            <tr><td>Metanol trong rượu bằng GC-MS</td><td>1602 mg/L</td><td>1602 mg/L (đáp án)</td></tr>
+            <tr><td>Nung đá vôi ở 900 °C</td><td>còn 56,0 %</td><td>56,0 % (lý thuyết CaO)</td></tr>
+            <tr><td>Nồi hấp đúng quy trình</td><td>120,8 °C, giảm 8,5 bậc log</td><td>đạt tiệt trùng</td></tr>
+            <tr><td>Nồi hấp không đuổi khí</td><td>đồng hồ 1,05 bar nhưng chỉ 94 °C</td><td>không tiệt trùng</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="gioi-han">Các số này cho thấy mô hình tính đúng so với đáp án và giá trị tham chiếu, chưa phải đánh giá hiệu quả dạy học.</p>
+      <div class="so-dem" id="so-kiem-thu">
+        <div><b>152</b><span>bài kiểm thử Python đạt</span></div>
+        <div><b>147</b><span>bài mô phỏng Hóa đạt</span></div>
+        <div><b>114</b><span>bài mô phỏng Sinh đạt</span></div>
+      </div>
+    </div>
+
+    <div class="mo-con" role="tabpanel" id="k2" aria-labelledby="t-k2" tabindex="0" hidden>
+      <h2>Hiệu năng trên laptop thông dụng</h2>
+      <p>Sau đợt tối ưu đồ họa, thời gian mỗi khung hình giảm 28–35%, hình ảnh gần như giữ nguyên.</p>
+      <div class="do">
+        <div class="dong-do"><div class="ten"><span>Máy nguội</span><b>60,1 → 82,0 FPS</b></div><div class="ray"><i class="cu" style="--w:60%"></i><i style="--w:82%"></i></div></div>
+        <div class="dong-do"><div class="ten"><span>Máy đã nóng</span><b>34,6 → 53,2 FPS</b></div><div class="ray"><i class="cu" style="--w:35%"></i><i style="--w:53%"></i></div></div>
+      </div>
+      <div class="chu-giai"><span><i class="cu"></i>Bản trước khi tối ưu</span><span><i></i>Bản hiện tại</span></div>
+      <p class="gioi-han">Đo bằng bản .exe trên laptop Intel Iris Xe, 1920 × 1080, tắt giới hạn 60 FPS để so sánh. Khi dùng thật, ứng dụng dừng ở 60 FPS.</p>
+    </div>
+
+    <div class="mo-con" role="tabpanel" id="k3" aria-labelledby="t-k3" tabindex="0" hidden>
+      <h2>Hạn chế đã biết</h2>
+      <p>Những điểm dưới đây nhóm nêu rõ để người xem đánh giá đúng phạm vi của dự án.</p>
+      <ul class="ds-han-che">
+        <li>Mô phỏng ở mức dạy học: đúng hiện tượng, gần đúng về số, không thay cho phần mềm nghiên cứu.</li>
+        <li>Chưa khảo sát hiệu quả dạy học. Lab Sinh tự do hiện được kiểm thử bằng bàn tay tự động, chưa có người thật chơi thử.</li>
+        <li>Độ chính xác của theo dõi bằng webcam trên Windows chưa được kiểm chứng.</li>
+        <li>Máy PCR, điện di và ghép gen vẫn dùng luồng riêng, chưa nối với lab Sinh tự do.</li>
+        <li>Tay cầm VERA Arc mới có gói in, chưa in thử, chưa cân thật và chưa có phần mềm hoàn chỉnh.</li>
+      </ul>
+    </div>
+
+    <div class="mo-con" role="tabpanel" id="k4" aria-labelledby="t-k4" tabindex="0" hidden>
+      <h2>Từng tầng, từng môn</h2>
+      <p>Việc đã xong, việc đang làm và hướng phát triển tiếp theo.</p>
+      <div class="lo-trinh">
+        <div class="moc xong"><span class="nhan-tt xong">Đã hoàn thành</span><h3>Lab Hóa và lab Sinh</h3><ul><li>Tầng 1: phòng thí nghiệm, kho hóa chất, máy phân tích, khu chế tạo, robot</li><li>Tầng 2: phòng sinh học, vi sinh, sinh học phân tử, kho sinh phẩm, nhà kính</li><li>Trợ lý AI, điều khiển bằng webcam, trang web quản lý</li><li>Gói in 3D tay cầm VERA Arc</li></ul></div>
+        <div class="moc dang"><span class="nhan-tt dang">Đang làm</span><h3>Thêm cách điều khiển, thêm nền tảng</h3><ul><li>In, lắp và viết phần mềm cho tay cầm VERA Arc</li><li>Bản cài cho macOS</li><li>Bàn lập trình khối lệnh ở phòng robot</li></ul></div>
+        <div class="moc"><span class="nhan-tt sau">Dự kiến</span><h3>Học cùng nhau</h3><ul><li>Nhiều người cùng vào một phòng thí nghiệm</li><li>Hệ thống lớp học cho giáo viên và học sinh</li><li>AI chạy ngay trên máy</li></ul></div>
+        <div class="moc"><span class="nhan-tt sau">Dự kiến</span><h3>Mở rộng và đánh giá</h3><ul><li>Tầng mới cho môn Vật lý</li><li>Hỗ trợ kính thực tế ảo</li><li>Khảo sát hiệu quả với học sinh tại trường</li></ul></div>
+      </div>
+    </div>
+
+    <div class="mo-con" role="tabpanel" id="k5" aria-labelledby="t-k5" tabindex="0" hidden>
+      <h2>Điều bạn có thể muốn biết</h2>
+      <p>Bấm vào từng câu để xem trả lời.</p>
+      <div class="hoi-dap">
+        <details><summary>VERA Lab có thay thế giờ thực hành thật không?</summary><p>Không. VERA Lab giúp học sinh chuẩn bị và ôn lại, còn kỹ năng cầm nắm ngoài đời vẫn cần giờ thực hành thật.</p></details>
+        <details><summary>Kết quả thí nghiệm có chính xác không?</summary><p>Mô phỏng ở mức phục vụ dạy học: đúng về hiện tượng và gần đúng về số liệu trong phạm vi các bài. Nhóm chạy kiểm thử tự động để đối chiếu với đáp án.</p></details>
+        <details><summary>Có cần kính thực tế ảo không?</summary><p>Không. VERA Lab chạy trên màn hình máy tính thường, điều khiển bằng chuột và bàn phím. Webcam và tay cầm là tùy chọn.</p></details>
+        <details><summary>Có cần kết nối mạng không?</summary><p>Phần trợ lý AI và robot lập kế hoạch cần kết nối tới máy chủ. Nhóm đang hướng tới AI chạy ngay trên máy.</p></details>
+        <details><summary>Các thí nghiệm sinh học có an toàn không?</summary><p>Trong ứng dụng chỉ dùng các chủng dạy học ở cấp an toàn thấp nhất, và trợ lý AI từ chối các yêu cầu vượt mức này.</p></details>
+      </div>
+      <p class="gioi-han"><a class="lien-ket" href="#/thuc-trang">Xem 12 nguồn về thực trạng</a></p>
+    </div>
+    </div>
+  </div>
+</section>
+
+<section class="tab" id="tai-ve" data-ten="Tải về" aria-labelledby="h-tai-ve">
+  <div class="khung dau-tab">
+    <p class="the-muc">Tải về</p>
+    <h1 id="h-tai-ve" tabindex="-1">Chạy trên máy tính thông dụng</h1>
+    <p class="dan">Không cần card đồ họa rời. Ứng dụng chỉ tải phòng bạn đang đứng và các phòng sát cửa, nên một tòa nhà lớn vẫn nhẹ máy.</p>
+  </div>
+  <div class="khung">
+    <div class="he-dh">
+      <div class="o-hdh">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg>
+        <b>Windows</b>
+        <button type="button" class="nut chinh nut-tai">Tải về</button>
+      </div>
+      <div class="o-hdh">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
+        <b>macOS</b>
+        <button type="button" class="nut chinh nut-tai">Tải về</button>
+      </div>
+    </div>
+    <p class="gioi-han">Webcam và tay cầm là tùy chọn. Chỉ cần chuột và bàn phím là dùng được.</p>
+
+    <div class="doan">
+      <h2>Cấu hình đề nghị</h2>
+      <div class="cuon-bang" tabindex="0" role="region" aria-label="Bảng cấu hình đề nghị">
+        <table class="bang">
+          <thead><tr><th>Mức máy</th><th>Cấu hình</th><th>Trải nghiệm</th></tr></thead>
+          <tbody>
+            <tr><td>Máy cũ</td><td>Card Intel UHD 620</td><td>Khoảng 30 FPS theo ước tính, nên chọn mức đồ họa thấp</td></tr>
+            <tr><td>Tối thiểu</td><td>Core i5 thế hệ 11 hoặc Ryzen 5 5500U, card tích hợp, RAM 8 GB</td><td>Mượt ở 1080p (đã đo trên Iris Xe)</td></tr>
+            <tr><td>Khuyến nghị</td><td>GTX 1650, RTX 3050 hoặc RX 6500 XT</td><td>Giữ được mức giới hạn 60 FPS theo ước tính</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
 
 <footer>
   <div class="khung">
-    <div><strong>VERA Lab</strong> · Virtual Experiment &amp; Reality-based AI Lab</div>
-    <div>Nguyễn Ngọc Bảo Trọng · Trần Đức Trọng</div>
+    <div class="chan">
+      <div>
+        <a class="nhan-hieu" href="#/gioi-thieu"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2.5 35.2 11.2v17.6L20 37.5 4.8 28.8V11.2z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/><path d="M12.5 13 20 28l7.5-15" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>VERA Lab</a>
+        <div>Virtual Experiment &amp; Reality-based AI Lab</div>
+        <div>Dự án Khoa học Kỹ thuật của học sinh Trường THPT Chuyên Lê Quý Đôn, Gia Lai</div>
+      </div>
+      <div>
+        <h2>Nhóm tác giả</h2>
+        <ul><li>Nguyễn Ngọc Bảo Trọng</li><li>Trần Đức Trọng</li></ul>
+      </div>
+      <div>
+        <h2>Xem nhanh</h2>
+        <ul><li><a href="#/thuc-trang">Thực trạng</a></li><li><a href="#/kiem-chung">Kiểm chứng</a></li><li><a href="#/tai-ve">Tải về</a></li></ul>
+      </div>
+    </div>
+    <div class="ban-quyen">Ảnh các phòng được chụp trực tiếp trong ứng dụng. Mô hình tòa nhà và tay cầm được dựng 3D ngay trên trang.</div>
   </div>
 </footer>
 
+<div class="thong-bao" id="thong-bao" role="status"></div>
+
 <dialog id="xem" aria-label="Xem ảnh lớn">
-  <button type="button" id="dong">Đóng</button>
-  <img id="xem-anh" alt="">
-  <p id="xem-chu"></p>
+  <button class="dong" type="button" id="dong-xem" aria-label="Đóng">×</button>
+  <img id="xem-anh" alt=""><p id="xem-chu"></p>
 </dialog>
 
+<script src="trang.js"></script>
+<script type="module" src="canh3d.js"></script>
 <script>
-(function () {
-  var giam = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  // Đánh số hình theo thứ tự trên trang
-  document.querySelectorAll('figure[data-so]').forEach(function (f) {
-    var c = f.querySelector('figcaption');
-    var b = document.createElement('b');
-    b.textContent = 'Hình ' + f.dataset.so + '.';
-    c.insertBefore(b, c.firstChild);
+  // Thư viện 3D không tải được thì hiện bản không 3D
+  window.addEventListener('load', function () {
+    setTimeout(function () {
+      if (!document.documentElement.classList.contains('co-3d')) {
+        document.documentElement.classList.add('khong-3d');
+        window.dispatchEvent(new Event('vera:khong-3d'));
+      }
+    }, 6000);
   });
-
-  // Phổ 1H-NMR: etanol CH3 1,17 ppm (ba), CH2 3,65 ppm (bốn), metanol 3,34 ppm; 60 MHz, J = 7 Hz
-  var J = 7 / 60;
-  var vach = [
-    [1.17 - J, 1], [1.17, 2], [1.17 + J, 1],
-    [3.65 - 1.5 * J, .34], [3.65 - .5 * J, 1], [3.65 + .5 * J, 1], [3.65 + 1.5 * J, .34],
-    [3.34, .55], [0, .28]
-  ];
-  var cv = document.getElementById('pho'), g = cv.getContext('2d');
-  var mau = { vach: '#5fe0d2', truc: '#9db4bd', luoi: 'rgba(157,180,189,.16)' };
-  function tinh(ppm) {
-    var y = 0, w = .012;
-    vach.forEach(function (v) { var d = ppm - v[0]; y += v[1] * w * w / (d * d + w * w); });
-    return y;
-  }
-  function ve(tiLe) {
-    var r = window.devicePixelRatio || 1, W = cv.clientWidth, H = cv.clientHeight;
-    if (cv.width !== Math.round(W * r)) { cv.width = Math.round(W * r); cv.height = Math.round(H * r); }
-    g.setTransform(r, 0, 0, r, 0, 0);
-    g.clearRect(0, 0, W, H);
-    var day = H - 26, tren = 10, pMax = 5, pMin = -.3;
-    var X = function (p) { return (pMax - p) / (pMax - pMin) * W; };
-    g.font = '12px "IBM Plex Mono", monospace'; g.textAlign = 'center'; g.fillStyle = mau.truc;
-    for (var p = 0; p <= 5; p++) {
-      g.strokeStyle = mau.luoi; g.beginPath(); g.moveTo(X(p), tren); g.lineTo(X(p), day); g.stroke();
-      g.fillText(String(p), X(p), H - 6);
-    }
-    g.textAlign = 'left'; g.fillText('δ (ppm)', 2, H - 6);
-    g.strokeStyle = mau.truc; g.beginPath(); g.moveTo(0, day); g.lineTo(W, day); g.stroke();
-    var n = Math.floor(W * Math.min(1, tiLe));
-    g.strokeStyle = mau.vach; g.lineWidth = 1.4; g.beginPath();
-    for (var x = 0; x <= n; x++) {
-      var ppm = pMax - x / W * (pMax - pMin);
-      var y = day - Math.min(1, tinh(ppm) / 2.1) * (day - tren);
-      if (x === 0) g.moveTo(x, y); else g.lineTo(x, y);
-    }
-    g.stroke(); g.lineWidth = 1;
-    if (tiLe >= 1) {
-      g.fillStyle = '#e8f1f0'; g.textAlign = 'center';
-      g.fillText('CH₂ etanol', X(3.65) - 44, tren + 40);
-      g.fillText('metanol', X(3.34) + 34, day - .3 * (day - tren));
-      g.fillText('CH₃ etanol', X(1.17), tren + 8 > 20 ? tren + 8 : 20);
-      g.fillText('DSS', X(0), day - .2 * (day - tren));
-    } else if (n > 0) {
-      g.strokeStyle = 'rgba(95,224,210,.5)'; g.beginPath(); g.moveTo(n, tren); g.lineTo(n, day); g.stroke();
-    }
-  }
-  function chay() {
-    if (giam) { ve(1); return; }
-    var t0 = null, lau = 2600;
-    function b(t) { if (t0 === null) t0 = t; var k = (t - t0) / lau; ve(k); if (k < 1) requestAnimationFrame(b); }
-    requestAnimationFrame(b);
-  }
-  ve(1);
-  chay();
-  window.addEventListener('resize', function () { ve(1); });
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (giam) ve(1); });
-
-  // Mặt bằng theo tọa độ ZoneMap: x là x, z là chiều đứng trên bản vẽ
-  var A = 'anh/';
-  var TANG = {
-    1: [
-      { ten: 'Phòng thí nghiệm', r: [0, 0, 20, 15], anh: 'tang1_toan_canh', ta: 'Phòng chính của khu Hóa học: bàn học sinh, bàn chuẩn độ, bàn đun, tủ hút, khu an toàn và ngăn kính chế tạo dụng cụ.' },
-      { ten: 'Hóa chất', r: [20, 0, 27, 15], anh: 'kho_hoa_chat', ta: 'Kho 720 hóa chất xếp theo nhóm trên kệ. Tra cứu trong phần mềm sẽ dẫn tới đúng vị trí.' },
-      { ten: 'Hành lang', r: [0, -2.2, 27, 0], anh: null, ta: 'Nối phòng thí nghiệm với dãy phòng phía nam, có dải lịch sử hóa học dọc tường.' },
-      { ten: 'Phòng máy phân tích', r: [0, -9, 13.5, -2.2], anh: 'phong_may', ta: 'Nơi đặt các máy phân tích, từ UV-Vis, AAS đến XRD, SEM và NMR. Mỗi máy có màn hình vận hành riêng.' },
-      { ten: 'Tự động hóa & robot', r: [13.5, -9, 27, -2.2], anh: 'robot', ta: 'Phòng tự động hóa với cobot và máy in 3D. Robot trợ lý có thể đi khắp tầng 1 để lấy và rót hóa chất.' },
-      { ten: 'Thang', r: [27, -2.2, 30, 6], anh: 'thang_may', ta: 'Lõi thang chung hai tầng: cầu thang bộ một vế và thang máy có cabin chạy thật.' }
-    ],
-    2: [
-      { ten: 'Phòng sinh học', r: [0, 0, 20, 15], anh: 'tang2_toan_canh', ta: 'Bàn học sinh với kính hiển vi và khay tiêu bản, nơi làm các bài quan sát tế bào, catalase, lên men.' },
-      { ten: 'Vi sinh', r: [20, 7.5, 27, 15], anh: 'vi_sinh', ta: 'Tủ an toàn sinh học, tủ ấm và nồi hấp. Chỉ dùng chủng dạy học cấp BSL-1.' },
-      { ten: 'Kho sinh phẩm', r: [20, 0, 27, 7.5], anh: null, ta: 'Tủ mát, tủ đông, mẫu vật và thuốc thử cho khu Sinh học.' },
-      { ten: 'Hành lang tầng 2', r: [0, -3.6, 27, 0], anh: 'hanh_lang_t2', ta: 'Hành lang rộng 3,6 m nối các khu, mỗi khu một màu cửa.' },
-      { ten: 'Sinh học phân tử', r: [0, -9, 13.5, -3.6], anh: 'khuan_lac', ta: 'Tách chiết ADN, PCR, điện di và trạm ghép gen.' },
-      { ten: 'Nhà kính', r: [13.5, -9, 27, -3.6], anh: 'nha_kinh', ta: 'Cây trồng cho các bài quang hợp, thoát hơi nước và hướng sáng.' },
-      { ten: 'Hành lang đông', r: [27, 6, 30, 15], anh: null, ta: 'Hành lang nối lõi thang với khu vi sinh và kho sinh phẩm.' },
-      { ten: 'Thang', r: [27, -2.2, 30, 6], anh: 'thang_may', ta: 'Lõi thang chung hai tầng: cầu thang bộ một vế và thang máy có cabin chạy thật.' }
-    ]
-  };
-  var svg = document.getElementById('ban-ve'), NS = 'http://www.w3.org/2000/svg';
-  var tangHien = 1;
-  function el(ten, thuocTinh, chu) {
-    var e = document.createElementNS(NS, ten);
-    for (var k in thuocTinh) e.setAttribute(k, thuocTinh[k]);
-    if (chu) e.textContent = chu;
-    return e;
-  }
-  function veTang(t, iChon) {
-    tangHien = t;
-    while (svg.firstChild) svg.removeChild(svg.firstChild);
-    // z dương lên trên bản vẽ: y = 15 - z
-    TANG[t].forEach(function (p, i) {
-      var x0 = p.r[0], z0 = p.r[1], x1 = p.r[2], z1 = p.r[3];
-      var chon = i === iChon;
-      var hop = el('rect', { 'class': 'phong' + (chon ? ' chon' : ''), x: x0, y: 15 - z1, width: x1 - x0, height: z1 - z0, tabindex: 0, role: 'button', 'aria-label': p.ten });
-      hop.addEventListener('click', function () { veTang(t, i); });
-      hop.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); veTang(t, i); } });
-      svg.appendChild(hop);
-      var doc = x1 - x0 < 4;
-      var tx = (x0 + x1) / 2, ty = 15 - (z0 + z1) / 2;
-      var nhan = el('text', { x: tx, y: ty + .2, 'text-anchor': 'middle', 'class': chon ? 'chon' : '' }, p.ten);
-      if (doc) nhan.setAttribute('transform', 'rotate(-90 ' + tx + ' ' + ty + ')');
-      svg.appendChild(nhan);
-    });
-    svg.appendChild(el('text', { x: 0, y: 25.2, 'class': 'truc' }, '0 m'));
-    svg.appendChild(el('text', { x: 30, y: 25.2, 'class': 'truc', 'text-anchor': 'end' }, '30 m'));
-    var p = TANG[t][iChon];
-    document.getElementById('phong-ten').textContent = p.ten;
-    document.getElementById('phong-mo-ta').textContent = p.ta;
-    var a = document.getElementById('phong-anh');
-    a.hidden = !p.anh;
-    if (p.anh) { a.src = A + p.anh + '.jpg'; a.alt = p.ten; }
-  }
-  function chonTang(t) {
-    document.getElementById('t1').setAttribute('aria-pressed', t === 1);
-    document.getElementById('t2').setAttribute('aria-pressed', t === 2);
-    veTang(t, 0);
-  }
-  document.getElementById('t1').addEventListener('click', function () { chonTang(1); });
-  document.getElementById('t2').addEventListener('click', function () { chonTang(2); });
-  veTang(1, 0);
-
-  // So sánh nồi hấp, số từ bài kiểm thử may4
-  var QT = {
-    dung: { ap: '1,05 bar', nhiet: '120,8 °C', log: '8,5 bậc log', kl: 'Đạt tiệt trùng.', lop: 'tot' },
-    sai: { ap: '1,05 bar', nhiet: '94,0 °C', log: '0 bậc log', kl: 'Đồng hồ vẫn báo đủ áp, nhưng không khí còn trong buồng làm nhiệt độ thấp. Không tiệt trùng được.', lop: 'xau' }
-  };
-  function chonQt(k) {
-    var q = QT[k];
-    document.getElementById('v-ap').textContent = q.ap;
-    document.getElementById('v-nhiet').textContent = q.nhiet;
-    document.getElementById('v-log').textContent = q.log;
-    var kl = document.getElementById('v-kl');
-    kl.textContent = q.kl; kl.className = 'ket-luan ' + q.lop;
-    document.getElementById('q-dung').setAttribute('aria-pressed', k === 'dung');
-    document.getElementById('q-sai').setAttribute('aria-pressed', k === 'sai');
-  }
-  document.getElementById('q-dung').addEventListener('click', function () { chonQt('dung'); });
-  document.getElementById('q-sai').addEventListener('click', function () { chonQt('sai'); });
-
-  // Xem ảnh lớn
-  var hop = document.getElementById('xem');
-  document.querySelectorAll('.mo-anh').forEach(function (b) {
-    b.setAttribute('aria-label', 'Xem ảnh lớn');
-    b.addEventListener('click', function () {
-      var i = b.querySelector('img'), f = b.closest('figure');
-      document.getElementById('xem-anh').src = i.src;
-      document.getElementById('xem-anh').alt = i.alt;
-      document.getElementById('xem-chu').textContent = f.querySelector('figcaption').textContent;
-      hop.showModal();
-    });
-  });
-  document.getElementById('dong').addEventListener('click', function () { hop.close(); });
-  hop.addEventListener('click', function (e) { if (e.target === hop) hop.close(); });
-
-  // Thanh phổ đánh dấu tiến độ đọc; khối hiện dần khi cuộn tới
-  var thanh = document.querySelector('.thanh');
-  function tienDo() {
-    var d = document.documentElement, m = d.scrollHeight - d.clientHeight;
-    thanh.style.setProperty('--tien-do', m > 0 ? (d.scrollTop / m).toFixed(4) : 0);
-  }
-  window.addEventListener('scroll', tienDo, { passive: true });
-  tienDo();
-  if (!giam && 'IntersectionObserver' in window) {
-    var io = new IntersectionObserver(function (ds) {
-      ds.forEach(function (d) {
-        if (d.isIntersecting && d.boundingClientRect.top > 0) d.target.classList.add('hien');
-        if (d.isIntersecting) io.unobserve(d.target);
-      });
-    }, { rootMargin: '0px 0px -6% 0px' });
-    document.querySelectorAll('section figure, section h2, .may-do, .cong-nghe > div, .bang-cuon').forEach(function (e) { io.observe(e); });
-  }
-})();
 </script>
 </body>
 </html>

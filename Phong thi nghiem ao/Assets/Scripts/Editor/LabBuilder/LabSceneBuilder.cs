@@ -123,14 +123,17 @@ namespace Khkt.EditorTools
                 BakeOcclusion(System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Prepend(zoneScenes, scene)));
                 EditorSceneManager.SaveOpenScenes();
             }
+            BuildMenuScene();
             AddToBuildSettings();
             AssetDatabase.SaveAssets();
+            EditorSceneManager.OpenScene(ScenePath);
             Debug.Log($"[KHKT] Đã dựng {ScenePath}: {total + zoneObjects} đối tượng ({total} ở cảnh lõi, {zoneObjects} ở {zoneScenes.Length} cảnh khu).");
         }
 
         static void AddToBuildSettings()
         {
-            var paths = new System.Collections.Generic.List<string> { ScenePath };
+            // màn hình chính đứng đầu: đây là cảnh bản .exe mở trước
+            var paths = new System.Collections.Generic.List<string> { MenuScenePath, ScenePath };
             for (int z = 0; z < Khkt.Rendering.ZoneMap.Zones.Length; z++) paths.Add(Khkt.Rendering.ZoneMap.ScenePath(z));
             var list = new System.Collections.Generic.List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
             list.RemoveAll(s => paths.Contains(s.path));
@@ -728,6 +731,9 @@ namespace Khkt.EditorTools
             if (!AssetDatabase.IsValidFolder($"{parent}/{name}")) AssetDatabase.CreateFolder(parent, name);
         }
 
+        /// <summary>Đèn nối tiếp nhau nên tầm với xa chỉ tốn công tính (mỗi điểm ảnh lặp qua mọi đèn với tới nó) mà hầu như không thêm sáng.</summary>
+        static float LightRangeScale => float.TryParse(System.Environment.GetEnvironmentVariable("KHKT_DEN_K"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float k) ? k : 0.55f;
+
         static Light PointLight(Transform p, string name, Vector3 pos, float range, float intensity, Color color)
         {
             var go = new GameObject(name);
@@ -735,7 +741,7 @@ namespace Khkt.EditorTools
             go.transform.localPosition = pos;
             var l = go.AddComponent<Light>();
             l.type = LightType.Point;
-            l.range = range;
+            l.range = range * LightRangeScale;
             l.intensity = intensity;
             l.color = color;
             l.shadows = LightShadows.None;
@@ -882,7 +888,7 @@ namespace Khkt.EditorTools
             // SMAA: khử răng cưa theo cạnh, sắc nét hơn FXAA và không làm mờ / không gây hạt như TAA, vẫn nhẹ cho card tích hợp
             // Đo 3 vòng trên Iris Xe: SMAA cao 66,3 · SMAA vừa 67,0 · FXAA 66,9 FPS (trong sai số) nên chọn SMAA cao (đẹp nhất)
             camData.antialiasing = AntialiasingMode.SubpixelMorphologicalAntiAliasing;
-            camData.antialiasingQuality = AntialiasingQuality.High;
+            camData.antialiasingQuality = AntialiasingQuality.Medium;  // đo trên Iris Xe: High tốn hơn mà nhìn không khác
             switch (System.Environment.GetEnvironmentVariable("KHKT_AA"))  // đo so sánh: fxaa, smaa_med
             {
                 case "fxaa": camData.antialiasing = AntialiasingMode.FastApproximateAntialiasing; break;

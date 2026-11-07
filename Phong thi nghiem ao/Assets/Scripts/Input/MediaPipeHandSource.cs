@@ -319,7 +319,7 @@ namespace Khkt.Input
                 GUI.Label(new Rect(x + 10, py, w - 20, lh), "Đưa tay vào khung webcam để điều khiển"); py += lh;
             }
 
-            GUI.Label(new Rect(x + 10, py, w - 20, lh), "F8: Đầu · F9: Căn · F10: Tay · F11: HUD");
+            GUI.Label(new Rect(x + 10, py, w - 20, lh), "F8: Đầu · F9: Mô phỏng · F10: Tay · F11: HUD · F12: Căn");
         }
     }
 }

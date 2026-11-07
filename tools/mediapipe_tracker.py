@@ -44,6 +44,7 @@ from mediapipe_tinh import (  # noqa: E402
     BoLocChopMatHaiLan,
     BoLocCuChi,
     tao_goi_udp,
+    dong_goi_diem_moc,
     tinh_blendshapes,
     tinh_gaze,
     tinh_khoang_cach_iris,
@@ -217,6 +218,8 @@ def main() -> None:
     sock_gui = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock_gui.setblocking(False)
     dich_gui = (args.may, args.cong)
+    dich_diem_moc = (args.may, args.cong + 2)  # chỉ gửi khi bảng F9 của Unity đang mở
+    diem_moc_den = 0.0
 
     # Socket UDP nghe lệnh điều khiển (ví dụ phím F8 tắt/bật gửi lệnh tạm dừng)
     sock_lenh = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -352,6 +355,9 @@ def main() -> None:
                         dang_tam_dung = True
                         luong_cam.tam_dung()
                         print("[MediaPipe] Nhận lệnh tạm dừng: tắt webcam.")
+                    elif lenh == "diem_moc_bat":
+                        # Bảng F9 đang mở: Unity nhắc lại mỗi giây, thôi nhắc thì tự tắt
+                        diem_moc_den = now_real + 3.0
                     elif lenh in ("tiep_tuc", "chay"):
                         dang_tam_dung = False
                         luong_cam.tiep_tuc()
@@ -460,6 +466,7 @@ def main() -> None:
 
             # 6. Xử lý kết quả khuôn mặt
             co_mat = False
+            lm_mat = None
             yaw, pitch, roll, dist_z = 0.0, 0.0, 0.0, 0.0
             dist_cm, e = 0.0, 0.0
             gaze_x, gaze_y = 0.0, 0.0
@@ -509,6 +516,7 @@ def main() -> None:
 
             # 7. Xử lý kết quả bàn tay
             hands_list: list[dict[str, Any]] = []
+            tay_tho: list[tuple[str, Any]] = []
             hand_output = res_hand[0]
             if hand_output and hand_output.hand_landmarks:
                 last_hand_seen_time = now_real
@@ -521,6 +529,7 @@ def main() -> None:
                         # MediaPipe gán nhãn theo góc nhìn người trong ảnh
                         ben = "phai" if "right" in label else "trai"
 
+                    tay_tho.append((ben, lm_tay))
                     prev_p = trang_thai_pinch.get(ben, False)
                     x_t, y_t, co_t, pinch_val, r_pinch = tinh_tay(lm_tay, prev_pinch=prev_p)
                     trang_thai_pinch[ben] = bool(pinch_val)
@@ -575,6 +584,9 @@ def main() -> None:
             data_bytes = json.dumps(goi).encode("utf-8")
             try:
                 sock_gui.sendto(data_bytes, dich_gui)
+                if now_real < diem_moc_den:
+                    goi_moc = dong_goi_diem_moc(lm_mat, tay_tho, w_raw / max(1, h_raw), now_real)
+                    sock_gui.sendto(json.dumps(goi_moc, separators=(",", ":")).encode("utf-8"), dich_diem_moc)
             except Exception:
                 pass
             t_gui_ms = (time.perf_counter() - t_gui_start) * 1000
