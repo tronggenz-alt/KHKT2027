@@ -225,7 +225,4 @@ namespace Khkt.Demo.Bio
             }
         }
     }
-
-    /// <summary>Biệt danh tương thích cho tiêu bản / lam kính sinh học (BioSlide : GlassSlide).</summary>
-    public class BioSlide : GlassSlide { }
 }

@@ -602,7 +602,7 @@ namespace Khkt.EditorTools
             var dishCol = dishG.gameObject.AddComponent<BoxCollider>();
             dishCol.center = new Vector3(0, 0.0075f, 0);
             dishCol.size = new Vector3(0.09f, 0.015f, 0.09f);
-            dishG.gameObject.AddComponent<BioPetriDish>();
+            dishG.gameObject.AddComponent<PetriDish>();
             var dishGrab = dishG.gameObject.AddComponent<Grabbable>();
             dishGrab.kind = "dia_petri";
             dishGrab.gripHeightM = 0.01f;

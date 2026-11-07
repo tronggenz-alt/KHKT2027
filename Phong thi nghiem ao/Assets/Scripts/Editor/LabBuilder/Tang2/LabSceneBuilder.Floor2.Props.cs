@@ -123,7 +123,7 @@ namespace Khkt.EditorTools
             slideGrab.lyingRadiusM = 0.013f;
             slideGrab.lengthM = 0.076f;
             slideGrab.massG = 5f;
-            var bioSlide = slideGrp.gameObject.AddComponent<BioSlide>();
+            var bioSlide = slideGrp.gameObject.AddComponent<GlassSlide>();
             bioSlide.slideId = name.Contains("vật kính dầu") ? "vi_khuan_nhuom_gram" : "bieu_bi_hanh";
             bioSlide.labelText = name.Contains("vật kính dầu") ? "Vi khuẩn nhuộm Gram" : "Biểu bì vảy hành";
             stageSock.Put(slideGrab);
@@ -410,7 +410,7 @@ namespace Khkt.EditorTools
             gr.gripHeightM = 0.01f;
             gr.massG = 45f;
             gr.liesOnTable = false;
-            var pd = dish.gameObject.AddComponent<BioPetriDish>();
+            var pd = dish.gameObject.AddComponent<PetriDish>();
             pd.mediaId = "thach_lb";
             pd.labelText = kind == 0 ? "E. coli K-12 · 10⁻⁵" : kind == 1 ? "Vi khuẩn sữa chua" : "Thạch LB vô trùng";
             return dish;
@@ -723,7 +723,7 @@ namespace Khkt.EditorTools
                 var lamCol = lam.gameObject.AddComponent<BoxCollider>();
                 lamCol.center = new Vector3(0, 0.003f, 0);
                 lamCol.size = new Vector3(0.026f, 0.006f, 0.076f);
-                var lamSlide = lam.gameObject.AddComponent<BioSlide>();
+                var lamSlide = lam.gameObject.AddComponent<GlassSlide>();
                 lamSlide.slideId = "lam_kinh_trang";
                 lamSlide.labelText = "Lam kính trắng";
                 var lamGrab = lam.gameObject.AddComponent<Grabbable>();
@@ -784,7 +784,7 @@ namespace Khkt.EditorTools
                 slideCol.center = new Vector3(0, 0.003f, 0);
                 slideCol.size = new Vector3(0.026f, 0.006f, 0.076f);
 
-                var bioSlide = slide.gameObject.AddComponent<BioSlide>();
+                var bioSlide = slide.gameObject.AddComponent<GlassSlide>();
                 bioSlide.slideId = slideIds[i];
                 bioSlide.labelText = slideNames[i];
                 if (bioSlide.sample != null)

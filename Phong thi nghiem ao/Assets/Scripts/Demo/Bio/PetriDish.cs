@@ -169,7 +169,4 @@ namespace Khkt.Demo.Bio
             }
         }
     }
-
-    /// <summary>Biệt danh tương thích cho đĩa Petri sinh học (BioPetriDish : PetriDish).</summary>
-    public class BioPetriDish : PetriDish { }
 }
