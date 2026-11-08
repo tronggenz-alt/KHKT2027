@@ -833,6 +833,11 @@ namespace Khkt.Demo.Bio
             }
         }
 
+        public static Color SampleSpecimenColor(string code, float u, float v, bool stainedBlue, bool isStomata, bool gramPos, bool gramNeg, float plasmo = 0f)
+        {
+            return SampleSpecimenColor(code, u, v, stainedBlue, false, isStomata, gramPos, gramNeg, false, false, false, plasmo, true);
+        }
+
         public static Color SampleSpecimenColor(string code, float u, float v, bool stainedBlue, bool stainedLugol, bool isStomata, bool gramPos, bool gramNeg, bool isSarcomere, bool isMouth, bool isYeast, float plasmolysis, bool stomaOpen)
         {
             code ??= "bieu_bi_hanh";

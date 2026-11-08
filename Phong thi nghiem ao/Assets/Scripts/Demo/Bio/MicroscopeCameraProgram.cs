@@ -141,7 +141,6 @@ namespace Khkt.Demo.Bio
             S.SetPlotAxes("THỊ TRƯỜNG QUANG HỌC & PHÂN BỐ KÍCH THƯỚC TẾ BÀO (µm)", "Vi trường thị kính / Chiều dài (µm)", "Cường độ / Số tế bào", "0", "400", "0", "20");
             Refresh();
         }
-        }
 
         public override void Refresh()
         {

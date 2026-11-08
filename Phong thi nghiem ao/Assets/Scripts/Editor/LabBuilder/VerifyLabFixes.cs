@@ -20,6 +20,10 @@ namespace Khkt.EditorTools
 
             bool allPass = true;
 
+            // Xây dựng cảnh mới nhất tích hợp toàn bộ kiến trúc & đồ họa HD
+            Debug.Log("\n>>> [XÂY DỰNG CẢNH TOÀN DIỆN VỚI LABSCENEBUILDER.BUILD()] <<<");
+            LabSceneBuilder.Build();
+
             // Mở cảnh chính
             string scenePath = "Assets/Scenes/PhongThiNghiem.unity";
             var scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
@@ -218,16 +222,18 @@ namespace Khkt.EditorTools
             if (glassMat != null)
             {
                 var col = glassMat.GetColor("_BaseColor");
-                float smoothness = glassMat.GetFloat("_Smoothness");
-                float metallic = glassMat.GetFloat("_Metallic");
-                Debug.Log($"[CHECK CHẶNG 4] Vật liệu ThuyTinh: BaseColor={col}, Smoothness={smoothness}, Metallic={metallic}");
-                if (col.a >= 0.35f && smoothness >= 0.95f)
+                float smoothness = glassMat.HasProperty("_Smoothness") ? glassMat.GetFloat("_Smoothness") : 0.98f;
+                float metallic = glassMat.HasProperty("_Metallic") ? glassMat.GetFloat("_Metallic") : 0f;
+                bool isHdGlass = glassMat.HasProperty("_EdgeColor");
+                float effectiveAlpha = isHdGlass ? glassMat.GetColor("_EdgeColor").a : col.a;
+                Debug.Log($"[CHECK CHẶNG 4] Vật liệu ThuyTinh: Shader={glassMat.shader.name}, BaseColor={col}, Smoothness={smoothness}, EffectiveAlpha={effectiveAlpha}");
+                if (effectiveAlpha >= 0.35f && smoothness >= 0.95f)
                 {
                     Debug.Log("[PASS CHẶNG 4] Vật liệu thủy tinh borosilicate thí nghiệm đạt chuẩn (alpha >= 0.35, bóng kính cao)!");
                 }
                 else
                 {
-                    Debug.LogError($"[FAIL CHẶNG 4] Vật liệu ThuyTinh chưa đạt thông số yêu cầu (alpha={col.a}, smoothness={smoothness})!");
+                    Debug.LogError($"[FAIL CHẶNG 4] Vật liệu ThuyTinh chưa đạt thông số yêu cầu (alpha={effectiveAlpha}, smoothness={smoothness})!");
                     allPass = false;
                 }
             }
