@@ -14,7 +14,7 @@ namespace Khkt.EditorTools
     /// </summary>
     public static class IosBuild
     {
-        const string DisplayName = "VERA Lab";
+        const string DisplayName = "LAB";
         const string BundleId = "com.trantrong.veralab";
         const string TeamId = "29263U3K84";  // nhóm cá nhân trong Xcode (Settings > Accounts)
         const string MeshPath = "Assets/Lab/Tang2/GiaiPhau/BP3D2_xuong.asset";
