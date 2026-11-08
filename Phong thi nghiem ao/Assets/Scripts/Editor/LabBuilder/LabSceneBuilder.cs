@@ -90,6 +90,7 @@ namespace Khkt.EditorTools
             AttachUsables(root);
             BuildDemo(root);
             BuildHdArchitecture(root);
+            SanitizeCeilingPenetrations(root);
             OptimizeRenderers(root);
             AttachHlod(root);
             AttachImpostors(root);
@@ -221,7 +222,7 @@ namespace Khkt.EditorTools
                 m.EnableKeyword("_ENVIRONMENTREFLECTIONS_OFF");
                 EditorUtility.SetDirty(m);
             }
-            labGlass = Mat("ThuyTinh", new Color(0.85f, 0.95f, 1f, 0.22f), 0.95f, 0, transparent: true);
+            labGlass = Mat("ThuyTinh", new Color(0.78f, 0.91f, 0.97f, 0.38f), 0.96f, 0.08f, transparent: true);
             liquidClear = Mat("DungDichTrong", new Color(0.8f, 0.9f, 1f, 0.35f), 0.9f, 0, transparent: true);
             liquidBlue = Mat("DungDichXanh", new Color(0.1f, 0.4f, 0.95f, 0.6f), 0.9f, 0, transparent: true);
             liquidPink = Mat("DungDichHong", new Color(0.95f, 0.35f, 0.65f, 0.5f), 0.9f, 0, transparent: true);
@@ -901,5 +902,92 @@ namespace Khkt.EditorTools
         }
 
         static Vector2 V(float r, float y) => new Vector2(r, y);
+
+        /// <summary>
+        /// Chặng 1: Quét và loại bỏ 100% các cột/ống/vật thể đâm xuyên trần Tầng 1 hoặc thò từ sàn Tầng 2 xuống.
+        /// </summary>
+        static void SanitizeCeilingPenetrations(Transform root)
+        {
+            var renderers = root.GetComponentsInChildren<Renderer>(true);
+            var toDestroy = new System.Collections.Generic.List<GameObject>();
+            int removedCount = 0;
+
+            // 1. Kiểm tra toàn bộ đối tượng dưới Tầng 2 (F2_Y = 3.8f): không được có đối tượng nào (trừ sàn / dầm / chỉ tầng)
+            // có điểm thấp nhất worldY < 3.72f (localY < -0.08f)
+            var tang2 = root.Find("Tầng 2");
+            if (tang2 != null)
+            {
+                foreach (var r in tang2.GetComponentsInChildren<Renderer>(true))
+                {
+                    if (r == null || !r.enabled) continue;
+                    string rName = r.gameObject.name;
+                    if (rName.StartsWith("Sàn ") || rName.StartsWith("Chỉ tầng") || rName.Contains("mái hiên") || rName.Contains("Dầm biên")) continue;
+
+                    var b = r.bounds;
+                    if (b.min.y < 3.72f)
+                    {
+                        Debug.LogWarning($"[SanitizeCeilingPenetrations] Phát hiện đối tượng Tầng 2 '{GetHierarchyPath(r.transform)}' có điểm thấp nhất y={b.min.y:F3} < 3.72m. Tự động loại bỏ!");
+                        if (!toDestroy.Contains(r.gameObject)) toDestroy.Add(r.gameObject);
+                    }
+                }
+            }
+
+            // 2. Quét bên trong phòng thí nghiệm Tầng 1 (x: 0..27m, z: 0..16m, trừ lõi thang và ngoài trời):
+            // Kiểm tra các khối hẹp (size.x < 0.35f && size.z < 0.35f):
+            // - Đâm xuyên mặt trần Tầng 1: bounds.min.y < 3.55f && bounds.max.y > 3.65f
+            // - Treo lơ lửng từ trần Tầng 1 xuống giữa phòng: bounds.max.y > 3.2f && bounds.min.y < 2.2f tại khu vực bàn học sinh x: 3..19, z: 1..14
+            foreach (var r in renderers)
+            {
+                if (r == null || toDestroy.Contains(r.gameObject)) continue;
+                var b = r.bounds;
+                // Bỏ qua bên ngoài tòa nhà hoặc khu vực thang bộ/thông tầng
+                if (b.center.x < 0.1f || b.center.x > 26.9f || b.center.z < 0.1f || b.center.z > 15.9f) continue;
+                string path = GetHierarchyPath(r.transform);
+                if (path.Contains("Ngoài trời") || path.Contains("NgoaiTroi")) continue;
+                if (b.size.x >= 0.35f || b.size.z >= 0.35f) continue;
+
+                // Trường hợp a: Đâm xuyên qua trần tầng 1
+                if (b.min.y < 3.55f && b.max.y > 3.65f)
+                {
+                    Debug.LogWarning($"[SanitizeCeilingPenetrations] Phát hiện khối hẹp '{path}' (size: {b.size}, bounds.y: {b.min.y:F2}..{b.max.y:F2}) đâm xuyên trần Tầng 1! Tự động loại bỏ!");
+                    if (!toDestroy.Contains(r.gameObject)) toDestroy.Add(r.gameObject);
+                    continue;
+                }
+
+                // Trường hợp b: Cột/ống treo từ trần xuống giữa phòng ở khu vực bàn học sinh
+                if (b.center.x >= 3f && b.center.x <= 19f && b.center.z >= 1f && b.center.z <= 14f)
+                {
+                    if (b.max.y > 3.2f && b.min.y < 2.2f)
+                    {
+                        Debug.LogWarning($"[SanitizeCeilingPenetrations] Phát hiện cột/ống treo bất thường '{path}' (size: {b.size}, bounds.y: {b.min.y:F2}..{b.max.y:F2}) giữa phòng! Tự động loại bỏ!");
+                        if (!toDestroy.Contains(r.gameObject)) toDestroy.Add(r.gameObject);
+                        continue;
+                    }
+                }
+            }
+
+            foreach (var go in toDestroy)
+            {
+                if (go != null)
+                {
+                    UnityEngine.Object.DestroyImmediate(go);
+                    removedCount++;
+                }
+            }
+
+            Debug.Log($"[SanitizeCeilingPenetrations] Hoàn tất quét kiểm tra: đã dọn dẹp {removedCount} đối tượng đâm xuyên trần hoặc sai vị trí.");
+        }
+
+        static string GetHierarchyPath(Transform t)
+        {
+            if (t == null) return "";
+            string path = t.name;
+            while (t.parent != null)
+            {
+                t = t.parent;
+                path = t.name + "/" + path;
+            }
+            return path;
+        }
     }
 }

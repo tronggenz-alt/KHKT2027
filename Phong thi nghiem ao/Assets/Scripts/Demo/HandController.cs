@@ -665,7 +665,10 @@ namespace Khkt.Demo
             }
             else
             {
-                g.transform.SetPositionAndRotation(placePos, Quaternion.Euler(0, g.HomeRotation.eulerAngles.y + heldYaw, 0));
+                // Bình thủy tinh đặt xuống bàn: xoay nhãn và vạch chia thể tích (+x) hướng về phía mắt người chơi
+                Vector3 lookDir = Flat((viewCamera != null ? viewCamera.transform.position : Vector3.zero) - placePos);
+                float faceYaw = lookDir.sqrMagnitude > 1e-4f ? (Quaternion.LookRotation(lookDir, Vector3.up).eulerAngles.y - 90f) : g.HomeRotation.eulerAngles.y;
+                g.transform.SetPositionAndRotation(placePos, Quaternion.Euler(0, faceYaw + heldYaw, 0));
             }
 
             int currentZone = Khkt.Rendering.ZoneMap.At(g.transform.position);
@@ -772,7 +775,9 @@ namespace Khkt.Demo
             if (Held != null)
             {
                 Transform t = Held.transform;
-                Quaternion upright = Quaternion.Euler(0, facing.eulerAngles.y + (HeldPart != null ? heldYaw : 0f), 0);
+                // Cầm bình trên tay: nhãn hóa chất và vạch chia hướng trực diện về phía mắt người chơi, nghiêng nhẹ 7° để nhìn rõ dung dịch
+                Quaternion facingCam = Quaternion.Euler(7f, facing.eulerAngles.y - 90f + (HeldPart != null ? heldYaw : 0f), 0);
+                Quaternion upright = (HeldPart != null) ? Quaternion.Euler(0, facing.eulerAngles.y + heldYaw, 0) : facingCam;
                 Vector3 objPos;
                 Quaternion objRot = upright;
                 if ((Current == Act.Suck || Current == Act.PipetteDrain || Current == Act.Measure || Current == Act.PaperTest) && TargetContainer != null)
@@ -853,7 +858,13 @@ namespace Khkt.Demo
         Vector3 HeldMouthLocal()
         {
             var c = Held.GetComponent<LabContainer>();
-            if (c != null && c.mouth != null) return Held.transform.InverseTransformPoint(c.mouth.position);
+            if (c != null && c.mouth != null)
+            {
+                Vector3 mouthLocal = Held.transform.InverseTransformPoint(c.mouth.position);
+                float r = c.bottomRadiusM > 0.01f ? c.bottomRadiusM : 0.035f;
+                mouthLocal.x += r * 0.95f; // Tâm xoay tại đúng mỏ rót (spout) ở mép miệng bình
+                return mouthLocal;
+            }
             var w = Held.GetComponent<WashBottle>();
             if (w != null && w.nozzle != null) return Held.transform.InverseTransformPoint(w.nozzle.position);
             return Vector3.up * 0.15f;

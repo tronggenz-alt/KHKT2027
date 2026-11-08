@@ -634,8 +634,12 @@ namespace Khkt.EditorTools
             Cyl(p, "Nắp can", pos + Vector3.up * 0.345f, 0.028f, 0.03f, redPlastic);
         }
 
-        static Mesh Erlenmeyer() => Lathe("BinhNon250", 24, V(0, 0), V(0.042f, 0), V(0.042f, 0), V(0.045f, 0.005f), V(0.044f, 0.02f),
-                                          V(0.017f, 0.1f), V(0.016f, 0.105f), V(0.016f, 0.14f), V(0.0175f, 0.143f));
+        static Mesh Erlenmeyer() =>
+            Lathe("BinhNon250", 24,
+                V(0, 0), V(0.042f, 0), V(0.045f, 0.005f), V(0.044f, 0.02f),
+                V(0.017f, 0.1f), V(0.016f, 0.105f), V(0.016f, 0.14f),
+                V(0.0185f, 0.14f), V(0.0185f, 0.144f), V(0.0145f, 0.144f),
+                V(0.0145f, 0.105f), V(0.041f, 0.02f), V(0.041f, 0.004f), V(0, 0.004f));
 
         static Mesh ReagentBottle() => Lathe("ChaiThuoc", 20, V(0, 0), V(0.032f, 0), V(0.032f, 0), V(0.033f, 0.003f), V(0.033f, 0.1f),
                                              V(0.03f, 0.115f), V(0.014f, 0.13f), V(0.013f, 0.135f), V(0.013f, 0.15f), V(0, 0.15f));
@@ -644,10 +648,13 @@ namespace Khkt.EditorTools
                                         V(0.008f, 0.15f), V(0.0085f, 0.152f));
 
         static Mesh Beaker(string name, float r, float h) =>
-            Lathe(name, 24, V(0, 0), V(r, 0), V(r, 0), V(r, h), V(r + 0.0015f, h + 0.002f));
+            Lathe(name, 24,
+                V(0, 0), V(r, 0), V(r, 0),
+                V(r, h), V(r + 0.003f, h), V(r + 0.003f, h + 0.004f), V(r - 0.0015f, h + 0.004f),
+                V(r - 0.0015f, h), V(r - 0.0015f, 0.0035f), V(0, 0.0035f));
 
         static Mesh LiquidIn(string name, float r, float h) =>
-            Lathe(name, 24, V(0, 0.002f), V(r, 0.002f), V(r, 0.002f), V(r, h), V(r, h), V(0, h));
+            Lathe(name, 24, V(0, 0.0035f), V(r - 0.0015f, 0.0035f), V(r - 0.0015f, 0.0035f), V(r - 0.0015f, h), V(r - 0.0015f, h), V(0, h));
 
         static Mesh Cylinder(string name, float r, float h) =>
             Lathe(name, 16, V(0, 0), V(r * 2.2f, 0), V(r * 2.2f, 0.006f), V(r, 0.006f), V(r, 0.006f), V(r, h), V(r * 1.15f, h + 0.004f));

@@ -19,7 +19,7 @@ namespace Khkt.Demo.Bio
         int markedCells = 0;
         double measuredLengthUm = 225.0;
         string lastSavedPng = "";
-        Button bLamp, bObj, bFinePlus, bFineMinus, bMeasure, bCount, bCapture, bStream;
+        Button bLamp, bObj, bFinePlus, bFineMinus, bMeasure, bCount, bCapture, bStream, bPlasmolysis, bDeplasmolysis, bStain;
         Text statusText;
 
         public MicroscopeCameraProgram(MicroscopeController mic = null)
@@ -42,40 +42,67 @@ namespace Khkt.Demo.Bio
                 if (hostMicroscope != null) hostMicroscope.CycleObjective();
                 S.Done("chon_vat_kinh");
             });
-            bFinePlus = S.AddButton("Lấy nét tinh (+2 µm)", 2, 0, () =>
+            bStream = S.AddButton("Chiếu Màn hình Lớp", 2, 0, () =>
+            {
+                if (hostMicroscope != null)
+                {
+                    hostMicroscope.cameraStreaming = !hostMicroscope.cameraStreaming;
+                    hostMicroscope.StreamToVideoWall();
+                }
+                S.Say("Đã đồng bộ luồng video HD lên màn hình tường video 75 inch (t2_tuong_video_2).", 1);
+            });
+
+            bFinePlus = S.AddButton("Ốc vi cấp (+2 µm)", 0, 1, () =>
             {
                 if (hostMicroscope != null) hostMicroscope.AdjustFineFocus(2f);
                 S.Done("lay_net");
             });
-            bFineMinus = S.AddButton("Lấy nét tinh (-2 µm)", 0, 1, () =>
+            bFineMinus = S.AddButton("Ốc vi cấp (-2 µm)", 1, 1, () =>
             {
                 if (hostMicroscope != null) hostMicroscope.AdjustFineFocus(-2f);
                 S.Done("lay_net");
             });
-            bMeasure = S.AddButton("Đo kích thước tế bào", 1, 1, () =>
+            bMeasure = S.AddButton("Đo thước trắc vi", 2, 1, () =>
             {
                 measuredLengthUm = hostMicroscope != null ? hostMicroscope.ComputeMeasuredCellSizeUm() : 220.0;
+                double umPerDiv = hostMicroscope != null ? hostMicroscope.MicronsPerDivision : 10.0;
                 S.Done("do_kich_thuoc");
-                S.Say($"Đã đo bằng thước trắc vi thị kính: chiều dài tế bào = {BioFeedback.FormatVi(measuredLengthUm, "0.0")} µm.", 1);
+                S.Say($"Đã đo bằng thước trắc vi (1 vạch = {BioFeedback.FormatVi(umPerDiv, "0.#")} µm): Kích thước tế bào = {BioFeedback.FormatVi(measuredLengthUm, "0.0")} µm.", 1);
             }, true);
-            bCount = S.AddButton("Đánh dấu đếm tế bào (+1)", 2, 1, () =>
+
+            bPlasmolysis = S.AddButton("NaCl 5% (Co NS)", 0, 2, () =>
+            {
+                if (hostMicroscope != null) hostMicroscope.ApplyReagent("nacl");
+                S.Say("Đã nhỏ NaCl 5%: Không bào co lại, màng sinh chất tách khỏi thành tế bào (co nguyên sinh).", 1);
+            });
+            bDeplasmolysis = S.AddButton("Nước cất (Phản co)", 1, 2, () =>
+            {
+                if (hostMicroscope != null) hostMicroscope.ApplyReagent("nuoc_cat");
+                S.Say("Đã nhỏ nước cất nhược trương: Không bào căng phồng trở lại (phản co nguyên sinh).", 1);
+            });
+            bStain = S.AddButton("Nhuộm màu tế bào", 2, 2, () =>
+            {
+                if (hostMicroscope != null)
+                {
+                    string nextStain = hostMicroscope.appliedStain == "lugol" ? "methylene_blue" : "lugol";
+                    hostMicroscope.ApplyReagent(nextStain);
+                }
+                S.Say("Đã đổi chất nhuộm hiển vi (Lugol I-KI hoặc Xanh Methylene).", 1);
+            });
+
+            bCount = S.AddButton("Đếm tế bào (+1)", 0, 3, () =>
             {
                 markedCells++;
-                S.Say($"Đã đánh dấu {markedCells} tế bào trong thị trường quan sát.", 0);
+                S.Say($"Đã đánh dấu {markedCells} tế bào trong vi trường.", 0);
             });
-            bStream = S.AddButton("Chiếu lên màn hình lớp", 0, 2, () =>
-            {
-                if (hostMicroscope != null) hostMicroscope.cameraStreaming = !hostMicroscope.cameraStreaming;
-                S.Say("Đã đồng bộ luồng video HDMI lên màn hình tường video 75 inch.", 1);
-            });
-            bCapture = S.AddButton("Chụp & Lưu ảnh PNG", 1, 2, () =>
+            bCapture = S.AddButton("Chụp & Lưu ảnh HD 1024px", 1, 3, () =>
             {
                 if (hostMicroscope != null) lastSavedPng = hostMicroscope.CaptureMicrographPng();
                 else lastSavedPng = "hien_vi_bieu_bi_hanh_400x.png";
-                S.Say($"Đã lưu ảnh tiêu bản: {lastSavedPng}", 1);
+                S.Say($"Đã lưu ảnh tiêu bản HD: {lastSavedPng}", 1);
             }, true, 2);
 
-            statusText = S.AddText("", 3, 0, 3, 13);
+            statusText = S.AddText("", 4, 0, 3, 13);
             S.SetPlotAxes("PHÂN BỐ KÍCH THƯỚC TẾ BÀO QUAN SÁT (µm)", "Chiều dài (µm)", "Số tế bào", "100", "400", "0", "20");
             Refresh();
         }
@@ -95,10 +122,18 @@ namespace Khkt.Demo.Bio
                 statusText.text = $"Độ phóng đại: {BioFeedback.FormatVi(mag, "0")}× · Thị trường: {BioFeedback.FormatVi(fov, "0.##")} mm · Đã đếm: {markedCells} tế bào";
             }
 
+            string stainInfo = hostMicroscope != null && !string.IsNullOrEmpty(hostMicroscope.appliedStain)
+                ? hostMicroscope.appliedStain.ToUpper()
+                : "Tự nhiên";
+            string plasmolysisInfo = hostMicroscope != null && hostMicroscope.plasmolysisFactor > 0.05f
+                ? $"Đang co nguyên sinh ({BioFeedback.FormatVi(hostMicroscope.plasmolysisFactor * 100f, "0")}%)"
+                : "Bình thường";
+
             S.SetResults(
-                $"<b>KẾT QUẢ CAMERA HIỂN VI KỸ THUẬT SỐ</b>\n" +
+                $"<b>KẾT QUẢ CAMERA HIỂN VI KỸ THUẬT SỐ HD (1024PX)</b>\n" +
                 $"• Độ phóng đại tổng: <b>{BioFeedback.FormatVi(mag, "0")}×</b> (Thị trường: {BioFeedback.FormatVi(fov, "0.##")} mm)\n" +
                 $"• Kích thước tế bào đo trên thước trắc vi: <b>{BioFeedback.FormatVi(measuredLengthUm, "0.0")} µm</b>\n" +
+                $"• Trạng thái mẫu: <b>Nhuộm {stainInfo} · {plasmolysisInfo}</b>\n" +
                 $"• Số tế bào đã đánh dấu trong vi trường: <b>{markedCells}</b>\n" +
                 $"• Tệp ảnh đã lưu: <b>{(string.IsNullOrEmpty(lastSavedPng) ? "(Chưa chụp)" : lastSavedPng)}</b>");
         }

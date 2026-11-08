@@ -400,16 +400,16 @@ namespace Khkt.EditorTools
             // 8. Thủy tinh Borosilicate 3.3, Mặt khum & Kính quang học (Giai đoạn 7)
             Enhance("ThuyTinh", m => {
                 SetNormal(m, normGlass, 0.15f);
-                m.SetFloat("_Smoothness", 0.98f);
-                m.SetFloat("_Metallic", 0f);
-                m.SetColor("_BaseColor", new Color(0.92f, 0.98f, 1.0f, 0.18f));
+                m.SetFloat("_Smoothness", 0.96f);
+                m.SetFloat("_Metallic", 0.08f);
+                m.SetColor("_BaseColor", new Color(0.78f, 0.91f, 0.97f, 0.38f));
             }, ref count);
 
             Enhance("CocThuyTinh", m => {
                 SetNormal(m, normGlass, 0.15f);
-                m.SetFloat("_Smoothness", 0.98f);
-                m.SetFloat("_Metallic", 0f);
-                m.SetColor("_BaseColor", new Color(0.92f, 0.98f, 1.0f, 0.20f));
+                m.SetFloat("_Smoothness", 0.96f);
+                m.SetFloat("_Metallic", 0.08f);
+                m.SetColor("_BaseColor", new Color(0.78f, 0.91f, 0.97f, 0.38f));
             }, ref count);
 
             Enhance("MatKhum", m => {

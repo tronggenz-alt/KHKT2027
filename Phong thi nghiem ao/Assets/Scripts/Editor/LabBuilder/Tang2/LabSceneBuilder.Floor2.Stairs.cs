@@ -21,7 +21,7 @@ namespace Khkt.EditorTools
         const float CoreX0 = 27f, CoreX1 = 30f, CoreZ0 = -2.2f, CoreZ1 = 6f;
         const float StairX0 = 28.55f, StairX1 = 29.8f, StairZ0 = 0.33f, StairZ1 = 5.9f;
         const int StairRisers = 22;
-        const float ShaftX0 = 28.5f, ShaftX1 = 29.8f, ShaftZ0 = -2.1f, ShaftZ1 = -0.8f;
+        const float ShaftX0 = 28.52f, ShaftX1 = 29.8f, ShaftZ0 = -2.1f, ShaftZ1 = -0.8f;
         const float LiftDoorZ0 = -1.85f, LiftDoorZ1 = -1.05f, LiftDoorH = 2.1f;
 
         static Material t2LiftSteel, t2LiftGranite;
@@ -69,13 +69,15 @@ namespace Khkt.EditorTools
             // Tường bao lõi, mỗi tầng một lượt (hàm Wall của tầng 1 cao H = 3,6 m), dải nối 3,6..3,8 ở giữa
             var f1 = Group("Tường lõi tầng 1", g);
             var f2 = Group("Tường lõi tầng 2", g, new Vector3(0, y2, 0));
-            foreach (var (fg, lvl) in new[] { (f1, 1), (f2, 2) })
-            {
-                Wall(fg, "Tường đông lõi thang", false, 29.9f, CoreZ0 - 0.1f, CoreZ1 + 0.1f, paint, facade, +1, Win(0.6f, 5.4f, 1.0f, 3.0f));
-                Wall(fg, "Tường nam lõi thang", true, CoreZ0, CoreX0 + 0.1f, ShaftX1, paint, facade, -1);
-                if (lvl == 1) Wall(fg, "Tường bắc lõi thang", true, CoreZ1, CoreX0 + 0.1f, ShaftX1, paint, facade, +1);
-                else Wall(fg, "Tường bắc lõi thang", true, CoreZ1, CoreX0 + 0.1f, ShaftX1, paint, null, 0, Vent(CoreX0 + 0.15f, ShaftX1 - 0.05f, 0f, 2.6f));
-            }
+            // Tầng 1: cửa sổ trên cao (y = 2.4m..3.2m), mảng tường đặc bên dưới đỡ tay vịn inox bằng giá chữ L không xuyên kính
+            Wall(f1, "Tường đông lõi thang", false, 29.9f, CoreZ0 - 0.1f, CoreZ1 + 0.1f, paint, facade, +1, Win(0.6f, 5.4f, 2.4f, 3.2f));
+            Wall(f1, "Tường nam lõi thang", true, CoreZ0, CoreX0 + 0.1f, ShaftX1, paint, facade, -1);
+            Wall(f1, "Tường bắc lõi thang", true, CoreZ1, CoreX0 + 0.1f, ShaftX1, paint, facade, +1);
+
+            // Tầng 2: cửa sổ kính lớn chiếu sáng tự nhiên cho toàn bộ sảnh và đỉnh cầu thang
+            Wall(f2, "Tường đông lõi thang", false, 29.9f, CoreZ0 - 0.1f, CoreZ1 + 0.1f, paint, facade, +1, Win(0.6f, 5.4f, 1.0f, 3.0f));
+            Wall(f2, "Tường nam lõi thang", true, CoreZ0, CoreX0 + 0.1f, ShaftX1, paint, facade, -1);
+            Wall(f2, "Tường bắc lõi thang", true, CoreZ1, CoreX0 + 0.1f, ShaftX1, paint, null, 0, Vent(CoreX0 + 0.15f, ShaftX1 - 0.05f, 0f, 2.6f));
             Slab(g, "Dải nối tường đông (trong)", 29.8f, CoreZ0 - 0.1f, 29.9f, CoreZ1 + 0.1f, paint, H, y2, false);
             Slab(g, "Dải nối tường đông (ngoài)", 29.9f, CoreZ0 - 0.1f, 30.0f, CoreZ1 + 0.1f, facade, H, y2, false);
             Slab(g, "Dải nối tường nam (trong)", CoreX0 + 0.1f, CoreZ0, ShaftX1, CoreZ0 + 0.1f, paint, H, y2, false);
@@ -106,6 +108,91 @@ namespace Khkt.EditorTools
         // Thang bộ
         // ---------------------------------------------------------------------
 
+        static GameObject SlopedGlassPanel(Transform parent, string name, float x, float z0, float y0, float z1, float y1, float height, float thickness, Material mat)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(parent, false);
+            var filter = go.AddComponent<MeshFilter>();
+            var rend = go.AddComponent<MeshRenderer>();
+            rend.sharedMaterial = mat;
+            rend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            rend.receiveShadows = false;
+
+            float t2 = thickness * 0.5f;
+            Vector3[] v = new Vector3[24];
+            Vector3[] n = new Vector3[24];
+            Vector2[] uv = new Vector2[24];
+            int[] t = new int[36];
+
+            // Mặt trái (-X)
+            v[0] = new Vector3(x - t2, y0, z0);
+            v[1] = new Vector3(x - t2, y0 + height, z0);
+            v[2] = new Vector3(x - t2, y1 + height, z1);
+            v[3] = new Vector3(x - t2, y1, z1);
+            for (int i = 0; i < 4; i++) n[i] = Vector3.left;
+            uv[0] = new Vector2(0, 0); uv[1] = new Vector2(0, 1); uv[2] = new Vector2(1, 1); uv[3] = new Vector2(1, 0);
+
+            // Mặt phải (+X)
+            v[4] = new Vector3(x + t2, y0, z0);
+            v[5] = new Vector3(x + t2, y1, z1);
+            v[6] = new Vector3(x + t2, y1 + height, z1);
+            v[7] = new Vector3(x + t2, y0 + height, z0);
+            for (int i = 4; i < 8; i++) n[i] = Vector3.right;
+            uv[4] = new Vector2(0, 0); uv[5] = new Vector2(1, 0); uv[6] = new Vector2(1, 1); uv[7] = new Vector2(0, 1);
+
+            // Mặt dưới (-Y/normal)
+            v[8] = new Vector3(x - t2, y0, z0);
+            v[9] = new Vector3(x - t2, y0 + height * 0.01f, z0);
+            v[10] = new Vector3(x + t2, y1, z1);
+            v[11] = new Vector3(x + t2, y0, z0);
+            Vector3 downNorm = Vector3.down;
+            for (int i = 8; i < 12; i++) n[i] = downNorm;
+            uv[8] = new Vector2(0, 0); uv[9] = new Vector2(0, 1); uv[10] = new Vector2(1, 1); uv[11] = new Vector2(1, 0);
+
+            // Mặt trên (+Y/normal)
+            v[12] = new Vector3(x - t2, y0 + height, z0);
+            v[13] = new Vector3(x + t2, y0 + height, z0);
+            v[14] = new Vector3(x + t2, y1 + height, z1);
+            v[15] = new Vector3(x - t2, y1 + height, z1);
+            Vector3 upNorm = Vector3.up;
+            for (int i = 12; i < 16; i++) n[i] = upNorm;
+            uv[12] = new Vector2(0, 0); uv[13] = new Vector2(1, 0); uv[14] = new Vector2(1, 1); uv[15] = new Vector2(0, 1);
+
+            // Mặt cắt đứng đầu dưới (-Z)
+            v[16] = new Vector3(x - t2, y0, z0);
+            v[17] = new Vector3(x - t2, y0 + height, z0);
+            v[18] = new Vector3(x + t2, y0 + height, z0);
+            v[19] = new Vector3(x + t2, y0, z0);
+            for (int i = 16; i < 20; i++) n[i] = Vector3.back;
+            uv[16] = new Vector2(0, 0); uv[17] = new Vector2(0, 1); uv[18] = new Vector2(1, 1); uv[19] = new Vector2(1, 0);
+
+            // Mặt cắt đứng đầu trên (+Z)
+            v[20] = new Vector3(x + t2, y1, z1);
+            v[21] = new Vector3(x + t2, y1 + height, z1);
+            v[22] = new Vector3(x - t2, y1 + height, z1);
+            v[23] = new Vector3(x - t2, y1, z1);
+            for (int i = 20; i < 24; i++) n[i] = Vector3.forward;
+            uv[20] = new Vector2(0, 0); uv[21] = new Vector2(0, 1); uv[22] = new Vector2(1, 1); uv[23] = new Vector2(1, 0);
+
+            for (int f = 0; f < 6; f++)
+            {
+                int bi = f * 4;
+                int ti = f * 6;
+                t[ti] = bi; t[ti + 1] = bi + 1; t[ti + 2] = bi + 2;
+                t[ti + 3] = bi; t[ti + 4] = bi + 2; t[ti + 5] = bi + 3;
+            }
+
+            var mesh = new Mesh { name = name };
+            mesh.vertices = v;
+            mesh.normals = n;
+            mesh.uv = uv;
+            mesh.triangles = t;
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
+            filter.sharedMesh = mesh;
+            return go;
+        }
+
         static void BuildStairFlight(Transform core)
         {
             var g = Group("Thang bộ", core);
@@ -121,7 +208,7 @@ namespace Khkt.EditorTools
                 Box(g, $"Mặt bậc {k}", new Vector3(cx, k * h - 0.02f, zr + d / 2 - 0.01f), new Vector3(w, 0.04f, d + 0.02f), oak, false);
                 Box(g, $"Nẹp chống trơn {k}", new Vector3(cx, k * h + 0.001f, zr + 0.02f), new Vector3(w - 0.1f, 0.003f, 0.04f), nosing, false);
             }
-            // Mặt phẳng qua chân các cổ bậc: dốc va chạm và kết cấu đỡ chạy theo mặt này
+            // Mặt phẳng qua chân các cổ bậc (họng thang): dốc va chạm và kết cấu đỡ chạy theo mặt này
             float run = StairZ1 - StairZ0, len = Mathf.Sqrt(run * run + F2_Y * F2_Y), ang = Mathf.Atan2(F2_Y, run) * Mathf.Rad2Deg;
             var rot = Quaternion.Euler(-ang, 0, 0);
             Vector3 normal = rot * Vector3.up, mid = new Vector3(cx, F2_Y / 2, (StairZ0 + StairZ1) / 2);
@@ -131,32 +218,60 @@ namespace Khkt.EditorTools
             ramp.transform.localPosition = mid - normal * 0.15f;
             ramp.transform.localRotation = rot;
             ramp.AddComponent<BoxCollider>().size = new Vector3(w, 0.3f, len);
-            // bản thang bê tông + mặt dưới trát phẳng, hai dầm thang
-            Box(g, "Bản thang", mid - normal * 0.2f, new Vector3(w, 0.16f, len), paint, false, new Vector3(-ang, 0, 0));
-            foreach (float x in new[] { StairX0 + 0.03f, StairX1 - 0.03f })
-                Box(g, "Dầm thang", new Vector3(x, mid.y, mid.z) - normal * 0.08f, new Vector3(0.06f, 0.36f, len), darkMetal, false, new Vector3(-ang, 0, 0));
+
+            // bản thang bê tông: đặt hoàn toàn bên dưới đường chân cổ bậc (họng thang), dày 0.14m
+            float cosAng = Mathf.Cos(ang * Mathf.Deg2Rad);
+            float throatOffset = h * cosAng;
+            Vector3 waistMid = mid - normal * (throatOffset + 0.08f);
+            Box(g, "Bản thang", waistMid, new Vector3(w, 0.14f, len - 0.22f), paint, false, new Vector3(-ang, 0, 0));
+
+            // Dầm biên đỡ thang: đặt bên dưới đáy bản thang, không bao giờ nhô lên mặt bậc
+            Vector3 beamMid = waistMid - normal * 0.10f;
+            foreach (float x in new[] { StairX0 + 0.05f, StairX1 - 0.05f })
+                Box(g, "Dầm thang", new Vector3(x, beamMid.y, beamMid.z), new Vector3(0.08f, 0.16f, len - 0.25f), darkMetal, false, new Vector3(-ang, 0, 0));
+
             // vách gỗ kín gầm thang phía tây (tầng 1 không đi vào gầm thang thấp)
             var under = Group("Vách gầm thang", g, new Vector3(StairX0 - 0.03f, 0, 0));
             Triangle(under, "Vách gỗ gầm thang", "T2_VachGamThang", new Vector2(StairZ0 + 0.55f, 0f), new Vector2(StairZ1, 0f), new Vector2(StairZ1, F2_Y - 0.42f), 0.03f, oak);
 
-            // Lan can kính phía tây vế thang, tay vịn gỗ cao 0,9 m trên mũi bậc; tay vịn inox áp tường phía đông
+            // Lan can kính phía tây vế thang (x = 28.52f): dùng SlopedGlassPanel có 2 đầu cắt thẳng đứng 100%
             var rail = Group("Lan can thang", g);
-            Vector3 railMid = new Vector3(StairX0 - 0.03f, F2_Y / 2 + 0.55f, (StairZ0 + StairZ1) / 2);
-            NoShadow(Box(rail, "Kính lan can", railMid, new Vector3(0.012f, 0.85f, len), windowGlass, true, new Vector3(-ang, 0, 0)));
-            Box(rail, "Tay vịn gỗ", railMid + Vector3.up * 0.47f, new Vector3(0.07f, 0.05f, len), oak, false, new Vector3(-ang, 0, 0));
+            float railX = StairX0 - 0.03f; // 28.52f
+            SlopedGlassPanel(rail, "Kính lan can", railX, StairZ0, 0.08f, StairZ1, F2_Y + 0.08f, 0.82f, 0.012f, windowGlass);
+
+            // Tay vịn gỗ: đặt đồng bộ ở độ cao 0.98m trên mũi bậc
+            Vector3 railMid = new Vector3(railX, F2_Y / 2 + 0.98f, (StairZ0 + StairZ1) / 2);
+            Box(rail, "Tay vịn gỗ", railMid, new Vector3(0.07f, 0.05f, len), oak, false, new Vector3(-ang, 0, 0));
+
+            // Trụ lan can vế thang
             for (int k = 0; k <= StairRisers; k += 4)
             {
                 float z = StairZ0 + k * d, y = Mathf.Min(k, StairRisers - 1) * h;
-                Box(rail, "Trụ lan can", new Vector3(StairX0 - 0.03f, y + 0.5f, z), new Vector3(0.04f, 1.0f, 0.04f), t2LiftSteel, false);
+                Box(rail, "Trụ lan can", new Vector3(railX, y + 0.49f, z), new Vector3(0.04f, 0.98f, 0.04f), t2LiftSteel, false);
             }
-            Box(rail, "Tay vịn tường", new Vector3(StairX1 - 0.05f, F2_Y / 2 + 0.9f, mid.z), new Vector3(0.04f, 0.04f, len), t2LiftSteel, false, new Vector3(-ang, 0, 0));
+            // Trụ đầu thang tầng 1 & tầng 2
+            Box(rail, "Trụ đầu thang tầng 1", new Vector3(railX, 0.5f, StairZ0), new Vector3(0.05f, 1.0f, 0.05f), t2LiftSteel, false);
+            Box(rail, "Trụ đầu thang tầng 2", new Vector3(railX, F2_Y + 0.5f, StairZ1), new Vector3(0.05f, 1.0f, 0.05f), t2LiftSteel, false);
+
+            // Khớp nối tay vịn đỉnh thang (nối tay vịn dốc với tay vịn ngang sàn T2) và chân thang
+            Box(rail, "Khớp nối tay vịn đỉnh thang", new Vector3(railX, F2_Y + 0.98f, StairZ1), new Vector3(0.072f, 0.052f, 0.08f), oak, false);
+            Box(rail, "Khớp nối tay vịn chân thang", new Vector3(railX, 0.98f, StairZ0), new Vector3(0.072f, 0.052f, 0.08f), oak, false);
+
+            // Tay vịn inox áp tường đông (x = StairX1 - 0.05f), có các gá L gắn vào tường bê tông phẳng
+            float wallRailX = StairX1 - 0.05f;
+            Box(rail, "Tay vịn tường", new Vector3(wallRailX, F2_Y / 2 + 0.98f, mid.z), new Vector3(0.04f, 0.04f, len - 0.1f), t2LiftSteel, false, new Vector3(-ang, 0, 0));
+            for (float bz = StairZ0 + 0.6f; bz <= StairZ1 - 0.4f; bz += 1.1f)
+            {
+                float by = (bz - StairZ0) / run * F2_Y + 0.98f;
+                Cyl(rail, "Gá tay vịn tường", new Vector3(StairX1 - 0.025f, by, bz), 0.015f, 0.05f, t2LiftSteel, false, new Vector3(0, 0, 90f));
+            }
 
             // Lan can bảo vệ lỗ thang ở tầng 2 (mép tây và mép nam lỗ)
             var top = Group("Lan can lỗ thang tầng 2", g, new Vector3(0, F2_Y, 0));
-            NoShadow(Box(top, "Kính lan can tây", new Vector3(ShaftX0, 0.55f, StairZ1 / 2), new Vector3(0.012f, 1.0f, StairZ1), windowGlass));
-            Box(top, "Tay vịn tây", new Vector3(ShaftX0, 1.08f, StairZ1 / 2), new Vector3(0.07f, 0.05f, StairZ1), oak, false);
-            NoShadow(Box(top, "Kính lan can nam", new Vector3((ShaftX0 + StairX1) / 2, 0.55f, 0.02f), new Vector3(StairX1 - ShaftX0, 1.0f, 0.012f), windowGlass));
-            Box(top, "Tay vịn nam", new Vector3((ShaftX0 + StairX1) / 2, 1.08f, 0.02f), new Vector3(StairX1 - ShaftX0, 0.05f, 0.07f), oak, false);
+            NoShadow(Box(top, "Kính lan can tây", new Vector3(ShaftX0, 0.49f, StairZ1 / 2), new Vector3(0.012f, 0.82f, StairZ1), windowGlass));
+            Box(top, "Tay vịn tây", new Vector3(ShaftX0, 0.98f, StairZ1 / 2), new Vector3(0.07f, 0.05f, StairZ1), oak, false);
+            NoShadow(Box(top, "Kính lan can nam", new Vector3((ShaftX0 + StairX1) / 2, 0.49f, 0.02f), new Vector3(StairX1 - ShaftX0, 0.82f, 0.012f), windowGlass));
+            Box(top, "Tay vịn nam", new Vector3((ShaftX0 + StairX1) / 2, 0.98f, 0.02f), new Vector3(StairX1 - ShaftX0, 0.05f, 0.07f), oak, false);
             Box(top, "Viền mép lỗ thang", new Vector3(ShaftX0 + 0.04f, -0.05f, StairZ1 / 2), new Vector3(0.08f, 0.12f, StairZ1), t2LiftSteel, false);
         }
 

@@ -309,6 +309,31 @@ namespace Khkt.EditorTools
             var gr = root.gameObject.AddComponent<Grabbable>();
             gr.kind = kind;
             gr.gripHeightM = gripHeight;
+
+            // Thêm chi tiết cho đồ thủy tinh phòng thí nghiệm: Viền miệng dày, ô ghi chú, vạch chia thể tích
+            if (kind == "coc" || kind == "binh_non")
+            {
+                float r = (kind == "coc" && capacityMl <= 120f) ? 0.025f : (kind == "coc" ? 0.035f : 0.042f);
+                float rimR = (kind == "binh_non") ? 0.0185f : r + 0.003f;
+                var glassRimMat = Mat("ThuyTinhVanh", new Color(0.78f, 0.91f, 0.97f, 0.62f), 0.96f, 0.08f, transparent: true);
+
+                // Viền miệng dày nổi bật khối 3D
+                Cyl(root, "Viền miệng dày", new Vector3(0, mouthY, 0), rimR, 0.005f, glassRimMat, false);
+
+                // Ô trắng ghi chú nhãn mờ (frosted marking spot)
+                var frostedMat = Mat("NhanTrangMo", new Color(0.96f, 0.96f, 0.98f, 0.70f), 0.25f, transparent: true);
+                Box(root, "Ô ghi chú", new Vector3(r * 0.96f, mouthY * 0.52f, 0), new Vector3(0.0006f, mouthY * 0.26f, r * 0.52f), frostedMat, false);
+
+                // Vạch chia thể tích trắng đục (Graduation scale marks)
+                var markMat = Mat("VachChiaTrang", new Color(1f, 1f, 1f, 0.88f), 0.35f, transparent: true);
+                for (int vi = 1; vi <= 4; vi++)
+                {
+                    float yv = mouthY * (vi * 0.2f);
+                    float markW = (vi % 2 == 0) ? r * 0.38f : r * 0.22f;
+                    Box(root, $"Vạch {vi}", new Vector3(r * 0.97f, yv, 0), new Vector3(0.0005f, 0.0016f, markW), markMat, false);
+                }
+            }
+
             return c;
         }
 

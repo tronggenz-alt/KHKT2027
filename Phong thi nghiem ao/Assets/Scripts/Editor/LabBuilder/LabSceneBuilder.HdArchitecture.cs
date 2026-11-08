@@ -49,17 +49,6 @@ namespace Khkt.EditorTools
             Box(g, "HD_PhaoTran_Bac", new Vector3(LabX / 2f, H - 0.04f, LabZ - 0.06f), new Vector3(LabX, 0.08f, 0.12f), matPhao, false);
             Box(g, "HD_PhaoTran_Tay", new Vector3(0.06f, H - 0.04f, LabZ / 2f), new Vector3(0.12f, 0.08f, LabZ), matPhao, false);
             Box(g, "HD_PhaoTran_Dong", new Vector3(LabX - 0.06f, H - 0.04f, LabZ / 2f), new Vector3(0.12f, 0.08f, LabZ), matPhao, false);
-
-            // 3. Cột cấp điện và khí kỹ thuật thả trần (service drops) hình elip thanh thoát inox mờ thả từ trần xuống giữa bàn
-            float[] dropXs = new float[] { 5.2f, 10.5f, 15.8f };
-            float[] dropZs = new float[] { 4.5f, 10.5f };
-            for (int ix = 0; ix < dropXs.Length; ix++)
-            {
-                for (int iz = 0; iz < dropZs.Length; iz++)
-                {
-                    var col = Cyl(g, $"HD_CotKyThuat_{ix}_{iz}", new Vector3(dropXs[ix], (H + 1.2f) / 2f, dropZs[iz]), 0.04f, H - 1.2f, matNhom, false);
-                }
-            }
         }
 
         static void BuildHdNhaKinh(Transform parent)

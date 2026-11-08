@@ -59,7 +59,7 @@ namespace Khkt.Interaction.Bio
                 return existing;
             }
             var go = new GameObject("BioFeedback");
-            DontDestroyOnLoad(go);
+            if (Application.isPlaying) DontDestroyOnLoad(go);
             Instance = go.AddComponent<BioFeedback>();
             return Instance;
         }
