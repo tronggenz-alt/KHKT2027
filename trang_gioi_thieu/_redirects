@@ -1,0 +1,4 @@
+# Nút Đăng nhập: chuyển tới web quản lý chạy trên máy trường qua Cloudflare Tunnel.
+# Tunnel không tài khoản đổi địa chỉ mỗi lần chạy lại: sửa hai dòng dưới rồi đăng lại trang.
+/quan-ly    https://actor-enhanced-extreme-americas.trycloudflare.com/    302
+/quan-ly/*  https://actor-enhanced-extreme-americas.trycloudflare.com/:splat    302

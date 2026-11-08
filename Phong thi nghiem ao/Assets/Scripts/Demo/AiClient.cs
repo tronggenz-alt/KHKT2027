@@ -3,6 +3,7 @@ using System.Collections;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
+using Khkt.Menu;
 
 namespace Khkt.Demo
 {
@@ -14,7 +15,11 @@ namespace Khkt.Demo
     public class AiClient : MonoBehaviour
     {
         [Tooltip("Địa chỉ máy chủ AI (uvicorn server.ai.main:app --port 8000)")]
-        public string serverUrl = "http://127.0.0.1:8000";
+        public string serverUrl
+        {
+            get => GameSession.ServerUrl;
+            set => GameSession.ServerUrl = value;
+        }
         public float timeoutS = 25f;
         const float PlanTimeoutS = 90f;  // kế hoạch robot dài; máy chủ thử mô hình mạnh trước, lỗi thì chuyển mô hình khác (tối đa 80 s)
 
@@ -135,13 +140,15 @@ namespace Khkt.Demo
         IEnumerator Post<TReq, TRes>(string path, TReq body, Action<TRes> ok, Action<string> fail, float timeout = 0f)
         {
             var json = JsonUtility.ToJson(body);
-            using (var r = new UnityWebRequest(serverUrl.TrimEnd('/') + path, "POST"))
+            using (var r = new UnityWebRequest(GameSession.ServerUrl + path, "POST"))
             {
                 r.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json));
                 r.downloadHandler = new DownloadHandlerBuffer();
                 r.SetRequestHeader("Content-Type", "application/json; charset=utf-8");
                 r.timeout = Mathf.CeilToInt(timeout > 0 ? timeout : timeoutS);
+                AccountClient.Authorize(r);
                 yield return r.SendWebRequest();
+                AccountClient.CheckExpired(r);
                 if (r.result != UnityWebRequest.Result.Success) { fail?.Invoke(r.error); yield break; }
                 TRes res;
                 try { res = JsonUtility.FromJson<TRes>(r.downloadHandler.text); }
@@ -152,10 +159,12 @@ namespace Khkt.Demo
 
         IEnumerator Get<TRes>(string path, Action<TRes> ok, Action<string> fail, float timeout)
         {
-            using (var r = UnityWebRequest.Get(serverUrl.TrimEnd('/') + path))
+            using (var r = UnityWebRequest.Get(GameSession.ServerUrl + path))
             {
                 r.timeout = Mathf.CeilToInt(timeout);
+                AccountClient.Authorize(r);
                 yield return r.SendWebRequest();
+                AccountClient.CheckExpired(r);
                 if (r.result != UnityWebRequest.Result.Success) { fail?.Invoke(r.error); yield break; }
                 TRes res = default;
                 try { res = JsonUtility.FromJson<TRes>(r.downloadHandler.text); }

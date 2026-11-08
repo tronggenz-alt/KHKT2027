@@ -1,0 +1,172 @@
+{
+  "ma": "nmr",
+  "ten": "Cộng hưởng từ hạt nhân ¹H (NMR) để bàn 60 MHz",
+  "may_mau": "Magritek Spinsolve 60 (nam châm vĩnh cửu, không cần heli lỏng, ống mẫu 5 mm) (thông số lấy theo máy mẫu; trên vỏ máy trong phòng lab ảo dùng tên chung)",
+  "nguyen_ly": [
+    "Hạt nhân ¹H có spin, đặt trong từ trường mạnh thì định hướng theo hai mức năng lượng. Xung sóng vô tuyến đúng tần số cộng hưởng (60 MHz ở máy này) làm các spin lật; khi trở về, chúng phát tín hiệu suy giảm dần (FID) mà cuộn thu ghi lại.",
+    "Electron quanh hạt nhân che chắn một phần từ trường, nên H ở môi trường hóa học khác nhau cộng hưởng ở tần số hơi khác nhau. Độ chênh tính theo phần triệu (ppm) so với chất chuẩn gọi là độ dịch chuyển hóa học δ: CH₃ cạnh C khoảng 1 ppm, CH₂ cạnh O khoảng 3,5 – 4 ppm.",
+    "Biến đổi Fourier FID cho phổ: mỗi nhóm H tương đương cho một tín hiệu. Diện tích (tích phân) tín hiệu tỉ lệ với số H, nên tỉ lệ tích phân cho biết tỉ lệ số H trong phân tử, hoặc tỉ lệ mol giữa các chất trong hỗn hợp (qNMR).",
+    "Tín hiệu bị tách thành nhiều vạch do tương tác với H ở cacbon bên cạnh (hằng số J ≈ 7 Hz): n H lân cận cho n + 1 vạch (quy tắc n + 1). CH₃ cạnh CH₂ là vạch ba, CH₂ cạnh CH₃ là vạch bốn.",
+    "H của nhóm OH, COOH trao đổi nhanh với nước nên nhập vào tín hiệu nước. Mẫu nước có tín hiệu nước rất lớn ở 4,79 ppm; máy dùng xung triệt tín hiệu nước để thấy rõ chất tan."
+  ],
+  "cong_thuc": [
+    "δ (ppm) = (ν − ν_chuẩn) / ν_máy × 10⁶",
+    "1 ppm = 60 Hz ở máy 60 MHz",
+    "n H lân cận → n + 1 vạch",
+    "n₁ / n₂ = (I₁/H₁) / (I₂/H₂)"
+  ],
+  "bo_phan": [
+    {
+      "ma": "nam_cham",
+      "ten": "Nam châm vĩnh cửu 1,4 T",
+      "chuc_nang": "Tạo từ trường mạnh, đồng đều; ổn định nhiệt độ."
+    },
+    {
+      "ma": "cuon_shim",
+      "ten": "Cuộn chỉnh đồng đều từ trường (shim)",
+      "chuc_nang": "Bù chỗ không đều của từ trường để vạch phổ hẹp."
+    },
+    {
+      "ma": "ong_mau",
+      "ten": "Ống mẫu 5 mm",
+      "chuc_nang": "Chứa khoảng 0,5 mL dung dịch mẫu."
+    },
+    {
+      "ma": "cuon_rf",
+      "ten": "Cuộn phát – thu sóng vô tuyến",
+      "chuc_nang": "Phát xung 60 MHz làm lật spin, rồi thu tín hiệu FID."
+    },
+    {
+      "ma": "may_phat",
+      "ten": "Máy phát xung RF",
+      "chuc_nang": "Tạo xung sóng vô tuyến ngắn, đúng tần số."
+    },
+    {
+      "ma": "may_thu",
+      "ten": "Bộ thu, chuyển đổi số",
+      "chuc_nang": "Khuếch đại FID rất yếu và số hóa."
+    },
+    {
+      "ma": "may_tinh",
+      "ten": "Máy tính xử lý",
+      "chuc_nang": "Biến đổi Fourier, chỉnh pha, chuẩn ppm, tích phân."
+    }
+  ],
+  "thong_so": [
+    {
+      "ten": "Tần số ¹H",
+      "gia_tri": "60 MHz",
+      "loai": "điển hình",
+      "nguon": "https://magritek.com/?p=13127"
+    },
+    {
+      "ten": "Độ rộng vạch",
+      "gia_tri": "< 0,5 Hz ở 50% chiều cao",
+      "loai": "điển hình",
+      "nguon": "https://magritek.com/?p=13127"
+    },
+    {
+      "ten": "Không cần heli lỏng, không quay ống mẫu",
+      "gia_tri": "nam châm không dùng chất làm lạnh",
+      "loai": "điển hình",
+      "nguon": "https://magritek.com/?p=13127"
+    },
+    {
+      "ten": "Độ dịch chuyển hóa học trong D₂O (etanol, metanol, axeton, axit axetic, etyl axetat, nước)",
+      "gia_tri": "theo Fulmer và cộng sự, Organometallics 2010, 29, 2176 (bảng S1)",
+      "loai": "tra cứu",
+      "nguon": "https://www.stoltz2.caltech.edu/publications/103-s-2010.pdf"
+    },
+    {
+      "ten": "Độ dịch chuyển của isoamyl axetat, đường, axit xitric",
+      "gia_tri": "giá trị điển hình, làm tròn",
+      "loai": "mô phỏng",
+      "mo_phong": true
+    }
+  ],
+  "quy_trinh": [
+    {
+      "ma": "chuan_bi_ong",
+      "ten": "Chuẩn bị ống mẫu",
+      "viec": "Lấy khoảng 0,5 mL mẫu vào ống 5 mm (cao khoảng 4 cm), lau sạch thành ống.",
+      "ly_do": "Mẫu phải phủ kín vùng cuộn thu.",
+      "loi": "Quá ít mẫu: từ trường không đều, vạch rộng."
+    },
+    {
+      "ma": "dat_ong",
+      "ten": "Đặt ống vào nam châm",
+      "viec": "Thả ống vào lỗ mẫu.",
+      "ly_do": "Mẫu phải nằm đúng vùng từ trường đều và cuộn thu.",
+      "loi": ""
+    },
+    {
+      "ma": "shim",
+      "ten": "Chỉnh đồng đều từ trường (shim)",
+      "viec": "Chạy shim tự động trên mẫu (hoặc mẫu chuẩn) đến khi vạch hẹp nhất.",
+      "ly_do": "Từ trường không đều làm vạch rộng, các vạch của vạch ba / vạch bốn nhập vào nhau.",
+      "loi": "Không shim: vạch rộng, không thấy tách vạch."
+    },
+    {
+      "ma": "do",
+      "ten": "Đo (xung – thu FID)",
+      "viec": "Chọn số lần quét, bật triệt tín hiệu nước nếu mẫu là dung dịch nước, đo.",
+      "ly_do": "Cộng nhiều lần quét thì nhiễu giảm theo √N.",
+      "loi": "Không triệt nước: tín hiệu nước che lấp tín hiệu chất tan."
+    },
+    {
+      "ma": "xu_ly",
+      "ten": "Xử lý: FT, chỉnh pha, chuẩn ppm",
+      "viec": "Biến đổi Fourier, chỉnh pha cho vạch dựng thẳng, đặt tín hiệu nước = 4,79 ppm (hoặc TMS = 0).",
+      "ly_do": "Sai pha thì vạch méo, tích phân sai.",
+      "loi": "Chưa chỉnh pha: vạch có phần âm."
+    },
+    {
+      "ma": "tich_phan",
+      "ten": "Tích phân, gán tín hiệu",
+      "viec": "Tích phân từng tín hiệu, đổi ra số H; gán theo δ và kiểu tách vạch; tính tỉ lệ mol các chất.",
+      "ly_do": "Diện tích tỉ lệ số H.",
+      "loi": ""
+    },
+    {
+      "ma": "ket_thuc",
+      "ten": "Lấy ống, rửa ống",
+      "viec": "Lấy ống mẫu ra, rửa, sấy.",
+      "ly_do": "Ống sạch để lần đo sau không lẫn mẫu cũ.",
+      "loi": ""
+    }
+  ],
+  "an_toan": [
+    "Từ trường mạnh: người đeo máy trợ tim, thiết bị cấy ghép không lại gần; để thẻ từ, đồng hồ cơ ra xa.",
+    "Ống mẫu thủy tinh mỏng dễ vỡ.",
+    "Mẫu chứa metanol độc: đậy nắp ống."
+  ],
+  "thuat_ngu": [
+    {
+      "tu": "FID",
+      "nghia": "Tín hiệu cảm ứng tắt dần: tín hiệu thu được sau xung, theo thời gian."
+    },
+    {
+      "tu": "δ (ppm)",
+      "nghia": "Độ dịch chuyển hóa học: vị trí tín hiệu, không phụ thuộc từ trường của máy."
+    },
+    {
+      "tu": "J (Hz)",
+      "nghia": "Hằng số tương tác spin – spin: khoảng cách giữa các vạch trong một tín hiệu tách."
+    },
+    {
+      "tu": "Tích phân",
+      "nghia": "Diện tích dưới tín hiệu, tỉ lệ số H."
+    },
+    {
+      "tu": "qNMR",
+      "nghia": "Định lượng bằng NMR: tỉ lệ tích phân / số H cho tỉ lệ mol."
+    }
+  ],
+  "cau_hoi_on_tap": [
+    "Etanol CH₃CH₂OH cho mấy tín hiệu trong D₂O? Mỗi tín hiệu tách mấy vạch, tỉ lệ tích phân bao nhiêu?",
+    "Vì sao không thấy tín hiệu H của nhóm OH của etanol khi đo trong nước?",
+    "Ở máy 60 MHz, J = 7 Hz bằng bao nhiêu ppm?",
+    "Tín hiệu đơn ở 3,34 ppm trong mẫu rượu có thể là chất gì? Làm sao tính hàm lượng của nó?",
+    "Vì sao phải shim trước khi đo?"
+  ]
+}

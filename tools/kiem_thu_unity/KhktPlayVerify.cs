@@ -11,6 +11,20 @@ public static class KhktPlayVerify
     {
         EditorPrefs.SetInt("ScriptCompilationDuringPlay", 1);  // không nạp lại script giữa lúc Play
         LabSceneBuilder.Build();
+        if (System.Environment.GetEnvironmentVariable("KHKT_TEST") == "trinh_chieu")
+        {
+            EditorSceneManager.OpenScene(LabSceneBuilder.MenuScenePath);
+            new GameObject("Kiểm thử trình chiếu").AddComponent<KhktSlideTest>();
+            EditorApplication.EnterPlaymode();
+            return;
+        }
+        if (System.Environment.GetEnvironmentVariable("KHKT_TEST") == "man_hinh_chinh")
+        {
+            EditorSceneManager.OpenScene(LabSceneBuilder.MenuScenePath);
+            new GameObject("Kiểm thử màn hình chính").AddComponent<KhktMenuTest>();
+            EditorApplication.EnterPlaymode();
+            return;
+        }
         EditorSceneManager.OpenScene(LabSceneBuilder.ScenePath);
         // bài thử không được mở cổng COM của Mega / ESP32 thật đang cắm vào máy
         foreach (var s in Object.FindObjectsByType<Khkt.Input.SerialControllerSource>()) Object.DestroyImmediate(s);
@@ -37,8 +51,39 @@ public static class KhktPlayVerify
         var scene = EditorSceneManager.OpenScene(LabSceneBuilder.ScenePath);
         new GameObject("Benchmark").AddComponent<KhktBenchmark>();
         EditorSceneManager.SaveScene(scene);
-        var report = BuildPipeline.BuildPlayer(new[] { LabSceneBuilder.ScenePath }, System.IO.Path.Combine(outDir, "PhongThiNghiemAo.exe"),
+        var scenes = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Select(System.Linq.Enumerable.Where(EditorBuildSettings.scenes, s => s.enabled && s.path != LabSceneBuilder.MenuScenePath), s => s.path));  // bản đo vào thẳng lab
+        var report = BuildPipeline.BuildPlayer(scenes, System.IO.Path.Combine(outDir, "PhongThiNghiemAo.exe"),
                                                BuildTarget.StandaloneWindows64, BuildOptions.None);
+        Debug.Log($"[KHKT-BUILD] {report.summary.result} {report.summary.totalSize / 1048576} MB {report.summary.totalTime}");
+        EditorApplication.Exit(report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded ? 0 : 1);
+    }
+
+    /// <summary>Bản .exe mở từ màn hình chính, kèm KhktMenuTest: đi hết luồng rồi tự thoát.</summary>
+    public static void BuildMenuTest()
+    {
+        string outDir = System.Environment.GetEnvironmentVariable("KHKT_BUILD");
+        PlayerSettings.runInBackground = true;
+        LabSceneBuilder.BuildMenuOnly();
+        var scene = EditorSceneManager.OpenScene(LabSceneBuilder.MenuScenePath);
+        new GameObject("Kiểm thử màn hình chính").AddComponent<KhktMenuTest>();
+        EditorSceneManager.SaveScene(scene);
+        var scenes = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Select(System.Linq.Enumerable.Where(EditorBuildSettings.scenes, s => s.enabled), s => s.path));
+        var report = BuildPipeline.BuildPlayer(scenes, System.IO.Path.Combine(outDir, "PhongThiNghiemAo.exe"), BuildTarget.StandaloneWindows64, BuildOptions.None);
+        Debug.Log($"[KHKT-BUILD] {report.summary.result} {report.summary.totalSize / 1048576} MB {report.summary.totalTime}");
+        EditorApplication.Exit(report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded ? 0 : 1);
+    }
+
+    /// <summary>Bản .exe kèm KhktNetTest: chạy nhiều cửa sổ với -khkt-net host | c1 | c2 để thử phòng học chung.</summary>
+    public static void BuildNetTest()
+    {
+        string outDir = System.Environment.GetEnvironmentVariable("KHKT_BUILD");
+        PlayerSettings.runInBackground = true;
+        LabSceneBuilder.BuildMenuOnly();
+        var scene = EditorSceneManager.OpenScene(LabSceneBuilder.MenuScenePath);
+        new GameObject("Kiểm thử phòng học chung").AddComponent<KhktNetTest>();
+        EditorSceneManager.SaveScene(scene);
+        var scenes = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Select(System.Linq.Enumerable.Where(EditorBuildSettings.scenes, s => s.enabled), s => s.path));
+        var report = BuildPipeline.BuildPlayer(scenes, System.IO.Path.Combine(outDir, "PhongThiNghiemAo.exe"), BuildTarget.StandaloneWindows64, BuildOptions.None);
         Debug.Log($"[KHKT-BUILD] {report.summary.result} {report.summary.totalSize / 1048576} MB {report.summary.totalTime}");
         EditorApplication.Exit(report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded ? 0 : 1);
     }

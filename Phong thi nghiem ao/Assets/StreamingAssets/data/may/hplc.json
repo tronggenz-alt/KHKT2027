@@ -1,0 +1,62 @@
+{
+  "ma": "hplc",
+  "ten": "Sắc ký lỏng hiệu năng cao (HPLC) với detector UV và chỉ số khúc xạ",
+  "may_mau": "Shimadzu Prominence LC-20 (bơm LC-20AD, detector UV-Vis SPD-20A, detector chỉ số khúc xạ RID-20A); cột 250 × 4,6 mm, hạt 5 µm (thông số lấy theo máy mẫu; trên vỏ máy trong phòng lab ảo dùng tên chung)",
+  "nguyen_ly": [
+    "Bơm cao áp đẩy pha động (dung môi lỏng) chảy đều qua cột nhồi hạt rất nhỏ (5 µm). Hạt nhỏ cho tách tốt nhưng cản dòng mạnh, nên cần áp suất hàng trăm bar.",
+    "Mẫu bơm vào qua van có vòng chứa mẫu (10 – 20 µL). Mỗi chất phân bố giữa pha động và pha tĩnh trên hạt; chất bị giữ càng mạnh thì ra càng muộn: t_R = t₀(1 + k), với t₀ là thời gian pha động đi hết cột.",
+    "Cột pha đảo C18 có pha tĩnh kỵ nước: chất phân cực ra trước, chất kỵ nước ra sau. Tăng phần dung môi hữu cơ (metanol, axetonitril) thì chất ra nhanh hơn. Axit hữu cơ chỉ được giữ ở dạng phân tử, nên pha động phải có pH thấp hơn pKa (ví dụ pH 2,5).",
+    "Detector UV đo độ hấp thụ của dòng chảy ra ở một bước sóng: axit hữu cơ đo ở 210 nm, axit benzoic ở khoảng 228 nm. Đường không hấp thụ UV nên đo bằng detector chỉ số khúc xạ (RID), so chỉ số khúc xạ của dòng mẫu với dòng pha động.",
+    "Định lượng theo chuẩn ngoài: chạy dãy chuẩn, dựng đường chuẩn diện tích pic theo nồng độ, rồi suy ra nồng độ mẫu (nhân hệ số pha loãng)."
+  ],
+  "cong_thuc": ["t_R = t₀(1 + k)", "log k = log k_w − S·φ (pha đảo)", "R_s = 2(t₂ − t₁)/(w₁ + w₂)", "ΔP ∝ η·L·F / d_p²"],
+  "bo_phan": [
+    {"ma": "binh_dung_moi", "ten": "Bình pha động", "chuc_nang": "Chứa dung môi đã lọc, có ống lọc đầu hút."},
+    {"ma": "khu_khi", "ten": "Bộ khử khí", "chuc_nang": "Loại khí hòa tan khỏi pha động để không tạo bọt trong bơm và detector."},
+    {"ma": "bom", "ten": "Bơm cao áp hai piston", "chuc_nang": "Đẩy pha động với lưu lượng chính xác (ví dụ 1,0 mL/phút), chịu tới 40 MPa."},
+    {"ma": "van_bom_mau", "ten": "Van bơm mẫu có vòng chứa mẫu", "chuc_nang": "Nạp mẫu vào vòng 10 µL rồi xoay van đưa mẫu vào dòng pha động."},
+    {"ma": "cot", "ten": "Cột sắc ký (C18 hoặc NH₂)", "chuc_nang": "Ống thép nhồi hạt silica gắn nhóm C18 / NH₂: nơi các chất được tách."},
+    {"ma": "lo_cot", "ten": "Lò cột", "chuc_nang": "Giữ nhiệt độ cột ổn định (30 °C) để thời gian lưu lặp lại."},
+    {"ma": "det_uv", "ten": "Detector UV-Vis", "chuc_nang": "Đo độ hấp thụ của dòng chảy ra ở bước sóng đã chọn."},
+    {"ma": "det_ri", "ten": "Detector chỉ số khúc xạ (RID)", "chuc_nang": "So chỉ số khúc xạ dòng mẫu với dòng so sánh; đo được chất không hấp thụ UV như đường."},
+    {"ma": "thai", "ten": "Bình chất thải", "chuc_nang": "Hứng pha động sau detector."}
+  ],
+  "thong_so": [
+    {"ten": "Áp suất tối đa của bơm", "gia_tri": "40 MPa (400 bar)", "loai": "điển hình", "nguon": "https://lcms.labrulez.com/bazaar/177"},
+    {"ten": "Dải lưu lượng của bơm", "gia_tri": "0,0001 – 10 mL/phút", "loai": "điển hình", "nguon": "https://lcms.labrulez.com/bazaar/177"},
+    {"ten": "Phương pháp đường", "gia_tri": "cột NH₂ 250 × 4,6 mm, axetonitril : nước 75 : 25, RID; thứ tự ra: fructozơ, glucozơ, saccarozơ, mantozơ, lactozơ", "loai": "phương pháp tham khảo", "nguon": "https://wwwqws.sigmaaldrich.com/CA/en/technical-documents/chromatograms/hplc/hplc-supelcosil-lc-nh2/supelco/g006195"},
+    {"ten": "Phương pháp axit hữu cơ", "gia_tri": "đệm KH₂PO₄ pH 2,5; detector UV (226 nm); thứ tự ra: tartaric, malic, xitric", "loai": "phương pháp tham khảo", "nguon": "https://icpms.cz/labrulez-bucket-strapi-h3hsga3/5991_1992_EN_6657f28d84/5991-1992EN.pdf"},
+    {"ten": "Phương pháp axit benzoic", "gia_tri": "cột C18 (RP18), metanol : đệm photphat pH 4, detector UV khoảng 226 – 230 nm", "loai": "phương pháp tham khảo", "nguon": "https://repository.unair.ac.id/9601"},
+    {"ten": "Hệ số giữ k của từng chất, hệ số đáp ứng detector", "gia_tri": "ước lượng theo thứ tự ra của tài liệu và mô hình log k = log k_w − S·φ", "loai": "mô phỏng", "mo_phong": true},
+    {"ten": "Áp suất theo lưu lượng, độ nhớt pha động", "gia_tri": "định luật Darcy, độ nhớt hỗn hợp nước – dung môi ước lượng", "loai": "mô phỏng", "mo_phong": true}
+  ],
+  "quy_trinh": [
+    {"ma": "chon_phuong_phap", "ten": "Chọn phương pháp, lắp cột", "viec": "Chọn phương pháp theo chất cần đo: axit hữu cơ (C18, pH 2,5, UV 210 nm), đường (NH₂, RID), axit benzoic (C18, UV 228 nm).", "ly_do": "Mỗi nhóm chất cần cột, pha động, detector riêng.", "loi": "Đo đường bằng detector UV: không thấy pic nào."},
+    {"ma": "duoi_khi", "ten": "Đuổi khí bơm (purge)", "viec": "Mở van xả, bơm nhanh để đẩy bọt khí ra khỏi đường ống, piston.", "ly_do": "Bọt khí làm lưu lượng, áp suất dao động, đường nền nhiễu.", "loi": "Không đuổi khí: áp suất dao động, đường nền răng cưa."},
+    {"ma": "can_bang", "ten": "Cân bằng cột", "viec": "Cho pha động chảy qua cột tới khi áp suất và đường nền ổn định (khoảng 10 thể tích cột).", "ly_do": "Cột chưa cân bằng: thời gian lưu trôi, đường nền dốc.", "loi": "Bơm mẫu ngay: thời gian lưu không lặp lại."},
+    {"ma": "loc_mau", "ten": "Lọc mẫu (màng 0,45 µm), pha loãng", "viec": "Lọc mẫu qua màng 0,45 µm; pha loãng nếu đặc.", "ly_do": "Hạt rắn làm tắc đầu cột, áp suất tăng dần.", "loi": "Không lọc mẫu có cặn: áp suất tăng sau mỗi lần bơm."},
+    {"ma": "day_chuan", "ten": "Chạy dãy chuẩn", "viec": "Bơm các chuẩn đã biết nồng độ, dựng đường chuẩn diện tích pic theo nồng độ.", "ly_do": "Diện tích pic tỉ lệ với lượng chất.", "loi": "Ít hơn 3 điểm chuẩn: đường chuẩn không tin cậy."},
+    {"ma": "chay_mau", "ten": "Bơm mẫu, chạy sắc ký", "viec": "Nạp mẫu vào vòng chứa, xoay van bơm; thu sắc ký đồ.", "ly_do": "Mỗi chất ra một pic ở thời gian lưu riêng.", "loi": ""},
+    {"ma": "dinh_luong", "ten": "Nhận diện, định lượng", "viec": "So thời gian lưu với chuẩn; tính nồng độ từ diện tích pic và đường chuẩn, nhân hệ số pha loãng.", "ly_do": "Cùng điều kiện thì cùng chất ra cùng thời gian lưu.", "loi": "Pic mẫu vượt chuẩn cao nhất: pha loãng rồi chạy lại."},
+    {"ma": "ket_thuc", "ten": "Rửa cột, tắt bơm", "viec": "Rửa cột bằng nước rồi dung dịch có dung môi hữu cơ; giảm dần lưu lượng, tắt bơm.", "ly_do": "Muối đệm kết tinh trong cột, bơm nếu để lâu.", "loi": ""}
+  ],
+  "an_toan": [
+    "Pha động hữu cơ (axetonitril, metanol) dễ cháy, độc: đậy kín bình, làm nơi thông gió.",
+    "Không nới đầu nối khi bơm đang chạy ở áp suất cao.",
+    "Áp suất vượt giới hạn: bơm tự dừng. Tìm chỗ tắc (lọc đầu cột, cột) trước khi chạy lại."
+  ],
+  "thuat_ngu": [
+    {"tu": "Pha động", "nghia": "Dung môi lỏng chảy qua cột, mang mẫu đi."},
+    {"tu": "Pha tĩnh", "nghia": "Lớp gắn trên hạt nhồi trong cột (C18, NH₂), giữ chất lại."},
+    {"tu": "t₀ (thời gian chết)", "nghia": "Thời gian chất hoàn toàn không bị giữ đi hết cột."},
+    {"tu": "Hệ số giữ k", "nghia": "Tỉ số thời gian chất nằm ở pha tĩnh so với ở pha động."},
+    {"tu": "Độ phân giải R_s", "nghia": "Mức tách của hai pic; R_s ≥ 1,5 là tách hoàn toàn."}
+  ],
+  "cau_hoi_on_tap": [
+    "Vì sao pha động phân tích axit hữu cơ phải có pH khoảng 2,5?",
+    "Vì sao không đo được đường bằng detector UV? Dùng detector gì thay thế?",
+    "Tăng lưu lượng từ 1 lên 2 mL/phút thì thời gian lưu và áp suất thay đổi thế nào?",
+    "Tăng phần metanol trong pha động thì axit benzoic ra sớm hơn hay muộn hơn? Vì sao?",
+    "Vì sao phải lọc mẫu trước khi bơm vào HPLC?"
+  ]
+}

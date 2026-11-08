@@ -1,5 +1,7 @@
 # Tay cầm VR V2 "Halo"
 
+> Bản này đã được thay bằng [VERA Drop](22-tay-cam-vera-drop.md). Phần giải thích cò Hall và OpenCV vẫn dùng được. Lưu ý HT7333 ghi trong bản vẽ TC2-04 chỉ cho 250 mA, không đủ khi ESP32 bật Wi-Fi.
+
 Thiết kế ngày 27/10/2026, thay cho bản V1 ở [docs/13](13-ban-ve-tay-cam-vr.md) (ống PVC + hộp thắt lưng).
 
 ## Bộ mạch

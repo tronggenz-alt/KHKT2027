@@ -4,7 +4,7 @@ Chạy:  python tools/trinh_bay/lam_trinh_bay.py <thư mục dựng>
   - <thư mục dựng>/img/*.jpg|png phải có sẵn (ảnh chụp đã thu nhỏ, ảnh 3D tay cầm)
   - ra <thư mục dựng>/trinh_bay.html; in PDF bằng Edge:
     msedge --headless=new --print-to-pdf=docs/trinh-bay/VERA_Lab_trinh_bay.pdf --no-pdf-header-footer trinh_bay.html
-Số liệu lấy từ docs/05–15 của dự án.
+Số liệu lấy từ docs/05–15 và docs/24 của dự án.
 """
 import os
 import sys
@@ -151,12 +151,12 @@ def t03():
 <text class="kt" x="16" y="48">HỌC SINH</text>
 <text class="kn" x="16" y="78">Kính VR (điện thoại / kính rời)</text>
 <rect x="16" y="96" width="218" height="142" rx="4" fill="#e8f7fa"/>
-<text class="kt" x="28" y="120" style="font-size:15px">TAY CẦM HALO</text>
+<text class="kt" x="28" y="120" style="font-size:15px">TAY CẦM VERA ARC</text>
 <text class="kn" x="28" y="142">ESP32 38 chân · Wi-Fi UDP</text><text class="kn" x="28" y="162">BMI160: vặn, gập, lắc cổ tay</text>
-<text class="kn" x="28" y="182">Joystick: đi, quay</text><text class="kn" x="28" y="202">Cò Hall analog 0–100%</text><text class="kn" x="28" y="222">Vòng halo cho OpenCV</text>
+<text class="kn" x="28" y="182">Joystick: đi, quay</text><text class="kn" x="28" y="202">Cò Hall analog 0–100%</text><text class="kn" x="28" y="222">4 cổng GPIO mở rộng</text>
 <rect x="16" y="252" width="218" height="74" rx="4" fill="#e8f7fa"/>
-<text class="kt" x="28" y="276" style="font-size:15px">WEBCAM + OPENCV</text>
-<text class="kn" x="28" y="298">đo xa gần, vị trí tay</text><text class="kn" x="28" y="316">Z = f · D / d (D = 70 mm)</text>
+<text class="kt" x="28" y="276" style="font-size:15px">WEBCAM + MEDIAPIPE</text>
+<text class="kn" x="28" y="298">theo dõi đầu và bàn tay</text><text class="kn" x="28" y="316">chưa thử khi đang cầm tay cầm</text>
 <text class="kn" x="16" y="356">Dự phòng: chuột – bàn phím</text><text class="kn" x="16" y="376">(nhóm đối chứng, máy không có kính)</text>
 <rect class="k" x="330" y="20" width="440" height="270" rx="6" style="stroke:#0e7c86;stroke-width:2"/>
 <text class="kt" x="348" y="48">ỨNG DỤNG UNITY 6 · WINDOWS / macOS</text>
@@ -207,7 +207,7 @@ def t04():
         ("6 máy phân tích + robot trợ lý theo kế hoạch AI", "Xong"),
         ("Web quản lý kho, thiết bị, nhật ký + mạng lưới khóa AI", "Xong"),
         ("Tay cầm Wi-Fi bản thử: joystick → ESP32 → game", "Chạy được"),
-        ("Tay cầm Halo: 3D, 7 file in, 5 bản vẽ, kiểm va chạm", "Thiết kế xong"),
+        ("Tay cầm VERA Arc: 3D, 8 file in, kiểm va chạm", "Thiết kế xong"),
         ("Lab Sinh học (tầng 2)", "Kế hoạch"),
         ("Web LMS cho giáo viên, học sinh", "Kế hoạch"),
         ("Nhiều người cùng thao tác trong lab", "Nghiên cứu"),
@@ -397,22 +397,25 @@ def t11():
 
 
 def t12():
+    cong = [("P1", "Mặt tối, trái", "GPIO13", "Số"), ("P2", "Mặt tối, phải", "GPIO14", "Số"), ("P3", "Mũi đầu, trái", "GPIO4", "Số"), ("P4", "Mũi đầu, phải", "GPIO36", "Analog")]
+    rows = "".join(f"<tr><td><b>{a}</b></td><td>{b}</td><td>{c}</td><td>{d}</td></tr>" for a, b, c, d in cong)
     than = f"""<div class="luoi" style="grid-template-columns:420px 1fr 330px">
-  <div class="the" style="padding:14px;background:radial-gradient(90% 80% at 50% 45%,#ffffff,#e8f0f1)"><img src="img/tc3d_a.png" alt="Tay cầm Halo, góc chéo phía trước" style="width:100%;height:100%;object-fit:contain;display:block"></div>
-  <div class="luoi" style="grid-template-rows:1fr 1fr;gap:12px">
-    <div class="the" style="padding:8px;background:#fff"><img src="img/tc3d_tach.png" alt="Tay cầm Halo tách rời các chi tiết" style="width:100%;height:100%;object-fit:contain;display:block"></div>
-    {anh('tc2_03.jpg', 'Bản vẽ TC2-03: cò Hall và điện áp ra theo độ bóp')}
+  <div class="the" style="padding:14px;background:radial-gradient(90% 80% at 50% 45%,#ffffff,#e8f0f1)"><img src="img/tc3d_a.png" alt="Tay cầm VERA Arc, góc chéo phía trước" style="width:100%;height:100%;object-fit:contain;display:block"></div>
+  <div class="luoi" style="grid-template-rows:1fr auto;gap:12px">
+    <div class="the" style="padding:8px;background:#fff;min-height:0"><img src="img/tc3d_tach.png" alt="Tay cầm VERA Arc tách rời các chi tiết" style="width:100%;height:100%;object-fit:contain;display:block"></div>
+    <div class="the" style="padding:10px 14px"><h3>4 cổng GPIO mở rộng</h3><table class="bang" style="font-size:12.5px"><thead><tr><th>Cổng</th><th>Vị trí</th><th>Chân</th><th>Tín hiệu</th></tr></thead><tbody>{rows}</tbody></table>
+      <div class="cap">Firmware và Unity chưa đọc 4 cổng này.</div></div>
   </div>
   <div class="the" style="border-top:4px solid var(--vr)"><h3>Thông số</h3><ul class="ds" style="font-size:13px">
-    <li>120 × 160 × 70 mm, ≈ 135 g kể cả mạch, chưa tính pin.</li>
-    <li>Cán <b>37 × 33 mm</b> ngả 20°: theo số đo bàn tay người Việt (đường kính tối ưu = 19,7% chiều dài bàn tay).</li>
-    <li><b>ESP32 38 chân</b> + <b>BMI160</b> trong cán; <b>joystick</b> trên mặt ngửa 15°.</li>
-    <li><b>Cò analog</b>: nam châm trên cò, cảm biến Hall SS49E cố định; bóp cò thì khe hở 6,5 → 3,8 mm, ESP32 đọc ≈ 465 mức.</li>
-    <li><b>Vòng halo Ø70</b> in nhựa huỳnh quang: OpenCV đo xa gần (Z = f·D/d), trục lớn elip không đổi khi nghiêng.</li>
-    <li>7 chi tiết in 3D (≈ 75 g nhựa), 5 bản vẽ 2D chiếu từ mô hình.</li>
-    <li>Kiểm va chạm tự động: linh kiện xếp chồng không lấn nhau, khe lắp 0,2–0,7 mm, cò không chạm vỏ suốt hành trình.</li></ul></div>
+    <li>81 × 71 × 123 mm, chỉ dùng cho tay phải. <b>≈ 137 g có pin: ước tính, chưa cân thật.</b></li>
+    <li>Cán ≈ 40 × 29 mm ôm <b>pin vuông 9V</b>, thay pin từ đáy; MP1584 hạ xuống 3,3 V.</li>
+    <li><b>ESP32 38 chân</b> + <b>BMI160</b> trong đầu; <b>joystick</b> trên mặt ngửa 20°.</li>
+    <li><b>Cò analog</b>: nam châm trên cò, Hall SS49E cố định; bóp cò thì khe hở 6,5 → 3,46 mm.</li>
+    <li><b>Vòng Ø71</b> in nhựa huỳnh quang, chỉ tạo dáng và mang logo, không tự sáng. Theo dõi tay dùng MediaPipe.</li>
+    <li>8 file STL, ≈ 53 g nhựa PLA (ước tính, chưa tính vật đỡ).</li>
+    <li>Kiểm va chạm tự động trên mô hình. <b>Chưa in thử</b>, kích thước linh kiện là số giả định.</li></ul></div>
 </div>"""
-    return trang(12, "Phần cứng", "Bản thiết kế tay cầm VR Halo", "Tay cầm tự thiết kế, in 3D được; mô hình 3D, bản vẽ và file in được sinh từ cùng một script nên luôn khớp nhau.", than)
+    return trang(12, "Phần cứng", "Bản thiết kế tay cầm VERA Arc", "Tay cầm tự thiết kế, chưa in thử; mô hình 3D và file in được sinh từ cùng một script nên luôn khớp nhau.", than)
 
 
 def mat_bang(tang):
@@ -558,7 +561,7 @@ def t15():
 
 def t16():
     gd = [("1", "Hoàn thiện Hóa", "Các bài còn lại; thử với học sinh; gắn kính VR; chỉnh theo phản hồi"),
-          ("2", "Tay cầm Halo", "In 3D, lắp mạch, firmware ESP32 (cò Hall, BMI160), OpenCV đo xa gần; đo độ trễ, độ chính xác"),
+          ("2", "Tay cầm VERA Arc", "In thử, lắp mạch, firmware ESP32 (cò Hall, BMI160, 4 cổng GPIO), thử MediaPipe khi đang cầm; đo độ trễ, độ chính xác"),
           ("3", "Web LMS", "Tài khoản, giao bài, chia nhóm, thảo luận, học liệu, quy tắc, chấm từ nhật ký"),
           ("4", "Lab Sinh học", "Dựng tầng 2; kính hiển vi ảo; 6–8 bài đầu tiên"),
           ("5", "Nhiều người + AI cục bộ", "Máy chủ LAN; đồng bộ trạng thái; mô hình AI chạy trên máy trường"),
@@ -572,7 +575,7 @@ def t16():
     <div class="the"><h3>Đóng góp mới của dự án</h3><ul class="ds" style="font-size:13.5px">
       <li>Phản ứng tính bằng <b>bộ máy hóa học</b> từ thành phần thật, không phải hoạt hình làm sẵn.</li>
       <li><b>Lắp ráp và gia công dụng cụ</b> tự do, bộ lắp chạy được như thật.</li>
-      <li><b>Tay cầm tự chế</b> tích hợp <b>cảm biến quán tính</b> (IMU), <b>cần điều khiển</b>, cò analog Hall và vòng halo đo vị trí bằng webcam. Mục tiêu là một <b>hệ thống tracking toàn diện</b> với <b>chi phí có lợi thế kinh tế cạnh tranh</b>, để <b>phổ cập rộng rãi</b>.</li>
+      <li><b>Tay cầm tự chế</b> tích hợp <b>cảm biến quán tính</b> (IMU), <b>cần điều khiển</b>, cò analog Hall và <b>4 cổng GPIO mở rộng</b>, kết hợp theo dõi tay bằng webcam (MediaPipe). Mục tiêu là một <b>hệ thống tracking toàn diện</b> với <b>chi phí có lợi thế kinh tế cạnh tranh</b>, để <b>phổ cập rộng rãi</b>.</li>
       <li><b>AI lai</b> đám mây / cục bộ, có máy chủ kiểm duyệt an toàn.</li>
       <li>Đo kỹ năng thao tác bằng số liệu, so sánh có đối chứng.</li>
       <li><b>Nhiều người cùng tham gia một lúc</b> trong cùng phòng lab.</li>

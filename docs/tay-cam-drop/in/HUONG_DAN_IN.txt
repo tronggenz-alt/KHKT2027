@@ -1,0 +1,20 @@
+﻿TAY CẦM VERA DROP - HƯỚNG DẪN IN 3D
+
+Đơn vị trong file STL: mm. In đúng tỉ lệ 100%. Các file đã xoay sẵn đúng hướng in.
+Mỗi file in 1 cái, riêng thanh.stl in 3 cái để dự phòng vì chi tiết rất nhỏ.
+
+File            Chi tiết                  Kích thước (mm)      Màu đề xuất   Hướng in
+than_phai.stl   Nửa thân phải, có chữ     58,1 x 77 x 20       Trắng         Mặt ghép úp xuống bàn
+than_trai.stl   Nửa thân trái             58,1 x 77 x 20       Trắng         Mặt ghép úp xuống bàn
+nap.stl         Nắp đầu                   54,9 x 42,2 x 32,8   Đen           Mặt đỉnh úp xuống bàn
+vong.stl        Vòng quanh cổ             55,1 x 41,3 x 4      Xanh ngọc     Nằm phẳng
+chen.stl        Chén lõm joystick         30 x 30 x 7,5        Xám đậm       Mặt lớn úp xuống bàn
+co.stl          Cò                        11,9 x 26,3 x 15,6   Đen           Nằm nghiêng
+thanh.stl       Ống thanh móc dây         4 x 4 x 12,5         Đen           Dựng đứng
+
+Nhờ bên in lưu ý:
+- 2 nửa thân cần vật đỡ ở bên trong và dưới 2 tai móc ở đáy. Giữ mặt ngoài sạch và mặt ghép phẳng.
+- Nửa thân phải có chữ khắc "VERA LAB - Le Quy Don", sâu 0,6 mm, chữ hoa cao khoảng 3,2 mm.
+  Nhờ xem giúp chữ có in rõ không; nếu cần thì chọn lớp in mỏng hơn.
+- Lỗ nhỏ: mồi vít Ø1,7, trục cò Ø2,2, lỗ qua ống thanh móc Ø2,3. Giữ đúng kích thước, không tự khoét rộng.
+- Vật liệu đề xuất: PLA hoặc PETG.

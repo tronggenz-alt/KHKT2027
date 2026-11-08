@@ -1,0 +1,550 @@
+{
+  "phien_ban": 1,
+  "tieu_ban": [
+    {
+      "ma": "bieu_bi_hanh",
+      "ten": "Biểu bì vảy hành tím không nhuộm",
+      "loai": "tu_lam",
+      "nhuom": "khong",
+      "kich_thuoc_te_bao_um": [
+        150,
+        300
+      ],
+      "bo_phan_chu_thich": [
+        {
+          "ten": "Vách tế bào (Cell wall)",
+          "x": 0.25,
+          "y": 0.35
+        },
+        {
+          "ten": "Không bào trung tâm chứa sắc tố anthocyanin",
+          "x": 0.52,
+          "y": 0.48
+        },
+        {
+          "ten": "Nhân tế bào (Nucleus)",
+          "x": 0.78,
+          "y": 0.32
+        }
+      ],
+      "nguon": "https://openstax.org/books/biology-2e/pages/4-3-eukaryotic-cells"
+    },
+    {
+      "ma": "bieu_bi_hanh_xanh",
+      "ten": "Biểu bì vảy hành nhuộm xanh methylen",
+      "loai": "tu_lam",
+      "nhuom": "xanh_methylen",
+      "kich_thuoc_te_bao_um": [
+        150,
+        300
+      ],
+      "bo_phan_chu_thich": [
+        {
+          "ten": "Nhân tế bào bắt màu xanh đậm",
+          "x": 0.45,
+          "y": 0.4
+        },
+        {
+          "ten": "Hạt nhân (Nucleolus)",
+          "x": 0.48,
+          "y": 0.42
+        },
+        {
+          "ten": "Tế bào chất (Cytoplasm)",
+          "x": 0.3,
+          "y": 0.55
+        }
+      ],
+      "nguon": "https://openstax.org/books/biology-2e/pages/4-3-eukaryotic-cells"
+    },
+    {
+      "ma": "thai_lai_tia_binh_thuong",
+      "ten": "Biểu bì lá thài lài tía bình thường (trương nước)",
+      "loai": "tu_lam",
+      "nhuom": "khong",
+      "kich_thuoc_te_bao_um": [
+        40,
+        90
+      ],
+      "bo_phan_chu_thich": [
+        {
+          "ten": "Tế bào biểu bì chứa không bào màu tím",
+          "x": 0.35,
+          "y": 0.45
+        },
+        {
+          "ten": "Khí khổng gồm 2 tế bào hình hạt đậu",
+          "x": 0.65,
+          "y": 0.5
+        },
+        {
+          "ten": "Lục lạp trong tế bào khí khổng",
+          "x": 0.62,
+          "y": 0.44
+        }
+      ],
+      "nguon": "https://openstax.org/books/biology-2e/pages/30-2-stems"
+    },
+    {
+      "ma": "thai_lai_tia_co_nguyen_sinh",
+      "ten": "Biểu bì lá thài lài tía co nguyên sinh (trong NaCl 10%)",
+      "loai": "tu_lam",
+      "nhuom": "khong",
+      "kich_thuoc_te_bao_um": [
+        40,
+        90
+      ],
+      "bo_phan_chu_thich": [
+        {
+          "ten": "Khối chất nguyên sinh co cụm tách khỏi vách",
+          "x": 0.5,
+          "y": 0.5
+        },
+        {
+          "ten": "Khoảng trống giữa vách và màng sinh chất",
+          "x": 0.28,
+          "y": 0.38
+        },
+        {
+          "ten": "Vách tế bào cellulose giữ nguyên hình dạng",
+          "x": 0.2,
+          "y": 0.25
+        }
+      ],
+      "nguon": "https://openstax.org/books/biology-2e/pages/5-2-passive-transport"
+    },
+    {
+      "ma": "thai_lai_tia_phan_co",
+      "ten": "Biểu bì lá thài lài tía phản co nguyên sinh (sau khi nhỏ nước cất)",
+      "loai": "tu_lam",
+      "nhuom": "khong",
+      "kich_thuoc_te_bao_um": [
+        40,
+        90
+      ],
+      "bo_phan_chu_thich": [
+        {
+          "ten": "Khối nguyên sinh chất hút nước nở căng áp sát vách",
+          "x": 0.48,
+          "y": 0.48
+        },
+        {
+          "ten": "Không bào tím phục hồi thể tích ban đầu",
+          "x": 0.55,
+          "y": 0.52
+        }
+      ],
+      "nguon": "https://openstax.org/books/biology-2e/pages/5-2-passive-transport"
+    },
+    {
+      "ma": "khi_khong_mo",
+      "ten": "Khí khổng mở (ở ngoài sáng)",
+      "loai": "tu_lam",
+      "nhuom": "khong",
+      "kich_thuoc_te_bao_um": [
+        30,
+        50
+      ],
+      "bo_phan_chu_thich": [
+        {
+          "ten": "Lỗ khí mở rộng (Stomatal pore)",
+          "x": 0.5,
+          "y": 0.5
+        },
+        {
+          "ten": "Vách trong dày của tế bào hạt đậu cong lõm",
+          "x": 0.45,
+          "y": 0.42
+        },
+        {
+          "ten": "Vách ngoài mỏng dãn dài ra ngoài",
+          "x": 0.32,
+          "y": 0.55
+        }
+      ],
+      "nguon": "https://openstax.org/books/biology-2e/pages/30-2-stems"
+    },
+    {
+      "ma": "khi_khong_dong",
+      "ten": "Khí khổng đóng (trong bóng tối hoặc thiếu nước)",
+      "loai": "tu_lam",
+      "nhuom": "khong",
+      "kich_thuoc_te_bao_um": [
+        30,
+        50
+      ],
+      "bo_phan_chu_thich": [
+        {
+          "ten": "Khe khí khổng khép kín",
+          "x": 0.5,
+          "y": 0.5
+        },
+        {
+          "ten": "Tế bào hình hạt đậu mất nước xẹp thẳng",
+          "x": 0.42,
+          "y": 0.45
+        }
+      ],
+      "nguon": "https://openstax.org/books/biology-2e/pages/30-2-stems"
+    },
+    {
+      "ma": "niem_mac_mieng",
+      "ten": "Tế bào niêm mạc miệng người nhuộm xanh methylen",
+      "loai": "tu_lam",
+      "nhuom": "xanh_methylen",
+      "kich_thuoc_te_bao_um": [
+        50,
+        75
+      ],
+      "bo_phan_chu_thich": [
+        {
+          "ten": "Nhân tế bào biểu mô dẹt bắt màu xanh thẫm",
+          "x": 0.5,
+          "y": 0.48
+        },
+        {
+          "ten": "Màng sinh chất mềm dẻo không có vách",
+          "x": 0.28,
+          "y": 0.35
+        },
+        {
+          "ten": "Tế bào chất bắt màu xanh nhạt",
+          "x": 0.65,
+          "y": 0.58
+        }
+      ],
+      "nguon": "https://openstax.org/books/biology-2e/pages/4-2-prokaryotic-cells"
+    },
+    {
+      "ma": "nam_men",
+      "ten": "Nấm men bánh mì (Saccharomyces cerevisiae) nảy chồi",
+      "loai": "tu_lam",
+      "nhuom": "xanh_methylen",
+      "kich_thuoc_te_bao_um": [
+        5,
+        10
+      ],
+      "bo_phan_chu_thich": [
+        {
+          "ten": "Tế bào nấm men hình cầu / bầu dục",
+          "x": 0.4,
+          "y": 0.45
+        },
+        {
+          "ten": "Chồi non đang mọc (Budding)",
+          "x": 0.58,
+          "y": 0.38
+        },
+        {
+          "ten": "Sẹo nảy chồi (Bud scar)",
+          "x": 0.35,
+          "y": 0.52
+        }
+      ],
+      "nguon": "https://www.atcc.org/products/204508"
+    },
+    {
+      "ma": "vi_khuan_sua_chua",
+      "ten": "Vi khuẩn sữa chua (Lactobacillus & Streptococcus)",
+      "loai": "tu_lam",
+      "nhuom": "gram",
+      "kich_thuoc_te_bao_um": [
+        0.8,
+        3.5
+      ],
+      "bo_phan_chu_thich": [
+        {
+          "ten": "Trực khuẩn Lactobacillus bulgaricus màu tím Gram+",
+          "x": 0.35,
+          "y": 0.45
+        },
+        {
+          "ten": "Chuỗi liên cầu Streptococcus thermophilus Gram+",
+          "x": 0.68,
+          "y": 0.52
+        }
+      ],
+      "nguon": "https://openstax.org/books/microbiology/pages/22-2-microbial-diseases-of-the-digestive-system"
+    },
+    {
+      "ma": "e_coli_gram",
+      "ten": "Escherichia coli K-12 nhuộm Gram (Gram âm)",
+      "loai": "tu_lam",
+      "nhuom": "gram",
+      "kich_thuoc_te_bao_um": [
+        1.0,
+        2.5
+      ],
+      "bo_phan_chu_thich": [
+        {
+          "ten": "Trực khuẩn ngắn bắt màu hồng đỏ Safranin",
+          "x": 0.5,
+          "y": 0.48
+        },
+        {
+          "ten": "Vách tế bào peptidoglycan mỏng kèm màng ngoài",
+          "x": 0.45,
+          "y": 0.52
+        }
+      ],
+      "nguon": "https://openstax.org/books/microbiology/pages/3-3-unique-characteristics-of-prokaryotic-cells"
+    },
+    {
+      "ma": "b_subtilis_gram",
+      "ten": "Bacillus subtilis nhuộm Gram (Gram dương)",
+      "loai": "tu_lam",
+      "nhuom": "gram",
+      "kich_thuoc_te_bao_um": [
+        2.0,
+        5.0
+      ],
+      "bo_phan_chu_thich": [
+        {
+          "ten": "Trực khuẩn lớn bắt màu tím Crystal Violet đậm",
+          "x": 0.4,
+          "y": 0.45
+        },
+        {
+          "ten": "Nội bào tử chịu nhiệt hình bầu dục sáng ở giữa",
+          "x": 0.42,
+          "y": 0.48
+        }
+      ],
+      "nguon": "https://openstax.org/books/microbiology/pages/3-3-unique-characteristics-of-prokaryotic-cells"
+    },
+    {
+      "ma": "pho_nang",
+      "ten": "Phế nang và mao mạch phổi (Alveoli)",
+      "loai": "co_dinh",
+      "nhuom": "he",
+      "kich_thuoc_te_bao_um": [
+        10,
+        30
+      ],
+      "bo_phan_chu_thich": [
+        {
+          "ten": "Tế bào biểu mô phế nang dẹt (Pneumocyte I)",
+          "x": 0.35,
+          "y": 0.42
+        },
+        {
+          "ten": "Lòng phế nang chứa khí trao đổi O2/CO2",
+          "x": 0.5,
+          "y": 0.5
+        },
+        {
+          "ten": "Mao mạch chứa hồng cầu đơn hàng",
+          "x": 0.72,
+          "y": 0.65
+        }
+      ],
+      "nguon": "https://openstax.org/books/anatomy-and-physiology-2e/pages/22-2-the-lungs"
+    },
+    {
+      "ma": "nephron",
+      "ten": "Cầu thận và ống lượn thận (Nephron)",
+      "loai": "co_dinh",
+      "nhuom": "he",
+      "kich_thuoc_te_bao_um": [
+        15,
+        45
+      ],
+      "bo_phan_chu_thich": [
+        {
+          "ten": "Búi mao mạch Malpighi (Glomerulus)",
+          "x": 0.48,
+          "y": 0.48
+        },
+        {
+          "ten": "Bao Bowman hứng dịch lọc cầu thận",
+          "x": 0.3,
+          "y": 0.35
+        },
+        {
+          "ten": "Biểu mô ống lượn gần có vi nhung mao",
+          "x": 0.75,
+          "y": 0.6
+        }
+      ],
+      "nguon": "https://openstax.org/books/anatomy-and-physiology-2e/pages/25-3-physiology-of-urine-formation"
+    },
+    {
+      "ma": "synapse",
+      "ten": "Khớp thần kinh hóa học (Chemical Synapse)",
+      "loai": "co_dinh",
+      "nhuom": "he",
+      "kich_thuoc_te_bao_um": [
+        0.5,
+        2.0
+      ],
+      "bo_phan_chu_thich": [
+        {
+          "ten": "Chùy tiền synapse chứa bóng chất dẫn truyền",
+          "x": 0.45,
+          "y": 0.32
+        },
+        {
+          "ten": "Khe synapse rộng 20 – 40 nm",
+          "x": 0.5,
+          "y": 0.5
+        },
+        {
+          "ten": "Màng sau synapse chứa thụ thể tiếp nhận",
+          "x": 0.55,
+          "y": 0.68
+        }
+      ],
+      "nguon": "https://openstax.org/books/anatomy-and-physiology-2e/pages/12-5-communication-between-neurons"
+    },
+    {
+      "ma": "sarcomere",
+      "ten": "Đơn vị co cơ vân (Sarcomere)",
+      "loai": "co_dinh",
+      "nhuom": "he",
+      "kich_thuoc_te_bao_um": [
+        2.0,
+        3.0
+      ],
+      "bo_phan_chu_thich": [
+        {
+          "ten": "Vạch Z giới hạn hai đầu sarcomere",
+          "x": 0.2,
+          "y": 0.5
+        },
+        {
+          "ten": "Băng tối A chứa sợi dày myosin xen sợi actin",
+          "x": 0.5,
+          "y": 0.48
+        },
+        {
+          "ten": "Băng sáng I chỉ chứa sợi mỏng actin",
+          "x": 0.78,
+          "y": 0.52
+        }
+      ],
+      "nguon": "https://openstax.org/books/anatomy-and-physiology-2e/pages/10-2-skeletal-muscle"
+    },
+    {
+      "ma": "te_bao_vien",
+      "ten": "Tế bào viền niêm mạc dạ dày tiết HCl (Parietal cell)",
+      "loai": "co_dinh",
+      "nhuom": "he",
+      "kich_thuoc_te_bao_um": [
+        20,
+        35
+      ],
+      "bo_phan_chu_thich": [
+        {
+          "ten": "Tế bào viền hình tháp bắt màu axit mạnh (hồng)",
+          "x": 0.52,
+          "y": 0.45
+        },
+        {
+          "ten": "Hệ thống vi quản nội bào bơm proton H+/K+ ATPase",
+          "x": 0.42,
+          "y": 0.52
+        },
+        {
+          "ten": "Tế bào chính tiết pepsinogen (bắt màu kiềm)",
+          "x": 0.75,
+          "y": 0.6
+        }
+      ],
+      "nguon": "https://openstax.org/books/anatomy-and-physiology-2e/pages/23-4-the-stomach"
+    },
+    {
+      "ma": "tieu_thuy_gan",
+      "ten": "Tiểu thùy gan hình lục giác (Hepatic lobule)",
+      "loai": "co_dinh",
+      "nhuom": "he",
+      "kich_thuoc_te_bao_um": [
+        20,
+        30
+      ],
+      "bo_phan_chu_thich": [
+        {
+          "ten": "Tĩnh mạch trung tâm tiểu thùy",
+          "x": 0.5,
+          "y": 0.5
+        },
+        {
+          "ten": "Dây tế bào gan xếp hình nan hoa",
+          "x": 0.38,
+          "y": 0.38
+        },
+        {
+          "ten": "Khoảng cửa chứa bộ ba cửa (TM cửa, ĐM gan, ống mật)",
+          "x": 0.82,
+          "y": 0.2
+        }
+      ],
+      "nguon": "https://openstax.org/books/anatomy-and-physiology-2e/pages/23-6-accessory-organs-in-digestion"
+    },
+    {
+      "ma": "phet_mau_nguoi",
+      "ten": "Phết máu ngoại vi người nhuộm Giemsa",
+      "loai": "co_dinh",
+      "nhuom": "he",
+      "kich_thuoc_te_bao_um": [
+        7.0,
+        15.0
+      ],
+      "bo_phan_chu_thich": [
+        {
+          "ten": "Hồng cầu hình đĩa lõm hai mặt không nhân",
+          "x": 0.35,
+          "y": 0.45
+        },
+        {
+          "ten": "Bạch cầu trung tính nhân nhiều thùy",
+          "x": 0.62,
+          "y": 0.5
+        },
+        {
+          "ten": "Bạch cầu lympho nhân to tròn chiếm gần hết tế bào",
+          "x": 0.48,
+          "y": 0.72
+        },
+        {
+          "ten": "Tiểu cầu nhỏ li ti đông máu",
+          "x": 0.25,
+          "y": 0.6
+        }
+      ],
+      "nguon": "https://openstax.org/books/anatomy-and-physiology-2e/pages/18-2-production-of-the-formed-elements"
+    },
+    {
+      "ma": "re_hanh_nguyen_phan",
+      "ten": "Mô phân sinh rễ hành các kỳ nguyên phân",
+      "loai": "co_dinh",
+      "nhuom": "he",
+      "kich_thuoc_te_bao_um": [
+        20,
+        45
+      ],
+      "bo_phan_chu_thich": [
+        {
+          "ten": "Kỳ đầu: NST đóng xoắn thấy rõ sợi",
+          "x": 0.25,
+          "y": 0.35
+        },
+        {
+          "ten": "Kỳ giữa: NST co ngắn cực đại xếp 1 hàng ở mặt phẳng xích đạo",
+          "x": 0.5,
+          "y": 0.45
+        },
+        {
+          "ten": "Kỳ sau: các cromatit tách nhau về 2 cực",
+          "x": 0.75,
+          "y": 0.55
+        },
+        {
+          "ten": "Kỳ cuối: vách ngăn tế bào mới hình thành",
+          "x": 0.4,
+          "y": 0.75
+        }
+      ],
+      "nguon": "https://openstax.org/books/biology-2e/pages/10-2-the-cell-cycle"
+    }
+  ]
+}

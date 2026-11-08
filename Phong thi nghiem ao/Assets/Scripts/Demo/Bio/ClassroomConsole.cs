@@ -59,6 +59,14 @@ namespace Khkt.Demo.Bio
                 screens[i].SetExperiment(code);
             }
 
+            if (BioLabProcedure.Instance != null)
+            {
+                bool isMol = code.Contains("pcr") || code.Contains("adn") || code.Contains("di_truyen");
+                BioLabProcedure.Instance.SetScenario(
+                    isMol ? BioLabProcedure.Scenario.DnaSplicingGfp : BioLabProcedure.Scenario.OnionPlasmolysis,
+                    false);
+            }
+
             BioFeedback.PlaySuccess();
             BioFeedback.LogAction("bang_dieu_khien_lop", "chon_bai_thi_nghiem",
                 $"Giáo viên phát bài thí nghiệm '{name}' ({code}) xuống toàn bộ {screens.Length} màn hình bàn học sinh.");

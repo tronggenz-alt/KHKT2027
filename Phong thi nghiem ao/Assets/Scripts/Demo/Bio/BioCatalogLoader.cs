@@ -343,6 +343,10 @@ namespace Khkt.Demo.Bio
 
                 string p2 = Path.GetFullPath(Path.Combine(Application.dataPath, "..", relativePath));
                 if (File.Exists(p2)) return File.ReadAllText(p2, Encoding.UTF8);
+
+                // bản .exe: dữ liệu đóng gói theo trong StreamingAssets
+                string p3 = Path.Combine(Application.streamingAssetsPath, relativePath);
+                if (File.Exists(p3)) return File.ReadAllText(p3, Encoding.UTF8);
             }
             catch (Exception e)
             {

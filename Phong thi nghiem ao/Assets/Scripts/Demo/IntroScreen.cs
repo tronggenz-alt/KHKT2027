@@ -1,6 +1,8 @@
+using System.Collections;
 using System.Collections.Generic;
 using Khkt.Environment;
 using Khkt.Environment.Tang2;
+using Khkt.Menu;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -14,6 +16,7 @@ namespace Khkt.Demo
     ///   • Hướng dẫn cảm ứng chuyên biệt cho iPad (loại bỏ phím chuột WASD, Esc khi chạy touch).
     ///   • Bổ sung tùy chọn Cài đặt: Âm thanh giao diện, Giảm chuyển động (Reduced Motion), Giảm độ trong suốt kính.
     ///   • 100% nút bấm đạt chuẩn Apple Touch Target (>= 44x44 pt).
+    ///   • Tích hợp vào thẳng phòng lab từ Menu chính (GameSession.EnterLabPending).
     /// </summary>
     public class IntroScreen : MonoBehaviour
     {
@@ -37,7 +40,7 @@ namespace Khkt.Demo
         {
             UiBridge.EnsureInteractive(ui.Canvas);
             var glass = Glass(ui.glassShader != null ? ui.glassShader : Shader.Find("Khkt/KinhMo"));
-            var dimRt = Rect(ui.Canvas.transform, "Màn hình giới thiệu", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(4000, 3000));
+            var dimRt = Rect(ui.Canvas.transform, "Bảng tạm dừng", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(4000, 3000));
             var dim = dimRt.gameObject.AddComponent<Image>();
             dim.color = new Color(0.02f, 0.05f, 0.09f, 0.55f);
             root = dimRt.gameObject;
@@ -236,6 +239,28 @@ namespace Khkt.Demo
                         : analyte == "H2SO4" || analyte == "H2C2O4" ? "Axit hai nấc: 1 mol axit cần 2 mol NaOH."
                         : "";
             setupNote.text = note + (analyteC <= 0 ? (note.Length > 0 ? "\n" : "") + "Nồng độ mẫu ẩn: tính ra rồi so với đáp án ở bảng kết quả." : "");
+            root.SetActive(false);
+            bool fromMenu = GameSession.EnterLabPending;
+            GameSession.EnterLabPending = false;
+            if (fromMenu)
+            {
+                StartCoroutine(EnterLab());
+            }
+            else if (showOnStart && !Application.isBatchMode)
+            {
+                Open();
+            }
+        }
+
+        IEnumerator EnterLab()
+        {
+            yield return null;
+            procedure.Stop();
+            viewer.GoTo(2);
+            string msg = Khkt.Input.PadInput.UsingTouch
+                ? "Thí nghiệm tự do: chạm Menu hoặc các nút cảm ứng để thao tác"
+                : "Thí nghiệm tự do: nhấn B để tìm hóa chất, T để hỏi robot, H để xem trợ giúp";
+            LabMessages.Say(msg, LabMessages.Tone.Info);
         }
 
         public void Open()
@@ -349,7 +374,7 @@ namespace Khkt.Demo
         {
             var kb = Keyboard.current;
             if (kb == null || !kb.escapeKey.wasPressedThisFrame) return;
-            if (IsOpen) { if (started) Close(); return; }
+            if (IsOpen) { Close(); return; }
             if (DesktopViewer.UiCapture == 0 && UiBridge.LastCloseFrame != Time.frameCount) Open();
         }
     }

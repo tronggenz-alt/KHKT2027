@@ -17,6 +17,8 @@ namespace Khkt.Demo.Bio
         public BioTool bioTool;
         public string heldSpecimenId = "";
         public string heldSpecimenName = "";
+        /// <summary>Mã chất đang gắp (từ khay mẫu, bình), để thả vào bình khác.</summary>
+        public string carriedMatter = "";
         public bool peeledTooFast = false;
 
         void Awake()

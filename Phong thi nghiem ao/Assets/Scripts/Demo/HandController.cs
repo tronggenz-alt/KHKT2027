@@ -312,12 +312,26 @@ namespace Khkt.Demo
             if (((kb != null && kb.qKey.wasPressedThisFrame) || (!uiOpen && PadInput.BackPressed)) && Held != null) ReturnHome();
             if (!uiOpen)
             {
+                bool onFloor2 = viewCamera != null && viewCamera.transform.position.y > 3.0f;
+                var bioProc = onFloor2 ? Khkt.Demo.Bio.BioLabProcedure.Instance : null;
                 bool enter = kb != null && (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame);
-                if (procedure != null && (enter || PadInput.RecordPressed)) procedure.RecordReading();
-                if (procedure != null && procedure.Active && HeldPart == null && ((kb != null && kb.rKey.wasPressedThisFrame) || PadInput.NewRunPressed))
+                if (enter || PadInput.RecordPressed)
                 {
-                    procedure.NewRun();
-                    PadInput.NewRunPressed = false;
+                    if (bioProc != null && bioProc.Active) bioProc.RecordReading();
+                    else if (procedure != null) procedure.RecordReading();
+                }
+                if (HeldPart == null && ((kb != null && kb.rKey.wasPressedThisFrame) || PadInput.NewRunPressed))
+                {
+                    if (bioProc != null && bioProc.Active)
+                    {
+                        bioProc.NewRun();
+                        PadInput.NewRunPressed = false;
+                    }
+                    else if (procedure != null && procedure.Active)
+                    {
+                        procedure.NewRun();
+                        PadInput.NewRunPressed = false;
+                    }
                 }
                 if (ui != null && ((kb != null && kb.hKey.wasPressedThisFrame) || PadInput.HelpPressed)) ui.ToggleHelp();
                 if (ui != null && ((kb != null && kb.gKey.wasPressedThisFrame) || PadInput.ToggleGraphPressed))
@@ -372,7 +386,17 @@ namespace Khkt.Demo
             else if (mouse != null && !Khkt.Environment.DesktopViewer.MouseLook && !PadInput.AimFromCenter)
                 ray = viewCamera.ScreenPointToRay(mouse.position.ReadValue());
             else ray = viewCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f));
-            hasHit = Physics.Raycast(ray, out hit, reach, ~0, QueryTriggerInteraction.Collide);
+            // tia không được dừng ở thân người chơi: cúi nhìn vật gần trên bàn thì tia đi qua khối thân ngay dưới mắt
+            int n = Physics.RaycastNonAlloc(ray, rayHits, reach, ~0, QueryTriggerInteraction.Collide);
+            hasHit = false;
+            float nearest = float.MaxValue;
+            for (int i = 0; i < n; i++)
+            {
+                if (rayHits[i].collider is CharacterController || rayHits[i].distance >= nearest) continue;
+                nearest = rayHits[i].distance;
+                hit = rayHits[i];
+                hasHit = true;
+            }
             if (!hasHit && PadInput.UsingTouch)
             {
                 // Vì lam kính, kim rất nhỏ, thêm hút ngắm nhẹ chỉ ở chế độ cảm ứng:
@@ -394,6 +418,7 @@ namespace Khkt.Demo
         }
 
         Ray lastRay;
+        readonly RaycastHit[] rayHits = new RaycastHit[16];
 
         void Decide()
         {
@@ -502,6 +527,12 @@ namespace Khkt.Demo
         public void Pick(Grabbable g)
         {
             if (g == null || Held != null) return;
+            var bottle = g.GetComponent<ChemicalBottle>();
+            if (bottle != null && ClassRules.IsLocked(bottle.stt))
+            {
+                LabMessages.Say("Giáo viên đã khóa hóa chất này", LabMessages.Tone.Warn);
+                return;
+            }
             var buret = g.GetComponent<BuretStopcock>();
             if (buret != null && buret.HasLiquid && g.Socket != null && g.Socket.mountsBuret)
             {

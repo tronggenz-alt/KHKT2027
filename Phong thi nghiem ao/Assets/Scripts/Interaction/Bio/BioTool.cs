@@ -16,8 +16,10 @@ namespace Khkt.Interaction.Bio
         ImmersionOil,     // Lọ dầu soi 100x (lo_dau_soi_immersion)
         ImmersionOilBottle = ImmersionOil,
         InoculationLoop,  // Que cấy vi sinh (que_cay_vi_sinh)
+        InoculatingLoop = InoculationLoop,
         Micropipette,     // Micropipet P20 / P200 / P1000 (micropipet_bo_3_cay)
         WateringCan,      // Bình tưới cây (binh_tuoi_cay_nha_kinh)
+        WashBottle = WateringCan,
         PhEcMeter,        // Bút đo pH/EC thủy canh (but_do_ph_ec_thuy_canh)
         ReflexHammer,     // Búa phản xạ thần kinh (bua_phan_xa_than_kinh)
         Stethoscope,      // Ống nghe huyết áp (may_do_huyet_ap_ong_nghe)

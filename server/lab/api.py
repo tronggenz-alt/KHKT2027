@@ -5,10 +5,10 @@ from __future__ import annotations
 import time
 import unicodedata
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 
-from . import db, keypool
+from . import db, keypool, truc_tiep
 
 router = APIRouter(prefix="/api")
 
@@ -142,8 +142,11 @@ class GhiNhatKy(BaseModel):
 
 
 @router.post("/nhat-ky")
-def ghi_nhat_ky(body: GhiNhatKy) -> dict:
-    return {"id": db.log(body.loai, body.tieu_de[:300], body.noi_dung[:2000], body.muc_do, body.nguon)}
+def ghi_nhat_ky(body: GhiNhatKy, request: Request) -> dict:
+    nd = request.state.nguoi_dung
+    nguon = f"hoc_sinh:{nd['ten_dang_nhap']}" if nd and nd["vai_tro"] == "hoc_sinh" else body.nguon  # học sinh không ghi giả được nguồn
+    truc_tiep.ghi_su_kien(nd, body.muc_do, body.tieu_de, body.noi_dung)
+    return {"id": db.log(body.loai, body.tieu_de[:300], body.noi_dung[:2000], body.muc_do, nguon)}
 
 
 # ---------------------------------------------------------------------------

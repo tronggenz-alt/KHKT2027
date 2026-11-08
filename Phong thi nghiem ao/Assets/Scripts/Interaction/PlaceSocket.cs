@@ -17,15 +17,25 @@ namespace Khkt.Interaction
         public Collider zone;
         [Tooltip("Kẹp buret: đặt buret vào đây là buret được lắp trên giá")]
         public bool mountsBuret;
+        [Tooltip("Cho phép đặt tiêu bản/vật mới đè lên vật đang ở trong ổ (đẩy vật cũ sang bên cạnh)")]
+        public bool allowReplaceOccupant;
 
-        public Grabbable Occupant { get; private set; }
+        [SerializeField] Grabbable occupant;
+        public Grabbable Occupant { get => occupant; private set => occupant = value; }
         public event Action<Grabbable> Changed;
 
-        public bool Accepts(Grabbable g) => g != null && Occupant == null && Array.IndexOf(accepts, g.kind) >= 0;
+        public bool Accepts(Grabbable g) => g != null && (Occupant == null || (allowReplaceOccupant && Occupant != g)) && Array.IndexOf(accepts, g.kind) >= 0;
 
         /// <summary>Đặt vật vào: gốc vật trùng gốc ổ, hướng theo ổ.</summary>
         public void Put(Grabbable g)
         {
+            if (Occupant != null && Occupant != g && allowReplaceOccupant)
+            {
+                var prev = Occupant;
+                Occupant = null;
+                prev.SetSocket(null);
+                prev.transform.position = transform.position + transform.right * 0.08f;
+            }
             Occupant = g;
             g.transform.SetPositionAndRotation(transform.position, transform.rotation);
             g.SetSocket(this);

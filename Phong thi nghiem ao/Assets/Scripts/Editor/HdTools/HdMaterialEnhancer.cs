@@ -35,18 +35,12 @@ namespace Khkt.EditorTools
                 {
                     float u = (float)x / w;
                     float centerU = Mathf.Abs(u - 0.5f);
-                    // Gân chính (midrib) chạy dọc tâm, vuốt thon về ngọn
+                    // Sinh cấu trúc gân lá hữu cơ bằng fBm đa tỷ lệ (không sin)
                     float midrib = Mathf.Clamp01(1.0f - centerU * 28.0f) * Mathf.Lerp(1.0f, 0.25f, v);
-                    // Gân nhánh xương cá lệch góc ~48 độ hướng lên
                     float branchCoord = (v - centerU * 0.7f) * 26.0f;
-                    float branchWave = Mathf.Sin(branchCoord * Mathf.PI);
-                    float branchMask = Mathf.SmoothStep(0.55f, 1.0f, branchWave) * Mathf.Clamp01(1.0f - centerU * 2.2f);
-                    // Lưới gân con vi mô
-                    float fine1 = Mathf.Sin(u * 120.0f + v * 80.0f) * Mathf.Cos(u * 90.0f - v * 110.0f);
-                    float fine2 = Mathf.Sin(u * 200.0f - v * 160.0f) * 0.5f;
-                    float fineMesh = (fine1 + fine2) * 0.08f;
-
-                    heights[x, y] = midrib * 0.65f + branchMask * 0.35f + fineMesh;
+                    float fracB = branchCoord - Mathf.Floor(branchCoord);
+                    float branchMask = Mathf.SmoothStep(0.2f, 0.8f, 1f - Mathf.Abs(fracB - 0.5f) * 2f) * Mathf.Clamp01(1.0f - centerU * 2.2f);
+                    heights[x, y] = midrib * 0.65f + branchMask * 0.35f;
                 }
             }
 
@@ -86,9 +80,13 @@ namespace Khkt.EditorTools
 
         public static void ConfigureTextureImporters()
         {
-            if (!Directory.Exists(HdTexDir)) return;
+            var searchDirs = new List<string>();
+            if (Directory.Exists(HdTexDir)) searchDirs.Add(HdTexDir);
+            if (Directory.Exists("Assets/Lab/Textures")) searchDirs.Add("Assets/Lab/Textures");
+            if (Directory.Exists("Assets/Lab/NhaHoaHoc")) searchDirs.Add("Assets/Lab/NhaHoaHoc");
+            if (Directory.Exists("Assets/Lab/Logo")) searchDirs.Add("Assets/Lab/Logo");
 
-            string[] guids = AssetDatabase.FindAssets("t:Texture2D", new[] { HdTexDir });
+            string[] guids = AssetDatabase.FindAssets("t:Texture2D", searchDirs.ToArray());
             bool changed = false;
 
             foreach (var guid in guids)
@@ -99,30 +97,64 @@ namespace Khkt.EditorTools
 
                 string filename = Path.GetFileNameWithoutExtension(path);
                 bool isNormal = filename.StartsWith("Normal_") || filename.EndsWith("_Normal");
-
+                bool isHdDir = path.StartsWith(HdTexDir);
                 bool needUpdate = false;
-                if (isNormal && importer.textureType != TextureImporterType.NormalMap)
+
+                // 1. Cấu hình Normal map / Albedo / Mask
+                if (isHdDir)
                 {
-                    importer.textureType = TextureImporterType.NormalMap;
-                    needUpdate = true;
+                    if (isNormal && importer.textureType != TextureImporterType.NormalMap)
+                    {
+                        importer.textureType = TextureImporterType.NormalMap;
+                        needUpdate = true;
+                    }
+                    else if (!isNormal && importer.textureType != TextureImporterType.Default)
+                    {
+                        importer.textureType = TextureImporterType.Default;
+                        importer.sRGBTexture = !filename.Contains("Mask") && !filename.Contains("AO_");
+                        needUpdate = true;
+                    }
+
+                    if (importer.maxTextureSize > 1024)
+                    {
+                        importer.maxTextureSize = 1024;
+                        needUpdate = true;
+                    }
+
+                    if (importer.wrapMode != TextureWrapMode.Repeat)
+                    {
+                        importer.wrapMode = TextureWrapMode.Repeat;
+                        needUpdate = true;
+                    }
                 }
-                else if (!isNormal && importer.textureType != TextureImporterType.Default)
+
+                // 2. Lọc dị hướng 16x toàn diện cho sàn, bàn, tường và đồ vật
+                if (importer.anisoLevel != 16)
                 {
-                    importer.textureType = TextureImporterType.Default;
-                    importer.sRGBTexture = !filename.Contains("Mask") && !filename.Contains("AO_");
+                    importer.anisoLevel = 16;
                     needUpdate = true;
                 }
 
-                if (importer.maxTextureSize > 1024)
-                {
-                    importer.maxTextureSize = 1024;
-                    needUpdate = true;
-                }
+                // 3. Mipmap tối ưu: tranh ảnh, bảng tuần hoàn, vạch chia buret và nhãn lọ không bị mờ
+                bool isTextOrChart = filename.Contains("BangTuanHoan") || filename.Contains("VachBuret") ||
+                                     filename.Contains("BangLo") || filename.StartsWith("Poster") ||
+                                     filename.StartsWith("GHS") || filename.StartsWith("T2_ApPhich") ||
+                                     filename.Contains("ManGiaiPhau") || filename.Contains("AnhGel") ||
+                                     filename.Contains("MachDien") || filename.Contains("Logo") ||
+                                     path.Contains("NhaHoaHoc");
 
-                if (importer.wrapMode != TextureWrapMode.Repeat)
+                if (isTextOrChart)
                 {
-                    importer.wrapMode = TextureWrapMode.Repeat;
-                    needUpdate = true;
+                    if (Mathf.Abs(importer.mipMapBias - (-0.5f)) > 0.01f)
+                    {
+                        importer.mipMapBias = -0.5f;
+                        needUpdate = true;
+                    }
+                    if (!importer.mipmapEnabled)
+                    {
+                        importer.mipmapEnabled = true;
+                        needUpdate = true;
+                    }
                 }
 
                 if (needUpdate)
@@ -168,53 +200,82 @@ namespace Khkt.EditorTools
             var terraMask = AssetDatabase.LoadAssetAtPath<Texture2D>($"{HdTexDir}/TerracottaClay002_Mask.png");
 
             var shaderLaCay = Shader.Find("Khkt/Bio/LaCay");
+            var shaderThuyTinh = Shader.Find("Khkt/HD/ThuyTinhHD");
 
             int count = 0;
 
-            // 1. Tường & Trần
+            // 1. Tường & Trần sơn trơn: BỎ NORMAL MAP, MÀU ĐỒNG NHẤT (Mục 4B)
             Enhance("TuongSon", m => {
-                SetNormal(m, normPlaster, 0.6f);
+                m.SetTexture("_BumpMap", null);
+                m.SetFloat("_BumpScale", 0f);
+                m.DisableKeyword("_NORMALMAP");
+                m.SetTexture("_BaseMap", null);
+                m.SetTexture("_MainTex", null);
                 m.SetFloat("_Smoothness", 0.18f);
                 m.SetFloat("_Metallic", 0f);
             }, ref count);
 
             Enhance("TuongNgoai", m => {
-                SetNormal(m, normFacade, 0.9f);
+                m.SetTexture("_BumpMap", null);
+                m.SetFloat("_BumpScale", 0f);
+                m.DisableKeyword("_NORMALMAP");
+                m.SetTexture("_BaseMap", null);
+                m.SetTexture("_MainTex", null);
                 m.SetFloat("_Smoothness", 0.12f);
                 m.SetFloat("_Metallic", 0f);
             }, ref count);
 
             Enhance("Tran", m => {
-                SetNormal(m, normPlaster, 0.4f);
+                m.SetTexture("_BumpMap", null);
+                m.SetFloat("_BumpScale", 0f);
+                m.DisableKeyword("_NORMALMAP");
+                m.SetTexture("_BaseMap", null);
+                m.SetTexture("_MainTex", null);
                 m.SetFloat("_Smoothness", 0.08f);
                 m.SetFloat("_Metallic", 0f);
             }, ref count);
 
             Enhance("T2_TuongKem", m => {
-                SetNormal(m, normPlaster, 0.5f);
+                m.SetTexture("_BumpMap", null);
+                m.SetFloat("_BumpScale", 0f);
+                m.DisableKeyword("_NORMALMAP");
+                m.SetTexture("_BaseMap", null);
+                m.SetTexture("_MainTex", null);
                 m.SetFloat("_Smoothness", 0.16f);
             }, ref count);
 
-            // 2. Sàn các khu
+            Enhance("ThanTu", m => {
+                m.SetTexture("_BumpMap", null);
+                m.SetFloat("_BumpScale", 0f);
+                m.DisableKeyword("_NORMALMAP");
+                m.SetTexture("_BaseMap", null);
+                m.SetTexture("_MainTex", null);
+                m.SetFloat("_Smoothness", 0.35f);
+                m.SetFloat("_Metallic", 0f);
+            }, ref count);
+
+            // 2. Sàn các khu: Lưới ron 2x2 trùng khít GachLatSan60 (Mục 4C)
             Enhance("SanPhongLab", m => {
-                SetNormal(m, normTilesLab, 0.8f);
+                SetNormal(m, normTilesLab, 0.75f);
                 SetAO(m, aoTilesLab, 0.9f);
                 m.SetFloat("_Smoothness", 0.55f);
             }, ref count);
 
             Enhance("SanPhongHoaChat", m => {
-                SetNormal(m, normTilesChem, 0.75f);
+                SetNormal(m, normTilesLab, 0.65f);
+                SetAO(m, aoTilesLab, 0.9f);
                 m.SetFloat("_Smoothness", 0.48f);
             }, ref count);
 
             Enhance("SanHanhLang", m => {
-                SetNormal(m, normTilesLab, 0.7f);
+                SetNormal(m, normTilesLab, 0.70f);
                 SetAO(m, aoTilesLab, 0.85f);
                 m.SetFloat("_Smoothness", 0.52f);
             }, ref count);
 
             Enhance("SanBanCong", m => {
-                SetNormal(m, normTilesLab, 0.9f);
+                SetNormal(m, normTilesLab, 0.80f);
+                SetAO(m, aoTilesLab, 0.8f);
                 m.SetFloat("_Smoothness", 0.35f);
             }, ref count);
 
@@ -397,19 +458,55 @@ namespace Khkt.EditorTools
             Enhance("ThungChuaXanh", m => { m.SetFloat("_Smoothness", 0.58f); m.SetFloat("_Metallic", 0.05f); }, ref count);
             Enhance("Khay8C59BF", m => { m.SetFloat("_Smoothness", 0.62f); m.SetFloat("_Metallic", 0.05f); }, ref count);
 
-            // 8. Thủy tinh Borosilicate 3.3, Mặt khum & Kính quang học (Giai đoạn 7)
+            // 8. Thủy tinh Borosilicate 3.3, Mặt khum & Kính quang học (Giai đoạn 7 & Mục 3)
             Enhance("ThuyTinh", m => {
-                SetNormal(m, normGlass, 0.15f);
-                m.SetFloat("_Smoothness", 0.96f);
-                m.SetFloat("_Metallic", 0.08f);
-                m.SetColor("_BaseColor", new Color(0.78f, 0.91f, 0.97f, 0.38f));
+                if (shaderThuyTinh != null)
+                {
+                    m.shader = shaderThuyTinh;
+                    m.SetColor("_BaseColor", new Color(0.95f, 0.98f, 1.0f, 0.12f));
+                    m.SetColor("_EdgeColor", new Color(0.55f, 0.72f, 0.85f, 0.65f));
+                    m.SetFloat("_F0", 0.04f);
+                    m.SetFloat("_FresnelPower", 4.2f);
+                    m.SetFloat("_RefractDistort", 0.028f);
+                    m.SetFloat("_Dispersion", 0.006f);
+                    m.SetFloat("_Smoothness", 0.98f);
+                    m.SetFloat("_SpecIntensity", 2.2f);
+                    m.SetFloat("_Absorption", 1.6f);
+                    m.SetFloat("_ShadowStrength", 0.18f);
+                    m.renderQueue = 3010;
+                }
+                else
+                {
+                    SetNormal(m, normGlass, 0.15f);
+                    m.SetFloat("_Smoothness", 0.96f);
+                    m.SetFloat("_Metallic", 0.08f);
+                    m.SetColor("_BaseColor", new Color(0.78f, 0.91f, 0.97f, 0.38f));
+                }
             }, ref count);
 
             Enhance("CocThuyTinh", m => {
-                SetNormal(m, normGlass, 0.15f);
-                m.SetFloat("_Smoothness", 0.96f);
-                m.SetFloat("_Metallic", 0.08f);
-                m.SetColor("_BaseColor", new Color(0.78f, 0.91f, 0.97f, 0.38f));
+                if (shaderThuyTinh != null)
+                {
+                    m.shader = shaderThuyTinh;
+                    m.SetColor("_BaseColor", new Color(0.95f, 0.98f, 1.0f, 0.12f));
+                    m.SetColor("_EdgeColor", new Color(0.55f, 0.72f, 0.85f, 0.65f));
+                    m.SetFloat("_F0", 0.04f);
+                    m.SetFloat("_FresnelPower", 4.2f);
+                    m.SetFloat("_RefractDistort", 0.028f);
+                    m.SetFloat("_Dispersion", 0.006f);
+                    m.SetFloat("_Smoothness", 0.98f);
+                    m.SetFloat("_SpecIntensity", 2.2f);
+                    m.SetFloat("_Absorption", 1.6f);
+                    m.SetFloat("_ShadowStrength", 0.18f);
+                    m.renderQueue = 3010;
+                }
+                else
+                {
+                    SetNormal(m, normGlass, 0.15f);
+                    m.SetFloat("_Smoothness", 0.96f);
+                    m.SetFloat("_Metallic", 0.08f);
+                    m.SetColor("_BaseColor", new Color(0.78f, 0.91f, 0.97f, 0.38f));
+                }
             }, ref count);
 
             Enhance("MatKhum", m => {

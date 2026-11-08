@@ -258,7 +258,7 @@ namespace Khkt.Demo
             Label(chip.transform, "Chữ", chipHelpText, 16, Dim, false, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(150, 44));
             var img = Panel(root, "Trợ giúp", new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(20, 0), new Vector2(820, 650), glassMat, 1.3f);
             helpPanel = img.gameObject;
-            MakeButton(img.transform, "Đóng trợ giúp", "✕", new Vector2(750, -14), new Vector2(50, 44), () => helpPanel.SetActive(false));
+            MakeButton(img.transform, "Đóng trợ giúp", "✕", new Vector2(740, -10), new Vector2(66, 65), () => helpPanel.SetActive(false));
             
             bool usingTouch = Khkt.Input.PadInput.UsingTouch;
             string titleLeft = usingTouch ? "Điều khiển cảm ứng iPad" : "Điều khiển bàn phím & chuột";
@@ -289,7 +289,7 @@ namespace Khkt.Demo
                 ("F", "Lắc bình nón"), ("Enter", "Ghi số đọc buret"), ("G", "Đồ thị pH"), ("R", "Làm lượt chuẩn độ mới"),
                 ("Tab   Alt", "Nhìn theo chuột · thả con trỏ"), ("B", "Tra cứu hóa chất"), ("T", "Trợ lý AI"), ("Esc", "Menu, chọn bài"),
 #if !UNITY_IOS
-                ("F8   F9", "Điều khiển bằng đầu qua webcam · căn lại"),
+                ("F8  F9  F12", "Đầu qua webcam · xem mô phỏng · căn lại"),
 #endif
             };
             for (int i = 0; i < rows.Length; i++)
@@ -369,6 +369,20 @@ namespace Khkt.Demo
             UpdateToast();
             UpdateHints();
             UpdateCard();
+            bool onFloor2 = viewCamera != null && viewCamera.transform.position.y > 3.0f;
+            var bioProc = onFloor2 ? Khkt.Demo.Bio.BioLabProcedure.Instance : null;
+            if (bioProc != null && bioProc.Active)
+            {
+                if (!stepBar.activeSelf) stepBar.SetActive(true);
+                if (loupePanel.activeSelf) loupePanel.SetActive(false);
+                if (dataPanel.activeSelf) dataPanel.SetActive(false);
+                if (graphPanel.activeSelf) graphPanel.SetActive(false);
+                UpdateBioStepper(bioProc);
+                bool showBioResult = bioProc.LastResult.HasValue;
+                if (resultPanel.activeSelf != showBioResult) resultPanel.SetActive(showBioResult);
+                if (showBioResult) UpdateBioResult(bioProc.LastResult.Value);
+                return;
+            }
             if (procedure == null) return;
             if (stepBar.activeSelf != procedure.Active) stepBar.SetActive(procedure.Active);
             if (!procedure.Active)
@@ -409,6 +423,22 @@ namespace Khkt.Demo
             }
         }
 
+        void UpdateBioStepper(Khkt.Demo.Bio.BioLabProcedure bioProc)
+        {
+            for (int i = 0; i < steps.Count && i < bioProc.Done.Length; i++)
+            {
+                bool done = bioProc.Done[i];
+                bool current = (int)bioProc.Current == i;
+                var (dot, num, lab) = steps[i];
+                lab.text = bioProc.StepNames != null && i < bioProc.StepNames.Length ? bioProc.StepNames[i] : $"Bước {i + 1}";
+                dot.color = done ? new Color(Good.r, Good.g, Good.b, 0.9f) : current ? Accent : new Color(1, 1, 1, 0.14f);
+                num.text = done ? "✓" : (i + 1).ToString();
+                num.color = done || current ? new Color(0.04f, 0.07f, 0.12f) : Dim;
+                lab.color = current ? Ink : done ? new Color(Good.r, Good.g, Good.b, 0.85f) : Dim;
+                lab.font = current ? Semibold : Regular;
+            }
+        }
+
         void UpdateToast()
         {
             float age = Time.time - LabMessages.MessageTime;
@@ -424,7 +454,7 @@ namespace Khkt.Demo
 
         void UpdateHints()
         {
-            int n = hand != null ? Mathf.Min(hand.Hints.Count, hintItems.Count) : 0;
+            int n = hand != null && !ClassRules.HideHelp ? Mathf.Min(hand.Hints.Count, hintItems.Count) : 0;
             hintBar.gameObject.SetActive(n > 0);
             if (n == 0) return;
             float x = 14;
@@ -607,6 +637,21 @@ namespace Khkt.Demo
             if (r.notMixedWell) notes.Add("Lắc bình chưa đều khi nhỏ");
             if (notes.Count == 0) notes.Add("Thao tác chuẩn: đúng vạch, đủ chỉ thị, dừng đúng giọt");
             resultNotes.text = "•  " + string.Join("\n•  ", notes.GetRange(0, Mathf.Min(4, notes.Count)));
+        }
+
+        void UpdateBioResult(Khkt.Demo.Bio.BioLabProcedure.BioResult r)
+        {
+            resultTitle.text = r.scenario == Khkt.Demo.Bio.BioLabProcedure.Scenario.OnionPlasmolysis
+                ? "Kết quả · Co & Phản co nguyên sinh"
+                : "Kết quả · Ghép ADN tái tổ hợp pUC19-GFP";
+            resultBig.text = r.headline;
+            resultSub.text = r.subline;
+            resultBadge.text = r.badgeText;
+            resultBadgeBg.color = r.score >= 90 ? Good : r.score >= 70 ? Warn : Bad;
+            if (r.notes != null && r.notes.Count > 0)
+                resultNotes.text = "•  " + string.Join("\n•  ", r.notes.GetRange(0, Mathf.Min(4, r.notes.Count)));
+            else
+                resultNotes.text = "•  Hoàn thành bài thực hành Sinh học.";
         }
 
         void DrawGraph()

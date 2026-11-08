@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Trình chiếu · VERA Lab</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="/tinh/vera.css">
+<script src="/tinh/phien.js"></script>
+<style>
+.bo-cuc { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); align-items: start; margin-top: 16px; }
+.cot { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 960px) {
+  .bo-cuc { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
+  .dieu-khien { position: sticky; top: 76px; }
+}
+.khung-chieu { position: relative; aspect-ratio: 16 / 9; border-radius: var(--bo); overflow: hidden; background: #14161b; color: #f5f5f7; display: flex; align-items: center; justify-content: center; text-align: center; }
+.khung-chieu img { width: 100%; height: 100%; object-fit: contain; display: block; background: #fff; }
+.khung-chieu .chu { padding: 16px 24px; overflow-wrap: anywhere; }
+.khung-chieu .chu b { display: block; font-size: clamp(18px, 2.4vw, 26px); line-height: 1.25; margin-bottom: 8px; }
+.khung-chieu .chu span { font-size: 15px; color: #c9ccd4; white-space: pre-line; }
+.tinh-trang { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 12px 0; font-size: 14.5px; color: var(--phu); }
+.nut-chuyen { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.nut-chuyen .nut { min-height: 58px; padding: 0 6px; font-size: 16px; white-space: nowrap; }
+.chon-man-hinh { display: grid; gap: 6px 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); }
+.chon-man-hinh label { display: flex; align-items: center; gap: 8px; min-height: 36px; font-size: 15px; }
+.chon-man-hinh input { width: 18px; height: 18px; accent-color: var(--nhan); }
+.ds-trang { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); margin-top: 14px; }
+.ds-trang button { position: relative; padding: 0; border: 2px solid var(--vien); border-radius: var(--bo-nho); background: var(--nen-2); overflow: hidden; cursor: pointer; }
+.ds-trang button:hover { border-color: var(--vien-dam); }
+.ds-trang button[aria-current="true"] { border-color: var(--nhan); }
+.ds-trang img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+.ds-trang span { position: absolute; left: 4px; bottom: 4px; padding: 0 6px; border-radius: 4px; background: rgba(20, 22, 27, .8); color: #fff; font-size: 12.5px; }
+.o-tai { display: block; padding: 16px; border: 1px dashed var(--vien-dam); border-radius: var(--bo-nho); text-align: center; cursor: pointer; }
+.o-tai.dang-keo { border-color: var(--nhan); background: var(--nhan-nhat); }
+.o-tai input { display: block; margin: 8px auto 0; max-width: 100%; font-size: 14.5px; }
+</style>
+</head>
+<body>
+<header class="thanh">
+  <div class="khung">
+    <a class="nhan-hieu" href="/giao-vien">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2.5 35.2 11.2v17.6L20 37.5 4.8 28.8V11.2z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/><path d="M12.5 13 20 28l7.5-15" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      VERA Lab
+    </a>
+    <a class="quay-lai" href="/giao-vien">← Trang chủ</a>
+    <div class="nguoi">
+      <span class="ten" data-ten-nguoi></span>
+      <button class="nut phu nho" data-dang-xuat>Đăng xuất</button>
+    </div>
+  </div>
+</header>
+<main class="khung">
+  <div class="dong-chinh">
+    <h1>Trình chiếu</h1>
+    <label class="o" style="margin-top: 0; min-width: min(100%, 260px)"><span>Lớp</span><select id="chon-lop"></select></label>
+  </div>
+  <p class="bao" id="bao-chung" role="alert" hidden></p>
+
+  <div class="bo-cuc" id="noi-dung" hidden>
+    <section class="the dieu-khien">
+      <div class="khung-chieu" id="xem-truoc" aria-live="polite"></div>
+      <div class="tinh-trang"><span class="nhan" id="nhan-trang-thai"></span><span id="so-may"></span></div>
+      <div class="nut-chuyen">
+        <button class="nut phu" id="trang-truoc">← Trang trước</button>
+        <button class="nut chinh" id="trang-sau">Trang sau →</button>
+      </div>
+      <p style="margin-top: 10px"><button class="nut phu nho nguy" id="tat">Tắt trình chiếu</button></p>
+    </section>
+
+    <div class="cot">
+      <section class="the">
+        <h2>Màn hình trong phòng thí nghiệm</h2>
+        <div class="chon-man-hinh" id="chon-man-hinh">
+          <label><input type="checkbox" value="tuong_video" checked> Tường video, tầng 1</label>
+          <label><input type="checkbox" value="t2_tuong_video" checked> Tường video, tầng 2</label>
+          <label><input type="checkbox" value="ban"> Màn hình nhóm, tầng 1</label>
+          <label><input type="checkbox" value="t2_ban"> Màn hình nhóm, tầng 2</label>
+          <label><input type="checkbox" value="hanh_lang"> Bảng tin hành lang, tầng 1</label>
+          <label><input type="checkbox" value="t2_hanh_lang"> Bảng tin hành lang, tầng 2</label>
+        </div>
+      </section>
+
+      <section class="the">
+        <h2>Bài giảng</h2>
+        <div class="hang-o" id="hang-chon-bai">
+          <label class="o"><span>Chọn bài</span><select id="chon-bai"></select></label>
+          <button class="nut phu" id="xoa-bai">Xóa bài này</button>
+        </div>
+        <div class="ds-trang" id="ds-trang"></div>
+        <form id="f-tai" novalidate style="margin-top: 16px">
+          <label class="o" style="margin-top: 0"><span>Tải bài giảng mới</span><input name="ten" maxlength="120" autocomplete="off" placeholder="Tên bài giảng"></label>
+          <label class="o-tai" id="o-tai" style="margin-top: 10px">
+            Chọn một tệp PDF hoặc nhiều ảnh (PNG, JPG)
+            <input type="file" name="tep" accept=".pdf,image/png,image/jpeg" multiple>
+          </label>
+          <small class="phu-chu" style="display: block; margin-top: 6px">PowerPoint: lưu thành PDF rồi tải lên. Tối đa 60 MB, 200 trang.</small>
+          <p class="bao" role="alert" hidden></p>
+          <button class="nut chinh" style="margin-top: 12px">Tải lên</button>
+        </form>
+      </section>
+
+      <section class="the">
+        <h2>Câu hỏi thảo luận</h2>
+        <form id="f-chu" novalidate>
+          <label class="o" style="margin-top: 0"><span>Tiêu đề</span><input name="tieu_de" maxlength="200" autocomplete="off" placeholder="Ví dụ: Vì sao phải lắc đều bình nón?"></label>
+          <label class="o"><span>Nội dung</span><textarea name="noi_dung" maxlength="2000" style="min-height: 84px"></textarea></label>
+          <label class="o"><span>Đếm ngược (phút, để trống nếu không cần)</span><input name="phut" type="number" min="0" max="120" inputmode="numeric"></label>
+          <p class="bao" role="alert" hidden></p>
+          <button class="nut phu" style="margin-top: 12px">Đưa lên màn hình</button>
+        </form>
+      </section>
+    </div>
+  </div>
+
+  <section class="the" id="chua-co-lop" hidden style="margin-top: 16px">
+    <p class="phu-chu">Bạn chưa có lớp nào. Hãy <a href="/giao-vien#lop">tạo lớp</a> trước khi trình chiếu.</p>
+  </section>
+</main>
+<script>
+const { esc } = Phien;
+const $ = (id) => document.getElementById(id);
+let baiGiang = [];   // bài của giáo viên này
+let baiChon = null;
+let hienTai = null;  // trạng thái máy chủ trả về gần nhất
+let anhDangHien = "";
+
+const lopId = () => Number($("chon-lop").value);
+const manHinh = () => [...document.querySelectorAll("#chon-man-hinh input:checked")].map((o) => o.value);
+
+function baoChung(loi) {
+  $("bao-chung").textContent = Phien.loiChu(loi);
+  $("bao-chung").hidden = false;
+}
+
+async function gui(body) {
+  try {
+    $("bao-chung").hidden = true;
+    ve(await Phien.gui(`/api/lop/${lopId()}/trinh-chieu`, "POST", body));
+  } catch (loi) {
+    baoChung(loi);
+  }
+}
+
+// Vẽ phần đang chiếu theo đúng máy chủ, nên điện thoại và máy tính cùng mở vẫn khớp nhau
+function ve(tt) {
+  hienTai = tt;
+  const d = tt.dang_chieu, khung = $("xem-truoc");
+  if (d.anh !== anhDangHien || d.loai !== "slide") {
+    anhDangHien = d.anh;
+    if (d.loai === "slide") khung.innerHTML = `<img src="${esc(d.anh)}" alt="${esc(d.tieu_de)}">`;
+    else if (d.loai === "chu") khung.innerHTML = `<div class="chu"><b>${esc(d.tieu_de)}</b><span>${esc(d.noi_dung)}</span></div>`;
+    else khung.innerHTML = `<div class="chu"><span>Chưa chiếu gì. Chọn một trang để đưa lên màn hình trong phòng.</span></div>`;
+  }
+  const nhan = $("nhan-trang-thai");
+  nhan.textContent = d.loai === "slide" ? `Đang chiếu trang ${d.trang}/${d.so_trang}` : d.loai === "chu" ? "Đang chiếu câu hỏi" : "Đã tắt";
+  nhan.classList.toggle("mo", d.loai !== "tat");
+  const tre = tt.do_tre_ms === null ? "" : ` · trễ ${(tt.do_tre_ms / 1000).toLocaleString("vi-VN", { maximumFractionDigits: 1 })} giây`;
+  $("so-may").textContent = tt.may_dang_mo
+    ? `${tt.may_dang_mo}/${tt.so_hoc_sinh} máy đang mở app${d.loai === "tat" ? "" : ` · ${tt.may_da_hien} máy đã hiện${tre}`}`
+    : `Chưa có máy nào trong lớp đang mở app (${tt.so_hoc_sinh} học sinh)`;
+  $("tat").disabled = d.loai === "tat";
+  capNhatNut();
+}
+
+function trangDangChieu() {
+  const d = hienTai?.dang_chieu;
+  return d?.loai === "slide" && d.bai_id === baiChon?.id ? d.trang : 0;
+}
+
+function capNhatNut() {
+  const dang = trangDangChieu(), tong = baiChon?.so_trang ?? 0;
+  $("trang-truoc").disabled = dang <= 1;
+  $("trang-sau").disabled = !tong || dang >= tong;
+  $("trang-sau").textContent = dang ? "Trang sau →" : "Chiếu từ đầu →";
+  document.querySelectorAll("#ds-trang button").forEach((n) => n.setAttribute("aria-current", Number(n.dataset.trang) === dang));
+}
+
+const chieuTrang = (trang) => gui({ loai: "slide", bai_id: baiChon.id, trang, man_hinh: manHinh() });
+
+function veBai() {
+  const co = baiGiang.length > 0;
+  $("hang-chon-bai").hidden = !co;
+  $("chon-bai").innerHTML = baiGiang.map((b) => `<option value="${b.id}" ${b.id === baiChon?.id ? "selected" : ""}>${esc(b.ten)} (${b.so_trang} trang)</option>`).join("");
+  $("ds-trang").innerHTML = baiChon
+    ? Array.from({ length: baiChon.so_trang }, (_, i) => `<button type="button" data-trang="${i + 1}" aria-label="Chiếu trang ${i + 1}"><img loading="lazy" src="/api/bai-giang/${baiChon.id}/trang/${i + 1}" alt=""><span>${i + 1}</span></button>`).join("")
+    : "";
+  capNhatNut();
+}
+
+async function napBai(chonId) {
+  baiGiang = await Phien.json("/api/bai-giang");
+  baiChon = baiGiang.find((b) => b.id === chonId) ?? baiChon ?? baiGiang[0] ?? null;
+  if (baiChon && !baiGiang.some((b) => b.id === baiChon.id)) baiChon = baiGiang[0] ?? null;
+  veBai();
+}
+
+async function napTrangThai() {
+  if (!lopId() || document.hidden) return;
+  try {
+    const tt = await Phien.json(`/api/lop/${lopId()}/trinh-chieu`);
+    ve(tt);
+    // Mở trang này giữa buổi: tự chọn đúng bài đang chiếu
+    if (tt.dang_chieu.bai_id && !trangDangChieu() && baiGiang.some((b) => b.id === tt.dang_chieu.bai_id) && !daChonTay) {
+      baiChon = baiGiang.find((b) => b.id === tt.dang_chieu.bai_id);
+      veBai();
+    }
+  } catch { /* mất mạng thoáng qua: nhịp sau thử lại */ }
+}
+let daChonTay = false;
+
+$("trang-sau").addEventListener("click", () => chieuTrang(trangDangChieu() + 1));
+$("trang-truoc").addEventListener("click", () => chieuTrang(trangDangChieu() - 1));
+$("tat").addEventListener("click", () => gui({ loai: "tat" }));
+$("ds-trang").addEventListener("click", (e) => {
+  const n = e.target.closest("button");
+  if (n) chieuTrang(Number(n.dataset.trang));
+});
+$("chon-bai").addEventListener("change", () => {
+  daChonTay = true;
+  baiChon = baiGiang.find((b) => b.id === Number($("chon-bai").value));
+  veBai();
+});
+$("chon-lop").addEventListener("change", () => { anhDangHien = ""; daChonTay = false; napTrangThai(); });
+$("chon-man-hinh").addEventListener("change", () => {
+  const d = hienTai?.dang_chieu;
+  if (d?.loai === "slide") gui({ loai: "slide", bai_id: d.bai_id, trang: d.trang, man_hinh: manHinh() });
+  else if (d?.loai === "chu") gui({ loai: "chu", tieu_de: d.tieu_de, noi_dung: d.noi_dung, man_hinh: manHinh() });
+});
+$("xoa-bai").addEventListener("click", async () => {
+  if (!baiChon || !confirm(`Xóa bài "${baiChon.ten}"? Ảnh các trang sẽ bị xóa hẳn, lớp đang chiếu bài này sẽ tắt.`)) return;
+  try {
+    await Phien.gui(`/api/bai-giang/${baiChon.id}`, "DELETE");
+    baiChon = null;
+    await napBai();
+    await napTrangThai();
+  } catch (loi) {
+    baoChung(loi);
+  }
+});
+addEventListener("keydown", (e) => {
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || !baiChon) return;
+  if (e.key === "ArrowRight" && !$("trang-sau").disabled) $("trang-sau").click();
+  if (e.key === "ArrowLeft" && !$("trang-truoc").disabled) $("trang-truoc").click();
+});
+
+const fTai = $("f-tai"), oTai = $("o-tai");
+for (const su of ["dragenter", "dragover"]) oTai.addEventListener(su, (e) => { e.preventDefault(); oTai.classList.add("dang-keo"); });
+for (const su of ["dragleave", "drop"]) oTai.addEventListener(su, (e) => { e.preventDefault(); oTai.classList.remove("dang-keo"); });
+oTai.addEventListener("drop", (e) => {
+  fTai.elements.tep.files = e.dataTransfer.files;
+  fTai.elements.tep.dispatchEvent(new Event("change"));
+});
+fTai.elements.tep.addEventListener("change", () => {
+  const tep = fTai.elements.tep.files[0];
+  if (tep && !fTai.elements.ten.value.trim()) fTai.elements.ten.value = tep.name.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ");
+});
+fTai.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const bao = fTai.querySelector(".bao"), nut = fTai.querySelector("button");
+  bao.hidden = true;
+  if (!fTai.elements.tep.files.length) { bao.textContent = "Hãy chọn tệp"; bao.hidden = false; return; }
+  nut.disabled = true;
+  nut.textContent = "Đang xử lý…";
+  try {
+    const kq = await Phien.json("/api/bai-giang", { method: "POST", body: new FormData(fTai) });
+    fTai.reset();
+    daChonTay = true;
+    await napBai(kq.id);
+  } catch (loi) {
+    bao.textContent = Phien.loiChu(loi);
+    bao.hidden = false;
+  }
+  nut.disabled = false;
+  nut.textContent = "Tải lên";
+});
+
+const fChu = $("f-chu");
+fChu.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const g = Object.fromEntries(new FormData(fChu)), bao = fChu.querySelector(".bao");
+  bao.hidden = true;
+  if (!g.tieu_de.trim()) { bao.textContent = "Hãy nhập tiêu đề"; bao.hidden = false; return; }
+  await gui({ loai: "chu", tieu_de: g.tieu_de, noi_dung: g.noi_dung, man_hinh: manHinh(), dem_nguoc_giay: Math.round(Number(g.phut || 0) * 60) });
+});
+
+(async () => {
+  try {
+    const lop = await Phien.json("/api/lop");
+    if (!lop.length) { $("chua-co-lop").hidden = false; return; }
+    $("chon-lop").innerHTML = lop.map((l) => `<option value="${l.id}">${esc(l.ten)}</option>`).join("");
+    $("noi-dung").hidden = false;
+    await napBai();
+    await napTrangThai();
+    setInterval(napTrangThai, 2000);
+  } catch (loi) {
+    baoChung(loi);
+  }
+})();
+</script>
+</body>
+</html>

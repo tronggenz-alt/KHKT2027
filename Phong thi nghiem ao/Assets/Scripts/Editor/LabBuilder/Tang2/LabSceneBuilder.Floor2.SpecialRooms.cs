@@ -1,5 +1,7 @@
+using Khkt.Demo.Bio;
 using Khkt.Environment.Tang2;
 using Khkt.Interaction;
+using Khkt.Interaction.Bio;
 using UnityEngine;
 using static Khkt.EditorTools.LabKit;
 
@@ -62,11 +64,30 @@ namespace Khkt.EditorTools
             var loops = Group("Ống cắm que cấy", isl, new Vector3(-0.45f, top, 0.25f));
             Cyl(loops, "Ống cắm", new Vector3(0, 0.05f, 0), 0.025f, 0.1f, steel);
             for (int i = 0; i < 3; i++)
-                Cyl(loops, "Que cấy", new Vector3((i - 1) * 0.01f, 0.15f, 0), 0.002f, 0.22f, i == 1 ? bioBlueTip : steel, false, new Vector3((i - 1) * 6f, 0, 0));
+            {
+                var qc = Group($"Que cấy {i + 1}", loops, new Vector3((i - 1) * 0.01f, 0.04f, 0));
+                Cyl(qc, "Thân que", new Vector3(0, 0.11f, 0), 0.002f, 0.22f, i == 1 ? bioBlueTip : steel, true, new Vector3((i - 1) * 6f, 0, 0));
+                var qcCol = qc.gameObject.AddComponent<CapsuleCollider>();
+                qcCol.center = new Vector3(0, 0.11f, 0);
+                qcCol.radius = 0.004f;
+                qcCol.height = 0.22f;
+                var qcBt = qc.gameObject.AddComponent<BioTool>();
+                qcBt.toolId = "que_cay_vong";
+                qcBt.kind = BioToolKind.InoculatingLoop;
+                qcBt.displayName = $"Que cấy {i + 1}";
+                qc.gameObject.AddComponent<InoculatingLoop>();
+                var qcg = qc.gameObject.AddComponent<Grabbable>();
+                qcg.kind = "que_cay";
+                qcg.gripHeightM = 0.04f;
+                qcg.liesOnTable = true;
+                qcg.lyingRadiusM = 0.003f;
+                qcg.lengthM = 0.22f;
+                qcg.massG = 15f;
+            }
             PetriStack(isl, new Vector3(-0.75f, top, 0.2f), 4, 0);
             PetriStack(isl, new Vector3(-0.9f, top, -0.2f), 3, 1);
             PetriStack(isl, new Vector3(-1.2f, top, 0.25f), 5, 2);
-            Microscope(isl, "Kính hiển vi vật kính dầu", new Vector3(0.0f, top, -0.3f), 90f, false, true);
+            Microscope(isl, "Kính hiển vi vật kính dầu", new Vector3(0.0f, top, -0.3f), 90f, true, true);
             ColonyCounter(isl, new Vector3(-0.6f, top, -0.3f), 90f);
             foreach (float x in new[] { -0.9f, 0.1f })
                 Stool(isl, "Ghế đẩu", new Vector3(x, 0, -0.95f));
@@ -80,7 +101,7 @@ namespace Khkt.EditorTools
             Box(prep, "Cửa tủ lạnh dưới quầy", new Vector3(-0.315f, 0.42f, -0.35f), new Vector3(0.012f, 0.72f, 0.7f), bioWhite, false);
             NoShadow(Box(prep, "Màn số tủ lạnh", new Vector3(-0.323f, 0.7f, -0.35f), new Vector3(0.004f, 0.03f, 0.08f), bioDisplayBlue, false));
             Box(prep, "Mặt quầy", new Vector3(0, 0.9f, 0), new Vector3(0.66f, 0.04f, 1.54f), epoxy);
-            for (int i = 0; i < 4; i++) Bottle(prep, "Chai môi trường LB", new Vector3(0.05f, 0.92f, -0.5f + i * 0.14f), 3);
+            for (int i = 0; i < 4; i++) BioBottle(prep, "Chai môi trường LB", new Vector3(0.05f, 0.92f, -0.5f + i * 0.14f), 3);
             PetriStack(prep, new Vector3(0.05f, 0.92f, 0.35f), 8, 2);
             Label(room, "MÔI TRƯỜNG NUÔI CẤY", new Vector3(StoreX - 0.104f, 1.6f, 11.95f), Vector3.left, 0.05f, new Color(0.05f, 0.42f, 0.42f));
 
@@ -117,8 +138,8 @@ namespace Khkt.EditorTools
             var stir = Group("Bếp khuấy từ", south, new Vector3(-0.3f, 0.92f, 0));
             RoundBox(stir, "Thân", new Vector3(0, 0.05f, 0), new Vector3(0.2f, 0.1f, 0.3f), 0.01f, bioWhite);
             Cyl(stir, "Mặt gia nhiệt", new Vector3(0, 0.104f, 0.03f), 0.08f, 0.008f, steel);
-            MeshObj(stir, "Bình môi trường", Erlenmeyer(), new Vector3(0, 0.108f, 0.03f), labGlass);
-            for (int i = 0; i < 5; i++) Bottle(south, "Chai thạch", new Vector3(0.4f + i * 0.2f, 0.92f, -0.08f), 1);
+            InteractiveErlenmeyer(stir, "Bình môi trường", new Vector3(0, 0.108f, 0.03f), 120f);
+            for (int i = 0; i < 5; i++) BioBottle(south, "Chai thạch", new Vector3(0.4f + i * 0.2f, 0.92f, -0.08f), 1);
             Box(south, "Bột thạch agar", new Vector3(1.5f, 0.98f, -0.05f), new Vector3(0.12f, 0.12f, 0.12f), bioKraft, false);
 
             // buồng đệm: ghế thay đồ, móc áo blouse, bồn rửa tay, thảm dính bụi, biển vùng sạch
@@ -442,11 +463,21 @@ namespace Khkt.EditorTools
             var banana = Group("Bộ tách chiết ADN chuối", isl, new Vector3(0.75f, top, 0.15f));
             var cocObj = Group("Cốc dịch nghiền", banana, Vector3.zero);
             MeshObj(cocObj, "Vỏ cốc", Beaker("Coc250", 0.035f, 0.1f), Vector3.zero, labGlass, true);
-            NoShadow(Cyl(cocObj, "Dịch chuối", new Vector3(0, 0.035f, 0), 0.033f, 0.07f, Mat("T2_DichChuoi", new Color(0.95f, 0.9f, 0.7f, 0.85f), 0.6f, 0, transparent: true), false));
+            var cocFill = LiquidObject(cocObj, "Dịch chuối",
+                new[] { V(0.033f, 0.002f), V(0.033f, 0.095f) },
+                Mat("T2_DichChuoi", new Color(0.95f, 0.9f, 0.7f, 0.85f), 0.6f, 0, transparent: true));
+            cocFill.volumeMl = 120f;
             var cocCol = cocObj.gameObject.AddComponent<CapsuleCollider>();
             cocCol.center = new Vector3(0, 0.05f, 0);
             cocCol.radius = 0.035f;
             cocCol.height = 0.1f;
+            var cocLc = cocObj.gameObject.AddComponent<LabContainer>();
+            cocLc.label = "Cốc dịch nghiền chuối";
+            cocLc.capacityMl = 250f;
+            cocLc.bottomRadiusM = 0.033f;
+            cocLc.fill = cocFill;
+            cocLc.liquidRenderer = cocFill.GetComponent<Renderer>();
+            cocLc.mouth = Child(cocObj, "Miệng", new Vector3(0, 0.1f, 0));
             var cocGrab = cocObj.gameObject.AddComponent<Grabbable>();
             cocGrab.kind = "coc";
             cocGrab.gripHeightM = 0.05f;
@@ -458,8 +489,18 @@ namespace Khkt.EditorTools
             conCol.center = new Vector3(0, 0.1f, 0);
             conCol.radius = 0.038f;
             conCol.height = 0.2f;
+            var conFill = LiquidObject(conObj, "Dung dịch cồn", new[] { V(0.03f, 0.003f), V(0.03f, 0.14f) }, liquidClear);
+            conFill.volumeMl = 180f;
+            var conLc = conObj.gameObject.AddComponent<LabContainer>();
+            conLc.label = "Cồn 90° lạnh";
+            conLc.capacityMl = 250f;
+            conLc.bottomRadiusM = 0.032f;
+            conLc.isStock = true;
+            conLc.fill = conFill;
+            conLc.liquidRenderer = conFill.GetComponent<Renderer>();
+            conLc.mouth = Child(conObj, "Miệng", new Vector3(0, 0.18f, 0));
             var conGrab = conObj.gameObject.AddComponent<Grabbable>();
-            conGrab.kind = "chai_hoa_chat";
+            conGrab.kind = "chai";
             conGrab.gripHeightM = 0.09f;
             conGrab.massG = 320f;
 
@@ -469,6 +510,10 @@ namespace Khkt.EditorTools
             duaCol.center = new Vector3(0, 0.1f, 0);
             duaCol.radius = 0.004f;
             duaCol.height = 0.2f;
+            var duaBt = duaObj.gameObject.AddComponent<BioTool>();
+            duaBt.toolId = "dua_thuy_tinh";
+            duaBt.displayName = "Đũa thủy tinh";
+            duaObj.gameObject.AddComponent<GlassRod>();
             var duaGrab = duaObj.gameObject.AddComponent<Grabbable>();
             duaGrab.kind = "dua_thuy_tinh";
             duaGrab.gripHeightM = 0.01f;
@@ -554,6 +599,14 @@ namespace Khkt.EditorTools
             NoShadow(MeshObj(dishG, "Đĩa petri", dish, Vector3.zero, bioPetri));
             NoShadow(Cyl(dishG, "Thạch LB + Amp + X-gal", new Vector3(0, 0.006f, 0), 0.042f, 0.008f, Mat("T2_ThachXgal", new Color(0.93f, 0.9f, 0.78f, 0.9f), 0.5f, 0, transparent: true)));
             Label(dishG, "LB + Amp + X-gal", new Vector3(0, 0.002f, 0.05f), Vector3.forward, 0.009f, new Color(0.2f, 0.25f, 0.3f));
+            var dishCol = dishG.gameObject.AddComponent<BoxCollider>();
+            dishCol.center = new Vector3(0, 0.0075f, 0);
+            dishCol.size = new Vector3(0.09f, 0.015f, 0.09f);
+            dishG.gameObject.AddComponent<PetriDish>();
+            var dishGrab = dishG.gameObject.AddComponent<Grabbable>();
+            dishGrab.kind = "dia_petri";
+            dishGrab.gripHeightM = 0.01f;
+            dishGrab.massG = 25f;
             PetriStack(g, new Vector3(1.15f, top, -0.12f), 3, 2);
             // chỗ đặt ống sản phẩm PCR mang tới, giá ống kết quả
             var src = Group("Chỗ đặt ống nguồn gen", g, new Vector3(-0.18f, top + 0.012f, 0.16f));
@@ -808,7 +861,23 @@ namespace Khkt.EditorTools
             float top = 0.8f;
             var beaker = Group("Cốc rong đuôi chó", table, new Vector3(0, top, 0));
             NoShadow(MeshObj(beaker, "Cốc 1000 ml", Beaker("Coc1000", 0.065f, 0.2f), Vector3.zero, labGlass));
-            NoShadow(Cyl(beaker, "Nước", new Vector3(0, 0.085f, 0), 0.062f, 0.17f, bioWater));
+            var elodeaFill = LiquidObject(beaker, "Nước", new[] { V(0.062f, 0.002f), V(0.062f, 0.19f) }, bioWater);
+            elodeaFill.volumeMl = 750f;
+            var elodeaCol = beaker.gameObject.AddComponent<CapsuleCollider>();
+            elodeaCol.center = new Vector3(0, 0.1f, 0);
+            elodeaCol.radius = 0.065f;
+            elodeaCol.height = 0.2f;
+            var elodeaLc = beaker.gameObject.AddComponent<LabContainer>();
+            elodeaLc.label = "Cốc rong đuôi chó 1000 mL";
+            elodeaLc.capacityMl = 1000f;
+            elodeaLc.bottomRadiusM = 0.062f;
+            elodeaLc.fill = elodeaFill;
+            elodeaLc.liquidRenderer = elodeaFill.GetComponent<Renderer>();
+            elodeaLc.mouth = Child(beaker, "Miệng", new Vector3(0, 0.2f, 0));
+            var elodeaGrab = beaker.gameObject.AddComponent<Grabbable>();
+            elodeaGrab.kind = "coc";
+            elodeaGrab.gripHeightM = 0.1f;
+            elodeaGrab.massG = 350f;
             for (int i = 0; i < 4; i++)
                 Cyl(beaker, "Cành rong", new Vector3((i - 1.5f) * 0.012f, 0.07f, 0.01f * (i % 2)), 0.002f, 0.13f, bioLeafLight, false, new Vector3((i - 1.5f) * 8, 0, 0));
             NoShadow(MeshObj(beaker, "Phễu úp", Lathe("T2_PheuUp", 20, V(0.05f, 0), V(0.052f, 0.004f), V(0.012f, 0.06f), V(0.01f, 0.1f), V(0.008f, 0.1f), V(0.009f, 0.06f), V(0.048f, 0.003f)), new Vector3(0, 0.01f, 0), labGlass));
@@ -823,6 +892,7 @@ namespace Khkt.EditorTools
             var bub = g.gameObject.AddComponent<ElodeaBubbles>();
             bub.lampTransform = lamp;
             bub.stemOrigin = stem;
+            bub.bubbleMaterial = Mat("T2_BotO2", new Color(0.9f, 0.97f, 1f), 0.8f);
             Label(table, "QUANG HỢP THẢI O₂ · RONG ĐUÔI CHÓ", new Vector3(0, top - 0.06f, 0.301f), Vector3.forward, 0.025f, new Color(0.1f, 0.3f, 0.12f));
             Info(g, "Thí nghiệm quang hợp thải O₂", "Rong đuôi chó dưới ánh đèn thải bọt khí O₂ thu vào ống nghiệm úp. Đèn càng gần (ánh sáng càng mạnh) bọt càng nhiều, tới khi đạt bão hòa ánh sáng.",
                  "Đếm số bọt mỗi phút ở các khoảng cách 10, 20, 30 cm. Cường độ sáng giảm theo bình phương khoảng cách.");

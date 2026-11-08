@@ -96,9 +96,11 @@ namespace Khkt.EditorTools
             AttachImpostors(root);
 
             // Dụng cụ cầm được, có thẻ thông tin hay có hiệu ứng không gộp lô tĩnh (để di chuyển và viền sáng được)
-            MarkStatic(root, t => t.name == WorkshopName || t.name == PartLibraryName || t.name.StartsWith("Cánh quạt") || t.name == "Bộ chuẩn độ" || t.name == "Ngọn lửa" || t.name == "Hệ thống demo"
+            MarkStatic(root, t => t.name == WorkshopName || t.name == PartLibraryName || t.name.StartsWith("Cánh quạt") || t.name == "Bộ chuẩn độ" || t.name == "Ngọn lửa" || t.name == "Nắp đèn cồn" || t.name == "Hệ thống demo"
                                   || t.GetComponent<Khkt.Demo.EquipmentInfo>() != null || t.GetComponent<Khkt.Interaction.Grabbable>() != null
-                                  || t.GetComponent<Khkt.Interaction.LabContainer>() != null || t.name == "Trạm" || t.name.StartsWith("Người xem")
+                                  || t.GetComponent<Khkt.Interaction.LabContainer>() != null || t.GetComponent<Khkt.Interaction.PlaceSocket>() != null
+                                  || t.GetComponent<Khkt.Demo.IDemoUsable>() != null || t.GetComponent<Khkt.Interaction.HeatSource>() != null
+                                  || t.name == "Trạm" || t.name.StartsWith("Người xem")
                                   || t.name.StartsWith("Màn hình") || t.name == "Robot trợ lý" || t.GetComponent<Khkt.Demo.LabScreen>() != null
                                   || t.GetComponent<UvScroll>() != null || t.GetComponent<Khkt.Rendering.AutoDoor>() != null
                                   || t.GetComponent<Khkt.Rendering.ClusterHlod>() != null || IsFloor2Dynamic(t));
@@ -109,6 +111,7 @@ namespace Khkt.EditorTools
 
             // Tách phần tĩnh của từng khu ra cảnh riêng (tải / gỡ cộng dồn lúc chạy), đồ tương tác ở lại cảnh lõi
             var zoneScenes = SplitIntoZones(scene, root);
+            BuildHdArchitecture(root);
             EditorSceneManager.SetActiveScene(scene);
             EditorSceneManager.SaveScene(scene, ScenePath);
             int total = root.GetComponentsInChildren<Transform>(true).Length, zoneObjects = 0;
@@ -122,14 +125,17 @@ namespace Khkt.EditorTools
                 BakeOcclusion(System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Prepend(zoneScenes, scene)));
                 EditorSceneManager.SaveOpenScenes();
             }
+            BuildMenuScene();
             AddToBuildSettings();
             AssetDatabase.SaveAssets();
+            EditorSceneManager.OpenScene(ScenePath);
             Debug.Log($"[KHKT] Đã dựng {ScenePath}: {total + zoneObjects} đối tượng ({total} ở cảnh lõi, {zoneObjects} ở {zoneScenes.Length} cảnh khu).");
         }
 
         static void AddToBuildSettings()
         {
-            var paths = new System.Collections.Generic.List<string> { ScenePath };
+            // màn hình chính đứng đầu: đây là cảnh bản .exe mở trước
+            var paths = new System.Collections.Generic.List<string> { MenuScenePath, ScenePath };
             for (int z = 0; z < Khkt.Rendering.ZoneMap.Zones.Length; z++) paths.Add(Khkt.Rendering.ZoneMap.ScenePath(z));
             var list = new System.Collections.Generic.List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
             list.RemoveAll(s => paths.Contains(s.path));
@@ -214,12 +220,13 @@ namespace Khkt.EditorTools
             // kính trong hơn: kính vẽ hai mặt nên độ đục cộng đôi; đục quá thì phòng bên kia trông như có sương mù
             windowGlass = Mat("KinhCuaSo", new Color(0.55f, 0.7f, 0.8f, 0.06f), 0.95f, 0, transparent: true);
             cabinetGlass = Mat("KinhTu", new Color(0.7f, 0.8f, 0.85f, 0.06f), 0.7f, 0, transparent: true);
-            // Kính vách / cửa sổ / tủ: tắt phản chiếu môi trường. Có đầu dò phản chiếu, mặt kính in cả căn phòng trắng lên
-            // thành một lớp mờ như sương, nhìn sang phòng bên kia không rõ. Vẫn giữ điểm sáng của đèn trên kính.
+            // Kính vách / cửa sổ / tủ: tắt phản chiếu môi trường và đốm chói specular (Mục 4E).
             foreach (var m in new[] { windowGlass, cabinetGlass })
             {
                 m.SetFloat("_EnvironmentReflections", 0f);
                 m.EnableKeyword("_ENVIRONMENTREFLECTIONS_OFF");
+                m.SetFloat("_SpecularHighlights", 0f);
+                m.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
                 EditorUtility.SetDirty(m);
             }
             labGlass = Mat("ThuyTinh", new Color(0.78f, 0.91f, 0.97f, 0.38f), 0.96f, 0.08f, transparent: true);
@@ -618,6 +625,8 @@ namespace Khkt.EditorTools
             sun.color = new Color(1f, 0.95f, 0.88f);
             sun.intensity = 1.6f;
             sun.shadows = LightShadows.Soft;
+            sun.shadowBias = 0.025f;
+            sun.shadowNormalBias = 0.12f;
             RenderSettings.sun = sun;
 
             // Ánh sáng môi trường chuẩn PBR HD: trần đạt 0.55-0.75, mặt bàn đạt 0.60-0.80
@@ -727,6 +736,9 @@ namespace Khkt.EditorTools
             if (!AssetDatabase.IsValidFolder($"{parent}/{name}")) AssetDatabase.CreateFolder(parent, name);
         }
 
+        /// <summary>Đèn nối tiếp nhau nên tầm với xa chỉ tốn công tính (mỗi điểm ảnh lặp qua mọi đèn với tới nó) mà hầu như không thêm sáng.</summary>
+        static float LightRangeScale => float.TryParse(System.Environment.GetEnvironmentVariable("KHKT_DEN_K"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float k) ? k : 0.55f;
+
         static Light PointLight(Transform p, string name, Vector3 pos, float range, float intensity, Color color)
         {
             var go = new GameObject(name);
@@ -734,7 +746,7 @@ namespace Khkt.EditorTools
             go.transform.localPosition = pos;
             var l = go.AddComponent<Light>();
             l.type = LightType.Point;
-            l.range = range;
+            l.range = range * LightRangeScale;
             l.intensity = intensity;
             l.color = color;
             l.shadows = LightShadows.None;
@@ -881,7 +893,7 @@ namespace Khkt.EditorTools
             // SMAA: khử răng cưa theo cạnh, sắc nét hơn FXAA và không làm mờ / không gây hạt như TAA, vẫn nhẹ cho card tích hợp
             // Đo 3 vòng trên Iris Xe: SMAA cao 66,3 · SMAA vừa 67,0 · FXAA 66,9 FPS (trong sai số) nên chọn SMAA cao (đẹp nhất)
             camData.antialiasing = AntialiasingMode.SubpixelMorphologicalAntiAliasing;
-            camData.antialiasingQuality = AntialiasingQuality.High;
+            camData.antialiasingQuality = AntialiasingQuality.Medium;  // đo trên Iris Xe: High tốn hơn mà nhìn không khác
             switch (System.Environment.GetEnvironmentVariable("KHKT_AA"))  // đo so sánh: fxaa, smaa_med
             {
                 case "fxaa": camData.antialiasing = AntialiasingMode.FastApproximateAntialiasing; break;

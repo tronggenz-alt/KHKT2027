@@ -21,7 +21,8 @@ namespace Khkt.Interaction
         public float massG = 100f;
 
         public bool IsHeld { get; private set; }
-        public PlaceSocket Socket { get; private set; }
+        [SerializeField] PlaceSocket socket;
+        public PlaceSocket Socket { get => socket; private set => socket = value; }
         public Vector3 HomePosition { get; private set; }
         public Quaternion HomeRotation { get; private set; }
         public PlaceSocket HomeSocket { get; private set; }

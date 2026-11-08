@@ -455,6 +455,15 @@ namespace Khkt.EditorTools
             mayData.furnaceDoc = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/lo_nung.json");
             mayData.distillerDoc = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/may_cat_nuoc.json");
             mayData.autoclaveDoc = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/noi_hap.json");
+            // đợt 5: thiết bị sinh học tầng 2
+            mayData.microscopeDoc = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/kinh_hien_vi.json");
+            mayData.biosafetyCabinetDoc = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/tu_an_toan_sinh_hoc.json");
+            mayData.incubatorDoc = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/tu_am_vi_sinh.json");
+            mayData.pcrDoc = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/may_pcr.json");
+            mayData.electrophoresisDoc = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/be_dien_di.json");
+            mayData.gelDoc = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/gel_doc.json");
+            mayData.geneCloningDoc = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/tram_ghep_gen.json");
+            mayData.od600Doc = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Data/May/may_do_od600.json");
             g.AddComponent<Khkt.Assembly.FluidNetwork>();
             var fx = g.AddComponent<ReactionFx>();
             fx.bubbleMaterial = Mat("BotKhi", new Color(1f, 1f, 1f, 0.55f), 0.95f, 0, transparent: true);
@@ -552,17 +561,24 @@ namespace Khkt.EditorTools
         /// <summary>Gắn PlaceSurface cho các mặt bàn để đặt dụng cụ xuống chỗ nào cũng được.</summary>
         static void AttachSurfaces(Transform root)
         {
-            bool IsSurfaceName(string n)
+            bool IsSurfaceName(Transform t)
             {
+                string n = t.name;
                 if (string.IsNullOrEmpty(n)) return false;
                 if (n == "Mặt bàn" || n.StartsWith("Mặt bàn đoạn") || n == "Mặt làm việc") return true;
-                if (n == "Mặt quầy" || n == "Mặt đảo" || n == "Mặt lưới" || n == "Mặt gia nhiệt") return true;
-                if (n == "Bàn thao tác inox" || n.StartsWith("Tầng kệ") || n == "Thân pass-box") return true;
+                if (n == "Mặt quầy" || n.StartsWith("Mặt quầy đoạn") || n == "Mặt đảo" || n.StartsWith("Mặt đảo đoạn")) return true;
+                if (n == "Mặt lưới" || n == "Mặt gia nhiệt" || n == "Bàn thao tác inox") return true;
+                if (n.StartsWith("Tầng kệ") || n == "Tấm giá" || n == "Kệ lưới" || n == "Đáy tủ" || n == "Thân pass-box") return true;
+                if (n == "Mặt" && t.parent != null)
+                {
+                    string pn = t.parent.name;
+                    if (pn.StartsWith("Quầy") || pn.StartsWith("Bàn") || pn.StartsWith("Đảo") || pn.StartsWith("Tủ")) return true;
+                }
                 return false;
             }
 
             foreach (var t in root.GetComponentsInChildren<Transform>(true))
-                if (IsSurfaceName(t.name) && t.GetComponent<Collider>() != null && t.GetComponent<PlaceSurface>() == null)
+                if (IsSurfaceName(t) && t.GetComponent<Collider>() != null && t.GetComponent<PlaceSurface>() == null)
                     t.gameObject.AddComponent<PlaceSurface>();
         }
 
@@ -753,6 +769,7 @@ namespace Khkt.EditorTools
                         break;
                     }
                     case "Vòi nước":
+                    case "Vòi cảm ứng":
                     {
                         var spout = t.Find("Miệng vòi");
                         if (spout == null) break;
@@ -770,22 +787,45 @@ namespace Khkt.EditorTools
                         break;
                     }
                     case "Vòi rửa mắt":
+                    case "Vòi rửa mắt khẩn cấp":
                     {
                         var jets = Group("Nước rửa mắt", t);
-                        foreach (float z in new[] { -0.05f, 0.05f })
-                            NoShadow(Cyl(jets, "Tia nước", new Vector3(0, 1.13f, z * 0.6f), 0.006f, 0.12f, waterMat, false,
-                                         new Vector3(z > 0 ? 18 : -18, 0, 0)));
+                        bool emergency = t.name == "Vòi rửa mắt khẩn cấp";
+                        foreach (float s in new[] { -0.05f, 0.05f })
+                        {
+                            Vector3 jPos = emergency ? new Vector3(s * 0.6f, 1.08f, 0) : new Vector3(0, 1.13f, s * 0.6f);
+                            Vector3 jRot = emergency ? new Vector3(0, 0, s > 0 ? -18 : 18) : new Vector3(s > 0 ? 18 : -18, 0, 0);
+                            NoShadow(Cyl(jets, "Tia nước", jPos, 0.006f, 0.12f, waterMat, false, jRot));
+                        }
                         jets.gameObject.SetActive(false);
+                        EnsureCollider(t);
                         var toggle = t.gameObject.AddComponent<ToggleEffect>();
                         toggle.showWhenOn = new[] { jets.gameObject };
                         toggle.onHint = "Bấm chuột trái: gạt cần cho nước phun";
                         toggle.offHint = "Bấm chuột trái: tắt nước";
                         break;
                     }
+                    case "Vòi sen khẩn cấp":
+                    {
+                        var spray = Group("Nước vòi sen", t);
+                        for (int i = -1; i <= 1; i++)
+                            for (int j = -1; j <= 1; j++)
+                                NoShadow(Cyl(spray, "Tia sen", new Vector3(i * 0.04f, 1.35f, 0.15f + j * 0.04f), 0.004f, 1.7f, waterMat));
+                        spray.gameObject.SetActive(false);
+                        EnsureCollider(t);
+                        var toggle = t.gameObject.AddComponent<ToggleEffect>();
+                        toggle.showWhenOn = new[] { spray.gameObject };
+                        toggle.onHint = "Bấm chuột trái: kéo tay giật xả nước khẩn cấp";
+                        toggle.offHint = "Bấm chuột trái: khóa vòi sen khẩn cấp";
+                        break;
+                    }
                     case "Công tắc đèn":
                     {
-                        var lights = root.Find("Phòng thí nghiệm/Đèn trần");
+                        var lights = t.position.y > 3.0f
+                            ? root.Find("Tầng 2/Phòng thí nghiệm sinh học/Đèn trần")
+                            : root.Find("Phòng thí nghiệm/Đèn trần");
                         if (lights == null) break;
+                        EnsureCollider(t);
                         var toggle = t.gameObject.AddComponent<ToggleEffect>();
                         toggle.isOn = true;
                         toggle.lights = lights.GetComponentsInChildren<Light>(true);

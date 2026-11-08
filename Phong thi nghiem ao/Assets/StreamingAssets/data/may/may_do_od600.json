@@ -1,0 +1,122 @@
+{
+  "ma": "may_do_od600",
+  "ten": "Máy quang phổ đo mật độ quang vi sinh và nồng độ ADN (OD600 / UV-Vis Spectrophotometer)",
+  "may_mau": "Eppendorf BioSpectrometer basic, dải bước sóng 200 - 830 nm, đo cuvet 1 cm tiêu chuẩn và micro-cuvet",
+  "nguyen_ly": [
+    "Đo mật độ quang OD600 (Optical Density tại bước sóng 600 nm): Ở 600 nm, tế bào vi sinh vật làm tán xạ ánh sáng truyền qua theo định luật tán xạ Rayleigh / Mie; mật độ tán xạ tỷ lệ thuận với sinh khối tế bào trong dịch huyền phù.",
+    "Đo độ hấp thụ quang học của axit nucleic tại 260 nm (A260) theo định luật Beer-Lambert: A = epsilon * c * l, trong đó 1 đơn vị A260 tương đương 50 µg/mL DNA chuỗi kép (dsDNA).",
+    "Đánh giá độ tinh sạch của chế phẩm ADN qua tỷ số A260/A280 (chuẩn tinh sạch 1,8 - 2,0; tỷ số < 1,8 cảnh báo mẫu còn lẫn protein hoặc phenol tồn dư)."
+  ],
+  "cong_thuc": [
+    "OD600 = -log10(I / I0)",
+    "C_dsDNA (µg/mL) = A260 * 50",
+    "Độ tinh sạch = A260 / A280"
+  ],
+  "bo_phan": [
+    {
+      "ma": "nguon_sang_xenon",
+      "ten": "Đèn flash Xenon phổ rộng",
+      "chuc_nang": "Phát chùm sáng liên tục từ vùng tử ngoại đến khả kiến (200 - 830 nm) không cần làm nóng lâu."
+    },
+    {
+      "ma": "he_don_sac",
+      "ten": "Cách tử nhiễu xạ lõm",
+      "chuc_nang": "Tách chùm sáng thành các bước sóng đơn sắc với độ rộng phổ hẹp 5 nm."
+    },
+    {
+      "ma": "ngan_cuvet",
+      "ten": "Ngăn đo cuvet có nắp chắn sáng",
+      "chuc_nang": "Giữ cuvet chuẩn 1 cm hoặc micro-cuvet đúng phương truyền quang học."
+    },
+    {
+      "ma": "detector_diode",
+      "ten": "Mảng diode silicon nhạy quang",
+      "chuc_nang": "Chuyển đổi cường độ photon truyền qua thành tín hiệu điện số hóa."
+    },
+    {
+      "ma": "man_hinh_dieu_khien",
+      "ten": "Màn hình màu tích hợp phím chức năng",
+      "chuc_nang": "Hiển thị giá trị mật độ quang OD, tính nồng độ ADN và vẽ đường cong sinh trưởng."
+    }
+  ],
+  "thong_so": [
+    {
+      "ten": "Dải bước sóng quang phổ",
+      "gia_tri": "200 – 830 nm",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.eppendorf.com/us-en/eShop-Products/Cell-Analysis/Spectrophotometry/BioSpectrometer-basic-p-PF-24750"
+    },
+    {
+      "ten": "Độ chính xác bước sóng",
+      "gia_tri": "±1 nm",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.eppendorf.com/us-en/eShop-Products/Cell-Analysis/Spectrophotometry/BioSpectrometer-basic-p-PF-24750"
+    },
+    {
+      "ten": "Dải đo trắc quang",
+      "gia_tri": "0 – 3,0 A",
+      "loai": "tiêu chuẩn",
+      "nguon": "https://www.eppendorf.com/us-en/eShop-Products/Cell-Analysis/Spectrophotometry/BioSpectrometer-basic-p-PF-24750"
+    },
+    {
+      "ten": "Mô phỏng mật độ quang OD600 vi sinh",
+      "gia_tri": "1 OD600 ≈ 8 * 10^8 tế bào/mL (E. coli K-12)",
+      "loai": "mô phỏng",
+      "mo_phong": true
+    }
+  ],
+  "quy_trinh": [
+    {
+      "ma": "bat_may",
+      "ten": "Khởi động và chọn phương pháp",
+      "viec": "Bật công tắc nguồn, chọn chế độ đo OD600 (vi sinh) hoặc Absorbance 260/280 (axit nucleic).",
+      "ly_do": "Máy tự kiểm chuẩn bước sóng và nạp thông số đo tương ứng.",
+      "loi": "Không chờ máy hoàn tất tự kiểm: số đo có thể bị trôi zero."
+    },
+    {
+      "ma": "do_blank",
+      "ten": "Đo mẫu trắng (Blank Zero)",
+      "viec": "Cho môi trường nuôi cấy chưa cấy khuẩn (hoặc nước cất/đệm TE) vào cuvet, đặt vào ngăn và bấm Blank.",
+      "ly_do": "Thiết lập chuẩn zero để trừ độ hấp thụ và phản xạ nền của dung môi và thành cuvet.",
+      "loi": "Quên đo mẫu trắng hoặc dùng sai dung môi trắng: kết quả OD bị sai lệch lớn."
+    },
+    {
+      "ma": "chuan_bi_mau",
+      "ten": "Nạp mẫu vào cuvet sạch",
+      "viec": "Hút 1,0 mL dịch huyền phù vi sinh vào cuvet 1 cm; dùng giấy lau kính lau sạch hai mặt truyền sáng.",
+      "ly_do": "Vân tay hoặc giọt nước bám ngoài thành cuvet gây tán xạ ánh sáng giả tạo.",
+      "loi": "Chạm ngón tay vào mặt truyền quang: làm tăng giá trị OD ảo."
+    },
+    {
+      "ma": "do_mau",
+      "ten": "Đo và ghi nhận kết quả",
+      "viec": "Đặt cuvet đúng chiều chùm sáng, đóng kín nắp buồng đo và bấm nút Sample / Measure.",
+      "ly_do": "Đảm bảo buồng đo kín quang học, không bị ánh sáng ngoài lọt vào cảm biến.",
+      "loi": "Để hở nắp buồng đo: ánh sáng phòng làm bão hòa cảm biến quang đi-ốt."
+    }
+  ],
+  "an_toan": [
+    "Luôn đậy kín nắp buồng đo khi phát chùm sáng để tránh ánh sáng tạp bên ngoài lọt vào detector.",
+    "Chỉ cầm vào hai mặt nhám bên hông cuvet, không chạm vào mặt quang học truyền sáng.",
+    "Dịch nuôi cấy vi sinh sau khi đo phải được thu gom vào thùng rác nguy hại sinh học để hấp tiệt trùng."
+  ],
+  "thuat_ngu": [
+    {
+      "tu": "OD600",
+      "nghia": "Mật độ quang tại bước sóng 600 nm, đại lượng đo mức độ tán xạ ánh sáng của huyền phù vi sinh vật."
+    },
+    {
+      "tu": "Blank (Mẫu trắng)",
+      "nghia": "Mẫu đối chứng chỉ chứa dung môi hoặc môi trường không tế bào, dùng để trừ tín hiệu nền."
+    },
+    {
+      "tu": "Tỷ số A260/A280",
+      "nghia": "Tỷ lệ độ hấp thụ ở 260 nm và 280 nm dùng để đánh giá mức độ sạch của mẫu DNA/RNA."
+    }
+  ],
+  "cau_hoi_on_tap": [
+    "Tại sao bước sóng 600 nm lại được sử dụng phổ biến để theo dõi sinh trưởng vi khuẩn thay vì các bước sóng vùng tử ngoại?",
+    "Mục đích của việc đo mẫu trắng (Blank) trước khi đo mẫu vi sinh là gì?",
+    "Nếu một mẫu ADN có tỷ số A260/A280 đạt 1,85 thì mẫu đó được đánh giá như thế nào?"
+  ]
+}
