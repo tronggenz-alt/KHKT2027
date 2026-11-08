@@ -101,8 +101,10 @@ namespace Khkt.Demo
         {
             const float itemW = 150f;
             int n = 7;
-            stepBar = Panel(root, "Thanh bước", new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -18),
+            // Đặt ở y = -105 để tuyệt đối không bao giờ nằm đè phía sau cụm "< | Đổi khu thí nghiệm | >" (y = -20)
+            stepBar = Panel(root, "Thanh bước", new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -105),
                             new Vector2(itemW * n + 24, 52), glassMat, 1.4f).gameObject;
+            stepBar.SetActive(false); // Mặc định ẩn hoàn toàn thanh 7 bước
             var bar = stepBar.GetComponent<Image>();
             for (int i = 0; i < n; i++)
             {
@@ -383,7 +385,11 @@ namespace Khkt.Demo
                 if (showBioResult) UpdateBioResult(bioProc.LastResult.Value);
                 return;
             }
-            if (procedure == null) return;
+            if (procedure == null)
+            {
+                if (stepBar != null && stepBar.activeSelf) stepBar.SetActive(false);
+                return;
+            }
             if (stepBar.activeSelf != procedure.Active) stepBar.SetActive(procedure.Active);
             if (!procedure.Active)
             {

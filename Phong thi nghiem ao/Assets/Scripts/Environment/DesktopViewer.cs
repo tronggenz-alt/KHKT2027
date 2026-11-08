@@ -47,6 +47,8 @@ namespace Khkt.Environment
         public float EyeOffset { get; set; }
         public float Pitch => pitch;
         public LabStation[] Stations => stations;
+        public Camera viewCamera => viewCam != null ? viewCam : (cameraTransform != null ? cameraTransform.GetComponent<Camera>() : Camera.main);
+        public bool IsSitting => seated;
 
         CharacterController controller;
         LabStation[] stations;
@@ -90,10 +92,15 @@ namespace Khkt.Environment
                 int l = LayerMask.NameToLayer(layer);
                 if (l >= 0) d[l] = dist;
             }
-            // Culling distances chuẩn HD: chữ nhỏ rõ đến 12 m, chữ vừa 25 m, chi tiết vật nhỏ hiển thị đến 30 m
-            Cull("ChuNho", 12f);
-            Cull("ChuVua", 25f);
-            Cull("ChiTietNho", 30f);
+            // 3-Tier Distance Culling chuẩn mực tối ưu:
+            // Cấp 1: Chữ nhỏ, nhãn lọ, vạch chia hiển vi (< 5 cm) culling ở 4.5 m
+            Cull("ChuNho", 4.5f);
+            Cull("LayerSmallText", 4.5f);
+            // Cấp 2: Chi tiết trung bình (ốc vít, núm xoay, nắp lọ, kẹp tiêu bản) culling ở 7.5 m
+            Cull("ChiTietNho", 7.5f);
+            Cull("LayerDetail", 7.5f);
+            // Cấp 3: Biển báo vừa / bảng chữ culling ở 12 m (vỏ máy, bàn ghế, tường luôn hiển thị)
+            Cull("ChuVua", 12f);
             cam.layerCullDistances = d;
             cam.layerCullSpherical = true;
         }

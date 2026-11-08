@@ -361,8 +361,16 @@ namespace Khkt.Demo.Instruments
 
             // thanh trên
             var top = Box(r, "Thanh trên", new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -12), new Vector2(1888, 64));
-            title = Label(top, "Tên máy", "", 24, Accent, true, TextAnchor.UpperLeft, new Vector2(22, -6), new Vector2(1000, 32));
-            subtitle = Label(top, "Máy mẫu", "", 14, Dim, false, TextAnchor.UpperLeft, new Vector2(22, -38), new Vector2(1300, 22));
+            top.anchorMin = new Vector2(0, 1);
+            top.anchorMax = new Vector2(1, 1);
+            top.pivot = new Vector2(0.5f, 1);
+            top.offsetMin = new Vector2(16, -76);
+            top.offsetMax = new Vector2(-16, -12);
+
+            title = Label(top, "Tên máy", "", 24, Accent, true, TextAnchor.MiddleLeft, new Vector2(28, -20), new Vector2(1100, 36));
+            title.horizontalOverflow = HorizontalWrapMode.Overflow;
+            subtitle = Label(top, "Máy mẫu", "", 14, Dim, false, TextAnchor.MiddleLeft, new Vector2(28, -48), new Vector2(1200, 24));
+            subtitle.horizontalOverflow = HorizontalWrapMode.Overflow;
             string exitText = Khkt.Input.PadInput.UsingTouch ? "Đóng ✕" : "Thoát  Esc";
             Corner(MakeButton(top, "Thoát", exitText, new Vector2(-14, -8), new Vector2(124, 48), Close, false, 15, new Vector2(1, 1)));
             Corner(MakeButton(top, "Nguyên lý", "Nguyên lý · bộ phận", new Vector2(-150, -8), new Vector2(196, 48), ShowPrinciple, false, 15, new Vector2(1, 1)));

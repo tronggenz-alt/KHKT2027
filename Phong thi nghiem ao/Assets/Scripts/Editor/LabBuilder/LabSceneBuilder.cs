@@ -229,7 +229,7 @@ namespace Khkt.EditorTools
                 m.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
                 EditorUtility.SetDirty(m);
             }
-            labGlass = Mat("ThuyTinh", new Color(0.78f, 0.91f, 0.97f, 0.38f), 0.96f, 0.08f, transparent: true);
+            labGlass = Mat("ThuyTinh", new Color(0.70f, 0.88f, 0.96f, 0.46f), 0.96f, 0.08f, transparent: true);
             liquidClear = Mat("DungDichTrong", new Color(0.8f, 0.9f, 1f, 0.35f), 0.9f, 0, transparent: true);
             liquidBlue = Mat("DungDichXanh", new Color(0.1f, 0.4f, 0.95f, 0.6f), 0.9f, 0, transparent: true);
             liquidPink = Mat("DungDichHong", new Color(0.95f, 0.35f, 0.65f, 0.5f), 0.9f, 0, transparent: true);

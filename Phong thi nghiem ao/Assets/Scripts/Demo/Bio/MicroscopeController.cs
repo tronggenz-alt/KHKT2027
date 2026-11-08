@@ -693,8 +693,9 @@ namespace Khkt.Demo.Bio
             }
 
             float scale = (float)mag / 10f;
-            float cx = TexSize * 0.5f, cy = TexSize * 0.5f, rMax = TexSize * 0.47f;
-            float rMax2 = rMax * rMax;
+            float cx = TexSize * 0.5f, cy = TexSize * 0.5f, rMax = TexSize * 0.465f;
+            float rOuter = rMax + 8f;
+            float rOuter2 = rOuter * rOuter;
             float invRMax = 1.0f / rMax;
             float invScale = 1.0f / Mathf.Max(0.35f, scale);
             float uOffset = stageX * 0.035f;
@@ -712,14 +713,14 @@ namespace Khkt.Demo.Bio
                 float dy2 = dy * dy;
                 int rowOffset = y * TexSize;
 
-                if (dy2 >= rMax2)
+                if (dy2 >= rOuter2)
                 {
                     for (int x = 0; x < TexSize; x++)
                         pixelBuf[rowOffset + x] = vignetteColor;
                     continue;
                 }
 
-                float halfW = Mathf.Sqrt(rMax2 - dy2);
+                float halfW = Mathf.Sqrt(rOuter2 - dy2);
                 int x0 = Mathf.Max(0, Mathf.CeilToInt(cx - halfW));
                 int x1 = Mathf.Min(TexSize - 1, Mathf.FloorToInt(cx + halfW));
 
@@ -731,6 +732,27 @@ namespace Khkt.Demo.Bio
                 for (int x = x0; x <= x1; x++)
                 {
                     float dx = x - cx;
+                    float dist = Mathf.Sqrt(dx * dx + dy2);
+                    // Thuật toán SDF Anti-Aliasing: Khử răng cưa 2.0 pixel ở mép vòng tròn thị kính và vành kim loại
+                    float innerMask = Mathf.Clamp01((rMax - dist) / 2.0f);
+                    float bezelMask = Mathf.Clamp01((rOuter - dist) / 2.0f) * (1f - innerMask);
+
+                    if (innerMask <= 0f && bezelMask <= 0f)
+                    {
+                        pixelBuf[rowOffset + x] = vignetteColor;
+                        continue;
+                    }
+
+                    Color bezelCol = new Color(0.09f, 0.11f, 0.15f, 1f);
+                    float hl = Mathf.Clamp01(1f - Mathf.Abs(dy - dx * 0.45f) / rMax) * 0.14f;
+                    bezelCol = Color.Lerp(bezelCol, new Color(0.26f, 0.30f, 0.38f), hl);
+
+                    if (innerMask <= 0f)
+                    {
+                        pixelBuf[rowOffset + x] = Color.Lerp(vignetteColor, bezelCol, bezelMask);
+                        continue;
+                    }
+
                     float u = (dx * invRMax) * invScale + uOffset;
 
                     float effectivePlasmo = Mathf.Max(plasmolysisFactor, plasmo);
@@ -803,7 +825,18 @@ namespace Khkt.Demo.Bio
                         }
                     }
 
+                    // Vignette quang học tự nhiên quanh mép rìa tròn
+                    float vig = Mathf.Clamp01(1f - Mathf.Pow(dist / rMax, 4.0f) * 0.35f);
+                    c *= vig;
                     c *= lightGain;
+
+                    // Hòa trộn SDF mượt mà với vành kim loại đen
+                    c = Color.Lerp(bezelCol, c, innerMask);
+                    if (bezelMask > 0f)
+                    {
+                        c = Color.Lerp(vignetteColor, c, innerMask + bezelMask);
+                    }
+
                     c.a = 1f;
                     pixelBuf[rowOffset + x] = c;
                 }
@@ -841,6 +874,41 @@ namespace Khkt.Demo.Bio
         public static Color SampleSpecimenColor(string code, float u, float v, bool stainedBlue, bool stainedLugol, bool isStomata, bool gramPos, bool gramNeg, bool isSarcomere, bool isMouth, bool isYeast, float plasmolysis, bool stomaOpen)
         {
             code ??= "bieu_bi_hanh";
+
+            // 0. Tiêu bản Mô học rễ / thân thực vật nhuộm kép (Carmin - Lục Iod: Libe hồng đỏ, Gỗ xanh lam)
+            if (code.Contains("mo_hoc") || code.Contains("than_re") || code.Contains("carmin") || code.Contains("thuc_vat"))
+            {
+                float rad = Mathf.Sqrt(u * u + v * v);
+                float bundleDist = Mathf.Abs(rad - 0.28f);
+                if (bundleDist < 0.12f)
+                {
+                    if (rad < 0.28f)
+                    {
+                        float xu = Mathf.Repeat(u * 16f, 1f) - 0.5f;
+                        float xv = Mathf.Repeat(v * 16f, 1f) - 0.5f;
+                        float xr = Mathf.Sqrt(xu * xu + xv * xv);
+                        if (xr < 0.38f)
+                        {
+                            if (xr > 0.24f) return new Color(0.12f, 0.42f, 0.68f); // Vách hóa gỗ xanh lam
+                            return new Color(0.96f, 0.98f, 1.0f);                  // Lòng mạch rỗng sáng
+                        }
+                        return new Color(0.20f, 0.55f, 0.72f);
+                    }
+                    else
+                    {
+                        float lu = Mathf.Repeat(u * 28f, 1f) - 0.5f;
+                        float lv = Mathf.Repeat(v * 28f, 1f) - 0.5f;
+                        float lr = Mathf.Sqrt(lu * lu + lv * lv);
+                        if (lr > 0.35f) return new Color(0.72f, 0.18f, 0.32f);
+                        return new Color(0.88f, 0.32f, 0.48f); // Libe đỏ Carmin
+                    }
+                }
+                float pu = Mathf.Repeat(u * 10f, 1f) - 0.5f;
+                float pv = Mathf.Repeat(v * 10f, 1f) - 0.5f;
+                float pr = Mathf.Sqrt(pu * pu + pv * pv);
+                if (pr > 0.44f) return new Color(0.68f, 0.52f, 0.60f);
+                return new Color(0.94f, 0.90f, 0.92f);
+            }
 
             // 11. Khuẩn lạc / tế bào E. coli mang pUC19-GFP phát huỳnh quang xanh lục (509 nm)
             if (code.Contains("gfp"))
@@ -953,7 +1021,7 @@ namespace Khkt.Demo.Bio
                 return new Color(0.93f, 0.91f, 0.96f);
             }
 
-            // 6. Tiêu bản máu người (hồng cầu & bạch cầu)
+            // 6. Tiêu bản máu người (hồng cầu lõm hai mặt & bạch cầu đa nhân trung tính / lympho)
             if (code.Contains("tieu_ban_mau") || code.Contains("hong_cau"))
             {
                 int idx = Mathf.Abs(Mathf.FloorToInt(u * 10f) * 7 + Mathf.FloorToInt(v * 10f) * 13);
@@ -962,12 +1030,25 @@ namespace Khkt.Demo.Bio
                 float r = Mathf.Sqrt(gx * gx + gy * gy);
                 if (idx % 11 == 0)
                 {
-                    if (r < 0.16f) return new Color(0.32f, 0.16f, 0.58f); // nhân múi bạch cầu
-                    if (r < 0.28f) return new Color(0.76f, 0.72f, 0.88f);
+                    // Bạch cầu trung tính (Neutrophil): nhân 3-4 múi nối nhau + hạt tế bào chất tím nhạt
+                    float nu1 = Mathf.Sqrt((gx - 0.05f) * (gx - 0.05f) + (gy - 0.04f) * (gy - 0.04f));
+                    float nu2 = Mathf.Sqrt((gx + 0.06f) * (gx + 0.06f) + (gy - 0.03f) * (gy - 0.03f));
+                    float nu3 = Mathf.Sqrt(gx * gx + (gy + 0.07f) * (gy + 0.07f));
+                    if (nu1 < 0.055f || nu2 < 0.052f || nu3 < 0.048f)
+                        return new Color(0.35f, 0.12f, 0.52f);
+                    if (r < 0.28f)
+                        return new Color(0.82f, 0.78f, 0.90f);
+                }
+                else if (idx % 17 == 0)
+                {
+                    // Tế bào Lympho: nhân to tròn đậm màu chiếm gần hết tế bào
+                    if (r < 0.18f) return new Color(0.24f, 0.10f, 0.48f);
+                    if (r < 0.24f) return new Color(0.70f, 0.82f, 0.95f);
                 }
                 else if (r < 0.22f)
                 {
-                    return r < 0.09f ? new Color(0.92f, 0.52f, 0.56f) : new Color(0.84f, 0.22f, 0.28f); // hồng cầu lõm 2 mặt
+                    // Hồng cầu hình đĩa lõm hai mặt: viền dày đỏ cam, tâm mỏng sáng màu
+                    return r < 0.09f ? new Color(0.94f, 0.58f, 0.60f) : new Color(0.84f, 0.22f, 0.26f);
                 }
                 return new Color(0.96f, 0.95f, 0.95f);
             }

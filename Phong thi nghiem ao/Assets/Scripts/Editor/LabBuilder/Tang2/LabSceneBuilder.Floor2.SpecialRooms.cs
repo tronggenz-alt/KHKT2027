@@ -772,8 +772,47 @@ namespace Khkt.EditorTools
                 foreach (int sz in new[] { -1, 1 })
                     Box(pot, "Chân", new Vector3(sx * 0.75f, 0.39f, sz * 0.25f), new Vector3(0.04f, 0.78f, 0.04f), alu, false);
             Box(pot, "Bao đất", new Vector3(-0.5f, 0.92f, 0), new Vector3(0.35f, 0.2f, 0.45f), bioKraft, false);
-            for (int i = 0; i < 3; i++) Plant(pot, new Vector3(0.0f + i * 0.2f, 0.82f, 0.05f), 3, 1f);
-            var can = Group("Bình tưới", pot, new Vector3(0.6f, 0, 0));
+            Plant(pot, new Vector3(0.25f, 0.82f, 0.05f), 3, 1f);
+            Plant(pot, new Vector3(0.45f, 0.82f, 0.05f), 2, 1f);
+
+            // Chậu cây thí nghiệm tương tác 4 giai đoạn sinh trưởng
+            var expPlant = Group("Chậu cây thực nghiệm sinh học", pot, new Vector3(-0.05f, 0.82f, 0.05f));
+            float potR = 0.07f, potH = 0.09f;
+            Cyl(expPlant, "Đĩa lót", new Vector3(0, 0.008f, 0), potR * 0.98f, 0.016f, potWhite, false);
+            var potMesh = Lathe("T2_ChauExp", 20, V(0, 0), V(potR * 0.75f, 0), V(potR * 0.78f, 0.01f), V(potR, potH * 0.92f), V(potR * 1.06f, potH * 0.95f), V(potR * 1.06f, potH), V(potR * 0.95f, potH), V(0, potH * 0.85f));
+            MeshObj(expPlant, "Chậu sứ", potMesh, Vector3.zero, potWhite);
+            var soilObj = Cyl(expPlant, "Đất ẩm", new Vector3(0, potH * 0.86f, 0), potR * 0.92f, 0.015f, bioSoil);
+
+            var st0 = Group("Giai đoạn 1", expPlant);
+            Ball(st0, "Hạt mầm", new Vector3(0, potH * 0.88f, 0), new Vector3(0.012f, 0.008f, 0.01f), bioLeaf);
+            Cyl(st0, "Nhú mầm", new Vector3(0.004f, potH * 0.89f, 0), 0.002f, 0.015f, bioLeafLight);
+
+            var st1 = Group("Giai đoạn 2", expPlant);
+            Cyl(st1, "Thân mầm", new Vector3(0, potH + 0.025f, 0), 0.003f, 0.05f, bioLeafLight);
+            Ball(st1, "Lá mầm 1", new Vector3(0.015f, potH + 0.045f, 0), new Vector3(0.02f, 0.005f, 0.015f), bioLeafLight);
+            Ball(st1, "Lá mầm 2", new Vector3(-0.015f, potH + 0.045f, 0), new Vector3(0.02f, 0.005f, 0.015f), bioLeafLight);
+
+            var st2 = Group("Giai đoạn 3", expPlant);
+            Cyl(st2, "Thân cây", new Vector3(0, potH + 0.05f, 0), 0.004f, 0.1f, bioLeafLight);
+            MeshObj(st2, "Tán lá", PlantMesh("DauNon", 6, 0.06f, 0.04f, 0.12f, 0.01f, false), new Vector3(0, potH + 0.08f, 0), bioLeaf);
+
+            var st3 = Group("Giai đoạn 4", expPlant);
+            Cyl(st3, "Thân cây", new Vector3(0, potH + 0.07f, 0), 0.005f, 0.14f, bioLeafLight);
+            MeshObj(st3, "Tán lá to", PlantMesh("DauNon", 8, 0.08f, 0.05f, 0.15f, 0.02f, false), new Vector3(0, potH + 0.1f, 0), bioLeaf);
+            Ball(st3, "Hoa vàng 1", new Vector3(0.02f, potH + 0.16f, 0.01f), Vector3.one * 0.016f, Mat("T2_HoaVang", new Color(1f, 0.88f, 0.2f), 0.5f));
+            Ball(st3, "Hoa vàng 2", new Vector3(-0.025f, potH + 0.14f, -0.01f), Vector3.one * 0.014f, Mat("T2_HoaVang", new Color(1f, 0.88f, 0.2f), 0.5f));
+
+            var calloutLbl = Label(expPlant, "", new Vector3(0, potH + 0.26f, 0), Vector3.forward, 0.016f, Color.white);
+            var gp = expPlant.gameObject.AddComponent<GrowablePlant>();
+            gp.stageObjects = new[] { st0.gameObject, st1.gameObject, st2.gameObject, st3.gameObject };
+            gp.soilRenderer = soilObj.GetComponent<Renderer>();
+            gp.calloutTextMesh = calloutLbl.GetComponent<TextMesh>();
+            var gpCol = expPlant.gameObject.AddComponent<CapsuleCollider>();
+            gpCol.center = new Vector3(0, potH * 0.5f, 0);
+            gpCol.radius = potR * 1.15f;
+            gpCol.height = potH * 1.3f;
+
+            var can = Group("Bình tưới", pot, new Vector3(0.65f, 0, 0));
             Cyl(can, "Thân bình", new Vector3(0, 0.12f, 0), 0.08f, 0.24f, Mat("T2_BinhTuoi", new Color(0.2f, 0.55f, 0.35f), 0.4f), true);
             Cyl(can, "Vòi bình", new Vector3(0.12f, 0.2f, 0), 0.012f, 0.25f, Mat("T2_BinhTuoi", new Color(0.2f, 0.55f, 0.35f), 0.4f), false, new Vector3(0, 0, -55));
             var canCol = can.gameObject.AddComponent<CapsuleCollider>();
@@ -784,11 +823,33 @@ namespace Khkt.EditorTools
             canGrab.kind = "binh_tuoi";
             canGrab.gripHeightM = 0.12f;
             canGrab.massG = 220f;
+
+            // Hệ thống phun sương & Dàn đèn LED PAR quang phổ
+            var mistGroup = Group("Hệ thống phun sương", gh, new Vector3(20.5f, 4.3f, -5.8f));
+            for (int i = 0; i < 6; i++)
+                Cyl(mistGroup, "Sương mù " + i, new Vector3((i - 2.5f) * 1.8f, -0.6f, 0), 0.35f, 1.2f, Mat("T2_SuongAm", new Color(0.92f, 0.96f, 1f, 0.15f), 0.9f, 0, transparent: true), false);
+            mistGroup.gameObject.SetActive(false);
+
+            var parGrowMat = Mat("T2_DenPAR", new Color(0.95f, 0.85f, 0.95f), 0.5f, 0, emission: new Color(2.4f, 0.6f, 2.2f));
+            var parLed1 = Box(gh, "Dàn đèn PAR 1", new Vector3(16.5f, 2.3f, -7.0f), new Vector3(3.5f, 0.03f, 0.2f), parGrowMat, false);
+            var parLed2 = Box(gh, "Dàn đèn PAR 2", new Vector3(23.7f, 2.3f, -7.0f), new Vector3(4.5f, 0.03f, 0.2f), parGrowMat, false);
+            var parLed3 = Box(gh, "Dàn đèn PAR 3", new Vector3(16.5f, 2.3f, -5.2f), new Vector3(3.5f, 0.03f, 0.2f), parGrowMat, false);
+            var parLed4 = Box(gh, "Dàn đèn PAR 4", new Vector3(23.7f, 2.3f, -5.2f), new Vector3(4.5f, 0.03f, 0.2f), parGrowMat, false);
+            parLed1.SetActive(false); parLed2.SetActive(false); parLed3.SetActive(false); parLed4.SetActive(false);
+
+            // Bảng điều khiển vi khí hậu nhà màng thông minh
             var sensor = Group("Cảm biến vi khí hậu", gh, new Vector3(RoomSplitX + 0.12f, 1.55f, -4.5f), 90f);
-            Box(sensor, "Hộp", Vector3.zero, new Vector3(0.3f, 0.22f, 0.05f), bioWhite, false);
-            NoShadow(Box(sensor, "Màn", new Vector3(0, 0.01f, 0.026f), new Vector3(0.24f, 0.12f, 0.004f), bioDisplayGreen, false));
-            Label(sensor, "28,5 °C · 72 %\nÁNH SÁNG 18 klx", new Vector3(0, 0.01f, 0.03f), Vector3.forward, 0.018f, new Color(0.6f, 1f, 0.65f));
-            Info(sensor, "Cảm biến vi khí hậu nhà kính", "Đo nhiệt độ, độ ẩm, cường độ ánh sáng; tự bật phun sương khi độ ẩm dưới 60 %, kéo rèm che khi nắng quá 40 klx.");
+            Box(sensor, "Hộp", Vector3.zero, new Vector3(0.44f, 0.32f, 0.05f), bioWhite, false);
+            NoShadow(Box(sensor, "Màn", new Vector3(0, 0.01f, 0.026f), new Vector3(0.38f, 0.24f, 0.004f), bioDisplayGreen, false));
+            var sensorLabel = Label(sensor, "", new Vector3(0, 0.01f, 0.03f), Vector3.forward, 0.016f, new Color(0.6f, 1f, 0.65f));
+            var ghCtrl = sensor.gameObject.AddComponent<GreenhouseController>();
+            ghCtrl.mistSystem = mistGroup.gameObject;
+            ghCtrl.parGrowLeds = new[] { parLed1, parLed2, parLed3, parLed4 };
+            ghCtrl.statusTextMesh = sensorLabel.GetComponent<TextMesh>();
+            var sCol = sensor.gameObject.AddComponent<BoxCollider>();
+            sCol.size = new Vector3(0.44f, 0.32f, 0.08f);
+
+            Info(sensor, "Hệ thống vi khí hậu thông minh", "Tự động đo nhiệt độ, độ ẩm, PAR. Cho phép bật/tắt phun sương và dàn đèn quang phổ sinh trưởng.");
             NoShadow(Box(gh, "Rãnh thoát nước", new Vector3(19.8f, 0.002f, -6.3f), new Vector3(0.18f, 0.004f, 5.0f), Mat("T2_NapRanh", new Color(0.2f, 0.21f, 0.22f), 0.5f, 0.6f), false));
             Plant(gh, new Vector3(26.4f, 0, -4.15f), 4, 1.3f, bioPotGrey);
             Plant(gh, new Vector3(14.1f, 0, -8.55f), 0, 1.5f, bioPotGrey);
@@ -881,8 +942,37 @@ namespace Khkt.EditorTools
             for (int i = 0; i < 4; i++)
                 Cyl(beaker, "Cành rong", new Vector3((i - 1.5f) * 0.012f, 0.07f, 0.01f * (i % 2)), 0.002f, 0.13f, bioLeafLight, false, new Vector3((i - 1.5f) * 8, 0, 0));
             NoShadow(MeshObj(beaker, "Phễu úp", Lathe("T2_PheuUp", 20, V(0.05f, 0), V(0.052f, 0.004f), V(0.012f, 0.06f), V(0.01f, 0.1f), V(0.008f, 0.1f), V(0.009f, 0.06f), V(0.048f, 0.003f)), new Vector3(0, 0.01f, 0), labGlass));
-            NoShadow(MeshObj(beaker, "Ống thu khí", TestTube(), new Vector3(0, 0.27f, 0), labGlass, false, new Vector3(180, 0, 0)));
+            var tube = MeshObj(beaker, "Ống thu khí", TestTube(), new Vector3(0, 0.27f, 0), labGlass, false, new Vector3(180, 0, 0));
+            NoShadow(tube);
             var stem = Group("Gốc cành rong", beaker, new Vector3(0, 0.12f, 0));
+
+            // Que đóm tàn đỏ thử khí O2 (SGK Sinh 11)
+            var splint = Group("Que đóm tàn đỏ", table, new Vector3(0.25f, top, 0.08f));
+            Cyl(splint, "Thân que gỗ", new Vector3(0, 0.06f, 0), 0.0025f, 0.12f, oak, false, new Vector3(0, 0, 45));
+            var emberMat = Mat("T2_TanDomDo", new Color(0.95f, 0.2f, 0.05f), 0.3f, 0, emission: new Color(2.5f, 0.4f, 0.1f));
+            var ember = Ball(splint, "Tàn đỏ", new Vector3(0.042f, 0.102f, 0), Vector3.one * 0.006f, emberMat);
+            var flameMat = Mat("T2_NgonLuaO2", new Color(1f, 0.85f, 0.2f), 0.8f, 0, emission: new Color(3.5f, 2.8f, 0.8f));
+            var flame = Ball(splint, "Ngọn lửa", new Vector3(0.045f, 0.115f, 0), new Vector3(0.018f, 0.04f, 0.018f), flameMat);
+            var flameLgt = flame.AddComponent<Light>();
+            flameLgt.type = LightType.Point;
+            flameLgt.range = 0.8f;
+            flameLgt.color = new Color(1f, 0.85f, 0.3f);
+            flameLgt.intensity = 2.0f;
+            flameLgt.enabled = false;
+            flame.SetActive(false);
+
+            var splintCol = splint.gameObject.AddComponent<BoxCollider>();
+            splintCol.center = new Vector3(0.02f, 0.06f, 0);
+            splintCol.size = new Vector3(0.1f, 0.12f, 0.06f);
+
+            var splintLbl = Label(splint, "Que đóm tàn đỏ", new Vector3(0, 0.16f, 0), Vector3.forward, 0.016f, Color.yellow);
+            var splintComp = splint.gameObject.AddComponent<OxygenGlowingSplint>();
+            splintComp.testTubeMouth = tube.transform;
+            splintComp.emberTip = ember;
+            splintComp.flameEffect = flame;
+            splintComp.flameLight = flameLgt;
+            splintComp.resultText = splintLbl.GetComponent<TextMesh>();
+
             // đèn trên thước trượt
             Box(table, "Thước trượt", new Vector3(-0.3f, top + 0.005f, 0), new Vector3(0.5f, 0.01f, 0.04f), signWhite, false);
             var lamp = Group("Đèn chiếu", table, new Vector3(-0.3f, top, 0));
@@ -906,35 +996,97 @@ namespace Khkt.EditorTools
             Cyl(table, "Giá đỡ", new Vector3(-0.2f, top + 0.25f, -0.1f), 0.008f, 0.5f, darkMetal);
             NoShadow(Cyl(table, "Ống mao dẫn", new Vector3(0.05f, top + 0.12f, -0.1f), 0.004f, 0.5f, labGlass, false, new Vector3(0, 0, 90)));
             Box(table, "Thước mm", new Vector3(0.05f, top + 0.105f, -0.1f), new Vector3(0.5f, 0.02f, 0.004f), signWhite, false);
+
+            // Bọt khí trong ống mao dẫn
+            var bubble = Ball(table, "Bọt khí đo thể tích", new Vector3(-0.15f, top + 0.12f, -0.1f), new Vector3(0.008f, 0.006f, 0.006f), Mat("T2_BotKhiPoto", Color.white, 0.9f));
+
             Plant(table, new Vector3(-0.2f, top + 0.3f, -0.1f), 3, 1.5f, labGlass);
-            Box(table, "Giấy coban clorua", new Vector3(0.3f, top + 0.003f, 0.12f), new Vector3(0.08f, 0.002f, 0.06f), Mat("T2_GiayCoban", new Color(0.35f, 0.5f, 0.85f), 0.2f), false);
+
+            // Giấy tẩm Coban Clorua (CoCl2) kẹp ở 2 mặt lá
+            var paperBottom = Box(table, "Giấy CoCl2 mặt dưới", new Vector3(-0.18f, top + 0.35f, -0.06f), new Vector3(0.04f, 0.002f, 0.03f), Mat("T2_GiayCobanDuoi", new Color(0.25f, 0.45f, 0.88f), 0.2f), false);
+            var paperTop = Box(table, "Giấy CoCl2 mặt trên", new Vector3(-0.22f, top + 0.39f, -0.14f), new Vector3(0.04f, 0.002f, 0.03f), Mat("T2_GiayCobanTren", new Color(0.25f, 0.45f, 0.88f), 0.2f), false);
+
+            var potoLbl = Label(table, "", new Vector3(0, top + 0.34f, 0), Vector3.forward, 0.016f, Color.white);
+            var potoExp = g.gameObject.AddComponent<PotometerExperiment>();
+            potoExp.bubbleTransform = bubble.transform;
+            potoExp.startX = -0.18f;
+            potoExp.endX = 0.28f;
+            potoExp.cobaltPaperBottom = paperBottom.GetComponent<Renderer>();
+            potoExp.cobaltPaperTop = paperTop.GetComponent<Renderer>();
+            potoExp.statusText = potoLbl.GetComponent<TextMesh>();
+
+            var potoCol = table.gameObject.AddComponent<BoxCollider>();
+            potoCol.center = new Vector3(0, top + 0.25f, 0);
+            potoCol.size = new Vector3(0.85f, 0.45f, 0.5f);
+
             Label(table, "THOÁT HƠI NƯỚC · POTOMETER", new Vector3(0, top - 0.06f, 0.301f), Vector3.forward, 0.025f, new Color(0.1f, 0.3f, 0.12f));
-            Info(g, "Thí nghiệm thoát hơi nước", "Bọt khí trong ống mao dẫn dịch chuyển theo lượng nước cành cây hút để bù thoát hơi nước. Giấy coban clorua xanh hóa hồng khi gặp hơi nước ở mặt dưới lá (nhiều khí khổng).");
+            Info(g, "Thí nghiệm thoát hơi nước", "Bọt khí trong ống mao dẫn dịch chuyển theo lượng nước cành cây hút để bù thoát hơi nước. Giấy coban clorua xanh hóa hồng khi gặp hơi nước ở mặt dưới lá (nhiều khí khổng gấp bội mặt trên).");
         }
 
         static void PhototropismStation(Transform p, Vector3 pos)
         {
             var g = Group("Thí nghiệm hướng sáng", p, pos);
-            var table = StationTable(g, 1.0f);
+            var table = StationTable(g, 1.2f);
             float top = 0.8f;
-            var box = Group("Hộp tối có khe sáng", table, new Vector3(0.1f, top, 0));
             var dark = Mat("T2_HopCartonDen", new Color(0.1f, 0.1f, 0.11f), 0.2f);
-            Box(box, "Đáy", new Vector3(0, 0.005f, 0), new Vector3(0.3f, 0.01f, 0.3f), dark);
+
+            var explainLbl = Label(table, "", new Vector3(0, top + 0.38f, 0), Vector3.forward, 0.015f, Color.white);
+
+            // 1. Hộp A: Thí nghiệm khe sáng bên hông (cây uốn cong 45° về phía khe)
+            var boxA = Group("Hộp A - Khe sáng bên", table, new Vector3(-0.25f, top, 0));
+            Box(boxA, "Đáy", new Vector3(0, 0.005f, 0), new Vector3(0.24f, 0.01f, 0.24f), dark);
             foreach (int s in new[] { -1, 1 })
-                Box(box, "Vách", new Vector3(0, 0.17f, s * 0.145f), new Vector3(0.3f, 0.34f, 0.01f), dark);
-            Box(box, "Vách sau", new Vector3(-0.145f, 0.17f, 0), new Vector3(0.01f, 0.34f, 0.28f), dark);
-            Box(box, "Vách có khe (dưới)", new Vector3(0.145f, 0.08f, 0), new Vector3(0.01f, 0.16f, 0.28f), dark);
-            Box(box, "Vách có khe (trên)", new Vector3(0.145f, 0.28f, 0), new Vector3(0.01f, 0.12f, 0.28f), dark);
-            Box(box, "Nắp hé", new Vector3(-0.05f, 0.35f, 0), new Vector3(0.2f, 0.01f, 0.3f), dark, false);
-            for (int i = 0; i < 3; i++)
-            {
-                var sprout = Group("Cây mầm nghiêng về khe sáng", box, new Vector3(-0.06f + i * 0.04f, 0.01f, -0.06f + i * 0.06f));
-                sprout.localRotation = Quaternion.Euler(0, 0, -20f);
-                Plant(sprout, Vector3.zero, 3, 1.1f);
-            }
-            for (int i = 0; i < 3; i++) Plant(table, new Vector3(-0.35f, top, -0.1f + i * 0.1f), 3, 1.1f);
-            Label(table, "HƯỚNG SÁNG", new Vector3(0, top - 0.06f, 0.301f), Vector3.forward, 0.025f, new Color(0.1f, 0.3f, 0.12f));
-            Info(g, "Thí nghiệm hướng sáng", "Cây mầm trong hộp tối có khe sáng mọc cong về phía khe: auxin dồn về phía khuất sáng làm phía đó dài nhanh hơn. Cây ngoài hộp mọc thẳng (đối chứng).");
+                Box(boxA, "Vách", new Vector3(0, 0.14f, s * 0.115f), new Vector3(0.24f, 0.28f, 0.01f), dark);
+            Box(boxA, "Vách sau", new Vector3(-0.115f, 0.14f, 0), new Vector3(0.01f, 0.28f, 0.22f), dark);
+            // Khe sáng ở vách phải (+x)
+            Box(boxA, "Vách có khe (dưới)", new Vector3(0.115f, 0.05f, 0), new Vector3(0.01f, 0.10f, 0.22f), dark);
+            Box(boxA, "Vách có khe (trên)", new Vector3(0.115f, 0.22f, 0), new Vector3(0.01f, 0.12f, 0.22f), dark);
+            // Nắp mở được
+            var lidA = Group("Nắp hộp A", boxA, new Vector3(0, 0.28f, -0.115f));
+            Box(lidA, "Tấm nắp", new Vector3(0, 0.005f, 0.115f), new Vector3(0.24f, 0.01f, 0.24f), dark, false);
+
+            // Cây mầm uốn cong 45° về phía khe sáng (+x)
+            var sproutA = Group("Cây mầm uốn cong 45°", boxA, new Vector3(-0.02f, 0.01f, 0));
+            sproutA.localRotation = Quaternion.Euler(0, 0, -45f);
+            Plant(sproutA, Vector3.zero, 3, 1.1f);
+
+            var boxACol = boxA.gameObject.AddComponent<BoxCollider>();
+            boxACol.center = new Vector3(0, 0.14f, 0);
+            boxACol.size = new Vector3(0.26f, 0.3f, 0.26f);
+            var protoA = boxA.gameObject.AddComponent<PhototropismBox>();
+            protoA.seedlingStemVisual = sproutA.transform;
+            protoA.RunExperiment(36.0, 45.0, false);
+
+            // 2. Hộp B: Thí nghiệm đối chứng (chiếu sáng đều từ trên, cây mọc thẳng đứng)
+            var boxB = Group("Hộp B - Chiếu sáng đỉnh (Đối chứng)", table, new Vector3(0.25f, top, 0));
+            Box(boxB, "Đáy", new Vector3(0, 0.005f, 0), new Vector3(0.24f, 0.01f, 0.24f), dark);
+            foreach (int s in new[] { -1, 1 })
+                Box(boxB, "Vách", new Vector3(0, 0.14f, s * 0.115f), new Vector3(0.24f, 0.28f, 0.01f), dark);
+            Box(boxB, "Vách sau", new Vector3(-0.115f, 0.14f, 0), new Vector3(0.01f, 0.28f, 0.22f), dark);
+            Box(boxB, "Vách trước", new Vector3(0.115f, 0.14f, 0), new Vector3(0.01f, 0.28f, 0.22f), dark);
+            // Nắp mở được có lỗ sáng ở giữa
+            var lidB = Group("Nắp hộp B", boxB, new Vector3(0, 0.28f, -0.115f));
+            Box(lidB, "Tấm nắp trước", new Vector3(0, 0.005f, 0.05f), new Vector3(0.24f, 0.01f, 0.11f), dark, false);
+            Box(lidB, "Tấm nắp sau", new Vector3(0, 0.005f, 0.18f), new Vector3(0.24f, 0.01f, 0.11f), dark, false);
+
+            // Cây mầm mọc thẳng đứng đối chứng
+            var sproutB = Group("Cây mầm mọc thẳng đứng", boxB, new Vector3(0, 0.01f, 0));
+            Plant(sproutB, Vector3.zero, 3, 1.1f);
+
+            var boxBCol = boxB.gameObject.AddComponent<BoxCollider>();
+            boxBCol.center = new Vector3(0, 0.14f, 0);
+            boxBCol.size = new Vector3(0.26f, 0.3f, 0.26f);
+            var protoB = boxB.gameObject.AddComponent<PhototropismBox>();
+            protoB.seedlingStemVisual = sproutB.transform;
+            protoB.RunExperiment(36.0, 0.0, false);
+
+            explainLbl.GetComponent<TextMesh>().text =
+                "<b>TÍNH HƯỚNG SÁNG (PHOTOTROPISM)</b>\n" +
+                "• Hộp A: Khe sáng hông → Auxin dồn phía tối → Thân uốn cong 45°\n" +
+                "• Hộp B (Đối chứng): Chiếu sáng đỉnh → Thân mọc thẳng đứng";
+
+            Label(table, "HƯỚNG SÁNG · PHOTOTROPISM", new Vector3(0, top - 0.06f, 0.301f), Vector3.forward, 0.025f, new Color(0.1f, 0.3f, 0.12f));
+            Info(g, "Thí nghiệm tính hướng sáng", "Cây mầm trong hộp tối có khe sáng mọc cong 45° về phía khe: Auxin (IAA) chuyển dồn về phía khuất sáng làm phía đó dãn dài nhanh hơn. Cây chiếu sáng đều từ đỉnh mọc thẳng đứng (đối chứng).");
         }
 
         /// <summary>Bàn thí nghiệm nhỏ trong nhà kính (mặt 0,8 m), trả về nhóm bàn để đặt đồ lên (y = 0 là sàn).</summary>

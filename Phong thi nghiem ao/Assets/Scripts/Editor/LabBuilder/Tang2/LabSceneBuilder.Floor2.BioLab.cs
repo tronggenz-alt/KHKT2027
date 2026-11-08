@@ -35,6 +35,7 @@ namespace Khkt.EditorTools
             TeacherArea(lab);  // bàn giáo viên + ghế của tầng 1 (cùng vị trí x 1,9, z 7,5)
             var desk = lab.Find("Bàn giáo viên");
             var teacherMic = Microscope(desk, "Kính hiển vi giáo viên", new Vector3(0f, 0.9f, -0.5f), 180f, true, true);
+            TaskLamp(desk, new Vector3(0.55f, 0.9f, -0.4f), -115f);
             var s2Wall = lab.Find("Tường bảng/Tường video/Màn hình tường video 2/Mặt màn hình");
             if (s2Wall != null && teacherMic.TryGetComponent<MicroscopeController>(out var tmc))
                 tmc.teacherScreenRenderer = s2Wall.GetComponent<Renderer>();
@@ -205,6 +206,7 @@ namespace Khkt.EditorTools
                 Stool(b, $"Ghế đẩu {i + 1}", L(0.85f, 0, z));
             }
             SlideBox(b, L(-0.17f, top, -0.45f), 0f, number == 1);
+            TaskLamp(b, L(-0.35f, top, 0.95f), 135f);
             InstrumentTray(b, L(-0.2f, top, 0.38f), 0f);
             var wb = Group("Bình tia nước cất", b, L(-0.24f, top, -1.12f));
             WashBottle(wb, Vector3.zero);

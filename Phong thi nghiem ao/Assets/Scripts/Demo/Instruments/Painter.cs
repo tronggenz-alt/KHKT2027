@@ -19,6 +19,12 @@ namespace Khkt.Demo.Instruments
             px = new Color32[w * h];
         }
 
+        public Color32[] Pixels => px;
+        public void SetPixel(int x, int y, Color32 c)
+        {
+            if ((uint)x < W && (uint)y < H) px[y * W + x] = c;
+        }
+
         public void Clear(Color c)
         {
             Color32 k = c;

@@ -81,6 +81,48 @@ namespace Khkt.EditorTools
             // Nhà kính: vách kính toàn phần phía nam và phía đông
             CurtainWall(g, "Vách kính nam nhà kính", true, WingZ, RoomSplitX + 0.1f, StoreX + 0.1f);
             CurtainWall(g, "Vách kính đông nhà kính", false, StoreX, WingZ + 0.1f, F2_CorridorZ - 0.1f);
+
+            // ===== 4. Chỉ phào trần & Len chân tường bịt kín khe hở Tầng 2 =====
+            RoomCorniceAndBaseboard(g, "Phòng sinh học chính", 0, 0, LabX, LabZ);
+            RoomCorniceAndBaseboard(g, "Phòng vi sinh", LabX, F2_ZoneSplitZ, StoreX, LabZ);
+            RoomCorniceAndBaseboard(g, "Kho sinh phẩm", LabX, 0, StoreX, F2_ZoneSplitZ);
+            RoomCorniceAndBaseboard(g, "Phòng sinh học phân tử", 0, WingZ, RoomSplitX, F2_CorridorZ);
+            RoomCorniceAndBaseboard(g, "Hành lang tầng 2", 0, F2_CorridorZ, StoreX, 0);
+        }
+
+        /// <summary>
+        /// Nẹp chỉ phào trần (Cornice: 0.04m x 0.05m màu paint) và len chân tường (Baseboard: 0.02m x 0.10m màu epoxyDark)
+        /// chạy quanh phòng để bịt kín 100% khe hở tiếp giáp tường - trần và tường - sàn.
+        /// </summary>
+        static void RoomCorniceAndBaseboard(Transform parent, string roomName, float x0, float z0, float x1, float z1)
+        {
+            var g = Group("Chỉ phào & Len chân - " + roomName, parent);
+            float lenX = x1 - x0;
+            float lenZ = z1 - z0;
+            float midX = (x0 + x1) * 0.5f;
+            float midZ = (z0 + z1) * 0.5f;
+
+            float cyCornice = F2_H - 0.025f;
+            float cThick = 0.04f, cHeight = 0.05f;
+
+            float cyBase = 0.05f;
+            float bThick = 0.02f, bHeight = 0.10f;
+
+            // 1. Phía Nam (z = z0)
+            Box(g, "Phào trần nam", new Vector3(midX, cyCornice, z0 + cThick * 0.5f), new Vector3(lenX, cHeight, cThick), paint, false);
+            Box(g, "Len chân nam", new Vector3(midX, cyBase, z0 + bThick * 0.5f), new Vector3(lenX, bHeight, bThick), epoxyDark, false);
+
+            // 2. Phía Bắc (z = z1)
+            Box(g, "Phào trần bắc", new Vector3(midX, cyCornice, z1 - cThick * 0.5f), new Vector3(lenX, cHeight, cThick), paint, false);
+            Box(g, "Len chân bắc", new Vector3(midX, cyBase, z1 - bThick * 0.5f), new Vector3(lenX, bHeight, bThick), epoxyDark, false);
+
+            // 3. Phía Tây (x = x0)
+            Box(g, "Phào trần tây", new Vector3(x0 + cThick * 0.5f, cyCornice, midZ), new Vector3(cThick, cHeight, lenZ), paint, false);
+            Box(g, "Len chân tây", new Vector3(x0 + bThick * 0.5f, cyBase, midZ), new Vector3(bThick, bHeight, lenZ), epoxyDark, false);
+
+            // 4. Phía Đông (x = x1)
+            Box(g, "Phào trần đông", new Vector3(x1 - cThick * 0.5f, cyCornice, midZ), new Vector3(cThick, cHeight, lenZ), paint, false);
+            Box(g, "Len chân đông", new Vector3(x1 - bThick * 0.5f, cyBase, midZ), new Vector3(bThick, bHeight, lenZ), epoxyDark, false);
         }
 
         /// <summary>Vách kính toàn phần: bậu bê tông thấp, kính cường lực, đố nhôm mỗi ~1,35 m, thanh ngang ở 2,3 m.</summary>

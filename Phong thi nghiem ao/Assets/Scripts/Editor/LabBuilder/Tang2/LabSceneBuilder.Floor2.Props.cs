@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Khkt.Demo;
 using Khkt.Demo.Bio;
 using Khkt.Interaction;
 using Khkt.Interaction.Bio;
@@ -35,9 +36,10 @@ namespace Khkt.EditorTools
             bioSpecimenPale = Mat("T2_MauVatNhat", new Color(0.82f, 0.72f, 0.6f), 0.5f);
             bioBiohazard = Mat("T2_CamNguyHai", new Color(0.95f, 0.42f, 0.08f), 0.45f);
             bioNitrile = Mat("T2_GangNitrile", new Color(0.35f, 0.5f, 0.92f), 0.35f);
-            bioLeaf = Mat("T2_LaCay", new Color(0.22f, 0.5f, 0.17f), 0.35f);
-            bioLeafDark = Mat("T2_LaCayDam", new Color(0.12f, 0.36f, 0.12f), 0.3f);
-            bioLeafLight = Mat("T2_LaCayNon", new Color(0.45f, 0.7f, 0.25f), 0.35f);
+            var leafTex = Tex("T2_LaGradient", 128, 128, LeafVeinPixel, repeat: false);
+            bioLeaf = Mat("T2_LaCay", new Color(0.22f, 0.5f, 0.17f), 0.35f, 0, leafTex);
+            bioLeafDark = Mat("T2_LaCayDam", new Color(0.12f, 0.36f, 0.12f), 0.3f, 0, leafTex);
+            bioLeafLight = Mat("T2_LaCayNon", new Color(0.45f, 0.7f, 0.25f), 0.35f, 0, leafTex);
             bioSoil = Mat("T2_DatTrong", new Color(0.22f, 0.15f, 0.1f), 0.08f);
             bioTerracotta = Mat("T2_ChauDatNung", new Color(0.66f, 0.36f, 0.22f), 0.2f);
             bioPotGrey = Mat("T2_ChauXam", new Color(0.36f, 0.38f, 0.4f), 0.3f);
@@ -79,8 +81,10 @@ namespace Khkt.EditorTools
         static Transform Microscope(Transform p, string name, Vector3 pos, float yaw, bool interactive, bool info = false)
         {
             var g = Group(name, p, pos, yaw);
-            var baseMesh = Lathe("T2_DeKinhHienVi", 24, V(0, 0), V(0.085f, 0), V(0.088f, 0.006f), V(0.088f, 0.03f), V(0.08f, 0.042f), V(0, 0.042f));
-            MeshObj(g, "Đế", baseMesh, new Vector3(-0.01f, 0, 0), bioWhite, true, null, 1f).transform.localScale = new Vector3(1.15f, 1f, 0.9f);
+            var baseMesh = Lathe("T2_DeKinhHienVi", 24, V(0, 0), V(0.085f, 0), V(0.085f, 0), V(0.088f, 0.006f), V(0.088f, 0.03f), V(0.08f, 0.042f), V(0, 0.042f));
+            var baseObj = MeshObj(g, "Đế", baseMesh, new Vector3(-0.01f, 0, 0), bioWhite, true, null, 1f);
+            baseObj.transform.localScale = new Vector3(1.15f, 1f, 0.9f);
+            NoShadow(baseObj);
             NoShadow(Cyl(g, "Đèn LED đế", new Vector3(0.015f, 0.044f, 0), 0.016f, 0.004f, tubeGlow));
             // thân cong: ba đoạn nghiêng
             Box(g, "Thân dưới", new Vector3(-0.06f, 0.1f, 0), new Vector3(0.05f, 0.12f, 0.055f), bioWhite, false);
@@ -281,10 +285,16 @@ namespace Khkt.EditorTools
             Box(gauge, "Kim", new Vector3(0.02f, 0.012f, 0.01f), new Vector3(0.002f, 0.03f, 0.004f), red, false, new Vector3(35, 0, 0));
             Cyl(g, "Van xả", new Vector3(-0.12f, 1.0f, -0.12f), 0.012f, 0.08f, bioChrome);
             var panel = Group("Bảng điều khiển", g, new Vector3(0.22f, 0.45f, 0), 0);
-            Box(panel, "Hộp", Vector3.zero, new Vector3(0.08f, 0.22f, 0.26f), bioWhite);
-            NoShadow(Box(panel, "Màn số", new Vector3(0.041f, 0.05f, 0), new Vector3(0.004f, 0.05f, 0.14f), bioDisplayRed, false));
+            var boxObj = Box(panel, "Hộp", Vector3.zero, new Vector3(0.08f, 0.22f, 0.26f), bioWhite);
+            NoShadow(boxObj);
+            // Viền bezel tối màu 3mm quanh màn hình & màn số lõm 1mm
+            Box(panel, "Viền bezel", new Vector3(0.0405f, 0.05f, 0), new Vector3(0.002f, 0.056f, 0.146f), bioBlack, false);
+            NoShadow(Box(panel, "Màn số", new Vector3(0.0395f, 0.05f, 0), new Vector3(0.002f, 0.05f, 0.14f), bioDisplayRed, false));
             Label(panel, "121 °C · 15 phút", new Vector3(0.045f, 0.052f, 0), Vector3.right, 0.016f, new Color(1f, 0.45f, 0.35f));
-            Cyl(panel, "Nút khởi động", new Vector3(0.042f, -0.05f, 0), 0.016f, 0.008f, safetyGreen, false, new Vector3(0, 0, 90));
+            // Núm xoay điều chỉnh có khấc rãnh
+            Cyl(panel, "Núm chỉnh nhiệt", new Vector3(0.042f, -0.015f, -0.05f), 0.014f, 0.012f, bioBlack, false, new Vector3(0, 0, 90));
+            Box(panel, "Vạch chỉ", new Vector3(0.049f, -0.015f, -0.05f), new Vector3(0.002f, 0.008f, 0.003f), signWhite, false);
+            Cyl(panel, "Nút khởi động", new Vector3(0.042f, -0.05f, 0.04f), 0.016f, 0.008f, safetyGreen, false, new Vector3(0, 0, 90));
             Info(g, "Nồi hấp tiệt trùng đứng", "Hơi nước bão hòa 121 °C, áp suất dư ~1 bar trong 15 – 20 phút diệt mọi vi sinh vật kể cả bào tử: tiệt trùng môi trường nuôi cấy, dụng cụ, rác thải sinh học.",
                  "Đổ đủ nước cất, không đậy kín chai môi trường, chờ áp suất về 0 mới mở nắp.");
             return g;
@@ -294,10 +304,16 @@ namespace Khkt.EditorTools
         static Transform BenchCentrifuge(Transform p, Vector3 pos, float yaw, float s = 1f)
         {
             var g = Group("Máy ly tâm", p, pos, yaw);
-            RoundBox(g, "Thân máy", new Vector3(0, 0.12f * s, 0), new Vector3(0.36f * s, 0.24f * s, 0.32f * s), 0.03f * s, bioWhite);
+            var bodyObj = RoundBox(g, "Thân máy", new Vector3(0, 0.12f * s, 0), new Vector3(0.36f * s, 0.24f * s, 0.32f * s), 0.03f * s, bioWhite);
+            NoShadow(bodyObj);
             MeshObj(g, "Nắp", Lathe("T2_NapLyTam", 24, V(0, 0), V(0.13f, 0), V(0.12f, 0.03f), V(0, 0.04f)), new Vector3(-0.02f * s, 0.24f * s, 0), translucentPlastic, false, null, s);
             Box(g, "Bảng phím", new Vector3(0.17f * s, 0.11f * s, 0), new Vector3(0.03f * s, 0.12f * s, 0.24f * s), bioBlack, false, new Vector3(0, 0, 20));
-            NoShadow(Box(g, "Màn số", new Vector3(0.186f * s, 0.13f * s, -0.04f * s), new Vector3(0.004f, 0.03f * s, 0.09f * s), bioDisplayBlue, false, new Vector3(0, 0, 20)));
+            // Viền bezel 3mm & màn số lõm 1mm
+            Box(g, "Viền bezel", new Vector3(0.185f * s, 0.13f * s, -0.04f * s), new Vector3(0.002f, 0.036f * s, 0.096f * s), bioBlack, false, new Vector3(0, 0, 20));
+            NoShadow(Box(g, "Màn số", new Vector3(0.184f * s, 0.13f * s, -0.04f * s), new Vector3(0.002f, 0.03f * s, 0.09f * s), bioDisplayBlue, false, new Vector3(0, 0, 20)));
+            // Núm xoay RPM & TIME
+            Cyl(g, "Núm RPM", new Vector3(0.186f * s, 0.09f * s, 0.04f * s), 0.012f * s, 0.008f, bioChrome, false, new Vector3(0, 0, 110));
+            Cyl(g, "Núm TIME", new Vector3(0.186f * s, 0.09f * s, -0.04f * s), 0.012f * s, 0.008f, bioChrome, false, new Vector3(0, 0, 110));
             Info(g, "Máy ly tâm", "Quay nhanh tạo lực ly tâm (tới vài nghìn × g) tách cặn tế bào, kết tủa DNA khỏi dịch.", "Đặt ống đối xứng, cân bằng khối lượng; đóng nắp trước khi chạy.");
             return g;
         }
@@ -309,9 +325,15 @@ namespace Khkt.EditorTools
             Box(g, "Thân bể", new Vector3(0, 0.1f, 0), new Vector3(0.32f, 0.2f, 0.5f), steel);
             Box(g, "Mặt nước", new Vector3(0, 0.17f, 0), new Vector3(0.28f, 0.004f, 0.46f), bioWater, false);
             Box(g, "Nắp gập", new Vector3(-0.15f, 0.27f, 0), new Vector3(0.02f, 0.14f, 0.48f), steel, false, new Vector3(0, 0, -12));
-            Box(g, "Hộp điều khiển", new Vector3(0.2f, 0.06f, 0), new Vector3(0.08f, 0.12f, 0.5f), bioWhite);
-            NoShadow(Box(g, "Màn số", new Vector3(0.241f, 0.08f, -0.1f), new Vector3(0.004f, 0.03f, 0.1f), bioDisplayRed, false));
+            var ctrlBox = Box(g, "Hộp điều khiển", new Vector3(0.2f, 0.06f, 0), new Vector3(0.08f, 0.12f, 0.5f), bioWhite);
+            NoShadow(ctrlBox);
+            // Viền bezel 3mm quanh màn LED & màn số lõm 1mm
+            Box(g, "Viền bezel", new Vector3(0.2405f, 0.08f, -0.1f), new Vector3(0.002f, 0.036f, 0.106f), bioBlack, false);
+            NoShadow(Box(g, "Màn số", new Vector3(0.2395f, 0.08f, -0.1f), new Vector3(0.002f, 0.03f, 0.1f), bioDisplayRed, false));
             Label(g, temp, new Vector3(0.245f, 0.082f, -0.1f), Vector3.right, 0.016f, new Color(1f, 0.45f, 0.35f));
+            // Núm xoay nhiệt độ có khấc rãnh
+            Cyl(g, "Núm xoay nhiệt", new Vector3(0.242f, 0.04f, -0.1f), 0.012f, 0.008f, bioBlack, false, new Vector3(0, 0, 90));
+            Box(g, "Vạch chỉ", new Vector3(0.247f, 0.046f, -0.1f), new Vector3(0.002f, 0.006f, 0.002f), signWhite, false);
             TubeRack(g, new Vector3(0, 0.172f, 0.08f), 5, bioOrangeCap);
             Info(g, "Bể ổn nhiệt", "Giữ nhiệt độ nước ổn định (30 – 95 °C) để ủ mẫu: enzyme ở 37 °C, ly giải tế bào ở 60 °C khi tách chiết DNA.");
             return g;
@@ -321,12 +343,18 @@ namespace Khkt.EditorTools
         static Transform AnalyticalBalance(Transform p, Vector3 pos, float yaw)
         {
             var g = Group("Cân phân tích", p, pos, yaw);
-            RoundBox(g, "Đế cân", new Vector3(0, 0.04f, 0), new Vector3(0.34f, 0.08f, 0.22f), 0.01f, bioWhite);
+            var baseBal = RoundBox(g, "Đế cân", new Vector3(0, 0.04f, 0), new Vector3(0.34f, 0.08f, 0.22f), 0.01f, bioWhite);
+            NoShadow(baseBal);
             NoShadow(Box(g, "Lồng kính", new Vector3(-0.03f, 0.18f, 0), new Vector3(0.24f, 0.2f, 0.2f), cabinetGlass));
             Box(g, "Khung lồng", new Vector3(-0.03f, 0.285f, 0), new Vector3(0.25f, 0.012f, 0.21f), bioWhite, false);
             var pan = Cyl(g, "Đĩa cân", new Vector3(-0.03f, 0.085f, 0), 0.04f, 0.006f, steel);
-            NoShadow(Box(g, "Màn số", new Vector3(0.155f, 0.06f, 0), new Vector3(0.03f, 0.03f, 0.12f), bioDisplayGreen, false, new Vector3(0, 0, 25)));
+            // Viền bezel tối màu quanh màn số & màn số lõm 1mm
+            Box(g, "Viền bezel", new Vector3(0.154f, 0.06f, 0), new Vector3(0.031f, 0.036f, 0.126f), bioBlack, false, new Vector3(0, 0, 25));
+            NoShadow(Box(g, "Màn số", new Vector3(0.153f, 0.06f, 0), new Vector3(0.029f, 0.03f, 0.12f), bioDisplayGreen, false, new Vector3(0, 0, 25)));
             var lbl = Label(g, "0,0000 g", new Vector3(0.172f, 0.068f, 0), Vector3.right, 0.016f, new Color(0.6f, 1f, 0.6f));
+            // Nút TARE và CAL kim loại mạ chrome
+            Cyl(g, "Nút TARE", new Vector3(0.165f, 0.035f, 0.04f), 0.008f, 0.004f, bioChrome, false, new Vector3(0, 0, 25));
+            Cyl(g, "Nút CAL", new Vector3(0.165f, 0.035f, -0.04f), 0.008f, 0.004f, bioChrome, false, new Vector3(0, 0, 25));
             var bs = g.gameObject.AddComponent<BalanceScale>();
             bs.pan = pan.transform;
             bs.display = lbl.GetComponent<TextMesh>();
@@ -341,9 +369,15 @@ namespace Khkt.EditorTools
         static Transform PhMeter(Transform p, Vector3 pos, float yaw)
         {
             var g = Group("Máy đo pH", p, pos, yaw);
-            RoundBox(g, "Thân máy", new Vector3(0, 0.035f, 0), new Vector3(0.18f, 0.07f, 0.2f), 0.01f, bioWhite);
-            NoShadow(Box(g, "Màn hình", new Vector3(0.091f, 0.04f, 0), new Vector3(0.004f, 0.04f, 0.12f), bioDisplayBlue, false));
+            var phBase = RoundBox(g, "Thân máy", new Vector3(0, 0.035f, 0), new Vector3(0.18f, 0.07f, 0.2f), 0.01f, bioWhite);
+            NoShadow(phBase);
+            // Viền bezel tối màu 3mm & màn hình lõm 1mm
+            Box(g, "Viền bezel", new Vector3(0.0905f, 0.04f, 0), new Vector3(0.003f, 0.046f, 0.126f), bioBlack, false);
+            NoShadow(Box(g, "Màn hình", new Vector3(0.0895f, 0.04f, 0), new Vector3(0.002f, 0.04f, 0.12f), bioDisplayBlue, false));
             var lbl = Label(g, "pH 7,02", new Vector3(0.095f, 0.042f, 0), Vector3.right, 0.02f, new Color(0.7f, 0.85f, 1f));
+            // Núm xoay CAL có vạch chỉ số
+            Cyl(g, "Núm CAL", new Vector3(0.092f, 0.02f, -0.06f), 0.009f, 0.008f, bioBlack, false, new Vector3(0, 0, 90));
+            Box(g, "Vạch chỉ", new Vector3(0.096f, 0.024f, -0.06f), new Vector3(0.002f, 0.005f, 0.002f), signWhite, false);
             Cyl(g, "Cột giá", new Vector3(-0.06f, 0.18f, 0.12f), 0.008f, 0.3f, steel);
             Box(g, "Cần giá", new Vector3(0.0f, 0.3f, 0.12f), new Vector3(0.12f, 0.015f, 0.02f), steel, false);
             var electrode = Cyl(g, "Điện cực", new Vector3(0.05f, 0.22f, 0.12f), 0.006f, 0.16f, labGlass);
@@ -368,6 +402,38 @@ namespace Khkt.EditorTools
             MeshObj(g, "Thân", Lathe("T2_ThanVortex", 20, V(0, 0), V(0.065f, 0), V(0.06f, 0.07f), V(0.035f, 0.09f), V(0, 0.09f)), Vector3.zero, bioWhite, true);
             Cyl(g, "Đầu cao su", new Vector3(0, 0.1f, 0), 0.028f, 0.02f, rubber);
             Box(g, "Núm tốc độ", new Vector3(0.06f, 0.035f, 0), new Vector3(0.01f, 0.025f, 0.025f), bioBlack, false);
+        }
+
+        /// <summary>Đèn bàn thí nghiệm có đốm sáng ấm chân thực khi lại gần (< 2.5m).</summary>
+        static Transform TaskLamp(Transform p, Vector3 pos, float yaw = 0f)
+        {
+            var g = Group("Đèn bàn thí nghiệm", p, pos, yaw);
+            var baseGo = Cyl(g, "Đế đèn", new Vector3(0, 0.006f, 0), 0.042f, 0.012f, bioBlack);
+            NoShadow(baseGo);
+            Cyl(g, "Cổ đứng", new Vector3(0, 0.12f, 0), 0.005f, 0.22f, bioChrome);
+            Cyl(g, "Cổ nghiêng", new Vector3(0.04f, 0.25f, 0), 0.0045f, 0.12f, bioChrome, false, new Vector3(0, 0, -35));
+            var hood = Lathe("T2_ChaoDenBan", 16, V(0, 0), V(0.012f, 0), V(0.012f, 0.02f), V(0.035f, 0.07f), V(0.036f, 0.075f), V(0, 0.075f));
+            MeshObj(g, "Chao đèn", hood, new Vector3(0.08f, 0.29f, 0), bioWhite, false, new Vector3(0, 0, 135));
+            var led = Cyl(g, "Bóng LED", new Vector3(0.08f, 0.285f, 0), 0.014f, 0.006f, tubeGlow, false, new Vector3(0, 0, 135));
+            NoShadow(led);
+
+            var lightGo = new GameObject("Vùng sáng ấm");
+            lightGo.transform.SetParent(g, false);
+            lightGo.transform.localPosition = new Vector3(0.10f, 0.28f, 0);
+            var l = lightGo.AddComponent<Light>();
+            l.type = LightType.Spot;
+            l.color = new Color(1f, 0.94f, 0.82f);
+            l.range = 2.2f;
+            l.spotAngle = 65f;
+            l.innerSpotAngle = 35f;
+            l.intensity = 1.3f;
+            l.shadows = LightShadows.None;
+            lightGo.transform.localEulerAngles = new Vector3(65f, 0, 0);
+
+            var spotCtrl = lightGo.AddComponent<TaskLampSpot>();
+            spotCtrl.spotLight = l;
+            spotCtrl.maxDistance = 2.5f;
+            return g;
         }
 
         // =====================================================================
@@ -916,9 +982,14 @@ namespace Khkt.EditorTools
             float potR = kind == 4 ? 0.18f : kind == 2 ? 0.07f : kind == 3 ? 0.05f : 0.11f;
             float potH = kind == 4 ? 0.45f : kind == 2 ? 0.08f : kind == 3 ? 0.07f : 0.16f;
             potR *= scale; potH *= scale;
+
+            // Đĩa lót hứng nước dưới đáy chậu
+            Cyl(g, "Đĩa lót", new Vector3(0, 0.008f * scale, 0), potR * 0.98f, 0.016f * scale, potMat ?? (kind == 4 ? potWhite : bioTerracotta), false);
+
             var pot = Lathe($"T2_Chau{kind}", 20, V(0, 0), V(potR * 0.75f, 0), V(potR * 0.78f, 0.01f), V(potR, potH * 0.92f), V(potR * 1.06f, potH * 0.95f), V(potR * 1.06f, potH), V(potR * 0.95f, potH), V(0, potH * 0.85f));
             MeshObj(g, "Chậu", pot, Vector3.zero, potMat ?? (kind == 4 ? potWhite : bioTerracotta), kind == 4);
-            Cyl(g, "Đất", new Vector3(0, potH * 0.86f, 0), potR * 0.92f, 0.01f, bioSoil);
+            // Đất ẩm sẫm màu
+            Cyl(g, "Đất ẩm", new Vector3(0, potH * 0.86f, 0), potR * 0.92f, 0.015f * scale, bioSoil);
             Mesh m0, m1;
             Material leafMat;
             switch (kind)
@@ -950,7 +1021,15 @@ namespace Khkt.EditorTools
                     break;
             }
             if (kind == 3) Cyl(g, "Thân non", new Vector3(0, potH + 0.06f * scale, 0), 0.003f, 0.12f * scale, bioLeafLight);
-            if (kind == 4) Cyl(g, "Thân cây", new Vector3(0, potH + 0.35f * scale, 0), 0.015f * scale, 0.7f * scale, trunk);
+            if (kind == 4)
+            {
+                // Thân chính phân cành tự nhiên
+                Cyl(g, "Thân chính", new Vector3(0, potH + 0.25f * scale, 0), 0.018f * scale, 0.5f * scale, trunk);
+                Cyl(g, "Thân ngọn", new Vector3(0.015f * scale, potH + 0.52f * scale, 0), 0.012f * scale, 0.35f * scale, trunk, false, new Vector3(0, 0, -8));
+                // Cành nhánh nghiêng mềm mại
+                Cyl(g, "Cành 1", new Vector3(0.05f * scale, potH + 0.36f * scale, 0), 0.008f * scale, 0.16f * scale, trunk, false, new Vector3(0, 35, 30));
+                Cyl(g, "Cành 2", new Vector3(-0.05f * scale, potH + 0.44f * scale, 0.01f * scale), 0.008f * scale, 0.15f * scale, trunk, false, new Vector3(0, -50, -28));
+            }
             var leafPos = new Vector3(0, potH * 0.9f + (kind == 4 ? 0.25f * scale : 0), 0);
             var leaves0 = MeshObj(g, "Tán lá", m0, leafPos, leafMat, false, null, scale);
             var leaves1 = MeshObj(g, "Tán lá (LOD1)", m1, leafPos, leafMat, false, null, scale);
@@ -987,6 +1066,33 @@ namespace Khkt.EditorTools
         // =====================================================================
 
         static bool Ell(float x, float y, float cx, float cy, float rx, float ry) => (x - cx) * (x - cx) / (rx * rx) + (y - cy) * (y - cy) / (ry * ry) < 1f;
+
+        /// <summary>Vân lá cây sinh học: gân chính, gân phụ và gradient xanh non ở ngọn tới xanh sẫm ở cuống.</summary>
+        static Color LeafVeinPixel(int x, int y)
+        {
+            float tY = y / 127f; // 0 ở cuống, 1 ở chóp
+            float dx = Mathf.Abs(x - 64f);
+
+            // Màu gradient từ gốc (sẫm) tới ngọn (sáng non)
+            Color baseCol = Color.Lerp(new Color(0.12f, 0.33f, 0.11f), new Color(0.32f, 0.62f, 0.18f), tY);
+
+            // Gân lá chính giữa
+            if (dx < 1.8f)
+            {
+                float veinAlpha = 1f - (dx / 1.8f);
+                return Color.Lerp(baseCol, new Color(0.52f, 0.75f, 0.28f), veinAlpha * 0.7f);
+            }
+
+            // Gân phụ nghiêng ~40 độ
+            float veinPattern = Mathf.Abs((y - dx * 0.85f) % 18f);
+            if (veinPattern < 1.4f && dx < 50f)
+            {
+                float veinAlpha = (1f - veinPattern / 1.4f) * (1f - dx / 50f);
+                return Color.Lerp(baseCol, new Color(0.42f, 0.68f, 0.24f), veinAlpha * 0.45f);
+            }
+
+            return baseCol;
+        }
 
         /// <summary>Áp phích "Cấu trúc tế bào": tế bào động vật (tròn) và thực vật (vuông có thành, lục lạp, không bào).</summary>
         static Color CellPosterPixel(int x, int y)

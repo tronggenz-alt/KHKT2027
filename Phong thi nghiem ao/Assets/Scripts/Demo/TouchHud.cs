@@ -20,6 +20,7 @@ namespace Khkt.Demo
     /// </summary>
     public class TouchHud : MonoBehaviour
     {
+        public static TouchHud Instance { get; private set; }
         public HandController hand;
         public DesktopViewer viewer;
         public LabProcedure procedure;
@@ -36,16 +37,36 @@ namespace Khkt.Demo
         CanvasGroup joyGroup;
         bool joyVisible;
 
+        // Khung nền Kính mờ hiện đại thống nhất (QuickActionDock)
+        RectTransform quickActionDock;
+        Image dockBg;
+
+        // Khay Công cụ mở rộng phía trên (4 slot)
+        public struct QuickSlotInfo
+        {
+            public string label;
+            public Action onClick;
+            public bool highlighted;
+            public bool isHold;
+            public float holdAxis;
+        }
+        readonly QuickSlotInfo[] registeredSlots = new QuickSlotInfo[4];
+        readonly GameObject[] slotRoots = new GameObject[4];
+        readonly Image[] slotBgs = new Image[4];
+        readonly Text[] slotTexts = new Text[4];
+        readonly TouchTapTrigger[] slotTaps = new TouchTapTrigger[4];
+        readonly TouchHoldTrigger[] slotHolds = new TouchHoldTrigger[4];
+
         // Nút tay chính
         Image mainActionBg;
         Text mainActionText, mainActionSub;
         bool mainActionHeld;
 
-        // Các nút ngữ cảnh
+        // Các nút ngữ cảnh & điều hướng phía dưới
         GameObject returnBtn, swirlBtn, shiftBtn, sitBtn, eyeUpBtn, eyeDownBtn;
         GameObject buretPanel, fabPanel, recordBtn, helpBtn;
         Text returnText, swirlText, sitText, helpText;
-        Image shiftBg;
+        Image returnBg, swirlBg, sitBg, eyeUpBg, eyeDownBg, shiftBg;
         Text shiftText;
         bool shiftActive;
 
@@ -65,6 +86,7 @@ namespace Khkt.Demo
 
         void Awake()
         {
+            Instance = this;
             if (glassShader == null) glassShader = Shader.Find("Khkt/KinhMo");
             glassMat = Glass(glassShader);
             glassLightMat = Glass(glassShader, light: true);
@@ -162,8 +184,7 @@ namespace Khkt.Demo
             ApplySafeArea();
 
             BuildJoystick();
-            BuildMainActionButton();
-            BuildSurroundingButtons();
+            BuildQuickActionDock();
             BuildTopBar();
             BuildMenuPanel();
             BuildStationPanel();
@@ -182,163 +203,237 @@ namespace Khkt.Demo
             knobImg.color = new Color(Accent.r, Accent.g, Accent.b, 0.7f);
         }
 
-        void BuildMainActionButton()
+        void BuildQuickActionDock()
         {
-            // Nút tay chính hình tròn lớn ở góc phải dưới (kích thước 110x110)
-            var rt = Rect(safeAreaRect, "MainActionButton", new Vector2(1, 0), new Vector2(1, 0), new Vector2(-40, 40), new Vector2(110, 110));
-            mainActionBg = rt.gameObject.AddComponent<Image>();
-            mainActionBg.sprite = SolidCircle;
-            mainActionBg.color = new Color(Accent.r, Accent.g, Accent.b, 0.35f);
+            // 1. Khung nền Kính mờ hiện đại thống nhất (QuickActionDock)
+            // Kích thước 404x186, bo góc 18px, màu nền new Color(0.08f, 0.12f, 0.18f, 0.74f) kèm viền sáng nhẹ new Color(1f, 1f, 1f, 0.18f)
+            quickActionDock = Rect(safeAreaRect, "QuickActionDock", new Vector2(1, 0), new Vector2(1, 0), new Vector2(-20, 20), new Vector2(404, 186));
+            dockBg = quickActionDock.gameObject.AddComponent<Image>();
+            dockBg.sprite = Solid;
+            dockBg.type = Image.Type.Sliced;
+            dockBg.color = new Color(0.08f, 0.12f, 0.18f, 0.74f);
 
-            var border = Rect(rt, "Border", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(110, 110)).gameObject.AddComponent<Image>();
-            border.sprite = Circle;
-            border.material = glassLightMat;
-            border.raycastTarget = false;
+            var borderRt = Rect(quickActionDock, "Border", Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            borderRt.anchorMin = Vector2.zero;
+            borderRt.anchorMax = Vector2.one;
+            borderRt.offsetMin = Vector2.zero;
+            borderRt.offsetMax = Vector2.zero;
+            var borderImg = borderRt.gameObject.AddComponent<Image>();
+            borderImg.sprite = Rounded;
+            borderImg.type = Image.Type.Sliced;
+            borderImg.material = glassLightMat;
+            borderImg.color = new Color(1f, 1f, 1f, 0.18f);
+            borderImg.raycastTarget = false;
 
-            mainActionText = Label(rt, "Text", "TAY", 20, Ink, true, TextAnchor.MiddleCenter, new Vector2(0, 6), new Vector2(100, 30));
-            mainActionSub = Label(rt, "Sub", "Chạm / Giữ", 11, Dim, false, TextAnchor.MiddleCenter, new Vector2(0, -18), new Vector2(100, 20));
+            // 2. Khay Công cụ mở rộng phía trên (4 slot dựng sẵn)
+            // Padding = 10, Gap = 8. Width = 384. Mỗi ô rộng 90px, cao 44px (chuẩn Apple HIG >= 44 pt)
+            for (int i = 0; i < 4; i++)
+            {
+                int slotIdx = i;
+                float slotX = 10 + i * (90 + 8);
+                var sRt = Rect(quickActionDock, $"Slot_{i}", new Vector2(0, 1), new Vector2(0, 1), new Vector2(slotX, -10), new Vector2(90, 44));
+                var sImg = sRt.gameObject.AddComponent<Image>();
+                sImg.sprite = Solid;
+                sImg.type = Image.Type.Sliced;
+                sImg.color = new Color(1f, 1f, 1f, 0.12f);
 
-            var hold = rt.gameObject.AddComponent<TouchHoldTrigger>();
-            hold.OnDown = () =>
+                var sBorder = Rect(sRt, "Border", Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+                sBorder.anchorMin = Vector2.zero;
+                sBorder.anchorMax = Vector2.one;
+                sBorder.offsetMin = Vector2.zero;
+                sBorder.offsetMax = Vector2.zero;
+                var sbImg = sBorder.gameObject.AddComponent<Image>();
+                sbImg.sprite = Rounded;
+                sbImg.type = Image.Type.Sliced;
+                sbImg.material = glassLightMat;
+                sbImg.color = new Color(1f, 1f, 1f, 0.14f);
+                sbImg.raycastTarget = false;
+
+                var sText = Label(sRt, "Text", "", 13, Ink, true, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(90, 44));
+
+                var tap = sRt.gameObject.AddComponent<TouchTapTrigger>();
+                tap.OnClick = () => OnSlotClicked(slotIdx);
+
+                var hold = sRt.gameObject.AddComponent<TouchHoldTrigger>();
+                hold.OnDown = () => OnSlotHoldDown(slotIdx);
+                hold.OnUp = () => OnSlotHoldUp(slotIdx);
+
+                NutHieuUng.Attach(sRt.gameObject, isHold: false);
+
+                slotRoots[i] = sRt.gameObject;
+                slotBgs[i] = sImg;
+                slotTexts[i] = sText;
+                slotTaps[i] = tap;
+                slotHolds[i] = hold;
+                slotRoots[i].SetActive(false);
+            }
+
+            // 3. Cụm Điều hướng & Thao tác chính phía dưới (y = -62, cao 114px, gap = 8px)
+            // Cột 1: Mắt ▲ (trên) và Mắt ▼ (dưới) - rộng 72px
+            eyeUpBtn = MakeDockSubButton("Nút Mắt ▲", "Mắt ▲", new Vector2(10, -62), new Vector2(72, 53),
+                out eyeUpBg, () => { PadInput.EyeAdjustAxis = 1f; }, () => { PadInput.EyeAdjustAxis = 0f; });
+
+            eyeDownBtn = MakeDockSubButton("Nút Mắt ▼", "Mắt ▼", new Vector2(10, -123), new Vector2(72, 53),
+                out eyeDownBg, () => { PadInput.EyeAdjustAxis = -1f; }, () => { PadInput.EyeAdjustAxis = 0f; });
+
+            // Cột 2: Ngồi (trên) và Chậm (dưới) - rộng 84px
+            string sitStr = PadInput.UsingTouch ? "Ngồi" : "Ngồi (C)";
+            sitBtn = MakeDockTapButton("Nút Ngồi", sitStr, new Vector2(90, -62), new Vector2(84, 53),
+                out sitBg, out sitText, () => { PadInput.TouchSitPressed = true; });
+
+            shiftBtn = MakeDockTapButton("Nút Shift", "Chậm", new Vector2(90, -123), new Vector2(84, 53),
+                out shiftBg, out shiftText, () =>
+                {
+                    shiftActive = !shiftActive;
+                    PadInput.TouchShift = shiftActive;
+                    shiftBg.color = shiftActive ? new Color(0.18f, 0.63f, 0.73f, 0.88f) : new Color(1f, 1f, 1f, 0.12f);
+                    shiftText.color = shiftActive ? Ink : Dim;
+                    shiftText.font = shiftActive ? Semibold : Regular;
+                });
+
+            // Cột 3: Trả về (trên) và Lắc (dưới) - rộng 84px
+            string retStr = PadInput.UsingTouch ? "Trả về" : "Trả về (Q)";
+            returnBtn = MakeDockTapButton("Nút Trả về", retStr, new Vector2(182, -62), new Vector2(84, 53),
+                out returnBg, out returnText, () => { PadInput.TouchBackPressed = true; });
+
+            string swStr = PadInput.UsingTouch ? "Lắc bình" : "Lắc (F)";
+            swirlBtn = MakeDockSubButton("Nút Lắc", swStr, new Vector2(182, -123), new Vector2(84, 53),
+                out swirlBg, () => { PadInput.TouchSwirl = true; }, () => { PadInput.TouchSwirl = false; });
+            swirlText = swirlBtn.GetComponentInChildren<Text>();
+
+            // Cột 4: Nút TAY chính (chiếm toàn bộ chiều cao 114px, rộng 110px)
+            var handRt = Rect(quickActionDock, "MainActionButton", new Vector2(0, 1), new Vector2(0, 1), new Vector2(274, -62), new Vector2(110, 114));
+            mainActionBg = handRt.gameObject.AddComponent<Image>();
+            mainActionBg.sprite = Solid;
+            mainActionBg.type = Image.Type.Sliced;
+            mainActionBg.color = new Color(1f, 1f, 1f, 0.16f);
+
+            var handBorder = Rect(handRt, "Border", Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            handBorder.anchorMin = Vector2.zero; handBorder.anchorMax = Vector2.one;
+            handBorder.offsetMin = Vector2.zero; handBorder.offsetMax = Vector2.zero;
+            var hbImg = handBorder.gameObject.AddComponent<Image>();
+            hbImg.sprite = Rounded;
+            hbImg.type = Image.Type.Sliced;
+            hbImg.material = glassLightMat;
+            hbImg.color = new Color(0.38f, 0.86f, 1f, 0.45f);
+            hbImg.raycastTarget = false;
+
+            mainActionText = Label(handRt, "Text", "TAY", 22, Ink, true, TextAnchor.MiddleCenter, new Vector2(0, 10), new Vector2(110, 36));
+            mainActionSub = Label(handRt, "Sub", "Chạm / Giữ", 11, Dim, false, TextAnchor.MiddleCenter, new Vector2(0, -20), new Vector2(110, 22));
+
+            var handHold = handRt.gameObject.AddComponent<TouchHoldTrigger>();
+            handHold.OnDown = () =>
             {
                 mainActionHeld = true;
                 PadInput.TouchUse = true;
-                mainActionBg.color = new Color(Accent.r, Accent.g, Accent.b, 0.75f);
+                mainActionBg.color = new Color(0.18f, 0.63f, 0.73f, 0.88f);
             };
-            hold.OnUp = () =>
+            handHold.OnUp = () =>
             {
                 mainActionHeld = false;
                 PadInput.TouchUse = false;
-                mainActionBg.color = new Color(Accent.r, Accent.g, Accent.b, 0.35f);
+                mainActionBg.color = new Color(1f, 1f, 1f, 0.16f);
             };
-            NutHieuUng.Attach(rt.gameObject, isHold: true, onRelease: hold.OnUp);
+            NutHieuUng.Attach(handRt.gameObject, isHold: true, onRelease: handHold.OnUp);
+
+            // Giữ lại tham chiếu các panel cũ dưới dạng đối tượng phụ ẩn an toàn
+            buretPanel = new GameObject("BuretPanelRef"); buretPanel.transform.SetParent(quickActionDock, false); buretPanel.SetActive(false);
+            fabPanel = new GameObject("FabPanelRef"); fabPanel.transform.SetParent(quickActionDock, false); fabPanel.SetActive(false);
+            recordBtn = new GameObject("RecordBtnRef"); recordBtn.transform.SetParent(quickActionDock, false); recordBtn.SetActive(false);
         }
 
-        void BuildSurroundingButtons()
+        readonly Action[] activeSlotActions = new Action[4];
+        readonly Action[] activeSlotDown = new Action[4];
+        readonly Action[] activeSlotUp = new Action[4];
+
+        void OnSlotClicked(int idx) => activeSlotActions[idx]?.Invoke();
+        void OnSlotHoldDown(int idx) => activeSlotDown[idx]?.Invoke();
+        void OnSlotHoldUp(int idx) => activeSlotUp[idx]?.Invoke();
+
+        public void RegisterQuickActionSlot(int slotIndex, string label, Action onClick, bool highlighted = false)
         {
-            // Nút Trả về (Q) - phía trên nút tay (kích thước 104x65 units >= 44 pt)
-            string retStr = PadInput.UsingTouch ? "Trả về" : "Trả về (Q)";
-            returnBtn = MakeHudButton("Nút Trả về", retStr, new Vector2(1, 0), new Vector2(-40, 168), new Vector2(110, 65), () =>
+            if (slotIndex < 0 || slotIndex >= 4) return;
+            registeredSlots[slotIndex] = new QuickSlotInfo
             {
-                PadInput.TouchBackPressed = true;
-            });
-            returnText = returnBtn.GetComponentInChildren<Text>();
-
-            // Nút Lắc bình (F) - giữ để lắc (kích thước 96x65)
-            var swirlRt = Rect(safeAreaRect, "Nút Lắc", new Vector2(1, 0), new Vector2(1, 0), new Vector2(-168, 40), new Vector2(96, 65));
-            var swirlImg = swirlRt.gameObject.AddComponent<Image>();
-            swirlImg.sprite = Rounded;
-            swirlImg.material = glassLightMat;
-            string swStr = PadInput.UsingTouch ? "Lắc bình" : "Lắc (F)";
-            swirlText = Label(swirlRt, "Text", swStr, 15, Ink, true, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(96, 65));
-            var swirlHold = swirlRt.gameObject.AddComponent<TouchHoldTrigger>();
-            swirlHold.OnDown = () => PadInput.TouchSwirl = true;
-            swirlHold.OnUp = () => PadInput.TouchSwirl = false;
-            NutHieuUng.Attach(swirlRt.gameObject, isHold: true, onRelease: swirlHold.OnUp);
-            swirlBtn = swirlRt.gameObject;
-
-            // Nút Chậm / Nhanh (Shift) - bật/tắt (kích thước 96x65)
-            var shiftRt = Rect(safeAreaRect, "Nút Shift", new Vector2(1, 0), new Vector2(1, 0), new Vector2(-168, 114), new Vector2(96, 65));
-            shiftBg = shiftRt.gameObject.AddComponent<Image>();
-            shiftBg.sprite = Rounded;
-            shiftBg.material = glassLightMat;
-            shiftText = Label(shiftRt, "Text", "Chậm", 14, Dim, false, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(96, 65));
-            var shiftTap = shiftRt.gameObject.AddComponent<TouchTapTrigger>();
-            shiftTap.OnClick = () =>
-            {
-                shiftActive = !shiftActive;
-                PadInput.TouchShift = shiftActive;
-                shiftBg.color = shiftActive ? new Color(Accent.r, Accent.g, Accent.b, 0.6f) : Color.white;
-                shiftText.color = shiftActive ? Ink : Dim;
-                shiftText.font = shiftActive ? Semibold : Regular;
+                label = label,
+                onClick = onClick,
+                highlighted = highlighted,
+                isHold = false,
+                holdAxis = 0f
             };
-            NutHieuUng.Attach(shiftRt.gameObject);
-            shiftBtn = shiftRt.gameObject;
+        }
 
-            // Nút Ngồi / Đứng (C) (kích thước 96x65)
-            string sitStr = PadInput.UsingTouch ? "Ngồi" : "Ngồi (C)";
-            sitBtn = MakeHudButton("Nút Ngồi", sitStr, new Vector2(1, 0), new Vector2(-168, 188), new Vector2(96, 65), () =>
-            {
-                PadInput.TouchSitPressed = true;
-            });
-            sitText = sitBtn.GetComponentInChildren<Text>();
+        GameObject MakeDockTapButton(string name, string text, Vector2 pos, Vector2 size, out Image bg, out Text label, Action onClick)
+        {
+            var rt = Rect(quickActionDock, name, new Vector2(0, 1), new Vector2(0, 1), pos, size);
+            bg = rt.gameObject.AddComponent<Image>();
+            bg.sprite = Solid;
+            bg.type = Image.Type.Sliced;
+            bg.color = new Color(1f, 1f, 1f, 0.12f);
 
-            // Nút Tầm mắt: Nâng / Hạ (kích thước 80x65)
-            var eyeUpRt = Rect(safeAreaRect, "Nút Tầm mắt lên", new Vector2(1, 0), new Vector2(1, 0), new Vector2(-274, 114), new Vector2(80, 65));
-            var eyeUpImg = eyeUpRt.gameObject.AddComponent<Image>();
-            eyeUpImg.sprite = Rounded;
-            eyeUpImg.material = glassLightMat;
-            Label(eyeUpRt, "Text", "Mắt ▲", 14, Ink, true, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(80, 65));
-            var eyeUpHold = eyeUpRt.gameObject.AddComponent<TouchHoldTrigger>();
-            eyeUpHold.OnDown = () => PadInput.EyeAdjustAxis = 1f;
-            eyeUpHold.OnUp = () => PadInput.EyeAdjustAxis = 0f;
-            NutHieuUng.Attach(eyeUpRt.gameObject, isHold: true, onRelease: eyeUpHold.OnUp);
-            eyeUpBtn = eyeUpRt.gameObject;
+            var border = Rect(rt, "Border", Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            border.anchorMin = Vector2.zero; border.anchorMax = Vector2.one;
+            border.offsetMin = Vector2.zero; border.offsetMax = Vector2.zero;
+            var bImg = border.gameObject.AddComponent<Image>();
+            bImg.sprite = Rounded;
+            bImg.type = Image.Type.Sliced;
+            bImg.material = glassLightMat;
+            bImg.color = new Color(1f, 1f, 1f, 0.16f);
+            bImg.raycastTarget = false;
 
-            var eyeDownRt = Rect(safeAreaRect, "Nút Tầm mắt xuống", new Vector2(1, 0), new Vector2(1, 0), new Vector2(-274, 40), new Vector2(80, 65));
-            var eyeDownImg = eyeDownRt.gameObject.AddComponent<Image>();
-            eyeDownImg.sprite = Rounded;
-            eyeDownImg.material = glassLightMat;
-            Label(eyeDownRt, "Text", "Mắt ▼", 14, Ink, true, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(80, 65));
-            var eyeDownHold = eyeDownRt.gameObject.AddComponent<TouchHoldTrigger>();
-            eyeDownHold.OnDown = () => PadInput.EyeAdjustAxis = -1f;
-            eyeDownHold.OnUp = () => PadInput.EyeAdjustAxis = 0f;
-            NutHieuUng.Attach(eyeDownRt.gameObject, isHold: true, onRelease: eyeDownHold.OnUp);
-            eyeDownBtn = eyeDownRt.gameObject;
+            label = Label(rt, "Text", text, 14, Ink, true, TextAnchor.MiddleCenter, Vector2.zero, size);
+            var tap = rt.gameObject.AddComponent<TouchTapTrigger>();
+            tap.OnClick = onClick;
+            NutHieuUng.Attach(rt.gameObject);
+            return rt.gameObject;
+        }
 
-            // Bảng điều khiển buret (Mở / Đóng / Khóa hẳn - nút cao 65)
-            var buretBox = Panel(safeAreaRect, "BuretPanel", new Vector2(1, 0), new Vector2(1, 0), new Vector2(-40, 248), new Vector2(340, 80), glassMat);
-            buretPanel = buretBox.gameObject;
-            var bp = buretBox.transform;
-            MakeHoldTextButton(bp, "Mở khóa", "Mở +", new Vector2(10, 8), new Vector2(100, 65), 1f);
-            MakeHoldTextButton(bp, "Đóng bớt", "Đóng -", new Vector2(120, 8), new Vector2(100, 65), -1f);
-            string closeBuretStr = PadInput.UsingTouch ? "Khóa buret" : "Khóa (Space)";
-            MakeTapTextButton(bp, "Khóa hẳn", closeBuretStr, new Vector2(230, 8), new Vector2(100, 65), () =>
-            {
-                PadInput.CloseStopcockPressed = true;
-            });
-            buretPanel.SetActive(false);
+        GameObject MakeDockSubButton(string name, string text, Vector2 pos, Vector2 size, out Image bg, Action onDown, Action onUp)
+        {
+            var rt = Rect(quickActionDock, name, new Vector2(0, 1), new Vector2(0, 1), pos, size);
+            bg = rt.gameObject.AddComponent<Image>();
+            bg.sprite = Solid;
+            bg.type = Image.Type.Sliced;
+            bg.color = new Color(1f, 1f, 1f, 0.12f);
 
-            // Bảng xoay bộ phận lắp ráp (Xoay -15° / Xoay +15° - nút cao 65)
-            var fabBox = Panel(safeAreaRect, "FabPanel", new Vector2(1, 0), new Vector2(1, 0), new Vector2(-40, 248), new Vector2(236, 80), glassMat);
-            fabPanel = fabBox.gameObject;
-            var fp = fabBox.transform;
-            MakeTapTextButton(fp, "Xoay trái", "⟲ -15°", new Vector2(10, 8), new Vector2(104, 65), () =>
-            {
-                PadInput.HeldYawStep = -1f;
-            });
-            MakeTapTextButton(fp, "Xoay phải", "⟳ +15°", new Vector2(122, 8), new Vector2(104, 65), () =>
-            {
-                PadInput.HeldYawStep = 1f;
-            });
-            fabPanel.SetActive(false);
+            var border = Rect(rt, "Border", Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            border.anchorMin = Vector2.zero; border.anchorMax = Vector2.one;
+            border.offsetMin = Vector2.zero; border.offsetMax = Vector2.zero;
+            var bImg = border.gameObject.AddComponent<Image>();
+            bImg.sprite = Rounded;
+            bImg.type = Image.Type.Sliced;
+            bImg.material = glassLightMat;
+            bImg.color = new Color(1f, 1f, 1f, 0.16f);
+            bImg.raycastTarget = false;
 
-            // Nút Ghi số đọc (kích thước 140x65)
-            string recStr = PadInput.UsingTouch ? "Ghi số đọc" : "Ghi số (Enter)";
-            recordBtn = MakeHudButton("Nút Ghi số", recStr, new Vector2(1, 0), new Vector2(-40, 248), new Vector2(140, 65), () =>
-            {
-                PadInput.TouchRecordPressed = true;
-            });
-            recordBtn.SetActive(false);
+            Label(rt, "Text", text, 14, Ink, true, TextAnchor.MiddleCenter, Vector2.zero, size);
+            var hold = rt.gameObject.AddComponent<TouchHoldTrigger>();
+            hold.OnDown = onDown;
+            hold.OnUp = onUp;
+            NutHieuUng.Attach(rt.gameObject, isHold: true, onRelease: onUp);
+            return rt.gameObject;
         }
 
         void BuildTopBar()
         {
-            // Nút Menu góc trên phải (kích thước 110x65)
+            Color topBtnBg = new Color(0.07f, 0.11f, 0.17f, 0.82f);
+            Color topBtnBorder = new Color(1f, 1f, 1f, 0.18f);
+
+            // Nút Menu góc trên phải (kích thước 110x65, tăng độ đục nền chống lóa)
             var menuBtn = MakeHudButton("Nút Menu", "Menu ☰", new Vector2(1, 1), new Vector2(-40, -40), new Vector2(110, 65), () =>
             {
                 menuPanel.SetActive(!menuPanel.activeSelf);
-            });
+            }, topBtnBg, topBtnBorder);
 
-            // Nút Trợ giúp (kích thước 110x65)
+            // Nút Trợ giúp (kích thước 110x65, tăng độ đục nền chống lóa)
             string helpStr = PadInput.UsingTouch ? "Trợ giúp ?" : "Trợ giúp (H)";
             helpBtn = MakeHudButton("Nút Trợ giúp", helpStr, new Vector2(1, 1), new Vector2(-160, -40), new Vector2(110, 65), () =>
             {
                 PadInput.TouchHelpPressed = true;
-            });
+            }, topBtnBg, topBtnBorder);
             helpText = helpBtn.GetComponentInChildren<Text>();
 
-            // Cụm đổi trạm: ◀ Đổi khu thí nghiệm ▶ (nút cao 65)
+            // Cụm đổi trạm: ◀ Đổi khu thí nghiệm ▶ (giữ nguyên vị trí và kích thước hoàn hảo)
             var stBox = Panel(safeAreaRect, "StationBar", new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -20), new Vector2(356, 75), glassMat);
             var sp = stBox.transform;
             MakeTapTextButton(sp, "Trạm trước", "◀", new Vector2(6, 5), new Vector2(66, 65), () =>
@@ -472,29 +567,113 @@ namespace Khkt.Demo
             bool touch = PadInput.UsingTouch;
             if (returnText != null) returnText.text = touch ? "Trả về" : "Trả về (Q)";
             if (swirlText != null) swirlText.text = touch ? "Lắc bình" : "Lắc (F)";
-            if (sitText != null) sitText.text = touch ? "Ngồi" : "Ngồi (C)";
             if (helpText != null) helpText.text = touch ? "Trợ giúp ?" : "Trợ giúp (H)";
 
-            // Nút Trả về (Q): chỉ hiện khi đang cầm vật
-            returnBtn.SetActive(hand.Held != null);
+            // Cập nhật trạng thái các nút ở cụm điều khiển dưới
+            if (sitBtn != null && sitText != null)
+            {
+                sitText.text = viewer != null && viewer.IsSitting ? "Đứng" : (touch ? "Ngồi" : "Ngồi (C)");
+                sitBg.color = viewer != null && viewer.IsSitting ? new Color(0.18f, 0.63f, 0.73f, 0.88f) : new Color(1f, 1f, 1f, 0.12f);
+            }
 
-            // Nút Lắc (F): hiện khi có thể lắc
+            if (shiftBtn != null && shiftBg != null)
+            {
+                shiftBg.color = shiftActive ? new Color(0.18f, 0.63f, 0.73f, 0.88f) : new Color(1f, 1f, 1f, 0.12f);
+            }
+
+            bool canReturn = hand.Held != null || hand.HeldPart != null;
+            if (returnBtn != null && returnBg != null && returnText != null)
+            {
+                returnBg.color = canReturn ? new Color(1f, 1f, 1f, 0.22f) : new Color(1f, 1f, 1f, 0.06f);
+                returnText.color = canReturn ? Ink : new Color(1f, 1f, 1f, 0.35f);
+            }
+
             bool canSwirl = (hand.Held != null && hand.Held.GetComponent<LabContainer>() != null) ||
                             hand.Current == HandController.Act.Swirl;
-            swirlBtn.SetActive(canSwirl);
+            if (swirlBtn != null && swirlBg != null && swirlText != null)
+            {
+                swirlBg.color = canSwirl ? new Color(0.18f, 0.63f, 0.73f, 0.88f) : new Color(1f, 1f, 1f, 0.08f);
+                swirlText.color = canSwirl ? Ink : new Color(1f, 1f, 1f, 0.35f);
+            }
 
-            // Buret: hiện panel vặn / khóa khi trỏ vào khóa buret hoặc quy trình có buret
+            // Cập nhật khay công cụ mở rộng phía trên (4 slot)
             bool nearBuret = hand.Current == HandController.Act.Stopcock ||
                              (procedure != null && procedure.buret != null && hand.Held == null);
-            buretPanel.SetActive(nearBuret);
-
-            // Lắp ráp: hiện panel xoay khi đang cầm bộ phận lắp ráp
             bool holdingPart = hand.HeldPart != null;
-            fabPanel.SetActive(holdingPart && !nearBuret);
-
-            // Ghi số: hiện khi quy trình đang chạy và có thể ghi số đọc
             bool canRecord = procedure != null && procedure.Active && !nearBuret && !holdingPart;
-            recordBtn.SetActive(canRecord);
+
+            for (int i = 0; i < 4; i++)
+            {
+                activeSlotActions[i] = null;
+                activeSlotDown[i] = null;
+                activeSlotUp[i] = null;
+            }
+
+            if (nearBuret)
+            {
+                // Slot 0: Mở + (giữ nút để xả buret)
+                SetSlot(0, "Mở +", true, false, () => { buretHoldDir = 1f; buretHoldTimer = 0f; }, () => { buretHoldDir = 0f; PadInput.TouchStopcockAxis = 0f; });
+                // Slot 1: Đóng - (giữ nút để hãm dòng buret)
+                SetSlot(1, "Đóng -", true, false, () => { buretHoldDir = -1f; buretHoldTimer = 0f; }, () => { buretHoldDir = 0f; PadInput.TouchStopcockAxis = 0f; });
+                // Slot 2: Khóa hẳn
+                string closeStr = touch ? "Khóa buret" : "Khóa";
+                SetSlot(2, closeStr, false, true, () => { PadInput.CloseStopcockPressed = true; });
+                // Slot 3: Ghi số (nếu quy trình cần)
+                if (procedure != null && procedure.Active)
+                    SetSlot(3, "Ghi số", false, false, () => { PadInput.TouchRecordPressed = true; });
+                else
+                    ClearSlot(3);
+            }
+            else if (holdingPart)
+            {
+                SetSlot(0, "⟲ -15°", false, false, () => { PadInput.HeldYawStep = -1f; });
+                SetSlot(1, "⟳ +15°", false, false, () => { PadInput.HeldYawStep = 1f; });
+                ClearSlot(2);
+                ClearSlot(3);
+            }
+            else if (canRecord)
+            {
+                SetSlot(0, "Ghi số đọc", false, true, () => { PadInput.TouchRecordPressed = true; });
+                for (int i = 1; i < 4; i++) ApplyCustomSlot(i);
+            }
+            else
+            {
+                for (int i = 0; i < 4; i++) ApplyCustomSlot(i);
+            }
+        }
+
+        void SetSlot(int idx, string label, bool isHold, bool highlight, Action onClickOrDown, Action onUp = null)
+        {
+            if (slotRoots[idx] == null) return;
+            slotRoots[idx].SetActive(true);
+            slotTexts[idx].text = label;
+            slotBgs[idx].color = highlight ? new Color(0.18f, 0.63f, 0.73f, 0.88f) : new Color(1f, 1f, 1f, 0.12f);
+            if (isHold)
+            {
+                activeSlotDown[idx] = onClickOrDown;
+                activeSlotUp[idx] = onUp;
+            }
+            else
+            {
+                activeSlotActions[idx] = onClickOrDown;
+            }
+        }
+
+        void ClearSlot(int idx)
+        {
+            if (slotRoots[idx] != null) slotRoots[idx].SetActive(false);
+        }
+
+        void ApplyCustomSlot(int idx)
+        {
+            if (!string.IsNullOrEmpty(registeredSlots[idx].label))
+            {
+                SetSlot(idx, registeredSlots[idx].label, false, registeredSlots[idx].highlighted, registeredSlots[idx].onClick);
+            }
+            else
+            {
+                ClearSlot(idx);
+            }
         }
 
         // =====================================================================
@@ -526,12 +705,26 @@ namespace Khkt.Demo
         // Bộ trợ giúp tạo nút
         // =====================================================================
 
-        GameObject MakeHudButton(string name, string text, Vector2 anchor, Vector2 pos, Vector2 size, Action onClick)
+        GameObject MakeHudButton(string name, string text, Vector2 anchor, Vector2 pos, Vector2 size, Action onClick, Color? bgColor = null, Color? borderColor = null)
         {
             var rt = Rect(safeAreaRect, name, anchor, anchor, pos, size);
             var img = rt.gameObject.AddComponent<Image>();
-            img.sprite = Rounded;
-            img.material = glassLightMat;
+            img.sprite = Solid;
+            img.type = Image.Type.Sliced;
+            img.color = bgColor ?? new Color(1f, 1f, 1f, 0.12f);
+
+            var borderRt = Rect(rt, "Border", Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            borderRt.anchorMin = Vector2.zero;
+            borderRt.anchorMax = Vector2.one;
+            borderRt.offsetMin = Vector2.zero;
+            borderRt.offsetMax = Vector2.zero;
+            var bImg = borderRt.gameObject.AddComponent<Image>();
+            bImg.sprite = Rounded;
+            bImg.type = Image.Type.Sliced;
+            bImg.material = glassLightMat;
+            bImg.color = borderColor ?? new Color(1f, 1f, 1f, 0.18f);
+            bImg.raycastTarget = false;
+
             Label(rt, "Text", text, 14, Ink, true, TextAnchor.MiddleCenter, Vector2.zero, size);
             var tap = rt.gameObject.AddComponent<TouchTapTrigger>();
             tap.OnClick = onClick;
