@@ -1,0 +1,16 @@
+{
+  "name": "verlab-cloudflare",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "xay": "node lenh.mjs xay",
+    "kiem-kieu": "tsc --noEmit",
+    "chay": "node lenh.mjs xay && wrangler pages dev --port 8788",
+    "dang": "node lenh.mjs xay && wrangler pages deploy --branch main --commit-dirty=true"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261104.1",
+    "typescript": "^5.9.2",
+    "wrangler": "^4.156.1"
+  }
+}
