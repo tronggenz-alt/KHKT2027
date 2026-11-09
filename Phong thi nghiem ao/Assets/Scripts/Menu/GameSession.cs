@@ -11,7 +11,11 @@ namespace Khkt.Menu
     {
         public const string MenuScene = "ManHinhChinh";
         public const string LabScene = "PhongThiNghiem";
-        public const string DefaultServerUrl = "http://127.0.0.1:8000";
+        /// <summary>Máy chủ quản lý chạy cố định trên Cloudflare: mọi lời gọi phải có mã phiên.</summary>
+        public const string CloudServerUrl = "https://verlab.pages.dev";
+        /// <summary>Bản FastAPI chạy trên chính máy này (server/), dùng khi không có mạng.</summary>
+        public const string LocalServerUrl = "http://127.0.0.1:8000";
+        public const string DefaultServerUrl = CloudServerUrl;
         const string ServerUrlKey = "vera.may_chu";
 
         /// <summary>Vừa bấm vào lab từ màn hình chính; IntroScreen đọc rồi xóa khi phòng lab tải xong.</summary>

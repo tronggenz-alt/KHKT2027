@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -266,6 +266,15 @@ public class KhktAutoTest : MonoBehaviour
         }        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "dau")
         {
             yield return HeadTest();
+            Log($"Xong sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "canh_tay")
+        {
+            yield return ArmTest();
             Log($"Xong sau {Time.realtimeSinceStartup - t0:0} s");
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.Exit(0);
@@ -2443,6 +2452,125 @@ public class KhktAutoTest : MonoBehaviour
         if (ok) f9Pass++; else f9Fail++;
         Log($"[f9] {(ok ? "ĐẠT" : "HỎNG")}: {name} {detail}");
     }
+
+    int armPass, armFail;
+    void ArmCheck(string name, bool ok, string detail = "")
+    {
+        if (ok) armPass++; else armFail++;
+        Log($"[tay] {(ok ? "ĐẠT" : "HỎNG")}: {name} {detail}");
+    }
+
+    // Gói giả như tracker gửi: điểm cho theo trục camera Unity (phải, lên, trước), đổi sang trục MediaPipe (đổi dấu, mm)
+    static string ArmJson(Vector3 elbowL, Vector3 wristL, int elbowConf, int wristConf, Vector3 handDir, bool pinch, System.Random rnd, float noiseM)
+    {
+        Vector3 N() => noiseM <= 0 ? Vector3.zero : new Vector3((float)(rnd.NextDouble() - 0.5), (float)(rnd.NextDouble() - 0.5), (float)(rnd.NextDouble() - 0.5)) * 2 * noiseM;
+        string Mm(Vector3 v) => $"{Mathf.RoundToInt(-v.x * 1000)},{Mathf.RoundToInt(-v.y * 1000)},{Mathf.RoundToInt(-v.z * 1000)}";
+        var arm = $"{{\"ben\":\"phai\",\"d\":[{Mm(Vector3.zero)},{Mm(elbowL + N())},{Mm(wristL + N())}],\"tin\":[99,{elbowConf},{wristConf}]}}";
+        // bàn tay xòe: 5 ngón song song theo handDir, xếp ngang
+        Vector3 side = Vector3.Cross(Vector3.up, handDir).normalized;
+        if (side.sqrMagnitude < 0.5f) side = Vector3.right;
+        var pts = new System.Collections.Generic.List<string> { Mm(Vector3.zero) };
+        for (int f = 0; f < 5; f++)
+        {
+            Vector3 b0 = side * (f - 2) * 0.02f + handDir * (f == 0 ? 0.02f : 0.07f);
+            for (int j = 0; j < 4; j++) pts.Add(Mm(b0 + handDir * j * 0.025f + N() * 0.3f));
+        }
+        var hand = $"{{\"ben\":\"phai\",\"w\":[{string.Join(",", pts)}],\"x\":500,\"y\":500,\"p\":{(pinch ? 1 : 0)},\"g\":\"\"}}";
+        return $"{{\"t\":0,\"tay\":[{hand}],\"canh\":[{arm}]}}";
+    }
+
+    IEnumerator SendArm(float seconds, Func<string> json)
+    {
+        var u = new System.Net.Sockets.UdpClient();
+        float t1 = Time.realtimeSinceStartup;
+        while (Time.realtimeSinceStartup - t1 < seconds)
+        {
+            var b = System.Text.Encoding.UTF8.GetBytes(json());
+            u.Send(b, b.Length, "127.0.0.1", 9054);
+            float tw = Time.realtimeSinceStartup;
+            while (Time.realtimeSinceStartup - tw < 1f / 30f) yield return null;
+        }
+        u.Close();
+    }
+
+    IEnumerator ArmTest()
+    {
+        var at = Khkt.Input.ArmTracking.Instance;
+        var rig = FindAnyObjectByType<ArmRig>();
+        ArmCheck("có ArmTracking và ArmRig", at != null && rig != null);
+        if (at == null || rig == null) yield break;
+        viewer.GoTo(2);
+        yield return Frames(30);
+        var rnd = new System.Random(3);
+        var cam = viewer.cameraTransform;
+        Shot("canh_tay_nghi");  // chưa có tín hiệu: hai tay để nghỉ
+
+        // 1) Duỗi thẳng ra trước, nhiễu 1,5 cm: chiều dài xương không đổi, hướng đúng
+        float maxLenErr = 0, sumAng = 0; int n = 0;
+        var wristTrace = new System.Collections.Generic.List<Vector3>();
+        var send = StartCoroutine(SendArm(1.5f, () => ArmJson(new Vector3(0, 0, 0.28f), new Vector3(0, 0, 0.53f), 95, 95, Vector3.forward, false, rnd, 0.015f)));
+        float t1 = Time.realtimeSinceStartup;
+        while (Time.realtimeSinceStartup - t1 < 1.5f)
+        {
+            yield return null;
+            if (!rig.Driving) continue;
+            maxLenErr = Mathf.Max(maxLenErr, Mathf.Abs((rig.RightElbow - rig.RightShoulder).magnitude - 0.28f), Mathf.Abs((rig.RightWrist - rig.RightElbow).magnitude - 0.25f));
+            sumAng += Vector3.Angle(rig.RightWrist - rig.RightShoulder, cam.forward); n++;
+            if (Time.realtimeSinceStartup - t1 > 0.5f) wristTrace.Add(cam.InverseTransformPoint(rig.RightWrist));
+        }
+        ArmCheck("cánh tay hiện, điều khiển bàn tay", rig.Driving && n > 20, $"{n} khung");
+        ArmCheck("chiều dài bắp tay, cẳng tay cố định dù số đo rung 1,5 cm", maxLenErr < 0.002f, $"lệch tối đa {maxLenErr * 1000:0.0} mm");
+        ArmCheck("duỗi thẳng ra trước đúng hướng", n > 0 && sumAng / n < 6f, $"lệch {sumAng / Mathf.Max(1, n):0.0}°");
+        if (wristTrace.Count > 5)
+        {
+            Vector3 m = Vector3.zero; foreach (var w in wristTrace) m += w; m /= wristTrace.Count;
+            float sd = 0; foreach (var w in wristTrace) sd += (w - m).sqrMagnitude; sd = Mathf.Sqrt(sd / wristTrace.Count);
+            Log($"[tay] Rung cổ tay (chỉ phần nội suy Unity, chưa tính bộ lọc của tracker): {sd * 1000:0.0} mm với nhiễu vào ±15 mm");
+        }
+
+        // 2) Gập khuỷu 90°, cẳng tay dựng lên
+        yield return SendArm(0.8f, () => ArmJson(new Vector3(0, 0, 0.28f), new Vector3(0, 0.25f, 0.28f), 95, 95, Vector3.up, false, rnd, 0));
+        ArmCheck("gập khuỷu: cẳng tay dựng đứng", Vector3.Dot((rig.RightWrist - rig.RightElbow).normalized, cam.up) > 0.95f);
+        Shot("canh_tay_gap_khuyu");
+
+        // 3) Ngón tay: chiều dài đốt giữ nguyên
+        float before = (rig.FingerJoint(8) - rig.FingerJoint(7)).magnitude;
+        yield return SendArm(0.6f, () => ArmJson(new Vector3(0, 0, 0.28f), new Vector3(0, 0.25f, 0.28f), 95, 95, Vector3.up, false, rnd, 0.01f));
+        float after = (rig.FingerJoint(8) - rig.FingerJoint(7)).magnitude;
+        ArmCheck("đốt ngón giữ chiều dài khi số đo rung", Mathf.Abs(after - before) < 0.001f, $"{before * 1000:0.0} -> {after * 1000:0.0} mm");
+
+        // 4) Không thấy khuỷu: IK tới cổ tay, khuỷu chúc xuống
+        Vector3 wristL = new Vector3(0.05f, 0.05f, 0.42f);
+        yield return SendArm(0.8f, () => ArmJson(new Vector3(0, 0, 0.28f), wristL, 20, 95, Vector3.forward, false, rnd, 0));
+        Vector3 want = rig.RightShoulder + cam.rotation * wristL;
+        ArmCheck("không thấy khuỷu: cổ tay tới đúng đích bằng IK", Vector3.Distance(rig.RightWrist, want) < 0.01f, $"lệch {Vector3.Distance(rig.RightWrist, want) * 1000:0} mm");
+        ArmCheck("IK: khuỷu thấp hơn đường vai - cổ tay", Vector3.Dot(rig.RightElbow - (rig.RightShoulder + rig.RightWrist) * 0.5f, Vector3.up) < 0);
+
+        // 5) Trỏ lòng bàn tay vào vật gần nhất trước mặt rồi chụm: cầm được
+        var g = Khkt.Rendering.ZoneRoot.FindAll<Khkt.Interaction.Grabbable>()
+            .Where(x => x.gameObject.activeInHierarchy && Vector3.Dot(x.transform.position - cam.position, cam.forward) > 0.3f)
+            .OrderBy(x => (x.transform.position - cam.position).sqrMagnitude).FirstOrDefault();
+        if (g != null)
+        {
+            Vector3 dir = (g.transform.position + Vector3.up * 0.03f - cam.position).normalized;
+            Vector3 wristW = cam.position + dir * 0.36f;
+            Vector3 wl = Quaternion.Inverse(cam.rotation) * (wristW - rig.RightShoulder);
+            Vector3 hd = Quaternion.Inverse(cam.rotation) * dir;
+            yield return SendArm(0.6f, () => ArmJson(new Vector3(0, 0, 0.28f), wl, 20, 95, hd, false, rnd, 0));
+            yield return SendArm(0.6f, () => ArmJson(new Vector3(0, 0, 0.28f), wl, 20, 95, hd, true, rnd, 0));
+            ArmCheck("trỏ vào vật rồi chụm thì cầm được", hand.Held != null, hand.Held != null ? hand.Held.name : "trỏ tới: " + g.name);
+            Shot("canh_tay_cam_vat");
+            yield return SendArm(0.4f, () => ArmJson(new Vector3(0, 0, 0.28f), wl, 20, 95, hd, false, rnd, 0));
+        }
+        else ArmCheck("có vật trước mặt để thử", false);
+
+        // 6) Mất tín hiệu: trả lại điều khiển cũ
+        yield return Seconds(0.8f);
+        ArmCheck("mất tín hiệu: ẩn cánh tay, trả lại bàn tay cũ", !rig.Driving && hand.OverrideAimPoint == null && !Khkt.Input.MediaPipeHandSource.SuppressController);
+        Log($"[tay] Tổng: đạt {armPass}, hỏng {armFail}");
+    }
+
+    static IEnumerator Seconds(float s) { yield return new WaitForSecondsRealtime(s); }
 
     IEnumerator TrackingF9Test()
     {

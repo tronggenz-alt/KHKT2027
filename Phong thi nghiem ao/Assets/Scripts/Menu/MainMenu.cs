@@ -529,7 +529,9 @@ namespace Khkt.Menu
             status[Screen.Settings] = MakeStatus(s, "Thông báo cài đặt", -196);
             MakeButton(s, "Nút Lưu địa chỉ", "Lưu", new Vector2(0, -248), new Vector2(ContentW, 54), DoSaveServer, 0);
             MakeButton(s, "Nút Kiểm tra kết nối", "Kiểm tra kết nối", new Vector2(0, -314), new Vector2(ContentW, 54), DoCheckServer, 1);
-            MakeButton(s, "Nút Mặc định", "Về địa chỉ mặc định", new Vector2(0, -380), new Vector2(ContentW, 54), () => serverField.text = GameSession.DefaultServerUrl, 1);
+            float half = (ContentW - 12) / 2;
+            MakeButton(s, "Nút Máy chủ trực tuyến", "Máy chủ trực tuyến", new Vector2(0, -380), new Vector2(half, 54), () => serverField.text = GameSession.CloudServerUrl, 1);
+            MakeButton(s, "Nút Mặc định", "Máy chủ trên máy này", new Vector2(half + 12, -380), new Vector2(half, 54), () => serverField.text = GameSession.LocalServerUrl, 1);
             System.Action leave = () => { if (!busy) Show(GameSession.HasIdentity ? Screen.Home : Screen.Login); };
             MakeButton(s, "Nút quay lại từ cài đặt", "Quay lại", new Vector2(0, -446), new Vector2(ContentW, 54), leave, 1);
             submit[Screen.Settings] = DoSaveServer;

@@ -45,6 +45,10 @@ from mediapipe_tinh import (  # noqa: E402
     BoLocCuChi,
     tao_goi_udp,
     dong_goi_diem_moc,
+    dong_goi_tay3d,
+    gan_ben_theo_pose,
+    mang_diem,
+    CHI_SO_CANH_TAY,
     tinh_blendshapes,
     tinh_gaze,
     tinh_khoang_cach_iris,
@@ -59,6 +63,7 @@ from mediapipe.tasks.python import vision
 
 MO_HINH_MAT = THU_MUC_GOC / "mo_hinh" / "face_landmarker.task"
 MO_HINH_TAY = THU_MUC_GOC / "mo_hinh" / "gesture_recognizer.task"
+MO_HINH_POSE = THU_MUC_GOC / "mo_hinh" / "pose_landmarker_lite.task"
 
 
 def con_song(pid: int) -> bool:
@@ -201,6 +206,7 @@ def main() -> None:
     parser.add_argument("--hfov", type=float, default=60.0, help="góc nhìn ngang của webcam (độ, mặc định 60.0)")
     parser.add_argument("--che-do", choices=["muot", "can-bang", "tiet-kiem"], default="muot", help="chế độ hiệu năng")
     parser.add_argument("--khong-tay", action="store_true", help="tắt nhận diện tay")
+    parser.add_argument("--khong-pose", action="store_true", help="tắt Pose (vai, khuỷu cho cánh tay ảo)")
     parser.add_argument("--gpu", action="store_true", help="bật GPU delegate (Metal Mac / Linux)")
     parser.add_argument("--chop-2-lan", action="store_true", help="bật xác nhận bằng chớp mắt hai lần nhanh")
     parser.add_argument("--pose", action="store_true", help="bật ước lượng tư thế thân người Pose Landmarker (tắt mặc định)")
@@ -280,6 +286,23 @@ def main() -> None:
             running_mode=vision.RunningMode.VIDEO,
         )
         gesture_recognizer = vision.GestureRecognizer.create_from_options(gesture_options)
+
+    # Pose bản nhẹ cho vai, khuỷu (cánh tay ảo). Tắt khi không nhận diện tay hoặc thiếu mô hình.
+    pose_landmarker = None
+    if not args.khong_tay and not args.khong_pose and MO_HINH_POSE.exists():
+        pose_landmarker = vision.PoseLandmarker.create_from_options(vision.PoseLandmarkerOptions(
+            base_options=mp_python.BaseOptions(model_asset_path=str(MO_HINH_POSE), delegate=delegate),
+            num_poses=1,
+            min_pose_detection_confidence=0.5,
+            min_pose_presence_confidence=0.5,
+            min_tracking_confidence=0.5,
+            running_mode=vision.RunningMode.VIDEO,
+        ))
+    dich_tay3d = (args.may, args.cong + 3)
+    # Bộ lọc 1€ cho điểm 3D: beta theo đơn vị mét. Đo trên dữ liệu giả lập: beta nhỏ làm trễ 80-125 ms,
+    # beta lớn hơn giữ gần đủ biên độ khi tay chạy nhanh mà đứng yên vẫn hết rung.
+    loc_tay3d: dict[str, OneEuro] = {}
+    loc_canh: dict[str, OneEuro] = {}
 
     # 4. Bộ lọc One Euro và bộ lọc trạng thái
     loc_dau = OneEuro(min_cutoff=0.7, beta=0.03)          # yaw, pitch, roll
@@ -432,6 +455,7 @@ def main() -> None:
             # Chạy song song FaceLandmarker và GestureRecognizer
             res_face = [None]
             res_hand = [None]
+            res_pose = [None]
             t_mat_ms = 0.0
             t_tay_ms = 0.0
 
@@ -455,11 +479,18 @@ def main() -> None:
                 t_tay_ms = (time.perf_counter() - t_t0) * 1000
 
             th_mat = threading.Thread(target=_chay_mat)
+            def _chay_pose():
+                if pose_landmarker is not None:
+                    res_pose[0] = pose_landmarker.detect_for_video(mp_img, ts_ms)
+
+            th_pose = threading.Thread(target=_chay_pose)
+            th_pose.start()
             th_tay = threading.Thread(target=_chay_tay)
             th_mat.start()
             th_tay.start()
             th_mat.join()
             th_tay.join()
+            th_pose.join()
             ket_qua_tay_cu = res_hand[0]
 
             t_loc_start = time.perf_counter()
@@ -518,6 +549,13 @@ def main() -> None:
             hands_list: list[dict[str, Any]] = []
             tay_tho: list[tuple[str, Any]] = []
             hand_output = res_hand[0]
+            pose_out = res_pose[0]
+            pose_anh = pose_out.pose_landmarks[0] if pose_out and pose_out.pose_landmarks else None
+            pose_tg = pose_out.pose_world_landmarks[0] if pose_out and pose_out.pose_world_landmarks else None
+            ben_pose = None
+            if hand_output and hand_output.hand_landmarks:
+                ben_pose = gan_ben_theo_pose([(float(h[0].x), float(h[0].y)) for h in hand_output.hand_landmarks], pose_anh)
+            tay3d: list[dict[str, Any]] = []
             if hand_output and hand_output.hand_landmarks:
                 last_hand_seen_time = now_real
                 so_thay_tay += 1
@@ -529,7 +567,14 @@ def main() -> None:
                         # MediaPipe gán nhãn theo góc nhìn người trong ảnh
                         ben = "phai" if "right" in label else "trai"
 
+                    if ben_pose:
+                        ben = ben_pose[idx_tay]
                     tay_tho.append((ben, lm_tay))
+                    if idx_tay < len(hand_output.hand_world_landmarks):
+                        if ben not in loc_tay3d:
+                            loc_tay3d[ben] = OneEuro(min_cutoff=1.0, beta=4.0)
+                        tay3d.append({"ben": ben, "w": loc_tay3d[ben](mang_diem(hand_output.hand_world_landmarks[idx_tay]), now_real),
+                                      "x": float(lm_tay[0].x), "y": float(lm_tay[0].y)})
                     prev_p = trang_thai_pinch.get(ben, False)
                     x_t, y_t, co_t, pinch_val, r_pinch = tinh_tay(lm_tay, prev_pinch=prev_p)
                     trang_thai_pinch[ben] = bool(pinch_val)
@@ -584,6 +629,20 @@ def main() -> None:
             data_bytes = json.dumps(goi).encode("utf-8")
             try:
                 sock_gui.sendto(data_bytes, dich_gui)
+                # cánh tay ảo: chụm, cử chỉ lấy từ gói chính để hai nơi dùng cùng một kết quả
+                for h in tay3d:
+                    g = next((x for x in hands_list if x["ben"] == h["ben"]), None)
+                    if g:
+                        h["p"], h["g"] = g["pinch"], g["cu_chi"]
+                canh = []
+                if pose_tg is not None and pose_anh is not None:
+                    for ben, ids in CHI_SO_CANH_TAY.items():
+                        if ben not in loc_canh:
+                            loc_canh[ben] = OneEuro(min_cutoff=0.7, beta=6.0)
+                        canh.append({"ben": ben, "d": loc_canh[ben](mang_diem(pose_tg, ids), now_real),
+                                     "tin": [float(getattr(pose_anh[i], "visibility", 1.0) or 0.0) for i in ids]})
+                if tay3d or canh:
+                    sock_gui.sendto(json.dumps(dong_goi_tay3d(tay3d, canh, now_real), separators=(",", ":")).encode("utf-8"), dich_tay3d)
                 if now_real < diem_moc_den:
                     goi_moc = dong_goi_diem_moc(lm_mat, tay_tho, w_raw / max(1, h_raw), now_real)
                     sock_gui.sendto(json.dumps(goi_moc, separators=(",", ":")).encode("utf-8"), dich_diem_moc)
