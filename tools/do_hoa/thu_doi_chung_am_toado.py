@@ -7,13 +7,14 @@ chạy HdCoordinateTool.CompareBatch để chứng minh công cụ phát hiện 
 sau đó khôi phục lại file gốc.
 """
 
+from pathlib import Path
 import os
 import sys
 import json
 import shutil
 import subprocess
 
-PROJECT_ROOT = "/Users/trantrong/VERALabHD"
+PROJECT_ROOT = str(Path(__file__).resolve().parents[2])
 JSON_PATH = os.path.join(PROJECT_ROOT, "docs/do-hoa-hd/toa_do_goc.json")
 BAK_PATH = os.path.join(PROJECT_ROOT, "docs/do-hoa-hd/toa_do_goc.json.bak")
 UNITY_PATH = "/Users/trantrong/Documents/6000.6.7f1/Unity.app/Contents/MacOS/Unity"

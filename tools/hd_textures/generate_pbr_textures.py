@@ -1,8 +1,9 @@
+from pathlib import Path
 import os
 import numpy as np
 from PIL import Image
 
-OUT_DIR = "/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/HD/Textures"
+OUT_DIR = str(Path(__file__).resolve().parents[2] / "Phong thi nghiem ao/Assets/Lab/HD/Textures")
 os.makedirs(OUT_DIR, exist_ok=True)
 SIZE = 1024
 
