@@ -237,3 +237,5 @@ Từ "polime" nay viết "polymer", "monome" viết "monomer", "trùng hợp" v�
 - Etyl axetat viết thế nào? Ethyl acetate, CH3COOC2H5.
 - Anilin tên mới? Aniline (benzenamine), C6H5NH2.
 - PVC là viết tắt của gì? Poly(vinyl chloride), poli(vinyl clorua).
+- Toluen và stiren viết tên mới thế nào? Toluene (methylbenzene) và styrene (vinylbenzene).
+- Glixerol tên IUPAC là gì? Glycerol (propane-1,2,3-triol).

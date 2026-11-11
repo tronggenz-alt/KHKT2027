@@ -124,3 +124,5 @@ Các thuốc thử Lugol, Biuret, Benedict, Fehling, Tollens, Ninhydrin đều c
 - Màu ngọn lửa của Ca2+ và Ba2+? Đỏ cam và lục vàng.
 - Cu2O màu gì? Đỏ gạch, sinh ra khi đường khử tác dụng với Cu(OH)2 đun nóng.
 - CuSO4 khan màu gì? Trắng, gặp nước hóa xanh lam.
+- Dung dịch Fe3+ và Fe2+ có màu gì? Fe3+ vàng nâu, Fe2+ lục nhạt.
+- Thêm acid vào dung dịch chromate màu vàng thì sao? Chuyển da cam vì tạo dichromate.

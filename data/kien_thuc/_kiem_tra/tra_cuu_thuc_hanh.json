@@ -1,0 +1,452 @@
+[
+  {
+    "cau_hoi": "Natri hidroxit là gì theo tên mới?",
+    "dap_an": "Sodium hydroxide, công thức NaOH.",
+    "tu_khoa": [
+      "sodium hydroxide",
+      "NaOH"
+    ],
+    "tep": "tra_cuu/02-ten-acid-base-oxide-ion-iupac-va-ten-cu.md"
+  },
+  {
+    "cau_hoi": "kali tên mới gọi là gì vậy",
+    "dap_an": "Potassium, kí hiệu K.",
+    "tu_khoa": [
+      "potassium",
+      "kali"
+    ],
+    "tep": "tra_cuu/01-ten-nguyen-to-iupac-va-ten-cu.md"
+  },
+  {
+    "cau_hoi": "Axit sunfuric tên quốc tế là gì?",
+    "dap_an": "Sulfuric acid, H2SO4.",
+    "tu_khoa": [
+      "sulfuric acid",
+      "H2SO4"
+    ],
+    "tep": "tra_cuu/02-ten-acid-base-oxide-ion-iupac-va-ten-cu.md"
+  },
+  {
+    "cau_hoi": "đồng sunfat ngậm nước gọi tên IUPAC thế nào",
+    "dap_an": "Copper(II) sulfate pentahydrate, CuSO4.5H2O.",
+    "tu_khoa": [
+      "copper(II) sulfate pentahydrate",
+      "CuSO4.5H2O"
+    ],
+    "tep": "tra_cuu/03-ten-muoi-va-hoa-chat-thuong-gap-iupac-va-ten-cu.md"
+  },
+  {
+    "cau_hoi": "Ancol etylic tên mới là gì?",
+    "dap_an": "Ethanol (ethyl alcohol), C2H5OH.",
+    "tu_khoa": [
+      "ethanol",
+      "ancol etylic"
+    ],
+    "tep": "tra_cuu/04-ten-hop-chat-huu-co-iupac-va-ten-cu.md"
+  },
+  {
+    "cau_hoi": "axetilen viết theo tên mới là gì",
+    "dap_an": "Acetylene (ethyne), C2H2.",
+    "tu_khoa": [
+      "acetylene",
+      "ethyne"
+    ],
+    "tep": "tra_cuu/04-ten-hop-chat-huu-co-iupac-va-ten-cu.md"
+  },
+  {
+    "cau_hoi": "Nguyên tử khối của clo dùng trong bài tập là bao nhiêu?",
+    "dap_an": "35,5 (giá trị chuẩn 35,45).",
+    "tu_khoa": [
+      "35,5",
+      "chlorine"
+    ],
+    "tep": "tra_cuu/05-nguyen-to-thuong-gap-nguyen-tu-khoi-do-am-dien.md"
+  },
+  {
+    "cau_hoi": "Hiệu độ âm điện bao nhiêu thì là liên kết ion?",
+    "dap_an": "Δχ ≥ 1,7.",
+    "tu_khoa": [
+      "1,7",
+      "liên kết ion"
+    ],
+    "tep": "tra_cuu/05-nguyen-to-thuong-gap-nguyen-tu-khoi-do-am-dien.md"
+  },
+  {
+    "cau_hoi": "Làm sao nhận biết ion Fe3+?",
+    "dap_an": "Dùng dung dịch KSCN cho màu đỏ máu, hoặc NaOH cho kết tủa nâu đỏ Fe(OH)3.",
+    "tu_khoa": [
+      "thiocyanate",
+      "đỏ máu"
+    ],
+    "tep": "tra_cuu/06-nhan-biet-cation.md"
+  },
+  {
+    "cau_hoi": "phân biệt Al3+ với Mg2+ bằng NaOH kiểu gì",
+    "dap_an": "Nhỏ NaOH dư: Al(OH)3 tan, Mg(OH)2 không tan.",
+    "tu_khoa": [
+      "Al(OH)3",
+      "NaOH dư"
+    ],
+    "tep": "tra_cuu/06-nhan-biet-cation.md"
+  },
+  {
+    "cau_hoi": "Thuốc thử nhận biết ion clorua là gì?",
+    "dap_an": "AgNO3, tạo kết tủa trắng AgCl.",
+    "tu_khoa": [
+      "AgNO3",
+      "AgCl"
+    ],
+    "tep": "tra_cuu/07-nhan-biet-anion.md"
+  },
+  {
+    "cau_hoi": "Nhận biết ion sunfat bằng gì?",
+    "dap_an": "BaCl2, tạo kết tủa trắng BaSO4 không tan trong acid.",
+    "tu_khoa": [
+      "BaCl2",
+      "BaSO4"
+    ],
+    "tep": "tra_cuu/07-nhan-biet-anion.md"
+  },
+  {
+    "cau_hoi": "Khí nào làm que đóm còn tàn đỏ bùng cháy?",
+    "dap_an": "Oxygen O2.",
+    "tu_khoa": [
+      "oxygen",
+      "que đóm"
+    ],
+    "tep": "tra_cuu/08-nhan-biet-chat-khi.md"
+  },
+  {
+    "cau_hoi": "làm sao phân biệt CO2 với SO2",
+    "dap_an": "SO2 mùi hắc và làm mất màu nước bromine; CO2 không làm mất màu.",
+    "tu_khoa": [
+      "nước bromine",
+      "SO2"
+    ],
+    "tep": "tra_cuu/08-nhan-biet-chat-khi.md"
+  },
+  {
+    "cau_hoi": "AgBr màu gì?",
+    "dap_an": "Vàng nhạt.",
+    "tu_khoa": [
+      "AgBr",
+      "vàng nhạt"
+    ],
+    "tep": "tra_cuu/09-mau-sac-chat-ion-ket-tua-ngon-lua.md"
+  },
+  {
+    "cau_hoi": "BaSO4 có tan trong nước không?",
+    "dap_an": "Không tan, kể cả trong acid mạnh.",
+    "tu_khoa": [
+      "BaSO4",
+      "không tan"
+    ],
+    "tep": "tra_cuu/10-tinh-tan-muoi-base-acid.md"
+  },
+  {
+    "cau_hoi": "Thế điện cực chuẩn của Cu2+/Cu bằng bao nhiêu?",
+    "dap_an": "+0,34 V.",
+    "tu_khoa": [
+      "0,34",
+      "Cu2+/Cu"
+    ],
+    "tep": "tra_cuu/11-day-hoat-dong-hoa-hoc-va-the-dien-cuc-chuan.md"
+  },
+  {
+    "cau_hoi": "sức điện động pin Zn Cu là bao nhiêu vôn",
+    "dap_an": "1,10 V.",
+    "tu_khoa": [
+      "1,10 V",
+      "pin Zn–Cu"
+    ],
+    "tep": "tra_cuu/11-day-hoat-dong-hoa-hoc-va-the-dien-cuc-chuan.md"
+  },
+  {
+    "cau_hoi": "Thể tích mol khí ở điều kiện chuẩn theo chương trình mới là bao nhiêu?",
+    "dap_an": "24,79 L/mol ở 25 °C và 1 bar.",
+    "tu_khoa": [
+      "24,79",
+      "điều kiện chuẩn"
+    ],
+    "tep": "tra_cuu/12-hang-so-don-vi-cong-thuc-tinh-toan.md"
+  },
+  {
+    "cau_hoi": "Công thức đổi nồng độ phần trăm sang nồng độ mol?",
+    "dap_an": "CM = 10 × D × C% / M.",
+    "tu_khoa": [
+      "CM",
+      "C%"
+    ],
+    "tep": "tra_cuu/12-hang-so-don-vi-cong-thuc-tinh-toan.md"
+  },
+  {
+    "cau_hoi": "Phenolphtalein đổi màu ở pH bao nhiêu?",
+    "dap_an": "Không màu dưới khoảng 8,2–8,3, chuyển hồng đến khoảng pH 10.",
+    "tu_khoa": [
+      "phenolphthalein",
+      "8,3"
+    ],
+    "tep": "tra_cuu/13-chat-chi-thi-acid-base.md"
+  },
+  {
+    "cau_hoi": "metyl da cam có khoảng đổi màu là bao nhiêu",
+    "dap_an": "pH 3,1 – 4,4, đỏ sang vàng.",
+    "tu_khoa": [
+      "methyl orange",
+      "3,1"
+    ],
+    "tep": "tra_cuu/13-chat-chi-thi-acid-base.md"
+  },
+  {
+    "cau_hoi": "Ba codon kết thúc là những codon nào?",
+    "dap_an": "UAA, UAG, UGA.",
+    "tu_khoa": [
+      "UAA",
+      "UGA"
+    ],
+    "tep": "tra_cuu/14-bang-ma-di-truyen.md"
+  },
+  {
+    "cau_hoi": "Codon AUG mã hóa amino acid nào?",
+    "dap_an": "Methionine, đồng thời là codon mở đầu.",
+    "tu_khoa": [
+      "AUG",
+      "methionine"
+    ],
+    "tep": "tra_cuu/14-bang-ma-di-truyen.md"
+  },
+  {
+    "cau_hoi": "mARN viết theo sách mới là gì?",
+    "dap_an": "mRNA.",
+    "tu_khoa": [
+      "mRNA",
+      "RNA"
+    ],
+    "tep": "tra_cuu/15-thuat-ngu-sinh-hoc-cu-moi.md"
+  },
+  {
+    "cau_hoi": "1 micromet bằng bao nhiêu nanomet?",
+    "dap_an": "1 000 nm.",
+    "tu_khoa": [
+      "micromet",
+      "nm"
+    ],
+    "tep": "tra_cuu/16-kich-thuoc-te-bao-don-vi-hien-vi.md"
+  },
+  {
+    "cau_hoi": "Vì sao không thấy virus bằng kính hiển vi quang học?",
+    "dap_an": "Virus nhỏ hơn giới hạn phân giải khoảng 0,2 µm của kính hiển vi quang học.",
+    "tu_khoa": [
+      "độ phân giải",
+      "virus"
+    ],
+    "tep": "tra_cuu/16-kich-thuoc-te-bao-don-vi-hien-vi.md"
+  },
+  {
+    "cau_hoi": "bị axit bắn vào tay thì làm gì",
+    "dap_an": "Rửa ngay bằng nhiều nước chảy ít nhất 15–20 phút và báo giáo viên.",
+    "tu_khoa": [
+      "rửa nước",
+      "bỏng acid"
+    ],
+    "tep": "thuc_hanh/01-an-toan-phong-thi-nghiem-hoa-hoc.md"
+  },
+  {
+    "cau_hoi": "Biểu tượng đầu lâu xương chéo trên nhãn hóa chất nghĩa là gì?",
+    "dap_an": "GHS06, độc cấp tính mức cao.",
+    "tu_khoa": [
+      "GHS06",
+      "độc cấp tính"
+    ],
+    "tep": "thuc_hanh/01-an-toan-phong-thi-nghiem-hoa-hoc.md"
+  },
+  {
+    "cau_hoi": "Hóa chất bắn vào mắt phải xử lí thế nào?",
+    "dap_an": "Rửa ở vòi rửa mắt khẩn cấp ít nhất 15 phút, banh mí mắt, rồi đi y tế.",
+    "tu_khoa": [
+      "vòi rửa mắt",
+      "15 phút"
+    ],
+    "tep": "thuc_hanh/01-an-toan-phong-thi-nghiem-hoa-hoc.md"
+  },
+  {
+    "cau_hoi": "Pha loãng axit sunfuric đặc thế nào cho đúng?",
+    "dap_an": "Rót từ từ acid vào nước, vừa rót vừa khuấy, không rót nước vào acid.",
+    "tu_khoa": [
+      "rót acid vào nước",
+      "pha loãng"
+    ],
+    "tep": "thuc_hanh/02-dung-cu-va-ky-thuat-co-ban-hoa-hoc.md"
+  },
+  {
+    "cau_hoi": "đun ống nghiệm bằng đèn cồn cần chú ý gì",
+    "dap_an": "Chất lỏng không quá 1/3 ống, kẹp ở 1/3 từ miệng, nghiêng 45°, miệng ống hướng ra xa người, hơ đều.",
+    "tu_khoa": [
+      "đèn cồn",
+      "1/3"
+    ],
+    "tep": "thuc_hanh/02-dung-cu-va-ky-thuat-co-ban-hoa-hoc.md"
+  },
+  {
+    "cau_hoi": "Thả đinh sắt vào dung dịch đồng sunfat có hiện tượng gì?",
+    "dap_an": "Đinh sắt phủ lớp đồng đỏ, màu xanh của dung dịch nhạt dần.",
+    "tu_khoa": [
+      "đinh sắt",
+      "CuSO4"
+    ],
+    "tep": "thuc_hanh/03-thi-nghiem-hoa-10.md"
+  },
+  {
+    "cau_hoi": "Thí nghiệm ảnh hưởng của nồng độ đến tốc độ phản ứng dùng phản ứng gì?",
+    "dap_an": "Sodium thiosulfate với HCl, đo thời gian xuất hiện vẩn đục sulfur.",
+    "tu_khoa": [
+      "Na2S2O3",
+      "tốc độ phản ứng"
+    ],
+    "tep": "thuc_hanh/03-thi-nghiem-hoa-10.md"
+  },
+  {
+    "cau_hoi": "Nhỏ H2SO4 đặc vào đường thấy gì?",
+    "dap_an": "Đường hóa đen thành than xốp phồng lên, tỏa nhiệt, có mùi hắc.",
+    "tu_khoa": [
+      "háo nước",
+      "đường"
+    ],
+    "tep": "thuc_hanh/04-thi-nghiem-hoa-11.md"
+  },
+  {
+    "cau_hoi": "Phản ứng tráng bạc làm thế nào?",
+    "dap_an": "Cho aldehyde vào thuốc thử Tollens pha mới, đun cách thủy khoảng 60 °C, thành ống phủ lớp bạc.",
+    "tu_khoa": [
+      "Tollens",
+      "tráng bạc"
+    ],
+    "tep": "thuc_hanh/04-thi-nghiem-hoa-11.md"
+  },
+  {
+    "cau_hoi": "Điện phân dung dịch CuSO4 thấy gì ở cực âm?",
+    "dap_an": "Có lớp đồng đỏ bám vào cathode; anode có khí O2.",
+    "tu_khoa": [
+      "điện phân",
+      "cathode"
+    ],
+    "tep": "thuc_hanh/05-thi-nghiem-hoa-12.md"
+  },
+  {
+    "cau_hoi": "làm xà phòng sao phải cho thêm muối ăn bão hòa",
+    "dap_an": "NaCl làm xà phòng ít tan, tách ra nổi lên trên.",
+    "tu_khoa": [
+      "xà phòng hóa",
+      "NaCl bão hòa"
+    ],
+    "tep": "thuc_hanh/05-thi-nghiem-hoa-12.md"
+  },
+  {
+    "cau_hoi": "Nồi hấp tiệt trùng chạy ở nhiệt độ bao nhiêu?",
+    "dap_an": "121 °C hơi nước bão hòa, ít nhất 15–20 phút.",
+    "tu_khoa": [
+      "121 °C",
+      "nồi hấp"
+    ],
+    "tep": "thuc_hanh/06-an-toan-sinh-hoc-bsl1-vo-trung-nuoi-cay.md"
+  },
+  {
+    "cau_hoi": "BSL-1 là gì?",
+    "dap_an": "Cấp an toàn sinh học thấp nhất, cho vi sinh vật không gây bệnh ở người khỏe mạnh như E. coli K-12.",
+    "tu_khoa": [
+      "BSL-1",
+      "an toàn sinh học"
+    ],
+    "tep": "thuc_hanh/06-an-toan-sinh-hoc-bsl1-vo-trung-nuoi-cay.md"
+  },
+  {
+    "cau_hoi": "đang ở vật kính 40x có vặn ốc to được không",
+    "dap_an": "Không, chỉ dùng ốc vi cấp để tránh vỡ tiêu bản.",
+    "tu_khoa": [
+      "ốc vi cấp",
+      "vật kính 40x"
+    ],
+    "tep": "thuc_hanh/07-kinh-hien-vi-tieu-ban-va-nhuom.md"
+  },
+  {
+    "cau_hoi": "Sau nhuộm Gram vi khuẩn Gram âm có màu gì?",
+    "dap_an": "Hồng đỏ của safranin; Gram dương màu tím.",
+    "tu_khoa": [
+      "Gram âm",
+      "safranin"
+    ],
+    "tep": "thuc_hanh/07-kinh-hien-vi-tieu-ban-va-nhuom.md"
+  },
+  {
+    "cau_hoi": "Micropipet có hai nấc dùng thế nào?",
+    "dap_an": "Hút ở nấc thứ nhất; khi xả ấn xuống nấc thứ hai để đẩy hết dung dịch.",
+    "tu_khoa": [
+      "nấc thứ nhất",
+      "nấc thứ hai"
+    ],
+    "tep": "thuc_hanh/08-micropipette-ly-tam-dien-di.md"
+  },
+  {
+    "cau_hoi": "Khi điện di DNA chạy về cực nào?",
+    "dap_an": "Về cực dương vì DNA tích điện âm.",
+    "tu_khoa": [
+      "cực dương",
+      "điện di"
+    ],
+    "tep": "thuc_hanh/08-micropipette-ly-tam-dien-di.md"
+  },
+  {
+    "cau_hoi": "Thí nghiệm co nguyên sinh dùng dung dịch gì?",
+    "dap_an": "NaCl 10 % ưu trương; phản co nguyên sinh dùng nước cất.",
+    "tu_khoa": [
+      "co nguyên sinh",
+      "NaCl 10"
+    ],
+    "tep": "thuc_hanh/09-thi-nghiem-sinh-10.md"
+  },
+  {
+    "cau_hoi": "khoai tây luộc cho vào oxi già sao không sủi bọt",
+    "dap_an": "Nhiệt làm biến tính enzyme catalase nên không phân hủy H2O2.",
+    "tu_khoa": [
+      "catalase",
+      "biến tính"
+    ],
+    "tep": "thuc_hanh/09-thi-nghiem-sinh-10.md"
+  },
+  {
+    "cau_hoi": "Tách chiết sắc tố lá dùng dung môi gì?",
+    "dap_an": "Acetone 80 % hoặc ethanol 96 %.",
+    "tu_khoa": [
+      "sắc tố",
+      "acetone"
+    ],
+    "tep": "thuc_hanh/10-thi-nghiem-sinh-11.md"
+  },
+  {
+    "cau_hoi": "Chứng minh hạt nảy mầm hô hấp thải CO2 bằng cách nào?",
+    "dap_an": "Dẫn khí trong bình chứa hạt nảy mầm vào nước vôi trong, nước vôi vẩn đục.",
+    "tu_khoa": [
+      "hô hấp",
+      "nước vôi trong"
+    ],
+    "tep": "thuc_hanh/10-thi-nghiem-sinh-11.md"
+  },
+  {
+    "cau_hoi": "Tách chiết ADN từ chuối sao phải dùng cồn lạnh?",
+    "dap_an": "DNA không tan trong cồn nên kết tủa thành sợi trắng; cồn lạnh giúp kết tủa nhanh và bảo vệ DNA.",
+    "tu_khoa": [
+      "tách chiết DNA",
+      "cồn lạnh"
+    ],
+    "tep": "thuc_hanh/11-thi-nghiem-sinh-12.md"
+  },
+  {
+    "cau_hoi": "Khuẩn lạc trắng trên đĩa X-gal có ý nghĩa gì?",
+    "dap_an": "Vi khuẩn mang plasmid tái tổ hợp có gene chèn làm hỏng lacZα.",
+    "tu_khoa": [
+      "khuẩn lạc trắng",
+      "X-gal"
+    ],
+    "tep": "thuc_hanh/11-thi-nghiem-sinh-12.md"
+  }
+]

@@ -94,3 +94,9 @@ Các tên khí và chất vô cơ trong Sinh học cũng theo môn Hóa: "khí �
 - Clôrôphin là gì? Chlorophyll, sắc tố quang hợp màu lục.
 - ADN ligaza gọi theo tên mới? DNA ligase.
 - Plasmit viết mới? Plasmid.
+- Lipit, glucôzơ, xenlulôzơ viết mới thế nào? Lipid, glucose, cellulose.
+- Côđon và anticôđon viết mới? Codon và anticodon.
+- Chu trình Crep viết theo tên mới là gì? Chu trình Krebs.
+- Hoocmôn viết mới? Hormone, ví dụ auxin, gibberellin, cytokinin.
+- Ti thể, lục lạp có đổi tên không? Không, vẫn giữ tên tiếng Việt (mitochondrion, chloroplast trong tiếng Anh).
+- Tên khoa học vi sinh vật viết thế nào? In nghiêng, viết hoa chữ đầu tên chi, ví dụ Escherichia coli.
