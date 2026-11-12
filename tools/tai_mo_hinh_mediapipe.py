@@ -32,6 +32,11 @@ DANH_SACH_MO_HINH = {
         "sha256": "fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1",
         "mo_ta": "Mô hình Hand Landmarker (21 điểm bàn tay)",
     },
+    "pose_landmarker_lite.task": {
+        "url": "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task",
+        "sha256": "59929e1d1ee95287735ddd833b19cf4ac46d29bc7afddbbf6753c459690d574a",
+        "mo_ta": "Mô hình Pose Landmarker bản nhẹ (vai, khuỷu, cổ tay cho cánh tay ảo)",
+    },
 }
 
 

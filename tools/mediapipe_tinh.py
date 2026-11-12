@@ -381,6 +381,66 @@ def dong_goi_diem_moc(
     }
 
 
+# Pose: chỉ số vai, khuỷu, cổ tay theo bên của người dùng (MediaPipe đặt tên theo cơ thể, không theo ảnh)
+CHI_SO_CANH_TAY = {"trai": (11, 13, 15), "phai": (12, 14, 16)}
+
+
+def gan_ben_theo_pose(co_tay_anh: list[tuple[float, float]], pose_anh: Any) -> list[str] | None:
+    """Gán trái / phải cho từng bàn tay theo cổ tay gần nhất của Pose.
+
+    Nhãn handedness của bàn tay giả định ảnh đã lật như gương, còn webcam không lật, nên dễ đảo.
+    Pose gắn bên theo cơ thể nên tin hơn. Không có Pose thì trả None (dùng nhãn cũ).
+    """
+    if pose_anh is None or len(pose_anh) < 17 or not co_tay_anh:
+        return None
+    def _xy(i):
+        p = pose_anh[i]
+        return (float(p.x), float(p.y)) if hasattr(p, "x") else (float(p[0]), float(p[1]))
+    goc = {"trai": _xy(15), "phai": _xy(16)}
+    ben = []
+    for x, y in co_tay_anh:
+        d = {k: (x - v[0]) ** 2 + (y - v[1]) ** 2 for k, v in goc.items()}
+        ben.append(min(d, key=d.get))
+    if len(ben) == 2 and ben[0] == ben[1]:
+        # hai tay cùng gần một cổ tay: tay nào gần hơn giữ bên đó, tay kia sang bên còn lại
+        d0 = (co_tay_anh[0][0] - goc[ben[0]][0]) ** 2 + (co_tay_anh[0][1] - goc[ben[0]][1]) ** 2
+        d1 = (co_tay_anh[1][0] - goc[ben[1]][0]) ** 2 + (co_tay_anh[1][1] - goc[ben[1]][1]) ** 2
+        khac = "trai" if ben[0] == "phai" else "phai"
+        if d0 <= d1:
+            ben[1] = khac
+        else:
+            ben[0] = khac
+    return ben
+
+
+def _xyz(p: Any) -> tuple[float, float, float]:
+    return (float(p.x), float(p.y), float(p.z)) if hasattr(p, "x") else (float(p[0]), float(p[1]), float(p[2]))
+
+
+def mang_diem(diem: Any, chi_so: Any = None) -> np.ndarray:
+    """Danh sách điểm (có .x .y .z hoặc bộ 3 số) -> mảng phẳng float, để đưa qua bộ lọc."""
+    ids = chi_so if chi_so is not None else range(len(diem))
+    return np.array([v for i in ids for v in _xyz(diem[i])], dtype=np.float64)
+
+
+def dong_goi_tay3d(tay: list[dict[str, Any]], canh: list[dict[str, Any]], t: float = 0.0) -> dict[str, Any]:
+    """Gói cho cánh tay ảo (cổng --cong + 3). Tọa độ thế giới tính bằng mm, số nguyên cho gói gọn.
+
+    tay: [{"ben", "w": 63 số mét (21 điểm bàn tay, gốc ở tâm bàn tay), "x", "y": cổ tay trên ảnh 0..1,
+           "p": chụm 0/1, "g": cử chỉ}]
+    canh: [{"ben", "d": 9 số mét (vai, khuỷu, cổ tay; gốc ở hông), "tin": 3 độ tin 0..1}]
+    """
+    def mm(a):
+        return [int(round(float(v) * 1000)) for v in a]
+    return {
+        "t": round(float(t), 4),
+        "tay": [{"ben": h["ben"], "w": mm(h["w"]), "x": int(round(h["x"] * 1000)), "y": int(round(h["y"] * 1000)),
+                 "p": int(h.get("p", 0)), "g": str(h.get("g", ""))} for h in tay if len(h["w"]) == 63],
+        "canh": [{"ben": c["ben"], "d": mm(c["d"]), "tin": [int(round(v * 100)) for v in c["tin"]]}
+                 for c in canh if len(c["d"]) == 9],
+    }
+
+
 def tao_goi_udp(
     ok: int,
     yaw: float = 0.0,

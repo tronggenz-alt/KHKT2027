@@ -578,3 +578,16 @@ Còn tồn:
 1. Kết hợp tín hiệu tay MediaPipe với tay cầm Halo phần cứng khi hoàn thành mạch ESP32 + BMI160.
 2. Huấn luyện tệp `gesture_recognizer_lab.task` với tập dữ liệu thực tế khoảng 200 ảnh mỗi cử chỉ.
 3. Đóng gói bộ cài đặt độc lập Windows (.exe + thư mục `tools` đóng gói) để bàn giao cho các trường THPT thử nghiệm.
+
+## Cánh tay ảo (bắp tay, cẳng tay, bàn tay 21 khớp)
+
+- **Tracker:** chạy thêm Pose bản nhẹ (`tools/mo_hinh/pose_landmarker_lite.task`), song song với mặt và tay. Tắt bằng `--khong-pose`.
+- **Gói gửi sang Unity:** cổng `--cong + 3` (mặc định 9054), gồm 21 điểm 3D mỗi bàn tay (mm) và vai, khuỷu, cổ tay kèm độ tin.
+- **Gán tay trái, phải:** theo cổ tay của Pose, vì nhãn trái, phải của bàn tay giả định ảnh đã lật như gương nên dễ đảo trên webcam không lật.
+- **Bộ lọc 1€:** điểm tay `min_cutoff` 1,5, `beta` 4; vai và khuỷu `min_cutoff` 1,0, `beta` 6, theo đơn vị mét.
+- **Unity** (`Input/ArmTracking.cs`, `Demo/ArmRig.cs`):
+  - Nội suy trễ khoảng một gói (khoảng 35 ms) để tay chạy đều.
+  - Chiều dài bắp tay, cẳng tay và từng đốt ngón cố định, nên số đo rung không làm tay co giãn.
+  - Không thấy khuỷu thì dùng IK hai xương.
+  - Tay phải trỏ qua lòng bàn tay vào vật, chụm ngón là cầm. Lúc này cần điều khiển cũ từ cử chỉ tạm tắt.
+- **Kiểm thử:** `KHKT_TEST=canh_tay` dùng dữ liệu giả, đạt 10/10. Chưa đo bằng webcam thật.

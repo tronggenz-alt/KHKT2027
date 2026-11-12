@@ -85,7 +85,7 @@ namespace Khkt.Demo
 
         public static PresentationClient Instance { get; private set; }
 
-        const float BeatInterval = 2f, RetryInterval = 5f, TimeoutS = 5f;
+        const float BeatInterval = 2f, IdleInterval = 5f, RetryInterval = 5f, TimeoutS = 5f;
         const float LockFailsafeS = 15f;
         const int MaxHeldChars = 80, MaxDoingChars = 160;
 
@@ -134,6 +134,7 @@ namespace Khkt.Demo
             lastGoodBeat = Time.realtimeSinceStartup;
             var wait = new WaitForSecondsRealtime(BeatInterval);
             var waitRetry = new WaitForSecondsRealtime(RetryInterval);
+            var waitIdle = new WaitForSecondsRealtime(IdleInterval);
             while (true)
             {
                 bool ok = true;
@@ -154,7 +155,9 @@ namespace Khkt.Demo
                     SetLocked(false, "");
                     LabMessages.Say("Mất kết nối với lớp: đã mở khóa điều khiển", LabMessages.Tone.Warn);
                 }
-                yield return ok ? wait : waitRetry;
+                // mỗi nhịp tính vào hạn mức lượt gọi của máy chủ: chỉ hỏi dày khi đang chiếu, kiểm tra hoặc bị khóa
+                bool busy = page != null || ClassRules.Exam || locked;
+                yield return !ok ? waitRetry : busy ? wait : waitIdle;
             }
         }
 

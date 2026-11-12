@@ -56,6 +56,7 @@ public class KhktSlideTest : MonoBehaviour
         var acc = File.ReadAllLines(Environment.GetEnvironmentVariable("KHKT_MENU_TK"));
         PlayerPrefs.DeleteKey("vera.may_chu");
         GameSession.SignOut();
+        GameSession.ServerUrl = GameSession.LocalServerUrl;  // giáo viên thử gọi máy chủ ở cổng 8000
         yield return Frames(5);
         var menu = FindAnyObjectByType<MainMenu>();
         Field("Ô đăng nhập: tên").text = acc[0];

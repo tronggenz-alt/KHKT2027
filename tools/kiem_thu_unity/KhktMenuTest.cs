@@ -458,7 +458,8 @@ public class KhktMenuTest : MonoBehaviour
         if (File.Exists(sessionFile)) File.Delete(sessionFile);
         yield return Frames(5);
         var menu = FindAnyObjectByType<MainMenu>();
-        Check("địa chỉ mặc định 127.0.0.1:8000", GameSession.ServerUrl == GameSession.DefaultServerUrl);
+        Check("địa chỉ mặc định là máy chủ trực tuyến", GameSession.ServerUrl == GameSession.CloudServerUrl);
+        GameSession.ServerUrl = GameSession.LocalServerUrl;  // bài này thử bản FastAPI ở cổng 8000
 
         Field("Ô đăng nhập: tên").text = user;
         Field("Ô đăng nhập: mật khẩu").text = "mat_khau_sai_unity";

@@ -32,6 +32,9 @@ namespace Khkt.Input
         public float handTimeoutSec = 0.3f;
         public bool showHud = false;
 
+        /// <summary>Cánh tay ảo (ArmRig) đang điều khiển bàn tay: thôi phát cần điều khiển ảo từ cử chỉ.</summary>
+        public static bool SuppressController { get; set; }
+
         public static float HandDepth => Instance != null ? Instance.depthOffset : 0f;
         public static bool HandActive => Instance != null && Instance.IsConnected;
 
@@ -127,7 +130,8 @@ namespace Khkt.Input
             var kb = Keyboard.current;
             if (kb != null)
             {
-                if (kb.f10Key.wasPressedThisFrame)
+                // F10 nay do InAppHandTracker giữ (bật webcam và nhận diện tay trong Unity)
+                if (false)
                 {
                     handTrackingEnabled = !handTrackingEnabled;
                     Debug.Log($"[MediaPipeHand] Theo dõi tay: {(handTrackingEnabled ? "BẬT" : "TẮT")}");
@@ -143,7 +147,7 @@ namespace Khkt.Input
                           (Assembly.FabricationWorkspace.Instance != null && Assembly.FabricationWorkspace.Instance.IsOpen);
 
             bool handRecent = (Time.unscaledTime - lastHandTime) <= handTimeoutSec;
-            bool shouldBeConnected = handTrackingEnabled && !uiOpen && handRecent && trackedHand.ok == 1;
+            bool shouldBeConnected = handTrackingEnabled && !uiOpen && handRecent && trackedHand.ok == 1 && !SuppressController;
 
             float dt = Mathf.Max(Time.unscaledDeltaTime, 1e-4f);
             timeMs += (uint)(dt * 1000f);

@@ -514,5 +514,36 @@ class TestDiemMoc(unittest.TestCase):
         self.assertEqual(g["tay"], [])
 
 
+class TestTay3D(unittest.TestCase):
+    def _pose(self, trai_x, phai_x):
+        d = [(0.5, 0.5, 0.0)] * 33
+        d[15] = (trai_x, 0.6, 0.0)
+        d[16] = (phai_x, 0.6, 0.0)
+        return d
+
+    def test_gan_ben_theo_co_tay_pose(self):
+        # webcam không lật: tay trái người dùng nằm bên phải ảnh
+        pose = self._pose(0.7, 0.3)
+        self.assertEqual(mt.gan_ben_theo_pose([(0.32, 0.6), (0.68, 0.62)], pose), ["phai", "trai"])
+        self.assertEqual(mt.gan_ben_theo_pose([(0.66, 0.6)], pose), ["trai"])
+
+    def test_hai_tay_cung_gan_mot_ben_thi_tach_ra(self):
+        pose = self._pose(0.7, 0.3)
+        self.assertEqual(sorted(mt.gan_ben_theo_pose([(0.66, 0.6), (0.55, 0.6)], pose)), ["phai", "trai"])
+
+    def test_khong_co_pose(self):
+        self.assertIsNone(mt.gan_ben_theo_pose([(0.5, 0.5)], None))
+
+    def test_dong_goi(self):
+        g = mt.dong_goi_tay3d([{"ben": "phai", "w": [0.01] * 63, "x": 0.25, "y": 0.5, "p": 1, "g": "Open_Palm"},
+                                {"ben": "trai", "w": [0.0] * 10, "x": 0, "y": 0}],
+                               [{"ben": "phai", "d": [0.1, -0.4, 0.0] * 3, "tin": [0.9, 0.8, 0.95]}], 2.0)
+        self.assertEqual(len(g["tay"]), 1)
+        self.assertEqual(g["tay"][0]["w"][:2], [10, 10])
+        self.assertEqual((g["tay"][0]["x"], g["tay"][0]["p"]), (250, 1))
+        self.assertEqual(g["canh"][0]["d"][:3], [100, -400, 0])
+        self.assertEqual(g["canh"][0]["tin"], [90, 80, 95])
+
+
 if __name__ == "__main__":
     unittest.main()
