@@ -603,6 +603,14 @@ namespace Khkt.Demo.Bio.Portal
 
         public void ReturnToLab()
         {
+            // GĐ3: Ưu tiên bộ máy chuyển cảnh hoàn chỉnh BioPortalTransition nếu có
+            var transition = BioPortalTransition.Instance;
+            if (transition != null && transition.CurrentState == BioPortalTransition.TransitionState.TrongPhong)
+            {
+                transition.StartCloseTransition();
+                return;
+            }
+
             if (isTransitioning) return;
             StartCoroutine(CoReturn());
         }
@@ -805,7 +813,8 @@ namespace Khkt.Demo.Bio.Portal
 
         Material CreateBeamMaterial()
         {
-            var shader = Shader.Find("Universal Render Pipeline/Unlit")
+            var shader = Shader.Find("Khkt/Tang2/HoloBeam")
+                         ?? Shader.Find("Universal Render Pipeline/Unlit")
                          ?? Shader.Find("Unlit/Transparent")
                          ?? Shader.Find("Sprites/Default");
             var mat = new Material(shader) { name = "HoloBeamMat", hideFlags = HideFlags.DontSave };

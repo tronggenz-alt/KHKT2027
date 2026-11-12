@@ -25,6 +25,12 @@ namespace Khkt.EditorTools
                 portal.targetHoloRoom = holo;
             }
 
+            var trans = Object.FindAnyObjectByType<BioPortalTransition>(FindObjectsInactive.Include);
+            if (trans != null && portal != null)
+            {
+                trans.portal = portal;
+            }
+
             return portalGo;
         }
 
@@ -58,9 +64,17 @@ namespace Khkt.EditorTools
             var meshes = Bp3dImporter.ImportBodyParts3D();
             if (meshes != null)
             {
-                var matBone = bioBone ?? Mat("T2_XuongNguoi", new Color(0.9f, 0.86f, 0.77f), 0.35f);
-                var matMuscle = bioMuscle ?? Mat("T2_CoNguoi", new Color(0.72f, 0.24f, 0.22f), 0.45f);
-                var matSkin = Mat("T2_DaNguoi", new Color(0.92f, 0.74f, 0.62f), 0.4f);
+                var shReveal = Shader.Find("Khkt/Tang2/HoloReveal") ?? Shader.Find("Universal Render Pipeline/Lit");
+                var matBone = Mat("T2_XuongNguoi_Holo", new Color(0.9f, 0.86f, 0.77f), 0.35f);
+                var matMuscle = Mat("T2_CoNguoi_Holo", new Color(0.72f, 0.24f, 0.22f), 0.45f);
+                var matSkin = Mat("T2_DaNguoi_Holo", new Color(0.92f, 0.74f, 0.62f), 0.4f);
+
+                if (shReveal != null)
+                {
+                    matBone.shader = shReveal;
+                    matMuscle.shader = shReveal;
+                    matSkin.shader = shReveal;
+                }
 
                 var bodyRoot = Group("BodyParts3D_1.7m", holoGo.transform, new Vector3(0f, 0.14f, 0f));
                 var skel = Bp3dBody(bodyRoot, "Bộ xương", meshes, "xuong", matBone, Vector3.zero, 1.7f, false, 0f);
@@ -72,11 +86,16 @@ namespace Khkt.EditorTools
                 holoRoom.layerSkin = skin;
             }
 
+            // Gắn bộ chuyển cảnh BioPortalTransition (GĐ3)
+            var transition = holoGo.AddComponent<BioPortalTransition>();
+            transition.holoRoom = holoRoom;
+
             // Gán liên kết sang BioPortal
             var portal = Object.FindAnyObjectByType<BioPortal>(FindObjectsInactive.Include);
             if (portal != null)
             {
                 portal.targetHoloRoom = holoRoom;
+                transition.portal = portal;
             }
 
             holoGo.SetActive(false);

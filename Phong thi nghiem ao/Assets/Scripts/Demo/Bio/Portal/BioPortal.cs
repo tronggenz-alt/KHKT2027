@@ -53,6 +53,15 @@ namespace Khkt.Demo.Bio.Portal
         [Header("Liên kết phòng ảo (GĐ2)")]
         public HoloBioRoom targetHoloRoom;
 
+        // Thời gian chờ phục hồi thẻ (GĐ3 cooldown)
+        float cooldownTimer = 0f;
+
+        public void SetCooldown(float duration = 0.8f)
+        {
+            cooldownTimer = duration;
+            HideCard();
+        }
+
         // Vòng sáng
         Transform ringTransform;
         MeshFilter ringMeshFilter;
@@ -370,6 +379,14 @@ namespace Khkt.Demo.Bio.Portal
 
         void UpdateProximity()
         {
+            // Nếu đang trong thời gian hồi chiêu 0.8s sau khi thoát phòng ảo thì không hiện thẻ
+            if (cooldownTimer > 0f)
+            {
+                cooldownTimer -= checkInterval;
+                if (isCardShown) HideCard();
+                return;
+            }
+
             // Nếu đang trong chế độ cận cảnh hoặc giao diện máy đang mở thì ẩn thẻ
             if (CloseUpView.IsActive || DesktopViewer.UiCapture > 0)
             {
@@ -606,12 +623,18 @@ namespace Khkt.Demo.Bio.Portal
             // GĐ1: Bấm nút ghi log chuẩn yêu cầu
             Debug.Log("[KHKT-BIO-PORTAL] Bấm vào Phòng Sinh học 3D");
 
-            // GĐ2: Vào phòng ảo tĩnh HoloBioRoom bằng Simple Crossfade
+            // GĐ3: Khởi chạy chuyển cảnh FSM BioPortalTransition sang HoloBioRoom
             var room = targetHoloRoom != null ? targetHoloRoom : FindAnyObjectByType<HoloBioRoom>(FindObjectsInactive.Include);
             if (room != null)
             {
                 HideCard();
-                room.Enter(this);
+                var transition = BioPortalTransition.Instance;
+                if (transition == null)
+                {
+                    var transGo = new GameObject("BioPortalTransition");
+                    transition = transGo.AddComponent<BioPortalTransition>();
+                }
+                transition.StartOpenTransition(this, room);
             }
         }
 
