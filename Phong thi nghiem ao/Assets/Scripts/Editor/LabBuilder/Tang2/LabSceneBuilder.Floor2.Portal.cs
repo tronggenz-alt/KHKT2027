@@ -84,6 +84,9 @@ namespace Khkt.EditorTools
                 holoRoom.layerSkeleton = skel;
                 holoRoom.layerMuscles = musc;
                 holoRoom.layerSkin = skin;
+
+                if (musc != null) musc.SetActive(false);
+                if (skel != null) skel.SetActive(false);
             }
 
             // Gắn bộ chuyển cảnh BioPortalTransition (GĐ3)
