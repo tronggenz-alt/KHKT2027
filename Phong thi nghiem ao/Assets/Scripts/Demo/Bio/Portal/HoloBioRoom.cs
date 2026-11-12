@@ -318,7 +318,7 @@ namespace Khkt.Demo.Bio.Portal
                 emission.rateOverTime = 38f;
 
                 var shape = ps.shape;
-                shape.shapeType = ParticleSystemShapeType.Cylinder;
+                shape.shapeType = ParticleSystemShapeType.Circle;
                 shape.radius = 0.95f;
                 shape.position = new Vector3(0f, 0f, 0f);
                 shape.rotation = new Vector3(-90f, 0f, 0f);

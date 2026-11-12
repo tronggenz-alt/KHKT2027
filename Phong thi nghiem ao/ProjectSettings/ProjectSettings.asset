@@ -536,7 +536,7 @@ PlayerSettings:
   enableInternalProfiler: 0
   logObjCUncaughtExceptions: 1
   enableCrashReportAPI: 0
-  cameraUsageDescription: 
+  cameraUsageDescription: "\u1EE8ng d\u1EE5ng c\u1EA7n truy c\u1EADp camera \u0111\u1EC3 theo d\xF5i c\u1EED ch\u1EC9 b\xE0n tay (Hand Tracking)."
   locationUsageDescription: 
   microphoneUsageDescription: 
   bluetoothUsageDescription: 

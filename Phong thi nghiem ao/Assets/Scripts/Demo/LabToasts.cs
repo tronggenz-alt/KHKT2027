@@ -105,7 +105,7 @@ namespace Khkt.Demo
         {
             if (instance != null) return instance;
             var go = new GameObject("Trung tâm thông báo", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler));
-            DontDestroyOnLoad(go);
+            if (Application.isPlaying) DontDestroyOnLoad(go);
             instance = go.AddComponent<LabToasts>();
             return instance;
         }

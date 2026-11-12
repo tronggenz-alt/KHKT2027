@@ -34,7 +34,7 @@ namespace Khkt.Interaction.Bio
                 return existing;
             }
             var go = new GameObject("BioCloseUpView");
-            DontDestroyOnLoad(go);
+            if (Application.isPlaying) DontDestroyOnLoad(go);
             Instance = go.AddComponent<CloseUpView>();
             return Instance;
         }

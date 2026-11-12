@@ -35,6 +35,7 @@ namespace Khkt.EditorTools
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.iOS, BundleId);
             PlayerSettings.iOS.appleDeveloperTeamID = TeamId;
             PlayerSettings.iOS.appleEnableAutomaticSigning = true;
+            PlayerSettings.iOS.cameraUsageDescription = "Ứng dụng cần truy cập camera để theo dõi cử chỉ bàn tay (Hand Tracking).";
             PlayerSettings.iOS.sdkVersion = sdk;
             PlayerSettings.iOS.simulatorSdkArchitecture = AppleMobileArchitectureSimulator.ARM64;  // mặc định x86_64, không chạy trên máy chip Apple
             // Góc nhìn thứ nhất: chỉ xoay ngang

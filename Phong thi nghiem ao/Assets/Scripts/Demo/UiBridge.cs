@@ -17,7 +17,7 @@ namespace Khkt.Demo
             if (Object.FindAnyObjectByType<EventSystem>() == null)
             {
                 var es = new GameObject("Hệ thống sự kiện giao diện", typeof(EventSystem), typeof(InputSystemUIInputModule));
-                Object.DontDestroyOnLoad(es);
+                if (Application.isPlaying) Object.DontDestroyOnLoad(es);
             }
             if (canvas != null && canvas.GetComponent<GraphicRaycaster>() == null) canvas.gameObject.AddComponent<GraphicRaycaster>();
         }
