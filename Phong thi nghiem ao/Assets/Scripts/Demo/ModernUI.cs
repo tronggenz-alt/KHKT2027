@@ -29,20 +29,28 @@ namespace Khkt.Demo
 
         // Thanh bước
         readonly List<(Image dot, Text num, Text label)> steps = new List<(Image, Text, Text)>();
-        // Thông báo
-        CanvasGroup toastGroup;
-        RectTransform toastRect;
-        Text toastText;
-        Image toastDot;
-        // Thanh gợi ý
+        // Thanh gợi ý (chỉ xếp lại khi nội dung gợi ý đổi)
         RectTransform hintBar;
+        Image hintBarImage;
         readonly List<(RectTransform chip, Text key, Text label)> hintItems = new List<(RectTransform, Text, Text)>();
-        // Card dụng cụ
+        readonly string[] hintKeys = new string[5], hintTexts = new string[5];
+        int hintShown = -1;
+        bool hintActing;
+        // Card dụng cụ (nội dung làm mới 5 lần/giây, vị trí bám theo vật mỗi khung hình)
         RectTransform card;
         CanvasGroup cardGroup;
-        Text cardTitle, cardStatus, cardBody;
+        Text cardKind, cardTitle, cardStatus, cardBody;
+        Image cardAccent;
         Transform cardTarget;
         Bounds cardBounds;
+        EquipmentInfo cardInfo;
+        ChemicalBottle cardChem;
+        bool cardIsTool;
+        float cardNextRefresh;
+        string cardTitleStr, cardStatusStr, cardBodyStr;
+        // Số liệu chuẩn độ: chữ làm mới 5 – 10 lần/giây thay vì mỗi khung hình
+        float nextDataAt, nextLoupeTextAt, nextResultAt;
+        static readonly string[] StepNums = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" };
         // Kính lúp, số liệu, kết quả, đồ thị, trợ giúp
         GameObject loupePanel, dataPanel, resultPanel, graphPanel, helpPanel, stepBar;
         Image crosshair;
@@ -78,7 +86,6 @@ namespace Khkt.Demo
             root = (RectTransform)cgo.transform;
 
             BuildStepper();
-            BuildToast();
             BuildHintBar();
             BuildCard();
             BuildLoupe();
@@ -120,22 +127,11 @@ namespace Khkt.Demo
             }
         }
 
-        void BuildToast()
-        {
-            var img = Panel(root, "Thông báo", new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -82), new Vector2(500, 44), glassMat, 2f);
-            toastRect = img.rectTransform;
-            toastGroup = img.gameObject.AddComponent<CanvasGroup>();
-            var dotRt = Rect(toastRect, "Chấm", new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(18, 0), new Vector2(10, 10));
-            toastDot = dotRt.gameObject.AddComponent<Image>();
-            toastDot.sprite = SolidCircle;
-            toastText = Label(toastRect, "Chữ", "", 17, Ink, false, TextAnchor.MiddleLeft, new Vector2(38, 14), new Vector2(900, 28), new Vector2(0, 0.5f));
-            toastText.horizontalOverflow = HorizontalWrapMode.Overflow;
-        }
-
         void BuildHintBar()
         {
             var img = Panel(root, "Gợi ý thao tác", new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0, 24), new Vector2(400, 54), glassMat, 1.6f);
             hintBar = img.rectTransform;
+            hintBarImage = img;
             for (int i = 0; i < 5; i++)  // tay cầm 1 cần ở chế độ ĐI cần 5 gợi ý
             {
                 var chip = Rect(hintBar, "Phím", new Vector2(0, 0.5f), new Vector2(0, 0.5f), Vector2.zero, new Vector2(60, 32));
@@ -155,19 +151,23 @@ namespace Khkt.Demo
 
         void BuildCard()
         {
-            var img = Panel(root, "Card dụng cụ", new Vector2(0, 0), new Vector2(0, 0.5f), Vector2.zero, new Vector2(340, 130), glassMat, 1.3f);
+            var img = Panel(root, "Card dụng cụ", new Vector2(0, 0), new Vector2(0, 0.5f), Vector2.zero, new Vector2(340, 150), glassMat, 1.3f);
             card = img.rectTransform;
             cardGroup = img.gameObject.AddComponent<CanvasGroup>();
             cardGroup.alpha = 0;
-            var accent = Rect(card, "Vạch nhấn", new Vector2(0, 1), new Vector2(0, 1), new Vector2(18, -20), new Vector2(4, 24));
-            var ai = accent.gameObject.AddComponent<Image>();
-            ai.sprite = Solid;
-            ai.type = Image.Type.Sliced;
-            ai.pixelsPerUnitMultiplier = 20f;
-            ai.color = Accent;
-            cardTitle = Label(card, "Tên", "", 21, Ink, true, TextAnchor.UpperLeft, new Vector2(32, -16), new Vector2(296, 30));
-            cardStatus = Label(card, "Trạng thái", "", 15, Accent, false, TextAnchor.UpperLeft, new Vector2(32, -46), new Vector2(296, 22));
-            cardBody = Label(card, "Mô tả", "", 15, Dim, false, TextAnchor.UpperLeft, new Vector2(32, -72), new Vector2(296, 50));
+            // Vạch nhấn chạy dọc mép trái: xanh ngọc với dụng cụ thường, vàng cảnh báo với hóa chất nguy hiểm
+            var accent = Rect(card, "Vạch nhấn", new Vector2(0, 1), new Vector2(0, 1), new Vector2(16, -16), new Vector2(4, 46));
+            cardAccent = accent.gameObject.AddComponent<Image>();
+            cardAccent.sprite = Solid;
+            cardAccent.type = Image.Type.Sliced;
+            cardAccent.pixelsPerUnitMultiplier = 20f;
+            cardAccent.color = Accent;
+            cardAccent.raycastTarget = false;
+            cardKind = Label(card, "Loại", "", 12, Accent, true, TextAnchor.UpperLeft, new Vector2(32, -14), new Vector2(296, 16));
+            cardKind.horizontalOverflow = HorizontalWrapMode.Overflow;
+            cardTitle = Label(card, "Tên", "", 21, Ink, true, TextAnchor.UpperLeft, new Vector2(32, -32), new Vector2(296, 30));
+            cardStatus = Label(card, "Trạng thái", "", 15, Accent, false, TextAnchor.UpperLeft, new Vector2(32, -62), new Vector2(296, 22));
+            cardBody = Label(card, "Mô tả", "", 15, Dim, false, TextAnchor.UpperLeft, new Vector2(32, -88), new Vector2(296, 50));
         }
 
         void BuildLoupe()
@@ -381,7 +381,7 @@ namespace Khkt.Demo
                 if (graphPanel.activeSelf) graphPanel.SetActive(false);
                 UpdateBioStepper(bioProc);
                 bool showBioResult = bioProc.LastResult.HasValue;
-                if (resultPanel.activeSelf != showBioResult) resultPanel.SetActive(showBioResult);
+                if (resultPanel.activeSelf != showBioResult) { resultPanel.SetActive(showBioResult); nextResultAt = 0f; }
                 if (showBioResult) UpdateBioResult(bioProc.LastResult.Value);
                 return;
             }
@@ -403,10 +403,10 @@ namespace Khkt.Demo
 
             bool near = reading != null && reading.eye != null && Vector3.Distance(reading.eye.position, reading.MeniscusPosition) < 2.5f;
             UpdateLoupe(near);
-            if (dataPanel.activeSelf != near) dataPanel.SetActive(near);
+            if (dataPanel.activeSelf != near) { dataPanel.SetActive(near); nextDataAt = 0f; }
             UpdateData();
             bool showResult = near && procedure.LastResult.HasValue;
-            if (resultPanel.activeSelf != showResult) resultPanel.SetActive(showResult);
+            if (resultPanel.activeSelf != showResult) { resultPanel.SetActive(showResult); nextResultAt = 0f; }
             if (showResult) UpdateResult(procedure.LastResult.Value);
             if (!near && graphPanel.activeSelf) graphPanel.SetActive(false);
             if ((graphPanel.activeSelf || showResult) && (drawnCurve != procedure.CurveVersion || drawnResult != procedure.LastResult.HasValue))
@@ -422,7 +422,7 @@ namespace Khkt.Demo
                 var (dot, num, lab) = steps[i];
                 lab.text = procedure.StepNames[i];
                 dot.color = done ? new Color(Good.r, Good.g, Good.b, 0.9f) : current ? Accent : new Color(1, 1, 1, 0.14f);
-                num.text = done ? "✓" : (i + 1).ToString();
+                num.text = done ? "✓" : StepNums[i];
                 num.color = done || current ? new Color(0.04f, 0.07f, 0.12f) : Dim;
                 lab.color = current ? Ink : done ? new Color(Good.r, Good.g, Good.b, 0.85f) : Dim;
                 lab.font = current ? Semibold : Regular;
@@ -438,53 +438,61 @@ namespace Khkt.Demo
                 var (dot, num, lab) = steps[i];
                 lab.text = bioProc.StepNames != null && i < bioProc.StepNames.Length ? bioProc.StepNames[i] : $"Bước {i + 1}";
                 dot.color = done ? new Color(Good.r, Good.g, Good.b, 0.9f) : current ? Accent : new Color(1, 1, 1, 0.14f);
-                num.text = done ? "✓" : (i + 1).ToString();
+                num.text = done ? "✓" : StepNums[i];
                 num.color = done || current ? new Color(0.04f, 0.07f, 0.12f) : Dim;
                 lab.color = current ? Ink : done ? new Color(Good.r, Good.g, Good.b, 0.85f) : Dim;
                 lab.font = current ? Semibold : Regular;
             }
         }
 
+        /// <summary>Thông báo do LabToasts vẽ (thẻ xếp chồng); ở đây chỉ báo cho nó biết phải né thanh bước.</summary>
         void UpdateToast()
         {
-            float age = Time.time - LabMessages.MessageTime;
-            float a = Mathf.Clamp01(Mathf.Min(age * 6f, 1.6f - age / 4f));
-            toastGroup.alpha = a;
-            if (a <= 0) return;
-            toastText.text = LabMessages.Message;
-            float w = Width(toastText, LabMessages.Message);
-            toastRect.sizeDelta = new Vector2(w + 58, 44);
-            toastDot.color = LabMessages.MessageTone == LabMessages.Tone.Warn ? Warn
-                           : LabMessages.MessageTone == LabMessages.Tone.Good ? Good : Accent;
+            LabToasts.TopOffset = stepBar != null && stepBar.activeSelf ? 170f : 86f;
         }
 
         void UpdateHints()
         {
             int n = hand != null && !ClassRules.HideHelp ? Mathf.Min(hand.Hints.Count, hintItems.Count) : 0;
-            hintBar.gameObject.SetActive(n > 0);
-            if (n == 0) return;
-            float x = 14;
-            for (int i = 0; i < hintItems.Count; i++)
+            if (hintBar.gameObject.activeSelf != (n > 0)) hintBar.gameObject.SetActive(n > 0);
+            if (n == 0) { hintShown = 0; return; }
+
+            // Đo bề rộng chữ và xếp lại là việc đắt (dựng lưới chữ, dựng lại canvas): chỉ làm khi gợi ý thật sự đổi
+            bool changed = n != hintShown;
+            for (int i = 0; i < n && !changed; i++)
+                changed = hintKeys[i] != hand.Hints[i].key || hintTexts[i] != hand.Hints[i].text;
+            if (changed)
             {
-                var (chip, key, label) = hintItems[i];
-                bool on = i < n;
-                chip.gameObject.SetActive(on);
-                label.gameObject.SetActive(on);
-                if (!on) continue;
-                key.text = hand.Hints[i].key;
-                label.text = hand.Hints[i].text;
-                float kw = Width(key, key.text) + 24;
-                chip.sizeDelta = new Vector2(kw, 32);
-                key.rectTransform.sizeDelta = new Vector2(kw, 32);
-                chip.anchoredPosition = new Vector2(x, 0);
-                x += kw + 10;
-                float lw = Width(label, label.text);
-                label.rectTransform.anchoredPosition = new Vector2(x, 15);
-                label.rectTransform.sizeDelta = new Vector2(lw + 4, 30);
-                x += lw + 26;
+                hintShown = n;
+                float x = 14;
+                for (int i = 0; i < hintItems.Count; i++)
+                {
+                    var (chip, key, label) = hintItems[i];
+                    bool on = i < n;
+                    if (chip.gameObject.activeSelf != on) chip.gameObject.SetActive(on);
+                    if (label.gameObject.activeSelf != on) label.gameObject.SetActive(on);
+                    if (!on) continue;
+                    hintKeys[i] = hand.Hints[i].key;
+                    hintTexts[i] = hand.Hints[i].text;
+                    key.text = hintKeys[i] ?? "";
+                    label.text = hintTexts[i] ?? "";
+                    float kw = Width(key, key.text) + 24;
+                    chip.sizeDelta = new Vector2(kw, 32);
+                    key.rectTransform.sizeDelta = new Vector2(kw, 32);
+                    chip.anchoredPosition = new Vector2(x, 0);
+                    x += kw + 10;
+                    float lw = Width(label, label.text);
+                    label.rectTransform.anchoredPosition = new Vector2(x, 15);
+                    label.rectTransform.sizeDelta = new Vector2(lw + 4, 30);
+                    x += lw + 26;
+                }
+                hintBar.sizeDelta = new Vector2(x - 12, 54);
             }
-            hintBar.sizeDelta = new Vector2(x - 12, 54);
-            hintBar.GetComponent<Image>().color = hand.Acting ? new Color(0.8f, 0.95f, 1f, 1f) : Color.white;
+            if (changed || hand.Acting != hintActing)
+            {
+                hintActing = hand.Acting;
+                hintBarImage.color = hintActing ? new Color(0.8f, 0.95f, 1f, 1f) : Color.white;
+            }
         }
 
         void UpdateCard()
@@ -498,50 +506,36 @@ namespace Khkt.Demo
                 else if (hand.Held.GetComponent<Pipette>() != null) target = hand.Held.transform;
                 else if (hand.TargetContainer != null) target = hand.TargetContainer.transform;
             }
-            var info = target != null ? target.GetComponentInParent<EquipmentInfo>() : null;
-            if (target != null && info == null) info = target.GetComponentInChildren<EquipmentInfo>();
-            var chem = target != null ? target.GetComponentInParent<ChemicalBottle>() : null;
-            bool show = target != null && (info != null || (chem != null && chem.Entry != null)) && !resultPanel.activeSelf;
-            cardGroup.alpha = Mathf.MoveTowards(cardGroup.alpha, show ? 1f : 0f, Time.unscaledDeltaTime * 8f);
-            if (!show) { cardTarget = null; return; }
 
-            if (target != cardTarget)
+            bool newTarget = target != cardTarget;
+            if (newTarget)
             {
+                // Tra thành phần và khối bao chỉ một lần cho mỗi vật (trước đây tra lại mỗi khung hình)
                 cardTarget = target;
-                var rs = target.GetComponentsInChildren<Renderer>();
-                cardBounds = rs.Length > 0 ? rs[0].bounds : new Bounds(target.position, Vector3.one * 0.1f);
-                foreach (var r in rs) if (!(r is ParticleSystemRenderer)) cardBounds.Encapsulate(r.bounds);
+                cardInfo = null;
+                cardChem = null;
+                if (target != null)
+                {
+                    cardInfo = target.GetComponentInParent<EquipmentInfo>();
+                    if (cardInfo == null) cardInfo = target.GetComponentInChildren<EquipmentInfo>();
+                    cardChem = target.GetComponentInParent<ChemicalBottle>();
+                    cardIsTool = target.GetComponentInParent<Grabbable>() != null;
+                    var rs = target.GetComponentsInChildren<Renderer>();
+                    cardBounds = rs.Length > 0 ? rs[0].bounds : new Bounds(target.position, Vector3.one * 0.1f);
+                    foreach (var r in rs) if (!(r is ParticleSystemRenderer)) cardBounds.Encapsulate(r.bounds);
+                }
             }
-            if (chem != null && chem.Entry != null)
+            bool hasChem = cardChem != null && cardChem.Entry != null;
+            bool show = target != null && (cardInfo != null || hasChem) && !resultPanel.activeSelf;
+            cardGroup.alpha = Mathf.MoveTowards(cardGroup.alpha, show ? 1f : 0f, Time.unscaledDeltaTime * 8f);
+            if (!show) return;
+
+            // Chữ trên card: dựng khi đổi vật, sau đó 5 lần/giây (thể tích, nhiệt độ, số cân vẫn chạy theo kịp mắt nhìn)
+            if (newTarget || Time.unscaledTime >= cardNextRefresh)
             {
-                var e = chem.Entry;
-                cardTitle.text = e.ten + (string.IsNullOrEmpty(e.cong_thuc) ? "" : "  " + e.Formula);
-                string hz = Khkt.Simulation.ChemicalCatalog.HazardText(e);
-                cardStatus.text = Khkt.Simulation.ChemicalCatalog.StateText(e) + " · " + Khkt.Simulation.ChemicalCatalog.ConcText(e) + (hz.Length > 0 ? "  <color=#FFC759>⚠ " + hz + "</color>" : "");
-                cardBody.text = Khkt.Simulation.ChemicalCatalog.Instance != null ? Khkt.Simulation.ChemicalCatalog.Instance.LocationText(e) : e.ma_vi_tri;
+                cardNextRefresh = Time.unscaledTime + 0.2f;
+                RefreshCardText(target, hasChem);
             }
-            else
-            {
-                cardTitle.text = info.title;
-                cardStatus.text = Status(target);
-                cardBody.text = FirstSentence(info.description);
-            }
-            cardStatus.gameObject.SetActive(cardStatus.text.Length > 0);
-            // Xếp dòng theo chiều cao thật của chữ (tên dài xuống 2 dòng không đè lên dòng dưới)
-            float y = -16;
-            float titleH = Mathf.Max(28, cardTitle.preferredHeight);
-            cardTitle.rectTransform.sizeDelta = new Vector2(296, titleH);
-            y -= titleH + 2;
-            if (cardStatus.text.Length > 0)
-            {
-                cardStatus.rectTransform.anchoredPosition = new Vector2(32, y);
-                float sh = Mathf.Max(20, cardStatus.preferredHeight);
-                cardStatus.rectTransform.sizeDelta = new Vector2(296, sh);
-                y -= sh + 4;
-            }
-            cardBody.rectTransform.anchoredPosition = new Vector2(32, y);
-            float bodyH = cardBody.preferredHeight;
-            card.sizeDelta = new Vector2(340, -y + bodyH + 18);
 
             // Đặt card bên phải vật, ngang phần trên của vật
             Vector3 anchorWorld = cardBounds.center + Vector3.up * cardBounds.extents.y * 0.6f + viewCamera.transform.right * cardBounds.extents.magnitude * 0.6f;
@@ -553,6 +547,62 @@ namespace Khkt.Demo
             pos.x = Mathf.Clamp(pos.x, 20, root.rect.width - card.sizeDelta.x - 20);
             pos.y = Mathf.Clamp(pos.y, card.sizeDelta.y / 2 + 90, root.rect.height - card.sizeDelta.y / 2 - 90);
             card.anchoredPosition = Vector2.Lerp(card.anchoredPosition, pos, cardGroup.alpha < 0.05f ? 1f : 1f - Mathf.Exp(-14f * Time.unscaledDeltaTime));
+            // Card nở nhẹ khi hiện ra (bỏ khi bật Giảm chuyển động)
+            float pop = Khkt.Environment.Tang2.ReducedMotion.IsEnabled ? 1f : Mathf.Lerp(0.96f, 1f, cardGroup.alpha);
+            card.localScale = new Vector3(pop, pop, 1f);
+        }
+
+        void RefreshCardText(Transform target, bool hasChem)
+        {
+            string title, status, body, kind;
+            bool hazard = false;
+            if (hasChem)
+            {
+                var e = cardChem.Entry;
+                title = e.ten + (string.IsNullOrEmpty(e.cong_thuc) ? "" : "  " + e.Formula);
+                string hz = Khkt.Simulation.ChemicalCatalog.HazardText(e);
+                hazard = hz.Length > 0;
+                status = Khkt.Simulation.ChemicalCatalog.StateText(e) + " · " + Khkt.Simulation.ChemicalCatalog.ConcText(e) + (hazard ? "  <color=#FFC759>⚠ " + hz + "</color>" : "");
+                body = Khkt.Simulation.ChemicalCatalog.Instance != null ? Khkt.Simulation.ChemicalCatalog.Instance.LocationText(e) : e.ma_vi_tri;
+                kind = hazard ? "HÓA CHẤT · CẨN THẬN" : "HÓA CHẤT";
+            }
+            else
+            {
+                title = cardInfo.title;
+                status = Status(target);
+                body = FirstSentence(cardInfo.description);
+                kind = cardIsTool ? "DỤNG CỤ" : "THIẾT BỊ";
+            }
+            if (title == cardTitleStr && status == cardStatusStr && body == cardBodyStr) return;  // không đổi: khỏi xếp lại
+            cardTitleStr = title;
+            cardStatusStr = status;
+            cardBodyStr = body;
+
+            Color tone = hazard ? Warn : Accent;
+            cardAccent.color = tone;
+            cardKind.color = new Color(tone.r, tone.g, tone.b, 0.92f);
+            cardKind.text = kind;
+            cardTitle.text = title ?? "";
+            cardStatus.text = status ?? "";
+            cardBody.text = body ?? "";
+            bool hasStatus = cardStatus.text.Length > 0;
+            if (cardStatus.gameObject.activeSelf != hasStatus) cardStatus.gameObject.SetActive(hasStatus);
+            // Xếp dòng theo chiều cao thật của chữ (tên dài xuống 2 dòng không đè lên dòng dưới)
+            float y = -32;
+            float titleH = Mathf.Max(28, cardTitle.preferredHeight);
+            cardTitle.rectTransform.sizeDelta = new Vector2(296, titleH);
+            cardAccent.rectTransform.sizeDelta = new Vector2(4, 16 + titleH);
+            y -= titleH + 2;
+            if (hasStatus)
+            {
+                cardStatus.rectTransform.anchoredPosition = new Vector2(32, y);
+                float sh = Mathf.Max(20, cardStatus.preferredHeight);
+                cardStatus.rectTransform.sizeDelta = new Vector2(296, sh);
+                y -= sh + 4;
+            }
+            cardBody.rectTransform.anchoredPosition = new Vector2(32, y);
+            float bodyH = cardBody.text.Length > 0 ? cardBody.preferredHeight : 0f;
+            card.sizeDelta = new Vector2(340, -y + bodyH + 18);
         }
 
         static string FirstSentence(string s)
@@ -599,13 +649,15 @@ namespace Khkt.Demo
             if (loupePanel.activeSelf != on) loupePanel.SetActive(on);
             if (!on) return;
             loupeImage.texture = loupe.Texture;
+            SetBar(flowBar, b.Opening);
+            SetBar(swirlBar, procedure.swirl != null ? procedure.swirl.Intensity : 0f);
+            if (Time.unscaledTime < nextLoupeTextAt) return;  // thanh mức chạy mỗi khung hình, chữ số 10 lần/giây là đủ
+            nextLoupeTextAt = Time.unscaledTime + 0.1f;
             float cm = reading.EyeAboveMeniscusM * 100f;
             eyeText.text = Mathf.Abs(cm) < 1f ? "<color=#73F29E>●</color>  Mắt ngang vạch"
                          : cm > 0 ? $"<color=#FFC759>●</color>  Mắt cao {LabProcedure.F(cm, "0")} cm · nhấn Z"
                          : $"<color=#FFC759>●</color>  Mắt thấp {LabProcedure.F(-cm, "0")} cm · nhấn X";
-            SetBar(flowBar, b.Opening);
             flowText.text = b.Opening <= 0.001f ? "đóng" : b.IsStream ? "chảy dòng" : $"{LabProcedure.F(b.FlowMlPerS / b.dropMl, "0.0")} giọt/s";
-            SetBar(swirlBar, procedure.swirl != null ? procedure.swirl.Intensity : 0f);
         }
 
         static void SetBar(Image fill, float v)
@@ -617,6 +669,8 @@ namespace Khkt.Demo
 
         void UpdateData()
         {
+            if (Time.unscaledTime < nextDataAt) return;
+            nextDataAt = Time.unscaledTime + 0.2f;
             string Ml(float? v) => v.HasValue ? LabProcedure.F(v.Value, "0.00") + " ml" : "—";
             var r = procedure.LastResult;
             dataLeft.text = $"V đầu\nV cuối\nV {procedure.Cfg.titrantShort}\nC {procedure.Cfg.analyteShort}";
@@ -627,6 +681,8 @@ namespace Khkt.Demo
 
         void UpdateResult(LabProcedure.Result r)
         {
+            if (Time.unscaledTime < nextResultAt) return;
+            nextResultAt = Time.unscaledTime + 0.5f;
             resultTitle.text = $"Kết quả · C({procedure.Cfg.analyteShort})";
             resultBig.text = LabProcedure.F(r.concentrationRead, "0.0000") + " M";
             resultSub.text = $"Thật: {LabProcedure.F(r.concentrationTrue, "0.0000")} M   ·   V NaOH {LabProcedure.F(r.volumeRead, "0.00")} ml";
@@ -647,6 +703,8 @@ namespace Khkt.Demo
 
         void UpdateBioResult(Khkt.Demo.Bio.BioLabProcedure.BioResult r)
         {
+            if (Time.unscaledTime < nextResultAt) return;
+            nextResultAt = Time.unscaledTime + 0.5f;
             resultTitle.text = r.scenario == Khkt.Demo.Bio.BioLabProcedure.Scenario.OnionPlasmolysis
                 ? "Kết quả · Co & Phản co nguyên sinh"
                 : "Kết quả · Ghép ADN tái tổ hợp pUC19-GFP";

@@ -2,7 +2,10 @@ using UnityEngine;
 
 namespace Khkt.Demo
 {
-    /// <summary>Thông báo ngắn trên đầu màn hình (một dòng), dùng chung cho quy trình, bàn tay, robot.</summary>
+    /// <summary>
+    /// Thông báo ngắn trên đầu màn hình, dùng chung cho quy trình, bàn tay, robot. Thẻ hiện ra do LabToasts vẽ;
+    /// Message / MessageTone / MessageTime giữ lại cho quy trình và bài kiểm thử đọc thông báo gần nhất.
+    /// </summary>
     public static class LabMessages
     {
         public enum Tone { Info, Good, Warn }
@@ -18,6 +21,8 @@ namespace Khkt.Demo
             MessageTone = tone;
             MessageTime = Time.time;
             if (tone == Tone.Warn) Khkt.Input.PadInput.Pulse(220, 160);  // cảnh báo: rung mạnh tay cầm Wi-Fi
+            LabToasts.Push(text, tone == Tone.Warn ? LabToasts.Tone.Warn : tone == Tone.Good ? LabToasts.Tone.Good : LabToasts.Tone.Info,
+                           tone == Tone.Warn ? 5f : 4f);
         }
     }
 }

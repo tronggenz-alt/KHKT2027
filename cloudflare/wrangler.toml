@@ -1,0 +1,9 @@
+# Dự án Cloudflare Pages "verlab" (verlab.pages.dev): trang giới thiệu + web quản lý, gói miễn phí.
+name = "verlab"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-09-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "verlab-db"
+database_id = "298c7c98-f48b-42c9-9b58-2e8ae6dc4c59"

@@ -367,7 +367,15 @@ namespace Khkt.Demo
 
             UpdatePose(dt);
             UpdatePadFeedback();
-            BuildHints();
+            // Gợi ý thao tác ghép chuỗi mới mỗi lần dựng: dựng lại ngay khi đổi vật / đổi thao tác, còn lại 10 lần/giây
+            // (đủ cho số đo, "Đang quay..." chạy theo) thay vì mỗi khung hình.
+            int sig = HintSignature();
+            if (sig != hintSig || Time.unscaledTime >= hintNextAt)
+            {
+                hintSig = sig;
+                hintNextAt = Time.unscaledTime + 0.1f;
+                BuildHints();
+            }
             if (outline != null) outline.SetTarget(TargetSocket != null ? null : HoverRoot);
             foreach (var s in sockets)
                 s.Highlight(Held != null && s.Accepts(Held), s == TargetSocket);
@@ -921,6 +929,29 @@ namespace Khkt.Demo
         }
 
         // ---------- Gợi ý thao tác ----------
+
+        int hintSig;
+        float hintNextAt;
+
+        static int H(object o) => o != null ? o.GetHashCode() : 0;
+
+        /// <summary>Dấu vết của mọi thứ quyết định nội dung gợi ý: đổi là phải dựng lại ngay.</summary>
+        int HintSignature()
+        {
+            unchecked
+            {
+                int h = (int)Current;
+                h = h * 31 + (HoverRoot != null ? HoverRoot.GetHashCode() : 0);
+                h = h * 31 + (Held != null ? Held.GetHashCode() : 0);
+                h = h * 31 + (TargetContainer != null ? TargetContainer.GetHashCode() : 0);
+                h = h * 31 + (TargetSocket != null ? TargetSocket.GetHashCode() : 0);
+                h = h * 31 + H(AttachTarget);
+                h = h * 31 + (hasHit && hit.collider != null ? hit.collider.GetHashCode() : 0);
+                int pad = (PadInput.UsingTouch ? 1 : 0) | (PadInput.SingleStick ? 2 : 0) | (PadInput.AimFromCenter ? 4 : 0)
+                        | (PadInput.UsingGamepad ? 8 : 0) | ((int)PadInput.Mode << 4);
+                return h * 31 + pad;
+            }
+        }
 
         void BuildHints()
         {

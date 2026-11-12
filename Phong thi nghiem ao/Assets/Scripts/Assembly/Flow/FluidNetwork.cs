@@ -162,8 +162,7 @@ namespace Khkt.Assembly
             if (Time.time >= nextScan)
             {
                 nextScan = Time.time + 1f;
-                containers.Clear();
-                foreach (var c in Khkt.Rendering.ZoneRoot.FindAll<LabContainer>()) if (c.reactive) containers.Add(c);
+                Khkt.Rendering.LiveSet<LabContainer>.Collect(containers, LabContainer.IsReactive);
             }
             var sw = prof;
             for (int i = 0; i < containers.Count; i++)

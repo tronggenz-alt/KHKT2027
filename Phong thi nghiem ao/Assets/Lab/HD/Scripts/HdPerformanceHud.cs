@@ -186,7 +186,8 @@ namespace Khkt.Rendering.HD
             // Mức đồ họa hiện tại
             var qm = HdQualityManager.Instance;
             string tierName = qm != null ? qm.GetTierName(qm.CurrentTier) : "Ultra";
-            GUILayout.Label($"Mức đồ họa: {tierName}", textStyle);
+            string scaleStr = qm != null ? $" · nét {Mathf.RoundToInt(qm.DynamicScale * 100f)} %" : "";
+            GUILayout.Label($"Mức đồ họa: {tierName}{scaleStr}", textStyle);
 
             // Nút bấm chuyển mức chất lượng
             GUILayout.BeginHorizontal();

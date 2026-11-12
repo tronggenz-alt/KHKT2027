@@ -55,8 +55,7 @@ namespace Khkt.Demo
             if (Time.time - lastScan > 1.5f)
             {
                 lastScan = Time.time;
-                containers.Clear();
-                foreach (var c in Khkt.Rendering.ZoneRoot.FindAll<LabContainer>()) if (c.reactive) containers.Add(c);
+                Khkt.Rendering.LiveSet<LabContainer>.Collect(containers, LabContainer.IsReactive);
             }
             foreach (var c in containers)
             {

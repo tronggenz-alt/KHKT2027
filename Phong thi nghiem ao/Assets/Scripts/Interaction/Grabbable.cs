@@ -34,7 +34,10 @@ namespace Khkt.Interaction
             colliders = GetComponentsInChildren<Collider>(true);
             HomePosition = transform.position;
             HomeRotation = transform.rotation;
+            Khkt.Rendering.LiveSet<Grabbable>.Add(this);
         }
+
+        void OnDestroy() => Khkt.Rendering.LiveSet<Grabbable>.Remove(this);
 
         void Start() => HomeSocket = Socket;
 

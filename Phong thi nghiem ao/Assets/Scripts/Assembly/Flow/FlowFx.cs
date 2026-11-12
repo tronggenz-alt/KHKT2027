@@ -289,9 +289,11 @@ namespace Khkt.Assembly
                 nextScan = Time.time + 1f;
                 jars.Clear();
                 thermometers.Clear();
-                foreach (var part in Khkt.Rendering.ZoneRoot.FindAll<ApparatusPart>())
+                var live = ApparatusPart.All;  // các bộ phận đang bật tự ghi tên vào đây: không cần quét cả cảnh mỗi giây
+                for (int pi = 0; pi < live.Count; pi++)
                 {
-                    if (part == null || !part.isActiveAndEnabled) continue;
+                    var part = live[pi];
+                    if (part == null || !part.isActiveAndEnabled || Khkt.Rendering.ZoneRoot.IsExcluded(part.transform)) continue;
                     if (part.libraryId == "nhiet_ke") thermometers.Add(part);
                     if (part.libraryId != "chau") continue;
                     foreach (var port in part.ports)
