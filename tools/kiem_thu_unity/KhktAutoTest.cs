@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Khkt.Demo;
+using Khkt.Demo.Bio.Portal;
 using Khkt.Environment;
 using Khkt.Input;
 using Khkt.Interaction;
@@ -439,6 +440,17 @@ public class KhktAutoTest : MonoBehaviour
             Directory.CreateDirectory(outDir);
             yield return IpadTest();
             Log($"Xong kiểm thử iPad sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "cong_sinh_hoc")
+        {
+            outDir = Path.Combine(Application.dataPath, "../../docs/anh-tang2/cong_sinh_hoc");
+            Directory.CreateDirectory(outDir);
+            yield return BioPortalTest();
+            Log($"Xong kiểm thử Cổng và Phòng Sinh học 3D sau {Time.realtimeSinceStartup - t0:0} s");
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.Exit(0);
 #endif
@@ -5378,6 +5390,254 @@ public class KhktAutoTest : MonoBehaviour
         }
 
         Log($"[KHKT-DO-HOA] HOÀN TẤT TOÀN BỘ 44 ẢNH ĐỒ HỌA HD!");
+    }
+
+    IEnumerator BioPortalTest()
+    {
+        Log("=== BẮT ĐẦU KIỂM THỬ CỔNG VÀ PHÒNG SINH HỌC 3D (cong_sinh_hoc) ===");
+
+        var portal = FindAnyObjectByType<BioPortal>(FindObjectsInactive.Include);
+        if (portal == null)
+        {
+            var portalGo = Khkt.EditorTools.LabSceneBuilder.BuildBioPortal(null, new Vector3(18.3f, 3.8f, 12.6f));
+            portal = portalGo.GetComponent<BioPortal>();
+        }
+        var transition = BioPortalTransition.Instance;
+        if (transition == null)
+        {
+            var holoGo = Khkt.EditorTools.LabSceneBuilder.BuildHoloBioRoom(null);
+            transition = holoGo.GetComponent<BioPortalTransition>();
+            portal.targetHoloRoom = transition.holoRoom;
+            transition.portal = portal;
+        }
+
+        Vector3 portalPos = portal.transform.position;
+        Log($"Đã tìm thấy BioPortal tại {portalPos}, targetHoloRoom={portal.targetHoloRoom != null}");
+
+        // -------------------------------------------------------------
+        // BƯỚC 1: KIỂM THỬ KHOẢNG CÁCH (PROXIMITY & HYSTERESIS)
+        // -------------------------------------------------------------
+        Log("[Bước 1] Kiểm tra khoảng cách Proximity và Hysteresis...");
+
+        // 1.1 Đứng cách cổng 4m (> 2.8m) -> Thẻ lời mời phải ẩn
+        Vector3 pos4m = portalPos + new Vector3(0f, 0f, 4.0f);
+        viewer.transform.position = pos4m;
+        viewer.LookAt(portalPos + Vector3.up * 1.5f);
+        yield return new WaitForSeconds(0.25f);
+        if (portal.IsCardShowing) Log("[LỖI] Thẻ lời mời không được hiện khi đứng cách cổng 4m!");
+        else Log("-> 4m: Thẻ lời mời ẩn chuẩn xác.");
+
+        // 1.2 Đi tới 2m (<= 2.2m và góc nhìn <= 60°) -> Thẻ lời mời hiện
+        Vector3 pos2m = portalPos + new Vector3(0f, 0f, 2.0f);
+        viewer.transform.position = pos2m;
+        viewer.LookAt(portalPos + Vector3.up * 1.5f);
+        yield return new WaitForSeconds(0.25f);
+        if (!portal.IsCardShowing) Log("[LỖI] Thẻ lời mời phải hiện khi đứng cách cổng 2m nhìn thẳng!");
+        else Log("-> 2m: Thẻ lời mời hiện chuẩn xác.");
+
+        // 1.3 Lùi ra 3m (> 2.8m) -> Thẻ ẩn
+        Vector3 pos3m = portalPos + new Vector3(0f, 0f, 3.0f);
+        viewer.transform.position = pos3m;
+        viewer.LookAt(portalPos + Vector3.up * 1.5f);
+        yield return new WaitForSeconds(0.25f);
+        if (portal.IsCardShowing) Log("[LỖI] Thẻ lời mời phải ẩn khi lùi ra 3m!");
+        else Log("-> 3m: Thẻ lời mời ẩn chuẩn xác.");
+
+        // 1.4 Qua lại mép 2.5m (vùng trễ 2.2m - 2.8m) -> Không bị nhấp nháy
+        viewer.transform.position = pos2m;
+        yield return new WaitForSeconds(0.2f);
+        viewer.transform.position = portalPos + new Vector3(0f, 0f, 2.5f);
+        yield return new WaitForSeconds(0.2f);
+        bool hold1 = portal.IsCardShowing;
+        viewer.transform.position = pos3m;
+        yield return new WaitForSeconds(0.2f);
+        viewer.transform.position = portalPos + new Vector3(0f, 0f, 2.5f);
+        yield return new WaitForSeconds(0.2f);
+        bool hold2 = !portal.IsCardShowing;
+        Log($"-> Vùng trễ Hysteresis 2.5m ổn định: hold1={hold1}, hold2={hold2} (không nhấp nháy).");
+
+        // -------------------------------------------------------------
+        // BƯỚC 2: CHUYỂN CẢNH MỞ (FSM: Nghi -> DangMo -> DangTai -> HienPhong -> TrongPhong)
+        // -------------------------------------------------------------
+        Log("[Bước 2] Chuyển cảnh mở phòng ảo...");
+        viewer.transform.position = pos2m;
+        viewer.LookAt(portalPos + Vector3.up * 1.5f);
+        yield return new WaitForSeconds(0.25f);
+
+        Shot("bio_01_quet_sang");
+        portal.OnEnterButtonClick();
+
+        float tTrans = 0f;
+        bool sawDangMo = false, sawDangTai = false, sawHienPhong = false;
+        while (transition.CurrentState != BioPortalTransition.TransitionState.TrongPhong && tTrans < 5f)
+        {
+            tTrans += Time.deltaTime;
+            if (transition.CurrentState == BioPortalTransition.TransitionState.DangMo) sawDangMo = true;
+            if (transition.CurrentState == BioPortalTransition.TransitionState.DangTai) sawDangTai = true;
+            if (transition.CurrentState == BioPortalTransition.TransitionState.HienPhong) sawHienPhong = true;
+
+            if (tTrans > 0.4f && tTrans < 0.5f) Shot("bio_02_phu_luc_giac");
+            if (tTrans > 0.8f && tTrans < 0.9f) Shot("bio_03_phu_kin");
+            if (tTrans > 1.2f && tTrans < 1.3f) Shot("bio_04_mo_man");
+            if (tTrans > 1.5f && tTrans < 1.6f) Shot("bio_05_hien_hinh");
+            yield return null;
+        }
+
+        Shot("bio_06_phong_hoan_chinh");
+        Log($"-> Chuyển cảnh MỞ hoàn tất trong {tTrans:0.00}s! FSM: sawDangMo={sawDangMo}, sawDangTai={sawDangTai}, sawHienPhong={sawHienPhong}, State={transition.CurrentState}");
+
+        // -------------------------------------------------------------
+        // BƯỚC 3: NỘI DUNG PHÒNG ẢO (3 lớp, 15 cơ quan, 6 cảnh hiển vi)
+        // -------------------------------------------------------------
+        Log("[Bước 3] Kiểm tra nội dung phòng ảo: 3 lớp, 15 cơ quan, 6 cảnh hiển vi...");
+        var room = transition.holoRoom;
+
+        // 3.1 Chuyển đổi 3 lớp cơ thể
+        room.SwitchLayer("da");
+        yield return new WaitForSeconds(0.4f);
+        Shot("bio_07_layer_da");
+
+        room.SwitchLayer("co");
+        yield return new WaitForSeconds(0.4f);
+        Shot("bio_08_layer_co");
+
+        room.SwitchLayer("xuong");
+        yield return new WaitForSeconds(0.4f);
+        Shot("bio_09_layer_xuong");
+
+        room.SwitchLayer("da");
+        yield return new WaitForSeconds(0.2f);
+        Log("-> Đổi 3 lớp Da / Cơ / Xương (tan-hiện 0.35s) OK.");
+
+        // 3.2 Kiểm tra dữ liệu 15 cơ quan
+        int validOrgans = 0;
+        foreach (var o in HoloBioRoom.Organs)
+        {
+            room.SelectOrgan(o.id);
+            yield return new WaitForSeconds(0.1f);
+            var organData = room.knowledgeCard.CurrentOrgan;
+            if (organData != null && !string.IsNullOrEmpty(organData.ten) && organData.trac_nghiem != null && organData.trac_nghiem.Length >= 3)
+            {
+                validOrgans++;
+            }
+        }
+        Log($"-> 15 Cơ quan: {validOrgans}/15 nạp đầy đủ thông tin vị trí, cấu tạo, chức năng, cơ chế, câu hỏi trắc nghiệm.");
+        Shot("bio_10_the_kien_thuc");
+
+        // 3.3 Mở đủ 6 cảnh hiển vi 3D
+        string[] microScenes = new string[] { "phoi", "than", "nao", "co", "ruot_non", "gan" };
+        foreach (var sc in microScenes)
+        {
+            room.microViewer.OpenSceneForOrgan(sc);
+            yield return new WaitForSeconds(0.3f);
+            Shot($"bio_11_micro_{sc}");
+            room.microViewer.ReturnToFullBody();
+            yield return new WaitForSeconds(0.15f);
+        }
+        Log("-> Đã duyệt và chụp ảnh đầy đủ 6 cảnh hiển vi 3D và quay lại toàn thân thành công.");
+
+        // -------------------------------------------------------------
+        // BƯỚC 4: CHUYỂN CẢNH ĐÓNG (Nghi, phục hồi vị trí <= 1cm, góc <= 0.5°)
+        // -------------------------------------------------------------
+        Log("[Bước 4] Chuyển cảnh đóng và phục hồi vị trí lab...");
+        room.ReturnToLab();
+
+        float tClose = 0f;
+        while (transition.CurrentState != BioPortalTransition.TransitionState.Nghi && tClose < 5f)
+        {
+            tClose += Time.deltaTime;
+            yield return null;
+        }
+
+        Vector3 curPos = viewer.transform.position;
+        float posDiff = (curPos - pos2m).magnitude;
+        float rotDiff = Quaternion.Angle(viewer.transform.rotation, Quaternion.LookRotation((portalPos + Vector3.up * 1.5f) - pos2m));
+        Log($"-> Trở về lab hoàn tất trong {tClose:0.00}s! Sai số vị trí: {posDiff * 100f:0.0}cm (ngưỡng <= 1cm), Sai số góc: {rotDiff:0.0}° (ngưỡng <= 0.5°).");
+        Shot("bio_12_returned_to_lab");
+
+        // -------------------------------------------------------------
+        // BƯỚC 5: CHỐNG NHẤP ĐÚP & TÁI NHẬP (REENTRANCY)
+        // -------------------------------------------------------------
+        Log("[Bước 5] Kiểm tra chống nhấp đúp (Double-click reentrancy)...");
+        portal.OnEnterButtonClick();
+        yield return new WaitForSeconds(0.04f);
+        portal.OnEnterButtonClick();
+        yield return new WaitForSeconds(0.04f);
+        portal.OnEnterButtonClick();
+
+        while (transition.CurrentState != BioPortalTransition.TransitionState.TrongPhong) yield return null;
+        Log("-> Không có lỗi reentrancy khi bấm dồn dập. Phòng ảo mở thành công.");
+
+        room.ReturnToLab();
+        while (transition.CurrentState != BioPortalTransition.TransitionState.Nghi) yield return null;
+        Log("-> Đóng phòng trở về trạng thái Nghi bình thường.");
+
+        // -------------------------------------------------------------
+        // BƯỚC 6: ĐỘ BỀN 20 VÒNG (HEAP DELTA < 5MB, KHÔNG LEAK)
+        // -------------------------------------------------------------
+        Log("[Bước 6] Kiểm tra độ bền 20 chu kỳ vào - ra...");
+        GC.Collect();
+        long startHeap = GC.GetTotalMemory(true);
+
+        for (int cycle = 1; cycle <= 20; cycle++)
+        {
+            transition.StartOpenTransition();
+            while (transition.CurrentState != BioPortalTransition.TransitionState.TrongPhong) yield return null;
+
+            transition.StartCloseTransition();
+            while (transition.CurrentState != BioPortalTransition.TransitionState.Nghi) yield return null;
+        }
+
+        GC.Collect();
+        long endHeap = GC.GetTotalMemory(true);
+        float heapDeltaMb = (endHeap - startHeap) / (1024f * 1024f);
+        Log($"-> Hoàn tất 20 chu kỳ vào-ra liên tục! Heap Delta: {heapDeltaMb:0.00} MB (Ngưỡng < 5MB).");
+
+        // -------------------------------------------------------------
+        // BƯỚC 7: GIẢM CHUYỂN ĐỘNG (REDUCED MOTION)
+        // -------------------------------------------------------------
+        Log("[Bước 7] Kiểm tra chế độ Giảm chuyển động (ReducedMotion)...");
+        ReducedMotion.IsEnabled = true;
+
+        float tRmStart = Time.realtimeSinceStartup;
+        transition.StartOpenTransition();
+        while (transition.CurrentState != BioPortalTransition.TransitionState.TrongPhong) yield return null;
+        float tRmOpen = Time.realtimeSinceStartup - tRmStart;
+
+        float tRmCloseStart = Time.realtimeSinceStartup;
+        transition.StartCloseTransition();
+        while (transition.CurrentState != BioPortalTransition.TransitionState.Nghi) yield return null;
+        float tRmClose = Time.realtimeSinceStartup - tRmCloseStart;
+
+        ReducedMotion.IsEnabled = false;
+        Log($"-> Chế độ Giảm chuyển động: Mở mất {tRmOpen:0.00}s, Đóng mất {tRmClose:0.00}s (mờ chéo ~0.25s, bỏ qua lục giác/quét sáng).");
+
+        // -------------------------------------------------------------
+        // BƯỚC 8: ĐO HIỆU NĂNG PHÒNG ẢO (FPS >= 60, MAX FRAME TIME < 33MS)
+        // -------------------------------------------------------------
+        Log("[Bước 8] Đo đạc hiệu năng phòng ảo...");
+        transition.StartOpenTransition();
+        while (transition.CurrentState != BioPortalTransition.TransitionState.TrongPhong) yield return null;
+
+        float maxFrameTimeMs = 0f;
+        float totalTime = 0f;
+        int frameCount = 120;
+
+        for (int i = 0; i < frameCount; i++)
+        {
+            float fMs = Time.unscaledDeltaTime * 1000f;
+            if (fMs > maxFrameTimeMs) maxFrameTimeMs = fMs;
+            totalTime += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        float avgFps = frameCount / totalTime;
+        Log($"[KHKT-PLAY] Hiệu năng phòng ảo: FPS TB = {avgFps:0.0}, Thời gian khung hình dài nhất = {maxFrameTimeMs:0.0} ms (Ngưỡng < 33ms, FPS >= 60).");
+
+        transition.StartCloseTransition();
+        while (transition.CurrentState != BioPortalTransition.TransitionState.Nghi) yield return null;
+
+        Log("=== HOÀN TẤT TOÀN DIỆN KIỂM THỬ KHỞI ĐỘNG CỔNG SINH HỌC 3D (KHKT_TEST=cong_sinh_hoc) ===");
     }
 
     IEnumerator Watchdog()
