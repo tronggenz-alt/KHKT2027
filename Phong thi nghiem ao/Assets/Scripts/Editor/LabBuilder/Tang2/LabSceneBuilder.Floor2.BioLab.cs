@@ -614,6 +614,9 @@ namespace Khkt.EditorTools
             for (int i = 0; i < 5; i++)
                 SpecimenJar(cab, new Vector3(0, 0.9f, -0.92f + i * 0.46f), i, 0.85f);
             Info(cab, "Mẫu ngâm", "Mẫu vật bảo quản trong dung dịch formalin: cá, ếch, rắn, tim lợn, cây non. Quan sát hình thái ngoài, so sánh các lớp động vật.");
+
+            // Cổng vào Phòng Sinh học 3D (GĐ1) tại (18.3, 3.8, 12.6) trong khu giải phẫu
+            BuildFloor2BioPortal(g);
         }
 
         /// <summary>
