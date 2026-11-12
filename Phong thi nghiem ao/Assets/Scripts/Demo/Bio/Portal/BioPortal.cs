@@ -50,6 +50,9 @@ namespace Khkt.Demo.Bio.Portal
         [SerializeField] bool isCardShown = false;
         public bool IsCardShown => isCardShown;
 
+        [Header("Liên kết phòng ảo (GĐ2)")]
+        public HoloBioRoom targetHoloRoom;
+
         // Vòng sáng
         Transform ringTransform;
         MeshFilter ringMeshFilter;
@@ -602,6 +605,14 @@ namespace Khkt.Demo.Bio.Portal
 
             // GĐ1: Bấm nút ghi log chuẩn yêu cầu
             Debug.Log("[KHKT-BIO-PORTAL] Bấm vào Phòng Sinh học 3D");
+
+            // GĐ2: Vào phòng ảo tĩnh HoloBioRoom bằng Simple Crossfade
+            var room = targetHoloRoom != null ? targetHoloRoom : FindAnyObjectByType<HoloBioRoom>(FindObjectsInactive.Include);
+            if (room != null)
+            {
+                HideCard();
+                room.Enter(this);
+            }
         }
 
         bool IsHoldingEquipment()

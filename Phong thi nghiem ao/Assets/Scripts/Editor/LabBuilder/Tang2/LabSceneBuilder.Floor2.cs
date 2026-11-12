@@ -80,6 +80,7 @@ namespace Khkt.EditorTools
             BuildGreenhouse(tang2);        // nhà kính thực vật
             BuildEastCorridor(tang2);      // hành lang đông
             BuildFloor2InteractiveTools(tang2); // gắn toàn bộ 108 dụng cụ tương tác Tầng 2
+            BuildHoloBioRoom(root);         // phòng ảo tĩnh HoloBioRoom (y = -600, GĐ2)
 
             EnsureFloor2ThemeMaterials();
             SetupFloor2ThemeSwitcher(tang2.gameObject);
