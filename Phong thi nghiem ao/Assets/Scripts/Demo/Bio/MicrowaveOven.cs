@@ -11,7 +11,7 @@ using Khkt.Simulation.Bio;
 namespace Khkt.Demo.Bio
 {
     [DisallowMultipleComponent]
-    public class MicrowaveOven : MonoBehaviour, IInteractable, IBioTarget
+    public class MicrowaveOven : MonoBehaviour, IInteractable, IBioTarget, IMachinePanel
     {
         public bool agaroseMelted;
         public float agarosePercent = 1.0f;
@@ -19,6 +19,22 @@ namespace Khkt.Demo.Bio
         public string TargetName => "Lò vi sóng";
         public string UseHint => agaroseMelted ? $"Bình agarose {BioFeedback.FormatVi(agarosePercent, "0.0")} % đã tan trong suốt (~60 °C). Cầm khay đúc gel rồi bấm vào lò để đổ gel."
             : "Bấm: đun bình agarose 1 % trong đệm TAE (nắp đậy hờ) đến khi tan trong suốt";
+
+        public MachineSpec PanelSpec()
+        {
+            var s = new MachineSpec { code = "MÁY · LÒ VI SÓNG", title = "Lò vi sóng đun agarose", subtitle = "Đun tan agarose trong đệm TAE để đổ gel điện di" };
+            s.parameters.Add(MachineParam.Slider("Nồng độ agarose", "%", 0.5f, 2.5f, 0.1f, () => agarosePercent, v => { if (!agaroseMelted) agarosePercent = v; }, "0.0",
+                v => v < 0.8f ? "Gel loãng: tách tốt đoạn ADN lớn (trên 5.000 bp), gel mềm dễ vỡ" : v <= 1.2f ? "Gel 1 %: tách tốt đoạn 500–10.000 bp" : "Gel đặc: tách tốt đoạn nhỏ (dưới 1.000 bp)"));
+            s.runLabel = () => agaroseMelted ? "Đun mẻ mới" : "Đun agarose";
+            s.status = () => agaroseMelted ? $"Bình agarose {BioFeedback.FormatVi(agarosePercent, "0.0")} % đã tan trong suốt (~60 °C).\nCầm khay đúc gel rồi bấm vào lò để đổ gel." : "Bình agarose chưa đun.";
+            s.run = () =>
+            {
+                agaroseMelted = false;
+                Use(null);
+                return $"Đã đun agarose {BioFeedback.FormatVi(agarosePercent, "0.0")} % tan trong suốt (đun ngắt quãng, lắc đều, nắp đậy hờ).\nĐể nguội ~60 °C rồi đổ vào khay đúc có cắm lược.";
+            };
+            return s;
+        }
 
         public void Use(GameObject user)
         {

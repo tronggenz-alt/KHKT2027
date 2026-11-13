@@ -141,11 +141,79 @@ namespace Khkt.Demo.Bio.Portal
             {
                 transform.position = new Vector3(transform.position.x, -600f, transform.position.z);
             }
-            gameObject.SetActive(false);
+            // Start chạy một khung hình SAU lần bật đầu tiên. Bản cũ tắt phòng vô điều kiện ở đây, nên lần đầu bước qua cổng
+            // phòng vừa bật đã tự tắt (màn hình đứng hình, phải vào lần hai mới thấy mô hình). Chỉ tắt khi phòng bị để bật
+            // sẵn trong cảnh mà không ai đang vào.
+            var transition = BioPortalTransition.Instance;
+            bool entering = isTransitioning || IsPrewarming ||
+                            (transition != null && transition.CurrentState != BioPortalTransition.TransitionState.Nghi);
+            if (!entering) gameObject.SetActive(false);
+        }
+
+        // =====================================================================
+        // Nạp trước (để lần mở đầu tiên không khựng)
+        // =====================================================================
+
+        public bool IsPrewarmed { get; private set; }
+        public bool IsPrewarming { get; private set; }
+
+        /// <summary>
+        /// Nạp trước phòng khi người dùng còn đang đi tới cổng, chia ra nhiều khung hình:
+        ///   khung 1: bật phòng (dựng camera, sàn, giao diện, nút cơ quan) nhưng ẩn giao diện và không vẽ ra màn hình;
+        ///   khung 2–4: vẽ từng lớp Da, Cơ, Xương một lần vào ảnh nhỏ 64 px để máy đưa lưới (~250 nghìn đỉnh) lên GPU
+        ///              và biên dịch sẵn shader;
+        ///   khung 5: đọc sẵn 15 tệp kiến thức, rồi tắt phòng.
+        /// Bản cũ dồn tất cả vào đúng khung hình chuyển cảnh nên hiệu ứng mở cổng bị khựng.
+        /// Chạy bằng coroutine của một đối tượng khác (BioPortal) vì phòng tự tắt ở cuối.
+        /// </summary>
+        public IEnumerator CoPrewarm()
+        {
+            if (IsPrewarmed || IsPrewarming || gameObject.activeSelf) yield break;
+            IsPrewarming = true;
+            gameObject.SetActive(true);                       // Awake: EnsureRoomHierarchy
+            var canvases = GetComponentsInChildren<Canvas>(true);
+            var canvasWasOn = new bool[canvases.Length];
+            for (int i = 0; i < canvases.Length; i++) { canvasWasOn[i] = canvases[i].enabled; canvases[i].enabled = false; }
+            if (holoCamera != null) holoCamera.enabled = false;
+            yield return null;                                // Start
+
+            if (holoCamera != null && !isTransitioning)
+            {
+                var rt = RenderTexture.GetTemporary(64, 64, 16);
+                var layers = new[] { layerSkin, layerMuscles, layerSkeleton };
+                ResetOrbitView();
+                UpdateOrbitCamera();
+                foreach (var layer in layers)
+                {
+                    if (layer == null) continue;
+                    if (isTransitioning) break;               // người dùng đã bấm vào phòng: nhường cho chuyển cảnh
+                    bool was = layer.activeSelf;
+                    layer.SetActive(true);
+                    holoCamera.targetTexture = rt;
+                    holoCamera.Render();
+                    holoCamera.targetTexture = null;
+                    layer.SetActive(was);
+                    yield return null;
+                }
+                holoCamera.targetTexture = null;
+                RenderTexture.ReleaseTemporary(rt);
+            }
+
+            OrganKnowledgeCard.PreloadAllData();
+            yield return null;
+
+            for (int i = 0; i < canvases.Length; i++) if (canvases[i] != null) canvases[i].enabled = canvasWasOn[i];
+            IsPrewarming = false;
+            IsPrewarmed = true;
+            // nếu trong lúc nạp người dùng đã vào phòng thì để nguyên
+            var transition = BioPortalTransition.Instance;
+            bool entering = isTransitioning || (transition != null && transition.CurrentState != BioPortalTransition.TransitionState.Nghi);
+            if (!entering) gameObject.SetActive(false);
         }
 
         void Update()
         {
+            if (IsPrewarming) return;   // đang nạp trước ở hậu trường: chưa nhận điều khiển
             float dt = Time.deltaTime;
 
             // 1. Quay 2 vòng xuyến ngược chiều nhau

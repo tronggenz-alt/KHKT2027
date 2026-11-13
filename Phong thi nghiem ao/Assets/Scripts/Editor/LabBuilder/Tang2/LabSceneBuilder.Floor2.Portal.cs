@@ -7,7 +7,7 @@ namespace Khkt.EditorTools
 {
     /// <summary>
     /// Dựng Cổng vào Phòng Sinh học 3D (BioPortal) và Phòng ảo tĩnh (HoloBioRoom) (GĐ1 & GĐ2):
-    ///   • BioPortal đặt tại (18.3, 3.8, 12.6) trong khu giải phẫu tầng 2.
+    ///   • BioPortal (khung cổng 3D) đặt tại (17.3, 3.8, 13.55) ở góc đông bắc khu giải phẫu tầng 2.
     ///   • HoloBioRoom đặt tại y = -600, sàn tròn 10m, bệ hologram, 4 vòng sáng, chùm sáng trụ hở 3.9m,
     ///     bụi sáng <= 150 hạt, mô hình BodyParts3D 1.7m (bộ xương, hệ cơ, da).
     ///   • Liên kết BioPortal -> HoloBioRoom.
@@ -16,7 +16,9 @@ namespace Khkt.EditorTools
     {
         public static GameObject BuildFloor2BioPortal(Transform anatomyArea)
         {
-            var portalGo = BuildBioPortal(anatomyArea, new Vector3(18.3f, 0f, 12.6f));
+            // Khung cổng 3D rộng 2 m cần chỗ trống: đặt ở góc đông bắc, lệch khỏi đầu bàn giải phẫu, mặt trước quay về giữa phòng
+            var portalGo = BuildBioPortal(anatomyArea, new Vector3(17.3f, 0f, 13.55f));
+            portalGo.transform.localRotation = Quaternion.Euler(0f, 205f, 0f);
             var portal = portalGo.GetComponent<BioPortal>();
 
             var holo = Object.FindAnyObjectByType<HoloBioRoom>(FindObjectsInactive.Include);
@@ -41,8 +43,8 @@ namespace Khkt.EditorTools
             portalGo.transform.localPosition = localPos;
             portalGo.transform.localRotation = Quaternion.identity;
 
-            var portal = portalGo.AddComponent<BioPortal>();
-            portal.EnsureFloorRing();
+            // Vòng sáng và khung cổng do BioPortal tự dựng lúc chạy (vật liệu tạo bằng mã không lưu được vào cảnh)
+            portalGo.AddComponent<BioPortal>();
 
             return portalGo;
         }

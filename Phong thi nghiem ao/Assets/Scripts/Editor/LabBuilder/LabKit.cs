@@ -96,6 +96,7 @@ namespace Khkt.EditorTools
             if (transparent) MakeTransparent(m);
             else MakeOpaque(m);
             ApplyHdMaterial(name, m, color, smoothness, metallic);
+            ClampSparkle(name, m);
             if (isNew) AssetDatabase.CreateAsset(m, path);
             else EditorUtility.SetDirty(m);
             materials[name] = m;

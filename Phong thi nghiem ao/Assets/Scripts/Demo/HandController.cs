@@ -142,7 +142,12 @@ namespace Khkt.Demo
                     if (released && !swirlStarted && pressTime >= 0) Pick(hoverGrab);
                     break;
                 case Act.Use:
-                    if (pressed) usable.Use();
+                    if (pressed)
+                    {
+                        // máy có bảng điều khiển: mở bảng chỉnh thông số rồi mới chạy
+                        if (MachinePanel.Enabled && usable is IMachinePanel machine) MachinePanel.Open(machine);
+                        else usable.Use();
+                    }
                     break;
                 case Act.Stopcock:
                     if (mouse != null)

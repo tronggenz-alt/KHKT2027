@@ -14,7 +14,7 @@ namespace Khkt.Demo.Bio
     /// Công thức: RCF = 1,118 × 10⁻⁵ × r(cm) × rpm²
     /// </summary>
     [DisallowMultipleComponent]
-    public class CentrifugeLoad : MonoBehaviour, IInteractable, IScrollAdjustable
+    public class CentrifugeLoad : MonoBehaviour, IInteractable, IScrollAdjustable, IMachinePanel
     {
         public string centrifugeId = "may_ly_tam_mini";
         public int rotorSlots = 12;
@@ -79,6 +79,31 @@ namespace Khkt.Demo.Bio
             BioFeedback.LogAction(centrifugeId, "ly_tam_thanh_cong",
                 $"Đã ly tâm cân bằng tại {rpm} rpm ({BioFeedback.FormatVi(CalculateRcf(), "0")} ×g): cặn lắng xuống đáy, dịch nổi tách pha rõ, giọt bám thành đã gom hết xuống đáy.");
             return true;
+        }
+
+        [NonSerialized] public float panelMinutes = 5f;
+        [NonSerialized] public int panelLoad = 0;
+
+        public MachineSpec PanelSpec()
+        {
+            var s = new MachineSpec { code = "MÁY · LY TÂM", title = centrifugeId == "may_ly_tam_mini" ? "Máy ly tâm mini" : "Máy ly tâm để bàn", subtitle = $"Rotor {rotorSlots} vị trí, bán kính {BioFeedback.FormatVi(rotorRadiusCm, "0.0")} cm · RCF = 1,118 × 10⁻⁵ × r × rpm²" };
+            s.parameters.Add(MachineParam.Slider("Tốc độ quay", "rpm", 1000f, 14000f, 500f, () => rpm, v => rpm = Mathf.RoundToInt(v), "0",
+                v => $"Lực ly tâm tương đối: {BioFeedback.FormatVi((float)Centrifugation.Rcf(rotorRadiusCm, v), "0")} ×g" + (v < 3000f ? " · gom giọt bám thành ống" : v < 9000f ? " · lắng tế bào vi khuẩn" : " · tủa ADN, tách pha")));
+            s.parameters.Add(MachineParam.Slider("Thời gian", "phút", 1f, 30f, 1f, () => panelMinutes, v => panelMinutes = v, "0"));
+            s.parameters.Add(MachineParam.Choice("Cách đặt ống", new[] { "Đối xứng 2 ống", "Chỉ 1 ống" }, () => panelLoad, i => panelLoad = i,
+                i => i < 0.5f ? "Hai ống cùng khối lượng đặt đối xứng qua tâm rotor" : "Một ống không có đối trọng: rotor mất cân bằng"));
+            s.parameters.Add(MachineParam.Choice("Nắp máy", new[] { "Mở", "Đóng" }, () => lidClosed ? 1 : 0, i => lidClosed = i == 1));
+            s.runLabel = () => "Quay ly tâm";
+            s.status = () => $"Đặt: {rpm} rpm ≈ {BioFeedback.FormatVi(CalculateRcf(), "0")} ×g\nNắp: {(lidClosed ? "ĐÓNG" : "MỞ")}";
+            s.run = () =>
+            {
+                if (panelLoad == 0) SetBalancedPair(0, 1.5f); else SetUnbalancedSingle(0, 1.5f);
+                if (!lidClosed) { RunSpin(); return "Máy không quay: nắp an toàn chưa đóng (khóa liên động)."; }
+                if (!IsBalanced(out float diff)) { RunSpin(); return $"Máy rung mạnh và tự ngắt: rotor lệch tải {BioFeedback.FormatVi(diff, "0.00")} g.\nĐặt thêm một ống đối trọng chứa nước cùng khối lượng ở vị trí đối diện."; }
+                RunSpin();
+                return $"Đã ly tâm {BioFeedback.FormatVi(panelMinutes, "0")} phút ở {rpm} rpm ({BioFeedback.FormatVi(CalculateRcf(), "0")} ×g).\nCặn lắng gọn dưới đáy ống, dịch nổi trong.";
+            };
+            return s;
         }
 
         public void Use(GameObject user)

@@ -76,18 +76,12 @@ namespace Khkt.Demo.Bio
 
         bool turning;
         bool inEyepieceView;
-        int selectedEyepieceKnob = 1; // 1: Thô, 2: Tinh, 3: X/Y, 4: Độ sáng, 5: Màn chắn
         Texture2D viewportTex;
         Color32[] pixelBuf;
         const int TexSize = 1024;
         bool texDirty = true;
         float lastRedrawTime;
         float lastStreamTime;
-        GUIStyle hudStyle, labelStyle, reticleNumStyle;
-        string footerText;
-        float footerNextAt;
-        static readonly string[] ReticleNums = { "0", "20", "40", "60", "80", "100" };
-        static readonly string[] KnobNames = { "1. Ốc sơ", "2. Ốc vi", "3. Bàn X/Y", "4. Độ sáng", "5. Iris" };
 
         public string TargetName => isTeacherCamera ? "Kính hiển vi kỹ thuật số giáo viên" : "Kính hiển vi quang học hai mắt";
 
@@ -99,7 +93,7 @@ namespace Khkt.Demo.Bio
                 double total = Optics.TotalMagnification(eyepieceMag, mag);
                 double fov = Optics.FieldOfViewMm(fieldNumberMm, mag);
                 string slideInfo = slideSample != null && !slideSample.IsEmpty ? slideSample.sampleName : activeSlideCode;
-                return $"Kính hiển vi: vật kính {BioFeedback.FormatVi(mag, "0")}× (vòng {color}, NA {BioFeedback.FormatVi(na, "0.00")}{(isOil ? ", dầu soi" : "")}), phóng đại {BioFeedback.FormatVi(total, "0")}×, thị trường {BioFeedback.FormatVi(fov, "0.##")} mm · Mẫu: {slideInfo}. Bấm đổi vật kính, giữ Shift+Bấm ghé mắt thị kính.";
+                return $"Kính hiển vi: vật kính {BioFeedback.FormatVi(mag, "0")}× (vòng {color}, NA {BioFeedback.FormatVi(na, "0.00")}{(isOil ? ", dầu soi" : "")}), phóng đại {BioFeedback.FormatVi(total, "0")}×, thị trường {BioFeedback.FormatVi(fov, "0.##")} mm · Mẫu: {slideInfo}. Bấm để mở màn hình soi kính.";
             }
         }
 
@@ -170,20 +164,48 @@ namespace Khkt.Demo.Bio
             ("ecoli_gfp", "11. Khuẩn lạc E. coli pUC19-GFP phát huỳnh quang")
         };
 
-        public void Use()
+        /// <summary>Bấm vào kính: mở màn hình soi (MicroscopeUI) với đủ các việc chính của một buổi soi kính.</summary>
+        public void Use() => MicroscopeUI.Open(this);
+
+        /// <summary>Màn hình soi báo đang mở / đã đóng: lúc mở thì vẽ lại thị trường ngay.</summary>
+        public void SetViewing(bool viewing)
         {
-            var kb = Keyboard.current;
-            if (kb != null && (kb.leftShiftKey.isPressed || kb.rightShiftKey.isPressed))
+            inEyepieceView = viewing;
+            if (viewing)
             {
-                ToggleEyepieceView();
-                return;
+                texDirty = true;
+                RenderViewportIfNeeded(true);
             }
-            if (kb != null && kb.cKey.isPressed)
-            {
-                OpenTeacherCameraProgram();
-                return;
-            }
-            OpenTeacherCameraProgram();
+        }
+
+        /// <summary>Vẽ lại thị trường nếu có thay đổi (force: vẽ ngay, bỏ qua giãn cách 0,1 giây).</summary>
+        public void Refresh(bool force)
+        {
+            if (force) texDirty = true;
+            RenderViewportIfNeeded(force);
+        }
+
+        public void SetBrightness(float value)
+        {
+            brightness = Mathf.Clamp01(value);
+            texDirty = true;
+        }
+
+        /// <summary>Đặt thuốc nhuộm đang dùng: "" (không nhuộm), "lugol", "methylene_blue" hoặc "gram".</summary>
+        public void SetStain(string stainId)
+        {
+            stainId ??= "";
+            if (appliedStain == stainId) return;
+            appliedStain = stainId;
+            BioFeedback.PlaySuccess();
+            string msg = stainId == "lugol" ? "Đã nhỏ Lugol (I-KI): nhân và hạt tinh bột bắt màu nâu đậm."
+                       : stainId == "methylene_blue" ? "Đã nhuộm xanh methylen: nhân tế bào bắt màu xanh lam đậm."
+                       : stainId == "gram" ? "Đã nhuộm Gram: vi khuẩn Gram dương màu tím, Gram âm màu hồng đỏ."
+                       : "Đã rửa sạch thuốc nhuộm.";
+            BioFeedback.ShowToast(msg, false);
+            BioFeedback.LogAction("kinh_hien_vi", stainId.Length > 0 ? "nhuom_" + stainId : "rua_thuoc_nhuom", msg);
+            texDirty = true;
+            RenderViewportIfNeeded(true);
         }
 
         public void OpenTeacherCameraProgram()
@@ -208,42 +230,18 @@ namespace Khkt.Demo.Bio
                 nosepiece.localRotation = Quaternion.Euler(0, currentObjectiveIndex * 90f, 0);
         }
 
+        // Tên hàm cũ (bảng IMGUI "ghé mắt thị kính") giữ lại cho mã gọi sẵn: nay đều mở / đóng màn hình soi mới.
         public void ToggleEyepieceView()
         {
-            if (inEyepieceView)
-            {
-                ExitEyepieceView();
-            }
-            else
-            {
-                EnterEyepieceView();
-            }
+            if (inEyepieceView) ExitEyepieceView(); else EnterEyepieceView();
         }
 
-        public void EnterEyepieceView()
-        {
-            if (eyepieceTarget == null)
-            {
-                var go = new GameObject("ViTriMatThiKinh");
-                go.transform.SetParent(transform, false);
-                go.transform.localPosition = new Vector3(0.18f, 0.42f, 0f);
-                go.transform.localRotation = Quaternion.Euler(25f, -90f, 0f);
-                eyepieceTarget = go.transform;
-            }
-            inEyepieceView = true;
-            texDirty = true;
-            RenderViewportIfNeeded(true);
-            CloseUpView.Enter(eyepieceTarget, TargetName, 38f, () => { inEyepieceView = false; });
-            BioFeedback.LogAction(isTeacherCamera ? "kinh_hien_vi_camera" : "kinh_hien_vi", "ghe_mat_thi_kinh",
-                $"Ghé mắt quan sát thị kính ở độ phóng đại {BioFeedback.FormatVi(CurrentMagnification, "0")}×.");
-        }
+        public void EnterEyepieceView() => MicroscopeUI.Open(this);
 
         public void ExitEyepieceView()
         {
-            if (!inEyepieceView) return;
+            if (MicroscopeUI.IsOpen) MicroscopeUI.Instance.Close();
             inEyepieceView = false;
-            if (CloseUpView.IsActive)
-                CloseUpView.Exit();
         }
 
         public void SetFocus(float offsetMm)
@@ -1202,206 +1200,6 @@ namespace Khkt.Demo.Bio
                 }
             }
 
-            if (!inEyepieceView) return;
-
-            var kb = Keyboard.current;
-            if (kb != null)
-            {
-                if (kb.digit1Key.wasPressedThisFrame) selectedEyepieceKnob = 1;
-                else if (kb.digit2Key.wasPressedThisFrame) selectedEyepieceKnob = 2;
-                else if (kb.digit3Key.wasPressedThisFrame) selectedEyepieceKnob = 3;
-                else if (kb.digit4Key.wasPressedThisFrame) selectedEyepieceKnob = 4;
-                else if (kb.digit5Key.wasPressedThisFrame) selectedEyepieceKnob = 5;
-                else if (kb.mKey.wasPressedThisFrame) { showMicrometerReticle = !showMicrometerReticle; texDirty = true; }
-                else if (kb.nKey.wasPressedThisFrame) { showAnnotations = !showAnnotations; }
-                else if (kb.pKey.wasPressedThisFrame) { ApplyReagent(plasmolysisActive ? "nuoc_cat" : "nacl"); }
-                else if (kb.lKey.wasPressedThisFrame) { ApplyReagent("lugol"); }
-                else if (kb.bKey.wasPressedThisFrame) { ApplyReagent("methylene_blue"); }
-                else if (kb.oKey.wasPressedThisFrame) { if (oilApplied) CleanOilWithLensTissue(); else ApplyImmersionOil(); }
-                else if (kb.cKey.wasPressedThisFrame) { CaptureMicrographPng(); }
-                else if (kb.escapeKey.wasPressedThisFrame) { ToggleEyepieceView(); }
-            }
-
-            var mouse = Mouse.current;
-            if (mouse != null)
-            {
-                float scroll = mouse.scroll.ReadValue().y;
-                if (Mathf.Abs(scroll) > 0.05f)
-                {
-                    int dir = scroll > 0f ? 1 : -1;
-                    switch (selectedEyepieceKnob)
-                    {
-                        case 1: AdjustCoarseFocus(dir * 0.1f); break;
-                        case 2: AdjustFineFocus(dir * 2f); break;
-                        case 3: AdjustStageXY(dir * 0.5f, 0f); break;
-                        case 4: brightness = Mathf.Clamp01(brightness + dir * 0.05f); texDirty = true; break;
-                        case 5: irisOpen = Mathf.Clamp01(irisOpen + dir * 0.05f); texDirty = true; break;
-                    }
-                    RenderViewportIfNeeded(false);
-                }
-            }
-        }
-
-        void OnGUI()
-        {
-            if (!inEyepieceView) return;
-            RenderViewportIfNeeded(false);
-            if (viewportTex == null) return;
-
-            // Phóng cả giao diện theo màn hình (trên iPad nút cũ chỉ cao ~14 pt) và dùng da kính tối chung của app
-            Vector2 screen = Khkt.Demo.GuiKit.Begin();
-            float sw = screen.x, sh = screen.y;
-            var btn = Khkt.Demo.GuiKit.Button;
-            var btnOn = Khkt.Demo.GuiKit.ButtonOn;
-
-            float size = Mathf.Min(sw, sh) * 0.68f;
-            Rect viewRect = new Rect((sw - size) * 0.5f, (sh - size) * 0.44f, size, size);
-            GUI.DrawTexture(viewRect, viewportTex, ScaleMode.StretchToFill);
-
-            hudStyle ??= Khkt.Demo.GuiKit.Panel;
-            labelStyle ??= Khkt.Demo.GuiKit.Caption;
-
-            // Hiển thị số đo trên thước trắc vi quang học
-            if (showMicrometerReticle)
-            {
-                reticleNumStyle ??= new GUIStyle(GUI.skin.label)
-                {
-                    fontSize = 10,
-                    alignment = TextAnchor.MiddleCenter,
-                    normal = { textColor = new Color(0.12f, 0.12f, 0.12f) }
-                };
-                float cyPix = viewRect.y + viewRect.height * 0.5f;
-                float rMaxPix = viewRect.width * 0.47f;
-                float reticleHalfWPix = rMaxPix * 0.72f;
-                float leftPix = viewRect.x + viewRect.width * 0.5f - reticleHalfWPix;
-                float totalWPix = reticleHalfWPix * 2f;
-                for (int dVal = 0; dVal <= 100; dVal += 20)
-                {
-                    float xPix = leftPix + (dVal / 100f) * totalWPix;
-                    GUI.Label(new Rect(xPix - 15f, cyPix - 18f, 30f, 16f), ReticleNums[dVal / 20], reticleNumStyle);
-                }
-            }
-
-            if (showAnnotations)
-            {
-                var slideRec = BioCatalogLoader.GetSlide(activeSlideCode);
-                if (slideRec != null)
-                {
-                    for (int i = 0; i < slideRec.chuThich.Count; i++)
-                    {
-                        var pt = slideRec.chuThich[i];
-                        float px = viewRect.x + pt.x * viewRect.width;
-                        float py = viewRect.y + (1f - pt.y) * viewRect.height;
-                        GUI.Label(new Rect(px, py, 260f, 24f), "← " + pt.ten, labelStyle);
-                    }
-                }
-            }
-
-            // Dòng thông số ghép nhiều chuỗi định dạng: dựng lại 5 lần/giây (OnGUI chạy vài lượt mỗi khung hình)
-            if (footerText == null || Time.unscaledTime >= footerNextAt)
-            {
-                footerNextAt = Time.unscaledTime + 0.2f;
-                string knobName = selectedEyepieceKnob switch
-                {
-                    1 => "1: Ốc sơ cấp (0,1 mm)",
-                    2 => "2: Ốc vi cấp (2 µm)",
-                    3 => "3: Bàn sa trượt X/Y",
-                    4 => "4: Độ sáng đèn LED",
-                    _ => "5: Màn chắn sáng (Iris)"
-                };
-                double cellUm = ComputeMeasuredCellSizeUm();
-                double umPerDiv = MicronsPerDivision;
-                // Màn cảm ứng không có bàn phím: bỏ dòng phím tắt, đã có nút bấm
-                string keyGuide = Khkt.Input.PadInput.UsingTouch
-                    ? "Chạm nút ▲ ▼ bên phải để vặn núm đang chọn"
-                    : "Phím 1..5: Đổi núm | Cuộn chuột: Vặn núm | P: Co/Phản co NaCl 5% | L: Lugol | B: Xanh | O: Dầu soi | C: Chụp HD & Chiếu video | Esc: Thoát";
-                footerText = $"Vật kính: {BioFeedback.FormatVi(Optics.GetObjectiveProps(Objectives[currentObjectiveIndex]).mag, "0")}× (NA {BioFeedback.FormatVi(Optics.GetObjectiveProps(Objectives[currentObjectiveIndex]).na, "0.00")}) | Phóng đại: {BioFeedback.FormatVi(CurrentMagnification, "0")}× | Thị trường: {BioFeedback.FormatVi(CurrentFovMm, "0.##")} mm\n" +
-                                $"Thước trắc vi: 1 vạch = {BioFeedback.FormatVi(umPerDiv, "0.#")} µm | Du xích sa trượt: X={stageX:+0.00;-0.00;0.00} mm, Y={stageY:+0.00;-0.00;0.00} mm | Tế bào: ~{BioFeedback.FormatVi(cellUm, "0")} µm\n" +
-                                $"Đang chọn [{knobName}] · {keyGuide}";
-            }
-            float footW = Mathf.Min(1180f, sw - 312f);  // chừa chỗ cho cột nút bên phải (nút Thoát ở góc dưới)
-            GUI.Box(new Rect((sw - footW) * 0.5f, sh - 90f, footW, 80f), footerText, hudStyle);
-
-            // Bảng nút thao tác nhanh (hỗ trợ cả chạm Touch và nhấp chuột Chuột)
-            float btnW = 112f, btnH = 38f;
-            float startX = (sw - 7 * (btnW + 6f)) * 0.5f;
-            float topY = 14f;
-
-            for (int ki = 0; ki < 5; ki++)
-            {
-                if (GUI.Button(new Rect(startX + ki * (btnW + 6f), topY, btnW, btnH), KnobNames[ki], selectedEyepieceKnob == ki + 1 ? btnOn : btn))
-                {
-                    selectedEyepieceKnob = ki + 1;
-                    BioFeedback.PlayClick();
-                }
-            }
-            if (GUI.Button(new Rect(startX + 5 * (btnW + 6f), topY, btnW, btnH), plasmolysisActive ? "Phản co (Nước)" : "Co NS (NaCl)", btn))
-            {
-                ApplyReagent(plasmolysisActive ? "nuoc_cat" : "nacl");
-            }
-            if (GUI.Button(new Rect(startX + 6 * (btnW + 6f), topY, btnW, btnH), "Đổi vật kính", btn))
-            {
-                CycleObjective();
-            }
-
-            // Hàng nút thí nghiệm và điều chỉnh bên phải
-            float rightX = sw - 146f;
-            if (GUI.Button(new Rect(rightX, 70f, 132f, 36f), showMicrometerReticle ? "Ẩn thước (M)" : "Hiện thước (M)", btn))
-            {
-                showMicrometerReticle = !showMicrometerReticle;
-                texDirty = true;
-                BioFeedback.PlayClick();
-            }
-            if (GUI.Button(new Rect(rightX, 114f, 132f, 36f), "Nhuộm Lugol (L)", btn))
-            {
-                ApplyReagent("lugol");
-            }
-            if (GUI.Button(new Rect(rightX, 158f, 132f, 36f), "Nhuộm Xanh (B)", btn))
-            {
-                ApplyReagent("methylene_blue");
-            }
-            if (GUI.Button(new Rect(rightX, 202f, 132f, 36f), oilApplied ? "Lau sạch dầu" : "Dầu soi 100×", btn))
-            {
-                if (oilApplied) CleanOilWithLensTissue(); else ApplyImmersionOil();
-            }
-            if (GUI.Button(new Rect(rightX, 246f, 132f, 36f), "Chụp ảnh HD (C)", btn))
-            {
-                CaptureMicrographPng();
-            }
-            if (GUI.Button(new Rect(rightX, 290f, 132f, 36f), "Chiếu Tường video", btn))
-            {
-                StreamToVideoWall();
-            }
-
-            // Nút vặn - và + lớn
-            if (GUI.Button(new Rect(rightX, sh * 0.5f + 10f, 132f, 44f), "▲ Tăng (+)", btn) || (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame))
-            {
-                ApplyEyepieceAdjustment(1);
-            }
-            if (GUI.Button(new Rect(rightX, sh * 0.5f + 62f, 132f, 44f), "▼ Giảm (-)", btn))
-            {
-                ApplyEyepieceAdjustment(-1);
-            }
-
-            // Nút thoát thị kính
-            if (GUI.Button(new Rect(rightX, sh - 64f, 132f, 44f), "✕ Thoát (Esc)", btn))
-            {
-                ToggleEyepieceView();
-            }
-        }
-
-        void ApplyEyepieceAdjustment(int dir)
-        {
-            switch (selectedEyepieceKnob)
-            {
-                case 1: AdjustCoarseFocus(dir * 0.1f); break;
-                case 2: AdjustFineFocus(dir * 2f); break;
-                case 3: AdjustStageXY(dir * 0.5f, 0f); break;
-                case 4: brightness = Mathf.Clamp01(brightness + dir * 0.05f); texDirty = true; break;
-                case 5: irisOpen = Mathf.Clamp01(irisOpen + dir * 0.05f); texDirty = true; break;
-            }
-            RenderViewportIfNeeded(false);
-            BioFeedback.PlayClick();
         }
     }
 }

@@ -65,20 +65,22 @@ namespace Khkt.Menu.Dashboard
     /// <summary>Màu sắc và mảnh giao diện chung của màn hình chính, theo trang giới thiệu (trang_gioi_thieu/kieu.css).</summary>
     public static class MenuKit
     {
-        public static readonly Color Paper = Hex(0xffffff);
-        public static readonly Color PaperAlt = Hex(0xf5f5f7);
-        public static readonly Color PaperHover = Hex(0xececf0);
-        public static readonly Color Ink = Hex(0x1d1d1f);
-        public static readonly Color InkDim = Hex(0x5c5d66);
-        public static readonly Color Line = Hex(0xd9d9de);
-        public static readonly Color Accent = Hex(0x0b63d1);
-        public static readonly Color AccentDeep = Hex(0x084fa8);
-        public static readonly Color AccentSoft = Hex(0xe8f1fd);
-        public static readonly Color Bio = Hex(0x0b7a5b);
-        public static readonly Color BioSoft = Hex(0xe3f4ee);
-        public static readonly Color Warn = Hex(0x9a5b00);
-        public static readonly Color WarnSoft = Hex(0xfdf1dc);
-        public static readonly Color Error = Hex(0xb3261e);
+        // Bảng màu VERA Instrument (2026-11-13): nền xanh mực, thẻ nổi sáng hơn nền một bậc, chữ sáng,
+        // màu nhấn lam đủ đậm để chữ trắng đọc rõ. Tên biến giữ như bản nền sáng cũ để các trang không phải sửa.
+        public static readonly Color Paper = Hex(0x111d31);       // thẻ
+        public static readonly Color PaperAlt = Hex(0x0a1322);    // nền trang
+        public static readonly Color PaperHover = Hex(0x1a2c49);
+        public static readonly Color Ink = Hex(0xeaf1ff);
+        public static readonly Color InkDim = Hex(0x93a7c4);
+        public static readonly Color Line = Hex(0x29406a);
+        public static readonly Color Accent = Hex(0x1b84ee);
+        public static readonly Color AccentDeep = Hex(0x1467c2);
+        public static readonly Color AccentSoft = Hex(0x12305a);
+        public static readonly Color Bio = Hex(0x2fd6a3);
+        public static readonly Color BioSoft = Hex(0x0f332d);
+        public static readonly Color Warn = Hex(0xffb84d);
+        public static readonly Color WarnSoft = Hex(0x3a2b10);
+        public static readonly Color Error = Hex(0xff6b6b);
 
         // Hệ số thu bán kính của GlassKit.Solid (bán kính gốc 30 px)
         public const float RadiusButton = 3f;  // 10 px
@@ -233,7 +235,7 @@ namespace Khkt.Menu.Dashboard
             var si = shadow.gameObject.AddComponent<Image>();
             si.sprite = SoftShadow;
             si.type = Image.Type.Sliced;
-            si.color = new Color(0.05f, 0.1f, 0.2f, 0.06f);
+            si.color = new Color(0f, 0.01f, 0.03f, 0.30f);
             si.raycastTarget = false;
 
             var body = Stretch(rt, "Thân", Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
@@ -244,8 +246,8 @@ namespace Khkt.Menu.Dashboard
                 var h2 = rt.gameObject.AddComponent<MenuHover>();
                 h2.hoverScale = 1.008f;
                 h2.shadow = si;
-                h2.shadowRest = 0.06f;
-                h2.shadowHover = 0.13f;
+                h2.shadowRest = 0.30f;
+                h2.shadowHover = 0.50f;
             }
             return rt;
         }
@@ -267,10 +269,11 @@ namespace Khkt.Menu.Dashboard
             target.raycastTarget = true;
             var b = outer.gameObject.AddComponent<Button>();
             var colors = b.colors;
-            colors.normalColor = Color.white;
-            colors.selectedColor = Color.white;
-            colors.highlightedColor = style == 0 ? new Color(0.86f, 0.86f, 0.86f) : PaperAlt;
-            colors.pressedColor = style == 0 ? new Color(0.76f, 0.76f, 0.76f) : PaperHover;
+            // nền tối: màu nút nhân với hệ số, lúc thường hơi dịu, rê chuột thì sáng lên đủ màu, bấm thì tối đi
+            colors.normalColor = new Color(0.88f, 0.88f, 0.88f);
+            colors.selectedColor = colors.normalColor;
+            colors.highlightedColor = Color.white;
+            colors.pressedColor = new Color(0.70f, 0.70f, 0.70f);
             colors.fadeDuration = 0.12f;
             b.colors = colors;
             b.targetGraphic = target;
@@ -289,7 +292,7 @@ namespace Khkt.Menu.Dashboard
             {
                 hover.tint = outer;
                 hover.tintRest = outer.color;
-                hover.tintHover = new Color(0.05f, 0.1f, 0.2f, 0.045f);
+                hover.tintHover = new Color(0.45f, 0.75f, 1f, 0.10f);
             }
             return b;
         }

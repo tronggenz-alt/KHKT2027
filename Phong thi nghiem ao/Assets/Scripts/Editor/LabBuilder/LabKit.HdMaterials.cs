@@ -111,25 +111,19 @@ namespace Khkt.EditorTools
         {
             InitHdMaterialCatalog();
 
-            if (name == "ThuyTinh" || name == "CocThuyTinh")
+            if (IsLabGlass(name))
             {
-                var glassShader = Shader.Find("Khkt/HD/ThuyTinhHD");
-                if (glassShader != null)
-                {
-                    m.shader = glassShader;
-                    m.SetColor("_BaseColor", new Color(0.95f, 0.98f, 1.0f, 0.12f));
-                    m.SetColor("_EdgeColor", new Color(0.55f, 0.72f, 0.85f, 0.65f));
-                    m.SetFloat("_F0", 0.04f);
-                    m.SetFloat("_FresnelPower", 4.2f);
-                    m.SetFloat("_RefractDistort", 0.028f);
-                    m.SetFloat("_Dispersion", 0.006f);
-                    m.SetFloat("_Smoothness", 0.98f);
-                    m.SetFloat("_SpecIntensity", 2.2f);
-                    m.SetFloat("_Absorption", 1.6f);
-                    m.SetFloat("_ShadowStrength", 0.18f);
-                    m.renderQueue = 3010;
-                }
+                ApplyLabGlass(name, m);
                 return;
+            }
+
+            // Vật liệu không nằm trong danh mục HD: gỡ ảnh pháp tuyến do công cụ cũ (HdMaterialEnhancer, đã xóa) gắn thêm.
+            // Bề mặt bóng có ảnh pháp tuyến hạt mịn là nguồn lấp lánh khi đổi góc nhìn.
+            if (!hdMaterialMap.ContainsKey(name) && m.HasProperty("_BumpMap") && m.GetTexture("_BumpMap") != null && !KeepsOwnNormal(name))
+            {
+                m.SetTexture("_BumpMap", null);
+                m.SetFloat("_BumpScale", 1f);
+                m.DisableKeyword("_NORMALMAP");
             }
 
             if (hdMaterialMap.TryGetValue(name, out var data))
@@ -184,6 +178,55 @@ namespace Khkt.EditorTools
             }
         }
 
+        /// <summary>Thủy tinh dụng cụ thí nghiệm của cả hai tầng: dùng chung shader Khkt/HD/ThuyTinhHD.</summary>
+        public static bool IsLabGlass(string name) =>
+            name == "ThuyTinh" || name == "CocThuyTinh" || name == "ThuyTinhVanh" || name == "T2_DiaPetri" || name == "HopLamKinh";
+
+        /// <summary>Lá cây dùng shader riêng có gân lá: giữ ảnh pháp tuyến của nó.</summary>
+        static bool KeepsOwnNormal(string name) => name.StartsWith("La") || name.StartsWith("T2_La") || name.Contains("Chau") || name.Contains("CaoSu");
+
+        static void ApplyLabGlass(string name, Material m)
+        {
+            var glassShader = Shader.Find("Khkt/HD/ThuyTinhHD");
+            if (glassShader == null)
+            {
+                Debug.LogWarning("[HD-MATERIALS] Thiếu shader Khkt/HD/ThuyTinhHD: thủy tinh dùng tạm URP Lit trong suốt.");
+                return;
+            }
+            m.shader = glassShader;
+            m.SetTexture("_BumpMap", null);
+            m.DisableKeyword("_NORMALMAP");
+            m.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+            m.DisableKeyword("_SURFACE_TYPE_TRANSPARENT");
+
+            // Thân kính borosilicat: gần như trong suốt khi nhìn thẳng, ngả xanh nhạt ở mép và đáy dày
+            Color body = new Color(0.92f, 0.97f, 1.0f, 0.045f);
+            Color edge = new Color(0.62f, 0.80f, 0.88f, 0.42f);
+            float absorption = 1.5f, reflect = 1.0f, backFade = 0.55f;
+            switch (name)
+            {
+                case "ThuyTinhVanh":   // vành miệng, vạch dày: đậm hơn để thấy rõ miệng cốc
+                    body.a = 0.10f; edge.a = 0.55f; absorption = 2.0f; break;
+                case "T2_DiaPetri":    // đĩa nhựa/thủy tinh mỏng, nhìn từ trên xuống: gần như không màu
+                    body.a = 0.03f; edge = new Color(0.78f, 0.86f, 0.90f, 0.30f); absorption = 1.2f; reflect = 0.8f; break;
+                case "HopLamKinh":
+                    body.a = 0.06f; edge.a = 0.36f; break;
+            }
+            m.SetColor("_BaseColor", body);
+            m.SetColor("_EdgeColor", edge);
+            m.SetFloat("_F0", 0.04f);
+            m.SetFloat("_FresnelPower", 5.0f);
+            m.SetFloat("_Smoothness", 0.93f);
+            m.SetFloat("_SpecIntensity", 1.0f);
+            m.SetFloat("_SpecMax", 2.2f);
+            m.SetFloat("_Absorption", absorption);
+            m.SetFloat("_ReflectStrength", reflect);
+            m.SetFloat("_BackFade", backFade);
+            m.SetOverrideTag("RenderType", "Transparent");
+            m.renderQueue = 3010;
+            m.enableInstancing = true;
+        }
+
         /// <summary>
         /// Cập nhật lại toàn bộ file .mat trong Assets/Lab/Materials sang chuẩn PBR HD.
         /// </summary>
@@ -205,11 +248,43 @@ namespace Khkt.EditorTools
                 float metal = m.HasProperty("_Metallic") ? m.GetFloat("_Metallic") : 0f;
 
                 ApplyHdMaterial(matName, m, col, smooth, metal);
+                ClampSparkle(matName, m);
                 EditorUtility.SetDirty(m);
                 count++;
             }
             AssetDatabase.SaveAssets();
             Debug.Log($"[HD-MATERIALS] Đã nâng cấp {count} vật liệu sang chuẩn PBR HD sạch.");
+        }
+
+        /// <summary>
+        /// Chặn nguồn lấp lánh theo góc nhìn trên vật liệu URP Lit: bề mặt vừa rất bóng vừa có ảnh pháp tuyến thì điểm sáng
+        /// nhảy giữa các điểm ảnh khi xoay camera. Giới hạn độ bóng 0,82 (kim loại 0,78) và độ nổi pháp tuyến 0,6 cho nhóm đó.
+        /// Vật liệu phát sáng mạnh (đèn LED, ngọn lửa) giới hạn cường độ để Bloom không chớp.
+        /// </summary>
+        public static void ClampSparkle(string name, Material m)
+        {
+            if (m == null || m.shader == null || m.shader.name != "Universal Render Pipeline/Lit") return;
+            bool hasNormal = m.HasProperty("_BumpMap") && m.GetTexture("_BumpMap") != null;
+            if (hasNormal)
+            {
+                float metal = m.GetFloat("_Metallic");
+                float cap = metal > 0.5f ? 0.78f : 0.82f;
+                if (m.GetFloat("_Smoothness") > cap) m.SetFloat("_Smoothness", cap);
+                if (m.GetFloat("_BumpScale") > 0.6f) m.SetFloat("_BumpScale", 0.6f);
+            }
+            if (m.IsKeywordEnabled("_EMISSION"))
+            {
+                Color e = m.GetColor("_EmissionColor");
+                float peak = Mathf.Max(e.r, Mathf.Max(e.g, e.b));
+                if (peak > 3.2f) m.SetColor("_EmissionColor", e * (3.2f / peak));
+            }
+        }
+
+        /// <summary>Chạy không cần mở cửa sổ Unity: -executeMethod Khkt.EditorTools.LabKit.UpdateAllMaterialsBatch</summary>
+        public static void UpdateAllMaterialsBatch()
+        {
+            lit = Shader.Find("Universal Render Pipeline/Lit");
+            UpdateAllMaterialsToHd();
         }
     }
 }

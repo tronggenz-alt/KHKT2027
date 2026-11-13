@@ -1,7 +1,19 @@
 # HANDOFF – CHEMISTRY & VERA LAB (KHKT2027)
 
 > Đọc AGENTS.md trước. File này mô tả tiến độ để AI khác (Gemini/Claude) làm tiếp ngay, không cần hỏi lại.
-> Cập nhật lần cuối: 2026-11-02 – bởi Claude (gộp phần cảm ứng iPad của Antigravity, cài lên iPad qua Xcode)
+> Cập nhật lần cuối: 2026-11-13 – bởi Claude (giao diện mới, bảng điều khiển máy, kính hiển vi, cổng 3D, sửa nháy vật liệu)
+
+## ĐÃ XONG (2026-11-13, Claude): GIAO DIỆN MỚI, BẢNG MÁY, KÍNH HIỂN VI, CỔNG 3D, SỬA NHÁY
+Nhánh `claude/project-ui-fixes-features-eb50e5`, dựa trên `tang2/cong-sinh-hoc-3d` (ae371697).
+1. **Sửa nháy theo góc nhìn**: viết lại `Assets/Lab/Shaders/ThuyTinhHD.shader` (bản cũ: hai lượt cùng thẻ LightMode nên URP chỉ vẽ mặt trong; không có từ khóa Forward+ nên lấy sai ô phản chiếu; điểm sáng GGX không trần làm Bloom chớp; bóng khử điểm bò theo camera). Bloom thêm trần `clamp = 6`. `LabKit.ClampSparkle` giới hạn độ bóng của vật liệu Lit có ảnh pháp tuyến và cường độ phát sáng. `LabKit.IsLabGlass` gom mọi thủy tinh dụng cụ (ThuyTinh, CocThuyTinh, ThuyTinhVanh, T2_DiaPetri, HopLamKinh) về một shader.
+2. **Xóa đồ họa cũ**: `HdMaterialEnhancer.cs` (đường ghi vật liệu thứ hai, trùng với `LabKit.HdMaterials.cs`), 27 ảnh vân không còn vật liệu nào dùng trong `Assets/Lab/HD/Textures`, `GachLatSan.png`, 4 tệp .meta mồ côi, `tools/hd_textures/generate_pbr_textures.py`, `update_material_assets.py`, `TRANG_THAI.md`. Từ nay chỉ còn MỘT đường ghi vật liệu: `LabKit.Mat()` → `ApplyHdMaterial`.
+3. **Giao diện VERA Instrument** (chủ đề khoa học, kỹ thuật): `GlassKit` đổi sang tấm vát góc, ke góc, vạch nhấn, lưới bản vẽ (shader `KinhMo`), bảng màu xanh mực + lam ngọc + hổ phách; thêm `Header`, `Rule`, `Readout`, `MakeSlider`, `MakeChip`, `Backdrop`, `Window`, `HostCanvas`. `GuiKit` và `MenuKit` (màn hình chính) đổi theo. Tên hàm cũ giữ nguyên nên mọi màn hình đổi theo mà không sửa từng cái.
+4. **Bảng điều khiển máy** `Demo/MachinePanel.cs`: bấm vào máy hiện bảng 1180 × 720 (không kín màn hình), chỉnh thông số bằng thanh trượt rồi bấm chạy. Máy khai báo bằng `IMachinePanel.PanelSpec()`. Đã gắn: máy phân tích hóa (`AnalyzerInstrument`, thông số có tác dụng thật với UV-Vis, FTIR, AAS, GC-MS, HPLC, chuẩn độ), tủ ấm, bể ổn nhiệt, nguồn điện di, máy PCR, nồi hấp, ly tâm, khối gia nhiệt, vortex, lò vi sóng. `HandController` mở bảng thay cho `Use()`; bài kiểm thử (`KHKT_TEST`) vẫn gọi thẳng `Use()`.
+5. **Kính hiển vi** `Demo/Bio/MicroscopeUI.cs`: một màn hình duy nhất (tiêu bản · thị trường kéo được · vật kính · lấy nét · độ sáng · nhuộm · co nguyên sinh · dầu soi · thước · chú thích · chụp ảnh). Bỏ bảng IMGUI "ghé mắt thị kính" trong `MicroscopeController`.
+6. **Bài demo cho giám khảo** `Demo/DemoShowcase.cs`: F2 hoặc nút góc trên trái, 7 bài, đưa tới trạm, thẻ hướng dẫn từng bước (F3, F4), robot làm mẫu với bài Hóa.
+7. **Cổng liên kết 3D** `Demo/Bio/Portal/BioPortal.Gate.cs`: khung cổng thật (trụ, xà, dải đèn, màng năng lượng, biển tên), bước qua là vào phòng. Cổng dời tới (17.3, 3.8, 13.55), quay 205°. Trước đây cảnh đã lưu không có cổng (mã có nhưng cảnh chưa dựng lại).
+8. **Phòng mô hình người mở mượt**: sửa `HoloBioRoom.Start()` tự tắt phòng ngay lần vào đầu; thêm `CoPrewarm()` nạp trước khi người dùng cách cổng 12 m.
+9. **Unity treo ở chế độ nền**: bản Unity trong `~/Documents/6000.6.7f1` (iCloud) kẹt ở `stat` khi dựng menu Help. Chạy được từ bản nhân bản `~/AppBuild/UnityEditor/Unity.app` (PlaybackEngines là liên kết tới bản gốc). Bản dựng thử ở `~/AppBuild/VERALab_ui`.
 
 ## ĐÃ XONG (2026-11-02, Claude): GỘP CẢM ỨNG IPAD, XUẤT QUA XCODE
 Gộp từ worktree `ipad_touch_biology_lab` (Antigravity, chưa commit bên đó) vào nhánh `claude/xcode-app-export-310c80`.

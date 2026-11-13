@@ -652,9 +652,12 @@ namespace Khkt.EditorTools
             var tm = profile.Add<Tonemapping>(true);
             tm.mode.Override(TonemappingMode.Neutral);
             var bloom = profile.Add<Bloom>(true);
-            bloom.threshold.Override(1.0f);
+            bloom.threshold.Override(1.05f);
             bloom.intensity.Override(0.30f);
             bloom.scatter.Override(0.65f);
+            // Trần độ sáng đưa vào Bloom: một điểm ảnh phản chiếu quá sáng (mép inox, thủy tinh) không còn nở thành quầng
+            // chớp tắt khi đổi góc nhìn. Mặc định của URP là 65472 (coi như không chặn).
+            bloom.clamp.Override(6f);
             // lọc chất lượng cao: viền sáng của dải LED mịn, không nhấp nháy theo điểm ảnh.
             bloom.highQualityFiltering.Override(true);
             var color = profile.Add<ColorAdjustments>(true);

@@ -31,11 +31,11 @@ namespace Khkt.Demo.Bio.Portal
     ///     hoặc khi giáo viên khóa (ClassRules.Exam).
     ///   • GĐ1: bấm nút ghi log "[KHKT-BIO-PORTAL] Bấm vào Phòng Sinh học 3D".
     /// </summary>
-    public class BioPortal : MonoBehaviour
+    public partial class BioPortal : MonoBehaviour
     {
         [Header("Cấu hình cự ly (Proximity)")]
-        public float showDistance = 2.2f;
-        public float hideDistance = 2.8f;
+        public float showDistance = 3.0f;
+        public float hideDistance = 3.7f;
         public float maxViewingAngle = 60f;
         public float checkInterval = 0.1f; // 10 Hz
 
@@ -59,6 +59,7 @@ namespace Khkt.Demo.Bio.Portal
         public void SetCooldown(float duration = 0.8f)
         {
             cooldownTimer = duration;
+            walkArmed = false;   // vừa trở về đứng ngay trong lòng cổng: phải bước ra rồi mới tính lần bước qua mới
             HideCard();
         }
 
@@ -93,12 +94,40 @@ namespace Khkt.Demo.Bio.Portal
 
         void Awake()
         {
+            // Vòng sáng lưu sẵn trong cảnh mất vật liệu (vật liệu tạo lúc dựng không lưu được): luôn dựng lại lúc chạy
+            if (Application.isPlaying)
+            {
+                var saved = transform.Find("FloorGlowingRing");
+                if (saved != null) { saved.name = "FloorGlowingRing (cũ)"; Destroy(saved.gameObject); }
+            }
             EnsureFloorRing();
+            if (Application.isPlaying) EnsureGate();
         }
 
         void Start()
         {
             EnsureCardUI();
+            StartCoroutine(CoPrewarmRoomWhenNear());
+        }
+
+        /// <summary>Khi người dùng tới gần cổng (12 m) thì nạp trước phòng mô hình người, để lúc bước qua cổng không khựng.</summary>
+        IEnumerator CoPrewarmRoomWhenNear()
+        {
+            var wait = new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(1.5f);   // để khu vừa nạp ổn định đã
+            while (true)
+            {
+                yield return wait;
+                var room = targetHoloRoom != null ? targetHoloRoom : FindAnyObjectByType<HoloBioRoom>(FindObjectsInactive.Include);
+                if (room == null) continue;
+                if (targetHoloRoom == null) targetHoloRoom = room;
+                if (room.IsPrewarmed) yield break;
+                if (DesktopViewer.UiCapture > 0 || room.gameObject.activeSelf) continue;
+                var cam = Camera.main;
+                if (cam == null || (cam.transform.position - GateCenter).sqrMagnitude > 12f * 12f) continue;
+                yield return room.CoPrewarm();
+                yield break;
+            }
         }
 
         void OnDestroy()
@@ -107,12 +136,14 @@ namespace Khkt.Demo.Bio.Portal
             if (ringMaterial != null) Destroy(ringMaterial);
             if (ringMesh != null) Destroy(ringMesh);
             if (cardRoot != null) Destroy(cardRoot);
+            DestroyGate();
         }
 
         void Update()
         {
             // 1. Cập nhật vòng sáng sàn: không cấp phát bộ nhớ (0 GC Alloc)
             UpdateRingVisuals();
+            UpdateGateVisuals();
 
             // 2. Kiểm tra cự ly ở tần số 10 Hz
             checkTimer += Time.deltaTime;
@@ -401,9 +432,12 @@ namespace Khkt.Demo.Bio.Portal
             }
 
             Vector3 eyePos = cachedCam.transform.position;
-            Vector3 portalCenter = transform.position;
-            Vector3 toPortal = portalCenter - eyePos;
-            float distSq = toPortal.sqrMagnitude;
+            // Khoảng cách tính trên mặt sàn tới tâm cổng, góc nhìn tính tới tâm lòng cổng (cao ngang ngực)
+            Vector3 toPortal = GateCenter - eyePos;
+            Vector3 flat = new Vector3(toPortal.x, 0f, toPortal.z);
+            float distSq = flat.sqrMagnitude;
+            CheckWalkThrough(eyePos);
+            if (cooldownTimer > 0f || DesktopViewer.UiCapture > 0) return;
 
             if (isCardShown)
             {

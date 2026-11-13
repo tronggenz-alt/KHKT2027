@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Khkt.Demo
 {
     /// <summary>
-    /// Da kính tối GlassKit cho các màn hình vẽ bằng IMGUI (thị kính kính hiển vi, góc nhìn cận cảnh):
+    /// Da VERA Instrument (tấm vát góc, xanh mực, viền lam ngọc) cho các màn hình vẽ bằng IMGUI (góc nhìn cận cảnh, thông báo):
     ///   • Begin() phóng cả giao diện theo màn hình. IMGUI tính bằng điểm ảnh thật nên trên iPad 2360 × 1640 nút 36 px
     ///     chỉ cao khoảng 14 pt, khó bấm trúng; sau khi phóng nút cao khoảng 39 pt.
     ///   • Button / ButtonOn / Panel: nền bo góc xanh đen, viền sáng mảnh, nút đang chọn màu ngọc lam, phông Be Vietnam Pro,
@@ -42,7 +42,7 @@ namespace Khkt.Demo
             get
             {
                 if (panel != null) return panel;
-                texPanel = Rounded(new Color(0.045f, 0.075f, 0.13f, 0.90f), new Color(1f, 1f, 1f, 0.22f));
+                texPanel = Rounded(new Color(0.03f, 0.06f, 0.11f, 0.93f), new Color(0.45f, 0.78f, 1f, 0.40f));
                 panel = new GUIStyle
                 {
                     font = GlassKit.Regular,
@@ -73,7 +73,7 @@ namespace Khkt.Demo
 
         static GUIStyle MakeButton(bool on)
         {
-            texIdle ??= Rounded(new Color(0.07f, 0.11f, 0.19f, 0.90f), new Color(1f, 1f, 1f, 0.26f));
+            texIdle ??= Rounded(new Color(0.06f, 0.11f, 0.19f, 0.92f), new Color(0.45f, 0.78f, 1f, 0.38f));
             texHover ??= Rounded(new Color(0.11f, 0.17f, 0.28f, 0.94f), new Color(GlassKit.Accent.r, GlassKit.Accent.g, GlassKit.Accent.b, 0.70f));
             texDown ??= Rounded(new Color(GlassKit.Accent.r * 0.55f, GlassKit.Accent.g * 0.55f, GlassKit.Accent.b * 0.6f, 0.96f), GlassKit.Accent);
             texOn ??= Rounded(new Color(GlassKit.Accent.r, GlassKit.Accent.g, GlassKit.Accent.b, 0.95f), new Color(1f, 1f, 1f, 0.55f));
@@ -86,7 +86,7 @@ namespace Khkt.Demo
                 padding = new RectOffset(8, 8, 4, 4),
                 clipping = TextClipping.Clip,
             };
-            Color ink = on ? new Color(0.03f, 0.07f, 0.12f) : GlassKit.Ink;
+            Color ink = on ? GlassKit.OnAccent : GlassKit.Ink;
             st.normal.background = on ? texOn : texIdle;
             st.hover.background = on ? texOn : texHover;
             st.active.background = texDown;
@@ -95,7 +95,7 @@ namespace Khkt.Demo
             return st;
         }
 
-        /// <summary>Ô bo góc 32 × 32 có viền 1 px, dùng làm nền 9 mảnh cho GUIStyle.</summary>
+        /// <summary>Ô vát góc 32 × 32 có viền 1 px, dùng làm nền 9 mảnh cho GUIStyle.</summary>
         static Texture2D Rounded(Color fill, Color border)
         {
             const int size = 32;
@@ -106,9 +106,9 @@ namespace Khkt.Demo
             for (int y = 0; y < size; y++)
                 for (int x = 0; x < size; x++)
                 {
-                    float qx = Mathf.Abs(x + 0.5f - half) - (half - radius);
-                    float qy = Mathf.Abs(y + 0.5f - half) - (half - radius);
-                    float outside = new Vector2(Mathf.Max(qx, 0), Mathf.Max(qy, 0)).magnitude + Mathf.Min(Mathf.Max(qx, qy), 0) - radius;
+                    // tấm vát góc 45° thay cho bo tròn
+                    float ax = Mathf.Abs(x + 0.5f - half), ay = Mathf.Abs(y + 0.5f - half);
+                    float outside = Mathf.Max(Mathf.Max(ax, ay) - half, (ax + ay - (2f * half - radius * 0.8f)) * 0.70710678f) + 0.75f;
                     float a = Mathf.Clamp01(0.5f - outside);
                     float edge = Mathf.Clamp01(1f - Mathf.Abs(outside + 0.75f) / 1.25f);
                     Color c = Color.Lerp(fill, new Color(border.r, border.g, border.b, Mathf.Max(fill.a, border.a)), edge * border.a);
