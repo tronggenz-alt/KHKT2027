@@ -6,6 +6,7 @@ Tạo 2 thư mục vòng giả lập vong_fake_A và vong_fake_B, trong đó von
 Chạy kiem_chung.py để chứng minh công cụ phát hiện LỖI TÁI SỬ DỤNG ẢNH CŨ và trả mã thoát != 0.
 """
 
+from pathlib import Path
 import os
 import sys
 import shutil
@@ -13,7 +14,7 @@ import json
 import hashlib
 import subprocess
 
-PROJECT_ROOT = "/Users/trantrong/VERALabHD"
+PROJECT_ROOT = str(Path(__file__).resolve().parents[2])
 TEST_BASE = os.path.join(PROJECT_ROOT, "docs/do-hoa-hd/tinh-chinh/doi_chung_am_vong")
 VONG_A = os.path.join(TEST_BASE, "vong_fake_A")
 VONG_B = os.path.join(TEST_BASE, "vong_fake_B")

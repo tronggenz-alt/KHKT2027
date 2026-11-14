@@ -4,6 +4,7 @@ Biến môi trường:
     LLM_BASE_URL  ví dụ http://localhost:11434/v1
     LLM_MODEL     tên mô hình
     LLM_API_KEY   (nếu dịch vụ cần) - chỉ để trên máy chủ
+    LLM_TIMEOUT   số giây chờ mỗi câu trả lời (mặc định 60; mô hình 32B qua đường hầm SSH nên đặt 90)
 """
 
 from __future__ import annotations
@@ -37,7 +38,7 @@ async def _chat(system: str, user: str, max_tokens: int, json_mode: bool = False
     }
     if json_mode:
         body["response_format"] = {"type": "json_object"}
-    async with httpx.AsyncClient(timeout=20) as client:
+    async with httpx.AsyncClient(timeout=float(os.environ.get("LLM_TIMEOUT", "60"))) as client:
         r = await client.post(f"{base_url}/chat/completions", json=body, headers=headers)
         r.raise_for_status()
         return r.json()["choices"][0]["message"]["content"].strip()

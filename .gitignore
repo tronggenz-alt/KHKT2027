@@ -15,6 +15,9 @@ sessions/
 marker_*.png
 # CSDL web quản lý (tồn kho, nhật ký, khóa API thật) - không đưa lên git
 data/lab.db
+# Kho RAG dựng từ data/kien_thuc bằng tools/xay_kho_rag.py (dựng lại được, vài chục MB)
+data/rag.db
+data/rag.tmp
 data/lab.db-*
 # Mật khẩu, mã lớp của tài khoản thử do `quan_tri nap-mau` sinh ra
 data/tai_khoan_mau_mat_khau.json
@@ -33,6 +36,10 @@ Phong thi nghiem ao/[Rr]ecordings/
 .claude/
 # Nhật ký
 *.log
+# Ảnh, báo cáo sinh ra khi chạy công cụ và nhật ký: không đưa lên git, các phiên AI không cần quét
+outputs/
+logs/
+.pytest_cache/
 
 # Bí mật: không bao giờ đưa lên git
 .env

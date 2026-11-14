@@ -1,3 +1,5 @@
+from pathlib import Path
+ROOT = Path(__file__).resolve().parents[2]
 import os
 import glob
 import re
@@ -25,7 +27,7 @@ def tinh_ti_so(path):
 
 # 1. Quét GUID của các texture
 tex_guids = {}
-for meta_path in glob.glob("/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/**/*.png.meta", recursive=True):
+for meta_path in glob.glob(f"{ROOT}/Phong thi nghiem ao/Assets/Lab/**/*.png.meta", recursive=True):
     with open(meta_path, "r", encoding="utf-8") as fp:
         m = re.search(r"guid:\s*([a-f0-9]+)", fp.read())
         if m:
@@ -34,7 +36,7 @@ for meta_path in glob.glob("/Users/trantrong/VERALabHD/Phong thi nghiem ao/Asset
 
 # 2. Quét các material xem dùng GUID nào
 mat_uses = {}
-for mat_path in glob.glob("/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets/Lab/Materials/*.mat"):
+for mat_path in glob.glob(f"{ROOT}/Phong thi nghiem ao/Assets/Lab/Materials/*.mat"):
     mat_name = os.path.basename(mat_path)[:-4]
     with open(mat_path, "r", encoding="utf-8") as fp:
         content = fp.read()
@@ -46,7 +48,7 @@ for mat_path in glob.glob("/Users/trantrong/VERALabHD/Phong thi nghiem ao/Assets
 # 3. Phân tích FFT các textures
 inventory = []
 for folder in ["Assets/Lab/HD/Textures", "Assets/Lab/Textures"]:
-    dir_path = f"/Users/trantrong/VERALabHD/Phong thi nghiem ao/{folder}"
+    dir_path = f"{ROOT}/Phong thi nghiem ao/{folder}"
     for f in sorted(glob.glob(f"{dir_path}/*.png")):
         fname = os.path.basename(f)
         r = tinh_ti_so(f)
@@ -64,7 +66,7 @@ for folder in ["Assets/Lab/HD/Textures", "Assets/Lab/Textures"]:
             "materials_used": sorted(mats)
         })
 
-out_json = "/Users/trantrong/VERALabHD/docs/do-hoa-hd/be-mat/danh_sach_van_soc.json"
+out_json = f"{ROOT}/docs/do-hoa-hd/be-mat/danh_sach_van_soc.json"
 os.makedirs(os.path.dirname(out_json), exist_ok=True)
 with open(out_json, "w", encoding="utf-8") as fp:
     json.dump(inventory, fp, indent=2, ensure_ascii=False)

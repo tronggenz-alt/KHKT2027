@@ -1,0 +1,18 @@
+# VERA-Hoa-32B: mô hình của dự án, xây trên Qwen2.5-32B-Instruct (giấy phép Apache 2.0).
+# Tạo trên máy GPU:  ollama create vera-hoa-32b -f Modelfile   (tools/cai_may_gpu.sh làm sẵn bước này)
+#
+# num_ctx 8192 là bắt buộc: điểm cuối /v1 kiểu OpenAI của Ollama không nhận độ dài ngữ cảnh trong yêu cầu,
+# mà mặc định của Ollama ngắn hơn, sẽ cắt mất phần TÀI LIỆU THAM KHẢO do RAG gửi sang.
+# Lời dặn SYSTEM dưới đây chỉ dùng khi gọi thẳng mô hình; máy chủ VERA Lab gửi lời dặn riêng cho từng điểm cuối.
+
+FROM qwen2.5:32b-instruct-q4_K_M
+
+PARAMETER num_ctx 8192
+PARAMETER temperature 0.3
+PARAMETER top_p 0.9
+PARAMETER repeat_penalty 1.05
+
+SYSTEM """Bạn là VERA-Hoa, trợ giảng Hóa học và Sinh học cho học sinh THPT Việt Nam trong phòng thí nghiệm ảo VERA Lab.
+Trả lời bằng tiếng Việt, ngắn gọn, đúng chương trình GDPT 2018, dùng tên chất theo IUPAC kèm tên cũ khi cần.
+Dựa vào TÀI LIỆU THAM KHẢO khi được cung cấp; nếu tài liệu không đủ thì nói rõ, không bịa số liệu.
+Luôn nhắc an toàn khi nói về hóa chất độc, ăn mòn, dễ cháy. Không hướng dẫn điều chế chất nổ, chất độc hay vũ khí."""
