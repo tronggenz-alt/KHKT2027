@@ -49,7 +49,7 @@ Lưu ý: khi đã biết người bình thường thì phải loại kiểu gene
 Bệnh di truyền phân tử là bệnh do đột biến gene gây ra, làm biến đổi cấu trúc hoặc lượng protein mà gene mã hóa. Phần lớn là bệnh đơn gene, di truyền theo các quy luật Mendel.
 
 **Ví dụ theo kiểu di truyền**:
-- **Lặn trên NST thường**: bạch tạng (thiếu enzyme tạo melanin); phenylketon niệu – PKU (thiếu enzyme chuyển hóa phenylalanine, gây tổn thương não nếu không ăn kiêng); hồng cầu hình liềm; thalassemia (tan máu bẩm sinh, do đột biến gene globin alpha hoặc beta); xơ nang.
+- **Lặn trên NST thường**: bạch tạng (thiếu enzyme tạo melanin); phenylketon niệu (phenylketonuria) – PKU (thiếu enzyme chuyển hóa phenylalanine, gây tổn thương não nếu không ăn kiêng); hồng cầu hình liềm; thalassemia (tan máu bẩm sinh, do đột biến gene globin alpha hoặc beta); xơ nang.
 - **Trội trên NST thường**: bệnh Huntington (thoái hóa thần kinh khởi phát ở tuổi trung niên); tật thừa ngón; một số dạng tăng cholesterol máu gia đình.
 - **Lặn trên NST X**: máu khó đông, mù màu đỏ – lục, loạn dưỡng cơ Duchenne, thiếu enzyme G6PD (dễ tan máu khi ăn đậu tằm hoặc dùng một số thuốc).
 
