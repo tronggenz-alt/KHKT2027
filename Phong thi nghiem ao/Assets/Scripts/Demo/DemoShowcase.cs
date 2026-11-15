@@ -241,7 +241,7 @@ namespace Khkt.Demo
             // ----- Thẻ hướng dẫn từng bước (không khóa điều khiển) -----
             var gi = Panel(canvas.transform, "Thẻ hướng dẫn demo", new Vector2(0, 1), new Vector2(0, 1), new Vector2(24, touch ? -112 : -24), new Vector2(520, 250),
                            glassOk ? Glass(shader) : null, 1.4f);
-            if (!glassOk) { gi.sprite = Solid; gi.color = Surface; }
+            if (!glassOk && !ReducedTransparency) { gi.sprite = Solid; gi.pixelsPerUnitMultiplier = UiTheme.IsVera ? 1.4f : 2.8f; gi.color = Surface; }
             gi.raycastTarget = true;
             guide = gi.gameObject;
             var g = guide.transform;
@@ -297,7 +297,7 @@ namespace Khkt.Demo
             {
                 SetChip(rows[i], i == selected);
                 var sub = rows[i].transform.Find("Phụ");
-                if (sub != null) sub.GetComponent<Text>().color = i == selected ? OnAccent : (Demos[i].area == "HÓA HỌC" ? Accent2 : Good);
+                if (sub != null) sub.GetComponent<Text>().color = Demos[i].area == "HÓA HỌC" ? Accent2 : Good;
             }
             dArea.text = $"{d.area} · {d.minutes}";
             dTitle.text = d.title;

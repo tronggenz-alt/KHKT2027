@@ -39,17 +39,17 @@ namespace Khkt.Demo.Instruments
 
         public override void Build()
         {
-            bCool = S.AddButton("Mở nước làm mát", 0, 0, () => { Cooling = !Cooling; if (Cooling && Feed) S.Done("cap_nuoc"); }, false, 1, 13);
-            bFeed = S.AddButton("Mở nước cấp", 1, 0, () => { Feed = !Feed; if (Cooling && Feed) S.Done("cap_nuoc"); }, false, 1, 13);
+            bCool = S.AddButton("Mở nước làm mát", 0, 0, () => { Cooling = !Cooling; if (Cooling && Feed) S.Done("cap_nuoc"); }, false, 1, 14);
+            bFeed = S.AddButton("Mở nước cấp", 1, 0, () => { Feed = !Feed; if (Cooling && Feed) S.Done("cap_nuoc"); }, false, 1, 14);
             bHeat = S.AddButton("Bật đun", 2, 0, ToggleHeat, true);
-            bStages = S.AddButton("", 0, 1, () => Stages = Stages == 2 ? 1 : 2, false, 2, 13);
-            bDiscard = S.AddButton("Bỏ phần nước đầu", 2, 1, Discard, false, 1, 13);
-            bCollect = S.AddButton("Hứng vào bình chứa", 0, 2, Collect, false, 1, 13);
-            bMeasure = S.AddButton("Đo độ dẫn điện", 1, 2, Measure, true, 1, 13);
-            bOpen = S.AddButton("", 2, 2, () => BottleOpen = !BottleOpen, false, 1, 13);
+            bStages = S.AddButton("", 0, 1, () => Stages = Stages == 2 ? 1 : 2, false, 2, 14);
+            bDiscard = S.AddButton("Bỏ phần nước đầu", 2, 1, Discard, false, 1, 14);
+            bCollect = S.AddButton("Hứng vào bình chứa", 0, 2, Collect, false, 1, 14);
+            bMeasure = S.AddButton("Đo độ dẫn điện", 1, 2, Measure, true, 1, 14);
+            bOpen = S.AddButton("", 2, 2, () => BottleOpen = !BottleOpen, false, 1, 14);
             bWait = S.AddButton("Để 2 giờ", 0, 3, () => { OpenMin += BottleOpen ? 120 : 10; S.Say(BottleOpen ? "Để bình hở 2 giờ ngoài không khí." : "Để bình đậy kín 2 giờ.", 0); });
-            bOff = S.AddButton("Tắt đun, xả cặn", 1, 3, TurnOff, false, 2, 13);
-            status = S.AddText("", 4, 0, 3, 13);
+            bOff = S.AddButton("Tắt đun, xả cặn", 1, 3, TurnOff, false, 2, 14);
+            status = S.AddText("", 4, 0, 3, 14);
             S.SetResults("Mở nước làm mát và nước cấp trước, rồi bật đun. Bỏ phần nước cất đầu, đo độ dẫn điện để xếp loại nước.");
         }
 
@@ -144,7 +144,7 @@ namespace Khkt.Demo.Instruments
         string BuildResults()
         {
             var sb = new StringBuilder();
-            sb.Append($"<color=#9FB3C8>Nước cấp (nước máy):</color> khoảng {Distiller.TapUs:0} µS/cm\n");
+            sb.Append($"<color={GlassKit.HexDim}>Nước cấp (nước máy):</color> khoảng {Distiller.TapUs:0} µS/cm\n");
             if (readings.Count > 0)
             {
                 sb.Append("\n<b>Các lần đo độ dẫn</b>\n");
@@ -163,27 +163,33 @@ namespace Khkt.Demo.Instruments
             float ph = time * 60;
             var f1 = new Vector2(170, 110);
             var f2 = new Vector2(540, 110);
+            var glass = SchemKit.GlassEdge;
+            var glassBg = new Color(glass.r, glass.g, glass.b, 0.18f);
             foreach (var (f, active) in new[] { (f1, Heater && Feed), (f2, Heater && Feed && Stages == 2) })
             {
-                p.Disc(f.x, f.y, 55, new Color(0.7f, 0.85f, 1f, 0.2f));
-                p.Ring(f.x, f.y, 55, new Color(0.85f, 0.92f, 1f, 0.7f), 2);
-                p.FillRect(f.x - 45, f.y - 50, 90, 45, Feed ? new Color(0.35f, 0.6f, 0.95f, 0.5f) : new Color(0.3f, 0.3f, 0.3f, 0.3f));
-                if (active && warm >= 2f) for (int i = 0; i < 4; i++) p.Disc(f.x - 30 + i * 20, f.y - 40 + Mathf.Repeat(time * 60 + i * 20, 40), 4, new Color(0.9f, 0.95f, 1f, 0.8f));
-                p.Line(f.x - 30, f.y - 60, f.x + 30, f.y - 60, Heater && !tripped ? new Color(1f, 0.45f, 0.2f) : SchemKit.Off, 5);
+                p.Disc(f.x, f.y, 55, glassBg);
+                p.Ring(f.x, f.y, 55, glass, 2);
+                p.FillRect(f.x - 45, f.y - 50, 90, 45, Feed ? SchemKit.Water : SchemKit.SubtleFill);
+                if (active && warm >= 2f) for (int i = 0; i < 4; i++) p.Disc(f.x - 30 + i * 20, f.y - 40 + Mathf.Repeat(time * 60 + i * 20, 40), 4, glass);
+                p.Line(f.x - 30, f.y - 60, f.x + 30, f.y - 60, Heater && !tripped ? SchemKit.Hot : SchemKit.Off, 5);
                 // sinh hàn chéo
-                p.Line(f.x + 30, f.y + 45, f.x + 180, f.y + 170, new Color(0.85f, 0.92f, 1f, 0.6f), 10);
-                SchemKit.Pipe(p, new[] { new Vector2(f.x + 60, f.y + 70), new Vector2(f.x + 160, f.y + 165) }, Cooling, ph, new Color(0.4f, 0.75f, 1f), 4);
+                p.Line(f.x + 30, f.y + 45, f.x + 180, f.y + 170, glass, 10);
+                SchemKit.Pipe(p, new[] { new Vector2(f.x + 60, f.y + 70), new Vector2(f.x + 160, f.y + 165) }, Cooling, ph, SchemKit.Flow, 4);
             }
-            if (Producing) p.Disc(f2.x + 180 + 5, f2.y + 120 - Mathf.Repeat(time * 80, 60), 5, new Color(0.8f, 0.9f, 1f));
-            SchemKit.Vessel(p, 760, 20, 120, 150, (float)Math.Min(1, BottleMl / 2000), new Color(0.8f, 0.9f, 1f, 0.45f));
-            if (!Cooling && Heater) for (int i = 0; i < 5; i++) p.Disc(f1.x + 190 + i * 8, f1.y + 180 + Mathf.Repeat(time * 50 + i * 15, 60), 7, new Color(1, 1, 1, 0.35f));
+            if (Producing) p.Disc(f2.x + 180 + 5, f2.y + 120 - Mathf.Repeat(time * 80, 60), 5, SchemKit.Flow);
+            SchemKit.Vessel(p, 760, 20, 120, 150, (float)Math.Min(1, BottleMl / 2000), SchemKit.Water);
+            if (!Cooling && Heater)
+            {
+                var steam = new Color(SchemKit.Edge.r, SchemKit.Edge.g, SchemKit.Edge.b, 0.45f);
+                for (int i = 0; i < 5; i++) p.Disc(f1.x + 190 + i * 8, f1.y + 180 + Mathf.Repeat(time * 50 + i * 15, 60), 7, steam);
+            }
             var d = Doc;
-            S.SchemLabel("b1", d.PartName("binh_dun_1"), f1.x, f1.y - 80, 11);
-            S.SchemLabel("b2", d.PartName("binh_dun_2") + (Stages == 2 ? "" : " (bỏ qua)"), f2.x, f2.y - 80, 11);
-            S.SchemLabel("sh", d.PartName("sinh_han_1") + (Cooling ? "" : " <color=#FFC966>(chưa có nước làm mát)</color>"), f1.x + 110, f1.y + 190, 11);
-            S.SchemLabel("chua", d.PartName("binh_chua") + $"\n{Fmt(BottleMl, "0")} mL", 820, 190, 11);
-            S.SchemLabel("dd", d.PartName("do_dan") + (double.IsNaN(LastUs) ? "" : $"\n<color=#73F29E>{Fmt(LastUs, LastUs < 1 ? "0.00" : "0.0")} µS/cm</color>"), 820, 300, 11);
-            S.SchemLabel("trang_thai", tripped ? "<color=#FF7A7A>NGẮT NHIỆT</color>" : Producing ? "<color=#61DBFF>ĐANG CẤT</color>" : Heater ? "<color=#FFC966>ĐANG ĐUN</color>" : "<color=#73F29E>SẴN SÀNG</color>", 420, 334, 14);
+            S.SchemLabel("b1", d.PartName("binh_dun_1"), f1.x, f1.y - 80, 14);
+            S.SchemLabel("b2", d.PartName("binh_dun_2") + (Stages == 2 ? "" : " (bỏ qua)"), f2.x, f2.y - 80, 14);
+            S.SchemLabel("sh", d.PartName("sinh_han_1") + (Cooling ? "" : $" <color={GlassKit.HexWarn}>(chưa có nước làm mát)</color>"), f1.x + 110, f1.y + 190, 14);
+            S.SchemLabel("chua", d.PartName("binh_chua") + $"\n{Fmt(BottleMl, "0")} mL", 820, 190, 14);
+            S.SchemLabel("dd", d.PartName("do_dan") + (double.IsNaN(LastUs) ? "" : $"\n<color={GlassKit.HexGood}>{Fmt(LastUs, LastUs < 1 ? "0.00" : "0.0")} µS/cm</color>"), 820, 300, 14);
+            S.SchemLabel("trang_thai", tripped ? $"<color={GlassKit.HexBad}>NGẮT NHIỆT</color>" : Producing ? $"<color={GlassKit.HexAccent}>ĐANG CẤT</color>" : Heater ? $"<color={GlassKit.HexWarn}>ĐANG ĐUN</color>" : $"<color={GlassKit.HexGood}>SẴN SÀNG</color>", 420, 334, 14);
         }
 
         public override void DrawPlot(Painter p)
@@ -191,14 +197,14 @@ namespace Khkt.Demo.Instruments
             InstrumentScreen.PlotFrame(p);
             S.SetPlotAxes("Độ dẫn điện các lần đo (thang log) và ngưỡng loại nước TCVN 4851", "Lần đo", "µS/cm (log)", "", "", "0,01", "1000");
             double L(double us) => (Math.Log10(Math.Max(0.01, us)) + 2) / 5;  // 0.01 → 0, 1000 → 1
-            foreach (var (lim, col) in new[] { (0.1, new Color(0.45f, 0.95f, 0.62f, 0.5f)), (1.0, new Color(0.45f, 0.86f, 1f, 0.5f)), (5.0, new Color(1f, 0.8f, 0.3f, 0.5f)) })
-                p.FillRect(0, (float)(L(lim) * (p.H - 8)) + 3, p.W, 2, col);
+            foreach (var (lim, col) in new[] { (0.1, InstrumentScreen.TraceGreen), (1.0, InstrumentScreen.TraceCyan), (5.0, InstrumentScreen.TraceGold) })
+                p.FillRect(0, (float)(L(lim) * (p.H - 8)) + 3, p.W, 2, new Color(col.r, col.g, col.b, 0.55f));
             var tap = (float)(L(Distiller.TapUs) * (p.H - 8)) + 3;
-            p.FillRect(10, 0, 40, tap, new Color(0.6f, 0.6f, 0.65f, 0.6f));
+            p.FillRect(10, 0, 40, tap, InstrumentScreen.TraceDim);
             for (int i = 0; i < readings.Count; i++)
             {
                 float h = (float)(L(readings[i].us) * (p.H - 8)) + 3;
-                p.FillRect(80 + i * 70, 0, 50, h, Distiller.Grade(readings[i].us) == 2 ? SchemKit.Good : new Color(1f, 0.7f, 0.35f));
+                p.FillRect(80 + i * 70, 0, 50, h, Distiller.Grade(readings[i].us) == 2 ? InstrumentScreen.TraceGreen : InstrumentScreen.TraceGold);
             }
         }
     }
@@ -236,16 +242,16 @@ namespace Khkt.Demo.Instruments
 
         public override void Build()
         {
-            bWater = S.AddButton("Châm nước đáy nồi", 0, 0, AddWater, false, 1, 13);
-            bLoad = S.AddButton("Xếp đồ + chỉ thị", 1, 0, Load, false, 1, 13);
+            bWater = S.AddButton("Châm nước đáy nồi", 0, 0, AddWater, false, 1, 14);
+            bLoad = S.AddButton("Xếp đồ + chỉ thị", 1, 0, Load, false, 1, 14);
             bLid = S.AddButton("Đóng nắp", 2, 0, CloseLid);
-            bVent = S.AddButton("", 0, 1, ToggleVent, false, 1, 13);
+            bVent = S.AddButton("", 0, 1, ToggleVent, false, 1, 14);
             bHeat = S.AddButton("Bật đun", 1, 1, StartHeat, true);
-            bHold = S.AddButton("", 2, 1, () => HoldTarget = HoldTarget == 15 ? 5 : HoldTarget == 5 ? 30 : 15, false, 1, 13);
-            bCool = S.AddButton("Tắt đun, chờ hạ áp", 0, 2, StopHeat, false, 1, 13);
+            bHold = S.AddButton("", 2, 1, () => HoldTarget = HoldTarget == 15 ? 5 : HoldTarget == 5 ? 30 : 15, false, 1, 14);
+            bCool = S.AddButton("Tắt đun, chờ hạ áp", 0, 2, StopHeat, false, 1, 14);
             bOpen = S.AddButton("Mở nắp", 1, 2, OpenLid);
-            bBi = S.AddButton("Ủ, đọc chỉ thị sinh học", 2, 2, ReadBi, false, 1, 12);
-            status = S.AddText("", 3, 0, 3, 13);
+            bBi = S.AddButton("Ủ, đọc chỉ thị sinh học", 2, 2, ReadBi, false, 1, 14);
+            status = S.AddText("", 3, 0, 3, 14);
             S.SetResults("Châm nước, xếp đồ kèm ống chỉ thị sinh học, đóng nắp, mở van xả, bật đun; đóng van khi hơi phun đều; giữ 121 °C trong 15 phút.");
         }
 
@@ -367,12 +373,12 @@ namespace Khkt.Demo.Instruments
         string BuildResults()
         {
             var sb = new StringBuilder();
-            sb.Append($"<color=#9FB3C8>Hơi bão hòa (IAPWS-IF97):</color> 121 °C ↔ {SteamTable.PsatBar(121):0.000} bar tuyệt đối = {SteamTable.PsatBar(121) - Atm:0.00} bar dư\n");
+            sb.Append($"<color={GlassKit.HexDim}>Hơi bão hòa (IAPWS-IF97):</color> 121 °C ↔ {SteamTable.PsatBar(121):0.000} bar tuyệt đối = {SteamTable.PsatBar(121) - Atm:0.00} bar dư\n");
             if (Minutes > 0)
             {
                 double pAirNow = AirBar * (T + 273.15) / 298.15;
                 sb.Append($"\nĐồng hồ {GaugeBar:0.00} bar dư = p hơi {(LidClosed ? SteamTable.PsatBar(Math.Max(1, T)) : 0):0.00} + p không khí {pAirNow:0.00} − p khí quyển {Atm:0.00} bar\n");
-                sb.Append($"Nhiệt độ thật: <b>{T:0.0} °C</b>" + (AirBar > 0.05 && !VentOpen ? $" <color=#FFC966>(còn không khí: thấp hơn {SteamTable.TsatC(SetGauge + Atm):0.0} °C ứng với áp suất chỉ)</color>" : "") + "\n");
+                sb.Append($"Nhiệt độ thật: <b>{T:0.0} °C</b>" + (AirBar > 0.05 && !VentOpen ? $" <color={GlassKit.HexWarn}>(còn không khí: thấp hơn {SteamTable.TsatC(SetGauge + Atm):0.0} °C ứng với áp suất chỉ)</color>" : "") + "\n");
                 sb.Append($"\n<b>Phân tích chuyên sâu: diệt bào tử</b>\nD(T) = {D121} × 10^((121 − T)/{Z}) phút · đã giảm <b>{LogKill:0.0} bậc</b> (10⁶ bào tử → còn khoảng 10^{N0Log - LogKill:0.0})\n");
                 sb.Append($"Giữ {HoldMin:0.0} phút ở áp suất đặt. Cần giảm ≥ 7 bậc (còn dưới 0,1 bào tử) để chỉ thị đạt.\n");
                 if (BiResult != "") sb.Append($"Chỉ thị sinh học: <b>{BiResult}</b>\n");
@@ -384,30 +390,36 @@ namespace Khkt.Demo.Instruments
         {
             SchemKit.Begin(p);
             var c = new Vector2(300, 170);
-            p.FillRect(c.x - 120, c.y - 140, 240, 270, new Color(0.55f, 0.58f, 0.62f));
-            p.FillRect(c.x - 105, c.y - 125, 210, 240, new Color(0.1f, 0.12f, 0.15f));
-            if (Water) p.FillRect(c.x - 105, c.y - 125, 210, 40, new Color(0.35f, 0.6f, 0.95f, 0.6f));
-            if (Heater) p.Line(c.x - 90, c.y - 132, c.x + 90, c.y - 132, new Color(1f, 0.45f, 0.2f), 5);
+            p.FillRect(c.x - 120, c.y - 140, 240, 270, SchemKit.Metal);
+            p.FillRect(c.x - 105, c.y - 125, 210, 240, SchemKit.BodyAlt);
+            if (Water) p.FillRect(c.x - 105, c.y - 125, 210, 40, SchemKit.Water);
+            if (Heater) p.Line(c.x - 90, c.y - 132, c.x + 90, c.y - 132, SchemKit.Hot, 5);
             float steam = Mathf.Clamp01((float)(T - 90) / 30);
-            for (int i = 0; i < 18; i++) p.Disc(c.x - 90 + (i * 37) % 180, c.y - 70 + Mathf.Repeat(time * 30 + i * 23, 170), 5, new Color(1, 1, 1, 0.25f * steam));
+            var steamCol = new Color(SchemKit.Edge.r, SchemKit.Edge.g, SchemKit.Edge.b, 0.35f * steam);
+            for (int i = 0; i < 18; i++) p.Disc(c.x - 90 + (i * 37) % 180, c.y - 70 + Mathf.Repeat(time * 30 + i * 23, 170), 5, steamCol);
             float air = (float)(AirBar / Atm);
-            for (int i = 0; i < (int)(air * 20); i++) p.Disc(c.x - 80 + (i * 53) % 160, c.y + 90 - (i * 31) % 120, 4, new Color(0.6f, 0.9f, 0.6f, 0.7f));
-            if (Loaded) { SchemKit.Box(p, c.x - 60, c.y - 60, 120, 90, new Color(0.25f, 0.27f, 0.3f)); p.FillRect(c.x + 20, c.y - 40, 14, 40, new Color(0.6f, 0.3f, 0.8f)); }
-            p.FillRect(c.x - 130, c.y + 130, 260, LidClosed ? 14 : 4, new Color(0.7f, 0.72f, 0.75f));
+            var airCol = new Color(SchemKit.Good.r, SchemKit.Good.g, SchemKit.Good.b, 0.75f);
+            for (int i = 0; i < (int)(air * 20); i++) p.Disc(c.x - 80 + (i * 53) % 160, c.y + 90 - (i * 31) % 120, 4, airCol);
+            if (Loaded) { SchemKit.Box(p, c.x - 60, c.y - 60, 120, 90, SchemKit.Body); p.FillRect(c.x + 20, c.y - 40, 14, 40, InstrumentScreen.TraceViolet); }
+            p.FillRect(c.x - 130, c.y + 130, 260, LidClosed ? 14 : 4, SchemKit.Edge);
             // van xả
-            p.FillRect(c.x + 80, c.y + 144, 12, 30, VentOpen ? new Color(1f, 0.8f, 0.3f) : SchemKit.Off);
-            if (VentOpen && T > 99) for (int i = 0; i < 4; i++) p.Disc(c.x + 86, c.y + 180 + Mathf.Repeat(time * 60 + i * 10, 40), 4, new Color(1, 1, 1, 0.5f));
+            p.FillRect(c.x + 80, c.y + 144, 12, 30, VentOpen ? SchemKit.Hot : SchemKit.Off);
+            if (VentOpen && T > 99)
+            {
+                var ventCol = new Color(SchemKit.Edge.r, SchemKit.Edge.g, SchemKit.Edge.b, 0.55f);
+                for (int i = 0; i < 4; i++) p.Disc(c.x + 86, c.y + 180 + Mathf.Repeat(time * 60 + i * 10, 40), 4, ventCol);
+            }
             // đồng hồ
             var g = new Vector2(700, 200);
             p.Ring(g.x, g.y, 70, SchemKit.Edge, 4);
             float a = Mathf.Lerp(220, -40, (float)(GaugeBar / 2.5)) * Mathf.Deg2Rad;
-            p.Line(g.x, g.y, g.x + Mathf.Cos(a) * 60, g.y + Mathf.Sin(a) * 60, GaugeBar > 1.6 ? new Color(1f, 0.4f, 0.4f) : SchemKit.Good, 4);
+            p.Line(g.x, g.y, g.x + Mathf.Cos(a) * 60, g.y + Mathf.Sin(a) * 60, GaugeBar > 1.6 ? InstrumentScreen.TraceCoral : SchemKit.Good, 4);
             var d = Doc;
-            S.SchemLabel("noi", d.PartName("noi") + $"\n<color=#FFB27A>{T:0.0} °C</color>", c.x, c.y + 205 > 340 ? 20 : c.y + 205, 12);
-            S.SchemLabel("van", d.PartName("van_xa") + (VentOpen ? " · mở" : " · đóng"), c.x + 200, c.y + 150, 11);
-            S.SchemLabel("dh", d.PartName("dong_ho") + $"\n<color=#73F29E>{GaugeBar:0.00} bar</color>", g.x, g.y - 95, 12);
-            S.SchemLabel("kk", $"<color=#9AE6A8>● không khí còn {AirBar / Atm:P0}</color>", c.x, 18, 11);
-            S.SchemLabel("trang_thai", !LidClosed ? "<color=#73F29E>NẮP MỞ</color>" : Heater ? (VentOpen ? "<color=#FFC966>ĐANG ĐUỔI KHÍ</color>" : "<color=#61DBFF>ĐANG TIỆT TRÙNG</color>") : GaugeBar > 0.05 ? "<color=#FFC966>ĐANG HẠ ÁP</color>" : "<color=#73F29E>SẴN SÀNG</color>", 700, 330, 14);
+            S.SchemLabel("noi", d.PartName("noi") + $"\n<color={GlassKit.HexWarn}>{T:0.0} °C</color>", c.x, c.y + 205 > 340 ? 20 : c.y + 205, 14);
+            S.SchemLabel("van", d.PartName("van_xa") + (VentOpen ? " · mở" : " · đóng"), c.x + 200, c.y + 150, 14);
+            S.SchemLabel("dh", d.PartName("dong_ho") + $"\n<color={GlassKit.HexGood}>{GaugeBar:0.00} bar</color>", g.x, g.y - 95, 14);
+            S.SchemLabel("kk", $"<color={GlassKit.HexGood}>● không khí còn {AirBar / Atm:P0}</color>", c.x, 18, 14);
+            S.SchemLabel("trang_thai", !LidClosed ? $"<color={GlassKit.HexGood}>NẮP MỞ</color>" : Heater ? (VentOpen ? $"<color={GlassKit.HexWarn}>ĐANG ĐUỔI KHÍ</color>" : $"<color={GlassKit.HexAccent}>ĐANG TIỆT TRÙNG</color>") : GaugeBar > 0.05 ? $"<color={GlassKit.HexWarn}>ĐANG HẠ ÁP</color>" : $"<color={GlassKit.HexGood}>SẴN SÀNG</color>", 700, 330, 14);
         }
 
         public override void DrawPlot(Painter p)
@@ -416,11 +428,11 @@ namespace Khkt.Demo.Instruments
             double tMax = Math.Max(60, Minutes * 1.05);
             S.SetPlotAxes("Nhiệt độ (cam), áp suất dư ×50 (xanh), lg số bào tử ×20 (tím) theo thời gian", "Thời gian (phút)", "°C", "0", Fmt(tMax, "0"), "0", "140");
             if (Trace.Count < 2) return;
-            p.Poly(Trace.Select(q => InstrumentScreen.Map(p, q.t, q.T, 0, tMax, 0, 140)).ToList(), new Color(1f, 0.6f, 0.35f), 2);
-            p.Poly(Trace.Select(q => InstrumentScreen.Map(p, q.t, q.pg * 50, 0, tMax, 0, 140)).ToList(), new Color(0.45f, 0.86f, 1f), 2);
-            p.Poly(Trace.Select(q => InstrumentScreen.Map(p, q.t, Math.Max(0, q.logN + 3) * 20, 0, tMax, 0, 140)).ToList(), new Color(0.75f, 0.55f, 1f), 2);
+            p.Poly(Trace.Select(q => InstrumentScreen.Map(p, q.t, q.T, 0, tMax, 0, 140)).ToList(), SchemKit.Hot, 2);
+            p.Poly(Trace.Select(q => InstrumentScreen.Map(p, q.t, q.pg * 50, 0, tMax, 0, 140)).ToList(), InstrumentScreen.TraceCyan, 2);
+            p.Poly(Trace.Select(q => InstrumentScreen.Map(p, q.t, Math.Max(0, q.logN + 3) * 20, 0, tMax, 0, 140)).ToList(), InstrumentScreen.TraceViolet, 2);
             var r = InstrumentScreen.Map(p, 0, 121, 0, tMax, 0, 140);
-            p.FillRect(0, r.y, p.W, 1, new Color(1, 1, 1, 0.3f));
+            p.FillRect(0, r.y, p.W, 1, InstrumentScreen.TraceDim);
         }
     }
 }

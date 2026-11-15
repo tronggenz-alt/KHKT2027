@@ -67,17 +67,17 @@ namespace Khkt.Demo.Instruments
 
         public override void Build()
         {
-            bSrc = S.AddButton("", 0, 0, () => { Src.Next(); Reset(); }, false, 2, 12);
-            bDry = S.AddButton("Sấy khô mẫu", 2, 0, Dry, false, 1, 13);
+            bSrc = S.AddButton("", 0, 0, () => { Src.Next(); Reset(); }, false, 2, 14);
+            bDry = S.AddButton("Sấy khô mẫu", 2, 0, Dry, false, 1, 14);
             bMass = S.AddButton("", 0, 1, NextMass);
             bO2 = S.AddButton("", 1, 1, NextO2);
-            bFill = S.AddButton("Lắp sợi mồi, nạp O₂", 2, 1, Fill, false, 1, 12);
-            bWater = S.AddButton("Đặt bom vào bình nước", 0, 2, PlaceInWater, false, 1, 12);
+            bFill = S.AddButton("Lắp sợi mồi, nạp O₂", 2, 1, Fill, false, 1, 14);
+            bWater = S.AddButton("Đặt bom vào bình nước", 0, 2, PlaceInWater, false, 1, 14);
             bFire = S.AddButton("ĐỐT", 1, 2, Fire, true);
             bCalc = S.AddButton("Tính kết quả", 2, 2, Calculate);
-            bCal = S.AddButton("Dùng làm hiệu chuẩn C", 0, 3, UseAsCalibration, false, 2, 13);
+            bCal = S.AddButton("Dùng làm hiệu chuẩn C", 0, 3, UseAsCalibration, false, 2, 14);
             bVent = S.AddButton("Xả khí, rửa bom", 2, 3, Vent);
-            status = S.AddText("", 4, 0, 3, 13);
+            status = S.AddText("", 4, 0, 3, 14);
             S.SetResults("Hiệu chuẩn trước: đốt khoảng 1 g axit benzoic chuẩn để tìm nhiệt dung C của hệ. Mẫu lỏng / dung dịch phải sấy khô trước khi đốt.");
         }
 
@@ -231,8 +231,8 @@ namespace Khkt.Demo.Instruments
         string BuildResults()
         {
             var sb = new StringBuilder();
-            sb.Append($"<color=#9FB3C8>Mẫu:</color> {Src.Describe(Sample)}\n");
-            if (Filled) sb.Append($"<color=#9FB3C8>Trong chén:</color> {string.Join(", ", charge.Select(s => $"{s.Name} {Fmt(s.Mg, "0.0")} mg"))}\n");
+            sb.Append($"<color={GlassKit.HexDim}>Mẫu:</color> {Src.Describe(Sample)}\n");
+            if (Filled) sb.Append($"<color={GlassKit.HexDim}>Trong chén:</color> {string.Join(", ", charge.Select(s => $"{s.Name} {Fmt(s.Mg, "0.0")} mg"))}\n");
             if (!double.IsNaN(Q))
             {
                 double C = Calibrated ? CalibratedC : NominalC;
@@ -247,15 +247,15 @@ namespace Khkt.Demo.Instruments
                     double kjmol = SpecificJg * pure.M / 1000;
                     double dH = -kjmol + pure.DeltaN * 8.314 * 298.15 / 1000;
                     sb.Append($"ΔcU = −{Fmt(kjmol, "0")} kJ/mol; ΔcH = ΔcU + Δn·RT = {Fmt(dH, "0")} kJ/mol (Δn khí = {Fmt(pure.DeltaN, "0.#")})\n");
-                    sb.Append($"<color=#9FB3C8>NIST: ΔcH° = {Fmt(pure.DeltaH, "0.#")} kJ/mol → sai {Fmt((dH / pure.DeltaH - 1) * 100, "+0.0;−0.0")}%</color>\n");
+                    sb.Append($"<color={GlassKit.HexDim}>NIST: ΔcH° = {Fmt(pure.DeltaH, "0.#")} kJ/mol → sai {Fmt((dH / pure.DeltaH - 1) * 100, "+0.0;−0.0")}%</color>\n");
                 }
                 if (Src.FromTube && mg > 0)
                 {
                     double perMl = Q / Src.TakeMl;
                     sb.Append($"Chất khô {Fmt(mg / Src.TakeMl * 100 / 1000, "0.0")} g/100 mL · năng lượng <b>{Fmt(perMl * 100 / 1000, "0")} kJ/100 mL = {Fmt(perMl * 100 / 4184, "0")} kcal/100 mL</b>\n");
-                    sb.Append("<color=#9FB3C8>Bom đo năng lượng toàn phần; năng lượng dinh dưỡng (hệ số Atwater) thấp hơn một chút vì cơ thể không đốt hết.</color>\n");
+                    sb.Append($"<color={GlassKit.HexDim}>Bom đo năng lượng toàn phần; năng lượng dinh dưỡng (hệ số Atwater) thấp hơn một chút vì cơ thể không đốt hết.</color>\n");
                 }
-                if (unknown.Count > 0) sb.Append($"<color=#FFC966>Chất hữu cơ chưa có nhiệt đốt cháy trong thư viện (không tính):</color> {string.Join(", ", unknown.Distinct())}\n");
+                if (unknown.Count > 0) sb.Append($"<color={GlassKit.HexWarn}>Chất hữu cơ chưa có nhiệt đốt cháy trong thư viện (không tính):</color> {string.Join(", ", unknown.Distinct())}\n");
             }
             return sb.ToString();
         }
@@ -268,11 +268,11 @@ namespace Khkt.Demo.Instruments
         {
             SchemKit.Begin(p);
             var c = new Vector2(330, 165);
-            SchemKit.Box(p, c.x - 220, c.y - 150, 440, 300, new Color(0.15f, 0.2f, 0.3f));   // vỏ
-            SchemKit.Vessel(p, c.x - 170, c.y - 120, 340, 230, 0.85f, new Color(0.35f, 0.6f, 0.95f, 0.45f));  // bình nước
-            SchemKit.Box(p, c.x - 60, c.y - 90, 120, 160, new Color(0.55f, 0.58f, 0.62f));  // bom
-            p.FillRect(c.x - 25, c.y - 50, 50, 14, new Color(0.85f, 0.85f, 0.8f));  // chén
-            if (Filled) p.FillRect(c.x - 15, c.y - 36, 30, 10, new Color(0.95f, 0.95f, 0.9f));
+            SchemKit.Box(p, c.x - 220, c.y - 150, 440, 300, SchemKit.Body);   // vỏ
+            SchemKit.Vessel(p, c.x - 170, c.y - 120, 340, 230, 0.85f, SchemKit.Water);  // bình nước
+            SchemKit.Box(p, c.x - 60, c.y - 90, 120, 160, SchemKit.BodyAlt);  // bom
+            p.FillRect(c.x - 25, c.y - 50, 50, 14, SchemKit.Metal);  // chén
+            if (Filled) p.FillRect(c.x - 15, c.y - 36, 30, 10, InstrumentScreen.TraceGold);
             bool burning = Running && RunMinutes > FireAt && RunMinutes < FireAt + 1.5;
             if (burning)
             {
@@ -287,20 +287,20 @@ namespace Khkt.Demo.Instruments
                 p.Line(c.x + 120 - Mathf.Cos(a) * 20, c.y - 60, c.x + 120 + Mathf.Cos(a) * 20, c.y - 60, SchemKit.Edge, 4);
             }
             // nhiệt kế
-            p.FillRect(c.x - 130, c.y - 80, 8, 220, new Color(0.9f, 0.9f, 0.95f));
+            p.FillRect(c.x - 130, c.y - 80, 8, 220, SchemKit.GlassEdge);
             // trạm oxy
             var o2 = new Vector2(800, 170);
-            SchemKit.Box(p, o2.x - 40, o2.y - 120, 80, 220, new Color(0.25f, 0.45f, 0.3f));
+            SchemKit.Box(p, o2.x - 40, o2.y - 120, 80, 220, Color.Lerp(SchemKit.Body, SchemKit.Good, 0.28f));
             p.Ring(o2.x, o2.y + 130, 26, SchemKit.Edge, 3);
             float ang = Mathf.Lerp(200, -20, (float)(O2Bar / 40)) * Mathf.Deg2Rad;
-            p.Line(o2.x, o2.y + 130, o2.x + Mathf.Cos(ang) * 20, o2.y + 130 + Mathf.Sin(ang) * 20, O2Bar >= 25 ? SchemKit.Good : new Color(1f, 0.6f, 0.3f), 3);
+            p.Line(o2.x, o2.y + 130, o2.x + Mathf.Cos(ang) * 20, o2.y + 130 + Mathf.Sin(ang) * 20, O2Bar >= 25 ? SchemKit.Good : SchemKit.Hot, 3);
             var d = Doc;
             double T = run != null && run.Curve.Count > 0 ? run.Curve[Math.Min(run.Curve.Count - 1, (int)(RunMinutes / Dt))].T : 24.6;
-            S.SchemLabel("vo", d.PartName("vo"), c.x, c.y + 162, 11);
-            S.SchemLabel("bom", d.PartName("bom"), c.x, c.y + 90, 11);
-            S.SchemLabel("nhiet_ke", d.PartName("nhiet_ke") + $"\n<color=#61DBFF>{Fmt(T, "0.0000")} °C</color>", c.x - 230, c.y + 120, 11, null, TextAnchor.MiddleLeft);
-            S.SchemLabel("oxy", d.PartName("oxy") + $"\n<color=#73F29E>{O2Bar:0} bar</color>", o2.x, o2.y - 140, 11);
-            S.SchemLabel("trang_thai", Running ? (RunMinutes < FireAt ? "<color=#61DBFF>TIỀN KỲ</color>" : RunMinutes < MainEnd ? "<color=#FFC966>CHÍNH KỲ (ĐÃ ĐỐT)</color>" : "<color=#61DBFF>HẬU KỲ</color>") : "<color=#73F29E>SẴN SÀNG</color>", 620, 334, 14);
+            S.SchemLabel("vo", d.PartName("vo"), c.x, c.y + 162, 14);
+            S.SchemLabel("bom", d.PartName("bom"), c.x, c.y + 90, 14);
+            S.SchemLabel("nhiet_ke", d.PartName("nhiet_ke") + $"\n<color={GlassKit.HexAccent}>{Fmt(T, "0.0000")} °C</color>", c.x - 230, c.y + 120, 14, null, TextAnchor.MiddleLeft);
+            S.SchemLabel("oxy", d.PartName("oxy") + $"\n<color={GlassKit.HexGood}>{O2Bar:0} bar</color>", o2.x, o2.y - 140, 14);
+            S.SchemLabel("trang_thai", Running ? (RunMinutes < FireAt ? $"<color={GlassKit.HexAccent}>TIỀN KỲ</color>" : RunMinutes < MainEnd ? $"<color={GlassKit.HexWarn}>CHÍNH KỲ (ĐÃ ĐỐT)</color>" : $"<color={GlassKit.HexAccent}>HẬU KỲ</color>") : $"<color={GlassKit.HexGood}>SẴN SÀNG</color>", 620, 334, 14);
         }
 
         // =====================================================================
@@ -316,10 +316,11 @@ namespace Khkt.Demo.Instruments
             double lo = run.Curve.Min(q => q.T) - 0.05, hi = run.Curve.Max(q => q.T) + 0.1;
             S.SetPlotAxes($"Nhiệt độ nước · {runName}", "Thời gian (phút)", "T (°C)", "0", Fmt(Minutes, "0"), Fmt(lo, "0.00"), Fmt(hi, "0.00"));
             var f = InstrumentScreen.Map(p, FireAt, lo, 0, Minutes, lo, hi);
-            p.FillRect(f.x - 1, 0, 2, p.H, new Color(1f, 0.6f, 0.3f, 0.6f));
+            var g = InstrumentScreen.TraceGold;
+            p.FillRect(f.x - 1, 0, 2, p.H, new Color(g.r, g.g, g.b, 0.7f));
             var m = InstrumentScreen.Map(p, MainEnd, lo, 0, Minutes, lo, hi);
-            p.FillRect(m.x - 1, 0, 2, p.H, new Color(1, 1, 1, 0.2f));
-            p.Poly(vis.Select(q => InstrumentScreen.Map(p, q.t, q.T, 0, Minutes, lo, hi)).ToList(), new Color(1f, 0.55f, 0.4f), 2);
+            p.FillRect(m.x - 1, 0, 2, p.H, InstrumentScreen.TraceDim);
+            p.Poly(vis.Select(q => InstrumentScreen.Map(p, q.t, q.T, 0, Minutes, lo, hi)).ToList(), InstrumentScreen.TraceCoral, 2);
         }
     }
 }
