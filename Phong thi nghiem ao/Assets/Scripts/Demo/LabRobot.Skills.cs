@@ -64,6 +64,8 @@ namespace Khkt.Demo
         Component Find(string id)
         {
             if (string.IsNullOrEmpty(id)) return null;
+            if (id == "vat_dang_cam") return Holding;                        // vật robot đang cầm
+            if (id == "vat_vua_lay") return lastTaken != null ? lastTaken : Holding;  // vật vừa lấy từ hộp cấp dụng cụ
             if (!id.StartsWith("@")) return RobotWorld.Resolve(id);
             if (placeholders.TryGetValue(id, out var c) && c != null) return c;
             c = ResolvePlaceholder(id);
@@ -157,7 +159,14 @@ namespace Khkt.Demo
             {
                 case "lac": yield return Shake(C(obj), n > 0 ? Mathf.Min(n, 30f) : 4f, r); break;
                 case "doi": yield return Wait(Mathf.Clamp(n <= 0 ? 5f : n, 1f, 60f)); break;
-                case "quan_sat": yield return Observe(C(obj), r); break;
+                case "quan_sat":
+                    if (C(obj) == null && obj != null) yield return ObserveBio(obj, r);  // bình, mẫu, thiết bị sinh học
+                    else yield return Observe(C(obj), r);
+                    break;
+                // dụng cụ sinh học tầng 2 (LabRobot.Bio.cs): dùng chung một cách cho mọi dụng cụ, không viết kịch bản riêng
+                case "dung_dung_cu": yield return ApplyTool(obj, dest, n > 0 ? Mathf.Clamp(Mathf.RoundToInt(n), 1, 20) : 1, r); break;
+                case "lay_dung_cu": yield return TakeFromDispenser(obj != null ? obj.GetComponentInParent<Khkt.Interaction.Bio.BioDispenser>() : null, r); break;
+                case "chinh_num": yield return SetKnob(obj, n, r); break;
                 case "tia_nuoc": yield return Rinse(C(dest != null ? dest : obj), n > 0 ? Mathf.Min(n, 100f) : 5f, r); break;
                 case "hut_pipet": yield return PipetteTransfer(C(obj), C(dest), n, r); break;
                 case "suc_khi": yield return Bubble(obj != null ? obj.GetComponentInParent<ChemicalBottle>() : null, C(dest), n > 0 ? Mathf.Min(n, 30f) : 5f, r); break;

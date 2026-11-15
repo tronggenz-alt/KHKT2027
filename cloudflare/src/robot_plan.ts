@@ -20,7 +20,7 @@ export const SKILLS: Record<string, string> = {
   ly_tam: "cho ống nghiệm (doi_tuong) vào máy ly tâm để kết tủa lắng xuống đáy",
   dua_vao_tu_hut: "mang (doi_tuong) vào tủ hút và bật quạt hút",
   doi: "chờ so_luong giây để quan sát hiện tượng",
-  quan_sat: "nhìn và nói rõ trong (doi_tuong) có gì: chất, pH, nhiệt độ, kết tủa, khí, hiện tượng vừa xảy ra",
+  quan_sat: "nhìn và nói rõ trong (doi_tuong) có gì: chất, pH, nhiệt độ, kết tủa, khí, hiện tượng vừa xảy ra (cả bình, mẫu, thiết bị sinh học)",
   do_ph: "đo pH dung dịch trong (doi_tuong) bằng máy đo pH",
   do_nhiet_do: "đo nhiệt độ (doi_tuong) bằng nhiệt kế điện tử",
   do_do_dan: "đo độ dẫn điện (doi_tuong)",
@@ -29,11 +29,18 @@ export const SKILLS: Record<string, string> = {
   can: "cân vật (doi_tuong) trên cân điện tử",
   can_chat_ran: "đặt (dich) lên cân, trừ bì rồi xúc chất rắn từ lọ (doi_tuong) tới đủ so_luong gam",
   phan_tich: "đặt mẫu (doi_tuong) vào máy phân tích (dich: mã may_...; bỏ trống thì máy gần nhất) và đọc kết quả",
-  bat_tat: "bật hoặc tắt thiết bị (doi_tuong): đèn cồn, bếp, máy khuấy, quạt tủ hút",
+  bat_tat: "bật hoặc tắt thiết bị (doi_tuong): đèn cồn, bếp, máy khuấy, quạt tủ hút; ở lab sinh: bấm nút (nut_), mở / đóng nắp (nap_), bấm thiết bị (thiet_bi_sinh_)",
   bat_tu_hut: "bật quạt tủ hút và quạt hút của phòng",
   tat_lua: "tắt mọi nguồn lửa và bếp",
   don_ban: "dọn bàn: đổ dung dịch thừa, trả dụng cụ, lau chỗ tràn",
   rua_mat: "dẫn tới vòi rửa mắt khẩn cấp",
+  // lab sinh tầng 2 (thao tác tự do: vật đích tự quyết định kết quả, không có kịch bản riêng cho từng dụng cụ)
+  dung_dung_cu: "LAB SINH: cầm dụng cụ sinh học (doi_tuong: dung_cu_sinh_, binh_sinh_, 'vat_dang_cam' hoặc 'vat_vua_lay') rồi dùng lên vật đích " +
+    "(dich: binh_sinh_, sinh_pham_, mau_sinh_, thiet_bi_sinh_), lặp so_luong lần. Bình đang cầm + chai gốc: lấy khoảng 7 ml sang bình; " +
+    "bình + bình: rót khoảng 7 ml; ống nhỏ giọt: lần đầu hút, các lần sau nhỏ từng giọt; kẹp: gắp mô rồi thả; dao lam: rạch, thái; " +
+    "đũa: khuấy; nhiệt kế, giấy pH: đo; que cấy: lấy / cấy vi khuẩn; micropipet: hút rồi bơm",
+  lay_dung_cu: "LAB SINH: lấy một dụng cụ mới từ hộp cấp (doi_tuong: hop_cap_...); sau đó gọi vật vừa lấy bằng mã 'vat_vua_lay'",
+  chinh_num: "LAB SINH: vặn núm chỉnh (doi_tuong: num_...) về giá trị so_luong theo đơn vị của núm (°C, V, phút...)",
   chuan_do: "làm mẫu trọn vẹn bài chuẩn độ đang chọn ở bàn 1: lắp buret, nạp, đọc V đầu, pipet mẫu, chỉ thị, chuẩn độ tới điểm cuối, tính nồng độ",
   thi_nghiem_mau: "làm một thí nghiệm mẫu có sẵn (ghi khóa vào hoa_chat)",
   noi: "nói một câu (loi) trong lúc làm, ví dụ giải thích bước đang minh họa",
@@ -56,11 +63,13 @@ export const TEMPLATES: Record<string, string> = {
 
 const NEEDS_OBJECT = new Set(["di_toi", "chi_vao", "cam", "tra_ve", "rot", "nho_giot", "xuc", "hut_pipet", "suc_khi", "do_bo", "lac", "khuay",
   "dun_nong", "ly_tam", "dua_vao_tu_hut", "quan_sat", "do_ph", "do_nhiet_do", "do_do_dan", "thu_quy", "thu_giay_ph",
-  "can", "can_chat_ran", "phan_tich", "bat_tat"]);
-const NEEDS_DEST = new Set(["rot", "nho_giot", "xuc", "hut_pipet", "tia_nuoc", "suc_khi", "can_chat_ran"]);
+  "can", "can_chat_ran", "phan_tich", "bat_tat", "lay_dung_cu", "chinh_num"]);
+const NEEDS_DEST = new Set(["rot", "nho_giot", "xuc", "hut_pipet", "tia_nuoc", "suc_khi", "can_chat_ran", "dung_dung_cu"]);
+// Mã đặc biệt Unity tự hiểu: vật robot đang cầm, vật vừa lấy từ hộp cấp dụng cụ
+const SPECIAL_IDS = new Set(["vat_dang_cam", "vat_vua_lay"]);
 const OPTIONAL_DEST = new Set(["phan_tich", "dun_nong"]);
 const LIMITS: Record<string, [number, number]> = { rot: [2, 100], nho_giot: [1, 20], xuc: [1, 5], hut_pipet: [25, 25], tia_nuoc: [5, 100], suc_khi: [5, 30],
-  lac: [4, 30], khuay: [15, 120], doi: [5, 60], dun_nong: [70, 100], can_chat_ran: [1, 20], do_bo: [0, 1000] };
+  lac: [4, 30], khuay: [15, 120], doi: [5, 60], dun_nong: [70, 100], can_chat_ran: [1, 20], do_bo: [0, 1000], dung_dung_cu: [1, 20] };
 
 export const PLAN_SCHEMA = {
   type: "object",
@@ -84,9 +93,11 @@ export const PLAN_SCHEMA = {
 };
 
 export const MAX_STEPS = 20;
+export const MAX_OBJECTS = 80; // trùng RobotWorld.MaxObjects trong Unity
 
 export const SYSTEM_PLAN =
-  "Bạn là bộ não của một robot trợ lý hình người trong phòng thí nghiệm hóa học ảo của trường THPT Việt Nam. " +
+  "Bạn là bộ não của một robot trợ lý hình người trong phòng thí nghiệm ảo Hóa - Sinh của trường THPT Việt Nam " +
+  "(tầng 1: lab hóa, tầng 2: lab sinh). " +
   "Bạn KHÔNG nhìn thấy cảnh 3D; bạn chỉ biết ẢNH CHỤP CẢNH dạng chữ đi kèm (danh sách vật với mã vật, tên, loại, " +
   "khoảng cách tới người dùng, đang chứa gì). Hãy trả lời học sinh bằng tiếng Việt ngắn gọn (tối đa 3 câu) và, nếu cần " +
   "hành động, lập KẾ HOẠCH là danh sách kỹ năng theo đúng thứ tự thực hiện. Kỹ năng có sẵn:\n" +
@@ -115,6 +126,15 @@ export const SYSTEM_PLAN =
   "(môi trường H2SO4 loãng), kim loại với axit loãng, nhận biết ion, trung hòa, chuẩn độ, điện phân dung dịch, " +
   "glucozơ với Cu(OH)2, tốc độ phản ứng, cân bằng hóa học. Chỉ từ chối (ke_hoach rỗng, giải thích nhẹ nhàng) khi yêu cầu " +
   "chế tạo chất nổ, pháo, chất độc / ma túy, hoặc tạo lượng lớn khí độc ngoài tủ hút.\n" +
+  "- Robot tự đi lên / xuống tầng bằng thang bộ khi vật cần tới ở tầng khác (lay_hoa_chat từ tầng 2 vẫn được: robot xuống " +
+  "phòng hóa chất tầng 1 rồi mang lên).\n" +
+  "- Khi người dùng ở TẦNG 2 (lab sinh, mã vật dạng binh_sinh_, sinh_pham_, dung_cu_sinh_, mau_sinh_, hop_cap_, num_, nut_, nap_, " +
+  "thiet_bi_sinh_): chỉ dùng di_toi, chi_vao, cam, dat, tra_ve, doi, noi, quan_sat, bat_tat, dung_dung_cu, lay_dung_cu, chinh_num. " +
+  "Các kỹ năng hóa học (rot, nho_giot, do_ph, dun_nong...) KHÔNG dùng được cho bình sinh học. Lab sinh là lab tự do, không có " +
+  "thí nghiệm mẫu: hãy ghép từng thao tác như người làm thật, đúng quy trình sinh học (ví dụ thử enzim catalase: lay_dung_cu hộp cấp " +
+  "ống nghiệm, dat xuống bàn, dung_dung_cu kẹp lên khay gan, dung_dung_cu kẹp lên 'vat_vua_lay' để thả mô, cam 'vat_vua_lay', " +
+  "dung_dung_cu 'vat_dang_cam' lên chai H2O2 để lấy H2O2, doi, quan_sat). Vật đích tự kiểm tra quy trình và báo lỗi nếu làm sai " +
+  "(ví dụ bóc biểu bì hành khi chưa rạch): gặp lỗi thì robot dừng và nói lý do.\n" +
   `- Câu hỏi chỉ cần trả lời thì ke_hoach rỗng. Tối đa ${MAX_STEPS} bước.`;
 
 const foldK = (s: string) => (s || "").replace(/đ/g, "d").replace(/Đ/g, "D").normalize("NFKD").replace(/\p{Mn}/gu, "").toLowerCase().trim();
@@ -139,7 +159,7 @@ const laSoChuoi = (s: string) => /^\d+$/.test(s);
 export function validate(plan: any[], object_ids: Set<string>, find_chemical: (q: string) => any): [Buoc[], string[]] {
   const out: Buoc[] = [], dropped: string[] = [];
   const fetched = new Map<string, number>();
-  const known = (v: string) => object_ids.has(v) || v.startsWith("hoa_chat:");
+  const known = (v: string) => object_ids.has(v) || SPECIAL_IDS.has(v) || v.startsWith("hoa_chat:");
   plan.slice(0, MAX_STEPS).forEach((s: any, i: number) => {
     s = s && typeof s === "object" ? s : {};
     const k = String(s.ky_nang ?? "");
@@ -175,6 +195,8 @@ export function validate(plan: any[], object_ids: Set<string>, find_chemical: (q
     }
     if (missing) { dropped.push(`bước ${i + 1}: hóa chất '${missing}' không có trong danh mục`); return; }
     if (k === "tia_nuoc" && !step.dich && known(step.doi_tuong)) step.dich = step.doi_tuong;
+    if (k === "dung_dung_cu" && !step.doi_tuong) step.doi_tuong = "vat_dang_cam"; // không ghi dụng cụ: dùng vật robot đang cầm
+    if (k === "dung_dung_cu" && !known(step.doi_tuong)) { dropped.push(`bước ${i + 1}: dụng cụ '${step.doi_tuong}' không có trong cảnh`); return; }
     if (NEEDS_OBJECT.has(k) && !known(step.doi_tuong)) { dropped.push(`bước ${i + 1}: mã vật '${step.doi_tuong}' không có trong cảnh`); return; }
     if (NEEDS_DEST.has(k) && !known(step.dich)) { dropped.push(`bước ${i + 1}: nơi nhận '${step.dich}' không có trong cảnh`); return; }
     if (OPTIONAL_DEST.has(k) && step.dich && !object_ids.has(step.dich)) step.dich = "";
@@ -196,7 +218,7 @@ export function formatScene(scene: any): string {
   if (scene.robot_dang_cam) lines.push(`Robot đang cầm: ${scene.robot_dang_cam}.`);
   if (scene.che_do) lines.push(`Chế độ: ${scene.che_do}.`);
   lines.push("Các vật gần người dùng (mã | tên | loại | cách người dùng | đang chứa):");
-  for (const v of (scene.vat || []).slice(0, 60)) lines.push(`- ${v.id} | ${v.ten} | ${v.loai} | ${Number(v.khoang_cach || 0).toFixed(1)} m | ${v.chua || ""}`);
+  for (const v of (scene.vat || []).slice(0, MAX_OBJECTS)) lines.push(`- ${v.id} | ${v.ten} | ${v.loai} | ${Number(v.khoang_cach || 0).toFixed(1)} m | ${v.chua || ""}`);
   if (scene.su_kien && scene.su_kien.length) lines.push("Hiện tượng gần đây: " + scene.su_kien.slice(-5).join("; "));
   return lines.join("\n");
 }

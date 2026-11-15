@@ -196,6 +196,9 @@ namespace Khkt.Interaction.Bio
                 inst.audioSource.PlayOneShot(inst.clipPop, 0.4f);
         }
 
+        /// <summary>Mỗi thông báo thực hành (nội dung, có phải cảnh báo không): robot trợ lý nghe để nói lại kết quả thao tác của nó.</summary>
+        public static event Action<string, bool> OnToast;
+
         /// <summary>
         /// Thông báo thao tác (thẻ kính ở giữa phía trên, do LabToasts vẽ). isError: thẻ đỏ "Cảnh báo thao tác";
         /// subtitle: dòng giải thích bên dưới (với lỗi là lý do khoa học).
@@ -203,6 +206,7 @@ namespace Khkt.Interaction.Bio
         public static void ShowToast(string message, bool isError = false, float seconds = 4.2f, string subtitle = "")
         {
             if (string.IsNullOrEmpty(message)) return;
+            OnToast?.Invoke(message, isError);
             bool hasSub = !string.IsNullOrEmpty(subtitle);
             if (isError)
                 Khkt.Demo.LabToasts.Push(message, Khkt.Demo.LabToasts.Tone.Error, seconds, "Cảnh báo thao tác", hasSub ? "Vì sao: " + subtitle : null);

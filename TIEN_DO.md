@@ -13,6 +13,7 @@ Cập nhật: 09/11/2026. Đây là bản tóm tắt để ai mở dự án (ng�
 
 ### Phòng thí nghiệm (Unity)
 - **Lab Hóa tầng 1:** khoảng 720 hóa chất, bộ máy phản ứng (pH, kết tủa, khí, oxi hóa – khử, màu), chuẩn độ, robot AI làm mẫu và xử lý sự cố.
+- **Robot đi hai tầng, dùng dụng cụ sinh học** (14/11/2026): lưới đi `NavGrid` hai tầng nối bằng thang bộ, robot tự leo thang theo người dùng và khi được sai tới vật ở tầng khác. Ở lab sinh robot dùng chung một cách cho mọi dụng cụ (kỹ năng `dung_dung_cu`, `lay_dung_cu`, `chinh_num`, mã ở `Demo/LabRobot.Bio.cs`), kết quả do bộ luật sinh học tính. Máy chủ lập kế hoạch (`server/ai/robot_plan.py`, `cloudflare/src/robot_plan.ts`) đã nhận các kỹ năng này; bản Cloudflare phải đăng lại thì AI trực tuyến mới dùng được. Bài thử: `chay.ps1 -Mode robot_tang2` (21 mục). Sửa `NavGrid` xong phải dựng lại cảnh.
 - **Máy phân tích:** 14 máy (UV-Vis, AAS, XRD, NMR...) chạy theo SOP thật. Xem docs/17–19.
 - **Khu chế tạo dụng cụ:** lắp ráp tự do bằng khớp nối, gia công ra bàn.
 - **Lab Sinh tầng 2:** thao tác tự do, sinh phẩm là vật thật, kết quả tính theo thành phần. Xem docs/23.
