@@ -2400,89 +2400,26 @@ namespace Khkt.Demo
         void PickTarget(GameObject target)
         {
             CloseInternal();
-            var g = ResolveGrabbable(target);
-            if (g == null) return;
             var hand = FindAnyObjectByType<HandController>();
-            if (hand == null || hand.Held == g) return;
-            if (hand.Held != null) hand.ReturnHome();
-            if (hand.Held != null) return;
-            hand.Pick(g);
+            if (hand != null && target != null) hand.PickFromPanel(target);
         }
 
         void ReturnTargetHome(GameObject target)
         {
             if (target == null) return;
-            var g = ResolveGrabbable(target);
-            if (g == null)
-            {
-                CloseInternal();
-                return;
-            }
-
             var hand = FindAnyObjectByType<HandController>();
-            bool returned;
-            if (hand != null && hand.Held == g)
+            if (hand != null)
             {
-                hand.ReturnHome();
-                returned = hand.Held == null;
-            }
-            else
-            {
-                returned = TryReturnStationaryHome(g);
-            }
-
-            if (returned)
-            {
-                CloseInternal();
-                LabToasts.Push("Đã trả dụng cụ về đúng vị trí ban đầu.", LabToasts.Tone.Info, 2.0f);
-            }
-        }
-
-        static bool TryReturnStationaryHome(Grabbable g)
-        {
-            if (g == null) return false;
-            var proc = FindAnyObjectByType<LabProcedure>();
-            var p = g.GetComponent<Pipette>();
-            if (p != null && !p.IsEmpty)
-            {
-                const string msg = "Pipet còn dung dịch: xả hết trước khi đặt xuống";
-                if (proc != null) proc.Say(msg, LabProcedure.Tone.Warn);
-                else LabMessages.Say(msg, LabMessages.Tone.Warn);
-                return false;
-            }
-            var c = g.GetComponent<LabContainer>();
-            if (g.liesOnTable && c != null && c.VolumeMl > 0.3f)
-            {
-                const string msg = "Dụng cụ đang chứa dung dịch, đặt nằm sẽ đổ ra";
-                if (proc != null) proc.Say(msg, LabProcedure.Tone.Warn);
-                else LabMessages.Say(msg, LabMessages.Tone.Warn);
-                return false;
-            }
-            var buret = g.GetComponent<BuretStopcock>();
-            if (buret != null && buret.HasLiquid && g.Socket != null && g.Socket.mountsBuret)
-            {
-                const string msg = "Buret đang chứa dung dịch: xả hết rồi mới tháo khỏi giá";
-                if (proc != null) proc.Say(msg, LabProcedure.Tone.Warn);
-                else LabMessages.Say(msg, LabMessages.Tone.Warn);
-                return false;
-            }
-            if (g.Socket != null) g.SetSocket(null);
-            if (g.HomeSocket != null && g.HomeSocket.Occupant == null)
-            {
-                g.HomeSocket.Put(g);
-            }
-            else
-            {
-                g.transform.SetPositionAndRotation(g.HomePosition, g.HomeRotation);
-                int homeZone = Khkt.Rendering.ZoneMap.At(g.HomePosition);
-                var homeRoot = Khkt.Rendering.ZoneRoot.Of(homeZone);
-                if (homeRoot != null)
+                if (hand.ReturnToHomeFromPanel(target))
                 {
-                    g.transform.SetParent(homeRoot.transform, true);
-                    if (homeRoot.Parked) g.gameObject.SetActive(false);
+                    CloseInternal();
+                    LabToasts.Push("Đã trả dụng cụ về đúng vị trí ban đầu.", LabToasts.Tone.Info, 2.0f);
                 }
             }
-            return true;
+            else
+            {
+                CloseInternal();
+            }
         }
 
         void AskAssistant(string fallbackQuestion)

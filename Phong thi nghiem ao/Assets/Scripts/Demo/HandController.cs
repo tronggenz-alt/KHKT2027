@@ -2,7 +2,9 @@ using System.Collections.Generic;
 using Khkt.Input;
 using Khkt.Interaction;
 using Khkt.Interaction.Bio;
+using Khkt.Simulation;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 namespace Khkt.Demo
@@ -69,10 +71,22 @@ namespace Khkt.Demo
         float pressTime = -1f, dropCooldown;
         bool wasDown;
         bool swirlStarted;
+        GameObject inspectHoldTarget;
+        float inspectHoldTimer;
+        bool inspectHoldOpened;
+        bool inspectProgressShown;
         Vector3 handPos;
         float tilt;
         float heldYaw;  // xoay bộ phận đang cầm (lăn chuột / R E) để chọn chiều khi lắp
         Transform pourStream;
+        readonly HashSet<(GameObject heldObj, LabContainer target, string riskKey)> confirmedSafety = new HashSet<(GameObject, LabContainer, string)>();
+        float safetyBlockedUntil;
+
+        static readonly string[] WaterReactiveIds =
+        {
+            "K(s)", "Na(s)", "Li(s)", "Ba(s)", "Ca(s)",
+            "CaC2(s)", "Al4C3(s)", "NaH(s)", "LiAlH4(s)", "NaBH4(s)"
+        };
 
         void Awake() => Active = this;
 
@@ -96,9 +110,12 @@ namespace Khkt.Demo
 
         void OnDestroy()
         {
+            CancelInspectHold();
             PadInput.ControllerChanged -= OnControllerChanged;
             PadInput.Notice -= OnPadNotice;
         }
+
+        void OnDisable() => CancelInspectHold();
 
         void OnPadNotice(string text) => Say(text);
 
@@ -108,12 +125,39 @@ namespace Khkt.Demo
             else Say("Mất kết nối tay cầm", LabProcedure.Tone.Warn);
         }
 
+        static bool IsOpenPanelOnClick => PlayerPrefs.GetInt(UiTheme.ClickModePrefKey, 0) == 1;
+
+        GameObject GetInspectTarget()
+        {
+            if (Held != null || (!ToolPanel.Enabled && !ToolPanel.ForceEnableForTest)) return null;
+            if ((Current == Act.Pick || Current == Act.Swirl) && hoverGrab != null)
+            {
+                if (hoverGrab.GetComponentInParent<IMachinePanel>() != null) return null;
+                return hoverGrab.gameObject;
+            }
+            if (Current == Act.Stopcock && stopcock != null && stopcock.buret != null)
+                return stopcock.buret.gameObject;
+            return null;
+        }
+
+        void CancelInspectHold()
+        {
+            inspectHoldTimer = 0f;
+            inspectHoldTarget = null;
+            if (inspectProgressShown)
+            {
+                LabToasts.HideProgress();
+                inspectProgressShown = false;
+            }
+        }
+
         void Update()
         {
             var mouse = Mouse.current;
             var kb = Keyboard.current;
-            bool uiOpen = Khkt.Environment.DesktopViewer.UiCapture > 0;
+            bool uiOpen = Khkt.Environment.DesktopViewer.UiCapture > 0 || ToolPanel.IsOpen || MachinePanel.IsOpen || ModernUI.IsSafetyModalOpen;
             bool looking = uiOpen || (mouse != null && mouse.rightButton.isPressed && !Khkt.Environment.DesktopViewer.MouseLook);
+            bool pointerOnUi = !OverrideHold && !Khkt.Environment.DesktopViewer.MouseLook && EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
             float dt = Time.deltaTime;
 
             if (!looking) Raycast(mouse);
@@ -123,23 +167,82 @@ namespace Khkt.Demo
             PadInput.AimHasTarget = Current != Act.None;
 
             bool shift = OverrideShift || (kb != null && (kb.leftShiftKey.isPressed || kb.rightShiftKey.isPressed)) || PadInput.Shift;
-            bool down = OverrideHold || (!looking && mouse != null && mouse.leftButton.isPressed) || (!uiOpen && PadInput.Use);
+            bool down = OverrideHold || (!looking && !pointerOnUi && mouse != null && mouse.leftButton.isPressed) || (!uiOpen && PadInput.Use);
             bool pressed = down && !wasDown;
             bool released = !down && wasDown;
             wasDown = down;
             if (pressed) pressTime = Time.time;
+
+            if (uiOpen)
+            {
+                CancelInspectHold();
+                inspectHoldOpened = false;
+            }
+
+            bool openPanelOnClick = IsOpenPanelOnClick;
+            var inspectTarget = !uiOpen ? GetInspectTarget() : null;
 
             Acting = false;
             dropCooldown -= dt;
             switch (Current)
             {
                 case Act.Pick:
-                    if (pressed) Pick(hoverGrab);
+                    if (openPanelOnClick && inspectTarget != null)
+                    {
+                        if (pressed)
+                        {
+                            CancelInspectHold();
+                            ToolPanel.OpenObject(inspectTarget);
+                        }
+                    }
+                    else if (inspectTarget != null)
+                    {
+                        if (pressed)
+                        {
+                            inspectHoldTarget = inspectTarget;
+                            inspectHoldTimer = 0f;
+                            inspectHoldOpened = false;
+                        }
+                        if (down && !inspectHoldOpened && inspectHoldTarget == inspectTarget)
+                        {
+                            inspectHoldTimer += dt;
+                            if (inspectHoldTimer >= 0.12f)
+                            {
+                                LabToasts.Progress("Mở chi tiết", Mathf.Clamp01(inspectHoldTimer / 0.4f));
+                                inspectProgressShown = true;
+                            }
+                            if (inspectHoldTimer >= 0.4f)
+                            {
+                                inspectHoldOpened = true;
+                                CancelInspectHold();
+                                ToolPanel.OpenObject(inspectTarget);
+                            }
+                        }
+                        else if (down && inspectHoldTarget != inspectTarget)
+                        {
+                            CancelInspectHold();
+                        }
+                        if (released)
+                        {
+                            bool shouldPick = !inspectHoldOpened && inspectHoldTarget == inspectTarget && pressTime >= 0;
+                            CancelInspectHold();
+                            inspectHoldOpened = false;
+                            if (shouldPick) Pick(hoverGrab);
+                        }
+                    }
+                    else
+                    {
+                        if (pressed) Pick(hoverGrab);
+                    }
                     break;
                 case Act.Swirl:
-                    // Giữ lâu là lắc bình tại chỗ, bấm nhanh là cầm lên
+                    // Giữ lâu là lắc bình tại chỗ, bấm nhanh là cầm lên (hoặc mở bảng chi tiết nếu bật chế độ Mở bảng)
                     if (down && pressTime >= 0 && Time.time - pressTime > 0.2f) { swirlStarted = true; Acting = true; }
-                    if (released && !swirlStarted && pressTime >= 0) Pick(hoverGrab);
+                    if (released && !swirlStarted && pressTime >= 0)
+                    {
+                        if (openPanelOnClick && inspectTarget != null) ToolPanel.OpenObject(inspectTarget);
+                        else Pick(hoverGrab);
+                    }
                     break;
                 case Act.Use:
                     if (pressed)
@@ -157,6 +260,48 @@ namespace Khkt.Demo
                     }
                     float padY = PadInput.Look.y;  // đẩy cần nhìn lên: mở thêm, kéo xuống: đóng bớt
                     if (Mathf.Abs(padY) > 0.05f) stopcock.buret.AdjustOpening(padY * keyRate * (shift ? 0.25f : 1f) * dt);
+
+                    if (openPanelOnClick && inspectTarget != null)
+                    {
+                        if (pressed)
+                        {
+                            CancelInspectHold();
+                            ToolPanel.OpenObject(inspectTarget);
+                        }
+                    }
+                    else if (inspectTarget != null)
+                    {
+                        if (pressed)
+                        {
+                            inspectHoldTarget = inspectTarget;
+                            inspectHoldTimer = 0f;
+                            inspectHoldOpened = false;
+                        }
+                        if (down && !inspectHoldOpened && inspectHoldTarget == inspectTarget)
+                        {
+                            inspectHoldTimer += dt;
+                            if (inspectHoldTimer >= 0.12f)
+                            {
+                                LabToasts.Progress("Mở chi tiết", Mathf.Clamp01(inspectHoldTimer / 0.4f));
+                                inspectProgressShown = true;
+                            }
+                            if (inspectHoldTimer >= 0.4f)
+                            {
+                                inspectHoldOpened = true;
+                                CancelInspectHold();
+                                ToolPanel.OpenObject(inspectTarget);
+                            }
+                        }
+                        else if (down && inspectHoldTarget != inspectTarget)
+                        {
+                            CancelInspectHold();
+                        }
+                        if (released)
+                        {
+                            CancelInspectHold();
+                            inspectHoldOpened = false;
+                        }
+                    }
                     break;
                 case Act.Place:
                     if (pressed) PlaceInSocket(TargetSocket);
@@ -165,7 +310,12 @@ namespace Khkt.Demo
                     if (pressed) PlaceOnSurface(hit.point);
                     break;
                 case Act.Pour:
-                    if (down) { Acting = true; Pour(dt); }
+                    if (down && Time.unscaledTime >= safetyBlockedUntil)
+                    {
+                        if (TryGateUnsafeAction(Held.gameObject, TargetContainer, Act.Pour)) break;
+                        Acting = true;
+                        Pour(dt);
+                    }
                     break;
                 case Act.Suck:
                     if (down)
@@ -178,32 +328,41 @@ namespace Khkt.Demo
                     }
                     break;
                 case Act.PipetteDrain:
-                    if (down)
+                    if (down && Time.unscaledTime >= safetyBlockedUntil)
                     {
+                        if (TryGateUnsafeAction(Held.gameObject, TargetContainer, Act.PipetteDrain)) break;
                         Acting = true;
                         Held.GetComponent<Pipette>().Drain(TargetContainer, dt, trim: shift);
                     }
                     break;
                 case Act.Drop:
-                    if (pressed && dropCooldown <= 0)
+                    if (pressed && dropCooldown <= 0 && Time.unscaledTime >= safetyBlockedUntil)
                     {
+                        if (TryGateUnsafeAction(Held.gameObject, TargetContainer, Act.Drop)) break;
                         Held.GetComponent<Dropper>().DropInto(TargetContainer);
                         dropCooldown = 0.25f;
                     }
                     break;
                 case Act.Spray:
-                    if (down) { Acting = true; Held.GetComponent<WashBottle>().SprayInto(TargetContainer, dt); }
+                    if (down && Time.unscaledTime >= safetyBlockedUntil)
+                    {
+                        if (TryGateUnsafeAction(Held.gameObject, TargetContainer, Act.Spray)) break;
+                        Acting = true;
+                        Held.GetComponent<WashBottle>().SprayInto(TargetContainer, dt);
+                    }
                     break;
                 case Act.Scoop:
-                    if (pressed && dropCooldown <= 0)
+                    if (pressed && dropCooldown <= 0 && Time.unscaledTime >= safetyBlockedUntil)
                     {
+                        if (TryGateUnsafeAction(Held.gameObject, TargetContainer, Act.Scoop)) break;
                         if (!Held.GetComponent<ChemicalBottle>().ScoopInto(TargetContainer)) Say("Lọ đã hết hóa chất");
                         dropCooldown = 0.3f;
                     }
                     break;
                 case Act.Bubble:
-                    if (down)
+                    if (down && Time.unscaledTime >= safetyBlockedUntil)
                     {
+                        if (TryGateUnsafeAction(Held.gameObject, TargetContainer, Act.Bubble)) break;
                         Acting = true;
                         var cb = Held.GetComponent<ChemicalBottle>();
                         cb.BubbleInto(TargetContainer, dt);
@@ -266,6 +425,11 @@ namespace Khkt.Demo
                         }
                     }
                     break;
+            }
+            if ((Current != Act.Pick && Current != Act.Stopcock) || !down)
+            {
+                CancelInspectHold();
+                if (!down) inspectHoldOpened = false;
             }
             if (Current != Act.BioTarget || !down)
             {
@@ -537,6 +701,56 @@ namespace Khkt.Demo
 
         // ---------- Cầm, đặt ----------
 
+        public void PickFromPanel(GameObject go)
+        {
+            if (go == null) return;
+            var raw = go.GetComponentInParent<Grabbable>();
+            var g = Khkt.Assembly.ApparatusPart.WorldGrab(raw);
+            if (g == null) g = raw;
+            if (g == null || Held == g) return;
+            if (Held != null) ReturnHome();
+            if (Held != null) return;
+            Pick(g);
+        }
+
+        public bool ReturnToHomeFromPanel(GameObject go)
+        {
+            if (go == null) return false;
+            var raw = go.GetComponentInParent<Grabbable>();
+            var g = Khkt.Assembly.ApparatusPart.WorldGrab(raw);
+            if (g == null) g = raw;
+            if (g == null) return false;
+            if (Held == g)
+            {
+                ReturnHome();
+                return Held == null;
+            }
+            if (!CanPutDown(g)) return false;
+            var buret = g.GetComponent<BuretStopcock>();
+            if (buret != null && buret.HasLiquid && g.Socket != null && g.Socket.mountsBuret)
+            {
+                procedure?.Say("Buret đang chứa dung dịch: xả hết rồi mới tháo khỏi giá", LabProcedure.Tone.Warn);
+                return false;
+            }
+            if (g.Socket != null) g.SetSocket(null);
+            if (g.HomeSocket != null && g.HomeSocket.Occupant == null)
+            {
+                g.HomeSocket.Put(g);
+            }
+            else
+            {
+                g.transform.SetPositionAndRotation(g.HomePosition, g.HomeRotation);
+                int homeZone = Khkt.Rendering.ZoneMap.At(g.HomePosition);
+                var homeRoot = Khkt.Rendering.ZoneRoot.Of(homeZone);
+                if (homeRoot != null)
+                {
+                    g.transform.SetParent(homeRoot.transform, true);
+                    if (homeRoot.Parked) g.gameObject.SetActive(false);
+                }
+            }
+            return true;
+        }
+
         public void Pick(Grabbable g)
         {
             if (g == null || Held != null) return;
@@ -553,6 +767,8 @@ namespace Khkt.Demo
                 return;
             }
             Held = g;
+            var go = g.gameObject;
+            confirmedSafety.RemoveWhere(k => k.heldObj == go);
             g.SetHeld(true);
             tilt = 0;
             heldYaw = 0;
@@ -801,6 +1017,182 @@ namespace Khkt.Demo
             if (spill > 0) procedure?.Say($"Tràn! {to.label} đã đầy", LabProcedure.Tone.Warn);
         }
 
+        bool TryGateUnsafeAction(GameObject heldObj, LabContainer target, Act act)
+        {
+            if (heldObj == null) return false;
+            if (!EvaluateSafetyRisk(heldObj, target, act, out string riskKey, out string title, out string reason, out string safeHint))
+                return false;
+
+            var key = (heldObj, target, riskKey);
+            if (confirmedSafety.Contains(key)) return false;
+
+            Acting = false;
+            safetyBlockedUntil = Time.unscaledTime + 0.35f;
+            var capturedBottle = act == Act.Scoop ? heldObj.GetComponent<ChemicalBottle>() : null;
+            var capturedDropper = act == Act.Drop ? heldObj.GetComponent<Dropper>() : null;
+            var capturedTarget = target;
+
+            ModernUI.ShowSafetyWarning(
+                title,
+                reason,
+                onProceed: () =>
+                {
+                    confirmedSafety.Add(key);
+                    safetyBlockedUntil = Time.unscaledTime + 0.05f;
+                    if (act == Act.Scoop && capturedBottle != null && capturedTarget != null && Held != null && Held.gameObject == heldObj)
+                    {
+                        if (!capturedBottle.ScoopInto(capturedTarget)) Say("Lọ đã hết hóa chất");
+                        dropCooldown = 0.3f;
+                    }
+                    else if (act == Act.Drop && capturedDropper != null && capturedTarget != null && Held != null && Held.gameObject == heldObj)
+                    {
+                        capturedDropper.DropInto(capturedTarget);
+                        dropCooldown = 0.25f;
+                    }
+                },
+                onChangeApproach: () =>
+                {
+                    safetyBlockedUntil = Time.unscaledTime + 0.5f;
+                    Say(safeHint, LabProcedure.Tone.Warn);
+                });
+            return true;
+        }
+
+        static bool EvaluateSafetyRisk(GameObject heldObj, LabContainer target, Act act,
+            out string riskKey, out string title, out string reason, out string safeHint)
+        {
+            riskKey = title = reason = safeHint = null;
+            var bottle = heldObj.GetComponent<ChemicalBottle>();
+            var fromContainer = heldObj.GetComponent<LabContainer>();
+            bool isSpray = act == Act.Spray;
+
+            Solution fromSol = default;
+            if (fromContainer != null && fromContainer.VolumeMl > 0.01f)
+            {
+                fromSol = fromContainer.Total;
+            }
+            else if (act == Act.Drop)
+            {
+                var dropper = heldObj.GetComponent<Dropper>();
+                if (dropper != null && dropper.source != null && dropper.source.VolumeMl > 0.01f)
+                    fromSol = dropper.source.Total;
+                else if (dropper != null && dropper.catalogStt > 0 && ChemicalCatalog.Instance != null)
+                {
+                    var ce = ChemicalCatalog.Instance.Get(dropper.catalogStt);
+                    if (ce != null) fromSol = ChemicalCatalog.Instance.Make(ce, 1f);
+                }
+            }
+
+            // 1. Sục bình khí độc ngoài tủ hút
+            if (act == Act.Bubble && bottle != null && bottle.IsGas && bottle.Entry != null &&
+                (bottle.Entry.HasHazard("doc") || bottle.Entry.HasHazard("khi_doc")))
+            {
+                bool inHood = target != null ? target.InFumeHood : FumeHoodZone.Covers(heldObj.transform.position);
+                if (!inHood)
+                {
+                    string formula = !string.IsNullOrEmpty(bottle.Entry.Formula) ? bottle.Entry.Formula : bottle.DisplayName;
+                    riskKey = "khi_doc_bubble";
+                    title = $"Nguy cơ rò rỉ khí độc {formula} ngoài tủ hút!";
+                    reason = $"Sục khí {bottle.DisplayName} bên ngoài tủ hút làm khí độc thoát ra không khí phòng thí nghiệm.\nCách an toàn: đặt bình nhận vào bên trong Tủ hút khí độc trước khi sục khí.";
+                    safeHint = $"Đã hủy: hãy đưa bình vào trong Tủ hút khí độc trước khi sục {formula}.";
+                    return true;
+                }
+            }
+
+            if (target == null) return false;
+
+            var toMix = target.Total.Mix;
+            double toVolL = target.VolumeMl > 0.01f ? target.VolumeMl / 1000.0 : 0.0;
+            bool targetInHood = target.InFumeHood;
+            double fromSulfuricM = fromSol.volumeMl > 0.01f ? fromSol.Mix.Get("SO4") / (fromSol.volumeMl / 1000.0) : 0.0;
+            double toSulfuricM = toVolL > 0 ? toMix.Get("SO4") / toVolL : 0.0;
+
+            // 2. Đổ nước hoặc dung dịch loãng vào H2SO4 đặc (> 6 M): sôi bắn axit
+            if ((act == Act.Pour || act == Act.PipetteDrain || isSpray) && target.VolumeMl > 0.5f)
+            {
+                bool incomingAqueous = isSpray || fromSol.volumeMl > 0.1f;
+                if (incomingAqueous && toSulfuricM > 6.0 && fromSulfuricM < 3.0)
+                {
+                    riskKey = "ban_be_h2so4";
+                    title = "Nguy cơ sôi bắn axit H₂SO₄ đặc!";
+                    reason = "Đổ nước hoặc dung dịch loãng vào axit sunfuric đặc (> 6 M) tỏa nhiệt cực mạnh, dễ làm dung dịch sôi bắn gây bỏng.\nCách an toàn: lấy nước cất làm nền trước rồi rót từ từ axit đặc theo thành bình và khuấy đều.";
+                    safeHint = "Đã hủy: không đổ nước vào H₂SO₄ đặc — hãy lấy nước trước rồi rót từ từ axit vào nước.";
+                    return true;
+                }
+            }
+
+            // 3. Trộn hóa chất sinh khí cực độc (Cl2, HCN) ngoài tủ hút
+            if (!targetInHood)
+            {
+                bool toAcid = target.VolumeMl > 0.2f && target.BulkPh < 5.0;
+                bool fromAcid = fromSol.volumeMl > 0.2f && fromSol.Ph < 5.0;
+                if (toAcid || fromAcid)
+                {
+                    bool hasClO = toMix.Get("ClO") > 1e-4 || fromSol.Mix.Get("ClO") > 1e-4;
+                    bool hasCl = toMix.Get("Cl-") > 1e-4 || fromSol.Mix.Get("Cl-") > 1e-4;
+                    double toClM = toVolL > 0 ? toMix.Get("Cl-") / toVolL : 0.0;
+                    double fromClM = fromSol.volumeMl > 0.01f ? fromSol.Mix.Get("Cl-") / (fromSol.volumeMl / 1000.0) : 0.0;
+                    bool hasChlorineOx = toMix.Get("MnO2(s)") > 1e-4 || fromSol.Mix.Get("MnO2(s)") > 1e-4 ||
+                                         toMix.Get("PbO2(s)") > 1e-4 || fromSol.Mix.Get("PbO2(s)") > 1e-4 ||
+                                         toMix.Get("MnO4-") > 1e-4 || fromSol.Mix.Get("MnO4-") > 1e-4;
+                    if ((hasClO && hasCl) || (hasChlorineOx && (toClM > 3.0 || fromClM > 3.0)))
+                    {
+                        riskKey = "khi_doc_cl2";
+                        title = "Nguy cơ giải phóng khí độc Cl₂ ngoài tủ hút!";
+                        reason = "Hỗn hợp phản ứng sinh khí Clo (Cl₂) vàng lục rất độc gây tổn thương đường hô hấp.\nCách an toàn: di chuyển bình phản ứng vào trong Tủ hút khí độc trước khi trộn.";
+                        safeHint = "Đã hủy: hãy đưa bình vào Tủ hút khí độc trước khi trộn phản ứng sinh Cl₂.";
+                        return true;
+                    }
+
+                    bool hasCN = toMix.Get("CN-") > 1e-5 || fromSol.Mix.Get("CN-") > 1e-5;
+                    if (hasCN)
+                    {
+                        riskKey = "khi_doc_hcn";
+                        title = "Nguy cơ sinh khí cực độc HCN ngoài tủ hút!";
+                        reason = "Muối xyanua gặp axit giải phóng khí hydro xyanua (HCN) cực độc.\nCách an toàn: chỉ thực hiện thí nghiệm trong Tủ hút khí độc đang bật quạt hút.";
+                        safeHint = "Đã hủy: phản ứng có xyanua và axit bắt buộc thực hiện trong Tủ hút khí độc.";
+                        return true;
+                    }
+                }
+            }
+
+            // 4. Kim loại kiềm / chất rắn phản ứng mãnh liệt với nước (cháy nổ)
+            bool targetHasWater = target.VolumeMl > 0.5f;
+            if (act == Act.Scoop && targetHasWater)
+            {
+                bool solidReactive = HasAnySpecies(fromSol, WaterReactiveIds) ||
+                    (bottle != null && bottle.Entry != null && (bottle.Entry.HasHazard("chay_no") || bottle.Entry.HasHazard("phan_ung_nuoc")));
+                if (solidReactive)
+                {
+                    string solidName = bottle != null ? bottle.DisplayName : "chất rắn hoạt động mạnh";
+                    riskKey = "chay_no_nuoc";
+                    title = "Nguy cơ phản ứng mãnh liệt / cháy nổ với nước!";
+                    reason = $"Cho {solidName} tiếp xúc trực tiếp với nước sẽ tỏa nhiệt mạnh và giải phóng khí dễ cháy (H₂ hoặc C₂H₂).\nCách an toàn: chỉ lấy lượng rất nhỏ, làm trong tủ hút và tránh xa nguồn lửa.";
+                    safeHint = $"Đã hủy: {solidName} phản ứng mạnh với nước — thao tác lượng nhỏ trong tủ hút, tránh xa ngọn lửa.";
+                    return true;
+                }
+            }
+            else if ((isSpray || fromSol.volumeMl > 0.2f) && HasAnySpecies(target.Total, WaterReactiveIds))
+            {
+                riskKey = "chay_no_nuoc";
+                title = "Nguy cơ phản ứng mãnh liệt / cháy nổ với nước!";
+                reason = "Bình nhận đang chứa kim loại kiềm hoặc chất phản ứng mạnh với nước, sinh khí dễ cháy (H₂ / C₂H₂) và tỏa nhiệt lớn.\nCách an toàn: kiểm soát lượng nước nhỏ trong tủ hút và đảm bảo không có ngọn lửa gần đó.";
+                safeHint = "Đã hủy: trong bình có chất phản ứng mạnh với nước — hãy đặt vào tủ hút và giữ xa nguồn lửa.";
+                return true;
+            }
+
+            return false;
+        }
+
+        static bool HasAnySpecies(Solution sol, string[] ids)
+        {
+            if (ids == null) return false;
+            var mix = sol.Mix;
+            for (int i = 0; i < ids.Length; i++)
+                if (mix.Get(ids[i]) > 1e-4) return true;
+            return false;
+        }
+
         // ---------- Tư thế tay và vật đang cầm ----------
 
         void UpdatePose(float dt)
@@ -969,12 +1361,29 @@ namespace Khkt.Demo
                 var info = t.GetComponentInParent<EquipmentInfo>();
                 return info != null ? info.title : t.name;
             }
+            var inspectNow = GetInspectTarget();
+            bool openOnClickNow = IsOpenPanelOnClick;
             switch (Current)
             {
-                case Act.Pick: Hints.Add(("Nhấn", "Cầm " + Lower(Name(hoverGrab.transform)))); break;
-                case Act.Swirl: Hints.Add(("Giữ", "Lắc bình")); Hints.Add(("Nhấn", "Cầm lên")); break;
+                case Act.Pick:
+                    if (openOnClickNow && inspectNow != null)
+                        Hints.Add(("Nhấn", "Mở chi tiết " + Lower(Name(hoverGrab.transform))));
+                    else
+                    {
+                        Hints.Add(("Nhấn", "Cầm " + Lower(Name(hoverGrab.transform))));
+                        if (inspectNow != null) Hints.Add(("Giữ", "Mở chi tiết"));
+                    }
+                    break;
+                case Act.Swirl:
+                    Hints.Add(("Giữ", "Lắc bình"));
+                    Hints.Add(("Nhấn", openOnClickNow && inspectNow != null ? "Mở chi tiết" : "Cầm lên"));
+                    break;
                 case Act.Use: Hints.Add(("Nhấn", Clean(usable.UseHint))); break;
-                case Act.Stopcock: Hints.Add(("Lăn chuột", "Mở / đóng khóa")); Hints.Add(("↑ ↓", "Tinh chỉnh")); break;
+                case Act.Stopcock:
+                    Hints.Add(("Lăn chuột", "Mở / đóng khóa"));
+                    Hints.Add(("↑ ↓", "Tinh chỉnh"));
+                    if (inspectNow != null) Hints.Add((openOnClickNow ? "Nhấn" : "Giữ", "Bảng buret"));
+                    break;
                 case Act.Place: Hints.Add(("Nhấn", "Đặt vào " + Lower(TargetSocket.label))); break;
                 case Act.PlaceSurface: Hints.Add(("Nhấn", "Đặt xuống")); break;
                 case Act.Pour: Hints.Add(("Giữ", "Rót vào " + Lower(TargetContainer.label))); break;
