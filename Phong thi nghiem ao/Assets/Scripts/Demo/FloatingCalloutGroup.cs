@@ -122,7 +122,19 @@ namespace Khkt.Demo
     {
         public string title = "";
         public string statusText = "";
-        public Color dotColor = new Color(0.18f, 0.85f, 0.65f);
+
+        Color customDotColor;
+        bool hasCustomDot;
+        public Color dotColor
+        {
+            get => hasCustomDot ? customDotColor : Good;
+            set
+            {
+                customDotColor = value;
+                hasCustomDot = true;
+                if (dotImg != null) dotImg.color = value;
+            }
+        }
 
         CanvasGroup canvasGroup;
         Image bgImg, borderImg, dotImg;
@@ -132,28 +144,37 @@ namespace Khkt.Demo
         void Awake()
         {
             canvasGroup = GetComponent<CanvasGroup>();
+            UiTheme.Changed += ApplyTheme;
+        }
+
+        void OnDestroy()
+        {
+            UiTheme.Changed -= ApplyTheme;
         }
 
         public void BuildVisuals()
         {
-            var rt = (RectTransform)transform;
+            float cs = UiTheme.IsVera ? 1.8f : 1f;
 
-            // Khung nền bo tròn (rgba(10, 16, 26, 0.78))
-            bgImg = gameObject.AddComponent<Image>();
+            // Viền thanh mảnh ngoài cùng (Solid) + nền nội thất lùi vào 1.5px để không đè chữ
+            borderImg = gameObject.AddComponent<Image>();
+            borderImg.sprite = Solid;
+            borderImg.type = Image.Type.Sliced;
+            borderImg.pixelsPerUnitMultiplier = cs;
+            borderImg.color = Line;
+            borderImg.raycastTarget = false;
+
+            var bgRt = Rect(transform, "Bg", Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            bgRt.anchorMin = Vector2.zero; bgRt.anchorMax = Vector2.one;
+            bgRt.pivot = new Vector2(0.5f, 0.5f);
+            bgRt.offsetMin = new Vector2(1.5f, 1.5f);
+            bgRt.offsetMax = new Vector2(-1.5f, -1.5f);
+            bgImg = bgRt.gameObject.AddComponent<Image>();
             bgImg.sprite = Solid;
             bgImg.type = Image.Type.Sliced;
-            bgImg.color = new Color(0.04f, 0.06f, 0.10f, 0.78f);
+            bgImg.pixelsPerUnitMultiplier = cs;
+            bgImg.color = SurfaceA(0.92f);
             bgImg.raycastTarget = false;
-
-            // Viền sáng thanh mảnh
-            var borderRt = Rect(transform, "Border", Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            borderRt.anchorMin = Vector2.zero; borderRt.anchorMax = Vector2.one;
-            borderRt.offsetMin = Vector2.zero; borderRt.offsetMax = Vector2.zero;
-            borderImg = borderRt.gameObject.AddComponent<Image>();
-            borderImg.sprite = Rounded;
-            borderImg.type = Image.Type.Sliced;
-            borderImg.color = new Color(1f, 1f, 1f, 0.22f);
-            borderImg.raycastTarget = false;
 
             // Chấm trạng thái nhỏ (xanh ngọc khi hoạt động)
             var dotRt = Rect(transform, "Dot", new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(22, 0), new Vector2(10, 10));
@@ -179,10 +200,20 @@ namespace Khkt.Demo
             }
         }
 
+        void ApplyTheme()
+        {
+            float cs = UiTheme.IsVera ? 1.8f : 1f;
+            if (borderImg != null) { borderImg.sprite = Solid; borderImg.pixelsPerUnitMultiplier = cs; borderImg.color = Line; }
+            if (bgImg != null) { bgImg.sprite = Solid; bgImg.pixelsPerUnitMultiplier = cs; bgImg.color = SurfaceA(0.92f); }
+            if (dotImg != null && !hasCustomDot) dotImg.color = Good;
+            if (titleLabel != null) titleLabel.color = Ink;
+            if (statusLabel != null) statusLabel.color = Accent;
+        }
+
         public void SetStatus(string text, Color? color = null)
         {
             if (statusLabel != null) statusLabel.text = text;
-            if (color.HasValue && dotImg != null) dotImg.color = color.Value;
+            if (color.HasValue) dotColor = color.Value;
         }
 
         public void UpdateCallout(Vector3 camPos, float maxDist)

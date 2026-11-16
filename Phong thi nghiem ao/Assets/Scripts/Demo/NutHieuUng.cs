@@ -51,11 +51,20 @@ namespace Khkt.Demo
 
         void EnsureHighlightOverlay()
         {
-            if (highlightOverlay != null) return;
+            if (highlightOverlay != null)
+            {
+                highlightOverlay.sprite = GlassKit.Solid;
+                return;
+            }
             var t = transform.Find("HighlightOverlay");
             if (t != null)
             {
                 highlightOverlay = t.GetComponent<Image>();
+                if (highlightOverlay != null)
+                {
+                    highlightOverlay.sprite = GlassKit.Solid;
+                    highlightOverlay.color = GlassKit.Wash(0f);
+                }
                 return;
             }
 
@@ -70,7 +79,7 @@ namespace Khkt.Demo
             highlightOverlay = go.AddComponent<Image>();
             highlightOverlay.sprite = GlassKit.Solid;
             highlightOverlay.type = Image.Type.Sliced;
-            highlightOverlay.color = new Color(1f, 1f, 1f, 0f);
+            highlightOverlay.color = GlassKit.Wash(0f);
             highlightOverlay.raycastTarget = false; // Tuyệt đối không cản trở raycast
         }
 
@@ -140,14 +149,14 @@ namespace Khkt.Demo
             if (rectTransform != null) rectTransform.localScale = baseScale;
             if (highlightOverlay != null)
             {
-                var c = highlightOverlay.color;
-                c.a = 0f;
-                highlightOverlay.color = c;
+                highlightOverlay.sprite = GlassKit.Solid;
+                highlightOverlay.color = GlassKit.Wash(0f);
             }
         }
 
         void PlayPressAnimation(bool down)
         {
+            EnsureHighlightOverlay();
             if (currentAnim != null) StopCoroutine(currentAnim);
             currentAnim = StartCoroutine(AnimateScaleAndAlpha(down));
         }
@@ -176,22 +185,13 @@ namespace Khkt.Demo
                     rectTransform.localScale = Vector3.LerpUnclamped(startScale, targetScale, ease);
 
                 if (highlightOverlay != null)
-                {
-                    Color c = highlightOverlay.color;
-                    c.a = Mathf.Lerp(startAlpha, targetAlpha, ease);
-                    highlightOverlay.color = c;
-                }
+                    highlightOverlay.color = GlassKit.Wash(Mathf.Lerp(startAlpha, targetAlpha, ease));
 
                 yield return null;
             }
 
             if (rectTransform != null && !reduced) rectTransform.localScale = targetScale;
-            if (highlightOverlay != null)
-            {
-                Color c = highlightOverlay.color;
-                c.a = targetAlpha;
-                highlightOverlay.color = c;
-            }
+            if (highlightOverlay != null) highlightOverlay.color = GlassKit.Wash(targetAlpha);
             currentAnim = null;
         }
 

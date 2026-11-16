@@ -36,8 +36,8 @@ namespace Khkt.Assembly
         bool dirty = true;
         float nextRefresh;
 
-        static readonly Color PanelColor = new Color(0.05f, 0.08f, 0.13f, 0.88f);
-        static readonly Color CellColor = new Color(1f, 1f, 1f, 0.07f);
+        static Color PanelColor => Surface;
+        static Color CellColor => Well;
         const int Columns = 3, MaxCells = 12;
 
         public void Init(FabricationWorkspace w, Shader glassShader)
@@ -161,7 +161,7 @@ namespace Khkt.Assembly
             var trackImg = track.gameObject.AddComponent<Image>();
             trackImg.sprite = Solid;
             trackImg.type = Image.Type.Sliced;
-            trackImg.color = new Color(1, 1, 1, 0.12f);
+            trackImg.color = Wash(0.18f);
             var fill = Rect(track, "Thanh", new Vector2(0, 0.5f), new Vector2(0, 0.5f), Vector2.zero, new Vector2(0, 14));
             progressFill = fill.gameObject.AddComponent<Image>();
             progressFill.sprite = Solid;
@@ -181,7 +181,7 @@ namespace Khkt.Assembly
             var img = rt.gameObject.AddComponent<Image>();
             img.sprite = Solid;
             img.type = Image.Type.Sliced;
-            img.pixelsPerUnitMultiplier = 1.6f;
+            img.pixelsPerUnitMultiplier = UiTheme.IsVera ? 1.6f : 2.6f;
             img.color = PanelColor;
             img.raycastTarget = true;  // chặn bấm xuyên xuống bàn ảo
             return rt;
@@ -196,8 +196,7 @@ namespace Khkt.Assembly
         void SetGroup(int g)
         {
             group = g;
-            for (int i = 0; i < tabs.Count; i++)
-                tabs[i].GetComponent<Image>().color = i == g ? new Color(Accent.r, Accent.g, Accent.b, 0.55f) : new Color(1, 1, 1, 0.13f);
+            for (int i = 0; i < tabs.Count; i++) SetChip(tabs[i], i == g);
             shown.Clear();
             if (ws.library != null) shown.AddRange(ws.library.InGroup(PartLibrary.Groups[g]).Take(MaxCells));
             groupTitle.text = $"{PartLibrary.Groups[g]} · {shown.Count} loại · bấm để lấy";
@@ -239,7 +238,7 @@ namespace Khkt.Assembly
                 if (!on) continue;
                 tx.text = items[i].text;
                 b.interactable = items[i].enabled;
-                tx.color = items[i].enabled ? Ink : new Color(Dim.r, Dim.g, Dim.b, 0.45f);
+                tx.color = items[i].enabled ? Ink : Muted;
                 var act = items[i].act;
                 choiceActions.Add(() => { pickPanel.SetActive(false); act(); });
             }
@@ -255,7 +254,7 @@ namespace Khkt.Assembly
             {
                 bool room = ws.HasRoom(d);
                 var dd = d;
-                items.Add(($"{(d.isDefault ? "★ " : "")}{d.label}  ·  {(room ? "<color=#7ef0a0>đủ chỗ</color>" : "hết chỗ")}", room, () => ws.Fabricate(dd)));
+                items.Add(($"{(d.isDefault ? "★ " : "")}{d.label}  ·  {(room ? $"<color={HexGood}>đủ chỗ</color>" : "hết chỗ")}", room, () => ws.Fabricate(dd)));
             }
             pickTitle.text = "Gia công: chọn bàn đích";
             pickSub.text = $"Bộ đang lắp: {ws.Parts().Count} bộ phận, chiếm {b.size.x * 100:0} × {b.size.z * 100:0} cm, cao {(b.max.y - ws.tableTop) * 100:0} cm. "
@@ -272,7 +271,7 @@ namespace Khkt.Assembly
             foreach (var s in sets)
             {
                 var ss = s;
-                items.Add(($"{s.name}\n<color=#9fb4c8>{s.where}</color>", true, () =>
+                items.Add(($"{s.name}\n<color={HexDim}>{s.where}</color>", true, () =>
                 {
                     string err = ws.Recall(ss);
                     if (err != null) ws.Say(err, true);
@@ -337,9 +336,9 @@ namespace Khkt.Assembly
         {
             infoTitle.text = title;
             var parts = new List<string>();
-            if (!string.IsNullOrEmpty(extra)) parts.Add($"<color=#7ef0a0>{extra}</color>");
+            if (!string.IsNullOrEmpty(extra)) parts.Add($"<color={HexGood}>{extra}</color>");
             if (info != null && !string.IsNullOrEmpty(info.description)) parts.Add(info.description);
-            if (info != null && !string.IsNullOrEmpty(info.usage)) parts.Add($"<color=#ffc96b>Lưu ý:</color> {info.usage}");
+            if (info != null && !string.IsNullOrEmpty(info.usage)) parts.Add($"<color={HexWarn}>Lưu ý:</color> {info.usage}");
             infoBody.text = string.Join("\n\n", parts);
         }
     }

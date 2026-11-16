@@ -43,13 +43,14 @@ namespace Khkt.Demo
             float dur = ReducedMotion.IsEnabled ? 0.06f : duration;
             while (elapsed < dur)
             {
+                if (cg == null) yield break;
                 elapsed += Time.unscaledDeltaTime;
                 float t = Mathf.Clamp01(elapsed / dur);
                 float ease = 1f - Mathf.Pow(1f - t, 3f);
                 cg.alpha = Mathf.Lerp(from, to, ease);
                 yield return null;
             }
-            cg.alpha = to;
+            if (cg != null) cg.alpha = to;
             onComplete?.Invoke();
         }
 
@@ -61,11 +62,13 @@ namespace Khkt.Demo
             Vector3 targetScale = Vector3.one;
             float startAlpha = cg != null ? cg.alpha : 1f;
 
+            if (rt == null) yield break;
             rt.localScale = startScale;
             float elapsed = 0f;
 
             while (elapsed < dur)
             {
+                if (rt == null) yield break;
                 elapsed += Time.unscaledDeltaTime;
                 float t = Mathf.Clamp01(elapsed / dur);
                 // Ease out quint: 1 - (1 - t)^5
@@ -77,7 +80,7 @@ namespace Khkt.Demo
                 yield return null;
             }
 
-            rt.localScale = targetScale;
+            if (rt != null) rt.localScale = targetScale;
             if (cg != null) cg.alpha = 1f;
             onComplete?.Invoke();
         }
@@ -90,6 +93,7 @@ namespace Khkt.Demo
 
             while (elapsed < dur)
             {
+                if (rt == null && cg == null) yield break;
                 elapsed += Time.unscaledDeltaTime;
                 float t = Mathf.Clamp01(elapsed / dur);
                 float ease = t * t; // Ease in

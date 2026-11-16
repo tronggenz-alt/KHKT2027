@@ -39,7 +39,7 @@ namespace Khkt.Demo
         {
             public RectTransform rt;
             public CanvasGroup group;
-            public Image border, badge, bar;
+            public Image border, bg, badge, countBg, bar;
             public Text glyph, title, body, sub, count;
             public string bodyText;
             public Tone tone;
@@ -56,7 +56,7 @@ namespace Khkt.Demo
         // Vòng tiến trình
         RectTransform ringRoot;
         CanvasGroup ringGroup;
-        Image ringFill;
+        Image ringDisc, ringTrack, ringFill, ringPillBg;
         Text ringPct, ringLabel;
         RectTransform ringPill;
         float ring01, ringAlpha;
@@ -129,11 +129,20 @@ namespace Khkt.Demo
             scaler.matchWidthOrHeight = 0.5f;
             root = (RectTransform)transform;
             Canvas.ForceUpdateCanvases();
+            UiTheme.Changed += OnThemeChanged;
         }
 
         void OnDestroy()
         {
+            UiTheme.Changed -= OnThemeChanged;
             if (instance == this) instance = null;
+        }
+
+        void OnThemeChanged()
+        {
+            for (int i = 0; i < active.Count; i++) Paint(active[i], active[i].tone);
+            foreach (var c in pool) Paint(c, c.tone);
+            ApplyRingTheme();
         }
 
         void Wake()
@@ -172,31 +181,33 @@ namespace Khkt.Demo
             c.group.blocksRaycasts = false;
             c.group.interactable = false;
 
-            // Viền sáng theo màu loại thông báo, bên trong là nền kính tối đặc (đọc rõ trên mọi cảnh phòng lab)
-            c.border = Fill(c.rt, "Viền", Solid, Color.white, 1.9f);
+            float cornerScale = UiTheme.IsVera ? 1.9f : 2.5f;
+
+            // Viền sáng theo màu loại thông báo, bên trong là nền theo chủ đề hiện tại (Trang/Den bo góc, XanhMuc vát góc)
+            c.border = Fill(c.rt, "Viền", Solid, Line, cornerScale);
             Stretch(c.border.rectTransform, 0f);
-            var bg = Fill(c.rt, "Nền", Solid, new Color(0.045f, 0.075f, 0.13f, 0.95f), 1.9f);
-            Stretch(bg.rectTransform, 1.5f);
+            c.bg = Fill(c.rt, "Nền", Solid, Surface, cornerScale);
+            Stretch(c.bg.rectTransform, 2f);
 
             var badgeRt = Rect(c.rt, "Huy hiệu", new Vector2(0, 1), new Vector2(0, 1), new Vector2(PadX, -PadY), new Vector2(BadgeSize, BadgeSize));
             c.badge = badgeRt.gameObject.AddComponent<Image>();
             c.badge.sprite = SolidCircle;
             c.badge.raycastTarget = false;
-            c.glyph = Label(badgeRt, "Ký hiệu", "i", 20, new Color(0.03f, 0.07f, 0.12f), true, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(BadgeSize, BadgeSize));
+            c.glyph = Label(badgeRt, "Ký hiệu", "i", 20, OnAccent, true, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(BadgeSize, BadgeSize));
 
             float tx = PadX + BadgeSize + 14f;
             c.title = Label(c.rt, "Nhãn", "", 13, Accent, true, TextAnchor.UpperLeft, new Vector2(tx, -PadY), new Vector2(360, 18));
             c.title.horizontalOverflow = HorizontalWrapMode.Overflow;
-            c.body = Label(c.rt, "Nội dung", "", 17, Ink, false, TextAnchor.UpperLeft, new Vector2(tx, -PadY), new Vector2(400, 24));
+            c.body = Label(c.rt, "Nội dung", "", 17, Ink, true, TextAnchor.UpperLeft, new Vector2(tx, -PadY), new Vector2(400, 24));
             c.sub = Label(c.rt, "Giải thích", "", 14, Dim, false, TextAnchor.UpperLeft, new Vector2(tx, -PadY), new Vector2(400, 20));
 
             var countRt = Rect(c.rt, "Số lần", new Vector2(1, 1), new Vector2(1, 1), new Vector2(-12, -10), new Vector2(40, 22));
-            var countBg = countRt.gameObject.AddComponent<Image>();
-            countBg.sprite = Solid;
-            countBg.type = Image.Type.Sliced;
-            countBg.pixelsPerUnitMultiplier = 4f;
-            countBg.color = new Color(1, 1, 1, 0.14f);
-            countBg.raycastTarget = false;
+            c.countBg = countRt.gameObject.AddComponent<Image>();
+            c.countBg.sprite = Solid;
+            c.countBg.type = Image.Type.Sliced;
+            c.countBg.pixelsPerUnitMultiplier = UiTheme.IsVera ? 4f : 5f;
+            c.countBg.color = Well;
+            c.countBg.raycastTarget = false;
             c.count = Label(countRt, "Chữ", "", 13, Ink, true, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(40, 22));
 
             var barRt = Rect(c.rt, "Vạch thời gian", new Vector2(0, 0), new Vector2(0, 0), new Vector2(PadX + 2, 6), new Vector2(100, 2.5f));
@@ -302,11 +313,51 @@ namespace Khkt.Demo
         {
             c.tone = tone;
             Color col = ToneColor(tone);
-            c.border.color = new Color(col.r, col.g, col.b, tone == Tone.Info ? 0.38f : 0.62f);
-            c.badge.color = col;
-            c.glyph.text = ToneGlyph(tone);
-            c.title.color = col;
-            c.bar.color = new Color(col.r, col.g, col.b, 0.75f);
+            float cornerScale = UiTheme.IsVera ? 1.9f : 2.5f;
+            if (c.border != null)
+            {
+                c.border.sprite = Solid;
+                c.border.pixelsPerUnitMultiplier = cornerScale;
+                float borderAlpha = (tone == Tone.Warn || tone == Tone.Error)
+                    ? 0.85f
+                    : (tone == Tone.Good ? 0.65f : (UiTheme.IsLight ? 0.35f : 0.42f));
+                c.border.color = new Color(col.r, col.g, col.b, borderAlpha);
+            }
+            if (c.bg != null)
+            {
+                c.bg.sprite = Solid;
+                c.bg.pixelsPerUnitMultiplier = cornerScale;
+                c.bg.color = Surface;
+            }
+            if (c.badge != null)
+            {
+                c.badge.sprite = SolidCircle;
+                c.badge.color = col;
+            }
+            if (c.glyph != null)
+            {
+                c.glyph.text = ToneGlyph(tone);
+                c.glyph.color = OnAccent;
+            }
+            if (c.title != null) c.title.color = col;
+            if (c.body != null)
+            {
+                c.body.font = Semibold;
+                c.body.color = Ink;
+            }
+            if (c.sub != null) c.sub.color = Dim;
+            if (c.countBg != null)
+            {
+                c.countBg.sprite = Solid;
+                c.countBg.pixelsPerUnitMultiplier = UiTheme.IsVera ? 4f : 5f;
+                c.countBg.color = Well;
+            }
+            if (c.count != null) c.count.color = Ink;
+            if (c.bar != null)
+            {
+                c.bar.sprite = Solid;
+                c.bar.color = new Color(col.r, col.g, col.b, 0.80f);
+            }
         }
 
         // =====================================================================
@@ -383,15 +434,13 @@ namespace Khkt.Demo
             ringGroup.interactable = false;
             ringGroup.alpha = 0f;
 
-            var disc = Rect(ringRoot, "Đĩa nền", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(96, 96)).gameObject.AddComponent<Image>();
-            disc.sprite = SolidCircle;
-            disc.color = new Color(0.045f, 0.075f, 0.13f, 0.72f);
-            disc.raycastTarget = false;
+            ringDisc = Rect(ringRoot, "Đĩa nền", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(96, 96)).gameObject.AddComponent<Image>();
+            ringDisc.sprite = SolidCircle;
+            ringDisc.raycastTarget = false;
 
-            var track = Rect(ringRoot, "Rãnh", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(84, 84)).gameObject.AddComponent<Image>();
-            track.sprite = RingSprite();
-            track.color = new Color(1, 1, 1, 0.16f);
-            track.raycastTarget = false;
+            ringTrack = Rect(ringRoot, "Rãnh", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(84, 84)).gameObject.AddComponent<Image>();
+            ringTrack.sprite = RingSprite();
+            ringTrack.raycastTarget = false;
 
             ringFill = Rect(ringRoot, "Mức", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(84, 84)).gameObject.AddComponent<Image>();
             ringFill.sprite = RingSprite();
@@ -400,7 +449,6 @@ namespace Khkt.Demo
             ringFill.fillOrigin = (int)Image.Origin360.Top;
             ringFill.fillClockwise = true;
             ringFill.fillAmount = 0f;
-            ringFill.color = Accent;
             ringFill.raycastTarget = false;
 
             var pctRt = Rect(ringRoot, "Phần trăm", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(84, 30));
@@ -408,24 +456,37 @@ namespace Khkt.Demo
             ringPct.font = Semibold;
             ringPct.fontSize = 19;
             ringPct.alignment = TextAnchor.MiddleCenter;
-            ringPct.color = Ink;
             ringPct.raycastTarget = false;
 
             ringPill = Rect(ringRoot, "Nhãn thao tác", new Vector2(0.5f, 0f), new Vector2(0.5f, 1f), new Vector2(0, -12), new Vector2(240, 36));
-            var pillBg = ringPill.gameObject.AddComponent<Image>();
-            pillBg.sprite = Solid;
-            pillBg.type = Image.Type.Sliced;
-            pillBg.pixelsPerUnitMultiplier = 2.6f;
-            pillBg.color = new Color(0.045f, 0.075f, 0.13f, 0.9f);
-            pillBg.raycastTarget = false;
+            ringPillBg = ringPill.gameObject.AddComponent<Image>();
+            ringPillBg.type = Image.Type.Sliced;
+            ringPillBg.raycastTarget = false;
             var labRt = Rect(ringPill, "Chữ", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(240, 36));
             ringLabel = labRt.gameObject.AddComponent<Text>();
             ringLabel.font = Regular;
             ringLabel.fontSize = 16;
             ringLabel.alignment = TextAnchor.MiddleCenter;
-            ringLabel.color = Ink;
             ringLabel.horizontalOverflow = HorizontalWrapMode.Overflow;
             ringLabel.raycastTarget = false;
+
+            ApplyRingTheme();
+        }
+
+        void ApplyRingTheme()
+        {
+            if (ringRoot == null) return;
+            if (ringDisc != null) ringDisc.color = SurfaceA(0.86f);
+            if (ringTrack != null) ringTrack.color = Wash(0.18f);
+            if (ringFill != null) ringFill.color = ringShownPct >= 100 ? Good : Accent;
+            if (ringPct != null) ringPct.color = Ink;
+            if (ringPillBg != null)
+            {
+                ringPillBg.sprite = Solid;
+                ringPillBg.pixelsPerUnitMultiplier = UiTheme.IsVera ? 2.6f : 3.2f;
+                ringPillBg.color = Surface;
+            }
+            if (ringLabel != null) ringLabel.color = Ink;
         }
 
         void UpdateRing(float dt)

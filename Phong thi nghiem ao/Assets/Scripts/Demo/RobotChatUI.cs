@@ -19,6 +19,8 @@ namespace Khkt.Demo
     /// </summary>
     public class RobotChatUI : MonoBehaviour
     {
+        public static RobotChatUI Instance { get; private set; }
+
         public ModernUI ui;
         public HandController hand;
         public LabProcedure procedure;
@@ -26,47 +28,74 @@ namespace Khkt.Demo
 
         public bool IsOpen { get; private set; }
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStatics() => Instance = null;
+
         GameObject panel;
+        Image panelImg, bubbleImg;
         InputField input;
-        Text log, status;
+        Button closeBtn, sendBtn;
+        readonly List<Button> quickBtns = new List<Button>();
+        Text titleLabel, log, status, bubbleOwner;
         CanvasGroup bubbleGroup;
         Text bubbleText;
         RectTransform bubble;
         float bubbleTime = -100;
-        readonly List<string> lines = new List<string>();
+        readonly List<(string who, string text)> entries = new List<(string, string)>();
         readonly List<string> history = new List<string>();
-        bool captured, waiting;
+        bool captured, waiting, glassOk;
+
+        void Awake()
+        {
+            Instance = this;
+        }
 
         void Start()
         {
+            if (Instance == null) Instance = this;
             UiBridge.EnsureInteractive(ui.Canvas);
-            var glass = Glass(ui.glassShader != null ? ui.glassShader : Shader.Find("Khkt/KinhMo"));
-            var img = Panel(ui.Canvas.transform, "Trợ lý AI", new Vector2(1, 0), new Vector2(1, 0), new Vector2(-20, 24), new Vector2(520, 560), glass, 1.3f);
-            img.raycastTarget = true;
-            panel = img.gameObject;
+            UiTheme.Changed += OnThemeChanged;
+            var shader = ui != null && ui.glassShader != null ? ui.glassShader : Shader.Find("Khkt/KinhMo");
+            glassOk = shader != null && ui != null && ui.Canvas != null && ui.Canvas.rootCanvas.renderMode == RenderMode.ScreenSpaceCamera;
+            var glass = glassOk ? Glass(shader) : null;
+            panelImg = Panel(ui.Canvas.transform, "Trợ lý AI", new Vector2(1, 0), new Vector2(1, 0), new Vector2(-20, 24), new Vector2(520, 560), glass, 1.3f);
+            if (!glassOk && !ReducedTransparency)
+            {
+                panelImg.sprite = Solid;
+                panelImg.pixelsPerUnitMultiplier = UiTheme.IsVera ? 1.3f : 2.8f;
+                panelImg.color = Surface;
+            }
+            panelImg.raycastTarget = true;
+            panel = panelImg.gameObject;
             var p = panel.transform;
-            Label(p, "Tiêu đề", "Robot trợ lý", 22, Ink, true, TextAnchor.UpperLeft, new Vector2(24, -18), new Vector2(300, 30));
+            titleLabel = Label(p, "Tiêu đề", "Robot trợ lý", 22, Ink, true, TextAnchor.UpperLeft, new Vector2(24, -18), new Vector2(300, 30));
             status = Label(p, "Trạng thái", "", 13, Dim, false, TextAnchor.UpperLeft, new Vector2(26, -50), new Vector2(470, 20));
             string closeChatLabel = PadInput.UsingTouch ? "Đóng ✕" : "Đóng  T";
-            MakeButton(p, "Đóng", closeChatLabel, new Vector2(-120, -18), new Vector2(110, 48), Close, false, 14, new Vector2(1, 1));
+            closeBtn = MakeButton(p, "Đóng", closeChatLabel, new Vector2(-120, -18), new Vector2(110, 48), Close, false, 14, new Vector2(1, 1));
             log = Label(p, "Hội thoại", "", 15, Ink, false, TextAnchor.LowerLeft, new Vector2(24, -78), new Vector2(472, 330));
             log.verticalOverflow = VerticalWrapMode.Truncate;
             string[] quick = { "Hiện tượng vừa rồi là gì?", "Làm mẫu chuẩn độ", "Thí nghiệm mẫu", "Đo pH bình này", "Lấy NaOH ra bàn", "Dọn bàn giúp mình" };
             for (int i = 0; i < quick.Length; i++)
             {
                 string q = quick[i];
-                MakeButton(p, "Gợi ý", q, new Vector2(24 + (i % 3) * 160, -418 - (i / 3) * 44), new Vector2(152, 40), () => Send(q), false, 13);
+                quickBtns.Add(MakeButton(p, "Gợi ý", q, new Vector2(24 + (i % 3) * 160, -418 - (i / 3) * 44), new Vector2(152, 40), () => Send(q), false, 13));
             }
             input = MakeInput(p, "Ô nhập", "Hỏi hoặc ra lệnh cho robot...", new Vector2(24, -506), new Vector2(366, 48), 16);
-            MakeButton(p, "Gửi", "Gửi", new Vector2(400, -506), new Vector2(96, 48), () => Send(input.text), true);
+            sendBtn = MakeButton(p, "Gửi", "Gửi", new Vector2(400, -506), new Vector2(96, 48), () => Send(input.text), true);
             panel.SetActive(false);
 
             // Bong bóng lời robot khi khung trò chuyện đang đóng
-            var bimg = Panel(ui.Canvas.transform, "Lời robot", new Vector2(1, 0), new Vector2(1, 0), new Vector2(-20, 100), new Vector2(460, 70), glass, 1.6f);
-            bubble = bimg.rectTransform;
-            bubbleGroup = bimg.gameObject.AddComponent<CanvasGroup>();
+            bubbleImg = Panel(ui.Canvas.transform, "Lời robot", new Vector2(1, 0), new Vector2(1, 0), new Vector2(-20, 100), new Vector2(460, 70), glass, 1.6f);
+            if (!glassOk && !ReducedTransparency)
+            {
+                bubbleImg.sprite = Solid;
+                bubbleImg.pixelsPerUnitMultiplier = UiTheme.IsVera ? 1.6f : 2.8f;
+                bubbleImg.color = Surface;
+            }
+            bubble = bubbleImg.rectTransform;
+            bubbleGroup = bubbleImg.gameObject.AddComponent<CanvasGroup>();
             bubbleGroup.alpha = 0;
-            Label(bubble, "Robot", "Robot", 13, Accent, true, TextAnchor.UpperLeft, new Vector2(18, -10), new Vector2(200, 18));
+            bubbleOwner = Label(bubble, "Robot", "Robot", 13, Accent, true, TextAnchor.UpperLeft, new Vector2(18, -10), new Vector2(200, 18));
             bubbleText = Label(bubble, "Chữ", "", 15, Ink, false, TextAnchor.UpperLeft, new Vector2(18, -30), new Vector2(424, 60));
 
             if (LabRobot.Instance != null) LabRobot.Instance.Spoke += OnRobotSpoke;
@@ -78,7 +107,74 @@ namespace Khkt.Demo
 
         void OnDestroy()
         {
+            UiTheme.Changed -= OnThemeChanged;
             if (LabRobot.Instance != null) LabRobot.Instance.Spoke -= OnRobotSpoke;
+            if (captured) UiBridge.SetCapture(ref captured, false);
+            if (Instance == this) Instance = null;
+        }
+
+        void OnThemeChanged()
+        {
+            var shader = ui != null && ui.glassShader != null ? ui.glassShader : Shader.Find("Khkt/KinhMo");
+            glassOk = shader != null && ui != null && ui.Canvas != null && ui.Canvas.rootCanvas.renderMode == RenderMode.ScreenSpaceCamera;
+            var glass = glassOk ? Glass(shader) : null;
+            ApplyPanelTheme(panelImg, glass, 1.3f);
+            ApplyPanelTheme(bubbleImg, glass, 1.6f);
+            if (titleLabel != null) titleLabel.color = Ink;
+            if (status != null) status.color = Dim;
+            if (log != null) log.color = Ink;
+            if (bubbleOwner != null) bubbleOwner.color = Accent;
+            if (bubbleText != null) bubbleText.color = Ink;
+            RefreshButtonTheme(closeBtn, false);
+            RefreshButtonTheme(sendBtn, true);
+            for (int i = 0; i < quickBtns.Count; i++) RefreshButtonTheme(quickBtns[i], false);
+            if (input != null)
+            {
+                var img = input.GetComponent<Image>();
+                if (img != null) { img.sprite = Solid; img.pixelsPerUnitMultiplier = UiTheme.IsVera ? 2.2f : 3f; img.color = Well; }
+                if (input.textComponent != null) input.textComponent.color = Ink;
+                if (input.placeholder is Text ph) ph.color = Muted;
+                input.caretColor = Accent;
+                input.selectionColor = new Color(Accent.r, Accent.g, Accent.b, 0.30f);
+                var border = input.transform.Find("Viền")?.GetComponent<Image>();
+                if (border != null && border.sprite == null) border.enabled = false;
+            }
+            RebuildLog();
+        }
+
+        static void RefreshButtonTheme(Button b, bool primary)
+        {
+            if (b == null) return;
+            var img = b.targetGraphic as Image;
+            if (img != null)
+            {
+                img.sprite = Solid;
+                img.pixelsPerUnitMultiplier = UiTheme.IsVera ? 2.2f : 3f;
+                img.color = primary ? (UiTheme.IsVera ? AccentFill : Accent) : ButtonFill;
+            }
+            var border = b.transform.Find("Viền")?.GetComponent<Image>();
+            if (border != null && border.sprite == null) border.enabled = false;
+            var t = b.transform.Find("Chữ")?.GetComponent<Text>();
+            if (t != null) t.color = primary ? OnAccent : Ink;
+        }
+
+        static void ApplyPanelTheme(Image img, Material glass, float scale)
+        {
+            if (img == null) return;
+            if (glass != null && !ReducedTransparency)
+            {
+                img.sprite = Rounded;
+                img.material = glass;
+                img.pixelsPerUnitMultiplier = scale;
+                img.color = Color.white;
+            }
+            else
+            {
+                img.material = null;
+                img.sprite = Solid;
+                img.pixelsPerUnitMultiplier = UiTheme.IsVera ? scale : 2.8f;
+                img.color = Surface;
+            }
         }
 
         void OnRobotSpoke(string s)
@@ -91,11 +187,57 @@ namespace Khkt.Demo
 
         void Add(string who, string text)
         {
-            lines.Add(who == "Bạn" ? $"<color=#9FE7FF><b>Bạn:</b></color> {text}" : $"<color=#8CF2B4><b>{who}:</b></color> {text}");
-            if (lines.Count > 14) lines.RemoveAt(0);
-            log.text = string.Join("\n", lines);
+            entries.Add((who, text));
+            if (entries.Count > 14) entries.RemoveAt(0);
+            RebuildLog();
             history.Add($"{who}: {text}");
             if (history.Count > 10) history.RemoveAt(0);
+        }
+
+        void RebuildLog()
+        {
+            if (log == null) return;
+            var sb = new StringBuilder();
+            for (int i = 0; i < entries.Count; i++)
+            {
+                if (i > 0) sb.Append('\n');
+                var (who, text) = entries[i];
+                sb.Append(who == "Bạn"
+                    ? $"<color={HexAccent}><b>Bạn:</b></color> {text}"
+                    : $"<color={HexGood}><b>{who}:</b></color> {text}");
+            }
+            log.text = sb.ToString();
+        }
+
+        /// <summary>Mở khung trợ lý AI từ bất kỳ bảng dụng cụ/máy nào và gửi ngay câu hỏi theo ngữ cảnh.</summary>
+        public static bool AskAbout(string topic, string question = null)
+        {
+            if (ClassRules.ChatLocked)
+            {
+                LabMessages.Say(ClassRules.Exam ? "Đang kiểm tra: trợ lý robot tạm khóa" : "Giáo viên đã tắt trợ lý robot", LabMessages.Tone.Warn);
+                return false;
+            }
+            var chat = Instance != null ? Instance : FindAnyObjectByType<RobotChatUI>(FindObjectsInactive.Include);
+            if (chat == null || chat.panel == null)
+            {
+                LabMessages.Say("Trợ lý robot chưa sẵn sàng trong cảnh hiện tại", LabMessages.Tone.Warn);
+                return false;
+            }
+            string cleanTopic = (topic ?? "").Trim();
+            string prompt = string.IsNullOrWhiteSpace(question)
+                ? (cleanTopic.Length > 0
+                    ? $"Hướng dẫn cách dùng, thông số quan trọng và lưu ý an toàn cho: {cleanTopic}"
+                    : "Hướng dẫn cách dùng, thông số quan trọng và lưu ý an toàn.")
+                : question.Trim();
+
+            chat.Open();
+            if (!chat.IsOpen) return false;
+            chat.panel.transform.SetAsLastSibling();
+            if (chat.input != null) chat.input.text = prompt;
+            chat.Send(prompt);
+            chat.panel.transform.SetAsLastSibling();
+            if (chat.input != null) chat.input.ActivateInputField();
+            return true;
         }
 
         public void Open()
@@ -105,16 +247,18 @@ namespace Khkt.Demo
                 LabMessages.Say(ClassRules.Exam ? "Đang kiểm tra: trợ lý robot tạm khóa" : "Giáo viên đã tắt trợ lý robot", LabMessages.Tone.Warn);
                 return;
             }
+            if (panel == null) return;
             IsOpen = true;
             panel.SetActive(true);
+            panel.transform.SetAsLastSibling();
             UiBridge.SetCapture(ref captured, true);
-            input.ActivateInputField();
+            if (input != null) input.ActivateInputField();
         }
 
         public void Close()
         {
             IsOpen = false;
-            panel.SetActive(false);
+            if (panel != null) panel.SetActive(false);
             UiBridge.SetCapture(ref captured, false);
         }
 
@@ -137,7 +281,7 @@ namespace Khkt.Demo
             }
             var ai = AiClient.Instance;
             var robot = LabRobot.Instance;
-            status.text = (ai != null && ai.Online ? $"<color=#73F29E>●</color> AI đám mây: {ai.Provider} {ai.Model}" : "<color=#FFC759>●</color> Ngoại tuyến: hiểu lệnh cơ bản (chạy server/ai để có AI)")
+            status.text = (ai != null && ai.Online ? $"<color={HexGood}>●</color> AI đám mây: {ai.Provider} {ai.Model}" : $"<color={HexWarn}>●</color> Ngoại tuyến: hiểu lệnh cơ bản (chạy server/ai để có AI)")
                           + (robot != null ? "  ·  " + robot.StatusText : "") + (waiting ? "  ·  đang nghĩ..." : "");
             float age = Time.time - bubbleTime;
             bubbleGroup.alpha = IsOpen ? 0 : Mathf.Clamp01(Mathf.Min(age * 5f, (9f - age) / 1.5f));
@@ -147,7 +291,7 @@ namespace Khkt.Demo
         {
             text = (text ?? "").Trim();
             if (text.Length == 0) return;
-            input.text = "";
+            if (input != null) input.text = "";
             Add("Bạn", text);
             var ai = AiClient.Instance;
             if (ai != null && ai.Online)

@@ -65,7 +65,7 @@ namespace Khkt.Demo.Instruments
             bIgnite = S.AddButton("Châm lửa", 2, 1, Ignite, true);
             bAcetOff = S.AddButton("Đóng axetilen", 0, 2, CloseAcetylene);
             bAirOff = S.AddButton("Đóng không khí", 1, 2, CloseAir);
-            bAdd = S.AddButton("", 2, 2, () => { Additive = !Additive; S.Say(Additive ? "Đã thêm chất phụ gia (La / Sr giải phóng; K / Cs chống ion hóa) vào mọi dung dịch, kể cả mẫu trắng và chuẩn" : "Bỏ chất phụ gia", 0); }, false, 1, 13);
+            bAdd = S.AddButton("", 2, 2, () => { Additive = !Additive; S.Say(Additive ? "Đã thêm chất phụ gia (La / Sr giải phóng; K / Cs chống ion hóa) vào mọi dung dịch, kể cả mẫu trắng và chuẩn" : "Bỏ chất phụ gia", 0); }, false, 1, 14);
             bBlank = S.AddButton("Nước cất", 0, 3, () => SetSource(Src.Blank));
             bStd = S.AddButton("", 1, 3, NextStd);
             bSample = S.AddButton("Mẫu ở ổ máy", 2, 3, () => SetSource(Src.Sample));
@@ -76,7 +76,7 @@ namespace Khkt.Demo.Instruments
             bMeas = S.AddButton("Đo mẫu", 1, 5, MeasureSample, true);
             bPlot = S.AddButton("", 2, 5, () => plotCal = !plotCal);
             S.AddButton("Tắt máy", 0, 6, TurnOff);
-            status = S.AddText("", 7, 0, 3, 13);
+            status = S.AddText("", 7, 0, 3, 14);
             S.SetResults("Bật máy và quạt hút, chọn đèn của kim loại cần đo. Đặt ống mẫu vào ổ trên nóc máy ở phòng lab trước khi mở màn hình này.");
         }
 
@@ -400,8 +400,8 @@ namespace Khkt.Demo.Instruments
             if (El != null)
             {
                 sb.Append($"<b>{El.Symbol} – {El.Name}</b>: vạch {Fmt(El.Line, "0.0")} nm · khe {Fmt(El.Slit, "0.0")} nm · đèn {El.LampMa:0} mA\n")
-                  .Append($"<color=#9FB3C8>Khoảng làm việc {Fmt(El.Lo, "0.###")} – {Fmt(El.Hi, "0.##")} mg/L · nồng độ đặc trưng ≈ {Fmt(El.CharacteristicConc, "0.###")} mg/L (A = 0,0044)</color>\n");
-                if (!string.IsNullOrEmpty(El.Note)) sb.Append($"<color=#9FB3C8>{El.Note}</color>\n");
+                  .Append($"<color={GlassKit.HexDim}>Khoảng làm việc {Fmt(El.Lo, "0.###")} – {Fmt(El.Hi, "0.##")} mg/L · nồng độ đặc trưng ≈ {Fmt(El.CharacteristicConc, "0.###")} mg/L (A = 0,0044)</color>\n");
+                if (!string.IsNullOrEmpty(El.Note)) sb.Append($"<color={GlassKit.HexDim}>{El.Note}</color>\n");
             }
             string src = Source == Src.None ? "—" : Source == Src.Blank ? "nước cất" : Source == Src.Std ? $"chuẩn {StdIndex + 1}" : $"{SampleName} ×{Dilution}";
             sb.Append($"Đang hút: {(aspiring ? src : "(ống hút ngoài không khí)")} · A = <b>{Fmt(Signal, "0.0000")}</b>\n");
@@ -409,12 +409,12 @@ namespace Khkt.Demo.Instruments
                 sb.Append($"\n<b>Đường chuẩn</b> ({CalPoints.Count} chuẩn + 0): A = {Fmt(CalFit.Slope, "0.0000")}·c {(CalFit.Intercept >= 0 ? "+" : "−")} {Fmt(Math.Abs(CalFit.Intercept), "0.0000")} · R² = {Fmt(CalFit.R2, "0.0000")}\n");
             if (Results.Count > 0)
             {
-                sb.Append("\n<b>Phân tích chuyên sâu: kim loại trong mẫu</b>\n<color=#9FB3C8>Kim loại · đo được · ×pha loãng · mẫu gốc</color>\n");
+                sb.Append($"\n<b>Phân tích chuyên sâu: kim loại trong mẫu</b>\n<color={GlassKit.HexDim}>Kim loại · đo được · ×pha loãng · mẫu gốc</color>\n");
                 foreach (var kv in Results)
                 {
                     var r = kv.Value;
-                    string col = r.note.Contains("VƯỢT") || r.note.Contains("N₂O") ? "#FFC966" : "#73F29E";
-                    sb.Append($"• <color=#61DBFF>{kv.Key}</color>: {Fmt(r.meas, "0.000")} mg/L × {r.dil} = <b>{Fmt(r.orig, "0.##")} mg/L</b>");
+                    string col = r.note.Contains("VƯỢT") || r.note.Contains("N₂O") ? GlassKit.HexWarn : GlassKit.HexGood;
+                    sb.Append($"• <color={GlassKit.HexAccent}>{kv.Key}</color>: {Fmt(r.meas, "0.000")} mg/L × {r.dil} = <b>{Fmt(r.orig, "0.##")} mg/L</b>");
                     if (r.note.Length > 0) sb.Append($" <color={col}>({r.note})</color>");
                     sb.Append('\n');
                 }
@@ -426,12 +426,9 @@ namespace Khkt.Demo.Instruments
         // Sơ đồ nguyên lý
         // =====================================================================
 
-        static readonly Color Body = new Color(0.12f, 0.17f, 0.25f), Edge = new Color(0.45f, 0.6f, 0.75f), Off = new Color(0.3f, 0.35f, 0.4f);
-
         public override void DrawSchematic(Painter p, float time)
         {
-            p.Clear(new Color(0.05f, 0.08f, 0.13f));
-            p.Frame(4, 4, p.W - 8, p.H - 8, new Color(1, 1, 1, 0.08f));
+            SchemKit.Begin(p);
             var els = Lib.Elements;
             var turret = new Vector2(95, 205);
             var burner = new Vector2(420, 165);
@@ -443,40 +440,43 @@ namespace Khkt.Demo.Instruments
             float beamY = 205;
 
             // tháp đèn
-            p.Disc(turret.x, turret.y, 62, Body);
-            p.Ring(turret.x, turret.y, 62, Edge);
+            p.Disc(turret.x, turret.y, 62, SchemKit.Body);
+            p.Ring(turret.x, turret.y, 62, SchemKit.Edge);
             int n = Math.Max(1, els.Count);
             for (int i = 0; i < n && i < els.Count; i++)
             {
                 float ang = (turretAngle + i * 360f / n) * Mathf.Deg2Rad;
                 var lp = turret + new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * 44;
                 bool sel = els[i].Symbol == Lamp;
-                p.Disc(lp.x, lp.y, 8, sel && Ready ? new Color(1f, 0.85f, 0.5f, 0.4f + 0.6f * Mathf.Clamp01(lampWarm / LampWarmS)) : Off);
+                var hot = SchemKit.Hot;
+                p.Disc(lp.x, lp.y, 8, sel && Ready ? new Color(hot.r, hot.g, hot.b, 0.45f + 0.55f * Mathf.Clamp01(lampWarm / LampWarmS)) : SchemKit.Off);
             }
             // đầu đốt, buồng phun, ống mao quản, cốc mẫu
-            p.FillRect(burner.x - 100, burner.y - 6, 200, 10, new Color(0.55f, 0.6f, 0.65f));
-            p.FillRect(chamber.x - 90, chamber.y - 30, 180, 60, Body);
-            p.Frame(chamber.x - 90, chamber.y - 30, 180, 60, Edge);
-            p.FillRect(burner.x - 8, chamber.y + 30, 16, burner.y - chamber.y - 36, Body);
-            p.Disc(nebul.x, nebul.y, 12, Body);
-            p.Ring(nebul.x, nebul.y, 12, Edge);
-            p.Line(nebul.x - 10, nebul.y - 6, cup.x + 6, cup.y + 10, new Color(0.85f, 0.9f, 1f, 0.7f), 2);
-            p.FillRect(cup.x - 22, cup.y - 18, 44, 34, new Color(0.7f, 0.85f, 1f, 0.25f));
-            p.Frame(cup.x - 24, cup.y - 20, 48, 40, new Color(0.85f, 0.92f, 1f, 0.6f));
+            p.FillRect(burner.x - 100, burner.y - 6, 200, 10, SchemKit.Metal);
+            p.FillRect(chamber.x - 90, chamber.y - 30, 180, 60, SchemKit.Body);
+            p.Frame(chamber.x - 90, chamber.y - 30, 180, 60, SchemKit.Edge);
+            p.FillRect(burner.x - 8, chamber.y + 30, 16, burner.y - chamber.y - 36, SchemKit.Body);
+            p.Disc(nebul.x, nebul.y, 12, SchemKit.Body);
+            p.Ring(nebul.x, nebul.y, 12, SchemKit.Edge);
+            p.Line(nebul.x - 10, nebul.y - 6, cup.x + 6, cup.y + 10, SchemKit.GlassEdge, 2);
+            p.FillRect(cup.x - 22, cup.y - 18, 44, 34, SchemKit.Water);
+            p.Frame(cup.x - 24, cup.y - 20, 48, 40, SchemKit.GlassEdge);
             // đường khí và van
-            Valve(p, new Vector2(120, 112), Air, new Color(0.4f, 0.7f, 1f));
-            Valve(p, new Vector2(120, 72), Acetylene, new Color(1f, 0.65f, 0.25f));
-            p.Line(132, 112, nebul.x - 12, nebul.y + 4, new Color(0.4f, 0.7f, 1f, Air ? 0.9f : 0.3f), 3);
-            p.Line(132, 72, chamber.x - 90, chamber.y - 18, new Color(1f, 0.65f, 0.25f, Acetylene ? 0.9f : 0.3f), 3);
+            var airCol = SchemKit.Flow;
+            var gasCol = SchemKit.Hot;
+            Valve(p, new Vector2(120, 112), Air, airCol);
+            Valve(p, new Vector2(120, 72), Acetylene, gasCol);
+            p.Line(132, 112, nebul.x - 12, nebul.y + 4, new Color(airCol.r, airCol.g, airCol.b, Air ? 0.9f : 0.3f), 3);
+            p.Line(132, 72, chamber.x - 90, chamber.y - 18, new Color(gasCol.r, gasCol.g, gasCol.b, Acetylene ? 0.9f : 0.3f), 3);
             // chụp hút khí thải
             var hood = new[] { new Vector2(330, 318), new Vector2(510, 318), new Vector2(470, 290), new Vector2(370, 290) };
-            p.FillPoly(hood, Body);
+            p.FillPoly(hood, SchemKit.Body);
             for (int k = 0; k < 3; k++)
             {
                 float a = (Fan ? time * 600 : 0) + k * 120;
                 var c = new Vector2(420, 326);
                 var d = new Vector2(Mathf.Cos(a * Mathf.Deg2Rad), Mathf.Sin(a * Mathf.Deg2Rad) * 0.35f) * 18;
-                p.Line(c.x, c.y, c.x + d.x, c.y + d.y, Fan ? new Color(0.8f, 0.9f, 1f) : Off, 3);
+                p.Line(c.x, c.y, c.x + d.x, c.y + d.y, Fan ? SchemKit.Edge : SchemKit.Off, 3);
             }
             // ngọn lửa (màu đặc trưng của kim loại khi hút mẫu)
             float T = 1;
@@ -486,34 +486,36 @@ namespace Khkt.Demo.Instruments
                 Color outer = new Color(1f, 0.55f, 0.2f, 0.55f);
                 if (aspiring && Source != Src.None && Source != Src.Blank) outer = Color.Lerp(outer, FlameColor(), 0.75f);
                 p.FillPoly(new[] { new Vector2(burner.x - 100, burner.y + 4), new Vector2(burner.x + 100, burner.y + 4), new Vector2(burner.x + 70, burner.y + 70 + flick), new Vector2(burner.x - 70, burner.y + 66 - flick) }, outer);
-                p.FillPoly(new[] { new Vector2(burner.x - 90, burner.y + 4), new Vector2(burner.x + 90, burner.y + 4), new Vector2(burner.x + 50, burner.y + 22), new Vector2(burner.x - 50, burner.y + 22) }, new Color(0.35f, 0.55f, 1f, 0.7f));
+                p.FillPoly(new[] { new Vector2(burner.x - 90, burner.y + 4), new Vector2(burner.x + 90, burner.y + 4), new Vector2(burner.x + 50, burner.y + 22), new Vector2(burner.x - 50, burner.y + 22) }, new Color(0.25f, 0.48f, 0.98f, 0.75f));
                 T = (float)Math.Pow(10, -Math.Max(0, Math.Min(3, Signal + zeroOffset)));
             }
             // giọt mẫu: hút lên, phun sương, bay lên ngọn lửa
             if (aspiring && Source != Src.None)
             {
+                var dropCol = new Color(airCol.r, airCol.g, airCol.b, 0.85f);
                 for (int k = 0; k < 6; k++)
                 {
                     float f = Mathf.Repeat(time * 0.8f + k / 6f, 1);
                     var q = Vector2.Lerp(cup + new Vector2(6, 10), nebul + new Vector2(-10, -6), f);
-                    p.Disc(q.x, q.y, 2.5f, new Color(0.7f, 0.9f, 1f, 0.9f));
+                    p.Disc(q.x, q.y, 2.5f, dropCol);
                 }
+                var mistCol = new Color(airCol.r, airCol.g, airCol.b, 0.55f);
                 for (int k = 0; k < 18; k++)
                 {
                     float f = Mathf.Repeat(time * 0.6f + k * 0.13f, 1);
                     float x = Mathf.Lerp(chamber.x - 80, chamber.x + 80, Mathf.Repeat(k * 0.37f + time * 0.1f, 1));
                     float y = Mathf.Lerp(chamber.y - 20, Flame ? burner.y + 40 : chamber.y + 20, f);
                     if (y > chamber.y + 25 && Mathf.Abs(x - burner.x) > 8 && y < burner.y) continue;
-                    p.Disc(x, y, 1.6f, new Color(0.85f, 0.95f, 1f, 0.6f));
+                    p.Disc(x, y, 1.6f, mistCol);
                 }
             }
             // bộ đơn sắc, ống nhân quang
-            p.FillRect(mono.x - 60, mono.y - 45, 120, 90, Body);
-            p.Frame(mono.x - 60, mono.y - 45, 120, 90, Edge);
-            p.Line(mono.x - 20, mono.y - 30, mono.x + 20, mono.y + 30, new Color(0.6f, 0.75f, 0.9f), 5);
-            p.FillRect(pmt.x - 30, pmt.y - 22, 60, 44, Body);
-            p.Frame(pmt.x - 30, pmt.y - 22, 60, 44, Edge);
-            p.FillRect(pmt.x + 36, pmt.y - 30, 10, 60, new Color(1, 1, 1, 0.08f));
+            p.FillRect(mono.x - 60, mono.y - 45, 120, 90, SchemKit.Body);
+            p.Frame(mono.x - 60, mono.y - 45, 120, 90, SchemKit.Edge);
+            p.Line(mono.x - 20, mono.y - 30, mono.x + 20, mono.y + 30, SchemKit.Edge, 5);
+            p.FillRect(pmt.x - 30, pmt.y - 22, 60, 44, SchemKit.Body);
+            p.Frame(pmt.x - 30, pmt.y - 22, 60, 44, SchemKit.Edge);
+            p.FillRect(pmt.x + 36, pmt.y - 30, 10, 60, SchemKit.SubtleFill);
             if (LampReady && Ready)
             {
                 Color line = Painter.Wavelength((float)El.Line);
@@ -522,20 +524,21 @@ namespace Khkt.Demo.Instruments
                 Beam(p, new Vector2(burner.x - 100, beamY), new Vector2(burner.x + 100, beamY), line, ph, (1 + T) / 2);
                 Beam(p, new Vector2(burner.x + 100, beamY), new Vector2(mono.x - 60, beamY), line, ph, T);
                 Beam(p, new Vector2(mono.x + 60, beamY), new Vector2(pmt.x - 30, beamY), line, ph, T);
-                p.FillRect(pmt.x + 36, pmt.y - 30, 10, 60 * T, new Color(0.45f, 0.95f, 0.62f, 0.9f));
+                var meterCol = SchemKit.Good;
+                p.FillRect(pmt.x + 36, pmt.y - 30, 10, 60 * T, new Color(meterCol.r, meterCol.g, meterCol.b, 0.9f));
             }
 
             var d2 = Doc;
-            S.SchemLabel("thap", d2.PartName("thap_den") + (El != null ? $"\n<color=#61DBFF>{El.Symbol} · {Fmt(El.Line, "0.0")} nm</color>" : ""), turret.x, turret.y + 88, 12);
-            S.SchemLabel("mao", d2.PartName("mao_quan"), cup.x - 40, cup.y + 46, 12);
-            S.SchemLabel("phun", d2.PartName("phun_suong"), chamber.x + 150, chamber.y - 4, 12);
-            S.SchemLabel("dau_dot", d2.PartName("dau_dot"), burner.x - 175, burner.y + 4, 12);
-            S.SchemLabel("lua", Flame ? d2.PartName("ngon_lua") : "(chưa có lửa)", burner.x, burner.y + 92, 12);
-            S.SchemLabel("don_sac", d2.PartName("don_sac"), mono.x, mono.y - 62, 12);
-            S.SchemLabel("pmt", d2.PartName("pmt") + (LampReady && Ready ? $"\n<color=#73F29E>T = {T * 100:0.#}%</color>" : ""), pmt.x, pmt.y - 52, 12);
-            S.SchemLabel("khi", "Không khí\n\nAxetilen", 70, 92, 12);
-            S.SchemLabel("hut", Fan ? "Quạt hút: chạy" : "Quạt hút: tắt", 560, 318, 12, Fan ? Good : Dim);
-            S.SchemLabel("trang_thai", !Power ? "<color=#8899AA>MÁY TẮT</color>" : !Ready ? "<color=#FFC966>ĐANG TỰ KIỂM TRA…</color>" : Flame ? "<color=#73F29E>LỬA ĐANG CHÁY</color>" : "<color=#61DBFF>SẴN SÀNG (chưa châm lửa)</color>", 760, 330, 14);
+            S.SchemLabel("thap", d2.PartName("thap_den") + (El != null ? $"\n<color={GlassKit.HexAccent}>{El.Symbol} · {Fmt(El.Line, "0.0")} nm</color>" : ""), turret.x, turret.y + 88, 14);
+            S.SchemLabel("mao", d2.PartName("mao_quan"), cup.x - 40, cup.y + 46, 14);
+            S.SchemLabel("phun", d2.PartName("phun_suong"), chamber.x + 150, chamber.y - 4, 14);
+            S.SchemLabel("dau_dot", d2.PartName("dau_dot"), burner.x - 175, burner.y + 4, 14);
+            S.SchemLabel("lua", Flame ? d2.PartName("ngon_lua") : "(chưa có lửa)", burner.x, burner.y + 92, 14);
+            S.SchemLabel("don_sac", d2.PartName("don_sac"), mono.x, mono.y - 62, 14);
+            S.SchemLabel("pmt", d2.PartName("pmt") + (LampReady && Ready ? $"\n<color={GlassKit.HexGood}>T = {T * 100:0.#}%</color>" : ""), pmt.x, pmt.y - 52, 14);
+            S.SchemLabel("khi", "Không khí\n\nAxetilen", 70, 92, 14);
+            S.SchemLabel("hut", Fan ? "Quạt hút: chạy" : "Quạt hút: tắt", 560, 318, 14, Fan ? Good : Dim);
+            S.SchemLabel("trang_thai", !Power ? $"<color={GlassKit.Hex(GlassKit.Muted)}>MÁY TẮT</color>" : !Ready ? $"<color={GlassKit.HexWarn}>ĐANG TỰ KIỂM TRA…</color>" : Flame ? $"<color={GlassKit.HexGood}>LỬA ĐANG CHÁY</color>" : $"<color={GlassKit.HexAccent}>SẴN SÀNG (chưa châm lửa)</color>", 760, 330, 14);
         }
 
         static Color Good => GlassKit.Good;
@@ -556,7 +559,7 @@ namespace Khkt.Demo.Instruments
 
         static void Valve(Painter p, Vector2 c, bool open, Color gas)
         {
-            p.Disc(c.x, c.y, 10, open ? new Color(0.45f, 0.95f, 0.62f) : new Color(1f, 0.45f, 0.45f));
+            p.Disc(c.x, c.y, 10, open ? SchemKit.Good : InstrumentScreen.TraceCoral);
             p.Ring(c.x, c.y, 10, gas, 2);
         }
 
@@ -589,12 +592,14 @@ namespace Khkt.Demo.Instruments
             if (trace.Count > 1)
             {
                 var pts = trace.Select(t => InstrumentScreen.Map(p, t.t - now + 30, Math.Max(0, Math.Min(yMax, t.a)), 0, 30, 0, yMax)).ToList();
-                p.Poly(pts, new Color(0.43f, 0.86f, 1f), 2);
+                p.Poly(pts, InstrumentScreen.TraceCyan, 2);
             }
+            var g = InstrumentScreen.TraceGreen;
+            var calTick = new Color(g.r, g.g, g.b, 0.6f);
             foreach (var c in CalPoints)
             {
                 var q = InstrumentScreen.Map(p, 30, Math.Min(yMax, c.a), 0, 30, 0, yMax);
-                p.FillRect(q.x - 30, q.y - 1, 30, 2, new Color(0.45f, 0.95f, 0.62f, 0.5f));
+                p.FillRect(q.x - 30, q.y - 1, 30, 2, calTick);
             }
         }
 
@@ -613,24 +618,25 @@ namespace Khkt.Demo.Instruments
                 // đường thật của máy (cong ở nồng độ cao) để thấy vì sao phải pha loãng
                 var curve = new List<Vector2>();
                 for (int i = 0; i <= 40; i++) { double c = cMax * i / 40; curve.Add(InstrumentScreen.Map(p, c, Math.Min(aMax, El.Absorbance(c)), 0, cMax, 0, aMax)); }
-                for (int i = 1; i < curve.Count; i += 2) p.Line(curve[i - 1].x, curve[i - 1].y, curve[i].x, curve[i].y, new Color(1, 1, 1, 0.18f), 2);
+                for (int i = 1; i < curve.Count; i += 2) p.Line(curve[i - 1].x, curve[i - 1].y, curve[i].x, curve[i].y, InstrumentScreen.TraceDim, 2);
             }
             if (CalPoints.Count >= 2)
             {
                 var a0 = InstrumentScreen.Map(p, 0, CalFit.Intercept, 0, cMax, 0, aMax);
                 var a1 = InstrumentScreen.Map(p, cMax, CalFit.Intercept + CalFit.Slope * cMax, 0, cMax, 0, aMax);
-                p.Line(a0.x, a0.y, a1.x, a1.y, new Color(0.43f, 0.86f, 1f, 0.8f), 2);
+                var cy = InstrumentScreen.TraceCyan;
+                p.Line(a0.x, a0.y, a1.x, a1.y, new Color(cy.r, cy.g, cy.b, 0.85f), 2);
             }
             foreach (var c in CalPoints)
             {
                 var q = InstrumentScreen.Map(p, c.c, c.a, 0, cMax, 0, aMax);
-                p.Disc(q.x, q.y, 6, new Color(0.45f, 0.95f, 0.62f));
+                p.Disc(q.x, q.y, 6, InstrumentScreen.TraceGreen);
             }
             if (has)
             {
                 var q = InstrumentScreen.Map(p, r.meas, Math.Min(aMax, r.a), 0, cMax, 0, aMax);
-                p.Line(q.x - 8, q.y - 8, q.x + 8, q.y + 8, new Color(1f, 0.45f, 0.45f), 3);
-                p.Line(q.x - 8, q.y + 8, q.x + 8, q.y - 8, new Color(1f, 0.45f, 0.45f), 3);
+                p.Line(q.x - 8, q.y - 8, q.x + 8, q.y + 8, InstrumentScreen.TraceCoral, 3);
+                p.Line(q.x - 8, q.y + 8, q.x + 8, q.y - 8, InstrumentScreen.TraceCoral, 3);
             }
         }
     }

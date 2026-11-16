@@ -29,24 +29,76 @@ namespace Khkt.Demo
         {
             public RectTransform rt;
             public CanvasGroup group;
+            public Image bg;
             public Text title, eq, detail, ai;
             public Image dot;
             public float born, life;
             public ChemEvent e;
+            public string where;
         }
 
         readonly List<Card> cards = new List<Card>();
         Material glass;
+        bool glassOk;
 
         void Awake() => Instance = this;
 
         void Start()
         {
-            glass = Glass(ui.glassShader != null ? ui.glassShader : Shader.Find("Khkt/KinhMo"));
+            RefreshGlass();
             LabContainer.ChemEventRaised += OnEvent;
+            UiTheme.Changed += OnThemeChanged;
         }
 
-        void OnDestroy() => LabContainer.ChemEventRaised -= OnEvent;
+        void OnDestroy()
+        {
+            LabContainer.ChemEventRaised -= OnEvent;
+            UiTheme.Changed -= OnThemeChanged;
+        }
+
+        void RefreshGlass()
+        {
+            var shader = ui != null && ui.glassShader != null ? ui.glassShader : Shader.Find("Khkt/KinhMo");
+            var canvas = ui != null ? ui.Canvas : null;
+            glassOk = shader != null && canvas != null && canvas.rootCanvas.renderMode == RenderMode.ScreenSpaceCamera;
+            glass = glassOk ? Glass(shader) : null;
+        }
+
+        void OnThemeChanged()
+        {
+            RefreshGlass();
+            foreach (var card in cards)
+            {
+                if (card.rt == null) continue;
+                if (card.bg != null)
+                {
+                    if (glassOk && !ReducedTransparency)
+                    {
+                        card.bg.sprite = Rounded;
+                        card.bg.material = glass;
+                        card.bg.pixelsPerUnitMultiplier = 1.3f;
+                        card.bg.color = Color.white;
+                    }
+                    else
+                    {
+                        card.bg.material = null;
+                        card.bg.sprite = Solid;
+                        card.bg.pixelsPerUnitMultiplier = UiTheme.IsVera ? 1.3f : 2.8f;
+                        card.bg.color = Surface;
+                    }
+                }
+                if (card.dot != null)
+                    card.dot.color = card.e.Severity == Severity.Danger ? Bad : card.e.Severity == Severity.Warning ? Warn : card.e.Kind == EventKind.Gas ? Accent : Good;
+                if (card.title != null) card.title.color = Ink;
+                if (card.eq != null) card.eq.color = Accent;
+                if (card.detail != null)
+                {
+                    card.detail.color = Dim;
+                    card.detail.text = (card.e.Detail ?? "") + (card.where.Length > 0 ? $"  <color={HexDim}>· {card.where}</color>" : "");
+                }
+                if (card.ai != null) card.ai.color = Good;
+            }
+        }
 
         void OnEvent(LabContainer c, ChemEvent e)
         {
@@ -70,17 +122,23 @@ namespace Khkt.Demo
                 if (old.e.Key == e.Key) { old.born = Time.time; return old; }
             if (cards.Count >= maxCards) { Destroy(cards[0].rt.gameObject); cards.RemoveAt(0); }
             var img = Panel(ui.Canvas.transform, "Chú thích hiện tượng", new Vector2(0, 1), new Vector2(0, 1), new Vector2(20, -90), new Vector2(400, 120), glass, 1.3f);
-            var card = new Card { rt = img.rectTransform, group = img.gameObject.AddComponent<CanvasGroup>(), born = Time.time, e = e,
+            if (!glassOk && !ReducedTransparency)
+            {
+                img.sprite = Solid;
+                img.pixelsPerUnitMultiplier = UiTheme.IsVera ? 1.3f : 2.8f;
+                img.color = Surface;
+            }
+            string where = c != null ? c.label : "";
+            var card = new Card { rt = img.rectTransform, bg = img, group = img.gameObject.AddComponent<CanvasGroup>(), born = Time.time, e = e, where = where,
                                   life = e.Severity >= Severity.Warning ? 22f : 14f };
             var dotRt = Rect(card.rt, "Chấm", new Vector2(0, 1), new Vector2(0, 1), new Vector2(18, -22), new Vector2(10, 10));
             card.dot = dotRt.gameObject.AddComponent<Image>();
             card.dot.sprite = SolidCircle;
             card.dot.color = e.Severity == Severity.Danger ? Bad : e.Severity == Severity.Warning ? Warn : e.Kind == EventKind.Gas ? Accent : Good;
-            string where = c != null ? c.label : "";
             card.title = Label(card.rt, "Tên hiện tượng", e.Title, 17, Ink, true, TextAnchor.UpperLeft, new Vector2(36, -12), new Vector2(350, 26));
             card.eq = Label(card.rt, "Phương trình", e.Equation ?? "", 15, Accent, false, TextAnchor.UpperLeft, new Vector2(36, -40), new Vector2(350, 22));
-            card.detail = Label(card.rt, "Giải thích", (e.Detail ?? "") + (where.Length > 0 ? $"  <color=#9FB4C8>· {where}</color>" : ""), 14, Dim, false, TextAnchor.UpperLeft, new Vector2(36, -64), new Vector2(350, 40));
-            card.ai = Label(card.rt, "AI", "", 14, new Color(0.75f, 0.92f, 0.85f, 0.95f), false, TextAnchor.UpperLeft, new Vector2(36, -100), new Vector2(350, 40));
+            card.detail = Label(card.rt, "Giải thích", (e.Detail ?? "") + (where.Length > 0 ? $"  <color={HexDim}>· {where}</color>" : ""), 14, Dim, false, TextAnchor.UpperLeft, new Vector2(36, -64), new Vector2(350, 40));
+            card.ai = Label(card.rt, "AI", "", 14, Good, false, TextAnchor.UpperLeft, new Vector2(36, -100), new Vector2(350, 40));
             cards.Add(card);
             return card;
         }
