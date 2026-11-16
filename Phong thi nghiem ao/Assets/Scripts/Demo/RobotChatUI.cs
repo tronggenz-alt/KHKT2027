@@ -33,6 +33,7 @@ namespace Khkt.Demo
         Text bubbleText;
         RectTransform bubble;
         float bubbleTime = -100;
+        float nextStatus;
         readonly List<string> lines = new List<string>();
         readonly List<string> history = new List<string>();
         bool captured, waiting;
@@ -135,12 +136,16 @@ namespace Khkt.Demo
                     input.ActivateInputField();
                 }
             }
+            float age = Time.time - bubbleTime;
+            bubbleGroup.alpha = IsOpen ? 0 : Mathf.Clamp01(Mathf.Min(age * 5f, (9f - age) / 1.5f));
+            // Dòng trạng thái chỉ thấy khi khung trò chuyện mở, và 4 lần/giây là đủ: bản cũ ghép chuỗi mới ở mọi
+            // khung hình suốt buổi (rác bộ nhớ đều đặn, lâu lâu khựng một nhịp khi máy dọn rác).
+            if (!IsOpen || Time.unscaledTime < nextStatus) return;
+            nextStatus = Time.unscaledTime + 0.25f;
             var ai = AiClient.Instance;
             var robot = LabRobot.Instance;
             status.text = (ai != null && ai.Online ? $"<color=#73F29E>●</color> AI đám mây: {ai.Provider} {ai.Model}" : "<color=#FFC759>●</color> Ngoại tuyến: hiểu lệnh cơ bản (chạy server/ai để có AI)")
                           + (robot != null ? "  ·  " + robot.StatusText : "") + (waiting ? "  ·  đang nghĩ..." : "");
-            float age = Time.time - bubbleTime;
-            bubbleGroup.alpha = IsOpen ? 0 : Mathf.Clamp01(Mathf.Min(age * 5f, (9f - age) / 1.5f));
         }
 
         public void Send(string text)

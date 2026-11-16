@@ -227,6 +227,7 @@ namespace Khkt.Demo
         }
 
         bool wasPastEndpointPink;
+        Grabbable buretGrab;
 
         bool HasIndicator()
         {
@@ -240,7 +241,8 @@ namespace Khkt.Demo
         void Update()
         {
             if (!Active) return;
-            var g = buret.GetComponent<Grabbable>();
+            if (buretGrab == null) buretGrab = buret.GetComponent<Grabbable>();
+            var g = buretGrab;
             var b = buret.container.contents;
             if (flask.PinkVisible > 0.2f) wasPastEndpointPink = true;
             bool past = PastEndpoint();

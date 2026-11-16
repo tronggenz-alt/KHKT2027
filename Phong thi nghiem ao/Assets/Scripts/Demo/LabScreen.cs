@@ -157,7 +157,50 @@ namespace Khkt.Demo
         /// <summary>Đẩy một trang chữ (câu hỏi thảo luận, ghi chú) lên màn hình và chuyển tới trang đó.</summary>
         public void ShowText(string title, string body) => Push(new Page { title = title, body = body });
 
-        public void ShowImage(Texture2D image, string caption = "") => Push(new Page { image = image, title = caption });
+        /// <summary>
+        /// Đẩy một ảnh lên màn hình. Ảnh đã có trang rồi (nguồn phát liên tục như camera kính hiển vi gọi lại nhiều lần
+        /// với cùng một texture) thì chỉ đổi chú thích và chuyển về trang đó, không thêm trang trùng.
+        /// </summary>
+        public void ShowImage(Texture2D image, string caption = "")
+        {
+            if (image != null)
+                for (int i = 0; i < pages.Count; i++)
+                    if (pages[i].image == image && !pages[i].live)
+                    {
+                        pages[i].title = caption;
+                        pauseAuto = 60f;
+                        Show(i);
+                        return;
+                    }
+            Push(new Page { image = image, title = caption });
+        }
+
+        /// <summary>Gỡ mọi trang đang dùng ảnh này (nguồn ảnh sắp bị hủy, ví dụ khu chứa kính hiển vi bị gỡ).</summary>
+        public void RemoveImage(Texture2D image)
+        {
+            if (image == null) return;
+            bool removed = false;
+            for (int i = pages.Count - 1; i >= 0; i--)
+                if (pages[i].image == image)
+                {
+                    pages.RemoveAt(i);
+                    if (i < PageIndex) PageIndex--;
+                    removed = true;
+                }
+            if (!removed) return;
+            if (pages.Count > 0) Show(Mathf.Min(PageIndex, pages.Count - 1));
+            else
+            {
+                PageIndex = 0;
+                if (!IsPresenting && mat != null)
+                {
+                    mat.SetTexture(BaseMapId, background);
+                    mat.SetTexture(EmissionMapId, background);
+                }
+                if (!IsPresenting && titleText != null) titleText.gameObject.SetActive(false);
+                if (!IsPresenting && bodyText != null) bodyText.gameObject.SetActive(false);
+            }
+        }
 
         public void ShowLive(Camera cam, string caption = "")
         {

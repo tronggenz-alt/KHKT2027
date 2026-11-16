@@ -89,6 +89,7 @@ namespace Khkt.Demo.Bio
         public float maxPlasmolysisPercent = 0f;
         public float currentPlasmolysisPercent = 0f;
         bool hadFocused4x;
+        MicroscopeController plasmolysedScope;  // kính đã thấy tế bào co nguyên sinh: phản co phải thấy trên chính kính này
 
         // Bộ nhớ đệm thiết bị Tầng 2 (tránh cấp phát bộ nhớ mỗi khung hình)
         MicroscopeController[] microscopes;
@@ -170,6 +171,7 @@ namespace Khkt.Demo.Bio
             maxPlasmolysisPercent = 0f;
             currentPlasmolysisPercent = 0f;
             hadFocused4x = false;
+            plasmolysedScope = null;
         }
 
         public void NewRun()
@@ -181,7 +183,14 @@ namespace Khkt.Demo.Bio
             maxPlasmolysisPercent = 0f;
             currentPlasmolysisPercent = 0f;
             hadFocused4x = false;
+            plasmolysedScope = null;
             BioFeedback.MistakeHistory.Clear();
+
+            // Lượt mới thì tiêu bản trên các kính cũng về trạng thái chưa nhỏ NaCl; không thì kính còn co nguyên sinh
+            // từ lượt trước làm bước 5 tự xong ngay ở lần kiểm tra kế tiếp.
+            if (CurrentScenario == Scenario.OnionPlasmolysis && microscopes != null)
+                for (int i = 0; i < microscopes.Length; i++)
+                    if (microscopes[i] != null) microscopes[i].ResetPlasmolysis();
 
             var hand = HandController.Active;
             if (hand != null && hand.Held != null) hand.ReturnHome();
@@ -217,13 +226,16 @@ namespace Khkt.Demo.Bio
                     Done[1] = true;
                     Done[2] = true;
                 }
-                if (actionCode == "nho_nacl_co_nguyen_sinh")
+                // "nho_nacl_5_phan_tram" / "nho_nuoc_cat" là mã do chính kính hiển vi ghi khi bấm nút nhỏ dung dịch trên
+                // màn hình soi. Bản cũ chỉ chờ hai mã mà không nơi nào phát ra, nên làm đúng trên màn hình soi vẫn
+                // không qua được bước 5, 6.
+                if (actionCode == "nho_nacl_co_nguyen_sinh" || actionCode == "nho_nacl_5_phan_tram")
                 {
                     Done[0] = Done[1] = Done[2] = true;
                     Done[4] = true;
                     if (maxPlasmolysisPercent < 62f) maxPlasmolysisPercent = 62f;
                 }
-                if (actionCode == "nho_nuoc_cat_phan_co_nguyen_sinh" && Done[4])
+                if ((actionCode == "nho_nuoc_cat_phan_co_nguyen_sinh" || actionCode == "nho_nuoc_cat") && Done[4])
                 {
                     Done[5] = true;
                     currentPlasmolysisPercent = 3f;
@@ -335,6 +347,7 @@ namespace Khkt.Demo.Bio
 
             if (microscopes != null)
             {
+                float currentMax = 0f;
                 for (int i = 0; i < microscopes.Length; i++)
                 {
                     var mc = microscopes[i];
@@ -376,22 +389,30 @@ namespace Khkt.Demo.Bio
                             nacl = mc.slideSample.concentrationPct;
                             plas = (float)Osmosis.PlasmolysisFraction(Osmosis.NaClPercentToMolar(nacl));
                         }
+                        // nhỏ NaCl bằng nút trên màn hình soi: kính tự giữ mức co nguyên sinh của tiêu bản đang soi
+                        if (mc.plasmolysisFactor > plas) plas = mc.plasmolysisFactor;
+                        if (mc.plasmolysisActive && nacl < 5f) nacl = 5f;
                         if (plas * 100f > maxPlasmolysisPercent)
                             maxPlasmolysisPercent = plas * 100f;
-                        currentPlasmolysisPercent = plas * 100f;
+                        if (plas > currentMax) currentMax = plas;
 
                         if (plas > 0.35f || (nacl >= 2.5f && plas > 0.25f))
                         {
                             Done[0] = Done[1] = Done[2] = Done[3] = true;
                             Done[4] = true;
+                            plasmolysedScope = mc;
                         }
 
-                        if (Done[4] && maxPlasmolysisPercent >= 35f && plas < 0.10f && nacl < 1.0f)
+                        // Phản co nguyên sinh phải thấy trên CHÍNH kính đã có tế bào co. Bản cũ xét mọi kính: 28 kính
+                        // còn lại chưa ai đụng tới (mức co 0 %) làm bước 6 tự xong ngay sau bước 5.
+                        if (Done[4] && mc == plasmolysedScope && maxPlasmolysisPercent >= 35f && plas < 0.10f && nacl < 1.0f)
                         {
                             Done[5] = true;
                         }
                     }
                 }
+                // Mức co đang thấy: lấy kính co nhiều nhất, không phải kính cuối danh sách (thường là kính không ai dùng).
+                currentPlasmolysisPercent = currentMax * 100f;
             }
         }
 

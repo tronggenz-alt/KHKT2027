@@ -437,10 +437,21 @@ namespace Khkt.Assembly
                 Note(src, "chay_thoat:" + gas, $"Khí dễ cháy {g.formula} thoát ra gần ngọn lửa!", "Nguy cơ cháy nổ: tắt đèn cồn hoặc dẫn khí ra xa ngọn lửa.", Severity.Danger, "chay_no", gas, 10f);
         }
 
+        static HeatSource[] flames = Array.Empty<HeatSource>();
+        static float flamesFoundAt = -10f;
+
         static bool NearFlame(Vector3 p)
         {
-            foreach (var h in UnityEngine.Object.FindObjectsByType<HeatSource>(FindObjectsInactive.Exclude))
-                if (h.On && Vector3.Distance(h.transform.position, p) < 0.45f) return true;
+            // Khí dễ cháy thoát ra thì hàm này bị gọi ở mỗi nhịp mô phỏng: quét cả cảnh tối đa 1 lần/giây
+            // (bếp, đèn cồn không tự sinh ra giữa chừng; bật / tắt thì đọc qua h.On ở dưới, luôn mới).
+            float now = Time.unscaledTime;
+            if (now - flamesFoundAt > 1f || now < flamesFoundAt)
+            {
+                flamesFoundAt = now;
+                flames = UnityEngine.Object.FindObjectsByType<HeatSource>(FindObjectsInactive.Exclude);
+            }
+            foreach (var h in flames)
+                if (h != null && h.isActiveAndEnabled && h.On && Vector3.Distance(h.transform.position, p) < 0.45f) return true;
             return false;
         }
 

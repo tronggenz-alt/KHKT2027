@@ -62,6 +62,7 @@ namespace Khkt.Demo
         bool drawnResult;
 
         const int GraphW = 460, GraphH = 170;
+        Color32[] graphPx;
 
         void Awake()
         {
@@ -722,7 +723,7 @@ namespace Khkt.Demo
         {
             drawnCurve = procedure.CurveVersion;
             drawnResult = procedure.LastResult.HasValue;
-            var px = new Color32[GraphW * GraphH];
+            var px = graphPx ??= new Color32[GraphW * GraphH];  // đồ thị vẽ lại sau mỗi giọt: dùng lại bộ đệm
             var bg = new Color32(10, 16, 28, 150);
             var grid = new Color32(255, 255, 255, 28);
             for (int i = 0; i < px.Length; i++) px[i] = bg;
