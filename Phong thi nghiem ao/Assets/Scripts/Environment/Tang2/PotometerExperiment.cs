@@ -29,6 +29,8 @@ namespace Khkt.Environment.Tang2
         Material matTopInstance;
         float experimentTime = 0f;
         float currentX;
+        float textTimer = 1f;
+        bool finished;
 
         void Start()
         {
@@ -40,15 +42,15 @@ namespace Khkt.Environment.Tang2
 
         void Update()
         {
+            // Bọt đã tới cuối ống và cả hai mặt giấy đã đổi màu xong: không còn gì thay đổi, chờ người dùng đặt lại.
+            if (finished) return;
             float dt = Time.deltaTime;
             experimentTime += dt;
 
-            // 1. Dịch chuyển bọt khí
-            currentX += travelSpeed * dt;
-            if (currentX > endX)
-            {
-                currentX = startX; // Tự động tuần hoàn hoặc dừng lại
-            }
+            // 1. Dịch chuyển bọt khí. Tới cuối ống mao quản thì bọt dừng ở đó (như potometer thật, phải mở khóa bình
+            //    chứa để đẩy bọt về). Bản cũ cho bọt nhảy về đầu ống trong khi đồng hồ vẫn chạy tiếp, nên số mm và
+            //    số giây trên bảng không còn khớp nhau và không tính được tốc độ thoát hơi nước.
+            currentX = Mathf.Min(endX, currentX + travelSpeed * dt);
 
             if (bubbleTransform != null)
             {
@@ -69,9 +71,12 @@ namespace Khkt.Environment.Tang2
             if (matTopInstance != null)
                 matTopInstance.color = Color.Lerp(DryCobaltBlue, HydratedPink, tTop);
 
-            // 3. Cập nhật thông số khoa học
-            if (statusText != null)
+            // 3. Cập nhật thông số khoa học: 4 lần/giây là đủ đọc. Bản cũ dựng chuỗi mới và dựng lại lưới chữ
+            //    ở MỌI khung hình, kể cả khi người xem đang ở phòng khác.
+            textTimer += dt;
+            if (statusText != null && textTimer >= 0.25f)
             {
+                textTimer = 0f;
                 string bottomState = tBottom > 0.8f ? "<color=#ff77aa>HÓA HỒNG (Thoát mạnh)</color>" : "Đang hút ẩm...";
                 string topState = tTop < 0.3f ? "<color=#4488ff>VẪN XANH (Thoát yếu)</color>" : "Chuyển màu chậm";
 
@@ -81,6 +86,7 @@ namespace Khkt.Environment.Tang2
                     $"Mặt dưới lá (Khí khổng nhiều): {bottomState}\n" +
                     $"Mặt trên lá (Ít khí khổng): {topState}\n" +
                     $"<i>[Chạm vào để đặt lại thí nghiệm]</i>";
+                finished = currentX >= endX && experimentTime >= 80f;
             }
         }
 
@@ -88,9 +94,18 @@ namespace Khkt.Environment.Tang2
         {
             experimentTime = 0f;
             currentX = startX;
+            finished = false;
+            textTimer = 1f;
 
             if (matBottomInstance != null) matBottomInstance.color = DryCobaltBlue;
             if (matTopInstance != null) matTopInstance.color = DryCobaltBlue;
+        }
+
+        void OnDestroy()
+        {
+            // .material ở Start tạo bản vật liệu riêng: phải tự hủy, nếu không mỗi lần nạp lại khu là rò thêm hai bản
+            if (matBottomInstance != null) Destroy(matBottomInstance);
+            if (matTopInstance != null) Destroy(matTopInstance);
         }
 
         void OnMouseDown()

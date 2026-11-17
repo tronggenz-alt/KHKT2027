@@ -281,6 +281,15 @@ namespace Khkt.Interaction
                         Detail = "Pha loãng H₂SO₄ đặc: rót từ từ axit vào nước và khuấy đều, không làm ngược lại.",
                     });
             }
+            else if (liquidBoth && a.volumeMl > 0.5f && hB / (s.volumeMl / 1000.0) > 6)
+            {
+                // (hB: H⁺ tự do của phần rót vào. Phải là axit đặc thật, không phải muối sunfat rắn vừa xúc vào.)
+                // Chiều đúng (rót axit đặc vào nước) cũng tỏa đúng chừng ấy nhiệt, chỉ là không bắn. Bản cũ chỉ tính
+                // nhiệt khi axit đặc nằm sẵn trong bình, nên pha loãng đúng cách thì bình không hề ấm lên.
+                double addedConc = s.Mix.Get("SO4") / (s.volumeMl / 1000.0);
+                if (addedConc > 6 && sulfuricAfter < addedConc * 0.97)
+                    heat += 60000 * s.Mix.Get("SO4") * (1 - sulfuricAfter / addedConc);
+            }
             ApplyHeat(heat, m.volumeMl);
             Raise(events, res.HeatJ > 0 ? (float)res.HeatJ : 0f);
             return m;

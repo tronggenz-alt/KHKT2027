@@ -23,6 +23,10 @@ namespace Khkt.Interaction
 
         public float LevelM { get; private set; }
 
+        static readonly List<Vector2> sharedRings = new List<Vector2>();
+        static readonly List<Vector3> sharedVerts = new List<Vector3>();
+        static readonly List<int> sharedTris = new List<int>();
+
         Mesh mesh;
         float builtLevel = -1f, computedVolume = -1f;
 
@@ -55,15 +59,23 @@ namespace Khkt.Interaction
             builtLevel = LevelM;
 
             // Các vòng biên: đáy (tâm), các điểm thành trong thấp hơn mực, mực chất lỏng, nắp (tâm)
-            var rings = new List<Vector2> { new Vector2(0, innerProfile[0].y), innerProfile[0], innerProfile[0] };
+            // Ba danh sách dùng chung (chỉ chạy trên luồng chính): lúc rót, mực đổi ở mọi khung hình và bản cũ
+            // cấp phát ba danh sách mới mỗi lần.
+            var rings = sharedRings;
+            rings.Clear();
+            rings.Add(new Vector2(0, innerProfile[0].y));
+            rings.Add(innerProfile[0]);
+            rings.Add(innerProfile[0]);
             for (int i = 1; i < innerProfile.Length && innerProfile[i].y < LevelM; i++) rings.Add(innerProfile[i]);
             var top = new Vector2(RadiusAt(LevelM), LevelM);
             rings.Add(top);
             rings.Add(top);
             rings.Add(new Vector2(0, LevelM));
 
-            var v = new List<Vector3>();
-            var t = new List<int>();
+            var v = sharedVerts;
+            var t = sharedTris;
+            v.Clear();
+            t.Clear();
             int row = segments + 1;
             foreach (var p in rings)
                 for (int s = 0; s <= segments; s++)

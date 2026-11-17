@@ -104,6 +104,7 @@ namespace Khkt.Demo
         Text cardInfoBtnTxt;
 
         const int GraphW = 460, GraphH = 170;
+        Color32[] graphPx;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void ResetStatics()
@@ -1317,7 +1318,8 @@ namespace Khkt.Demo
             if (tex == null) return;
             int w = tex.width;
             int h = tex.height;
-            var px = new Color32[w * h];
+            // đồ thị vẽ lại sau mỗi giọt: dùng lại bộ đệm, không cấp phát mới
+            var px = graphPx != null && graphPx.Length == w * h ? graphPx : (graphPx = new Color32[w * h]);
 
             Color baseBg = UiTheme.IsVera ? Well : Surface;
             baseBg.a = 1f;

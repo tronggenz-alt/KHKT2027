@@ -16,8 +16,14 @@ namespace Khkt.Interaction
         static readonly CultureInfo Vi = CultureInfo.GetCultureInfo("vi-VN");
         public string Reading { get; private set; } = "";
 
+        float nextRead;
+
         void Update()
         {
+            // 5 lần/giây là đủ cho một màn hình số. Bản cũ tìm thành phần và dựng chuỗi mới ở mọi khung hình,
+            // trên mọi máy quang phổ trong cảnh, kể cả khi không ai đứng gần.
+            if (Time.unscaledTime < nextRead) return;
+            nextRead = Time.unscaledTime + 0.2f;
             var c = slot != null && slot.Occupant != null ? slot.Occupant.GetComponent<LabContainer>() : null;
             if (c == null || c.VolumeMl < 0.5f) Reading = "Đặt cuvet";
             else

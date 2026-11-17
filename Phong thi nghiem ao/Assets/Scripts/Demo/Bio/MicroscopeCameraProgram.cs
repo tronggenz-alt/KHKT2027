@@ -53,7 +53,11 @@ namespace Khkt.Demo.Bio
 
             bLamp = S.AddButton("Đèn LED đế", 0, 0, () =>
             {
-                if (hostMicroscope != null) hostMicroscope.lampOn = !hostMicroscope.lampOn;
+                if (hostMicroscope != null)
+                {
+                    hostMicroscope.lampOn = !hostMicroscope.lampOn;
+                    hostMicroscope.Refresh(true);
+                }
                 S.Done("bat_den");
             });
             bObj = S.AddButton("Đổi vật kính (4×..100×)", 1, 0, () =>
@@ -195,7 +199,35 @@ namespace Khkt.Demo.Bio
                 p.Line(190, 64, 190, 265, new Color32(255, 235, 120, 220), 3);
         }
 
+        Color32[] plotCache;
+        int plotCacheKey;
+
+        /// <summary>
+        /// Màn hình máy gọi hàm này 30 lần/giây. Ảnh tiêu bản tính từng điểm ảnh nên chỉ vẽ lại khi có gì đổi
+        /// (tiêu bản, vật kính, nét, vị trí bàn sa trượt, thuốc nhuộm); còn lại chép từ bản đã vẽ.
+        /// </summary>
         public override void DrawPlot(Khkt.Demo.Instruments.Painter p)
+        {
+            if (hostMicroscope != null) hostMicroscope.Refresh(false);  // kính có thay đổi thì vẽ lại (tối đa 10 lần/giây)
+            int key = PlotKey();
+            if (plotCache != null && plotCache.Length == p.Pixels.Length && key == plotCacheKey)
+            {
+                p.Restore(plotCache);
+                return;
+            }
+            RenderPlot(p);
+            if (plotCache == null || plotCache.Length != p.Pixels.Length) plotCache = new Color32[p.Pixels.Length];
+            System.Array.Copy(p.Pixels, plotCache, plotCache.Length);
+            plotCacheKey = key;
+        }
+
+        int PlotKey()
+        {
+            int mode = showStructureSchematic ? 1 : 2;
+            return hostMicroscope == null ? mode : mode + hostMicroscope.ViewportVersion * 4;
+        }
+
+        void RenderPlot(Khkt.Demo.Instruments.Painter p)
         {
             p.Clear(new Color32(8, 14, 24, 255));
 
@@ -255,77 +287,84 @@ namespace Khkt.Demo.Bio
                 return;
             }
 
-            // CHẾ ĐỘ XEM TIÊU BẢN THỊ KÍNH TRÒN SDF ANTI-ALIASING SIÊU MỊN
-            int cx = 220, cy = 230, rMax = 180;
-            float rOuter = rMax + 8f;
-            float rOuter2 = rOuter * rOuter;
-            string code = hostMicroscope != null ? hostMicroscope.activeSlideCode : "bieu_bi_hanh";
-            float mag = hostMicroscope != null ? (float)(hostMicroscope.CurrentMagnification / 10.0) : 10f;
-            float scale = Mathf.Max(0.4f, mag / 10f);
-            float blur = hostMicroscope != null ? Mathf.Clamp((float)hostMicroscope.ComputeCurrentBlurFactor(), 0f, 4f) : 0f;
-            bool stainedBlue = code.Contains("niem_mac") || (hostMicroscope?.slideSample != null && hostMicroscope.slideSample.stainId.Contains("methylen"));
-            bool isStomata = code.Contains("khi_khong") || code.Contains("thai_lai");
-            bool gram = code.Contains("gram");
-            float plasmo = code.Contains("co_nguyen_sinh") ? 0.55f : (hostMicroscope?.mountedSlide != null ? hostMicroscope.mountedSlide.plasmolysisFraction : 0f);
-
-            int yMin = Mathf.Max(0, cy - (int)rOuter);
-            int yMax = Mathf.Min(p.H - 1, cy + (int)rOuter);
-
-            for (int py = yMin; py <= yMax; py++)
+            // Thị trường: chép đúng ảnh kính đang soi. Bản cũ tự vẽ một ảnh riêng, bỏ qua thuốc nhuộm, co nguyên sinh,
+            // đèn và dầu soi, nên bấm các nút đó mà hình trên màn hình này không hề đổi.
+            if (hostMicroscope == null || !hostMicroscope.BlitViewport(p.Pixels, p.W, p.H, 21, 31, 398))
             {
-                float dy = py - cy;
-                float dy2 = dy * dy;
-                if (dy2 >= rOuter2) continue;
+                // CHẾ ĐỘ XEM TIÊU BẢN THỊ KÍNH TRÒN SDF ANTI-ALIASING SIÊU MỊN
+                int cx = 220, cy = 230, rMax = 180;
+                float rOuter = rMax + 8f;
+                float rOuter2 = rOuter * rOuter;
+                string code = hostMicroscope != null ? hostMicroscope.activeSlideCode : "bieu_bi_hanh";
+                float mag = hostMicroscope != null ? (float)(hostMicroscope.CurrentMagnification / 10.0) : 10f;
+                float scale = Mathf.Max(0.4f, mag / 10f);
+                float blur = hostMicroscope != null ? Mathf.Clamp((float)hostMicroscope.ComputeCurrentBlurFactor(), 0f, 4f) : 0f;
+                bool stainedBlue = code.Contains("niem_mac") || (hostMicroscope?.slideSample != null && hostMicroscope.slideSample.stainId.Contains("methylen"));
+                bool isStomata = code.Contains("khi_khong") || code.Contains("thai_lai");
+                bool gram = code.Contains("gram");
+                float plasmo = code.Contains("co_nguyen_sinh") ? 0.55f : (hostMicroscope?.mountedSlide != null ? hostMicroscope.mountedSlide.plasmolysisFraction : 0f);
 
-                float halfW = Mathf.Sqrt(rOuter2 - dy2);
-                int x0 = Mathf.Max(0, Mathf.FloorToInt(cx - halfW));
-                int x1 = Mathf.Min(p.W - 1, Mathf.CeilToInt(cx + halfW));
-                float v = (dy / rMax) / scale + (hostMicroscope != null ? hostMicroscope.stageY * 0.04f : 0f);
+                var kind = MicroscopeController.ClassifySpecimen(code, isStomata, gram, gram, false, false, false);
 
-                for (int px = x0; px <= x1; px++)
+                int yMin = Mathf.Max(0, cy - (int)rOuter);
+                int yMax = Mathf.Min(p.H - 1, cy + (int)rOuter);
+
+                for (int py = yMin; py <= yMax; py++)
                 {
-                    float dx = px - cx;
-                    float dist = Mathf.Sqrt(dx * dx + dy2);
-                    // Thuật toán Signed Distance Field (SDF) Anti-Aliasing viền vòng tròn
-                    float innerMask = Mathf.Clamp01((rMax - dist) / 2.0f);
-                    float bezelMask = Mathf.Clamp01((rOuter - dist) / 2.0f) * (1f - innerMask);
+                    float dy = py - cy;
+                    float dy2 = dy * dy;
+                    if (dy2 >= rOuter2) continue;
 
-                    if (innerMask <= 0f && bezelMask <= 0f) continue;
+                    float halfW = Mathf.Sqrt(rOuter2 - dy2);
+                    int x0 = Mathf.Max(0, Mathf.FloorToInt(cx - halfW));
+                    int x1 = Mathf.Min(p.W - 1, Mathf.CeilToInt(cx + halfW));
+                    float v = (dy / rMax) / scale + (hostMicroscope != null ? hostMicroscope.stageY * 0.04f : 0f);
 
-                    Color32 bezelCol = new Color32(20, 24, 30, 255);
-                    float hl = Mathf.Clamp01(1f - Mathf.Abs(dy - dx * 0.45f) / rMax) * 0.15f;
-                    bezelCol = Color.Lerp(bezelCol, new Color(0.28f, 0.32f, 0.40f), hl);
-
-                    if (innerMask <= 0f)
+                    for (int px = x0; px <= x1; px++)
                     {
-                        p.SetPixel(px, py, Color.Lerp(new Color32(8, 14, 24, 255), bezelCol, bezelMask));
-                        continue;
+                        float dx = px - cx;
+                        float dist = Mathf.Sqrt(dx * dx + dy2);
+                        // Thuật toán Signed Distance Field (SDF) Anti-Aliasing viền vòng tròn
+                        float innerMask = Mathf.Clamp01((rMax - dist) / 2.0f);
+                        float bezelMask = Mathf.Clamp01((rOuter - dist) / 2.0f) * (1f - innerMask);
+
+                        if (innerMask <= 0f && bezelMask <= 0f) continue;
+
+                        Color32 bezelCol = new Color32(20, 24, 30, 255);
+                        float hl = Mathf.Clamp01(1f - Mathf.Abs(dy - dx * 0.45f) / rMax) * 0.15f;
+                        bezelCol = Color.Lerp(bezelCol, new Color(0.28f, 0.32f, 0.40f), hl);
+
+                        if (innerMask <= 0f)
+                        {
+                            p.SetPixel(px, py, Color.Lerp(new Color32(8, 14, 24, 255), bezelCol, bezelMask));
+                            continue;
+                        }
+
+                        float u = (dx / rMax) / scale + (hostMicroscope != null ? hostMicroscope.stageX * 0.04f : 0f);
+                        Color c = MicroscopeController.SampleSpecimenColor(kind, u, v, stainedBlue, false, gram, gram, plasmo, true);
+                        if (blur > 0.15f)
+                            c = Color.Lerp(c, new Color(0.82f, 0.80f, 0.86f), Mathf.Clamp01(blur * 0.3f));
+
+                        // Góc tối vignette tự nhiên quanh rìa thị kính quang học
+                        float vig = Mathf.Clamp01(1f - Mathf.Pow(dist / rMax, 4.0f) * 0.35f);
+                        c *= vig;
+
+                        c = Color.Lerp(bezelCol, c, innerMask);
+                        if (bezelMask > 0f)
+                            c = Color.Lerp(new Color(0.03f, 0.05f, 0.09f), c, innerMask + bezelMask);
+
+                        p.SetPixel(px, py, (Color32)c);
                     }
-
-                    float u = (dx / rMax) / scale + (hostMicroscope != null ? hostMicroscope.stageX * 0.04f : 0f);
-                    Color c = MicroscopeController.SampleSpecimenColor(code, u, v, stainedBlue, isStomata, gram, gram, plasmo);
-                    if (blur > 0.15f)
-                        c = Color.Lerp(c, new Color(0.82f, 0.80f, 0.86f), Mathf.Clamp01(blur * 0.3f));
-
-                    // Góc tối vignette tự nhiên quanh rìa thị kính quang học
-                    float vig = Mathf.Clamp01(1f - Mathf.Pow(dist / rMax, 4.0f) * 0.35f);
-                    c *= vig;
-
-                    c = Color.Lerp(bezelCol, c, innerMask);
-                    if (bezelMask > 0f)
-                        c = Color.Lerp(new Color(0.03f, 0.05f, 0.09f), c, innerMask + bezelMask);
-
-                    p.SetPixel(px, py, (Color32)c);
                 }
-            }
 
-            // Thước trắc vi thị kính ngang tâm
-            p.Line(cx - 130, cy, cx + 130, cy, new Color32(20, 25, 30, 210), 2);
-            for (int k = -10; k <= 10; k++)
-            {
-                int tx = cx + k * 12;
-                int tlen = (k % 5 == 0) ? 14 : 7;
-                p.Line(tx, cy, tx, cy + tlen, new Color32(20, 25, 30, 210), 1);
+                // Thước trắc vi thị kính ngang tâm
+                p.Line(cx - 130, cy, cx + 130, cy, new Color32(20, 25, 30, 210), 2);
+                for (int k = -10; k <= 10; k++)
+                {
+                    int tx = cx + k * 12;
+                    int tlen = (k % 5 == 0) ? 14 : 7;
+                    p.Line(tx, cy, tx, cy + tlen, new Color32(20, 25, 30, 210), 1);
+                }
             }
 
             // 2. Bên phải: Biểu đồ phân bố kích thước tế bào đo được
