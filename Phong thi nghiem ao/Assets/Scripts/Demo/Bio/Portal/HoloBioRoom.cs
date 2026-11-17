@@ -398,6 +398,8 @@ namespace Khkt.Demo.Bio.Portal
                 var psr = dustGo.GetComponent<ParticleSystemRenderer>();
                 psr.shadowCastingMode = ShadowCastingMode.Off;
                 psr.receiveShadows = false;
+                // Không gán vật liệu thì URP vẽ hạt màu hồng tím (vật liệu mặc định của built-in).
+                psr.sharedMaterial = CreateUnlitAdditiveMaterial(new Color(34f / 255f, 211f / 255f, 238f / 255f, 0.6f));
             }
 
             if (orbitTarget == null)

@@ -56,7 +56,7 @@ namespace Khkt.Demo.Bio.Portal
         // Thời gian chờ phục hồi thẻ (GĐ3 cooldown)
         float cooldownTimer = 0f;
 
-        public void SetCooldown(float duration = 0.8f)
+        public void SetCooldown(float duration = 1.0f)
         {
             cooldownTimer = duration;
             walkArmed = false;   // vừa trở về đứng ngay trong lòng cổng: phải bước ra rồi mới tính lần bước qua mới
@@ -657,18 +657,29 @@ namespace Khkt.Demo.Bio.Portal
             // GĐ1: Bấm nút ghi log chuẩn yêu cầu
             Debug.Log("[KHKT-BIO-PORTAL] Bấm vào Phòng Sinh học 3D");
 
-            // GĐ3: Khởi chạy chuyển cảnh FSM BioPortalTransition sang HoloBioRoom
-            var room = targetHoloRoom != null ? targetHoloRoom : FindAnyObjectByType<HoloBioRoom>(FindObjectsInactive.Include);
-            if (room != null)
+            HideCard();
+            var transition = BioPortalTransition.Instance;
+            if (transition == null)
             {
-                HideCard();
-                var transition = BioPortalTransition.Instance;
-                if (transition == null)
-                {
-                    var transGo = new GameObject("BioPortalTransition");
-                    transition = transGo.AddComponent<BioPortalTransition>();
-                }
-                transition.StartOpenTransition(this, room);
+                var transGo = new GameObject("BioPortalTransition");
+                transition = transGo.AddComponent<BioPortalTransition>();
+            }
+            transition.StartOpenTransition(this, targetHoloRoom);
+        }
+
+        /// <summary>
+        /// Phục hồi lab khi người dùng đóng Phòng Sinh học 3D.
+        /// </summary>
+        public void OnReturnFromBioLab()
+        {
+            var transition = BioPortalTransition.Instance;
+            if (transition != null)
+            {
+                transition.OnReturnFromBioLab();
+            }
+            else
+            {
+                SetCooldown(1.0f);
             }
         }
 

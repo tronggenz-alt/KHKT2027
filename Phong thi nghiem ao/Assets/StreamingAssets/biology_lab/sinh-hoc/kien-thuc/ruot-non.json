@@ -1,0 +1,64 @@
+{
+  "id": "ruot_non",
+  "ten": "Ruột non",
+  "can_duyet": true,
+  "chuong_trinh": "Sinh học 11 – Dinh dưỡng và tiêu hoá ở động vật (CT GDPT 2018); nền tảng KHTN 8",
+  "vi_tri": [
+    "Nối tiếp dạ dày qua môn vị, cuộn trong khoang bụng; đoạn đầu là tá tràng, tiếp theo là hỗng tràng và hồi tràng."
+  ],
+  "cau_tao": [
+    "Là đoạn dài nhất của ống tiêu hoá.",
+    "Tá tràng nhận dịch mật (từ gan, túi mật) và dịch tuỵ đổ vào.",
+    "Niêm mạc có nhiều nếp gấp, trên nếp gấp có lông ruột, trên tế bào lông ruột có lông cực nhỏ → diện tích bề mặt hấp thụ rất lớn.",
+    "Trong mỗi lông ruột có mạng mao mạch máu và mạch bạch huyết."
+  ],
+  "chuc_nang": [
+    "Là nơi tiêu hoá hoá học triệt để thức ăn thành chất đơn giản nhờ dịch tuỵ, dịch mật và dịch ruột.",
+    "Là nơi hấp thụ chủ yếu các chất dinh dưỡng: glucose, amino acid, acid béo và glycerol, vitamin, muối khoáng, nước."
+  ],
+  "co_che": [
+    "Tinh bột → maltose (amylase) → glucose (maltase); protein → peptide → amino acid (trypsin và các peptidase); lipid → acid béo + glycerol (lipase).",
+    "Muối mật nhũ tương hoá lipid thành các giọt nhỏ giúp lipase hoạt động; dịch mật không chứa enzyme tiêu hoá.",
+    "Chất dinh dưỡng được hấp thụ qua tế bào lông ruột bằng khuếch tán và vận chuyển chủ động; phần lớn lipid đi theo mạch bạch huyết, các chất còn lại vào mao mạch máu rồi về gan."
+  ],
+  "lien_he": [
+    "Một số người thiếu enzyme lactase nên uống sữa bị đầy bụng, tiêu chảy (không dung nạp lactose).",
+    "Nhiễm giun sán ở ruột làm cơ thể thiếu chất; nên ăn chín uống sôi, tẩy giun định kì."
+  ],
+  "diem_thi": [
+    "Ruột non là nơi tiêu hoá hoá học và hấp thụ chủ yếu; các đặc điểm cấu tạo phù hợp với chức năng hấp thụ.",
+    "Sản phẩm cuối cùng của quá trình tiêu hoá tinh bột, protein, lipid.",
+    "Động vật ăn thực vật có ruột dài hơn động vật ăn thịt vì thức ăn khó tiêu hoá và nghèo dinh dưỡng."
+  ],
+  "trac_nghiem": [
+    {
+      "cau": "Dịch mật có vai trò",
+      "lua_chon": ["phân giải protein thành amino acid", "phân giải tinh bột thành glucose", "nhũ tương hoá lipid, giúp lipase hoạt động", "diệt vi khuẩn trong ruột già"],
+      "dap_an": "C",
+      "giai_thich": "Muối mật chia lipid thành các giọt nhỏ, tăng diện tiếp xúc với lipase; dịch mật không chứa enzyme."
+    },
+    {
+      "cau": "Đặc điểm nào giúp ruột non hấp thụ chất dinh dưỡng hiệu quả?",
+      "lua_chon": ["Niêm mạc có nếp gấp, lông ruột và lông cực nhỏ", "Thành có ba lớp cơ dày", "Có nhiều tuyến tiết HCl", "Có dạ múi khế"],
+      "dap_an": "A",
+      "giai_thich": "Các nếp gấp, lông ruột và lông cực nhỏ làm diện tích bề mặt hấp thụ tăng lên rất nhiều lần."
+    },
+    {
+      "cau": "Sản phẩm cuối cùng khi tiêu hoá tinh bột trong ruột non là",
+      "lua_chon": ["maltose", "glycogen", "amino acid", "glucose"],
+      "dap_an": "D",
+      "giai_thich": "Amylase phân giải tinh bột thành maltose, maltase tiếp tục phân giải maltose thành glucose để hấp thụ."
+    },
+    {
+      "cau": "Vì sao động vật ăn thực vật có ruột dài hơn động vật ăn thịt?",
+      "lua_chon": ["Vì chúng ăn ít", "Vì thức ăn thực vật khó tiêu hoá và nghèo dinh dưỡng", "Vì chúng không có dạ dày", "Vì ruột dài giúp tiết nhiều HCl"],
+      "dap_an": "B",
+      "giai_thich": "Ruột dài giúp thức ăn ở lại lâu hơn để được tiêu hoá và hấp thụ triệt để."
+    }
+  ],
+  "goi_y_hoi": [
+    "Vì sao ruột non là nơi hấp thụ chủ yếu?",
+    "Dịch mật và dịch tuỵ có vai trò gì?",
+    "Lipid được hấp thụ theo con đường nào?"
+  ]
+}
