@@ -132,7 +132,8 @@ namespace Khkt.Menu.Dashboard
             var row = Row("Hàng thẻ mô-đun", -262, 114);
             cardChem = BuildModuleCard(row, 0, "Phòng Hóa", "hoa", "Tầng 1 · chuẩn độ", "Vào", () => EnterStation(2), MenuKit.Accent);
             cardBio = BuildModuleCard(row, 1, "Phòng Sinh", "sinh", "Tầng 2 · hiển vi, PCR", "Vào", () => EnterStation(21), MenuKit.Bio);
-            BuildModuleCard(row, 2, "Cơ chế 3D", "co_che", "3D ⇄ giấy · 8 bài", "Mở", MoDun("Khkt.CoChe.CoCheMoDun"), MenuKit.Accent);
+            // 18/11: Cơ chế 3D chuyển vào màn "Giải bài tập" (Chuỗi, 3D, Cơ chế); thẻ này mở màn đó
+            BuildModuleCard(row, 2, "Giải bài tập", "co_che", "Chuỗi · 3D · Cơ chế", "Mở", () => (shell.Host as MainMenu)?.MoGiaiBaiTap(true), MenuKit.Accent);
             BuildModuleCard(row, 3, "Thực vật 3D", "thuc_vat", "Cấu tạo, quang hợp", "Mở", MoDun("Khkt.Bio.ThucVat.ThucVatMoDun"), MenuKit.Bio);
             BuildModuleCard(row, 4, "Giải phẫu", "giai_phau", "Cơ thể người 3D", "Mở", MoDun("Khkt.Bio.GiaiPhau.GiaiPhauMoDun"), MenuKit.Warn);
         }

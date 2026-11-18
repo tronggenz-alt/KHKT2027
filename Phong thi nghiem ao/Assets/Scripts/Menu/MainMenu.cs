@@ -54,6 +54,9 @@ namespace Khkt.Menu
         Text loadText, loginServerText, aiStatusText;
         RectTransform uiRoot, loginRoot, panelRoot;
         DashboardShell dashboard;
+        ManChonLuong chonLuong;         // 18/11: màn đầu tiên, 2 nút lớn Giải bài tập / Phòng Lab
+        ManGiaiBaiTap giaiBaiTap;       // phần CHEMISTRY đưa vào VERA: Chuỗi, 3D, Cơ chế
+        bool giaiBaiTapTuBang;          // mở từ bảng điều khiển thì Quay lại về bảng, không về màn chọn
         bool panelVisible;
         Image loadBar;
         InputField roomJoinField;
@@ -85,7 +88,19 @@ namespace Khkt.Menu
         {
             if (GameSession.HasIdentity)
             {
+                // từ phòng lab quay về: vào thẳng bảng điều khiển như trước
                 Show(GameSession.User != null && GameSession.User.phai_doi_mat_khau ? Screen.ChangePassword : Screen.Home);
+                yield break;
+            }
+            chonLuong.Hien();
+        }
+
+        /// <summary>Màn chọn → "Phòng Lab": luồng cũ, đăng nhập (tự khôi phục phiên nếu còn) rồi vào bảng điều khiển.</summary>
+        IEnumerator VaoPhongLab()
+        {
+            if (GameSession.HasIdentity)
+            {
+                AfterSignIn();
                 yield break;
             }
             Show(Screen.Login);
@@ -135,6 +150,8 @@ namespace Khkt.Menu
         public void Show(Screen s)
         {
             Current = s;
+            if (chonLuong != null && chonLuong.DangHien) chonLuong.An();        // vào màn nào của luồng Phòng Lab thì ẩn màn chọn
+            if (giaiBaiTap != null && giaiBaiTap.DangHien && s != Screen.Home) giaiBaiTap.An();
             foreach (var kv in screens) kv.Value.SetActive(kv.Key == s);
             if (status.TryGetValue(s, out var t)) t.text = "";
             if (s == Screen.Home)
@@ -511,6 +528,47 @@ namespace Khkt.Menu
             // Từ lab về thì đi thẳng vào trang chính: bảng đăng nhập chỉ bật khi thật sự cần
             MenuAnim.Group(loginRoot).alpha = 0f;
             loginRoot.gameObject.SetActive(false);
+
+            var veMan = MakeButton(panel, "Nút Về màn chọn", "← Màn chính", new Vector2(36, -28), new Vector2(160, 44), () => { if (!busy) VeManChon(); }, 2, RadiusButton, new Vector2(0, 1));
+            ((RectTransform)veMan.transform).pivot = new Vector2(0, 1);
+
+            giaiBaiTap = ManGiaiBaiTap.Tao(uiRoot, logo);
+            giaiBaiTap.QuayLai = () =>
+            {
+                giaiBaiTap.An();
+                if (!giaiBaiTapTuBang) chonLuong.Hien();
+            };
+            giaiBaiTap.MoCoChe = () => Khkt.CoChe.CoCheMoDun.Mo();
+            giaiBaiTap.MoChuoi = () => Khkt.CoChe.CoCheMoDun.MoGiaiChuoi();
+            giaiBaiTap.Mo3D = () => Khkt.CoChe.MoHinh3DMoDun.Mo();
+            var caiDatGbt = CaiDatGiaiBaiTap.Tao(uiRoot);
+            giaiBaiTap.MoCaiDat = caiDatGbt.Hien;
+            giaiBaiTap.MoHoaLy = ma => giaiBaiTap.Bao("Hóa lý (" + ma.Replace('_', ' ') + "): đang chuyển 4 mô phỏng của CHEMISTRY sang Unity, sẽ có ở bản sau.", false);
+            chonLuong = ManChonLuong.Tao(uiRoot, logo);
+            chonLuong.ChonPhongLab = () => { chonLuong.An(); StartCoroutine(VaoPhongLab()); };
+            chonLuong.ChonGiaiBaiTap = () => { chonLuong.An(); MoGiaiBaiTap(false); };
+            chonLuong.Thoat = Application.Quit;
+            chonLuong.gameObject.SetActive(false);
+        }
+
+        /// <summary>Mở màn Giải bài tập. tuBang = mở từ bảng điều khiển (Quay lại thì về bảng).</summary>
+        public void MoGiaiBaiTap(bool tuBang)
+        {
+            giaiBaiTapTuBang = tuBang;
+            giaiBaiTap.Hien();
+        }
+
+        /// <summary>Từ màn đăng nhập về màn chọn 2 luồng.</summary>
+        void VeManChon()
+        {
+            if (panelVisible)
+            {
+                panelVisible = false;
+                var g = MenuAnim.Group(loginRoot);
+                g.blocksRaycasts = false;
+                MenuAnim.Fade(g, g.alpha, 0f, 0.22f, 0f, () => loginRoot.gameObject.SetActive(false));
+            }
+            chonLuong.Hien();
         }
 
         void BuildLeftShowcase(RectTransform left)

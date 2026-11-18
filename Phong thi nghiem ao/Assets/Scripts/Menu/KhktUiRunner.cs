@@ -77,6 +77,16 @@ namespace Khkt.Menu
             while (Time.realtimeSinceStartup - t < s || khung < canKhung) { khung++; yield return null; }
         }
 
+        /// <summary>Bấm thẻ lớn: nút nằm ở thân thẻ (con của đối tượng mang tên thẻ).</summary>
+        static bool BamThe(Transform root, string ten)
+        {
+            var t = root.GetComponentsInChildren<Transform>(true).FirstOrDefault(x => x.name == ten && x.gameObject.activeInHierarchy);
+            var b = t != null ? t.GetComponentInChildren<Button>() : null;
+            if (b == null) return false;
+            b.onClick.Invoke();
+            return true;
+        }
+
         static bool Bam(Transform root, string ten)
         {
             var b = root.GetComponentsInChildren<Button>(true).FirstOrDefault(x => x.name == ten && x.gameObject.activeInHierarchy && x.interactable);
@@ -104,6 +114,16 @@ namespace Khkt.Menu
                 var menu = FindAnyObjectByType<MainMenu>();
                 if (menu == null) { Check(false, "Mở ManHinhChinh"); continue; }
                 string ten = nen.ToString();
+
+                // 18/11: màn đầu tiên là màn chọn 2 luồng (Giải bài tập / Phòng Lab)
+                var chon = FindAnyObjectByType<ManChonLuong>();
+                Check(chon != null && chon.DangHien, $"Mở app vào màn chọn 2 luồng ({ten})");
+                yield return Cho(0.6f);
+                yield return Chup(menu, $"man_chon_{ten}");
+                if (nen == UiTheme.Mode.Trang && cheDo != "truoc") yield return KiemGiaiBaiTap(menu);
+                bool vaoLab = chon != null && BamThe(menu.transform, "Nút lớn Phòng Lab");
+                yield return Cho(0.6f);
+                Check(vaoLab && menu.Current == MainMenu.Screen.Login && !chon.DangHien, $"Nút Phòng Lab mở màn đăng nhập ({ten})");
 
                 menu.Show(MainMenu.Screen.Login);
                 yield return Cho(0.6f);
@@ -228,7 +248,7 @@ namespace Khkt.Menu
             if (nen != "Trang") yield break;
             int coAnh = the.Count(r => r.GetComponentsInChildren<RawImage>(true).Any(x => x.name == "Ảnh thu nhỏ" && x.texture != null));
             Check(coAnh == 5, "Mỗi thẻ mô-đun có ảnh thu nhỏ", $"{coAnh}/5");
-            foreach (var (ten, lop) in new[] { ("Cơ chế 3D", "Khkt.CoChe.CoCheMoDun"), ("Thực vật 3D", "Khkt.Bio.ThucVat.ThucVatMoDun"), ("Giải phẫu", "Khkt.Bio.GiaiPhau.GiaiPhauMoDun") })
+            foreach (var (ten, lop) in new[] { ("Thực vật 3D", "Khkt.Bio.ThucVat.ThucVatMoDun"), ("Giải phẫu", "Khkt.Bio.GiaiPhau.GiaiPhauMoDun") })
             {
                 bool coLop = AppDomain.CurrentDomain.GetAssemblies().Any(a => a.GetType(lop, false) != null);
                 var t = the.FirstOrDefault(r => r.name == "Thẻ mô-đun " + ten);
@@ -236,7 +256,20 @@ namespace Khkt.Menu
                 Check(t != null && (coLop ? !chu.Contains("Sắp có") : chu.Contains("Sắp có")), $"Thẻ {ten}: {(coLop ? "mở được" : "ghi Sắp có")} (tìm lớp {lop})");
             }
             // bấm từng thẻ mô-đun → mở qua Mo() tìm theo tên lớp, Dong() đưa về bảng điều khiển
-            foreach (var (ten, lop) in new[] { ("Cơ chế 3D", "Khkt.CoChe.CoCheMoDun"), ("Thực vật 3D", "Khkt.Bio.ThucVat.ThucVatMoDun"), ("Giải phẫu", "Khkt.Bio.GiaiPhau.GiaiPhauMoDun") })
+            // thẻ "Giải bài tập" (thay thẻ Cơ chế 3D) mở màn Giải bài tập, Quay lại về bảng điều khiển
+            {
+                var gbt = FindAnyObjectByType<ManGiaiBaiTap>(FindObjectsInactive.Include);
+                var tg = the.FirstOrDefault(r => r.name == "Thẻ mô-đun Giải bài tập");
+                var ng = tg != null ? tg.GetComponentsInChildren<Button>(true).FirstOrDefault() : null;
+                ng?.onClick.Invoke();
+                yield return Cho(0.5f);
+                Check(gbt != null && gbt.DangHien, "Thẻ Giải bài tập trên bảng điều khiển mở màn Giải bài tập");
+                Bam(gbt != null ? gbt.transform : menu.transform, "Nút Về màn chính");
+                yield return Cho(0.5f);
+                Check(gbt != null && !gbt.DangHien && dash.gameObject.activeInHierarchy && !FindAnyObjectByType<ManChonLuong>(FindObjectsInactive.Include).DangHien,
+                      "Quay lại từ Giải bài tập (mở từ bảng) về bảng điều khiển");
+            }
+            foreach (var (ten, lop) in new[] { ("Thực vật 3D", "Khkt.Bio.ThucVat.ThucVatMoDun"), ("Giải phẫu", "Khkt.Bio.GiaiPhau.GiaiPhauMoDun") })
             {
                 var kieu = AppDomain.CurrentDomain.GetAssemblies().Select(a => a.GetType(lop, false)).FirstOrDefault(x => x != null);
                 if (kieu == null) continue;                       // nhánh chưa gộp: đã kiểm "Sắp có" ở trên
@@ -253,6 +286,53 @@ namespace Khkt.Menu
                 bool dong = dangMo != null && !(bool)dangMo.GetValue(null);
                 Check(dong && dash.gameObject.activeInHierarchy, $"{ten}: Dong() đưa về bảng điều khiển");
             }
+        }
+
+        /// <summary>Màn Giải bài tập: 3 công cụ lớn, hàng Hóa lý, Cài đặt chỉ còn Thông tin + API, mở được Cơ chế và Mô hình 3D.</summary>
+        IEnumerator KiemGiaiBaiTap(MainMenu menu)
+        {
+            bool bam = BamThe(menu.transform, "Nút lớn Giải bài tập");
+            yield return Cho(0.6f);
+            var gbt = FindAnyObjectByType<ManGiaiBaiTap>();
+            Check(bam && gbt != null && gbt.DangHien, "Nút Giải bài tập mở màn Giải bài tập");
+            if (gbt == null) yield break;
+            yield return Chup(menu, "giai_bai_tap_Trang");
+            var ten = gbt.GetComponentsInChildren<RectTransform>(true).Select(r => r.name).ToList();
+            int congCu = new[] { "Công cụ Chuỗi phản ứng", "Công cụ Mô hình 3D", "Công cụ Cơ chế" }.Count(ten.Contains);
+            Check(congCu == 3, "Có 3 công cụ: Chuỗi phản ứng, Mô hình 3D, Cơ chế", $"{congCu}/3");
+            int hoaLy = ten.Count(n => n.StartsWith("Hóa lý "));
+            Check(hoaLy == 4, "Có hàng Hóa lý (4 mục nhỏ) ở dưới", $"{hoaLy}");
+            Check(!ten.Any(n => n.Contains("Phòng thí nghiệm Hóa học") || n.Contains("Sinh học 3D")), "Không có phòng lab Hóa/Sinh của CHEMISTRY");
+
+            Bam(gbt.transform, "Nút Cài đặt Giải bài tập");
+            yield return Cho(0.5f);
+            var cd = FindAnyObjectByType<CaiDatGiaiBaiTap>();
+            var muc = cd != null ? cd.GetComponentsInChildren<Button>(true).Where(b => b.name.StartsWith("Mục ")).Select(b => b.name).ToList() : new List<string>();
+            Check(cd != null && muc.Count == 2 && muc.Contains("Mục Thông tin") && muc.Contains("Mục API"), "Cài đặt Giải bài tập chỉ còn Thông tin và API", string.Join(", ", muc));
+            yield return Chup(menu, "cai_dat_giai_bai_tap_Trang");
+            if (cd != null) Bam(cd.transform, "Nút Đóng cài đặt");
+            yield return Cho(0.3f);
+
+            BamThe(gbt.transform, "Công cụ Cơ chế");
+            yield return Cho(1.0f);
+            Check(Khkt.CoChe.CoCheMoDun.DangMo, "Công cụ Cơ chế mở mô-đun cơ chế 3D ⇄ giấy");
+            Khkt.CoChe.CoCheMoDun.Dong();
+            yield return Frames(3);
+            BamThe(gbt.transform, "Công cụ Mô hình 3D");
+            yield return Cho(1.0f);
+            Check(Khkt.CoChe.MoHinh3DMoDun.DangMo, "Công cụ Mô hình 3D mở mô-đun 3D");
+            Khkt.CoChe.MoHinh3DMoDun.Dong();
+            yield return Frames(3);
+            BamThe(gbt.transform, "Công cụ Chuỗi phản ứng");
+            yield return Cho(1.0f);
+            Check(Khkt.CoChe.CoCheMoDun.DangMo && Khkt.CoChe.CoCheMoDun.Instance.BangChuoiMo, "Công cụ Chuỗi phản ứng mở bảng giải chuỗi");
+            Khkt.CoChe.CoCheMoDun.Instance?.BatBangChuoi(false);
+            Khkt.CoChe.CoCheMoDun.Dong();
+            yield return Frames(3);
+
+            Bam(gbt.transform, "Nút Về màn chính");
+            yield return Cho(0.5f);
+            Check(!gbt.DangHien && FindAnyObjectByType<ManChonLuong>().DangHien, "Về màn chính từ Giải bài tập");
         }
 
         static string DuongDan(Transform t)

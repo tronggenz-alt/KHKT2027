@@ -6,6 +6,8 @@
     GET  /co-che/chuoi-mau       3 chuỗi mẫu chạy được khi không có mạng
     POST /co-che/giai-thich      {"cau_hoi", "ma_bai"?} → lời giải thích có trích nguồn
     POST /co-che/giai-chuoi      {"chuoi": "C2H4 -> C2H5OH -> CH3CHO -> CH3COOH"} → từng bước + mã cơ chế nếu khớp mẫu
+    POST /co-che/mo-hinh-3d      {"van_ban": "ethanol" | "CH3COOH" | "CCO"} → nguyên tử, liên kết 3D (mục Mô hình 3D)
+    GET  /co-che/mo-hinh-3d/mau  tên chất mẫu
 """
 from __future__ import annotations
 
@@ -17,7 +19,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
 
-from . import dong_goi, giai_chuoi, giai_thich, tri_thuc
+from . import dong_goi, giai_chuoi, giai_thich, mo_hinh_3d, tri_thuc
 from .duong_dan import thu_muc_build
 from ..cau_hinh_may import thong_so
 
@@ -31,6 +33,10 @@ class YeuCauGiaiThich(BaseModel):
 
 class YeuCauChuoi(BaseModel):
     chuoi: str = Field(min_length=3, max_length=400)
+
+
+class YeuCau3D(BaseModel):
+    van_ban: str = Field(min_length=1, max_length=200)
 
 
 def _muc_luc() -> list[dict]:
@@ -86,3 +92,16 @@ async def giai_chuoi_api(yc: YeuCauChuoi) -> dict:
     if kq.get("loi"):
         raise HTTPException(422, kq["loi"])
     return kq
+
+
+@router.get("/mo-hinh-3d/mau")
+def mau_3d() -> list[str]:
+    return mo_hinh_3d.MAU
+
+
+@router.post("/mo-hinh-3d")
+def mo_hinh_3d_api(yc: YeuCau3D) -> dict:
+    try:
+        return mo_hinh_3d.tao_mo_hinh(yc.van_ban)
+    except mo_hinh_3d.LoiMoHinh as e:
+        raise HTTPException(422, str(e)) from e

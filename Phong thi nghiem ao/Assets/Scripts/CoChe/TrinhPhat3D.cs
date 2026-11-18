@@ -32,6 +32,7 @@ namespace Khkt.CoChe
         public bool NhanDieuKhien = true;
         public float Phang = 1f;
         public float ThoiGianBuoc = 2.6f;
+        public float TocDo = 1f;                 // 1×, 2×, ½× (nút tốc độ ở khung bước)
         public float KhoangCach = 13f;
         public Quaternion Xoay = Quaternion.Euler(12f, -18f, 0f);
         /// <summary>Vùng màn hình (tỉ lệ 0..1) dành cho hình 3D: tâm phân tử đặt vào giữa vùng này, kéo chuột trong vùng để xoay.</summary>
@@ -43,9 +44,10 @@ namespace Khkt.CoChe
         public event System.Action DoiBuoc;
 
         float tNhanh;
-        Mesh cau, tru, dia;
+        Mesh cau, tru, dia, cauE;
         int manhCau = -1;
-        Material matGoc, matE, matChan;
+        Material matGoc, matE, matChan, matLk, matQuang;
+        readonly List<Matrix4x4> quang = new List<Matrix4x4>();
         readonly Dictionary<string, Material> matNt = new Dictionary<string, Material>();
         readonly Dictionary<string, List<Matrix4x4>> nhom = new Dictionary<string, List<Matrix4x4>>();
         readonly List<Matrix4x4> lk = new List<Matrix4x4>(), hat = new List<Matrix4x4>();
@@ -68,7 +70,7 @@ namespace Khkt.CoChe
             Xoay = Quaternion.Euler(12f, -18f, 0f);
             float r = 2f;
             foreach (var tt in kb.TrangThai) foreach (var p in tt.ToaDo.Values) r = Mathf.Max(r, p.magnitude);
-            KhoangCach = Mathf.Clamp(r * 2.9f, 8f, 40f);
+            KhoangCach = Mathf.Clamp(r * 2.3f, 6.5f, 40f);       // phân tử chiếm phần lớn màn như bản demo
             DoiBuoc?.Invoke();
         }
 
@@ -123,7 +125,7 @@ namespace Khkt.CoChe
         {
             if (KichBan == null || Cam == null) return;
             DieuKhien();
-            float dt = Time.unscaledDeltaTime;
+            float dt = Time.unscaledDeltaTime * TocDo;
             if (DangNhanhSai)
             {
                 tNhanh += dt / 3.4f;
@@ -197,12 +199,15 @@ namespace Khkt.CoChe
 
         void DamBaoTaiNguyen()
         {
-            int n = Mathf.Max(8, HardwareProfile.SoManhCau);
+            // nguyên tử luôn tròn mịn (ít nhất 48 mảnh): mỗi phân tử chỉ vài chục quả cầu, vẽ instancing nên không tốn
+            int n = Mathf.Max(48, HardwareProfile.SoManhCau);
             if (cau == null || manhCau != n)
             {
                 if (cau != null) Destroy(cau);
                 if (tru != null) Destroy(tru);
+                if (cauE != null) Destroy(cauE);
                 cau = TaoCau(n, n / 2);
+                cauE = TaoCau(24, 12);
                 tru = TaoTru(Mathf.Max(8, n / 2));
                 manhCau = n;
             }
@@ -218,6 +223,12 @@ namespace Khkt.CoChe
                 matE = new Material(matE) { enableInstancing = true };
                 matE.SetColor("_BaseColor", new Color(1f, 0.86f, 0.2f));
                 matChan = new Material(matChan);
+                // liên kết xám sáng và quầng vàng quanh electron như bản demo đã duyệt
+                matLk = new Material(matGoc) { enableInstancing = true, name = "CoChe_LienKet" };
+                matLk.SetColor("_BaseColor", new Color32(0xa7, 0xaf, 0xbd, 0xff));
+                matLk.SetColor("_Color", new Color32(0xa7, 0xaf, 0xbd, 0xff));
+                matQuang = new Material(matChan) { enableInstancing = true, name = "CoChe_Quang" };
+                matQuang.SetColor("_BaseColor", new Color(1f, 0.82f, 0.4f, 0.16f));
             }
         }
 
@@ -233,6 +244,20 @@ namespace Khkt.CoChe
         }
 
         static float Muot(float x) { x = Mathf.Clamp01(x); return x * x * (3f - 2f * x); }
+
+        // ---- cho lớp nhãn trên màn (CoCheMoDun): vị trí, nguyên tố, điện tích của khung đang vẽ
+        public IReadOnlyDictionary<string, Vector3> ViTriNguyenTu => viTri;
+        public string NguyenTo(string id) => KichBan == null ? "C" : Nguyen(id);
+        public float CoNguyenTu(string id) => coNt.TryGetValue(id, out var c) ? c : 0f;
+        public Vector3 TheGioi(Vector3 p) => W(p);
+        public int DienTichHienTai(string id)
+        {
+            if (KichBan == null || KichBan.TrangThai.Count == 0) return 0;
+            TrangThai3D s;
+            if (DangNhanhSai && NhanhHienTai != null) s = KichBan.TrangThai[Mathf.Clamp(NhanhHienTai.TuTrangThai, 0, KichBan.TrangThai.Count - 1)];
+            else { var b = BuocHienTai; if (b == null) return 0; s = KichBan.TrangThai[T < 0.6f ? b.Tu : b.Den]; }
+            return s.DienTich.TryGetValue(id, out var d) ? d : 0;
+        }
 
         Vector3 W(Vector3 p)
         {
@@ -320,26 +345,40 @@ namespace Khkt.CoChe
             foreach (var kv in bacB)
                 if (!bacA.ContainsKey(kv.Key)) VeLienKet(kv.Key, kv.Value, m);
 
-            // electron bay theo mũi tên
+            // electron bay theo mũi tên (18/11, theo góp ý): cặp electron bay như một khối, hai hạt xoay quanh nhau quanh đường bay,
+            // tăng tốc – hãm êm (smootherstep), lớn dần khi rời nguyên tử và thu lại khi tới đích; vệt sáng mờ dần phía sau (vẽ trong suốt).
             int toiDa = Mathf.Max(8, HardwareProfile.SoHatToiDa);
+            quang.Clear();
             if (tE > 0f && tE < 1.0f && muiTen != null)
             {
-                int vet = Mathf.Clamp(toiDa / Mathf.Max(1, muiTen.Count * 2) - 1, 0, 6);
+                int vet = Mathf.Clamp(toiDa / Mathf.Max(1, muiTen.Count * 2), 2, 5);
+                float quay = Time.unscaledTime * 7.5f;
                 foreach (var mt in muiTen)
                 {
                     if (!DiemMuiTen(mt, out var s0, out var c0, out var e0)) continue;
                     float dung = DangNhanhSai && NhanhHienTai != null ? DiemChan(s0, c0, e0) : 1f;
-                    for (int k = 0; k < mt.SoE; k++)
+                    float u = Mathf.Min(MuotHon(Mathf.Clamp01(tE)), dung);
+                    if (u <= 0f) continue;
+                    Vector3 huong = (Bezier(s0, c0, e0, Mathf.Min(1f, u + 0.02f)) - Bezier(s0, c0, e0, Mathf.Max(0f, u - 0.02f))).normalized;
+                    if (huong.sqrMagnitude < 1e-6f) huong = (e0 - s0).normalized;
+                    Vector3 vg1 = Vector3.Cross(huong, Mathf.Abs(Vector3.Dot(huong, Vector3.up)) > 0.9f ? Vector3.right : Vector3.up).normalized;
+                    Vector3 vg2 = Vector3.Cross(huong, vg1);
+                    float hien = Mathf.SmoothStep(0f, 1f, u / 0.12f) * Mathf.Lerp(1f, 0.82f, Mathf.SmoothStep(0f, 1f, (u - 0.85f) / 0.15f));
+                    for (int k = 0; k < mt.SoE && hat.Count < toiDa; k++)
                     {
-                        float u = Mathf.Min(Muot(tE) - k * 0.06f, dung);
-                        if (u <= 0f) continue;
-                        Vector3 lech = k == 0 ? Vector3.zero : Vector3.Cross((e0 - s0).normalized, Vector3.up).normalized * 0.12f;
-                        for (int v = 0; v <= vet && hat.Count < toiDa; v++)
+                        float pha = quay + k * Mathf.PI;
+                        Vector3 lech = mt.SoE == 2 ? (vg1 * Mathf.Cos(pha) + vg2 * Mathf.Sin(pha)) * 0.11f : Vector3.zero;
+                        Vector3 p = Bezier(s0, c0, e0, u) + lech;
+                        float co = 0.16f * hien;
+                        hat.Add(Matrix4x4.TRS(W(p), Quaternion.identity, Vector3.one * co));
+                        quang.Add(Matrix4x4.TRS(W(p), Quaternion.identity, Vector3.one * co * 3.0f));
+                        for (int v = 1; v <= vet; v++)                       // vệt: cầu trong suốt nhỏ dần theo đường đã đi
                         {
-                            float uu = u - v * 0.035f;
-                            if (uu < 0f) break;
-                            float co = 0.17f * (1f - v / (float)(vet + 2));
-                            hat.Add(Matrix4x4.TRS(W(Bezier(s0, c0, e0, uu) + lech), Quaternion.identity, Vector3.one * co));
+                            float uu = u - v * 0.028f;
+                            if (uu <= 0f) break;
+                            float g = 1f - v / (float)(vet + 1);
+                            Vector3 pv = Bezier(s0, c0, e0, uu) + lech * g;
+                            quang.Add(Matrix4x4.TRS(W(pv), Quaternion.identity, Vector3.one * co * (0.6f + 1.6f * g)));
                         }
                     }
                 }
@@ -348,8 +387,9 @@ namespace Khkt.CoChe
 
             // vẽ
             foreach (var kv in nhom) VeNhom(MatNguyenTu(kv.Key), cau, kv.Value);
-            VeNhom(MatNguyenTu("C"), tru, lk);
-            VeNhom(matE, cau, hat);
+            VeNhom(matLk != null ? matLk : MatNguyenTu("C"), tru, lk);
+            VeNhom(matE, cauE, hat);
+            if (matQuang != null) VeNhom(matQuang, cauE, quang);
             if (DangNhanhSai && NhanhHienTai != null && NhanhHienTai.BanKinhChan > 0f)
             {
                 var c = matChan.GetColor("_BaseColor");
@@ -396,6 +436,8 @@ namespace Khkt.CoChe
             foreach (var o in lech)
                 lk.Add(Matrix4x4.TRS(wa + ngang * o, quay, new Vector3(r, dai, r)));
         }
+
+        static float MuotHon(float x) => x * x * x * (x * (6f * x - 15f) + 10f);
 
         static Vector3 Bezier(Vector3 a, Vector3 c, Vector3 b, float u) => (1 - u) * (1 - u) * a + 2 * u * (1 - u) * c + u * u * b;
 
@@ -538,9 +580,12 @@ namespace Khkt.CoChe
             if (cau != null) Destroy(cau);
             if (tru != null) Destroy(tru);
             if (dia != null) Destroy(dia);
+            if (cauE != null) Destroy(cauE);
             foreach (var m in matNt.Values) Destroy(m);
             if (matE != null) Destroy(matE);         // matE, matChan là bản sao tạo bằng new Material(...)
             if (matChan != null) Destroy(matChan);
+            if (matLk != null) Destroy(matLk);
+            if (matQuang != null) Destroy(matQuang);
         }
     }
 }
