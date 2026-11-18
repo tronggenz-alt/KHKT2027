@@ -497,6 +497,13 @@ namespace Khkt.Rendering
                     cam.name.Contains("Impostor", StringComparison.OrdinalIgnoreCase))
                     continue;
 
+                // camera chỉ vẽ giao diện (hoặc đã gắn CameraKhongHauKy): không hậu kỳ, tonemapping làm trắng thành xám
+                if (CameraKhongHauKy.BoQua(cam))
+                {
+                    data.renderPostProcessing = false;
+                    continue;
+                }
+
                 data.renderPostProcessing = m != MucDoHoa.Thap;
 
                 if (!string.IsNullOrEmpty(cliAaOverride))

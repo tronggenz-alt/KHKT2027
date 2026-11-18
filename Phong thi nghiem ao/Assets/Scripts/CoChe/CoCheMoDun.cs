@@ -107,6 +107,7 @@ namespace Khkt.CoChe
             Cam.nearClipPlane = 0.05f;
             Cam.farClipPlane = 300f;
             Cam.depth = 95;
+            Khkt.Rendering.CameraKhongHauKy.Gan(Cam);   // giấy trắng phải trắng thật: không hậu kỳ
 
             var cgo = new GameObject("Canvas cơ chế", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
             cgo.transform.SetParent(transform, false);
@@ -308,16 +309,12 @@ namespace Khkt.CoChe
             GlassKit.SetChip(nutAnH, TrinhPhat.AnH);
         }
 
-        UnityEngine.Rendering.Universal.UniversalAdditionalCameraData camData;
+        readonly Vector3[] gocVung = new Vector3[4];
 
         void Update()
         {
-            // camera lớp phủ vẽ giao diện + mô hình: không hậu kỳ (HardwareProfile bật hậu kỳ cho mọi camera Base,
-            // tonemapping làm giấy trắng thành xám)
-            if (camData == null && Cam != null) camData = Cam.GetComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>();
-            if (camData != null && camData.renderPostProcessing) camData.renderPostProcessing = false;
             if (vungNhin == null) return;
-            var g = new Vector3[4];
+            var g = gocVung;                           // dùng lại mảng, không cấp phát mỗi khung
             vungNhin.GetWorldCorners(g);
             Vector2 a = RectTransformUtility.WorldToScreenPoint(Cam, g[0]), b = RectTransformUtility.WorldToScreenPoint(Cam, g[2]);
             float w = Mathf.Max(1, Cam.pixelWidth), h = Mathf.Max(1, Cam.pixelHeight);

@@ -98,7 +98,7 @@ namespace Khkt.Menu
             if (restored) AfterSignIn();
         }
 
-        UnityEngine.Rendering.Universal.UniversalAdditionalCameraData menuCamData;
+        bool daGanKhongHauKy;
 
         void Update()
         {
@@ -118,14 +118,14 @@ namespace Khkt.Menu
         }
 
         /// <summary>
-        /// Camera màn chính chỉ vẽ giao diện: không được có hậu kỳ. HardwareProfile.ApplyCameras (G1) bật hậu kỳ cho mọi camera
-        /// Base; tonemapping Neutral khi đó kéo màu trắng xuống ~81% làm cả giao diện xám đục. Tắt lại mỗi khung hình (rẻ).
+        /// Camera màn chính chỉ vẽ giao diện: không được có hậu kỳ (tonemapping kéo trắng xuống ~81%, giao diện xám đục).
+        /// Gắn CameraKhongHauKy một lần là HardwareProfile.ApplyCameras bỏ qua nó (sửa gốc ở C5, thay cho tắt lại mỗi khung).
         /// </summary>
         void GiuCameraGiaoDienSach()
         {
-            if (menuCamera == null) return;
-            if (menuCamData == null) menuCamData = menuCamera.GetComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>();
-            if (menuCamData != null && menuCamData.renderPostProcessing) menuCamData.renderPostProcessing = false;
+            if (daGanKhongHauKy || menuCamera == null) return;
+            Khkt.Rendering.CameraKhongHauKy.Gan(menuCamera);
+            daGanKhongHauKy = true;
         }
 
         // =====================================================================

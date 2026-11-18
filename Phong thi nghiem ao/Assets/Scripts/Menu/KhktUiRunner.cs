@@ -235,20 +235,24 @@ namespace Khkt.Menu
                 var chu = t != null ? t.GetComponentsInChildren<Text>(true).Select(x => x.text).ToList() : new List<string>();
                 Check(t != null && (coLop ? !chu.Contains("Sắp có") : chu.Contains("Sắp có")), $"Thẻ {ten}: {(coLop ? "mở được" : "ghi Sắp có")} (tìm lớp {lop})");
             }
-            // bấm thẻ Cơ chế 3D → mở mô-đun qua Mo() tìm theo tên lớp
-            var tc = the.FirstOrDefault(r => r.name == "Thẻ mô-đun Cơ chế 3D");
-            var nut = tc != null ? tc.GetComponentsInChildren<Button>(true).FirstOrDefault() : null;
-            if (nut != null)
+            // bấm từng thẻ mô-đun → mở qua Mo() tìm theo tên lớp, Dong() đưa về bảng điều khiển
+            foreach (var (ten, lop) in new[] { ("Cơ chế 3D", "Khkt.CoChe.CoCheMoDun"), ("Thực vật 3D", "Khkt.Bio.ThucVat.ThucVatMoDun"), ("Giải phẫu", "Khkt.Bio.GiaiPhau.GiaiPhauMoDun") })
             {
+                var kieu = AppDomain.CurrentDomain.GetAssemblies().Select(a => a.GetType(lop, false)).FirstOrDefault(x => x != null);
+                if (kieu == null) continue;                       // nhánh chưa gộp: đã kiểm "Sắp có" ở trên
+                var tc = the.FirstOrDefault(r => r.name == "Thẻ mô-đun " + ten);
+                var nut = tc != null ? tc.GetComponentsInChildren<Button>(true).FirstOrDefault() : null;
+                if (nut == null) { Check(false, $"Thẻ {ten} có nút"); continue; }
+                var dangMo = kieu.GetProperty("DangMo", BindingFlags.Public | BindingFlags.Static);
                 nut.onClick.Invoke();
-                yield return Cho(0.5f);
-                var kieu = AppDomain.CurrentDomain.GetAssemblies().Select(a => a.GetType("Khkt.CoChe.CoCheMoDun", false)).FirstOrDefault(x => x != null);
-                bool mo = kieu != null && (bool)kieu.GetProperty("DangMo", BindingFlags.Public | BindingFlags.Static).GetValue(null);
-                Check(mo, "Thẻ Cơ chế 3D gọi CoCheMoDun.Mo()");
-                kieu?.GetMethod("Dong", BindingFlags.Public | BindingFlags.Static)?.Invoke(null, null);
-                yield return Frames(3);
+                yield return Cho(1.0f);
+                bool mo = dangMo != null && (bool)dangMo.GetValue(null);
+                Check(mo, $"Thẻ {ten} gọi {kieu.Name}.Mo() và mô-đun mở");
+                kieu.GetMethod("Dong", BindingFlags.Public | BindingFlags.Static, null, Type.EmptyTypes, null)?.Invoke(null, null);
+                yield return Frames(5);
+                bool dong = dangMo != null && !(bool)dangMo.GetValue(null);
+                Check(dong && dash.gameObject.activeInHierarchy, $"{ten}: Dong() đưa về bảng điều khiển");
             }
-            else Check(false, "Thẻ Cơ chế 3D có nút");
         }
 
         static string DuongDan(Transform t)
