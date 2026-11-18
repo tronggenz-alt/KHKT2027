@@ -12,7 +12,9 @@ Lần sau tiếp tục thì đọc tệp này trước. Báo cáo chi tiết: `b
 ## Đang làm / còn lại (theo thứ tự)
 1. ~~Test giả lập Gemini~~ (xong).
 2. ~~Thử khóa Gemini~~: khóa dùng được. 19/11: gemini-pro-latest và gemini-flash-latest lúc trả 429 hết hạn mức, lúc treo; gemini-flash-lite-latest trả lời được (9 s). Đã sửa giai_de.py: quá giờ hoặc 429 thì chuyển sang mô hình sau; thêm flash-lite vào cuối danh sách.
-3. ĐANG LÀM: thử thật 1 đề chữ (scratchpad/thu_chu.py, đề cộng HBr vào propen) và 1 ảnh đề (ảnh tự tạo ở scratchpad, `anh_de_thu.png`: Câu 2, (CH3)3CBr + H2O).
+3. Thử thật (Gemini flash-lite, Claude 401). Đề chữ (cộng HBr vào propen): đạt, 2 bước, AI tự sửa 3 lần, 38,7 s. Ảnh đề SN1 lần 1: 422 (AI sai khung C). Đã thêm `smiles_co_map` (RDKit đánh map sẵn cho chất đầu) và lần 2 đạt: 3 bước, có bước chậm, 24,6 s. Kết quả ở scratchpad `ket_qua_anh.json`.
+   ĐANG LÀM: chạy KhktCoCheVerify với KHKT_CO_CHE_DE_JSON=<ket_qua_anh.json> để chụp kết quả thật ở cả 3D và Giấy. Cùng lúc đang có một phiên Unity của Hóa lý chạy, script tự đợi.
+  (dòng cũ:) thử thật 1 đề chữ và 1 ảnh đề (ảnh tự tạo ở scratchpad, `anh_de_thu.png`: Câu 2, (CH3)3CBr + H2O).
    - Khóa Claude trong `.env` đang bị 401. Phiên chính đã báo người dùng thay khóa; phiên này không sửa `.env`.
 4. Điền kết quả vào `bao-cao-co-che-tu-de.md`, chỗ đang ghi KET_QUA_UNITY và KET_QUA_THU_THAT.
 5. Xóa `StreamingAssets/CoChe/mau_kiem_thu.bin` (tệp này git bỏ qua), rồi commit.

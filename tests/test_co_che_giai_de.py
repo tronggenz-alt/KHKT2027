@@ -11,6 +11,7 @@ import io
 import json
 import os
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -172,6 +173,7 @@ class TestNhaCungCap(unittest.TestCase):
     def setUp(self):
         giai_de._claude_hong = ""
         giai_de._da_dung.clear()
+        giai_de._gemini_tam_bo.clear()
 
     def tearDown(self):
         giai_de._claude_hong = ""
@@ -202,6 +204,9 @@ class TestNhaCungCap(unittest.TestCase):
         self.assertEqual(kq["thong_tin"]["mo_hinh"], "gemini-flash-latest")
         self.assertTrue(kq["kich_ban_3d"]["trang_thai"])
         self.assertTrue(giai_de._claude_hong)                  # lần sau bỏ qua Claude
+        self.assertNotIn("gemini-pro-latest", giai_de._gemini_tam_bo)       # 404 không tạm bỏ
+        giai_de._gemini_tam_bo["gemini-pro-latest"] = time.time() + 60    # 429/quá giờ → bỏ qua mô hình đó
+        self.assertEqual(giai_de.ds_mo_hinh_gemini()[0], "gemini-flash-latest")
 
     def test_anh_sang_inline_data(self):
         nd = giai_de._noi_dung_gemini([{"role": "user", "content": [

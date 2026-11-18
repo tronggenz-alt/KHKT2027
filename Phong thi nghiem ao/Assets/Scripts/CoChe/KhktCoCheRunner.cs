@@ -182,6 +182,10 @@ namespace Khkt.CoChe
                 jsonDeGia = GoiCoChe.GiaiJson(File.ReadAllBytes(Path.Combine(GoiCoChe.ThuMuc, "sn2_ch3br.verapack")))
                                     .Replace("\"ma\":\"sn2_ch3br\"", "\"ma\":\"de_thu\"");
                 jsonDeGia = jsonDeGia.Substring(0, jsonDeGia.LastIndexOf('}')) + ",\"thong_tin\":{\"mo_hinh\":\"gia\",\"giay\":1.0,\"so_lan_sua\":1}}";
+                // KHKT_CO_CHE_DE_JSON = tệp kết quả THẬT của /co-che/giai-de (vd do máy chủ giải ảnh đề) → hiện và chụp chính kết quả đó
+                string deThat = System.Environment.GetEnvironmentVariable("KHKT_CO_CHE_DE_JSON");
+                bool coDeThat = !string.IsNullOrEmpty(deThat) && File.Exists(deThat);
+                if (coDeThat) jsonDeGia = File.ReadAllText(deThat);
                 md.BatDeMoi(true);
                 yield return null;
                 Check(md.DeMoiMo && !md.TrinhPhat.NhanDieuKhien, "Bảng Đề mới mở, phím ← → Space không điều khiển phim khi gõ");
@@ -198,11 +202,23 @@ namespace Khkt.CoChe
                 float td = Time.realtimeSinceStartup;
                 while ((md.DangGiaiDe || md.TrangThaiDeCuoi.StartsWith("Đang")) && Time.realtimeSinceStartup - td < 5f) yield return null;
                 yield return Frames(2);
-                Check(md.BaiHienTai != null && md.BaiHienTai.Ma == "de_thu" && md.BaiHienTai.KichBan.Buoc.Count > 0 && md.DeDaGiai.Count == 1 && !md.DeMoiMo,
+                Check(md.BaiHienTai != null && (coDeThat || md.BaiHienTai.Ma == "de_thu") && md.BaiHienTai.KichBan.Buoc.Count > 0 && md.DeDaGiai.Count == 1 && !md.DeMoiMo,
                       "Đề mới: kết quả máy chủ mở như một bài", md.TrangThaiDeCuoi);
                 Check(guiAnhDe, "Đề mới: ảnh đề được gửi kèm (anh_base64)");
                 Check(md.TrinhPhat.NhanDieuKhien, "Đóng bảng Đề mới trả điều khiển phim 3D");
+                md.TrinhPhat.DenBuoc(Mathf.Min(1, md.TrinhPhat.SoBuoc - 1));
+                md.TrinhPhat.DatT(0.45f);
+                yield return null;
                 Shot("de_moi_ket_qua");
+                md.DatCheDo(true);
+                float tg = Time.realtimeSinceStartup;
+                while (md.DangChuyen && Time.realtimeSinceStartup - tg < 3f) yield return null;
+                yield return Frames(2);
+                Check(md.CheDoGiay && md.Giay.DuLieu.NetDs.Count > 0, "Đề mới: sơ đồ giấy có nét", $"{md.Giay.DuLieu.NetDs.Count} nét");
+                Shot("de_moi_giay");
+                md.DatCheDo(false);
+                tg = Time.realtimeSinceStartup;
+                while (md.DangChuyen && Time.realtimeSinceStartup - tg < 3f) yield return null;
                 md.BatDeMoi(true);
                 md.DatAnhDe(null, "");
                 md.PhanTichDe("LOI_THU");

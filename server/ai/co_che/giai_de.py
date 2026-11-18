@@ -55,6 +55,7 @@ DO_SANG_TOI_THIEU = 28
 VAN_BAN_TOI_DA = 4000
 CHO_MAC_DINH = 300.0                # giây cho cả lượt giải (đọc ảnh + viết + sửa + dựng 3D/giấy)
 CHO_MOI_LAN_GOI = 180.0             # giây cho một lần gọi Claude
+CHO_GEMINI = 90.0                   # giây cho một lần gọi một mô hình Gemini (quá thì thử mô hình sau)
 VAN_DE_ANH = ("", "khong_phai_de_hoa", "mo", "toi", "bi_cat", "khac")
 
 GoiAI = Callable[[str, list, dict], Awaitable[str]]
@@ -240,9 +241,15 @@ def co_khoa_gemini() -> bool:
     return bool(os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY"))
 
 
+GEMINI_TAM_BO_GIAY = 600.0          # mô hình vừa 429/quá giờ/quá tải → bỏ qua 10 phút (khỏi chờ lại ở mỗi lượt sửa)
+_gemini_tam_bo: dict[str, float] = {}
+
+
 def ds_mo_hinh_gemini() -> list[str]:
     ds = [os.environ.get("GEMINI_MODEL_CO_CHE") or "", "gemini-pro-latest", "gemini-flash-latest", "gemini-flash-lite-latest"]
-    return [m for i, m in enumerate(ds) if m and m not in ds[:i]]
+    ds = [m for i, m in enumerate(ds) if m and m not in ds[:i]]
+    con = [m for m in ds if _gemini_tam_bo.get(m, 0) <= time.time()]
+    return con or ds
 
 
 def _schema_gemini(sc):
@@ -301,10 +308,11 @@ async def goi_gemini(system: str, messages: list, schema: dict) -> str:
     loi_cuoi = ""
     for mo_hinh in ds_mo_hinh_gemini():
         try:
-            ma, d = await asyncio.to_thread(_post_gemini, mo_hinh, than, CHO_MOI_LAN_GOI)
+            ma, d = await asyncio.to_thread(_post_gemini, mo_hinh, than, CHO_GEMINI)
         except (TimeoutError, urllib.error.URLError, OSError) as e:
             if isinstance(e, TimeoutError) or "timed out" in str(e):      # mô hình này treo → thử mô hình sau
-                loi_cuoi += f"{mo_hinh}: quá {CHO_MOI_LAN_GOI:.0f} s; "
+                loi_cuoi += f"{mo_hinh}: quá {CHO_GEMINI:.0f} s; "
+                _gemini_tam_bo[mo_hinh] = time.time() + GEMINI_TAM_BO_GIAY
                 continue
             raise LoiGiaiDe(f"Không gọi được Gemini: {e}", "loi_ai", 502) from e
         thong_bao = ((d.get("error") or {}).get("message") or "")[:200]
@@ -312,6 +320,8 @@ async def goi_gemini(system: str, messages: list, schema: dict) -> str:
             raise LoiGiaiDe("Khóa Gemini (GEMINI_API_KEY) không hợp lệ.", "sai_key_gemini", 503)
         if ma in (404, 429, 500, 503):                       # không có mô hình này / hết hạn mức / quá tải → mô hình sau
             loi_cuoi += f"{mo_hinh}: {ma} {thong_bao[:90]}; "
+            if ma != 404:
+                _gemini_tam_bo[mo_hinh] = time.time() + GEMINI_TAM_BO_GIAY
             continue
         if ma != 200:
             raise LoiGiaiDe(f"Gemini lỗi {ma}: {thong_bao}", "loi_ai", 502)
@@ -493,6 +503,28 @@ def kiem_tra_co_che(d: dict) -> list[str]:
         return [f"Cấu trúc JSON sai: {e}"]
 
 
+def ten_de_doc(ten: str) -> str:
+    """Tên cơ chế cho người đọc: bỏ số map ([CH3:1] → [CH3]) và ngoặc của nguyên tử trung hoà đơn giản ([CH3] → CH3)."""
+    ten = re.sub(r":\d+\]", "]", ten)
+    return re.sub(r"\[([A-Z][a-z]?(?:H\d?)?)\]", r"\1", ten)
+
+
+def smiles_co_map(ds: list[str]) -> list[str]:
+    """Chất đầu → SMILES có atom map liên tiếp cho MỌI nguyên tử nặng, số H ghi trong ngoặc ([CH3:1]) – gợi ý cho AI viết bước 1
+    đúng khung (mô hình nhỏ hay viết sai mạch cacbon / thiếu H khi tự đánh map)."""
+    out, so = [], 1
+    for x in ds:
+        m = Chem.MolFromSmiles(x)
+        if m is None:
+            continue
+        for a in m.GetAtoms():
+            if a.GetAtomicNum() > 1:
+                a.SetAtomMapNum(so)
+                so += 1
+        out.append(Chem.MolToSmiles(m, allHsExplicit=True))
+    return out
+
+
 async def sinh_co_che(van_ban: str, chat: list[str], san_pham: list[str], dieu_kien: str, goi_y_loai: str,
                       goi_ai: GoiAI) -> tuple[dict, list[str], int]:
     """AI viết cơ chế; RDKit kiểm; sai thì gửi lỗi cụ thể cho AI sửa (tối đa SO_LAN_SUA lần).
@@ -500,6 +532,9 @@ async def sinh_co_che(van_ban: str, chat: list[str], san_pham: list[str], dieu_k
     yc = f"Phản ứng / đề bài: {van_ban}"
     if chat:
         yc += f"\nChất tham gia (SMILES): {', '.join(chat)}"
+        co_map = smiles_co_map(chat)
+        if co_map:
+            yc += f"\n\"chat\" của bước 1 nên dùng đúng các SMILES đã đánh map này (giữ map, số H): {', '.join(co_map)}"
     if san_pham:
         yc += f"\nSản phẩm (SMILES): {', '.join(san_pham)}"
     if dieu_kien:
@@ -640,6 +675,7 @@ async def giai_de(van_ban: str = "", anh: bytes | None = None, loai: str = "", g
     if loi:
         raise LoiGiaiDe(f"AI đã sửa {so_lan_sua} lần nhưng cơ chế vẫn chưa nhất quán khi mô phỏng bằng RDKit – chưa dựng 3D. "
                         "Hãy ghi rõ chất tham gia/sản phẩm hoặc thử lại.", "co_che_sai", 422, loi[:8])
+    co_che["ten"] = ten_de_doc(str(co_che.get("ten") or "Cơ chế"))
     ma = "de_" + khoa[:10]
     try:
         kq = await asyncio.to_thread(dung_ket_qua, co_che, de, ma)
