@@ -1,5 +1,6 @@
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Khkt.EditorTools
@@ -7,6 +8,8 @@ namespace Khkt.EditorTools
     /// <summary>
     /// Bấm Play trong Unity luôn chạy từ màn hình chính (ManHinhChinh), như app thật.
     /// Mở dự án mà đang ở cảnh trống (Untitled) thì tự mở ManHinhChinh.
+    /// Khi chạy ngầm (-batchmode: kiểm thử, xuất app) thì không ép về ManHinhChinh, vì bộ kiểm thử tự mở cảnh mình cần;
+    /// nếu bị ép, màn chính đứng chờ máy chủ và bài thử treo (18/11 treo 1,5 giờ).
     /// </summary>
     [InitializeOnLoad]
     static class CanhKhoiDong
@@ -20,6 +23,12 @@ namespace Khkt.EditorTools
 
         static void CaiDat()
         {
+            if (Application.isBatchMode)
+            {
+                EditorSceneManager.playModeStartScene = null;
+                return;
+            }
+
             var canh = AssetDatabase.LoadAssetAtPath<SceneAsset>(CanhChinh);
             if (canh == null) return;
             EditorSceneManager.playModeStartScene = canh;
