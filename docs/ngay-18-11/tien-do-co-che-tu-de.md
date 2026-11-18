@@ -11,8 +11,8 @@ Lần sau tiếp tục thì đọc tệp này trước. Báo cáo chi tiết: `b
 
 ## Đang làm / còn lại (theo thứ tự)
 1. ~~Test giả lập Gemini~~ (xong).
-2. Thử khóa Gemini bằng một lệnh nhỏ (không in giá trị khóa).
-3. Thử thật 1 đề chữ và 1 ảnh đề (ảnh tự tạo ở scratchpad, `anh_de_thu.png`: Câu 2, (CH3)3CBr + H2O).
+2. ~~Thử khóa Gemini~~: khóa dùng được. 19/11: gemini-pro-latest và gemini-flash-latest lúc trả 429 hết hạn mức, lúc treo; gemini-flash-lite-latest trả lời được (9 s). Đã sửa giai_de.py: quá giờ hoặc 429 thì chuyển sang mô hình sau; thêm flash-lite vào cuối danh sách.
+3. ĐANG LÀM: thử thật 1 đề chữ (scratchpad/thu_chu.py, đề cộng HBr vào propen) và 1 ảnh đề (ảnh tự tạo ở scratchpad, `anh_de_thu.png`: Câu 2, (CH3)3CBr + H2O).
    - Khóa Claude trong `.env` đang bị 401. Phiên chính đã báo người dùng thay khóa; phiên này không sửa `.env`.
 4. Điền kết quả vào `bao-cao-co-che-tu-de.md`, chỗ đang ghi KET_QUA_UNITY và KET_QUA_THU_THAT.
 5. Xóa `StreamingAssets/CoChe/mau_kiem_thu.bin` (tệp này git bỏ qua), rồi commit.

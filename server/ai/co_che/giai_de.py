@@ -241,7 +241,7 @@ def co_khoa_gemini() -> bool:
 
 
 def ds_mo_hinh_gemini() -> list[str]:
-    ds = [os.environ.get("GEMINI_MODEL_CO_CHE") or "", "gemini-pro-latest", "gemini-flash-latest"]
+    ds = [os.environ.get("GEMINI_MODEL_CO_CHE") or "", "gemini-pro-latest", "gemini-flash-latest", "gemini-flash-lite-latest"]
     return [m for i, m in enumerate(ds) if m and m not in ds[:i]]
 
 
@@ -302,13 +302,16 @@ async def goi_gemini(system: str, messages: list, schema: dict) -> str:
     for mo_hinh in ds_mo_hinh_gemini():
         try:
             ma, d = await asyncio.to_thread(_post_gemini, mo_hinh, than, CHO_MOI_LAN_GOI)
-        except (urllib.error.URLError, TimeoutError, OSError) as e:
+        except (TimeoutError, urllib.error.URLError, OSError) as e:
+            if isinstance(e, TimeoutError) or "timed out" in str(e):      # mô hình này treo → thử mô hình sau
+                loi_cuoi += f"{mo_hinh}: quá {CHO_MOI_LAN_GOI:.0f} s; "
+                continue
             raise LoiGiaiDe(f"Không gọi được Gemini: {e}", "loi_ai", 502) from e
         thong_bao = ((d.get("error") or {}).get("message") or "")[:200]
         if ma in (401, 403) or (ma == 400 and "API key" in thong_bao):
             raise LoiGiaiDe("Khóa Gemini (GEMINI_API_KEY) không hợp lệ.", "sai_key_gemini", 503)
         if ma in (404, 429, 500, 503):                       # không có mô hình này / hết hạn mức / quá tải → mô hình sau
-            loi_cuoi = f"{mo_hinh}: {ma} {thong_bao}"
+            loi_cuoi += f"{mo_hinh}: {ma} {thong_bao[:90]}; "
             continue
         if ma != 200:
             raise LoiGiaiDe(f"Gemini lỗi {ma}: {thong_bao}", "loi_ai", 502)
@@ -320,7 +323,7 @@ async def goi_gemini(system: str, messages: list, schema: dict) -> str:
             raise LoiGiaiDe(f"Gemini không trả lời ({ung.get('finishReason') or 'rỗng'}).", "tu_choi", 422)
         _da_dung.append(mo_hinh)
         return chu.strip()
-    raise LoiGiaiDe(f"Gemini quá tải hoặc hết hạn mức ({loi_cuoi}) – thử lại sau.", "qua_tai", 503)
+    raise LoiGiaiDe(f"Gemini quá tải hoặc hết hạn mức ({loi_cuoi.rstrip('; ')}) – thử lại sau.", "qua_tai", 503)
 
 
 # ---------------------------------------------------------------- chọn nhà cung cấp: Claude → Gemini
