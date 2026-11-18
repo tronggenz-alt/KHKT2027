@@ -253,11 +253,18 @@ namespace Khkt.Demo.Bio.ThucVat
             CapNhatMoPhong(dt);
         }
 
+        float henChuSo;   // C5: chữ số liệu cập nhật ~5 lần/giây thay vì mỗi khung (nối chuỗi dài = cấp phát mỗi khung)
+
         void CapNhatMoPhong(float dt)
         {
             trangThai = ThucVatMoPhong.TinhToan(dk);
             Cay3D?.ApplySimulation(dk, trangThai, dt, dayTimeScale);
-            RefreshMetricsText();
+            // dt = 0: người dùng vừa đổi thanh trượt/chế độ → cập nhật ngay
+            if (dt <= 0f || Time.unscaledTime >= henChuSo)
+            {
+                henChuSo = Time.unscaledTime + 0.2f;
+                RefreshMetricsText();
+            }
         }
 
         void RefreshMetricsText()
