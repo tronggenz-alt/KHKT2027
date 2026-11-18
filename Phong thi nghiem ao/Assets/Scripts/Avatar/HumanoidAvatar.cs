@@ -363,6 +363,13 @@ namespace Khkt.Avatar
             return go.transform;
         }
 
+        // C5: mỗi hình người tạo 8 vật liệu riêng; người khác vào/ra phòng học chung nhiều lần thì phải giải phóng, không rò bộ nhớ
+        void OnDestroy()
+        {
+            foreach (var m in new[] { skinMat, hairMat, coatMat, trimMat, pantsMat, shoeMat, goggleFrameMat, goggleLensMat })
+                if (m != null) Destroy(m);
+        }
+
         static Material Mat(Shader sh, Color color, float smooth)
         {
             var m = new Material(sh) { hideFlags = HideFlags.DontSave };

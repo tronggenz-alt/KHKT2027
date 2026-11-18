@@ -539,6 +539,8 @@ namespace Khkt.CoChe
             if (tru != null) Destroy(tru);
             if (dia != null) Destroy(dia);
             foreach (var m in matNt.Values) Destroy(m);
+            if (matE != null) Destroy(matE);         // matE, matChan là bản sao tạo bằng new Material(...)
+            if (matChan != null) Destroy(matChan);
         }
     }
 }

@@ -1,6 +1,6 @@
 # VERA Lab: tiến độ và hiện trạng toàn dự án
 
-Cập nhật: 09/11/2026. Đây là bản tóm tắt để ai mở dự án (người hay AI) cũng nắm được ngay. Chi tiết nằm trong `docs/` và `contracts.md`.
+Cập nhật: 18/11/2026. Đây là bản tóm tắt để ai mở dự án (người hay AI) cũng nắm được ngay. Chi tiết nằm trong `docs/` và `contracts.md`.
 
 ## 1. Dự án
 
@@ -21,6 +21,13 @@ Cập nhật: 09/11/2026. Đây là bản tóm tắt để ai mở dự án (ng�
 - **Màn hình chính** (cảnh `ManHinhChinh`): đăng nhập, tạo tài khoản bằng mã lớp, dùng thử, cài đặt máy chủ (mặc định `https://verlab.pages.dev`), một nút "Vào phòng thí nghiệm". Xem docs/25-man-hinh-chinh.
 - **Phòng học chung:** Unity Relay (mã 6 ký tự) hoặc LAN. Thấy nhau, cầm chung một vật có phân xử. Chưa đồng bộ hóa chất. Xem docs/26.
 - **Lớp học từ web** (qua `POST /app/nhip`): trình chiếu lên tường video, theo dõi trực tiếp, thông báo, "Tất cả chú ý", chế độ Kiểm tra, khóa hóa chất, lệnh robot.
+
+- **Ngày 18/11/2026** (nhánh `n18/tich-hop`, chưa vào `main`; tổng kết ở `docs/ngay-18-11/TONG_KET.md`):
+  - Cơ chế Hóa 3D ⇄ giấy trong app (phím M): 8 bài demo, gói mã hóa `.verapack`, máy chủ cơ chế + AI tại máy cổng 8010, bảng giải chuỗi.
+  - Thực vật 3D (3 lát cắt, 7 thanh trượt) và Giải phẫu người 3D chạy trong app trên Mac/Windows.
+  - Bàn tay 3 đốt + găng nitrile, mô hình người 3D trong phòng học chung.
+  - Hồ sơ phần cứng 5 mức đồ họa; app Mac xuất bằng `Khkt.EditorTools.MacBuild.Build`, đo `-vera-do`: p95 17,6 ms, 1,3 khung/phút > 50 ms.
+  - Giao diện ngoài lab hết xám, bảng điều khiển 5 thẻ mô-đun, tên và biểu tượng "VERA Lab".
 
 ### Điều khiển bằng cơ thể
 - **Nhận diện tay ngay trong Unity** (`Input/InAppHandTracker.cs`):
@@ -57,7 +64,12 @@ Cập nhật: 09/11/2026. Đây là bản tóm tắt để ai mở dự án (ng�
 | Phòng robot, bàn lập trình khối lệnh | Tạm dừng |
 | Giao diện web giai đoạn 2–6 | Đang làm ở phiên thiết kế web |
 | Gói in VERA Band | Đang làm |
-| Bản macOS | Tạm dừng |
+| Bản macOS | Chạy được (18/11). Mac là nền tảng chính từ 15/11 |
+| `.mat` tự đổi sau khi chạy kiểm thử Unity | Chưa tìm ra chỗ. Hoàn tác trước khi commit. Xem TONG_KET 18/11 mục 5 |
+| Lần mở đầu app Mac giật ở tầng 2 | Cần làm nóng shader tầng 2 ở màn chờ |
+| Bản Windows của mô-đun mới | Chưa xuất (máy Mac chưa cài Windows Build Support) |
+| Cảm ứng iPad cho Cơ chế, Thực vật, Giải phẫu | Chưa làm (iPad xếp cuối) |
+| Merge `n18/tich-hop` vào `main` | Chờ người dùng đồng ý |
 
 ## 4. Lưu ý quan trọng
 
