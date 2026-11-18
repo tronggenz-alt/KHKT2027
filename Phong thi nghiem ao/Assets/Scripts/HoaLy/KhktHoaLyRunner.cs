@@ -175,24 +175,23 @@ namespace Khkt.HoaLy
             k.Dat(24.79, 298.15, 1);
             yield return Giay(1.6f);
             // cấp phát mỗi khung (số liệu chữ ~5 lần/giây được tính vào)
-            using (var ghi = Unity.Profiling.ProfilerRecorder.StartNew(Unity.Profiling.ProfilerCategory.Memory, "GC Allocated In Frame"))
-            {
-                long tong = 0, lonNhat = 0;
-                int soKhung = 0, khongCap = 0;
-                float t0 = Time.realtimeSinceStartup;
-                yield return null;
-                while (Time.realtimeSinceStartup - t0 < 2f)
-                {
-                    yield return null;
-                    long b = ghi.LastValue;
-                    tong += b; lonNhat = Math.Max(lonNhat, b); soKhung++;
-                    if (b == 0) khongCap++;
-                }
-                if (ghi.Valid)
-                    Check(tong / (double)Math.Max(1, soKhung) < 3000, "Khí: cấp phát mỗi khung nhỏ (vẽ hạt không cấp phát; chữ số liệu 5 lần/giây)",
-                        $"TB {tong / (double)Math.Max(1, soKhung):0} B/khung, lớn nhất {lonNhat} B, {khongCap}/{soKhung} khung không cấp phát");
-                else Debug.Log("[HL_NOTE] Không đọc được bộ đếm GC Allocated In Frame – bỏ qua đo cấp phát");
-            }
+            // cấp phát mỗi khung: đo nền (lớp phủ đóng) rồi đo khi trang khí chạy, lấy hiệu (Editor/Input System tự cấp phát mỗi khung)
+            yield return DoCapPhat(1.5f);
+            double nen = capTb;
+            yield return null;
+            mh.Cam.targetTexture = null;
+            HoaLyMoDun.Dong();
+            yield return DoCapPhat(1.5f);
+            double nenDong = capTb;
+            HoaLyMoDun.Mo("khi_ly_tuong");
+            mh.Cam.targetTexture = rt;
+            yield return Frames(3);
+            yield return DoCapPhat(2f);
+            double mo = capTb;
+            if (capHopLe)
+                Check(mo - nenDong < 1500, "Khí: phần cấp phát của Hóa lý mỗi khung nhỏ (vẽ hạt, đồ thị không cấp phát; chữ số liệu 5 lần/giây)",
+                    $"mở {mo:0} B/khung, nền (đóng) {nenDong:0} B/khung → Hóa lý {mo - nenDong:0} B/khung; lần đo đầu {nen:0}");
+            else Debug.Log("[HL_NOTE] Không đọc được bộ đếm GC Allocated In Frame – bỏ qua đo cấp phát");
             Shot("khi_ly_tuong");
             k.Dat(8, 900, 3);
             yield return Giay(1.2f);
@@ -392,6 +391,27 @@ namespace Khkt.HoaLy
                 Shot("cau_hoi_" + ma);
             }
             mh.DatCheDoCauHoi(false);
+        }
+
+        double capTb;
+        bool capHopLe;
+
+        IEnumerator DoCapPhat(float giay)
+        {
+            using (var ghi = Unity.Profiling.ProfilerRecorder.StartNew(Unity.Profiling.ProfilerCategory.Memory, "GC Allocated In Frame"))
+            {
+                long tong = 0;
+                int so = 0;
+                yield return null;
+                float t0 = Time.realtimeSinceStartup;
+                while (Time.realtimeSinceStartup - t0 < giay)
+                {
+                    yield return null;
+                    tong += ghi.LastValue; so++;
+                }
+                capHopLe = ghi.Valid;
+                capTb = tong / (double)Math.Max(1, so);
+            }
         }
 
         IEnumerator Watchdog(float s)

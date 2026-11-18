@@ -230,16 +230,17 @@ namespace Khkt.HoaLy
             PhongDuoi = 1;
             if (fEa > 0 && fEa < fMax * 0.15)
             {
-                int mu = (int)Math.Ceiling(Math.Log10(fMax * 0.45 / fEa));
+                int mu = (int)Math.Floor(Math.Log10(fMax * 0.9 / fEa));
                 PhongDuoi = Math.Pow(10, mu);
                 var mauDuoi = HoaLyUi.C32(GlassKit.Accent2, 0.95f);
                 int dau = -1;
                 for (int i = 0; i < duong.Length; i++)
                 {
                     double e = eMax * i / (duong.Length - 1);
-                    if (e < eaHd * 0.55) continue;
+                    double fz = TocDoMoHinh.MatDoNangLuong(e, T) * PhongDuoi;
+                    if (e < eaHd * 0.8 || fz > fMax * 1.05) continue;
                     if (dau < 0) dau = i;
-                    duong[i] = dtE.Diem(e, Math.Min(fMax * 1.08, TocDoMoHinh.MatDoNangLuong(e, T) * PhongDuoi));
+                    duong[i] = dtE.Diem(e, fz);
                     if (i > dau && e >= eaHd) ve2.VeDai(duong[i - 1].x, duong[i - 1].y, duong[i].x, duong[i].y, vung2.yMin, HoaLyUi.C32(GlassKit.Accent2, 0.30f));
                 }
                 if (dau >= 0)

@@ -18,19 +18,18 @@ Nhánh n18/tich-hop. Lần sau tiếp tục: đọc tệp này trước.
   - `BangCauHoi.cs`, `TrangKhiLyTuong.cs`, `TrangTocDo.cs`, `TrangCanBang.cs`, `TrangDongCo.cs`
   - `KhktHoaLyRunner.cs` + `Scripts/Editor/KhktHoaLyVerify.cs`
 
-- Bước 4 (đang làm): lần chạy Unity 1 – 54 đạt, 5 sai (4 lỗi cân bằng do batchmode chậm → runner đợi theo thời gian mô phỏng + TuaNhanh; cấp phát 3,7 KB/khung do số trục tạo chuỗi mỗi khung → DoThi chỉ tạo chuỗi khi vạch đổi).
-  Đã sửa theo ảnh: chú thích xuống dòng dưới tiêu đề, 13 ô số trục x, công thức NO₂/Fe³⁺, đường trùng nhau vẽ dày khác nhau,
-  đuôi E ≥ Ea phóng to 10ⁿ, cơ cấu trục khuỷu không đè xi-lanh. Lần chạy 2 đang chạy.
+- Bước 4: KhktHoaLyVerify **59/59 đạt** (lần 3 và 4), 13 ảnh đã xem, chép vào docs/ngay-18-11/anh/hoa-ly/.
+- Bước 5: .meta đã commit (faef9f7c); báo cáo docs/ngay-18-11/bao-cao-hoa-ly.md đã viết.
+- Lần chạy cuối (19/11 sáng): 59/59 đạt, ảnh đã chép; commit cuối gồm ảnh, TrangTocDo.cs (đuôi tại Ea), runner (đo cấp phát theo hiệu), báo cáo. XONG.
 
-## Còn lại (theo thứ tự)
-4. Kiểm KhktHoaLyVerify tới khi [HL_RESULT] ALL PASSED; chép ảnh $TMPDIR/vera_hoaly_shots → docs/ngay-18-11/anh/hoa-ly/, xem lại ảnh
-5. Chép .meta (bản sao ~/AppBuild/VERA_claude hoặc thư mục chính nếu Unity của phiên khác đã sinh) cho Scripts/HoaLy, Resources/HoaLy, Editor/KhktHoaLyVerify.cs; viết docs/ngay-18-11/bao-cao-hoa-ly.md; commit
+## Còn lại
+- Không còn việc bắt buộc. Đo cấp phát sạch bằng Profiler trên bản dựng Mac (Editor nhiễu 1,4–3,2 KB/khung). Gợi ý sau: nút quá trình đẳng nhiệt/đẳng áp cho trang khí, Wiebe cho động cơ.
 
 ## Lệnh kiểm thử
 Test thuần (không cần Unity), từ `Phong thi nghiem ao/Assets/Scripts/HoaLy/MoHinh` (Main.cs gọi HoaLySimTests.RunAll với 8 tệp JSON trong Resources/HoaLy):
     B=/Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/Scripting/MonoBleedingEdge
     $B/bin/mono $B/lib/mono/4.5/csc.exe -langversion:9 -out:/tmp/t.exe *.cs Main.cs && $B/bin/mono /tmp/t.exe ../../../Resources/HoaLy
-Unity (sau bước 4): `pgrep -fl -- -batchmode` rỗng rồi
+Unity: kiểm `pgrep -fl -- "Contents/MacOS/Unity -batchmode"` rỗng (mẫu "Unity.*-batchmode" khớp nhầm shell của phiên khác) rồi
     ~/AppBuild/VERA_claude/dong_bo_va_chay.sh ~/Developer/Antigravity KhktHoaLyVerify.Run hoa_ly
 
 Biên dịch thử phần Unity ngoài Unity (nhanh, không cần batchmode): mono csc.exe với -r: UnityEngine.dll, UnityEngine.*Module.dll
