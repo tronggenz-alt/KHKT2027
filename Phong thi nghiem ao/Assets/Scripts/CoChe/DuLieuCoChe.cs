@@ -114,7 +114,11 @@ namespace Khkt.CoChe
         public float X0, X1, Y0, Y1;
         public class Nut { public string Id; public Vector2 P; public string Nhan = ""; }
         public class Net { public string A, B; public string Kieu = "1"; public Vector2? Phia; }
-        public class MuiTenCong { public Vector2 Tu, Qua, Den; public string Kieu; }
+        public class MuiTenCong { public Vector2 Tu, Qua, Den; public string Kieu; public bool Gach, Cheo; }
+        /// <summary>(18/11) Cặp electron tự do: tâm P, hướng ra GocDo (độ, 0 = phải, 90 = lên).</summary>
+        public class CapE { public Vector2 P; public float GocDo; }
+        /// <summary>(18/11) Khối giai đoạn: tiêu đề nghiêng gạch lượn sóng tại Xy, khung nền, các bước 3D thuộc khối; Nen = "sai" | "chon" | null.</summary>
+        public class GiaiDoan { public string TieuDe, Nen; public Vector2 Xy; public float X0, X1, Y0, Y1; public List<int> Buoc = new List<int>(); public int NhanhSai = -1; }
         public class MuiTenPU { public float X1, X2, Y; public string Tren, Duoi; public bool ThuanNghich; }
         public class Chu { public Vector2 P; public string T; }
         public Dictionary<string, Nut> NutDs = new Dictionary<string, Nut>();
@@ -123,6 +127,12 @@ namespace Khkt.CoChe
         public List<MuiTenCong> Mt = new List<MuiTenCong>();
         public List<MuiTenPU> Pu = new List<MuiTenPU>();
         public List<Chu> Ten = new List<Chu>(), Dt = new List<Chu>(), ChuKhac = new List<Chu>();
+        // (18/11) giấy kiểu đáp án bài thi – HOP_DONG_APP.md mục 2b
+        public List<CapE> CapEDs = new List<CapE>();
+        public List<Chu> DtVong = new List<Chu>();
+        public List<GiaiDoan> GiaiDoanDs = new List<GiaiDoan>();
+        public string Phong = "", KieuCongThuc = "";
+        public bool CoChan => Phong == "co_chan";
 
         static Vector2 V2(object o) { var l = L(o); return l.Count < 2 ? Vector2.zero : new Vector2(F(l[0]), F(l[1])); }
 
@@ -149,7 +159,7 @@ namespace Khkt.CoChe
             foreach (var o in L(Lay(d, "mt")))
             {
                 var m = D(o);
-                sd.Mt.Add(new MuiTenCong { Tu = V2(Lay(m, "tu")), Qua = V2(Lay(m, "qua")), Den = V2(Lay(m, "den")), Kieu = S(m, "kieu", "nua_dau") });
+                sd.Mt.Add(new MuiTenCong { Tu = V2(Lay(m, "tu")), Qua = V2(Lay(m, "qua")), Den = V2(Lay(m, "den")), Kieu = S(m, "kieu", "nua_dau"), Gach = B(m, "gach"), Cheo = B(m, "cheo") });
             }
             foreach (var o in L(Lay(d, "pu")))
             {
@@ -163,6 +173,30 @@ namespace Khkt.CoChe
             Doc("ten", sd.Ten);
             Doc("dt", sd.Dt);
             Doc("chu", sd.ChuKhac);
+            Doc("dt_vong", sd.DtVong);
+            foreach (var o in L(Lay(d, "cap_e")))
+            {
+                var l = L(o);
+                if (l.Count >= 3) sd.CapEDs.Add(new CapE { P = new Vector2(F(l[0]), F(l[1])), GocDo = F(l[2]) });
+            }
+            foreach (var o in L(Lay(d, "giai_doan")))
+            {
+                var g = D(o);
+                var gd = new GiaiDoan { TieuDe = S(g, "tieu_de", ""), Nen = S(g, "nen", null), Xy = V2(Lay(g, "xy")) };
+                var kh = L(Lay(g, "khung"));
+                if (kh.Count == 4) { gd.X0 = F(kh[0]); gd.X1 = F(kh[1]); gd.Y0 = F(kh[2]); gd.Y1 = F(kh[3]); }
+                foreach (var b in L(Lay(g, "buoc"))) gd.Buoc.Add(I(b));
+                if (Lay(g, "nhanh_sai") != null) gd.NhanhSai = I(Lay(g, "nhanh_sai"));
+                sd.GiaiDoanDs.Add(gd);
+            }
+            sd.Phong = S(d, "phong", "");
+            sd.KieuCongThuc = S(d, "kieu_cong_thuc", "");
+            if (sd.DtVong.Count > 0)
+            {
+                // có điện tích vòng tròn: bỏ ký tự điện tích cuối nhãn, bỏ "dt" kiểu cũ (HOP_DONG_APP.md mục 2b)
+                foreach (var n in sd.NutDs.Values) n.Nhan = (n.Nhan ?? "").TrimEnd('⁺', '⁻', '²', '³');
+                sd.Dt.Clear();
+            }
             return sd;
         }
     }

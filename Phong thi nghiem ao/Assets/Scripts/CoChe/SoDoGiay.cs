@@ -11,13 +11,21 @@ namespace Khkt.CoChe
     ///   nét đơn/đôi/ba (nét đôi trong vòng: nét thứ hai ngắn, phía trong), nét "sau" vẽ trước và nét trước có khe che màu giấy,
     ///   nêm đặc / nêm gạch cho lập thể, mũi tên cong Bézier (một ngạnh = 1 e, hai ngạnh = 2 e), mũi tên phản ứng có chữ
     ///   trên/dưới (⇌ khi thuận nghịch), chấm gốc tự do, điện tích, nhãn A1…
-    /// Chữ là các Text con (phông Be Vietnam Pro của GlassKit, đủ dấu tiếng Việt và chỉ số dưới Unicode CO₂Me).
+    /// (18/11, HOP_DONG_APP.md mục 2b – kiểu đáp án bài thi như bản demo sn2_sn1.html): cặp electron tự do (chấm đôi), điện tích
+    ///   trong vòng tròn ⊕ ⊖, khối giai đoạn có nền nhấn (nhánh sai / nhánh được chọn) và tiêu đề in nghiêng gạch chân lượn sóng,
+    ///   mũi tên nhánh sai nét đứt có ✕, phông có chân (Times New Roman của hệ điều hành qua CoCheMoDun.PhongCoChan) khi phong = co_chan.
+    /// Chữ là các Text con (mặc định phông Be Vietnam Pro của GlassKit, đủ dấu tiếng Việt và chỉ số dưới Unicode CO₂Me).
     /// </summary>
     public class SoDoGiay : MaskableGraphic
     {
         public static readonly Color MauGiay = new Color32(0xff, 0xfd, 0xf7, 0xff);
         public static readonly Color MauMuc = new Color32(0x1b, 0x26, 0x21, 0xff);
         public static readonly Color MauMuiTen = new Color32(0xb3, 0x26, 0x1e, 0xff);
+        public static readonly Color MauVang = new Color32(0xc9, 0xa2, 0x27, 0xff);
+        public static readonly Color MauDoNhan = new Color32(0xc6, 0x28, 0x28, 0xff);
+        public static readonly Color MauGach = new Color32(0x8f, 0x95, 0x92, 0xff);
+        static readonly Color NenSai = new Color32(0xc6, 0x28, 0x28, 0x0d), NenChon = new Color32(0xc9, 0xa2, 0x27, 0x14),
+                              NenDangXem = new Color32(0xc6, 0x28, 0x28, 0x0b);
         const float KyTu = 0.17f;
 
         SoDoGiayDuLieu sd;
@@ -30,6 +38,23 @@ namespace Khkt.CoChe
         readonly Dictionary<string, N> nt = new Dictionary<string, N>();
 
         public SoDoGiayDuLieu DuLieu => sd;
+        int buocDangXem = -1;
+
+        /// <summary>Tô khối giai đoạn chứa bước 3D đang xem (vạch trái đỏ, nền rất nhạt – như .buoc.dang-xem của bản demo). −1 = bỏ tô.</summary>
+        public void DanhDauBuoc(int buoc)
+        {
+            if (buoc == buocDangXem) return;
+            buocDangXem = buoc;
+            if (sd != null) DungChu();
+        }
+
+        /// <summary>Chỉ số khối giai đoạn (trong DuLieu.GiaiDoanDs) chứa bước; −1 nếu không có.</summary>
+        public int GiaiDoanCuaBuoc(int buoc)
+        {
+            if (sd == null) return -1;
+            for (int i = 0; i < sd.GiaiDoanDs.Count; i++) if (sd.GiaiDoanDs[i].NhanhSai < 0 && sd.GiaiDoanDs[i].Buoc.Contains(buoc)) return i;
+            return -1;
+        }
 
         protected override void Awake()
         {
@@ -97,7 +122,8 @@ namespace Khkt.CoChe
             rt.anchoredPosition = p;
             rt.sizeDelta = new Vector2(Mathf.Max(20f, t.Length * co * 0.9f + co), co * 1.6f);
             var tx = go.AddComponent<Text>();
-            tx.font = dam ? GlassKit.Semibold : GlassKit.Regular;
+            Font coChan = sd != null && sd.CoChan ? CoCheMoDun.PhongCoChan(dam) : null;
+            tx.font = coChan != null ? coChan : dam ? GlassKit.Semibold : GlassKit.Regular;
             tx.fontSize = Mathf.Max(8, Mathf.RoundToInt(co));
             tx.fontStyle = nghieng ? FontStyle.Italic : FontStyle.Normal;
             tx.color = mau ?? MauMuc;
@@ -127,6 +153,14 @@ namespace Khkt.CoChe
                 else ThemChu(a.T, X(a.P), co, TextAnchor.MiddleCenter);
             }
             foreach (var d in sd.Dt) ThemChu(d.T.Replace("⁺", "+").Replace("⁻", "−"), X(d.P), co * 0.78f, TextAnchor.MiddleCenter);
+            foreach (var d in sd.DtVong) ThemChu(d.T, X(d.P), co * (d.T.Length > 1 ? 0.62f : 0.72f), TextAnchor.MiddleCenter, true);
+            foreach (var g in sd.GiaiDoanDs)
+            {
+                if (string.IsNullOrEmpty(g.TieuDe)) continue;
+                var tx = ThemChu(g.TieuDe, X(g.Xy), co * 1.12f, TextAnchor.MiddleLeft, true, true);
+                tx.rectTransform.sizeDelta = new Vector2(Mathf.Max(tx.preferredWidth + 8f, 40f), co * 1.8f);
+                GachLuonSong(X(g.Xy) + new Vector2(0, -co * 0.62f), tx.preferredWidth);
+            }
             foreach (var d in sd.ChuKhac) ThemChu(d.T, X(d.P), co, TextAnchor.MiddleCenter);
             foreach (var d in sd.Ten) ThemChu(d.T, X(d.P), co * 1.05f, TextAnchor.MiddleCenter, true);
             foreach (var p in sd.Pu)
@@ -156,6 +190,19 @@ namespace Khkt.CoChe
             lopNet.sizeDelta = Vector2.zero;
             var vh = (VertexHelper)null;
             float net = Mathf.Max(1f, 1.6f * S / 34f);
+            // khối giai đoạn: nền nhấn + vạch trái (vẽ trước mọi nét)
+            int dangXem = GiaiDoanCuaBuoc(buocDangXem);
+            for (int gi = 0; gi < sd.GiaiDoanDs.Count; gi++)
+            {
+                var g = sd.GiaiDoanDs[gi];
+                bool xem = gi == dangXem;
+                if (g.Nen == null && !xem) continue;
+                Color nen = xem ? NenDangXem : g.Nen == "sai" ? NenSai : NenChon;
+                Color vien = xem || g.Nen == "sai" ? MauDoNhan : MauVang;
+                Vector2 a = X(new Vector2(g.X0, g.Y1)), b = X(new Vector2(g.X1, g.Y0));
+                if (g.Nen != null || xem) Manh((a + b) * 0.5f, new Vector2(b.x - a.x, a.y - b.y), 0f, nen);
+                Manh(new Vector2(a.x + 1.5f, (a.y + b.y) * 0.5f), new Vector2(3f, a.y - b.y), 0f, vien);
+            }
             var sau = new List<System.Action>();
             var khe = new List<System.Action>();
             var truoc = new List<System.Action>();
@@ -205,6 +252,19 @@ namespace Khkt.CoChe
             foreach (var f in khe) f();
             foreach (var f in truoc) f();
             foreach (var g in sd.Goc) Tron(vh, X(g), 2.7f * S / 34f, MauMuc);
+            foreach (var c in sd.CapEDs)                                        // cặp e: hai chấm vuông góc với hướng ra
+            {
+                float r = c.GocDo * Mathf.Deg2Rad;
+                Vector2 v = new Vector2(-Mathf.Sin(r), Mathf.Cos(r)) * 0.09f;
+                Tron(vh, X(c.P + v), 2.2f * S / 34f, MauMuc);
+                Tron(vh, X(c.P - v), 2.2f * S / 34f, MauMuc);
+            }
+            foreach (var d in sd.DtVong)                                        // điện tích trong vòng tròn: viền mực, lòng màu giấy
+            {
+                float r = (d.T.Length > 1 ? 8.5f : 6.8f) * S / 34f;
+                Tron(vh, X(d.P), r, MauMuc);
+                Tron(vh, X(d.P), r - Mathf.Max(1f, 1.2f * S / 34f), MauGiay);
+            }
             foreach (var m in sd.Mt) MuiTenCong(vh, m, net * 0.82f);
             foreach (var p in sd.Pu) MuiTenPhanUng(vh, p, net * 0.88f);
         }
@@ -220,20 +280,29 @@ namespace Khkt.CoChe
         {
             Vector2 A = X(m.Tu), C = X(m.Qua), B = X(m.Den);
             Vector2 truoc = A;
-            for (int i = 1; i <= 24; i++)
+            Color mau = m.Gach ? MauGach : MauMuiTen;
+            int so = m.Gach ? 36 : 24;
+            for (int i = 1; i <= so; i++)
             {
-                float u = i / 24f;
+                float u = i / (float)so;
                 Vector2 p = (1 - u) * (1 - u) * A + 2 * u * (1 - u) * C + u * u * B;
-                Doan(vh, truoc, p, w, MauMuiTen);
+                if (!m.Gach || (i % 3) != 0) Doan(vh, truoc, p, w, mau);           // nét đứt: bỏ 1/3 số đoạn
                 truoc = p;
+            }
+            if (m.Cheo)                                                          // dấu ✕ đỏ ở giữa đường cong
+            {
+                Vector2 g0 = 0.25f * A + 0.5f * C + 0.25f * B;
+                float k0 = 7f * S / 34f;
+                Doan(vh, g0 + new Vector2(-k0, -k0), g0 + new Vector2(k0, k0), w * 1.7f, MauDoNhan);
+                Doan(vh, g0 + new Vector2(-k0, k0), g0 + new Vector2(k0, -k0), w * 1.7f, MauDoNhan);
             }
             Vector2 t = (B - C).normalized;
             Vector2 pn = new Vector2(-t.y, t.x);
             Vector2 g = (A + B) * 0.5f;
             if (Vector2.Dot(C - g, pn) < 0) pn = -pn;
             float k = S / 34f;
-            Doan(vh, B, B - t * 8f * k + pn * 4.5f * k, w, MauMuiTen);
-            if (m.Kieu != "nua_dau") Doan(vh, B, B - t * 8f * k - pn * 4.5f * k, w, MauMuiTen);
+            Doan(vh, B, B - t * 8f * k + pn * 4.5f * k, w, mau);
+            if (m.Kieu != "nua_dau") Doan(vh, B, B - t * 8f * k - pn * 4.5f * k, w, mau);
         }
 
         void MuiTenPhanUng(VertexHelper vh, SoDoGiayDuLieu.MuiTenPU p, float w)
@@ -284,6 +353,20 @@ namespace Khkt.CoChe
             float rong = Mathf.Max(1.2f, S / 34f * 1.4f);
             int n = Mathf.Clamp(Mathf.CeilToInt((b - c).magnitude / rong) + 1, 2, 24);
             for (int i = 0; i <= n; i++) Doan(vh, a, Vector2.Lerp(b, c, i / (float)n), rong, mau);
+        }
+
+        /// <summary>Gạch chân lượn sóng màu vàng dưới tiêu đề giai đoạn (như text-decoration: underline wavy #c9a227).</summary>
+        void GachLuonSong(Vector2 dau, float dai)
+        {
+            if (lopNet == null || dai <= 1f) return;
+            float buoc = 3f * Mathf.Max(0.6f, S / 34f), bien = 1.6f * Mathf.Max(0.6f, S / 34f), w = Mathf.Max(1f, 1.2f * S / 34f);
+            Vector2 truoc = dau;
+            for (float x = buoc; x <= dai; x += buoc * 0.5f)
+            {
+                Vector2 p = dau + new Vector2(x, Mathf.Sin(x / buoc * Mathf.PI) * bien);
+                Doan(null, truoc, p, w, MauVang);
+                truoc = p;
+            }
         }
 
         void Tron(VertexHelper vh, Vector2 c, float r, Color mau) => Manh(c, new Vector2(2 * r, 2 * r), 0f, mau, GlassKit.SolidCircle);

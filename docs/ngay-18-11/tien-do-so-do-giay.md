@@ -23,7 +23,11 @@
   (trang `so_sanh.html`, chụp bằng Chrome headless: trái = demo vẽ tay hoặc ảnh app cũ, phải = tự sinh mới).
 
 ## Đang làm dở
-- App Unity: `SoDoGiay.cs` + `DuLieuCoChe.cs` đã sửa (chưa commit) – đang chạy KhktCoCheVerify để biết biên dịch được.
+- App Unity: `SoDoGiay.cs` + `DuLieuCoChe.cs` đã commit; Unity biên dịch hai tệp này KHÔNG lỗi (chỉ cảnh báo cũ).
+  KhktCoCheVerify chưa chạy được: cả dự án đang lỗi ở `HoaLy/HoaLyMoDun.cs(118)` (thiếu `TrangDongCo`, phiên Hóa lý đang làm dở).
+  Chạy lại khi phiên đó xong: `pgrep -fl -- -batchmode` trống rồi
+  `Unity -batchmode -projectPath "Phong thi nghiem ao" -executeMethod KhktCoCheVerify.Run -logFile <tệp>`; sau đó
+  `git status` – nếu Lab/Materials/*.mat hay anh/g2..g4 bị đổi thì `git checkout --`.
 
 ## Còn lại (theo thứ tự)
 3. Dựng lại: `.venv/bin/python -m server.ai.co_che.dung_bai_demo` rồi `.venv/bin/python -m server.ai.co_che.dong_goi --unity`.
