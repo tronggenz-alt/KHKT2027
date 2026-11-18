@@ -73,6 +73,11 @@ namespace Khkt.Menu
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
+            // C4 (18/11): nền là ảnh dựng thật của phòng lab (2x, làm mờ nhẹ, phủ màu thương hiệu) và logo vẽ lại nét cho Retina
+            var nenLab = Resources.Load<Texture2D>("GiaoDien/NenLab");
+            if (nenLab != null) background = nenLab;
+            var logoNet = Resources.Load<Texture2D>("GiaoDien/LogoVera192");
+            if (logoNet != null) logo = logoNet;
             BuildUi();
         }
 
@@ -93,8 +98,11 @@ namespace Khkt.Menu
             if (restored) AfterSignIn();
         }
 
+        UnityEngine.Rendering.Universal.UniversalAdditionalCameraData menuCamData;
+
         void Update()
         {
+            GiuCameraGiaoDienSach();
             if (panelVisible) FitBackground();
             var kb = Keyboard.current;
             if (kb == null || busy) return;
@@ -107,6 +115,17 @@ namespace Khkt.Menu
             {
                 if (back.TryGetValue(Current, out var a)) a();
             }
+        }
+
+        /// <summary>
+        /// Camera màn chính chỉ vẽ giao diện: không được có hậu kỳ. HardwareProfile.ApplyCameras (G1) bật hậu kỳ cho mọi camera
+        /// Base; tonemapping Neutral khi đó kéo màu trắng xuống ~81% làm cả giao diện xám đục. Tắt lại mỗi khung hình (rẻ).
+        /// </summary>
+        void GiuCameraGiaoDienSach()
+        {
+            if (menuCamera == null) return;
+            if (menuCamData == null) menuCamData = menuCamera.GetComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>();
+            if (menuCamData != null && menuCamData.renderPostProcessing) menuCamData.renderPostProcessing = false;
         }
 
         // =====================================================================
@@ -406,7 +425,7 @@ namespace Khkt.Menu
                 Say(Screen.Home, "Không tìm thấy cảnh phòng thí nghiệm trong bản dựng này.");
                 yield break;
             }
-            float shown = 0f;
+            float shown = 0f, doiMeo = 0f;
             while (!op.isDone)
             {
                 LoadProgress = Mathf.Clamp01(op.progress / 0.9f);
@@ -414,6 +433,12 @@ namespace Khkt.Menu
                 shown = Mathf.MoveTowards(shown, LoadProgress, Time.unscaledDeltaTime * 1.6f);
                 loadBar.rectTransform.anchorMax = new Vector2(shown, 1);
                 loadText.text = $"{shown * 100f:0} %";
+                doiMeo += Time.unscaledDeltaTime;
+                if (tipText != null && doiMeo >= 5f)                // đổi mẹo mỗi 5 giây
+                {
+                    doiMeo = 0f;
+                    tipText.text = MeoAnToan[UnityEngine.Random.Range(0, MeoAnToan.Length)];
+                }
                 yield return null;
             }
         }
@@ -443,6 +468,7 @@ namespace Khkt.Menu
             canvas.renderMode = RenderMode.ScreenSpaceCamera;
             canvas.worldCamera = menuCamera;
             canvas.planeDistance = 1f;
+            canvas.pixelPerfect = true;                       // viền 1 px thẳng hàng điểm ảnh (sắc trên Retina)
             var scaler = cgo.GetComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920, 1080);
@@ -914,7 +940,7 @@ namespace Khkt.Menu
 
         void BuildLoading(RectTransform p)
         {
-            var s = NewScreen(p, Screen.Loading, "Đang tải", "Đang mở phòng thí nghiệm", "Lần đầu có thể mất khoảng một phút trên máy yếu.", ContentW, 300f);
+            var s = NewScreen(p, Screen.Loading, "Đang tải", "Đang mở phòng thí nghiệm", "Lần đầu có thể mất khoảng một phút trên máy yếu.", ContentW, 340f);
             var track = Fill(s, "Thanh nền", new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, -120), new Vector2(ContentW, 12), PaperHover, 10f);
             var fill = Stretch(track.rectTransform, "Thanh tiến độ", new Vector2(0, 0), new Vector2(0, 1), Vector2.zero, Vector2.zero);
             loadBar = fill.gameObject.AddComponent<Image>();
@@ -924,7 +950,22 @@ namespace Khkt.Menu
             loadBar.color = Accent;
             loadBar.raycastTarget = false;
             loadText = GlassKit.Label(s, "Phần trăm", "0 %", 17, InkDim, false, TextAnchor.UpperLeft, new Vector2(0, -144), new Vector2(ContentW, 28));
+            GlassKit.Label(s, "Tiêu đề mẹo", "MẸO AN TOÀN PHÒNG THÍ NGHIỆM", 13, Accent, true, TextAnchor.UpperLeft, new Vector2(0, -196), new Vector2(ContentW, 20));
+            tipText = GlassKit.Label(s, "Mẹo an toàn", MeoAnToan[UnityEngine.Random.Range(0, MeoAnToan.Length)], 17, Ink, false, TextAnchor.UpperLeft, new Vector2(0, -222), new Vector2(ContentW, 80));
         }
+
+        Text tipText;
+        static readonly string[] MeoAnToan =
+        {
+            "Luôn đeo kính bảo hộ và áo choàng khi làm việc với axit, bazơ hoặc dung môi.",
+            "Pha loãng axit sunfuric: rót từ từ AXIT vào NƯỚC, không làm ngược lại.",
+            "Không ngửi trực tiếp miệng bình hóa chất; dùng tay phẩy nhẹ hơi về phía mũi.",
+            "Đun ống nghiệm thì hướng miệng ống ra xa người khác và xa chính mình.",
+            "Hóa chất dễ cháy (ethanol, acetone) phải để xa ngọn lửa đèn cồn.",
+            "Làm việc với khí độc (Cl₂, NO₂, H₂S) trong tủ hút.",
+            "Hóa chất bắn vào mắt: rửa ngay bằng vòi rửa mắt ít nhất 15 phút.",
+            "Không trả hóa chất thừa vào lọ gốc; đổ vào bình thu hồi đúng loại.",
+        };
 
         InputField MakeField(Transform parent, Screen s, string name, string label, float y, bool password, float width = ContentW)
         {

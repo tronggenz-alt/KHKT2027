@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cơ chế SN2 – SN1</title>
+<style>
+:root{
+  --kinh:rgba(18,24,44,.78); --vien:rgba(255,255,255,.12); --chu:#e8ecf5; --chu-phu:#9aa5bd;
+  --do:#ff6b6b; --lam:#6ab7ff; --nhan:rgb(230,236,245); --muc:#1b2621;
+}
+body.giay{ --kinh:rgba(255,253,247,.92); --vien:rgba(27,38,33,.14); --chu:#1b2621; --chu-phu:#5d6862; }
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#0b1020;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--chu)}
+#canvas{position:fixed;inset:0}
+#nhan-lop{position:fixed;inset:0;pointer-events:none}
+.nhan{font-weight:600;color:var(--nhan);white-space:nowrap;text-shadow:0 0 6px rgba(0,0,0,.6)}
+.dt{width:19px;height:19px;border-radius:50%;border:1.6px solid currentColor;display:grid;place-items:center;font:700 14px/1 system-ui}
+.the{padding:5px 10px;border-radius:999px;font:600 12.5px/1.3 system-ui;max-width:240px;white-space:normal;text-align:center;border:1.5px solid currentColor;backdrop-filter:blur(4px)}
+.the.do{color:var(--do);background:rgba(255,107,107,.14)}
+.the.lam{color:var(--lam);background:rgba(106,183,255,.14)}
+
+header{position:fixed;top:14px;left:16px;right:16px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;pointer-events:none;z-index:5}
+header>*{pointer-events:auto}
+h1{margin:0;font-size:19px;transition:color .9s}
+header p{margin:3px 0 0;color:var(--chu-phu);font-size:13px}
+#chuyen{position:relative;display:flex;border:1px solid var(--vien);background:var(--kinh);border-radius:999px;padding:4px;cursor:pointer;backdrop-filter:blur(10px);transition:background .9s,border-color .9s}
+#chuyen span{position:relative;z-index:1;padding:7px 16px;font:600 14px system-ui;color:var(--chu-phu);transition:color .5s}
+#chuyen i{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:999px;background:#3b82f6;transition:transform .55s cubic-bezier(.65,0,.35,1),background .9s}
+body.giay #chuyen i{transform:translateX(100%);background:#1b2621}
+#chuyen span.bat{color:#fff}
+body.giay #chuyen span.bat{color:#f6f1e6}
+header>div{transition:opacity .5s}
+body.giay header>div{opacity:0;pointer-events:none}
+#goi-y{position:fixed;top:66px;left:16px;font-size:12px;color:var(--chu-phu);transition:opacity .6s}
+body.giay #goi-y{opacity:0}
+
+#bang{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(780px,calc(100% - 32px));background:var(--kinh);border:1px solid var(--vien);border-radius:16px;padding:14px 16px 12px;backdrop-filter:blur(12px);transition:opacity .6s,transform .6s;z-index:4}
+body.giay #bang{opacity:0;pointer-events:none;transform:translate(-50%,24px)}
+.dong1{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#chip{font:700 11.5px system-ui;padding:4px 9px;border-radius:999px;letter-spacing:.3px;color:#fff}
+#chip.khong{background:#d32f2f} #chip.co{background:#2e7d32} #chip.trung{display:none}
+h2{margin:0;font-size:16px}
+#mo-ta{margin:8px 0 10px;font-size:14px;line-height:1.5;min-height:42px}
+#truc{position:relative;display:flex;gap:3px;height:22px;margin-bottom:10px}
+#truc .doan{position:relative;height:6px;margin-top:8px;border-radius:3px;background:rgba(232,236,245,.16);overflow:hidden}
+#truc .doan b{position:absolute;inset:0;width:0;background:#3b82f6}
+#truc .doan.khong b{background:#ef4444}
+#keo{position:absolute;inset:0;width:100%;opacity:0;cursor:pointer;margin:0}
+.nut{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.nut button,.nut select{font:600 14px system-ui;color:var(--chu);background:transparent;border:1px solid var(--vien);border-radius:9px;padding:6px 12px;cursor:pointer}
+.nut button:hover{background:rgba(255,255,255,.08)}
+.nut select option{color:#111}
+.chu-thich{margin-left:auto;font-size:12px;color:var(--chu-phu);display:flex;gap:12px;flex-wrap:wrap}
+.chu-thich i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#ffd166;box-shadow:0 0 6px #ffd166;margin-right:5px;vertical-align:1px}
+
+/* ---------- tờ bài giải (chế độ giấy, tĩnh) ---------- */
+#to-giay{position:fixed;inset:0;overflow:auto;opacity:0;visibility:hidden;padding:76px 16px 48px;z-index:3}
+.to{max-width:880px;margin:0 auto;background:#fffdf7;border:1px solid #e3dccb;box-shadow:0 12px 34px rgba(60,50,20,.10);border-radius:6px;padding:26px 34px 30px;color:var(--muc);font-family:"Times New Roman",Georgia,serif;transform:translateY(calc((1 - var(--hien,1)) * 18px))}
+.to h2{font-size:24px;margin:0 0 10px;text-align:center;letter-spacing:.5px}
+.to .de{font-size:17px;line-height:1.55;margin:0 0 6px}
+.buoc{margin:14px -16px 0;padding:8px 16px 10px;border-left:3px solid transparent;border-radius:2px}
+.buoc.dang-xem{border-left-color:#c62828;background:rgba(198,40,40,.045)}
+.buoc h3{font-size:18px;margin:0 0 6px}
+.buoc p,.buoc li{font-size:16.5px;line-height:1.55;margin:6px 0}
+.buoc ul{margin:4px 0;padding-left:22px}
+.hinh{display:block;margin:4px auto;max-width:100%;height:auto;overflow:visible}
+.hinh text.nt{font:600 17px "Helvetica Neue",Arial,sans-serif;text-anchor:middle;dominant-baseline:central;fill:var(--muc)}
+.hinh .lk{stroke:var(--muc);stroke-width:1.8;stroke-linecap:round}
+.hinh .e{fill:var(--muc)}
+.hinh .dt{fill:#fffdf7;stroke:var(--muc);stroke-width:1.3}
+.hinh .dtc{font:700 13px Arial,sans-serif;text-anchor:middle;dominant-baseline:central;fill:var(--muc)}
+.hinh .mt{fill:none;stroke:#c62828;stroke-width:1.8;stroke-linecap:round}
+.hinh .mt.gach{stroke:#8f9592;stroke-dasharray:6 5}
+.hinh .x{fill:#c62828;font:700 26px Arial,sans-serif;text-anchor:middle;dominant-baseline:central}
+.hinh .pu{stroke:var(--muc);stroke-width:1.6}
+.hinh .dk{font:italic 15px "Times New Roman",serif;text-anchor:middle;fill:var(--muc)}
+.pt{font-size:17px;text-align:center;margin:8px 0}
+.tieu-de{font-style:italic;text-decoration:underline wavy #c9a227;text-underline-offset:4px}
+#nut-gt{margin-top:14px;font:600 14.5px system-ui;color:#1b2621;background:#f3ecdc;border:1px solid #dccfae;border-radius:10px;padding:8px 14px;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+#nut-gt:hover{background:#ece2c9}
+#nut-gt b{display:inline-block;transition:transform .3s}
+#nut-gt[aria-expanded="true"] b{transform:rotate(180deg)}
+#gt{display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s ease}
+#gt.mo{grid-template-rows:1fr}
+#gt>div{overflow:hidden}
+#gt .noi{margin-top:12px;padding:12px 18px;border-left:3px solid #c9a227;background:#fbf6e9;border-radius:4px;font-size:16.5px;line-height:1.55}
+#gt .noi p{margin:6px 0}
+@media (max-width:560px){ h1{font-size:16px} #mo-ta{font-size:13px} .chu-thich{display:none} #chuyen span{padding:6px 12px} .to{padding:18px 16px} .buoc{margin:12px -8px 0;padding:8px} }
+</style>
+</head>
+<body>
+<div id="canvas"></div>
+<div id="nhan-lop"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="dau" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#c62828"/></marker>
+    <marker id="dau-den" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1b2621"/></marker>
+  </defs>
+</svg>
+
+<div id="to-giay"><article class="to" id="to"></article></div>
+
+<header>
+  <div><h1>SN2 hay SN1?</h1><p>(CH₃)₃C–Br + OH⁻ · bản thử cơ chế 3D ⇄ giấy</p></div>
+  <button id="chuyen" title="Phím G"><span class="c3 bat">3D</span><span class="cg">Giấy</span><i></i></button>
+</header>
+<div id="goi-y">Kéo để xoay 360° · cuộn để phóng to</div>
+
+<section id="bang">
+  <div class="dong1"><span id="chip"></span><h2 id="ten-gd"></h2></div>
+  <p id="mo-ta"></p>
+  <div id="truc"><input id="keo" type="range" min="0" max="1000" value="0" aria-label="Tua"></div>
+  <div class="nut">
+    <button id="lui" title="Bước trước (←)">⏮</button>
+    <button id="chay" title="Chạy / dừng (Space)">⏸</button>
+    <button id="toi" title="Bước sau (→)">⏭</button>
+    <select id="toc"><option value=".5">0.5×</option><option value="1" selected>1×</option><option value="1.6">1.6×</option></select>
+    <button id="nut-h" aria-pressed="false" title="Ẩn / hiện nguyên tử H (phím H)">Ẩn H</button>
+    <div class="chu-thich"><span><i></i>cặp electron</span><span>xám đậm C · trắng H · đỏ O · nâu Br</span></div>
+  </div>
+</section>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
+</script>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
+
+// ================================================================ tiện ích
+const V = (x, y, z = 0) => new THREE.Vector3(x, y, z);
+const kep = x => Math.min(1, Math.max(0, x));
+const sm = x => { x = kep(x); return x * x * (3 - 2 * x); };
+const seg = (t, a, b) => sm((t - a) / (b - a));
+const bump = (t, a, b, c, d) => seg(t, a, b) * (1 - seg(t, c, d));
+const giua = (a, b) => a.clone().add(b).multiplyScalar(.5);
+const huong = (a, b) => b.clone().sub(a).normalize();
+function vuongGoc(u) {
+  const v = V(0, 1, 0).addScaledVector(u, -u.y);
+  if (v.lengthSq() < 1e-4) v.set(0, 0, 1).addScaledVector(u, -u.z);
+  return v.normalize();
+}
+// hướng tứ diện thứ "goc" của nguyên tử có một liên kết theo hướng u (109,5° so với u)
+function tuDien(u, goc) {
+  const v = vuongGoc(u), w = new THREE.Vector3().crossVectors(u, v);
+  return u.clone().multiplyScalar(-.333).addScaledVector(v, .943 * Math.cos(goc)).addScaledVector(w, .943 * Math.sin(goc)).normalize();
+}
+const MAU_NEN = new THREE.Color("#0b1020"), MAU_GIAY = new THREE.Color("#f6f1e6"), MUC = new THREE.Color("#1b2621");
+const VANG = new THREE.Color("#ffd166"), DO = new THREE.Color("#ff4d4d"), DEN = new THREE.Color(0);
+
+// ================================================================ tư thế 3D (Å) và hình phẳng (dùng khi chuyển sang giấy)
+const P3 = {}, Q = {};
+P3["0"] = { C: V(0, 0, 0), Br: V(1.95, 0, 0), M1: V(-.513, 1.452, 0), M2: V(-.513, -.726, 1.257), M3: V(-.513, -.726, -1.257), O: V(-6.4, .4, 0) };
+P3.B = { ...P3["0"], O: V(-3.35, 0, 0) };
+P3["1"] = { C: V(0, 0, 0), Br: V(5.4, -1.2, 0), M1: V(0, 1.5, 0), M2: V(0, -.75, 1.3), M3: V(0, -.75, -1.3), O: V(-6.4, .4, 0) };
+P3.A = { ...P3["1"], O: V(-2.7, 0, 0) };
+P3["2"] = { C: V(0, 0, 0), Br: V(5.4, -1.2, 0), M1: V(.513, 1.452, 0), M2: V(.513, -.726, 1.257), M3: V(.513, -.726, -1.257), O: V(-1.43, 0, 0) };
+
+Q["0"] = { C: V(0, 0), M1: V(0, 1.5), M2: V(0, -1.5), M3: V(-1.5, 0), Br: V(1.6, 0), O: V(-5, 0) };
+Q.B = { ...Q["0"], O: V(-3.5, 0) };
+Q["1"] = { C: V(0, 0), M1: V(0, 1.5), M2: V(1.3, -.75), M3: V(-1.3, -.75), Br: V(3.8, 0), O: V(-5, 0) };
+Q.A = { ...Q["1"], O: V(-3.0, 0) };
+Q["2"] = { C: V(0, 0), M1: V(0, 1.5), M2: V(1.5, 0), M3: V(0, -1.5), O: V(-1.5, 0), Br: V(4.2, 0) };
+
+// ================================================================ giai đoạn
+const M_CUA = (a, b) => ({ M1: [a, b], M2: [a, b], M3: [a, b] });
+const GD = [
+  { ten: "Chất ban đầu", dur: 3, tu: "0", den: "0", kha: null,
+    mo_ta: "tert-Butyl bromide (CH₃)₃C–Br và ion OH⁻. O mang 3 cặp electron tự do; liên kết C–Br phân cực (C δ+, Br δ−). Xoay để thấy 9 nguyên tử H của ba nhóm CH₃." },
+  { ten: "Thử SN2: OH⁻ tấn công mặt sau", dur: 5.5, tu: "0", qua: "B", qua_t: [.42, .6], den: "0", kha: false,
+    mo_ta: "SN2 đòi hỏi nucleophile vào từ phía sau, ngược hướng với Br (180°). Ở carbon bậc ba, ba nhóm CH₃ (9 nguyên tử H) che kín mặt sau nên cặp e của O không tới được C. Đường SN2 bị chặn → chuyển sang SN1." },
+  { ten: "SN1 bước 1 (chậm): C–Br đứt dị li", dur: 5, tu: "0", den: "1", kha: true, cua: { Br: [.3, 1], ...M_CUA(.35, 1) },
+    mo_ta: "Cặp electron của liên kết C–Br dồn hẳn về Br. Br⁻ tách ra, để lại carbocation bậc ba. Đây là bước chậm quyết định tốc độ: v = k[(CH₃)₃CBr]." },
+  { ten: "Carbocation phẳng, orbital p trống", dur: 4, tu: "1", den: "1", kha: true,
+    mo_ta: "C⁺ lai hoá sp²: ba nhóm CH₃ nằm trên một mặt phẳng (120°), orbital p trống vuông góc với mặt phẳng đó. Ba nhóm CH₃ đẩy electron nên carbocation bậc ba bền. Nucleophile vào được từ cả hai mặt." },
+  { ten: "SN1 bước 2 (nhanh): OH⁻ tấn công C⁺", dur: 5, tu: "1", qua: "A", qua_t: [.35, .4], den: "2", kha: true, cua: M_CUA(.45, 1),
+    mo_ta: "Một cặp electron tự do của O dồn vào orbital p trống, tạo liên kết C–O. Carbon trở lại dạng tứ diện sp³; điện tích − của O và + của C cùng mất." },
+  { ten: "Sản phẩm", dur: 3, tu: "2", den: "2", kha: null,
+    mo_ta: "(CH₃)₃C–OH (2-methylpropan-2-ol) + Br⁻. Dẫn xuất bậc ba thế theo SN1, không theo SN2. Lưu ý: với OH⁻ đặc và đun nóng, phản ứng tách (tạo alkene) cạnh tranh mạnh." },
+];
+const TONG = GD.reduce((s, g) => s + g.dur, 0);
+const BAT_DAU = []; GD.reduce((s, g) => (BAT_DAU.push(s), s + g.dur), 0);
+function giaiDoan(T) {
+  for (let i = 0; i < GD.length; i++) if (T < BAT_DAU[i] + GD[i].dur) return [i, (T - BAT_DAU[i]) / GD[i].dur];
+  return [GD.length - 1, 1];
+}
+function viTri(P, k, g, t) {
+  const r = g.cua?.[k]; if (r) t = kep((t - r[0]) / (r[1] - r[0]));
+  const a = P[g.tu][k], c = P[g.den][k];
+  if (g.qua) {
+    const b = P[g.qua][k], [x, y] = g.qua_t;
+    if (t < x) return a.clone().lerp(b, sm(t / x));
+    if (t < y) return b.clone();
+    return b.clone().lerp(c, sm((t - y) / (1 - y)));
+  }
+  return a.clone().lerp(c, sm(t));
+}
+
+// ================================================================ cảnh 3D
+const khung = document.getElementById("canvas"), lopNhan = document.getElementById("nhan-lop");
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+khung.appendChild(renderer.domElement);
+const nhanR = new CSS2DRenderer({ element: lopNhan });
+const scene = new THREE.Scene();
+scene.background = MAU_NEN.clone();
+const camera = new THREE.PerspectiveCamera(40, 1, .1, 200);
+const TAM3 = V(-.6, 0, 0), TAM2 = V(-.5, 0, 0);
+camera.position.copy(TAM3).add(V(.45, .38, 1).normalize().multiplyScalar(15));
+const dk = new OrbitControls(camera, renderer.domElement);
+dk.target.copy(TAM3); dk.enableDamping = true; dk.enablePan = false; dk.minDistance = 5; dk.maxDistance = 32;
+scene.add(new THREE.HemisphereLight(0xdfe8ff, 0x1a1f33, 1.05));
+const den1 = new THREE.DirectionalLight(0xffffff, 1.7); den1.position.set(5, 8, 7); scene.add(den1);
+const den2 = new THREE.DirectionalLight(0x88aaff, .55); den2.position.set(-6, -3, -5); scene.add(den2);
+// lưới tròn dưới chân: mốc không gian khi xoay 360°
+const san = new THREE.PolarGridHelper(7, 16, 6, 64, 0x3a4a7a, 0x26304f);
+san.position.set(-.6, -3.4, 0); san.material.transparent = true; scene.add(san);
+
+const texSang = (() => {
+  const c = document.createElement("canvas"); c.width = c.height = 64;
+  const x = c.getContext("2d"), g = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+  g.addColorStop(0, "rgba(255,255,255,1)"); g.addColorStop(.35, "rgba(255,255,255,.45)"); g.addColorStop(1, "rgba(255,255,255,0)");
+  x.fillStyle = g; x.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(c);
+})();
+
+// ---- nguyên tử: đủ C, H thật (r = bán kính quả cầu 3D, rg = khi trải phẳng)
+const geoCau = new THREE.SphereGeometry(1, 40, 28);
+const NT = {
+  C:  { mau: "#33383f", r: .40, rg: .34, n3: "C",  ng: "C" },
+  M1: { mau: "#33383f", r: .36, rg: .42, n3: "",   ng: "CH₃" },
+  M2: { mau: "#33383f", r: .36, rg: .42, n3: "",   ng: "CH₃" },
+  M3: { mau: "#33383f", r: .36, rg: .42, n3: "",   ng: "CH₃" },
+  Br: { mau: "#a33a26", r: .60, rg: .38, n3: "Br", ng: "Br" },
+  O:  { mau: "#e0453a", r: .44, rg: .42, n3: "O",  ng: "HO" },
+  H:  { mau: "#f1f3f6", r: .25, rg: 0,   n3: "",   ng: "" },
+};
+const H_METYL = [];
+for (const mk of ["M1", "M2", "M3"]) for (let j = 0; j < 3; j++) {
+  const k = `${mk}h${j}`; H_METYL.push([k, mk, j]);
+  NT[k] = { mau: "#eef0f4", r: .24, rg: 0, n3: "", ng: "" };
+}
+for (const d of Object.values(NT)) {
+  d.goc = new THREE.Color(d.mau);
+  d.mesh = new THREE.Mesh(geoCau, new THREE.MeshStandardMaterial({ color: d.goc.clone(), roughness: .38, metalness: .06 }));
+  scene.add(d.mesh);
+  const el = document.createElement("div"); el.className = "nhan"; el.textContent = d.n3;
+  d.nhan = new CSS2DObject(el); scene.add(d.nhan);
+}
+
+// ---- liên kết
+const geoTru = new THREE.CylinderGeometry(1, 1, 1, 18, 1, true);
+const MAU_LK = new THREE.Color("#a7afbd");
+const taoLK = (a, b, mo) => {
+  const mesh = new THREE.Mesh(geoTru, new THREE.MeshStandardMaterial({ color: MAU_LK.clone(), roughness: .5, transparent: true }));
+  scene.add(mesh); return { a, b, mo, mesh };
+};
+const LK = [
+  taoLK("C", "M1", () => 1), taoLK("C", "M2", () => 1), taoLK("C", "M3", () => 1),
+  taoLK("C", "Br", (i, t) => i < 2 ? 1 : i === 2 ? 1 - seg(t, .05, .5) : 0),
+  taoLK("C", "O", (i, t) => i < 4 ? 0 : i === 4 ? seg(t, .45, .85) : 1),
+  taoLK("O", "H", (i, t, m) => 1 - m),
+  ...H_METYL.map(([k, mk]) => taoLK(mk, k, (i, t, m) => 1 - m)),
+];
+const Y = V(0, 1, 0);
+const laH = k => k === "H" || /h\d$/.test(k);
+let anH = false, heSoH = 1, hH = 1;    // hH: 1 = hiện H, 0 = ẩn (đổi mượt ~0,35 s)
+function datLK(l, A, i, t, m) {
+  const op = l.mo(i, t, m) * (laH(l.b) ? hH : 1), mesh = l.mesh;
+  mesh.visible = op > .01; if (!mesh.visible) return;
+  const a = A[l.a], b = A[l.b], d = b.clone().sub(a), len = d.length();
+  if (len < 1e-3) { mesh.visible = false; return; }
+  mesh.position.copy(a).addScaledVector(d, .5);
+  mesh.quaternion.setFromUnitVectors(Y, d.normalize());
+  const r = .1 * (1 - m) + .032 * m;
+  mesh.scale.set(r, len, r);
+  mesh.material.opacity = op;
+  mesh.material.color.copy(MAU_LK).lerp(DEN, m);
+  mesh.material.emissive.copy(DEN).lerp(MUC, m);
+}
+
+// ---- cặp electron: 2 hạt + quầng sáng + thuỳ orbital mờ
+const geoHat = new THREE.SphereGeometry(1, 14, 10);
+class CapE {
+  constructor() {
+    this.hat = [0, 1].map(() => { const m = new THREE.Mesh(geoHat, new THREE.MeshStandardMaterial({ color: 0, emissive: VANG.clone() })); scene.add(m); return m; });
+    this.sang = new THREE.Sprite(new THREE.SpriteMaterial({ map: texSang, color: VANG.clone(), blending: THREE.AdditiveBlending, transparent: true, depthWrite: false }));
+    this.thuy = new THREE.Mesh(geoCau, new THREE.MeshStandardMaterial({ color: VANG.clone(), emissive: new THREE.Color("#3a2a00"), transparent: true, opacity: .15, depthWrite: false }));
+    scene.add(this.sang, this.thuy);
+  }
+  dat(p, dir, m, { nong = 0, thuy = 1, dong = 0, hien = 1 } = {}) {
+    const nhin = camera.position.clone().sub(p).normalize();
+    const tach = new THREE.Vector3().crossVectors(dir, nhin);
+    if (tach.lengthSq() < 1e-4) tach.copy(vuongGoc(dir)); tach.normalize();
+    const d = .1 * (1 - m) + .085 * m, r = (.072 * (1 - m) + .055 * m) * (1 + .4 * dong);
+    const mau = VANG.clone().lerp(DO, nong), muc = mau.clone().lerp(MUC, m);
+    this.hat.forEach((h, j) => {
+      h.visible = hien > .01;
+      h.position.copy(p).addScaledVector(tach, j ? d : -d); h.scale.setScalar(r); h.material.emissive.copy(muc);
+    });
+    this.sang.position.copy(p); this.sang.scale.setScalar(.7 + .6 * dong + .5 * nong);
+    this.sang.material.color.copy(mau); this.sang.material.opacity = .9 * (1 - m) * hien;
+    this.sang.visible = this.sang.material.opacity > .005;
+    this.thuy.position.copy(p).addScaledVector(dir, -.2);
+    this.thuy.quaternion.setFromUnitVectors(Y, dir); this.thuy.scale.set(.22, .44, .22);
+    this.thuy.material.color.copy(mau); this.thuy.material.opacity = .17 * thuy * (1 - m) * hien;
+    this.thuy.visible = this.thuy.material.opacity > .005;
+  }
+}
+const CAP = { Oa: new CapE(), Ob: new CapE(), Oc: new CapE(), B1: new CapE(), B2: new CapE(), B3: new CapE(), CBr: new CapE() };
+
+class Vet {   // vệt sáng sau cặp e đang di chuyển
+  constructor() {
+    this.n = 26; this.ds = []; const geo = new THREE.BufferGeometry();
+    this.pos = new Float32Array(this.n * 3); const col = new Float32Array(this.n * 3);
+    for (let i = 0; i < this.n; i++) { const a = (i / (this.n - 1)) ** 1.6; col[i * 3] = VANG.r * a; col[i * 3 + 1] = VANG.g * a; col[i * 3 + 2] = VANG.b * a; }
+    geo.setAttribute("position", new THREE.BufferAttribute(this.pos, 3));
+    geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
+    this.diem = new THREE.Points(geo, new THREE.PointsMaterial({ size: .22, map: texSang, vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+    scene.add(this.diem);
+  }
+  day(p, m) {
+    if (!this.ds.length) for (let i = 0; i < this.n; i++) this.ds.push(p.clone());
+    this.ds.shift(); this.ds.push(p.clone());
+    this.ds.forEach((q, i) => q.toArray(this.pos, i * 3));
+    this.diem.geometry.attributes.position.needsUpdate = true;
+    this.diem.material.opacity = 1 - m; this.diem.visible = m < .99;
+  }
+}
+const VET = { Oa: new Vet(), CBr: new Vet() };
+
+// ---- màn chắn không gian: CHỈ hiện lúc OH⁻ va vào mặt sau (giai đoạn 2), ngoài ra ẩn hẳn
+const chan = new THREE.Group(); chan.position.set(-.45, 0, 0); scene.add(chan);
+const vo = new THREE.Mesh(new THREE.SphereGeometry(2.3, 48, 32), new THREE.MeshBasicMaterial({ color: 0xff3b3b, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide }));
+const luoi = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(2.31, 2)), new THREE.LineBasicMaterial({ color: 0xff6b6b, transparent: true, opacity: 0, depthWrite: false }));
+chan.add(vo, luoi); chan.visible = false;
+const vong = new THREE.Mesh(new THREE.RingGeometry(.22, .3, 48), new THREE.MeshBasicMaterial({ color: 0xff5252, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false }));
+vong.rotation.y = Math.PI / 2; vong.position.set(-2.76, 0, 0); vong.visible = false; scene.add(vong);
+
+// ---- orbital p trống của C⁺ và hai hướng tấn công
+const pOrb = [1, -1].map(s => {
+  const m = new THREE.Mesh(geoCau, new THREE.MeshStandardMaterial({ color: 0x6ab7ff, emissive: 0x0b2a4a, transparent: true, opacity: 0, depthWrite: false }));
+  m.scale.set(.85, .42, .42); m.position.set(.85 * s, 0, 0); m.visible = false; scene.add(m); return m;
+});
+const huongTC = [-1, 1].map(s => {
+  const g = new THREE.Group();
+  const ln = new THREE.Line(new THREE.BufferGeometry().setFromPoints([V(3.9 * s, 0, 0), V(1.25 * s, 0, 0)]),
+    new THREE.LineDashedMaterial({ color: 0x6ab7ff, dashSize: .22, gapSize: .14, transparent: true }));
+  ln.computeLineDistances();
+  const non = new THREE.Mesh(new THREE.ConeGeometry(.12, .32, 16), new THREE.MeshBasicMaterial({ color: 0x6ab7ff, transparent: true }));
+  non.position.set(1.2 * s, 0, 0); non.rotation.z = s > 0 ? Math.PI / 2 : -Math.PI / 2;
+  g.add(ln, non); g.visible = false; scene.add(g); return g;
+});
+
+const nhanHTML = (cls, html) => { const el = document.createElement("div"); el.className = cls; el.innerHTML = html; const o = new CSS2DObject(el); scene.add(o); return o; };
+const DT = { O: nhanHTML("dt", "−"), C: nhanHTML("dt", "+"), Br: nhanHTML("dt", "−") };
+const theChan = nhanHTML("the do", "✕ Ba nhóm CH₃ che mặt sau — SN2 không khả thi");
+const theSN1 = nhanHTML("the lam", "→ Chuyển sang đường SN1");
+const theHaiMat = nhanHTML("the lam", "Vào được từ cả hai mặt của orbital p");
+const theCham = nhanHTML("the do", "Bước chậm");
+
+// ================================================================ tờ bài giải (tĩnh, kiểu bài thi)
+const S = 36;
+const nuaRong = a => a.t.length * .13 + .07;
+function hinh({ nt = [], lk = [], mt = [], pu = [], cong = [], khung: [x0, x1, y0, y1] }) {
+  const X = x => ((x - x0) * S).toFixed(1), Yp = y => ((y1 - y) * S).toFixed(1);
+  let s = "";
+  for (const [i, j] of lk) {
+    const a = nt[i], b = nt[j]; let dx = b.x - a.x, dy = b.y - a.y; const L = Math.hypot(dx, dy); dx /= L; dy /= L;
+    const ngang = Math.abs(dx) > .7, ca = ngang ? nuaRong(a) + .08 : .32, cb = ngang ? nuaRong(b) + .08 : .32;
+    s += `<line x1="${X(a.x + dx * ca)}" y1="${Yp(a.y + dy * ca)}" x2="${X(b.x - dx * cb)}" y2="${Yp(b.y - dy * cb)}" class="lk"/>`;
+  }
+  for (const a of nt) {
+    s += `<text x="${X(a.x)}" y="${Yp(a.y)}" class="nt">${a.t}</text>`;
+    for (const c of a.cap || []) {
+      const [ux, uy] = { u: [0, 1], d: [0, -1], l: [-1, 0], r: [1, 0] }[c];
+      const r = ux ? nuaRong(a) + .14 : .43, px = a.x + ux * r, py = a.y + uy * r;
+      for (const k of [-1, 1]) s += `<circle cx="${X(px - uy * .09 * k)}" cy="${Yp(py + ux * .09 * k)}" r="2.3" class="e"/>`;
+    }
+    if (a.dt) {
+      const cx = a.x + nuaRong(a) + .28, cy = a.y + .52;
+      s += `<circle cx="${X(cx)}" cy="${Yp(cy)}" r="7.5" class="dt"/><text x="${X(cx)}" y="${Yp(cy)}" class="dtc">${a.dt === "+" ? "+" : "−"}</text>`;
+    }
+  }
+  for (const m of mt) {
+    const [ax, ay] = m.tu, [bx, by] = m.den, [cx, cy] = m.qua;
+    s += `<path d="M${X(ax)},${Yp(ay)} Q${X(cx)},${Yp(cy)} ${X(bx)},${Yp(by)}" class="mt${m.gach ? " gach" : ""}"${m.gach ? "" : ' marker-end="url(#dau)"'}/>`;
+    if (m.gach) s += `<text x="${X(.25 * ax + .5 * cx + .25 * bx)}" y="${Yp(.25 * ay + .5 * cy + .25 * by)}" class="x">✕</text>`;
+  }
+  for (const p of pu) {
+    s += `<line x1="${X(p.x1)}" y1="${Yp(p.y)}" x2="${X(p.x2)}" y2="${Yp(p.y)}" class="pu" marker-end="url(#dau-den)"/>`;
+    if (p.tren) s += `<text x="${X((p.x1 + p.x2) / 2)}" y="${Yp(p.y + .38)}" class="dk">${p.tren}</text>`;
+  }
+  for (const [x, y] of cong) s += `<text x="${X(x)}" y="${Yp(y)}" class="nt">+</text>`;
+  const w = (x1 - x0) * S, h = (y1 - y0) * S;
+  return `<svg class="hinh" viewBox="0 0 ${w} ${h}" width="${w}">${s}</svg>`;
+}
+const tbu = (cx, nhanTrai = "H₃C") => [   // khung (CH₃)₃C– vẽ thu gọn: CH₃ trên, dưới, trái
+  { x: cx - 1.5, y: 0, t: nhanTrai }, { x: cx, y: 0, t: "C" }, { x: cx, y: 1.45, t: "CH₃" }, { x: cx, y: -1.45, t: "CH₃" },
+];
+const H1 = hinh({
+  nt: [{ x: .6, y: 0, t: "HO", cap: ["u", "d", "r"], dt: "-" }, ...tbu(4.7), { x: 6.2, y: 0, t: "Br", cap: ["u", "d", "r"] }],
+  lk: [[1, 2], [2, 3], [2, 4], [2, 5]],
+  mt: [{ tu: [1.1, .1], den: [4.5, .25], qua: [2.9, 2.5], gach: true }],
+  khung: [-.1, 7.3, -2, 2.6],
+});
+const H2 = hinh({
+  nt: [...tbu(2.2), { x: 3.7, y: 0, t: "Br", cap: ["u", "d", "r"] },
+       { x: 8.7, y: 0, t: "C", dt: "+" }, { x: 8.7, y: 1.45, t: "CH₃" }, { x: 7.45, y: -.8, t: "H₃C" }, { x: 9.95, y: -.8, t: "CH₃" },
+       { x: 12.2, y: 0, t: "Br", cap: ["u", "d", "r", "l"], dt: "-" }],
+  lk: [[0, 1], [1, 2], [1, 3], [1, 4], [5, 6], [5, 7], [5, 8]],
+  mt: [{ tu: [2.95, .1], den: [3.6, .32], qua: [3.15, 1.3] }],
+  pu: [{ x1: 4.9, x2: 6.6, y: 0, tren: "chậm" }],
+  cong: [[11.05, 0]],
+  khung: [0, 13.3, -2, 2.2],
+});
+const H3 = hinh({
+  nt: [{ x: .6, y: 0, t: "HO", cap: ["u", "d", "r"], dt: "-" },
+       { x: 2.8, y: 0, t: "C", dt: "+" }, { x: 2.8, y: 1.45, t: "CH₃" }, { x: 2.8, y: -1.45, t: "CH₃" }, { x: 4.3, y: 0, t: "CH₃" },
+       { x: 7.9, y: 0, t: "HO", cap: ["u", "d"] }, { x: 9.4, y: 0, t: "C" }, { x: 9.4, y: 1.45, t: "CH₃" }, { x: 9.4, y: -1.45, t: "CH₃" }, { x: 10.9, y: 0, t: "CH₃" },
+       { x: 13, y: 0, t: "Br", cap: ["u", "d", "r", "l"], dt: "-" }],
+  lk: [[1, 2], [1, 3], [1, 4], [5, 6], [6, 7], [6, 8], [6, 9]],
+  mt: [{ tu: [1.1, .1], den: [2.6, .2], qua: [1.85, 1.1] }],
+  pu: [{ x1: 5.3, x2: 7, y: 0, tren: "nhanh" }],
+  cong: [[11.95, 0]],
+  khung: [-.1, 14, -2, 2.2],
+});
+// Tờ giấy = sơ đồ cơ chế như đáp án (chỉ hình). Toàn bộ lời giải thích nằm trong ô "Giải thích", bấm mới mở.
+document.getElementById("to").innerHTML = `
+  <section class="buoc" data-gd="1">
+    <h3 class="tieu-de">Không theo S<sub>N</sub>2 (C bậc III bị cản trở không gian):</h3>
+    ${H1}
+  </section>
+  <section class="buoc" data-gd="2,3">
+    <h3 class="tieu-de">Cơ chế S<sub>N</sub>1:</h3>
+    ${H2}
+  </section>
+  <section class="buoc" data-gd="4,0,5">
+    ${H3}
+  </section>
+  <button id="nut-gt" aria-expanded="false">Giải thích từng bước <b>▾</b></button>
+  <div id="gt"><div><div class="noi">
+    <p><b>Vì sao không theo S<sub>N</sub>2.</b> S<sub>N</sub>2 cần OH⁻ tấn công vào C từ phía đối diện với Br. (CH₃)₃C–Br là dẫn xuất bậc III: ba nhóm CH₃ cồng kềnh che chắn mặt sau nên OH⁻ không tiếp cận được.</p>
+    <p><b>Bước 1 (chậm).</b> Liên kết C–Br phân cắt dị li, cặp electron chuyển hẳn về Br tạo Br⁻ và carbocation bậc III. Carbocation lai hoá sp², phẳng, được ba nhóm CH₃ làm bền (hiệu ứng +I, siêu liên hợp).</p>
+    <p><b>Bước 2 (nhanh).</b> Cặp electron tự do của O trong OH⁻ tấn công vào orbital p trống của C⁺ (từ một trong hai phía của mặt phẳng), tạo liên kết C–O.</p>
+    <p><b>Kết luận.</b> (CH₃)₃C–Br + OH⁻ ⟶ (CH₃)₃C–OH + Br⁻, theo S<sub>N</sub>1; v = k[(CH₃)₃CBr] (bậc 1, không phụ thuộc [OH⁻]). Lưu ý: với kiềm đặc, đun nóng, phản ứng tách tạo (CH₃)₂C=CH₂ chiếm ưu thế.</p>
+  </div></div></div>`;
+document.getElementById("nut-gt").onclick = e => { const mo = document.getElementById("gt").classList.toggle("mo"); e.currentTarget.setAttribute("aria-expanded", mo); };
+
+// ================================================================ trạng thái chạy
+let T = 0, chay = true, tocDo = 1, giay = false, u = 0, gdCu = -1;
+const camNguoi = { huong: camera.position.clone().sub(TAM3).normalize(), xa: camera.position.distanceTo(TAM3) };
+const $ = id => document.getElementById(id);
+const toGiay = $("to-giay");
+const doanEl = GD.map(g => {
+  const d = document.createElement("div"); d.className = "doan" + (g.kha === false ? " khong" : "");
+  d.style.flex = g.dur; d.innerHTML = "<b></b>"; d.title = g.ten;
+  $("truc").insertBefore(d, $("keo")); return d;
+});
+function capNhatBang(i) {
+  const g = GD[i];
+  $("ten-gd").textContent = `${i + 1}. ${g.ten}`;
+  $("mo-ta").textContent = g.mo_ta;
+  const chip = $("chip");
+  chip.className = g.kha === false ? "khong" : g.kha ? "co" : "trung";
+  chip.textContent = g.kha === false ? "KHÔNG KHẢ THI" : g.kha ? "KHẢ THI" : "";
+}
+
+function khung1(dt) {
+  if (chay && !giay) { T += dt * tocDo; if (T >= TONG) { T = TONG; datChay(false); } }
+  u = kep(u + (giay ? 1 : -1) * dt / 1.5);
+  const m = sm(u / .62);                 // 0 → 1: hình 3D trải phẳng
+  const lo = sm((u - .5) / .5);          // 0 → 1: tờ bài giải hiện ra, hình 3D mờ đi
+  const [i, t] = giaiDoan(T), g = GD[i];
+  if (i !== gdCu) { gdCu = i; capNhatBang(i); }
+
+  // ---- vị trí nguyên tử nặng ở hai không gian rồi trộn
+  const A3 = {}, A2 = {};
+  for (const k of ["C", "M1", "M2", "M3", "Br", "O"]) { A3[k] = viTri(P3, k, g, t); A2[k] = viTri(Q, k, g, t); }
+  if (i === 1 && t > .42 && t < .64) { const s = (t - .42) / .22; A3.O.x -= Math.sin(s * Math.PI * 5) * .14 * (1 - s); }
+  const uOC = huong(A3.O, A3.C);
+  A3.H = A3.O.clone().addScaledVector(tuDien(uOC, 0), .97); A2.H = A2.O.clone();
+  // H của nhóm CH₃: tứ diện quanh C metyl, so le với liên kết C–C
+  for (const [k, mk, j] of H_METYL) {
+    const uMC = huong(A3[mk], A3.C);
+    A3[k] = A3[mk].clone().addScaledVector(tuDien(uMC, j * 2.094 + Math.PI / 3), 1.09);
+    A2[k] = A2[mk].clone();
+  }
+  const A = {};
+  for (const k in A3) A[k] = A3[k].clone().lerp(A2[k], m);
+
+  // ---- camera
+  if (u === 0) {
+    dk.enabled = true; dk.update();
+    camNguoi.huong.copy(camera.position).sub(dk.target).normalize(); camNguoi.xa = camera.position.distanceTo(dk.target);
+    if (camera.fov !== 40) { camera.fov = 40; camera.updateProjectionMatrix(); }
+  } else {
+    dk.enabled = false;
+    const fov = 40 + (9 - 40) * m;
+    const cao = (2 * camNguoi.xa * Math.tan(THREE.MathUtils.degToRad(20))) * (1 - m) + 10.5 * m;
+    const tam = TAM3.clone().lerp(TAM2, m);
+    let h = camNguoi.huong.clone().lerp(V(0, 0, 1), m); if (h.lengthSq() < 1e-4) h.set(0, .2, 1); h.normalize();
+    camera.fov = fov; camera.updateProjectionMatrix();
+    camera.position.copy(tam).addScaledVector(h, cao / (2 * Math.tan(THREE.MathUtils.degToRad(fov / 2))));
+    camera.up.set(0, 1, 0); camera.lookAt(tam);
+  }
+  scene.background.copy(MAU_NEN).lerp(MAU_GIAY, m);
+  document.body.style.background = "#" + scene.background.getHexString();
+  const cn = new THREE.Color("#e6ecf5").lerp(MUC, m);
+  document.documentElement.style.setProperty("--nhan", `rgb(${cn.r * 255 | 0},${cn.g * 255 | 0},${cn.b * 255 | 0})`);
+  khung.style.opacity = lopNhan.style.opacity = 1 - lo;
+  toGiay.style.opacity = lo; toGiay.style.visibility = lo > .001 ? "visible" : "hidden";
+  toGiay.style.pointerEvents = lo > .5 ? "auto" : "none";
+  toGiay.style.setProperty("--hien", lo);
+  san.material.opacity = .5 * (1 - m); san.visible = m < .99;
+
+  // ---- nguyên tử + nhãn
+  heSoH = kep(heSoH + (anH ? -1 : 1) * dt / .35); hH = sm(heSoH);
+  for (const [k, d] of Object.entries(NT)) {
+    const mesh = d.mesh;
+    mesh.position.copy(A[k]);
+    const r = (d.r * (1 - m) + d.rg * m) * (laH(k) ? hH : 1); mesh.scale.setScalar(Math.max(r, 1e-3)); mesh.visible = r > .005;
+    mesh.material.color.copy(d.goc).lerp(DEN, m);
+    mesh.material.emissive.copy(DEN).lerp(MAU_GIAY, m);
+    d.nhan.position.copy(A[k]);
+    // ẩn H thì nhóm metyl hiện nhãn CH₃ để vẫn đọc được
+    const el = d.nhan.element, chu = m < .5 ? (hH < .5 && d.ng === "CH₃" ? "CH₃" : d.n3) : d.ng;
+    if (el.textContent !== chu) el.textContent = chu;
+    el.style.fontSize = (12 + 6 * m) + "px";
+  }
+  for (const l of LK) datLK(l, A, i, t, m);
+
+  // ---- cặp electron
+  const uBC3 = huong(A3.Br, A3.C), u2OC = huong(A2.O, A2.C), u2BC = huong(A2.Br, A2.C);
+  const vg2 = v => V(-v.y, v.x, 0);
+  const tron = (p3, d3, p2, d2) => [p3.lerp(p2, m), d3.lerp(d2, m).normalize()];
+  const eTC = i < 4 ? 0 : i === 4 ? seg(t, .38, .85) : 1;
+  {
+    const p3 = A3.O.clone().addScaledVector(uOC, .72).lerp(giua(A3.O, A3.C), eTC);
+    const p2 = A2.O.clone().addScaledVector(u2OC, .42).lerp(giua(A2.O, A2.C), eTC);
+    const [p, d] = tron(p3, uOC.clone(), p2, u2OC.clone());
+    const nong = i === 1 ? bump(t, .38, .44, .62, .75) : 0;
+    const dong = i === 4 ? bump(t, .3, .4, .8, .9) : i === 1 ? bump(t, .1, .2, .4, .45) : 0;
+    CAP.Oa.dat(p, d, m, { nong, thuy: 1 - eTC, dong }); VET.Oa.day(p, m);
+  }
+  [["Ob", 2.094], ["Oc", 4.189]].forEach(([k, goc], j) => {
+    const d3 = tuDien(uOC, goc), d2 = vg2(u2OC).multiplyScalar(j ? -1 : 1);
+    const [p, d] = tron(A3.O.clone().addScaledVector(d3, .72), d3, A2.O.clone().addScaledVector(d2, .5), d2);
+    CAP[k].dat(p, d, m);
+  });
+  [["B1", 0], ["B2", 2.094], ["B3", 4.189]].forEach(([k, goc], j) => {
+    const d3 = tuDien(uBC3, goc), d2 = j === 0 ? u2BC.clone().negate() : vg2(u2BC).multiplyScalar(j === 1 ? 1 : -1);
+    const [p, d] = tron(A3.Br.clone().addScaledVector(d3, .88), d3, A2.Br.clone().addScaledVector(d2, .5), d2);
+    CAP[k].dat(p, d, m);
+  });
+  {
+    const eLi = i < 2 ? 0 : i === 2 ? seg(t, .05, .5) : 1;
+    const p3 = giua(A3.C, A3.Br).lerp(A3.Br.clone().addScaledVector(uBC3, .88), eLi);
+    const p2 = giua(A2.C, A2.Br).lerp(A2.Br.clone().addScaledVector(u2BC, .5), eLi);
+    const d3 = eLi < .5 ? huong(A3.C, A3.Br) : uBC3.clone(), d2 = eLi < .5 ? huong(A2.C, A2.Br) : u2BC.clone();
+    const [p, d] = tron(p3, d3, p2, d2);
+    CAP.CBr.dat(p, d, m, { thuy: eLi, dong: i === 2 ? bump(t, 0, .08, .45, .55) : 0 }); VET.CBr.day(p, m);
+  }
+
+  // ---- màn chắn: chỉ trong giai đoạn thử SN2, quanh lúc va chạm
+  const mc = i === 1 ? bump(t, .33, .43, .72, .88) : 0, vaCham = i === 1 ? bump(t, .4, .43, .5, .62) : 0;
+  vo.material.opacity = (.06 + .12 * vaCham) * mc * (1 - m);
+  luoi.material.opacity = (.3 + .45 * vaCham) * mc * (1 - m);
+  chan.visible = mc * (1 - m) > .005;
+  chan.scale.setScalar(1 + .04 * vaCham);
+  const rv = i === 1 ? kep((t - .42) / .2) : 0;
+  vong.material.opacity = (rv > 0 && rv < 1 ? (1 - rv) * .9 : 0) * (1 - m);
+  vong.visible = vong.material.opacity > .005; vong.scale.setScalar(1 + rv * 6);
+
+  const po = (i === 2 ? seg(t, .5, 1) : i === 3 ? 1 : i === 4 ? 1 - seg(t, .4, .8) : 0) * (1 - m);
+  pOrb.forEach(o => { o.material.opacity = .26 * po; o.visible = po > .01; });
+  const htc = (i === 3 ? seg(t, .1, .4) : i === 4 ? 1 - seg(t, 0, .3) : 0) * (1 - m);
+  huongTC.forEach(gp => { gp.visible = htc > .01; gp.children.forEach(c => c.material.opacity = htc); });
+
+  // ---- điện tích, thẻ
+  const dtO = i < 4 ? 1 : i === 4 ? 1 - seg(t, .5, .85) : 0;
+  const dtC = i === 2 ? seg(t, .4, .7) : i === 3 ? 1 : i === 4 ? 1 - seg(t, .5, .85) : 0;
+  const dtBr = i === 2 ? seg(t, .4, .7) : i > 2 ? 1 : 0;
+  [["O", dtO, "#6ab7ff"], ["C", dtC, "#ff6b6b"], ["Br", dtBr, "#6ab7ff"]].forEach(([k, op, mau]) => {
+    const o = DT[k]; o.position.copy(A[k]).add(V(.5, .5, 0));
+    o.element.style.opacity = op; o.element.style.color = m > .5 ? "#1b2621" : mau;
+  });
+  theChan.position.set(-3.1, 2.7, 0); theChan.element.style.opacity = i === 1 ? seg(t, .43, .5) : 0;
+  theSN1.position.set(-3.1, -2.6, 0); theSN1.element.style.opacity = i === 1 ? seg(t, .72, .82) : 0;
+  theHaiMat.position.set(0, -2.7, 0); theHaiMat.element.style.opacity = i === 3 ? seg(t, .15, .4) : i === 4 ? 1 - seg(t, 0, .25) : 0;
+  theCham.position.set(1.6, 2.1, 0); theCham.element.style.opacity = i === 2 ? bump(t, .05, .15, .85, 1) : 0;
+
+  doanEl.forEach((d, j) => { d.firstChild.style.width = (j < i ? 100 : j > i ? 0 : t * 100) + "%"; });
+  $("keo").value = Math.round(T / TONG * 1000);
+}
+
+// ================================================================ điều khiển
+function datChay(v) { chay = v; $("chay").textContent = v ? "⏸" : "▶"; }
+function nhay(i) { i = Math.max(0, Math.min(GD.length - 1, i)); T = BAT_DAU[i] + .001; }
+function doiCheDo() {
+  giay = !giay; document.body.classList.toggle("giay", giay);
+  document.querySelector("#chuyen .c3").classList.toggle("bat", !giay);
+  document.querySelector("#chuyen .cg").classList.toggle("bat", giay);
+  if (giay) {   // tô sáng phần bài giải ứng với bước đang xem
+    const i = giaiDoan(T)[0];
+    let chon = null;
+    document.querySelectorAll(".buoc").forEach(b => {
+      const co = b.dataset.gd.split(",").map(Number).includes(i);
+      b.classList.toggle("dang-xem", co); if (co) chon = b;
+    });
+    if (chon) toGiay.scrollTop = Math.max(0, chon.offsetTop - 90);
+  }
+}
+$("chuyen").onclick = doiCheDo;
+$("chay").onclick = () => { if (T >= TONG) T = 0; datChay(!chay); };
+$("lui").onclick = () => { const [i, t] = giaiDoan(T); nhay(t < .08 ? i - 1 : i); };
+$("toi").onclick = () => nhay(giaiDoan(T)[0] + 1);
+$("toc").onchange = e => tocDo = +e.target.value;
+function doiH() {
+  anH = !anH;
+  $("nut-h").textContent = anH ? "Hiện H" : "Ẩn H";
+  $("nut-h").setAttribute("aria-pressed", anH);
+}
+$("nut-h").onclick = doiH;
+$("keo").oninput = e => { T = e.target.value / 1000 * TONG; datChay(false); };
+addEventListener("keydown", e => {
+  if (e.target.tagName === "SELECT") return;
+  if (e.key.toLowerCase() === "g") return doiCheDo();
+  if (giay) return;
+  if (e.key.toLowerCase() === "h") return doiH();
+  if (e.code === "Space") { e.preventDefault(); $("chay").click(); }
+  else if (e.key === "ArrowRight") $("toi").click();
+  else if (e.key === "ArrowLeft") $("lui").click();
+});
+function coKhung() {
+  const W = innerWidth, H = innerHeight;
+  renderer.setSize(W, H); nhanR.setSize(W, H);
+  camera.aspect = W / H; camera.updateProjectionMatrix();
+}
+addEventListener("resize", coKhung); coKhung();
+const dongHo = new THREE.Clock();
+renderer.setAnimationLoop(() => {
+  khung1(Math.min(dongHo.getDelta(), .05));
+  renderer.render(scene, camera); nhanR.render(scene, camera);
+});
+window.__coChe = { nhay, doiCheDo, datChay, get T() { return T; }, set T(v) { T = v; } };
+</script>
+</body>
+</html>

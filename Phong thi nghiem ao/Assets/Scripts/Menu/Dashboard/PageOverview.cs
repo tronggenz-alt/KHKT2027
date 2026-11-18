@@ -102,34 +102,84 @@ namespace Khkt.Menu.Dashboard
             cardLab = MenuKit.Card(row, "Thẻ phòng thí nghiệm", 0f, 1f, 0, 124, Gap);
             var body = MenuKit.Body(cardLab);
             body.GetComponent<Image>().color = MenuKit.Accent;
+            var anhLab = Resources.Load<Texture2D>("GiaoDien/AnhThu/lab_bang");
+            if (anhLab != null)                                   // C4: ảnh dựng thật của lab dưới lớp màu nhấn, để thẻ nổi bật
+            {
+                var a = MenuKit.Stretch(body, "Ảnh lab", Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+                var ri = a.gameObject.AddComponent<RawImage>();
+                ri.texture = anhLab;
+                ri.raycastTarget = false;
+                ri.uvRect = new Rect(0, 0.3f, 1, 0.42f);
+                if (body.GetComponent<Mask>() == null) body.gameObject.AddComponent<Mask>().showMaskGraphic = true;   // ảnh theo góc bo của thẻ
+                var phu = MenuKit.Stretch(body, "Lớp màu nhấn", Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero).gameObject.AddComponent<Image>();
+                phu.color = MenuKit.WithAlpha(MenuKit.Accent, 0.86f);
+                phu.raycastTarget = false;
+            }
             GlassKit.Label(body, "Tiêu đề thẻ", "Phòng thí nghiệm", 26, MenuKit.OnAccent, true, TextAnchor.UpperLeft, new Vector2(32, -24), new Vector2(620, 36));
             GlassKit.Label(body, "Mô tả thẻ", "Tự tay làm thí nghiệm Hóa học, Sinh học trong phòng lab ảo.", 17, MenuKit.WithAlpha(MenuKit.OnAccent, 0.94f), false, TextAnchor.UpperLeft, new Vector2(32, -64), new Vector2(700, 28));
-            var size = new Vector2(240, 54);
+            var size = new Vector2(270, 58);
             MenuKit.MakeButton(body, "Nút Vào phòng thí nghiệm", "Vào phòng thí nghiệm", new Vector2(-32, 0), size, () => EnterStation(-1), 3, MenuKit.RadiusButton, new Vector2(1, 0.5f));
-            var roomBtn = MenuKit.MakeButton(body, "Nút chuyển Phòng học chung", "Phòng học chung", new Vector2(-284, 0), new Vector2(190, 54), () => shell.OpenRoom?.Invoke(), 0, MenuKit.RadiusButton, new Vector2(1, 0.5f));
+            var roomBtn = MenuKit.MakeButton(body, "Nút chuyển Phòng học chung", "Phòng học chung", new Vector2(-32 - size.x - 16, 0), new Vector2(190, size.y), () => shell.OpenRoom?.Invoke(), 0, MenuKit.RadiusButton, new Vector2(1, 0.5f));
             roomBtn.GetComponent<Image>().color = UiTheme.Pick(MenuKit.AccentDeep, MenuKit.Hex(0x0c2440), MenuKit.Hex(0x07344c));
             var roomLabel = roomBtn.transform.Find("Chữ")?.GetComponent<Text>();
             if (roomLabel != null) roomLabel.color = UiTheme.Pick(MenuKit.OnAccent, MenuKit.Ink, MenuKit.Ink);
         }
 
+        // C4 (18/11): hàng thẻ mô-đun có ảnh thu nhỏ. Mô-đun của nhánh khác được gọi Mo() bằng cách tìm lớp theo tên trong mọi
+        // assembly đã nạp; chưa có lớp thì thẻ ghi "Sắp có" – biên dịch không lỗi dù nhánh bên kia chưa gộp.
         void BuildShortcutCards()
         {
-            var row = Row("Hàng lối tắt tầng", -262, 114);
-            cardChem = BuildFloorCard(row, "Thẻ phòng Hóa tầng 1", 0f, 0.5f, MenuKit.IconBeaker, MenuKit.AccentSoft, MenuKit.Accent,
-                                      "Phòng Hóa tầng 1", "Thí nghiệm chuẩn độ, pha chế, phân tích phổ", "Vào tầng 1", 2);
-            cardBio = BuildFloorCard(row, "Thẻ phòng Sinh tầng 2", 0.5f, 1f, MenuKit.IconGrowth, MenuKit.BioSoft, MenuKit.Bio,
-                                     "Phòng Sinh tầng 2", "Kính hiển vi, PCR, điện di, ly tâm, mô hình 3D", "Vào tầng 2", 21);
+            var row = Row("Hàng thẻ mô-đun", -262, 114);
+            cardChem = BuildModuleCard(row, 0, "Phòng Hóa", "hoa", "Tầng 1 · chuẩn độ", "Vào", () => EnterStation(2), MenuKit.Accent);
+            cardBio = BuildModuleCard(row, 1, "Phòng Sinh", "sinh", "Tầng 2 · hiển vi, PCR", "Vào", () => EnterStation(21), MenuKit.Bio);
+            BuildModuleCard(row, 2, "Cơ chế 3D", "co_che", "3D ⇄ giấy · 8 bài", "Mở", MoDun("Khkt.CoChe.CoCheMoDun"), MenuKit.Accent);
+            BuildModuleCard(row, 3, "Thực vật 3D", "thuc_vat", "Cấu tạo, quang hợp", "Mở", MoDun("Khkt.Bio.ThucVat.ThucVatMoDun"), MenuKit.Bio);
+            BuildModuleCard(row, 4, "Giải phẫu", "giai_phau", "Cơ thể người 3D", "Mở", MoDun("Khkt.Bio.GiaiPhau.GiaiPhauMoDun"), MenuKit.Warn);
         }
 
-        RectTransform BuildFloorCard(RectTransform parent, string name, float x0, float x1, string glyph, Color soft, Color ink,
-                                     string heading, string desc, string ctaText, int stationIndex)
+        /// <summary>Hàm gọi Mo() tĩnh của lớp tên đầy đủ; null nếu lớp chưa có trong bản dựng.</summary>
+        static Action MoDun(string tenLop)
         {
-            var card = MenuKit.Card(parent, name, x0, x1, 0, 114, Gap);
+            foreach (var a in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                var t = a.GetType(tenLop, false);
+                var m = t?.GetMethod("Mo", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static, null, Type.EmptyTypes, null);
+                if (m != null) return () => m.Invoke(null, null);
+            }
+            return null;
+        }
+
+        RectTransform BuildModuleCard(RectTransform parent, int i, string heading, string anh, string desc, string cta, Action onClick, Color ink)
+        {
+            var card = MenuKit.Card(parent, "Thẻ mô-đun " + heading, i / 5f, (i + 1) / 5f, 0, 114, Gap);
             var body = MenuKit.Body(card);
-            MenuKit.IconBadge(body, "Ô biểu tượng", glyph, new Vector2(24, -18), 44, soft, ink);
-            GlassKit.Label(body, "Tiêu đề thẻ", heading, 20, MenuKit.Ink, true, TextAnchor.UpperLeft, new Vector2(82, -16), new Vector2(450, 28));
-            GlassKit.Label(body, "Mô tả thẻ", desc, 15, MenuKit.InkDim, false, TextAnchor.UpperLeft, new Vector2(82, -48), new Vector2(450, 48));
-            MenuKit.MakeButton(body, "Nút " + ctaText, ctaText, new Vector2(-24, 0), new Vector2(150, 46), () => EnterStation(stationIndex), 1, MenuKit.RadiusButton, new Vector2(1, 0.5f));
+            // khung bo góc (cùng bán kính với nút) làm mặt nạ để ảnh thu nhỏ không lòi góc vuông ra ngoài thẻ bo tròn
+            var khung = MenuKit.Fill(body, "Khung ảnh", new Vector2(0, 1), new Vector2(0, 1), new Vector2(12, -12), new Vector2(96, 90), Color.white, MenuKit.RadiusButton);
+            khung.gameObject.AddComponent<Mask>().showMaskGraphic = false;
+            var thu = MenuKit.Stretch(khung.transform, "Ảnh thu nhỏ", Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            var img = thu.gameObject.AddComponent<RawImage>();
+            img.texture = Resources.Load<Texture2D>("GiaoDien/AnhThu/" + anh);
+            img.color = img.texture != null ? Color.white : MenuKit.WithAlpha(ink, 0.25f);
+            img.raycastTarget = false;
+            if (img.texture != null)                          // cắt giữa ảnh cho vừa khung 96×90
+            {
+                float want = 96f / 90f, have = (float)img.texture.width / img.texture.height;
+                img.uvRect = want < have ? new Rect((1f - want / have) * 0.5f, 0, want / have, 1) : new Rect(0, (1f - have / want) * 0.5f, 1, have / want);
+            }
+            var tieuDe = GlassKit.Label(body, "Tiêu đề thẻ", heading, 18, MenuKit.Ink, true, TextAnchor.UpperLeft, new Vector2(120, -12), new Vector2(170, 26));
+            var moTa = GlassKit.Label(body, "Mô tả thẻ", desc, 13, MenuKit.InkDim, false, TextAnchor.UpperLeft, new Vector2(120, -38), new Vector2(170, 20));
+            foreach (var t in new[] { tieuDe, moTa })             // thẻ hẹp (màn 4:3, cỡ chữ lớn): co chữ thay vì tràn khung
+            {
+                t.horizontalOverflow = HorizontalWrapMode.Wrap;
+                t.verticalOverflow = VerticalWrapMode.Truncate;
+                t.resizeTextForBestFit = true;
+                t.resizeTextMinSize = 10;
+                t.resizeTextMaxSize = t.fontSize;
+            }
+            bool co = onClick != null;
+            var nut = MenuKit.MakeButton(body, "Nút " + heading, co ? cta : "Sắp có", new Vector2(120, -60), new Vector2(104, 44),
+                                         onClick ?? (() => { }), co ? 1 : 2, MenuKit.RadiusButton, new Vector2(0, 1));
+            nut.interactable = co;
             return card;
         }
 
