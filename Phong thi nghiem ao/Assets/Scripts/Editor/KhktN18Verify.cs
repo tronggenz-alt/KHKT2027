@@ -4,11 +4,13 @@ using System.Collections.Generic;
 using System.IO;
 using Khkt.Avatar;
 using Khkt.Demo;
+using Khkt.Demo.Bio.ThucVat;
 using Khkt.Environment;
 using Khkt.Input;
 using Khkt.Interaction;
 using Khkt.Network;
 using Khkt.Rendering;
+using Khkt.Simulation.Bio.ThucVat;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -67,13 +69,24 @@ namespace Khkt.EditorTools
 
             if (cmd == "G2_TRUOC")
                 activeRoutine = CoCaptureG2Baseline();
-            else if (cmd == "G2_RUN" || cmd == "ALL_RUN")
+            else if (cmd == "G2_RUN")
                 activeRoutine = CoRunG2Verify(exitWhenDone: true);
+            else if (cmd == "G3_RUN")
+                activeRoutine = CoRunG3Verify(exitWhenDone: true);
+            else if (cmd == "ALL_RUN")
+                activeRoutine = CoRunAllVerify();
         }
 
         public static void ChupG2Truoc() => LaunchPlayModeCommand("G2_TRUOC");
         public static void RunG2() => LaunchPlayModeCommand("G2_RUN");
+        public static void RunG3() => LaunchPlayModeCommand("G3_RUN");
         public static void Run() => LaunchPlayModeCommand("ALL_RUN");
+
+        static IEnumerator CoRunAllVerify()
+        {
+            yield return CoRunG2Verify(exitWhenDone: false);
+            yield return CoRunG3Verify(exitWhenDone: true);
+        }
 
         static void LaunchPlayModeCommand(string cmd)
         {
@@ -213,6 +226,13 @@ namespace Khkt.EditorTools
         static string GetG2ShotDir()
         {
             string dir = Path.GetFullPath(Path.Combine(Application.dataPath, "..", "..", "docs", "ngay-18-11", "anh", "g2"));
+            Directory.CreateDirectory(dir);
+            return dir;
+        }
+
+        static string GetG3ShotDir()
+        {
+            string dir = Path.GetFullPath(Path.Combine(Application.dataPath, "..", "..", "docs", "ngay-18-11", "anh", "g3"));
             Directory.CreateDirectory(dir);
             return dir;
         }
@@ -579,7 +599,220 @@ namespace Khkt.EditorTools
                 Application.logMessageReceived -= OnUnityLog;
             }
 
-            FinishVerify(exitWhenDone);
+            FinishVerify(exitWhenDone, "G2");
+        }
+
+        // =====================================================================
+        // Nhóm G3 — Mô hình 3D thực vật: cấu trúc, chức năng, dạy học
+        // =====================================================================
+
+        static IEnumerator CoRunG3Verify(bool exitWhenDone)
+        {
+            Application.logMessageReceived -= OnUnityLog;
+            Application.logMessageReceived += OnUnityLog;
+            yield return WaitSceneReady();
+
+            // 1. Unit test C# thuần
+            bool simOk = ThucVatSimTests.RunAll(out int simPassed, out int simFailed, out _);
+            Check(simOk && simFailed == 0 && simPassed >= 10, "G3 Pure C# ThucVatSimTests passed", $"pass={simPassed}, fail={simFailed}");
+
+            // 2. Tài liệu thông số có nguồn khoa học data/sinh/thuc_vat.json
+            string jsonPath = Path.GetFullPath(Path.Combine(Application.dataPath, "..", "..", "data", "sinh", "thuc_vat.json"));
+            bool jsonValid = File.Exists(jsonPath) && File.ReadAllText(jsonPath).Contains("\"nguon\"");
+            Check(jsonValid, "G3 data/sinh/thuc_vat.json exists with cited sources", jsonPath);
+
+            // 3. Lối vào Bàn mô hình thực vật tại Nhà kính tầng 2
+            var viewer = UnityEngine.Object.FindAnyObjectByType<DesktopViewer>();
+            Camera mainCam = Camera.main;
+            if (viewer != null)
+            {
+                viewer.SetPose(new Vector3(20.2f, 3.8f, -5.0f), 68f, 15f);
+                Physics.SyncTransforms();
+            }
+            float tZone = Time.realtimeSinceStartup;
+            while (!ZoneStreamer.Settled && Time.realtimeSinceStartup - tZone < 10f) yield return null;
+            yield return WaitPlayFrames(15);
+
+            var ban = BanMoHinhThucVat.EnsureSpawned();
+            yield return WaitPlayFrames(2);
+            Check(ban != null && ban.gameObject.activeInHierarchy, "G3 Greenhouse BanMoHinhThucVat active in scene");
+
+            string outDir = GetG3ShotDir();
+            var rt = new RenderTexture(ShotW, ShotH, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4 };
+            var tex = new Texture2D(ShotW, ShotH, TextureFormat.RGB24, false);
+
+            try
+            {
+                if (mainCam != null)
+                    RenderToFile(mainCam, rt, tex, Path.Combine(outDir, "g3_6_ban_mo_hinh_nha_kinh.png"), includeUi: false);
+
+                // 4. Mở mô-đun qua hợp đồng Khkt.Bio.ThucVat.ThucVatMoDun tìm từ AppDomain (như C4) và từ bàn nhà kính
+                Type contractType = null;
+                foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+                {
+                    contractType = asm.GetType("Khkt.Bio.ThucVat.ThucVatMoDun", false);
+                    if (contractType != null) break;
+                }
+                bool contractOk = false;
+                if (contractType != null)
+                {
+                    var pDangMo = contractType.GetProperty("DangMo");
+                    var mMo = contractType.GetMethod("Mo", Type.EmptyTypes);
+                    var mDong = contractType.GetMethod("Dong", Type.EmptyTypes);
+                    mMo?.Invoke(null, null);
+                    bool openedViaContract = pDangMo != null && (bool)pDangMo.GetValue(null) && ThucVatMoDunImpl.DangMo;
+                    mDong?.Invoke(null, null);
+                    bool closedViaContract = pDangMo != null && !(bool)pDangMo.GetValue(null) && !ThucVatMoDunImpl.DangMo;
+                    contractOk = openedViaContract && closedViaContract;
+                }
+                Check(contractOk, "G3 Khkt.Bio.ThucVat.ThucVatMoDun contract discovered and working across assemblies");
+
+                HardwareProfile.Dat(MucDoHoa.Cao);
+                ban?.Use(null);
+                yield return WaitPlayFrames(8);
+
+                var ctrl = ThucVatMoDunImpl.HienTai;
+                Check(ThucVatMoDunImpl.DangMo && ctrl != null && ctrl.Cay3D != null && ctrl.StageCamera != null,
+                    "G3 ThucVatMoDunImpl.Mo() opens dedicated 3D stage and UI");
+                if (ctrl == null) yield break;
+
+                // 5. Kéo thanh trượt kiểm tra đúng chiều sinh lý
+                var baseEnv = DieuKienMoiTruong.MacDinh;
+                ctrl.DatDieuKien(baseEnv);
+                ctrl.SetAnhSang(1500f); double qhThap = ctrl.TrangThai.CuongDoQuangHopRong;
+                ctrl.SetAnhSang(18000f); double qhVua = ctrl.TrangThai.CuongDoQuangHopRong;
+                ctrl.SetAnhSang(50000f); double qhCao = ctrl.TrangThai.CuongDoQuangHopRong;
+                ctrl.SetAnhSang(0f); double qhDem = ctrl.TrangThai.CuongDoQuangHopRong;
+                bool lightOk = qhVua > qhThap && qhCao >= qhVua && (qhCao - qhVua) < (qhVua - qhThap) && ctrl.TrangThai.BanDem && qhDem < 0.0;
+                Check(lightOk, "G3 Photosynthesis increases to saturation and night stops photosynthesis",
+                    $"low={qhThap:F2}, mid={qhVua:F2}, sat={qhCao:F2}, night={qhDem:F2}");
+
+                ctrl.DatDieuKien(baseEnv);
+                ctrl.SetDoAmKhongKhi(25f); double th25 = ctrl.TrangThai.TocDoThoatHoiNuocMmPhut;
+                ctrl.SetDoAmKhongKhi(88f); double th88 = ctrl.TrangThai.TocDoThoatHoiNuocMmPhut;
+                ctrl.SetDoAmDat(12f); double turgorDry = ctrl.TrangThai.DoTruongTeBaoHatDau01;
+                ctrl.SetDoAmDat(80f); double turgorWet = ctrl.TrangThai.DoTruongTeBaoHatDau01;
+                Check(th88 < th25 && turgorDry < turgorWet * 0.5,
+                    "G3 Humidity reduces transpiration and drought ABA closes guard cells",
+                    $"rh25={th25:F2}, rh88={th88:F2}, turgorDry={turgorDry:F2}, wet={turgorWet:F2}");
+
+                ctrl.SetGocDen(55f);
+                ctrl.SetSoGioHuongSang(36f);
+                Check(ctrl.TrangThai.GocUonThanDo > 30.0 && ctrl.TrangThai.TiLeAuxinPhiaToi > 0.60,
+                    "G3 Phototropism bends stem toward light with auxin accumulation on dark side",
+                    $"bend={ctrl.TrangThai.GocUonThanDo:F1}deg");
+
+                // 6. Chụp 5 ảnh cấu trúc, 3 lát cắt và chuyển động dạy học
+                ctrl.ChonCheDo(CheDoThucVat.BaiGiang);
+                ctrl.DatDieuKien(DieuKienMoiTruong.MacDinh);
+                ctrl.ChonKhungNhin(KhungNhinThucVat.TongThe, instantCamera: true);
+                ctrl.ChonBoPhan("than_cay");
+                yield return WaitPlayFrames(6);
+                RenderStageWithOverlay(ctrl.StageCamera, ctrl.UiCanvas, rt, tex, Path.Combine(outDir, "g3_1_tong_the_cay_hai_la_mam.png"));
+
+                ctrl.ChonKhungNhin(KhungNhinThucVat.LatCatRe, instantCamera: true);
+                ctrl.ChonBoPhan("re_dai_caspari");
+                yield return WaitPlayFrames(6);
+                RenderStageWithOverlay(ctrl.StageCamera, ctrl.UiCanvas, rt, tex, Path.Combine(outDir, "g3_2_lat_cat_re_caspari.png"));
+
+                ctrl.ChonKhungNhin(KhungNhinThucVat.LatCatThan, instantCamera: true);
+                ctrl.ChonBoPhan("than_tang_sinh_mach");
+                yield return WaitPlayFrames(6);
+                RenderStageWithOverlay(ctrl.StageCamera, ctrl.UiCanvas, rt, tex, Path.Combine(outDir, "g3_3_lat_cat_than_bo_mach.png"));
+
+                ctrl.ChonKhungNhin(KhungNhinThucVat.LatCatLa, instantCamera: true);
+                ctrl.SetDoAmDat(85f);
+                ctrl.ChonBoPhan("la_khi_khong");
+                yield return WaitPlayFrames(6);
+                RenderStageWithOverlay(ctrl.StageCamera, ctrl.UiCanvas, rt, tex, Path.Combine(outDir, "g3_4_lat_cat_la_khi_khong.png"));
+
+                ctrl.ChonCheDo(CheDoThucVat.TuDo);
+                ctrl.ChonKhungNhin(KhungNhinThucVat.TongThe, instantCamera: true);
+                ctrl.SetAnhSang(36000f);
+                ctrl.SetGocDen(55f);
+                ctrl.SetSoGioHuongSang(42f);
+                ctrl.ChonBoPhan("la_cay");
+                yield return WaitPlayFrames(6);
+                RenderStageWithOverlay(ctrl.StageCamera, ctrl.UiCanvas, rt, tex, Path.Combine(outDir, "g3_5_quang_hop_va_huong_sang.png"));
+
+                // 7. Đo nhịp khung ở mức Cao khi mở mô-đun
+                int sampleFrames = 45;
+                float tStart = Time.realtimeSinceStartup;
+                yield return WaitPlayFrames(sampleFrames);
+                float elapsed = Mathf.Max(0.001f, Time.realtimeSinceStartup - tStart);
+                float editorFps = sampleFrames / elapsed;
+                Debug.Log($"[N18_G3_PERF] Cao mode PlayMode {sampleFrames} frames in {elapsed:F3}s (~{editorFps:F1} FPS in Editor)");
+                Check(editorFps >= 20f, "G3 Stage runs smoothly at HardwareProfile Cao", $"editorFps={editorFps:F1}");
+
+                // 8. Đóng mô-đun
+                ThucVatMoDunImpl.Dong();
+                yield return WaitPlayFrames(4);
+                Check(!ThucVatMoDunImpl.DangMo, "G3 ThucVatMoDunImpl.Dong() closes cleanly");
+            }
+            finally
+            {
+                if (ThucVatMoDunImpl.DangMo) ThucVatMoDunImpl.Dong();
+                HardwareProfile.DatTuDong();
+                rt.Release();
+                UnityEngine.Object.Destroy(rt);
+                UnityEngine.Object.Destroy(tex);
+                Application.logMessageReceived -= OnUnityLog;
+            }
+
+            FinishVerify(exitWhenDone, "G3");
+        }
+
+        static void RenderStageWithOverlay(Camera stageCam, Canvas overlayCanvas, RenderTexture rt, Texture2D tex, string path)
+        {
+            if (stageCam == null) return;
+            RenderMode prevMode = RenderMode.ScreenSpaceOverlay;
+            Camera prevWorldCam = null;
+            float prevPlaneDist = 100f;
+            int prevLayer = 5;
+            if (overlayCanvas != null)
+            {
+                prevMode = overlayCanvas.renderMode;
+                prevWorldCam = overlayCanvas.worldCamera;
+                prevPlaneDist = overlayCanvas.planeDistance;
+                prevLayer = overlayCanvas.gameObject.layer;
+                overlayCanvas.renderMode = RenderMode.ScreenSpaceCamera;
+                overlayCanvas.worldCamera = stageCam;
+                overlayCanvas.planeDistance = 0.25f;
+                Canvas.ForceUpdateCanvases();
+            }
+
+            var oldRt = stageCam.targetTexture;
+            bool oldEn = stageCam.enabled;
+            int oldMask = stageCam.cullingMask;
+            float oldNear = stageCam.nearClipPlane;
+            try
+            {
+                stageCam.enabled = true;
+                stageCam.cullingMask = oldMask | (1 << 5);
+                stageCam.nearClipPlane = 0.02f;
+                stageCam.targetTexture = rt;
+                stageCam.Render();
+                RenderTexture.active = rt;
+                tex.ReadPixels(new Rect(0, 0, ShotW, ShotH), 0, 0);
+                tex.Apply();
+                RenderTexture.active = null;
+                File.WriteAllBytes(path, tex.EncodeToPNG());
+            }
+            finally
+            {
+                stageCam.targetTexture = oldRt;
+                stageCam.enabled = oldEn;
+                stageCam.cullingMask = oldMask;
+                stageCam.nearClipPlane = oldNear;
+                if (overlayCanvas != null)
+                {
+                    overlayCanvas.renderMode = prevMode;
+                    overlayCanvas.worldCamera = prevWorldCam;
+                    overlayCanvas.planeDistance = prevPlaneDist;
+                    overlayCanvas.gameObject.layer = prevLayer;
+                    Canvas.ForceUpdateCanvases();
+                }
+            }
         }
 
         static void CheckConnectedWrist(ArmRig armRig, HandRig rig, string checkName)
@@ -615,16 +848,16 @@ namespace Khkt.EditorTools
             return lm;
         }
 
-        static void FinishVerify(bool exitWhenDone)
+        static void FinishVerify(bool exitWhenDone, string tag = "G2")
         {
-            Debug.Log($"[N18_G2_SUMMARY] passes={passes} failures={failures} runtimeErrors={runtimeErrors}");
+            Debug.Log($"[N18_{tag}_SUMMARY] passes={passes} failures={failures} runtimeErrors={runtimeErrors}");
             if (failedNotes.Count > 0)
                 Debug.LogError("[N18_FAILED_LIST] " + string.Join(" || ", failedNotes));
             if (runtimeErrNotes.Count > 0)
                 Debug.LogError("[N18_RUNTIME_ERR_LIST] " + string.Join(" || ", runtimeErrNotes));
 
             bool ok = failures == 0 && runtimeErrors == 0;
-            Debug.Log(ok ? "[N18_G2_RESULT] ALL PASSED" : "[N18_G2_RESULT] FAILED");
+            Debug.Log(ok ? $"[N18_{tag}_RESULT] ALL PASSED" : $"[N18_{tag}_RESULT] FAILED");
             if (exitWhenDone) EditorApplication.Exit(ok ? 0 : 1);
         }
 
