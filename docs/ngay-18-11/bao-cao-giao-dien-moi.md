@@ -49,14 +49,20 @@ Nguyên tắc thiết kế rút ra từ CHEMISTRY: `thiet-ke-giao-dien-moi.md`. 
 - Ảnh batchmode dựng ở màn ảo 640×480 nên chữ nhỏ có thể hơi nhòe; độ nét đánh giá trên app Mac (mục dưới).
 - Biểu tượng thanh bên và ô chỉ số dùng phông Segoe MDL2 (chỉ có trên Windows); trên Mac các ô biểu tượng trống như trước.
 
-## Độ nét trên app Mac: CHƯA kiểm
-Đã chạy `Khkt.EditorTools.MacBuild.Build` hai lần (19/11 sáng). Cả hai lần lệnh bị dừng từ bên ngoài (mã 144): lần 1
-lúc đang biên dịch shader, không có lỗi mã; lần 2 trước khi Unity khởi động. `~/AppBuild/VERA_mac` vẫn là bản 18/11.
-Việc còn lại: dựng lại khi máy rảnh rồi mở app ở màn Retina, xem chữ 13–17 điểm ở màn chọn, đăng nhập và cài đặt.
-Thiết kế đã lo phần nét: canvas pixelPerfect, sprite viền vẽ ở 2x, thẻ nhấc bằng dời vị trí (không phóng to nên chữ không bị
-co giãn nhòe), chỉ nút co 0,97 trong lúc nhấn.
+## Độ nét trên app Mac (19/11)
+- Dựng từ **mã đã commit** (`git archive HEAD` sang bản kiểm sạch, `Khkt.EditorTools.MacBuild.Build`): Succeeded, 0 lỗi,
+  403 s, 247 MB → `~/AppBuild/VERA_mac/VERA Lab.app`. (Hai lần dựng trước đó bị dừng từ bên ngoài, mã 144.)
+- Mở app trên màn Liquid Retina 2880×1864, chụp ở độ phân giải gốc: `anh/giao-dien-moi/app_mac_man_chon.png` (thu còn
+  1600 rộng) và `app_mac_the_lon_retina_goc.png` (cắt 1:1 điểm ảnh gốc).
+- Kết quả: chữ nét ở mọi cỡ, kể cả nhãn 12–13 điểm và dấu tiếng Việt; viền tóc và góc bo của thẻ, nút "Vào ngay" mịn,
+  không răng cưa; bóng thẻ mềm, không bị cắt; nền dải màu không thành bậc.
+- Chuyển động: ảnh chụp cách nhau 1 giây nên chỉ thấy trạng thái cuối (các phần hiện lần lượt xong trong ~0,75 s). Hiệu ứng
+  rê chuột và nhấn chưa được xem tận mắt trên app thật trong phiên này (không điều khiển chuột); chuyển động đã kiểm qua
+  KhktUiVerify (đợi `MenuAnim.Busy`, không còn nhóm mờ dở khi chụp).
+- Không xóa cài đặt đã lưu của app; app đóng bằng lệnh thoát bình thường.
 
 ## Commit
 - `ab8d18f9`: hệ thống chung MenuKit/MenuAnim, ảnh trước, nguyên tắc thiết kế.
 - `9c6ce2ba`: áp lên mọi màn, ảnh sau.
-- Commit cuối: bỏ số mờ trên thẻ lớn, ảnh sau lần cuối, báo cáo.
+- `cc987299`: bỏ số mờ trên thẻ lớn, ảnh sau lần cuối, báo cáo.
+- Commit cuối: kết quả app Mac, ảnh app thật.

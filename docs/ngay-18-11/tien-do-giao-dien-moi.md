@@ -22,10 +22,11 @@ Commit (bước 2): ManChonLuong, MainMenu, DashboardShell, PageOverview, MenuKi
 
 Bước 3 (commit cuối): bỏ số mờ 01/02, kiểm lần cuối 54/54 đạt, ảnh sau lần cuối, báo cáo `bao-cao-giao-dien-moi.md`.
 
+Bước 4 (commit cuối): app Mac dựng từ HEAD cc987299 (thành công), mở trên Retina, chữ nét; ảnh `app_mac_*.png`, báo cáo cập nhật.
+
 ## Còn lại
-1. Dựng app Mac (`Khkt.EditorTools.MacBuild.Build`, ra ~/AppBuild/VERA_mac) và xem độ nét chữ trên Retina: hai lần dựng
-   bị dừng từ bên ngoài (mã 144), chưa làm được.
-2. Khi phiên Hóa lý commit xong: chạy lại KhktUiVerify từ thư mục chính (không cần bản kiểm riêng).
+1. Xem tận mắt hiệu ứng rê chuột / nhấn trên app thật (cần người dùng hoặc điều khiển chuột).
+2. Khi phiên Hóa lý commit xong: chạy lại KhktUiVerify từ thư mục chính.
 
 ## Lệnh kiểm thử
 ```bash
