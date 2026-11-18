@@ -1268,6 +1268,10 @@ namespace Khkt.Demo
             if (hand != null)
             {
                 hand.curl = Held != null ? 1f : Current == Act.Pick || Current == Act.Swirl ? 0.3f : 0f;
+                hand.TargetContactObject = Held != null
+                    ? Held.transform
+                    : (Current == Act.Stopcock && stopcock != null ? stopcock.transform : null);
+                hand.SetTargetPose(Khkt.Avatar.HandPoseTable.ClassifyToolPose(Held, Current, Current == Act.Pick || Current == Act.Swirl));
                 hand.transform.rotation = handRot;
                 Vector3 gripLocal = hand.Grip != null ? hand.Grip.localPosition : Vector3.zero;
                 hand.transform.position = handPos - handRot * gripLocal;

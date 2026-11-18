@@ -1,30 +1,26 @@
+using Khkt.Avatar;
 using Khkt.Input;
 using UnityEngine;
 
 namespace Khkt.Demo
 {
     /// <summary>
-    /// Cánh tay ảo theo MediaPipe: bắp tay, cẳng tay, bàn tay 21 khớp, gắn từ vai ảo dưới camera.
-    ///  • Hướng bắp tay, cẳng tay lấy từ Pose; chiều dài xương cố định nên số đo rung không làm tay co giãn.
-    ///  • Không thấy khuỷu: IK hai xương tới cổ tay (Pose hoặc vị trí bàn tay trên ảnh), khuỷu chúc xuống, ra ngoài.
-    ///  • Ngón tay: hướng từng đốt theo 21 điểm 3D, chiều dài đốt lấy trung vị lúc mới thấy tay rồi giữ nguyên.
-    ///  • Tay phải điều khiển bàn tay của HandController: trỏ qua lòng bàn tay, chụm ngón là cầm.
+    /// Cánh tay người chơi ở góc nhìn thứ nhất: vai, bắp tay (áo blouse), khuỷu, cẳng tay (áo blouse),
+    /// nối liền mạch vào cổ tay bàn tay giải phẫu HandRig (phải và trái).
+    ///  • Không dùng tay giả trùng lặp: khi điều khiển bằng chuột/tay cầm, tay phải nối thẳng vào HandRig của HandController;
+    ///    tay trái ở tư thế nghỉ tự nhiên. Khi bật nhận diện webcam (InAppHandTracker / ArmTracking), ánh xạ 21 điểm vào HandRig.
     /// </summary>
     public class ArmRig : MonoBehaviour
     {
         static readonly int[] Parent = { -1, 0, 1, 2, 3, 0, 5, 6, 7, 0, 9, 10, 11, 0, 13, 14, 15, 0, 17, 18, 19 };
-        const float UpperLen = 0.28f, ForeLen = 0.25f, Reach = 0.46f;
+        const float UpperLen = 0.28f, ForeLen = 0.26f, Reach = 0.45f;
 
-        /// <summary>Bộ lọc 1€ cho véc-tơ: tần số cắt tăng theo tốc độ, nên đứng yên mượt mà chạy nhanh vẫn ít trễ.</summary>
         class Euro
         {
-            Vector3 x, dx;
+            Vector3 x, dx, y;
             bool ready;
             public void Reset() => ready = false;
 
-            Vector3 y;
-
-            /// <summary>Lọc 1€ rồi qua vùng chết mềm: rung nhỏ hơn dead (m) bị bỏ, vượt ngưỡng chỉ tính phần vượt nên không giật.</summary>
             public Vector3 F(Vector3 v, float dt, float minCutoff, float beta, float dead = 0f)
             {
                 if (!ready) { ready = true; x = y = v; dx = Vector3.zero; return v; }
@@ -39,7 +35,6 @@ namespace Khkt.Demo
             static float Alpha(float cutoff, float dt) => 1f / (1f + 1f / (2f * Mathf.PI * cutoff * dt));
         }
 
-        // m và m/s trong trục camera; chỉnh ở Inspector nếu còn rung (giảm minCutoff) hoặc trễ (tăng beta)
         public float ArmMinCutoff = 1.0f, ArmBeta = 2.5f, FingerMinCutoff = 1.2f, FingerBeta = 25f;
 
         class Arm
@@ -51,7 +46,7 @@ namespace Khkt.Demo
             public void ResetFilters() { fElbow.Reset(); fWrist.Reset(); foreach (var e in fBone) e.Reset(); }
             public GameObject root;
             public Transform upper, fore, elbowBall, shoulderBall;
-            public Transform[] joints = new Transform[21], bones = new Transform[21];
+            public HandRig leftRestHand;
             public readonly float[] boneLen = new float[21];
             public int lenSamples;
             public Vector3 elbow, wrist;
@@ -62,107 +57,98 @@ namespace Khkt.Demo
         public HandController hand;
 
         public bool Driving { get; private set; }
-        /// <summary>Lòng bàn tay của tay đang điều khiển (ưu tiên tay phải).</summary>
         public Vector3 RightPalm { get; private set; }
         public Vector3 RightElbow => arms[0] != null ? arms[0].elbow : Vector3.zero;
         public Vector3 RightWrist => arms[0] != null ? arms[0].wrist : Vector3.zero;
         public Vector3 RightShoulder => Shoulder(0);
-        public Vector3 FingerJoint(int i) => arms[0] != null ? arms[0].fingers[i] : Vector3.zero;
+        public Vector3 FingerJoint(int i) => arms[0] != null && i >= 0 && i < 21 ? arms[0].fingers[i] : Vector3.zero;
 
         readonly Arm[] arms = new Arm[2];
         int drivingSide;
-        Renderer[] handRigRenderers;
-        Material skin, sleeve, glove;
+        Material sleeve;
 
         void Start()
         {
             if (cameraTransform == null && Camera.main != null) cameraTransform = Camera.main.transform;
             if (hand == null) hand = HandController.Active != null ? HandController.Active : FindAnyObjectByType<HandController>();
-            if (hand != null && hand.hand != null) handRigRenderers = hand.hand.GetComponentsInChildren<Renderer>(true);
+            if (hand != null && hand.hand != null)
+            {
+                hand.hand.EnsureBuilt();
+                SetHandRenderers(true);
+            }
         }
 
         Vector3 Shoulder(int side)
         {
             if (cameraTransform == null) return Vector3.zero;
-            // vai ảo: dưới, lệch sang hai bên camera, theo hướng nhìn ngang (không cúi theo đầu)
-            var flat = Quaternion.Euler(0, cameraTransform.eulerAngles.y, 0);
-            return cameraTransform.position + flat * new Vector3(side == 0 ? 0.19f : -0.19f, -0.24f, -0.04f);
+            var flat = Quaternion.Euler(0f, cameraTransform.eulerAngles.y, 0f);
+            return cameraTransform.position + flat * new Vector3(side == 0 ? 0.19f : -0.19f, -0.25f, -0.05f);
         }
 
         void LateUpdate()
         {
+            if (cameraTransform == null) return;
             var at = ArmTracking.Instance;
             bool master = MediaPipeHandSource.Instance == null || MediaPipeHandSource.Instance.handTrackingEnabled;
             ArmTracking.Side driver = null;
+
             for (int i = 0; i < 2; i++)
             {
                 var s = at == null ? null : i == 0 ? at.Right : at.Left;
-                bool show = master && s != null && (s.handSeen || s.armSeen) && cameraTransform != null;
-                if (cameraTransform == null) continue;
+                bool show = master && s != null && (s.handSeen || s.armSeen);
                 if (arms[i] == null) arms[i] = Build(i);
                 if (!arms[i].root.activeSelf) arms[i].root.SetActive(true);
-                if (show != arms[i].tracked) { arms[i].tracked = show; arms[i].ResetFilters(); }  // đổi nguồn: không trôi từ chỗ cũ
-                // luôn có hai tay: không nhận diện thì tay phải nối tới găng tay của chuột, tay trái để nghỉ
-                if (show) Pose(arms[i], s, i);
+                if (show != arms[i].tracked) { arms[i].tracked = show; arms[i].ResetFilters(); }
+
+                if (show)
+                {
+                    PoseTracked(arms[i], s, i);
+                    if (s.handSeen && driver == null) { driver = s; drivingSide = i; }
+                }
                 else
                 {
-                    // găng tay của chuột ở gần thì tay phải với tới đó; ở xa (trỏ ra bàn khác) thì hai tay để nghỉ
-                    Vector3 glove = hand != null && hand.hand != null && hand.hand.gameObject.activeInHierarchy ? hand.hand.transform.position : Vector3.positiveInfinity;
-                    if (i == 0 && (glove - Shoulder(0)).sqrMagnitude < 0.5f * 0.5f) Pose(arms[i], restRight, 0, glove);
-                    else Pose(arms[i], RestHand(i), i);
+                    PoseMouseOrRest(arms[i], i);
                 }
-                // tay nào đang thấy cũng điều khiển được, ưu tiên tay phải
-                if (show && s.handSeen && driver == null) { driver = s; drivingSide = i; }
             }
+
             Drive(driver);
-            // không theo tay thật: găng tay của chuột chỉ hiện khi đang cầm vật, để màn hình không có ba bàn tay
-            if (!Driving && handRigRenderers != null)
+        }
+
+        void PoseMouseOrRest(Arm a, int side)
+        {
+            if (side == 0 && hand != null && hand.hand != null)
             {
-                bool want = hand != null && hand.Held != null;
-                if (want != gloveShown)
-                {
-                    gloveShown = want;
-                    foreach (var r in handRigRenderers) if (r != null) r.enabled = want;
-                }
+                hand.hand.EnsureBuilt();
+                hand.hand.SkipIdleUpdate = false;
+                SetHandRenderers(true);
+
+                Vector3 wristTarget = hand.hand.WristAttach != null ? hand.hand.WristAttach.position : hand.hand.transform.position;
+                Quaternion wristRot = hand.hand.transform.rotation;
+                PlaceConnectedArm(a, side, wristTarget, wristRot);
+                SyncFingerTelemetryFromRig(a, hand.hand);
+                return;
+            }
+
+            // Tay trái để nghỉ gọn ở mép dưới bên trái tầm nhìn, lòng bàn tay hơi hướng vào bàn thí nghiệm
+            if (a.leftRestHand != null)
+            {
+                a.leftRestHand.EnsureBuilt();
+                a.leftRestHand.SkipIdleUpdate = true;
+                a.leftRestHand.SetTargetPose(HandPoseId.Nghi);
+                a.leftRestHand.StepPoseAndContact(Time.unscaledDeltaTime);
+
+                Quaternion camFlat = Quaternion.Euler(0f, cameraTransform.eulerAngles.y, 0f);
+                Vector3 restPos = cameraTransform.position + camFlat * new Vector3(-0.22f, -0.31f, 0.36f);
+                Quaternion restRot = camFlat * Quaternion.Euler(14f, 18f, -12f);
+                a.leftRestHand.transform.SetPositionAndRotation(restPos, restRot);
+                Vector3 wristTarget = a.leftRestHand.WristAttach != null ? a.leftRestHand.WristAttach.position : restPos;
+                PlaceConnectedArm(a, side, wristTarget, restRot);
             }
         }
 
-        bool gloveShown = true;
-
-        // =====================================================================
-        // Tư thế
-        // =====================================================================
-
-        readonly ArmTracking.Side restRight = new ArmTracking.Side();
-        readonly ArmTracking.Side[] restHands = new ArmTracking.Side[2];
-
-        /// <summary>Tay để nghỉ ở mép dưới khung nhìn, lòng bàn tay úp, các ngón hơi khum.</summary>
-        ArmTracking.Side RestHand(int side)
+        void PoseTracked(Arm a, ArmTracking.Side s, int side)
         {
-            if (restHands[side] != null) return restHands[side];
-            float sign = side == 0 ? 1f : -1f;   // tay phải lệch phải, tay trái lệch trái
-            var s = new ArmTracking.Side { handSeen = true, wristImage = new Vector2(side == 0 ? 0.3f : 0.7f, 0.86f) };
-            Vector3 fwd = new Vector3(-0.25f * sign, -0.3f, 1f).normalized;
-            Vector3 across = Vector3.Cross(Vector3.up, fwd).normalized;
-            s.hand[0] = Vector3.zero;
-            for (int f = 0; f < 5; f++)
-            {
-                // ngón cái chếch vào trong, bốn ngón xếp hàng ngang, đốt sau cụp xuống dần
-                Vector3 baseP = f == 0 ? (fwd * 0.03f - across * sign * 0.035f) : (fwd * 0.085f + across * sign * (f - 2.5f) * 0.019f);
-                Vector3 dir = f == 0 ? (fwd - across * sign * 0.6f).normalized : fwd;
-                s.hand[1 + f * 4] = baseP;
-                for (int j = 1; j < 4; j++)
-                {
-                    dir = (dir + Vector3.down * 0.35f).normalized;
-                    s.hand[1 + f * 4 + j] = s.hand[f * 4 + j] + dir * (f == 0 ? 0.03f : 0.026f - j * 0.003f);
-                }
-            }
-            return restHands[side] = s;
-        }
-
-        void Pose(Arm a, ArmTracking.Side s, int side, Vector3? wristTarget = null)
-        {
-            var cam = cameraTransform.rotation;
+            Quaternion cam = cameraTransform.rotation;
             Vector3 sh = Shoulder(side);
             Vector3 elbow, wrist;
             if (s.armSeen && s.elbowConf >= 0.5f && (s.elbow - s.shoulder).sqrMagnitude > 1e-4f)
@@ -173,10 +159,8 @@ namespace Khkt.Demo
             }
             else
             {
-                // không thấy khuỷu: đích cổ tay từ Pose, không có thì từ vị trí bàn tay trên ảnh
                 Vector3 target;
-                if (wristTarget.HasValue) target = wristTarget.Value;
-                else if (s.armSeen && s.wristConf >= 0.5f) target = sh + cam * (s.wrist - s.shoulder);
+                if (s.armSeen && s.wristConf >= 0.5f) target = sh + cam * (s.wrist - s.shoulder);
                 else
                 {
                     var img = s.wristImage;
@@ -185,8 +169,7 @@ namespace Khkt.Demo
                 }
                 SolveIk(sh, target, side, out elbow, out wrist);
             }
-            // Lọc 1€ trong trục camera (gốc ở vai): đứng yên thì mượt hẳn, cử động nhanh thì bám sát;
-            // sau khi lọc đặt lại chiều dài xương cho đúng
+
             var inv = Quaternion.Inverse(cam);
             float dt = Mathf.Max(Time.deltaTime, 1e-3f);
             Vector3 eL = a.fElbow.F(inv * (elbow - sh), dt, ArmMinCutoff, ArmBeta, 0.004f);
@@ -198,18 +181,17 @@ namespace Khkt.Demo
             wrist = sh + cam * wL;
             a.elbow = elbow;
             a.wrist = wrist;
-            Place(a.shoulderBall, sh, sh, 0.06f, false);
-            Place(a.upper, sh, elbow, 0.055f, true);
-            Place(a.elbowBall, elbow, elbow, 0.05f, false);
-            Place(a.fore, elbow, wrist, 0.045f, true);
 
-            if (!s.handSeen)
-            {
-                for (int i = 0; i < 21; i++) a.joints[i].gameObject.SetActive(false);
-                for (int i = 1; i < 21; i++) a.bones[i].gameObject.SetActive(false);
-                return;
-            }
-            // Chiều dài đốt: trung bình 30 lần đo đầu rồi giữ nguyên, để số đo rung không làm ngón co giãn
+            PlaceSegment(a.shoulderBall, sh, sh, 0.088f, false);
+            PlaceSegment(a.upper, sh, elbow, 0.082f, true);
+            PlaceSegment(a.elbowBall, elbow, elbow, 0.074f, false);
+            Vector3 foreDir = (wrist - elbow).sqrMagnitude > 1e-6f ? (wrist - elbow).normalized : cam * Vector3.forward;
+            PlaceSegment(a.fore, elbow, wrist - foreDir * 0.030f, 0.058f, true);
+
+            HandRig rig = side == 0 && hand != null ? hand.hand : a.leftRestHand;
+            if (rig == null) return;
+            if (!s.handSeen) return;
+
             for (int i = 1; i < 21; i++)
             {
                 float len = (s.hand[i] - s.hand[Parent[i]]).magnitude;
@@ -217,32 +199,66 @@ namespace Khkt.Demo
             }
             if (a.lenSamples < 30) a.lenSamples++;
 
-            // Lọc hướng từng đốt (trục camera) rồi dựng lại từ cổ tay với chiều dài đã chốt
+            var filteredLocal = new Vector3[21];
+            filteredLocal[0] = Vector3.zero;
             a.fingers[0] = wrist;
             for (int i = 1; i < 21; i++)
             {
                 Vector3 d = a.fBone[i].F(s.hand[i] - s.hand[Parent[i]], dt, FingerMinCutoff, FingerBeta, 0.0015f);
-                a.fingers[i] = a.fingers[Parent[i]] + (d.sqrMagnitude > 1e-8f ? cam * d.normalized : Vector3.zero) * a.boneLen[i];
+                Vector3 dir = d.sqrMagnitude > 1e-8f ? d.normalized : Vector3.forward;
+                float len = a.boneLen[i] > 1e-4f ? a.boneLen[i] : 0.025f;
+                filteredLocal[i] = filteredLocal[Parent[i]] + dir * len;
+                a.fingers[i] = wrist + cam * filteredLocal[i];
             }
-            for (int i = 0; i < 21; i++)
-            {
-                a.joints[i].gameObject.SetActive(true);
-                Place(a.joints[i], a.fingers[i], a.fingers[i], i == 0 ? 0.03f : i % 4 == 0 ? 0.016f : 0.019f, false);
-            }
-            for (int i = 1; i < 21; i++)
-            {
-                a.bones[i].gameObject.SetActive(true);
-                Place(a.bones[i], a.fingers[Parent[i]], a.fingers[i], Parent[i] == 0 ? 0.022f : 0.017f, true);
-            }
+
+            InAppHandTracker.MapLandmarksToHandRig(filteredLocal, rig, cam, wrist);
+
             if (side == drivingSide)
+                RightPalm = (a.fingers[0] + a.fingers[5] + a.fingers[9] + a.fingers[13] + a.fingers[17]) * 0.2f;
+        }
+
+        void PlaceConnectedArm(Arm a, int side, Vector3 wristTarget, Quaternion wristRot)
+        {
+            Vector3 sh = Shoulder(side);
+            // Nghiêng nhẹ vai theo tầm với để cẳng tay áo luôn gắn kín vào cổ tay bàn tay, không bị đứt đoạn
+            Vector3 toTarget = wristTarget - sh;
+            float maxReach = UpperLen + ForeLen - 0.01f;
+            if (toTarget.magnitude > maxReach)
+                sh = wristTarget - toTarget.normalized * maxReach;
+
+            SolveIk(sh, wristTarget, side, out Vector3 elbow, out Vector3 wrist);
+            a.elbow = elbow;
+            a.wrist = wristTarget;
+
+            PlaceSegment(a.shoulderBall, sh, sh, 0.088f, false);
+            PlaceSegment(a.upper, sh, elbow, 0.082f, true);
+            PlaceSegment(a.elbowBall, elbow, elbow, 0.074f, false);
+            Vector3 foreDir = (wristTarget - elbow).sqrMagnitude > 1e-6f ? (wristTarget - elbow).normalized : wristRot * Vector3.forward;
+            PlaceSegment(a.fore, elbow, wristTarget - foreDir * 0.030f, 0.058f, true);
+        }
+
+        static void SyncFingerTelemetryFromRig(Arm a, HandRig rig)
+        {
+            if (a == null || rig == null) return;
+            a.fingers[0] = rig.WristAttach != null ? rig.WristAttach.position : rig.transform.position;
+            rig.GetThumbJoints(out var tCmc, out var tMcp, out var tIp, out var tTip);
+            a.fingers[1] = tCmc != null ? tCmc.position : a.fingers[0];
+            a.fingers[2] = tMcp != null ? tMcp.position : a.fingers[1];
+            a.fingers[3] = tIp != null ? tIp.position : a.fingers[2];
+            a.fingers[4] = tTip != null ? tTip.position : a.fingers[3];
+            for (int f = 0; f < 4; f++)
             {
-                Vector3 palm = Vector3.zero;
-                foreach (int i in new[] { 0, 5, 9, 13, 17 }) palm += a.fingers[i];
-                RightPalm = palm / 5f;
+                if (rig.GetFingerJoints(f, out var mcp, out var pip, out var dip, out var tip))
+                {
+                    int b = 5 + f * 4;
+                    a.fingers[b] = mcp.position;
+                    a.fingers[b + 1] = pip.position;
+                    a.fingers[b + 2] = dip.position;
+                    a.fingers[b + 3] = tip.position;
+                }
             }
         }
 
-        /// <summary>IK hai xương: khuỷu nằm trên mặt phẳng chứa vai, đích và hướng chúc xuống, ra ngoài.</summary>
         void SolveIk(Vector3 sh, Vector3 target, int side, out Vector3 elbow, out Vector3 wrist)
         {
             Vector3 to = target - sh;
@@ -257,8 +273,9 @@ namespace Khkt.Demo
             elbow = sh + dir * a + bend.normalized * h;
         }
 
-        static void Place(Transform t, Vector3 from, Vector3 to, float width, bool bone)
+        static void PlaceSegment(Transform t, Vector3 from, Vector3 to, float width, bool bone)
         {
+            if (t == null) return;
             if (!bone)
             {
                 t.position = from;
@@ -268,20 +285,14 @@ namespace Khkt.Demo
             Vector3 d = to - from;
             t.position = (from + to) * 0.5f;
             t.rotation = d.sqrMagnitude > 1e-8f ? Quaternion.FromToRotation(Vector3.up, d) : Quaternion.identity;
-            // capsule cao 2 đơn vị gồm cả hai đầu tròn: phần thân bằng chiều dài xương
             t.localScale = new Vector3(width, Mathf.Max(width, d.magnitude) * 0.5f, width);
         }
-
-        // =====================================================================
-        // Điều khiển bàn tay của HandController
-        // =====================================================================
 
         void Drive(ArmTracking.Side right)
         {
             bool want = right != null && hand != null;
             if (want)
             {
-                // tia từ camera đi qua lòng bàn tay: trỏ tay vào vật nào thì chọn vật đó; chụm ngón là cầm
                 hand.OverrideAimPoint = RightPalm + (RightPalm - cameraTransform.position).normalized * 0.05f;
                 hand.OverrideHold = right.pinch;
             }
@@ -291,43 +302,49 @@ namespace Khkt.Demo
             {
                 hand.OverrideAimPoint = null;
                 hand.OverrideHold = false;
+                if (hand.hand != null)
+                {
+                    hand.hand.SkipIdleUpdate = false;
+                    hand.hand.ClearLandmarkControl();
+                }
             }
-            // tay thật đã có hình: ẩn găng tay cũ, tắt cần điều khiển ảo từ cử chỉ để không điều khiển hai lần
-            if (handRigRenderers != null) foreach (var r in handRigRenderers) if (r != null) r.enabled = !want;
-            gloveShown = !want;
+            SetHandRenderers(true);
             MediaPipeHandSource.SuppressController = want;
         }
 
-        // =====================================================================
-        // Dựng hình
-        // =====================================================================
+        void SetHandRenderers(bool on)
+        {
+            if (hand != null && hand.hand != null)
+                hand.hand.SetRenderEnabled(on);
+        }
 
         Arm Build(int side)
         {
-            if (skin == null)
+            if (sleeve == null)
+                sleeve = Lit(new Color(0.94f, 0.95f, 0.97f), 0.14f);
+            var a = new Arm { root = new GameObject(side == 0 ? "Cánh tay phải" : "Cánh tay trái") };
+            a.shoulderBall = Part(PrimitiveType.Sphere, a.root.transform, "Vai áo", sleeve);
+            a.upper = Part(PrimitiveType.Capsule, a.root.transform, "Bắp tay áo", sleeve);
+            a.elbowBall = Part(PrimitiveType.Sphere, a.root.transform, "Khuỷu áo", sleeve);
+            a.fore = Part(PrimitiveType.Capsule, a.root.transform, "Cẳng tay áo", sleeve);
+
+            if (side == 1)
             {
-                skin = Lit(new Color(0.86f, 0.7f, 0.6f));
-                sleeve = Lit(new Color(0.93f, 0.94f, 0.96f));  // tay áo blouse trắng
-                glove = Lit(new Color(0.27f, 0.56f, 0.93f));
-            }
-            var a = new Arm { root = new GameObject(side == 0 ? "Cánh tay phải (MediaPipe)" : "Cánh tay trái (MediaPipe)") };
-            a.shoulderBall = Part(PrimitiveType.Sphere, a.root.transform, "Vai", sleeve);
-            a.upper = Part(PrimitiveType.Capsule, a.root.transform, "Bắp tay", sleeve);
-            a.elbowBall = Part(PrimitiveType.Sphere, a.root.transform, "Khuỷu", sleeve);
-            a.fore = Part(PrimitiveType.Capsule, a.root.transform, "Cẳng tay", skin);
-            for (int i = 0; i < 21; i++)
-            {
-                a.joints[i] = Part(PrimitiveType.Sphere, a.root.transform, "Khớp " + i, glove);
-                if (i > 0) a.bones[i] = Part(PrimitiveType.Capsule, a.root.transform, "Đốt " + i, glove);
+                var leftGo = new GameObject("Bàn tay trái");
+                leftGo.transform.SetParent(a.root.transform, false);
+                var lr = leftGo.AddComponent<HandRig>();
+                lr.side = 1;
+                lr.EnsureBuilt();
+                a.leftRestHand = lr;
             }
             return a;
         }
 
-        static Material Lit(Color c)
+        static Material Lit(Color c, float smoothness)
         {
             var m = new Material(Shader.Find("Universal Render Pipeline/Lit")) { hideFlags = HideFlags.DontSave };
             m.SetColor("_BaseColor", c);
-            m.SetFloat("_Smoothness", 0.4f);
+            m.SetFloat("_Smoothness", smoothness);
             return m;
         }
 
@@ -335,7 +352,7 @@ namespace Khkt.Demo
         {
             var go = GameObject.CreatePrimitive(type);
             go.name = name;
-            Destroy(go.GetComponent<Collider>());  // tia chọn vật đi xuyên qua cánh tay
+            Destroy(go.GetComponent<Collider>());
             go.transform.SetParent(parent, false);
             var r = go.GetComponent<MeshRenderer>();
             r.sharedMaterial = mat;
