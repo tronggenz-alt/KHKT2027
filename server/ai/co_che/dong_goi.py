@@ -1,7 +1,7 @@
 """Gói mã hóa .verapack cho app: bài + kịch bản 3D + sơ đồ giấy của một bài cơ chế.
 
     python -m server.ai.co_che.dong_goi [ma ...] [--unity]     → build/co_che/goi/<ma>.verapack
-        --unity: chép thêm gói vào Assets/StreamingAssets/CoChe/ và khóa vào Assets/Resources/CoChe/khoa.bytes (git bỏ qua)
+        --unity: chép thêm gói vào Assets/StreamingAssets/CoChe/ và khóa ĐÃ CHE vào Assets/Resources/CoChe/khoa.bytes (git bỏ qua)
 
 Cấu trúc (mọi số nguyên big-endian):
     "VERA1" (5 byte) | phiên bản (1 byte = 1) | salt (16) | IV (16) | AES-256-CBC(gzip(JSON), PKCS#7) | HMAC-SHA256 (32)
@@ -125,6 +125,19 @@ def ghi_nhat_ky(ma: str, dau: dict, dich: str) -> None:
         f.write(json.dumps({"ma": ma, **dau, "dich": dich, "luc": time.strftime("%Y-%m-%d %H:%M:%S")}, ensure_ascii=False) + "\n")
 
 
+# Che khóa trong app (C3): khoa.bytes = khóa gốc XOR SHA256("VERA·" + A + "·" + B + "·" + C); ba hằng A, B, C nằm rải ở ba lớp
+# C# (GoiCoChe, TrinhPhat3D, CoCheMoDun). Chỉ làm khó thêm việc lấy khóa từ app, KHÔNG phải bảo mật thật.
+CHE_A, CHE_B, CHE_C = "lều-propellane-1.1.1", "electron-đi-trước-35%", "VERA-Lab-18/11"
+
+
+def mat_na_che() -> bytes:
+    return hashlib.sha256(f"VERA·{CHE_A}·{CHE_B}·{CHE_C}".encode("utf-8")).digest()
+
+
+def che_khoa(khoa: bytes) -> bytes:
+    return bytes(a ^ b for a, b in zip(khoa, mat_na_che()))
+
+
 def main(argv: list[str]) -> int:
     unity = "--unity" in argv
     chon = [a for a in argv if not a.startswith("--")]
@@ -146,7 +159,7 @@ def main(argv: list[str]) -> int:
         rs.mkdir(parents=True, exist_ok=True)
         for ma in ma_ds:
             shutil.copy2(ra / f"{ma}.verapack", sa / f"{ma}.verapack")
-        (rs / "khoa.bytes").write_bytes(khoa)
+        (rs / "khoa.bytes").write_bytes(che_khoa(khoa))
         print(f"→ {sa} ({len(ma_ds)} gói), khóa → {rs / 'khoa.bytes'}")
     print(f"→ {ra}")
     return 0
