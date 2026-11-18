@@ -1,0 +1,14 @@
+{
+ "ten": "SN2: CH₃CH₂Br + OH⁻ → CH₃CH₂OH + Br⁻ (ví dụ công khai cho test)",
+ "loai": "SN2",
+ "dieu_kien": "NaOH loãng, t°",
+ "giai_thich": "Dẫn xuất bậc một, nucleophin mạnh: thế một giai đoạn SN2.",
+ "buoc": [
+  {"chat": ["[OH-:1]", "[CH3:2][CH2:3][Br:4]"],
+   "mui_ten": [{"tu": {"loai": "cap_e", "nguyen_tu": 1}, "den": {"loai": "nguyen_tu", "nguyen_tu": 3}, "kieu": "day_du"},
+               {"tu": {"loai": "lien_ket", "nguyen_tu": [3, 4]}, "den": {"loai": "nguyen_tu", "nguyen_tu": 4}, "kieu": "day_du"}],
+   "trang_thai_chuyen_tiep": true, "buoc_cham": true,
+   "ghi_chu": "OH⁻ tấn công từ phía sau, C–Br đứt đồng thời."}
+ ],
+ "san_pham": ["[CH3:2][CH2:3][OH:1]", "[Br-:4]"]
+}

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bài demo cơ chế</title>
+<style>
+:root{--muc:#1b2621;--giay:#fffdf7;--nen:#f6f1e6;--vien:#e3dccb;--phu:#5d6862}
+body{margin:0;background:var(--nen);font-family:system-ui,sans-serif;color:var(--muc);padding:20px 16px}
+.to{max-width:1200px;margin:0 auto 18px;background:var(--giay);border:1px solid var(--vien);border-radius:6px;padding:16px 20px}
+h1{font-size:18px;max-width:1200px;margin:0 auto 12px}
+h2{font-size:16px;margin:0 0 4px}
+.de{font-size:13px;color:var(--phu);margin:0 0 8px}
+.so-do{display:block;width:100%;height:auto}
+.so-do .lk{stroke:var(--muc);stroke-width:1.6;stroke-linecap:round}
+.so-do .lk.sau{stroke:var(--muc);stroke-width:1.4}
+.so-do .nem{fill:var(--muc)}
+.so-do .nt{font:15.5px "Times New Roman",serif;text-anchor:middle;dominant-baseline:central;fill:var(--muc)}
+.so-do .dt{font:12px "Times New Roman",serif;text-anchor:middle;dominant-baseline:central;fill:var(--muc)}
+.so-do .ten{font:700 16px "Times New Roman",serif;text-anchor:middle;dominant-baseline:central;fill:var(--muc)}
+.so-do .mt{fill:none;stroke:#b3261e;stroke-width:1.3}
+.so-do .pu{stroke:var(--muc);stroke-width:1.4;fill:none}
+.so-do .dk{font:italic 14px "Times New Roman",serif;text-anchor:middle;fill:var(--muc)}
+.so-do .goc{fill:var(--muc)}
+.cham{font-size:12.5px;color:var(--phu);margin:6px 0 0}
+</style>
+</head>
+<body>
+<h1>Bộ bài demo cơ chế – sơ đồ giấy tự động (build/co_che)</h1>
+<div id="ds"></div>
+<script type="module">
+// Mở qua máy chủ tĩnh ở gốc kho (launch.json "co-che-3d"): /nguyen_mau/co_che_3d/xem_bai_demo.html?bai=<ma>
+import { veSoDo, kiemTraDeNhin } from "./ve_giay.js";
+const goc = "../../build/co_che/";
+const chon = new URLSearchParams(location.search).get("bai");
+const ml = await (await fetch(goc + "muc_luc.json")).json();
+const ds = document.getElementById("ds");
+for (const b of ml.bai.filter(b => !chon || b.ma === chon)) {
+  const sd = await (await fetch(`${goc}${b.ma}/${b.ma}.giay.json`)).json();
+  const loi = kiemTraDeNhin(sd);
+  const tong = Object.values(loi).flat();
+  const o = document.createElement("div");
+  o.className = "to"; o.id = b.ma;
+  o.innerHTML = `<h2>${b.ten}</h2><p class="de">${b.de}</p>${veSoDo(sd)}<p class="cham">Bộ chấm: ${Object.entries(loi).map(([k, v]) => `${k} ${v.length}`).join(" · ")}${tong.length ? " — " + tong.join("; ") : " — đạt"}</p>`;
+  ds.appendChild(o);
+}
+</script>
+</body>
+</html>
