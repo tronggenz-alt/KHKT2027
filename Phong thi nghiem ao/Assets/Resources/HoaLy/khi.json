@@ -1,0 +1,92 @@
+{
+  "danh_sach": [
+    {
+      "id": "N2",
+      "ten": "Nitrogen",
+      "ct": "N₂",
+      "M": 28.013,
+      "gamma": 1.4,
+      "a": 1.370,
+      "b": 0.0387,
+      "mau": "var(--hl-khi-n2, #38bdf8)",
+      "nguon": "CRC Handbook of Chemistry and Physics, 97th ed."
+    },
+    {
+      "id": "O2",
+      "ten": "Oxygen",
+      "ct": "O₂",
+      "M": 31.999,
+      "gamma": 1.4,
+      "a": 1.382,
+      "b": 0.0319,
+      "mau": "var(--hl-khi-o2, #f43f5e)",
+      "nguon": "CRC Handbook of Chemistry and Physics, 97th ed."
+    },
+    {
+      "id": "He",
+      "ten": "Helium",
+      "ct": "He",
+      "M": 4.0026,
+      "gamma": 1.6667,
+      "a": 0.0346,
+      "b": 0.0237,
+      "mau": "var(--hl-khi-he, #fbbf24)",
+      "nguon": "CRC Handbook of Chemistry and Physics, 97th ed."
+    },
+    {
+      "id": "H2",
+      "ten": "Hydrogen",
+      "ct": "H₂",
+      "M": 2.016,
+      "gamma": 1.4,
+      "a": 0.2476,
+      "b": 0.0266,
+      "mau": "var(--hl-khi-h2, #a855f7)",
+      "nguon": "CRC Handbook of Chemistry and Physics, 97th ed."
+    },
+    {
+      "id": "CO2",
+      "ten": "Carbon dioxide",
+      "ct": "CO₂",
+      "M": 44.01,
+      "gamma": 1.29,
+      "a": 3.640,
+      "b": 0.04267,
+      "mau": "var(--hl-khi-co2, #34d399)",
+      "nguon": "CRC Handbook of Chemistry and Physics, 97th ed."
+    },
+    {
+      "id": "Ar",
+      "ten": "Argon",
+      "ct": "Ar",
+      "M": 39.948,
+      "gamma": 1.6667,
+      "a": 1.355,
+      "b": 0.0320,
+      "mau": "var(--hl-khi-ar, #818cf8)",
+      "nguon": "CRC Handbook of Chemistry and Physics, 97th ed."
+    },
+    {
+      "id": "Ne",
+      "ten": "Neon",
+      "ct": "Ne",
+      "M": 20.18,
+      "gamma": 1.6667,
+      "a": 0.2135,
+      "b": 0.0171,
+      "mau": "var(--hl-khi-ne, #fb923c)",
+      "nguon": "CRC Handbook of Chemistry and Physics, 97th ed."
+    },
+    {
+      "id": "Air",
+      "ten": "Không khí",
+      "ct": "Không khí",
+      "M": 28.96,
+      "gamma": 1.4,
+      "a": 1.358,
+      "b": 0.0364,
+      "mau": "var(--hl-khi-air, #94a3b8)",
+      "nguon": "CRC Handbook of Chemistry and Physics, 97th ed."
+    }
+  ]
+}

@@ -1,0 +1,139 @@
+{
+  "phien_ban": 1,
+  "mon": "Hoá lý",
+  "chu_de": "Cân bằng hoá học & Nguyên lý Le Chatelier",
+  "danh_sach": [
+    {
+      "id": "ch-01",
+      "dang": "I",
+      "tieu_de": "Câu 1 (Phần I): Ảnh hưởng của áp suất lên cân bằng",
+      "cau_hoi": "Cho phản ứng tổng hợp ammonia: N₂(k) + 3H₂(k) ⇌ 2NH₃(k) (ΔrH°₂₉₈ = −91,8 kJ). Khi tăng áp suất chung của hệ bằng cách nén thể tích, cân bằng sẽ chuyển dịch theo chiều nào?",
+      "lua_chon": [
+        "A. Chiều thuận (tạo thêm NH₃)",
+        "B. Chiều nghịch (phân huỷ NH₃)",
+        "C. Không chuyển dịch vì hằng số cân bằng không đổi",
+        "D. Ban đầu theo chiều nghịch, sau đó theo chiều thuận"
+      ],
+      "dap_an": "A",
+      "giai_thich": "Trước phản ứng có 1 + 3 = 4 mol khí, sau phản ứng có 2 mol khí (Δn = 2 − 4 = −2 < 0). Khi tăng áp suất, theo nguyên lý Le Chatelier (C3), cân bằng chuyển dịch theo chiều làm giảm số mol khí, tức chiều thuận tạo thêm NH₃.",
+      "nguon": "SGK Hoá học 11 (KNTT) - Bài Chuyển dịch cân bằng hoá học"
+    },
+    {
+      "id": "ch-02",
+      "dang": "I",
+      "tieu_de": "Câu 2 (Phần I): Ảnh hưởng của nhiệt độ và bản chất toả/thu nhiệt",
+      "cau_hoi": "Xét cân bằng khí trong ống tiêm: 2NO₂(k, nâu đỏ) ⇌ N₂O₄(k, không màu) có ΔrH°₂₉₈ = −57,2 kJ. Khi ngâm ống tiêm vào chậu nước đá (hạ nhiệt độ), hiện tượng quan sát được là gì?",
+      "lua_chon": [
+        "A. Màu nâu đỏ của hỗn hợp khí đậm dần lên",
+        "B. Màu nâu đỏ của hỗn hợp khí nhạt dần đi",
+        "C. Màu sắc không đổi vì thể tích ống tiêm giữ cố định",
+        "D. Khí N₂O₄ bị phân huỷ hoàn toàn thành NO₂"
+      ],
+      "dap_an": "B",
+      "giai_thich": "Phản ứng thuận là phản ứng toả nhiệt (ΔH < 0). Khi hạ nhiệt độ, theo nguyên lý Le Chatelier (C4), cân bằng chuyển dịch theo chiều toả nhiệt (chiều thuận) để chống lại sự giảm nhiệt độ. Nồng độ NO₂ nâu đỏ giảm và N₂O₄ không màu tăng, do đó màu nâu đỏ nhạt dần đi.",
+      "nguon": "SGK Hoá học 11 (CTST) - Thực hành chuyển dịch cân bằng NO₂ và N₂O₄"
+    },
+    {
+      "id": "ch-03",
+      "dang": "I",
+      "tieu_de": "Câu 3 (Phần I): Vai trò của chất xúc tác đối với cân bằng hoá học",
+      "cau_hoi": "Khi thêm chất xúc tác bột sắt (Fe) vào hệ phản ứng tổng hợp ammonia N₂(k) + 3H₂(k) ⇌ 2NH₃(k), phát biểu nào sau đây là chính xác nhất?",
+      "lua_chon": [
+        "A. Làm tăng hiệu suất tạo thành NH₃ ở trạng thái cân bằng",
+        "B. Làm hằng số cân bằng Kc của phản ứng tăng lên",
+        "C. Làm hệ nhanh đạt tới trạng thái cân bằng mà không làm thay đổi vị trí cân bằng và Kc",
+        "D. Làm chuyển dịch cân bằng theo chiều thuận vì giảm năng lượng hoạt hoá thuận"
+      ],
+      "dap_an": "C",
+      "giai_thich": "Theo lý thuyết động học và nhiệt động (C7), chất xúc tác làm giảm năng lượng hoạt hoá của cả phản ứng thuận và nghịch cùng một lượng ΔEa, do đó tốc độ thuận và nghịch tăng cùng một tỉ số. Chất xúc tác chỉ rút ngắn thời gian đạt cân bằng, không làm thay đổi giá trị Kc và không làm chuyển dịch cân bằng.",
+      "nguon": "SGK Hoá học 11 - Bài Cân bằng hoá học"
+    },
+    {
+      "id": "ch-04",
+      "dang": "II",
+      "tieu_de": "Câu 4 (Phần II): Đúng / Sai về Thương số phản ứng Q và Chiều chuyển dịch",
+      "cau_hoi": "Cho một hệ phản ứng hoá học đồng thể khí đang ở nhiệt độ T xác định với hằng số cân bằng Kc:",
+      "y": [
+        { "noi_dung": "a) Khi thương số phản ứng Q < Kc, tốc độ phản ứng thuận lớn hơn tốc độ phản ứng nghịch (v_t > v_n) và hệ chuyển dịch theo chiều thuận.", "dung": true },
+        { "noi_dung": "b) Khi nén giảm thể tích hệ phản ứng H₂(k) + I₂(k) ⇌ 2HI(k), thương số phản ứng Q không đổi và cân bằng không chuyển dịch.", "dung": true },
+        { "noi_dung": "c) Ở trạng thái cân bằng hoá học (Q = Kc), phản ứng hoá học dừng lại hoàn toàn và các phân tử ngừng phản ứng.", "dung": false },
+        { "noi_dung": "d) Biểu thức hằng số cân bằng nồng độ Kc của phản ứng 2NO₂(k) ⇌ N₂O₄(k) là Kc = [N₂O₄] / [NO₂]².", "dung": true }
+      ],
+      "giai_thich": "Ý c sai: Cân bằng hoá học là cân bằng động, phản ứng thuận và nghịch vẫn liên tục diễn ra với tốc độ bằng nhau (v_t = v_n) chứ không dừng lại.",
+      "nguon": "SGK Hoá học 11 - Cân bằng hoá học & Thương số phản ứng"
+    },
+    {
+      "id": "ch-05",
+      "dang": "II",
+      "tieu_de": "Câu 5 (Phần II): Đúng / Sai về Thí nghiệm nén ống tiêm NO₂ – N₂O₄",
+      "cau_hoi": "Xét thí nghiệm nén pít-tông của ống tiêm chứa hỗn hợp khí 2NO₂(nâu đỏ) ⇌ N₂O₄(không màu) ở nhiệt độ phòng:",
+      "y": [
+        { "noi_dung": "a) Ngay lập tức khi đẩy pít-tông nén thể tích còn 1/2, nồng độ NO₂ tăng gấp 2 lần khiến màu nâu đỏ đậm lên ngay tức thì.", "dung": true },
+        { "noi_dung": "b) Sau khi màu nâu đậm lên ngay lập tức, cân bằng chuyển dịch theo chiều tạo N₂O₄ làm nồng độ NO₂ giảm dần và màu nhạt bớt.", "dung": true },
+        { "noi_dung": "c) Ở trạng thái cân bằng mới sau khi nén, nồng độ NO₂ vẫn lớn hơn nồng độ NO₂ ban đầu trước khi nén.", "dung": true },
+        { "noi_dung": "d) Việc thêm khí trơ Heli (He) vào ống tiêm ở thể tích cố định sẽ làm cân bằng chuyển dịch theo chiều tạo N₂O₄.", "dung": false }
+      ],
+      "giai_thich": "Ý d sai: Thêm khí trơ ở thể tích không đổi không làm thay đổi nồng độ hay áp suất riêng phần của NO₂ và N₂O₄, do đó thương số Q không đổi và cân bằng không chuyển dịch.",
+      "nguon": "SGK Hoá học 11 - Thực hành cân bằng Le Chatelier"
+    },
+    {
+      "id": "ch-06",
+      "dang": "II",
+      "tieu_de": "Câu 6 (Phần II): Đúng / Sai về Mối liên hệ Kc, Kp và Nhiệt động học",
+      "cau_hoi": "Xét các hệ thức liên hệ giữa hằng số cân bằng và các đại lượng nhiệt động lực học:",
+      "y": [
+        { "noi_dung": "a) Mối liên hệ giữa hằng số Kp và Kc cho phản ứng chất khí là Kp = Kc · (RT)^Δn (với Δn là độ biến thiên số mol khí).", "dung": true },
+        { "noi_dung": "b) Đồ thị biểu diễn mối liên hệ ln Kc theo 1/T (phương trình van 't Hoff) là một đường thẳng có hệ số góc bằng −ΔrH° / R.", "dung": true },
+        { "noi_dung": "c) Đối với phản ứng thu nhiệt (ΔrH° > 0), khi nhiệt độ tăng thì hằng số cân bằng Kc giảm đi.", "dung": false },
+        { "noi_dung": "d) Ở trạng thái cân bằng hoá học, biến thiên năng lượng tự do Gibbs của phản ứng ΔrG = 0.", "dung": true }
+      ],
+      "giai_thich": "Ý c sai: Đối với phản ứng thu nhiệt (ΔH > 0), khi nhiệt độ T tăng thì Kc tăng lên theo phương trình van 't Hoff (ln(K₂/K₁) = −ΔH/R · (1/T₂ − 1/T₁) > 0).",
+      "nguon": "Hoá lý cơ sở - Nhiệt động học cân bằng hoá học"
+    },
+    {
+      "id": "ch-07",
+      "dang": "III",
+      "tieu_de": "Câu 7 (Phần III): Tính hằng số Kp từ Kc",
+      "cau_hoi": "Ở 298,15 K, hằng số cân bằng phân ly của phản ứng N₂O₄(k) ⇌ 2NO₂(k) là Kc = 4,61·10⁻³ mol/L. Tính hằng số cân bằng áp suất Kp của phản ứng ở nhiệt độ này (theo đơn vị bar, lấy R = 0,0831446 L·bar/(mol·K), kết quả làm tròn đến năm chữ số thập phân, ví dụ 0,11428).",
+      "dap_so": "0,11428",
+      "tinh_bang": {
+        "ham": "kpTuKc",
+        "tham_so": { "Kc": 0.00461, "T": 298.15, "delta_n": 1 },
+        "truong": "Kp",
+        "lam_tron": 5
+      },
+      "giai_thich": "Kp = Kc · (R · T)^Δn = 4,61·10⁻³ · (0,0831446 · 298.15)¹ = 4,61·10⁻³ · 24,7896 ≈ 0,11428 bar.",
+      "nguon": "Bài tập Cân bằng hoá học N₂O₄ - NO₂"
+    },
+    {
+      "id": "ch-08",
+      "dang": "III",
+      "tieu_de": "Câu 8 (Phần III): Nồng độ cân bằng ban đầu của NO₂",
+      "cau_hoi": "Cho ban đầu chỉ có khí N₂O₄ với nồng độ [N₂O₄]₀ = 0,0400 M ở 298,15 K. Phản ứng phân ly xảy ra: N₂O₄(k) ⇌ 2NO₂(k) có Kc = 4,61·10⁻³ mol/L. Tính nồng độ cân bằng của khí NO₂ (theo đơn vị mol/L, làm tròn đến năm chữ số thập phân, ví dụ 0,01248).",
+      "dap_so": "0,01248",
+      "tinh_bang": {
+        "ham": "canBangPhanLi",
+        "tham_so": { "C0": 0.0400, "Kc": 0.00461 },
+        "truong": "cB",
+        "lam_tron": 5
+      },
+      "giai_thich": "Gọi x là nồng độ N₂O₄ phân ly: Kc = 4x² / (0,04 − x) = 0,00461 => 4x² + 0,00461x − 0,0001844 = 0 => x ≈ 0,006238 M. Nồng độ [NO₂] = 2x = 2 · 0,006238 ≈ 0,01248 M.",
+      "nguon": "Bảng ICE cân bằng hoá học"
+    },
+    {
+      "id": "ch-09",
+      "dang": "III",
+      "tieu_de": "Câu 9 (Phần III): Hằng số cân bằng Kc ở nhiệt độ 373,15 K",
+      "cau_hoi": "Biết phản ứng N₂O₄(k) ⇌ 2NO₂(k) có Kc = 4,61·10⁻³ mol/L ở 298,15 K và ΔrH° = +57,2 kJ/mol. Coi ΔrH° không phụ thuộc vào nhiệt độ, hãy tính hằng số cân bằng Kc ở nhiệt độ 373,15 K (100 °C) (cho R = 8,31446 J/(mol·K), kết quả làm tròn đến bốn chữ số thập phân, ví dụ 0,4763).",
+      "dap_so": "0,4763",
+      "tinh_bang": {
+        "ham": "kcTheoT",
+        "tham_so": { "T": 373.15, "deltaH_kJ": 57.2, "T_ref": 298.15, "Kc_ref": 0.00461 },
+        "truong": "Kc",
+        "lam_tron": 4
+      },
+      "giai_thich": "Theo phương trình van 't Hoff: ln(Kc/4,61·10⁻³) = −(57200 / 8,31446) · (1/373,15 − 1/298,15) = 4,6378 => Kc = 4,61·10⁻³ · e^(4,6378) ≈ 0,47625 ≈ 0,4763 mol/L.",
+      "nguon": "Hoá lý - Phương trình van 't Hoff"
+    }
+  ]
+}

@@ -1,0 +1,139 @@
+{
+  "phien_ban": 1,
+  "mon": "Hoá lý",
+  "chu_de": "Khí lý tưởng & Phương trình trạng thái",
+  "danh_sach": [
+    {
+      "id": "ch-01",
+      "dang": "I",
+      "tieu_de": "Câu 1 (Phần I): Định luật Boyle về quá trình đẳng nhiệt",
+      "cau_hoi": "Khi giữ nhiệt độ của một khối khí lý tưởng xác định không đổi, nếu thể tích của khối khí giảm đi 3 lần thì áp suất của khối khí sẽ biến đổi như thế nào?",
+      "lua_chon": [
+        "A. Giảm đi 3 lần",
+        "B. Tăng lên 3 lần",
+        "C. Không đổi",
+        "D. Tăng lên 9 lần"
+      ],
+      "dap_an": "B",
+      "giai_thich": "Theo định luật Boyle (K7), trong quá trình đẳng nhiệt của một lượng khí xác định, áp suất tỉ lệ nghịch với thể tích: p₁V₁ = p₂V₂. Do đó khi V giảm 3 lần thì p tăng 3 lần.",
+      "nguon": "SGK Vật lí 12 (KNTT) - Bài Định luật Boyle"
+    },
+    {
+      "id": "ch-02",
+      "dang": "I",
+      "tieu_de": "Câu 2 (Phần I): Định luật Charles về quá trình đẳng áp",
+      "cau_hoi": "Trong một quá trình biến đổi trạng thái của khối khí lý tưởng có áp suất không đổi (quá trình đẳng áp), hệ thức nào sau đây mô tả đúng định luật Charles?",
+      "lua_chon": [
+        "A. V / T = hằng số",
+        "B. p · V = hằng số",
+        "C. p / T = hằng số",
+        "D. V · T = hằng số"
+      ],
+      "dap_an": "A",
+      "giai_thich": "Theo định luật Charles (K6), ở áp suất không đổi, thể tích của một lượng khí xác định tỉ lệ thuận với nhiệt độ tuyệt đối T (Kelvin): V/T = const.",
+      "nguon": "SGK Vật lí 12 (CTST) - Bài Định luật Charles"
+    },
+    {
+      "id": "ch-03",
+      "dang": "I",
+      "tieu_de": "Câu 3 (Phần I): Thể tích mol khí ở điều kiện chuẩn",
+      "cau_hoi": "Theo IUPAC và chương trình SGK mới (25 °C tương ứng 298,15 K và áp suất 1 bar = 10⁵ Pa), thể tích của 1 mol khí lý tưởng bất kỳ ở điều kiện chuẩn (đkc) xấp xỉ bằng bao nhiêu?",
+      "lua_chon": [
+        "A. 22,414 L",
+        "B. 24,790 L",
+        "C. 24,465 L",
+        "D. 22,711 L"
+      ],
+      "dap_an": "B",
+      "giai_thich": "Ở điều kiện chuẩn mới (T = 298,15 K, p = 1 bar), V = nRT/p = 1 · 0,0831446 · 298,15 / 1 ≈ 24,79 L/mol. (22,414 L là ở 0 °C và 1 atm).",
+      "nguon": "SGK Hoá học 10 (KNTT) - Bài Khí lý tưởng và thể tích mol"
+    },
+    {
+      "id": "ch-04",
+      "dang": "II",
+      "tieu_de": "Câu 4 (Phần II): Đúng / Sai về Thuyết động học phân tử chất khí",
+      "cau_hoi": "Xét các phát biểu theo thuyết động học phân tử chất khí và mô hình khí lý tưởng:",
+      "y": [
+        { "noi_dung": "a) Động năng tịnh tiến trung bình của một phân tử khí chỉ phụ thuộc vào nhiệt độ tuyệt đối T theo công thức W̄đ = 3/2 · kB · T.", "dung": true },
+        { "noi_dung": "b) Ở cùng một nhiệt độ T, các phân tử khí có khối lượng mol M lớn hơn sẽ có căn quân phương vận tốc v_rms lớn hơn.", "dung": false },
+        { "noi_dung": "c) Áp suất chất khí tác dụng lên thành bình sinh ra do các phân tử khí chuyển động hỗn loạn và va chạm liên tục vào thành bình.", "dung": true },
+        { "noi_dung": "d) Khí lý tưởng là mô hình giả định coi các phân tử là chất điểm và chỉ tương tác khi va chạm đàn hồi.", "dung": true }
+      ],
+      "giai_thich": "Ý b sai: Công thức v_rms = √(3RT/M). Do M nằm ở mẫu số nên khí có phân tử khối lớn hơn (như CO₂, O₂) sẽ chuyển động trung bình chậm hơn khí nhẹ (như H₂, He).",
+      "nguon": "SGK Vật lí 12 - Thuyết động học phân tử khí"
+    },
+    {
+      "id": "ch-05",
+      "dang": "II",
+      "tieu_de": "Câu 5 (Phần II): Đúng / Sai về Các quá trình biến đổi trạng thái",
+      "cau_hoi": "Xét một lượng khí lý tưởng xác định thực hiện các quá trình nhiệt động:",
+      "y": [
+        { "noi_dung": "a) Trong quá trình giãn nở đẳng nhiệt, nội năng của khí không đổi (ΔU = 0), toàn bộ nhiệt lượng nhận vào chuyển hoá thành công sinh ra (Q = A').", "dung": true },
+        { "noi_dung": "b) Trong quá trình nén đoạn nhiệt (Q = 0), công thực hiện lên khí làm tăng nội năng khiến nhiệt độ khối khí tăng lên.", "dung": true },
+        { "noi_dung": "c) Trong quá trình đẳng tích, khí không sinh công (A = 0) nên nhiệt lượng cấp vào làm biến thiên nội năng ΔU = Q.", "dung": true },
+        { "noi_dung": "d) Trong quá trình giãn đẳng áp, công khí sinh ra bằng A' = p · ΔV > 0 và nhiệt độ khí giảm đi.", "dung": false }
+      ],
+      "giai_thich": "Ý d sai: Khi giãn đẳng áp (V tăng ở p không đổi), theo định luật Charles V/T = const nên nhiệt độ T phải tăng lên (khí nóng lên, nhận nhiệt Q = nCpΔT > 0).",
+      "nguon": "SGK Vật lí 12 - Định luật I nhiệt động lực học"
+    },
+    {
+      "id": "ch-06",
+      "dang": "II",
+      "tieu_de": "Câu 6 (Phần II): Đúng / Sai về Khí thực & Phương trình Van der Waals",
+      "cau_hoi": "Xét phương trình Van der Waals (p + a·n²/V²)(V − n·b) = nRT mô tả trạng thái khí thực:",
+      "y": [
+        { "noi_dung": "a) Số hạng a·n²/V² tính đến lực hút liên phân tử giữa các hạt khí thực (gọi là áp suất nội).", "dung": true },
+        { "noi_dung": "b) Đại lượng b biểu thị thể tích riêng bị chiếm giữ bởi 1 mol các phân tử khí (thể tích loại trừ).", "dung": true },
+        { "noi_dung": "c) Ở áp suất rất cao và nhiệt độ thấp, khí thực tuân theo định luật khí lý tưởng chính xác hơn ở áp suất thấp.", "dung": false },
+        { "noi_dung": "d) Hệ số nén Z = pV/(nRT) của khí lý tưởng luôn bằng 1 ở mọi điều kiện.", "dung": true }
+      ],
+      "giai_thich": "Ý c sai: Ở áp suất rất cao (các phân tử ở quá gần nhau, lực tương tác và thể tích bản thân hạt trở nên đáng kể) và nhiệt độ thấp, khí thực sai lệch nhiều nhất so với khí lý tưởng.",
+      "nguon": "Hoá lý cơ sở - Khí thực và phương trình Van der Waals"
+    },
+    {
+      "id": "ch-07",
+      "dang": "III",
+      "tieu_de": "Câu 7 (Phần III): Thể tích khí ở nhiệt độ và áp suất xác định",
+      "cau_hoi": "Tính thể tích của 1 mol khí lý tưởng ở nhiệt độ T = 300 K và áp suất p = 2,0 bar (cho R = 0,0831446 L·bar/(mol·K), kết quả tính theo đơn vị Lít và làm tròn đến hai chữ số thập phân, dùng dấu phẩy như 12,47).",
+      "dap_so": "12,47",
+      "tinh_bang": {
+        "ham": "theTich",
+        "tham_so": { "n": 1, "T": 300, "p_bar": 2.0 },
+        "truong": "V_L",
+        "lam_tron": 2
+      },
+      "giai_thich": "V = n·R·T / p = 1 · 0,0831446 · 300 / 2,0 = 24,94338 / 2,0 = 12,472 L ≈ 12,47 L.",
+      "nguon": "Bài tập Định luật khí lý tưởng"
+    },
+    {
+      "id": "ch-08",
+      "dang": "III",
+      "tieu_de": "Câu 8 (Phần III): Vận tốc căn quân phương v_rms của phân tử Nitơ",
+      "cau_hoi": "Tính căn quân phương vận tốc v_rms của phân tử khí Nitơ (N₂, M = 28,013 g/mol) ở nhiệt độ 300 K (cho hằng số R = 8,31446 J/(mol·K), tính theo đơn vị m/s và làm tròn đến một chữ số thập phân, ví dụ 516,8).",
+      "dap_so": "516,8",
+      "tinh_bang": {
+        "ham": "vRms",
+        "tham_so": { "M_g_mol": 28.013, "T": 300 },
+        "truong": "v_rms",
+        "lam_tron": 1
+      },
+      "giai_thich": "v_rms = √(3RT/M) = √(3 · 8,31446 · 300 / 0,028013) = √267123,8 ≈ 516,84 m/s ≈ 516,8 m/s.",
+      "nguon": "Vật lí 12 - Thuyết động học chất khí"
+    },
+    {
+      "id": "ch-09",
+      "dang": "III",
+      "tieu_de": "Câu 9 (Phần III): Công giãn nở đẳng nhiệt",
+      "cau_hoi": "Cho 1 mol khí lý tưởng ở 300 K giãn nở đẳng nhiệt từ thể tích V₁ = 10 L đến V₂ = 20 L. Tính công A' mà khối khí sinh ra môi trường (theo đơn vị Joule, cho R = 8,31446 J/(mol·K), làm tròn đến hàng đơn vị, ví dụ 1729).",
+      "dap_so": "1729",
+      "tinh_bang": {
+        "ham": "quaTrinh",
+        "tham_so": { "tu": { "n": 1, "T": 300, "V": 10 }, "den": { "V": 20 }, "giu": "T" },
+        "truong": "A_sinh",
+        "lam_tron": 0
+      },
+      "giai_thich": "A' = n·R·T · ln(V₂/V₁) = 1 · 8,31446 · 300 · ln(20/10) = 2494,34 · 0,693147 ≈ 1728,94 J ≈ 1729 J.",
+      "nguon": "Vật lí 12 - Định luật I nhiệt động lực học"
+    }
+  ]
+}
