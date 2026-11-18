@@ -166,6 +166,72 @@ class TestGiaiDe(unittest.TestCase):
             giai_de.doc_json("không có")
 
 
+class TestNhaCungCap(unittest.TestCase):
+    """Claude trước; Claude không có khóa / 401 → Gemini (REST giả lập qua _post_gemini); cả hai hỏng → 503 nêu cả hai."""
+
+    def setUp(self):
+        giai_de._claude_hong = ""
+        giai_de._da_dung.clear()
+
+    def tearDown(self):
+        giai_de._claude_hong = ""
+
+    @staticmethod
+    def _gemini_tra(ds):
+        goi = []
+
+        def post(mo_hinh, than, cho):
+            goi.append((mo_hinh, than))
+            return ds.pop(0)
+        return goi, post
+
+    def test_claude_hong_sang_gemini(self):
+        goi, post = self._gemini_tra([(404, {"error": {"message": "not found"}}),
+                                      (200, {"candidates": [{"content": {"parts": [{"text": "nghĩ…", "thought": True},
+                                                                                     {"text": json.dumps(DUNG)}]}}]})])
+
+        async def claude_401(*a):
+            raise giai_de.LoiGiaiDe("Khóa Claude (ANTHROPIC_API_KEY) không hợp lệ.", "sai_key", 503)
+        with mock.patch.object(giai_de, "goi_claude", claude_401), mock.patch.object(giai_de, "_post_gemini", post), \
+                mock.patch.dict(os.environ, {"GEMINI_API_KEY": "k-gia", "GEMINI_MODEL_CO_CHE": ""}):
+            kq = chay(giai_de.giai_de("Thủy phân bromoethane", dung_cache=False))
+        self.assertEqual([g[0] for g in goi], ["gemini-pro-latest", "gemini-flash-latest"])   # 404 → mô hình sau
+        than = goi[1][1]
+        self.assertEqual(than["generationConfig"]["responseMimeType"], "application/json")
+        self.assertNotIn("additionalProperties", json.dumps(than["generationConfig"]["responseJsonSchema"]))
+        self.assertEqual(kq["thong_tin"]["mo_hinh"], "gemini-flash-latest")
+        self.assertTrue(kq["kich_ban_3d"]["trang_thai"])
+        self.assertTrue(giai_de._claude_hong)                  # lần sau bỏ qua Claude
+
+    def test_anh_sang_inline_data(self):
+        nd = giai_de._noi_dung_gemini([{"role": "user", "content": [
+            {"type": "image", "source": {"type": "base64", "media_type": "image/png", "data": "QUJD"}}, {"type": "text", "text": "đọc"}]},
+            {"role": "assistant", "content": "{}"}])
+        self.assertEqual(nd[0]["parts"][0], {"inline_data": {"mime_type": "image/png", "data": "QUJD"}})
+        self.assertEqual(nd[1]["role"], "model")
+
+    def test_ca_hai_hong(self):
+        async def claude_thieu(*a):
+            raise giai_de.LoiGiaiDe("Chưa có khóa Claude.", "thieu_key", 503)
+        goi, post = self._gemini_tra([(400, {"error": {"message": "API key not valid. Please pass a valid API key."}})])
+        with mock.patch.object(giai_de, "goi_claude", claude_thieu), mock.patch.object(giai_de, "_post_gemini", post), \
+                mock.patch.dict(os.environ, {"GEMINI_API_KEY": "k-gia"}):
+            with self.assertRaises(giai_de.LoiGiaiDe) as cm:
+                chay(giai_de.giai_de("x", dung_cache=False))
+        self.assertEqual(cm.exception.status, 503)
+        self.assertIn("Claude", cm.exception.thong_diep)
+        self.assertIn("Gemini", cm.exception.thong_diep)
+
+    def test_claude_loi_khac_khong_doi(self):
+        async def claude_qua_tai(*a):
+            raise giai_de.LoiGiaiDe("Claude quá tải.", "qua_tai", 503)
+        with mock.patch.object(giai_de, "goi_claude", claude_qua_tai):
+            with self.assertRaises(giai_de.LoiGiaiDe) as cm:
+                chay(giai_de.goi_ai_mac_dinh("s", [{"role": "user", "content": "x"}], {}))
+        self.assertEqual(cm.exception.ma, "qua_tai")
+        self.assertFalse(giai_de._claude_hong)
+
+
 class TestApiGiaiDe(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
