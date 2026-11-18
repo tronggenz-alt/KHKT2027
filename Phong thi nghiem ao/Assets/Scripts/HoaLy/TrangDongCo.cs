@@ -58,7 +58,7 @@ namespace Khkt.HoaLy
             chipChuTrinh = NhomChip(new[] { "Otto (xăng)", "Diesel (dầu)" }, -36, 548, i => DatChuTrinh(i == 1 ? KieuChuTrinh.Diesel : KieuChuTrinh.Otto), 0, 2, 38, 14);
             TieuMuc("Nhiên liệu (đặt q_in cho Otto)", -88);
             var tenNl = new string[DanhSachNhienLieu.Count];
-            for (int i = 0; i < tenNl.Length; i++) tenNl[i] = DanhSachNhienLieu[i].CongThuc.Replace("C8H18", "C₈H₁₈").Replace("C2H5OH", "C₂H₅OH").Replace("CH4", "CH₄").Replace("H2", "H₂");
+            for (int i = 0; i < tenNl.Length; i++) tenNl[i] = HoaLyUi.CongThuc(DanhSachNhienLieu[i].CongThuc);
             chipNl = NhomChip(tenNl, -110, 548, ChonNhienLieu, -1, 4, 38, 14);
             chuNl = HoaLyUi.Chu(VungDieuKhien, "Phản ứng cháy", "", 13, GlassKit.Dim, false, TextAnchor.UpperLeft, new Vector2(20, -154), new Vector2(548, 36));
             TieuMuc("Tham số", -196);
@@ -106,7 +106,7 @@ namespace Khkt.HoaLy
             for (int k = 0; k < chipNl.Length; k++) GlassKit.SetChip(chipNl[k], k == i);
             var kq = DongCoNhietMoHinh.TinhNhienLieu(NhienLieuChon);
             ThanhQ.value = Mathf.Clamp((float)kq.QIn, 200f, 2500f);
-            chuNl.text = kq.PhuongTrinh + $"\nLHV = {HoaLyUi.So(kq.LHV_MJ_kg, 2)} MJ/kg · AFR = {HoaLyUi.So(kq.AFR, 2)} → q_in = {HoaLyUi.So(kq.QIn, 0)} kJ/kg (k = 0,55)";
+            chuNl.text = HoaLyUi.CongThuc(NhienLieuChon.CongThuc) + kq.PhuongTrinh.Substring(NhienLieuChon.CongThuc.Length).Replace("CO₂", "CO₂") + $"\nLHV = {HoaLyUi.So(kq.LHV_MJ_kg, 2)} MJ/kg · AFR = {HoaLyUi.So(kq.AFR, 2)} → q_in = {HoaLyUi.So(kq.QIn, 0)} kJ/kg (k = 0,55)";
             TinhLai();
         }
 
@@ -190,8 +190,10 @@ namespace Khkt.HoaLy
             var r = veMay.rectTransform.rect;
             veMay.BatDau();
             float cx = r.center.x, w = Mathf.Min(170, r.width * 0.42f);
-            float dinh = r.yMax - 60, hanhTrinh = Mathf.Min(165, r.height * 0.30f), R = hanhTrinh / 2, L = 110;
-            float khoangChet = Mathf.Clamp(hanhTrinh / (float)(kq.R - 1), 10, 80);   // V₂/(V₁−V₂) = 1/(r−1)
+            // chiều cao cần: khoảng chết + hành trình 2R + chốt 20 + thanh truyền L = 2,2R + 40 + đĩa trục R + 10, chừa 70 cho nhãn dưới
+            float dinh = r.yMax - 56;
+            float R = Mathf.Clamp((r.height - 250) / 4.2f, 30, 78), hanhTrinh = 2 * R, L = 2.2f * R + 40;
+            float khoangChet = Mathf.Clamp(hanhTrinh / (float)(kq.R - 1), 8, 40);   // V₂/(V₁−V₂) = 1/(r−1)
             float frac = (float)((v - kq.V2) / (kq.V1 - kq.V2));
             float yPit = dinh - khoangChet - hanhTrinh * frac;
             float dayThanh = dinh - khoangChet - hanhTrinh - 44;
@@ -220,7 +222,8 @@ namespace Khkt.HoaLy
             float a = (float)(Goc * Mathf.Deg2Rad);
             var chot = new Vector2(cx + banKinh * Mathf.Sin(a), yTruc + banKinh * Mathf.Cos(a));
             var mauTruc = HoaLyUi.C32(GlassKit.Ink, 0.55f);
-            veMay.VeHat(cx, yTruc, banKinh + 10, HoaLyUi.C32(GlassKit.Line, 2f));
+            veMay.VeHat(cx, yTruc, banKinh + 12, HoaLyUi.C32(GlassKit.Well));
+            veMay.VeKhung(new Rect(cx - banKinh - 26, yTruc - banKinh - 18, 2 * banKinh + 52, 2 * banKinh + 36), 3, HoaLyUi.C32(GlassKit.Line, 1.6f));
             veMay.VeDoan(new Vector2(cx, yTruc), chot, 10, mauTruc);
             veMay.VeDoan(chot, new Vector2(cx, yPit - 20), 9, HoaLyUi.C32(GlassKit.Dim));
             veMay.VeHat(chot.x, chot.y, 8, HoaLyUi.C32(GlassKit.Accent2));

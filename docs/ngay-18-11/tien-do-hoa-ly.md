@@ -18,9 +18,13 @@ Nhánh n18/tich-hop. Lần sau tiếp tục: đọc tệp này trước.
   - `BangCauHoi.cs`, `TrangKhiLyTuong.cs`, `TrangTocDo.cs`, `TrangCanBang.cs`, `TrangDongCo.cs`
   - `KhktHoaLyRunner.cs` + `Scripts/Editor/KhktHoaLyVerify.cs`
 
+- Bước 4 (đang làm): lần chạy Unity 1 – 54 đạt, 5 sai (4 lỗi cân bằng do batchmode chậm → runner đợi theo thời gian mô phỏng + TuaNhanh; cấp phát 3,7 KB/khung do số trục tạo chuỗi mỗi khung → DoThi chỉ tạo chuỗi khi vạch đổi).
+  Đã sửa theo ảnh: chú thích xuống dòng dưới tiêu đề, 13 ô số trục x, công thức NO₂/Fe³⁺, đường trùng nhau vẽ dày khác nhau,
+  đuôi E ≥ Ea phóng to 10ⁿ, cơ cấu trục khuỷu không đè xi-lanh. Lần chạy 2 đang chạy.
+
 ## Còn lại (theo thứ tự)
-4. Chạy KhktHoaLyVerify trong Unity, sửa lỗi tới khi [HL_RESULT] ALL PASSED; chép ảnh $TMPDIR/vera_hoaly_shots → docs/ngay-18-11/anh/hoa-ly/, tự xem ảnh, chỉnh giao diện
-5. Chép .meta do Unity sinh (bản sao ~/AppBuild/VERA_claude) về repo cho Scripts/HoaLy, Resources/HoaLy, Editor/KhktHoaLyVerify.cs; viết docs/ngay-18-11/bao-cao-hoa-ly.md; commit
+4. Kiểm KhktHoaLyVerify tới khi [HL_RESULT] ALL PASSED; chép ảnh $TMPDIR/vera_hoaly_shots → docs/ngay-18-11/anh/hoa-ly/, xem lại ảnh
+5. Chép .meta (bản sao ~/AppBuild/VERA_claude hoặc thư mục chính nếu Unity của phiên khác đã sinh) cho Scripts/HoaLy, Resources/HoaLy, Editor/KhktHoaLyVerify.cs; viết docs/ngay-18-11/bao-cao-hoa-ly.md; commit
 
 ## Lệnh kiểm thử
 Test thuần (không cần Unity), từ `Phong thi nghiem ao/Assets/Scripts/HoaLy/MoHinh` (Main.cs gọi HoaLySimTests.RunAll với 8 tệp JSON trong Resources/HoaLy):

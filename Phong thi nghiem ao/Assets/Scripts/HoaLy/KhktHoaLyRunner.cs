@@ -60,7 +60,7 @@ namespace Khkt.HoaLy
 
         IEnumerator Start()
         {
-            StartCoroutine(Watchdog(300f));
+            StartCoroutine(Watchdog(480f));
             rt = new RenderTexture(ShotW, ShotH, 24, RenderTextureFormat.ARGB32);
             rt.Create();
             readTex = new Texture2D(ShotW, ShotH, TextureFormat.RGBA32, false);
@@ -234,17 +234,21 @@ namespace Khkt.HoaLy
             t.ChonPhanUng(0);
         }
 
-        IEnumerator ChayToi(TrangCanBang cb, float giay)
+        /// <summary>Đợi theo thời gian MÔ PHỎNG (batchmode có thể chạy chậm hơn thời gian thực, dt bị kẹp 0,05 s).</summary>
+        static IEnumerator ChoMoPhong(TrangCanBang cb, double giay)
         {
-            yield return Giay(giay);
+            double t0 = cb.ThoiGian;
+            float r0 = Time.realtimeSinceStartup;
+            while (cb.ThoiGian - t0 < giay && Time.realtimeSinceStartup - r0 < 40f) yield return null;
         }
 
         IEnumerator KiemCanBang(HoaLyManHinh mh)
         {
             mh.ChonTrang("can_bang");
             var cb = (TrangCanBang)mh.TrangHienTai;
+            cb.TuaNhanh = 3f;
             cb.ChonHe(0);
-            yield return Giay(6f);
+            yield return ChoMoPhong(cb, 14);
             var he = cb.He;
             int iNO2 = Array.FindIndex(he.Chat, x => x.CongThuc == "NO2");
             var ice = CanBangMoHinh.CanBangPhanLi(0.04, 0, 1 / he.K);
@@ -252,16 +256,16 @@ namespace Khkt.HoaLy
             double no2 = he.C[iNO2], K0 = he.K;
             cb.Dat(348.15, 1);
             Check(he.K < K0 && cb.ChieuDuDoan == ChieuDich.Nghich, "Le Chatelier: đun nóng hệ tỏa nhiệt → K giảm, dự đoán dịch nghịch");
-            yield return Giay(5f);
+            yield return ChoMoPhong(cb, 14);
             Check(cb.XiSauTacDong < 0 && he.C[iNO2] > no2 && Math.Abs(he.Q() / he.K - 1) < 0.02, "Le Chatelier: sau khi đun hệ thật sự dịch nghịch, NO₂ nâu tăng", $"ξ = {cb.XiSauTacDong:0.00000}");
             Shot("can_bang_dun_nong");
             cb.Dat(348.15, 0.5);
             Check(cb.ChieuDuDoan == ChieuDich.Thuan && Gan(he.Q() / he.K, 0.5, 0.02), "Le Chatelier: nén ×2 (Δn = −1) → Q = K/2, dịch thuận");
-            yield return Giay(5f);
+            yield return ChoMoPhong(cb, 14);
             Check(cb.XiSauTacDong > 0, "Le Chatelier: sau khi nén hệ dịch thuận (về phía ít mol khí)", $"ξ = {cb.XiSauTacDong:0.00000}");
             cb.ThemChat(iNO2);
             Check(cb.ChieuDuDoan == ChieuDich.Thuan, "Le Chatelier: thêm NO₂ → dịch thuận");
-            yield return Giay(4f);
+            yield return ChoMoPhong(cb, 14);
             Check(cb.XiSauTacDong > 0, "Le Chatelier: thêm NO₂ – hệ đã dịch thuận");
             double Kx = he.K;
             cb.DatXucTac(true);
@@ -270,16 +274,16 @@ namespace Khkt.HoaLy
             cb.DatXucTac(false);
 
             cb.ChonHe(1);   // H₂ + I₂ ⇌ 2HI
-            yield return Giay(5f);
+            yield return ChoMoPhong(cb, 14);
             cb.Dat(cb.He.T, 0.5);
             Check(cb.ChieuDuDoan == ChieuDich.CanBang, "Le Chatelier: H₂ + I₂ ⇌ 2HI (Δn = 0) nén không chuyển dịch");
             cb.ChonHe(2);   // Haber
-            yield return Giay(5f);
+            yield return ChoMoPhong(cb, 14);
             int iNH3 = Array.FindIndex(cb.He.Chat, x => x.SanPham);
             double nh3 = cb.He.C[iNH3];
             cb.Dat(cb.He.T, 0.5);
             Check(cb.ChieuDuDoan == ChieuDich.Thuan, "Le Chatelier: Haber nén → dịch thuận");
-            yield return Giay(5f);
+            yield return ChoMoPhong(cb, 14);
             Check(cb.He.C[iNH3] > 2 * nh3, "Haber: nén làm tăng NH₃ hơn mức chỉ do nồng độ ×2", $"{nh3 * 2:0.0000} → {cb.He.C[iNH3]:0.0000}");
             double KCao = cb.He.K;
             cb.Dat(cb.He.T + 100, 0.5);
@@ -287,13 +291,14 @@ namespace Khkt.HoaLy
             yield return Giay(2f);
             Shot("can_bang_haber");
             cb.ChonHe(3);   // Fe³⁺ + SCN⁻
-            yield return Giay(5f);
+            yield return ChoMoPhong(cb, 14);
             Shot("can_bang_fe_scn");
             cb.Dat(cb.He.T, 2);
             Check(cb.ChieuDuDoan == ChieuDich.Nghich, "Le Chatelier: pha loãng Fe³⁺ + SCN⁻ → dịch nghịch");
-            yield return Giay(4f);
+            yield return ChoMoPhong(cb, 14);
             Check(cb.XiSauTacDong < 0, "Pha loãng: hệ đã dịch nghịch", $"ξ = {cb.XiSauTacDong:0.000000}");
             cb.ChonHe(0);
+            cb.TuaNhanh = 1f;
         }
 
         IEnumerator KiemDongCo(HoaLyManHinh mh)

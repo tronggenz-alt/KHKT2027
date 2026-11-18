@@ -66,7 +66,24 @@ namespace Khkt.HoaLy
             return s.StartsWith("-") ? "−" + s.Substring(1) : s;
         }
 
-        static readonly string SoMu = "⁰¹²³⁴⁵⁶⁷⁸⁹";
+        static readonly string SoMu = "⁰¹²³⁴⁵⁶⁷⁸⁹", SoDuoi = "₀₁₂₃₄₅₆₇₈₉";
+
+        /// <summary>Công thức hóa học dễ đọc: "NO2" → "NO₂", "Fe3+" → "Fe³⁺", "SCN-" → "SCN⁻", "[Fe(SCN)]2+" → "[Fe(SCN)]²⁺".</summary>
+        public static string CongThuc(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return s;
+            int dien = s.Length;
+            if (s.EndsWith("+") || s.EndsWith("-"))
+            {
+                dien = s.Length - 1;
+                while (dien > 0 && char.IsDigit(s[dien - 1])) dien--;
+            }
+            var sb = new System.Text.StringBuilder(s.Length);
+            for (int i = 0; i < dien; i++) sb.Append(char.IsDigit(s[i]) && i > 0 ? SoDuoi[s[i] - '0'] : s[i]);
+            for (int i = dien; i < s.Length; i++)
+                sb.Append(char.IsDigit(s[i]) ? SoMu[s[i] - '0'] : s[i] == '+' ? '⁺' : '⁻');
+            return sb.ToString();
+        }
 
         public static string Mu(int e)
         {
@@ -149,12 +166,15 @@ namespace Khkt.HoaLy
         public readonly LuoiVe Ve;
         public readonly RectTransform Goc;
         public double XMin, XMax = 1, YMin, YMax = 1;
-        public float LeTrai = 70, LePhai = 22, LeTren = 46, LeDuoi = 50;
+        public float LeTrai = 70, LePhai = 22, LeTren = 62, LeDuoi = 50;
         public string DinhDangX = "", DinhDangY = "";
-        readonly Text[] soX = new Text[8], soY = new Text[7];
+        readonly Text[] soX = new Text[13], soY = new Text[9];
+        readonly Vector2[] viTriX = new Vector2[13], viTriY = new Vector2[9];
         readonly Text tieuDe, nhanX, nhanY;
-        double buocX, buocY, xMinCu = double.NaN, xMaxCu, yMinCu, yMaxCu;
-        float rongCu, caoCu;
+        /// <summary>Dòng chú thích dưới tiêu đề (trái).</summary>
+        public readonly Text ChuThich;
+        double buocX, buocY;
+        long khoaX = long.MinValue, khoaY = long.MinValue;
         /// <summary>Hệ số chia số trục khi hiển thị (vd. trục đơn vị kPa nhưng ghi bar).</summary>
         public double ChiaX = 1, ChiaY = 1;
 
@@ -166,6 +186,8 @@ namespace Khkt.HoaLy
             nhanX = HoaLyUi.Chu(Goc, "Nhãn trục x", truongX, 13, GlassKit.Dim, false, TextAnchor.LowerRight, new Vector2(-322, 6), new Vector2(300, 20), new Vector2(1, 0));
             nhanX.rectTransform.pivot = new Vector2(0, 0);
             nhanY = HoaLyUi.Chu(Goc, "Nhãn trục y", truongY, 13, GlassKit.Dim, false, TextAnchor.UpperRight, new Vector2(-322, -14), new Vector2(300, 20), new Vector2(1, 1));
+            ChuThich = HoaLyUi.Chu(Goc, "Chú thích", "", 13, GlassKit.Dim, false, TextAnchor.UpperLeft, new Vector2(18, -38), new Vector2(1200, 20));
+            ChuThich.horizontalOverflow = HorizontalWrapMode.Overflow;
             for (int i = 0; i < soX.Length; i++)
             {
                 soX[i] = HoaLyUi.Chu(Goc, "Số x", "", 12, GlassKit.Muted, false, TextAnchor.UpperCenter, Vector2.zero, new Vector2(90, 18), new Vector2(0.5f, 0.5f));
@@ -202,53 +224,55 @@ namespace Khkt.HoaLy
         public float X(double x) { var v = Vung; return v.xMin + (float)((x - XMin) / (XMax - XMin)) * v.width; }
         public float Y(double y) { var v = Vung; return v.yMin + Mathf.Clamp((float)((y - YMin) / (YMax - YMin)), -0.02f, 1.04f) * v.height; }
 
-        /// <summary>Vẽ lưới, trục; cập nhật số vạch khi trục hoặc kích thước đổi. Gọi sau Ve.BatDau().</summary>
+        /// <summary>
+        /// Vẽ lưới, trục; số vạch chỉ tạo chuỗi mới khi bước chia hoặc vạch đầu đổi (trục co giãn mượt không cấp phát mỗi khung).
+        /// Gọi sau Ve.BatDau().
+        /// </summary>
         public void VeKhung()
         {
             var v = Vung;
             if (v.width < 10 || v.height < 10) return;
-            var r = Ve.rectTransform.rect;
-            bool doi = XMin != xMinCu || XMax != xMaxCu || YMin != yMinCu || YMax != yMaxCu || r.width != rongCu || r.height != caoCu;
-            if (doi)
-            {
-                xMinCu = XMin; xMaxCu = XMax; yMinCu = YMin; yMaxCu = YMax; rongCu = r.width; caoCu = r.height;
-                buocX = HoaLyUi.BuocDep(XMax - XMin, 6);
-                buocY = HoaLyUi.BuocDep(YMax - YMin, 5);
-            }
+            buocX = HoaLyUi.BuocDep(XMax - XMin, 6);
+            buocY = HoaLyUi.BuocDep(YMax - YMin, 5);
             var luoi = HoaLyUi.C32(GlassKit.Line, 0.55f);
             var truc = HoaLyUi.C32(GlassKit.Dim, 0.9f);
+            long dauX = (long)Math.Ceiling(XMin / buocX - 1e-9), dauY = (long)Math.Ceiling(YMin / buocY - 1e-9);
+            long kX = dauX * 1000003L + BitConverter.DoubleToInt64Bits(buocX), kY = dauY * 1000003L + BitConverter.DoubleToInt64Bits(buocY);
+            bool doiX = kX != khoaX, doiY = kY != khoaY;
+            khoaX = kX; khoaY = kY;
             int ix = 0;
-            for (double x = Math.Ceiling(XMin / buocX) * buocX; x <= XMax + buocX * 1e-6 && ix < soX.Length; x += buocX, ix++)
+            for (long j = dauX; ix < soX.Length; j++, ix++)
             {
+                double x = j * buocX;
+                if (x > XMax + buocX * 1e-6) break;
                 float px = X(x);
                 Ve.VeHop(px - 0.5f, v.yMin, px + 0.5f, v.yMax, luoi);
-                if (doi)
-                {
-                    soX[ix].text = HoaLyUi.So(x / ChiaX, SoLe(buocX / ChiaX));
-                    soX[ix].rectTransform.anchoredPosition = new Vector2(px, v.yMin - 6) + ViTriGoc();
-                    soX[ix].gameObject.SetActive(true);
-                }
+                if (doiX) soX[ix].text = HoaLyUi.So(x / ChiaX, SoLe(buocX / ChiaX));
+                DatViTri(soX[ix], ref viTriX[ix], new Vector2(px, v.yMin - 6));
             }
-            if (doi) for (int i = ix; i < soX.Length; i++) soX[i].gameObject.SetActive(false);
+            for (int i = ix; i < soX.Length; i++) if (soX[i].gameObject.activeSelf) soX[i].gameObject.SetActive(false);
             int iy = 0;
-            for (double y = Math.Ceiling(YMin / buocY) * buocY; y <= YMax + buocY * 1e-6 && iy < soY.Length; y += buocY, iy++)
+            for (long j = dauY; iy < soY.Length; j++, iy++)
             {
+                double y = j * buocY;
+                if (y > YMax + buocY * 1e-6) break;
                 float py = Y(y);
                 Ve.VeHop(v.xMin, py - 0.5f, v.xMax, py + 0.5f, luoi);
-                if (doi)
-                {
-                    soY[iy].text = HoaLyUi.So(y / ChiaY, SoLe(buocY / ChiaY));
-                    soY[iy].rectTransform.anchoredPosition = new Vector2(v.xMin - 8, py) + ViTriGoc();
-                    soY[iy].gameObject.SetActive(true);
-                }
+                if (doiY) soY[iy].text = HoaLyUi.So(y / ChiaY, SoLe(buocY / ChiaY));
+                DatViTri(soY[iy], ref viTriY[iy], new Vector2(v.xMin - 8, py));
             }
-            if (doi) for (int i = iy; i < soY.Length; i++) soY[i].gameObject.SetActive(false);
+            for (int i = iy; i < soY.Length; i++) if (soY[i].gameObject.activeSelf) soY[i].gameObject.SetActive(false);
             Ve.VeHop(v.xMin - 1, v.yMin - 1, v.xMax, v.yMin + 1, truc);
             Ve.VeHop(v.xMin - 1, v.yMin - 1, v.xMin + 1, v.yMax, truc);
         }
 
-        // Ve và Goc cùng kích thước, Text neo giữa Goc: tọa độ cục bộ của Ve trùng với anchoredPosition (pivot 0.5) – không cần dịch.
-        static Vector2 ViTriGoc() => Vector2.zero;
+        static void DatViTri(Text t, ref Vector2 cu, Vector2 moi)
+        {
+            if (!t.gameObject.activeSelf) t.gameObject.SetActive(true);
+            if ((cu - moi).sqrMagnitude < 0.04f) return;
+            cu = moi;
+            t.rectTransform.anchoredPosition = moi;
+        }
 
         static int SoLe(double buoc)
         {

@@ -21,6 +21,8 @@ namespace Khkt.HoaLy
         public HeCanBang He { get; private set; }
         public double V { get; private set; } = 1;
         public double ThoiGian { get; private set; }
+        /// <summary>Hệ số tua nhanh thời gian mô phỏng (kiểm thử đặt &gt; 1).</summary>
+        public float TuaNhanh = 1f;
 
         // kết quả tác động gần nhất (cho kiểm thử)
         public string TacDongCuoi { get; private set; } = "";
@@ -59,7 +61,7 @@ namespace Khkt.HoaLy
 
             var the1 = HoaLyUi.The(VungTrai, "Đồ thị nồng độ", new Vector2(0, 0.42f), Vector2.one, new Vector2(0, 8), Vector2.zero);
             dtC = new DoThi(the1, "Đồ thị", "Nồng độ theo thời gian", "t (s)", "C (mol/L)");
-            chuThich = HoaLyUi.Chu(the1, "Chú thích", "", 13, GlassKit.Dim, false, TextAnchor.UpperRight, new Vector2(-640, -14), new Vector2(620, 22), new Vector2(1, 1));
+            chuThich = dtC.ChuThich;
             for (int i = 0; i < mocChu.Length; i++)
             {
                 mocChu[i] = HoaLyUi.Chu(the1, "Mốc", "", 12, GlassKit.Accent2, true, TextAnchor.UpperLeft, Vector2.zero, new Vector2(140, 18), new Vector2(0.5f, 0.5f));
@@ -142,7 +144,7 @@ namespace Khkt.HoaLy
             {
                 bool co = k < He.Chat.Length;
                 nutThem[k].gameObject.SetActive(co);
-                if (co) nutThem[k].transform.Find("Chữ").GetComponent<Text>().text = "+ " + He.Chat[k].CongThuc;
+                if (co) nutThem[k].transform.Find("Chữ").GetComponent<Text>().text = "+ " + HoaLyUi.CongThuc(He.Chat[k].CongThuc);
             }
             ThoiGian = 0; soLs = 0; dauLs = 0; soMoc = 0; yMaxHien = 0;
             foreach (var m in mocChu) m.gameObject.SetActive(false);
@@ -173,7 +175,7 @@ namespace Khkt.HoaLy
             double tong = 0;
             foreach (var c in He.C) tong += c;
             He.C[k] += Math.Max(0.002, 0.25 * tong / He.C.Length);
-            DanhDau("thêm " + He.Chat[k].CongThuc);
+            DanhDau("thêm " + HoaLyUi.CongThuc(He.Chat[k].CongThuc));
         }
 
         public void Dat(double T, double v) { ThanhT.value = (float)T; ThanhV.value = (float)v; }
@@ -209,6 +211,7 @@ namespace Khkt.HoaLy
         {
             if (He == null) return;
             SoKhung++;
+            dt *= TuaNhanh;
             ThoiGian += dt;
             XiSauTacDong += He.Buoc(dt);
             henMau -= dt;
@@ -247,7 +250,7 @@ namespace Khkt.HoaLy
                 }
                 if (so < SoMau) duong[so++] = dtC.Diem(ThoiGian, He.C[k]);
                 var mauK = HoaLyUi.C32(HoaLyUi.MauChuoi(k));
-                ve.VeDuong(duong, so, 3f, mauK);
+                ve.VeDuong(duong, so, 3f + 2.5f * (He.Chat.Length - 1 - k), mauK);
                 ve.VeHat(duong[so - 1].x, duong[so - 1].y, 6, mauK);
             }
             ve.KetThuc();
@@ -303,7 +306,7 @@ namespace Khkt.HoaLy
             var ch = CanBangMoHinh.Chieu(Q, K);
             var sb = new System.Text.StringBuilder();
             for (int k = 0; k < He.Chat.Length && k < 4; k++)
-                sb.Append($"<color=#{ColorUtility.ToHtmlStringRGB(HoaLyUi.MauChuoi(k))}>━ [{He.Chat[k].CongThuc}] {HoaLyUi.So(He.C[k], 4)}</color>   ");
+                sb.Append($"<color=#{ColorUtility.ToHtmlStringRGB(HoaLyUi.MauChuoi(k))}>━ [{HoaLyUi.CongThuc(He.Chat[k].CongThuc)}] {HoaLyUi.So(He.C[k], 4)} M</color>   ");
             DatChu(chuThich, sb.ToString());
             dtC.TieuDe = He.PhuongTrinh + " · " + (He.LaKp ? "K gốc là Kp, đổi sang Kc" : "Kc");
             DatChu(oK, HoaLyUi.So(K, 4));

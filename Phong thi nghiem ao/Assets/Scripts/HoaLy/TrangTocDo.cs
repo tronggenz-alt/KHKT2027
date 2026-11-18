@@ -33,6 +33,8 @@ namespace Khkt.HoaLy
         /// <summary>Thời điểm con trỏ trên đồ thị (s thật của phản ứng).</summary>
         public double ThoiDiem { get; private set; }
         public double TCuoiTruc { get; private set; } = 1;
+        /// <summary>Hệ số phóng to phần đuôi f(E) trên đồ thị năng lượng (1 = không phóng).</summary>
+        public double PhongDuoi { get; private set; } = 1;
 
         public Slider ThanhEa, ThanhT, ThanhC0;
         Toggle nutXucTac;
@@ -54,10 +56,10 @@ namespace Khkt.HoaLy
 
             var the1 = HoaLyUi.The(VungTrai, "Đồ thị C–t", new Vector2(0, 0.45f), Vector2.one, new Vector2(0, 8), Vector2.zero);
             dtC = new DoThi(the1, "Đồ thị", "Nồng độ theo thời gian", "t", "C (mol/L)");
-            chuThichC = HoaLyUi.Chu(the1, "Chú thích", "", 13, GlassKit.Dim, false, TextAnchor.UpperRight, new Vector2(-640, -14), new Vector2(620, 22), new Vector2(1, 1));
+            chuThichC = dtC.ChuThich;
             var the2 = HoaLyUi.The(VungTrai, "Phân bố năng lượng", Vector2.zero, new Vector2(1, 0.45f), Vector2.zero, new Vector2(0, -8));
             dtE = new DoThi(the2, "Đồ thị", "Phân bố năng lượng phân tử – phần E ≥ Ea phản ứng được", "E (kJ/mol)", "f(E)");
-            chuThichE = HoaLyUi.Chu(the2, "Chú thích", "", 13, GlassKit.Dim, false, TextAnchor.UpperRight, new Vector2(-640, -14), new Vector2(620, 22), new Vector2(1, 1));
+            chuThichE = dtE.ChuThich;
 
             TieuMuc("Phản ứng", -14);
             string[] ten = new string[DanhSach.Count];
@@ -223,6 +225,26 @@ namespace Khkt.HoaLy
                 if (i > 0 && e >= eaHd) ve2.VeDai(duong[i - 1].x, duong[i - 1].y, duong[i].x, duong[i].y, vung2.yMin, toT);
             }
             ve2.VeDuong(duong, duong.Length, 3f, mauT);
+            // đuôi E ≥ Ea thường chỉ cỡ 10⁻⁶–10⁻¹⁰: vẽ thêm đuôi phóng to 10ⁿ lần để thấy được phần phân tử đủ năng lượng
+            double fEa = TocDoMoHinh.MatDoNangLuong(eaHd, T);
+            PhongDuoi = 1;
+            if (fEa > 0 && fEa < fMax * 0.15)
+            {
+                int mu = (int)Math.Ceiling(Math.Log10(fMax * 0.45 / fEa));
+                PhongDuoi = Math.Pow(10, mu);
+                var mauDuoi = HoaLyUi.C32(GlassKit.Accent2, 0.95f);
+                int dau = -1;
+                for (int i = 0; i < duong.Length; i++)
+                {
+                    double e = eMax * i / (duong.Length - 1);
+                    if (e < eaHd * 0.55) continue;
+                    if (dau < 0) dau = i;
+                    duong[i] = dtE.Diem(e, Math.Min(fMax * 1.08, TocDoMoHinh.MatDoNangLuong(e, T) * PhongDuoi));
+                    if (i > dau && e >= eaHd) ve2.VeDai(duong[i - 1].x, duong[i - 1].y, duong[i].x, duong[i].y, vung2.yMin, HoaLyUi.C32(GlassKit.Accent2, 0.30f));
+                }
+                if (dau >= 0)
+                    for (int i = dau + 1; i < duong.Length; i += 2) ve2.VeDoan(duong[i - 1], duong[i], 2.5f, mauDuoi);
+            }
             ve2.VeNetDut(new Vector2(dtE.X(Ea), vung2.yMin), new Vector2(dtE.X(Ea), vung2.yMax), 2f, 7, HoaLyUi.C32(GlassKit.Bad, 0.9f));
             if (XucTac) ve2.VeNetDut(new Vector2(dtE.X(eaHd), vung2.yMin), new Vector2(dtE.X(eaHd), vung2.yMax), 2f, 7, HoaLyUi.C32(GlassKit.Good, 0.95f));
             ve2.KetThuc();
@@ -236,9 +258,10 @@ namespace Khkt.HoaLy
             double k = K;
             dtC.NhanX = "t (s) · cả trục " + HoaLyUi.ThoiGian(TCuoiTruc);
             DatChu(ptChu, PhanUng.PhuongTrinh + (XucTac && !string.IsNullOrEmpty(PhanUng.XucTac) ? "   · xúc tác " + PhanUng.XucTac : ""));
-            DatChu(chuThichC, $"<color=#{ColorUtility.ToHtmlStringRGB(new Color(PhanUng.MauChatDau[0], PhanUng.MauChatDau[1], PhanUng.MauChatDau[2]))}>━ {PhanUng.ChatDau}</color>   " +
-                              $"<color=#{ColorUtility.ToHtmlStringRGB(new Color(PhanUng.MauSanPham[0], PhanUng.MauSanPham[1], PhanUng.MauSanPham[2]))}>━ {PhanUng.SanPham}</color>   ┅ mốc 298 K   t = {HoaLyUi.ThoiGian(ThoiDiem)}");
-            DatChu(chuThichE, $"━ {HoaLyUi.So(T, 0)} K   ┅ 298 K   <color=#{ColorUtility.ToHtmlStringRGB(GlassKit.Bad)}>┆ Ea</color>" + (XucTac ? $"   <color=#{ColorUtility.ToHtmlStringRGB(GlassKit.Good)}>┆ Ea xúc tác</color>" : ""));
+            DatChu(chuThichC, $"<color=#{ColorUtility.ToHtmlStringRGB(new Color(PhanUng.MauChatDau[0], PhanUng.MauChatDau[1], PhanUng.MauChatDau[2]))}>━ {HoaLyUi.CongThuc(PhanUng.ChatDau)}</color>   " +
+                              $"<color=#{ColorUtility.ToHtmlStringRGB(new Color(PhanUng.MauSanPham[0], PhanUng.MauSanPham[1], PhanUng.MauSanPham[2]))}>━ {HoaLyUi.CongThuc(PhanUng.SanPham)}</color>   ┅ mốc 298 K   t = {HoaLyUi.ThoiGian(ThoiDiem)}");
+            DatChu(chuThichE, $"━ {HoaLyUi.So(T, 0)} K   ┅ 298 K   <color=#{ColorUtility.ToHtmlStringRGB(GlassKit.Bad)}>┆ Ea</color>" + (XucTac ? $"   <color=#{ColorUtility.ToHtmlStringRGB(GlassKit.Good)}>┆ Ea xúc tác</color>" : "") +
+                              (PhongDuoi > 1 ? $"   <color=#{ColorUtility.ToHtmlStringRGB(GlassKit.Accent2)}>┅ đuôi phóng to ×10{HoaLyUi.Mu((int)Math.Round(Math.Log10(PhongDuoi)))}</color>" : ""));
             DatChu(oK, HoaLyUi.So(k, 4));
             DatChu(oDonVi, "bậc " + bac + " · " + (bac == 0 ? "M/s" : bac == 1 ? "s⁻¹" : "M⁻¹·s⁻¹"));
             DatChu(oTBanHuy, HoaLyUi.ThoiGian(ThoiGianBanHuy));
