@@ -308,8 +308,14 @@ namespace Khkt.CoChe
             GlassKit.SetChip(nutAnH, TrinhPhat.AnH);
         }
 
+        UnityEngine.Rendering.Universal.UniversalAdditionalCameraData camData;
+
         void Update()
         {
+            // camera lớp phủ vẽ giao diện + mô hình: không hậu kỳ (HardwareProfile bật hậu kỳ cho mọi camera Base,
+            // tonemapping làm giấy trắng thành xám)
+            if (camData == null && Cam != null) camData = Cam.GetComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>();
+            if (camData != null && camData.renderPostProcessing) camData.renderPostProcessing = false;
             if (vungNhin == null) return;
             var g = new Vector3[4];
             vungNhin.GetWorldCorners(g);
