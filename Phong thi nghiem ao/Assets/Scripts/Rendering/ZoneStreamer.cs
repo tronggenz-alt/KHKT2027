@@ -29,9 +29,9 @@ namespace Khkt.Rendering
 
         public Transform viewer;
         [Tooltip("Tới gần cửa trong khoảng này thì tải trước khu bên kia (m)")]
-        public float preloadRadius = 4.5f;
+        public float preloadRadius = 6.5f;
         [Tooltip("Khu không còn cần bao lâu thì gỡ (s)")]
-        public float unloadDelayS = 2.5f;
+        public float unloadDelayS = 8.0f;
         [Tooltip("Tắt: tải mọi khu và giữ nguyên (để so sánh hiệu năng)")]
         public bool streaming = true;
         [Tooltip("Ưu tiên tải nền. BelowNormal: dựng cảnh rải ra nhiều khung hình, đỡ giật khi đi qua cửa")]
@@ -48,10 +48,15 @@ namespace Khkt.Rendering
         readonly Dictionary<object, (float until, Vector3[] points)> keeps = new Dictionary<object, (float, Vector3[])>();
         readonly List<object> expired = new List<object>();
         readonly List<Light>[] zoneLights = new List<Light>[ZoneMap.Zones.Length];
-        bool started;
+        bool started, initSettled;
         Transform strayRoot;
         CanvasGroup overlay;
         Text overlayText;
+        int lastOverlayZone = int.MinValue;
+        Vector3 prevViewerPos;
+        bool hasPrevViewerPos;
+        Vector3 viewerVel;
+        float lastUnloadAt = -99f;
 
         /// <summary>Khu vừa tải xong (true) hoặc vừa gỡ (false).</summary>
         public static event System.Action<int, bool> ZoneChanged;
@@ -98,7 +103,7 @@ namespace Khkt.Rendering
 
         IEnumerator Start()
         {
-            // Để mọi đồ tương tác khởi tạo đủ (Awake / Start) rồi mới cho các khu không cần ngủ
+            // Để mọi đồ tương tác khởi tạo đủ (Awake / Start) rồi mới cho các khu không cần ngủ (rải qua từng khung hình)
             yield return null;
             yield return null;
             started = true;
@@ -107,9 +112,19 @@ namespace Khkt.Rendering
             {
                 if (need[z] || !streaming) { lastNeeded[z] = Time.time; continue; }
                 Park(z);
-                if (state[z] == State.Loaded) Unload(z);
-                else SetLights(z, false);
+                if (state[z] == State.Loaded)
+                {
+                    Unload(z);
+                    yield return null;
+                    yield return null;
+                    yield return null;
+                }
+                else
+                {
+                    SetLights(z, false);
+                }
             }
+            initSettled = true;
         }
 
         /// <summary>
@@ -143,8 +158,11 @@ namespace Khkt.Rendering
         void Update()
         {
             if (!started) return;
+            UpdateViewerVelocity();
             ComputeNeed();
             float now = Time.time;
+            float rtNow = Time.unscaledTime;
+            bool unloadedOneThisFrame = false;
             for (int z = 0; z < N; z++)
             {
                 if (need[z] || !streaming)
@@ -152,12 +170,32 @@ namespace Khkt.Rendering
                     lastNeeded[z] = now;
                     if (state[z] == State.Unloaded) Load(z);
                 }
-                else if (state[z] == State.Loaded && now - lastNeeded[z] > unloadDelayS)
+                else if (!unloadedOneThisFrame && state[z] == State.Loaded &&
+                         now - lastNeeded[z] > unloadDelayS && rtNow - lastUnloadAt >= 0.45f)
                 {
                     Unload(z);
+                    lastUnloadAt = rtNow;
+                    unloadedOneThisFrame = true;
                 }
             }
             UpdateOverlay();
+        }
+
+        void UpdateViewerVelocity()
+        {
+            if (viewer == null) return;
+            Vector3 p = viewer.position;
+            float dt = Time.unscaledDeltaTime;
+            if (hasPrevViewerPos && dt > 1e-4f)
+            {
+                Vector3 rawVel = (p - prevViewerPos) / dt;
+                if (rawVel.sqrMagnitude < 400f) // bỏ qua bước dịch chuyển tức thời
+                    viewerVel = Vector3.Lerp(viewerVel, rawVel, 0.25f);
+                else
+                    viewerVel = Vector3.zero;
+            }
+            prevViewerPos = p;
+            hasPrevViewerPos = true;
         }
 
         void ComputeNeed()
@@ -169,11 +207,31 @@ namespace Khkt.Rendering
                 int vz = ZoneMap.At(v);
                 if (vz >= 0) need[vz] = true;
                 else if (v.y < 3.6f) { need[ZoneMap.Lab] = true; need[ZoneMap.Store] = true; }  // ngoài hiên tầng 1: nhìn qua cửa sổ vào trong
-                foreach (var d in AutoDoor.All)
+
+                // Nạp trước theo hướng di chuyển và hướng nhìn để đi qua cửa / lên cầu thang không khựng
+                Vector3 predicted = v + viewerVel * 2.0f;
+                Vector3 lookAhead = v + viewer.forward * 4.0f;
+                Mark(ZoneMap.At(predicted));
+                Mark(ZoneMap.At(lookAhead));
+
+                // Gần lõi thang hoặc đang leo thang: chỉ giữ cụm cầu thang & hai hành lang nối
+                if (vz == ZoneMap.Stairs || (v.x > 25.0f && v.z > -2.5f && v.z < 6.2f))
                 {
-                    if (!d.OnSameFloor(v)) continue;  // không nạp trước cửa ở tầng khác
+                    Mark(ZoneMap.Stairs);
+                    Mark(ZoneMap.Corridor);
+                    Mark(ZoneMap.CorridorT2);
+                }
+
+                float r2 = preloadRadius * preloadRadius;
+                for (int i = 0; i < AutoDoor.All.Count; i++)
+                {
+                    var d = AutoDoor.All[i];
+                    if (d == null) continue;
+                    bool sameFloor = d.OnSameFloor(v) || d.OnSameFloor(predicted);
+                    if (!sameFloor) continue;  // không nạp trước cửa ở tầng khác
                     Vector3 dv = d.Center - v;
-                    if (dv.x * dv.x + dv.z * dv.z > preloadRadius * preloadRadius) continue;
+                    Vector3 dp = d.Center - predicted;
+                    if (dv.x * dv.x + dv.z * dv.z > r2 && dp.x * dp.x + dp.z * dp.z > r2) continue;
                     Mark(d.zoneA);
                     Mark(d.zoneB);
                 }
@@ -181,13 +239,16 @@ namespace Khkt.Rendering
             var bot = LabRobot.Instance;
             if (bot != null) Mark(ZoneMap.At(bot.transform.position));
             float now = Time.time;
-            expired.Clear();
-            foreach (var kv in keeps)
+            if (keeps.Count > 0)
             {
-                if (kv.Value.until < now) { expired.Add(kv.Key); continue; }
-                foreach (var p in kv.Value.points) Mark(ZoneMap.At(p));
+                expired.Clear();
+                foreach (var kv in keeps)
+                {
+                    if (kv.Value.until < now) { expired.Add(kv.Key); continue; }
+                    foreach (var p in kv.Value.points) Mark(ZoneMap.At(p));
+                }
+                for (int i = 0; i < expired.Count; i++) keeps.Remove(expired[i]);
             }
-            foreach (var k in expired) keeps.Remove(k);
             for (int z = 0; z < N; z++)
                 if (now - requestedAt[z] < unloadDelayS) need[z] = true;
         }
@@ -199,7 +260,7 @@ namespace Khkt.Rendering
 
         bool IsSettled()
         {
-            if (!started) return false;
+            if (!started || !initSettled) return false;
             for (int z = 0; z < N; z++)
             {
                 if (state[z] == State.Loading || state[z] == State.Unloading) return false;
@@ -315,8 +376,11 @@ namespace Khkt.Rendering
         {
             var root = ZoneRoot.Of(z);
             if (root == null || root.Parked) return;
-            foreach (var g in root.GetComponentsInChildren<Grabbable>(true))
+            var grabbables = root.CollectGrabbables();
+            for (int i = 0; i < grabbables.Count; i++)
             {
+                var g = grabbables[i];
+                if (g == null) continue;
                 var up = g.transform.parent != null ? g.transform.parent.GetComponentInParent<Grabbable>(true) : null;
                 if (up != null && up.transform.IsChildOf(root.transform)) continue;  // vật con đi theo vật cha
                 int at = ZoneMap.At(g.transform.position);
@@ -362,7 +426,8 @@ namespace Khkt.Rendering
 
         void UpdateOverlay()
         {
-            bool waiting = viewer != null && !IsReady(ZoneMap.At(viewer.position));
+            int curZone = viewer != null ? ZoneMap.At(viewer.position) : -1;
+            bool waiting = viewer != null && !IsReady(curZone);
             if (overlay == null)
             {
                 if (!waiting) return;
@@ -370,7 +435,11 @@ namespace Khkt.Rendering
             }
             float target = waiting ? 1f : 0f;
             overlay.alpha = Mathf.MoveTowards(overlay.alpha, target, Time.unscaledDeltaTime * (waiting ? 12f : 4f));
-            if (waiting) overlayText.text = "Đang tải " + ZoneMap.Name(ZoneMap.At(viewer.position)).ToLowerInvariant() + "…";
+            if (waiting && curZone != lastOverlayZone)
+            {
+                lastOverlayZone = curZone;
+                overlayText.text = "Đang tải " + ZoneMap.Name(curZone).ToLowerInvariant() + "…";
+            }
             bool show = overlay.alpha > 0.001f;
             if (overlay.gameObject.activeSelf != show) overlay.gameObject.SetActive(show);
         }

@@ -102,7 +102,10 @@ namespace Khkt.Rendering
         bool running;
         bool cliMode;
         bool cliShort;
+        bool cliSweep;
         string cliTag;
+        string cliShotDir;
+        string cliShotPrefix = "anh";
         Coroutine activeRoutine;
         readonly List<MauKhung> samples = new List<MauKhung>(16384);
         readonly FrameTiming[] timingBuf = new FrameTiming[1];
@@ -129,13 +132,17 @@ namespace Khkt.Rendering
 
         void Start()
         {
-            if (cliMode && !running)
+            if (cliSweep && !running)
+                activeRoutine = StartCoroutine(CoRunSweepCli());
+            else if (!string.IsNullOrEmpty(cliShotDir) && !running)
+                activeRoutine = StartCoroutine(CoRunShotsCli());
+            else if (cliMode && !running)
                 activeRoutine = StartCoroutine(CoRunCli());
         }
 
         void Update()
         {
-            if (cliMode) return;
+            if (cliMode || cliSweep || !string.IsNullOrEmpty(cliShotDir)) return;
             var kb = Keyboard.current;
             if (kb != null && kb.f7Key.wasPressedThisFrame)
             {
@@ -154,8 +161,14 @@ namespace Khkt.Rendering
                     cliMode = true;
                 else if (string.Equals(a, "-vera-do-ngan", StringComparison.OrdinalIgnoreCase))
                     cliShort = true;
+                else if (string.Equals(a, "-vera-sweep", StringComparison.OrdinalIgnoreCase))
+                    cliSweep = true;
                 else if (a.StartsWith("-vera-nhan=", StringComparison.OrdinalIgnoreCase))
                     cliTag = SanitizeTag(a.Substring("-vera-nhan=".Length));
+                else if (a.StartsWith("-vera-chup-g1=", StringComparison.OrdinalIgnoreCase))
+                    cliShotDir = a.Substring("-vera-chup-g1=".Length).Trim();
+                else if (a.StartsWith("-vera-chup-tien-to=", StringComparison.OrdinalIgnoreCase))
+                    cliShotPrefix = SanitizeTag(a.Substring("-vera-chup-tien-to=".Length));
             }
         }
 
@@ -173,6 +186,83 @@ namespace Khkt.Rendering
             activeRoutine = null;
             running = false;
             LabMessages.Say("Đã dừng đo khung hình.", LabMessages.Tone.Info);
+        }
+
+        IEnumerator CoRunSweepCli()
+        {
+            running = true;
+            Application.runInBackground = true;
+            if (SceneManager.GetActiveScene().name != "PhongThiNghiem")
+            {
+                var op = SceneManager.LoadSceneAsync("PhongThiNghiem", LoadSceneMode.Single);
+                while (op != null && !op.isDone) yield return null;
+            }
+            float w0 = Time.realtimeSinceStartup;
+            while (FindAnyObjectByType<DesktopViewer>() == null && Time.realtimeSinceStartup - w0 < 15f)
+                yield return null;
+            yield return null;
+            yield return null;
+            var intro = FindAnyObjectByType<IntroScreen>();
+            if (intro != null && intro.IsOpen) intro.Close();
+            var viewer = FindAnyObjectByType<DesktopViewer>();
+            ApplyPose(viewer, new Vector3(5.8f, 0f, 5.05f), 90f, 4f);
+            float tSettle = Time.realtimeSinceStartup;
+            while (!ZoneStreamer.Settled && Time.realtimeSinceStartup - tSettle < 10f) yield return null;
+            yield return new WaitForSecondsRealtime(0.5f);
+
+            var urp = UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline as UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset;
+            var cam = viewer.viewCamera;
+            var camData = cam != null ? cam.GetComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>() : null;
+            var vol = FindAnyObjectByType<UnityEngine.Rendering.Volume>();
+            UnityEngine.Rendering.Universal.Bloom bloom = null;
+            if (vol != null && vol.sharedProfile != null) vol.sharedProfile.TryGet(out bloom);
+
+            var sb = new StringBuilder();
+            sb.AppendLine($"SWEEP {Screen.width}x{Screen.height}");
+
+            IEnumerator MeasureStep(string label, Action apply)
+            {
+                apply();
+                for (int k = 0; k < 10; k++) yield return null;
+                double gpuSum = 0, cpuSum = 0, dtSum = 0; int cnt = 0, gc = 0;
+                float s0 = Time.realtimeSinceStartup;
+                while (Time.realtimeSinceStartup - s0 < 1.5f)
+                {
+                    yield return null;
+                    dtSum += Time.unscaledDeltaTime * 1000.0;
+                    cnt++;
+                    FrameTimingManager.CaptureFrameTimings();
+                    if (FrameTimingManager.GetLatestTimings(1, timingBuf) > 0 && timingBuf[0].gpuFrameTime > 0)
+                    {
+                        cpuSum += timingBuf[0].cpuFrameTime;
+                        gpuSum += timingBuf[0].gpuFrameTime;
+                        gc++;
+                    }
+                }
+                string line = $"{label}: dt={dtSum / cnt:0.00}ms cpu={(gc > 0 ? cpuSum / gc : -1):0.00}ms gpu={(gc > 0 ? gpuSum / gc : -1):0.00}ms";
+                sb.AppendLine(line);
+                Debug.Log("[VERA-SWEEP] " + line);
+            }
+
+            if (urp != null && camData != null)
+            {
+                yield return MeasureStep("1_hien_tai(msaa2+smaa+hdr64+depth+opaque+bloomHQ)", () => { });
+                yield return MeasureStep("2_hdr32", () => { urp.hdrColorBufferPrecision = UnityEngine.Rendering.Universal.HDRColorBufferPrecision._32Bits; });
+                yield return MeasureStep("3_no_depth_no_opaque", () => { urp.supportsCameraDepthTexture = false; urp.supportsCameraOpaqueTexture = false; });
+                yield return MeasureStep("4_bloom_thuong", () => { if (bloom != null) bloom.highQualityFiltering.value = false; });
+                yield return MeasureStep("5_no_smaa(msaa2_only)", () => { camData.antialiasing = UnityEngine.Rendering.Universal.AntialiasingMode.None; });
+                yield return MeasureStep("6_msaa4_only", () => { urp.msaaSampleCount = 4; camData.antialiasing = UnityEngine.Rendering.Universal.AntialiasingMode.None; });
+                yield return MeasureStep("7_smaa_only(msaa1)", () => { urp.msaaSampleCount = 1; camData.antialiasing = UnityEngine.Rendering.Universal.AntialiasingMode.SubpixelMorphologicalAntiAliasing; camData.antialiasingQuality = UnityEngine.Rendering.Universal.AntialiasingQuality.Medium; });
+                yield return MeasureStep("8_no_post_msaa4", () => { urp.msaaSampleCount = 4; camData.renderPostProcessing = false; });
+                yield return MeasureStep("9_no_hdr_msaa4_post_on", () => { camData.renderPostProcessing = true; urp.supportsHDR = false; urp.msaaSampleCount = 4; camData.antialiasing = UnityEngine.Rendering.Universal.AntialiasingMode.None; });
+                yield return MeasureStep("10_scale0.85_msaa2_smaa_post_hdr32", () => { urp.supportsHDR = true; urp.renderScale = 0.85f; urp.msaaSampleCount = 2; camData.antialiasing = UnityEngine.Rendering.Universal.AntialiasingMode.SubpixelMorphologicalAntiAliasing; });
+            }
+
+            string outP = Path.Combine(Application.persistentDataPath, "do_khung", "sweep_gpu.txt");
+            Directory.CreateDirectory(Path.GetDirectoryName(outP));
+            File.WriteAllText(outP, sb.ToString());
+            running = false;
+            Application.Quit();
         }
 
         IEnumerator CoRunCli()
@@ -193,6 +283,107 @@ namespace Khkt.Rendering
             float duration = cliShort ? 30f : 90f;
             string tag = !string.IsNullOrEmpty(cliTag) ? cliTag : (cliShort ? "cli_30s" : "cli_90s");
             yield return CoMeasure(duration, tag, quitWhenDone: true, onDone: null);
+        }
+
+        IEnumerator CoRunShotsCli()
+        {
+            running = true;
+            Application.runInBackground = true;
+            if (SceneManager.GetActiveScene().name != "PhongThiNghiem")
+            {
+                var op = SceneManager.LoadSceneAsync("PhongThiNghiem", LoadSceneMode.Single);
+                while (op != null && !op.isDone) yield return null;
+            }
+
+            float wait0 = Time.realtimeSinceStartup;
+            while (FindAnyObjectByType<DesktopViewer>() == null && Time.realtimeSinceStartup - wait0 < 15f)
+                yield return null;
+
+            yield return null;
+            yield return null;
+
+            var intro = FindAnyObjectByType<IntroScreen>();
+            if (intro != null && intro.IsOpen) intro.Close();
+
+            var viewer = FindAnyObjectByType<DesktopViewer>();
+            if (viewer == null)
+            {
+                running = false;
+                Application.Quit();
+                yield break;
+            }
+
+            Directory.CreateDirectory(cliShotDir);
+
+            // 1. Buret (vạch chia & chữ gần)
+            var buret = FindAnyObjectByType<Khkt.Interaction.BuretStopcock>();
+            if (buret != null)
+            {
+                Vector3 focus = buret.transform.position + Vector3.up * 0.22f;
+                viewer.SetPose(new Vector3(focus.x + 0.42f, 0f, focus.z), -90f, 0f);
+                yield return null;
+                viewer.LookAt(focus);
+            }
+            else
+            {
+                ApplyPose(viewer, new Vector3(6.05f, 0f, 2.60f), -90f, 10f);
+            }
+            yield return CaptureNamedShot("buret");
+
+            // 2. Biển báo khu thực hành & dãy bàn
+            ApplyPose(viewer, new Vector3(5.8f, 0f, 5.05f), 90f, -8f);
+            yield return CaptureNamedShot("bien_bao");
+
+            // 3. Vân sàn & mặt bàn góc nghiêng (lọc dị hướng)
+            ApplyPose(viewer, new Vector3(2.6f, 0f, 4.9f), 82f, 22f);
+            yield return CaptureNamedShot("san_ban");
+
+            // 4. Nhà kính tầng 2
+            ApplyPose(viewer, new Vector3(19.8f, 3.8f, -5.8f), 135f, 6f);
+            yield return CaptureNamedShot("nha_kinh");
+
+            // 5. Màn hình Cài đặt -> tab Hiển thị (chụp cho ảnh nghiệm thu SAU)
+            if (string.Equals(cliShotPrefix, "sau", StringComparison.OrdinalIgnoreCase) && intro != null)
+            {
+                ApplyPose(viewer, new Vector3(5.8f, 0f, 5.05f), 90f, -8f);
+                yield return null;
+                intro.OpenDisplaySettings();
+                yield return CaptureNamedShot("cai_dat_hien_thi");
+                intro.Close();
+            }
+
+            Debug.Log($"[DO-KHUNG-CHUP] Hoàn tất chụp ảnh '{cliShotPrefix}' ({Screen.width}x{Screen.height}) vào {cliShotDir}");
+            running = false;
+            yield return null;
+            Application.Quit();
+        }
+
+        IEnumerator CaptureNamedShot(string suffix)
+        {
+            // Chờ 2 khung để ZoneStreamer.Update() nhận biết vị trí mới sau SetPose
+            yield return null;
+            yield return null;
+
+            float t0 = Time.realtimeSinceStartup;
+            while (!ZoneStreamer.Settled && Time.realtimeSinceStartup - t0 < 12f)
+                yield return null;
+
+            // Chờ màn mờ chuyển khu (nếu vừa stream cảnh tầng 2) hạ xuống hoàn toàn
+            float waitFadeUntil = Time.realtimeSinceStartup + 0.7f;
+            while (Time.realtimeSinceStartup < waitFadeUntil)
+                yield return null;
+
+            for (int i = 0; i < 6; i++) yield return null;
+            yield return new WaitForEndOfFrame();
+
+            string path = Path.Combine(cliShotDir, $"{cliShotPrefix}_{suffix}.png");
+            if (File.Exists(path)) File.Delete(path);
+            ScreenCapture.CaptureScreenshot(path);
+
+            float tw = Time.realtimeSinceStartup;
+            while (!File.Exists(path) && Time.realtimeSinceStartup - tw < 2.5f)
+                yield return null;
+            yield return null;
         }
 
         void StartMeasurement(float durationS, string tag, bool quitWhenDone, Action<MucDoHoa, KetQuaDo> onDone)
@@ -323,25 +514,7 @@ namespace Khkt.Rendering
 
         static void ApplyPose(DesktopViewer viewer, Vector3 pos, float yaw, float pitch)
         {
-            var cc = viewer.GetComponent<CharacterController>();
-            if (cc != null) cc.enabled = false;
-            viewer.transform.position = pos;
-            if (cc != null) cc.enabled = true;
-
-            viewer.seated = false;
-            viewer.EyeOffset = 0f;
-            if (viewer.cameraTransform != null)
-            {
-                var lp = viewer.cameraTransform.localPosition;
-                lp.y = viewer.standingEyeHeight;
-                viewer.cameraTransform.localPosition = lp;
-                Vector3 dir = Quaternion.Euler(pitch, yaw, 0f) * Vector3.forward;
-                viewer.LookAt(viewer.cameraTransform.position + dir * 5f);
-            }
-            else
-            {
-                viewer.transform.rotation = Quaternion.Euler(0f, yaw, 0f);
-            }
+            viewer.SetPose(pos, yaw, pitch);
         }
 
         KetQuaDo BuildAndSaveReport(string tag, float durationS)

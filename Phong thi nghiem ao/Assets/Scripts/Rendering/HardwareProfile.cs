@@ -28,6 +28,21 @@ namespace Khkt.Rendering
         static bool skipApplyForBaseline;
         static string cliAaOverride;
         static bool sceneHooked;
+        static bool shadersWarmed;
+        static GameObject hookGo;
+
+        sealed class HardwareProfileHook : MonoBehaviour
+        {
+            void Start()
+            {
+                if (!skipApplyForBaseline)
+                {
+                    DisableLegacyHdQualityManager();
+                    ApplyCurrent();
+                    WarmUpShadersOnce();
+                }
+            }
+        }
 
         static readonly Dictionary<ParticleSystem, int> particleBaseMax = new Dictionary<ParticleSystem, int>();
 
@@ -56,6 +71,9 @@ namespace Khkt.Rendering
             public bool softShadows;
             public object softShadowQuality;
             public bool additionalShadows;
+            public HDRColorBufferPrecision hdrPrecision;
+            public bool depthTex;
+            public bool opaqueTex;
 #if ENABLE_UPSCALER_FRAMEWORK
             public string upscalerName;
 #else
@@ -64,6 +82,7 @@ namespace Khkt.Rendering
         }
 
         static AssetSnapshot? savedSnapshot;
+        static readonly List<(ScriptableRendererFeature feature, bool active)> savedFeatures = new List<(ScriptableRendererFeature, bool)>();
         static bool editorHooked;
 #endif
 
@@ -211,11 +230,24 @@ namespace Khkt.Rendering
         static void InitAfterSceneLoad()
         {
             EnsureInitialized();
-            ApplyCurrent();
+            if (!skipApplyForBaseline)
+            {
+                DisableLegacyHdQualityManager();
+                ApplyCurrent();
+                WarmUpShadersOnce();
+            }
+            if (hookGo == null)
+            {
+                hookGo = new GameObject("HardwareProfileHook");
+                UnityEngine.Object.DontDestroyOnLoad(hookGo);
+                hookGo.AddComponent<HardwareProfileHook>();
+            }
         }
 
         static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
+            if (!skipApplyForBaseline)
+                DisableLegacyHdQualityManager();
             ApplyCurrent();
         }
 
@@ -295,12 +327,64 @@ namespace Khkt.Rendering
         {
             if (skipApplyForBaseline) return;
 
+            DisableLegacyHdQualityManager();
+            ApplyRetinaResolution(muc);
             ApplyQualitySettings(muc);
             ApplyUrpAsset(muc);
             ApplyCameras(muc);
+            ApplyVolumes(muc);
             ApplyFloorAndBenchTextures(muc);
             ApplyParticleCap();
-            ApplyRetinaResolution(muc);
+        }
+
+        static void DisableLegacyHdQualityManager()
+        {
+            var hdType = Type.GetType("Khkt.Rendering.HD.HdQualityManager, Assembly-CSharp");
+            if (hdType == null) return;
+            var found = UnityEngine.Object.FindObjectsByType(hdType, FindObjectsInactive.Include);
+            for (int i = 0; i < found.Length; i++)
+            {
+                if (found[i] is MonoBehaviour mb && mb != null)
+                {
+                    var govField = hdType.GetField("governorEnabled", BindingFlags.Public | BindingFlags.Instance);
+                    govField?.SetValue(mb, false);
+                    if (mb.enabled) mb.enabled = false;
+                }
+            }
+        }
+
+        static void WarmUpShadersOnce()
+        {
+            if (shadersWarmed || !Application.isPlaying) return;
+            shadersWarmed = true;
+
+            string[] shaderNames =
+            {
+                "Universal Render Pipeline/Lit",
+                "Universal Render Pipeline/Simple Lit",
+                "Universal Render Pipeline/Unlit",
+                "Khkt/HD/ThuyTinhHD",
+                "Khkt/LaCay",
+                "Khkt/KinhMo",
+                "Khkt/CuaSoAo",
+                "Khkt/ChuTrongCanh",
+                "Khkt/VienSang",
+                "Khkt/TieuBan"
+            };
+
+            var svc = new ShaderVariantCollection();
+            for (int i = 0; i < shaderNames.Length; i++)
+            {
+                var sh = Shader.Find(shaderNames[i]);
+                if (sh == null) continue;
+                try
+                {
+                    svc.Add(new ShaderVariantCollection.ShaderVariant(sh, PassType.ScriptableRenderPipeline));
+                }
+                catch { }
+            }
+            svc.WarmUp();
+            UnityEngine.Object.Destroy(svc);
         }
 
         static void ApplyQualitySettings(MucDoHoa m)
@@ -345,8 +429,13 @@ namespace Khkt.Rendering
 
             int msaa = MsaaCountFor(m);
             if (cliAaOverride == "msaa4x") msaa = 4;
-            else if (cliAaOverride == "taa" || cliAaOverride == "smaa") msaa = m >= MucDoHoa.Cao ? 4 : 1;
+            else if (cliAaOverride == "msaa2x") msaa = 2;
+            else if (cliAaOverride == "taa" || cliAaOverride == "smaa" || cliAaOverride == "none") msaa = 1;
             urp.msaaSampleCount = msaa;
+
+            urp.hdrColorBufferPrecision = m >= MucDoHoa.SieuNet
+                ? HDRColorBufferPrecision._64Bits
+                : HDRColorBufferPrecision._32Bits;
 
             urp.shadowDistance = ShadowDistanceFor(m);
             urp.shadowCascadeCount = ShadowCascadesFor(m);
@@ -370,9 +459,12 @@ namespace Khkt.Rendering
                 FiSoftShadowQuality.SetValue(urp, Enum.ToObject(qType, qVal));
             }
 
+            bool enableSsao = m >= MucDoHoa.SieuNet;
+            urp.supportsCameraDepthTexture = enableSsao;
+            urp.supportsCameraOpaqueTexture = m >= MucDoHoa.Vua;
+
             if (FiRendererDataList?.GetValue(urp) is ScriptableRendererData[] renderers)
             {
-                bool enableSsao = m >= MucDoHoa.Cao;
                 for (int i = 0; i < renderers.Length; i++)
                 {
                     var rd = renderers[i];
@@ -381,7 +473,12 @@ namespace Khkt.Rendering
                     {
                         var feat = rd.rendererFeatures[f];
                         if (feat != null && feat.name.Contains("Occlusion", StringComparison.OrdinalIgnoreCase))
+                        {
+#if UNITY_EDITOR
+                            SaveFeatureSnapshotOnce(feat);
+#endif
                             feat.SetActive(enableSsao);
+                        }
                     }
                 }
             }
@@ -407,11 +504,12 @@ namespace Khkt.Rendering
                     switch (cliAaOverride)
                     {
                         case "msaa4x":
+                        case "msaa2x":
                             data.antialiasing = AntialiasingMode.None;
                             break;
                         case "smaa":
                             data.antialiasing = AntialiasingMode.SubpixelMorphologicalAntiAliasing;
-                            data.antialiasingQuality = AntialiasingQuality.Medium;
+                            data.antialiasingQuality = AntialiasingQuality.High;
                             break;
                         case "taa":
                             data.antialiasing = AntialiasingMode.TemporalAntiAliasing;
@@ -423,23 +521,25 @@ namespace Khkt.Rendering
                     continue;
                 }
 
-                switch (m)
+                // Trên Apple Silicon Metal TBDR, MSAA phần cứng nằm gọn trong tile memory:
+                // sắc nét chữ trên kính/buret hơn SMAA/TAA và tiết kiệm ~3 ms GPU.
+                data.antialiasing = AntialiasingMode.None;
+            }
+        }
+
+        static void ApplyVolumes(MucDoHoa m)
+        {
+            if (!Application.isPlaying) return;
+            var vols = UnityEngine.Object.FindObjectsByType<Volume>(FindObjectsInactive.Include);
+            bool hqBloom = m >= MucDoHoa.SieuNet;
+            for (int i = 0; i < vols.Length; i++)
+            {
+                var vol = vols[i];
+                if (vol == null || vol.profile == null) continue;
+                if (vol.profile.TryGet(out Bloom bloom))
                 {
-                    case MucDoHoa.Thap:
-                        data.antialiasing = AntialiasingMode.None;
-                        break;
-                    case MucDoHoa.Vua:
-                        data.antialiasing = AntialiasingMode.SubpixelMorphologicalAntiAliasing;
-                        data.antialiasingQuality = AntialiasingQuality.Low;
-                        break;
-                    case MucDoHoa.Cao:
-                        data.antialiasing = AntialiasingMode.SubpixelMorphologicalAntiAliasing;
-                        data.antialiasingQuality = AntialiasingQuality.Medium;
-                        break;
-                    default:
-                        data.antialiasing = AntialiasingMode.SubpixelMorphologicalAntiAliasing;
-                        data.antialiasingQuality = AntialiasingQuality.High;
-                        break;
+                    bloom.highQualityFiltering.overrideState = true;
+                    bloom.highQualityFiltering.value = hqBloom;
                 }
             }
         }
@@ -517,15 +617,15 @@ namespace Khkt.Rendering
             int physH = Display.main.systemHeight;
             if (physW <= 0 || physH <= 0) return;
 
-            if (Screen.fullScreen && (Screen.width != physW || Screen.height != physH))
-                Screen.SetResolution(physW, physH, Screen.fullScreenMode);
+            if (Screen.width != physW || Screen.height != physH || Screen.fullScreenMode != FullScreenMode.FullScreenWindow)
+                Screen.SetResolution(physW, physH, FullScreenMode.FullScreenWindow);
         }
 
         static float ShadowDistanceFor(MucDoHoa m) => m switch
         {
             MucDoHoa.Thap => 18f,
-            MucDoHoa.Vua => 24f,
-            MucDoHoa.Cao => 30f,
+            MucDoHoa.Vua => 22f,
+            MucDoHoa.Cao => 28f,
             _ => 45f
         };
 
@@ -537,14 +637,26 @@ namespace Khkt.Rendering
             _ => 4
         };
 
-        static int MsaaCountFor(MucDoHoa m) => m switch
+        static int MsaaCountFor(MucDoHoa m)
         {
-            MucDoHoa.Thap => 1,
-            MucDoHoa.Vua => 2,
-            _ => 4
-        };
+            bool ultraHighRes = Screen.width >= 2560 || (Display.main != null && Display.main.systemWidth >= 2560 && m == MucDoHoa.Cao);
+            return m switch
+            {
+                MucDoHoa.Thap => 1,
+                MucDoHoa.Vua => 2,
+                MucDoHoa.Cao => ultraHighRes ? 2 : 4,
+                _ => 4
+            };
+        }
 
 #if UNITY_EDITOR
+        static void SaveFeatureSnapshotOnce(ScriptableRendererFeature feat)
+        {
+            for (int i = 0; i < savedFeatures.Count; i++)
+                if (savedFeatures[i].feature == feat) return;
+            savedFeatures.Add((feat, feat.isActive));
+        }
+
         static void SaveSnapshotOnce(UniversalRenderPipelineAsset urp)
         {
             if (savedSnapshot.HasValue) return;
@@ -561,6 +673,9 @@ namespace Khkt.Rendering
                 softShadows = FiSoftShadows != null && (bool)FiSoftShadows.GetValue(urp),
                 softShadowQuality = FiSoftShadowQuality != null ? FiSoftShadowQuality.GetValue(urp) : null,
                 additionalShadows = FiAdditionalShadows != null && (bool)FiAdditionalShadows.GetValue(urp),
+                hdrPrecision = urp.hdrColorBufferPrecision,
+                depthTex = urp.supportsCameraDepthTexture,
+                opaqueTex = urp.supportsCameraOpaqueTexture,
 #if ENABLE_UPSCALER_FRAMEWORK
                 upscalerName = urp.upscalerName
 #else
@@ -591,6 +706,12 @@ namespace Khkt.Rendering
             if (FiSoftShadowQuality != null && s.softShadowQuality != null)
                 FiSoftShadowQuality.SetValue(s.asset, s.softShadowQuality);
             FiAdditionalShadows?.SetValue(s.asset, s.additionalShadows);
+            s.asset.hdrColorBufferPrecision = s.hdrPrecision;
+            s.asset.supportsCameraDepthTexture = s.depthTex;
+            s.asset.supportsCameraOpaqueTexture = s.opaqueTex;
+            for (int i = 0; i < savedFeatures.Count; i++)
+                if (savedFeatures[i].feature != null) savedFeatures[i].feature.SetActive(savedFeatures[i].active);
+            savedFeatures.Clear();
         }
 #endif
     }
