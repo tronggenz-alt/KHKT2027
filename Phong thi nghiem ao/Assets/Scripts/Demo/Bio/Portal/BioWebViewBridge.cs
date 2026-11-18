@@ -88,34 +88,17 @@ namespace Khkt.Demo.Bio.Portal
 
 #if UNITY_IOS && !UNITY_EDITOR
             _OpenBioWebView(fullPath);
-#elif UNITY_EDITOR || UNITY_STANDALONE_OSX
-            try
-            {
-                var uri = new Uri(fullPath);
-                Application.OpenURL(uri.AbsoluteUri);
-            }
-            catch (Exception ex)
-            {
-                Debug.LogWarning($"[BioWebViewBridge] Failed to create URI for '{fullPath}', falling back to raw path: {ex.Message}");
-                Application.OpenURL("file://" + fullPath.Replace('\\', '/'));
-            }
-            bridge.showEditorOverlay = true;
 #else
-            try
+            // G4: Mac, Windows và Unity Editor mở mô-đun Giải phẫu người 3D trực tiếp trong ứng dụng, không mở trình duyệt ngoài.
+            Khkt.Demo.Bio.GiaiPhau.GiaiPhauMoDunImpl.Mo(() =>
             {
-                var uri = new Uri(fullPath);
-                Application.OpenURL(uri.AbsoluteUri);
-            }
-            catch
-            {
-                Application.OpenURL("file://" + fullPath.Replace('\\', '/'));
-            }
-            bridge.showEditorOverlay = true;
+                if (s_instance != null) s_instance.OnWebViewClosed("in_app_closed");
+            });
 #endif
         }
 
         /// <summary>
-        /// Đóng WebView hoặc hủy overlay, phục hồi lab.
+        /// Đóng WebView (iOS) hoặc đóng mô-đun Giải phẫu 3D trong ứng dụng (Mac/Windows/Editor), phục hồi lab.
         /// </summary>
         public static void Close()
         {
@@ -124,8 +107,15 @@ namespace Khkt.Demo.Bio.Portal
 #if UNITY_IOS && !UNITY_EDITOR
             _CloseBioWebView();
 #else
-            s_instance.showEditorOverlay = false;
-            s_instance.OnWebViewClosed(string.Empty);
+            if (Khkt.Demo.Bio.GiaiPhau.GiaiPhauMoDunImpl.DangMo)
+            {
+                Khkt.Demo.Bio.GiaiPhau.GiaiPhauMoDunImpl.Dong();
+            }
+            else
+            {
+                s_instance.showEditorOverlay = false;
+                s_instance.OnWebViewClosed(string.Empty);
+            }
 #endif
         }
 

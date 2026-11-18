@@ -1,0 +1,3 @@
+<linker>
+  <assembly fullname="Khkt.Bio.ThucVat.Bridge" preserve="all"/>
+</linker>

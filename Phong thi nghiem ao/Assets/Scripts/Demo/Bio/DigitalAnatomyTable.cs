@@ -68,6 +68,11 @@ namespace Khkt.Demo.Bio
             BioFeedback.LogAction("ban_giai_phau_so", "doi_lop_giai_phau",
                 $"Bàn giải phẫu số: chuyển sang lớp '{names[layer]}' (Cơ quan trọng tâm: {OrganNames[selectedOrganIndex]}).");
             enabled = true;
+#if UNITY_STANDALONE || UNITY_EDITOR
+            // G4: Mở thẳng mô-đun Giải phẫu người 3D ngay trong ứng dụng trên Mac/Windows/Editor.
+            if (!Khkt.Demo.Bio.GiaiPhau.GiaiPhauMoDunImpl.DangMo)
+                Khkt.Demo.Bio.GiaiPhau.GiaiPhauMoDunImpl.Mo();
+#endif
         }
 
         public void SelectNextOrgan()

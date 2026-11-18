@@ -349,5 +349,14 @@ namespace Khkt.Input
             if (at != null) at.FeedHand(ben, world, new Vector2(1f - img[0].x, img[0].y), t.pinch);
             return true;
         }
+
+        /// <summary>Ánh xạ trực tiếp 21 mốc bàn tay MediaPipe (camera space, mét) vào khung xương giải phẫu HandRig.</summary>
+        public static void MapLandmarksToHandRig(Vector3[] worldLandmarks, HandRig rig, Quaternion cameraRot, Vector3? wristWorldPos = null)
+        {
+            if (rig == null || worldLandmarks == null || worldLandmarks.Length < 21) return;
+            rig.ApplyMediaPipeLandmarks(worldLandmarks, cameraRot);
+            if (wristWorldPos.HasValue && rig.WristAttach != null)
+                rig.transform.position += wristWorldPos.Value - rig.WristAttach.position;
+        }
     }
 }
