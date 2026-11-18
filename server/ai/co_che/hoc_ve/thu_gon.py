@@ -62,6 +62,8 @@ def dung_duoc(m) -> bool:
         return False
     if m.GetRingInfo().NumRings():
         return False
+    if any(a.GetChiralTag() != Chem.ChiralType.CHI_UNSPECIFIED for a in m.GetAtoms()):
+        return False                                   # tâm lập thể: vẽ khung có nêm
     return sum(1 for a in m.GetAtoms() if a.GetAtomicNum() > 1) <= 12
 
 
@@ -99,8 +101,8 @@ def h_an(m, giu: set[int]) -> set[int]:
         if not a.GetAtomMapNum() and a.GetNeighbors()[0].GetAtomicNum() in (7, 8, 16) and \
                 sum(1 for n in a.GetNeighbors()[0].GetNeighbors() if n.GetAtomicNum() > 1) >= 2:
             continue                                   # H do tach_h_di_to thêm: giữ để vẽ dựng đứng
-        if a.GetNeighbors()[0].GetAtomicNum() == 1:
-            continue                                   # H–H
+        if a.GetNeighbors()[0].GetAtomicNum() in (1, 9, 17, 35, 53):
+            continue                                   # H–H, H–Cl, H–Br: giữ nét như SGK
         ra.add(a.GetIdx())
     return ra
 
@@ -163,6 +165,8 @@ def bay(m, an: set[int], uu_tien: set[int], truoc: dict | None = None) -> np.nda
             a = m.GetAtomWithIdx(e)
             if a.GetAtomicNum() == 1 and len(hien) > 2:
                 s -= 6
+            if a.GetAtomicNum() not in (1, 6):
+                s += 2                                   # dị tố / halogen ở đầu mạch (H₃C–C–Br như đáp án)
             if a.GetAtomicNum() == 8 and len(p) > 1 and any(b.GetBondTypeAsDouble() == 2 for b in a.GetBonds()):
                 s -= 3
         return s
@@ -254,9 +258,17 @@ def bay(m, an: set[int], uu_tien: set[int], truoc: dict | None = None) -> np.nda
 
 
 # ------------------------------------------------------------------ cặp electron, điện tích vòng tròn
+NHO = set("₀₁₂₃₄₅₆₇₈₉⁺⁻²³")
+
+
+def rong_chu(t: str) -> float:
+    """Bề rộng thật ước lượng của chữ: ký tự thường 0,34, chỉ số dưới/mũ 0,2."""
+    return sum(.2 if ch in NHO else .34 for ch in t)
+
+
 def vung_chu(x: float, y: float, t: str, can: str) -> tuple[float, float]:
     """Mép trái/phải của chữ (không tính lề) theo cách căn của ve_giay.js."""
-    w = len(t) * .34
+    w = rong_chu(t)
     if can == "trai":
         x0 = x - KY_TU
     elif can == "phai":
@@ -282,7 +294,7 @@ def cho_cap_e(P: np.ndarray, i: int, ke: list[int], t: str, ky_hieu: str, can: s
     tt = bo_dien_tich(t)
     vt = tt.find(ky_hieu) if ky_hieu in tt else 0
     x0, _ = vung_chu(x, y, tt, can)
-    cx = x0 + (vt + len(ky_hieu) / 2) * .34
+    cx = x0 + rong_chu(tt[:vt]) + len(ky_hieu) * .17
     nua = len(ky_hieu) * .17
     o = [(cx, y + .4, 90.0), (cx, y - .4, 270.0)]
     if vt == 0:
@@ -316,13 +328,13 @@ def cho_dien_tich(P: np.ndarray, i: int, ke: list[int], t: str, can: str, net: l
     x, y = float(P[i][0]), float(P[i][1])
     if t:
         x0, x1 = vung_chu(x, y, bo_dien_tich(t), can)
-        ung = [(x1 + .2, y + .42), (x0 - .2, y + .42), (x1 + .2, y - .42), (x0 - .2, y - .42), ((x0 + x1) / 2, y + .62)]
+        ung = [(x1 + .3, y + .5), (x0 - .3, y + .5), (x1 + .3, y - .5), (x0 - .3, y - .5), ((x0 + x1) / 2, y + .7)]
     else:
         ung = [(x + .45 * math.cos(math.radians(g)), y + .45 * math.sin(math.radians(g))) for g in (45, 135, -45, -135, 90, -90, 0, 180)]
     tot, tot_d = ung[0], -1e9
     for k, c in enumerate(ung):
         d = min([_kc_doan(c, a, b) for a, b in net] + [math.dist(c, q) for q in diem_tranh] + [9.0])
-        d = min(d, .5) - .02 * k                      # đủ xa (≥ 0,5) thì giữ thứ tự ưu tiên
+        d = min(d, .45) - .02 * k                      # đủ xa (≥ 0,5) thì giữ thứ tự ưu tiên
         if d > tot_d:
             tot, tot_d = c, d
     return round(tot[0], 3), round(tot[1], 3)

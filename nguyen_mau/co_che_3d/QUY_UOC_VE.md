@@ -31,6 +31,13 @@ lấy cách vẽ đó vào bảng này.
 6. **Electron độc thân:** một chấm đặt ở phía trống của nguyên tử (ngược hướng các liên kết).
 7. **Giữ hướng khung giữa các bước:** chất sau đặt cùng hướng với chất trước để mắt dò theo được.
 8. **Nhãn chất** (A1, A4…) in đậm, ngay dưới chất.
+9. (18/11, theo bản demo đã duyệt) **Kiểu SGK cho chất mạch hở nhỏ:** công thức thu gọn, mạch chính nằm ngang, nhánh dựng
+   đứng; dị tố/halogen ở đầu mạch bên phải (H₃C–C(CH₃)₂–Br); hai nguyên tử phản ứng ở hai C kề đặt khác phía (Br trên, H dưới
+   trong E2). Bài kiểu HSG (R, CO₂Me, khung nhiều vòng) vẫn vẽ khung xương. Mã: `server/ai/co_che/hoc_ve/thu_gon.py`.
+10. **Cặp e tự do** (chấm đôi) trên dị tố tham gia mũi tên 2 e, ở bốn hướng trên/dưới/trái/phải, tránh nét và chữ H.
+11. **Điện tích trong vòng tròn** ⊕ ⊖ ở góc trên-phải nhãn (đổi góc khi vướng nét/cặp e).
+12. **Mỗi bước một phương trình**; giai đoạn có **tiêu đề in nghiêng gạch chân lượn sóng**; nhánh sai đứng trước, nền nhấn,
+    mũi tên nét đứt có ✕; "chậm"/"nhanh" trên mũi tên phản ứng; chữ phông có chân.
 
 ## 3. Bộ chấm độ dễ nhìn (`kiemTraDeNhin`)
 

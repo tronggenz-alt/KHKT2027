@@ -72,6 +72,28 @@ Sơ đồ dài tự xuống hàng (bề rộng ~26 đơn vị), nên `y` có th�
 | `chu` | `[[x,y,"+"]]` | (18/11) chữ thường khác: dấu "+" giữa các chất cùng trạng thái |
 | `ten` | `[[x,y,"A1"]]` | nhãn chất |
 
+### 2b. (18/11) Giấy kiểu đáp án bài thi – trường thêm (giữ mọi trường cũ, app cũ vẫn đọc được)
+
+Giống bản demo đã duyệt `sn2_sn1.html` (chế độ Giấy) / `hsg_propellane.html`: mỗi bước một phương trình, công thức thu gọn,
+cặp e tự do, điện tích trong vòng tròn, giai đoạn có tiêu đề. Máy chủ: `server/ai/co_che/hoc_ve/ve_theo_mau.py` + `thu_gon.py`.
+
+| Trường | Kiểu | Ý nghĩa |
+|---|---|---|
+| `phong` | `"co_chan"` | mọi chữ trên giấy dùng phông có chân (Times New Roman; Unity: `CoCheMoDun.PhongCoChan`) |
+| `kieu_cong_thuc` | `"thu_gon"` \| `"khung"` | thông tin: bài kiểu SGK (thu gọn H₃C–C(CH₃)₂–Br) hay kiểu HSG (khung xương, có R/CO₂Me hoặc nhiều vòng). `co_che.json` có thể ép bằng `"kieu_ve"` |
+| `cap_e` | `[[x,y,góc]]` | cặp electron tự do: tâm cặp và hướng ra (độ, 0 = phải, 90 = lên); vẽ HAI chấm cách tâm ±0,09 theo phương vuông góc với hướng ra, bán kính chấm ≈ 0,065 |
+| `dt_vong` | `[[x,y,"+"\|"−"\|"2+"…]]` | điện tích trong vòng tròn (⊕ ⊖), bán kính ≈ 0,2 (0,25 nếu 2 ký tự), nền màu giấy, viền mực. **Có `dt_vong` thì: bỏ qua `dt` và bỏ ký tự điện tích ở cuối nhãn nút** (`OH⁻` → `OH`) trước khi căn chữ |
+| `giai_doan` | `[{tieu_de, xy:[x,y], khung:[x0,x1,y0,y1], buoc:[k…], nen?, nhanh_sai?}]` | khối giai đoạn: tiêu đề in nghiêng, đậm vừa, căn trái tại `xy` (y = giữa dòng), gạch chân lượn sóng màu #c9a227; `nen` `"sai"` (nhánh sai: nền đỏ rất nhạt, vạch trái đỏ #c62828) / `"chon"` (nhánh được chọn khi có nhánh sai: nền vàng nhạt, vạch trái #c9a227); `buoc` = chỉ số bước trong `.3d.json` thuộc khối (để app tô khối đang xem) |
+| `mt[].gach`, `mt[].cheo` | bool | mũi tên của nhánh sai: nét đứt màu xám #8f9592; `cheo` → dấu ✕ đỏ ở điểm giữa đường cong (Bézier t = 0,5) |
+| `pu[].tren/duoi` | string | thêm `"nhanh"` cho bước không chậm khi cơ chế có bước chậm; cơ chế một bước không ghi "chậm"; bước chỉ chuyển H⁺ ghi "chuyển H⁺" |
+| `chu` | | thêm hệ số trước chất ("2" trong 2 Cl•) |
+
+Cách bày (máy chủ đã tính sẵn, app chỉ vẽ): nhánh sai đứng trước, rồi giai đoạn chính ("Cơ chế SN1:", "Cơ chế cộng electrophin (AE):"…;
+chuỗi gốc tự do: "Khơi mào:", "Phát triển mạch:", "Tắt mạch:"). Mỗi bước = chất tham gia (bỏ chất đứng ngoài) → sản phẩm của
+bước (áp mũi tên bằng RDKit, chất trùng gộp hệ số). Cặp e chỉ vẽ trên dị tố tham gia mũi tên 2 e của bước (hoặc khai báo
+`buoc[].cap_e`), không vẽ trên gốc tự do. Mũi tên cong xuất phát từ cặp e / chấm e độc thân hướng về đích. `co_che.json`
+có thể đặt `tieu_de_giay` (tiêu đề giai đoạn chính) và `nhanh_sai[].tieu_de`.
+
 Quy tắc vẽ nhãn, khe che, ngạnh mũi tên: xem [QUY_UOC_VE.md](QUY_UOC_VE.md) và `ve_giay.js` (bản thử web) – bản Unity
 phải vẽ giống hệt.
 

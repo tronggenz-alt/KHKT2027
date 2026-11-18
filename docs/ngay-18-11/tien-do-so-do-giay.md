@@ -14,15 +14,15 @@
 - `server/ai/co_che/hoc_ve/thu_gon.py` (mới): bày công thức thu gọn kiểu SGK, đếm cặp e / e độc thân, chọn chỗ cặp e và vòng điện tích.
 - `ve_theo_mau.py`: lớp `Chat` có tham số `thu_gon`, `giu` (mặc định tắt → hành vi cũ, test cũ đạt).
 
+- (commit sau 35540e46) `tao_so_do` mới: mỗi bước một phương trình, giai đoạn có tiêu đề, nhánh sai, cặp e, `dt_vong`,
+  chậm/nhanh, chuỗi gốc tự do; `tests/test_co_che_so_do_giay.py` (9 test) đạt; test cũ `tests.test_co_che_demo` đạt.
+- Hợp đồng HOP_DONG_APP.md mục 2b, QUY_UOC_VE.md mục 2 (9–12), `ve_giay.js` + `xem_bai_demo.html` vẽ trường mới
+  (xem: /nguyen_mau/co_che_3d/xem_bai_demo.html?bai=sn1_tbubr, máy chủ tĩnh cổng 8765).
+
 ## Đang làm dở
-- Viết lại `tao_so_do` trong `ve_theo_mau.py`: mỗi bước một phương trình (áp mũi tên bằng `co_che.ap_mui_ten` để ra sản phẩm thật, gộp 2 Cl•),
-  giai đoạn có tiêu đề (`giai_doan`), nhánh sai trước (nền "sai", mũi tên `gach` + `cheo`), cặp e (`cap_e: [[x,y,góc]]`),
-  điện tích vòng (`dt_vong: [[x,y,"+"]]`, vẫn giữ nhãn có điện tích và `dt` cho app cũ), `phong: "co_chan"`, nhãn chậm/nhanh,
-  gốc chuỗi: Khơi mào / Phát triển mạch / Tắt mạch.
+- (chưa) App Unity.
 
 ## Còn lại (theo thứ tự)
-1. Xong `tao_so_do` mới; test Python mới `tests/test_co_che_so_do_giay.py`.
-2. Hợp đồng: HOP_DONG_APP.md mục "18/11 – giấy kiểu bài thi"; QUY_UOC_VE.md; `ve_giay.js` vẽ trường mới.
 3. Dựng lại: `.venv/bin/python -m server.ai.co_che.dung_bai_demo` rồi `.venv/bin/python -m server.ai.co_che.dong_goi --unity`.
 4. App: `SoDoGiay.cs` + `DuLieuCoChe.cs` (đọc cap_e, dt_vong, giai_doan, mt.gach/cheo, phong).
 5. Kiểm tra: `.venv/bin/python -m unittest tests.test_co_che_demo tests.test_co_che_so_do_giay`; KhktCoCheVerify (một -batchmode);

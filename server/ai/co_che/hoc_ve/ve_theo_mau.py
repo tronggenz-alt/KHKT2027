@@ -394,8 +394,9 @@ class Chat:
                     continue
                 t = tg.nhan(a, self.an)
                 ke = [P[n.GetIdx()][0] for n in a.GetNeighbors() if n.GetIdx() not in self.an]
-                if len(ke) == 1 and P[a.GetIdx()][0] < ke[0] - .2:
-                    q = DIEN_TICH.get(a.GetFormalCharge(), "")
+                q = DIEN_TICH.get(a.GetFormalCharge(), "")
+                if (len(ke) == 1 and P[a.GetIdx()][0] < ke[0] - .2) or \
+                        (not ke and a.GetSymbol() in ("O", "S") and tg.so_h(a, self.an) >= 2):   # H₂O, H₃O⁺ như SGK
                     t = _dao_nhan(t) if not q else _dao_nhan(t[:-len(q)]) + q
             else:
                 t = _nhan_nt(a, m, P, self.nhan_map, _ghi_c(m, a))
@@ -507,109 +508,313 @@ def _phia_trong2(P: np.ndarray, i: int, ke: list[int], tranh: list[np.ndarray] =
     return tot
 
 
-# ============================================================================ dựng sơ đồ cả cơ chế
-RONG_HANG = 26.0         # quá bề rộng này thì xuống hàng (đơn vị độ dài liên kết)
+# ============================================================================ dựng sơ đồ cả cơ chế (18/11: kiểu đáp án bài thi)
+# Như bản demo đã duyệt (nguyen_mau/co_che_3d/sn2_sn1.html, chế độ Giấy):
+#   - mỗi bước là MỘT phương trình: các chất tham gia bước (bỏ chất đứng ngoài như Br⁻) → sản phẩm thật của bước (áp mũi tên
+#     bằng co_che.ap_mui_ten; hai Cl• giống nhau gộp thành "2 Cl•");
+#   - các bước gom thành GIAI ĐOẠN có tiêu đề in nghiêng gạch chân lượn sóng ("Cơ chế SN1:", "Khơi mào:"…); nhánh sai đứng
+#     trước, nền nhấn, mũi tên gạch có dấu ✕ ("Không theo SN2 (C bậc III bị cản trở không gian):");
+#   - chất mạch hở nhỏ vẽ công thức THU GỌN (thu_gon.py), có cặp e tự do trên dị tố tham gia mũi tên, điện tích trong vòng tròn;
+#   - mũi tên cong xuất phát từ cặp e (hoặc chấm e độc thân); "chậm"/"nhanh" trên mũi tên phản ứng; phông có chân.
+from .. import co_che as cc_mod  # noqa: E402
+
+RONG_HANG = 24.0         # quá bề rộng này thì xuống hàng (đơn vị độ dài liên kết)
+TIEU_DE_LOAI = {
+    "SN1": "Cơ chế SN1:", "SN2": "Cơ chế SN2:", "E1": "Cơ chế E1:", "E2": "Cơ chế E2:", "E1CB": "Cơ chế E1cB:",
+    "AE": "Cơ chế cộng electrophin (AE):", "AN": "Cơ chế cộng nucleophin (AN):", "AR": "Cơ chế cộng gốc tự do (AR):",
+    "SEAR": "Cơ chế thế electrophin vào vòng thơm (SEAr):", "SNAR": "Cơ chế thế nucleophin vào vòng thơm (SNAr):",
+    "THE_ACYL": "Cơ chế thế nucleophin vào nhóm acyl:", "GOC_TU_DO": "Cơ chế gốc tự do:", "SR": "Cơ chế thế gốc tự do (SR):",
+    "PERICYCLIC": "Cơ chế pericyclic:", "CHUYEN_VI": "Cơ chế (có chuyển vị):",
+}
+LY_DO_CHAN = {"can_tro_khong_gian": "bị cản trở không gian", "khong_anti_periplanar": "H không ở vị trí anti so với nhóm rời đi"}
 
 
 def _so_e(m):
     return len(m["tu"]["nguyen_tu"]) if isinstance(m["tu"]["nguyen_tu"], list) else 1
 
 
-def tao_so_do(co_che: dict) -> dict:
-    """co_che.json → sơ đồ giấy (.giay.json, hợp đồng HOP_DONG_APP.md mục 2)."""
-    nhan_map = {int(x["map"]): x["nhan"] for x in co_che.get("nhan_hien_thi", [])}
-    cac_buoc = co_che["buoc"]
-    chat_theo_buoc = [b["chat"] for b in cac_buoc] + [co_che["san_pham"]]
-    sd = {"nt": {}, "lk": [], "goc": [], "dt": [], "mt": [], "pu": [], "ten": [], "chu": []}
-    truoc: dict[int, np.ndarray] = {}
+def _maps(s: str) -> set[int]:
+    return {int(x) for x in re.findall(r":(\d+)\]", s)}
 
-    # 1. bày từng chất của từng trạng thái
-    nhom = []
-    for k, ds in enumerate(chat_theo_buoc):
-        cs = []
-        for smi in ds:
-            c = Chat(smi, nhan_map, truoc)
-            truoc.update({a.GetAtomMapNum(): c.P[a.GetIdx()].copy() for a in c.m.GetAtoms() if a.GetAtomMapNum()})
-            cs.append(c)
-        nhom.append(cs)
 
-    # 2. xếp theo hàng: chất – "+" – chất – mũi tên phản ứng – …; quá RONG_HANG thì xuống hàng
-    x, y_hang, cao_hang = .6, 0.0, 0.0
-    vi_tri: list[dict[int, tuple]] = []           # trạng thái k: map → (điểm, có nhãn, chất, chỉ số)
-    dat: list[tuple] = []                          # (chất, dx, dy, tiền tố)
-    for k, cs in enumerate(nhom):
-        rong = sum(c.khung()[1] - c.khung()[0] for c in cs) + .9 * (len(cs) - 1)
-        if x > .6 and x + rong > RONG_HANG:
-            y_hang -= cao_hang + 1.6
-            x, cao_hang = .6, 0.0
-        vt = {}
-        for j, c in enumerate(cs):
+def _maps_mt(mts: list, chi_day_du: bool = False, chi_nguon: bool = False) -> set[int]:
+    ra = set()
+    for x in mts:
+        if chi_day_du and x.get("kieu", "day_du") == "nua_dau":
+            continue
+        for d in (("tu",) if chi_nguon else ("tu", "den")):
+            v = x[d]["nguyen_tu"]
+            ra |= {int(z) for z in (v if isinstance(v, list) else [v])}
+    return ra
+
+
+def _gop(ds: list[str]) -> list[tuple[str, int]]:
+    """Gộp chất trùng (bỏ map): Cl• + Cl• → 2 Cl•."""
+    ra, khoa = [], []
+    for s in ds:
+        try:
+            m = _mol(s)
+            for a in m.GetAtoms():
+                a.SetAtomMapNum(0)
+            k = Chem.MolToSmiles(m)
+        except Exception:  # noqa: BLE001
+            k = s
+        if k in khoa:
+            ra[khoa.index(k)][1] += 1
+        else:
+            khoa.append(k)
+            ra.append([s, 1])
+    return [(s, n) for s, n in ra]
+
+
+def _chuyen_h(b: dict) -> list[tuple[int, int]]:
+    ra = []
+    for x in b.get("chuyen_h") or []:
+        try:
+            ra.append((int(x["tu"]), int(x["den"])))
+        except (KeyError, TypeError, ValueError):
+            continue
+    return ra
+
+
+def _phuong_trinh(b: dict, sau: list[str]) -> tuple[list[str], list[tuple[str, int]]]:
+    """Một bước → (chất tham gia, [(sản phẩm, hệ số)]). Sản phẩm tính bằng cách áp mũi tên (đúng cả chất phụ như HCl)."""
+    mts = b.get("mui_ten") or []
+    ch = _chuyen_h(b)
+    dung = _maps_mt(mts) | {v for c in ch for v in c}
+    if not dung:
+        return list(b["chat"]), _gop(list(sau))
+    trai = [s for s in b["chat"] if _maps(s) & dung] or list(b["chat"])
+    try:
+        rw = cc_mod.ap_mui_ten(cc_mod.tu_smiles(trai), [cc_mod.MuiTen.tu_dict(x) for x in mts], chuyen_h=ch)
+        phai = cc_mod.cac_manh_smiles(rw)
+    except Exception:  # noqa: BLE001
+        cu = set().union(*(_maps(s) for s in trai))
+        phai = [s for s in sau if _maps(s) & cu] or list(sau)
+    return trai, _gop(phai)
+
+
+def _co_goc(ds: list[str]) -> bool:
+    for s in ds:
+        try:
+            if any(tg.so_goc(a) for a in _mol(s).GetAtoms()):
+                return True
+        except Exception:  # noqa: BLE001
+            continue
+    return False
+
+
+def _chon_thu_gon(co_che: dict, tt: list[list[str]]) -> bool:
+    """Kiểu SGK (thu gọn) trừ khi là bài kiểu HSG: có nhóm viết tắt (R, CO₂Me) hoặc khung nhiều vòng → khung xương."""
+    k = co_che.get("kieu_ve")
+    if k in ("thu_gon", "khung"):
+        return k == "thu_gon"
+    if co_che.get("nhan_hien_thi"):
+        return False
+    for ds in tt:
+        for s in ds:
+            try:
+                m = _mol(s)
+            except Exception:  # noqa: BLE001
+                continue
+            if any(a.GetAtomicNum() == 0 for a in m.GetAtoms()) or m.GetRingInfo().NumRings() >= 2:
+                return False
+    return True
+
+
+def _tieu_de_chinh(co_che: dict) -> str:
+    if co_che.get("tieu_de_giay"):
+        return str(co_che["tieu_de_giay"])
+    m = re.search(r"→\s*([A-Z][A-Za-z0-9]{0,3})\s*$", str(co_che.get("ten") or ""))
+    if m:
+        return f"Cơ chế hình thành {m.group(1)}:"
+    return TIEU_DE_LOAI.get(str(co_che.get("loai") or "").upper(), "Cơ chế phản ứng:")
+
+
+def _tieu_de_sai(ns: dict, trai: list[str]) -> str:
+    if ns.get("tieu_de"):
+        return str(ns["tieu_de"])
+    ten = str(ns.get("ten") or "Nhánh sai")
+    kieu = ns.get("kieu_chan", "")
+    ly = LY_DO_CHAN.get(kieu, "")
+    dich = ns.get("dich") or []
+    try:
+        mol = cc_mod.tu_smiles(trai)
+        bd = cc_mod.ban_do(mol)
+        if kieu == "can_tro_khong_gian" and len(dich) > 1 and int(dich[1]) in bd:
+            n_c = sum(1 for n in mol.GetAtomWithIdx(bd[int(dich[1])]).GetNeighbors() if n.GetAtomicNum() == 6)
+            if n_c >= 2:
+                ly = f"C bậc {'III' if n_c >= 3 else 'II'} bị cản trở không gian"
+        if kieu == "khong_anti_periplanar":
+            for x in ns.get("mui_ten") or []:
+                if x["tu"]["loai"] == "lien_ket" and x["den"]["loai"] == "nguyen_tu" and int(x["den"]["nguyen_tu"]) in bd:
+                    ly = f"H không ở vị trí anti so với {mol.GetAtomWithIdx(bd[int(x['den']['nguyen_tu'])]).GetSymbol()}"
+    except Exception:  # noqa: BLE001
+        pass
+    m = re.match(r"(.+?)\s+bị chặn", ten)
+    dau = f"Không theo {m.group(1)}" if m else ten
+    return f"{dau} ({ly}):" if ly else f"{dau}:"
+
+
+def _sd_rong() -> dict:
+    return {"nt": {}, "lk": [], "goc": [], "dt": [], "dt_vong": [], "cap_e": [], "mt": [], "pu": [], "chu": [], "ten": []}
+
+
+def _ghi_chat(sd: dict, c: Chat, dx: float, dy: float, tt: str, cap_maps: set[int], huong: dict,
+              cap_vt: dict, goc_vt: dict) -> None:
+    """Ghi một chất vào sơ đồ: nút, nét, cặp e, e độc thân, điện tích (vòng tròn + kiểu cũ)."""
+    P = c.P + (dx, dy)
+    m = c.m
+    ke_hien = lambda i: [n.GetIdx() for n in m.GetAtomWithIdx(i).GetNeighbors() if c.hien(n.GetIdx())]
+    net = []
+    for b in m.GetBonds():
+        i, j = b.GetBeginAtomIdx(), b.GetEndAtomIdx()
+        if not (c.hien(i) and c.hien(j)):
+            continue
+        net.append((P[i], P[j]))
+        bac = {Chem.BondType.DOUBLE: 2, Chem.BondType.TRIPLE: 3}.get(b.GetBondType(), 1)
+        ls = c.lap_the.get((i, j)) or c.lap_the.get((j, i))
+        if ls:
+            a0, a1 = (i, j) if (i, j) in c.lap_the else (j, i)
+            sd["lk"].append([f"{tt}{a0}", f"{tt}{a1}", ls])
+            continue
+        e = [f"{tt}{i}", f"{tt}{j}"]
+        if (min(i, j), max(i, j)) in c.sau:
+            e.append("sau")
+        elif bac > 1:
+            e.append(bac)
+            if b.IsInRing():               # nét đôi thứ hai phía trong vòng
+                vong = min((r for r in m.GetRingInfo().AtomRings() if i in r and j in r), key=len)
+                e.append([round(float(z), 3) for z in P[list(vong)].mean(0)])
+        sd["lk"].append(e)
+    tranh = []
+    for a in m.GetAtoms():
+        i = a.GetIdx()
+        if not c.hien(i):
+            continue
+        sd["nt"][f"{tt}{i}"] = [round(float(P[i][0]), 3), round(float(P[i][1]), 3)] + ([c.nhan[i]] if i in c.nhan else [])
+    # cặp electron tự do: dị tố có nhãn, tham gia mũi tên đầy đủ của bước (hoặc khai báo cap_e)
+    for a in m.GetAtoms():
+        i, mp = a.GetIdx(), a.GetAtomMapNum()
+        if not c.hien(i) or i not in c.nhan or a.GetAtomicNum() not in tg.DI_TO_CAP or not mp or mp not in cap_maps:
+            continue
+        if tg.so_goc(a):
+            continue                                   # gốc tự do: chỉ vẽ chấm e độc thân như SGK
+        ke = ke_hien(i)
+        t = tg.bo_dien_tich(c.nhan[i])
+        can = tg.can_nhan(t, len(ke), float(P[i][0]), float(P[ke[0]][0]) if len(ke) == 1 else None)
+        h = huong.get(mp)
+        cap = tg.cho_cap_e(P, i, ke, t, a.GetSymbol(), can, tg.so_cap(a), None if h is None else h - P[i])
+        for x, y, g in cap:
+            sd["cap_e"].append([x, y, g])
+            cap_vt.setdefault(mp, []).append((x, y, g))
+            tranh.append((x, y))
+    # electron độc thân
+    for a in m.GetAtoms():
+        i = a.GetIdx()
+        if not c.hien(i) or not tg.so_goc(a):
+            continue
+        ke = ke_hien(i)
+        mp = a.GetAtomMapNum()
+        tr = [np.array(huong[mp]) for _ in (0,)] if mp in huong else []
+        v = _phia_trong2(P, i, ke, [P[i] - (t - P[i]) for t in tr])
+        r = .45 if i in c.nhan else .3
+        if i in c.nhan and abs(v[0]) > .6:
+            r = len(tg.bo_dien_tich(c.nhan[i])) * .17 + .25
+        q = [round(float(z), 3) for z in P[i] + v * r]
+        sd["goc"].append(q)
+        goc_vt.setdefault(mp, []).append(tuple(q))
+        tranh.append(tuple(q))
+    # điện tích: vòng tròn ⊕/⊖ (mới) + kiểu cũ (nhãn có ⁺⁻, "dt" cho C không nhãn) để app cũ vẫn đọc được
+    for a in m.GetAtoms():
+        i, q = a.GetIdx(), a.GetFormalCharge()
+        if not c.hien(i) or not q:
+            continue
+        ke = ke_hien(i)
+        t = c.nhan.get(i, "")
+        can = tg.can_nhan(tg.bo_dien_tich(t), len(ke), float(P[i][0]), float(P[ke[0]][0]) if len(ke) == 1 else None)
+        khac = [tuple(P[j]) for j in c.nhan if j != i and c.hien(j)]
+        x, y = tg.cho_dien_tich(P, i, ke, t, can, net, tranh + khac)
+        sd["dt_vong"].append([x, y, ("+" if q > 0 else "−") if abs(q) == 1 else f"{abs(q)}{'+' if q > 0 else '−'}"])
+        tranh.append((x, y))
+        if i not in c.nhan:
+            v = _phia_trong2(P, i, ke)
+            sd["dt"].append([round(float(P[i][0] + v[0] * .38), 3), round(float(P[i][1] + v[1] * .38), 3), DIEN_TICH.get(q, "")])
+
+
+def _do_rong_pu(p: dict) -> float:
+    return max(1.6, len(p.get("tren") or "") * .26 + .5, len(p.get("duoi") or "") * .26 + .5)
+
+
+def _ve_phuong_trinh(pt: dict, chats_trai: list, chats_phai: list, nhan_map: dict, so: int) -> list[dict]:
+    """Một phương trình → các hàng (sơ đồ cục bộ, y quanh 0). Mũi tên cong của bước vẽ trên vế trái."""
+    hang = []
+
+    def hang_moi():
+        h = {"sd": _sd_rong(), "x": .6}
+        hang.append(h)
+        return h
+
+    h = hang_moi()
+    vt: dict[int, tuple] = {}
+    dat_trai = []
+    for j, c in enumerate(chats_trai):
+        x0, x1, y0, y1 = c.khung()
+        if j:
+            if pt.get("gach"):
+                h["x"] += .9
+            else:
+                h["sd"]["chu"].append([round(h["x"] + .1, 3), 0.0, "+"])
+                h["x"] += .55
+        dx, dy = h["x"] - x0, -(y0 + y1) / 2
+        dat_trai.append((c, dx, dy, f"p{so}t{j}_"))
+        for a in c.m.GetAtoms():
+            if a.GetAtomMapNum() and c.hien(a.GetIdx()):
+                vt[a.GetAtomMapNum()] = (c.P[a.GetIdx()] + (dx, dy), a.GetIdx() in c.nhan, c, a.GetIdx(), dx, dy)
+        h["x"] += x1 - x0 + .35
+    # hướng tấn công của từng nguồn cặp e (để cặp e đặt về phía đích)
+    huong = {}
+    for x in pt["mt"]:
+        if x["tu"]["loai"] in ("cap_e", "nguyen_tu"):
+            a = x["tu"]["nguyen_tu"]
+            a = a[0] if isinstance(a, list) else a
+            d = x["den"]["nguyen_tu"]
+            d = [z for z in (d if isinstance(d, list) else [d]) if z != a]
+            if d and d[-1] in vt:
+                huong[int(a)] = vt[d[-1]][0]
+    cap_vt, goc_vt = {}, {}
+    for c, dx, dy, tt in dat_trai:
+        _ghi_chat(h["sd"], c, dx, dy, tt, pt["cap"], huong, cap_vt, goc_vt)
+    # mũi tên phản ứng + vế phải
+    if not pt.get("gach"):
+        p = {}
+        if pt.get("tren"):
+            p["tren"] = pt["tren"] if len(pt["tren"]) <= 22 else pt["tren"][:21] + "…"
+        if pt.get("toc"):
+            p["tren" if "tren" not in p else "duoi"] = pt["toc"]
+        if pt.get("thuan_nghich"):
+            p["thuan_nghich"] = True
+        dai = _do_rong_pu(p)
+        p.update({"x1": round(h["x"], 3), "x2": round(h["x"] + dai, 3), "y": 0.0})
+        h["sd"]["pu"].append(p)
+        h["x"] += dai + .5
+        rong_phai = sum(c.khung()[1] - c.khung()[0] + .9 + (.45 if n > 1 else 0) for c, n in chats_phai)
+        hp = h if h["x"] + rong_phai <= RONG_HANG + 1 else hang_moi()
+        if hp is not h:
+            hp["x"] = 2.4
+        for j, (c, n) in enumerate(chats_phai):
             x0, x1, y0, y1 = c.khung()
             if j:
-                sd["chu"].append([round(x + .1, 3), round(y_hang, 3), "+"])
-                x += .55
-            dx, dy = x - x0, y_hang - (y0 + y1) / 2
-            dat.append((c, dx, dy, f"s{k}{chr(97 + j)}"))
-            cao_hang = max(cao_hang, y1 - y0)
-            for a in c.m.GetAtoms():
-                if a.GetAtomMapNum():
-                    vt[a.GetAtomMapNum()] = (c.P[a.GetIdx()] + (dx, dy), a.GetIdx() in c.nhan, c, a.GetIdx(), dx, dy)
-            x += x1 - x0 + .35
-        vi_tri.append(vt)
-        if k < len(nhom) - 1:
-            b = cac_buoc[k]
-            tren = b.get("dieu_kien") or (co_che.get("dieu_kien", "") if k == 0 else "")
-            tren = tren if len(tren) <= 22 else tren[:21] + "…"
-            dai = max(1.6, len(tren) * .26 + .5)
-            if x + dai > RONG_HANG + 2:
-                y_hang -= cao_hang + 1.6
-                x, cao_hang = .6, 0.0
-            p = {"x1": round(x, 3), "x2": round(x + dai, 3), "y": round(y_hang, 3)}
-            if tren:
-                p["tren"] = tren
-            if b.get("thuan_nghich"):
-                p["thuan_nghich"] = True
-            if b.get("buoc_cham"):
-                p["duoi"] = "chậm"
-            sd["pu"].append(p)
-            x += dai + .5
-
-    # 3. ghi nút, nét, chấm gốc tự do, điện tích của C
-    for c, dx, dy, tt in dat:
-        P = c.P + (dx, dy)
-        for a in c.m.GetAtoms():
-            i = a.GetIdx()
-            sd["nt"][f"{tt}{i}"] = [round(float(P[i][0]), 3), round(float(P[i][1]), 3)] + ([c.nhan[i]] if i in c.nhan else [])
-            ke = [n.GetIdx() for n in a.GetNeighbors()]
-            if a.GetNumRadicalElectrons():
-                v = _phia_trong2(P, i, ke)
-                r = .45 if i in c.nhan else .3
-                if i in c.nhan and abs(v[0]) > .6:
-                    r = len(c.nhan[i]) * .17 + .25
-                sd["goc"].append([round(float(z), 3) for z in P[i] + v * r])
-            if a.GetFormalCharge() and i not in c.nhan:
-                v = _phia_trong2(P, i, ke)
-                sd["dt"].append([round(float(P[i][0] + v[0] * .38), 3), round(float(P[i][1] + v[1] * .38), 3),
-                                 DIEN_TICH.get(a.GetFormalCharge(), "")])
-        for b in c.m.GetBonds():
-            i, j = b.GetBeginAtomIdx(), b.GetEndAtomIdx()
-            bac = {Chem.BondType.DOUBLE: 2, Chem.BondType.TRIPLE: 3}.get(b.GetBondType(), 1)
-            ls = c.lap_the.get((i, j)) or c.lap_the.get((j, i))
-            if ls:
-                a0, a1 = (i, j) if (i, j) in c.lap_the else (j, i)
-                sd["lk"].append([f"{tt}{a0}", f"{tt}{a1}", ls])
-                continue
-            e = [f"{tt}{i}", f"{tt}{j}"]
-            if (min(i, j), max(i, j)) in c.sau:
-                e.append("sau")
-            elif bac > 1:
-                e.append(bac)
-                if b.IsInRing():               # nét đôi thứ hai phía trong vòng
-                    vong = min((r for r in c.m.GetRingInfo().AtomRings() if i in r and j in r), key=len)
-                    e.append([round(float(z), 3) for z in P[list(vong)].mean(0)])
-            sd["lk"].append(e)
-
-    # 4. mũi tên cong: chọn đường cong ít cắt nét, không đè chữ
+                hp["sd"]["chu"].append([round(hp["x"] + .1, 3), 0.0, "+"])
+                hp["x"] += .55
+            if n > 1:
+                hp["sd"]["chu"].append([round(hp["x"] + .15, 3), 0.0, str(n)])
+                hp["x"] += .45
+            dx, dy = hp["x"] - x0, -(y0 + y1) / 2
+            _ghi_chat(hp["sd"], c, dx, dy, f"p{so}p{j}_", pt["cap"], {}, {}, {})
+            hp["x"] += x1 - x0 + .35
+    # mũi tên cong (trên vế trái)
+    sd = h["sd"]
     hop_chu = list(_hop_nhan(sd).values())
     for p in sd["pu"]:
         xm = (p["x1"] + p["x2"]) / 2
@@ -617,50 +822,208 @@ def tao_so_do(co_che: dict) -> dict:
             if t:
                 w = len(t) * .13 + .1
                 hop_chu.append((xm - w, xm + w, p["y"] + dyy - .2, p["y"] + dyy + .2))
-    for x0, y0, t in sd["chu"]:
+    for x0, y0, _ in sd["chu"]:
         hop_chu.append((x0 - .2, x0 + .2, y0 - .2, y0 + .2))
     net = [(np.array(sd["nt"][l[0]][:2]), np.array(sd["nt"][l[1]][:2])) for l in sd["lk"]]
-    for k, b in enumerate(cac_buoc):
-        vt = vi_tri[k]
-        tam = np.mean([v[0] for v in vt.values()], axis=0)
-        for mt in b["mui_ten"]:
-            ve = _mui_ten(mt, vt, tam, net, hop_chu, sd["mt"])
-            if ve:
-                sd["mt"].append(ve)
+    tam = np.mean([v[0] for v in vt.values()], axis=0) if vt else np.zeros(2)
+    cheo_xong = False
+    for x in pt["mt"]:
+        ve = _mui_ten(x, vt, tam, net, hop_chu, sd["mt"], cap_vt, goc_vt)
+        if not ve:
+            continue
+        if pt.get("gach"):
+            ve["gach"] = True
+            nguon = x["tu"]["nguyen_tu"]
+            nguon = nguon[0] if isinstance(nguon, list) else nguon
+            if not cheo_xong and (pt.get("cheo") is None or int(nguon) == pt["cheo"]):
+                ve["cheo"] = True
+                cheo_xong = True
+        sd["mt"].append(ve)
+    return hang
 
-    xs = [v[0] for v in sd["nt"].values()] + [p["x2"] for p in sd["pu"]]
-    ys = [v[1] for v in sd["nt"].values()]
+
+def _khung_sd(sd: dict) -> tuple[float, float, float, float]:
+    xs, ys = [], []
+    for v in sd["nt"].values():
+        xs.append(v[0]); ys.append(v[1])
+    for x, y, *_ in sd["goc"] + sd["dt_vong"] + sd["cap_e"] + sd["chu"]:
+        xs.append(x); ys.append(y)
+    for h in _hop_nhan(sd).values():
+        xs += [h[0], h[1]]; ys += [h[2], h[3]]
+    for p in sd["pu"]:
+        xs += [p["x1"], p["x2"]]
+        ys += [p["y"] + (.75 if p.get("tren") else .2), p["y"] - (.8 if p.get("duoi") else .2)]
     for m in sd["mt"]:
-        xs += [m["qua"][0] * .5 + (m["tu"][0] + m["den"][0]) * .25]
-        ys += [m["qua"][1] * .5 + (m["tu"][1] + m["den"][1]) * .25]
-    sd["khung"] = [round(min(xs) - .8, 2), round(max(xs) + 1.2, 2), round(min(ys) - 1.0, 2), round(max(ys) + 1.2, 2)]
-    for k in ("goc", "dt", "ten", "chu"):
+        for w in range(11):
+            x, y = _bezier(m, w / 10)
+            xs.append(x); ys.append(y)
+    if not xs:
+        return 0, 0, 0, 0
+    return min(xs), max(xs), min(ys) - .3, max(ys) + .3
+
+
+def _doi(sd: dict, dy: float) -> None:
+    for v in sd["nt"].values():
+        v[1] = round(v[1] + dy, 3)
+    for k in ("goc", "dt", "dt_vong", "cap_e", "chu", "ten"):
+        for v in sd[k]:
+            v[1] = round(v[1] + dy, 3)
+    for p in sd["pu"]:
+        p["y"] = round(p["y"] + dy, 3)
+    for m in sd["mt"]:
+        for k in ("tu", "qua", "den"):
+            m[k][1] = round(m[k][1] + dy, 3)
+
+
+def tao_so_do(co_che: dict) -> dict:
+    """co_che.json → sơ đồ giấy (.giay.json, hợp đồng HOP_DONG_APP.md mục 2 + mục "18/11 – giấy kiểu bài thi")."""
+    nhan_map = {int(x["map"]): x["nhan"] for x in co_che.get("nhan_hien_thi", [])}
+    cac_buoc = co_che["buoc"]
+    tt = [b["chat"] for b in cac_buoc] + [co_che["san_pham"]]
+    thu_gon = _chon_thu_gon(co_che, tt)
+    co_cham = len(cac_buoc) > 1 and any(b.get("buoc_cham") for b in cac_buoc)
+
+    # 1. phương trình: nhánh sai trước, rồi từng bước
+    pts, gd = [], []
+    for j, ns in enumerate(co_che.get("nhanh_sai") or []):
+        k = int(ns.get("tu_buoc", 1)) - 1
+        if not 0 <= k < len(cac_buoc) or not ns.get("mui_ten"):
+            continue
+        mts = ns["mui_ten"]
+        dung = _maps_mt(mts)
+        trai = list(ns.get("them") or []) + [s for s in cac_buoc[k]["chat"] if _maps(s) & dung]
+        dich = ns.get("dich") or []
+        pts.append({"trai": trai, "phai": [], "mt": mts, "gach": True, "cheo": int(dich[0]) if dich else None,
+                    "giu": dung, "cap": _maps_mt(mts, True), "buoc": k})
+        gd.append({"tieu_de": _tieu_de_sai(ns, trai), "nen": "sai", "pt": [len(pts) - 1], "buoc": [], "nhanh_sai": j})
+    dau_chinh = len(pts)
+    for k, b in enumerate(cac_buoc):
+        trai, phai = _phuong_trinh(b, tt[k + 1])
+        mts = b.get("mui_ten") or []
+        chm = {v for c in _chuyen_h(b) for v in c}
+        tren = b.get("dieu_kien") or (co_che.get("dieu_kien", "") if k == 0 else "")
+        if not tren and chm and not mts:
+            tren = "chuyển H⁺"
+        toc = "chậm" if co_cham and b.get("buoc_cham") else "nhanh" if co_cham else ""
+        pts.append({"trai": trai, "phai": phai, "mt": mts, "gach": False, "giu": _maps_mt(mts) | chm,
+                    "cap": _maps_mt(mts, True) | {int(x) for x in b.get("cap_e") or []} | chm, "buoc": k,
+                    "tren": tren, "toc": toc, "thuan_nghich": bool(b.get("thuan_nghich"))})
+    if not cac_buoc:                                     # một chất đứng riêng (so_do_mot_chat)
+        pts.append({"trai": list(co_che["san_pham"]), "phai": [], "mt": [], "gach": True, "giu": set(), "cap": set(), "buoc": None})
+        gd.append({"tieu_de": "", "pt": [0], "buoc": []})
+    # 2. giai đoạn của cơ chế chính: chuỗi gốc tự do → Khơi mào / Phát triển mạch / Tắt mạch; còn lại một giai đoạn
+    if cac_buoc:
+        nhom = []
+        for i in range(dau_chinh, len(pts)):
+            g0, g1 = _co_goc(pts[i]["trai"]), _co_goc([s for s, _ in pts[i]["phai"]])
+            nhom.append("Khơi mào:" if not g0 and g1 else "Tắt mạch:" if g0 and not g1 else "Phát triển mạch:" if g0 else None)
+        chuoi = str(co_che.get("loai", "")).upper() in ("GOC_TU_DO", "SR") and nhom and nhom[0] == "Khơi mào:" and \
+            len(pts[dau_chinh]["trai"]) == 1 and None not in nhom
+        if chuoi:
+            for i, t in enumerate(nhom):
+                if i and t == nhom[i - 1]:
+                    gd[-1]["pt"].append(dau_chinh + i)
+                    gd[-1]["buoc"].append(pts[dau_chinh + i]["buoc"])
+                else:
+                    gd.append({"tieu_de": t, "pt": [dau_chinh + i], "buoc": [pts[dau_chinh + i]["buoc"]]})
+        else:
+            gd.append({"tieu_de": _tieu_de_chinh(co_che), "pt": list(range(dau_chinh, len(pts))),
+                       "buoc": list(range(len(cac_buoc)))})
+            if dau_chinh:
+                gd[-1]["nen"] = "chon"
+
+    # 3. bày chất theo thứ tự đọc (chất sau giữ hướng chất trước theo atom map) và xếp hàng
+    truoc: dict[int, np.ndarray] = {}
+
+    def chat(smi, giu):
+        c = Chat(smi, nhan_map, truoc, thu_gon, frozenset(giu))
+        truoc.update({a.GetAtomMapNum(): c.P[a.GetIdx()].copy() for a in c.m.GetAtoms() if a.GetAtomMapNum()})
+        return c
+
+    sd = _sd_rong()
+    y_tren = 0.0
+    giai_doan = []
+    for g in gd:
+        g_top = y_tren
+        if g.get("tieu_de"):
+            tieu = {"tieu_de": g["tieu_de"], "x": .3, "y": round(y_tren - .45, 3)}
+            y_tren -= 1.05
+        else:
+            tieu = None
+        for i in g["pt"]:
+            pt = pts[i]
+            ct = [chat(s, pt["giu"]) for s in pt["trai"]]
+            cp = [(chat(s, ()), n) for s, n in pt["phai"]]        # vế phải: H gộp vào nhãn (CH₃–C⁺H–CH₃, H₂O)
+            for h in _ve_phuong_trinh(pt, ct, cp, nhan_map, i):
+                x0, x1, y0, y1 = _khung_sd(h["sd"])
+                _doi(h["sd"], y_tren - y1)
+                y_tren -= (y1 - y0) + .35
+                for k in sd:
+                    if isinstance(sd[k], dict):
+                        sd[k].update(h["sd"][k])
+                    else:
+                        sd[k] += h["sd"][k]
+        if tieu is not None:
+            e = {"tieu_de": tieu["tieu_de"], "xy": [tieu["x"], tieu["y"]], "y0": round(y_tren + .1, 3), "y1": round(g_top, 3),
+                 "buoc": [b for b in g["buoc"] if b is not None]}
+            if g.get("nen"):
+                e["nen"] = g["nen"]
+            if "nhanh_sai" in g:
+                e["nhanh_sai"] = g["nhanh_sai"]
+            giai_doan.append(e)
+        y_tren -= .45
+
+    # 4. khung bao, giai đoạn trải hết bề ngang
+    x0, x1, y0, y1 = _khung_sd(sd)
+    for e in giai_doan:
+        x1 = max(x1, e["xy"][0] + len(e["tieu_de"]) * .2)
+        y1 = max(y1, e["y1"])
+    sd["khung"] = [round(min(x0, 0) - .5, 2), round(x1 + .8, 2), round(y0 - .6, 2), round(y1 + .3, 2)]
+    for e in giai_doan:
+        e["khung"] = [round(sd["khung"][0] + .15, 2), round(sd["khung"][1] - .15, 2), e.pop("y0"), e.pop("y1")]
+    if giai_doan:
+        sd["giai_doan"] = giai_doan
+    sd["phong"] = "co_chan"
+    sd["kieu_cong_thuc"] = "thu_gon" if thu_gon else "khung"
+    for k in ("goc", "dt", "dt_vong", "cap_e", "ten", "chu"):
         if not sd[k]:
             del sd[k]
     return sd
 
 
-def _mui_ten(mt: dict, vt: dict, tam: np.ndarray, net: list, hop_chu: list, da_ve: list) -> dict | None:
-    """Một mũi tên cong: điểm đầu ở cặp e (phía trống, ngoài hộp chữ) hoặc giữa liên kết; điểm cuối dừng trước nguyên tử
-    đích / giữa liên kết mới; điểm điều khiển chọn trong nhiều phương án (hai phía × bốn độ cong) để ít cắt nét, không
-    đè chữ, không sát mũi tên khác."""
-    lay = lambda x: x if isinstance(x, list) else [x]
+def _mui_ten(mt: dict, vt: dict, tam: np.ndarray, net: list, hop_chu: list, da_ve: list,
+             cap_vt: dict | None = None, goc_vt: dict | None = None) -> dict | None:
+    """Một mũi tên cong: điểm đầu ở cặp e đã vẽ (hướng về đích), chấm e độc thân, hoặc giữa liên kết; điểm cuối dừng trước
+    nguyên tử đích / giữa liên kết mới; điểm điều khiển chọn trong nhiều phương án (hai phía × bốn độ cong) để ít cắt nét,
+    không đè chữ, không sát mũi tên khác."""
+    lay = lambda x: [int(z) for z in x] if isinstance(x, list) else [int(x)]
     tu_l, tu = mt["tu"]["loai"], lay(mt["tu"]["nguyen_tu"])
     de_l, de = mt["den"]["loai"], lay(mt["den"]["nguyen_tu"])
     if any(m not in vt for m in tu + de):
         return None
     diem = lambda m: vt[m][0]
     ban_kinh = lambda m: (len(vt[m][2].nhan.get(vt[m][3], "")) * .12 + .22) if vt[m][1] else .12
-    if tu_l == "cap_e":
+    if tu_l in ("cap_e", "nguyen_tu"):
         a = tu[0]
-        c = vt[a][2]
-        P = c.P + (vt[a][4], vt[a][5])
-        ke = [n.GetIdx() for n in c.m.GetAtomWithIdx(vt[a][3]).GetNeighbors()]
         dich = diem(de[-1] if de[-1] != a else de[0])
-        v = _phia_trong2(P, vt[a][3], ke, [dich])
-        A = diem(a) + v * (ban_kinh(a) + .12)
+        ud = dich - diem(a)
+        ud = ud / (np.linalg.norm(ud) + 1e-9)
+        nguon = ((goc_vt or {}).get(a) if mt.get("kieu") == "nua_dau" else None) or (cap_vt or {}).get(a) or (goc_vt or {}).get(a)
+        if nguon:
+            def huong_cap(q):
+                v = np.array(q[:2]) - diem(a)
+                return v / (np.linalg.norm(v) + 1e-9)
+            q = max(nguon, key=lambda q: float(huong_cap(q) @ ud))
+            A = np.array(q[:2]) + huong_cap(q) * .13
+        else:
+            c = vt[a][2]
+            P = c.P + (vt[a][4], vt[a][5])
+            ke = [n.GetIdx() for n in c.m.GetAtomWithIdx(vt[a][3]).GetNeighbors() if c.hien(n.GetIdx())]
+            v = _phia_trong2(P, vt[a][3], ke, [dich])
+            A = diem(a) + v * (ban_kinh(a) + .12)
     else:
         A = (diem(tu[0]) + diem(tu[1])) / 2
+    tach = tu_l == "lien_ket" and de_l == "nguyen_tu" and de[0] in tu      # liên kết đứt, cặp e về nguyên tử
     if de_l == "nguyen_tu":
         c0 = de[0]
         u = A - diem(c0)
@@ -681,7 +1044,20 @@ def _mui_ten(mt: dict, vt: dict, tam: np.ndarray, net: list, hop_chu: list, da_v
     n = np.array([-d[1], d[0]]) / L
     g = (A + B) / 2
     tot, tot_d = None, 1e9
+    A0, B0 = A, B
     for s in (1, -1):
+        if tach and mt.get("kieu") == "nua_dau" and (n * s)[1] < -1e-6:
+            continue                                # phân cắt đồng li: hai mũi tên móc câu cùng toả lên phía trên
+        if tach:                                    # như đáp án: từ giữa nét, vòng lên, chạm mép trên của nhãn nguyên tử
+            c0 = de[0]
+            r = ban_kinh(c0) + .1
+            g0 = math.atan2(*(A0 - diem(c0))[::-1])
+            huong_b = [np.array([math.cos(g0 + k * math.radians(65)), math.sin(g0 + k * math.radians(65))]) for k in (1, -1)]
+            B = diem(c0) + max(huong_b, key=lambda v: float(v @ (n * s))) * max(r, .38)
+            A = A0 + n * s * .08
+        else:
+            A, B = A0, B0
+        g = (A + B) / 2
         for f in (.35, .55, .8, 1.1):
             h = max(.55, f * L)
             C = g + n * s * h
@@ -702,9 +1078,10 @@ def _mui_ten(mt: dict, vt: dict, tam: np.ndarray, net: list, hop_chu: list, da_v
                         phat += 1
                 truoc = p
             if phat < tot_d:
-                tot, tot_d = C, phat
+                tot, tot_d = (A, C, B), phat
     tron = lambda v: [round(float(z), 3) for z in v]
-    return {"tu": tron(A), "qua": tron(tot), "den": tron(B), "kieu": mt.get("kieu", "day_du")}
+    A, C, B = tot
+    return {"tu": tron(A), "qua": tron(C), "den": tron(B), "kieu": mt.get("kieu", "day_du")}
 
 
 def so_do_mot_chat(smiles: str, nhan_map: dict | None = None) -> dict:

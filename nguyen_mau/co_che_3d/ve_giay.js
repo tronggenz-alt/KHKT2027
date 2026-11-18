@@ -70,10 +70,28 @@ function chuanHoa(d) {
   return nt;
 }
 
-export function veSoDo(d, S = 34) {
+// (18/11) trường mới kiểu bài thi: có dt_vong → điện tích vẽ trong vòng tròn, bỏ ký tự điện tích cuối nhãn và bỏ "dt".
+const boDienTich = t => t.replace(/[⁺⁻²³]+$/, "");
+export function chuanHoaMoi(d) {
+  if (!d.dt_vong) return d;
+  return { ...d, nt: Object.fromEntries(Object.entries(d.nt).map(([k, v]) => [k, v.length > 2 ? [v[0], v[1], boDienTich(v[2])] : v])), dt: [] };
+}
+
+export function veSoDo(d0, S = 34) {
+  const d = chuanHoaMoi(d0);
   const [x0, x1, y0, y1] = d.khung;
   const X = x => (x - x0) * S, Y = y => (y1 - y) * S, f = v => v.toFixed(1);
   const nt = chuanHoa(d);
+  let nen = "";
+  for (const g of d.giai_doan || []) {           // khối giai đoạn: nền nhấn (nhánh sai / nhánh được chọn) + tiêu đề gạch lượn sóng
+    const [gx0, gx1, gy0, gy1] = g.khung;
+    if (g.nen) nen += `<rect x="${f(X(gx0))}" y="${f(Y(gy1))}" width="${f((gx1 - gx0) * S)}" height="${f((gy1 - gy0) * S)}" class="gd ${g.nen}"/>` +
+      `<line x1="${f(X(gx0))}" y1="${f(Y(gy1))}" x2="${f(X(gx0))}" y2="${f(Y(gy0))}" class="gd-vien ${g.nen}"/>`;
+    const tx = X(g.xy[0]), ty = Y(g.xy[1]), w = g.tieu_de.length * .2 * S;
+    let song = `M${f(tx)},${f(ty + 11)}`;
+    for (let k = 0; k * 6 < w; k++) song += ` q1.5,${k % 2 ? 3 : -3} 3,0 t3,0`;
+    nen += `<text x="${f(tx)}" y="${f(ty)}" class="tieu-de-gd">${g.tieu_de}</text><path d="${song}" class="song"/>`;
+  }
   const sau = [], khe = [], truoc = [];
   for (const [ia, ib, kieu = 1, phia] of d.lk) {
     const a = nt[ia], b = nt[ib];
@@ -107,25 +125,32 @@ export function veSoDo(d, S = 34) {
     khe.push(`<line x1="${f(X(p.x + (q.x - p.x) * k))}" y1="${f(Y(p.y + (q.y - p.y) * k))}" x2="${f(X(q.x - (q.x - p.x) * k))}" y2="${f(Y(q.y - (q.y - p.y) * k))}" stroke="${MAU_GIAY}" stroke-width="${rong}"/>`);
     truoc.push(s);
   }
-  let s = sau.join("") + khe.join("") + truoc.join("");
+  let s = nen + sau.join("") + khe.join("") + truoc.join("");
   for (const a of Object.values(nt)) if (a.t) {
     const t = a.t.replace(/([₀-₉])/g, c => `<tspan dy="4" font-size="11">${"₀₁₂₃₄₅₆₇₈₉".indexOf(c)}</tspan><tspan dy="-4">`);
     const xn = a.can === "trai" ? X(a.x - KY_TU) : a.can === "phai" ? X(a.x + KY_TU) : X(a.x);
     const neo = a.can === "trai" ? ' style="text-anchor:start"' : a.can === "phai" ? ' style="text-anchor:end"' : "";
     s += `<text x="${f(xn)}" y="${f(Y(a.y))}" class="nt"${neo}>${t}${"</tspan>".repeat((a.t.match(/[₀-₉]/g) || []).length)}</text>`;
   }
+  for (const [x, y, g] of d.cap_e || []) {   // cặp electron tự do: hai chấm vuông góc với hướng ra
+    const r = g * Math.PI / 180, px = -Math.sin(r) * .09, py = Math.cos(r) * .09;
+    for (const k of [-1, 1]) s += `<circle cx="${f(X(x + px * k))}" cy="${f(Y(y + py * k))}" r="2.2" class="goc"/>`;
+  }
+  for (const [x, y, t] of d.dt_vong || []) s += `<circle cx="${f(X(x))}" cy="${f(Y(y))}" r="${t.length > 1 ? 8.5 : 6.8}" class="dtv"/><text x="${f(X(x))}" y="${f(Y(y))}" class="dtc">${t}</text>`;
   for (const [x, y] of d.goc || []) s += `<circle cx="${f(X(x))}" cy="${f(Y(y))}" r="2.7" class="goc"/>`;
   for (const [x, y, t] of d.dt || []) s += `<text x="${f(X(x))}" y="${f(Y(y))}" class="dt">${t.replace("⁺", "+").replace("⁻", "−")}</text>`;
   for (const [x, y, t] of d.chu || []) s += `<text x="${f(X(x))}" y="${f(Y(y))}" class="nt">${t}</text>`;
   for (const m of d.mt || []) {        // mũi tên cong nửa đầu: một ngạnh ở phía ngoài đường cong
     const [ax, ay] = m.tu, [cx, cy] = m.qua, [bx, by] = m.den;
-    s += `<path d="M${f(X(ax))},${f(Y(ay))} Q${f(X(cx))},${f(Y(cy))} ${f(X(bx))},${f(Y(by))}" class="mt"/>`;
+    const lop = m.gach ? "mt gach" : "mt";
+    s += `<path d="M${f(X(ax))},${f(Y(ay))} Q${f(X(cx))},${f(Y(cy))} ${f(X(bx))},${f(Y(by))}" class="${lop}"/>`;
+    if (m.cheo) s += `<text x="${f(X(.25 * ax + .5 * cx + .25 * bx))}" y="${f(Y(.25 * ay + .5 * cy + .25 * by))}" class="cheo">✕</text>`;
     let tx = X(bx) - X(cx), ty = Y(by) - Y(cy); const tl = Math.hypot(tx, ty); tx /= tl; ty /= tl;
     let px = -ty, py = tx;
     const gx = (X(ax) + X(bx)) / 2, gy = (Y(ay) + Y(by)) / 2;
     if ((X(cx) - gx) * px + (Y(cy) - gy) * py < 0) { px = -px; py = -py; }
-    s += `<path d="M${f(X(bx))},${f(Y(by))} L${f(X(bx) - tx * 8 + px * 4.5)},${f(Y(by) - ty * 8 + py * 4.5)}" class="mt"/>`;
-    if (m.kieu && m.kieu !== "nua_dau") s += `<path d="M${f(X(bx))},${f(Y(by))} L${f(X(bx) - tx * 8 - px * 4.5)},${f(Y(by) - ty * 8 - py * 4.5)}" class="mt"/>`;
+    s += `<path d="M${f(X(bx))},${f(Y(by))} L${f(X(bx) - tx * 8 + px * 4.5)},${f(Y(by) - ty * 8 + py * 4.5)}" class="${lop}"/>`;
+    if (m.kieu && m.kieu !== "nua_dau") s += `<path d="M${f(X(bx))},${f(Y(by))} L${f(X(bx) - tx * 8 - px * 4.5)},${f(Y(by) - ty * 8 - py * 4.5)}" class="${lop}"/>`;
   }
   for (const p of d.pu || []) {
     const xa = X(p.x1), xb = X(p.x2), y = Y(p.y);
@@ -136,7 +161,8 @@ export function veSoDo(d, S = 34) {
     if (p.duoi) s += `<text x="${f((xa + xb) / 2)}" y="${f(y + 18)}" class="dk">${p.duoi}</text>`;
   }
   for (const [x, y, t] of d.ten || []) s += `<text x="${f(X(x))}" y="${f(Y(y))}" class="ten">${t}</text>`;
-  return `<svg class="so-do" viewBox="0 0 ${f((x1 - x0) * S)} ${f((y1 - y0) * S)}">${s}</svg>`;
+  const lopSvg = d.phong === "co_chan" ? "so-do co-chan" : "so-do";
+  return `<svg class="${lopSvg}" viewBox="0 0 ${f((x1 - x0) * S)} ${f((y1 - y0) * S)}">${s}</svg>`;
 }
 
 // ------------------------------------------------------------------ 3. bộ chấm độ dễ nhìn
@@ -151,7 +177,8 @@ const kc = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 const hopChu = a => a.hop;
 const trongHop = (p, h) => p.x > h.x0 && p.x < h.x1 && p.y > h.y0 && p.y < h.y1;
 
-export function kiemTraDeNhin(d) {
+export function kiemTraDeNhin(d0) {
+  const d = chuanHoaMoi(d0);
   const nt = chuanHoa(d);
   const lk = d.lk.map(([a, b, kieu]) => ({ a: nt[a], b: nt[b], sau: kieu === "sau" }));
   const loi = { cat_nhau: [], chu_de: [], mui_ten_cat: [], mui_ten_sat: [], goc_hep: [] };
