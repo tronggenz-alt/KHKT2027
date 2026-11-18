@@ -80,3 +80,10 @@ bao_cao_so_do*.json
 nguyen_mau/co_che_3d/du_lieu/
 VERA_du_lieu_rieng/
 *.key
+
+# Gói cơ chế và khóa chép vào Unity (C2) – không đưa lên git
+Phong thi nghiem ao/Assets/StreamingAssets/CoChe/
+Phong thi nghiem ao/Assets/StreamingAssets/CoChe.meta
+Phong thi nghiem ao/Assets/Resources/CoChe/
+Phong thi nghiem ao/Assets/Resources/CoChe.meta
+*.bytes.meta
