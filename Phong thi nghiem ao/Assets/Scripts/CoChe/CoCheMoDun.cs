@@ -13,7 +13,8 @@ namespace Khkt.CoChe
 {
     /// <summary>
     /// Mô-đun "Cơ chế 3D ⇄ Giấy" (hợp đồng chung: Mo(), Dong(), DangMo). Lớp phủ toàn màn hình có camera riêng:
-    /// danh sách 8 bài (gói .verapack trong StreamingAssets/CoChe), trình phát 3D, sơ đồ giấy, chuyển 3D ⇄ Giấy (0,8 s: hình 3D
+    /// danh sách 8 bài (gói .verapack trong StreamingAssets/CoChe) + bảng "Đề mới" (gõ đề hoặc chọn ảnh đề → POST /co-che/giai-de →
+    /// AI viết cơ chế, RDKit kiểm, máy chủ dựng 3D + giấy → mở như một bài), trình phát 3D, sơ đồ giấy, chuyển 3D ⇄ Giấy (0,8 s: hình 3D
     /// trải phẳng rồi tờ giấy hiện lên), ô "Giải thích" (mặc định đóng), nút "Hỏi AI" (/co-che/giai-thich), bảng giải chuỗi
     /// (/co-che/giai-chuoi) và ô cài đặt URL máy chủ (PlayerPrefs). Phím tắt trong lab: M (chưa dùng ở lab; F7–F12, Esc, B, T, H… đã dùng).
     /// Không sửa HandController hay cảnh: tự gắn bằng [RuntimeInitializeOnLoadMethod].
@@ -47,8 +48,20 @@ namespace Khkt.CoChe
         public string KetQuaChuoiCuoi { get; private set; } = "";
         public int SoTheChuoi { get; private set; }
         public string TraLoiAICuoi { get; private set; } = "";
+        public bool DeMoiMo => deMoi != null && deMoi.gameObject.activeSelf;
+        public bool DangGiaiDe { get; private set; }
+        public string TrangThaiDeCuoi { get; private set; } = "";
+        public string TenAnhDe { get; private set; } = "";
+        public byte[] AnhDe { get; private set; }
+        /// <summary>Các bài giải từ đề mới trong phiên này (mã → bài), mở lại bằng chip "Đề đã giải".</summary>
+        public readonly List<BaiCoChe> DeDaGiai = new List<BaiCoChe>();
+        public const float ChoGiaiDe = 330f;                    // máy chủ tự dừng ở 300 s
+        public const int AnhToiDa = 8 * 1024 * 1024;
 
-        RectTransform goc, vungNhin, giaiThich, bangChuoi, caiDat;
+        RectTransform goc, vungNhin, giaiThich, bangChuoi, caiDat, deMoi, dsDeDaGiai;
+        InputField oDe;
+        Text trangThaiDe, nhanAnhDe;
+        Button nutPhanTich, nutBoAnh;
         CanvasGroup lopGiay;
         Text tieuDe, deBai, chuThich, noiDungGiaiThich, trangThaiAI, trangThaiChuoi, nhanMayChu;
         Button nut3D, nutGiay, nutAnH, nutPhat, nutNhanh, nutHoiAI;
@@ -76,6 +89,13 @@ namespace Khkt.CoChe
         }
 
         public static void BatTat() { if (DangMo) Dong(); else Mo(); }
+
+        /// <summary>Mở thẳng bảng "Đề mới" (gõ đề / chọn ảnh đề) – dùng được từ màn Giải bài tập.</summary>
+        public static void MoDeMoi()
+        {
+            Mo();
+            Instance?.BatDeMoi(true);
+        }
 
         /// <summary>Mở thẳng bảng giải chuỗi (công cụ "Chuỗi phản ứng" của màn Giải bài tập).</summary>
         public static void MoGiaiChuoi()
@@ -197,6 +217,7 @@ namespace Khkt.CoChe
             deBai.horizontalOverflow = HorizontalWrapMode.Wrap;
             GlassKit.Label(dau, "Gợi ý", "Kéo để xoay 360° · cuộn để phóng to · ← → chuyển bước · Space phát/dừng", 13, ChuPhu, false, TextAnchor.UpperLeft, new Vector2(0, -92), new Vector2(1100, 20));
             NutKinh(dau, "Nút Chọn bài", "Bài khác ▾", new Vector2(0, -118), new Vector2(150, 40), () => dsBai.gameObject.SetActive(!dsBai.gameObject.activeSelf), 14);
+            NutKinh(dau, "Nút Đề mới", "＋ Đề mới (gõ / ảnh)", new Vector2(160, -118), new Vector2(210, 40), () => { dsBai.gameObject.SetActive(false); BatDeMoi(true); }, 14);
 
             // ---- nút gạt 3D | Giấy (góc phải) + Đóng
             var gat = GlassKit.Rect(goc, "Nút gạt 3D Giấy", new Vector2(1, 1), new Vector2(1, 1), new Vector2(-150, -22), new Vector2(190, 52));
@@ -253,12 +274,13 @@ namespace Khkt.CoChe
             giaiThich.gameObject.SetActive(false);
 
             // ---- danh sách bài (bảng nổi, mở bằng "Bài khác ▾")
-            dsBai = GlassKit.Rect(goc, "Danh sách bài", new Vector2(0, 1), new Vector2(0, 1), new Vector2(28, -214), new Vector2(460, 680));
+            dsBai = GlassKit.Rect(goc, "Danh sách bài", new Vector2(0, 1), new Vector2(0, 1), new Vector2(28, -214), new Vector2(460, 740));
             var nenDs = dsBai.gameObject.AddComponent<Image>();
             nenDs.sprite = GlassKit.Solid; nenDs.type = Image.Type.Sliced; nenDs.pixelsPerUnitMultiplier = 2f; nenDs.color = new Color32(16, 22, 40, 245);
             nenDs.raycastTarget = true;
 
             DungBangChuoi();
+            DungDeMoi();
             DungCaiDat();
             DungDanhSach(dsBai);
             NutKinh(dsBai, "Giải chuỗi", "Giải chuỗi phản ứng", new Vector2(16, 64), new Vector2(428, 44), () => { dsBai.gameObject.SetActive(false); BatBangChuoi(true); }, 15, new Vector2(0, 0));
@@ -272,8 +294,11 @@ namespace Khkt.CoChe
             DanhSachMa.Clear();
             try { DanhSachMa.AddRange(GoiCoChe.DanhSachTrongMay()); }
             catch (System.Exception e) { Debug.LogWarning("[CoChe] Không đọc được thư mục gói: " + e.Message); }
-            GlassKit.Label(trai, "Tiêu đề danh sách", "8 bài mẫu", 15, ChuPhu, true, TextAnchor.UpperLeft, new Vector2(18, -14), new Vector2(420, 24));
-            float y = -46;
+            var nutDe = NutKinh(trai, "Đề mới", "＋ Giải đề mới (gõ đề hoặc ảnh đề)", new Vector2(16, -14), new Vector2(428, 46),
+                                () => { dsBai.gameObject.SetActive(false); BatDeMoi(true); }, 15);
+            nutDe.GetComponent<Image>().color = new Color(0.23f, 0.51f, 0.96f, 0.30f);
+            GlassKit.Label(trai, "Tiêu đề danh sách", "Bài mẫu", 15, ChuPhu, true, TextAnchor.UpperLeft, new Vector2(18, -72), new Vector2(420, 24));
+            float y = -102;
             foreach (var ma in DanhSachMa)
             {
                 string ten = ma;
@@ -290,7 +315,7 @@ namespace Khkt.CoChe
             }
             if (DanhSachMa.Count == 0)
                 GlassKit.Label(trai, "Trống", "Chưa có gói cơ chế trong StreamingAssets/CoChe.\nChạy: python -m server.ai.co_che.dong_goi --unity",
-                               14, GlassKit.Warn, false, TextAnchor.UpperLeft, new Vector2(18, -46), new Vector2(420, 90));
+                               14, GlassKit.Warn, false, TextAnchor.UpperLeft, new Vector2(18, -102), new Vector2(420, 90));
         }
 
         // ---- tiện ích dựng nút kiểu kính tối (giống bản demo, không theo giao diện sáng/tối của app)
@@ -500,6 +525,14 @@ namespace Khkt.CoChe
             BaiCoChe b;
             try { b = Nap(ma); }
             catch (System.Exception e) { tieuDe.text = "Không mở được gói " + ma; deBai.text = e.Message; return; }
+            MoBai(b);
+        }
+
+        /// <summary>Mở một bài đã có trong bộ nhớ (bài mẫu đã giải gói, hoặc bài giải từ đề mới).</summary>
+        public void MoBai(BaiCoChe b)
+        {
+            if (b == null) return;
+            string ma = b.Ma;
             BaiHienTai = b;
             tieuDe.text = b.Ten;
             deBai.text = b.De;
@@ -507,6 +540,7 @@ namespace Khkt.CoChe
             TrinhPhat.Nap(b.KichBan);
             Giay.Dat(b.SoDo);
             nutNhanh.gameObject.SetActive(b.KichBan.NhanhSai.Count > 0);
+            deBai.text = b.De.Length > 220 ? b.De.Substring(0, 217) + "…" : b.De;
             for (int i = 0; i < nutBai.Count; i++)
                 nutBai[i].GetComponent<Image>().color = DanhSachMa[i] == ma ? new Color(0.23f, 0.51f, 0.96f, 0.35f) : new Color(1f, 1f, 1f, 0.04f);
             TraLoiAICuoi = "";
@@ -752,6 +786,180 @@ namespace Khkt.CoChe
                 SoTheChuoi++;
             }
             trangThaiChuoi.text = (B(kq, "da_kiem_chung") ? "Toàn bộ chuỗi đã kiểm chứng." : "Có phần chưa kiểm chứng (AI đưa ra) – cần giáo viên xem lại.") + $"  {SoTheChuoi} bước.";
+        }
+
+        // ------------------------------------------------------------------ đề mới: gõ đề / chọn ảnh đề → máy chủ giải
+        public static readonly string[] DeMau =
+        {
+            "Viết cơ chế phản ứng cộng HBr vào propen, giải thích sản phẩm chính.",
+            "Viết cơ chế thủy phân 2-brom-2-metylpropan trong nước (đun nóng).",
+            "CC(C)Br + [OH-] -> CC(C)O + [Br-]",
+        };
+
+        void DungDeMoi()
+        {
+            var nen = GlassKit.Fill(goc, "Bảng đề mới", Vector2.zero, new Vector2(1180, 660), GlassKit.Surface, new Vector2(0.5f, 0.5f), true).rectTransform;
+            nen.pivot = new Vector2(0.5f, 0.5f);
+            nen.anchoredPosition = new Vector2(0, 20);
+            nen.GetComponent<Image>().raycastTarget = true;
+            deMoi = nen;
+            GlassKit.Header(nen, "CƠ CHẾ · ĐỀ MỚI", "Giải đề bài mới",
+                            "Gõ đề (chữ hoặc SMILES) hoặc chọn ảnh đề → AI viết cơ chế → RDKit kiểm từng mũi tên → xem 3D ⇄ Giấy", 960, 30, -22);
+            GlassKit.MakeButton(nen, "Đóng đề", "Đóng", new Vector2(1030, -26), new Vector2(120, 44), () => BatDeMoi(false));
+
+            oDe = GlassKit.MakeInput(nen, "Đề bài", "Gõ đề bài, ví dụ: Viết cơ chế phản ứng của CH3CH2Br với NaOH loãng…",
+                                     new Vector2(30, -124), new Vector2(1120, 160), 17);
+            oDe.lineType = InputField.LineType.MultiLineNewline;
+            oDe.characterLimit = 4000;
+            foreach (var t in new[] { oDe.textComponent, (Text)oDe.placeholder })
+            {
+                t.alignment = TextAnchor.UpperLeft;
+                t.rectTransform.anchoredPosition = new Vector2(14, -10);
+                t.rectTransform.sizeDelta = new Vector2(1120 - 28, 160 - 20);
+            }
+
+            float y = -300;
+            var nutAnh = GlassKit.MakeButton(nen, "Chọn ảnh đề", "Chọn ảnh đề…", new Vector2(30, y), new Vector2(200, 48), ChonAnhDe);
+            if (!ChonTepHeThong.HoTro)
+            {
+                nutAnh.interactable = false;
+                nutAnh.GetComponentInChildren<Text>().text = "Ảnh đề (sắp có)";
+            }
+            nhanAnhDe = GlassKit.Label(nen, "Ảnh đã chọn", "Chưa chọn ảnh (không bắt buộc)", 15, GlassKit.Dim, false, TextAnchor.MiddleLeft,
+                                       new Vector2(244, y), new Vector2(560, 48));
+            nutBoAnh = GlassKit.MakeButton(nen, "Bỏ ảnh", "Bỏ ảnh", new Vector2(810, y), new Vector2(110, 48), () => DatAnhDe(null, ""));
+            nutBoAnh.gameObject.SetActive(false);
+            nutPhanTich = GlassKit.MakeButton(nen, "Phân tích", "Phân tích", new Vector2(930, y), new Vector2(220, 48), () => PhanTichDe(), true, 17);
+
+            y = -364;
+            GlassKit.Label(nen, "Đề mẫu", "Đề mẫu:", 14, GlassKit.Dim, true, TextAnchor.MiddleLeft, new Vector2(30, y), new Vector2(80, 40));
+            float x = 110;
+            foreach (var d in DeMau)
+            {
+                string dd = d;
+                var chip = GlassKit.MakeChip(nen, "Đề mẫu", d, new Vector2(x, y), new Vector2(340, 40), () => oDe.text = dd, false, 12);
+                chip.GetComponentInChildren<Text>().horizontalOverflow = HorizontalWrapMode.Wrap;
+                x += 348;
+            }
+            trangThaiDe = GlassKit.Label(nen, "Trạng thái đề", "", 15, GlassKit.Dim, false, TextAnchor.UpperLeft, new Vector2(30, -420), new Vector2(1120, 140));
+            trangThaiDe.horizontalOverflow = HorizontalWrapMode.Wrap;
+            GlassKit.Label(nen, "Đã giải", "Đề đã giải trong phiên này:", 14, GlassKit.Dim, true, TextAnchor.UpperLeft, new Vector2(30, -572), new Vector2(400, 22));
+            dsDeDaGiai = GlassKit.Rect(nen, "Các đề đã giải", new Vector2(0, 1), new Vector2(0, 1), new Vector2(30, -598), new Vector2(1120, 44));
+            nen.gameObject.SetActive(false);
+        }
+
+        public void BatDeMoi(bool mo)
+        {
+            if (deMoi == null) return;
+            deMoi.gameObject.SetActive(mo);
+            if (TrinhPhat != null) TrinhPhat.NhanDieuKhien = !mo && !CheDoGiay;   // gõ Space/← → trong ô đề không điều khiển phim 3D
+            if (mo)
+            {
+                deMoi.SetAsLastSibling();
+                if (oDe != null && !DangGiaiDe) oDe.ActivateInputField();
+            }
+        }
+
+        /// <summary>Gắn (hoặc bỏ, khi du == null) ảnh đề sẽ gửi kèm. Ảnh PNG/JPG lớn hơn 7 MB được nén lại JPG trước khi gửi.</summary>
+        public void DatAnhDe(byte[] du, string ten)
+        {
+            if (du != null && du.Length > 7 * 1024 * 1024)
+            {
+                var tex = new Texture2D(2, 2);
+                if (tex.LoadImage(du)) du = tex.EncodeToJPG(85);
+                Destroy(tex);
+            }
+            AnhDe = du;
+            TenAnhDe = du == null ? "" : ten;
+            nhanAnhDe.text = du == null ? "Chưa chọn ảnh (không bắt buộc)" : $"Ảnh: {ten} ({du.Length / 1024f:0} KB)";
+            nhanAnhDe.color = du == null ? GlassKit.Dim : GlassKit.Ink;
+            nutBoAnh.gameObject.SetActive(du != null);
+        }
+
+        /// <summary>Nút "Chọn ảnh đề…": hộp chọn tệp của hệ điều hành (ChonTepHeThong).</summary>
+        public void ChonAnhDe()
+        {
+            if (DangGiaiDe) return;
+            StartCoroutine(ChonTepHeThong.ChonAnh("Chọn ảnh đề Hoá", (duong, loi) =>
+            {
+                if (!string.IsNullOrEmpty(loi)) { DatTrangThaiDe(loi, true); return; }
+                if (string.IsNullOrEmpty(duong)) return;                          // bấm Hủy
+                var (du, loiDoc) = ChonTepHeThong.DocTep(duong, AnhToiDa);
+                if (du == null) { DatTrangThaiDe(loiDoc, true); return; }
+                DatAnhDe(du, System.IO.Path.GetFileName(duong));
+                DatTrangThaiDe("Đã chọn ảnh. Có thể ghi thêm vào ô đề (vd \"chỉ câu 2\") rồi bấm Phân tích.", false);
+            }));
+        }
+
+        void DatTrangThaiDe(string chu, bool loi)
+        {
+            TrangThaiDeCuoi = chu;
+            trangThaiDe.text = chu;
+            trangThaiDe.color = loi ? GlassKit.Warn : GlassKit.Dim;
+        }
+
+        /// <summary>Gửi đề (chữ trong ô và/hoặc ảnh đã chọn) lên máy chủ; xong thì mở bài như 8 bài mẫu.</summary>
+        public void PhanTichDe(string vanBan = null)
+        {
+            if (DangGiaiDe) return;
+            string de = (vanBan ?? oDe.text ?? "").Trim();
+            if (de.Length == 0 && AnhDe == null) { DatTrangThaiDe("Hãy gõ đề hoặc chọn ảnh đề.", true); return; }
+            StartCoroutine(GoiGiaiDe(de, AnhDe));
+        }
+
+        IEnumerator GoiGiaiDe(string de, byte[] anh)
+        {
+            DangGiaiDe = true;
+            nutPhanTich.interactable = false;
+            nutPhanTich.GetComponentInChildren<Text>().text = "Đang phân tích…";
+            float t0 = Time.realtimeSinceStartup;
+            string viec = anh != null ? "đọc ảnh đề → AI viết cơ chế → RDKit kiểm (AI tự sửa nếu sai) → dựng 3D và sơ đồ giấy"
+                                      : "AI viết cơ chế → RDKit kiểm (AI tự sửa nếu sai) → dựng 3D và sơ đồ giấy";
+            bool xong = false, ok = false;
+            string kq = "";
+            StartCoroutine(MayChuCoChe.GiaiDe(de, anh, "", ChoGiaiDe, (o, k) => { ok = o; kq = k; xong = true; }));
+            while (!xong)
+            {
+                DatTrangThaiDe($"Đang phân tích… {Time.realtimeSinceStartup - t0:0} s\n({viec}; thường 20–120 giây)", false);
+                yield return new WaitForSecondsRealtime(0.5f);
+            }
+            DangGiaiDe = false;
+            nutPhanTich.interactable = true;
+            nutPhanTich.GetComponentInChildren<Text>().text = "Phân tích";
+            if (!ok) { DatTrangThaiDe("Chưa giải được: " + kq, true); yield break; }
+            BaiCoChe b;
+            string thongTin = "";
+            try
+            {
+                b = BaiCoChe.TuJson(kq);
+                if (b.KichBan == null || b.KichBan.Buoc.Count == 0) throw new System.Exception("kết quả không có bước nào");
+                var tt = D(Lay(D(JsonNho.Doc(kq)), "thong_tin"));
+                int sua = I(Lay(tt, "so_lan_sua"));
+                thongTin = $"{S(tt, "mo_hinh")}, {F(Lay(tt, "giay")):0} s" + (sua > 0 ? $", AI đã tự sửa {sua} lần" : "") + (B(tt, "tu_bo_nho_dem") ? ", lấy lại kết quả cũ" : "");
+            }
+            catch (System.Exception e) { DatTrangThaiDe("Kết quả lỗi định dạng: " + e.Message, true); yield break; }
+            DaNap[b.Ma] = b;
+            DeDaGiai.RemoveAll(x => x.Ma == b.Ma);
+            DeDaGiai.Add(b);
+            VeDeDaGiai();
+            DatTrangThaiDe($"Xong: {b.Ten} – {b.KichBan.Buoc.Count} bước, đã qua kiểm tra RDKit ({thongTin}).", false);
+            BatDeMoi(false);
+            MoBai(b);
+            DatCheDo(false);
+        }
+
+        void VeDeDaGiai()
+        {
+            for (int i = dsDeDaGiai.childCount - 1; i >= 0; i--) Destroy(dsDeDaGiai.GetChild(i).gameObject);
+            float x = 0;
+            for (int i = Mathf.Max(0, DeDaGiai.Count - 4); i < DeDaGiai.Count; i++)
+            {
+                var b = DeDaGiai[i];
+                string ten = b.Ten.Length > 34 ? b.Ten.Substring(0, 33) + "…" : b.Ten;
+                var chip = GlassKit.MakeChip(dsDeDaGiai, "Đề đã giải", ten, new Vector2(x, 0), new Vector2(272, 40), () => { BatDeMoi(false); MoBai(b); DatCheDo(false); }, false, 12);
+                chip.GetComponentInChildren<Text>().horizontalOverflow = HorizontalWrapMode.Wrap;
+                x += 280;
+            }
         }
 
         // ------------------------------------------------------------------ cài đặt máy chủ

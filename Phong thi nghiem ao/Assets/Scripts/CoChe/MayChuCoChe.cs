@@ -47,6 +47,60 @@ namespace Khkt.CoChe
             else xong(true, r.downloadHandler.text);
         }
 
+        /// <summary>
+        /// POST /co-che/giai-de: đề chữ và/hoặc ảnh đề (gửi base64 trong JSON) → JSON bài (cùng khung gói .verapack, không mã hóa),
+        /// mở bằng BaiCoChe.TuJson. Lỗi: thông điệp tiếng Việt của máy chủ (detail.thong_diep + vài dòng chi_tiet) thay vì chỉ mã HTTP.
+        /// </summary>
+        public static IEnumerator GiaiDe(string vanBan, byte[] anh, string loai, float cho, Action<bool, string> xong)
+        {
+            var sb = new StringBuilder("{\"van_ban\":").Append(ChuoiJson(vanBan ?? ""));
+            if (!string.IsNullOrEmpty(loai)) sb.Append(",\"loai\":").Append(ChuoiJson(loai));
+            if (anh != null && anh.Length > 0) sb.Append(",\"anh_base64\":\"").Append(Convert.ToBase64String(anh)).Append('"');
+            string than = sb.Append('}').ToString();
+            if (GiaLap != null)
+            {
+                var (ma, json) = GiaLap("POST", "/co-che/giai-de", than);
+                yield return null;
+                bool ok = ma >= 200 && ma < 300;
+                xong(ok, ok ? json : LoiTuMayChu(ma, json));
+                yield break;
+            }
+            using var r = new UnityWebRequest(Url + "/co-che/giai-de", "POST");
+            r.downloadHandler = new DownloadHandlerBuffer();
+            r.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(than));
+            r.SetRequestHeader("Content-Type", "application/json");
+            r.timeout = Mathf.CeilToInt(cho);
+            yield return r.SendWebRequest();
+            if (r.result == UnityWebRequest.Result.Success) xong(true, r.downloadHandler.text);
+            else if (r.responseCode > 0) xong(false, LoiTuMayChu(r.responseCode, r.downloadHandler?.text));
+            else xong(false, r.error != null && r.error.ToLowerInvariant().Contains("timeout")
+                               ? $"Quá {cho:0} giây chưa có kết quả – thử lại."
+                               : $"Không kết nối được {Url} ({r.error}). Bật máy chủ: python -m server.ai.co_che.may_chu");
+        }
+
+        /// <summary>{"detail": {"thong_diep", "ma", "chi_tiet": [...]}} hoặc {"detail": "..."} → một đoạn chữ cho người dùng.</summary>
+        public static string LoiTuMayChu(long ma, string json)
+        {
+            try
+            {
+                var d = JsonNho.D(JsonNho.Doc(json));
+                var det = JsonNho.Lay(d, "detail");
+                if (det is string s1 && s1.Length > 0) return s1;
+                var dd = JsonNho.D(det);
+                string tb = JsonNho.S(dd, "thong_diep");
+                var ct = new StringBuilder(tb);
+                int n = 0;
+                foreach (var o in JsonNho.L(JsonNho.Lay(dd, "chi_tiet")))
+                {
+                    if (n++ >= 4) { ct.Append("\n  …"); break; }
+                    ct.Append("\n  • ").Append(o as string);
+                }
+                if (tb.Length > 0) return ct.ToString();
+            }
+            catch (Exception) { }
+            return $"Máy chủ trả mã {ma}";
+        }
+
         public static string ChuoiJson(string s)
         {
             var sb = new StringBuilder("\"");

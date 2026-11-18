@@ -18,7 +18,8 @@ namespace Khkt.CoChe
     /// Kiểm thử mô-đun cơ chế trong PlayMode (batchmode, có đồ hoạ) – gọi từ Editor/KhktCoCheVerify.Run:
     ///   giải gói thử do Python tạo + 8 gói thật; từ chối gói sửa 1 byte; phát hết các bước ở mức Thấp và Cao; chuyển 3D ⇄ Giấy;
     ///   nhánh sai có màn chắn; bảng giải chuỗi và Hỏi AI với máy chủ giả; nút Hỏi AI mờ khi không có máy chủ; đo FPS bài
-    ///   propellane ở mức Cao; chụp ảnh từng bài ở cả hai chế độ vào Path.GetTempPath()/vera_coche_shots. Log [CC_PASS]/[CC_FAIL].
+    ///   propellane ở mức Cao; bảng "Đề mới": chọn ảnh (hộp chọn giả), Phân tích (máy chủ giả trả JSON bài thường) mở bài như bài mẫu,
+    ///   lỗi 422 hiện thông điệp máy chủ; chụp ảnh từng bài ở cả hai chế độ vào Path.GetTempPath()/vera_coche_shots. Log [CC_PASS]/[CC_FAIL].
     /// </summary>
     public class KhktCoCheRunner : MonoBehaviour
     {
@@ -172,6 +173,48 @@ namespace Khkt.CoChe
             Shot("bang_giai_chuoi");
             md.BatBangChuoi(false);
 
+            // 5b. đề mới: chọn ảnh (hộp chọn giả) → Phân tích (máy chủ giả) → mở bài; lỗi máy chủ hiện rõ
+            {
+                string anhThu = Path.Combine(outDir, "anh_de_thu.png");
+                var texDe = new Texture2D(320, 240);
+                File.WriteAllBytes(anhThu, texDe.EncodeToPNG());
+                Destroy(texDe);
+                jsonDeGia = GoiCoChe.GiaiJson(File.ReadAllBytes(Path.Combine(GoiCoChe.ThuMuc, "sn2_ch3br.verapack")))
+                                    .Replace("\"ma\":\"sn2_ch3br\"", "\"ma\":\"de_thu\"");
+                jsonDeGia = jsonDeGia.Substring(0, jsonDeGia.LastIndexOf('}')) + ",\"thong_tin\":{\"mo_hinh\":\"gia\",\"giay\":1.0,\"so_lan_sua\":1}}";
+                md.BatDeMoi(true);
+                yield return null;
+                Check(md.DeMoiMo && !md.TrinhPhat.NhanDieuKhien, "Bảng Đề mới mở, phím ← → Space không điều khiển phim khi gõ");
+                ChonTepHeThong.GiaLap = () => (anhThu, null);
+                md.ChonAnhDe();
+                float tc2 = Time.realtimeSinceStartup;
+                while (md.AnhDe == null && Time.realtimeSinceStartup - tc2 < 3f) yield return null;
+                ChonTepHeThong.GiaLap = null;
+                Check(md.AnhDe != null && md.TenAnhDe == "anh_de_thu.png", "Chọn ảnh đề (hộp chọn giả) gắn ảnh", md.TenAnhDe);
+                yield return null;
+                Shot("bang_de_moi");
+                guiAnhDe = false;
+                md.PhanTichDe("Viết cơ chế CH3Br + NaOH loãng");
+                float td = Time.realtimeSinceStartup;
+                while ((md.DangGiaiDe || md.TrangThaiDeCuoi.StartsWith("Đang")) && Time.realtimeSinceStartup - td < 5f) yield return null;
+                yield return Frames(2);
+                Check(md.BaiHienTai != null && md.BaiHienTai.Ma == "de_thu" && md.BaiHienTai.KichBan.Buoc.Count > 0 && md.DeDaGiai.Count == 1 && !md.DeMoiMo,
+                      "Đề mới: kết quả máy chủ mở như một bài", md.TrangThaiDeCuoi);
+                Check(guiAnhDe, "Đề mới: ảnh đề được gửi kèm (anh_base64)");
+                Check(md.TrinhPhat.NhanDieuKhien, "Đóng bảng Đề mới trả điều khiển phim 3D");
+                Shot("de_moi_ket_qua");
+                md.BatDeMoi(true);
+                md.DatAnhDe(null, "");
+                md.PhanTichDe("LOI_THU");
+                td = Time.realtimeSinceStartup;
+                while ((md.DangGiaiDe || md.TrangThaiDeCuoi.StartsWith("Đang")) && Time.realtimeSinceStartup - td < 5f) yield return null;
+                Check(md.TrangThaiDeCuoi.Contains("chưa nhất quán") && md.TrangThaiDeCuoi.Contains("Bước 1"), "Đề mới: lỗi 422 hiện thông điệp + chi tiết của máy chủ", md.TrangThaiDeCuoi);
+                yield return null;
+                Shot("de_moi_loi");
+                md.BatDeMoi(false);
+                md.MoBai("sn2_ch3br");
+            }
+
             // 6. đo FPS bài propellane ở mức Cao
             HardwareProfile.Dat(MucDoHoa.Cao);
             int vsyncCu = QualitySettings.vSyncCount, fpsCu = Application.targetFrameRate;
@@ -261,10 +304,18 @@ namespace Khkt.CoChe
             Check(saiKhoa, "Sai khóa bị từ chối");
         }
 
+        static string jsonDeGia = "{}";
+        static bool guiAnhDe;
+
         static (long, string) MayChuGia(string pt, string duong, string than)
         {
             switch (duong)
             {
+                case "/co-che/giai-de":
+                    if (than.Contains("LOI_THU"))
+                        return (422, "{\"detail\":{\"thong_diep\":\"AI đã sửa 3 lần nhưng cơ chế vẫn chưa nhất quán khi mô phỏng bằng RDKit.\",\"ma\":\"co_che_sai\",\"chi_tiet\":[\"Bước 1: sản phẩm không khớp\"]}}");
+                    guiAnhDe = than.Contains("\"anh_base64\":\"");
+                    return (200, jsonDeGia);
                 case "/co-che/suc-khoe":
                     return (200, "{\"ok\":true,\"mo_hinh\":\"gia\",\"so_bai\":8}");
                 case "/co-che/giai-thich":
