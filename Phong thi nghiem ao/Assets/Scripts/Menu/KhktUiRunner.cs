@@ -352,6 +352,9 @@ namespace Khkt.Menu
         // ------------------------------------------------------------------ chụp
         IEnumerator Chup(MainMenu _, string ten)
         {
+            // chuyển động vào màn (thẻ hiện lần lượt) phải xong rồi mới chụp; tối đa 3 giây
+            float t0 = Time.realtimeSinceStartup;
+            while (Khkt.Menu.Dashboard.MenuAnim.Busy && Time.realtimeSinceStartup - t0 < 3f) yield return null;
             foreach (var (w, h) in CoMan)
             {
                 var m = FindAnyObjectByType<MainMenu>();              // cảnh có thể vừa nạp lại: luôn lấy màn hình đang sống

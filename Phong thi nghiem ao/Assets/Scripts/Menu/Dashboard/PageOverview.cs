@@ -120,7 +120,7 @@ namespace Khkt.Menu.Dashboard
             var size = new Vector2(270, 58);
             MenuKit.MakeButton(body, "Nút Vào phòng thí nghiệm", "Vào phòng thí nghiệm", new Vector2(-32, 0), size, () => EnterStation(-1), 3, MenuKit.RadiusButton, new Vector2(1, 0.5f));
             var roomBtn = MenuKit.MakeButton(body, "Nút chuyển Phòng học chung", "Phòng học chung", new Vector2(-32 - size.x - 16, 0), new Vector2(190, size.y), () => shell.OpenRoom?.Invoke(), 0, MenuKit.RadiusButton, new Vector2(1, 0.5f));
-            roomBtn.GetComponent<Image>().color = UiTheme.Pick(MenuKit.AccentDeep, MenuKit.Hex(0x0c2440), MenuKit.Hex(0x07344c));
+            MenuKit.Face(roomBtn).color = UiTheme.Pick(MenuKit.AccentDeep, MenuKit.Hex(0x0c2440), MenuKit.Hex(0x07344c));
             var roomLabel = roomBtn.transform.Find("Chữ")?.GetComponent<Text>();
             if (roomLabel != null) roomLabel.color = UiTheme.Pick(MenuKit.OnAccent, MenuKit.Ink, MenuKit.Ink);
         }
