@@ -20,10 +20,12 @@ Commit ab8d18f9: hệ thống chung + ảnh trước + nguyên tắc (KhktUiVeri
 Commit (bước 2): ManChonLuong, MainMenu, DashboardShell, PageOverview, MenuKit (TextField) + ảnh "sau" — KhktUiVerify 54/54 đạt
 (chạy từ bản kiểm riêng `scratchpad/wt/dong_bo.sh` vì tệp Hóa lý chưa commit của phiên khác đang làm dở, không biên dịch).
 
+Bước 3 (commit cuối): bỏ số mờ 01/02, kiểm lần cuối 54/54 đạt, ảnh sau lần cuối, báo cáo `bao-cao-giao-dien-moi.md`.
+
 ## Còn lại
-1. Chạy kiểm thử lần cuối (màn chọn đã bỏ số mờ 01/02), chép lại ảnh `sau_man_chon_*`.
-2. Dựng app Mac (Khkt.EditorTools.MacBuild.Build → ~/AppBuild/VERA_mac), xem độ nét chữ.
-3. Viết `docs/ngay-18-11/bao-cao-giao-dien-moi.md`, commit.
+1. Dựng app Mac (`Khkt.EditorTools.MacBuild.Build`, ra ~/AppBuild/VERA_mac) và xem độ nét chữ trên Retina: hai lần dựng
+   bị dừng từ bên ngoài (mã 144), chưa làm được.
+2. Khi phiên Hóa lý commit xong: chạy lại KhktUiVerify từ thư mục chính (không cần bản kiểm riêng).
 
 ## Lệnh kiểm thử
 ```bash
