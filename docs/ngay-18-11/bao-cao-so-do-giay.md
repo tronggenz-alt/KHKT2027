@@ -38,7 +38,8 @@ Ngày 18–19/11/2026, nhánh `n18/tich-hop`. Tiến độ chi tiết: [tien-do-
   chuỗi gốc tự do, 8 bài) và `tests/test_co_che_demo.py` (cũ): đạt.
 - Ảnh so sánh: `anh/so-do-giay/<bài>.png` (trái: bản demo vẽ tay hoặc ảnh app trước khi sửa; phải: tự sinh mới). Trang tạo
   ảnh: `anh/so-do-giay/so_sanh.html?bai=<mã>&demo=<sn2_sn1|hsg_propellane>`.
-- KhktCoCheVerify: xem mục 4.
+- **KhktCoCheVerify: ALL PASSED** (Unity 6000.6.7f1, batchmode có đồ hoạ, 19/11). Ảnh tờ giấy trong app:
+  `anh/so-do-giay/app_<bài>.png`. Vật liệu `Lab/Materials/*.mat` bị test đổi đã `git checkout --`.
 
 ## 4. Còn lại / hạn chế
 

@@ -22,20 +22,12 @@
 - (f85721d2 + commit sau) Dựng lại 8 bài, đóng gói `--unity`; ảnh so sánh 8 bài `docs/ngay-18-11/anh/so-do-giay/*.png`
   (trang `so_sanh.html`, chụp bằng Chrome headless: trái = demo vẽ tay hoặc ảnh app cũ, phải = tự sinh mới).
 
-## Đang làm dở
-- App Unity: `SoDoGiay.cs` + `DuLieuCoChe.cs` đã commit; Unity biên dịch hai tệp này KHÔNG lỗi (chỉ cảnh báo cũ).
-  KhktCoCheVerify chưa chạy được: cả dự án đang lỗi ở `HoaLy/HoaLyMoDun.cs(118)` (thiếu `TrangDongCo`, phiên Hóa lý đang làm dở).
-  Chạy lại khi phiên đó xong: `pgrep -fl -- -batchmode` trống rồi
-  `Unity -batchmode -projectPath "Phong thi nghiem ao" -executeMethod KhktCoCheVerify.Run -logFile <tệp>`; sau đó
-  `git status` – nếu Lab/Materials/*.mat hay anh/g2..g4 bị đổi thì `git checkout --`.
+- KhktCoCheVerify ALL PASSED (19/11); ảnh app `anh/so-do-giay/app_*.png`; sửa dấu +/− trong vòng (phông app), gạch lượn sóng thấp hơn.
 
-## Còn lại (theo thứ tự)
-3. Dựng lại: `.venv/bin/python -m server.ai.co_che.dung_bai_demo` rồi `.venv/bin/python -m server.ai.co_che.dong_goi --unity`.
-4. App: `SoDoGiay.cs` + `DuLieuCoChe.cs` (đọc cap_e, dt_vong, giai_doan, mt.gach/cheo, phong).
-5. Kiểm tra: `.venv/bin/python -m unittest tests.test_co_che_demo tests.test_co_che_so_do_giay`; KhktCoCheVerify (một -batchmode);
-   ảnh so sánh vào `docs/ngay-18-11/anh/so-do-giay/`.
-6. `docs/ngay-18-11/bao-cao-so-do-giay.md`, commit.
+## Đang làm dở
+- Không. Việc đã xong; hạn chế còn lại ghi trong bao-cao-so-do-giay.md mục 4.
 
 ## Lệnh kiểm thử
-- `.venv/bin/python -m unittest tests.test_co_che_demo`
+- `.venv/bin/python -m unittest tests.test_co_che_demo tests.test_co_che_so_do_giay`
 - `.venv/bin/python -m unittest tests.test_khong_lo_du_lieu` (trước mỗi commit)
+- KhktCoCheVerify (một -batchmode mỗi lúc), sau đó hoàn tác `Lab/Materials/*.mat` nếu bị đổi.

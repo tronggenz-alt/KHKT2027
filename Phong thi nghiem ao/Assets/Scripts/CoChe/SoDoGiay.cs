@@ -153,13 +153,20 @@ namespace Khkt.CoChe
                 else ThemChu(a.T, X(a.P), co, TextAnchor.MiddleCenter);
             }
             foreach (var d in sd.Dt) ThemChu(d.T.Replace("⁺", "+").Replace("⁻", "−"), X(d.P), co * 0.78f, TextAnchor.MiddleCenter);
-            foreach (var d in sd.DtVong) ThemChu(d.T, X(d.P), co * (d.T.Length > 1 ? 0.62f : 0.72f), TextAnchor.MiddleCenter, true);
+            foreach (var d in sd.DtVong)
+            {
+                // dấu trong vòng tròn: phông không chân của app (đủ "−" U+2212), cỡ theo bán kính vòng, không nhỏ hơn 9 px
+                var tx = ThemChu(d.T, X(d.P), co, TextAnchor.MiddleCenter, true);
+                tx.font = GlassKit.Semibold;
+                tx.fontSize = Mathf.Max(9, Mathf.RoundToInt((d.T.Length > 1 ? 11f : 13f) * S / 34f));
+                tx.fontStyle = FontStyle.Normal;
+            }
             foreach (var g in sd.GiaiDoanDs)
             {
                 if (string.IsNullOrEmpty(g.TieuDe)) continue;
                 var tx = ThemChu(g.TieuDe, X(g.Xy), co * 1.12f, TextAnchor.MiddleLeft, true, true);
                 tx.rectTransform.sizeDelta = new Vector2(Mathf.Max(tx.preferredWidth + 8f, 40f), co * 1.8f);
-                GachLuonSong(X(g.Xy) + new Vector2(0, -co * 0.62f), tx.preferredWidth);
+                GachLuonSong(X(g.Xy) + new Vector2(0, -co * 0.85f), tx.preferredWidth);
             }
             foreach (var d in sd.ChuKhac) ThemChu(d.T, X(d.P), co, TextAnchor.MiddleCenter);
             foreach (var d in sd.Ten) ThemChu(d.T, X(d.P), co * 1.05f, TextAnchor.MiddleCenter, true);
@@ -261,7 +268,7 @@ namespace Khkt.CoChe
             }
             foreach (var d in sd.DtVong)                                        // điện tích trong vòng tròn: viền mực, lòng màu giấy
             {
-                float r = (d.T.Length > 1 ? 8.5f : 6.8f) * S / 34f;
+                float r = Mathf.Max(5.5f, (d.T.Length > 1 ? 8.5f : 6.8f) * S / 34f);
                 Tron(vh, X(d.P), r, MauMuc);
                 Tron(vh, X(d.P), r - Mathf.Max(1f, 1.2f * S / 34f), MauGiay);
             }
