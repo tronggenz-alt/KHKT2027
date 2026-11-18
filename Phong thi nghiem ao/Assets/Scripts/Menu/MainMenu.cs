@@ -543,7 +543,16 @@ namespace Khkt.Menu
             giaiBaiTap.Mo3D = () => Khkt.CoChe.MoHinh3DMoDun.Mo();
             var caiDatGbt = CaiDatGiaiBaiTap.Tao(uiRoot);
             giaiBaiTap.MoCaiDat = caiDatGbt.Hien;
-            giaiBaiTap.MoHoaLy = ma => giaiBaiTap.Bao("Hóa lý (" + ma.Replace('_', ' ') + "): đang chuyển 4 mô phỏng của CHEMISTRY sang Unity, sẽ có ở bản sau.", false);
+            giaiBaiTap.MoHoaLy = ma =>
+            {
+                // mô-đun Hóa lý (Scripts/HoaLy) tìm theo tên lớp: thư mục đó làm riêng, không phải sửa tệp này khi gắn vào
+                foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+                {
+                    var m = asm.GetType("Khkt.HoaLy.HoaLyMoDun", false)?.GetMethod("Mo", new[] { typeof(string) });
+                    if (m != null) { m.Invoke(null, new object[] { ma }); return; }
+                }
+                giaiBaiTap.Bao("Hóa lý (" + ma.Replace('_', ' ') + "): đang chuyển 4 mô phỏng của CHEMISTRY sang Unity, sẽ có ở bản sau.", false);
+            };
             chonLuong = ManChonLuong.Tao(uiRoot, logo);
             chonLuong.ChonPhongLab = () => { chonLuong.An(); StartCoroutine(VaoPhongLab()); };
             chonLuong.ChonGiaiBaiTap = () => { chonLuong.An(); MoGiaiBaiTap(false); };
