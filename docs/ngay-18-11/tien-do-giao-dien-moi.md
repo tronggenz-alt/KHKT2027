@@ -15,14 +15,15 @@
   - `PageOverview.cs`: nút Phòng học chung đổi màu qua `MenuKit.Face(b)` (nút mới không còn Image ở gốc).
   - `KhktUiRunner.cs`: hàm chụp đợi `MenuAnim.Busy` hết (tối đa 3 s).
 
-## Đang làm
-- Kiểm biên dịch hệ thống chung bằng KhktUiVerify.Run.
+Commit ab8d18f9: hệ thống chung + ảnh trước + nguyên tắc (KhktUiVerify 54/54 đạt).
 
-## Còn lại (theo thứ tự)
-1. ManChonLuong.cs: màn chọn 2 luồng (Backdrop, tiêu đề 60 đậm có bóng, 2 thẻ lớn dải màu navy/ngọc lục bảo, nhấc khi rê, mũi tên nhích), màn Giải bài tập (thẻ công cụ có ImageFrame, hàng Hóa lý), Cài đặt Giải bài tập (Pop, Tabs, Input).
-2. MainMenu.cs: nền Backdrop, bỏ mảng tô cột trái/phải, mỗi màn trong thẻ Surface, MakeField → MenuKit.Input, nút Cài đặt góc dưới trái màn đăng nhập, cài đặt dùng Tabs + Switch, thẻ xem trước giao diện dùng viền tóc, màn chờ.
-3. DashboardShell.cs + PageOverview.cs: nền Backdrop, thanh bên viền tóc, vệt chọn, thẻ mô-đun ImageFrame.
-4. Chạy kiểm thử, xem ảnh, chép ảnh "sau" vào docs, viết `bao-cao-giao-dien-moi.md`, commit.
+Commit (bước 2): ManChonLuong, MainMenu, DashboardShell, PageOverview, MenuKit (TextField) + ảnh "sau" — KhktUiVerify 54/54 đạt
+(chạy từ bản kiểm riêng `scratchpad/wt/dong_bo.sh` vì tệp Hóa lý chưa commit của phiên khác đang làm dở, không biên dịch).
+
+## Còn lại
+1. Chạy kiểm thử lần cuối (màn chọn đã bỏ số mờ 01/02), chép lại ảnh `sau_man_chon_*`.
+2. Dựng app Mac (Khkt.EditorTools.MacBuild.Build → ~/AppBuild/VERA_mac), xem độ nét chữ.
+3. Viết `docs/ngay-18-11/bao-cao-giao-dien-moi.md`, commit.
 
 ## Lệnh kiểm thử
 ```bash

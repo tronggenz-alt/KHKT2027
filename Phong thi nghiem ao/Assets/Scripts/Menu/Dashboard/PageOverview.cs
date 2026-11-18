@@ -101,20 +101,17 @@ namespace Khkt.Menu.Dashboard
             var row = Row("Hàng phòng thí nghiệm", -124, 124);
             cardLab = MenuKit.Card(row, "Thẻ phòng thí nghiệm", 0f, 1f, 0, 124, Gap);
             var body = MenuKit.Body(cardLab);
-            body.GetComponent<Image>().color = MenuKit.Accent;
-            var anhLab = Resources.Load<Texture2D>("GiaoDien/AnhThu/lab_bang");
-            if (anhLab != null)                                   // C4: ảnh dựng thật của lab dưới lớp màu nhấn, để thẻ nổi bật
-            {
-                var a = MenuKit.Stretch(body, "Ảnh lab", Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-                var ri = a.gameObject.AddComponent<RawImage>();
-                ri.texture = anhLab;
-                ri.raycastTarget = false;
-                ri.uvRect = new Rect(0, 0.3f, 1, 0.42f);
-                if (body.GetComponent<Mask>() == null) body.gameObject.AddComponent<Mask>().showMaskGraphic = true;   // ảnh theo góc bo của thẻ
-                var phu = MenuKit.Stretch(body, "Lớp màu nhấn", Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero).gameObject.AddComponent<Image>();
-                phu.color = MenuKit.WithAlpha(MenuKit.Accent, 0.86f);
-                phu.raycastTarget = false;
-            }
+            // 18/11: thẻ màu nhấn dải chéo (như thẻ lớn CHEMISTRY) thay cho ảnh dưới lớp màu che bằng Mask stencil (góc răng cưa)
+            var nen = body.GetComponent<Image>();
+            nen.color = Color.white;
+            MenuKit.Gradient(nen, MenuKit.Accent, Color.Lerp(MenuKit.AccentDeep, Color.black, UiTheme.IsLight ? 0.15f : 0.35f), 120f);
+            if (UiTheme.IsLight) MenuKit.Sheen(cardLab, MenuKit.RadiusCard, 0.25f);
+            MenuKit.CardRing(cardLab).color = new Color(1, 1, 1, 0.14f);
+            var hvLab = cardLab.GetComponent<MenuHover>();
+            if (hvLab != null) hvLab.ringRest = hvLab.ringHover = new Color(1, 1, 1, 0.14f);
+            var bongLab = cardLab.Find("Bóng").GetComponent<Image>();
+            bongLab.color = MenuKit.WithAlpha(UiTheme.IsLight ? MenuKit.AccentDeep : Color.black, UiTheme.IsLight ? 0.28f : 0.5f);
+            if (hvLab != null) hvLab.shadowRest = hvLab.shadowHover = bongLab.color.a;
             GlassKit.Label(body, "Tiêu đề thẻ", "Phòng thí nghiệm", 26, MenuKit.OnAccent, true, TextAnchor.UpperLeft, new Vector2(32, -24), new Vector2(620, 36));
             GlassKit.Label(body, "Mô tả thẻ", "Tự tay làm thí nghiệm Hóa học, Sinh học trong phòng lab ảo.", 17, MenuKit.WithAlpha(MenuKit.OnAccent, 0.94f), false, TextAnchor.UpperLeft, new Vector2(32, -64), new Vector2(700, 28));
             var size = new Vector2(270, 58);
@@ -154,19 +151,10 @@ namespace Khkt.Menu.Dashboard
         {
             var card = MenuKit.Card(parent, "Thẻ mô-đun " + heading, i / 5f, (i + 1) / 5f, 0, 114, Gap);
             var body = MenuKit.Body(card);
-            // khung bo góc (cùng bán kính với nút) làm mặt nạ để ảnh thu nhỏ không lòi góc vuông ra ngoài thẻ bo tròn
-            var khung = MenuKit.Fill(body, "Khung ảnh", new Vector2(0, 1), new Vector2(0, 1), new Vector2(12, -12), new Vector2(96, 90), Color.white, MenuKit.RadiusButton);
-            khung.gameObject.AddComponent<Mask>().showMaskGraphic = false;
-            var thu = MenuKit.Stretch(khung.transform, "Ảnh thu nhỏ", Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            var img = thu.gameObject.AddComponent<RawImage>();
-            img.texture = Resources.Load<Texture2D>("GiaoDien/AnhThu/" + anh);
-            img.color = img.texture != null ? Color.white : MenuKit.WithAlpha(ink, 0.25f);
-            img.raycastTarget = false;
-            if (img.texture != null)                          // cắt giữa ảnh cho vừa khung 96×90
-            {
-                float want = 96f / 90f, have = (float)img.texture.width / img.texture.height;
-                img.uvRect = want < have ? new Rect((1f - want / have) * 0.5f, 0, want / have, 1) : new Rect(0, (1f - have / want) * 0.5f, 1, have / want);
-            }
+            if (onClick != null) MenuKit.MakeCardClickable(card, onClick, 4f);
+            // ảnh thu nhỏ bo góc lồng trong thẻ (bán kính trong = 20 − đệm 12 = 8), góc phủ màu thẻ nên khử răng cưa
+            var khung = GlassKit.Rect(body, "Khung ảnh", new Vector2(0, 1), new Vector2(0, 1), new Vector2(12, -12), new Vector2(96, 90));
+            MenuKit.ImageFrame(khung, "Khung", "Ảnh thu nhỏ", Resources.Load<Texture2D>("GiaoDien/AnhThu/" + anh), MenuKit.Paper, 8f, MenuKit.WithAlpha(ink, 0.25f));
             var tieuDe = GlassKit.Label(body, "Tiêu đề thẻ", heading, 18, MenuKit.Ink, true, TextAnchor.UpperLeft, new Vector2(120, -12), new Vector2(170, 26));
             var moTa = GlassKit.Label(body, "Mô tả thẻ", desc, 13, MenuKit.InkDim, false, TextAnchor.UpperLeft, new Vector2(120, -38), new Vector2(170, 20));
             foreach (var t in new[] { tieuDe, moTa })             // thẻ hẹp (màn 4:3, cỡ chữ lớn): co chữ thay vì tràn khung

@@ -861,7 +861,7 @@ namespace Khkt.Menu.Dashboard
 
         // ------------------------------------------------------------------ ô nhập, công tắc, nhóm chọn
         /// <summary>Ô nhập: nền lõm, viền tóc; khi gõ thì viền màu nhấn và quầng 3 điểm (như :focus của CHEMISTRY).</summary>
-        public static InputField Input(Transform parent, string name, string placeholder, Vector2 pos, Vector2 size, int fontSize = 18, bool password = false)
+        public static InputField TextField(Transform parent, string name, string placeholder, Vector2 pos, Vector2 size, int fontSize = 18, bool password = false)
         {
             var rt = GlassKit.Rect(parent, name, new Vector2(0, 1), new Vector2(0, 1), pos, size);
             var haloRt = Stretch(rt, "Quầng", Vector2.zero, Vector2.one, new Vector2(-3, -3), new Vector2(3, 3));
