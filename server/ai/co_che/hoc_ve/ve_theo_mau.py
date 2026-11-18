@@ -202,6 +202,7 @@ def _phia_trong(P: np.ndarray, i: int, ke: list[int]) -> np.ndarray:
 # góc × lật) → mạch hở: CoordGen (zigzag 120°) rồi xoay cho nét nằm trên lưới 30° và trục dài nằm ngang.
 from ..duong_dan import doc_nguyen_tac_ve  # noqa: E402
 from . import tu_duy_ve as td  # noqa: E402
+from . import thu_gon as tg  # noqa: E402
 from .bo_do import _bezier, _giao, _hop_nhan, _trong  # noqa: E402
 
 _TU_DUY = td.TuDuy(KHO, KHO_VO, doc_nguyen_tac_ve())
@@ -352,12 +353,25 @@ def _net_lap_the(m, P: np.ndarray) -> dict[tuple[int, int], str]:
 class Chat:
     """Một chất đã bày trên giấy (toạ độ theo độ dài liên kết = 1, tâm khung bao ở gốc)."""
 
-    def __init__(self, smiles: str, nhan_map: dict, truoc: dict | None = None):
+    def __init__(self, smiles: str, nhan_map: dict, truoc: dict | None = None, thu_gon: bool = False,
+                 giu: frozenset = frozenset()):
         m = _mol(smiles)
         try:
             Chem.Kekulize(m, clearAromaticFlags=True)    # vòng thơm vẽ nét đôi xen kẽ như SGK
         except Exception:  # noqa: BLE001
             pass
+        self.an: set[int] = set()                         # H gộp vào nhãn (không vẽ)
+        self.thu_gon = thu_gon and tg.dung_duoc(m)
+        self.nhan_map = nhan_map
+        if self.thu_gon:                                  # công thức thu gọn kiểu SGK (18/11)
+            m = tg.tach_h_di_to(m)
+            self.m = m
+            self.an = tg.h_an(m, set(giu))
+            self.sau = set()
+            self.P = tg.bay(m, self.an, set(giu), truoc)
+            self._dat_nhan()
+            self.lap_the = {}
+            return
         self.m = m
         P, self.sau = bay_chat_chi_tiet(smiles, m)
         P = P / 1.5
@@ -375,16 +389,32 @@ class Chat:
         m, P = self.m, self.P
         self.nhan = {}
         for a in m.GetAtoms():
-            t = _nhan_nt(a, m, P, self.nhan_map, _ghi_c(m, a))
+            if self.thu_gon:
+                if a.GetIdx() in self.an:
+                    continue
+                t = tg.nhan(a, self.an)
+                ke = [P[n.GetIdx()][0] for n in a.GetNeighbors() if n.GetIdx() not in self.an]
+                if len(ke) == 1 and P[a.GetIdx()][0] < ke[0] - .2:
+                    q = DIEN_TICH.get(a.GetFormalCharge(), "")
+                    t = _dao_nhan(t) if not q else _dao_nhan(t[:-len(q)]) + q
+            else:
+                t = _nhan_nt(a, m, P, self.nhan_map, _ghi_c(m, a))
             if t:
                 self.nhan[a.GetIdx()] = t.translate(CHI_SO_DUOI)
+
+    def hien(self, i: int) -> bool:
+        return i not in self.an
 
     def so_do_rieng(self, tien_to: str = "a", dx: float = 0.0, dy: float = 0.0) -> dict:
         sd = {"nt": {}, "lk": []}
         for i in range(self.m.GetNumAtoms()):
+            if i in self.an:
+                continue
             sd["nt"][f"{tien_to}{i}"] = [float(self.P[i][0] + dx), float(self.P[i][1] + dy)] + ([self.nhan[i]] if i in self.nhan else [])
         for b in self.m.GetBonds():
             i, j = b.GetBeginAtomIdx(), b.GetEndAtomIdx()
+            if i in self.an or j in self.an:
+                continue
             bac = {Chem.BondType.DOUBLE: 2, Chem.BondType.TRIPLE: 3}.get(b.GetBondType(), 1)
             sd["lk"].append([f"{tien_to}{i}", f"{tien_to}{j}", bac])
         return sd
