@@ -19,8 +19,11 @@
 - Hợp đồng HOP_DONG_APP.md mục 2b, QUY_UOC_VE.md mục 2 (9–12), `ve_giay.js` + `xem_bai_demo.html` vẽ trường mới
   (xem: /nguyen_mau/co_che_3d/xem_bai_demo.html?bai=sn1_tbubr, máy chủ tĩnh cổng 8765).
 
+- (f85721d2 + commit sau) Dựng lại 8 bài, đóng gói `--unity`; ảnh so sánh 8 bài `docs/ngay-18-11/anh/so-do-giay/*.png`
+  (trang `so_sanh.html`, chụp bằng Chrome headless: trái = demo vẽ tay hoặc ảnh app cũ, phải = tự sinh mới).
+
 ## Đang làm dở
-- (chưa) App Unity.
+- App Unity: `SoDoGiay.cs` + `DuLieuCoChe.cs` đã sửa (chưa commit) – đang chạy KhktCoCheVerify để biết biên dịch được.
 
 ## Còn lại (theo thứ tự)
 3. Dựng lại: `.venv/bin/python -m server.ai.co_che.dung_bai_demo` rồi `.venv/bin/python -m server.ai.co_che.dong_goi --unity`.

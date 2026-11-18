@@ -1052,14 +1052,14 @@ def _mui_ten(mt: dict, vt: dict, tam: np.ndarray, net: list, hop_chu: list, da_v
             c0 = de[0]
             r = ban_kinh(c0) + .1
             g0 = math.atan2(*(A0 - diem(c0))[::-1])
-            huong_b = [np.array([math.cos(g0 + k * math.radians(65)), math.sin(g0 + k * math.radians(65))]) for k in (1, -1)]
-            B = diem(c0) + max(huong_b, key=lambda v: float(v @ (n * s))) * max(r, .38)
+            huong_b = [np.array([math.cos(g0 + k * math.radians(80)), math.sin(g0 + k * math.radians(80))]) for k in (1, -1)]
+            B = diem(c0) + max(huong_b, key=lambda v: float(v @ (n * s))) * max(r, .45)
             A = A0 + n * s * .08
         else:
             A, B = A0, B0
         g = (A + B) / 2
         for f in (.35, .55, .8, 1.1):
-            h = max(.55, f * L)
+            h = max(.8 if tach and mt.get("kieu") != "nua_dau" else .55, f * L)
             C = g + n * s * h
             m = {"tu": A, "qua": C, "den": B}
             phat = .15 * f + (0 if float(np.dot(n * s, g - tam)) < 0 else .6)
