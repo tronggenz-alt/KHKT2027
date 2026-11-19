@@ -1,4 +1,4 @@
-# Tiến độ: nút Về sảnh + giải phẫu bản web cũ (19/11) — TẠM DỪNG vì hạn mức
+# Tiến độ: nút Về sảnh + giải phẫu bản web cũ (19/11) — ĐÃ XONG, xem bao-cao-lab-va-giai-phau.md
 
 Hạn mức 5 giờ đã dùng 76%, dừng theo luật chừa 15%. Nhánh `n18/tich-hop`.
 

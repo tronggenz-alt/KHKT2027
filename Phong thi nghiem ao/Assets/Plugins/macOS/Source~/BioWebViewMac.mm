@@ -9,6 +9,7 @@
 @interface BioMacWeb : NSObject <WKScriptMessageHandler, WKNavigationDelegate, WKUIDelegate>
 @property (nonatomic, strong) NSView* host;
 @property (nonatomic, strong) WKWebView* web;
+@property (nonatomic, strong) NSButton* backButton;
 @property (nonatomic, weak) NSResponder* prevResponder;
 @property (nonatomic, assign) BOOL open;
 @property (nonatomic, assign) BOOL closedFlag;
@@ -52,7 +53,9 @@
         NSFontAttributeName: [NSFont systemFontOfSize:14 weight:NSFontWeightSemibold] }];
     b.frame = NSMakeRect(16, 16, 112, 36);                 // góc dưới trái: không che thanh tiêu đề của trang
     b.autoresizingMask = NSViewMaxYMargin | NSViewMaxXMargin;
+    b.hidden = YES;                                        // chỉ hiện khi trang không có nút "Về phòng Lab 3D" riêng
     [host addSubview:b];
+    self.backButton = b;
 
     [cv addSubview:host positioned:NSWindowAbove relativeTo:nil];
     self.host = host; self.web = web;
@@ -78,7 +81,7 @@
     }
     NSWindow* w = self.host.window;
     [self.host removeFromSuperview];
-    self.host = nil; self.web = nil;
+    self.host = nil; self.web = nil; self.backButton = nil;
     if (w) [w makeFirstResponder:self.prevResponder ?: w.contentView];
     self.open = NO;
 }
@@ -105,6 +108,15 @@
     }
     h(WKNavigationActionPolicyAllow);
 }
+
+- (void)webView:(WKWebView*)v didFinishNavigation:(WKNavigation*)n {
+    [v evaluateJavaScript:@"!!document.getElementById('nut-ve-lab')" completionHandler:^(id r, NSError* e) {
+        self.backButton.hidden = (e == nil && [r respondsToSelector:@selector(boolValue)] && [r boolValue]);
+    }];
+}
+- (void)webView:(WKWebView*)v didFailNavigation:(WKNavigation*)n withError:(NSError*)e { self.backButton.hidden = NO; }
+- (void)webView:(WKWebView*)v didFailProvisionalNavigation:(WKNavigation*)n withError:(NSError*)e { self.backButton.hidden = NO; }
+- (void)webViewWebContentProcessDidTerminate:(WKWebView*)v { self.backButton.hidden = NO; }
 
 // target=_blank / window.open: liên kết web mở bằng trình duyệt mặc định
 - (WKWebView*)webView:(WKWebView*)v createWebViewWithConfiguration:(WKWebViewConfiguration*)c forNavigationAction:(WKNavigationAction*)a windowFeatures:(WKWindowFeatures*)f {
