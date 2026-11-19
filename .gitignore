@@ -87,3 +87,6 @@ Phong thi nghiem ao/Assets/StreamingAssets/CoChe.meta
 Phong thi nghiem ao/Assets/Resources/CoChe/
 Phong thi nghiem ao/Assets/Resources/CoChe.meta
 *.bytes.meta
+
+# báo sai của học sinh (máy chủ cơ chế ghi, không đưa lên kho)
+data/bao_sai/

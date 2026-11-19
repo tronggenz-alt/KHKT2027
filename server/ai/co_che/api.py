@@ -13,6 +13,9 @@
                                  Ảnh ≤ 8 MB (JPG/PNG/WEBP/HEIC), chờ tối đa 300 s (VERA_GIAI_DE_CHO). Trả JSON THƯỜNG cùng khung gói
                                  .verapack {"phien_ban","ma","bai","kich_ban_3d","so_do_giay"} + "co_che","doc_anh","thong_tin".
                                  Lỗi: {"detail": {"thong_diep","ma","chi_tiet"}} mã 400/413/415/422/503 (chưa có ANTHROPIC_API_KEY)/504.
+    POST /co-che/giai-thich-chi-tiet  {"ten","de","loai","buoc":[{"ten","ghi_chu"}]} → tổng quan + từng bước + lưu ý (hoi_dap.py)
+    POST /co-che/hoi-dap         {"cau_hoi","ma_bai"?,"ten","de","buoc","lich_su":[{"vai","noi_dung"}]} → trả lời theo bài đang xem
+    POST /co-che/bao-sai         {"ma_bai"?,"ten","mo_ta","che_do"?,"buoc"?,"nguon"?} → ghi data/bao_sai/<nguon>.jsonl
 """
 from __future__ import annotations
 
@@ -28,7 +31,7 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
 
-from . import dong_goi, giai_chuoi, giai_de, giai_thich, mo_hinh_3d, tri_thuc
+from . import dong_goi, giai_chuoi, giai_de, giai_thich, hoi_dap, mo_hinh_3d, tri_thuc
 from .duong_dan import thu_muc_build
 from ..cau_hinh_may import thong_so
 
@@ -41,7 +44,36 @@ class YeuCauGiaiThich(BaseModel):
 
 
 class YeuCauChuoi(BaseModel):
-    chuoi: str = Field(min_length=3, max_length=400)
+    chuoi: str = Field(default="", max_length=400)
+    anh_base64: str = Field(default="", max_length=giai_de.ANH_TOI_DA * 4 // 3 + 1024)   # ảnh đề chuỗi: AI chép chuỗi rồi giải như chữ
+    muc_do: str = Field(default="tu_dong", max_length=20)          # tu_dong | trung_binh | hsg (tuỳ chọn của app, ghi vào kết quả)
+    muc_thong_minh: str = Field(default="can_bang", max_length=20)
+    tra_cuu: bool = False
+
+
+class YeuCauGiaiThichChiTiet(BaseModel):
+    ten: str = Field(default="", max_length=300)
+    de: str = Field(default="", max_length=4000)
+    loai: str = Field(default="", max_length=60)
+    buoc: list[dict] = Field(default_factory=list, max_length=30)
+
+
+class YeuCauHoiDap(BaseModel):
+    cau_hoi: str = Field(min_length=1, max_length=800)
+    ma_bai: str = Field(default="", max_length=40)
+    ten: str = Field(default="", max_length=300)
+    de: str = Field(default="", max_length=4000)
+    buoc: list[dict] = Field(default_factory=list, max_length=30)
+    lich_su: list[dict] = Field(default_factory=list, max_length=40)
+
+
+class YeuCauBaoSai(BaseModel):
+    ma_bai: str = Field(default="", max_length=60)
+    ten: str = Field(default="", max_length=300)
+    mo_ta: str = Field(min_length=1, max_length=2000)
+    che_do: str = Field(default="", max_length=20)
+    buoc: int | None = None
+    nguon: str = Field(default="co_che", pattern=r"^(co_che|chuoi|mo_hinh_3d)$")
 
 
 class YeuCau3D(BaseModel):
@@ -97,7 +129,24 @@ async def giai_thich_co_che(yc: YeuCauGiaiThich) -> dict:
 
 @router.post("/giai-chuoi")
 async def giai_chuoi_api(yc: YeuCauChuoi) -> dict:
-    kq = await giai_chuoi.giai(yc.chuoi)
+    chuoi, doc_tu_anh = yc.chuoi.strip(), ""
+    if not chuoi and yc.anh_base64:
+        b64 = yc.anh_base64.split(",", 1)[1] if yc.anh_base64.startswith("data:") else yc.anh_base64
+        try:
+            anh = base64.b64decode(b64, validate=True)
+        except (binascii.Error, ValueError):
+            raise HTTPException(400, "anh_base64 không hợp lệ.") from None
+        try:
+            chuoi = doc_tu_anh = await hoi_dap.doc_chuoi_tu_anh(anh)
+        except giai_de.LoiGiaiDe as e:
+            raise HTTPException(e.status, e.thong_diep) from e
+    if len(chuoi) < 3:
+        raise HTTPException(422, "Chưa có chuỗi: gõ chuỗi (A -> B -> C) hoặc chọn ảnh đề.")
+    kq = await giai_chuoi.giai(chuoi)
+    if not kq.get("loi"):
+        kq["tuy_chon"] = {"muc_do": yc.muc_do, "muc_thong_minh": yc.muc_thong_minh, "tra_cuu": yc.tra_cuu}
+        if doc_tu_anh:
+            kq["chuoi_doc_tu_anh"] = doc_tu_anh
     if kq.get("loi"):
         raise HTTPException(422, kq["loi"])
     return kq
@@ -166,3 +215,35 @@ async def giai_de_api(request: Request) -> dict:
         raise _loi_giai_de(e) from e
     except asyncio.TimeoutError as e:
         raise _loi_giai_de(giai_de.LoiGiaiDe(f"Giải đề quá {cho:.0f} giây – thử lại hoặc tách đề nhỏ hơn.", "qua_gio", 504)) from e
+
+
+def _loi_hoi_dap(e: giai_de.LoiGiaiDe) -> HTTPException:
+    return HTTPException(e.status, {"thong_diep": e.thong_diep, "ma": e.ma})
+
+
+@router.post("/giai-thich-chi-tiet")
+async def giai_thich_chi_tiet_api(yc: YeuCauGiaiThichChiTiet) -> dict:
+    try:
+        return await asyncio.wait_for(hoi_dap.giai_thich_chi_tiet(yc.ten, yc.de, yc.loai, yc.buoc), 150)
+    except giai_de.LoiGiaiDe as e:
+        raise _loi_hoi_dap(e) from e
+    except asyncio.TimeoutError as e:
+        raise HTTPException(504, {"thong_diep": "AI trả lời quá lâu – thử lại.", "ma": "qua_gio"}) from e
+
+
+@router.post("/hoi-dap")
+async def hoi_dap_api(yc: YeuCauHoiDap) -> dict:
+    try:
+        return await asyncio.wait_for(hoi_dap.hoi_dap(yc.cau_hoi, yc.ten, yc.de, yc.buoc, yc.lich_su, yc.ma_bai), 150)
+    except giai_de.LoiGiaiDe as e:
+        raise _loi_hoi_dap(e) from e
+    except asyncio.TimeoutError as e:
+        raise HTTPException(504, {"thong_diep": "AI trả lời quá lâu – thử lại.", "ma": "qua_gio"}) from e
+
+
+@router.post("/bao-sai")
+def bao_sai_api(yc: YeuCauBaoSai) -> dict:
+    try:
+        return hoi_dap.bao_sai(yc.ma_bai, yc.ten, yc.mo_ta, yc.che_do, yc.buoc, yc.nguon)
+    except giai_de.LoiGiaiDe as e:
+        raise _loi_hoi_dap(e) from e

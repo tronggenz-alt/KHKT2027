@@ -288,7 +288,11 @@ namespace Khkt.Menu
             }
         }
 
-        /// <summary>Màn Giải bài tập: 3 công cụ lớn, hàng Hóa lý, Cài đặt chỉ còn Thông tin + API, mở được Cơ chế và Mô hình 3D.</summary>
+        /// <summary>
+        /// Màn Giải bài tập (19/11, bố cục CHEMISTRY): thanh điều hướng 5 mục, trang chủ 3 thẻ công cụ + thẻ Hóa lý,
+        /// trang Chuỗi (3 tab nhập, tuỳ chọn, kết quả từng bước gập/mở, báo sai), trang Cơ chế (tab, 8 bài mẫu, kiểu cơ chế,
+        /// kết quả + mở 3D ⇄ Giấy), Mô hình 3D, Hóa lý 4 thẻ; Cài đặt chỉ Thông tin + API. Máy chủ giả (MayChuCoChe.GiaLap).
+        /// </summary>
         IEnumerator KiemGiaiBaiTap(MainMenu menu)
         {
             bool bam = BamThe(menu.transform, "Nút lớn Giải bài tập");
@@ -298,10 +302,10 @@ namespace Khkt.Menu
             if (gbt == null) yield break;
             yield return Chup(menu, "giai_bai_tap_Trang");
             var ten = gbt.GetComponentsInChildren<RectTransform>(true).Select(r => r.name).ToList();
+            int nav = new[] { "Trang chủ", "Chuỗi phản ứng", "Cơ chế", "Mô hình 3D", "Hóa lý" }.Count(n => ten.Contains("Điều hướng " + n));
+            Check(nav == 5, "Thanh điều hướng có 5 mục", $"{nav}/5");
             int congCu = new[] { "Công cụ Chuỗi phản ứng", "Công cụ Mô hình 3D", "Công cụ Cơ chế" }.Count(ten.Contains);
-            Check(congCu == 3, "Có 3 công cụ: Chuỗi phản ứng, Mô hình 3D, Cơ chế", $"{congCu}/3");
-            int hoaLy = ten.Count(n => n.StartsWith("Hóa lý "));
-            Check(hoaLy == 4, "Có hàng Hóa lý (4 mục nhỏ) ở dưới", $"{hoaLy}");
+            Check(congCu == 3 && ten.Contains("Thẻ Hóa lý"), "Trang chủ: 3 thẻ công cụ + thẻ ngang Hóa lý", $"{congCu}/3");
             Check(!ten.Any(n => n.Contains("Phòng thí nghiệm Hóa học") || n.Contains("Sinh học 3D")), "Không có phòng lab Hóa/Sinh của CHEMISTRY");
 
             Bam(gbt.transform, "Nút Cài đặt Giải bài tập");
@@ -313,26 +317,117 @@ namespace Khkt.Menu
             if (cd != null) Bam(cd.transform, "Nút Đóng cài đặt");
             yield return Cho(0.3f);
 
-            BamThe(gbt.transform, "Công cụ Cơ chế");
+            var giaCu = Khkt.CoChe.MayChuCoChe.GiaLap;
+            Khkt.CoChe.MayChuCoChe.GiaLap = MayChuGia;
+
+            // Chuỗi phản ứng
+            BamThe(gbt.transform, "Công cụ Chuỗi phản ứng");
+            yield return Cho(0.6f);
+            Check(gbt.TrangDang == ManGiaiBaiTap.Trang.Chuoi, "Thẻ Chuỗi phản ứng mở trang Chuỗi");
+            var tc = gbt.GetComponentsInChildren<RectTransform>(true).Where(r => r.name.StartsWith("Tab ") && r.name != "Tab nhập" && r.GetComponentInParent<TrangCuon>(true)?.name == "Trang Chuỗi phản ứng").Count();
+            Check(tc == 3 && ten.Contains("Bước ngang 3") && ten.Contains("Mức độ đề") && ten.Contains("Mức thông minh") && ten.Contains("Công tắc tra cứu"),
+                  "Trang Chuỗi: 3 tab nhập, bước ngang, tuỳ chọn mức độ / thông minh / tra cứu", $"{tc} tab");
+            yield return Chup(menu, "chuoi_nhap_Trang");
+            BamThe(gbt.transform, "Tab Chuỗi mẫu");
+            yield return null;
+            Bam(gbt.transform, "Chuỗi mẫu 1");               // tab Chuỗi mẫu: bấm là giải ngay
+            float t0 = Time.realtimeSinceStartup;
+            while (gbt.SoBuocChuoi == 0 && Time.realtimeSinceStartup - t0 < 4f) yield return null;
+            Check(gbt.SoBuocChuoi == 4, "Giải chuỗi mẫu: 4 thẻ bước", gbt.SoBuocChuoi.ToString());
+            Bam(gbt.transform, "Nút Mở tất cả");
+            yield return Cho(0.4f);
+            Check(gbt.GetComponentsInChildren<Button>(true).Any(b => b.name == "Nút Xem cơ chế 4"), "Mở tất cả: bước có cơ chế mẫu hiện nút Xem cơ chế");
+            yield return Chup(menu, "chuoi_ket_qua_Trang");
+            Bam(gbt.transform, "Nút Báo sai chuỗi");
+            yield return Cho(0.4f);
+            var hop = gbt.GetComponentInChildren<HopBaoSai>(true);
+            Check(hop != null && hop.DangMo, "Kết quả chuỗi: nút Báo sai mở hộp báo sai");
+            yield return Chup(menu, "bao_sai_Trang");
+            hop?.Gui("Bước 2 thiếu điều kiện");
+            yield return Cho(0.3f);
+            Check(hop != null && hop.KetQuaCuoi.Contains("ok"), "Gửi báo sai chuỗi");
+            yield return Cho(1.6f);
+
+            // Cơ chế
+            Bam(gbt.transform, "Điều hướng Cơ chế");
+            yield return Cho(0.6f);
+            Check(gbt.TrangDang == ManGiaiBaiTap.Trang.CoChe, "Thanh điều hướng mở trang Cơ chế");
+            yield return Chup(menu, "co_che_nhap_Trang");
+            Check(gbt.SoBaiMau == 8, "Trang Cơ chế: lưới 8 bài mẫu", gbt.SoBaiMau.ToString());
+            Check(gbt.GetComponentsInChildren<Button>(true).Count(b => b.name.StartsWith("Loại ")) == 11, "Trang Cơ chế: 11 lựa chọn kiểu cơ chế");
+            BamThe(gbt.transform, "Tab Bài mẫu");
+            yield return Cho(0.4f);
+            yield return Chup(menu, "co_che_bai_mau_Trang");
+            BamThe(gbt.transform, "Tab Văn bản");
+            var oDe = gbt.GetComponentsInChildren<InputField>(true).FirstOrDefault(x => x.name == "Ô đề");
+            if (oDe != null) oDe.text = "CH3Br + NaOH loãng";
+            Bam(gbt.transform, "Loại SN2");
+            yield return null;
+            Bam(gbt.transform, "Nút Vẽ cơ chế");
+            t0 = Time.realtimeSinceStartup;
+            while (gbt.BaiKetQua == null && Time.realtimeSinceStartup - t0 < 4f) yield return null;
+            Check(gbt.BaiKetQua != null && gbt.GetComponentsInChildren<Button>(true).Count(b => b.name.StartsWith("Bước cơ chế ")) == gbt.BaiKetQua.KichBan.Buoc.Count,
+                  "Vẽ cơ chế (máy chủ giả, loại SN2): kết quả có danh sách bước", gbt.BaiKetQua?.Ten);
+            Check(guiLoai == "SN2", "Gửi kiểu cơ chế đã chọn", guiLoai);
+            yield return Cho(0.5f);
+            yield return Chup(menu, "co_che_ket_qua_Trang");
+            Bam(gbt.transform, "Nút Giải thích chi tiết");
             yield return Cho(1.0f);
-            Check(Khkt.CoChe.CoCheMoDun.DangMo, "Công cụ Cơ chế mở mô-đun cơ chế 3D ⇄ giấy");
+            Check(Khkt.CoChe.CoCheMoDun.DangMo && Khkt.CoChe.CoCheMoDun.Instance.GiaiThichMo && Khkt.CoChe.CoCheMoDun.Instance.TabBen == 1,
+                  "Giải thích chi tiết mở trình phát 3D ⇄ Giấy ở tab Giải thích");
+            Khkt.CoChe.CoCheMoDun.Instance?.BatGiaiThich(false);
             Khkt.CoChe.CoCheMoDun.Dong();
             yield return Frames(3);
-            BamThe(gbt.transform, "Công cụ Mô hình 3D");
+
+            // Mô hình 3D, Hóa lý
+            Bam(gbt.transform, "Điều hướng Mô hình 3D");
+            yield return Cho(0.6f);
+            Check(gbt.TrangDang == ManGiaiBaiTap.Trang.MoHinh3D, "Thanh điều hướng mở trang Mô hình 3D");
+            yield return Chup(menu, "mo_hinh_3d_Trang");
+            Bam(gbt.transform, "Nút Dựng mô hình 3D");
             yield return Cho(1.0f);
-            Check(Khkt.CoChe.MoHinh3DMoDun.DangMo, "Công cụ Mô hình 3D mở mô-đun 3D");
+            Check(Khkt.CoChe.MoHinh3DMoDun.DangMo, "Dựng mô hình 3D mở mô-đun 3D");
             Khkt.CoChe.MoHinh3DMoDun.Dong();
             yield return Frames(3);
-            BamThe(gbt.transform, "Công cụ Chuỗi phản ứng");
-            yield return Cho(1.0f);
-            Check(Khkt.CoChe.CoCheMoDun.DangMo && Khkt.CoChe.CoCheMoDun.Instance.BangChuoiMo, "Công cụ Chuỗi phản ứng mở bảng giải chuỗi");
-            Khkt.CoChe.CoCheMoDun.Instance?.BatBangChuoi(false);
-            Khkt.CoChe.CoCheMoDun.Dong();
-            yield return Frames(3);
+            Bam(gbt.transform, "Điều hướng Hóa lý");
+            yield return Cho(0.6f);
+            int hl = gbt.GetComponentsInChildren<RectTransform>(true).Count(r => r.name.StartsWith("Hóa lý ") && r.GetComponentInParent<TrangCuon>(true)?.name == "Trang Hóa lý");
+            Check(gbt.TrangDang == ManGiaiBaiTap.Trang.HoaLy && hl == 4, "Trang Hóa lý có 4 mô phỏng", hl.ToString());
+            yield return Chup(menu, "hoa_ly_Trang");
+            Bam(gbt.transform, "Điều hướng Trang chủ");
+            yield return Cho(0.4f);
+            Khkt.CoChe.MayChuCoChe.GiaLap = giaCu;
 
             Bam(gbt.transform, "Nút Về màn chính");
             yield return Cho(0.5f);
             Check(!gbt.DangHien && FindAnyObjectByType<ManChonLuong>().DangHien, "Về màn chính từ Giải bài tập");
+        }
+
+        static string guiLoai = "";
+
+        /// <summary>Máy chủ giả cho trang Giải bài tập: giải chuỗi 4 bước, giải đề trả gói bài mẫu SN2, báo sai.</summary>
+        static (long, string) MayChuGia(string pt, string duong, string than)
+        {
+            switch (duong)
+            {
+                case "/co-che/giai-chuoi":
+                    return (200, "{\"chuoi\":\"C2H4 -> C2H5OH -> CH3CHO -> CH3COOH -> CH3COOC2H5\",\"da_kiem_chung\":true,\"chat\":[{\"ki_hieu\":\"C2H5OH\",\"ten\":\"ethanol\"},{\"ki_hieu\":\"CH3CHO\",\"ten\":\"acetaldehyde\"}],\"buoc\":[" +
+                        "{\"tu\":\"C2H4\",\"den\":\"C2H5OH\",\"phan_ung\":\"cộng H₂O (hydrat hoá)\",\"dieu_kien\":\"H₂O, H₂SO₄ loãng, t°\",\"loai\":\"AE\",\"ma_co_che\":\"cong_hbr_propen\",\"khop_mau\":\"cung_loai\",\"kiem_chung\":\"da_kiem_chung\"}," +
+                        "{\"tu\":\"C2H5OH\",\"den\":\"CH3CHO\",\"phan_ung\":\"oxi hoá bằng CuO\",\"dieu_kien\":\"CuO, t°\",\"loai\":\"OXI_HOA\",\"ma_co_che\":null,\"kiem_chung\":\"da_kiem_chung\"}," +
+                        "{\"tu\":\"CH3CHO\",\"den\":\"CH3COOH\",\"phan_ung\":\"oxi hoá aldehyde\",\"dieu_kien\":\"O₂, Mn²⁺\",\"loai\":\"OXI_HOA\",\"ma_co_che\":null,\"kiem_chung\":\"chua_kiem_chung\"}," +
+                        "{\"tu\":\"CH3COOH\",\"den\":\"CH3COOC2H5\",\"phan_ung\":\"ester hoá\",\"dieu_kien\":\"C₂H₅OH, H₂SO₄ đặc\",\"loai\":\"THE_ACYL\",\"ma_co_che\":\"este_hoa_fischer\",\"khop_mau\":\"dung_mau\",\"kiem_chung\":\"da_kiem_chung\"}]}");
+                case "/co-che/giai-de":
+                    var m = System.Text.RegularExpressions.Regex.Match(than, "\"loai\":\"([A-Z_0-9]*)\"");
+                    guiLoai = m.Success ? m.Groups[1].Value : "";
+                    return (200, Khkt.CoChe.GoiCoChe.GiaiJson(File.ReadAllBytes(Path.Combine(Khkt.CoChe.GoiCoChe.ThuMuc, "sn2_ch3br.verapack"))));
+                case "/co-che/bao-sai":
+                    return (200, "{\"ok\":true,\"ma\":\"gia\"}");
+                case "/co-che/suc-khoe":
+                    return (200, "{\"ok\":true,\"mo_hinh\":\"gia\",\"so_bai\":8}");
+                case "/co-che/giai-thich-chi-tiet":
+                    return (200, "{\"tong_quan\":\"SN2.\",\"buoc\":[],\"luu_y\":[],\"nguon\":\"ai\",\"mo_hinh\":\"gia\",\"giay\":0.1}");
+            }
+            return (404, "{}");
         }
 
         static string DuongDan(Transform t)

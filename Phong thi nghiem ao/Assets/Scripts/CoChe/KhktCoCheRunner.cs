@@ -160,8 +160,38 @@ namespace Khkt.CoChe
             while (string.IsNullOrEmpty(md.TraLoiAICuoi) && Time.realtimeSinceStartup - ta < 3f) yield return null;
             Check(md.TraLoiAICuoi.Contains("phía sau"), "Hỏi AI nhận lời giải thích (máy chủ giả)");
             yield return null;
+            Shot("sn2_ch3br_hoi_dap");
+            // 4b. bảng bên: các bước (bấm dòng → nhảy bước), giải thích chi tiết (máy chủ giả), xuất ảnh, báo sai
+            md.MoBangBen(0);
+            yield return Frames(2);
+            Check(md.TabBen == 0 && md.SoDongBuoc == md.TrinhPhat.SoBuoc && md.SoDongBuoc > 0, "Bảng bên: danh sách các bước đủ dòng", $"{md.SoDongBuoc}/{md.TrinhPhat.SoBuoc}");
+            var dong2 = md.GetComponentsInChildren<Button>(true).FirstOrDefault(b => b.name == "Dòng bước " + md.TrinhPhat.SoBuoc);
+            dong2?.onClick.Invoke();
+            Check(dong2 != null && md.TrinhPhat.ChiSoBuoc == md.TrinhPhat.SoBuoc - 1, "Bấm dòng bước nhảy tới bước đó");
+            Shot("sn2_ch3br_cac_buoc");
+            md.MoBangBen(1);
+            float tgct = Time.realtimeSinceStartup;
+            while (string.IsNullOrEmpty(md.GiaiThichChiTietCuoi) && Time.realtimeSinceStartup - tgct < 3f) yield return null;
+            Check(md.GiaiThichChiTietCuoi.Contains("Nucleophin tấn công"), "Giải thích chi tiết từ /co-che/giai-thich-chi-tiet");
+            yield return null;
             Shot("sn2_ch3br_giai_thich");
             md.BatGiaiThich(false);
+            yield return md.XuatAnhGiay();
+            bool coAnh = md.DuongAnhXuatCuoi != "" && File.Exists(md.DuongAnhXuatCuoi) && new FileInfo(md.DuongAnhXuatCuoi).Length > 5000;
+            Check(coAnh && md.CheDoGiay, "Xuất ảnh PNG sơ đồ giấy", md.DuongAnhXuatCuoi);
+            if (coAnh) { File.Copy(md.DuongAnhXuatCuoi, Path.Combine(outDir, "xuat_anh_giay.png"), true); File.Delete(md.DuongAnhXuatCuoi); }
+            var hop = md.GetComponentInChildren<Khkt.Menu.HopBaoSai>(true);
+            md.GetComponentsInChildren<Button>(true).FirstOrDefault(b => b.name == "Nút Báo sai")?.onClick.Invoke();
+            yield return Frames(3);
+            Check(hop != null && hop.DangMo, "Nút Báo sai mở hộp báo sai");
+            Shot("bao_sai");
+            hop?.Gui("Mũi tên bước 1 vẽ sai chỗ");
+            float tbs = Time.realtimeSinceStartup;
+            while ((hop == null || hop.KetQuaCuoi == "") && Time.realtimeSinceStartup - tbs < 3f) yield return null;
+            Check(soBaoSai >= 1 && hop != null && hop.KetQuaCuoi.Contains("ok"), "Gửi báo sai tới /co-che/bao-sai", $"{soBaoSai} lần, {hop?.KetQuaCuoi}, {MayChuCoChe.GiaLap != null}");
+            yield return new WaitForSecondsRealtime(1.6f);
+            md.DatCheDo(false);
+            while (md.DangChuyen) yield return null;
 
             // 5. bảng giải chuỗi (máy chủ giả)
             md.BatBangChuoi(true);
@@ -323,6 +353,8 @@ namespace Khkt.CoChe
         static string jsonDeGia = "{}";
         static bool guiAnhDe;
 
+        static int soBaoSai;
+
         static (long, string) MayChuGia(string pt, string duong, string than)
         {
             switch (duong)
@@ -334,6 +366,13 @@ namespace Khkt.CoChe
                     return (200, jsonDeGia);
                 case "/co-che/suc-khoe":
                     return (200, "{\"ok\":true,\"mo_hinh\":\"gia\",\"so_bai\":8}");
+                case "/co-che/hoi-dap":
+                    return (200, "{\"tra_loi\":\"OH⁻ tấn công C từ phía sau, đối diện Br (Bước 1).\",\"goi_y\":[],\"nguon\":\"ai\",\"mo_hinh\":\"gia\",\"giay\":0.1}");
+                case "/co-che/giai-thich-chi-tiet":
+                    return (200, "{\"tong_quan\":\"SN2 một giai đoạn.\",\"buoc\":[{\"so\":1,\"tieu_de\":\"Nucleophin tấn công\",\"noi_dung\":\"Cặp electron của O tấn công C.\"}],\"luu_y\":[\"Nhớ nghịch đảo cấu hình.\"],\"nguon\":\"ai\",\"mo_hinh\":\"gia\",\"giay\":0.1}");
+                case "/co-che/bao-sai":
+                    soBaoSai++;
+                    return (200, "{\"ok\":true,\"ma\":\"gia\"}");
                 case "/co-che/giai-thich":
                     return (200, "{\"tra_loi\":\"OH⁻ tấn công C từ phía sau, đối diện Br [1].\",\"nguon\":[{\"so\":1,\"tieu_de\":\"SN2 › Các bước\",\"nguon\":\"bai_demo/sn2_ch3br\"}],\"nha_cung_cap\":\"gia\",\"mo_hinh\":\"gia\",\"kiem_chung\":\"ai_theo_tai_lieu\",\"giay\":0.1}");
                 case "/co-che/giai-chuoi":
@@ -354,6 +393,9 @@ namespace Khkt.CoChe
             var cam = md.Cam;
             var cu = cam.targetTexture;
             cam.targetTexture = rt;
+            // batchmode có màn 640×480: chữ dựng ở cỡ đó bị nhòe khi kết xuất 1920×1080 → ép dựng lại chữ theo cỡ ảnh
+            foreach (var t in md.GetComponentsInChildren<Text>()) t.SetAllDirty();
+            Canvas.ForceUpdateCanvases();
             cam.Render();
             RenderTexture.active = rt;
             readTex.ReadPixels(new Rect(0, 0, ShotW, ShotH), 0, 0);

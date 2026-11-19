@@ -104,6 +104,42 @@ namespace Khkt.CoChe
             Instance?.BatBangChuoi(true);
         }
 
+        /// <summary>Tạo mô-đun (chưa mở lớp phủ) để đọc danh sách / nạp bài mẫu từ trang Giải bài tập.</summary>
+        public static CoCheMoDun DamBaoCo()
+        {
+            if (Instance == null) Tao();
+            return Instance;
+        }
+
+        /// <summary>Mở lớp phủ với một bài; tab bảng bên: 0 Các bước, 1 Giải thích, 2 Hỏi đáp (-1 giữ nguyên); buoc ≥ 0 thì nhảy tới bước đó.</summary>
+        public static void MoVoiBai(BaiCoChe b, int tab = -1, int buoc = -1)
+        {
+            if (b == null) return;
+            DamBaoCo();
+            Mo();
+            Instance.DaNap[b.Ma] = b;
+            if (Instance.BaiHienTai != b) Instance.MoBai(b);
+            if (Instance.CheDoGiay) Instance.DatCheDo(false);
+            if (buoc >= 0 && buoc < Instance.TrinhPhat.SoBuoc) Instance.TrinhPhat.DenBuoc(buoc);
+            if (tab >= 0) Instance.MoBangBen(tab);
+        }
+
+        public static void MoMau(string ma)
+        {
+            DamBaoCo();
+            BaiCoChe b;
+            try { b = Instance.Nap(ma); } catch (System.Exception e) { Debug.LogWarning("[CoChe] " + e.Message); return; }
+            MoVoiBai(b);
+        }
+
+        public void GhiDeDaGiai(BaiCoChe b)
+        {
+            DaNap[b.Ma] = b;
+            DeDaGiai.RemoveAll(x => x.Ma == b.Ma);
+            DeDaGiai.Add(b);
+            VeDeDaGiai();
+        }
+
         static void Tao()
         {
             var go = new GameObject("Cơ chế 3D ⇄ Giấy");
@@ -215,9 +251,9 @@ namespace Khkt.CoChe
             tieuDe = GlassKit.Label(dau, "Tên bài", "Chọn một bài", 27, ChuSang, true, TextAnchor.UpperLeft, Vector2.zero, new Vector2(1180, 38));
             deBai = GlassKit.Label(dau, "Đề", "", 16, ChuPhu, false, TextAnchor.UpperLeft, new Vector2(0, -42), new Vector2(1100, 44));
             deBai.horizontalOverflow = HorizontalWrapMode.Wrap;
-            GlassKit.Label(dau, "Gợi ý", "Kéo để xoay 360° · cuộn để phóng to · ← → chuyển bước · Space phát/dừng", 13, ChuPhu, false, TextAnchor.UpperLeft, new Vector2(0, -92), new Vector2(1100, 20));
-            NutKinh(dau, "Nút Chọn bài", "Bài khác ▾", new Vector2(0, -118), new Vector2(150, 40), () => dsBai.gameObject.SetActive(!dsBai.gameObject.activeSelf), 14);
-            NutKinh(dau, "Nút Đề mới", "＋ Đề mới (gõ / ảnh)", new Vector2(160, -118), new Vector2(210, 40), () => { dsBai.gameObject.SetActive(false); BatDeMoi(true); }, 14);
+            GlassKit.Label(dau, "Gợi ý", "Kéo để xoay 360° · cuộn để phóng to · ← → chuyển bước · Space phát/dừng", 15, ChuPhu, false, TextAnchor.UpperLeft, new Vector2(0, -92), new Vector2(1100, 20));
+            NutKinh(dau, "Nút Chọn bài", "Bài khác ▾", new Vector2(0, -118), new Vector2(150, 40), () => dsBai.gameObject.SetActive(!dsBai.gameObject.activeSelf), 15);
+            NutKinh(dau, "Nút Đề mới", "＋ Đề mới (gõ / ảnh)", new Vector2(160, -118), new Vector2(210, 40), () => { dsBai.gameObject.SetActive(false); BatDeMoi(true); }, 15);
 
             // ---- nút gạt 3D | Giấy (góc phải) + Đóng
             var gat = GlassKit.Rect(goc, "Nút gạt 3D Giấy", new Vector2(1, 1), new Vector2(1, 1), new Vector2(-150, -22), new Vector2(190, 52));
@@ -229,7 +265,11 @@ namespace Khkt.CoChe
             vg.sprite = GlassKit.Solid; vg.type = Image.Type.Sliced; vg.pixelsPerUnitMultiplier = 1f; vg.color = XanhNhan;
             nut3D = NutTrong(gat, "3D", new Vector2(5, 0), new Vector2(90, 42), () => DatCheDo(false), out nhanGat3D);
             nutGiay = NutTrong(gat, "Giấy", new Vector2(95, 0), new Vector2(90, 42), () => DatCheDo(true), out nhanGatGiay);
-            nutDong = NutKinh(goc, "Đóng", "Đóng", new Vector2(-24, -26), new Vector2(110, 44), Dong, 15, new Vector2(1, 1));
+            nutDong = NutKinh(goc, "Đóng", "← Quay lại", new Vector2(-24, -26), new Vector2(130, 44), Dong, 15, new Vector2(1, 1));
+            // hàng nút dưới nút gạt: xuất ảnh sơ đồ giấy, báo sai, bảng bên (các bước / giải thích / hỏi đáp)
+            nutXuat = NutKinh(goc, "Nút Xuất ảnh", "Xuất ảnh PNG", new Vector2(-24, -84), new Vector2(150, 40), () => StartCoroutine(XuatAnhGiay()), 15, new Vector2(1, 1));
+            nutBaoSai = NutKinh(goc, "Nút Báo sai", "Báo sai", new Vector2(-182, -84), new Vector2(104, 40), () => hopBaoSai.Mo("co_che", BaiHienTai?.Ma, BaiHienTai?.Ten, TrinhPhat.ChiSoBuoc, CheDoGiay ? "giay" : "3d"), 15, new Vector2(1, 1));
+            nutBangBen = NutKinh(goc, "Nút Bảng bên", "Các bước ▸", new Vector2(-294, -84), new Vector2(130, 40), () => BatGiaiThich(!GiaiThichMo), 15, new Vector2(1, 1));
 
             // ---- khung bước (giữa đáy)
             var kb = GlassKit.Rect(goc, "Khung bước", new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0, 20), new Vector2(1180, 220));
@@ -259,19 +299,10 @@ namespace Khkt.CoChe
             GlassKit.Label(kb, "Chú giải", "<color=#ffd166>●</color> cặp electron   xám đậm C · trắng H · đỏ O · nâu Br", 13, ChuPhu, false, TextAnchor.MiddleRight,
                            new Vector2(-22, -150), new Vector2(330, 44), new Vector2(1, 1)).rectTransform.pivot = new Vector2(1, 1);
 
-            // ---- ô giải thích (mặc định đóng), nổi bên phải
-            giaiThich = GlassKit.Fill(goc, "Giải thích", new Vector2(-500, -100), new Vector2(476, 700), GlassKit.Surface, new Vector2(1, 1), true).rectTransform;
-            giaiThich.GetComponent<Image>().raycastTarget = true;
-            GlassKit.Label(giaiThich, "Tiêu đề", "Giải thích", 20, GlassKit.Ink, true, TextAnchor.UpperLeft, new Vector2(20, -16), new Vector2(436, 28));
-            noiDungGiaiThich = GlassKit.Label(giaiThich, "Nội dung", "", 15, GlassKit.Ink, false, TextAnchor.UpperLeft, new Vector2(20, -52), new Vector2(436, 430));
-            noiDungGiaiThich.horizontalOverflow = HorizontalWrapMode.Wrap;
-            oCauHoi = GlassKit.MakeInput(giaiThich, "Câu hỏi", "Hỏi về bài này…", new Vector2(20, -496), new Vector2(436, 48), 15);
-            GlassKit.MakeButton(giaiThich, "Gửi", "Hỏi AI", new Vector2(20, -552), new Vector2(140, 44), HoiAI, true);
-            GlassKit.MakeButton(giaiThich, "Đóng giải thích", "Đóng", new Vector2(170, -552), new Vector2(100, 44), () => BatGiaiThich(false));
-            trangThaiAI = GlassKit.Label(giaiThich, "Trạng thái AI", "", 14, GlassKit.Dim, false, TextAnchor.UpperLeft, new Vector2(20, -604), new Vector2(436, 90));
-            trangThaiAI.horizontalOverflow = HorizontalWrapMode.Wrap;
-            nhanMayChu = GlassKit.Label(giaiThich, "Máy chủ", "", 12, GlassKit.Dim, false, TextAnchor.UpperLeft, new Vector2(20, -676), new Vector2(436, 20));
-            giaiThich.gameObject.SetActive(false);
+            DungBangBen();
+            thongBao = GlassKit.Label(goc, "Thông báo", "", 16, ChuSang, false, TextAnchor.MiddleRight, new Vector2(-24, -132), new Vector2(900, 30), new Vector2(1, 1));
+            thongBao.rectTransform.pivot = new Vector2(1, 1);
+            thongBao.horizontalOverflow = HorizontalWrapMode.Overflow;
 
             // ---- danh sách bài (bảng nổi, mở bằng "Bài khác ▾")
             dsBai = GlassKit.Rect(goc, "Danh sách bài", new Vector2(0, 1), new Vector2(0, 1), new Vector2(28, -214), new Vector2(460, 740));
@@ -283,6 +314,7 @@ namespace Khkt.CoChe
             DungDeMoi();
             DungCaiDat();
             DungDanhSach(dsBai);
+            hopBaoSai = Khkt.Menu.HopBaoSai.Tao(goc);
             NutKinh(dsBai, "Giải chuỗi", "Giải chuỗi phản ứng", new Vector2(16, 64), new Vector2(428, 44), () => { dsBai.gameObject.SetActive(false); BatBangChuoi(true); }, 15, new Vector2(0, 0));
             NutKinh(dsBai, "Cài đặt", "Cài đặt máy chủ", new Vector2(16, 14), new Vector2(428, 44), () => caiDat.gameObject.SetActive(true), 15, new Vector2(0, 0));
             dsBai.gameObject.SetActive(false);
@@ -343,7 +375,7 @@ namespace Khkt.CoChe
             b.colors = cl;
             b.navigation = new Navigation { mode = Navigation.Mode.None };
             b.onClick.AddListener(() => bam());
-            var t = GlassKit.Label(rt, "Chữ", chu, coChu, ChuSang, true, TextAnchor.MiddleCenter, Vector2.zero, co);
+            var t = GlassKit.Label(rt, "Chữ", chu, coChu, ChuSang, false, TextAnchor.MiddleCenter, Vector2.zero, co);
             t.raycastTarget = false;
             return b;
         }
@@ -395,6 +427,13 @@ namespace Khkt.CoChe
             vachGat.GetComponent<Image>().color = giay ? Muc : XanhNhan;
             nhanGat3D.color = giay ? new Color32(0x5d, 0x68, 0x62, 0xff) : Color.white;
             nhanGatGiay.color = giay ? new Color32(0xf6, 0xf1, 0xe6, 0xff) : ChuPhu;
+            foreach (var n in new[] { nutXuat, nutBaoSai, nutBangBen })
+                if (n != null)
+                {
+                    n.GetComponent<Image>().color = giay ? new Color32(0xef, 0xe9, 0xdb, 0xff) : new Color(1f, 1f, 1f, 0.04f);
+                    n.GetComponentInChildren<Text>().color = giay ? Muc : ChuSang;
+                }
+            if (thongBao != null) thongBao.color = giay ? Muc : ChuSang;
             if (nutDong != null)                                   // nút Đóng đọc được trên cả nền tối và nền giấy
             {
                 nutDong.GetComponent<Image>().color = giay ? new Color32(0xef, 0xe9, 0xdb, 0xff) : new Color(1f, 1f, 1f, 0.04f);
@@ -509,6 +548,7 @@ namespace Khkt.CoChe
             if (!daTangUiCapture) { DesktopViewer.UiCapture++; daTangUiCapture = true; }
             Cam.backgroundColor = CheDoGiay ? NenGiay : NenToi;
             if (BaiHienTai == null && DanhSachMa.Count > 0) MoBai(DanhSachMa[0]);
+            else if (BaiHienTai != null && string.IsNullOrEmpty(GiaiThichChiTietCuoi)) taiGiaiThich = StartCoroutine(TaiGiaiThichChiTiet(BaiHienTai));
             StartCoroutine(KiemMayChu());
         }
 
@@ -546,6 +586,10 @@ namespace Khkt.CoChe
                 nutBai[i].GetComponent<Image>().color = DanhSachMa[i] == ma ? new Color(0.23f, 0.51f, 0.96f, 0.35f) : new Color(1f, 1f, 1f, 0.04f);
             TraLoiAICuoi = "";
             trangThaiAI.text = "";
+            hoiDap.Clear();
+            VeDongBuoc();
+            if (taiGiaiThich != null) StopCoroutine(taiGiaiThich);
+            if (gameObject.activeInHierarchy) taiGiaiThich = StartCoroutine(TaiGiaiThichChiTiet(b));
             DungTruc();
             CapNhatGiaiThich();
             CapNhatChuThich();
@@ -616,7 +660,7 @@ namespace Khkt.CoChe
             Vector2 a = RectTransformUtility.WorldToScreenPoint(Cam, g[0]), b = RectTransformUtility.WorldToScreenPoint(Cam, g[2]);
             float w = Mathf.Max(1, Cam.pixelWidth), h = Mathf.Max(1, Cam.pixelHeight);
             var vung = Rect.MinMaxRect(a.x / w, a.y / h, b.x / w, b.y / h);
-            if (GiaiThichMo) vung.xMax = Mathf.Max(vung.xMin + 0.2f, vung.xMax - 500f / 1920f);
+            if (GiaiThichMo) vung.xMax = Mathf.Max(vung.xMin + 0.2f, vung.xMax - 520f / 1920f);
             TrinhPhat.VungNhin = vung;
             var ten = nutPhat.GetComponentInChildren<Text>();
             string can = TrinhPhat.DangPhat ? "Dừng" : "Phát";
@@ -631,6 +675,7 @@ namespace Khkt.CoChe
             if (chuThich == null || BaiHienTai == null) return;
             var tp = TrinhPhat;
             Giay.DanhDauBuoc(tp.ChiSoBuoc);                       // tô khối giai đoạn đang xem trên tờ giấy (như .buoc.dang-xem của demo)
+            ToDongBuoc();
             if (tp.DangNhanhSai && tp.NhanhHienTai != null)
             {
                 DatNhan("KHÔNG KHẢ THI", new Color32(0xdc, 0x26, 0x26, 0xff));
@@ -658,18 +703,252 @@ namespace Khkt.CoChe
         public void BatGiaiThich(bool mo)
         {
             giaiThich.gameObject.SetActive(mo);
-            if (mo) CapNhatGiaiThich();
+            nutBangBen.GetComponentInChildren<Text>().text = mo ? "Đóng bảng ◂" : "Các bước ▸";
+            if (mo) { giaiThich.SetAsLastSibling(); ChonTabBen(Mathf.Max(0, tabBen.current)); }
         }
+
+        /// <summary>Mở bảng bên ở tab i (0 Các bước, 1 Giải thích chi tiết, 2 Hỏi đáp).</summary>
+        public void MoBangBen(int i)
+        {
+            BatGiaiThich(true);
+            tabBen.Select(i, true);
+        }
+
+        public int TabBen => tabBen != null ? tabBen.current : -1;
+        public int SoDongBuoc => dongBuoc.Count;
+        public string GiaiThichChiTietCuoi { get; private set; } = "";
+        public string DuongAnhXuatCuoi { get; private set; } = "";
 
         void CapNhatGiaiThich()
         {
             if (noiDungGiaiThich == null || BaiHienTai == null) return;
+            noiDungGiaiThich.text = string.IsNullOrEmpty(GiaiThichChiTietCuoi) ? GiaiThichMau() : GiaiThichChiTietCuoi;
+            CoGianChu(noiDungGiaiThich);
+            VeHoiDap();
+        }
+
+        string GiaiThichMau()
+        {
             var sb = new StringBuilder();
             sb.Append(BaiHienTai.KichBan.GiaiThich).Append("\n\n");
-            foreach (var (ten, gt) in BaiHienTai.CacBuoc) sb.Append("<b>").Append(ten).Append(":</b> ").Append(gt).Append('\n');
-            if (!string.IsNullOrEmpty(TraLoiAICuoi)) sb.Append("\n<b>AI trả lời:</b> ").Append(TraLoiAICuoi);
-            noiDungGiaiThich.text = sb.ToString();
+            foreach (var (ten, gt) in BaiHienTai.CacBuoc) sb.Append("<b>").Append(ten).Append(":</b> ").Append(gt).Append("\n\n");
+            if (BaiHienTai.LoiHayGap.Count > 0) sb.Append("<b>Lỗi hay gặp</b>\n• ").Append(string.Join("\n• ", BaiHienTai.LoiHayGap));
+            return sb.ToString();
         }
+
+        static void CoGianChu(Text t)
+        {
+            var rt = t.rectTransform;
+            float h = t.cachedTextGeneratorForLayout.GetPreferredHeight(t.text, t.GetGenerationSettings(new Vector2(rt.rect.width, 0))) / Mathf.Max(0.01f, t.pixelsPerUnit);
+            rt.sizeDelta = new Vector2(rt.sizeDelta.x, Mathf.Max(60, h + 24));
+            if (rt.parent is RectTransform nd) nd.sizeDelta = new Vector2(nd.sizeDelta.x, rt.sizeDelta.y + 10);
+        }
+
+        // ------------------------------------------------------------------ bảng bên: Các bước / Giải thích / Hỏi đáp
+        RectTransform benBuoc, benGiaiThich, benHoiDap, dsDongBuoc;
+        Khkt.Menu.Dashboard.MenuTabs tabBen;
+        Text chuHoiDap, nguonGiaiThich, thongBao;
+        Button nutXuat, nutBaoSai, nutBangBen, nutGuiHoi;
+        Khkt.Menu.HopBaoSai hopBaoSai;
+        readonly List<Button> dongBuoc = new List<Button>();
+        readonly List<(bool ai, string chu)> hoiDap = new List<(bool, string)>();
+        Coroutine taiGiaiThich;
+
+        void DungBangBen()
+        {
+            giaiThich = GlassKit.Rect(goc, "Giải thích", new Vector2(1, 1), new Vector2(1, 1), new Vector2(-24, -140), new Vector2(480, 670));
+            var nen = giaiThich.gameObject.AddComponent<Image>();
+            nen.sprite = GlassKit.Solid; nen.type = Image.Type.Sliced; nen.pixelsPerUnitMultiplier = 2f;
+            nen.color = new Color32(16, 22, 40, 240);
+            nen.raycastTarget = true;
+            var vien = GlassKit.Rect(giaiThich, "Viền", Vector2.zero, Vector2.zero, Vector2.zero, Vector2.zero);
+            vien.anchorMin = Vector2.zero; vien.anchorMax = Vector2.one; vien.offsetMin = vien.offsetMax = Vector2.zero;
+            tabBen = Khkt.Menu.Dashboard.MenuKit.Tabs(giaiThich, "Tab bảng bên", new[] { "Tab Các bước", "Tab Giải thích", "Tab Hỏi đáp" },
+                new[] { "Các bước", "Giải thích", "Hỏi đáp" }, new Vector2(20, -18), new Vector2(144, 40), false, 4f, -1, ChonTabBen);
+            foreach (var l in tabBen.labels) l.fontStyle = FontStyle.Normal;
+
+            benBuoc = KhungCuon(giaiThich, "Nội dung Các bước", out dsDongBuoc);
+            benGiaiThich = KhungCuon(giaiThich, "Nội dung Giải thích", out var ndGt);
+            noiDungGiaiThich = GlassKit.Label(ndGt, "Nội dung", "", 16, ChuSang, false, TextAnchor.UpperLeft, new Vector2(4, 0), new Vector2(424, 100));
+            noiDungGiaiThich.horizontalOverflow = HorizontalWrapMode.Wrap;
+            noiDungGiaiThich.supportRichText = true;
+            nguonGiaiThich = GlassKit.Label(giaiThich, "Nguồn giải thích", "", 13, ChuPhu, false, TextAnchor.UpperLeft, new Vector2(20, -642), new Vector2(440, 20));
+
+            benHoiDap = KhungCuon(giaiThich, "Nội dung Hỏi đáp", out var ndHd, 132);
+            chuHoiDap = GlassKit.Label(ndHd, "Hội thoại", "", 16, ChuSang, false, TextAnchor.UpperLeft, new Vector2(4, 0), new Vector2(424, 100));
+            chuHoiDap.horizontalOverflow = HorizontalWrapMode.Wrap;
+            chuHoiDap.supportRichText = true;
+            oCauHoi = GlassKit.MakeInput(benHoiDap, "Câu hỏi", "Hỏi về bài này… (Enter để gửi)", new Vector2(0, -470), new Vector2(440, 48), 15);
+            oCauHoi.onSubmit.AddListener(_ => HoiAI());
+            nutGuiHoi = NutKinh(benHoiDap, "Gửi câu hỏi", "Gửi", new Vector2(0, -526), new Vector2(100, 40), HoiAI, 15);
+            NutKinh(benHoiDap, "Xoá hội thoại", "Xoá hội thoại", new Vector2(108, -526), new Vector2(140, 40), () => { hoiDap.Clear(); VeHoiDap(); }, 15);
+            trangThaiAI = GlassKit.Label(benHoiDap, "Trạng thái AI", "", 13, ChuPhu, false, TextAnchor.UpperLeft, new Vector2(256, -526), new Vector2(190, 44));
+            trangThaiAI.horizontalOverflow = HorizontalWrapMode.Wrap;
+            nhanMayChu = GlassKit.Label(giaiThich, "Máy chủ", "", 12, ChuPhu, false, TextAnchor.UpperLeft, new Vector2(20, -642), new Vector2(440, 20));
+            giaiThich.gameObject.SetActive(false);
+        }
+
+        /// <summary>Vùng cuộn trong bảng bên (dưới thanh tab). chuaDuoi: chừa chỗ dưới cho ô nhập.</summary>
+        static RectTransform KhungCuon(RectTransform cha, string ten, out RectTransform noiDung, float chuaDuoi = 36)
+        {
+            var g = GlassKit.Rect(cha, ten, new Vector2(0, 1), new Vector2(0, 1), new Vector2(20, -76), new Vector2(440, 560));
+            var vp = GlassKit.Rect(g, "Khung nhìn", new Vector2(0, 1), new Vector2(0, 1), Vector2.zero, new Vector2(440, 560 - chuaDuoi));
+            vp.gameObject.AddComponent<RectMask2D>();
+            var bat = vp.gameObject.AddComponent<Image>();
+            bat.color = new Color(1, 1, 1, 0.001f);
+            noiDung = GlassKit.Rect(vp, "Nội dung", new Vector2(0, 1), new Vector2(0, 1), Vector2.zero, new Vector2(440, 100));
+            var sr = g.gameObject.AddComponent<ScrollRect>();
+            sr.viewport = vp; sr.content = noiDung; sr.horizontal = false; sr.movementType = ScrollRect.MovementType.Clamped; sr.scrollSensitivity = 36f;
+            g.gameObject.SetActive(false);
+            return g;
+        }
+
+        void ChonTabBen(int i)
+        {
+            benBuoc.gameObject.SetActive(i == 0);
+            benGiaiThich.gameObject.SetActive(i == 1);
+            benHoiDap.gameObject.SetActive(i == 2);
+            nguonGiaiThich.gameObject.SetActive(i == 1);
+            nhanMayChu.gameObject.SetActive(i == 0);
+            if (TrinhPhat != null) TrinhPhat.NhanDieuKhien = i != 2 && !CheDoGiay;
+            if (i == 1) CapNhatGiaiThich();
+            if (i == 2) { VeHoiDap(); oCauHoi.ActivateInputField(); }
+        }
+
+        void VeDongBuoc()
+        {
+            foreach (var b in dongBuoc) if (b != null) Destroy(b.gameObject);
+            dongBuoc.Clear();
+            if (BaiHienTai == null) return;
+            var ds = BaiHienTai.KichBan.Buoc;
+            float y = 0;
+            for (int i = 0; i < ds.Count; i++)
+            {
+                int ii = i;
+                var b = NutKinh(dsDongBuoc, "Dòng bước " + (i + 1), "", new Vector2(0, y), new Vector2(436, 76), () => { DatCheDo(false); TrinhPhat.DenBuoc(ii); }, 15);
+                var t = b.GetComponentInChildren<Text>();
+                t.alignment = TextAnchor.MiddleLeft; t.supportRichText = true; t.horizontalOverflow = HorizontalWrapMode.Wrap;
+                t.rectTransform.sizeDelta = new Vector2(408, 70); t.rectTransform.anchoredPosition = new Vector2(14, -3);
+                string gc = ds[i].GhiChu ?? "";
+                if (gc.Length > 92) gc = gc.Substring(0, 90) + "…";
+                t.text = $"<b>{i + 1}. {ds[i].Ten}</b>" + (ds[i].BuocCham ? "  <color=#f5b84b>· chậm</color>" : "") + $"\n<color=#9aa5bd>{gc}</color>";
+                dongBuoc.Add(b);
+                y -= 82;
+            }
+            dsDongBuoc.sizeDelta = new Vector2(440, -y);
+            ToDongBuoc();
+        }
+
+        void ToDongBuoc()
+        {
+            for (int i = 0; i < dongBuoc.Count; i++)
+                dongBuoc[i].GetComponent<Image>().color = i == TrinhPhat.ChiSoBuoc && !TrinhPhat.DangNhanhSai ? new Color(0.23f, 0.51f, 0.96f, 0.32f) : new Color(1f, 1f, 1f, 0.04f);
+        }
+
+        void VeHoiDap()
+        {
+            if (chuHoiDap == null) return;
+            var sb = new StringBuilder();
+            if (hoiDap.Count == 0) sb.Append("<color=#9aa5bd>Hỏi bất cứ điều gì về bài đang xem, ví dụ:\n• Vì sao bước 1 là bước chậm?\n• Đổi sang dung môi khác thì sao?\n• Sản phẩm phụ là gì?</color>");
+            foreach (var (ai, chu) in hoiDap)
+                sb.Append(ai ? "<color=#7fb2ff><b>VERA</b></color>\n" : "<color=#ffd166><b>Bạn</b></color>\n").Append(chu).Append("\n\n");
+            chuHoiDap.text = sb.ToString();
+            CoGianChu(chuHoiDap);
+        }
+
+        IEnumerator TaiGiaiThichChiTiet(BaiCoChe b)
+        {
+            GiaiThichChiTietCuoi = "";
+            nguonGiaiThich.text = "Đang tạo giải thích chi tiết trên máy chủ…";
+            while (LyDoMayChu == "chưa kiểm tra") yield return null;
+            if (!CoMayChu) { nguonGiaiThich.text = "Giải thích soạn sẵn của bài (chưa kết nối máy chủ)."; yield break; }
+            var sb = new StringBuilder("{\"ten\":").Append(MayChuCoChe.ChuoiJson(b.Ten)).Append(",\"de\":").Append(MayChuCoChe.ChuoiJson(b.De ?? ""))
+                .Append(",\"loai\":").Append(MayChuCoChe.ChuoiJson(b.KichBan.Loai ?? "")).Append(",\"buoc\":[");
+            for (int i = 0; i < b.KichBan.Buoc.Count; i++)
+                sb.Append(i > 0 ? "," : "").Append("{\"ten\":").Append(MayChuCoChe.ChuoiJson(b.KichBan.Buoc[i].Ten ?? "")).Append(",\"ghi_chu\":").Append(MayChuCoChe.ChuoiJson(b.KichBan.Buoc[i].GhiChu ?? "")).Append('}');
+            sb.Append("]}");
+            yield return MayChuCoChe.Goi("POST", "/co-che/giai-thich-chi-tiet", sb.ToString(), 160f, (ok, kq) =>
+            {
+                if (BaiHienTai != b) return;
+                if (!ok) { nguonGiaiThich.text = "Giải thích soạn sẵn (máy chủ: " + kq + ")"; return; }
+                try
+                {
+                    var d = D(JsonNho.Doc(kq));
+                    var o = new StringBuilder();
+                    o.Append("<b>Tổng quan</b>\n").Append(S(d, "tong_quan")).Append("\n\n");
+                    foreach (var x in L(Lay(d, "buoc"))) { var bb = D(x); o.Append($"<b>Bước {I(Lay(bb, "so"))} · {S(bb, "tieu_de")}</b>\n{S(bb, "noi_dung")}\n\n"); }
+                    var luuY = L(Lay(d, "luu_y"));
+                    if (luuY.Count > 0) { o.Append("<b>Lưu ý khi làm bài</b>"); foreach (var x in luuY) o.Append("\n• ").Append(x as string); }
+                    GiaiThichChiTietCuoi = o.ToString();
+                    nguonGiaiThich.text = S(d, "nguon") == "ai" ? $"AI viết theo các bước đã kiểm chứng ({S(d, "mo_hinh")}, {F(Lay(d, "giay")):0.0} s)" : "Giải thích theo ghi chú đã kiểm chứng (chưa có AI: " + S(d, "ly_do") + ")";
+                    if (GiaiThichMo) CapNhatGiaiThich();
+                }
+                catch (System.Exception e) { nguonGiaiThich.text = "Giải thích lỗi định dạng: " + e.Message; }
+            });
+        }
+
+        // ------------------------------------------------------------------ xuất ảnh sơ đồ giấy (PNG)
+        /// <summary>Chụp tờ giấy (chế độ Giấy) thành PNG gấp đôi độ phân giải màn hình, lưu vào thư mục Ảnh/VERA Lab.</summary>
+        public IEnumerator XuatAnhGiay()
+        {
+            if (BaiHienTai == null) yield break;
+            if (!CheDoGiay)
+            {
+                DatCheDo(true);
+                float t0 = Time.realtimeSinceStartup;
+                while ((DangChuyen || !CheDoGiay) && Time.realtimeSinceStartup - t0 < 3f) yield return null;
+            }
+            var to = (RectTransform)lopToGiay.transform;
+            bool moBen = GiaiThichMo, moDs = dsBai.gameObject.activeSelf;
+            giaiThich.gameObject.SetActive(false); dsBai.gameObject.SetActive(false);
+            var nutTo = to.Find("Nút Giải thích từng bước");
+            if (nutTo != null) nutTo.gameObject.SetActive(false);
+            yield return null;                         // (WaitForEndOfFrame không chạy ở batchmode) – một khung để canvas dựng lại
+            var c = new Vector3[4];
+            to.GetWorldCorners(c);
+            var cam = Cam.targetTexture;
+            int W = cam != null ? cam.width : Screen.width, H = cam != null ? cam.height : Screen.height;
+            var rt = RenderTexture.GetTemporary(W * 2, H * 2, 24, RenderTextureFormat.ARGB32);
+            Vector2 a = RectTransformUtility.WorldToScreenPoint(Cam, c[0]), b = RectTransformUtility.WorldToScreenPoint(Cam, c[2]);
+            float kx = 2f * W / Mathf.Max(1, Cam.pixelWidth), ky = 2f * H / Mathf.Max(1, Cam.pixelHeight);
+            Cam.targetTexture = rt;
+            Canvas.ForceUpdateCanvases();
+            Cam.Render();
+            Cam.targetTexture = cam;
+            var vung = Rect.MinMaxRect(Mathf.Clamp(a.x * kx, 0, W * 2), Mathf.Clamp(a.y * ky, 0, H * 2), Mathf.Clamp(b.x * kx, 0, W * 2), Mathf.Clamp(b.y * ky, 0, H * 2));
+            var cu = RenderTexture.active;
+            RenderTexture.active = rt;
+            var tex = new Texture2D(Mathf.Max(1, (int)vung.width), Mathf.Max(1, (int)vung.height), TextureFormat.RGB24, false);
+            tex.ReadPixels(vung, 0, 0);
+            tex.Apply();
+            RenderTexture.active = cu;
+            RenderTexture.ReleaseTemporary(rt);
+            if (nutTo != null) nutTo.gameObject.SetActive(true);
+            giaiThich.gameObject.SetActive(moBen); dsBai.gameObject.SetActive(moDs);
+            string loi = null;
+            try
+            {
+                string thuMuc = System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyPictures), "VERA Lab");
+                if (string.IsNullOrEmpty(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyPictures))) thuMuc = System.IO.Path.Combine(Application.persistentDataPath, "Anh");
+                System.IO.Directory.CreateDirectory(thuMuc);
+                string ten = "co_che_" + System.Text.RegularExpressions.Regex.Replace(BaiHienTai.Ma ?? "bai", "[^a-zA-Z0-9_]+", "_") + "_" + System.DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".png";
+                DuongAnhXuatCuoi = System.IO.Path.Combine(thuMuc, ten);
+                System.IO.File.WriteAllBytes(DuongAnhXuatCuoi, tex.EncodeToPNG());
+            }
+            catch (System.Exception e) { loi = e.Message; DuongAnhXuatCuoi = ""; }
+            Destroy(tex);
+            BaoNhanh(loi == null ? "Đã lưu ảnh: " + DuongAnhXuatCuoi : "Không lưu được ảnh: " + loi, loi != null);
+        }
+
+        void BaoNhanh(string chu, bool loi)
+        {
+            thongBao.text = chu;
+            thongBao.color = loi ? new Color32(0xf8, 0x71, 0x71, 0xff) : (CheDoGiay ? Muc : ChuSang);
+            StopCoroutine(nameof(XoaThongBao));
+            StartCoroutine(nameof(XoaThongBao));
+        }
+
+        IEnumerator XoaThongBao() { yield return new WaitForSecondsRealtime(6f); thongBao.text = ""; }
 
         IEnumerator KiemMayChu()
         {
@@ -689,25 +968,40 @@ namespace Khkt.CoChe
         {
             if (BaiHienTai == null) return;
             if (!CoMayChu) { trangThaiAI.text = "Chưa kết nối máy chủ cơ chế: " + LyDoMayChu; return; }
-            string cau = oCauHoi != null && !string.IsNullOrWhiteSpace(oCauHoi.text) ? oCauHoi.text : "Giải thích ngắn gọn cơ chế này cho học sinh.";
+            string cau = oCauHoi != null && !string.IsNullOrWhiteSpace(oCauHoi.text) ? oCauHoi.text.Trim() : "Giải thích ngắn gọn cơ chế này cho học sinh.";
+            if (oCauHoi != null) oCauHoi.text = "";
+            if (!GiaiThichMo || tabBen.current != 2) MoBangBen(2);
             StartCoroutine(GoiAI(cau));
         }
 
         IEnumerator GoiAI(string cau)
         {
-            trangThaiAI.text = "Đang hỏi AI tại máy… (mô hình nhỏ cần 5–15 giây)";
-            string than = "{\"cau_hoi\":" + MayChuCoChe.ChuoiJson(cau) + ",\"ma_bai\":" + MayChuCoChe.ChuoiJson(BaiHienTai.Ma) + "}";
-            yield return MayChuCoChe.Goi("POST", "/co-che/giai-thich", than, 150f, (ok, kq) =>
+            var b = BaiHienTai;
+            var lichSu = new StringBuilder("[");
+            for (int i = 0; i < hoiDap.Count; i++)
+                lichSu.Append(i > 0 ? "," : "").Append("{\"vai\":\"").Append(hoiDap[i].ai ? "ai" : "hoc_sinh").Append("\",\"noi_dung\":").Append(MayChuCoChe.ChuoiJson(hoiDap[i].chu)).Append('}');
+            lichSu.Append(']');
+            hoiDap.Add((false, cau));
+            VeHoiDap();
+            trangThaiAI.text = "Đang hỏi AI…";
+            nutGuiHoi.interactable = false;
+            var sb = new StringBuilder("{\"cau_hoi\":").Append(MayChuCoChe.ChuoiJson(cau)).Append(",\"ma_bai\":").Append(MayChuCoChe.ChuoiJson(b.Ma ?? ""))
+                .Append(",\"ten\":").Append(MayChuCoChe.ChuoiJson(b.Ten ?? "")).Append(",\"de\":").Append(MayChuCoChe.ChuoiJson(b.De ?? "")).Append(",\"buoc\":[");
+            for (int i = 0; i < b.KichBan.Buoc.Count; i++)
+                sb.Append(i > 0 ? "," : "").Append("{\"ten\":").Append(MayChuCoChe.ChuoiJson(b.KichBan.Buoc[i].Ten ?? "")).Append(",\"ghi_chu\":").Append(MayChuCoChe.ChuoiJson(b.KichBan.Buoc[i].GhiChu ?? "")).Append('}');
+            sb.Append("],\"lich_su\":").Append(lichSu).Append('}');
+            yield return MayChuCoChe.Goi("POST", "/co-che/hoi-dap", sb.ToString(), 160f, (ok, kq) =>
             {
-                if (!ok) { trangThaiAI.text = "Không hỏi được AI: " + kq; return; }
+                nutGuiHoi.interactable = true;
+                if (!ok) { trangThaiAI.text = "Không hỏi được: " + kq; return; }
                 try
                 {
                     var d = D(JsonNho.Doc(kq));
                     TraLoiAICuoi = S(d, "tra_loi");
-                    var nguon = new List<string>();
-                    foreach (var o in L(Lay(d, "nguon"))) nguon.Add($"[{I(Lay(D(o), "so"))}] {S(D(o), "tieu_de")}");
-                    trangThaiAI.text = $"Nguồn: {string.Join("; ", nguon)}\n({S(d, "nha_cung_cap")} {S(d, "mo_hinh")}, {F(Lay(d, "giay")):0.0} s, {S(d, "kiem_chung")})";
-                    CapNhatGiaiThich();
+                    hoiDap.Add((true, TraLoiAICuoi));
+                    string ng = S(d, "nguon");
+                    trangThaiAI.text = ng == "ai" ? $"{S(d, "mo_hinh")} · {F(Lay(d, "giay")):0.0} s" : ng == "tai_may" ? "AI tại máy (RAG)" : "Theo bài mẫu (chưa có AI)";
+                    VeHoiDap();
                 }
                 catch (System.Exception e) { trangThaiAI.text = "Trả lời lỗi định dạng: " + e.Message; }
             });

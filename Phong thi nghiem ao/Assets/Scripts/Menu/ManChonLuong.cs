@@ -46,6 +46,15 @@ namespace Khkt.Menu
             KhoiDau.AnMan(goc);
         }
 
+        /// <summary>Phím tắt màn đầu: G = Giải bài tập, L = Phòng Lab.</summary>
+        void Update()
+        {
+            var kb = UnityEngine.InputSystem.Keyboard.current;
+            if (kb == null || !DangHien) return;
+            if (kb.gKey.wasPressedThisFrame) ChonGiaiBaiTap?.Invoke();
+            else if (kb.lKey.wasPressedThisFrame) ChonPhongLab?.Invoke();
+        }
+
         void Dung(Texture2D logo)
         {
             Backdrop(goc);
@@ -121,124 +130,6 @@ namespace Khkt.Menu
             var muiTen = GlassKit.Label(moi.transform, "Mũi tên", "→", 18, cuoi, true, TextAnchor.MiddleLeft, new Vector2(112, 0), new Vector2(30, 48));
             hv.nudge = muiTen.rectTransform;
             hv.nudgeX = 6f;
-            return the;
-        }
-    }
-
-    /// <summary>
-    /// Màn "Giải bài tập": phần app CHEMISTRY đưa vào VERA, giao diện theo bảng điều khiển VERA.
-    /// Ba công cụ lớn: Chuỗi phản ứng, Mô hình 3D, Cơ chế (3D ⇄ giấy, tách từ bảng điều khiển sang đây).
-    /// </summary>
-    public class ManGiaiBaiTap : MonoBehaviour
-    {
-        public Action QuayLai;
-        public Action MoChuoi, Mo3D, MoCoChe;
-        public Action<string> MoHoaLy;
-        public Action MoCaiDat;
-
-        RectTransform goc;
-        Text trangThai;
-        readonly List<RectTransform> lanLuot = new List<RectTransform>();
-
-        public static ManGiaiBaiTap Tao(RectTransform cha, Texture2D logo)
-        {
-            var rt = Full(cha, "Màn Giải bài tập");
-            var m = rt.gameObject.AddComponent<ManGiaiBaiTap>();
-            m.goc = rt;
-            m.Dung(logo);
-            rt.gameObject.SetActive(false);
-            return m;
-        }
-
-        public bool DangHien => goc != null && goc.gameObject.activeSelf;
-
-        public void Hien()
-        {
-            KhoiDau.HienMan(goc, lanLuot);
-            trangThai.text = "";
-        }
-
-        public void An()
-        {
-            KhoiDau.AnMan(goc);
-        }
-
-        public void Bao(string chu, bool loi = true)
-        {
-            trangThai.color = loi ? Error : Bio;
-            trangThai.text = chu;
-            if (loi) MenuAnim.Shake(trangThai.rectTransform);
-        }
-
-        void Dung(Texture2D logo)
-        {
-            Backdrop(goc);
-            KhoiDau.ThanhTren(goc, logo);
-            var ve = MakeButton(goc, "Nút Về màn chính", "← Về màn chính", new Vector2(-40, -28), new Vector2(190, 46), () => QuayLai?.Invoke(), 1, RadiusButton, new Vector2(1, 1));
-            ((RectTransform)ve.transform).pivot = new Vector2(1, 1);
-            var caiDat = MakeButton(goc, "Nút Cài đặt Giải bài tập", "Cài đặt", new Vector2(-246, -28), new Vector2(130, 46), () => MoCaiDat?.Invoke(), 1, RadiusButton, new Vector2(1, 1));
-            ((RectTransform)caiDat.transform).pivot = new Vector2(1, 1);
-
-            const float Pad = 96f;
-            var nhan = Eyebrow(goc, "Nhãn trang", "Hóa hữu cơ · THPT & HSG", new Vector2(Pad, -124), 600, Accent);
-            var td = GlassKit.Label(goc, "Tiêu đề", "Giải bài tập", 48, Ink, true, TextAnchor.UpperLeft, new Vector2(Pad, -146), new Vector2(1200, 64));
-            TextShadow(td, UiTheme.IsLight ? 0.06f : 0.45f, 2f);
-            var mt = GlassKit.Label(goc, "Mô tả", "Giải chuỗi, xem chất trong không gian, hiểu cơ chế như bài thi trên giấy.",
-                                    19, InkDim, false, TextAnchor.UpperLeft, new Vector2(Pad, -214), new Vector2(1500, 30));
-            lanLuot.Add(nhan.rectTransform);
-            lanLuot.Add(td.rectTransform);
-            lanLuot.Add(mt.rectTransform);
-
-            var hang = Stretch(goc, "Ba công cụ", new Vector2(0, 1), new Vector2(1, 1), new Vector2(Pad - 14, -724), new Vector2(-Pad + 14, -270));
-            lanLuot.Add(CongCu(hang, 0, "Chuỗi phản ứng", "Giải chuỗi", "Nhập chuỗi A → B → C hoặc chọn chuỗi mẫu. Máy tìm từng chất, nêu điều kiện và loại phản ứng.",
-                   "GiaoDien/AnhThu/chuoi", Accent, "Giải chuỗi", () => MoChuoi?.Invoke()));
-            lanLuot.Add(CongCu(hang, 1, "Mô hình 3D", "Tìm chất hữu cơ", "Gõ tên hoặc công thức, xem phân tử 3D xoay 360°, bật tắt H, đo cấu tạo.",
-                   "GiaoDien/AnhThu/mo_hinh_3d", Bio, "Xem 3D", () => Mo3D?.Invoke()));
-            lanLuot.Add(CongCu(hang, 2, "Cơ chế", "3D ⇄ giấy", "Electron chạy trong không gian 3D, chuyển sang tờ giấy trình bày như đáp án. 8 bài mẫu.",
-                   "GiaoDien/AnhThu/co_che", Warn, "Mở cơ chế", () => MoCoChe?.Invoke()));
-
-            // Hóa lý: hàng thẻ nhỏ ở dưới (4 mô phỏng của CHEMISTRY)
-            var tdHl = GlassKit.Label(goc, "Tiêu đề Hóa lý", "Hóa lý", 24, Ink, true, TextAnchor.UpperLeft, new Vector2(Pad, -754), new Vector2(200, 34));
-            var phuHl = GlassKit.Label(goc, "Mô tả Hóa lý", "4 mô phỏng tương tác", 15, InkMute, false, TextAnchor.MiddleLeft, new Vector2(Pad + 92, -754), new Vector2(400, 34));
-            lanLuot.Add(tdHl.rectTransform);
-            lanLuot.Add(phuHl.rectTransform);
-            var hl = Stretch(goc, "Hàng Hóa lý", new Vector2(0, 1), new Vector2(1, 1), new Vector2(Pad - 14, -904), new Vector2(-Pad + 14, -800));
-            string[,] dsHl = { { "khi_ly_tuong", "Khí lý tưởng", "pV = nRT, hạt chuyển động", "pV" }, { "toc_do", "Tốc độ phản ứng", "Nồng độ, nhiệt độ, xúc tác", "v" },
-                               { "can_bang", "Cân bằng Le Chatelier", "Dịch chuyển cân bằng", "⇌" }, { "dong_co_nhiet", "Động cơ nhiệt", "Chu trình, hiệu suất", "η" } };
-            for (int i = 0; i < 4; i++)
-            {
-                string ma = dsHl[i, 0];
-                var the = Card(hl, "Hóa lý " + dsHl[i, 1], i / 4f, (i + 1) / 4f, 0, 96, 28);
-                MakeCardClickable(the, () => MoHoaLy?.Invoke(ma), 3f);
-                var than = Body(the);
-                var oKyHieu = Fill(than, "Biểu tượng", new Vector2(0, 1), new Vector2(0, 1), new Vector2(20, -24), new Vector2(48, 48), AccentSoft, RadiusButton);
-                Ring(oKyHieu.transform, "Viền", WithAlpha(Accent, 0.22f), RadiusButton);
-                GlassKit.Label(oKyHieu.transform, "Ký hiệu", dsHl[i, 3], 18, Accent, true, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(48, 48));
-                GlassKit.Label(than, "Tên", dsHl[i, 1], 18, Ink, true, TextAnchor.UpperLeft, new Vector2(84, -21), new Vector2(300, 26));
-                GlassKit.Label(than, "Mô tả", dsHl[i, 2], 14, InkDim, false, TextAnchor.UpperLeft, new Vector2(84, -50), new Vector2(300, 22));
-                lanLuot.Add(the);
-            }
-
-            trangThai = GlassKit.Label(goc, "Thông báo", "", 17, Error, false, TextAnchor.UpperLeft, new Vector2(Pad, -928), new Vector2(1500, 28));
-        }
-
-        static RectTransform CongCu(RectTransform hang, int i, string ten, string phu, string moTa, string anh, Color mau, string cta, Action bam)
-        {
-            var the = Card(hang, "Công cụ " + ten, i / 3f, (i + 1) / 3f, 0, 454, 28, true, 24f);
-            MakeCardClickable(the, bam, 5f);
-            var than = Body(the);
-
-            // ảnh bo góc lồng trong thẻ: bán kính trong = 24 − đệm 14 ≈ 12
-            var khung = Stretch(than, "Khung ảnh", new Vector2(0, 1), new Vector2(1, 1), new Vector2(14, -210), new Vector2(-14, -14));
-            ImageFrame(khung, "Khung", "Ảnh", Resources.Load<Texture2D>(anh), Paper, 12f, WithAlpha(mau, 0.25f));
-
-            Eyebrow(than, "Dòng phụ", phu, new Vector2(24, -230), 400, mau);
-            GlassKit.Label(than, "Tên", ten, 28, Ink, true, TextAnchor.UpperLeft, new Vector2(24, -254), new Vector2(460, 40));
-            var mt = GlassKit.Label(than, "Mô tả", moTa, 16, InkDim, false, TextAnchor.UpperLeft, new Vector2(24, -300), new Vector2(0, 70));
-            mt.rectTransform.anchorMax = new Vector2(1, 1);
-            mt.rectTransform.offsetMax = new Vector2(-24, mt.rectTransform.offsetMax.y);
-            mt.horizontalOverflow = HorizontalWrapMode.Wrap;
-            MakeButton(than, "Nút " + ten, cta + "  →", new Vector2(24, 24), new Vector2(180, 48), bam, 0, RadiusButton, new Vector2(0, 0));
             return the;
         }
     }
