@@ -12,3 +12,11 @@
 Xong 19/11: KhktUiVerify 66/66, KhktCoCheVerify 59/59, KhktHoaLyVerify 59/59, 76 test Python, app Mac xuất được; báo cáo `bao-cao-giai-bai-tap.md`.
 Việc tiếp theo (nếu làm): nối tuỳ chọn mức độ/thông minh/tra cứu vào phần AI của giai_chuoi.py; chụp app thật từng trang khi đã cấp quyền ghi màn hình.
 Chạy: `KHKT_UI_SHOTS=<thư mục> ~/AppBuild/VERA_claude/dong_bo_va_chay.sh ~/Developer/Antigravity KhktUiVerify.Run sau_ui`
+
+## TẠM DỪNG 19/11 (luồng đáp án kiểu trợ lý AI) – hạn mức 5 giờ 76%
+
+- Xong: tham khảo + thiết kế `docs/ngay-19-11/thiet-ke-luong-dap-an.md` (nguyên tắc, bố cục, chuyển động, kế hoạch mã 7 bước).
+- Dở: chưa viết mã.
+- Còn lại (theo mục 4 của tệp thiết kế): DongThoiGian.cs + KhoiDapAn, BangLon.cs (75% giữa màn, nền mờ, Esc), ChupHinh.cs
+  (chụp giấy/3D thành ảnh), gắn vào 3 trang (ô đề dính đáy, tuỳ chọn gập), Cơ chế "Mở lớn" chứa khung 3D ⇄ giấy, kiểm thử
+  KhktUiRunner + KhktCoCheVerify, xuất app Mac, báo cáo, commit. Không sửa MainMenu.cs (phiên khác đang làm lab/giải phẫu).
