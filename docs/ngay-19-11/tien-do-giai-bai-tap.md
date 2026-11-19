@@ -26,3 +26,10 @@ Chạy: `KHKT_UI_SHOTS=<thư mục> ~/AppBuild/VERA_claude/dong_bo_va_chay.sh ~/
 ## TẠM DỪNG tối 19/11 (hạn mức 64%, mốc 70%)
 - Xong: 3D kiểu CHEMISTRY, ô đề dính đáy, phím Enter/⌘↵, 3D nhúng trong bảng lớn Cơ chế (logic + kiểm thử 77/77), app Mac xuất.
 - Dở: khung 3D trong bảng lớn hiện tối trong ảnh kiểm thử – kiểm `Xem3DNho` (khoảng cách camera, hiển thị RawImage), xem trong app thật bằng chuột.
+- Khoanh vùng lỗi khung 3D trong bảng lớn (19/11 tối): điểm ảnh giữa khung đo được màu quầng electron (0,58; 0,47; 0,25) –
+  phần **không cần đèn** (quầng, electron Unlit) có vẽ, còn **nguyên tử Lit ra đen** → gần như chắc là **thiếu ánh sáng**
+  ở cảnh menu (cảnh lab có đèn nên trình phát Cơ chế không bị). Đèn riêng `Đèn 3D bảng` (cullingMask lớp 5) có thể bị URP
+  bỏ qua (chỉ 1 đèn chính / không hỗ trợ culling mask). Hướng sửa lần sau, chọn một:
+  1. Trong `Xem3DNho` dùng vật liệu nguyên tử không cần đèn (Unlit có tô bóng giả) hoặc bật Emission = 35% màu nguyên tử;
+  2. Hoặc đặt `RenderSettings.ambientLight` sáng khi bảng mở và trả lại khi đóng.
+  Rồi chạy KhktUiVerify (kiểm "Khung 3D trong bảng có hình phân tử" phải > 2000 điểm khác nền) và xem ảnh co_che_bang_lon_3d.
