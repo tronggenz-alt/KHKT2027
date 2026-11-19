@@ -201,6 +201,9 @@ namespace Khkt.Demo
             guideText = Label(h, "Phím", GetControlGuidanceText(), 14, Dim, false, TextAnchor.MiddleLeft, new Vector2(52, -680), new Vector2(1136, 26));
 
             MakeButton(h, "Cài đặt", "Cài đặt", new Vector2(52, -720), new Vector2(164, 50), ShowSettings, false, 15);
+            // 19/11: rời lab về sảnh đầu (bảng điều khiển hoặc màn chọn 2 luồng), luôn hỏi lại
+            if (VeSanh.CoTheVe)
+                MakeButton(h, "Nút Về sảnh", "← Về sảnh", new Vector2(232, -720), new Vector2(164, 50), MoHoiVeSanh, false, 15);
             continueBtnObj = MakeButton(h, "Tiếp tục", "Tiếp tục", new Vector2(762, -720), new Vector2(160, 50), Close, false, 15).gameObject;
             continueBtnObj.SetActive(false);
             MakeButton(h, "Vào phòng thí nghiệm", "Vào phòng thí nghiệm", new Vector2(936, -720), new Vector2(252, 50), LaunchSelectedMode, true, 16);
@@ -558,6 +561,76 @@ namespace Khkt.Demo
             img.color = fallbackBg;
         }
 
+        GameObject hoiVeSanh;
+        Text hoiVeSanhNoiDung;
+
+        public bool DangHoiVeSanh => hoiVeSanh != null && hoiVeSanh.activeSelf;
+
+        /// <summary>Hộp hỏi "Về sảnh": Ở lại / Về màn chọn ban đầu / Về bảng điều khiển (hoặc Về sảnh nếu chưa đăng nhập).</summary>
+        public void MoHoiVeSanh()
+        {
+            if (hoiVeSanh == null) BuildHoiVeSanh(home.transform.parent);
+            hoiVeSanhNoiDung.text = VeSanh.DangLamDo()
+                ? "Bài đang làm dở sẽ mất. Bạn vẫn muốn rời phòng lab?"
+                : "Rời phòng lab và quay về sảnh đầu?";
+            hoiVeSanh.SetActive(true);
+            hoiVeSanh.transform.SetAsLastSibling();
+        }
+
+        public void DongHoiVeSanh() { if (hoiVeSanh != null) hoiVeSanh.SetActive(false); }
+
+        void XacNhanVeSanh(bool veManChon)
+        {
+            DongHoiVeSanh();
+            IsOpen = false;
+            UiBridge.SetCapture(ref captured, false);
+            VeSanh.Ve(veManChon);
+        }
+
+        void BuildHoiVeSanh(Transform parent)
+        {
+            var scrimRt = new GameObject("Hỏi về sảnh", typeof(RectTransform)).GetComponent<RectTransform>();
+            scrimRt.SetParent(parent, false);
+            scrimRt.anchorMin = Vector2.zero;
+            scrimRt.anchorMax = Vector2.one;
+            scrimRt.offsetMin = scrimRt.offsetMax = Vector2.zero;
+            var scrimImg = scrimRt.gameObject.AddComponent<Image>();
+            scrimImg.sprite = Plain;
+            scrimImg.color = Scrim(0.62f);
+            scrimImg.raycastTarget = true;
+
+            float cornerScale = UiTheme.IsVera ? 1.2f : 2.6f;
+            var borderRt = Rect(scrimRt, "Viền hộp thoại", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(640, 240));
+            var borderImg = borderRt.gameObject.AddComponent<Image>();
+            borderImg.sprite = Solid;
+            borderImg.type = Image.Type.Sliced;
+            borderImg.pixelsPerUnitMultiplier = cornerScale;
+            borderImg.color = Line;
+
+            var cardRt = new GameObject("Khung hộp thoại", typeof(RectTransform)).GetComponent<RectTransform>();
+            cardRt.SetParent(borderRt, false);
+            cardRt.anchorMin = Vector2.zero;
+            cardRt.anchorMax = Vector2.one;
+            cardRt.offsetMin = new Vector2(1.5f, 1.5f);
+            cardRt.offsetMax = new Vector2(-1.5f, -1.5f);
+            var cardImg = cardRt.gameObject.AddComponent<Image>();
+            cardImg.sprite = Solid;
+            cardImg.type = Image.Type.Sliced;
+            cardImg.pixelsPerUnitMultiplier = cornerScale;
+            cardImg.color = Surface;
+
+            Label(cardRt, "Tiêu đề", "Về sảnh", 20, Ink, true, TextAnchor.UpperLeft, new Vector2(28, -24), new Vector2(580, 28));
+            hoiVeSanhNoiDung = Label(cardRt, "Nội dung", "", 16, Dim, false, TextAnchor.UpperLeft, new Vector2(28, -64), new Vector2(580, 56));
+
+            MakeButton(cardRt, "Nút ở lại", "Ở lại", new Vector2(28, -166), new Vector2(120, 48), DongHoiVeSanh, false, 15);
+            MakeButton(cardRt, "Nút về màn chọn", "Màn chọn ban đầu", new Vector2(160, -166), new Vector2(214, 48), () => XacNhanVeSanh(true), false, 15);
+            MakeButton(cardRt, "Nút về bảng điều khiển", GameSession.HasIdentity ? "Bảng điều khiển" : "Về sảnh",
+                new Vector2(386, -166), new Vector2(222, 48), () => XacNhanVeSanh(false), true, 15);
+
+            hoiVeSanh = scrimRt.gameObject;
+            hoiVeSanh.SetActive(false);
+        }
+
         void BuildThemeConfirmDialog(Transform parent)
         {
             var scrimRt = new GameObject("Xác nhận đổi nền", typeof(RectTransform)).GetComponent<RectTransform>();
@@ -894,6 +967,7 @@ namespace Khkt.Demo
             if (setup != null) setup.SetActive(false);
             if (settings != null) settings.SetActive(false);
             if (themeConfirmDialog != null) themeConfirmDialog.SetActive(false);
+            DongHoiVeSanh();
             if (guideText != null) guideText.text = GetControlGuidanceText();
             if (continueBtnObj != null) continueBtnObj.SetActive(started);
             SelectModeCard(selectedMode);
@@ -1061,6 +1135,11 @@ namespace Khkt.Demo
             if (kb == null || !kb.escapeKey.wasPressedThisFrame) return;
             if (IsOpen)
             {
+                if (DangHoiVeSanh)
+                {
+                    DongHoiVeSanh();
+                    return;
+                }
                 if (themeConfirmDialog != null && themeConfirmDialog.activeSelf)
                 {
                     CancelThemeSwitch();

@@ -84,7 +84,9 @@ namespace Khkt.Menu
 
         IEnumerator Start()
         {
-            if (GameSession.HasIdentity)
+            bool veManChon = GameSession.VeManChonKhiVe;
+            GameSession.VeManChonKhiVe = false;
+            if (GameSession.HasIdentity && !veManChon)
             {
                 // từ phòng lab quay về: vào thẳng bảng điều khiển như trước
                 Show(GameSession.User != null && GameSession.User.phai_doi_mat_khau ? Screen.ChangePassword : Screen.Home);
