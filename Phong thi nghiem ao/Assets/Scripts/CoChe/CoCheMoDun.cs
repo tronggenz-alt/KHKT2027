@@ -898,7 +898,7 @@ namespace Khkt.CoChe
             // phím tắt (khi không gõ chữ): V = Xem 3D ⇄ bảng giấy, F = phóng to ⇄ thu nhỏ khung 3D
             var kb = Keyboard.current;
             var sel = EventSystem.current != null ? EventSystem.current.currentSelectedGameObject : null;
-            bool dangGo = sel != null && sel.GetComponent<InputField>() is InputField f && f.isFocused;
+            bool dangGo = sel != null && sel.GetComponent<InputField>() is InputField f && f.isFocused && f.gameObject.activeInHierarchy;
             if (kb != null && !dangGo && !DangChuyen && (hopBaoSai == null || !hopBaoSai.DangMo))
             {
                 if (kb.vKey.wasPressedThisFrame) DatCheDo(!CheDoGiay);

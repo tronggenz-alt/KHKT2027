@@ -20,6 +20,8 @@ namespace Khkt.Menu
     {
         public const float Le = 150f;          // lề trái/phải nội dung (đơn vị canvas 1920 rộng)
         public const float DinhThanhPhu = 76f;  // chiều cao thanh phụ dính
+        // bo góc vừa phải (19/11, góp ý: không dùng dạng viên thuốc): đơn vị canvas 1920 rộng ≈ ×0,75 ở màn 1440
+        public const float BoNho = 8f, BoNut = 12f, BoThe = 16f, BoTheLon = 20f;
 
         public RectTransform Goc, NoiDung;
         public ScrollRect Cuon;
@@ -81,17 +83,17 @@ namespace Khkt.Menu
             foreach (var b in cacBuoc) rongBuoc += 40 + b.Length * 9.5f + 22;
             float rong = 32 + ten.Length * 10f + 60 + rongBuoc + 10;
             var vien = GlassKit.Rect(thanh, "Viên", new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(Le - 6, 0), new Vector2(rong, 52));
-            Shadow(vien, "Bóng", 6f, RadiusPill, -1f, UiTheme.IsLight ? 0.06f : 0.3f);
-            Paint(Full(vien, "Mặt"), Paper, RadiusPill);
-            Ring(vien, "Viền", Hair, RadiusPill);
-            var ve = MakeButton(vien, "Nút quay lại " + ten, "‹  " + ten, new Vector2(6, -6), new Vector2(32 + ten.Length * 10f + 30, 40), () => quayLai?.Invoke(), 1, RadiusPill);
+            Shadow(vien, "Bóng", 6f, 14f, -1f, UiTheme.IsLight ? 0.06f : 0.3f);
+            Paint(Full(vien, "Mặt"), Paper, 14f);
+            Ring(vien, "Viền", Hair, 14f);
+            var ve = MakeButton(vien, "Nút quay lại " + ten, "‹  " + ten, new Vector2(6, -6), new Vector2(32 + ten.Length * 10f + 30, 40), () => quayLai?.Invoke(), 1, 10f);
             ve.transform.Find("Chữ").GetComponent<Text>().fontSize = 16;
             float x = 6 + 32 + ten.Length * 10f + 30 + 14;
             for (int i = 0; i < cacBuoc.Length; i++)
             {
                 float w = 40 + cacBuoc[i].Length * 9.5f;
                 int ii = i;
-                var nut = MakeButton(vien, "Bước ngang " + (i + 1), "", new Vector2(x, -6), new Vector2(w, 40), () => CuonToi(buoc[ii].y), 2, RadiusPill);
+                var nut = MakeButton(vien, "Bước ngang " + (i + 1), "", new Vector2(x, -6), new Vector2(w, 40), () => CuonToi(buoc[ii].y), 2, 10f);
                 var chu = nut.transform.Find("Chữ").GetComponent<Text>();
                 chu.supportRichText = true;
                 chu.fontSize = 15;
@@ -148,12 +150,12 @@ namespace Khkt.Menu
         /// <summary>Đầu trang công cụ: nhãn nhỏ, tiêu đề rất lớn, mô tả.</summary>
         public void DauTrang(string nhan, string tieuDe, string moTa)
         {
-            var k = Khoi("Đầu trang", 196, 30);
+            var k = Khoi("Đầu trang", 178, 34);
             NhanNho(k, "Nhãn trang", nhan, Vector2.zero, 900);
-            var td = GlassKit.Label(k, "Tiêu đề", tieuDe, 64, Ink, true, TextAnchor.UpperLeft, new Vector2(-3, -26), new Vector2(1500, 84));
+            var td = GlassKit.Label(k, "Tiêu đề", tieuDe, 54, Ink, true, TextAnchor.UpperLeft, new Vector2(-2, -28), new Vector2(1500, 72));
             td.horizontalOverflow = HorizontalWrapMode.Overflow;
             TextShadow(td, UiTheme.IsLight ? 0.05f : 0.4f, 2f);
-            ChuRong(k, "Mô tả", moTa, 19, InkDim, false, 0, -120, 70, 300);
+            ChuRong(k, "Mô tả", moTa, 18, InkDim, false, 0, -108, 66, 360);
             LanLuot.Add(k);
         }
 
@@ -161,11 +163,11 @@ namespace Khkt.Menu
         public float DauMuc(string so, string tieuDe, string phu)
         {
             float y = Y;
-            var k = Khoi("Mục " + so, 104, 18);
-            GlassKit.Label(k, "Số mục", so, 19, Accent, true, TextAnchor.UpperLeft, Vector2.zero, new Vector2(80, 26));
-            var td = GlassKit.Label(k, "Tên mục", tieuDe, 38, Ink, true, TextAnchor.UpperLeft, new Vector2(-1, -26), new Vector2(1200, 50));
+            var k = Khoi("Mục " + so, 92, 16);
+            GlassKit.Label(k, "Số mục", so, 17, Accent, true, TextAnchor.UpperLeft, Vector2.zero, new Vector2(80, 24));
+            var td = GlassKit.Label(k, "Tên mục", tieuDe, 32, Ink, true, TextAnchor.UpperLeft, new Vector2(-1, -24), new Vector2(1200, 44));
             td.horizontalOverflow = HorizontalWrapMode.Overflow;
-            GlassKit.Label(k, "Phụ mục", phu, 16, InkMute, false, TextAnchor.UpperLeft, new Vector2(0, -78), new Vector2(1400, 24)).horizontalOverflow = HorizontalWrapMode.Overflow;
+            GlassKit.Label(k, "Phụ mục", phu, 16, InkMute, false, TextAnchor.UpperLeft, new Vector2(0, -68), new Vector2(1400, 24)).horizontalOverflow = HorizontalWrapMode.Overflow;
             LanLuot.Add(k);
             return y;
         }
@@ -173,7 +175,7 @@ namespace Khkt.Menu
         /// <summary>Thẻ trắng hết bề ngang khối, không nhấc khi rê chuột.</summary>
         public static RectTransform The(RectTransform khoi, string ten, float y = 0, float h = -0.001f)
         {
-            var the = h > 0 ? Card(khoi, ten, 0, 1, y, h, 0, false, RadiusCard) : Card(khoi, ten, 0, 1, y, -0f, 0, false, RadiusCard);
+            var the = h > 0 ? Card(khoi, ten, 0, 1, y, h, 0, false, BoThe) : Card(khoi, ten, 0, 1, y, -0f, 0, false, BoThe);
             if (h <= 0) { the.offsetMin = new Vector2(0, 0); the.offsetMax = new Vector2(0, y); }
             Body(the).GetComponent<Image>().raycastTarget = true;
             return Body(the);
@@ -201,7 +203,7 @@ namespace Khkt.Menu
             for (int i = 0; i < n; i++)
             {
                 int ii = i;
-                var the = Card(khoi, "Tab " + ten[i], i / (float)n, (i + 1) / (float)n, 0, 116, 18, true, RadiusCard);
+                var the = Card(khoi, "Tab " + ten[i], i / (float)n, (i + 1) / (float)n, 0, 116, 18, true, BoThe);
                 MakeCardClickable(the, () => nhom.Chon(ii, true), 2f);
                 var than = Body(the);
                 var o = Fill(than, "Biểu tượng", new Vector2(0, 1), new Vector2(0, 1), new Vector2(22, -16), new Vector2(34, 34), Well, 9f);
@@ -265,7 +267,7 @@ namespace Khkt.Menu
         public static Button Chip(Transform cha, string ten, string chu, Vector2 pos, Action bam, int coChu = 14)
         {
             float w = Mathf.Min(560, 30 + chu.Length * coChu * 0.56f);
-            var b = MakeButton(cha, ten, chu, pos, new Vector2(w, 36), bam, 1, RadiusPill);
+            var b = MakeButton(cha, ten, chu, pos, new Vector2(w, 36), bam, 1, BoNut);
             var t = b.transform.Find("Chữ").GetComponent<Text>();
             t.fontSize = coChu; t.color = InkDim; t.fontStyle = FontStyle.Normal;
             return b;
@@ -290,19 +292,37 @@ namespace Khkt.Menu
         {
             float w = 26 + chu.Length * 8.2f;
             var rt = GlassKit.Rect(cha, ten, new Vector2(0, 1), new Vector2(0, 1), pos, new Vector2(w, 28));
-            Paint(Full(rt, "Mặt"), nen, RadiusPill);
+            Paint(Full(rt, "Mặt"), nen, BoNho);
             var t = GlassKit.Label(rt, "Chữ", chu, 13, mauChu, true, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(w, 28));
             t.horizontalOverflow = HorizontalWrapMode.Overflow;
             return rt;
         }
 
+        /// <summary>Công tắc gọn (rãnh 42×24 bo 12, núm 18) thay cho công tắc viên nang lớn của MenuKit.</summary>
+        public static Toggle CongTac(Transform cha, string ten, string nhan, Vector2 pos, Vector2 co, bool batDau, Action<bool> doi)
+        {
+            var t = Switch(cha, ten, nhan, pos, co, batDau, doi);
+            var sw = t.GetComponent<MenuSwitch>();
+            var ranh = sw.track.rectTransform;
+            ranh.sizeDelta = new Vector2(42, 24);
+            sw.track.sprite = Round(12f);
+            if (sw.trackRing != null) sw.trackRing.sprite = RingSprite(12f);
+            sw.knob.sizeDelta = new Vector2(18, 18);
+            foreach (var img in sw.knob.GetComponentsInChildren<Image>(true))
+                img.sprite = img.name == "Bóng" ? ShadowSprite(3f, 9f) : Round(9f);
+            sw.travel = 9f;
+            var lbl = t.transform.Find("Nhãn") as RectTransform;
+            if (lbl != null) lbl.sizeDelta = new Vector2(co.x - 60, lbl.sizeDelta.y);
+            return t;
+        }
+
         /// <summary>Nút "?" nhỏ: bấm thì hiện/ẩn dòng giải thích ngay dưới nhãn.</summary>
         public static void NutHoi(Transform cha, string ten, Vector2 pos, Text giaiThich)
         {
-            var b = MakeButton(cha, "Nút ? " + ten, "?", pos, new Vector2(24, 24), () =>
+            var b = MakeButton(cha, "Nút ? " + ten, "?", pos, new Vector2(22, 22), () =>
             {
                 giaiThich.gameObject.SetActive(!giaiThich.gameObject.activeSelf);
-            }, 1, RadiusPill);
+            }, 1, BoNut);
             var t = b.transform.Find("Chữ").GetComponent<Text>();
             t.fontSize = 13; t.color = InkMute;
             giaiThich.gameObject.SetActive(false);

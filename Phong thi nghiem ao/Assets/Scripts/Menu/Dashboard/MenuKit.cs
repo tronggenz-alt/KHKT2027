@@ -1053,6 +1053,7 @@ namespace Khkt.Menu.Dashboard
         public Toggle toggle;
         public Image track, trackRing, knobFace;
         public RectTransform knob;
+        public float travel = 11f;              // núm chạy ±travel quanh giữa rãnh
         float k = -1f, v;
 
         void Update()
@@ -1074,7 +1075,7 @@ namespace Khkt.Menu.Dashboard
                 }
             }
             float c = Mathf.Clamp01(k);
-            knob.anchoredPosition = new Vector2(Mathf.LerpUnclamped(-11f, 11f, k), 0f);
+            knob.anchoredPosition = new Vector2(Mathf.LerpUnclamped(-travel, travel, k), 0f);
             track.color = Color.Lerp(MenuKit.Well, MenuKit.Accent, c);
             trackRing.color = Color.Lerp(MenuKit.HairStrong, MenuKit.WithAlpha(MenuKit.Accent, 0f), c);
             knobFace.color = Color.Lerp(UiTheme.IsLight ? Color.white : MenuKit.Hex(0xd4d4d8), Color.white, c);

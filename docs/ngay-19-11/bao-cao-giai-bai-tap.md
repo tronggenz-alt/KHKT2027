@@ -121,3 +121,18 @@ Kiểm tra:
 
 Còn lại: ở bước "chất mới tham gia", khung nhìn ôm cả chất sắp bay vào nên lúc đầu phân tử đang có lệch về một phía
 (đúng chỗ dành cho chất bay tới, nhưng có thể cần chỉnh nếu thấy khó nhìn).
+
+## 7. Bổ sung tối 19/11: bo góc vừa phải, công tắc gọn, chỉnh tỉ lệ
+
+Góp ý: bo tròn quá (công tắc viên thuốc, mục bước nền tròn) nhìn xấu; bo vừa thôi và chỉnh tỉ lệ bố cục.
+- Bán kính riêng cho nhánh Giải bài tập (`TrangCuon.BoNho/BoNut/BoThe/BoTheLon` = 8/12/16/20 đơn vị canvas 1920 rộng,
+  ≈ 6/9/12/15 px ở màn 1440): nút, chip, mục điều hướng, chip loại cơ chế = 12; mục bước ngang và nút quay lại = 10;
+  thanh phụ = 14; thẻ = 16; thẻ công cụ lớn và hộp Báo sai = 20; huy hiệu = 8. Không còn dạng viên thuốc tròn hẳn.
+- Công tắc gọn `TrangCuon.CongTac`: rãnh 42×24 bo 12, núm 18 (trước 52×30 và 24), núm chạy ±9; MenuSwitch thêm `travel`
+  (mặc định 11 như cũ, các màn khác không đổi).
+- Tỉ lệ: tiêu đề trang 64 → 54, tiêu đề mục 38 → 32, đầu trang/mục thấp lại; thẻ Tuỳ chọn 236 → 200, công tắc sát nhãn;
+  nút `?` 22.
+- Phím 1–5 / V / F chỉ bị chặn khi ô nhập ĐANG HIỆN có con trỏ (trước đó ô đăng nhập đã ẩn vẫn có thể chặn phím).
+- Kiểm tra: KhktUiVerify 66/66; ảnh `sau_*.png` cập nhật; app Mac xuất lại, trang chủ Giải bài tập thật:
+  `app_mac_trang_chu_bo_vua.png`. Gửi phím bằng System Events vào app lần này không ổn định (lúc nhận, lúc không), nên
+  các trang trong app thật chưa chụp lại được; ảnh các trang lấy từ KhktUiVerify (cùng mã).

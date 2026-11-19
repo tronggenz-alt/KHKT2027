@@ -66,7 +66,7 @@ namespace Khkt.Menu
             var kb = UnityEngine.InputSystem.Keyboard.current;
             if (kb == null || CoCheMoDun.DangMo || MoHinh3DMoDun.DangMo || (baoSai != null && baoSai.DangMo)) return;
             var sel = UnityEngine.EventSystems.EventSystem.current?.currentSelectedGameObject;
-            if (sel != null && sel.GetComponent<InputField>() is InputField f && f.isFocused) return;
+            if (sel != null && sel.GetComponent<InputField>() is InputField f && f.isFocused && f.gameObject.activeInHierarchy) return;
             var phim = new[] { kb.digit1Key, kb.digit2Key, kb.digit3Key, kb.digit4Key, kb.digit5Key };
             for (int i = 0; i < phim.Length; i++) if (phim[i].wasPressedThisFrame) { MoTrang((Trang)i); return; }
             if (kb.escapeKey.wasPressedThisFrame && TrangDang != Trang.Chu) MoTrang(Trang.Chu);
@@ -96,7 +96,7 @@ namespace Khkt.Menu
             {
                 float w = 36 + tenNav[i].Length * 10f;
                 var tr = (Trang)i;
-                var b = MakeButton(goc, "Điều hướng " + tenNav[i], tenNav[i], new Vector2(x, -29), new Vector2(w, 44), () => MoTrang(tr), 2, RadiusPill, new Vector2(0.5f, 1));
+                var b = MakeButton(goc, "Điều hướng " + tenNav[i], tenNav[i], new Vector2(x, -29), new Vector2(w, 44), () => MoTrang(tr), 2, TrangCuon.BoNut, new Vector2(0.5f, 1));
                 ((RectTransform)b.transform).pivot = new Vector2(0, 1);
                 var chu = b.transform.Find("Chữ").GetComponent<Text>();
                 chu.fontSize = 16;
@@ -161,7 +161,7 @@ namespace Khkt.Menu
 
             // thẻ ngang Hóa lý
             var k = t.Khoi("Hàng Hóa lý", 132, 26);
-            var the = Card(k, "Thẻ Hóa lý", 0, 1, 0, 132, 0, true, RadiusCard);
+            var the = Card(k, "Thẻ Hóa lý", 0, 1, 0, 132, 0, true, TrangCuon.BoThe);
             MakeCardClickable(the, () => MoTrang(Trang.HoaLy), 2f);
             var than = Body(the);
             var o = Fill(than, "Biểu tượng", new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(30, 0), new Vector2(64, 64), AccentSoft, 16f);
@@ -169,7 +169,7 @@ namespace Khkt.Menu
             TrangCuon.NhanNho(than, "Nhãn", "Hóa lý · 4 mô phỏng tương tác", new Vector2(118, -26), 600, Accent);
             GlassKit.Label(than, "Tên", "Hóa lý", 26, Ink, true, TextAnchor.UpperLeft, new Vector2(118, -48), new Vector2(400, 36));
             GlassKit.Label(than, "Mô tả", "Khí lý tưởng · Tốc độ phản ứng · Cân bằng Le Chatelier · Động cơ nhiệt", 16, InkDim, false, TextAnchor.UpperLeft, new Vector2(118, -88), new Vector2(900, 24));
-            var nut = MakeButton(than, "Nút Mở Hóa lý", "Mở Hóa lý  →", new Vector2(-30, 0), new Vector2(170, 48), () => MoTrang(Trang.HoaLy), 0, RadiusPill, new Vector2(1, 0.5f));
+            var nut = MakeButton(than, "Nút Mở Hóa lý", "Mở Hóa lý  →", new Vector2(-30, 0), new Vector2(170, 48), () => MoTrang(Trang.HoaLy), 0, TrangCuon.BoNut, new Vector2(1, 0.5f));
             ((RectTransform)nut.transform).pivot = new Vector2(1, 0.5f);
             t.LanLuot.Add(k);
             t.ChanTrang();
@@ -181,7 +181,7 @@ namespace Khkt.Menu
         static RectTransform TheCongCu(RectTransform hang, int i, string ten, string nhan, string kyHieu, string moTa, string[] chip,
                                        Color dau, Color cuoi, Color chu, Color phu, Action bam)
         {
-            var the = Card(hang, "Công cụ " + ten, i / 3f, (i + 1) / 3f, 0, 300, 24, true, RadiusLarge);
+            var the = Card(hang, "Công cụ " + ten, i / 3f, (i + 1) / 3f, 0, 300, 24, true, TrangCuon.BoTheLon);
             MakeCardClickable(the, bam, 4f);
             var than = Body(the);
             var nen = than.GetComponent<Image>();
@@ -295,8 +295,8 @@ namespace Khkt.Menu
 
             // 02 tuỳ chọn
             t.GhiBuoc(1, t.DauMuc("02", "Tuỳ chọn giải", "Chọn mức độ đề và cách giải, rồi bấm Giải chuỗi."));
-            var khoiTc = t.Khoi("Khối tuỳ chọn", 236, 30);
-            var tc = Card(khoiTc, "Thẻ tuỳ chọn", 0, 0.62f, 0, 236, 18, false, RadiusCard);
+            var khoiTc = t.Khoi("Khối tuỳ chọn", 200, 30);
+            var tc = Card(khoiTc, "Thẻ tuỳ chọn", 0, 0.62f, 0, 200, 18, false, TrangCuon.BoThe);
             var tcThan = Body(tc);
             TrangCuon.NhanNho(tcThan, "Nhãn mức độ", "Mức độ đề", new Vector2(28, -26), 200);
             var gtMucDo = GlassKit.Label(tcThan, "Giải thích mức độ", "Tự động: máy đoán theo chuỗi · Trung bình: lời giải gọn · HSG: thêm điều kiện, sản phẩm phụ.", 13, InkMute, false, TextAnchor.UpperLeft, new Vector2(28, -104), new Vector2(980, 20));
@@ -306,13 +306,13 @@ namespace Khkt.Menu
             var gtTm = GlassKit.Label(tcThan, "Giải thích thông minh", "Mức cao cho AI nghĩ kỹ hơn ở bước chưa có trong bảng (chậm hơn).", 13, InkMute, false, TextAnchor.UpperLeft, new Vector2(28, -104), new Vector2(980, 20));
             TrangCuon.NutHoi(tcThan, "thông minh", new Vector2(644, -22), gtTm);
             Tabs(tcThan, "Mức thông minh", new[] { "Nhanh", "Cân bằng", "Kỹ", "Tối đa" }, new[] { "Nhanh", "Cân bằng", "Kỹ", "Tối đa" }, new Vector2(500, -54), new Vector2(94, 40), false, 4f, 1, i => mucThongMinh = i);
-            Switch(tcThan, "Công tắc tra cứu", "Tra cứu tài liệu khoa học (kèm nguồn khi AI phải tự giải)", new Vector2(28, -140), new Vector2(620, 44), false, b => traCuu = b);
-            var tc2 = Card(khoiTc, "Thẻ lời giải", 0.62f, 1f, 0, 236, 18, false, RadiusCard);
+            TrangCuon.CongTac(tcThan, "Công tắc tra cứu", "Tra cứu tài liệu khoa học (kèm nguồn khi AI phải tự giải)", new Vector2(28, -134), new Vector2(480, 44), false, b => traCuu = b);
+            var tc2 = Card(khoiTc, "Thẻ lời giải", 0.62f, 1f, 0, 200, 18, false, TrangCuon.BoThe);
             var tc2Than = Body(tc2);
             TrangCuon.NhanNho(tc2Than, "Nhãn", "Lời giải", new Vector2(28, -26), 200);
             TrangCuon.ChuRong(tc2Than, "Cách giải",
                 "Bước có trong bảng đã kiểm chứng: lấy ngay, ghi <b>đã kiểm chứng</b>.\nBước mới: AI (Claude, dự phòng Gemini, rồi AI tại máy) giải, RDKit kiểm công thức, ghi <b>chưa kiểm chứng</b>.",
-                15, InkDim, false, 28, -58, 160, 28);
+                15, InkDim, false, 28, -56, 130, 28);
             t.LanLuot.Add(khoiTc);
 
             var khoiNut = t.Khoi("Khối nút giải", 60, 60);
@@ -487,7 +487,7 @@ namespace Khkt.Menu
                 bool mo = moBuocChuoi[i];
                 float h = mo ? 196 : 78;
                 int ii = i;
-                var the = Card(k, "Bước chuỗi " + (i + 1), 0, 1, y, h, 0, true, RadiusCard);
+                var the = Card(k, "Bước chuỗi " + (i + 1), 0, 1, y, h, 0, true, TrangCuon.BoThe);
                 MakeCardClickable(the, () => { moBuocChuoi[ii] = !moBuocChuoi[ii]; VeKetQuaChuoi(D(Doc(kqChuoi))); }, 1.5f);
                 var than = Body(the);
                 string tu = S(b, "tu"), den = S(b, "den");
@@ -638,7 +638,7 @@ namespace Khkt.Menu
                 if (x + w > 1560) { x = 28; y -= 50; }
                 string m = ma;
                 bool d = ma == loaiCoChe;
-                var b = MakeButton(cha, "Loại " + (ma == "" ? "TU_DONG" : ma), ten, new Vector2(x, y), new Vector2(w, 40), () => { loaiCoChe = m; VeChipLoai(cha); }, d ? 0 : 1, RadiusPill);
+                var b = MakeButton(cha, "Loại " + (ma == "" ? "TU_DONG" : ma), ten, new Vector2(x, y), new Vector2(w, 40), () => { loaiCoChe = m; VeChipLoai(cha); }, d ? 0 : 1, TrangCuon.BoNut);
                 var chu = b.transform.Find("Chữ").GetComponent<Text>();
                 chu.fontSize = 15;
                 if (!d) { chu.color = InkDim; chu.fontStyle = FontStyle.Normal; }
@@ -899,7 +899,7 @@ namespace Khkt.Menu
             {
                 string ma = ds[i, 0];
                 var k = t.Khoi("Khối " + ds[i, 1], 120, 16);
-                var the = Card(k, "Hóa lý " + ds[i, 1], 0, 1, 0, 120, 0, true, RadiusCard);
+                var the = Card(k, "Hóa lý " + ds[i, 1], 0, 1, 0, 120, 0, true, TrangCuon.BoThe);
                 MakeCardClickable(the, () => MoHoaLy?.Invoke(ma), 2f);
                 var th = Body(the);
                 var o = Fill(th, "Biểu tượng", new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(30, 0), new Vector2(60, 60), AccentSoft, 16f);
@@ -907,7 +907,7 @@ namespace Khkt.Menu
                 TrangCuon.NhanNho(th, "Số", $"Mô phỏng {i + 1:00}", new Vector2(116, -24), 300, Accent);
                 GlassKit.Label(th, "Tên", ds[i, 1], 24, Ink, true, TextAnchor.UpperLeft, new Vector2(116, -44), new Vector2(700, 34));
                 GlassKit.Label(th, "Mô tả", ds[i, 2], 16, InkDim, false, TextAnchor.UpperLeft, new Vector2(116, -80), new Vector2(900, 24));
-                var nut = MakeButton(th, "Nút Mở " + ds[i, 1], "Mở mô phỏng  →", new Vector2(-30, 0), new Vector2(190, 48), () => MoHoaLy?.Invoke(ma), 0, RadiusPill, new Vector2(1, 0.5f));
+                var nut = MakeButton(th, "Nút Mở " + ds[i, 1], "Mở mô phỏng  →", new Vector2(-30, 0), new Vector2(190, 48), () => MoHoaLy?.Invoke(ma), 0, TrangCuon.BoNut, new Vector2(1, 0.5f));
                 ((RectTransform)nut.transform).pivot = new Vector2(1, 0.5f);
                 t.LanLuot.Add(k);
             }
@@ -940,7 +940,7 @@ namespace Khkt.Menu
             mo.color = GlassKit.Scrim(UiTheme.IsLight ? 0.32f : 0.55f);
             mo.raycastTarget = true;
             h.khung = GlassKit.Rect(g, "Khung", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(760, 470));
-            var the = Card(h.khung, "Thẻ báo sai", 0, 1, 0, 470, 0, false, RadiusLarge);
+            var the = Card(h.khung, "Thẻ báo sai", 0, 1, 0, 470, 0, false, TrangCuon.BoTheLon);
             var th = Body(the);
             th.GetComponent<Image>().raycastTarget = true;
             Eyebrow(th, "Nhãn", "Báo sai", new Vector2(34, -30), 300, Error);
