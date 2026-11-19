@@ -3,19 +3,87 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>VERA Lab · Dự án Khoa học Kỹ thuật</title>
-<meta name="description" content="VERA Lab là dự án khoa học kỹ thuật của học sinh Trường THPT Chuyên Lê Quý Đôn, Gia Lai: tòa nhà thí nghiệm ảo Hóa – Sinh tích hợp AI, đi cùng giờ thực hành thật.">
-<meta property="og:title" content="VERA Lab · Dự án Khoa học Kỹ thuật">
-<meta property="og:description" content="Tòa nhà thí nghiệm ảo Hóa – Sinh tích hợp AI của học sinh Trường THPT Chuyên Lê Quý Đôn, Gia Lai.">
-<meta property="og:image" content="anh/hero.jpg">
-<meta name="theme-color" content="#ffffff">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%230b63d1'/%3E%3Cpath d='M10 10l10 21 10-21' fill='none' stroke='%23fff' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<title>VERA Lab – Phòng thí nghiệm ảo Hóa – Sinh tích hợp AI | Dự án KHKT</title>
+<meta name="description" content="VERA Lab là phòng thí nghiệm ảo Hóa – Sinh tích hợp AI: 720 hóa chất, 14 máy phân tích, robot trợ lý, điều khiển bằng bàn tay qua webcam và lớp học do giáo viên điều khiển từ web. Dự án KHKT của học sinh THPT Chuyên Lê Quý Đôn, Gia Lai.">
+<meta name="keywords" content="phòng thí nghiệm ảo, thí nghiệm hóa học ảo, thí nghiệm sinh học ảo, thực tế ảo giáo dục, mô phỏng thí nghiệm, VERA Lab, dự án khoa học kỹ thuật, KHKT, GDPT 2018">
+<meta name="author" content="Nguyễn Ngọc Bảo Trọng, Trần Đức Trọng">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://verlab.pages.dev/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="VERA Lab">
+<meta property="og:locale" content="vi_VN">
+<meta property="og:url" content="https://verlab.pages.dev/">
+<meta property="og:title" content="VERA Lab – Phòng thí nghiệm ảo Hóa – Sinh tích hợp AI">
+<meta property="og:description" content="Tòa nhà thí nghiệm ảo hai tầng: tự tay làm thí nghiệm, kết quả tính từ chính thao tác của học sinh, giáo viên điều khiển cả lớp từ trình duyệt.">
+<meta property="og:image" content="https://verlab.pages.dev/anh/hero.jpg">
+<meta property="og:image:width" content="1600">
+<meta property="og:image:height" content="855">
+<meta property="og:image:alt" content="Phòng thí nghiệm Hóa trong ứng dụng VERA Lab">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="VERA Lab – Phòng thí nghiệm ảo Hóa – Sinh tích hợp AI">
+<meta name="twitter:description" content="Tự tay làm thí nghiệm Hóa – Sinh ngay trên máy tính thông dụng. Dự án Khoa học Kỹ thuật.">
+<meta name="twitter:image" content="https://verlab.pages.dev/anh/hero.jpg">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light dark">
+<script>
+  // Đặt giao diện trước khi vẽ để không chớp màu: lựa chọn đã lưu, nếu không có thì theo máy
+  try { var m = localStorage.getItem('vera-mau'); if (m === 'light' || m === 'dark') document.documentElement.dataset.theme = m; } catch (e) {}
+</script>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="kieu.css">
 <script>document.documentElement.classList.add('js');</script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://verlab.pages.dev/#website",
+      "url": "https://verlab.pages.dev/",
+      "name": "VERA Lab",
+      "alternateName": "Virtual Experiment & Reality-based AI Lab",
+      "inLanguage": "vi"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://verlab.pages.dev/#ung-dung",
+      "name": "VERA Lab",
+      "alternateName": "Virtual Experiment & Reality-based AI Lab",
+      "description": "Hệ thống trải nghiệm phòng thí nghiệm thực tế ảo Hóa – Sinh tích hợp AI trong dạy học: tòa nhà thí nghiệm hai tầng, 720 hóa chất, 14 máy phân tích, 16 bài thí nghiệm Sinh, robot trợ lý AI, điều khiển bằng bàn tay qua webcam và web quản lý lớp học cho giáo viên.",
+      "url": "https://verlab.pages.dev/",
+      "image": "https://verlab.pages.dev/anh/hero.jpg",
+      "screenshot": ["https://verlab.pages.dev/anh/hoa_lab.jpg", "https://verlab.pages.dev/anh/sinh_lab.jpg", "https://verlab.pages.dev/anh/ui_web.jpg"],
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Windows",
+      "inLanguage": "vi",
+      "audience": { "@type": "EducationalAudience", "educationalRole": ["student", "teacher"] },
+      "author": [
+        { "@type": "Person", "name": "Nguyễn Ngọc Bảo Trọng" },
+        { "@type": "Person", "name": "Trần Đức Trọng" }
+      ],
+      "sourceOrganization": { "@type": "EducationalOrganization", "name": "Trường THPT Chuyên Lê Quý Đôn, Gia Lai" }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://verlab.pages.dev/#hoi-dap",
+      "mainEntity": [
+        { "@type": "Question", "name": "VERA Lab có thay thế giờ thực hành thật không?", "acceptedAnswer": { "@type": "Answer", "text": "Không. VERA Lab giúp học sinh chuẩn bị và ôn lại, còn kỹ năng cầm nắm ngoài đời vẫn cần giờ thực hành thật." } },
+        { "@type": "Question", "name": "Kết quả thí nghiệm có chính xác không?", "acceptedAnswer": { "@type": "Answer", "text": "Mô phỏng ở mức phục vụ dạy học: đúng về hiện tượng và gần đúng về số liệu trong phạm vi các bài. Nhóm chạy kiểm thử tự động để đối chiếu với đáp án." } },
+        { "@type": "Question", "name": "Có cần kính thực tế ảo không?", "acceptedAnswer": { "@type": "Answer", "text": "Không. VERA Lab chạy trên màn hình máy tính thường, điều khiển bằng chuột và bàn phím. Webcam và tay cầm là tùy chọn." } },
+        { "@type": "Question", "name": "Giáo viên quản lý lớp như thế nào?", "acceptedAnswer": { "@type": "Answer", "text": "Giáo viên đăng nhập trang quản lý trên trình duyệt để tạo lớp, cấp mã lớp, chấm kết quả, trình chiếu bài giảng lên màn hình trong phòng lab, theo dõi học sinh trực tiếp và bật chế độ Kiểm tra." } },
+        { "@type": "Question", "name": "Nhiều học sinh có vào chung một phòng thí nghiệm được không?", "acceptedAnswer": { "@type": "Answer", "text": "Được. Phòng học chung nối qua Internet bằng mã 6 ký tự hoặc trong mạng LAN. Mọi người thấy nhau và cầm chung dụng cụ; dung dịch và phản ứng chưa được đồng bộ giữa các máy." } },
+        { "@type": "Question", "name": "Có cần kết nối mạng không?", "acceptedAnswer": { "@type": "Answer", "text": "Phần trợ lý AI, robot lập kế hoạch và lớp học từ web cần kết nối tới máy chủ. Chế độ dùng thử không cần mạng." } },
+        { "@type": "Question", "name": "Các thí nghiệm sinh học có an toàn không?", "acceptedAnswer": { "@type": "Answer", "text": "Trong ứng dụng chỉ dùng các chủng dạy học ở cấp an toàn thấp nhất (BSL-1), và trợ lý AI từ chối các yêu cầu vượt mức này." } }
+      ]
+    }
+  ]
+}
+</script>
 </head>
 <body>
 <a class="bo-qua" href="#noi-dung" id="bo-qua">Bỏ qua tới nội dung</a>
@@ -27,84 +95,242 @@
       VERA Lab
     </a>
     <nav class="menu" id="menu" aria-label="Các mục của trang">
-      <a href="#/gioi-thieu">Giới thiệu</a>
+      <a href="#/gioi-thieu">Tổng quan</a>
       <a href="#/thuc-trang">Thực trạng</a>
       <a href="#/san-pham">Sản phẩm</a>
       <a href="#/tham-quan">Tham quan</a>
       <a href="#/cong-nghe">Công nghệ</a>
       <a href="#/kiem-chung">Kiểm chứng</a>
+      <a class="chi-dt" href="/quan-ly">Đăng nhập cho giáo viên, học sinh</a>
     </nav>
-    <a class="nut phu nho" href="/quan-ly">Đăng nhập</a>
-    <a class="nut chinh nho" href="#/tai-ve">Tải về</a>
+    <div class="cong-cu">
+      <button type="button" class="nut-bieu nut-mau" id="nut-mau" aria-label="Chuyển giao diện sáng hoặc tối" title="Chuyển giao diện sáng / tối">
+        <svg class="mat-trang" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2z"/></svg>
+        <svg class="mat-troi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.2M12 19.8V22M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M2 12h2.2M19.8 12H22M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6"/></svg>
+      </button>
+      <a class="lien-dang-nhap" href="/quan-ly">Đăng nhập</a>
+      <a class="nut vien nho" href="#/tai-ve">Tải về</a>
+      <button type="button" class="nut-bieu nut-menu" id="nut-menu" aria-controls="menu" aria-expanded="false" aria-label="Mở menu">
+        <svg class="ba-gach" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        <svg class="dong-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
   </div>
 </header>
 
 <main id="noi-dung" tabindex="-1">
 
-<section class="tab" id="gioi-thieu" data-ten="Giới thiệu" aria-labelledby="h-gioi-thieu">
+<!-- ═════════════════════════ TỔNG QUAN ═════════════════════════ -->
+<section class="tab" id="gioi-thieu" data-ten="Tổng quan" aria-labelledby="h-gioi-thieu">
+  <div class="mo-dau">
+    <div class="khung mo-dau-chu">
+      <a class="thong-diep" href="#/san-pham"><span class="nhan-moi">Mới</span><span>Lớp học điều khiển từ web, phòng học chung và thao tác bằng bàn tay</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <h1 id="h-gioi-thieu" tabindex="-1">Tự tay làm thí nghiệm Hóa – Sinh, <span class="nhan-chu-chinh">ngay trên máy tính thông dụng</span></h1>
+      <p class="dan">VERA Lab là tòa nhà thí nghiệm ảo hai tầng tích hợp AI. Học sinh đi lại, cầm dụng cụ, pha hóa chất và vận hành máy phân tích; kết quả được tính từ chính những gì các em đã làm. Giáo viên điều khiển cả lớp từ trình duyệt.</p>
+      <div class="nhom-nut">
+        <a class="nut chinh lon co-mui" href="#/tham-quan">Tham quan phòng lab</a>
+        <a class="nut vien lon" href="/quan-ly">Đăng nhập lớp học</a>
+      </div>
+      <ul class="cam-ket" aria-label="Điểm chính">
+        <li>Không cần kính VR</li>
+        <li>Chạy trên card đồ họa tích hợp</li>
+        <li>Chuột, webcam hoặc tay cầm tự chế</li>
+      </ul>
+    </div>
+
+    <div class="khung">
+      <div class="cua-so-app">
+        <div class="dau-cua-so" aria-hidden="true"><i></i><i></i><i></i><span>VERA Lab · Mô hình tòa nhà dựng từ mặt bằng ứng dụng</span></div>
+        <figure class="san-khau" id="san-khau" data-che="toa">
+          <img class="anh-hoa" src="anh/hero.jpg" alt="Phòng thí nghiệm Hóa, ảnh chụp trong ứng dụng VERA Lab" width="1600" height="855">
+          <img class="anh-sinh" src="anh/hero_sinh.jpg" alt="Phòng thí nghiệm Sinh, ảnh chụp trong ứng dụng VERA Lab" width="1600" height="855" loading="lazy">
+          <canvas id="c-toa" role="img" aria-label="Mô hình 3D tòa nhà VERA Lab, kéo sang ngang để xoay"></canvas>
+          <div class="nhan-3d" id="nhan-t1" style="color:#7fb2ff">Tầng 1 · Hóa học</div>
+          <div class="nhan-3d" id="nhan-t2" style="color:#5fe0bd">Tầng 2 · Sinh học</div>
+          <figcaption class="chu-canh" id="chu-canh">Mô hình 3D dựng từ mặt bằng của ứng dụng. Kéo để xoay.</figcaption>
+          <div class="chon-canh" id="chon-canh" role="group" aria-label="Chọn nội dung hiển thị">
+            <button type="button" data-che="toa" aria-pressed="true">Tòa nhà</button>
+            <button type="button" data-che="tach" aria-pressed="false">Tách tầng</button>
+            <button type="button" data-che="hoa" aria-pressed="false">Lab Hóa</button>
+            <button type="button" data-che="sinh" aria-pressed="false">Lab Sinh</button>
+          </div>
+        </figure>
+      </div>
+    </div>
+  </div>
+
   <div class="khung">
-    <div class="mo-dau">
-      <div>
-        <div class="dau-du-an">
-          <img src="anh/logo_lqd.png" alt="Trường THPT Chuyên Lê Quý Đôn, Gia Lai" width="640" height="171">
-          <span class="huy-hieu">Dự án Khoa học Kỹ thuật</span>
-        </div>
-        <h1 id="h-gioi-thieu" tabindex="-1">Để mỗi học sinh đều được tự tay làm thí nghiệm</h1>
-        <p class="dan">VERA Lab là dự án khoa học kỹ thuật của học sinh Trường THPT Chuyên Lê Quý Đôn, Gia Lai. Nhóm xây dựng một tòa nhà thí nghiệm ảo Hóa – Sinh tích hợp AI, chạy trên máy tính thông dụng, để học sinh tập trước và tập lại bên cạnh giờ thực hành thật.</p>
-        <div class="nhom-nut">
-          <a class="nut chinh" href="#/thuc-trang">Vì sao có dự án này</a>
-          <a class="nut phu" href="#/tham-quan">Tham quan phòng lab</a>
-        </div>
-      </div>
-      <figure class="san-khau" id="san-khau" data-che="toa">
-        <img class="anh-hoa" src="anh/hero.jpg" alt="Phòng thí nghiệm Hóa, ảnh chụp trong ứng dụng VERA Lab" loading="lazy">
-        <img class="anh-sinh" src="anh/hero_sinh.jpg" alt="Phòng thí nghiệm Sinh, ảnh chụp trong ứng dụng VERA Lab" loading="lazy">
-        <canvas id="c-toa" role="img" aria-label="Mô hình 3D tòa nhà VERA Lab, kéo sang ngang để xoay"></canvas>
-        <div class="nhan-3d" id="nhan-t1" style="color:#7fb2ff">Tầng 1 · Hóa học</div>
-        <div class="nhan-3d" id="nhan-t2" style="color:#5fe0bd">Tầng 2 · Sinh học</div>
-        <figcaption class="chu-canh" id="chu-canh">Mô hình 3D dựng từ mặt bằng của ứng dụng. Kéo để xoay.</figcaption>
-        <div class="chon-canh" id="chon-canh" role="group" aria-label="Chọn nội dung hiển thị">
-          <button type="button" data-che="toa" aria-pressed="true">Tòa nhà</button>
-          <button type="button" data-che="tach" aria-pressed="false">Tách tầng</button>
-          <button type="button" data-che="hoa" aria-pressed="false">Lab Hóa</button>
-          <button type="button" data-che="sinh" aria-pressed="false">Lab Sinh</button>
-        </div>
-      </figure>
-    </div>
-
-    <dl class="phieu" aria-label="Thông tin dự án">
-      <div><dt>Đề tài</dt><dd>Hệ thống trải nghiệm phòng thí nghiệm thực tế ảo Hóa – Sinh tích hợp AI trong dạy học</dd></div>
-      <div><dt>Tác giả</dt><dd>Nguyễn Ngọc Bảo Trọng<br>Trần Đức Trọng</dd></div>
-      <div><dt>Đơn vị</dt><dd>Trường THPT Chuyên Lê Quý Đôn, Gia Lai</dd></div>
-      <div><dt>Hình thức</dt><dd>Dự án Khoa học Kỹ thuật của học sinh trung học</dd></div>
-    </dl>
-
-    <div class="doan">
-      <h2>Dự án trong bốn ý</h2>
-      <div class="bon-y">
-        <a class="the-y" href="#/thuc-trang"><small>Vấn đề</small><p>Cấp THPT cả nước còn thiếu 5.328 phòng học bộ môn. Thiết bị dạy học tối thiểu mới đáp ứng 58,9% nhu cầu (số liệu 2023).</p><span class="lien-ket">Xem thực trạng</span></a>
-        <a class="the-y" href="#/san-pham"><small>Giải pháp</small><p>Học sinh đi lại trong tòa nhà 3D và tự tay thao tác. Kết quả được tính từ chính việc đã làm, không phát lại video.</p><span class="lien-ket">Xem sản phẩm</span></a>
-        <a class="the-y" href="#/tham-quan"><small>Trải nghiệm</small><p>Mặt bằng 3D bấm được, xem từng phòng bằng ảnh chụp trực tiếp trong ứng dụng.</p><span class="lien-ket">Tham quan</span></a>
-        <a class="the-y" href="#/kiem-chung"><small>Kiểm chứng</small><p>Đối chiếu kết quả mô phỏng với đáp án và giá trị tham chiếu. Phần chưa làm được ghi rõ.</p><span class="lien-ket">Xem kiểm chứng</span></a>
-      </div>
-    </div>
-
-    <div class="so-lieu" aria-label="Quy mô hệ thống">
+    <div class="dai-so" aria-label="Quy mô hệ thống">
       <div><b>2</b><span>tầng Hóa và Sinh</span></div>
       <div><b>13</b><span>khu chức năng</span></div>
-      <div><b>720</b><span>hóa chất</span></div>
+      <div><b>720</b><span>hóa chất tra cứu được</span></div>
+      <div><b>14</b><span>máy phân tích theo quy trình thật</span></div>
       <div><b>108</b><span>dụng cụ sinh học</span></div>
-      <div><b>14</b><span>máy phân tích</span></div>
       <div><b>16</b><span>bài thí nghiệm Sinh</span></div>
+    </div>
+
+    <div class="bang-chay" aria-label="Công nghệ sử dụng">
+      <p>Xây dựng bằng</p>
+      <div class="cua-so"><ul class="day"><li>Unity 6</li><li>URP</li><li>C#</li><li>MediaPipe</li><li>Netcode · Unity Relay</li><li>Python</li><li>FastAPI</li><li>OpenCV</li><li>ESP32</li><li>BMI160</li><li>three.js</li><li>Cloudflare Pages</li><li>D1</li></ul><ul class="day" aria-hidden="true"><li>Unity 6</li><li>URP</li><li>C#</li><li>MediaPipe</li><li>Netcode · Unity Relay</li><li>Python</li><li>FastAPI</li><li>OpenCV</li><li>ESP32</li><li>BMI160</li><li>three.js</li><li>Cloudflare Pages</li><li>D1</li></ul></div>
+    </div>
+
+    <!-- Tính năng: lưới ô -->
+    <div class="doan">
+      <div class="dau-doan">
+        <p class="the-muc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v6l-5.4 9.4A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.4-2.6L14 9V3"/></svg>Sản phẩm</p>
+        <h2>Mọi thứ của một phòng thí nghiệm, gói trong một ứng dụng</h2>
+        <p class="dan">Từ bàn thí nghiệm, kho hóa chất đến phòng máy phân tích và nhà kính. Mỗi lần làm là một kết quả riêng, sai thì làm lại, không tốn hóa chất và không ai bị thương.</p>
+      </div>
+      <div class="luoi-o">
+        <a class="o rong" href="#/san-pham">
+          <div class="o-chu">
+            <small>Thí nghiệm tự do</small>
+            <h3>Kết quả được tính, không phát lại video</h3>
+            <p>Rót, pha, đun và quan sát hiện tượng. Mỗi bình lưu có chất gì, bao nhiêu, ở nhiệt độ nào; phản ứng, màu sắc và tín hiệu máy đo được tính từ đúng thứ tự học sinh đã làm.</p>
+            <ul class="nhan-nho"><li>720 hóa chất</li><li>16 bài Sinh</li><li>Bám chương trình GDPT 2018</li></ul>
+          </div>
+          <div class="o-anh"><img src="anh/sinh_hienvi.jpg" alt="Bàn kính hiển vi trong phòng Sinh của VERA Lab" width="1200" height="641" loading="lazy"></div>
+        </a>
+        <a class="o" href="#/san-pham">
+          <div class="o-anh"><img src="anh/hoa_may.jpg" alt="Phòng máy phân tích của VERA Lab" width="1200" height="641" loading="lazy"></div>
+          <div class="o-chu">
+            <small>Thiết bị hiện đại</small>
+            <h3>14 máy phân tích chạy theo quy trình chuẩn</h3>
+            <p>UV-Vis, AAS, XRD, NMR, sắc ký khí… Mỗi máy có màn hình vận hành, chế độ Hướng dẫn và Thực hành.</p>
+          </div>
+        </a>
+        <a class="o" href="#/cong-nghe">
+          <div class="o-anh"><img src="anh/robot.jpg" alt="Robot trợ lý AI trong VERA Lab" width="1000" height="744" loading="lazy"></div>
+          <div class="o-chu">
+            <small>Trợ lý AI</small>
+            <h3>Robot làm theo lời, qua bộ kiểm tra an toàn</h3>
+            <p>AI lập kế hoạch từng bước, bộ kiểm tra loại bước sai hoặc mất an toàn trước khi robot thực hiện.</p>
+          </div>
+        </a>
+        <a class="o" href="#/san-pham">
+          <div class="o-anh"><img src="anh/ui_laprap.jpg" alt="Giao diện lắp ráp dụng cụ 3D của VERA Lab" width="1200" height="675" loading="lazy"></div>
+          <div class="o-chu">
+            <small>Chế tạo</small>
+            <h3>Tự lắp bộ dụng cụ của riêng mình</h3>
+            <p>Khoảng 40 loại bộ phận, nối bằng khớp. Bộ dụng cụ chạy đúng theo cách đã nối, kể cả khi nối sai.</p>
+          </div>
+        </a>
+        <a class="o o-tay" href="#/cong-nghe">
+          <div class="cu-chi" aria-hidden="true">
+            <span><b>Nắm</b>mở danh sách</span>
+            <span><b>Trỏ</b>chọn dòng</span>
+            <span><b>Chụm</b>lấy vật</span>
+            <span><b>Út</b>bật máy</span>
+            <span><b>Xòe</b>đặt xuống</span>
+          </div>
+          <div class="o-chu">
+            <small>Điều khiển tự nhiên</small>
+            <h3>Thao tác bằng bàn tay trước webcam</h3>
+            <p>Nhận diện tay chạy ngay trong ứng dụng. Không cần kính VR; chuột và bàn phím vẫn dùng bình thường.</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dải tối: dành cho nhà trường -->
+  <div class="dai-toi">
+    <div class="khung">
+      <div class="nha-truong">
+        <div>
+          <p class="the-muc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V9.5L12 4l7 5.5V21"/><path d="M9.5 21v-5h5v5"/></svg>Cho giáo viên và nhà trường</p>
+          <h2>Một lớp học, một bảng điều khiển</h2>
+          <p class="dan">Giáo viên mở trang quản lý trên trình duyệt và điều khiển trực tiếp những gì đang diễn ra trong phòng lab ảo của cả lớp.</p>
+          <ul class="ds-tinh-nang">
+            <li><b>Trình chiếu</b>Đưa bài giảng PDF lên màn hình lớn ngay trong phòng lab.</li>
+            <li><b>Theo dõi trực tiếp</b>Xem từng học sinh đang ở đâu, cầm gì, làm tới bước nào.</li>
+            <li><b>Tất cả chú ý</b>Một nút để tạm khóa đi lại và thao tác của cả lớp.</li>
+            <li><b>Chế độ Kiểm tra</b>Ẩn gợi ý, khóa trợ lý AI, đếm ngược theo giờ máy chủ.</li>
+            <li><b>Khóa hóa chất</b>Chặn những chất nguy hiểm theo từng buổi học.</li>
+            <li><b>Lớp, mã lớp, chấm điểm</b>Học sinh tự tạo tài khoản bằng mã lớp; giáo viên xem và chấm kết quả.</li>
+          </ul>
+          <div class="nhom-nut">
+            <a class="nut sang lon co-mui" href="/quan-ly">Đăng nhập trang quản lý</a>
+            <a class="nut vien-toi lon" href="#/san-pham">Xem chi tiết</a>
+          </div>
+        </div>
+        <div>
+          <div class="cua-so-app toi">
+            <div class="dau-cua-so" aria-hidden="true"><i></i><i></i><i></i><span>verlab.pages.dev · Trang quản lý</span></div>
+            <img src="anh/ui_web.jpg" alt="Trang web quản lý của VERA Lab dành cho giáo viên" width="1200" height="750" loading="lazy">
+          </div>
+          <dl class="so-toi">
+            <div><dt>0,3–1,5 giây</dt><dd>từ lúc giáo viên bấm tới khi màn hình trong lab hiện xong</dd></div>
+            <div><dt>36/36</dt><dd>bài kiểm thử lớp học với ứng dụng và máy chủ thật</dd></div>
+            <div><dt>31/31</dt><dd>bài kiểm thử phòng học chung, qua LAN và Internet</dd></div>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="khung">
+    <!-- Vì sao -->
+    <div class="doan">
+      <div class="vi-sao">
+        <div>
+          <p class="the-muc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 2.8 19.5h18.4z"/><path d="M12 10v4M12 16.8h.01"/></svg>Vì sao có VERA Lab</p>
+          <h2>Học sinh cần được làm thí nghiệm. Nhiều trường chưa đủ điều kiện.</h2>
+          <figure class="trich-nho">
+            <blockquote>“Hóa chất được cấp không sử dụng, để lâu hết hạn”</blockquote>
+            <figcaption>VietnamPlus, kết luận thanh tra tại 8 trường có cấp THPT ở Gia Lai, 01/10/2026</figcaption>
+          </figure>
+          <a class="lien-ket" href="#/thuc-trang">Đọc thực trạng với 12 nguồn dẫn</a>
+        </div>
+        <div class="bon-so">
+          <div class="o-so"><b>5.328</b><p>phòng học bộ môn cấp THPT còn thiếu</p><small>Cả nước, năm học 2022–2023</small></div>
+          <div class="o-so"><b>58,9%</b><p>thiết bị dạy học tối thiểu cấp THPT đáp ứng nhu cầu</p><small>Cả nước, năm học 2022–2023</small></div>
+          <div class="o-so"><b>27,7%</b><p>giáo viên Hóa thường xuyên dùng thí nghiệm khi dạy bài mới</p><small>Khảo sát 285 giáo viên, 2021</small></div>
+          <div class="o-so"><b>72%</b><p>trường THPT chưa có phòng thí nghiệm riêng</p><small>Khảo sát ở Hà Nội, 2019</small></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kiểm chứng ngắn -->
+    <div class="doan">
+      <div class="dau-doan">
+        <p class="the-muc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8 7.5 9.5 4.3-1.5 7.5-4.9 7.5-9.5V6z"/><path d="m8.6 12 2.4 2.4 4.4-4.8"/></svg>Kiểm chứng</p>
+        <h2>Con số đo được, không phải lời hứa</h2>
+        <p class="dan">Mô hình được đối chiếu với đáp án và giá trị tham chiếu bằng kiểm thử tự động. Phần chưa làm được ghi rõ.</p>
+      </div>
+      <div class="kiem-nhanh">
+        <div class="the-tho"><span class="nhan-tt xong">Đã đối chiếu</span><h3>Nhiệt đốt cháy glucozơ</h3><p class="so-lon">15570 J/g</p><p>Giá trị NIST: 15569 J/g</p></div>
+        <div class="the-tho"><span class="nhan-tt xong">Đo trên mạch thật</span><h3>Trôi hướng của tay cầm</h3><p class="so-lon">0,071°</p><p>sau 10 phút nằm yên; không bù thì trôi 108,7°</p></div>
+        <div class="the-tho"><span class="nhan-tt xong">Đã đo</span><h3>Tối ưu đồ họa</h3><p class="so-lon">−28 đến −35%</p><p>thời gian mỗi khung hình, laptop Intel Iris Xe, 1080p</p></div>
+        <div class="the-tho"><span class="nhan-tt chua">Chưa làm</span><h3>Hiệu quả dạy học</h3><p class="so-lon">Chưa khảo sát</p><p>Chưa thử trên học sinh thật, đã có trong lộ trình</p></div>
+      </div>
+      <div class="nhom-lien-ket">
+        <a class="lien-ket" href="#/kiem-chung">Xem toàn bộ kiểm chứng và hạn chế</a>
+        <a class="lien-ket" href="#/kiem-chung" data-mo-tab="t-k6">Kết quả khử nhiễu cảm biến tay cầm</a>
+      </div>
+    </div>
+
+    <!-- Thông tin dự án -->
+    <div class="doan">
+      <div class="phieu-du-an">
+        <img src="anh/logo_lqd.png" alt="Logo Trường THPT Chuyên Lê Quý Đôn, Gia Lai" width="640" height="171" loading="lazy">
+        <dl class="phieu" aria-label="Thông tin dự án">
+          <div><dt>Đề tài</dt><dd>Hệ thống trải nghiệm phòng thí nghiệm thực tế ảo Hóa – Sinh tích hợp AI trong dạy học</dd></div>
+          <div><dt>Tác giả</dt><dd>Nguyễn Ngọc Bảo Trọng<br>Trần Đức Trọng</dd></div>
+          <div><dt>Đơn vị</dt><dd>Trường THPT Chuyên Lê Quý Đôn, Gia Lai</dd></div>
+          <div><dt>Hình thức</dt><dd>Dự án Khoa học Kỹ thuật của học sinh trung học</dd></div>
+        </dl>
+      </div>
     </div>
   </div>
 </section>
 
+<!-- ═════════════════════════ THỰC TRẠNG ═════════════════════════ -->
 <section class="tab" id="thuc-trang" data-ten="Thực trạng" aria-labelledby="h-thuc-trang">
   <div class="khung dau-tab">
     <p class="the-muc">Thực trạng</p>
     <h1 id="h-thuc-trang" tabindex="-1">Học sinh cần được làm thí nghiệm. Nhiều trường chưa đủ điều kiện.</h1>
-    <p class="dan">Thực hành là phần cốt lõi của môn Hóa và Sinh. Dưới đây là những gì báo chí và các nghiên cứu ở Việt Nam đã ghi nhận, từ tỉnh Gia Lai đến cả nước.</p>
+    <p class="dan">Thực hành là phần cốt lõi của môn Hóa và Sinh. Dưới đây là những gì báo chí và các nghiên cứu ở Việt Nam đã ghi nhận, từ tỉnh Gia Lai đến cả nước, kèm năm và phạm vi của từng con số.</p>
   </div>
 
   <div class="khung">
@@ -205,8 +431,8 @@
         <li>Điều khiển tự nhiên hơn chuột và bàn phím, bằng webcam và tay cầm tự chế giá rẻ.</li>
       </ol>
       <div class="nhom-nut">
-        <a class="nut chinh" href="#/san-pham">Xem giải pháp</a>
-        <a class="nut phu" href="#/kiem-chung">Xem cách kiểm chứng</a>
+        <a class="nut chinh co-mui" href="#/san-pham">Xem giải pháp</a>
+        <a class="nut vien" href="#/kiem-chung">Xem cách kiểm chứng</a>
       </div>
     </div>
 
@@ -232,11 +458,12 @@
   </div>
 </section>
 
+<!-- ═════════════════════════ SẢN PHẨM ═════════════════════════ -->
 <section class="tab" id="san-pham" data-ten="Sản phẩm" aria-labelledby="h-san-pham">
   <div class="khung dau-tab">
     <p class="the-muc">Sản phẩm</p>
     <h1 id="h-san-pham" tabindex="-1">Vào lab, nhìn quanh và bắt tay làm</h1>
-    <p class="dan">VERA Lab đưa không gian thí nghiệm lên máy tính để học sinh làm đi làm lại đến khi thành thạo. Chọn một tính năng để xem chi tiết.</p>
+    <p class="dan">VERA Lab đưa cả một tòa nhà thí nghiệm lên máy tính để học sinh làm đi làm lại đến khi thành thạo, còn giáo viên dẫn dắt cả lớp từ trình duyệt. Chọn một tính năng để xem chi tiết.</p>
   </div>
   <div class="khung">
     <div class="cau-chuyen kham-pha" data-nhom-tab>
@@ -246,46 +473,56 @@
         <button type="button" role="tab" id="t-p3" aria-controls="p3" aria-selected="false" tabindex="-1">Thiết bị hiện đại</button>
         <button type="button" role="tab" id="t-p4" aria-controls="p4" aria-selected="false" tabindex="-1">Lắp bộ dụng cụ riêng</button>
         <button type="button" role="tab" id="t-p5" aria-controls="p5" aria-selected="false" tabindex="-1">Trợ lý AI và robot</button>
-        <button type="button" role="tab" id="t-p6" aria-controls="p6" aria-selected="false" tabindex="-1">Điều khiển bằng webcam</button>
-        <button type="button" role="tab" id="t-p7" aria-controls="p7" aria-selected="false" tabindex="-1">Web quản lý cho giáo viên</button>
+        <button type="button" role="tab" id="t-p6" aria-controls="p6" aria-selected="false" tabindex="-1">Thao tác bằng bàn tay</button>
+        <button type="button" role="tab" id="t-p7" aria-controls="p7" aria-selected="false" tabindex="-1">Lớp học từ web</button>
+        <button type="button" role="tab" id="t-p8" aria-controls="p8" aria-selected="false" tabindex="-1">Phòng học chung</button>
       </div>
       <div>
         <article class="chuong" role="tabpanel" id="p1" aria-labelledby="t-p1" tabindex="0">
-          <img src="anh/sinh_hanhlang.jpg" alt="Hành lang tầng 2 trong VERA Lab" loading="lazy">
+          <img src="anh/sinh_hanhlang.jpg" alt="Hành lang tầng 2 trong VERA Lab" width="1200" height="641" loading="lazy">
           <h3>Đi lại tự do như ở trường thật</h3>
-          <p>Nhìn bằng góc nhìn thứ nhất, đi qua cửa tự động, lên tầng bằng cầu thang hoặc thang máy. Cần nhanh thì dịch chuyển thẳng tới từng trạm.</p>
+          <p>Nhìn bằng góc nhìn thứ nhất, đi qua cửa tự động, lên tầng bằng cầu thang hoặc thang máy. Cần nhanh thì dịch chuyển thẳng tới từng trạm. Ứng dụng chỉ tải phòng đang đứng và các phòng sát cửa, nên một tòa nhà lớn vẫn nhẹ máy.</p>
+          <ul class="nhan-nho"><li>2 tầng, 13 khu chức năng</li><li>Cửa tự động, thang máy</li><li>Dịch chuyển nhanh tới trạm</li></ul>
         </article>
         <article class="chuong" role="tabpanel" id="p2" aria-labelledby="t-p2" tabindex="0" hidden>
-          <img src="anh/sinh_hienvi.jpg" alt="Bàn kính hiển vi trong phòng Sinh" loading="lazy">
+          <img src="anh/sinh_hienvi.jpg" alt="Bàn kính hiển vi trong phòng Sinh" width="1200" height="641" loading="lazy">
           <h3>Tự tay làm thí nghiệm</h3>
-          <p>Cầm dụng cụ, rót, pha, đun và quan sát hiện tượng. Ở lab Sinh, trong bình có gì do học sinh đưa vào, kết quả tính theo thành phần, nhiệt độ và thời gian.</p>
-          <ul class="nhan-nho"><li>16 bài thí nghiệm Sinh</li><li>720 hóa chất tra cứu được</li><li>Bám chương trình GDPT 2018</li></ul>
+          <p>Cầm dụng cụ, rót, pha, đun và quan sát hiện tượng. Ở lab Sinh, trong bình có gì do học sinh đưa vào, sinh phẩm là vật thật trong cảnh, kết quả tính theo thành phần, nhiệt độ và thời gian.</p>
+          <ul class="nhan-nho"><li>16 bài thí nghiệm Sinh</li><li>720 hóa chất tra cứu được</li><li>Chuẩn độ, kết tủa, khí, oxi hóa – khử</li><li>Bám chương trình GDPT 2018</li></ul>
         </article>
         <article class="chuong" role="tabpanel" id="p3" aria-labelledby="t-p3" tabindex="0" hidden>
-          <img src="anh/hoa_may.jpg" alt="Phòng máy phân tích" loading="lazy">
+          <img src="anh/hoa_may.jpg" alt="Phòng máy phân tích" width="1200" height="641" loading="lazy">
           <h3>Dùng thử thiết bị hiện đại</h3>
-          <p>Mỗi máy có màn hình vận hành riêng, chế độ Hướng dẫn và Thực hành. Học sinh làm quen với quy trình trước khi gặp máy thật.</p>
-          <ul class="nhan-nho"><li>Kính hiển vi điện tử</li><li>Máy PCR</li><li>Máy sắc ký khí</li><li>Máy nhiễu xạ tia X</li></ul>
+          <p>14 máy phân tích chạy theo quy trình vận hành chuẩn. Mỗi máy có màn hình vận hành riêng, chế độ Hướng dẫn và Thực hành. Máy đọc tín hiệu từ chính mẫu học sinh pha, nên mẫu pha sai sẽ ra kết quả sai.</p>
+          <ul class="nhan-nho"><li>UV-Vis</li><li>AAS</li><li>XRD</li><li>NMR</li><li>Sắc ký khí</li><li>Kính hiển vi điện tử</li><li>PCR</li></ul>
         </article>
         <article class="chuong" role="tabpanel" id="p4" aria-labelledby="t-p4" tabindex="0" hidden>
-          <img src="anh/ui_laprap.jpg" alt="Giao diện lắp ráp dụng cụ 3D" loading="lazy">
+          <img src="anh/ui_laprap.jpg" alt="Giao diện lắp ráp dụng cụ 3D" width="1200" height="675" loading="lazy">
           <h3>Tự lắp bộ dụng cụ của riêng mình</h3>
-          <p>Chọn trong khoảng 40 loại bộ phận và ghép lại trên giao diện 3D. Bộ dụng cụ xuất hiện ngay trên bàn thí nghiệm bạn chọn và chạy đúng theo cách bạn đã nối.</p>
+          <p>Chọn trong khoảng 40 loại bộ phận và ghép lại bằng khớp nối trên giao diện 3D. Bộ dụng cụ xuất hiện ngay trên bàn thí nghiệm bạn chọn và chạy đúng theo cách bạn đã nối.</p>
         </article>
         <article class="chuong" role="tabpanel" id="p5" aria-labelledby="t-p5" tabindex="0" hidden>
-          <img src="anh/robot.jpg" alt="Robot trợ lý trong VERA Lab" loading="lazy">
+          <img src="anh/robot.jpg" alt="Robot trợ lý trong VERA Lab" width="1000" height="744" loading="lazy">
           <h3>Trợ lý AI và robot luôn bên cạnh</h3>
-          <p>Hỏi cách dùng máy, nhờ robot đi lấy hóa chất hoặc làm giúp một bước. Robot chỉ làm những bước đã qua kiểm tra an toàn.</p>
+          <p>Hỏi cách dùng máy, nhờ robot đi lấy hóa chất, làm mẫu hoặc xử lý sự cố. Robot chỉ làm những bước đã qua bộ kiểm tra an toàn.</p>
         </article>
         <article class="chuong" role="tabpanel" id="p6" aria-labelledby="t-p6" tabindex="0" hidden>
-          <img src="anh/hoa_lab.jpg" alt="Phòng thí nghiệm Hóa nhìn từ góc người dùng" loading="lazy">
-          <h3>Điều khiển bằng webcam, không cần kính VR</h3>
-          <p>Quay đầu để nhìn quanh, ghé lại gần để phóng to, dùng cử chỉ tay để thao tác. Chuột và bàn phím vẫn dùng bình thường nếu bạn thích.</p>
+          <img src="anh/hoa_lab.jpg" alt="Phòng thí nghiệm Hóa nhìn từ góc người dùng" width="1200" height="641" loading="lazy">
+          <h3>Thao tác bằng bàn tay, không cần kính VR</h3>
+          <p>Đưa tay trước webcam: nắm tay để mở danh sách dụng cụ hoặc hóa chất trên bàn, ngón trỏ trượt để chọn, chụm hai ngón để lấy, xòe tay để đặt xuống. Nhận diện tay chạy ngay trong ứng dụng; chuột và bàn phím vẫn dùng bình thường.</p>
+          <ul class="nhan-nho"><li>Nắm ngang: dụng cụ</li><li>Nắm dọc: hóa chất</li><li>Trỏ: chọn</li><li>Chụm: lấy</li><li>Giơ ngón út: bật máy</li><li>Xòe: đặt xuống</li></ul>
         </article>
         <article class="chuong" role="tabpanel" id="p7" aria-labelledby="t-p7" tabindex="0" hidden>
-          <img src="anh/ui_web.jpg" alt="Trang web quản lý của VERA Lab" loading="lazy">
-          <h3>Trang web quản lý cho giáo viên</h3>
-          <p>Xem kho hóa chất, thiết bị, lịch sử mượn trả và nhật ký thí nghiệm trên trình duyệt, cả ở khu Hóa và khu Sinh.</p>
+          <img src="anh/ui_web.jpg" alt="Trang web quản lý của VERA Lab" width="1200" height="750" loading="lazy">
+          <h3>Giáo viên điều khiển lớp học từ trình duyệt</h3>
+          <p>Trình chiếu bài giảng lên màn hình lớn trong phòng lab, theo dõi trực tiếp từng học sinh, gửi thông báo, bấm “Tất cả chú ý”, bật chế độ Kiểm tra, khóa hóa chất nguy hiểm và ra lệnh cho robot. Cùng trang đó quản lý lớp, mã lớp, kết quả, kho hóa chất và phòng Sinh.</p>
+          <ul class="nhan-nho"><li>Trình chiếu</li><li>Theo dõi trực tiếp</li><li>Chế độ Kiểm tra</li><li>Khóa hóa chất</li><li>Chấm kết quả</li></ul>
+        </article>
+        <article class="chuong" role="tabpanel" id="p8" aria-labelledby="t-p8" tabindex="0" hidden>
+          <img src="anh/sinh_ban.jpg" alt="Khu bàn học sinh ở tầng 2 của VERA Lab" width="1200" height="641" loading="lazy">
+          <h3>Cùng vào một phòng thí nghiệm</h3>
+          <p>Giáo viên mở phòng qua Internet bằng mã 6 ký tự hoặc trong mạng LAN, học sinh nhập mã để vào. Mọi người thấy nhau với tên riêng, cầm chung dụng cụ; máy mở phòng phân xử ai đang cầm vật nào.</p>
+          <p class="gioi-han">Hiện mới đồng bộ vị trí và vật đang cầm. Dung dịch, phản ứng và máy phân tích chưa được đồng bộ giữa các máy.</p>
         </article>
       </div>
     </div>
@@ -293,9 +530,9 @@
     <div class="doan">
       <h2>Từ cửa phòng tới kết quả, trong bốn bước</h2>
       <ol class="cac-buoc">
-        <li><h3>Vào phòng</h3><p>Đi bộ trong tòa nhà hoặc dịch chuyển nhanh tới trạm cần làm.</p></li>
+        <li><h3>Vào phòng</h3><p>Đăng nhập hoặc dùng thử, đi bộ trong tòa nhà hoặc dịch chuyển nhanh tới trạm cần làm.</p></li>
         <li><h3>Chuẩn bị</h3><p>Tìm hóa chất, lấy dụng cụ, hoặc nhờ robot mang tới bàn.</p></li>
-        <li><h3>Thực hành</h3><p>Tự tay thao tác, hỏi trợ lý AI khi chưa rõ quy trình.</p></li>
+        <li><h3>Thực hành</h3><p>Tự tay thao tác bằng chuột hoặc bàn tay, hỏi trợ lý AI khi chưa rõ quy trình.</p></li>
         <li><h3>Xem kết quả</h3><p>Kết quả tính theo đúng việc bạn đã làm. Sai thì làm lại, không mất gì.</p></li>
       </ol>
     </div>
@@ -307,7 +544,8 @@
         <li><i>2</i><b>Làm sai vẫn an toàn, và có hậu quả thật</b><p>Bỏ qua một bước trong quy trình thì thí nghiệm hỏng đúng như ngoài đời. Bài học nhớ lâu mà không ai gặp nguy hiểm.</p></li>
         <li><i>3</i><b>Tự do lắp ráp, không theo khuôn</b><p>Bạn tự chọn, tự nối, và bộ dụng cụ chạy đúng theo cách đã nối, kể cả khi nối sai.</p></li>
         <li><i>4</i><b>Robot AI có giới hạn an toàn</b><p>Robot nhận yêu cầu bằng lời và tự lập kế hoạch từng bước, nhưng mỗi bước phải qua bộ kiểm tra trước khi thực hiện.</p></li>
-        <li><i>5</i><b>Nhập vai bằng thiết bị rẻ</b><p>Webcam thường đã đủ để quay đầu nhìn quanh, thêm tay cầm tự chế thay cho kính VR đắt tiền.</p></li>
+        <li><i>5</i><b>Nhập vai bằng thiết bị rẻ</b><p>Webcam thường đã đủ để thao tác bằng bàn tay, thêm tay cầm tự chế thay cho kính VR đắt tiền.</p></li>
+        <li><i>6</i><b>Giáo viên điều khiển phòng lab ảo từ web</b><p>Bài giảng, thông báo, chế độ Kiểm tra và khóa hóa chất đi thẳng từ trình duyệt của giáo viên vào ứng dụng của học sinh.</p></li>
       </ol>
       <p class="gioi-han">Các điểm trên là đặc điểm của hệ thống. Nhóm chưa khảo sát đối chiếu có hệ thống với các phần mềm thí nghiệm ảo khác.</p>
     </div>
@@ -315,19 +553,20 @@
     <div class="doan">
       <h2>VERA Lab dành cho ai</h2>
       <div class="ba-cot">
-        <div class="the-tho"><h3>Học sinh</h3><p>Làm thí nghiệm trước và sau giờ học, luyện tới khi thành thạo, thử cả thao tác sai để hiểu vì sao phải làm đúng.</p></div>
-        <div class="the-tho"><h3>Giáo viên</h3><p>Minh họa những thí nghiệm khó tổ chức trên lớp, theo dõi kho, thiết bị và nhật ký qua trang web quản lý.</p></div>
-        <div class="the-tho"><h3>Nhà trường</h3><p>Bổ sung trải nghiệm về thiết bị và kỹ thuật chưa có điều kiện trang bị. VERA Lab đi cùng giờ thực hành thật, không thay thế.</p></div>
+        <div class="the-tho"><span class="bieu-tuong" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 9 12 4.5 21.5 9 12 13.5z"/><path d="M6.5 11v4.5c0 1.5 2.5 3 5.5 3s5.5-1.5 5.5-3V11M21.5 9v5"/></svg></span><h3>Học sinh</h3><p>Làm thí nghiệm trước và sau giờ học, luyện tới khi thành thạo, thử cả thao tác sai để hiểu vì sao phải làm đúng.</p></div>
+        <div class="the-tho"><span class="bieu-tuong" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M12 16v4M8 20h8M7 12.5l3-3 2.5 2.5L17 7.5"/></svg></span><h3>Giáo viên</h3><p>Minh họa những thí nghiệm khó tổ chức trên lớp, trình chiếu và theo dõi cả lớp trong phòng lab ảo, chấm kết quả trên web.</p></div>
+        <div class="the-tho"><span class="bieu-tuong" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V9.5L12 4l7 5.5V21"/><path d="M9.5 21v-5h5v5M9 11.5h.01M15 11.5h.01"/></svg></span><h3>Nhà trường</h3><p>Bổ sung trải nghiệm về thiết bị và kỹ thuật chưa có điều kiện trang bị. VERA Lab đi cùng giờ thực hành thật, không thay thế.</p></div>
       </div>
     </div>
   </div>
 </section>
 
+<!-- ═════════════════════════ THAM QUAN ═════════════════════════ -->
 <section class="tab" id="tham-quan" data-ten="Tham quan" aria-labelledby="h-tham-quan">
   <div class="khung dau-tab">
     <p class="the-muc">Tham quan</p>
     <h1 id="h-tham-quan" tabindex="-1">Hai tầng, mỗi khu một vai trò</h1>
-    <p class="dan">Chọn tầng, rồi bấm vào từng phòng trên mô hình 3D để xem nơi đó có gì. Kéo sang ngang để xoay.</p>
+    <p class="dan">Chọn tầng, rồi bấm vào từng phòng trên mô hình 3D để xem nơi đó có gì. Mọi ảnh đều chụp trực tiếp trong ứng dụng.</p>
   </div>
   <div class="khung" data-nhom-tab id="nhom-tang">
     <div class="ds-ngang" role="tablist" aria-label="Chọn tầng">
@@ -388,30 +627,32 @@
   </div>
 </section>
 
+<!-- ═════════════════════════ CÔNG NGHỆ ═════════════════════════ -->
 <section class="tab" id="cong-nghe" data-ten="Công nghệ" aria-labelledby="h-cong-nghe">
   <div class="khung dau-tab">
     <p class="the-muc">Công nghệ</p>
     <h1 id="h-cong-nghe" tabindex="-1">Bên dưới hệ thống</h1>
-    <p class="dan">Chọn một chủ đề để xem VERA Lab hoạt động thế nào, từ cách tính kết quả đến tay cầm do nhóm tự thiết kế.</p>
+    <p class="dan">Chọn một chủ đề để xem VERA Lab hoạt động thế nào, từ cách tính kết quả, trợ lý AI, nhận diện bàn tay đến tay cầm do nhóm tự thiết kế.</p>
   </div>
   <div class="khung" data-nhom-tab>
     <div class="ds-ngang" role="tablist" aria-label="Các chủ đề công nghệ">
       <button type="button" role="tab" id="t-n1" aria-controls="n1" aria-selected="true">Kiến trúc</button>
       <button type="button" role="tab" id="t-n2" aria-controls="n2" aria-selected="false" tabindex="-1">Mô phỏng</button>
       <button type="button" role="tab" id="t-n3" aria-controls="n3" aria-selected="false" tabindex="-1">AI và robot</button>
-      <button type="button" role="tab" id="t-n4" aria-controls="n4" aria-selected="false" tabindex="-1">Webcam</button>
+      <button type="button" role="tab" id="t-n4" aria-controls="n4" aria-selected="false" tabindex="-1">Bàn tay và webcam</button>
       <button type="button" role="tab" id="t-n5" aria-controls="n5" aria-selected="false" tabindex="-1">Tay cầm</button>
     </div>
 
     <div class="mo-con" role="tabpanel" id="n1" aria-labelledby="t-n1" tabindex="0">
-      <h2>Năm lớp công nghệ làm nên VERA Lab</h2>
+      <h2>Sáu lớp công nghệ làm nên VERA Lab</h2>
       <p>Mỗi lớp đảm nhận một việc riêng, nên có thể sửa và kiểm thử từng phần.</p>
       <ul class="lop">
-        <li><b>Không gian 3D</b><p>Tòa nhà hai tầng, chỉ tải phòng đang cần.</p><span>Unity 6, URP</span></li>
-        <li><b>Mô phỏng</b><p>Bộ máy tính kết quả từ thao tác của từng học sinh.</p><span>C#, có kiểm thử tự động</span></li>
+        <li><b>Không gian 3D</b><p>Tòa nhà hai tầng dựng bằng code, chỉ tải phòng đang cần.</p><span>Unity 6, URP</span></li>
+        <li><b>Mô phỏng</b><p>Bộ máy tính kết quả từ thao tác của từng học sinh: pH, kết tủa, khí, oxi hóa – khử, màu, tín hiệu máy đo.</p><span>C#, có kiểm thử tự động</span></li>
         <li><b>Trí tuệ nhân tạo</b><p>Trợ lý trả lời theo quy trình máy, robot lập kế hoạch có kiểm tra an toàn.</p><span>Python, FastAPI, nhiều nhà cung cấp AI</span></li>
-        <li><b>Điều khiển tự nhiên</b><p>Theo dõi đầu và tay qua webcam, tay cầm không dây tự chế.</p><span>MediaPipe, OpenCV, ESP32</span></li>
-        <li><b>Quản lý</b><p>Kho, thiết bị, nhật ký thí nghiệm trên trình duyệt.</p><span>Web, SQLite</span></li>
+        <li><b>Điều khiển tự nhiên</b><p>Nhận diện bàn tay ngay trong ứng dụng, theo dõi đầu qua webcam, tay cầm không dây tự chế.</p><span>MediaPipe, OpenCV, ESP32</span></li>
+        <li><b>Nhiều người</b><p>Phòng học chung qua Internet bằng mã phòng hoặc trong mạng LAN.</p><span>Netcode for GameObjects, Unity Relay</span></li>
+        <li><b>Quản lý lớp học</b><p>Tài khoản, lớp, kết quả, trình chiếu, theo dõi trực tiếp, kho Hóa và phòng Sinh trên trình duyệt.</p><span>Cloudflare Pages Functions, D1</span></li>
       </ul>
     </div>
 
@@ -436,7 +677,7 @@
 
     <div class="mo-con" role="tabpanel" id="n3" aria-labelledby="t-n3" tabindex="0" hidden>
       <div class="hai-cot">
-        <img class="anh-vua" src="anh/robot.jpg" alt="Robot trợ lý trong VERA Lab" loading="lazy">
+        <img class="anh-vua" src="anh/robot.jpg" alt="Robot trợ lý trong VERA Lab" width="1000" height="744" loading="lazy">
         <div class="cot-chu">
           <h2>AI đề xuất, bộ kiểm tra quyết định</h2>
           <p>Robot không tự do hành động theo mọi câu trả lời của AI.</p>
@@ -446,7 +687,7 @@
             <li><div><h3>AI lập kế hoạch</h3><p>Kết quả là các bước thuộc những kỹ năng robot có sẵn.</p></div></li>
             <li><div><h3>Bộ kiểm tra duyệt từng bước</h3><p>Bước sai hoặc mất an toàn bị loại trước khi robot thực hiện.</p></div></li>
           </ol>
-          <p class="gioi-han">Trong lab Sinh chỉ dùng chủng dạy học cấp an toàn thấp nhất (BSL-1), AI từ chối yêu cầu vượt mức này. Phần AI hiện cần kết nối mạng tới máy chủ.</p>
+          <p class="gioi-han">Trong lab Sinh chỉ dùng chủng dạy học cấp an toàn thấp nhất (BSL-1), AI từ chối yêu cầu vượt mức này. Ở chế độ Kiểm tra, giáo viên khóa được trợ lý AI của học sinh ngay trên máy chủ. Phần AI cần kết nối mạng tới máy chủ.</p>
         </div>
       </div>
     </div>
@@ -454,18 +695,19 @@
     <div class="mo-con" role="tabpanel" id="n4" aria-labelledby="t-n4" tabindex="0" hidden>
       <div class="hai-cot">
         <div class="dem-webcam">
-          <img src="anh/hoa_lab.jpg" alt="Góc nhìn trong phòng Hóa xoay theo chuyển động đầu" loading="lazy">
-          <div class="webcam" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="24" cy="18" r="10"/><path d="M8 44c1-10 8-14 16-14s15 4 16 14"/></svg></div>
+          <img src="anh/hoa_lab.jpg" alt="Góc nhìn trong phòng Hóa khi điều khiển bằng webcam" width="1200" height="641" loading="lazy">
+          <div class="webcam" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 26V12a3 3 0 0 1 6 0v11"/><path d="M23 22v-3a3 3 0 0 1 6 0v4"/><path d="M29 22a3 3 0 0 1 6 0v8c0 7-5 12-11 12s-9-3-11-7l-4-7a3 3 0 0 1 5-3l3 4"/></svg></div>
         </div>
         <div class="cot-chu">
           <h2>Webcam thường thay cho kính VR</h2>
-          <p>Quay đầu để xoay góc nhìn, ghé lại gần để phóng to, dùng cử chỉ tay để thao tác.</p>
+          <p>Bàn tay trước webcam trở thành hai tay ảo trong phòng lab. Thao tác theo từng bàn thí nghiệm, nên không cần với chính xác tới từng vật.</p>
           <ol class="cac-buoc">
-            <li><div><h3>Đọc hình từ webcam</h3><p>Chương trình Python đọc hình ảnh ngay trên máy.</p></div></li>
-            <li><div><h3>Tìm điểm trên mặt và tay</h3><p>MediaPipe tìm 478 điểm trên mặt và các điểm bàn tay.</p></div></li>
-            <li><div><h3>Lọc rung</h3><p>Bộ lọc One Euro làm chuyển động mượt hơn.</p></div></li>
-            <li><div><h3>Gửi sang ứng dụng</h3><p>Unity đổi các số này thành góc nhìn, độ phóng và cử chỉ.</p></div></li>
+            <li><div><h3>Đọc hình từ webcam</h3><p>Ứng dụng đọc hình ngay trên máy, không gửi lên mạng.</p></div></li>
+            <li><div><h3>Tìm điểm trên bàn tay</h3><p>MediaPipe chạy trong Unity tìm các điểm mốc của bàn tay, khoảng 17 ms mỗi khung trong bản thử nghiệm.</p></div></li>
+            <li><div><h3>Nhận ra cử chỉ</h3><p>Nắm, trỏ, chụm, giơ ngón út, xòe tay, mỗi cử chỉ một việc.</p></div></li>
+            <li><div><h3>Điều khiển hai tay ảo</h3><p>Mở danh sách, chọn, lấy, dùng và đặt vật trên bàn đang đứng.</p></div></li>
           </ol>
+          <p class="gioi-han">Theo dõi đầu (F8) vẫn dùng chương trình Python với OpenCV và có thể bị Smart App Control của Windows 11 chặn. Độ chính xác nhận diện tay với webcam thật trong lúc chơi chưa được đo.</p>
         </div>
       </div>
     </div>
@@ -473,7 +715,7 @@
     <div class="mo-con" role="tabpanel" id="n5" aria-labelledby="t-n5" tabindex="0" hidden>
       <div class="khu-tay-cam">
         <div id="tay-cam">
-          <canvas id="c-arc" role="img" aria-label="Mô hình 3D tay cầm VERA Arc, kéo sang ngang để xoay"></canvas>
+          <canvas id="c-arc" role="img" aria-label="Mô hình 3D tay cầm VERA Band 2, kéo sang ngang để xoay"></canvas>
           <svg id="tc-duong" aria-hidden="true"></svg>
           <div id="tc-cham" aria-hidden="true"></div>
           <div class="tc-tai" aria-hidden="true">Đang tải mô hình 3D…</div>
@@ -486,29 +728,31 @@
         </div>
         <div>
           <div class="buoc-tc">
-            <p class="the-muc">Phần cứng tự thiết kế</p>
-            <h3>Tay cầm VERA Arc</h3>
-            <p>Tay cầm do nhóm tự thiết kế, để thao tác trong lab tự nhiên hơn chuột và bàn phím. Vòng tròn nhỏ ngả ra sau mang logo và chữ VERA LAB. Chén quanh joystick hình lục giác, cùng hình với logo.</p>
+            <p class="the-muc">Phần cứng tự thiết kế · bản nháp</p>
+            <h3>Tay cầm VERA Band 2</h3>
+            <p>Tay cầm đeo bằng quai trên mu bàn tay, không cần nắm chặt, để thao tác trong lab tự nhiên hơn chuột và bàn phím. Tấm mu tay mang logo, chén quanh joystick hình lục giác cùng hình với logo, vân lục giác chống trượt ở vùng nắm.</p>
             <div class="tc-thong-so">
-              <div><b>81 × 71 × 123</b><span>mm, cả vòng và cò</span></div>
-              <div><b>≈ 137 g</b><span>có pin, ước tính</span></div>
-              <div><b>8</b><span>file STL để in 3D</span></div>
+              <div><b>78 × 78 × 128</b><span>mm</span></div>
+              <div><b>≈ 144 g</b><span>có pin 9V, 54 g nhựa, ước tính</span></div>
+              <div><b>5</b><span>tệp in 3D theo màu nhựa</span></div>
             </div>
           </div>
           <div class="buoc-tc" hidden>
             <p class="the-muc">Tháo rời</p>
             <h3>Thiết kế để in và tự lắp</h3>
-            <p>Thân gồm hai nửa bắt vít, phù hợp để gửi xưởng in 3D. Pin thay từ đáy, đẩy nắp là mở, không cần tua vít. Có thanh móc dây đeo cổ tay ở đáy cán.</p>
+            <p>Thân gồm hai nửa bắt vít M2, mặt ghép đặt xuống bàn khi in. Nắp khoang pin ở đáy có gai khóa, quai băng gai dính rộng 20 mm. Các chi tiết được gom theo màu nhựa: trắng, đen, xanh ngọc huỳnh quang và bạc.</p>
           </div>
           <div class="buoc-tc" hidden>
             <p class="the-muc">Bên trong</p>
             <h3>Linh kiện phổ thông, dễ mua</h3>
-            <p>Mạch ESP32 truyền không dây, cảm biến chuyển động BMI160, joystick, cò bóp dùng cảm biến Hall, pin vuông 9V và mạch hạ áp MP1584. Bốn cổng mở rộng cho phép gắn thêm nút bấm hoặc cảm biến.</p>
+            <p>ESP32 DevKitC truyền không dây, cảm biến chuyển động BMI160, joystick KY-023, cò bóp dùng cảm biến Hall SS49E và nam châm, pin vuông 9V, mạch hạ áp MP1584, công tắc trượt và nút bấm phụ.</p>
           </div>
           <div class="buoc-tc" hidden>
             <p class="the-muc">Trạng thái</p>
-            <h3>Đã có gói in, chưa lắp thử</h3>
-            <p>Đây là mô hình 3D của chính bản thiết kế dùng để in. Phần mềm kiểm tra va chạm trên mô hình đã đạt, nhưng nhóm chưa in thử, chưa cân thật và chưa viết xong phần mềm cho tay cầm.</p>
+            <h3>Bản nháp, đang chờ duyệt dáng</h3>
+            <p>So với VERA Band: vùng nắm rộng từ 47 lên 53 mm, khuyên quai cách gốc ngón cái 4,68 mm thay vì 0,42 mm, đế thấp từ 17 xuống 12 mm, thêm bướu đỡ lòng bàn tay. Các số này đo trên mô hình 3D; nhóm chưa in, chưa cân và chưa thử trên tay thật.</p>
+            <p>Mạch ESP32 + BMI160 dùng cho tay cầm đã được đo riêng, chưa lắp vào vỏ: để yên 10 phút chỉ trôi 0,071°, so với 108,7° nếu không khử nhiễu.</p>
+            <a class="lien-ket" href="#/kiem-chung" data-mo-tab="t-k6">Xem kết quả khử nhiễu cảm biến</a>
           </div>
         </div>
       </div>
@@ -516,6 +760,7 @@
   </div>
 </section>
 
+<!-- ═════════════════════════ KIỂM CHỨNG ═════════════════════════ -->
 <section class="tab" id="kiem-chung" data-ten="Kiểm chứng" aria-labelledby="h-kiem-chung">
   <div class="khung dau-tab">
     <p class="the-muc">Kiểm chứng</p>
@@ -533,6 +778,7 @@
     <div class="ds-ngang" role="tablist" aria-label="Các phần của kiểm chứng">
       <button type="button" role="tab" id="t-k1" aria-controls="k1" aria-selected="true">Đối chiếu số liệu</button>
       <button type="button" role="tab" id="t-k2" aria-controls="k2" aria-selected="false" tabindex="-1">Hiệu năng</button>
+      <button type="button" role="tab" id="t-k6" aria-controls="k6" aria-selected="false" tabindex="-1">Cảm biến tay cầm</button>
       <button type="button" role="tab" id="t-k3" aria-controls="k3" aria-selected="false" tabindex="-1">Hạn chế</button>
       <button type="button" role="tab" id="t-k4" aria-controls="k4" aria-selected="false" tabindex="-1">Lộ trình</button>
       <button type="button" role="tab" id="t-k5" aria-controls="k5" aria-selected="false" tabindex="-1">Câu hỏi thường gặp</button>
@@ -559,7 +805,11 @@
         <div><b>152</b><span>bài kiểm thử Python đạt</span></div>
         <div><b>147</b><span>bài mô phỏng Hóa đạt</span></div>
         <div><b>114</b><span>bài mô phỏng Sinh đạt</span></div>
+        <div><b>36/36</b><span>kiểm thử lớp học từ web</span></div>
+        <div><b>31/31</b><span>kiểm thử phòng học chung</span></div>
+        <div><b>19/19</b><span>kiểm thử thao tác tay</span></div>
       </div>
+      <p class="gioi-han">Phòng học chung được kiểm thử bằng ba tiến trình .exe thật, qua LAN và qua Relay thật. Lớp học từ web được kiểm thử với API thật, độ trễ từ lúc giáo viên bấm tới khi màn hình trong ứng dụng hiện xong là 0,3 đến 1,5 giây.</p>
     </div>
 
     <div class="mo-con" role="tabpanel" id="k2" aria-labelledby="t-k2" tabindex="0" hidden>
@@ -573,15 +823,83 @@
       <p class="gioi-han">Đo bằng bản .exe trên laptop Intel Iris Xe, 1920 × 1080, tắt giới hạn 60 FPS để so sánh. Khi dùng thật, ứng dụng dừng ở 60 FPS.</p>
     </div>
 
+    <div class="mo-con" role="tabpanel" id="k6" aria-labelledby="t-k6" tabindex="0" hidden>
+      <h2>Khử nhiễu và chống trôi cảm biến tay cầm</h2>
+      <p>Cảm biến BMI160 không có la bàn, nên hướng quay quanh trục đứng chỉ là cộng dồn vận tốc góc: mọi sai số nhỏ của con quay đều dồn thành trôi. Nhóm đo trên mạch thật ESP32 + BMI160 (firmware v3.0, nối USB, 200 mẫu mỗi giây), để tay cầm nằm yên 15 phút, rồi chạy lại đúng chuỗi số đo đó qua nhiều thuật toán để so sánh công bằng.</p>
+
+      <div class="the-do">
+        <div class="dau-the-do">
+          <div><span class="nhan-tt xong">Đo trên mạch thật · 11/11/2026</span><h3>Trôi hướng sau 10 phút nằm yên</h3></div>
+          <p>Thang logarit · vạch đứt là chỉ tiêu 1° / 10 phút</p>
+        </div>
+        <div class="bd-log" style="--chi-tieu:46.5%">
+          <div class="dong-bd"><span>Cộng dồn thô, không bù</span><div class="ray-bd"><i style="--w:93.8%"></i></div><b>108,7°</b></div>
+          <div class="dong-bd"><span>Chỉ bù độ lệch 2 giây đầu</span><div class="ray-bd"><i style="--w:47.4%"></i></div><b>1,09°</b></div>
+          <div class="dong-bd"><span>Madgwick + bù sai số tĩnh</span><div class="ray-bd"><i style="--w:47.4%"></i></div><b>1,09°</b></div>
+          <div class="dong-bd"><span>Mahony Ki = 0,02 + bù sai số tĩnh</span><div class="ray-bd"><i style="--w:47.4%"></i></div><b>1,09°</b></div>
+          <div class="dong-bd"><span>Firmware cũ</span><div class="ray-bd"><i class="tot" style="--w:15.6%"></i></div><b>0,047°</b></div>
+          <div class="dong-bd noi"><span>Firmware mới, hướng do mạch gửi về</span><div class="ray-bd"><i class="tot" style="--w:19.8%"></i></div><b>0,071°</b></div>
+        </div>
+        <p class="gioi-han">Lần đo 2: tay cầm bị chạm ở giây 73 làm lệch khoảng 1,7°; từ phút 2 đến phút 10, firmware mới chỉ trôi thêm 0,008°. Khi nằm yên, firmware cũ và mới đều đạt chỉ tiêu, vì cả hai cùng học lại độ lệch lúc tay cầm đứng yên.</p>
+      </div>
+
+      <div class="so-dem">
+        <div><b>0,36–0,45</b><span>°/√h nhiễu con quay (ARW), datasheet ghi 0,008 °/s/√Hz ≈ 0,48</span></div>
+        <div><b>0,0099°</b><span>rung tia khi nằm yên, chỉ tiêu dưới 0,15°</span></div>
+        <div><b>0 / 360.000</b><span>mẫu bị mất qua USB, 200,0 Hz đều</span></div>
+        <div><b>12,6 ms</b><span>tuổi dữ liệu lúc dùng (P95: 21,9 ms)</span></div>
+        <div><b>0</b><span>lần chạm ma ở hai nút cảm ứng, nhiễu 0,08% mức nền</span></div>
+        <div><b>12,6–15,2</b><span>°/h bất ổn định độ lệch (Allan)</span></div>
+      </div>
+
+      <div class="doan">
+        <h2>Khi cầm trên tay thì sao?</h2>
+        <p class="gioi-dan">Cầm tay thì không lúc nào nằm yên hẳn, nên ưu điểm của firmware mới nằm ở đây. Phần này là <b>mô phỏng</b> 10 phút thao tác, dùng nhiễu con quay đo được ở trên, chưa đo bằng tay người thật.</p>
+        <div class="cuon-bang" tabindex="0" role="region" aria-label="Trôi hướng khi cầm tay, mô phỏng">
+          <table class="bang">
+            <thead><tr><th>Cấu hình</th><th>Có lúc đặt xuống bàn</th><th>Cầm liên tục</th></tr></thead>
+            <tbody>
+              <tr><td>Madgwick + bù sai số tĩnh</td><td>39,8°</td><td>46,4°</td></tr>
+              <tr><td>Firmware cũ (học lại khi nằm yên)</td><td>7,8°</td><td>45,3°</td></tr>
+              <tr class="noi"><td>Firmware mới</td><td>1,69° (giảm 96%)</td><td>4,44° (giảm 90%)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="gioi-han">Mô phỏng giả định đã chạy hai bước hiệu chuẩn bù nhiệt và tỉ lệ con quay. Trên mạch đã đo, hai bước này chưa làm; nếu bỏ qua, kết quả firmware mới sẽ gần firmware cũ hơn.</p>
+      </div>
+
+      <div class="hai-cot ky-thuat">
+        <div>
+          <h3>Sáu kỹ thuật trong firmware</h3>
+          <ol class="ds-ky-thuat">
+            <li><b>Bù sai số tĩnh</b>Cân 2 giây lúc bật để đo độ lệch con quay.</li>
+            <li><b>Học lại khi nằm yên</b>Đặt trên bàn quá 0,5 giây thì học lại độ lệch, góc đứng hẳn.</li>
+            <li><b>Bù nhiệt</b>Độ lệch thay đổi theo nhiệt độ mạch, bù theo hệ số °/s mỗi °C.</li>
+            <li><b>Vùng chết mềm</b>Quay chậm dưới 0,5 °/s bị bỏ, từ 0,5 đến 1 °/s giảm dần.</li>
+            <li><b>Hiệu chuẩn tỉ lệ</b>Xoay 5 vòng để chỉnh tỉ lệ con quay trục đứng.</li>
+            <li><b>Lấy mẫu đều 200 Hz</b>Thời gian mỗi mẫu đo bằng micro giây.</li>
+          </ol>
+          <p class="gioi-han">Đã thử và bỏ: Mahony có Ki và ZARU, vì cả hai học nhầm chuyển động của tay thành độ lệch.</p>
+        </div>
+        <div class="hinh-do">
+          <figure><a href="anh/do_troi_yaw.png" target="_blank" rel="noopener"><img src="anh/do_troi_yaw.png" alt="Biểu đồ trôi quanh trục đứng khi tay cầm nằm yên 15 phút, so sánh các thuật toán trên cùng một lần ghi" width="1560" height="1080" loading="lazy"></a><figcaption>Trôi theo thời gian, cùng một lần ghi. Ô xanh là chỉ tiêu ±1°.</figcaption></figure>
+          <figure><a href="anh/do_allan.png" target="_blank" rel="noopener"><img src="anh/do_allan.png" alt="Biểu đồ độ lệch Allan của con quay BMI160 theo ba trục" width="1080" height="720" loading="lazy"></a><figcaption>Độ lệch Allan của con quay: dốc −½ là nhiễu trắng, đáy là bất ổn định độ lệch.</figcaption></figure>
+        </div>
+      </div>
+      <p class="gioi-han">Chưa đo: nút cảm ứng khi chạm thật, kết nối Wi-Fi, hệ số nhiệt (nhiệt độ mạch chỉ đổi 0,01 °C trong buổi đo). Trục Y của joystick đang lỗi đấu nối, nên trong phòng thử 7 bài thao tác dùng chuỗi số đo thật, bản hiện tại đạt 18/23 chỉ số; khi sửa dây đạt 23/23.</p>
+    </div>
+
     <div class="mo-con" role="tabpanel" id="k3" aria-labelledby="t-k3" tabindex="0" hidden>
       <h2>Hạn chế đã biết</h2>
       <p>Những điểm dưới đây nhóm nêu rõ để người xem đánh giá đúng phạm vi của dự án.</p>
       <ul class="ds-han-che">
         <li>Mô phỏng ở mức dạy học: đúng hiện tượng, gần đúng về số, không thay cho phần mềm nghiên cứu.</li>
         <li>Chưa khảo sát hiệu quả dạy học. Lab Sinh tự do hiện được kiểm thử bằng bàn tay tự động, chưa có người thật chơi thử.</li>
-        <li>Độ chính xác của theo dõi bằng webcam trên Windows chưa được kiểm chứng.</li>
+        <li>Phòng học chung mới đồng bộ vị trí và vật đang cầm, chưa đồng bộ dung dịch, phản ứng và máy phân tích.</li>
+        <li>Độ chính xác nhận diện tay với webcam thật trong lúc chơi chưa được đo. Theo dõi đầu bằng Python có thể bị Smart App Control chặn.</li>
         <li>Máy PCR, điện di và ghép gen vẫn dùng luồng riêng, chưa nối với lab Sinh tự do.</li>
-        <li>Tay cầm VERA Arc mới có gói in, chưa in thử, chưa cân thật và chưa có phần mềm hoàn chỉnh.</li>
+        <li>Tay cầm VERA Band 2 còn là bản nháp: chưa in, chưa cân, chưa thử trên tay thật; độ vừa tay mới đo trên mô hình 3D. Mạch cảm biến đã đo khi nằm yên, nhưng trục Y joystick đang lỗi đấu nối; nút cảm ứng khi chạm và kết nối Wi-Fi chưa đo.</li>
+        <li>Trôi hướng khi cầm tay mới có số mô phỏng (dùng nhiễu đo thật), chưa đo bằng tay người.</li>
       </ul>
     </div>
 
@@ -589,10 +907,10 @@
       <h2>Từng tầng, từng môn</h2>
       <p>Việc đã xong, việc đang làm và hướng phát triển tiếp theo.</p>
       <div class="lo-trinh">
-        <div class="moc xong"><span class="nhan-tt xong">Đã hoàn thành</span><h3>Lab Hóa và lab Sinh</h3><ul><li>Tầng 1: phòng thí nghiệm, kho hóa chất, máy phân tích, khu chế tạo, robot</li><li>Tầng 2: phòng sinh học, vi sinh, sinh học phân tử, kho sinh phẩm, nhà kính</li><li>Trợ lý AI, điều khiển bằng webcam, trang web quản lý</li><li>Gói in 3D tay cầm VERA Arc</li></ul></div>
-        <div class="moc dang"><span class="nhan-tt dang">Đang làm</span><h3>Thêm cách điều khiển, thêm nền tảng</h3><ul><li>In, lắp và viết phần mềm cho tay cầm VERA Arc</li><li>Bản cài cho macOS</li><li>Bàn lập trình khối lệnh ở phòng robot</li></ul></div>
-        <div class="moc"><span class="nhan-tt sau">Dự kiến</span><h3>Học cùng nhau</h3><ul><li>Nhiều người cùng vào một phòng thí nghiệm</li><li>Hệ thống lớp học cho giáo viên và học sinh</li><li>AI chạy ngay trên máy</li></ul></div>
-        <div class="moc"><span class="nhan-tt sau">Dự kiến</span><h3>Mở rộng và đánh giá</h3><ul><li>Tầng mới cho môn Vật lý</li><li>Hỗ trợ kính thực tế ảo</li><li>Khảo sát hiệu quả với học sinh tại trường</li></ul></div>
+        <div class="moc xong"><span class="nhan-tt xong">Đã hoàn thành</span><h3>Lab Hóa và lab Sinh</h3><ul><li>Tầng 1: phòng thí nghiệm, kho hóa chất, 14 máy phân tích, khu chế tạo, robot</li><li>Tầng 2: phòng sinh học, vi sinh, sinh học phân tử, kho sinh phẩm, nhà kính</li><li>Trợ lý AI và robot có bộ kiểm tra an toàn</li></ul></div>
+        <div class="moc xong"><span class="nhan-tt xong">Đã hoàn thành</span><h3>Lớp học và nhiều người</h3><ul><li>Tài khoản, lớp, mã lớp, chấm kết quả trên web</li><li>Trình chiếu, theo dõi trực tiếp, chế độ Kiểm tra, khóa hóa chất</li><li>Phòng học chung qua Internet và LAN</li><li>Thao tác bằng bàn tay qua webcam</li><li>Firmware tay cầm chống trôi, đo trên mạch thật</li></ul></div>
+        <div class="moc dang"><span class="nhan-tt dang">Đang làm</span><h3>Hoàn thiện</h3><ul><li>Đồng bộ dung dịch và phản ứng trong phòng học chung</li><li>Tay cầm VERA Band 2: duyệt dáng, in, lắp, nối vào ứng dụng</li><li>Mở rộng số phản ứng hóa học được mô phỏng</li></ul></div>
+        <div class="moc"><span class="nhan-tt sau">Dự kiến</span><h3>Mở rộng và đánh giá</h3><ul><li>Khảo sát hiệu quả với học sinh tại trường</li><li>AI chạy ngay trên máy</li><li>Bản cài cho macOS, tầng mới cho môn Vật lý</li><li>Hỗ trợ kính thực tế ảo</li></ul></div>
       </div>
     </div>
 
@@ -603,8 +921,10 @@
         <details><summary>VERA Lab có thay thế giờ thực hành thật không?</summary><p>Không. VERA Lab giúp học sinh chuẩn bị và ôn lại, còn kỹ năng cầm nắm ngoài đời vẫn cần giờ thực hành thật.</p></details>
         <details><summary>Kết quả thí nghiệm có chính xác không?</summary><p>Mô phỏng ở mức phục vụ dạy học: đúng về hiện tượng và gần đúng về số liệu trong phạm vi các bài. Nhóm chạy kiểm thử tự động để đối chiếu với đáp án.</p></details>
         <details><summary>Có cần kính thực tế ảo không?</summary><p>Không. VERA Lab chạy trên màn hình máy tính thường, điều khiển bằng chuột và bàn phím. Webcam và tay cầm là tùy chọn.</p></details>
-        <details><summary>Có cần kết nối mạng không?</summary><p>Phần trợ lý AI và robot lập kế hoạch cần kết nối tới máy chủ. Nhóm đang hướng tới AI chạy ngay trên máy.</p></details>
-        <details><summary>Các thí nghiệm sinh học có an toàn không?</summary><p>Trong ứng dụng chỉ dùng các chủng dạy học ở cấp an toàn thấp nhất, và trợ lý AI từ chối các yêu cầu vượt mức này.</p></details>
+        <details><summary>Giáo viên quản lý lớp như thế nào?</summary><p>Giáo viên đăng nhập trang quản lý trên trình duyệt để tạo lớp, cấp mã lớp, chấm kết quả, trình chiếu bài giảng lên màn hình trong phòng lab, theo dõi học sinh trực tiếp và bật chế độ Kiểm tra.</p></details>
+        <details><summary>Nhiều học sinh có vào chung một phòng thí nghiệm được không?</summary><p>Được. Phòng học chung nối qua Internet bằng mã 6 ký tự hoặc trong mạng LAN. Mọi người thấy nhau và cầm chung dụng cụ; dung dịch và phản ứng chưa được đồng bộ giữa các máy.</p></details>
+        <details><summary>Có cần kết nối mạng không?</summary><p>Phần trợ lý AI, robot lập kế hoạch và lớp học từ web cần kết nối tới máy chủ. Chế độ dùng thử không cần mạng.</p></details>
+        <details><summary>Các thí nghiệm sinh học có an toàn không?</summary><p>Trong ứng dụng chỉ dùng các chủng dạy học ở cấp an toàn thấp nhất (BSL-1), và trợ lý AI từ chối các yêu cầu vượt mức này.</p></details>
       </div>
       <p class="gioi-han"><a class="lien-ket" href="#/thuc-trang">Xem 12 nguồn về thực trạng</a></p>
     </div>
@@ -612,6 +932,7 @@
   </div>
 </section>
 
+<!-- ═════════════════════════ TẢI VỀ ═════════════════════════ -->
 <section class="tab" id="tai-ve" data-ten="Tải về" aria-labelledby="h-tai-ve">
   <div class="khung dau-tab">
     <p class="the-muc">Tải về</p>
@@ -623,12 +944,14 @@
       <div class="o-hdh">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg>
         <b>Windows</b>
+        <span>Bản .exe, đã chạy thử trên laptop Intel Iris Xe</span>
         <button type="button" class="nut chinh nut-tai">Tải về</button>
       </div>
       <div class="o-hdh">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
         <b>macOS</b>
-        <button type="button" class="nut chinh nut-tai">Tải về</button>
+        <span>Dự kiến</span>
+        <button type="button" class="nut vien nut-tai">Tải về</button>
       </div>
     </div>
     <p class="gioi-han">Webcam và tay cầm là tùy chọn. Chỉ cần chuột và bàn phím là dùng được.</p>
@@ -652,23 +975,47 @@
 </main>
 
 <footer>
+  <div class="loi-moi">
+    <div class="khung">
+      <div>
+        <h2>Bước vào phòng thí nghiệm ảo</h2>
+        <p>Tham quan hai tầng Hóa và Sinh ngay trên trang, hoặc đăng nhập trang quản lý dành cho giáo viên và học sinh.</p>
+      </div>
+      <div class="nhom-nut">
+        <a class="nut sang lon co-mui" href="#/tham-quan">Tham quan phòng lab</a>
+        <a class="nut vien-toi lon" href="/quan-ly">Đăng nhập</a>
+      </div>
+    </div>
+  </div>
   <div class="khung">
     <div class="chan">
       <div>
         <a class="nhan-hieu" href="#/gioi-thieu"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2.5 35.2 11.2v17.6L20 37.5 4.8 28.8V11.2z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/><path d="M12.5 13 20 28l7.5-15" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>VERA Lab</a>
-        <div>Virtual Experiment &amp; Reality-based AI Lab</div>
-        <div>Dự án Khoa học Kỹ thuật của học sinh Trường THPT Chuyên Lê Quý Đôn, Gia Lai</div>
+        <p>Virtual Experiment &amp; Reality-based AI Lab. Dự án Khoa học Kỹ thuật của học sinh Trường THPT Chuyên Lê Quý Đôn, Gia Lai.</p>
+        <p class="tac-gia">Nguyễn Ngọc Bảo Trọng · Trần Đức Trọng</p>
       </div>
       <div>
-        <h2>Nhóm tác giả</h2>
-        <ul><li>Nguyễn Ngọc Bảo Trọng</li><li>Trần Đức Trọng</li></ul>
+        <h2>Sản phẩm</h2>
+        <ul><li><a href="#/san-pham">Tính năng</a></li><li><a href="#/tham-quan">Tham quan</a></li><li><a href="#/cong-nghe">Công nghệ</a></li><li><a href="#/tai-ve">Tải về</a></li></ul>
       </div>
       <div>
-        <h2>Xem nhanh</h2>
-        <ul><li><a href="#/thuc-trang">Thực trạng</a></li><li><a href="#/kiem-chung">Kiểm chứng</a></li><li><a href="#/tai-ve">Tải về</a></li></ul>
+        <h2>Dự án</h2>
+        <ul><li><a href="#/thuc-trang">Thực trạng</a></li><li><a href="#/kiem-chung">Kiểm chứng</a></li><li><a href="#/kiem-chung" data-mo-tab="t-k6">Đo cảm biến tay cầm</a></li><li><a href="#/thuc-trang" data-mo-nguon>Nguồn tham khảo</a></li></ul>
+      </div>
+      <div>
+        <h2>Lớp học</h2>
+        <ul><li><a href="/quan-ly">Đăng nhập</a></li><li><a href="/dang-nhap#tao-tai-khoan">Tạo tài khoản bằng mã lớp</a></li></ul>
+      </div>
+      <div>
+        <h2>Giao diện</h2>
+        <div class="chon-mau" id="chon-mau" role="group" aria-label="Chọn giao diện">
+          <button type="button" data-mau="auto" aria-pressed="true">Tự động</button>
+          <button type="button" data-mau="light" aria-pressed="false">Sáng</button>
+          <button type="button" data-mau="dark" aria-pressed="false">Tối</button>
+        </div>
       </div>
     </div>
-    <div class="ban-quyen">Ảnh các phòng được chụp trực tiếp trong ứng dụng. Mô hình tòa nhà và tay cầm được dựng 3D ngay trên trang.</div>
+    <div class="ban-quyen"><span>© 2026 VERA Lab · Dự án Khoa học Kỹ thuật</span><span>Ảnh các phòng được chụp trực tiếp trong ứng dụng. Mô hình tòa nhà và tay cầm được dựng 3D ngay trên trang.</span></div>
   </div>
 </footer>
 
@@ -680,6 +1027,8 @@
 </dialog>
 
 <script src="trang.js"></script>
+<script src="hieu_ung.js"></script>
+<script src="nen_chim.js"></script>
 <script type="module" src="canh3d.js"></script>
 <script>
   // Thư viện 3D không tải được thì hiện bản không 3D

@@ -91,12 +91,17 @@ namespace Khkt.Input
             recenterSince = askSince = -1;
             mode = StickMode.Walk;
             stickPrev = waitRelease = false;
+            joyBadSinceX = joyBadSinceY = joyOkSinceX = joyOkSinceY = veraTapA = veraADown = -1;
+            joyBadX = joyBadY = veraAPrev = false;
             pressStart = lastTap = runSince = turnSince = -1;
             chord = holdFired = sit = false;
             LookYUsedByTool = AimHasTarget = false;
             ControllerChanged = null;
             Notice = null;
         }
+
+        /// <summary>VeraPointer báo người chơi đang lia tay cầm VERA: ưu tiên tia tay cầm hơn chuột.</summary>
+        public static void MarkPadUse() => lastPadUse = Time.unscaledTime;
 
         public static void Register(ControllerSource s) { if (!sources.Contains(s)) sources.Add(s); }
         public static void Unregister(ControllerSource s) => sources.Remove(s);
@@ -141,7 +146,8 @@ namespace Khkt.Input
                 var s = active.Latest;
                 bool Held(ControllerButtons b) => s.Pressed(b) || active.ButtonDown(b);
                 singleStick = s.Pressed(ControllerButtons.SingleStick);
-                if (singleStick) SingleStickTick(s.Joy2, Held(ControllerButtons.Joy2Press), now);
+                if (s.Vera) VeraTick(s, Held(ControllerButtons.Joy2Press), now);
+                else if (singleStick) SingleStickTick(s.Joy2, Held(ControllerButtons.Joy2Press), now);
                 else
                 {
                     move = s.Joy2;
@@ -281,6 +287,78 @@ namespace Khkt.Input
                 }
                 use = button;
             }
+        }
+
+        // ----- Tay cầm VERA (firmware/tay_cam_vera): tia trỏ bằng hướng tay cầm (VeraPointer), cần gạt chỉ để đi -----
+        // Nút cảm ứng A / B do HandController đọc (B giữ = cầm, buông = đặt; A = dùng, giữ A khi cầm = chế độ tinh / rót).
+
+        static float joyBadSinceX = -1, joyBadSinceY = -1, joyOkSinceX = -1, joyOkSinceY = -1, veraTapA = -1, veraADown = -1;
+        static bool joyBadX, joyBadY, veraAPrev;
+
+        static void VeraTick(ControllerState s, bool stickPress, float now)
+        {
+            bool still = s.Has(VeraFlags.Still);
+            Vector2 j = new Vector2(GuardAxis(s.Joy2.x, still, now, ref joyBadSinceX, ref joyOkSinceX, ref joyBadX, "X"),
+                                    GuardAxis(s.Joy2.y, still, now, ref joyBadSinceY, ref joyOkSinceY, ref joyBadY, "Y"));
+            // vùng chết tròn 8% (trong) / 5% (ngoài) rồi đường cong expo, như phòng thử (xu_ly.joystick)
+            float r = j.magnitude;
+            j = r < 0.08f ? Vector2.zero : j * (Mathf.Pow(Mathf.Min(1f, (r - 0.08f) / 0.87f), 1.6f) / r);
+            move = new Vector2(0, j.y);
+            if (Mathf.Abs(j.x) > 0.85f) { if (turnSince < 0) turnSince = now; }
+            else turnSince = -1;
+            look = new Vector2(j.x * (turnSince >= 0 && now - turnSince > 0.7f ? 1f : 0.8f), 0);
+            if (j.y > 0.9f) { if (runSince < 0) runSince = now; }
+            else runSince = -1;
+            shift = runSince >= 0 && now - runSince >= RunAfterS;
+            use = s.Has(VeraFlags.TouchB);
+            swirl = stickPress;  // nhấn cần: lắc bình
+            // nhấp đúp A khi không trỏ vào gì: bật / tắt trợ giúp
+            bool a = s.Has(VeraFlags.TouchA);
+            if (a && !veraAPrev) veraADown = now;
+            if (!a && veraAPrev && now - veraADown < 0.25f)
+            {
+                if (veraTapA >= 0 && now - veraTapA < 0.35f && !AimHasTarget)
+                {
+                    help = true;
+                    veraTapA = -1;
+                }
+                else veraTapA = now;
+            }
+            veraAPrev = a;
+        }
+
+        /// <summary>
+        /// Trục cần gạt lệch tâm khi tay cầm nằm yên trên bàn (không ai chạm) quá 1 s: dây lỏng hoặc tâm lưu sai
+        /// (đo 11/11/2026: dây VRy làm nhân vật tự đi 8 m / 3 phút). Tạm bỏ trục đó, dùng lại khi về tâm 2 s liền.
+        /// </summary>
+        static float GuardAxis(float v, bool still, float now, ref float badSince, ref float okSince, ref bool bad, string axis)
+        {
+            if (!bad)
+            {
+                if (still && Mathf.Abs(v) > 0.12f)
+                {
+                    if (badSince < 0) badSince = now;
+                    if (now - badSince > 1f)
+                    {
+                        bad = true;
+                        okSince = -1;
+                        Notice?.Invoke($"Cần gạt trục {axis} lệch tâm khi không ai chạm (dây lỏng?): tạm bỏ trục {axis}");
+                    }
+                }
+                else badSince = -1;
+            }
+            else if (Mathf.Abs(v) < 0.05f)
+            {
+                if (okSince < 0) okSince = now;
+                if (now - okSince > 2f)
+                {
+                    bad = false;
+                    badSince = -1;
+                    Notice?.Invoke($"Cần gạt trục {axis} đã về tâm, dùng lại");
+                }
+            }
+            else okSince = -1;
+            return bad ? 0f : v;
         }
 
         static void SetMode(StickMode m)

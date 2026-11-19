@@ -270,6 +270,7 @@ namespace Khkt.Demo
             var robot = LabRobot.Instance;
             var cat = ChemicalCatalog.Instance;
 
+            if (LocalBio(q)) return;
             bool doIt = Has(q, "lam", "minh hoa", "thuc hien", "demo", "cho xem", "giup", "thu ");
             if (Has(q, "chuan do") && doIt && !Has(q, "huong dan", "cach "))
             {
@@ -342,7 +343,57 @@ namespace Khkt.Demo
                 return;
             }
             if (Has(q, "tra cuu", "tim kiem")) { Execute("mo_tra_cuu", 0); return; }
-            Add("Robot", "Mình làm được: \"làm mẫu chuẩn độ\", \"thí nghiệm mẫu\", \"làm nhận biết Cu2+\", \"đo pH bình này\", \"đun nóng\", \"ly tâm\", \"lấy CuSO4 ra bàn\", \"KMnO4 ở đâu\", \"dọn bàn\", \"bật tủ hút\". Chạy máy chủ AI để ra lệnh tự do.");
+            Add("Robot", "Mình làm được: \"làm mẫu chuẩn độ\", \"thí nghiệm mẫu\", \"làm nhận biết Cu2+\", \"đo pH bình này\", \"đun nóng\", \"ly tâm\", \"lấy CuSO4 ra bàn\", \"KMnO4 ở đâu\", \"dọn bàn\", \"bật tủ hút\". Ở lab sinh tầng 2: \"lấy ống nghiệm\", \"trong ống có gì\" (mình tự đi thang bộ theo bạn). Chạy máy chủ AI để ra lệnh tự do.");
+        }
+
+        /// <summary>
+        /// Lệnh tại chỗ ở lab sinh tầng 2 khi không có AI: lấy dụng cụ mới từ hộp cấp ("lấy ống nghiệm"), xem trong bình sinh học
+        /// gần nhất ("trong ống có gì"). Thao tác tự do nhiều bước cần máy chủ AI (kỹ năng dung_dung_cu).
+        /// </summary>
+        bool LocalBio(string q)
+        {
+            var robot = LabRobot.Instance;
+            if (robot == null || viewer == null || viewer.position.y < 3f) return false;  // chỉ khi người dùng ở tầng 2
+            Vector3 u = viewer.position;
+            if (Has(q, "lay", "mang", "dua", "dem"))
+            {
+                Khkt.Interaction.Bio.BioDispenser box = null;
+                float bd = 15f;
+                foreach (var d in Khkt.Rendering.ZoneRoot.FindAll<Khkt.Interaction.Bio.BioDispenser>())
+                {
+                    if (d.transform.position.y < 3.6f || d.remaining <= 0 || !q.Contains(ChemicalCatalog.Fold(d.itemName))) continue;
+                    float dist = Vector3.Distance(d.transform.position, u);
+                    if (dist < bd) { bd = dist; box = d; }
+                }
+                if (box != null)
+                {
+                    RobotWorld.Ids["hop_cap_dang_chon"] = box;
+                    Add("Robot", $"Mình lấy một {box.itemName} mới ra bàn cho bạn.");
+                    robot.ExecutePlan(new List<RobotStep>
+                    {
+                        new RobotStep { ky_nang = "lay_dung_cu", doi_tuong = "hop_cap_dang_chon" },
+                        new RobotStep { ky_nang = "dat", dich = "ban_nguoi_dung" },
+                    });
+                    return true;
+                }
+            }
+            if (Has(q, "quan sat", "co gi", "trong binh", "trong ong", "trong coc", "chua gi"))
+            {
+                Khkt.Interaction.Bio.BioVessel best = null;
+                float bd = 2.5f;
+                foreach (var v in Khkt.Rendering.ZoneRoot.FindAll<Khkt.Interaction.Bio.BioVessel>())
+                {
+                    if (v.isStock || v.mix.IsEmpty || v.transform.position.y < 3.6f) continue;
+                    float dist = Vector3.Distance(v.transform.position, u);
+                    if (dist < bd) { bd = dist; best = v; }
+                }
+                if (best == null) { Add("Robot", "Quanh bạn chưa có bình sinh học nào đang chứa mẫu."); return true; }
+                RobotWorld.Ids["binh_sinh_dang_chon"] = best;
+                Add("Robot", $"Mình xem trong {best.label}.");
+                robot.ExecutePlan(new List<RobotStep> { new RobotStep { ky_nang = "quan_sat", doi_tuong = "binh_sinh_dang_chon" } });
+                return true;
+            }
+            return false;
         }
 
         static bool Has(string q, params string[] keys)

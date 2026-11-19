@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="/tinh/vera.css">
 <script src="/tinh/phien.js"></script>
+<script src="/tinh/chuyen_trang.js"></script>
 <style>
 .bo-cuc { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); align-items: start; margin-top: 16px; }
 .cot { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
@@ -264,7 +265,9 @@ fTai.addEventListener("submit", async (e) => {
   nut.disabled = true;
   nut.textContent = "Đang xử lý…";
   try {
-    const kq = await Phien.json("/api/bai-giang", { method: "POST", body: new FormData(fTai) });
+    const body = await ChuyenTrang.formData(fTai, (so) => { nut.textContent = `Đang chuyển trang ${so}…`; });
+    nut.textContent = "Đang tải lên…";
+    const kq = await Phien.json("/api/bai-giang", { method: "POST", body });
     fTai.reset();
     daChonTay = true;
     await napBai(kq.id);

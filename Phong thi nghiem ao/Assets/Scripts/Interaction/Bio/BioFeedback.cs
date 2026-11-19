@@ -205,8 +205,12 @@ namespace Khkt.Interaction.Bio
                 inst.audioSource.PlayOneShot(inst.clipPop, 0.4f);
         }
 
+        /// <summary>Mỗi thông báo thực hành (nội dung, có phải cảnh báo không): robot trợ lý nghe để nói lại kết quả thao tác của nó.</summary>
+        public static event Action<string, bool> OnToast;
+
         public static void ShowToast(string message, bool isError = false, float seconds = 4.2f, string subtitle = "")
         {
+            OnToast?.Invoke(message ?? "", isError);
             var inst = Ensure();
             inst.toastTitle = isError ? "CẢNH BÁO THAO TÁC SINH HỌC" : "THÔNG BÁO THỰC HÀNH SINH HỌC";
             inst.toastBody = message ?? "";

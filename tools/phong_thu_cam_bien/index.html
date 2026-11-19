@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phòng thử cảm biến VERA</title>
+<style>
+  :root { --nen: #0f1418; --o: #172028; --vien: #2a3640; --chu: #dfe7ec; --mo: #8a9aa6; --nhan: #38d6c4; --do: #ff6b6b; --vang: #ffc857; --xanh: #6fdc8c; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--nen); color: var(--chu); font: 14px/1.45 "Segoe UI", system-ui, sans-serif; overflow: hidden; }
+  #canh { position: fixed; inset: 0 0 0 380px; }
+  #canh canvas { display: block; width: 100%; height: 100%; }
+  #ben { position: fixed; left: 0; top: 0; bottom: 0; width: 380px; background: var(--o); border-right: 1px solid var(--vien); display: flex; flex-direction: column; }
+  #dau { padding: 12px 14px 10px; border-bottom: 1px solid var(--vien); }
+  #dau h1 { margin: 0 0 8px; font-size: 16px; letter-spacing: .3px; }
+  #dau h1 b { color: var(--nhan); }
+  .hang { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  button { background: #22303a; color: var(--chu); border: 1px solid #34444f; border-radius: 6px; padding: 6px 10px; font: inherit; cursor: pointer; }
+  button:hover { border-color: var(--nhan); }
+  button.chinh { background: var(--nhan); color: #06231f; border-color: var(--nhan); font-weight: 600; }
+  button.nho { padding: 3px 8px; font-size: 12.5px; }
+  button:disabled { opacity: .45; cursor: default; }
+  #tt { font-size: 12.5px; color: var(--mo); margin-top: 6px; }
+  #tt .ok { color: var(--xanh); } #tt .loi { color: var(--do); }
+  #the { display: flex; border-bottom: 1px solid var(--vien); }
+  #the button { flex: 1; border: 0; border-radius: 0; background: transparent; padding: 9px 2px; font-size: 12.5px; color: var(--mo); border-bottom: 2px solid transparent; }
+  #the button.chon { color: var(--chu); border-bottom-color: var(--nhan); }
+  #noi { flex: 1; overflow-y: auto; padding: 10px 14px 20px; }
+  .muc { border: 1px solid var(--vien); border-radius: 8px; margin-bottom: 10px; background: #131b21; }
+  .muc > h3 { margin: 0; padding: 8px 10px; font-size: 13.5px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+  .muc > h3 i { font-style: normal; font-size: 12px; font-weight: 500; }
+  .muc .than { padding: 2px 10px 10px; }
+  .muc.dong .than { display: none; }
+  .so { font-family: Consolas, ui-monospace, monospace; font-size: 12.5px; color: #c8d6df; white-space: pre; }
+  .goi { color: var(--mo); font-size: 12.5px; margin: 4px 0 6px; }
+  .buoc { display: flex; gap: 6px; align-items: center; margin: 5px 0; font-size: 12.8px; }
+  .buoc span { flex: 1; }
+  .dat { color: var(--xanh); } .chua { color: var(--mo); } .canh-bao { color: var(--vang); } .hong { color: var(--do); }
+  .thanh { position: relative; height: 14px; background: #0c1216; border: 1px solid var(--vien); border-radius: 4px; margin: 4px 0; overflow: hidden; }
+  .thanh > div { position: absolute; top: 0; bottom: 0; left: 0; background: var(--nhan); }
+  .thanh > s { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--vang); text-decoration: none; }
+  canvas.ve { background: #0c1216; border: 1px solid var(--vien); border-radius: 6px; display: block; margin: 6px auto; }
+  label.chk { font-size: 12.8px; display: inline-flex; gap: 4px; align-items: center; margin-right: 10px; }
+  input[type=range] { width: 100%; }
+  #nk { font-family: Consolas, monospace; font-size: 11.5px; color: var(--mo); max-height: 110px; overflow-y: auto; white-space: pre-wrap; border-top: 1px solid var(--vien); padding: 6px 14px; }
+  #hud { position: fixed; left: 396px; top: 12px; background: rgba(15,20,24,.82); border: 1px solid var(--vien); border-radius: 8px; padding: 8px 12px; font-size: 13px; pointer-events: none; min-width: 230px; }
+  #hud b { color: var(--nhan); }
+  #hud .lon { font-size: 22px; font-weight: 600; }
+  #thong-bao { position: fixed; left: calc(50% + 190px); top: 40%; transform: translate(-50%, -50%); font-size: 26px; font-weight: 700; color: #fff; text-shadow: 0 2px 12px #000; pointer-events: none; opacity: 0; transition: opacity .25s; text-align: center; }
+  kbd { background: #22303a; border: 1px solid #34444f; border-radius: 4px; padding: 0 5px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div id="ben">
+  <div id="dau">
+    <h1>Phòng thử cảm biến <b>VERA</b></h1>
+    <div class="hang">
+      <button id="nut-noi" class="chinh">Kết nối tay cầm</button>
+      <label class="chk"><input type="checkbox" id="gia-lap"> Giả lập</label>
+      <button id="nut-ghi" class="nho" title="Ghi số liệu thô ra tệp CSV (làm minh chứng)">● Ghi CSV</button>
+    </div>
+    <div id="tt">Chưa kết nối. Cần Chrome hoặc Edge.</div>
+  </div>
+  <div id="the">
+    <button data-the="can" class="chon">Căn chỉnh</button>
+    <button data-the="rot">Rót</button>
+    <button data-the="tro">Trỏ chọn</button>
+    <button data-the="ong">Pipet</button>
+    <button data-the="buret">Chuẩn độ</button>
+  </div>
+  <div id="noi"></div>
+  <div id="nk"></div>
+</div>
+<div id="canh"></div>
+<div id="hud"></div>
+<div id="thong-bao"></div>
+<script type="importmap">{ "imports": { "three": "./thu_vien/three.module.js" } }</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

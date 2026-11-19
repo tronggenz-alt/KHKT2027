@@ -201,14 +201,19 @@ namespace Khkt.EditorTools
         static void BakeNavGrid(Transform root)
         {
             Physics.SyncTransforms();
-            var bytes = NavGrid.Bake(out int nx, out int nz);
+            var bytes = NavGrid.Bake(0, out int nx, out int nz);
+            var bytes2 = NavGrid.Bake(1, out _, out _);
             var go = new GameObject("Lưới đi robot (nướng sẵn)");
             go.transform.SetParent(root, false);
             var d = go.AddComponent<NavGridData>();
             d.nx = nx;
             d.nz = nz;
             d.walk = bytes;
-            Debug.Log($"[KHKT] Đã nướng lưới đi robot: {nx} × {nz} ô, {bytes.Count(b => b != 0)} ô đi được.");
+            d.walk2 = bytes2;
+            Debug.Log($"[KHKT] Đã nướng lưới đi robot: {nx} × {nz} ô, tầng 1 {bytes.Count(b => b != 0)} ô đi được, tầng 2 {bytes2.Count(b => b != 0)} ô đi được.");
+            // Chân thang (tầng 1) và đầu thang (tầng 2) phải có ô đi được, nếu không robot không đổi tầng được
+            NavGrid.Build();
+            if (!NavGrid.StairLinked) Debug.LogError("[KHKT] Lưới đi robot: thang bộ không nối được hai tầng (chân hoặc đầu thang bị chặn).");
         }
 
         // =====================================================================

@@ -1,4 +1,4 @@
-using Khkt.Input;
+﻿using Khkt.Input;
 using UnityEngine;
 
 namespace Khkt.Demo
@@ -62,6 +62,16 @@ namespace Khkt.Demo
         public HandController hand;
 
         public bool Driving { get; private set; }
+        /// <summary>Số bàn tay đang hiện (hai cánh tay ảo + găng tay của chuột), để kiểm thử: không bao giờ quá 2.</summary>
+        public int VisibleHands
+        {
+            get
+            {
+                int n = 0;
+                foreach (var a in arms) if (a != null && a.root.activeSelf && a.joints[0].gameObject.activeSelf) n++;
+                return n + (gloveShown && hand != null && hand.Held != null ? 1 : 0);
+            }
+        }
         /// <summary>Lòng bàn tay của tay đang điều khiển (ưu tiên tay phải).</summary>
         public Vector3 RightPalm { get; private set; }
         public Vector3 RightElbow => arms[0] != null ? arms[0].elbow : Vector3.zero;
@@ -94,31 +104,41 @@ namespace Khkt.Demo
             var at = ArmTracking.Instance;
             bool master = MediaPipeHandSource.Instance == null || MediaPipeHandSource.Instance.handTrackingEnabled;
             ArmTracking.Side driver = null;
+            if (cameraTransform == null) return;
+            // găng tay của chuột (HandController) đang ở đâu: chỉ có nghĩa khi đang cầm vật
+            bool holding = hand != null && hand.Held != null && hand.hand != null;
+            Vector3 glove = holding ? hand.hand.transform.position : Vector3.positiveInfinity;
+            bool gloveReach = holding && (glove - Shoulder(0)).sqrMagnitude < 0.62f * 0.62f;
+            bool rightAtGlove = false;
             for (int i = 0; i < 2; i++)
             {
                 var s = at == null ? null : i == 0 ? at.Right : at.Left;
-                bool show = master && s != null && (s.handSeen || s.armSeen) && cameraTransform != null;
-                if (cameraTransform == null) continue;
+                bool show = master && s != null && s.handSeen;
                 if (arms[i] == null) arms[i] = Build(i);
-                if (!arms[i].root.activeSelf) arms[i].root.SetActive(true);
-                if (show != arms[i].tracked) { arms[i].tracked = show; arms[i].ResetFilters(); }  // đổi nguồn: không trôi từ chỗ cũ
-                // luôn có hai tay: không nhận diện thì tay phải nối tới găng tay của chuột, tay trái để nghỉ
-                if (show) Pose(arms[i], s, i);
-                else
+                // không đặt lại bộ lọc khi đổi nguồn (tay thật <-> tay nghỉ): tay trượt mềm sang chỗ mới thay vì nhảy
+                arms[i].tracked = show;
+                bool visible = true;
+                if (show)
                 {
-                    // găng tay của chuột ở gần thì tay phải với tới đó; ở xa (trỏ ra bàn khác) thì hai tay để nghỉ
-                    Vector3 glove = hand != null && hand.hand != null && hand.hand.gameObject.activeInHierarchy ? hand.hand.transform.position : Vector3.positiveInfinity;
-                    if (i == 0 && (glove - Shoulder(0)).sqrMagnitude < 0.5f * 0.5f) Pose(arms[i], restRight, 0, glove);
-                    else Pose(arms[i], RestHand(i), i);
+                    // tay đang điều khiển mà đang cầm vật: bàn tay ảo ôm đúng vật (vật nằm theo tia trỏ)
+                    bool drives = driver == null;
+                    Pose(arms[i], s, i, drives && gloveReach ? glove : (Vector3?)null);
+                    if (drives) { driver = s; drivingSide = i; rightAtGlove = gloveReach; }
                 }
-                // tay nào đang thấy cũng điều khiển được, ưu tiên tay phải
-                if (show && s.handSeen && driver == null) { driver = s; drivingSide = i; }
+                else if (i == 0 && holding)
+                {
+                    // tay phải nghỉ mà đang cầm vật: với tới vật nếu tới được, không thì ẩn hẳn (găng tay hiện thay)
+                    if (gloveReach && driver == null) { Pose(arms[i], RestHand(i), 0, glove); rightAtGlove = true; }
+                    else visible = false;
+                }
+                else Pose(arms[i], RestHand(i), i);
+                if (arms[i].root.activeSelf != visible) arms[i].root.SetActive(visible);
             }
             Drive(driver);
-            // không theo tay thật: găng tay của chuột chỉ hiện khi đang cầm vật, để màn hình không có ba bàn tay
-            if (!Driving && handRigRenderers != null)
+            // găng tay chỉ hiện khi đang cầm mà không bàn tay ảo nào ôm vật: lúc nào cũng đúng hai bàn tay trên màn hình
+            if (handRigRenderers != null)
             {
-                bool want = hand != null && hand.Held != null;
+                bool want = holding && !rightAtGlove && driver == null;
                 if (want != gloveShown)
                 {
                     gloveShown = want;
@@ -279,7 +299,7 @@ namespace Khkt.Demo
         void Drive(ArmTracking.Side right)
         {
             bool want = right != null && hand != null;
-            if (want)
+            if (want && !GestureControl.Owning)
             {
                 // tia từ camera đi qua lòng bàn tay: trỏ tay vào vật nào thì chọn vật đó; chụm ngón là cầm
                 hand.OverrideAimPoint = RightPalm + (RightPalm - cameraTransform.position).normalized * 0.05f;
@@ -287,14 +307,12 @@ namespace Khkt.Demo
             }
             if (want == Driving) return;
             Driving = want;
-            if (!want && hand != null)
+            if (!want && hand != null && !GestureControl.Owning)
             {
                 hand.OverrideAimPoint = null;
                 hand.OverrideHold = false;
             }
-            // tay thật đã có hình: ẩn găng tay cũ, tắt cần điều khiển ảo từ cử chỉ để không điều khiển hai lần
-            if (handRigRenderers != null) foreach (var r in handRigRenderers) if (r != null) r.enabled = !want;
-            gloveShown = !want;
+            // tắt cần điều khiển ảo từ cử chỉ để không điều khiển hai lần (găng tay do LateUpdate quyết định)
             MediaPipeHandSource.SuppressController = want;
         }
 

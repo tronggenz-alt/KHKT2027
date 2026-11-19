@@ -8,10 +8,10 @@ Thành phần chính:
   - 720 hóa chất xếp kệ, bộ máy hóa học tính phản ứng thật;
   - chuẩn độ, phòng máy phân tích, lắp ráp dụng cụ tự do kèm mạng dòng chảy;
   - robot trợ lý theo kế hoạch AI.
-- **Tay cầm tự chế "VERA Arc":**
+- **Tay cầm tự chế "VERA Band":**
   - ESP32 DevKitC 38 chân + cảm biến chuyển động BMI160 + joystick KY-023 + cò analog bằng cảm biến Hall SS49E;
-  - 81 × 71 × 123 mm, vòng tròn có logo, pin vuông 9V trong cán, 4 cổng mở rộng GPIO, thân 2 nửa bắt vít;
-  - vỏ in 3D, đã có gói gửi in, chưa in thử. Xem [docs/24](docs/24-tay-cam-vera-arc.md).
+  - đeo vào tay bằng quai qua mu bàn tay, thả lỏng vẫn bám; pin vuông 9V trong cán, 4 cổng mở rộng GPIO, thân 2 nửa bắt vít;
+  - vỏ in 3D, đã có gói gửi in 5 file STL và file kích thước, chưa in thử. Xem [docs/27](docs/27-tay-cam-vera-band.md).
 - **Theo dõi đầu & cử chỉ tay bằng webcam (MediaPipe):** 478 điểm mặt 3D, đo khoảng cách cm thật, hướng nhìn gaze, cử chỉ tay ảo (`MediaPipeHandSource`: pinch, palm, fist, thumb up), HUD F11. Tự động lùi về YuNet nếu thiếu MediaPipe. Xem [docs/20](docs/20-mediapipe.md).
 - **Web quản lý:** kho hóa chất, thiết bị, nhật ký; mạng lưới khóa AI.
 
@@ -25,7 +25,8 @@ Thành phần chính:
 
 | Tài liệu | Nội dung |
 | --- | --- |
-| [docs/24-tay-cam-vera-arc.md](docs/24-tay-cam-vera-arc.md) | **Tay cầm "VERA Arc"**: ESP32 38 chân + BMI160 + joystick + cò analog Hall + pin vuông 9V; 4 cổng mở rộng GPIO; gói 8 file STL, sơ đồ đấu nối, thứ tự lắp |
+| [docs/27-tay-cam-vera-band.md](docs/27-tay-cam-vera-band.md) | **Tay cầm "VERA Band"**: đeo vào tay bằng quai qua mu bàn tay; gói 5 file STL theo màu, file kích thước 1:1 đối chiếu cỡ tay người Việt trưởng thành |
+| [docs/24-tay-cam-vera-arc.md](docs/24-tay-cam-vera-arc.md) | Tay cầm "VERA Arc", bản trước của VERA Band; điện tử, đấu nối và 4 cổng GPIO vẫn dùng chung: ESP32 38 chân + BMI160 + joystick + cò analog Hall + pin vuông 9V; 4 cổng mở rộng GPIO; gói 8 file STL, sơ đồ đấu nối, thứ tự lắp |
 | [docs/22-tay-cam-vera-drop.md](docs/22-tay-cam-vera-drop.md) | Tay cầm "VERA Drop", bản trước của VERA Arc: dáng giọt nước, pin LiPo, 7 file STL, 6 bản vẽ 2D |
 | [docs/15-tay-cam-v2-halo.md](docs/15-tay-cam-v2-halo.md) | Tay cầm V2 "Halo", bản trước của VERA Drop. Phần giải thích cò Hall và OpenCV vẫn dùng được |
 | [docs/20-mediapipe.md](docs/20-mediapipe.md) | **Theo dõi đầu & cử chỉ tay MediaPipe** (F8, F10, F11): MediaPipe 1.2.0 (478 điểm mặt 3D, cử chỉ tay ảo `MediaPipeHandSource`, đo khoảng cách tròng mắt cm, hướng nhìn gaze, 3 bộ cảm giác, trễ < 20 ms, CPU 0%) |

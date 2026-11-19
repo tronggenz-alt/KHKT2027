@@ -2,7 +2,7 @@
 // thanh bên và thanh dưới điện thoại, hộp tìm kiếm. Khung giáo viên, học sinh còn dùng thêm tab theo địa chỉ # và thẻ tài khoản.
 const Phien = (() => {
   // Trang mới: thêm đường dẫn vào TRANG_CO_KHUNG và một dòng vào MENU; trong trang chỉ cần <header class="thanh"> như truc_tiep.html.
-  const TRANG_CO_KHUNG = { "/giao-vien": "giao_vien", "/hoc-sinh": "hoc_sinh", "/truc-tiep": "giao_vien", "/trinh-chieu": "giao_vien", "/buoi-hoc": "giao_vien" };
+  const TRANG_CO_KHUNG = { "/giao-vien": "giao_vien", "/hoc-sinh": "hoc_sinh", "/truc-tiep": "giao_vien", "/trinh-chieu": "giao_vien", "/buoi-hoc": "giao_vien", "/hoa": "giao_vien", "/sinh": "giao_vien" };
   const MENU = {
     giao_vien: [
       ["", [["nha", "Hôm nay", "/giao-vien#tong-quan"], ["lop", "Lớp học", "/giao-vien#lop"], ["cham", "Chấm bài", "/giao-vien#ket-qua"]]],

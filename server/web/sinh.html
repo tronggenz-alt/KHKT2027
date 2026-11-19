@@ -6,28 +6,28 @@
 <link rel="icon" href="data:,">
 <title>Phòng Lab Sinh học VERA · Tầng 2 · Quản lý phòng thí nghiệm</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="/tinh/vera.css">
 <script src="/tinh/phien.js"></script>
 <style>
 :root {
-  --bg: #f5f5f7; --panel: #ffffff; --panel-2: #f5f5f7; --line: #d9d9de; --text: #1d1d1f; --muted: #5c5d66;
-  --accent: #0b63d1; --accent-soft: #e8f1fd; --good: #0b7a5b; --good-soft: #e3f4ee; --warn: #8f5600; --warn-soft: #fbefd9;
-  --bad: #b3261e; --bad-soft: #fbeaea; --shadow: none; --on-accent: #ffffff;
+  --bg: var(--san); --panel: var(--nen); --panel-2: var(--nen-2); --line: var(--vien); --text: var(--chu); --muted: var(--phu);
+  --accent: var(--nhan); --accent-soft: var(--nhan-nhat); --good: var(--xanh); --good-soft: var(--xanh-nhat); --warn: var(--vang); --warn-soft: var(--vang-nhat);
+  --bad: var(--do); --bad-soft: var(--do-nhat); --shadow: none; --on-accent: var(--tren-nhan);
 }
 * { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; max-width: 100%; overflow-x: hidden; background: var(--bg); color: var(--text); font: 14px/1.5 "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif; }
-header { background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 10; }
-.bar { max-width: 1240px; margin: 0 auto; padding: 12px 16px 0; }
+body { font-size: 14.5px; overflow-anchor: none; }
+.bar { max-width: 1240px; margin: 0 auto; padding: 20px 16px 0; }
 .title { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .title-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.title h1 { font-size: 18px; margin: 0; font-weight: 650; letter-spacing: -.01em; }
+.title h1 { font-size: clamp(22px, 2.4vw, 30px); margin: 0; font-weight: 700; letter-spacing: -.02em; }
 .chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 6px; font-size: 12px;
         background: var(--panel-2); border: 1px solid var(--line); color: var(--muted); }
 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
 .chip.on .dot { background: var(--good); } .chip.off .dot { background: var(--bad); }
-nav { display: flex; gap: 2px; margin-top: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-nav button { border: 0; background: none; color: var(--muted); padding: 9px 12px; font: inherit; font-weight: 550; cursor: pointer;
+#tabs { display: flex; gap: 2px; margin-top: 12px; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--line); }
+#tabs button { border: 0; background: none; color: var(--muted); padding: 9px 12px; font: inherit; font-weight: 550; cursor: pointer;
              border-bottom: 2px solid transparent; white-space: nowrap; }
-nav button.active { color: var(--accent); border-color: var(--accent); }
+#tabs button.active { color: var(--accent); border-color: var(--accent); }
 main { max-width: 1240px; margin: 0 auto; padding: 16px; }
 section { display: none; } section.active { display: block; }
 h2 { font-size: 15px; margin: 0 0 10px; font-weight: 650; }
@@ -50,6 +50,7 @@ button.b.danger:hover { border-color: var(--bad); color: var(--bad); }
 button.b.sm, a.b.sm { padding: 3px 8px; font-size: 12px; }
 button.b:disabled { opacity: .55; cursor: default; }
 .tablewrap { overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+@media (max-width: 700px) { .tablewrap table { min-width: 720px; } }
 table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
 th { font-size: 12px; color: var(--muted); font-weight: 600; background: var(--panel-2); position: sticky; top: 0; }
@@ -76,50 +77,45 @@ tr.over td { background: var(--bad-soft); }
 .week-grid { display: grid; grid-template-columns: 74px repeat(7, minmax(92px, 1fr)); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; min-width: 720px; }
 .week-cell { padding: 6px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); font-size: 12px; min-height: 44px; cursor: pointer; }
 .week-cell.head { background: var(--panel-2); font-weight: 600; text-align: center; cursor: default; min-height: auto; }
-.week-cell.booked { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.week-cell.booked { background: var(--accent-soft); color: var(--accent); font-weight: 600; cursor: default; }
+.week-cell.hom-nay { box-shadow: inset 0 2px 0 var(--accent); }
 @media (max-width: 600px) {
   main, .bar { padding-left: 16px; padding-right: 16px; }
   .grid { grid-template-columns: repeat(2, 1fr); }
 }
 select, input { max-width: 100%; }
 @media (max-width: 600px) {
-  header { position: static; }
   .bar { position: relative; }
   .title h1 { flex-basis: 100%; font-size: 16px; }
-  .title > .title-left:last-child { position: absolute; right: 16px; top: 12px; }
   [data-ten-nguoi] { display: none; }
 }
 </style>
 </head>
 <body>
-<header>
-  <div class="bar">
-    <div class="title">
-      <div class="title-left">
-        <a class="b sm" href="/giao-vien">← Trang chủ</a>
-        <a class="b sm" href="/hoa">Phòng Hóa</a>
-        <h1>Phòng Lab Sinh học VERA · Tầng 2 (BSL-1)</h1>
-        <span class="chip on" id="connChip"><span class="dot"></span><span id="connText">Đang đồng bộ</span></span>
-      </div>
-      <div class="title-left">
-        <span class="muted small" data-ten-nguoi></span>
-        <button class="b sm" type="button" data-dang-xuat>Đăng xuất</button>
-      </div>
-    </div>
-    <nav id="tabs">
-      <button data-tab="tong-quan" class="active">Tổng quan tầng 2</button>
-      <button data-tab="dung-cu">Dụng cụ &amp; thiết bị</button>
-      <button data-tab="muon-tra">Mượn – trả</button>
-      <button data-tab="sinh-pham">Kho sinh phẩm</button>
-      <button data-tab="nhiet-do">Nhiệt độ tủ</button>
-      <button data-tab="dat-lich">Đặt lịch</button>
-      <button data-tab="ket-qua">Kết quả thí nghiệm</button>
-      <button data-tab="su-co">Sự cố an toàn</button>
-      <button data-tab="bao-tri">Bảo trì – hiệu chuẩn</button>
-      <button data-tab="huong-dan">Hướng dẫn dụng cụ</button>
-    </nav>
+<header class="thanh">
+  <div class="khung">
+    <a class="nhan-hieu" href="/giao-vien"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2.5 35.2 11.2v17.6L20 37.5 4.8 28.8V11.2z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/><path d="M12.5 13 20 28l7.5-15" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>VERA Lab</a>
+    <div class="nguoi"><span class="ten" data-ten-nguoi></span><button class="nut phu nho" type="button" data-dang-xuat>Đăng xuất</button></div>
   </div>
 </header>
+<div class="bar">
+  <div class="title"><div class="title-left">
+    <h1>Phòng Lab Sinh học VERA · Tầng 2 (BSL-1)</h1>
+    <span class="chip on" id="connChip"><span class="dot"></span><span id="connText">Đang đồng bộ</span></span>
+  </div></div>
+  <nav id="tabs" aria-label="Các mục Phòng Sinh">
+    <button data-tab="tong-quan" class="active">Tổng quan tầng 2</button>
+    <button data-tab="dung-cu">Dụng cụ &amp; thiết bị</button>
+    <button data-tab="muon-tra">Mượn – trả</button>
+    <button data-tab="sinh-pham">Kho sinh phẩm</button>
+    <button data-tab="nhiet-do">Nhiệt độ tủ</button>
+    <button data-tab="dat-lich">Đặt lịch</button>
+    <button data-tab="ket-qua">Kết quả thí nghiệm</button>
+    <button data-tab="su-co">Sự cố an toàn</button>
+    <button data-tab="bao-tri">Bảo trì – hiệu chuẩn</button>
+    <button data-tab="huong-dan">Hướng dẫn dụng cụ</button>
+  </nav>
+</div>
 
 <main>
   <div class="banner-err" id="errBanner">
@@ -134,11 +130,11 @@ select, input { max-width: 100%; }
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:8px">
           <h2 style="margin:0">Bản đồ mặt bằng Tầng 2 (Hành lang 3,6 m · 8 khu)</h2>
-          <span class="small muted">● Xanh: Sẵn sàng · ● Lam: Đang chạy · ● Vàng: Cần bảo trì · ● Đỏ: Cảnh báo</span>
+          <span class="small muted">● Xanh: Sẵn sàng · ● Ngọc: Đang chạy · ● Vàng: Cần bảo trì · ● Đỏ: Cảnh báo · ● Xám: chưa có tín hiệu</span>
         </div>
         <div class="svg-wrap" id="floorMapWrap"></div>
         <div id="machineDetailCard" class="card" style="margin-top:10px;margin-bottom:0;background:var(--panel-2)">
-          <span class="muted small">Bấm vào một chấm thiết bị trên bản đồ mặt bằng để xem trạng thái thời gian thực.</span>
+          <span class="muted small">Bấm vào một chấm thiết bị để xem trạng thái phòng ảo gửi lên.</span>
         </div>
       </div>
       <div>
@@ -241,7 +237,7 @@ select, input { max-width: 100%; }
       <div class="card">
         <div class="toolbar" style="justify-content:space-between">
           <h2 style="margin:0">Đồ thị giám sát nhiệt độ (Ngưỡng: 4 ± 2 °C &amp; −20 ± 5 °C)</h2>
-          <button class="b sm" onclick="recordSampleTemp()">+ Ghi mẫu nhiệt độ hiện tại</button>
+          <span class="muted small">Số đo do phòng ảo gửi lên</span>
         </div>
         <div class="svg-wrap" id="tempDetailSvg"></div>
       </div>
@@ -266,8 +262,8 @@ select, input { max-width: 100%; }
           <option value="noi_hap">Nồi hấp tiệt trùng</option>
           <option value="tu_an_toan_sinh_hoc">Tủ an toàn sinh học cấp II</option>
         </select>
-        <input id="dlUser" placeholder="Giáo viên / Học sinh" value="GV Sinh học">
-        <input id="dlClass" placeholder="Lớp" value="10A1" style="width:90px">
+        <input id="dlUser" placeholder="Giáo viên / Học sinh">
+        <input id="dlClass" placeholder="Lớp" style="width:90px">
         <input id="dlStart" type="datetime-local">
         <input id="dlEnd" type="datetime-local">
         <input id="dlPurpose" placeholder="Mục đích (vd: Bài tế bào biểu bì hành)" style="flex:1;min-width:180px">
@@ -310,7 +306,7 @@ select, input { max-width: 100%; }
           <option value="kho_sinh_pham">Kho sinh phẩm</option>
           <option value="nha_kinh">Nhà kính thực vật</option>
         </select>
-        <input id="scType" placeholder="Loại sự cố (vd: vo_lam_kinh, tran_do_vi_sinh)" value="tran_do_vi_sinh">
+        <input id="scType" placeholder="Loại sự cố (vd: vo_lam_kinh, tran_do_vi_sinh)">
         <select id="scSeverity">
           <option value="canh_bao">Cảnh báo</option>
           <option value="nghiem_trong">Nghiêm trọng</option>
@@ -344,8 +340,8 @@ select, input { max-width: 100%; }
           <option value="bao_tri">Bảo trì – vệ sinh</option>
           <option value="sua_chua">Sửa chữa khắc phục</option>
         </select>
-        <input id="btPerson" placeholder="Người thực hiện" value="Kỹ thuật viên">
-        <input id="btResult" placeholder="Kết quả (vd: Đạt chuẩn ISO 8655)" value="Đạt chuẩn">
+        <input id="btPerson" placeholder="Người thực hiện">
+        <input id="btResult" placeholder="Kết quả (vd: Đạt chuẩn ISO 8655)">
         <input id="btNote" placeholder="Ghi chú" style="flex:1;min-width:150px">
         <button class="b primary" onclick="createMaintenance()">Lưu hồ sơ</button>
       </div>
@@ -376,7 +372,8 @@ select, input { max-width: 100%; }
 
 <script>
 const viNum = new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 2 });
-let currentTab = localStorage.getItem('khkt_sinh_tab') || 'tong-quan';
+const TAB_HOP_LE = ['tong-quan', 'dung-cu', 'muon-tra', 'sinh-pham', 'nhiet-do', 'dat-lich', 'ket-qua', 'su-co', 'bao-tri', 'huong-dan'];
+let currentTab = [location.hash.slice(1), localStorage.getItem('khkt_sinh_tab')].find((t) => TAB_HOP_LE.includes(t)) || 'tong-quan';
 let allToolsCache = [];
 let allExpCache = [];
 let machineStatusCache = [];
@@ -448,9 +445,10 @@ async function api(path, opts = {}) {
   }
 }
 
-// Chuyển Tab
+// Chuyển Tab. Không gán location.hash khi tải trang: trình duyệt sẽ cuộn tới section cùng id
+addEventListener('hashchange', () => { const t = location.hash.slice(1); if (TAB_HOP_LE.includes(t)) { switchTab(t); scrollTo(0, 0); } });
 document.querySelectorAll('#tabs button').forEach(btn => {
-  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  btn.addEventListener('click', () => { switchTab(btn.dataset.tab); history.replaceState(null, '', '#' + btn.dataset.tab); });
 });
 
 function switchTab(tabId) {
@@ -510,19 +508,20 @@ function renderFloor2MapSvg(statuses) {
     const y = mapY(z.z1);
     const w = (z.x1 - z.x0) * scale;
     const h = (z.z1 - z.z0) * scale;
-    svg += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${z.fill}" stroke="${z.stroke}" stroke-width="1.5" rx="3"/>`;
-    svg += `<text x="${x + 6}" y="${y + 15}" fill="#17202a" font-size="11" font-weight="600">${esc(z.ten)}</text>`;
+    svg += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${z.stroke}" fill-opacity=".16" stroke="${z.stroke}" stroke-width="1.5" rx="3"/>`;
+    svg += `<text x="${x + 6}" y="${y + 15}" fill="#e9eff7" font-size="11" font-weight="600">${esc(z.ten)}</text>`;
   });
 
   MACHINE_DOTS.forEach(m => {
-    const st = stMap[m.ma] || { trang_thai: 'san_sang', mo_ta: 'Sẵn sàng vận hành', tien_do: 0 };
+    const co = stMap[m.ma] && stMap[m.ma].nguon !== 'mac_dinh';
+    const st = co ? stMap[m.ma] : { trang_thai: 'chua_co', mo_ta: 'Chưa có tín hiệu từ phòng ảo', tien_do: 0 };
     const color = st.trang_thai === 'hong' || st.trang_thai === 'canh_bao' ? '#c2362f' :
                   (st.trang_thai === 'can_bao_tri' ? '#b26b00' :
-                  (st.trang_thai === 'dang_chay' ? '#0f7c86' : '#1f8a4c'));
+                  (st.trang_thai === 'dang_chay' ? '#38d6c4' : st.trang_thai === 'san_sang' ? '#3ddc97' : '#5c6b7d'));
     const cx = mapX(m.x);
     const cy = mapY(m.z);
     svg += `<g style="cursor:pointer" onclick="showMachineDetail('${m.ma}')">`;
-    svg += `<circle cx="${cx}" cy="${cy}" r="6.5" fill="${color}" stroke="#ffffff" stroke-width="1.5"/>`;
+    svg += `<circle cx="${cx}" cy="${cy}" r="6.5" fill="${color}" stroke="#05080e" stroke-width="1.5"/>`;
     if (st.trang_thai === 'dang_chay' && st.mo_ta) {
       svg += `<text x="${cx + 9}" y="${cy + 4}" fill="#0f7c86" font-size="10" font-weight="700">${esc(st.mo_ta)}</text>`;
     }
@@ -534,15 +533,16 @@ function renderFloor2MapSvg(statuses) {
 
 window.showMachineDetail = function(ma) {
   const m = MACHINE_DOTS.find(x => x.ma === ma) || { ma, ten: ma };
-  const st = machineStatusCache.find(x => x.ma === ma) || { trang_thai: 'san_sang', mo_ta: 'Sẵn sàng hoạt động', tien_do: 0 };
+  const tim = machineStatusCache.find(x => x.ma === ma && x.nguon !== 'mac_dinh');
+  const st = tim || { trang_thai: 'chua_co', mo_ta: 'Phòng ảo chưa gửi trạng thái máy này.', tien_do: 0 };
   const badgeCls = st.trang_thai === 'hong' || st.trang_thai === 'canh_bao' ? 'bad' :
-                   (st.trang_thai === 'can_bao_tri' ? 'warn' : (st.trang_thai === 'dang_chay' ? 'info' : 'good'));
+                   (st.trang_thai === 'can_bao_tri' ? 'warn' : (st.trang_thai === 'dang_chay' ? 'info' : st.trang_thai === 'san_sang' ? 'good' : ''));
   document.getElementById('machineDetailCard').innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
       <div><b>${esc(m.ten)}</b> <span class="mono small muted">(${esc(ma)})</span></div>
       <span class="badge ${badgeCls}">${esc(st.trang_thai)}</span>
     </div>
-    <div class="small" style="margin-top:4px">${esc(st.mo_ta || 'Thiết bị hoạt động bình thường.')}</div>
+    <div class="small" style="margin-top:4px">${esc(st.mo_ta || '')}</div>
     <div style="margin-top:8px"><button class="b sm" onclick="switchTab('huong-dan');loadToolGuide('${esc(ma)}')">Xem hướng dẫn vận hành</button></div>
   `;
 };
@@ -587,7 +587,7 @@ async function loadOverview() {
     const sp = ov.sinh_pham || {};
     const scList = ov.su_co_moi || [];
     document.getElementById('ovStats').innerHTML = `
-      <div class="stat good"><div class="k">Tổng mã dụng cụ</div><div class="v">${fmtNum(dc.tong || 108)}</div></div>
+      <div class="stat good"><div class="k">Tổng mã dụng cụ</div><div class="v">${fmtNum(dc.tong ?? 0)}</div></div>
       <div class="stat ${dc.hong > 0 ? 'bad' : ''}"><div class="k">Dụng cụ hỏng / vỡ</div><div class="v">${fmtNum(dc.hong || 0)}</div></div>
       <div class="stat ${dc.dang_muon > 0 ? 'warn' : ''}"><div class="k">Đang cho mượn</div><div class="v">${fmtNum(dc.dang_muon || 0)}</div></div>
       <div class="stat ${(sp.sap_het || []).length > 0 ? 'warn' : ''}"><div class="k">Sinh phẩm sắp hết</div><div class="v">${fmtNum((sp.sap_het || []).length)}</div></div>
@@ -600,7 +600,7 @@ async function loadOverview() {
       <span class="badge ${t.canh_bao ? 'bad' : 'good'}" style="margin-right:6px">
         ${esc(t.tu)}: ${fmtNum(t.nhiet_do)} °C ${t.canh_bao ? '⚠ Cảnh báo!' : '✓ Ổn định'}
       </span>
-    `).join('') || '<span class="badge good">Tủ mát 4,0 °C · Tủ đông −20,0 °C</span>';
+    `).join('') || '<span class="muted small">Chưa có số đo nào.</span>';
 
     renderTempSvg('ovTempSvg', tempRes.muc || []);
 
@@ -718,8 +718,9 @@ async function loadLoans() {
 window.createLoan = async function() {
   const ma_dung_cu = document.getElementById('mtTool').value || 'kinh_hien_vi';
   const so_luong = Number(document.getElementById('mtQty').value || 1);
-  const nguoi = document.getElementById('mtUser').value.trim() || 'Học sinh';
-  const lop = document.getElementById('mtClass').value.trim() || '10A1';
+  const nguoi = document.getElementById('mtUser').value.trim();
+  const lop = document.getElementById('mtClass').value.trim();
+  if (!nguoi) { showToast('Nhập tên người mượn'); return; }
   const dueVal = document.getElementById('mtDue').value;
   const han_tra = dueVal ? Math.floor(new Date(dueVal).getTime() / 1000) : Math.floor(Date.now() / 1000 + 86400 * 3);
   try {
@@ -773,16 +774,17 @@ async function loadBioStock() {
 
 window.addBioStock = async function() {
   const body = {
-    ten: document.getElementById('spName').value.trim() || 'Sinh phẩm thực hành',
+    ten: document.getElementById('spName').value.trim(),
     loai: document.getElementById('spType').value,
     tu: document.getElementById('spCabinet').value,
     ngan: document.getElementById('spShelf').value.trim() || 'Ngăn 1',
     so_luong: Number(document.getElementById('spQty').value || 5),
     don_vi: document.getElementById('spUnit').value.trim() || 'lọ',
-    so_lo: 'LOT-2026',
+    so_lo: '',
     han_dung: Math.floor(Date.now() / 1000 + 86400 * 180),
     cap_an_toan: document.getElementById('spBsl').value.trim()
   };
+  if (!body.ten) { showToast('Nhập tên sinh phẩm'); return; }
   try {
     await api('/lab/sinh/sinh-pham', { method: 'POST', body: JSON.stringify(body) });
     showToast('Đã thêm sinh phẩm BSL-1 vào kho');
@@ -857,31 +859,37 @@ async function loadBookings() {
   } catch (_) {}
 }
 
+// Tuần hiện tại, thứ 2 đến chủ nhật. Mỗi ô là một ca 2 giờ; lịch nằm đúng ngày và ca theo giờ bắt đầu thật.
+const CA = [{ label: '07:30', h: 7 }, { label: '09:30', h: 9 }, { label: '13:30', h: 13 }, { label: '15:30', h: 15 }];
+function dauTuan() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+  return d;
+}
 function renderWeekGrid(bookings) {
-  const days = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'CN'];
-  const slots = [
-    { label: '07:30', h: 7 },
-    { label: '09:30', h: 9 },
-    { label: '13:30', h: 13 },
-    { label: '15:30', h: 15 }
-  ];
-  let html = `<div class="week-cell head">Ca / Thứ</div>` + days.map(d => `<div class="week-cell head">${d}</div>`).join('');
-  slots.forEach(sl => {
-    html += `<div class="week-cell head">${sl.label}</div>`;
-    for (let d = 0; d < 7; d++) {
-      const hit = (bookings || []).find((b, idx) => idx % 7 === d && (new Date(Number(b.bat_dau) * 1000).getHours() === sl.h || idx === d));
-      if (hit) {
-        html += `<div class="week-cell booked">${esc(hit.doi_tuong)}<br><span class="small">${esc(hit.lop || hit.nguoi)}</span></div>`;
-      } else {
-        html += `<div class="week-cell" onclick="prefillSlot(${d},${sl.h})"><span class="muted small">+ Đặt ca</span></div>`;
-      }
-    }
+  const t2 = dauTuan(), homNay = new Date().toDateString();
+  const ngay = [...Array(7)].map((_, i) => { const d = new Date(t2); d.setDate(t2.getDate() + i); return d; });
+  const ten = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'CN'];
+  let html = `<div class="week-cell head">Ca / Ngày</div>` + ngay.map((d, i) => `<div class="week-cell head ${d.toDateString() === homNay ? 'hom-nay' : ''}">${ten[i]} ${d.getDate()}/${d.getMonth() + 1}</div>`).join('');
+  CA.forEach((ca, k) => {
+    const hetCa = k + 1 < CA.length ? CA[k + 1].h : 24;
+    html += `<div class="week-cell head">${ca.label}</div>`;
+    ngay.forEach((d, i) => {
+      const trung = (bookings || []).filter((b) => {
+        const bd = new Date(Number(b.bat_dau) * 1000);
+        return bd.toDateString() === d.toDateString() && bd.getHours() >= (k === 0 ? 0 : ca.h) && bd.getHours() < hetCa;
+      });
+      html += trung.length
+        ? `<div class="week-cell booked">${trung.map((b) => `${esc(b.doi_tuong)}<br><span class="small">${esc(b.lop || b.nguoi)}</span>`).join('<hr>')}</div>`
+        : `<div class="week-cell" onclick="prefillSlot(${i},${ca.h})"><span class="muted small">+ Đặt ca</span></div>`;
+    });
   });
   document.getElementById('weekGrid').innerHTML = html;
 }
 
 window.prefillSlot = function(dayOffset, hour) {
-  const base = new Date();
+  const base = dauTuan();
   base.setDate(base.getDate() + dayOffset);
   base.setHours(hour, 0, 0, 0);
   const end = new Date(base.getTime() + 7200 * 1000);
@@ -901,12 +909,13 @@ window.createBooking = async function() {
   const ket_thuc = eVal ? Math.floor(new Date(eVal).getTime() / 1000) : bat_dau + 7200;
   const body = {
     doi_tuong: document.getElementById('dlTarget').value,
-    nguoi: document.getElementById('dlUser').value.trim() || 'GV Sinh học',
-    lop: document.getElementById('dlClass').value.trim() || '10A1',
+    nguoi: document.getElementById('dlUser').value.trim(),
+    lop: document.getElementById('dlClass').value.trim(),
     bat_dau,
     ket_thuc,
-    muc_dich: document.getElementById('dlPurpose').value.trim() || 'Thực hành Sinh học'
+    muc_dich: document.getElementById('dlPurpose').value.trim()
   };
+  if (!body.nguoi || !sVal) { showToast('Nhập người đặt và giờ bắt đầu'); return; }
   try {
     await api('/lab/sinh/dat-lich', { method: 'POST', body: JSON.stringify(body) });
     showToast('Đặt lịch thành công');
@@ -943,7 +952,7 @@ async function loadResults() {
       <tbody>${items.length ? items.map(r => `<tr>
         <td class="small">${fmtDate(r.thoi_gian)}</td>
         <td><b>${esc(r.hoc_sinh)}</b></td>
-        <td>${esc(r.lop || '—')} · ${esc(r.ban || 'Bàn 1')}</td>
+        <td>${esc(r.lop || '—')} · ${esc(r.ban || '—')}</td>
         <td><span class="badge info">${esc(r.ma_bai)}</span></td>
         <td class="num"><input type="number" min="0" max="10" step="0.5" value="${r.diem ?? ''}" id="diem_${r.id}"></td>
         <td><input value="${esc(r.nhan_xet || '')}" id="nx_${r.id}" placeholder="Nhập nhận xét…" style="width:180px"></td>
@@ -957,7 +966,8 @@ async function loadResults() {
 }
 
 window.gradeResult = async function(id) {
-  const diem = Number(document.getElementById(`diem_${id}`).value || 9.5);
+  const o = document.getElementById(`diem_${id}`).value.trim();
+  const diem = o === '' ? null : Number(o);  // để trống là chưa chấm, không tự điền điểm
   const nhan_xet = document.getElementById(`nx_${id}`).value;
   try {
     await api(`/lab/sinh/ket-qua/${id}`, { method: 'PATCH', body: JSON.stringify({ diem, nhan_xet }) });
@@ -1007,12 +1017,13 @@ async function loadIncidents() {
 window.createIncident = async function() {
   const body = {
     phong: document.getElementById('scRoom').value,
-    loai: document.getElementById('scType').value.trim() || 'su_co_thao_tac',
+    loai: document.getElementById('scType').value.trim() || 'khac',
     muc_do: document.getElementById('scSeverity').value,
-    mo_ta: document.getElementById('scDesc').value.trim() || 'Sự cố thao tác trong phòng thí nghiệm',
-    xu_ly: 'Đã cô lập vùng tràn và xử lý bằng NaOCl 0,5%',
+    mo_ta: document.getElementById('scDesc').value.trim(),
+    xu_ly: '',
     trang_thai: 'moi'
   };
+  if (!body.mo_ta) { showToast('Mô tả sự cố trước khi ghi'); return; }
   try {
     await api('/lab/sinh/su-co', { method: 'POST', body: JSON.stringify(body) });
     showToast('Đã ghi nhận sự cố an toàn sinh học');
@@ -1055,10 +1066,11 @@ window.createMaintenance = async function() {
     ma_dung_cu: document.getElementById('btTool').value || 'micropipet_p200',
     loai: document.getElementById('btType').value,
     ngay: Math.floor(Date.now() / 1000),
-    nguoi: document.getElementById('btPerson').value.trim() || 'Kỹ thuật viên',
-    ket_qua: document.getElementById('btResult').value.trim() || 'Đạt chuẩn',
+    nguoi: document.getElementById('btPerson').value.trim(),
+    ket_qua: document.getElementById('btResult').value.trim(),
     ghi_chu: document.getElementById('btNote').value.trim()
   };
+  if (!body.nguoi || !body.ket_qua) { showToast('Nhập người thực hiện và kết quả'); return; }
   try {
     await api('/lab/sinh/bao-tri', { method: 'POST', body: JSON.stringify(body) });
     showToast('Đã lưu hồ sơ bảo trì – hiệu chuẩn');
@@ -1153,6 +1165,8 @@ switchTab(currentTab);
 setInterval(() => {
   if (document.visibilityState === 'visible') refreshCurrentTab();
 }, 5000);
+// Mở thẳng /trang#tab: trình duyệt tự cuộn tới section cùng id, kéo về đầu để thấy tiêu đề
+addEventListener("load", () => scrollTo(0, 0));
 </script>
 </body>
 </html>

@@ -32,8 +32,15 @@ namespace Khkt.Input
         /// <summary>Joystick di chuyển, -1..1.</summary>
         public Vector2 Joy2;
         public ControllerButtons Buttons;
+        /// <summary>Mẫu từ tay cầm VERA (gói 5C / 5D): hướng do mạch tính, có cảm ứng A / B, không qua Mahony trên máy tính.</summary>
+        public bool Vera;
+        /// <summary>VERA: mức cảm ứng 0..255 (A: ngón cái, B: ngón trỏ).</summary>
+        public byte TouchA, TouchB;
+        public VeraFlags Flags;
+        public float TempC;
 
         public bool Pressed(ControllerButtons b) => (Buttons & b) != 0;
+        public bool Has(VeraFlags f) => (Flags & f) != 0;
         public Quaternion UnityRotation => Frames.ToUnity(OrientationRH);
         /// <summary>Góc giữa trục "lên" của tay cầm và phương thẳng đứng (độ).</summary>
         public float TiltDeg => Vector3.Angle(UnityRotation * Vector3.up, Vector3.up);

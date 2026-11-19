@@ -1,6 +1,6 @@
 # VERA Lab: tiến độ và hiện trạng toàn dự án
 
-Cập nhật: 09/11/2026. Đây là bản tóm tắt để ai mở dự án (người hay AI) cũng nắm được ngay. Chi tiết nằm trong `docs/` và `contracts.md`.
+Cập nhật: 10/11/2026. Đây là bản tóm tắt để ai mở dự án (người hay AI) cũng nắm được ngay. Chi tiết nằm trong `docs/` và `contracts.md`.
 
 ## 1. Dự án
 
@@ -22,11 +22,12 @@ Cập nhật: 09/11/2026. Đây là bản tóm tắt để ai mở dự án (ng�
 - **Lớp học từ web** (qua `POST /app/nhip`): trình chiếu lên tường video, theo dõi trực tiếp, thông báo, "Tất cả chú ý", chế độ Kiểm tra, khóa hóa chất, lệnh robot.
 
 ### Điều khiển bằng cơ thể
-- **Nhận diện tay ngay trong Unity** (`Input/InAppHandTracker.cs`):
-  - mô hình MediaPipe chạy bằng Inference Engine, nằm ở `Assets/Lab/MoHinh/Resources`;
-  - tự bật khi vào lab, F10 bật/tắt;
-  - hai tay hiện sẵn (`Demo/ArmRig.cs`), có lọc 1€ và vùng chết mềm;
-  - trỏ vào vật rồi chụm ngón để cầm.
+- **Điều khiển bằng thao tác tay** (docs/28):
+  - nắm ngang mở danh sách dụng cụ, nắm dọc mở danh sách hóa chất (trượt ra bên phải), ngón trỏ trượt chọn, chụm 2 ngón lấy, giơ ngón út bật máy hoặc đi bàn khác, xòe tay đặt xuống;
+  - tương tác theo từng bàn; F7 xem webcam và điểm mốc;
+  - nguồn tay mặc định là `tools/tay_tracker.py`, tự chạy khi vào lab, F10 bật / tắt;
+  - MediaPipe C# (MediaPipeUnityPlugin) chạy trong .exe (`Input/PluginHandTracker.cs`), không cần Python; Python là dự phòng;
+  - luôn đúng hai bàn tay (`Demo/ArmRig.cs`). Kiểm thử Unity `thao_tac` đạt 19/19.
 - **Tracker Python** (`tools/mediapipe_tracker.py`): mặt, đầu, mắt (F8), Pose. Bảng F9 mô phỏng tracking. Đã sửa dấu yaw. **Có thể bị Smart App Control chặn**, xem mục 4.
 - **Tay cầm ESP32 + BMI160** (SDA 21, SCL 22):
   - firmware `firmware/tay_cam_bmi160` chống trôi khi để yên;
@@ -50,12 +51,14 @@ Cập nhật: 09/11/2026. Đây là bản tóm tắt để ai mở dự án (ng�
 | Việc | Trạng thái |
 |---|---|
 | Pose trong Unity (khuỷu, vai thật) | Đã tải mô hình `pose_*.onnx`, chưa nối. Hiện khuỷu suy ra bằng IK |
-| Đo nhận diện tay bằng webcam thật | Chưa đo. Game ghi `[TayUnity] ... khung/giây` vào Player.log mỗi 5 giây |
+| Đo nhận diện tay bằng webcam thật | Chưa đo trong game. Tracker Python xử lý 11 ms/khung |
+| MediaPipe C# trong Unity (bỏ Python) | Chạy trong bản sao kiểm thử và .exe: 17 ms/khung, không giật sau khi bật. Project thật chưa thêm gói (290 MB, không đưa vào git) |
 | Phòng học chung đồng bộ dung dịch, phản ứng | Chưa làm. Máy mở phòng sẽ tính, máy khác chỉ nhận |
 | Phủ phản ứng hóa học (148/242 phản ứng chuẩn) | Kế hoạch 6 giai đoạn chờ duyệt |
 | Phòng robot, bàn lập trình khối lệnh | Tạm dừng |
 | Giao diện web giai đoạn 2–6 | Đang làm ở phiên thiết kế web |
 | Gói in VERA Band | Đang làm |
+| Tay cầm VERA trong app (G2): tia trỏ, hút mục tiêu, nút cảm ứng | Xong, đạt kiểm thử tự động (docs/30). Chưa chạy thử có người cầm; dây joystick Y đang lỏng; Wi-Fi chưa đặt |
 | Bản macOS | Tạm dừng |
 
 ## 4. Lưu ý quan trọng
@@ -75,7 +78,7 @@ Cập nhật: 09/11/2026. Đây là bản tóm tắt để ai mở dự án (ng�
 |---|---|
 | F8 | Điều khiển bằng đầu |
 | F9 | Mô phỏng tracking |
-| F10 | Nhận diện tay |
+| F10 | Bật / tắt nhận diện tay (tự bật khi vào lab) |
 | F11 | Bảng trạng thái MediaPipe |
 | F12 | Căn lại tư thế đầu |
 | Esc | Tạm dừng, về màn hình chính |

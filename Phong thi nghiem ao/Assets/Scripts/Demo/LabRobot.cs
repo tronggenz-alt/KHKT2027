@@ -37,6 +37,8 @@ namespace Khkt.Demo
         public bool Busy => task != null;
         public string StatusText { get; private set; } = "Sẵn sàng";
         public Grabbable Holding { get; private set; }
+        /// <summary>Đường đi gần nhất robot tính cho một kỹ năng (bài kiểm thử và gỡ lỗi đọc).</summary>
+        public List<Vector3> LastPath { get; private set; }
         /// <summary>Robot nói (khung trò chuyện hiện lên).</summary>
         public event Action<string> Spoke;
 
@@ -60,9 +62,14 @@ namespace Khkt.Demo
             mpb = new MaterialPropertyBlock();
             pelvisBaseY = pelvis != null ? pelvis.localPosition.y : 0.86f;
             LabContainer.Spilled += OnSpill;
+            Khkt.Interaction.Bio.BioFeedback.OnToast += OnBioToast;
         }
 
-        void OnDestroy() => LabContainer.Spilled -= OnSpill;
+        void OnDestroy()
+        {
+            LabContainer.Spilled -= OnSpill;
+            Khkt.Interaction.Bio.BioFeedback.OnToast -= OnBioToast;
+        }
 
         public void Say(string text) => Spoke?.Invoke(text);
 
@@ -93,8 +100,11 @@ namespace Khkt.Demo
             if (viewerCamera == null) return;
             Vector3 user = viewerCamera.position;
             Vector3 f = viewerCamera.forward; f.y = 0; f = f.sqrMagnitude > 1e-4f ? f.normalized : Vector3.forward;
-            Vector3 want = new Vector3(user.x, 0, user.z) + Vector3.Cross(Vector3.up, f) * 0.9f + f * 0.4f;
-            float d = Flat(want - transform.position).magnitude;
+            // Người dùng ở tầng nào thì robot theo tới tầng đó (qua thang bộ). Khác tầng: coi như ở rất xa để robot chạy tới.
+            int userFloor = NavGrid.FloorOfEye(user);
+            bool sameFloor = !NavGrid.OnStair(transform.position) && NavGrid.FloorOfFeet(transform.position) == userFloor;
+            Vector3 want = new Vector3(user.x, NavGrid.BaseY(userFloor), user.z) + Vector3.Cross(Vector3.up, f) * 0.9f + f * 0.4f;
+            float d = sameFloor ? Flat(want - transform.position).magnitude : 99f;
             followCheck -= Time.deltaTime;
             if (d > 1.8f && followCheck <= 0)
             {
@@ -114,13 +124,17 @@ namespace Khkt.Demo
             }
         }
 
-        /// <summary>Đi một bước dọc đường. Trả true khi tới điểm cuối.</summary>
+        /// <summary>
+        /// Đi một bước dọc đường. Trả true khi tới điểm cuối. Điểm trên đường mang độ cao thật: đoạn thang bộ nối sàn tầng 1
+        /// (y = 0) với sàn tầng 2 (y = 3,8) nên robot leo dần theo dốc thang.
+        /// </summary>
         bool StepAlong(List<Vector3> path, ref int i, float speed)
         {
             if (i >= path.Count) return true;
             lastStepFrame = Time.frameCount;
             Vector3 p = transform.position;
-            Vector3 target = new Vector3(path[i].x, p.y, path[i].z);
+            Vector3 target = path[i];
+            if (Mathf.Abs(target.y - p.y) > 0.05f) speed = Mathf.Min(speed, walkSpeed);  // lên xuống thang thì đi bộ, không chạy
             if (Khkt.Rendering.AutoDoor.Blocks(p, target))  // cửa trước mặt chưa mở (khu bên kia đang tải): đứng chờ
             {
                 speedNow = Mathf.MoveTowards(speedNow, 0, Time.deltaTime * 4f);
@@ -260,7 +274,14 @@ namespace Khkt.Demo
         {
             if (!NavGrid.Ready) NavGrid.Build();
             Vector3 me = transform.position;
-            if (Flat(p - me).magnitude <= maxR && Flat(p - me).magnitude >= 0.3f) { yield return Turn(p); yield break; }
+            // Hai tầng trùng mặt bằng: phải xét cả tầng, không chỉ khoảng cách trên mặt sàn
+            int floor = NavGrid.FloorOf(p);
+            float y0 = NavGrid.BaseY(floor);
+            bool sameFloor = !NavGrid.OnStair(me) && NavGrid.FloorOfFeet(me) == floor;
+            if (sameFloor && Flat(p - me).magnitude <= maxR && Flat(p - me).magnitude >= 0.3f) { yield return Turn(p); yield break; }
+            if (!sameFloor && !NavGrid.StairLinked) { r.ok = false; r.why = floor == 1 ? "không có đường lên tầng 2" : "không có đường xuống tầng 1"; yield break; }
+            if (!sameFloor) StatusText = floor == 1 ? "Đang lên tầng 2 bằng thang bộ" : "Đang xuống tầng 1 bằng thang bộ";
+            Vector3 origin = sameFloor ? me : floor == 1 ? NavGrid.StairTop : NavGrid.StairBottom;  // khác tầng: tính quãng đường từ đầu thang
             // Khu đích phải đang tải để tìm chỗ đứng trống (tủ, bàn ở khu đã gỡ không còn va chạm)
             var zones = Khkt.Rendering.ZoneStreamer.Instance;
             if (zones != null)
@@ -275,9 +296,9 @@ namespace Khkt.Demo
                 for (int a = 0; a < 24; a++)
                 {
                     float ang = a * Mathf.PI * 2 / 24;
-                    Vector3 c = new Vector3(p.x + Mathf.Cos(ang) * rad, 0, p.z + Mathf.Sin(ang) * rad);
+                    Vector3 c = new Vector3(p.x + Mathf.Cos(ang) * rad, y0, p.z + Mathf.Sin(ang) * rad);
                     if (!NavGrid.Walkable(c) || !NavGrid.Free(c, 0.18f)) continue;
-                    float cost = Flat(c - me).magnitude + rad * 2;
+                    float cost = Flat(c - origin).magnitude + rad * 2;
                     if (cost < bestCost) { bestCost = cost; best = c; }
                 }
                 if (bestCost < float.MaxValue) break;
@@ -286,12 +307,22 @@ namespace Khkt.Demo
             var path = NavGrid.Path(me, best);
             if (path == null) { r.ok = false; r.why = "không tìm được đường đi"; yield break; }
             zones?.KeepPath(this, path);
+            LastPath = path;
             int i = 1;
             float total = 0;
             for (int k = 1; k < path.Count; k++) total += Vector3.Distance(path[k - 1], path[k]);
             float speed = total > 6f ? runSpeed : walkSpeed;
-            float guard = 0;
-            while (!StepAlong(path, ref i, speed) && guard < 60f) { guard += Time.deltaTime; yield return null; }
+            float guard = 0, limit = 45f + total / walkSpeed * 2f, renew = 0;
+            bool arrived = false;
+            while (guard < limit)
+            {
+                if (StepAlong(path, ref i, speed)) { arrived = true; break; }
+                guard += Time.deltaTime;
+                renew += Time.deltaTime;
+                if (renew > 10f) { renew = 0; zones?.KeepPath(this, path); }  // đường dài (đổi tầng): giữ các khu trên đường luôn được tải
+                yield return null;
+            }
+            if (!arrived) { r.ok = false; r.why = "đi mãi chưa tới nơi (cửa chưa mở hoặc đường bị chặn)"; yield break; }
             yield return Turn(p);
         }
 
@@ -375,17 +406,18 @@ namespace Khkt.Demo
         /// <summary>Chỗ trống trên mặt bàn gần điểm p.</summary>
         static Vector3 SurfaceSpotNear(Vector3 p, float radius)
         {
+            float y0 = NavGrid.BaseY(NavGrid.FloorOf(p));  // mặt sàn của tầng chứa p
             for (float rr = 0; rr <= radius; rr += 0.12f)
                 for (int a = 0; a < (rr == 0 ? 1 : 12); a++)
                 {
                     float ang = a * Mathf.PI / 6;
-                    Vector3 from = new Vector3(p.x + Mathf.Cos(ang) * rr, 1.6f, p.z + Mathf.Sin(ang) * rr);
+                    Vector3 from = new Vector3(p.x + Mathf.Cos(ang) * rr, y0 + 1.6f, p.z + Mathf.Sin(ang) * rr);
                     if (!Physics.Raycast(from, Vector3.down, out var hit, 1.2f, ~0, QueryTriggerInteraction.Ignore)) continue;
                     if (hit.collider.GetComponentInParent<PlaceSurface>() == null) continue;
                     if (Physics.CheckSphere(hit.point + Vector3.up * 0.08f, 0.055f, ~0, QueryTriggerInteraction.Ignore)) continue;
                     return hit.point;
                 }
-            return new Vector3(p.x, 0.8f, p.z);
+            return new Vector3(p.x, y0 + 0.8f, p.z);
         }
 
         /// <summary>Chỗ trống trên mặt bàn trước mặt người dùng.</summary>
@@ -474,7 +506,8 @@ namespace Khkt.Demo
 
         IEnumerator Point(Vector3 p, Res r)
         {
-            if (Flat(p - transform.position).magnitude > 3f) { yield return WalkNear(p, r, 1.6f); if (!r.ok) yield break; }
+            bool otherFloor = NavGrid.OnStair(transform.position) || NavGrid.FloorOfFeet(transform.position) != NavGrid.FloorOf(p);
+            if (otherFloor || Flat(p - transform.position).magnitude > 3f) { yield return WalkNear(p, r, 1.6f); if (!r.ok) yield break; }
             yield return Turn(p);
             Vector3 dir = (p - shoulderR.position).normalized;
             yield return Reach(shoulderR.position + dir * (upperArm + foreArm - 0.02f), 0.4f);
@@ -484,12 +517,19 @@ namespace Khkt.Demo
 
         IEnumerator Use(Component c, Res r)
         {
+            // hộp cấp dụng cụ sinh học: "dùng" nghĩa là lấy một cái (không đưa vào tay người dùng)
+            var dispenser = c.GetComponentInParent<Khkt.Interaction.Bio.BioDispenser>();
+            if (dispenser != null) { yield return TakeFromDispenser(dispenser, r); yield break; }
             yield return WalkNear(c.transform.position, r);
             if (!r.ok) yield break;
             yield return Reach(c.transform.position + Vector3.up * 0.05f, 0.4f);
+            bioToast = null;
             if (c is IDemoUsable u) u.Use();
             else if (c.GetComponent<IDemoUsable>() is IDemoUsable u2) u2.Use();
+            else if (c.GetComponentInParent<IDemoUsable>() is IDemoUsable u3) u3.Use();
+            else { r.ok = false; r.why = "vật này không bấm / bật tắt được"; }
             yield return Retract();
+            if (r.ok && bioToastError && !string.IsNullOrEmpty(bioToast)) { r.ok = false; r.why = bioToast; }  // thiết bị sinh học từ chối (đang khóa an toàn...)
         }
 
         IEnumerator ReturnHome(Grabbable g, Res r)

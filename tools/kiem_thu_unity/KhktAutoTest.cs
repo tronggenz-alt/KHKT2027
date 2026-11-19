@@ -272,6 +272,24 @@ public class KhktAutoTest : MonoBehaviour
 #endif
             yield break;
         }
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "mp_cs")
+        {
+            yield return MediaPipeCsTest();
+            Log($"Xong sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "thao_tac")
+        {
+            yield return GestureTest();
+            Log($"Xong sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
         if (Environment.GetEnvironmentVariable("KHKT_TEST") == "canh_tay")
         {
             yield return ArmTest();
@@ -361,9 +379,30 @@ public class KhktAutoTest : MonoBehaviour
 #endif
             yield break;
         }
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "robot_tang2")
+        {
+            yield return RobotFloor2Test(proc);
+            Log($"Xong kiểm thử robot tầng 2 sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
         if (Environment.GetEnvironmentVariable("KHKT_TEST") == "sinh_tu_do")
         {
             yield return BioFreeTest();
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "tay_cam_vera")
+        {
+            VeraParserTest();
+            string tep = Environment.GetEnvironmentVariable("KHKT_VERA");
+            if (!string.IsNullOrEmpty(tep) && File.Exists(tep)) VeraReplay(tep);
+            yield return VeraE2E();
+            Log($"Xong sau {Time.realtimeSinceStartup - t0:0} s");
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.Exit(0);
 #endif
@@ -706,6 +745,278 @@ public class KhktAutoTest : MonoBehaviour
             }
             yield return null;
         }
+    }
+
+    // ---------- Tay cầm VERA (G2): gói v3 / thô, tia trỏ, hút mục tiêu, nút cảm ứng ----------
+
+    static byte VCrc(byte[] b, int s, int n)
+    {
+        byte c = 0;
+        for (int i = s; i < s + n; i++)
+        {
+            c ^= b[i];
+            for (int k = 0; k < 8; k++) c = (c & 0x80) != 0 ? (byte)((c << 1) ^ 0x07) : (byte)(c << 1);
+        }
+        return c;
+    }
+
+    static void W16(byte[] b, int i, int v)
+    {
+        v = Mathf.Clamp(v, -32768, 32767);
+        b[i] = (byte)(v & 0xFF);
+        b[i + 1] = (byte)((v >> 8) & 0xFF);
+    }
+
+    /// <summary>Gói v3 đúng bố cục firmware/tay_cam_vera/mang.h (dongGoiV3). qRH: hệ tay cầm thuận tay phải.</summary>
+    static byte[] BuildV3(byte seq, uint tMs, Quaternion qRH, Vector2 joy, byte mucA, byte mucB, byte bits)
+    {
+        var g = new byte[37];
+        g[0] = 0xA5; g[1] = 0x5C; g[2] = 3; g[3] = seq;
+        g[4] = (byte)tMs; g[5] = (byte)(tMs >> 8); g[6] = (byte)(tMs >> 16); g[7] = (byte)(tMs >> 24);
+        W16(g, 8, Mathf.RoundToInt(qRH.w * 16384)); W16(g, 10, Mathf.RoundToInt(qRH.x * 16384));
+        W16(g, 12, Mathf.RoundToInt(qRH.y * 16384)); W16(g, 14, Mathf.RoundToInt(qRH.z * 16384));
+        Vector3 a = Quaternion.Inverse(qRH) * new Vector3(0, 0, 1);  // trọng lực trong hệ tay cầm
+        W16(g, 22, Mathf.RoundToInt(a.x * 4096)); W16(g, 24, Mathf.RoundToInt(a.y * 4096)); W16(g, 26, Mathf.RoundToInt(a.z * 4096));
+        W16(g, 28, Mathf.RoundToInt(joy.x * 32767)); W16(g, 30, Mathf.RoundToInt(joy.y * 32767));
+        g[32] = mucA; g[33] = mucB; g[34] = bits; g[35] = 67;
+        g[36] = VCrc(g, 2, 34);
+        return g;
+    }
+
+    /// <summary>Hướng tay cầm (hệ thuận tay phải): mũi quay sang TRÁI headingDeg, ngẩng pitchUpDeg.</summary>
+    static Quaternion VQ(float headingDeg, float pitchUpDeg)
+    {
+        float h = headingDeg * Mathf.Deg2Rad, p = -pitchUpDeg * Mathf.Deg2Rad;
+        var qz = new Quaternion(0, 0, Mathf.Sin(h / 2), Mathf.Cos(h / 2));
+        var qy = new Quaternion(0, Mathf.Sin(p / 2), 0, Mathf.Cos(p / 2));
+        return qz * qy;
+    }
+
+    void VeraParserTest()
+    {
+        var q0 = VQ(20, -10);
+        var pk = BuildV3(7, 123456, q0, new Vector2(0.5f, -0.25f), 40, 200, 0x03);
+        var bad = (byte[])pk.Clone();
+        bad[20] ^= 0xFF;
+        var st = new List<byte> { (byte)'#', (byte)'O', (byte)'K', (byte)'\n', 0xA5, 0x11 };
+        st.AddRange(pk); st.AddRange(bad); st.AddRange(pk);
+        var arr = st.ToArray();
+        var p = new Khkt.Input.PacketParser();
+        var outR = new List<Khkt.Input.RawPacket>();
+        var outV = new List<Khkt.Input.VeraSample>();
+        var a1 = arr.Take(23).ToArray();
+        var a2 = arr.Skip(23).ToArray();
+        p.Feed(a1, a1.Length, outR, outV);
+        p.Feed(a2, a2.Length, outR, outV);
+        p.Messages.TryDequeue(out string msg);
+        bool ok = outV.Count == 2 && outR.Count == 0 && p.CrcErrors >= 1;
+        if (outV.Count > 0)
+        {
+            var v = outV[0];
+            float qerr = Quaternion.Angle(v.OrientationRH, q0);
+            ok &= v.Seq == 7 && v.TimeMs == 123456 && qerr < 0.1f && Mathf.Abs(v.Joy.x - 0.5f) < 1e-3f && Mathf.Abs(v.Joy.y + 0.25f) < 1e-3f
+                  && v.TouchA == 40 && v.TouchB == 200 && v.Flags == (Khkt.Input.VeraFlags.TouchA | Khkt.Input.VeraFlags.TouchB) && Mathf.Abs(v.TempC - 27) < 0.01f;
+            var s = Khkt.Input.ControllerPackets.FromVera(v);
+            ok &= s.Vera && s.Pressed(Khkt.Input.ControllerButtons.Trigger) && s.Pressed(Khkt.Input.ControllerButtons.Joy1Press);
+            Log($"[vera] giải mã v3: {outV.Count} gói, CRC lỗi {p.CrcErrors}, thông báo '{msg}', seq {v.Seq}, t {v.TimeMs}, sai hướng {qerr:0.000}°, joy ({v.Joy.x:0.000},{v.Joy.y:0.000}), A {v.TouchA} B {v.TouchB}, cờ {v.Flags}, {v.TempC:0.0}°C");
+        }
+        Log($"[vera] KIỂM GIẢI MÃ V3: {(ok ? "ĐẠT" : "CHƯA ĐẠT")}");
+    }
+
+    /// <summary>Phát lại tệp ghi .vera (tools/ghi_tay_cam.py) qua PacketParser + VeraAimCore + OneEuro2, ghi CSV để so với Python (ConTro).</summary>
+    void VeraReplay(string path)
+    {
+        var d = File.ReadAllBytes(path);
+        int i = 9;  // "VERAGHI1\n"
+        var p = new Khkt.Input.PacketParser();
+        var outR = new List<Khkt.Input.RawPacket>();
+        var outV = new List<Khkt.Input.VeraSample>();
+        var core = new Khkt.Input.VeraAimCore { YawLimit = 70f };
+        var f = new Khkt.Input.OneEuro2(1f, 0.05f);
+        var sb = new System.Text.StringBuilder("seq,t_ms,huong,yaw,pitch,roll,yaw_loc,pitch_loc\n");
+        var ci = System.Globalization.CultureInfo.InvariantCulture;
+        uint lastT = 0;
+        bool have = false;
+        int n = 0;
+        while (i + 11 <= d.Length)
+        {
+            int loai = d[i], len = d[i + 1] | (d[i + 2] << 8);
+            i += 11;
+            if (i + len > d.Length) break;
+            if (loai == 1)
+            {
+                var seg = new byte[len];
+                Array.Copy(d, i, seg, 0, len);
+                outV.Clear();
+                p.Feed(seg, len, outR, outV);
+                foreach (var v in outV)
+                {
+                    float dt = have ? Mathf.Clamp((v.TimeMs - lastT) / 1000f, 0.001f, 0.1f) : 0f;
+                    lastT = v.TimeMs;
+                    have = true;
+                    core.Step(v.OrientationRH, dt);
+                    var fl = f.Step(new Vector2(core.Yaw, core.Pitch), dt);
+                    sb.Append(string.Format(ci, "{0},{1},{2:0.0000},{3:0.0000},{4:0.0000},{5:0.0000},{6:0.0000},{7:0.0000}\n",
+                        v.Seq, v.TimeMs, core.HeadingAbs, core.Yaw, core.Pitch, core.Roll, fl.x, fl.y));
+                    n++;
+                }
+            }
+            i += len;
+        }
+        File.WriteAllText(Path.Combine(outDir, "vera_phat_lai.csv"), sb.ToString());
+        Log($"[vera] phát lại {Path.GetFileName(path)}: {n} gói VERA, CRC lỗi {p.CrcErrors}, mất {p.LostPackets} gói -> vera_phat_lai.csv");
+    }
+
+    IEnumerator VeraE2E()
+    {
+        var src = FindAnyObjectByType<Khkt.Input.UdpControllerSource>();
+        src.enabled = false;
+        src.listenPort = 4298;  // tránh tay cầm thật đang phát vào 4210
+        src.enabled = true;
+        var sock = new System.Net.Sockets.UdpClient(new System.Net.IPEndPoint(System.Net.IPAddress.Loopback, 0));
+        var game = new System.Net.IPEndPoint(System.Net.IPAddress.Loopback, 4298);
+        hand.VeraInTest = true;
+        Khkt.Demo.AimAssist.StrengthDeg = 5f;
+        float heading = 0, pitchUp = -15;
+        Vector2 joy = Vector2.zero;
+        bool tA = false, tB = false, still = false;
+        byte seq = 0;
+        float tStart = Time.realtimeSinceStartup, lastSend = -1;
+        var notes = new List<string>();
+        Khkt.Input.PadInput.Notice += s => notes.Add(s);
+        Khkt.Input.VeraPointer.Message += s => notes.Add(s);
+
+        IEnumerator Send(float sec)
+        {
+            float end = Time.realtimeSinceStartup + sec;
+            while (Time.realtimeSinceStartup < end)
+            {
+                float now = Time.realtimeSinceStartup;
+                if (now - lastSend >= 0.01f)
+                {
+                    lastSend = now;
+                    byte bits = (byte)((tA ? 1 : 0) | (tB ? 2 : 0) | (still ? 8 : 0));
+                    var pk = BuildV3(seq++, (uint)((now - tStart) * 1000), VQ(heading, pitchUp), joy, (byte)(tA ? 200 : 0), (byte)(tB ? 200 : 0), bits);
+                    sock.Send(pk, pk.Length, game);
+                }
+                yield return null;
+            }
+        }
+
+        viewer.GoTo(1);
+        yield return Frames(3);
+        yield return Send(1.5f);
+        var vp = Khkt.Input.VeraPointer.Instance;
+        Log($"[vera] nối: PadInput={Khkt.Input.PadInput.ControllerConnected} nguồn={Khkt.Input.PadInput.Controller?.ControllerName} " +
+            $"VeraPointer={(vp != null)} có hướng={(vp != null && vp.HasControl)} tia VERA={hand.VeraAiming} | {src.StatusText}");
+
+        // chọn một vật cầm được trong tầm nhìn, gần giữa màn hình, không bị che
+        Vector3 eye = cam.transform.position;
+        Grabbable target = null;
+        float bestA = 999;
+        foreach (var g in FindObjectsByType<Grabbable>(FindObjectsSortMode.None))
+        {
+            var col = g.GetComponentInChildren<Collider>();
+            if (col == null || !col.enabled) continue;
+            Vector3 v = col.bounds.center - eye;
+            if (v.magnitude > 2.2f || v.magnitude < 0.3f) continue;
+            float a = Vector3.Angle(cam.transform.forward, v);
+            if (a > 22 || a >= bestA) continue;
+            if (!Physics.Raycast(eye, v.normalized, out var h, 3f) || h.collider.GetComponentInParent<Grabbable>() != g) continue;
+            bestA = a;
+            target = g;
+        }
+        if (target == null)
+        {
+            Log("[vera] KHÔNG tìm được vật cầm được trong tầm nhìn: bỏ phần hút mục tiêu");
+            yield break;
+        }
+        var tc = target.GetComponentInChildren<Collider>().bounds.center;
+        Vector3 dir = (tc - eye).normalized;
+        float bodyYaw = cam.transform.eulerAngles.y;
+        float H = -Mathf.DeltaAngle(bodyYaw, Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg);  // dương = sang trái
+        float P = Mathf.Asin(dir.y) * Mathf.Rad2Deg;
+        Vector3 home = target.transform.position;
+        string Ten(Transform t) => t != null ? t.name : "-";
+        bool OnTarget() => hand.HoverRoot != null && (hand.HoverRoot == target.transform || target.transform.IsChildOf(hand.HoverRoot) || hand.HoverRoot.IsChildOf(target.transform));
+        string State() => $"tác vụ={hand.Current} trỏ={Ten(hand.HoverRoot)} hút={(hand.Assist.Target != null ? hand.Assist.Target.name : "-")} nón={hand.Assist.ConeDeg:0.0}° tốc={hand.Assist.Speed:0}°/s";
+        Log($"[vera] vật thử: {target.name} cách {Vector3.Distance(eye, tc):0.00} m, hướng tia {H:+0.0;-0.0}° / {P:+0.0;-0.0}°");
+
+        int pass = 0, total = 0;
+        void Check(string ten, bool ok) { total++; if (ok) pass++; Log($"[vera] {(ok ? "ĐẠT " : "CHƯA")} {ten} | {State()}"); }
+
+        heading = H; pitchUp = P;
+        yield return Send(0.7f);
+        Check("trỏ đúng tâm vật", hand.Current == HandController.Act.Pick && OnTarget());
+        heading = H + 25;
+        yield return Send(0.6f);
+        Check("lệch 25°: không hút vào vật thử", !OnTarget());
+        heading = H + 3;
+        yield return Send(0.7f);
+        Shot("vera_hut_3do.png");
+        Check("lệch 3° (không trúng thẳng): tự hút vào vật", hand.Current == HandController.Act.Pick && OnTarget());
+        heading = H + 6.5f;
+        yield return Send(0.5f);
+        Check("đang dính, lệch tiếp tới 6,5°: vẫn giữ (dính có trễ)", OnTarget());
+        heading = H + 25;
+        yield return Send(0.6f);
+        heading = H + 11;
+        yield return Send(0.6f);
+        Check("vào lại từ xa, lệch 11° (ngoài nón): không hút", !OnTarget());
+
+        // lia nhanh 240°/s qua vật: nón thu nhỏ
+        float minCone = 99;
+        for (int k = 0; k <= 15; k++)
+        {
+            heading = H - 30 + 4 * k;
+            yield return Send(1f / 60f);
+            minCone = Mathf.Min(minCone, hand.Assist.ConeDeg);
+        }
+        Check($"lia nhanh: nón thu còn {minCone:0.0}° (< 5°)", minCone < 4.0f);
+
+        // cầm: trỏ lệch 2°, chạm B
+        heading = H + 2;
+        yield return Send(0.6f);
+        tB = true;
+        yield return Send(0.4f);
+        Check("chạm B khi đang hút: cầm được vật", hand.Held != null && (hand.Held == target || hand.Held.transform.IsChildOf(target.transform) || target.transform.IsChildOf(hand.Held.transform)));
+        // chế độ tinh: giữ A, quay tay cầm 8°, tia chỉ đi khoảng 2°
+        var a0 = vp.FilteredAngles;
+        tA = true;
+        yield return Send(0.3f);
+        heading += 8;
+        yield return Send(0.8f);
+        float moved = Mathf.Abs(vp.FilteredAngles.x - a0.x);
+        Check($"giữ A khi cầm (chế độ tinh): tay quay 8°, tia đi {moved:0.0}°", moved > 1.2f && moved < 3.2f);
+        tA = false;
+        heading -= 8;
+        yield return Send(0.6f);
+        // đặt: trỏ về chỗ cũ (mặt bàn / ô), buông B
+        heading = H; pitchUp = P - 3;
+        yield return Send(0.8f);
+        var actBeforeRelease = hand.Current;
+        tB = false;
+        yield return Send(0.5f);
+        Check($"buông B ({actBeforeRelease}): đã đặt / trả vật", hand.Held == null);
+        float lech = Vector3.Distance(new Vector3(home.x, 0, home.z), new Vector3(target.transform.position.x, 0, target.transform.position.z));
+        Check($"trỏ xuống mặt bàn chỗ cũ rồi buông: vật nằm cách chỗ cũ {lech:0.00} m (không bị hút sang ô khác)", lech < 0.12f);
+
+        // cần gạt lệch tâm khi nằm yên (dây lỏng): sau 1 s bỏ trục, nhân vật không tự đi
+        still = true;
+        joy = new Vector2(0, -0.4f);
+        Vector3 p0 = viewer.transform.position;
+        yield return Send(1.0f);
+        float walked1 = Vector3.Distance(p0, viewer.transform.position);
+        p0 = viewer.transform.position;
+        yield return Send(2.0f);
+        float walked2 = Vector3.Distance(p0, viewer.transform.position);
+        Check($"cần Y lệch 0,4 khi nằm yên: 1 s đầu đi {walked1:0.00} m, 2 s sau đi {walked2:0.00} m", walked2 < 0.05f);
+        joy = Vector2.zero;
+        still = false;
+        yield return Send(2.5f);
+        Log($"[vera] thông báo: {string.Join(" || ", notes.Distinct())}");
+        Log($"[vera] KẾT QUẢ ĐẦU-CUỐI: {pass}/{total} đạt");
+        sock.Close();
     }
 
     IEnumerator PadTestXyb()
@@ -2572,6 +2883,269 @@ public class KhktAutoTest : MonoBehaviour
 
     static IEnumerator Seconds(float s) { yield return new WaitForSecondsRealtime(s); }
 
+    // ===================== MediaPipe C# (MediaPipeUnityPlugin) =====================
+    IEnumerator MediaPipeCsTest()
+    {
+#if KHKT_MEDIAPIPE_PLUGIN
+        bool okCreate = false;
+        Mediapipe.Tasks.Vision.HandLandmarker.HandLandmarker lmk = null;
+        try
+        {
+            var bytes = File.ReadAllBytes(Path.Combine(Application.streamingAssetsPath, "hand_landmarker.task"));
+            var opts = new Mediapipe.Tasks.Vision.HandLandmarker.HandLandmarkerOptions(
+                new Mediapipe.Tasks.Core.BaseOptions(Mediapipe.Tasks.Core.BaseOptions.Delegate.CPU, modelAssetBuffer: bytes),
+                Mediapipe.Tasks.Vision.Core.RunningMode.VIDEO, numHands: 2);
+            lmk = Mediapipe.Tasks.Vision.HandLandmarker.HandLandmarker.CreateFromOptions(opts);
+            okCreate = true;
+        }
+        catch (Exception e) { Log("[mp] lỗi tạo HandLandmarker: " + e); }
+        Log($"[mp] {(okCreate ? "ĐẠT" : "HỎNG")}: nạp mediapipe_c.dll và tạo HandLandmarker");
+        if (!okCreate) yield break;
+
+        // ảnh thử: ảnh bàn tay nếu có (KHKT_MP_ANH), không thì ảnh xám 320x240
+        var tex = new Texture2D(320, 240, TextureFormat.RGBA32, false);
+        var anh = Environment.GetEnvironmentVariable("KHKT_MP_ANH");
+        if (!string.IsNullOrEmpty(anh) && File.Exists(anh))
+        {
+            var src = new Texture2D(2, 2);
+            src.LoadImage(File.ReadAllBytes(anh));
+            var rt = RenderTexture.GetTemporary(320, 240);
+            Graphics.Blit(src, rt, new Vector2(1, -1), new Vector2(0, 1));
+            RenderTexture.active = rt;
+            tex.ReadPixels(new Rect(0, 0, 320, 240), 0, 0);
+            RenderTexture.active = null;
+            RenderTexture.ReleaseTemporary(rt);
+        }
+        else
+        {
+            var px = new Color32[320 * 240];
+            for (int i = 0; i < px.Length; i++) px[i] = new Color32(120, 120, 120, 255);
+            tex.SetPixels32(px);
+        }
+        tex.Apply();
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        int hands = 0, n = 60;
+        for (int i = 0; i < n; i++)
+        {
+            using (var img = new Mediapipe.Image(Mediapipe.ImageFormat.Types.Format.Srgba, 320, 240, 320 * 4, tex.GetRawTextureData<byte>()))
+            {
+                var r = lmk.DetectForVideo(img, 1000 + i * 33);
+                hands = r.handLandmarks != null ? r.handLandmarks.Count : 0;
+            }
+        }
+        double ms = sw.Elapsed.TotalMilliseconds / n;
+        Log($"[mp] ĐẠT: chạy {n} khung, trung bình {ms:0.0} ms/khung, thấy {hands} tay ở khung cuối");
+        lmk.Close();
+
+        // nguồn tay đầy đủ (webcam + LIVE_STREAM) chạy 6 giây
+        var plug = gameObject.AddComponent<Khkt.Input.PluginHandTracker>();
+        bool began = plug.Begin();
+        float tw = Time.realtimeSinceStartup, worstLoad = 0;
+        while (began && !plug.Running && !plug.Failed && Time.realtimeSinceStartup - tw < 15f) { yield return null; worstLoad = Mathf.Max(worstLoad, Time.unscaledDeltaTime); }
+        began = began && plug.Running;
+        Log($"[mp] nạp ở luồng phụ mất {Time.realtimeSinceStartup - tw:0.0} s, khung chậm nhất lúc nạp {worstLoad * 1000:0} ms");
+        Log($"[mp] {(began ? "ĐẠT" : "HỎNG")}: bật PluginHandTracker (webcam + LIVE_STREAM) {plug.LastError}");
+        if (began)
+        {
+            float t1 = Time.realtimeSinceStartup;
+            float worst = 0; int frames = 0;
+            int slow = 0; float worstLate = 0;
+            while (Time.realtimeSinceStartup - t1 < 8f)
+            {
+                yield return null; frames++;
+                float d = Time.unscaledDeltaTime;
+                worst = Mathf.Max(worst, d);
+                if (Time.realtimeSinceStartup - t1 > 1.5f) { worstLate = Mathf.Max(worstLate, d); if (d > 0.05f) slow++; }
+            }
+            Log($"[mp] 8 giây: {frames} khung game, chậm nhất {worst * 1000:0} ms (sau 1,5 giây đầu: {worstLate * 1000:0} ms, {slow} khung > 50 ms), kết quả MediaPipe {plug.Fps:0.0}/giây, lỗi '{plug.LastError}'");
+            plug.Stop();
+        }
+#else
+        Log("[mp] HỎNG: chưa bật KHKT_MEDIAPIPE_PLUGIN");
+        yield break;
+#endif
+    }
+
+    // ===================== Thao tác tay (gói của tay_tracker.py có điểm ảnh + nhãn thao tác) =====================
+    int gPass, gFail;
+    void GCheck(string name, bool ok, string detail = "")
+    {
+        if (ok) gPass++; else gFail++;
+        Log($"[thao_tac] {(ok ? "ĐẠT" : "HỎNG")}: {name} {detail}");
+    }
+
+    /// <summary>Gói giả: cả 21 điểm ảnh đặt đúng chỗ ứng với điểm màn hình sp (đảo phép đổi của GestureControl).</summary>
+    static string GestureJson(Vector2 sp, string g)
+    {
+        float mx = Mathf.Lerp(0.14f, 0.86f, sp.x / Camera.main.pixelWidth);
+        float my = Mathf.Lerp(0.10f, 0.78f, 1f - sp.y / Camera.main.pixelHeight);
+        var lm = string.Join(",", Enumerable.Repeat($"{Mathf.RoundToInt(mx * 1000)},{Mathf.RoundToInt(my * 1000)},0", 21));
+        var w = string.Join(",", Enumerable.Range(0, 21).Select(i => $"{i * 3},{-i * 4},{i}"));
+        return "{\"t\":0,\"tay\":[{\"ben\":\"phai\",\"w\":[" + w + "],\"x\":500,\"y\":500,\"p\":" + (g == "chum" ? 1 : 0) +
+               ",\"g\":\"" + g + "\",\"lm\":[" + lm + "]}],\"canh\":[]}";
+    }
+
+    IEnumerator Gest(float sec, Func<Vector2> sp, string g) => SendArm(sec, () => GestureJson(sp(), g));
+
+    static Vector2 ScreenOf(Khkt.Interaction.Grabbable g)
+    {
+        var rs = g.GetComponentsInChildren<Renderer>();
+        Vector3 c = rs.Length > 0 ? rs[0].bounds.center : g.transform.position;
+        var p = Camera.main.WorldToScreenPoint(c);
+        return new Vector2(p.x, p.y);
+    }
+
+    static bool OnScreen(Vector3 world)
+    {
+        var p = Camera.main.WorldToScreenPoint(world);
+        return p.z > 0.3f && p.z < 2.6f && p.x > Camera.main.pixelWidth * 0.12f && p.x < Camera.main.pixelWidth * 0.88f && p.y > Camera.main.pixelHeight * 0.12f && p.y < Camera.main.pixelHeight * 0.88f;
+    }
+
+    /// <summary>Nắm tay mở danh sách, ngón trỏ trượt tới đúng vật, chụm 2 ngón để lấy.</summary>
+    IEnumerator GrabWith(GestureControl gc, Khkt.Interaction.Grabbable target, string fist)
+    {
+        Func<Vector2> c = () => new Vector2(Camera.main.pixelWidth * 0.5f, Camera.main.pixelHeight * 0.5f);
+        yield return Gest(0.4f, c, "tro");
+        yield return Gest(0.4f, c, fist);
+        int idx = -1;
+        for (int i = 0; i < gc.MenuCount; i++) if (gc.MenuItem(i) == target) idx = i;
+        if (idx < 0) yield break;
+        Func<Vector2> slid = () => { float y = gc.MenuRowScreenY(idx); return new Vector2(c().x, float.IsNaN(y) ? c().y : y); };
+        yield return Gest(0.8f, slid, "tro");
+        yield return Gest(0.4f, slid, "chum");
+    }
+
+    IEnumerator GestureTest()
+    {
+        var gc = GestureControl.Instance;
+        var rig = FindAnyObjectByType<ArmRig>();
+        GCheck("có GestureControl và ArmRig", gc != null && rig != null);
+        if (gc == null || rig == null) yield break;
+        var all = Khkt.Rendering.ZoneRoot.FindAll<Khkt.Interaction.Grabbable>().ToList();
+        int maxHands = 0;
+        IEnumerator Watch(IEnumerator inner)
+        {
+            while (inner.MoveNext()) { maxHands = Mathf.Max(maxHands, rig.VisibleHands); yield return inner.Current; }
+        }
+        Func<Vector2> center = () => new Vector2(Camera.main.pixelWidth * 0.5f, Camera.main.pixelHeight * 0.5f);
+        float step = Mathf.Max(28f, Camera.main.pixelHeight * 0.055f);
+
+        foreach (var (kind, fist, label) in new[] { (GestureControl.ListKind.Tool, "nam_ngang", "dụng cụ"), (GestureControl.ListKind.Chemical, "nam_doc", "hóa chất") })
+        {
+            BenchZone zone = null;
+            List<Khkt.Interaction.Grabbable> onBench = null;
+            for (int st = 0; st < 14 && zone == null; st++)
+            {
+                viewer.GoTo(st);
+                yield return Frames(12);
+                var z = BenchZones.Current(Camera.main.transform.position);
+                if (z == null) continue;
+                var list = all.Where(x => x != null && x.gameObject.activeInHierarchy && !x.IsHeld && z.Contains(x.transform.position + Vector3.up * 0.03f) &&
+                                          GestureControl.IsChemical(x) == (kind == GestureControl.ListKind.Chemical)).ToList();
+                if (list.Count >= 2) { zone = z; onBench = list; }
+            }
+            if (zone == null) { GCheck($"có bàn với từ 2 {label} trở lên", false); continue; }
+
+            // 1) nắm tay: danh sách đúng loại trượt ra
+            yield return Watch(Gest(0.4f, center, "tro"));
+            yield return Watch(Gest(0.4f, center, fist));
+            bool rightKind = gc.MenuCount > 0 && Enumerable.Range(0, gc.MenuCount).All(i => gc.MenuItem(i) != null && GestureControl.IsChemical(gc.MenuItem(i)) == (kind == GestureControl.ListKind.Chemical));
+            GCheck($"{fist}: mở danh sách {label} trên {zone.Name}", gc.MenuKind == kind && rightKind, $"{gc.MenuCount} dòng: {string.Join(", ", Enumerable.Range(0, Mathf.Min(4, gc.MenuCount)).Select(gc.MenuItemName))}");
+            yield return Frames(20);   // chờ danh sách trượt ra hẳn
+            Shot("thao_tac_ds_" + fist);
+
+            // 2) giơ ngón trỏ, đưa tay ngang dòng kế bên rồi chụm: lấy đúng dòng đang chọn
+            int sel0 = gc.MenuSel, k = gc.MenuCount;
+            int want = sel0 + 1 < k ? sel0 + 1 : sel0 - 1;
+            Func<Vector2> slid = () => { float y = gc.MenuRowScreenY(want); return new Vector2(center().x, float.IsNaN(y) ? center().y : y); };
+            yield return Watch(Gest(0.8f, slid, "tro"));
+            GCheck("ngón trỏ trượt: dòng chọn đi theo", gc.MenuSel == want, $"{sel0} -> {gc.MenuSel} (muốn {want})");
+            Shot("thao_tac_ds_chon_" + fist);
+            // nắm lại / cong ngón giữa chừng ở chỗ khác: dòng chọn đứng yên
+            int keep = gc.MenuSel;
+            yield return Watch(Gest(0.4f, () => new Vector2(center().x, Camera.main.pixelHeight * 0.95f), fist));
+            GCheck("nắm tay giữa chừng: dòng chọn không nhảy", gc.MenuSel == keep, $"{keep} -> {gc.MenuSel}");
+            yield return Watch(Gest(0.5f, slid, "tro"));
+            var expect = gc.MenuItem(gc.MenuSel);
+            yield return Watch(Gest(0.4f, slid, "chum"));
+            GCheck("chụm 2 ngón: lấy đúng vật đã chọn", hand.Held != null && hand.Held == expect && gc.MenuCount == 0,
+                   hand.Held != null ? GestureControl.NameOf(hand.Held) : $"menu {gc.MenuCount}");
+            GCheck($"đang cầm {label}: không quá 2 bàn tay", rig.VisibleHands <= 2, $"{rig.VisibleHands}");
+            Shot("thao_tac_cam_" + fist);
+
+            // 3) trỏ ra ngoài bàn rồi xòe tay: vật nằm lại trên bàn đang làm
+            var held = hand.Held;
+            yield return Watch(Gest(0.7f, () => new Vector2(Camera.main.pixelWidth * 0.5f, Camera.main.pixelHeight * 0.95f), "mo"));
+            GCheck("xòe tay: đặt xuống trong bàn đang làm", hand.Held == null && held != null && zone.Contains(held.transform.position + Vector3.up * 0.03f),
+                   held != null ? $"{GestureControl.NameOf(held)} tại {held.transform.position}" : "");
+            yield return Watch(Gest(0.3f, center, "tro"));
+
+            // 4) xòe tay khi danh sách đang mở: đóng
+            yield return Watch(Gest(0.4f, center, fist));
+            yield return Watch(Gest(0.7f, center, "mo"));
+            GCheck("xòe tay: đóng danh sách", gc.MenuCount == 0);
+        }
+
+        // chụm khi chưa mở danh sách: không cầm gì
+        yield return Gest(0.4f, center, "tro");
+        yield return Gest(0.4f, center, "chum");
+        GCheck("chụm khi chưa nắm tay mở danh sách: không cầm gì", hand.Held == null);
+        yield return Gest(0.3f, center, "tro");
+
+        // ngón út: bật máy trên bàn đang đứng
+        bool used = false;
+        for (int st = 0; st < 14 && !used; st++)
+        {
+            viewer.GoTo(st);
+            yield return Frames(12);
+            MonoBehaviour u = null;
+            Vector3 cpos = Vector3.zero;
+            var zz = BenchZones.Current(Camera.main.transform.position);
+            foreach (var m in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+            {
+                if (!(m is IDemoUsable) || !m.isActiveAndEnabled) continue;
+                var col = m.GetComponentInChildren<Collider>();
+                if (col == null || !OnScreen(col.bounds.center)) continue;
+                if (zz != null && !zz.box.Contains(col.bounds.center)) continue;
+                u = m; cpos = col.bounds.center; break;
+            }
+            if (u == null) continue;
+            Func<Vector2> at = () => { var p = Camera.main.WorldToScreenPoint(cpos); return new Vector2(p.x, p.y); };
+            yield return Gest(0.5f, at, "tro");
+            yield return Gest(0.4f, at, "ut");
+            if (gc.MenuCount > 0)
+            {
+                Shot("thao_tac_ds_may");
+                yield return Gest(0.4f, at, "tro");
+                yield return Gest(0.4f, at, "chum");
+            }
+            used = true;
+            Shot("thao_tac_ut");
+            GCheck("giơ ngón út: bật máy trên bàn", !string.IsNullOrEmpty(gc.LastAction), $"{u.name}: {gc.LastAction}");
+        }
+        if (!used) GCheck("có máy trên bàn để thử ngón út", false);
+
+        // ngón út trỏ ra ngoài bàn: danh sách đi tới bàn khác
+        viewer.GoTo(1);
+        yield return Frames(12);
+        var here = BenchZones.Current(Camera.main.transform.position);
+        Func<Vector2> up = () => new Vector2(Camera.main.pixelWidth * 0.5f, Camera.main.pixelHeight * 0.97f);
+        yield return Gest(0.4f, up, "tro");
+        yield return Gest(0.4f, up, "ut");
+        GCheck("ngón út ra ngoài bàn: danh sách đi tới bàn", gc.MenuIsTravel, $"{gc.MenuCount} bàn");
+        yield return Frames(20);
+        Shot("thao_tac_ds_di_ban");
+        var before = Camera.main.transform.position;
+        yield return Gest(0.4f, up, "tro");
+        yield return Gest(0.4f, up, "chum");
+        GCheck("chụm: đi tới bàn đã chọn", Vector3.Distance(before, Camera.main.transform.position) > 0.5f && BenchZones.Current(Camera.main.transform.position) != here);
+
+        GCheck("suốt bài thử không lúc nào quá 2 bàn tay", maxHands <= 2, $"tối đa {maxHands}");
+        yield return Seconds(1.2f);
+        GCheck("mất tay: trả lại điều khiển chuột", !GestureControl.Owning && hand.OverrideAimPoint == null);
+        Log($"[thao_tac] Tổng: đạt {gPass}, hỏng {gFail}");
+    }
+
     IEnumerator TrackingF9Test()
     {
         var ht = Khkt.Input.HeadTracking.Instance;
@@ -3708,6 +4282,220 @@ public class KhktAutoTest : MonoBehaviour
     {
         float t0 = Time.realtimeSinceStartup;
         while (Time.realtimeSinceStartup - t0 < seconds) yield return null;
+    }
+
+    // ---- Robot lên tầng 2 và dùng dụng cụ sinh học (kỹ năng thật của robot, kết quả do bộ luật sinh học tính) ----
+    int rbPass, rbFails;
+    void Rb(bool ok, string name, string detail = "")
+    {
+        if (ok) rbPass++; else rbFails++;
+        Log($"[robot_t2] {(ok ? "đạt" : "SAI")} {name}{(detail != null && detail.Length > 0 ? " · " + detail : "")}");
+    }
+
+    /// <summary>Mã của vật trong ảnh chụp cảnh; vật ở ngoài tầm chụp thì đăng ký mã tạm (ghi rõ trong nhật ký).</summary>
+    string RbId(Component c, string fallback)
+    {
+        foreach (var kv in RobotWorld.Ids)
+            if (kv.Value != null && (kv.Value == c || kv.Value.gameObject == c.gameObject)) return kv.Key;
+        RobotWorld.Ids[fallback] = c;
+        Log($"[robot_t2] (ngoài tầm ảnh chụp, đăng ký mã tạm) {fallback} = {c.name}");
+        return fallback;
+    }
+
+    IEnumerator RbWaitRobot(LabRobot bot, float maxSeconds, string shotAt = null)
+    {
+        float t = Time.time;
+        bool shot = false;
+        Time.timeScale = 4f;
+        yield return Frames(3);
+        while (bot.Busy && Time.time - t < maxSeconds)
+        {
+            if (shotAt != null && !shot && Time.time - t > 12f) { shot = true; viewer.LookAt(bot.transform.position + Vector3.up * 1.1f); yield return Frames(3); Shot(shotAt); }
+            yield return null;
+        }
+        Time.timeScale = 1f;
+    }
+
+    IEnumerator RobotFloor2Test(LabProcedure proc)
+    {
+        var bot = LabRobot.Instance;
+        var said = new List<string>();
+        bot.Spoke += s => { said.Add(s); Log("[robot_t2] ROBOT: " + s); };
+        Log($"[robot_t2] robot lúc đầu ở {bot.transform.position}, thang bộ nối hai tầng: {NavGrid.StairLinked}");
+        Rb(NavGrid.StairLinked, "lưới đi hai tầng nối được qua thang bộ");
+        Rb(bot.transform.position.y < 0.5f, "robot bắt đầu ở tầng 1");
+
+        // 1) Người dùng lên lab sinh tầng 2: robot phải tự leo thang bộ theo lên
+        viewer.GoTo(21);
+        yield return Frames(10);
+        float tw = Time.realtimeSinceStartup;
+        while (!Khkt.Rendering.ZoneStreamer.Settled && Time.realtimeSinceStartup - tw < 20f) yield return null;
+        var room = FindObjectsByType<Transform>().First(x => x.name == "Phòng thí nghiệm sinh học");
+        bioBench = Khkt.Demo.Bio.BioFloor2InteractiveTools.FindNamed(room, "Bàn sinh học 3");
+        viewer.GoNear(bioBench.position + Vector3.up * 0.9f, new Vector3(1, 0.7f, 0.2f), 1.3f);
+        yield return Frames(5);
+        Log($"[robot_t2] người dùng ở {viewer.transform.position} (mắt {cam.transform.position})");
+        float t1 = Time.time, maxY = 0, stairSeen = 0;
+        Time.timeScale = 4f;
+        bool stairShot = false;
+        while (Time.time - t1 < 240f)
+        {
+            Vector3 bp = bot.transform.position;
+            maxY = Mathf.Max(maxY, bp.y);
+            if (NavGrid.OnStair(bp))
+            {
+                stairSeen += Time.deltaTime;
+                if (!stairShot && bp.y > 1.6f)
+                {
+                    stairShot = true;
+                    Time.timeScale = 1f;
+                    viewer.GoNear(bp + Vector3.up * 1.0f, new Vector3(-1f, 0.5f, -0.6f), 3.2f);
+                    yield return Frames(6);
+                    Shot("r01_robot_leo_thang");
+                    viewer.GoNear(bioBench.position + Vector3.up * 0.9f, new Vector3(1, 0.7f, 0.2f), 1.3f);
+                    Time.timeScale = 4f;
+                }
+            }
+            Vector3 dv = bp - viewer.transform.position; dv.y = 0;
+            if (bp.y > NavGrid.Floor2Y - 0.05f && dv.magnitude < 2.6f) break;
+            yield return null;
+        }
+        Time.timeScale = 1f;
+        yield return Frames(5);
+        Vector3 rp = bot.transform.position;
+        Rb(Mathf.Abs(rp.y - NavGrid.Floor2Y) < 0.05f, "robot lên tới sàn tầng 2", $"robot ở {rp}, mất {Time.time - t1:0} s (thời gian trong game)");
+        Rb(stairSeen > 1f, "robot đi theo dốc thang bộ (không dịch chuyển tức thời)", $"ở trên thang {stairSeen:0.0} s");
+        Rb(Khkt.Rendering.ZoneMap.At(rp) == Khkt.Rendering.ZoneMap.BioLab, "robot đứng trong phòng thí nghiệm sinh học", Khkt.Rendering.ZoneMap.Name(Khkt.Rendering.ZoneMap.At(rp)));
+        { Vector3 dv = rp - viewer.transform.position; dv.y = 0; Rb(dv.magnitude < 2.6f, "robot đứng cạnh người dùng", $"cách {dv.magnitude:0.0} m"); }
+        viewer.LookAt(rp + Vector3.up * 1.1f);
+        yield return Frames(8);
+        Shot("r02_robot_o_tang2");
+
+        // 2) Ảnh chụp cảnh ở tầng 2: có dụng cụ sinh học, không lẫn đồ tầng 1 nằm ngay bên dưới
+        var snap = RobotWorld.Capture(viewer.transform, hand, proc);
+        var byKind = snap.vat.GroupBy(v => System.Text.RegularExpressions.Regex.Replace(v.id, @"(_\d+|:\d+)$", "")).ToDictionary(g => g.Key, g => g.Count());
+        Log($"[robot_t2] ảnh chụp cảnh: khu '{snap.khu_vuc}', {snap.vat.Length} vật: " + string.Join(", ", byKind.Select(kv => $"{kv.Key}×{kv.Value}")));
+        foreach (var v in snap.vat.Take(12)) Log($"[robot_t2]   {v.id} | {v.ten} | {v.loai} | {v.khoang_cach:0.0} m | {v.chua}");
+        Rb(snap.khu_vuc.Contains("sinh học"), "ảnh chụp cảnh ghi đúng khu tầng 2", snap.khu_vuc);
+        Rb(snap.vat.Any(v => v.id.StartsWith("dung_cu_sinh_") || v.id.StartsWith("binh_sinh_") || v.id.StartsWith("sinh_pham_")), "ảnh chụp cảnh có dụng cụ / bình / sinh phẩm sinh học");
+        Rb(snap.vat.Any(v => v.id.StartsWith("hop_cap_")), "ảnh chụp cảnh có hộp cấp dụng cụ");
+        Rb(RobotWorld.Ids.Values.All(c => c == null || c.transform.position.y >= 3.6f || (bot.Holding != null && c.gameObject == bot.Holding.gameObject)), "ảnh chụp cảnh không lẫn vật tầng 1");
+
+        // 3) Thí nghiệm catalase do robot làm bằng kỹ năng chung (không có kịch bản riêng): lấy ống, gắp gan, thả vào ống, lấy H2O2
+        var liver = StockOf(Khkt.Simulation.Bio.BioMatterDb.Liver);
+        var h2o2 = StockOf(Khkt.Simulation.Bio.BioMatterDb.H2O2);
+        var forceps = FindObjectsByType<Khkt.Demo.Bio.Forceps>().OrderBy(f => (f.transform.position - bioBench.position).sqrMagnitude).First();
+        var dTube = Disp("ống nghiệm");
+        string idHop = RbId(dTube, "t_hop_ong"), idKep = RbId(forceps, "t_kep"), idGan = RbId(liver, "t_gan"), idH2o2 = RbId(h2o2, "t_h2o2");
+        Log($"[robot_t2] mã: hộp ống {idHop}, kẹp {idKep}, khay gan {idGan}, chai H2O2 {idH2o2}");
+        int before = FindObjectsByType<Khkt.Interaction.Bio.BioVessel>().Length;
+        bot.ExecutePlan(new List<RobotStep>
+        {
+            new RobotStep { ky_nang = "noi", loi = "Mình làm thí nghiệm enzim catalase trong gan." },
+            new RobotStep { ky_nang = "lay_dung_cu", doi_tuong = idHop },
+            new RobotStep { ky_nang = "dat", dich = "ban_nguoi_dung" },
+            new RobotStep { ky_nang = "dung_dung_cu", doi_tuong = idKep, dich = idGan, so_luong = 1 },
+            new RobotStep { ky_nang = "dung_dung_cu", doi_tuong = idKep, dich = "vat_vua_lay", so_luong = 1 },
+            new RobotStep { ky_nang = "cam", doi_tuong = "vat_vua_lay" },
+            new RobotStep { ky_nang = "dung_dung_cu", doi_tuong = "vat_dang_cam", dich = idH2o2, so_luong = 1 },
+            new RobotStep { ky_nang = "doi", so_luong = 5 },
+            new RobotStep { ky_nang = "quan_sat", doi_tuong = "vat_dang_cam" },
+            new RobotStep { ky_nang = "dat", dich = "ban_nguoi_dung" },
+        });
+        yield return RbWaitRobot(bot, 400f, "r03_robot_dung_dung_cu_sinh");
+        Rb(!bot.Busy, "robot làm xong kế hoạch sinh học", bot.StatusText);
+        Rb(!said.Any(s => s.StartsWith("Mình dừng ở bước")), "không dừng giữa chừng", said.LastOrDefault(s => s.StartsWith("Mình dừng")) ?? "");
+        var vessels = FindObjectsByType<Khkt.Interaction.Bio.BioVessel>();
+        Rb(vessels.Length == before + 1, "robot lấy được một ống nghiệm mới từ hộp cấp", $"{before} → {vessels.Length} bình");
+        var tube = vessels.FirstOrDefault(v => !v.isStock && v.mix.Has(Khkt.Simulation.Bio.BioMatterDb.Liver));
+        Rb(tube != null, "kẹp của robot gắp mô gan thả vào ống", tube != null ? tube.mix.Describe() : "không ống nào có gan");
+        if (tube != null)
+        {
+            Rb(tube.mix.Has(Khkt.Simulation.Bio.BioMatterDb.H2O2) || tube.mix.o2Ml > 0.05, "robot lấy H2O2 từ chai gốc vào ống", tube.mix.Describe());
+            Rb(tube.mix.o2Ml > 0.1, "gan + H2O2 trong ống của robot: sinh O2 (bộ luật sinh học tính)", $"O2 {tube.mix.o2Ml:0.0} mL, bọt {tube.mix.foam:0.00}");
+            Rb(tube.transform.position.y > 3.8f + 0.5f && tube.transform.position.y < 3.8f + 1.3f && !tube.GetComponent<Grabbable>().IsHeld, "ống được đặt lại lên bàn tầng 2", tube.transform.position.ToString());
+            viewer.GoNear(tube.transform.position, new Vector3(0.6f, 0.4f, 0.2f), 0.5f);
+            yield return Frames(8);
+            Shot("r04_ong_gan_h2o2_cua_robot");
+            viewer.GoNear(bioBench.position + Vector3.up * 0.9f, new Vector3(1, 0.7f, 0.2f), 1.3f);
+        }
+        Rb(said.Any(s => s.Contains("°C") || s.Contains("Hiện tượng")), "robot nói lại trạng thái bình theo mô phỏng", said.LastOrDefault(s => s.Contains("°C")) ?? "");
+
+        // 4) Sai quy trình thì vật đích từ chối và robot nói lý do (bóc biểu bì hành khi chưa rạch)
+        var onion = StockOf(Khkt.Simulation.Bio.BioMatterDb.Onion);
+        if (onion != null && !onion.scored)
+        {
+            said.Clear();
+            bot.ExecutePlan(new List<RobotStep> { new RobotStep { ky_nang = "dung_dung_cu", doi_tuong = idKep, dich = RbId(onion, "t_hanh"), so_luong = 1 } });
+            yield return RbWaitRobot(bot, 200f);
+            Rb(said.Any(s => s.StartsWith("Mình dừng ở bước")) && string.IsNullOrEmpty(forceps.carriedMatter), "bóc biểu bì khi chưa rạch: robot dừng, nói lý do", said.LastOrDefault() ?? "");
+        }
+
+        // 5) Núm chỉnh và nút bấm của thiết bị sinh học
+        var knob = FindObjectsByType<Khkt.Interaction.Bio.BioKnob>().Where(k => !k.locked && k.transform.position.y >= 3.6f && k.maxValue - k.minValue > 2 * Mathf.Max(k.step, 0.001f))
+            .OrderBy(k => (k.transform.position - viewer.transform.position).sqrMagnitude).FirstOrDefault();
+        if (knob != null)
+        {
+            float want = Mathf.Abs(knob.value - knob.maxValue) > knob.step ? knob.maxValue : knob.minValue, old = knob.value;
+            bot.ExecutePlan(new List<RobotStep> { new RobotStep { ky_nang = "chinh_num", doi_tuong = RbId(knob, "t_num"), so_luong = want } });
+            yield return RbWaitRobot(bot, 300f);
+            Rb(Mathf.Abs(knob.value - want) <= Mathf.Max(knob.step, 0.01f), "robot vặn núm chỉnh tới giá trị yêu cầu", $"{knob.label}: {old} → {knob.value} (muốn {want})");
+        }
+        else Log("[robot_t2] (không có núm chỉnh nào để thử)");
+        var button = FindObjectsByType<Khkt.Interaction.Bio.BioButton>().Where(b => b.isToggle && !b.locked && b.transform.position.y >= 3.6f)
+            .OrderBy(b => (b.transform.position - viewer.transform.position).sqrMagnitude).FirstOrDefault();
+        if (button != null)
+        {
+            bool was = button.isOn;
+            bot.ExecutePlan(new List<RobotStep> { new RobotStep { ky_nang = "bat_tat", doi_tuong = RbId(button, "t_nut") } });
+            yield return RbWaitRobot(bot, 300f);
+            Rb(button.isOn != was, "robot bấm nút bật / tắt thiết bị sinh học", $"{button.label}: {was} → {button.isOn}");
+        }
+        else Log("[robot_t2] (không có nút bật tắt nào để thử)");
+
+        // 6) Người dùng xuống lại tầng 1: robot đi thang bộ xuống theo
+        viewer.GoTo(2);
+        yield return Frames(10);
+        float t2 = Time.time;
+        Time.timeScale = 4f;
+        while (Time.time - t2 < 300f)
+        {
+            Vector3 bp = bot.transform.position;
+            Vector3 dv = bp - viewer.transform.position; dv.y = 0;
+            if (bp.y < 0.05f && dv.magnitude < 2.6f && !bot.Busy) break;
+            yield return null;
+        }
+        Time.timeScale = 1f;
+        yield return Frames(5);
+        rp = bot.transform.position;
+        { Vector3 dv = rp - viewer.transform.position; dv.y = 0; Rb(Mathf.Abs(rp.y) < 0.05f && dv.magnitude < 2.6f, "robot xuống lại tầng 1 theo người dùng", $"robot ở {rp}, cách {dv.magnitude:0.0} m, mất {Time.time - t2:0} s"); }
+        viewer.LookAt(rp + Vector3.up * 1.1f);
+        yield return Frames(8);
+        Shot("r05_robot_ve_tang1");
+
+        // 7) Từ tầng 1 sai robot lên tầng 2 lấy việc (đi tới một vật ở tầng 2) rồi quay về
+        string idFar = RbId(h2o2, "t_h2o2");
+        float farBest = 99f;  // robot tới gần vật nhất bao nhiêu khi đã ở tầng 2 (sau đó nó còn đi cất dụng cụ đang cầm)
+        Log($"[robot_t2] di_toi {idFar} → {RobotWorld.Resolve(idFar)?.name} ở {RobotWorld.Resolve(idFar)?.transform.position}, robot ở {bot.transform.position}, bận={bot.Busy}");
+        bot.ExecutePlan(new List<RobotStep> { new RobotStep { ky_nang = "di_toi", doi_tuong = idFar } });
+        {
+            float t3 = Time.time, lastLog = -99;
+            Time.timeScale = 4f;
+            yield return Frames(3);
+            while (bot.Busy && Time.time - t3 < 400f)
+            {
+                if (Time.time - lastLog > 5f) { lastLog = Time.time; Log($"[robot_t2]   t={Time.time - t3:0} s robot {bot.transform.position} · {bot.StatusText}"); }
+                { Vector3 q = bot.transform.position; if (Mathf.Abs(q.y - NavGrid.Floor2Y) < 0.05f) farBest = Mathf.Min(farBest, Vector2.Distance(new Vector2(q.x, q.z), new Vector2(h2o2.transform.position.x, h2o2.transform.position.z))); }
+                yield return null;
+            }
+            Time.timeScale = 1f;
+            Log($"[robot_t2] di_toi xong sau {Time.time - t3:0} s, bận={bot.Busy}, đường: " + (bot.LastPath != null ? string.Join(" → ", bot.LastPath.Select(p => $"({p.x:0.0},{p.y:0.0},{p.z:0.0})")) : "không có"));
+        }
+        rp = bot.transform.position;
+        Rb(farBest < 1.3f, "lệnh di_toi một vật ở tầng khác: robot tự lên tầng 2 tới đúng chỗ", $"tới gần nhất {farBest:0.0} m, cuối cùng robot ở {rp}");
+
+        Log($"[robot_t2] {rbPass} đạt, {rbFails} sai");
+        Log(rbFails == 0 ? "[robot_t2] TẤT CẢ ĐẠT" : $"[robot_t2] CÓ {rbFails} LỖI");
     }
 
     IEnumerator BioFreeTest()

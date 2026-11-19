@@ -3,101 +3,202 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="icon" href="data:,">
 <title>Đăng nhập · VERA Lab</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="/tinh/vera.css">
+<meta name="description" content="Đăng nhập trang quản lý VERA Lab dành cho giáo viên và học sinh: lớp học, kết quả thí nghiệm, trình chiếu và theo dõi phòng thí nghiệm ảo.">
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="https://verlab.pages.dev/dang-nhap">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
+<script>try { var m = localStorage.getItem('vera-mau'); if (m === 'light' || m === 'dark') document.documentElement.dataset.theme = m; } catch (e) {}</script>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
 <style>
-body { min-height: 100vh; min-height: 100dvh; background: radial-gradient(52% 62% at 70% 48%, rgba(56, 214, 196, .13), transparent 72%) no-repeat, var(--san); }
-.dn { display: grid; grid-template-columns: minmax(0, 440px) minmax(0, 1fr); align-items: center; gap: clamp(16px, 3vw, 48px); min-height: 100vh; min-height: 100dvh; padding: clamp(16px, 3vw, 40px) clamp(16px, 5vw, 72px); }
-.cot-form { position: relative; z-index: 1; display: grid; gap: 16px; }
-.cot-form .nhan-hieu { font-size: 20px; }
-.cot-form .nhan-hieu svg { width: 30px; height: 30px; }
-.the { padding: clamp(20px, 2.400vw, 28px); border-radius: 18px; background: rgba(11, 18, 28, .86); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
-.the h1 { font-size: 26px; line-height: 1.200; }
-.the > form > .phu-chu { margin-top: 6px; }
-.chon { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; padding: 3px; margin-bottom: 20px; border-radius: var(--bo); background: var(--nen-o); border: 1px solid var(--vien); }
-.chon button { min-height: 40px; border: 0; border-radius: var(--bo-nho); background: none; color: var(--phu); font-size: 14.500px; font-weight: 600; cursor: pointer; }
-.chon button[aria-selected="true"] { background: var(--nen-3); color: var(--chu); }
-form .nut { margin-top: 18px; }
-.chan { margin-top: 16px; text-align: center; font-size: 14px; color: var(--phu); }
-.chan button { border: 0; padding: 0; background: none; color: var(--nhan); font-size: inherit; cursor: pointer; text-decoration: underline; }
-.nguon { font-size: 13px; color: var(--mo); }
-.cot-ve { min-width: 0; }
-.cot-ve h2 { max-width: 22ch; margin: 0 0 4px; font-size: clamp(24px, 2.600vw, 38px); line-height: 1.120; font-weight: 700; letter-spacing: -.022em; text-wrap: balance; }
-.cot-ve p { max-width: 54ch; color: var(--phu); font-size: 15px; }
-#ban-do { margin-top: 8px; animation: troi 9s ease-in-out infinite alternate; }
-@keyframes troi { from { transform: translateY(-6px); } to { transform: translateY(6px); } }
-@media (prefers-reduced-motion: reduce) { #ban-do { animation: none; } }
-@media (max-width: 900px) {
-  .dn { grid-template-columns: minmax(0, 1fr); align-content: start; align-items: start; padding-block: 16px 24px; gap: 12px; }
-  .cot-ve { order: -1; }
-  .cot-ve h2, .cot-ve p { display: none; }
-  #ban-do { margin: 44px -6px -6px; animation: none; }
-  .cot-form { display: contents; }
-  .cot-form .nhan-hieu { order: -2; }
-  .cot-ve { order: -1; margin-top: -44px; }
+:root {
+  color-scheme: light;
+  --nen: #ffffff; --nen-2: #f6f8fa; --mat: #ffffff; --o: #ffffff;
+  --chu: #1f2328; --phu: #59636e; --mo: #818b98;
+  --vien: #d1d9e0; --vien-o: #d1d9e0; --vien-dam: #b7c0c9;
+  --nhan: #0b63d1; --nhan-nhat: #ddf4ff;
+  --loi-chu: #d1242f; --loi-nen: #ffebe9; --loi-vien: rgba(255, 129, 130, .4);
+  --cham: rgba(31, 35, 40, .09);
+  --bong: 0 1px 0 rgba(31, 35, 40, .04);
 }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --nen: #0d1117; --nen-2: #151b23; --mat: #151b23; --o: #0d1117;
+  --chu: #f0f6fc; --phu: #9198a1; --mo: #7d8590;
+  --vien: #30363d; --vien-o: #3d444d; --vien-dam: #484f58;
+  --nhan: #4493f8; --nhan-nhat: rgba(56, 139, 253, .15);
+  --loi-chu: #ff7b72; --loi-nen: rgba(248, 81, 73, .1); --loi-vien: rgba(248, 81, 73, .4);
+  --cham: rgba(240, 246, 252, .07);
+  --bong: 0 0 transparent;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --nen: #0d1117; --nen-2: #151b23; --mat: #151b23; --o: #0d1117;
+    --chu: #f0f6fc; --phu: #9198a1; --mo: #7d8590;
+    --vien: #30363d; --vien-o: #3d444d; --vien-dam: #484f58;
+    --nhan: #4493f8; --nhan-nhat: rgba(56, 139, 253, .15);
+    --loi-chu: #ff7b72; --loi-nen: rgba(248, 81, 73, .1); --loi-vien: rgba(248, 81, 73, .4);
+    --cham: rgba(240, 246, 252, .07);
+    --bong: 0 0 transparent;
+  }
+}
+* { box-sizing: border-box; }
+html { background: var(--nen); }
+body { margin: 0; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; background: var(--nen); color: var(--chu); font: 400 14.5px/1.5 "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: 420px; z-index: -1; background-image: radial-gradient(var(--cham) 1px, transparent 1.2px); background-size: 22px 22px; -webkit-mask-image: radial-gradient(ellipse 60% 100% at 50% 0%, #000 20%, transparent 75%); mask-image: radial-gradient(ellipse 60% 100% at 50% 0%, #000 20%, transparent 75%); pointer-events: none; }
+a { color: var(--nhan); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--nhan); outline-offset: 2px; border-radius: 4px; }
+[hidden] { display: none !important; }
+
+.cot { width: 100%; max-width: 372px; margin: 0 auto; padding: 40px 16px 24px; flex: 1; }
+.logo { display: flex; justify-content: center; margin-bottom: 22px; color: var(--chu); }
+.logo svg { width: 52px; height: 52px; }
+.logo:hover { text-decoration: none; }
+.dau-form { margin-bottom: 16px; text-align: center; }
+.dau-form h1 { margin: 0; font-size: 24px; line-height: 1.3; font-weight: 400; letter-spacing: -.01em; }
+.dau-form .phu-chu { margin: 6px 0 0; color: var(--phu); font-size: 14px; }
+.hop { padding: 16px; border: 1px solid var(--vien); border-radius: 8px; background: var(--mat); box-shadow: var(--bong); }
+#khung { animation: hien .45s cubic-bezier(.2, .7, .2, 1) both; }
+form:not([hidden]) .hop { animation: hien .3s cubic-bezier(.2, .7, .2, 1) both; }
+@keyframes hien { from { opacity: 0; transform: translateY(8px); } }
+
+.truong { margin-bottom: 16px; }
+.hang-nhan { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+.truong label { display: block; font-weight: 500; font-size: 14px; }
+.truong > label { margin-bottom: 6px; }
+.truong small { display: block; margin-top: 6px; color: var(--mo); font-size: 12.5px; line-height: 1.45; }
+.lien-nho { border: 0; padding: 0; background: none; color: var(--nhan); font: inherit; font-size: 12.5px; font-weight: 500; cursor: pointer; }
+.lien-nho:hover { text-decoration: underline; text-underline-offset: 2px; }
+.o-nhap { position: relative; }
+input { display: block; width: 100%; height: 38px; padding: 5px 12px; border: 1px solid var(--vien-o); border-radius: 6px; background: var(--o); color: var(--chu); font: inherit; font-size: 15px; transition: border-color .15s, box-shadow .15s; }
+input:hover { border-color: var(--vien-dam); }
+input:focus { outline: none; border-color: var(--nhan); box-shadow: 0 0 0 3px var(--nhan-nhat); }
+.o-nhap input { padding-right: 42px; }
+.mat { position: absolute; right: 4px; top: 4px; width: 30px; height: 30px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 4px; background: none; color: var(--mo); cursor: pointer; }
+.mat:hover { color: var(--chu); background: var(--nen-2); }
+.mat svg { width: 17px; height: 17px; }
+.mat .an { display: none; }
+.mat[aria-pressed="true"] .hien-mat { display: none; }
+.mat[aria-pressed="true"] .an { display: block; }
+.goi-y { margin: -6px 0 16px; padding: 8px 12px; border: 1px solid var(--vien); border-radius: 6px; background: var(--nen-2); color: var(--phu); font-size: 13px; }
+.bao { margin: 0 0 14px; padding: 10px 12px; border: 1px solid var(--loi-vien); border-radius: 6px; background: var(--loi-nen); color: var(--loi-chu); font-size: 13.5px; }
+.nut { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 38px; border: 1px solid transparent; border-radius: 6px; background: #0b63d1; color: #fff; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; transition: background-color .15s, opacity .15s; }
+.nut:hover { background: #0952ad; }
+.nut:disabled { opacity: .7; cursor: progress; }
+.nut:disabled::before { content: ""; width: 14px; height: 14px; border: 2px solid rgba(255, 255, 255, .45); border-top-color: #fff; border-radius: 50%; animation: quay .7s linear infinite; }
+@keyframes quay { to { transform: rotate(360deg); } }
+.chan-form { margin: 14px 0 0; text-align: center; font-size: 13.5px; }
+.chan-form button { border: 0; padding: 0; background: none; color: var(--nhan); font: inherit; cursor: pointer; }
+.chan-form button:hover { text-decoration: underline; }
+
+.the-phu { margin-top: 16px; padding: 16px; border: 1px solid var(--vien); border-radius: 8px; text-align: center; font-size: 14px; }
+.the-phu button { border: 0; padding: 0; background: none; color: var(--nhan); font: inherit; font-weight: 500; cursor: pointer; }
+.the-phu button:hover { text-decoration: underline; text-underline-offset: 2px; }
+.the-phu button::before { content: attr(data-dan) " "; color: var(--chu); font-weight: 400; }
+
+.tin-cay { display: grid; gap: 8px; margin: 22px 0 0; padding: 0; list-style: none; color: var(--phu); font-size: 12.5px; }
+.tin-cay li { display: flex; gap: 8px; align-items: flex-start; }
+.tin-cay svg { flex: none; width: 15px; height: 15px; margin-top: 1px; color: var(--mo); }
+
+.chan-trang { padding: 20px 16px 32px; }
+.chan-trang ul { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 22px; margin: 0; padding: 0; list-style: none; font-size: 12.5px; color: var(--mo); }
+.chan-trang a { color: var(--phu); }
+.chan-trang a:hover { color: var(--nhan); }
+
+@media (min-width: 720px) { .cot { padding-top: 64px; } }
+@media (prefers-reduced-motion: reduce) { *, *::before { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
 </style>
 </head>
 <body>
-<main class="dn">
-  <div class="cot-form">
-  <span class="nhan-hieu">
-    <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2.5 35.2 11.2v17.6L20 37.5 4.8 28.8V11.2z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/><path d="M12.5 13 20 28l7.5-15" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    VERA Lab
-  </span>
+<main class="cot">
+  <a class="logo" href="/" aria-label="VERA Lab, về trang giới thiệu">
+    <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2.5 35.2 11.2v17.6L20 37.5 4.8 28.8V11.2z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="M12.5 13 20 28l7.5-15" fill="none" stroke="#0b63d1" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </a>
 
-  <div class="the" id="khung" hidden>
-    <div class="chon" role="tablist" id="chon">
-      <button type="button" role="tab" id="tab-vao" aria-selected="true" aria-controls="f-vao">Đăng nhập</button>
-      <button type="button" role="tab" id="tab-ky" aria-selected="false" aria-controls="f-ky">Tạo tài khoản</button>
-    </div>
-
+  <div id="khung" hidden>
     <form id="f-vao" novalidate>
-      <h1>Trang quản lý VERA Lab</h1>
-      <p class="phu-chu">Dành cho giáo viên và học sinh.</p>
-      <label class="o"><span>Tên đăng nhập</span><input name="ten_dang_nhap" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
-      <label class="o"><span>Mật khẩu</span><input name="mat_khau" type="password" autocomplete="current-password" required></label>
-      <p class="bao" role="alert" hidden></p>
-      <button class="nut chinh rong">Đăng nhập</button>
-      <p class="chan">Quên mật khẩu? Nhờ giáo viên đặt lại.</p>
+      <div class="dau-form">
+        <h1>Đăng nhập vào VERA Lab</h1>
+        <p class="phu-chu">Trang quản lý dành cho giáo viên và học sinh</p>
+      </div>
+      <div class="hop">
+        <p class="bao" role="alert" hidden></p>
+        <div class="truong">
+          <label for="vao-ten">Tên đăng nhập</label>
+          <input id="vao-ten" name="ten_dang_nhap" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+        </div>
+        <div class="truong">
+          <div class="hang-nhan"><label for="vao-mk">Mật khẩu</label><button type="button" class="lien-nho" id="quen" aria-expanded="false" aria-controls="goi-y-quen">Quên mật khẩu?</button></div>
+          <div class="o-nhap">
+            <input id="vao-mk" name="mat_khau" type="password" autocomplete="current-password" required>
+            <button type="button" class="mat" aria-label="Hiện mật khẩu" aria-pressed="false"><svg class="hien-mat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="an" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4M6.6 6.6C3.7 8.5 2 12 2 12s3.6 7 10 7a9.6 9.6 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button>
+          </div>
+        </div>
+        <p class="goi-y" id="goi-y-quen" hidden>Mật khẩu do giáo viên quản lý lớp đặt lại. Hãy nhờ giáo viên của bạn cấp mật khẩu tạm.</p>
+        <button class="nut">Đăng nhập</button>
+      </div>
     </form>
 
     <form id="f-ky" novalidate hidden>
-      <h1>Tạo tài khoản học sinh</h1>
-      <p class="phu-chu">Cần mã lớp do giáo viên đưa.</p>
-      <label class="o"><span>Mã lớp</span><input name="ma_lop" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="16" required></label>
-      <label class="o"><span>Họ và tên</span><input name="ho_ten" autocomplete="name" maxlength="80" required></label>
-      <label class="o"><span>Tên đăng nhập</span><input name="ten_dang_nhap" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="32" required><small>3 đến 32 ký tự: chữ không dấu, số, dấu chấm, gạch nối, gạch dưới.</small></label>
-      <label class="o"><span>Mật khẩu</span><input name="mat_khau" type="password" autocomplete="new-password" required><small>Ít nhất 8 ký tự.</small></label>
-      <p class="bao" role="alert" hidden></p>
-      <button class="nut chinh rong">Tạo tài khoản</button>
+      <div class="dau-form">
+        <h1>Tạo tài khoản học sinh</h1>
+        <p class="phu-chu">Cần mã lớp do giáo viên đưa</p>
+      </div>
+      <div class="hop">
+        <p class="bao" role="alert" hidden></p>
+        <div class="truong"><label for="ky-ma">Mã lớp</label><input id="ky-ma" name="ma_lop" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="16" required></div>
+        <div class="truong"><label for="ky-ho-ten">Họ và tên</label><input id="ky-ho-ten" name="ho_ten" autocomplete="name" maxlength="80" required></div>
+        <div class="truong"><label for="ky-ten">Tên đăng nhập</label><input id="ky-ten" name="ten_dang_nhap" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="32" required><small>3 đến 32 ký tự: chữ không dấu, số, dấu chấm, gạch nối, gạch dưới.</small></div>
+        <div class="truong"><label for="ky-mk">Mật khẩu</label><div class="o-nhap"><input id="ky-mk" name="mat_khau" type="password" autocomplete="new-password" required><button type="button" class="mat" aria-label="Hiện mật khẩu" aria-pressed="false"><svg class="hien-mat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="an" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4M6.6 6.6C3.7 8.5 2 12 2 12s3.6 7 10 7a9.6 9.6 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div><small>Ít nhất 8 ký tự.</small></div>
+        <button class="nut">Tạo tài khoản</button>
+      </div>
     </form>
 
     <form id="f-doi" novalidate hidden>
-      <h1>Đổi mật khẩu</h1>
-      <p class="phu-chu">Đây là mật khẩu tạm. Hãy đặt mật khẩu của riêng bạn trước khi tiếp tục.</p>
-      <input name="ten" type="text" autocomplete="username" hidden>
-      <label class="o"><span>Mật khẩu hiện tại</span><input name="mat_khau_cu" type="password" autocomplete="current-password" required></label>
-      <label class="o"><span>Mật khẩu mới</span><input name="mat_khau_moi" type="password" autocomplete="new-password" required><small>Ít nhất 8 ký tự.</small></label>
-      <label class="o"><span>Nhập lại mật khẩu mới</span><input name="nhap_lai" type="password" autocomplete="new-password" required></label>
-      <p class="bao" role="alert" hidden></p>
-      <button class="nut chinh rong">Lưu mật khẩu mới</button>
-      <p class="chan"><button type="button" id="thoat">Đăng xuất</button></p>
+      <div class="dau-form">
+        <h1>Đổi mật khẩu</h1>
+        <p class="phu-chu">Đây là mật khẩu tạm. Hãy đặt mật khẩu của riêng bạn trước khi tiếp tục.</p>
+      </div>
+      <div class="hop">
+        <p class="bao" role="alert" hidden></p>
+        <input name="ten" type="text" autocomplete="username" hidden>
+        <div class="truong"><label for="doi-cu">Mật khẩu hiện tại</label><input id="doi-cu" name="mat_khau_cu" type="password" autocomplete="current-password" required></div>
+        <div class="truong"><label for="doi-moi">Mật khẩu mới</label><input id="doi-moi" name="mat_khau_moi" type="password" autocomplete="new-password" required><small>Ít nhất 8 ký tự.</small></div>
+        <div class="truong"><label for="doi-lai">Nhập lại mật khẩu mới</label><input id="doi-lai" name="nhap_lai" type="password" autocomplete="new-password" required></div>
+        <button class="nut">Lưu mật khẩu mới</button>
+        <p class="chan-form"><button type="button" id="thoat">Đăng xuất</button></p>
+      </div>
     </form>
-  </div>
-  <p class="nguon">Trường THPT Chuyên Lê Quý Đôn, Gia Lai</p>
-  </div>
-  <div class="cot-ve">
-    <h2>Phòng thí nghiệm ảo Hóa và Sinh</h2>
-    <p>Giáo viên quản lý lớp, phòng và kết quả. Học sinh xem bài, ôn tập và điểm của mình.</p>
-    <div id="ban-do" aria-hidden="true"></div>
+
+    <div class="the-phu" id="chon">
+      <button type="button" id="tab-vao" data-dan="Đã có tài khoản?" hidden>Đăng nhập</button>
+      <button type="button" id="tab-ky" data-dan="Học sinh mới?">Tạo tài khoản bằng mã lớp</button>
+    </div>
+
+    <ul class="tin-cay">
+      <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg>Mật khẩu chỉ được lưu ở dạng băm, máy chủ không giữ bản gốc.</li>
+      <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 1.8 2.8 4v3.6c0 3 2.2 5.3 5.2 6.4 3-1.1 5.2-3.4 5.2-6.4V4z"/><path d="m5.8 8 1.6 1.6 2.8-3"/></svg>Không mở đăng ký tự do: tài khoản do giáo viên tạo, hoặc học sinh tạo bằng mã lớp.</li>
+    </ul>
   </div>
 </main>
-<script src="/tinh/ban_do.js"></script>
+
+<footer class="chan-trang">
+  <ul>
+    <li><a href="/">Trang giới thiệu</a></li>
+    <li><a href="/#/san-pham">Sản phẩm</a></li>
+    <li><a href="/#/kiem-chung">Kiểm chứng</a></li>
+    <li>© 2026 VERA Lab · Dự án Khoa học Kỹ thuật</li>
+  </ul>
+</footer>
+
 <script>
-BanDo.ve(document.getElementById("ban-do"));
 const thamSo = new URLSearchParams(location.search);
 const $ = (id) => document.getElementById(id);
 
@@ -118,8 +219,9 @@ async function goi(duong, body) {
 function hien(form) {
   for (const f of ["f-vao", "f-ky", "f-doi"]) $(f).hidden = f !== form;
   $("chon").hidden = form === "f-doi";
-  $("tab-vao").setAttribute("aria-selected", form === "f-vao");
-  $("tab-ky").setAttribute("aria-selected", form === "f-ky");
+  // Ô phụ dưới thẻ chỉ hiện lối sang biểu mẫu còn lại
+  $("tab-vao").hidden = form !== "f-ky";
+  $("tab-ky").hidden = form !== "f-vao";
   $("khung").hidden = false;
 }
 
@@ -162,13 +264,26 @@ ganForm($("f-doi"), async (g) => {
   location.replace(trangTiep(nd));
 });
 
-$("tab-vao").addEventListener("click", () => hien("f-vao"));
-$("tab-ky").addEventListener("click", () => hien("f-ky"));
+$("tab-vao").addEventListener("click", () => { hien("f-vao"); $("f-vao").elements.ten_dang_nhap.focus(); });
+$("tab-ky").addEventListener("click", () => { hien("f-ky"); $("f-ky").elements.ma_lop.focus(); });
 $("thoat").addEventListener("click", async () => {
   await goi("/auth/dang-xuat", {}).catch(() => {});
   $("f-doi").reset();
   hien("f-vao");
 });
+$("quen").addEventListener("click", () => {
+  const mo = $("goi-y-quen").hidden;
+  $("goi-y-quen").hidden = !mo;
+  $("quen").setAttribute("aria-expanded", String(mo));
+});
+for (const n of document.querySelectorAll(".mat")) {
+  n.addEventListener("click", () => {
+    const o = n.previousElementSibling, hienMk = o.type === "password";
+    o.type = hienMk ? "text" : "password";
+    n.setAttribute("aria-pressed", String(hienMk));
+    n.setAttribute("aria-label", hienMk ? "Ẩn mật khẩu" : "Hiện mật khẩu");
+  });
+}
 
 (async () => {
   const r = await fetch("/auth/toi").catch(() => null);
@@ -177,6 +292,7 @@ $("thoat").addEventListener("click", async () => {
     if (nd.phai_doi_mat_khau) return moDoiMatKhau(nd);
     return location.replace(trangTiep(nd));
   }
+  if (location.hash === "#tao-tai-khoan") { hien("f-ky"); $("f-ky").elements.ma_lop.focus(); return; }
   hien("f-vao");
   $("f-vao").elements.ten_dang_nhap.focus();
 })();

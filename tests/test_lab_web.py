@@ -415,6 +415,33 @@ class RobotPlanTest(TempDb):
         self.assertEqual(steps[3]["so_luong"], 30)
         self.assertEqual(len(dropped), 1)  # do_ph thiếu mã vật
 
+    def test_ky_nang_sinh_hoc_tang_2(self):
+        ids = {"binh_sinh_1", "sinh_pham_1", "dung_cu_sinh_1", "hop_cap_1", "num_1", "nut_1"}
+        plan = [
+            {"ky_nang": "lay_dung_cu", "doi_tuong": "hop_cap_1", "dich": "", "so_luong": 0, "hoa_chat": "", "loi": ""},
+            {"ky_nang": "dat", "doi_tuong": "", "dich": "ban_nguoi_dung", "so_luong": 0, "hoa_chat": "", "loi": ""},
+            {"ky_nang": "dung_dung_cu", "doi_tuong": "dung_cu_sinh_1", "dich": "sinh_pham_1", "so_luong": 0, "hoa_chat": "", "loi": ""},
+            {"ky_nang": "dung_dung_cu", "doi_tuong": "dung_cu_sinh_1", "dich": "vat_vua_lay", "so_luong": 99, "hoa_chat": "", "loi": ""},
+            {"ky_nang": "dung_dung_cu", "doi_tuong": "", "dich": "binh_sinh_1", "so_luong": 2, "hoa_chat": "", "loi": ""},
+            {"ky_nang": "dung_dung_cu", "doi_tuong": "kep_khong_co", "dich": "binh_sinh_1", "so_luong": 1, "hoa_chat": "", "loi": ""},
+            {"ky_nang": "dung_dung_cu", "doi_tuong": "dung_cu_sinh_1", "dich": "", "so_luong": 1, "hoa_chat": "", "loi": ""},
+            {"ky_nang": "chinh_num", "doi_tuong": "num_1", "dich": "", "so_luong": 37, "hoa_chat": "", "loi": ""},
+            {"ky_nang": "chinh_num", "doi_tuong": "", "dich": "", "so_luong": 37, "hoa_chat": "", "loi": ""},
+            {"ky_nang": "bat_tat", "doi_tuong": "nut_1", "dich": "", "so_luong": 0, "hoa_chat": "", "loi": ""},
+            {"ky_nang": "quan_sat", "doi_tuong": "vat_dang_cam", "dich": "", "so_luong": 0, "hoa_chat": "", "loi": ""},
+        ]
+        steps, dropped = robot_plan.validate(plan, ids, main.find_chemical)
+        self.assertEqual([s["ky_nang"] for s in steps],
+                         ["lay_dung_cu", "dat", "dung_dung_cu", "dung_dung_cu", "dung_dung_cu", "chinh_num", "bat_tat", "quan_sat"])
+        self.assertEqual(steps[2]["so_luong"], 1)                 # mặc định một lần
+        self.assertEqual(steps[3]["so_luong"], 20)                # trần 20 lần
+        self.assertEqual(steps[3]["dich"], "vat_vua_lay")         # mã đặc biệt: vật vừa lấy từ hộp cấp
+        self.assertEqual(steps[4]["doi_tuong"], "vat_dang_cam")   # không ghi dụng cụ: vật robot đang cầm
+        self.assertEqual(steps[5]["so_luong"], 37)
+        self.assertEqual(len(dropped), 3)  # dụng cụ lạ, thiếu vật đích, chinh_num thiếu núm
+        self.assertIn("dung_dung_cu", robot_plan.SYSTEM_PLAN)
+        self.assertIn("TẦNG 2", robot_plan.SYSTEM_PLAN)
+
     def test_thi_nghiem_mau(self):
         self.assertEqual(robot_plan.find_template("nhận biết Cu2+"), "nhan_biet_cu2")
         self.assertEqual(robot_plan.find_template("Chuẩn độ"), "chuan_do")

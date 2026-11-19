@@ -1,4 +1,4 @@
-using Khkt.Input;
+﻿using Khkt.Input;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -69,6 +69,8 @@ namespace Khkt.Environment
             if (FindAnyObjectByType<Khkt.Input.HeadTracking>() == null) gameObject.AddComponent<Khkt.Input.HeadTracking>();
             if (FindAnyObjectByType<Khkt.Input.InAppHandTracker>() == null) gameObject.AddComponent<Khkt.Input.InAppHandTracker>();
             if (FindAnyObjectByType<Khkt.Input.ArmTracking>() == null) gameObject.AddComponent<Khkt.Input.ArmTracking>();
+            if (FindAnyObjectByType<Khkt.Input.HandTrackerProcess>() == null) gameObject.AddComponent<Khkt.Input.HandTrackerProcess>();
+            if (FindAnyObjectByType<Khkt.Demo.GestureControl>() == null) gameObject.AddComponent<Khkt.Demo.GestureControl>();
             if (FindAnyObjectByType<Khkt.Demo.ArmRig>() == null) gameObject.AddComponent<Khkt.Demo.ArmRig>().cameraTransform = cameraTransform;
             if (FindAnyObjectByType<Khkt.Demo.PresentationClient>() == null) gameObject.AddComponent<Khkt.Demo.PresentationClient>();
             if (FindAnyObjectByType<Khkt.Input.TrackingViewer>() == null) gameObject.AddComponent<Khkt.Input.TrackingViewer>();

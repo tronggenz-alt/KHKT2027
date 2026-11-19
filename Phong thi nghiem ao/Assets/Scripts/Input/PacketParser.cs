@@ -15,6 +15,7 @@ namespace Khkt.Input
 
     /// <summary>
     /// Giải mã gói 29 byte từ firmware (docs/02-giao-thuc-tay-cam.md). Bản Python tương đương: khkt/protocol.py.
+    /// Tay cầm VERA (firmware/tay_cam_vera): thêm gói v3 A5 5C (37 byte) và gói thô A5 5D (105 byte), ra VeraSample.
     /// Không an toàn đa luồng: chỉ gọi Feed từ một luồng.
     /// </summary>
     public sealed class PacketParser
@@ -30,9 +31,18 @@ namespace Khkt.Input
 
         readonly List<byte> buf = new List<byte>(256);
         readonly StringBuilder text = new StringBuilder();
-        int lastSeq = -1;
+        int lastSeq = -1, lastVeraSeq = -1;
+        readonly byte[] one = new byte[VeraSample.LengthRaw];
 
-        public void Feed(byte[] data, int count, List<RawPacket> output)
+        /// <summary>Số gói VERA (5C / 5D) đã giải mã được.</summary>
+        public int VeraPackets { get; private set; }
+
+        static int LengthOf(byte kind) => kind == 0x5C ? VeraSample.LengthV3 : kind == 0x5D ? VeraSample.LengthRaw : Length;
+
+        public void Feed(byte[] data, int count, List<RawPacket> output) => Feed(data, count, output, null);
+
+        /// <summary>vera = null: gói VERA được bỏ qua (vẫn tiêu thụ đúng độ dài).</summary>
+        public void Feed(byte[] data, int count, List<RawPacket> output, List<VeraSample> vera)
         {
             for (int i = 0; i < count; i++) buf.Add(data[i]);
             int pos = 0;
@@ -48,12 +58,34 @@ namespace Khkt.Input
                 }
                 SkipText(pos, s);
                 pos = s;
-                if (buf.Count - pos < Length) break;
-                if (Crc8(pos + 2, 26) != buf[pos + 28])
+                byte kind = buf[pos + 1];
+                int len = LengthOf(kind);
+                if (buf.Count - pos < len) break;
+                if (Crc8(pos + 2, len - 3) != buf[pos + len - 1])
                 {
                     CrcErrors++;
                     SkipText(pos, pos + 1);
                     pos += 1;
+                    continue;
+                }
+                if (kind != 0x5A)
+                {
+                    for (int i = 0; i < len; i++) one[i] = buf[pos + i];
+                    var v = kind == 0x5C ? VeraSample.DecodeV3(one, 0) : VeraSample.DecodeRaw(one, 0);
+                    if (kind == 0x5C)
+                    {
+                        if (lastVeraSeq >= 0) LostPackets += (v.Seq - lastVeraSeq - 1 + 256) % 256;
+                        lastVeraSeq = v.Seq;
+                    }
+                    else
+                    {
+                        int n = one[3];
+                        if (lastVeraSeq >= 0) LostPackets += ((v.Seq - lastVeraSeq - n + 65536) % 65536) / System.Math.Max(1, n);
+                        lastVeraSeq = v.Seq;
+                    }
+                    VeraPackets++;
+                    vera?.Add(v);
+                    pos += len;
                     continue;
                 }
                 var p = Decode(pos);
@@ -68,7 +100,7 @@ namespace Khkt.Input
         int FindSync(int from)
         {
             for (int i = from; i + 1 < buf.Count; i++)
-                if (buf[i] == 0xA5 && buf[i + 1] == 0x5A) return i;
+                if (buf[i] == 0xA5 && (buf[i + 1] == 0x5A || buf[i + 1] == 0x5C || buf[i + 1] == 0x5D)) return i;
             return -1;
         }
 
