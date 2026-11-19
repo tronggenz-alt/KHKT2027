@@ -539,6 +539,7 @@ namespace Khkt.CoChe
             tieuDeTo.text = "Cơ chế " + b.Ten + ":";
             TrinhPhat.Nap(b.KichBan);
             Giay.Dat(b.SoDo);
+            Giay.DanhDauBuoc(TrinhPhat.ChiSoBuoc);
             nutNhanh.gameObject.SetActive(b.KichBan.NhanhSai.Count > 0);
             deBai.text = b.De.Length > 220 ? b.De.Substring(0, 217) + "…" : b.De;
             for (int i = 0; i < nutBai.Count; i++)
@@ -629,6 +630,7 @@ namespace Khkt.CoChe
         {
             if (chuThich == null || BaiHienTai == null) return;
             var tp = TrinhPhat;
+            Giay.DanhDauBuoc(tp.ChiSoBuoc);                       // tô khối giai đoạn đang xem trên tờ giấy (như .buoc.dang-xem của demo)
             if (tp.DangNhanhSai && tp.NhanhHienTai != null)
             {
                 DatNhan("KHÔNG KHẢ THI", new Color32(0xdc, 0x26, 0x26, 0xff));

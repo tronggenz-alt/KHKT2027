@@ -1,5 +1,9 @@
 # Tiến độ: Cơ chế từ đề bài mới
 
+> **XONG (19/11).** Commit: 076d786f, e75072dd, 26cfdde2, 470c0686, cùng commit cuối có `DanhDauBuoc` và báo cáo.
+> KhktCoCheVerify 53/53 đạt (bản sạch HEAD + DanhDauBuoc, kết quả ảnh đề thật). Test Python 18/18. Thử thật đề chữ và ảnh đề đều đạt (Gemini flash-lite).
+> Đã xóa `mau_kiem_thu.bin`; máy chủ 8010 đã tắt. Việc còn lại: người dùng thay khóa Claude trong `.env`.
+
 Lần sau tiếp tục thì đọc tệp này trước. Báo cáo chi tiết: `bao-cao-co-che-tu-de.md`.
 
 ## Đã xong
@@ -16,6 +20,7 @@ Lần sau tiếp tục thì đọc tệp này trước. Báo cáo chi tiết: `b
    ĐANG LÀM: chạy KhktCoCheVerify với KHKT_CO_CHE_DE_JSON=<ket_qua_anh.json> để chụp kết quả thật ở cả 3D và Giấy. Cùng lúc đang có một phiên Unity của Hóa lý chạy, script tự đợi.
   (dòng cũ:) thử thật 1 đề chữ và 1 ảnh đề (ảnh tự tạo ở scratchpad, `anh_de_thu.png`: Câu 2, (CH3)3CBr + H2O).
    - Khóa Claude trong `.env` đang bị 401. Phiên chính đã báo người dùng thay khóa; phiên này không sửa `.env`.
+3b. CoCheMoDun gọi `Giay.DanhDauBuoc(TrinhPhat.ChiSoBuoc)` trong CapNhatChuThich và sau MoBai (phiên Sơ đồ giấy nhờ). Đã sửa, CHƯA commit; cần chạy KhktCoCheVerify lần nữa vì lần đang chạy đồng bộ mã trước khi sửa.
 4. Điền kết quả vào `bao-cao-co-che-tu-de.md`, chỗ đang ghi KET_QUA_UNITY và KET_QUA_THU_THAT.
 5. Xóa `StreamingAssets/CoChe/mau_kiem_thu.bin` (tệp này git bỏ qua), rồi commit.
 
