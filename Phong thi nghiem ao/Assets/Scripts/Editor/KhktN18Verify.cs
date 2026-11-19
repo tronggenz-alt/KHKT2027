@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Khkt.Avatar;
 using Khkt.Demo;
 using Khkt.Demo.Bio;
@@ -785,7 +786,7 @@ namespace Khkt.EditorTools
         }
 
         // =====================================================================
-        // Nhóm G4 — Giải phẫu người 3D ngay trong ứng dụng (Mac/Windows)
+        // Nhóm G4 — Giải phẫu người 3D (19/11: bản web BIO-LAB 3D cũ của CHEMISTRY, thay mô-đun C# G4)
         // =====================================================================
 
         static IEnumerator CoRunG4Verify(bool exitWhenDone)
@@ -794,17 +795,31 @@ namespace Khkt.EditorTools
             Application.logMessageReceived += OnUnityLog;
             yield return WaitSceneReady();
 
-            // 1. Dữ liệu 15 cơ quan & hồ sơ tiếng Việt
-            var danhMuc = Bp3dReader.TaiDanhMucCoQuan();
-            Check(danhMuc != null && danhMuc.Count == 15, "G4 Loads all 15 Vietnamese anatomy organ dossiers", $"count={danhMuc?.Count ?? 0}");
+            // 1. Bản web đầy đủ trong StreamingAssets (chạy ngoại tuyến, có nút về Lab)
+            string goc = Path.Combine(Application.streamingAssetsPath, "biology_lab");
+            string html = Path.Combine(Application.streamingAssetsPath, BioWebViewBridge.HtmlRelPath);
+            string noiDung = File.Exists(html) ? File.ReadAllText(html) : "";
+            string[] tepCan = { "sinh-hoc/bp3d.bin.gz", "sinh-hoc/giai-thich/index.js", "vendor/three/three.module.js",
+                                "vendor/gsap.3.12.5.min.js", "vendor/mathjax.3.2.2.js", "dieu-khien-tay/cu-chi.js" };
+            var thieu = tepCan.Where(t => !File.Exists(Path.Combine(goc, t))).ToList();
+            Check(noiDung.Length > 300000 && thieu.Count == 0, "G4 Bản web BIO-LAB 3D đủ tệp trong StreamingAssets/biology_lab", "thiếu: " + string.Join(", ", thieu));
+            Check(noiDung.Contains("id=\"nut-ve-lab\"") && noiDung.Contains("messageHandlers.unity") && noiDung.Contains("veralab://close")
+                  && noiDung.Contains("./vendor/three/three.module.js") && !noiDung.Contains("cdn.jsdelivr.net/npm/three"),
+                  "G4 Trang có nút Về Lab, gửi 'close' cho app, three.js nạp từ vendor (không cần mạng)");
 
-            // 2. Cầu nối hợp đồng Khkt.Bio.GiaiPhau.GiaiPhauMoDun qua assembly riêng
+            // 2. Plugin WKWebView cho Mac: bundle có mã máy, chỉ bật cho Standalone OSX
+            string bundle = "Assets/Plugins/macOS/BioWebViewMac.bundle";
+            bool coMa = File.Exists(Path.Combine(Application.dataPath, "Plugins/macOS/BioWebViewMac.bundle/Contents/MacOS/BioWebViewMac"));
+            var imp = UnityEditor.AssetImporter.GetAtPath(bundle) as UnityEditor.PluginImporter;
+            Check(coMa && imp != null && imp.GetCompatibleWithPlatform(UnityEditor.BuildTarget.StandaloneOSX) && !imp.GetCompatibleWithEditor(),
+                  "G4 Plugins/macOS/BioWebViewMac.bundle có mã máy, bật cho bản Mac", $"coMa={coMa} imp={(imp != null)}");
+
+            // 3. Cầu nối hợp đồng Khkt.Bio.GiaiPhau.GiaiPhauMoDun (thẻ Giải phẫu) → BioWebViewBridge
             System.Reflection.MethodInfo mMo = null, mDong = null;
             System.Reflection.PropertyInfo pDangMo = null;
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            for (int i = 0; i < assemblies.Length; i++)
+            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
             {
-                var tBridge = assemblies[i].GetType("Khkt.Bio.GiaiPhau.GiaiPhauMoDun", false);
+                var tBridge = asm.GetType("Khkt.Bio.GiaiPhau.GiaiPhauMoDun", false);
                 if (tBridge == null) continue;
                 mMo = tBridge.GetMethod("Mo", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
                 mDong = tBridge.GetMethod("Dong", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
@@ -813,175 +828,72 @@ namespace Khkt.EditorTools
             }
             Check(mMo != null && mDong != null && pDangMo != null, "G4 Bridge contract Khkt.Bio.GiaiPhau.GiaiPhauMoDun found");
 
-            string outDir = Path.GetFullPath(Path.Combine(Application.dataPath, "..", "..", "docs", "ngay-18-11", "anh", "g4"));
-            Directory.CreateDirectory(outDir);
-
-            var rt = new RenderTexture(ShotW, ShotH, 24, RenderTextureFormat.ARGB32);
-            rt.Create();
-            var tex = new Texture2D(ShotW, ShotH, TextureFormat.RGBA32, false);
-
+            int ucGoc = DesktopViewer.UiCapture;
             try
             {
-                HardwareProfile.Dat(MucDoHoa.Cao);
-
-                // 3. Đo thời gian mở lần đầu <= 3 giây
-                float t0 = Time.realtimeSinceStartup;
                 mMo?.Invoke(null, null);
                 yield return WaitPlayFrames(2);
-                float firstOpenSec = Time.realtimeSinceStartup - t0;
-                bool isOpenNow = pDangMo != null && (bool)pDangMo.GetValue(null);
-                Check(isOpenNow && firstOpenSec <= 3.0f, "G4 First open GiaiPhauMoDun.Mo() completes within 3s", $"sec={firstOpenSec:F3}s");
-
+                bool mo = pDangMo != null && (bool)pDangMo.GetValue(null);
+                Check(mo && BioWebViewBridge.IsOpen && !GiaiPhauMoDunImpl.DangMo && DesktopViewer.UiCapture == ucGoc + 1,
+                      "G4 GiaiPhauMoDun.Mo() mở bản web (không mở mô-đun C# G4), khoá điều khiển lab",
+                      $"cach={BioWebViewBridge.CachHien} uiCapture={DesktopViewer.UiCapture}");
                 mDong?.Invoke(null, null);
                 yield return WaitPlayFrames(2);
+                Check(!BioWebViewBridge.IsOpen && DesktopViewer.UiCapture == ucGoc, "G4 GiaiPhauMoDun.Dong() đóng trang, trả điều khiển lab");
 
-                // 4. Mở / đóng 5 lần không tăng bộ nhớ vô hạn
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                long memBefore = Profiler.GetTotalAllocatedMemoryLong();
+                // 4. Mở / đóng 5 lần không rò UiCapture
+                bool gonHet = true;
                 for (int c = 0; c < 5; c++)
                 {
-                    mMo?.Invoke(null, null);
-                    yield return WaitPlayFrames(2);
-                    mDong?.Invoke(null, null);
-                    yield return WaitPlayFrames(2);
+                    BioWebViewBridge.Open();
+                    yield return WaitPlayFrames(1);
+                    gonHet &= BioWebViewBridge.IsOpen;
+                    BioWebViewBridge.Close();
+                    yield return WaitPlayFrames(1);
+                    gonHet &= !BioWebViewBridge.IsOpen;
                 }
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                long memAfter = Profiler.GetTotalAllocatedMemoryLong();
-                float memDeltaMb = (memAfter - memBefore) / (1024f * 1024f);
-                Check(!GiaiPhauMoDunImpl.DangMo && memDeltaMb < 20f,
-                    "G4 Open/Close 5 cycles stays bounded without leak",
-                    $"deltaMB={memDeltaMb:F2}MB");
+                Check(gonHet && DesktopViewer.UiCapture == ucGoc, "G4 Mở/đóng bản web 5 lần sạch sẽ", $"uiCapture={DesktopViewer.UiCapture}");
 
-                // 5. Lối vào trên Mac/Windows (BioWebViewBridge & DigitalAnatomyTable mở trực tiếp trong app)
-                BioWebViewBridge.Open();
-                yield return WaitPlayFrames(2);
-                bool openedViaPortal = GiaiPhauMoDunImpl.DangMo && BioWebViewBridge.IsOpen;
-                BioWebViewBridge.Close();
-                yield return WaitPlayFrames(2);
-                Check(openedViaPortal && !GiaiPhauMoDunImpl.DangMo && !BioWebViewBridge.IsOpen,
-                    "G4 BioWebViewBridge opens/closes GiaiPhauMoDun in-app without external browser");
-
+                // 5. Bàn giải phẫu số trong lab mở cùng bản web
                 var table = UnityEngine.Object.FindAnyObjectByType<DigitalAnatomyTable>(FindObjectsInactive.Include);
                 if (table != null)
                 {
                     table.Use();
                     yield return WaitPlayFrames(2);
-                    Check(GiaiPhauMoDunImpl.DangMo, "G4 DigitalAnatomyTable.Use() launches GiaiPhauMoDun on desktop");
+                    Check(BioWebViewBridge.IsOpen && !GiaiPhauMoDunImpl.DangMo, "G4 DigitalAnatomyTable.Use() mở bản web BIO-LAB 3D");
+                    BioWebViewBridge.Close();
+                    yield return WaitPlayFrames(1);
                 }
-                else
+
+                // 6. Máy chủ nội bộ cho Windows / Editor: phục vụ trang và module JS đúng kiểu
+                bool bat = MayChuWebNoiBo.Bat(goc);
+                long maHtml = 0, maJs = 0; string kieuJs = "";
+                if (bat)
                 {
-                    GiaiPhauMoDunImpl.Mo();
-                    yield return WaitPlayFrames(2);
+                    using (var r = UnityEngine.Networking.UnityWebRequest.Get(MayChuWebNoiBo.Url("biology-lab-3d.html")))
+                    {
+                        r.SendWebRequest();
+                        float han = Time.realtimeSinceStartup + 10f;
+                        while (!r.isDone && Time.realtimeSinceStartup < han) yield return null;
+                        maHtml = r.responseCode;
+                        if (maHtml != 200) Debug.Log("[G4] html lỗi: " + r.error);
+                    }
+                    using (var r = UnityEngine.Networking.UnityWebRequest.Get(MayChuWebNoiBo.Url("vendor/three/three.module.js")))
+                    {
+                        r.SendWebRequest();
+                        float han = Time.realtimeSinceStartup + 10f;
+                        while (!r.isDone && Time.realtimeSinceStartup < han) yield return null;
+                        maJs = r.responseCode;
+                        kieuJs = r.GetResponseHeader("Content-Type") ?? "";
+                    }
                 }
-
-                var ctrl = GiaiPhauMoDunImpl.HienTai;
-                var sanKhau = ctrl?.SanKhau;
-                Check(ctrl != null && sanKhau != null, "G4 Controller and GiaiPhauSanKhau3D initialized");
-
-                // 6. Bật/tắt 8 hệ cơ quan + Da
-                string[] eightSys = { "xuong", "he_co", "tieu_hoa", "tuan_hoan", "ho_hap", "than_kinh", "bai_tiet", "noi_tiet" };
-                bool allToggledOk = true;
-                foreach (string sys in eightSys)
-                {
-                    ctrl.DatHeCoQuan(sys, false);
-                    if (sanKhau.LayTrangThaiHe(sys)) allToggledOk = false;
-                    ctrl.DatHeCoQuan(sys, true);
-                    if (!sanKhau.LayTrangThaiHe(sys)) allToggledOk = false;
-                }
-                Check(allToggledOk, "G4 Toggles all 8 anatomical systems on/off");
-
-                // 7. Ảnh 1: Tổng quan hệ cơ & xương (Bóc lớp 0.36)
-                ctrl.DatBocLop(0.36f);
-                ctrl.DatMatCat(CheDoMatCat.Tat, 0f);
-                ctrl.DatGocNhinToanThan(instant: true);
-                yield return WaitPlayFrames(6);
-                RenderStageWithOverlay(ctrl.StageCamera, ctrl.UiCanvas, rt, tex, Path.Combine(outDir, "01_tong_quan_he_co_xuong.png"));
-
-                // 8. Ảnh 2: Bóc lớp 0.78 lộ nội tạng & hệ tuần hoàn
-                ctrl.DatBocLop(0.78f);
-                ctrl.DatGocNhinNoiTang(instant: true);
-                yield return WaitPlayFrames(6);
-                RenderStageWithOverlay(ctrl.StageCamera, ctrl.UiCanvas, rt, tex, Path.Combine(outDir, "02_boc_lop_noi_tang_tuan_hoan.png"));
-
-                // 9. Mặt cắt dọc / ngang / trán & Ảnh 3: Mặt cắt dọc (Sagittal)
-                ctrl.DatBocLop(0.70f);
-                ctrl.DatMatCat(CheDoMatCat.CatNgang, 0.25f);
-                yield return WaitPlayFrames(2);
-                ctrl.DatMatCat(CheDoMatCat.CatTran, 0f);
-                yield return WaitPlayFrames(2);
-                ctrl.DatMatCat(CheDoMatCat.CatDoc, 0f);
-                ctrl.OrbitCam.SetTarget(GiaiPhauSanKhau3D.StageOrigin + new Vector3(0f, 1.05f, 0f), 146f, 10f, 1.45f, true);
-                yield return WaitPlayFrames(6);
-                RenderStageWithOverlay(ctrl.StageCamera, ctrl.UiCanvas, rt, tex, Path.Combine(outDir, "03_mat_cat_doc_co_the.png"));
-                Check(sanKhau.CheDoCat == CheDoMatCat.CatDoc, "G4 Cross-section plane cuts Sagittal/Transverse/Coronal cleanly");
-
-                // 10. Nhấp chọn ít nhất 3 cơ quan (tim, phoi, nao) & Ảnh 4: Chọn tim + Thẻ kiến thức
-                ctrl.DatMatCat(CheDoMatCat.Tat, 0f);
-                ctrl.XuLyChonCoQuan("nao");
-                yield return WaitPlayFrames(2);
-                bool pickedNao = sanKhau.CoQuanDangChon == "nao";
-                ctrl.XuLyChonCoQuan("phoi");
-                yield return WaitPlayFrames(2);
-                bool pickedPhoi = sanKhau.CoQuanDangChon == "phoi";
-                ctrl.XuLyChonCoQuan("tim");
-                ctrl.DatBocLop(0.82f);
-                ctrl.DatGocNhinNoiTang(instant: true);
-                yield return WaitPlayFrames(6);
-                bool pickedTim = sanKhau.CoQuanDangChon == "tim";
-                Check(pickedNao && pickedPhoi && pickedTim, "G4 Organ selection & knowledge card switches across 3+ organs");
-                RenderStageWithOverlay(ctrl.StageCamera, ctrl.UiCanvas, rt, tex, Path.Combine(outDir, "04_chon_tim_va_the_kien_thuc.png"));
-
-                // 11. Tách riêng cơ quan & đổi nhịp tim 60 -> 120 lần/phút + Ảnh 5
-                ctrl.DatNhipTim(60f);
-                yield return WaitPlayFrames(3);
-                ctrl.DatNhipTim(120f);
-                ctrl.DatTachRa(true);
-                yield return WaitPlayFrames(8);
-                Check(sanKhau.DangTachRa && Mathf.Abs(sanKhau.NhipTimBpm - 120f) < 0.5f,
-                    "G4 Isolate organ ('Tách ra') & heart beat slider 60-120 bpm work cleanly");
-                RenderStageWithOverlay(ctrl.StageCamera, ctrl.UiCanvas, rt, tex, Path.Combine(outDir, "05_tach_rieng_co_quan_tim_120bpm.png"));
-
-                // 12. Trả về cơ thể & Câu hỏi nhanh 5 câu + Ảnh 6
-                ctrl.DatTachRa(false);
-                ctrl.DatCheDo(CheDoGiaiPhau.CauHoiNhanh);
-                ctrl.BatDauLaiCauHoiNhanh();
-                ctrl.DatGocNhinNoiTang(instant: true);
-                ctrl.TraLoiChiCoQuan("tim");
-                yield return WaitPlayFrames(6);
-                RenderStageWithOverlay(ctrl.StageCamera, ctrl.UiCanvas, rt, tex, Path.Combine(outDir, "06_cau_hoi_nhanh_chi_co_quan.png"));
-
-                string[] quizAnswers = { "tim", "phoi", "nao", "da_day", "than" };
-                for (int qIdx = 1; qIdx < quizAnswers.Length; qIdx++)
-                {
-                    ctrl.ChuyenCauHoiNhanh(qIdx);
-                    ctrl.TraLoiChiCoQuan(quizAnswers[qIdx]);
-                }
-                Check(ctrl.DiemCauHoiNhanh == 5 && ctrl.SoCauDaTraLoi == 5,
-                    "G4 5-question pointing quiz scores 5/5 accurately",
-                    $"score={ctrl.DiemCauHoiNhanh}/5");
-
-                // 13. Hiệu năng ở mức Cao khi mở mô-đun
-                int sampleFrames = 45;
-                float ts = Time.realtimeSinceStartup;
-                yield return WaitPlayFrames(sampleFrames);
-                float dt = Mathf.Max(0.001f, Time.realtimeSinceStartup - ts);
-                float editorFps = sampleFrames / dt;
-                Debug.Log($"[N18_G4_PERF] Cao mode PlayMode open={firstOpenSec:F3}s memDelta={memDeltaMb:F2}MB fps=~{editorFps:F1}");
-                Check(editorFps >= 20f, "G4 Maintains smooth frame pacing at HardwareProfile Cao", $"editorFps={editorFps:F1}");
-
-                GiaiPhauMoDunImpl.Dong();
-                yield return WaitPlayFrames(3);
-                Check(!GiaiPhauMoDunImpl.DangMo, "G4 GiaiPhauMoDunImpl.Dong() closes cleanly");
+                Check(bat && maHtml == 200 && maJs == 200 && kieuJs.StartsWith("text/javascript"),
+                      "G4 Máy chủ nội bộ 127.0.0.1 phục vụ trang và module three.js", $"html={maHtml} js={maJs} {kieuJs}");
+                MayChuWebNoiBo.Tat();
             }
             finally
             {
-                if (GiaiPhauMoDunImpl.DangMo) GiaiPhauMoDunImpl.Dong();
-                HardwareProfile.DatTuDong();
-                rt.Release();
-                UnityEngine.Object.Destroy(rt);
-                UnityEngine.Object.Destroy(tex);
+                if (BioWebViewBridge.IsOpen) BioWebViewBridge.Close();
                 Application.logMessageReceived -= OnUnityLog;
             }
 

@@ -14,8 +14,10 @@ namespace Khkt.Demo.Bio.Portal
     ///   • Trên iOS: mở WKWebView toàn màn hình thông qua plugin native BioWebViewPlugin.mm.
     ///     Hỗ trợ WebGL, nạp file:// nội bộ từ StreamingAssets/biology_lab/biology-lab-3d.html,
     ///     bắt sự kiện nút đóng (veralab://close hoặc message 'unity') và nút thoát nổi '← Về Lab'.
-    ///   • Trên Unity Editor / macOS Standalone: mở biology-lab-3d.html trên trình duyệt mặc định
-    ///     và hiển thị nút GUI overlay '← Trở về Phòng Lab 3D' để kiểm thử thuận tiện.
+    ///   • Trên macOS (bản app): WKWebView phủ cửa sổ app qua Plugins/macOS/BioWebViewMac.bundle, nút '← Về Lab'
+    ///     (19/11, thay mô-đun G4 viết lại bằng C#; mã G4 vẫn giữ nhưng không dùng).
+    ///   • Trên Windows / Unity Editor: mở trang qua máy chủ nội bộ http://127.0.0.1 (MayChuWebNoiBo) bằng trình duyệt
+    ///     mặc định và hiện nút '← Trở về Phòng Lab 3D'. Editor batchmode (kiểm thử) chỉ đánh dấu mở, không mở trình duyệt.
     ///   • Nhận callback OnWebViewClosed từ native hoặc nút GUI để phục hồi trạng thái Lab 3D.
     /// </summary>
     public class BioWebViewBridge : MonoBehaviour
@@ -38,6 +40,19 @@ namespace Khkt.Demo.Bio.Portal
         [DllImport("__Internal")]
         private static extern void _CloseBioWebView();
 #endif
+#if UNITY_STANDALONE_OSX && !UNITY_EDITOR
+        [DllImport("BioWebViewMac")] private static extern int _BioMac_Open(string path);
+        [DllImport("BioWebViewMac")] private static extern void _BioMac_Close();
+        [DllImport("BioWebViewMac")] private static extern int _BioMac_ConsumeClosed();
+        private bool nativeMac;
+#endif
+        private bool captured;
+        private CursorLockMode prevLock;
+        private bool prevVisible;
+
+        /// <summary>Cách trang đang được hiện: "ios", "mac", "trinh_duyet", "khong_giao_dien" (batchmode) — cho kiểm thử.</summary>
+        public static string CachHien { get; private set; } = "";
+        public const string HtmlRelPath = "biology_lab/biology-lab-3d.html";
 
         private void Awake()
         {
@@ -81,20 +96,55 @@ namespace Khkt.Demo.Bio.Portal
             s_onClosedCallback = onClosed;
             bridge._isOpen = true;
 
-            string htmlRelPath = "biology_lab/biology-lab-3d.html";
-            string fullPath = Path.Combine(Application.streamingAssetsPath, htmlRelPath);
-
+            string fullPath = Path.Combine(Application.streamingAssetsPath, HtmlRelPath);
             Debug.Log($"[BioWebViewBridge] Opening Biology Lab 3D at: {fullPath}");
+            bridge.GiuGiaoDien(true);
 
 #if UNITY_IOS && !UNITY_EDITOR
+            CachHien = "ios";
             _OpenBioWebView(fullPath);
 #else
-            // G4: Mac, Windows và Unity Editor mở mô-đun Giải phẫu người 3D trực tiếp trong ứng dụng, không mở trình duyệt ngoài.
-            Khkt.Demo.Bio.GiaiPhau.GiaiPhauMoDunImpl.Mo(() =>
-            {
-                if (s_instance != null) s_instance.OnWebViewClosed("in_app_closed");
-            });
+            bool xong = false;
+#if UNITY_STANDALONE_OSX && !UNITY_EDITOR
+            try { bridge.nativeMac = _BioMac_Open(fullPath) == 1; }
+            catch (Exception e) { Debug.LogWarning("[BioWebViewBridge] BioWebViewMac lỗi: " + e.Message); bridge.nativeMac = false; }
+            if (bridge.nativeMac) { CachHien = "mac"; xong = true; }
 #endif
+            if (!xong)
+            {
+                if (Application.isBatchMode)
+                {
+                    CachHien = "khong_giao_dien";
+                }
+                else
+                {
+                    string url = MayChuWebNoiBo.Bat(Path.GetDirectoryName(fullPath))
+                        ? MayChuWebNoiBo.Url(Path.GetFileName(fullPath))
+                        : new Uri(fullPath).AbsoluteUri;
+                    Application.OpenURL(url);
+                    CachHien = "trinh_duyet";
+                    bridge.showEditorOverlay = true;
+                }
+            }
+#endif
+        }
+
+        /// <summary>Khi trang mở: thả con trỏ và chặn điều khiển lab (UiCapture); khi đóng: trả lại như cũ.</summary>
+        void GiuGiaoDien(bool giu)
+        {
+            if (giu == captured) return;
+            captured = giu;
+            if (giu)
+            {
+                prevLock = Cursor.lockState; prevVisible = Cursor.visible;
+                Khkt.Environment.DesktopViewer.UiCapture++;
+                if (!Application.isBatchMode) { Cursor.lockState = CursorLockMode.None; Cursor.visible = true; }
+            }
+            else
+            {
+                Khkt.Environment.DesktopViewer.UiCapture = Mathf.Max(0, Khkt.Environment.DesktopViewer.UiCapture - 1);
+                if (!Application.isBatchMode) { Cursor.lockState = prevLock; Cursor.visible = prevVisible; }
+            }
         }
 
         /// <summary>
@@ -107,15 +157,16 @@ namespace Khkt.Demo.Bio.Portal
 #if UNITY_IOS && !UNITY_EDITOR
             _CloseBioWebView();
 #else
-            if (Khkt.Demo.Bio.GiaiPhau.GiaiPhauMoDunImpl.DangMo)
+#if UNITY_STANDALONE_OSX && !UNITY_EDITOR
+            if (s_instance.nativeMac)
             {
-                Khkt.Demo.Bio.GiaiPhau.GiaiPhauMoDunImpl.Dong();
+                s_instance.nativeMac = false;
+                _BioMac_Close();
+                _BioMac_ConsumeClosed();
             }
-            else
-            {
-                s_instance.showEditorOverlay = false;
-                s_instance.OnWebViewClosed(string.Empty);
-            }
+#endif
+            s_instance.showEditorOverlay = false;
+            s_instance.OnWebViewClosed(string.Empty);
 #endif
         }
 
@@ -131,6 +182,8 @@ namespace Khkt.Demo.Bio.Portal
 
             _isOpen = false;
             showEditorOverlay = false;
+            CachHien = "";
+            GiuGiaoDien(false);
 
             var callback = s_onClosedCallback;
             s_onClosedCallback = null;
@@ -147,6 +200,14 @@ namespace Khkt.Demo.Bio.Portal
 
         private void Update()
         {
+#if UNITY_STANDALONE_OSX && !UNITY_EDITOR
+            if (nativeMac && _BioMac_ConsumeClosed() == 1)
+            {
+                nativeMac = false;
+                OnWebViewClosed("mac_closed");
+                return;
+            }
+#endif
             if (!showEditorOverlay) return;
 
 #if ENABLE_INPUT_SYSTEM
@@ -188,7 +249,7 @@ namespace Khkt.Demo.Bio.Portal
             };
             labelStyle.normal.textColor = new Color(0.13f, 0.77f, 0.93f); // Cyan #22D3EE
 
-            GUI.Label(new Rect(x + 10, y + 8, bannerWidth - 20, 22), "🧪 Phòng Sinh học 3D đang mở trên trình duyệt", labelStyle);
+            GUI.Label(new Rect(x + 10, y + 8, bannerWidth - 20, 22), "Phòng Sinh học 3D đang mở trên trình duyệt", labelStyle);
 
             // Nút bấm quay về
             var btnStyle = new GUIStyle(GUI.skin.button)
@@ -209,6 +270,7 @@ namespace Khkt.Demo.Bio.Portal
         {
             if (s_instance == this)
             {
+                GiuGiaoDien(false);
                 s_instance = null;
             }
         }
