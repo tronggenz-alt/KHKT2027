@@ -136,3 +136,6 @@ Góp ý: bo tròn quá (công tắc viên thuốc, mục bước nền tròn) nh
 - Kiểm tra: KhktUiVerify 66/66; ảnh `sau_*.png` cập nhật; app Mac xuất lại, trang chủ Giải bài tập thật:
   `app_mac_trang_chu_bo_vua.png`. Gửi phím bằng System Events vào app lần này không ổn định (lúc nhận, lúc không), nên
   các trang trong app thật chưa chụp lại được; ảnh các trang lấy từ KhktUiVerify (cùng mã).
+
+Chụp lại app thật (bản có bo góc mới): kích hoạt cửa sổ app rồi gửi **mã phím** (key code) thay vì ký tự – bộ gõ tiếng Việt
+đã nuốt phím số khi gửi ký tự. Đủ 5 trang: `app_mac_that_1_chu.png`, `_2_chuoi`, `_3_co_che`, `_4_3d`, `_5_hoa_ly`.
