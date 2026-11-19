@@ -85,7 +85,7 @@ namespace Khkt.CoChe
             var md = CoCheMoDun.Instance;
             Check(CoCheMoDun.DangMo && md != null, "Mo() mở lớp phủ cơ chế");
             Check(DesktopViewer.UiCapture == uiCapCu + 1, "Mở lớp phủ khoá điều khiển lab (UiCapture+1)");
-            md.Cam.targetTexture = rt;                                     // canvas + 3D dựng theo khung 1920×1080
+            md.DatDich(rt);                                     // canvas + 3D dựng theo khung 1920×1080
             yield return Frames(5);
             Check(md.DanhSachMa.Count == 8, "Danh sách có 8 bài", string.Join(",", md.DanhSachMa));
             int napDuoc = 0;
@@ -129,9 +129,13 @@ namespace Khkt.CoChe
                     }
                     if (muc == MucDoHoa.Cao)
                     {
+                        md.DatCheDo(false);
+                        float t3 = Time.realtimeSinceStartup;
+                        while (md.DangChuyen && Time.realtimeSinceStartup - t3 < 3f) yield return null;
                         tp.DenBuoc(Mathf.Min(1, tp.SoBuoc - 1));
                         tp.DatT(0.42f);
-                        yield return null;
+                        tp.DatNgayGocDich();                                   // ảnh chụp đúng góc tự chọn của bước
+                        yield return Frames(2);
                         Shot($"{ma}_3d");
                         md.DatCheDo(true);
                         float tt = Time.realtimeSinceStartup;
@@ -149,6 +153,72 @@ namespace Khkt.CoChe
                 }
                 Check(buocOk == buocTong && buocTong > 0, $"Phát hết các bước, mức {HardwareProfile.TenMuc(muc)}", $"{buocOk}/{buocTong} bước");
                 Check(hatQua == 0, $"Số hạt electron ≤ SoHatToiDa ({HardwareProfile.SoHatToiDa}), mức {HardwareProfile.TenMuc(muc)}");
+            }
+
+            // 3b. 19/11: mở bài là bản giấy; Xem 3D → khung nhỏ dưới tờ giấy; phóng to ⇄ thu nhỏ; quay lại bảng giấy; tốc độ; góc tự chọn
+            {
+                md.DatCheDo(true);
+                float tq = Time.realtimeSinceStartup;
+                while (md.DangChuyen && Time.realtimeSinceStartup - tq < 3f) yield return null;
+                CoCheMoDun.MoVoiBai(md.Nap("sn1_tbubr"));
+                yield return Frames(3);
+                Check(md.CheDoGiay && !md.Khung3DMo, "Mở bài: hiện bản giấy trước, khung 3D đóng");
+                Shot("luong_giay_truoc");
+                var nut3d = md.GetComponentsInChildren<Button>(true).FirstOrDefault(b => b.name == "Nút Xem 3D");
+                nut3d?.onClick.Invoke();
+                tq = Time.realtimeSinceStartup;
+                while ((md.DangChuyen || md.CheDoGiay) && Time.realtimeSinceStartup - tq < 3f) yield return null;
+                yield return Frames(3);
+                var r = md.VungCam3D;
+                Check(nut3d != null && md.Khung3DMo && !md.ToanMan && r.width > 0.3f && r.width < 0.7f && r.yMin < 0.2f && r.yMax < 0.5f,
+                      "Nút Xem 3D bật khung 3D nhỏ phía dưới", $"rect {r}");
+                md.TrinhPhat.DenBuoc(0); md.TrinhPhat.DatT(0.35f);
+                yield return Frames(2);
+                md.TrinhPhat.DatNgayGocDich();
+                yield return null;
+                Shot("khung_3d_nho");
+                md.GetComponentsInChildren<Button>(true).FirstOrDefault(b => b.name == "Nút Phóng to")?.onClick.Invoke();
+                yield return new WaitForSecondsRealtime(0.45f);
+                yield return Frames(2);
+                r = md.VungCam3D;
+                Check(md.ToanMan && r.width > 0.97f && r.height > 0.8f, "Nút Phóng to: 3D ra toàn màn hình", $"rect {r}");
+                md.TrinhPhat.DenBuoc(1); md.TrinhPhat.DatT(0.3f);
+                yield return null;
+                md.TrinhPhat.DatNgayGocDich();
+                yield return null;
+                Shot("khung_3d_toan_man");
+                md.GetComponentsInChildren<Button>(true).FirstOrDefault(b => b.name == "Nút Phóng to")?.onClick.Invoke();
+                yield return new WaitForSecondsRealtime(0.45f);
+                yield return Frames(2);
+                Check(!md.ToanMan && md.VungCam3D.width < 0.7f, "Thu nhỏ về khung");
+                var sl = md.GetComponentsInChildren<Slider>(true).FirstOrDefault();
+                if (sl != null) sl.value = 0.25f;
+                Check(sl != null && Mathf.Abs(md.TrinhPhat.TocDo - 0.25f) < 1e-3f && sl.minValue <= 0.25f && sl.maxValue >= 3f, "Thanh tốc độ kéo liên tục 0,25× – 3×", $"{md.TrinhPhat.TocDo}");
+                md.DatTocDo(1f);
+                // góc tự chọn: mỗi bước có mũi tên thì mũi tên không bị nhìn dọc trục (thấy được đường bay)
+                var tpg = md.TrinhPhat;
+                int gocOk = 0, gocTong = 0;
+                for (int i = 0; i < tpg.SoBuoc; i++)
+                {
+                    tpg.DenBuoc(i);
+                    yield return null;
+                    var b = tpg.BuocHienTai;
+                    var s0 = tpg.KichBan.TrangThai[b.Tu].ToaDo;
+                    foreach (var mt in b.MuiTen)
+                    {
+                        if (mt.Tu.Length == 0 || mt.Den.Length == 0 || !s0.ContainsKey("m" + mt.Tu[0]) || !s0.ContainsKey("m" + mt.Den[0])) continue;
+                        var u = s0["m" + mt.Den[0]] - s0["m" + mt.Tu[0]];
+                        if (u.sqrMagnitude < 1e-4f) continue;
+                        var v = Quaternion.Inverse(tpg.XoayDich) * Vector3.back;
+                        gocTong++;
+                        if (Vector3.Cross(u.normalized, v).magnitude > 0.5f) gocOk++;
+                    }
+                }
+                Check(gocTong == 0 || gocOk >= gocTong * 0.8f, "Góc nhìn tự chọn: mũi tên electron nằm ngang mặt nhìn", $"{gocOk}/{gocTong}");
+                md.GetComponentsInChildren<Button>(true).FirstOrDefault(b => b.name == "Nút Quay lại bảng giấy")?.onClick.Invoke();
+                tq = Time.realtimeSinceStartup;
+                while ((md.DangChuyen || !md.CheDoGiay) && Time.realtimeSinceStartup - tq < 3f) yield return null;
+                Check(md.CheDoGiay && !md.Khung3DMo && !md.Cam3D.enabled, "Quay lại bảng giấy đóng khung 3D");
             }
 
             // 4. ô Giải thích mặc định đóng; Hỏi AI (máy chủ giả)
@@ -266,7 +336,7 @@ namespace Khkt.CoChe
             int vsyncCu = QualitySettings.vSyncCount, fpsCu = Application.targetFrameRate;
             QualitySettings.vSyncCount = 0;
             Application.targetFrameRate = -1;
-            md.Cam.targetTexture = null;
+            md.DatDich(null);
             md.MoBai("hsg_propellane_a4");
             md.TrinhPhat.ThoiGianBuoc = 1.2f;
             md.TrinhPhat.DenBuoc(0, true);
@@ -283,14 +353,14 @@ namespace Khkt.CoChe
             Check(FpsDo >= 60f, "Propellane mức Cao ≥ 60 FPS", $"{FpsDo:0.0} FPS, {SystemInfo.graphicsDeviceName}, {Screen.width}×{Screen.height}");
             QualitySettings.vSyncCount = vsyncCu;
             Application.targetFrameRate = fpsCu;
-            md.Cam.targetTexture = rt;
+            md.DatDich(rt);
 
             // 7. không có máy chủ: nút Hỏi AI mờ, ghi rõ lý do
             CoCheMoDun.Dong();
             MayChuCoChe.GiaLap = null;
             MayChuCoChe.Url = "http://127.0.0.1:9";
             CoCheMoDun.Mo();
-            md.Cam.targetTexture = rt;
+            md.DatDich(rt);
             float tk = Time.realtimeSinceStartup;
             while (Time.realtimeSinceStartup - tk < 6f && md.LyDoMayChu == "") yield return null;
             yield return Frames(3);
@@ -299,7 +369,7 @@ namespace Khkt.CoChe
             Shot("khong_may_chu");
 
             // 8. đóng
-            md.Cam.targetTexture = null;
+            md.DatDich(null);
             CoCheMoDun.Dong();
             yield return Frames(3);
             Check(!CoCheMoDun.DangMo && DesktopViewer.UiCapture == uiCapCu, "Dong() đóng lớp phủ, trả điều khiển lab");
@@ -392,16 +462,16 @@ namespace Khkt.CoChe
             if (md == null) return;
             var cam = md.Cam;
             var cu = cam.targetTexture;
-            cam.targetTexture = rt;
+            md.DatDich(rt);
             // batchmode có màn 640×480: chữ dựng ở cỡ đó bị nhòe khi kết xuất 1920×1080 → ép dựng lại chữ theo cỡ ảnh
             foreach (var t in md.GetComponentsInChildren<Text>()) t.SetAllDirty();
             Canvas.ForceUpdateCanvases();
-            cam.Render();
+            md.VeTatCa();
             RenderTexture.active = rt;
             readTex.ReadPixels(new Rect(0, 0, ShotW, ShotH), 0, 0);
             readTex.Apply();
             RenderTexture.active = null;
-            cam.targetTexture = cu;
+            md.DatDich(cu);
             string p = Path.Combine(outDir, ten + ".png");
             File.WriteAllBytes(p, readTex.EncodeToPNG());
             shots++;

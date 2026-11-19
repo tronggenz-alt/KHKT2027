@@ -84,3 +84,40 @@ Thử thật với máy chủ đang chạy (khóa Claude vẫn 401): `/co-che/ho
   chưa dùng chúng để đổi cách giải (bảng đã kiểm chứng giải như nhau) – cần nối vào phần AI giải bước mới.
 - Chọn ảnh đề trên iPad chưa có (nút ghi "sắp có"), theo thứ tự ưu tiên Mac > Windows > iPad.
 - Khóa Claude trong .env vẫn 401; mọi tính năng AI đang chạy bằng Gemini.
+
+## 6. Bổ sung chiều 19/11: Cơ chế – giấy trước, khung 3D nhỏ ⇄ toàn màn hình, góc nhìn tự chọn
+
+Yêu cầu: chỉnh chuyển động/góc camera cho dễ thấy electron; thanh tốc độ kéo liên tục; khi giải bài hiện **bản giấy trước**,
+nút **Xem 3D** bật **khung nhỏ phía dưới** chỉ có 3D + thanh điều khiển, nút **phóng to** ra toàn màn hình (cũng chỉ 3D +
+điều khiển, có nút thu nhỏ), nút **Quay lại bảng giấy**; áp dụng cho 8 bài mẫu và đề mới.
+
+Đã làm (`CoChe/TrinhPhat3D.cs`, `CoChe/CoCheMoDun.cs`):
+- **Góc nhìn tự chọn mỗi bước** (`TinhGocNhin`): chấm điểm 160 hướng nhìn rải đều trên mặt cầu – mũi tên electron phải nằm
+  ngang mặt nhìn (thấy trọn đường bay), nguyên tử tham gia không bị nguyên tử khác che và không chồng nhau, ưu tiên gần góc
+  đang nhìn và hơi nhìn từ trên xuống. Camera xoay mượt tới góc đó (giảm dần theo hàm mũ, ~1 s), đồng thời tự căn **tâm và
+  khoảng cách** ôm các chất của bước. Kéo chuột / cuộn thì tắt tự động tới bước sau.
+- **Electron chậm hơn**: một bước 4,2 s ở 1× (trước 2,6 s), electron bay ≈ 2,3 s.
+- **Thanh tốc độ** kéo liên tục 0,25× – 3× (hiện số, ví dụ 1.00×) thay cho nút 3 mức.
+- **Luồng giấy trước**: mở bài (mẫu hoặc đề mới, từ trang Giải bài tập hay phím M) là tờ giấy; nút **▶ Xem 3D** ở góc dưới
+  phải tờ giấy. Bấm: tờ giấy thu lên phía trên (0,6×), **khung 3D 1040×450** trượt hiện ở giữa đáy màn: đầu khung ghi
+  "Bước n/N tên bước", nút **Phóng to** và **Quay lại bảng giấy**; thanh dưới có ‹ Phát/Dừng ›, thanh tiến trình theo bước
+  (bấm đoạn để nhảy bước), **Tốc độ**, Ẩn H. **Phóng to** giãn khung ra toàn màn hình trong 0,3 s (nút đổi thành **Thu nhỏ**).
+  Đề bài, bảng bên, khung bước cũ không hiện trong khung 3D.
+- Kỹ thuật: camera 3D riêng vẽ vào RenderTexture bằng cỡ màn, chỉ vẽ đúng phần ô xem (`Camera.rect` + `RawImage.uvRect`) nên
+  nét 1:1 và đổi khung nhỏ ⇄ toàn màn không cấp phát lại; vẫn một camera gốc URP cho giao diện, nhãn nguyên tử (Br, ⊕ ⊖) đè
+  đúng chỗ trong khung; kéo xoay chỉ nhận khi chuột ở trong ô xem.
+- Phím tắt (Mac): **V** = Xem 3D ⇄ bảng giấy, **F** = phóng to ⇄ thu nhỏ, Space phát/dừng, ← → chuyển bước.
+- Nút "Bài khác ▾" chuyển lên hàng nút phải (đọc được trên nền giấy); bấm Báo sai khi đang xem 3D thì về giấy rồi mở hộp.
+
+Kiểm tra:
+- KhktCoCheVerify **66/66** – thêm: mở bài là giấy (khung 3D đóng); nút Xem 3D bật khung nhỏ ở đáy (rect ~0,54 × 0,30 màn);
+  Phóng to → ô 3D phủ bề ngang màn; Thu nhỏ về khung; thanh tốc độ 0,25×–3×; góc tự chọn – mũi tên không bị nhìn dọc trục
+  (≥ 80% mũi tên); Quay lại bảng giấy tắt khung và camera 3D. KhktUiVerify **66/66** (không đổi).
+- App Mac xuất lại thành công; mở app thật, phím M → tờ giấy (Thế gốc tự do CH₄ + Cl₂), V → khung 3D nhỏ dưới tờ giấy,
+  Space phát, F → toàn màn hình: `anh/giai-bai-tap/app_mac_co_che_*.png` (góc trên phải che thông báo hệ thống).
+  Ảnh kiểm thử: `sau_trinh_phat_luong_giay_truoc.png`, `sau_trinh_phat_khung_3d_nho.png`, `sau_trinh_phat_khung_3d_toan_man.png`.
+- Sau một lần xuất app, 14 tệp `Lab/Materials/*.mat` trong kho chính bị đổi: đã lưu `git diff --binary` vào
+  `~/Developer/Antigravity-luu-ban-cu/mat_sau_build_co_che_3d_*.diff` rồi `git checkout --`.
+
+Còn lại: ở bước "chất mới tham gia", khung nhìn ôm cả chất sắp bay vào nên lúc đầu phân tử đang có lệch về một phía
+(đúng chỗ dành cho chất bay tới, nhưng có thể cần chỉnh nếu thấy khó nhìn).

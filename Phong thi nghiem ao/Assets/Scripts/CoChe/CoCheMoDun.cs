@@ -119,8 +119,8 @@ namespace Khkt.CoChe
             Mo();
             Instance.DaNap[b.Ma] = b;
             if (Instance.BaiHienTai != b) Instance.MoBai(b);
-            if (Instance.CheDoGiay) Instance.DatCheDo(false);
-            if (buoc >= 0 && buoc < Instance.TrinhPhat.SoBuoc) Instance.TrinhPhat.DenBuoc(buoc);
+            if (buoc >= 0 && buoc < Instance.TrinhPhat.SoBuoc) { Instance.TrinhPhat.DenBuoc(buoc); if (Instance.CheDoGiay) Instance.DatCheDo(false); }
+            else if (!Instance.CheDoGiay) Instance.DatCheDo(true);          // bài mới: hiện bản giấy trước, bấm "Xem 3D" mới bật khung 3D
             if (tab >= 0) Instance.MoBangBen(tab);
         }
 
@@ -268,7 +268,7 @@ namespace Khkt.CoChe
             nutDong = NutKinh(goc, "Đóng", "← Quay lại", new Vector2(-24, -26), new Vector2(130, 44), Dong, 15, new Vector2(1, 1));
             // hàng nút dưới nút gạt: xuất ảnh sơ đồ giấy, báo sai, bảng bên (các bước / giải thích / hỏi đáp)
             nutXuat = NutKinh(goc, "Nút Xuất ảnh", "Xuất ảnh PNG", new Vector2(-24, -84), new Vector2(150, 40), () => StartCoroutine(XuatAnhGiay()), 15, new Vector2(1, 1));
-            nutBaoSai = NutKinh(goc, "Nút Báo sai", "Báo sai", new Vector2(-182, -84), new Vector2(104, 40), () => hopBaoSai.Mo("co_che", BaiHienTai?.Ma, BaiHienTai?.Ten, TrinhPhat.ChiSoBuoc, CheDoGiay ? "giay" : "3d"), 15, new Vector2(1, 1));
+            nutBaoSai = NutKinh(goc, "Nút Báo sai", "Báo sai", new Vector2(-182, -84), new Vector2(104, 40), () => { string cd = CheDoGiay ? "giay" : "3d"; if (!CheDoGiay) DatCheDo(true); hopBaoSai.Mo("co_che", BaiHienTai?.Ma, BaiHienTai?.Ten, TrinhPhat.ChiSoBuoc, cd); }, 15, new Vector2(1, 1));
             nutBangBen = NutKinh(goc, "Nút Bảng bên", "Các bước ▸", new Vector2(-294, -84), new Vector2(130, 40), () => BatGiaiThich(!GiaiThichMo), 15, new Vector2(1, 1));
 
             // ---- khung bước (giữa đáy)
@@ -319,6 +319,24 @@ namespace Khkt.CoChe
             NutKinh(dsBai, "Cài đặt", "Cài đặt máy chủ", new Vector2(16, 14), new Vector2(428, 44), () => caiDat.gameObject.SetActive(true), 15, new Vector2(0, 0));
             dsBai.gameObject.SetActive(false);
             DatMauGat(false);
+            toGiay = to;
+            nutXem3D = NutGiay(to, "Nút Xem 3D", "▶  Xem 3D", new Vector2(-36, 24), new Vector2(170, 46), () => DatCheDo(false));
+            var nx = (RectTransform)nutXem3D.transform;
+            nx.anchorMin = nx.anchorMax = new Vector2(1, 0); nx.pivot = new Vector2(1, 0); nx.anchoredPosition = new Vector2(-36, 24);
+            nutXem3D.GetComponent<Image>().color = new Color32(0x1b, 0x26, 0x21, 0xff);
+            nutXem3D.GetComponentInChildren<Text>().color = new Color32(0xf6, 0xf1, 0xe6, 0xff);
+            DungKhung3D();
+            // 19/11: mở là thấy tờ giấy; đầu trang 3D cũ, khung bước cũ, nút gạt 3D|Giấy thôi dùng (3D nằm trong khung riêng)
+            dauTrang.gameObject.SetActive(false);
+            khungBuoc.gameObject.SetActive(false);
+            nenGat.gameObject.SetActive(false);
+            vungNhin.gameObject.SetActive(false);
+            lopGiay.alpha = 1f; lopGiay.blocksRaycasts = true;
+            CheDoGiay = true;
+            Cam.backgroundColor = NenGiay;
+            TrinhPhat.NhanDieuKhien = false;
+            nutBaiKhac = NutKinh(goc, "Nút Chọn bài phải", "Bài khác ▾", new Vector2(-170, -26), new Vector2(130, 44), () => dsBai.gameObject.SetActive(!dsBai.gameObject.activeSelf), 15, new Vector2(1, 1));
+            DatMauGat(true);
         }
 
         void DungDanhSach(RectTransform trai)
@@ -427,7 +445,7 @@ namespace Khkt.CoChe
             vachGat.GetComponent<Image>().color = giay ? Muc : XanhNhan;
             nhanGat3D.color = giay ? new Color32(0x5d, 0x68, 0x62, 0xff) : Color.white;
             nhanGatGiay.color = giay ? new Color32(0xf6, 0xf1, 0xe6, 0xff) : ChuPhu;
-            foreach (var n in new[] { nutXuat, nutBaoSai, nutBangBen })
+            foreach (var n in new[] { nutXuat, nutBaoSai, nutBangBen, nutBaiKhac })
                 if (n != null)
                 {
                     n.GetComponent<Image>().color = giay ? new Color32(0xef, 0xe9, 0xdb, 0xff) : new Color(1f, 1f, 1f, 0.04f);
@@ -501,9 +519,11 @@ namespace Khkt.CoChe
                     bool coChu = e != "C" && e != "H";
                     if (!coChu && dt == 0) continue;
                     if (TrinhPhat.CoNguyenTu(kv.Key) < 0.5f) continue;
-                    var sp = Cam.WorldToScreenPoint(TrinhPhat.TheGioi(kv.Value));
+                    var sp = TrinhPhat.Cam.WorldToScreenPoint(TrinhPhat.TheGioi(kv.Value));
                     if (sp.z <= 0f) continue;
-                    if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(khungNhan, sp, Cam, out var lp)) continue;
+                    var kr = khungNhan.rect;
+                    var lp = new Vector2((sp.x / Mathf.Max(1, TrinhPhat.Cam.pixelWidth) - 0.5f) * kr.width, (sp.y / Mathf.Max(1, TrinhPhat.Cam.pixelHeight) - 0.5f) * kr.height);
+                    if (Mathf.Abs(lp.x) > kr.width * 0.5f || Mathf.Abs(lp.y) > kr.height * 0.5f) continue;
                     var t = LayNhan(dung++);
                     string chu = coChu ? e : "";
                     if (dt != 0) chu += dt > 0 ? (dt > 1 ? dt + "⊕" : "⊕") : (dt < -1 ? (-dt) + "⊖" : "⊖");
@@ -544,9 +564,9 @@ namespace Khkt.CoChe
         {
             camTat.Clear();
             foreach (var c in Camera.allCameras)
-                if (c != Cam && c.enabled) { c.enabled = false; camTat.Add(c); }   // trả GPU cho lớp phủ; bật lại khi đóng
+                if (c != Cam && !c.transform.IsChildOf(transform) && c.enabled) { c.enabled = false; camTat.Add(c); }   // trả GPU cho lớp phủ; bật lại khi đóng
             if (!daTangUiCapture) { DesktopViewer.UiCapture++; daTangUiCapture = true; }
-            Cam.backgroundColor = CheDoGiay ? NenGiay : NenToi;
+            Cam.backgroundColor = NenGiay;
             if (BaiHienTai == null && DanhSachMa.Count > 0) MoBai(DanhSachMa[0]);
             else if (BaiHienTai != null && string.IsNullOrEmpty(GiaiThichChiTietCuoi)) taiGiaiThich = StartCoroutine(TaiGiaiThichChiTiet(BaiHienTai));
             StartCoroutine(KiemMayChu());
@@ -602,44 +622,264 @@ namespace Khkt.CoChe
             StartCoroutine(Chuyen(giay));
         }
 
+        /// <summary>
+        /// 19/11: tờ giấy luôn hiện; "Xem 3D" bật khung 3D nhỏ phía dưới (tờ giấy thu lên trên), "Quay lại bảng giấy" tắt khung.
+        /// sangGiay = true: đóng khung 3D (chỉ còn giấy). Khung phóng to được ra toàn màn hình (DatToanMan).
+        /// </summary>
         IEnumerator Chuyen(bool sangGiay)
         {
             DangChuyen = true;
-            DatMauGat(sangGiay);
             dsBai.gameObject.SetActive(false);
-            const float nua = 0.4f;
-            for (float t = 0; t < 2 * nua; t += Time.unscaledDeltaTime)
+            if (!sangGiay)
             {
-                float u = t / nua;
-                float g;
-                if (sangGiay)
-                {
-                    TrinhPhat.Phang = Mathf.Lerp(1f, 0.02f, Muot(u));                 // 3D trải phẳng
-                    g = Muot(u - 1f);                                                   // rồi tờ giấy hiện lên
-                }
-                else
-                {
-                    g = 1f - Muot(u);
-                    TrinhPhat.Phang = Mathf.Lerp(0.02f, 1f, Muot(u - 1f));
-                }
-                lopGiay.alpha = g;
-                lopToGiay.transform.localScale = Vector3.one * Mathf.Lerp(0.96f, 1f, g);
-                dauTrang.alpha = khungBuoc.alpha = 1f - g;
-                ((RectTransform)khungBuoc.transform).anchoredPosition = new Vector2(0, 20 - 24 * g);
-                Cam.backgroundColor = Color.Lerp(NenToi, NenGiay, g);
+                khung3D.gameObject.SetActive(true);
+                Cam3D.enabled = true;
+                khung3D.SetAsLastSibling();
+                if (giaiThich != null) giaiThich.SetAsLastSibling();
+                dsBai.SetAsLastSibling();
+                DatKhung(ToanMan ? 1f : 0f);
+            }
+            const float lau = 0.38f;
+            for (float t = 0; t < lau; t += Time.unscaledDeltaTime)
+            {
+                float g = Muot(t / lau);
+                if (sangGiay) g = 1f - g;
+                DatHienKhung(g);
                 yield return null;
             }
-            TrinhPhat.Phang = sangGiay ? 0.02f : 1f;
-            lopGiay.alpha = sangGiay ? 1f : 0f;
-            lopToGiay.transform.localScale = Vector3.one;
-            lopGiay.blocksRaycasts = sangGiay;
-            dauTrang.alpha = khungBuoc.alpha = sangGiay ? 0f : 1f;
-            dauTrang.blocksRaycasts = khungBuoc.blocksRaycasts = !sangGiay;
-            ((RectTransform)khungBuoc.transform).anchoredPosition = new Vector2(0, sangGiay ? -4 : 20);
-            Cam.backgroundColor = sangGiay ? NenGiay : NenToi;
+            DatHienKhung(sangGiay ? 0f : 1f);
+            if (sangGiay)
+            {
+                khung3D.gameObject.SetActive(false);
+                Cam3D.enabled = false;
+                ToanMan = false;
+            }
+            TrinhPhat.Phang = 1f;
             TrinhPhat.NhanDieuKhien = !sangGiay;
             CheDoGiay = sangGiay;
             DangChuyen = false;
+        }
+
+        /// <summary>g = 0: chỉ giấy; g = 1: khung 3D hiện đủ, tờ giấy thu nhỏ lên phía trên.</summary>
+        void DatHienKhung(float g)
+        {
+            nhomKhung.alpha = g;
+            nhomKhung.blocksRaycasts = g > 0.5f;
+            khung3D.localScale = Vector3.one * Mathf.Lerp(0.94f, 1f, g);
+            toGiay.localScale = Vector3.one * Mathf.Lerp(1f, 0.6f, g);
+            toGiay.anchoredPosition = Vector2.Lerp(new Vector2(0, -18), new Vector2(0, 178), g);
+            if (nutXem3D != null) nutXem3D.gameObject.SetActive(g < 0.5f);
+        }
+
+        // ------------------------------------------------------------------ khung 3D nhỏ ⇄ toàn màn hình
+        public Camera Cam3D { get; private set; }
+        public bool ToanMan { get; private set; }
+        public bool Khung3DMo => khung3D != null && khung3D.gameObject.activeSelf && !CheDoGiay;
+        /// <summary>Ô xem 3D trên màn (tỉ lệ 0..1 của đích kết xuất).</summary>
+        public Rect VungCam3D => vungManHinh;
+        RectTransform khung3D, vungXem, dauKhung, thanhKhung, toGiay;
+        CanvasGroup nhomKhung;
+        Text chuDauKhung, chuTocKhung;
+        Slider thanhToc;
+        Button nutPhongTo, nutXem3D, nutBaiKhac;
+        float fKhung;
+        Coroutine chayKhung;
+        const float KhungRong = 1040f, KhungCao = 450f;
+
+        void DungKhung3D()
+        {
+            // camera 3D riêng vẽ vào RenderTexture; khung là RawImage trên canvas giấy (một camera gốc URP, nhãn nguyên tử đè đúng chỗ)
+            var c3 = new GameObject("Camera 3D khung");
+            c3.transform.SetParent(transform, false);
+            Cam3D = c3.AddComponent<Camera>();
+            Cam3D.clearFlags = CameraClearFlags.SolidColor;
+            Cam3D.backgroundColor = NenToi;
+            Cam3D.cullingMask = 1 << TrinhPhat3D.LopVe;
+            Cam3D.fieldOfView = 32f; Cam3D.nearClipPlane = 0.05f; Cam3D.farClipPlane = 300f;
+            Cam3D.depth = Cam.depth - 1;
+            Khkt.Rendering.CameraKhongHauKy.Gan(Cam3D);
+            Cam3D.enabled = false;
+            TrinhPhat.Cam = Cam3D;
+            TrinhPhat.VungNhin = new Rect(0, 0, 1, 1);
+            TrinhPhat.ViTriChuot = ChuotTrongVung;
+            var gocKhung = goc;
+
+            khung3D = GlassKit.Rect(gocKhung, "Khung 3D", Vector2.zero, Vector2.zero, Vector2.zero, new Vector2(KhungRong, KhungCao));
+            nhomKhung = khung3D.gameObject.AddComponent<CanvasGroup>();
+            var nen = khung3D.gameObject.AddComponent<Image>();
+            nen.sprite = GlassKit.Solid; nen.type = Image.Type.Sliced; nen.pixelsPerUnitMultiplier = 2f;
+            nen.color = new Color32(0x0b, 0x10, 0x20, 0xff);
+            nen.raycastTarget = true;                               // chặn bấm xuyên xuống tờ giấy
+            var bong = KeoGian(khung3D, "Bóng", new Vector2(-2, -8), new Vector2(2, 2));
+            bong.SetAsFirstSibling();
+            var bi = bong.gameObject.AddComponent<Image>();
+            bi.sprite = GlassKit.Solid; bi.type = Image.Type.Sliced; bi.pixelsPerUnitMultiplier = 2f;
+            bi.color = new Color(0.1f, 0.08f, 0.02f, 0.22f); bi.raycastTarget = false;
+
+            // đầu khung: bước đang xem (chữ ngắn) + Phóng to / Thu nhỏ + Quay lại bảng giấy
+            dauKhung = KeoGian(khung3D, "Đầu khung", Vector2.zero, Vector2.zero);
+            dauKhung.anchorMin = new Vector2(0, 1); dauKhung.offsetMin = new Vector2(0, -50); dauKhung.offsetMax = Vector2.zero;
+            var nd = dauKhung.gameObject.AddComponent<Image>();
+            nd.color = new Color32(18, 24, 44, 255); nd.raycastTarget = true;
+            chuDauKhung = GlassKit.Label(dauKhung, "Bước", "", 16, ChuSang, false, TextAnchor.MiddleLeft, new Vector2(18, 0), new Vector2(560, 50));
+            chuDauKhung.supportRichText = true;
+            var quay = NutKinh(dauKhung, "Nút Quay lại bảng giấy", "Quay lại bảng giấy", new Vector2(-10, -6), new Vector2(190, 38), () => DatCheDo(true), 15, new Vector2(1, 1));
+            ((RectTransform)quay.transform).pivot = new Vector2(1, 1);
+            nutPhongTo = NutKinh(dauKhung, "Nút Phóng to", "⤢  Phóng to", new Vector2(-208, -6), new Vector2(150, 38), () => DatToanMan(!ToanMan), 15, new Vector2(1, 1));
+            ((RectTransform)nutPhongTo.transform).pivot = new Vector2(1, 1);
+
+            vungXem = KeoGian(khung3D, "Vùng xem 3D", new Vector2(0, 72), new Vector2(0, -50));
+            vungXem.gameObject.AddComponent<RectMask2D>();
+            anh3D = vungXem.gameObject.AddComponent<RawImage>();
+            anh3D.raycastTarget = false;
+            anh3D.color = Color.white;
+            khungNhan.SetParent(vungXem, false);
+            khungNhan.SetAsLastSibling();
+            khungNhan.anchorMin = Vector2.zero; khungNhan.anchorMax = Vector2.one; khungNhan.offsetMin = khungNhan.offsetMax = Vector2.zero;
+
+            // thanh điều khiển: ‹ Phát › · tiến trình theo bước · tốc độ (kéo liên tục 0,25× – 3×) · Ẩn H
+            thanhKhung = KeoGian(khung3D, "Thanh điều khiển 3D", Vector2.zero, Vector2.zero);
+            thanhKhung.anchorMax = new Vector2(1, 0); thanhKhung.offsetMin = Vector2.zero; thanhKhung.offsetMax = new Vector2(0, 72);
+            var nt = thanhKhung.gameObject.AddComponent<Image>();
+            nt.color = new Color32(18, 24, 44, 255); nt.raycastTarget = true;
+            float x = 14, y = -14;
+            NutKinh(thanhKhung, "Nút Bước trước 3D", "‹", new Vector2(x, y), new Vector2(44, 44), () => TrinhPhat.BuocTruoc(), 20); x += 50;
+            nutPhat = NutKinh(thanhKhung, "Nút Phát 3D", "Phát", new Vector2(x, y), new Vector2(84, 44), () => TrinhPhat.PhatDung(), 15); x += 90;
+            NutKinh(thanhKhung, "Nút Bước sau 3D", "›", new Vector2(x, y), new Vector2(44, 44), () => TrinhPhat.BuocSau(), 20); x += 62;
+            truc = GlassKit.Rect(thanhKhung, "Trục bước 3D", new Vector2(0, 1), new Vector2(0, 1), new Vector2(x, -33), new Vector2(100, 8));
+            truc.anchorMax = new Vector2(1, 1); truc.offsetMax = new Vector2(-(14 + 96 + 12 + 230 + 64), truc.offsetMax.y);
+            var tocRt = GlassKit.Rect(thanhKhung, "Tốc độ 3D", new Vector2(1, 1), new Vector2(1, 1), new Vector2(-(14 + 96 + 12), -14), new Vector2(230 + 56, 44));
+            GlassKit.Label(tocRt, "Nhãn", "Tốc độ", 14, ChuPhu, false, TextAnchor.MiddleLeft, Vector2.zero, new Vector2(60, 44));
+            thanhToc = TaoThanhTruot(tocRt, new Vector2(60, -12), new Vector2(160, 20), 0.25f, 3f, 1f, v => { TrinhPhat.TocDo = v; chuTocKhung.text = v.ToString("0.00") + "×"; });
+            chuTocKhung = GlassKit.Label(tocRt, "Giá trị", "1.00×", 15, ChuSang, false, TextAnchor.MiddleRight, new Vector2(226, 0), new Vector2(58, 44));
+            nutAnH = NutKinh(thanhKhung, "Nút Ẩn H 3D", "Ẩn H", new Vector2(-14, -14), new Vector2(96, 44), BatAnH, 15, new Vector2(1, 1));
+            ((RectTransform)nutAnH.transform).pivot = new Vector2(1, 1);
+            ((RectTransform)tocRt).pivot = new Vector2(1, 1);
+            khung3D.gameObject.SetActive(false);
+            DatKhung(0f);
+        }
+
+        RawImage anh3D;
+        RenderTexture rt3D;
+        Rect vungManHinh;
+
+        /// <summary>Điểm chuột (pixel màn hình) → toạ độ 0..1 trong ô xem 3D; null nếu ngoài ô hoặc đang có bảng nổi che.</summary>
+        Vector2? ChuotTrongVung(Vector2 p)
+        {
+            if (!Khung3DMo || DangChuyen) return null;
+            if (GiaiThichMo && RectTransformUtility.RectangleContainsScreenPoint(giaiThich, p, Cam)) return null;
+            if (dsBai.gameObject.activeSelf || (hopBaoSai != null && hopBaoSai.DangMo)) return null;
+            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(vungXem, p, Cam, out var lp)) return null;
+            var r = vungXem.rect;
+            var n = new Vector2((lp.x - r.xMin) / Mathf.Max(1, r.width), (lp.y - r.yMin) / Mathf.Max(1, r.height));
+            return n.x >= 0 && n.x <= 1 && n.y >= 0 && n.y <= 1 ? n : (Vector2?)null;
+        }
+
+        /// <summary>Thanh trượt uGUI tự dựng (nền, phần đã kéo, núm tròn).</summary>
+        static Slider TaoThanhTruot(Transform cha, Vector2 pos, Vector2 co, float min, float max, float gt, System.Action<float> doi)
+        {
+            var rt = GlassKit.Rect(cha, "Thanh trượt", new Vector2(0, 1), new Vector2(0, 1), pos, co);
+            var nen = KeoGian(rt, "Nền", new Vector2(0, co.y * 0.5f - 3), new Vector2(0, -(co.y * 0.5f - 3)));
+            var ni = nen.gameObject.AddComponent<Image>(); ni.sprite = GlassKit.Solid; ni.type = Image.Type.Sliced; ni.color = new Color(1, 1, 1, 0.16f);
+            var vungDay = KeoGian(rt, "Vùng đầy", new Vector2(0, co.y * 0.5f - 3), new Vector2(0, -(co.y * 0.5f - 3)));
+            var day = KeoGian(vungDay, "Đầy", Vector2.zero, Vector2.zero);
+            var di = day.gameObject.AddComponent<Image>(); di.sprite = GlassKit.Solid; di.type = Image.Type.Sliced; di.color = XanhNhan;
+            var vungNum = KeoGian(rt, "Vùng núm", new Vector2(8, 0), new Vector2(-8, 0));
+            var num = GlassKit.Rect(vungNum, "Núm", new Vector2(0, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(18, 18));
+            var nimg = num.gameObject.AddComponent<Image>(); nimg.sprite = GlassKit.Solid; nimg.type = Image.Type.Sliced; nimg.pixelsPerUnitMultiplier = 0.4f; nimg.color = Color.white;
+            var sl = rt.gameObject.AddComponent<Slider>();
+            sl.fillRect = day; sl.handleRect = num; sl.targetGraphic = nimg;
+            sl.direction = Slider.Direction.LeftToRight;
+            sl.minValue = min; sl.maxValue = max; sl.value = gt;
+            sl.navigation = new Navigation { mode = Navigation.Mode.None };
+            sl.onValueChanged.AddListener(v => doi(v));
+            return sl;
+        }
+
+        /// <summary>Đặt tốc độ phát 3D (0,25× – 3×), đồng bộ thanh trượt.</summary>
+        public void DatTocDo(float v)
+        {
+            v = Mathf.Clamp(v, 0.25f, 3f);
+            if (thanhToc != null) thanhToc.SetValueWithoutNotify(v);
+            TrinhPhat.TocDo = v;
+            if (chuTocKhung != null) chuTocKhung.text = v.ToString("0.00") + "×";
+        }
+
+        /// <summary>Phóng khung 3D ra toàn màn hình hoặc thu về khung nhỏ (0,3 s). Toàn màn hình chỉ có 3D + thanh điều khiển.</summary>
+        public void DatToanMan(bool toanMan)
+        {
+            if (CheDoGiay) DatCheDo(false);
+            ToanMan = toanMan;
+            nutPhongTo.GetComponentInChildren<Text>().text = toanMan ? "⤡  Thu nhỏ" : "⤢  Phóng to";
+            if (chayKhung != null) StopCoroutine(chayKhung);
+            if (!gameObject.activeInHierarchy) { DatKhung(toanMan ? 1f : 0f); return; }
+            chayKhung = StartCoroutine(ChayKhung(toanMan ? 1f : 0f));
+        }
+
+        IEnumerator ChayKhung(float den)
+        {
+            float tu = fKhung;
+            const float lau = 0.3f;
+            for (float t = 0; t < lau; t += Time.unscaledDeltaTime) { DatKhung(Mathf.Lerp(tu, den, Muot(t / lau))); yield return null; }
+            DatKhung(den);
+            chayKhung = null;
+        }
+
+        /// <summary>f = 0: khung nhỏ giữa đáy màn; f = 1: phủ toàn màn hình.</summary>
+        void DatKhung(float f)
+        {
+            fKhung = f;
+            var cha = (RectTransform)khung3D.parent;
+            float W = cha.rect.width > 1 ? cha.rect.width : 1920f, H = cha.rect.height > 1 ? cha.rect.height : 1080f;
+            var nho = Rect.MinMaxRect(W * 0.5f - KhungRong * 0.5f, 18f, W * 0.5f + KhungRong * 0.5f, 18f + KhungCao);
+            var to = Rect.MinMaxRect(0, 0, W, H);
+            float x0 = Mathf.Lerp(nho.xMin, to.xMin, f), y0 = Mathf.Lerp(nho.yMin, to.yMin, f), x1 = Mathf.Lerp(nho.xMax, to.xMax, f), y1 = Mathf.Lerp(nho.yMax, to.yMax, f);
+            khung3D.anchorMin = khung3D.anchorMax = Vector2.zero;
+            khung3D.pivot = new Vector2(0.5f, 0.5f);
+            khung3D.sizeDelta = new Vector2(x1 - x0, y1 - y0);
+            khung3D.anchoredPosition = new Vector2((x0 + x1) * 0.5f, (y0 + y1) * 0.5f);
+        }
+
+        /// <summary>
+        /// RenderTexture cỡ bằng đích của camera giấy (màn hình hoặc ảnh kiểm thử); camera 3D chỉ vẽ góc dưới trái bằng đúng
+        /// số điểm ảnh của ô xem, RawImage lấy đúng phần đó (uvRect) → nét 1:1, đổi khung nhỏ ⇄ toàn màn không cấp phát lại.
+        /// </summary>
+        void CapNhatVungCam3D()
+        {
+            if (Cam3D == null || !Cam3D.enabled || vungXem == null) return;
+            int W = Mathf.Max(64, Cam.pixelWidth), H = Mathf.Max(64, Cam.pixelHeight);
+            if (rt3D == null || rt3D.width != W || rt3D.height != H)
+            {
+                if (rt3D != null) { Cam3D.targetTexture = null; rt3D.Release(); Destroy(rt3D); }
+                rt3D = new RenderTexture(W, H, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4, name = "CoChe3D" };
+                rt3D.Create();
+                Cam3D.targetTexture = rt3D;
+                anh3D.texture = rt3D;
+            }
+            var g = gocVung;
+            vungXem.GetWorldCorners(g);
+            Vector2 a = RectTransformUtility.WorldToScreenPoint(Cam, g[0]), b = RectTransformUtility.WorldToScreenPoint(Cam, g[2]);
+            vungManHinh = Rect.MinMaxRect(a.x / W, a.y / H, b.x / W, b.y / H);
+            float fw = Mathf.Clamp(vungManHinh.width, 0.02f, 1f), fh = Mathf.Clamp(vungManHinh.height, 0.02f, 1f);
+            var r = new Rect(0, 0, fw, fh);
+            if (Cam3D.rect != r) Cam3D.rect = r;
+            anh3D.uvRect = r;
+        }
+
+        /// <summary>Kiểm thử/chụp ảnh: đặt đích kết xuất cho cả 3 camera (giấy, 3D, giao diện khung).</summary>
+        public void DatDich(RenderTexture rt)
+        {
+            Cam.targetTexture = rt;
+        }
+
+        /// <summary>Kiểm thử/chụp ảnh: vẽ lần lượt giấy → 3D → khung (như màn hình thật).</summary>
+        public void VeTatCa()
+        {
+            CapNhatVungCam3D();
+            if (Cam3D != null && Cam3D.enabled) Cam3D.Render();
+            CapNhatNhan();
+            Canvas.ForceUpdateCanvases();
+            Cam.Render();
         }
 
         static float Muot(float x) { x = Mathf.Clamp01(x); return x * x * (3f - 2f * x); }
@@ -654,21 +894,30 @@ namespace Khkt.CoChe
 
         void Update()
         {
-            if (vungNhin == null) return;
-            var g = gocVung;                           // dùng lại mảng, không cấp phát mỗi khung
-            vungNhin.GetWorldCorners(g);
-            Vector2 a = RectTransformUtility.WorldToScreenPoint(Cam, g[0]), b = RectTransformUtility.WorldToScreenPoint(Cam, g[2]);
-            float w = Mathf.Max(1, Cam.pixelWidth), h = Mathf.Max(1, Cam.pixelHeight);
-            var vung = Rect.MinMaxRect(a.x / w, a.y / h, b.x / w, b.y / h);
-            if (GiaiThichMo) vung.xMax = Mathf.Max(vung.xMin + 0.2f, vung.xMax - 520f / 1920f);
-            TrinhPhat.VungNhin = vung;
+            if (nutPhat == null) return;
+            // phím tắt (khi không gõ chữ): V = Xem 3D ⇄ bảng giấy, F = phóng to ⇄ thu nhỏ khung 3D
+            var kb = Keyboard.current;
+            var sel = EventSystem.current != null ? EventSystem.current.currentSelectedGameObject : null;
+            bool dangGo = sel != null && sel.GetComponent<InputField>() is InputField f && f.isFocused;
+            if (kb != null && !dangGo && !DangChuyen && (hopBaoSai == null || !hopBaoSai.DangMo))
+            {
+                if (kb.vKey.wasPressedThisFrame) DatCheDo(!CheDoGiay);
+                else if (kb.fKey.wasPressedThisFrame) DatToanMan(!ToanMan);
+            }
             var ten = nutPhat.GetComponentInChildren<Text>();
             string can = TrinhPhat.DangPhat ? "Dừng" : "Phát";
             if (ten.text != can) ten.text = can;
             CapNhatTruc();
+            if (chuDauKhung != null && BaiHienTai != null)
+            {
+                var tp = TrinhPhat;
+                string chu = tp.DangNhanhSai && tp.NhanhHienTai != null ? "<color=#ff6b6b>Nhánh sai</color>  " + tp.NhanhHienTai.Ten
+                           : tp.BuocHienTai != null ? $"<b>Bước {tp.ChiSoBuoc + 1}/{tp.SoBuoc}</b>  {tp.BuocHienTai.Ten}" : "";
+                if (chuDauKhung.text != chu) chuDauKhung.text = chu;
+            }
         }
 
-        void LateUpdate() => CapNhatNhan();     // sau khi TrinhPhat3D đã tính vị trí nguyên tử của khung này
+        void LateUpdate() { CapNhatVungCam3D(); CapNhatNhan(); }     // sau khi TrinhPhat3D đã tính vị trí nguyên tử của khung này
 
         void CapNhatChuThich()
         {

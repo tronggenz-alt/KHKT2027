@@ -31,8 +31,25 @@ namespace Khkt.CoChe
         public bool AnH;
         public bool NhanDieuKhien = true;
         public float Phang = 1f;
-        public float ThoiGianBuoc = 2.6f;
-        public float TocDo = 1f;                 // 1×, 2×, ½× (nút tốc độ ở khung bước)
+        public float ThoiGianBuoc = 4.2f;        // 19/11: chậm hơn để thấy rõ electron bay (bay ≈ 55% đầu bước ≈ 2,3 s ở 1×)
+        public float TocDo = 1f;                 // thanh trượt 0,25× – 3× ở khung 3D
+        /// <summary>Tự chọn góc nhìn mỗi bước (thấy rõ đường electron và nguyên tử tham gia, không bị che). Kéo chuột thì tắt tới bước sau.</summary>
+        public bool TuDongGoc = true;
+        /// <summary>Khi hình 3D hiện trong một khung (RenderTexture): đổi điểm chuột (pixel màn hình) → toạ độ 0..1 trong khung, null nếu ngoài khung.</summary>
+        public System.Func<Vector2, Vector2?> ViTriChuot;
+        Quaternion xoayDich = Quaternion.Euler(12f, -18f, 0f);
+        int dichBuoc = -2;
+        Vector3 tamDich, tamNay;                 // tâm khung nhìn (toạ độ mô hình) của bước, trượt mượt
+        float khoangDich = 13f;
+        bool dichNhanh;
+        public Quaternion XoayDich => xoayDich;
+        /// <summary>Đặt ngay góc, tâm, khoảng cách tự chọn của bước hiện tại (chụp ảnh, kiểm thử).</summary>
+        public void DatNgayGocDich()
+        {
+            CapNhatDich();
+            Xoay = xoayDich; tamNay = tamDich;
+            KhoangCach = khoangDich * (Cam != null ? Mathf.Clamp(1.6f / Mathf.Max(0.3f, Cam.aspect), 1f, 1.8f) : 1f);
+        }
         public float KhoangCach = 13f;
         public Quaternion Xoay = Quaternion.Euler(12f, -18f, 0f);
         /// <summary>Vùng màn hình (tỉ lệ 0..1) dành cho hình 3D: tâm phân tử đặt vào giữa vùng này, kéo chuột trong vùng để xoay.</summary>
@@ -68,9 +85,11 @@ namespace Khkt.CoChe
             DangNhanhSai = false;
             NhanhHienTai = null;
             Xoay = Quaternion.Euler(12f, -18f, 0f);
-            float r = 2f;
-            foreach (var tt in kb.TrangThai) foreach (var p in tt.ToaDo.Values) r = Mathf.Max(r, p.magnitude);
-            KhoangCach = Mathf.Clamp(r * 2.3f, 6.5f, 40f);       // phân tử chiếm phần lớn màn như bản demo
+            dichBuoc = -2;
+            CapNhatDich();
+            Xoay = xoayDich;                                        // mở bài: đặt ngay góc tốt, không quay vòng
+            tamNay = tamDich;
+            KhoangCach = khoangDich;
             DoiBuoc?.Invoke();
         }
 
@@ -125,6 +144,14 @@ namespace Khkt.CoChe
         {
             if (KichBan == null || Cam == null) return;
             DieuKhien();
+            CapNhatDich();
+            if (TuDongGoc && !keo)
+            {
+                float k = 1f - Mathf.Exp(-2.2f * Time.unscaledDeltaTime);
+                Xoay = Quaternion.Slerp(Xoay, xoayDich, k);
+                tamNay = Vector3.Lerp(tamNay, tamDich, k);
+                KhoangCach = Mathf.Lerp(KhoangCach, khoangDich * Mathf.Clamp(1.6f / Mathf.Max(0.3f, Cam.aspect), 1f, 1.8f), k);
+            }
             float dt = Time.unscaledDeltaTime * TocDo;
             if (DangNhanhSai)
             {
@@ -157,9 +184,14 @@ namespace Khkt.CoChe
             var m = Mouse.current;
             if (m == null) return;
             Vector2 p = m.position.ReadValue();
-            var vp = new Vector2(p.x / Mathf.Max(1, Screen.width), p.y / Mathf.Max(1, Screen.height));
-            bool trongVung = VungNhin.Contains(vp) && (EventSystem.current == null || !EventSystem.current.IsPointerOverGameObject());
-            if (m.leftButton.wasPressedThisFrame && trongVung) { keo = true; chuotTruoc = p; }
+            bool trongVung;
+            if (ViTriChuot != null) trongVung = ViTriChuot(p).HasValue;
+            else
+            {
+                var vp = new Vector2(p.x / Mathf.Max(1, Screen.width), p.y / Mathf.Max(1, Screen.height));
+                trongVung = VungNhin.Contains(vp) && (EventSystem.current == null || !EventSystem.current.IsPointerOverGameObject());
+            }
+            if (m.leftButton.wasPressedThisFrame && trongVung) { keo = true; chuotTruoc = p; TuDongGoc = false; }
             if (!m.leftButton.isPressed) keo = false;
             if (keo)
             {
@@ -169,7 +201,112 @@ namespace Khkt.CoChe
             }
             float cuon = m.scroll.ReadValue().y;
             if (trongVung && Mathf.Abs(cuon) > 0.01f)
-                KhoangCach = Mathf.Clamp(KhoangCach * (cuon > 0 ? 0.9f : 1.1f), 4f, 60f);
+            { KhoangCach = Mathf.Clamp(KhoangCach * (cuon > 0 ? 0.9f : 1.1f), 4f, 60f); TuDongGoc = false; }
+        }
+
+        // ------------------------------------------------------------------ góc nhìn tự động (19/11)
+        void CapNhatDich()
+        {
+            if (KichBan == null) return;
+            int k = DangNhanhSai ? -1 : ChiSoBuoc;
+            if (k == dichBuoc && DangNhanhSai == dichNhanh) return;
+            dichBuoc = k;
+            dichNhanh = DangNhanhSai;
+            TuDongGoc = true;
+            xoayDich = TinhGocNhin();
+            // khung nhìn ôm các chất có mặt ở bước này (trạng thái đầu và cuối của bước): tâm + khoảng cách vừa đủ
+            var ds = new List<Vector3>();
+            if (DangNhanhSai && NhanhHienTai != null) ds.AddRange(KichBan.TrangThai[Mathf.Clamp(NhanhHienTai.TuTrangThai, 0, KichBan.TrangThai.Count - 1)].ToaDo.Values);
+            else if (BuocHienTai != null)
+            {
+                ds.AddRange(KichBan.TrangThai[Mathf.Clamp(BuocHienTai.Tu, 0, KichBan.TrangThai.Count - 1)].ToaDo.Values);
+                ds.AddRange(KichBan.TrangThai[Mathf.Clamp(BuocHienTai.Den, 0, KichBan.TrangThai.Count - 1)].ToaDo.Values);
+            }
+            if (ds.Count > 0)
+            {
+                Vector3 mn = ds[0], mx = ds[0];
+                foreach (var p in ds) { mn = Vector3.Min(mn, p); mx = Vector3.Max(mx, p); }
+                tamDich = (mn + mx) * 0.5f;
+                float r = 1.2f;
+                foreach (var p in ds) r = Mathf.Max(r, (p - tamDich).magnitude + 0.5f);
+                float tanf = Mathf.Tan((Cam != null ? Cam.fieldOfView : 32f) * 0.5f * Mathf.Deg2Rad);
+                khoangDich = Mathf.Clamp(r / tanf * 1.08f, 5f, 60f);
+            }
+        }
+
+        static readonly Vector3[] HuongThu = TaoHuongThu(160);
+
+        static Vector3[] TaoHuongThu(int n)
+        {
+            var ds = new Vector3[n];
+            float vang = Mathf.PI * (3f - Mathf.Sqrt(5f));
+            for (int i = 0; i < n; i++)
+            {
+                float y = 1f - 2f * (i + 0.5f) / n, r = Mathf.Sqrt(1f - y * y), a = vang * i;
+                ds[i] = new Vector3(Mathf.Cos(a) * r, y, Mathf.Sin(a) * r);
+            }
+            return ds;
+        }
+
+        /// <summary>
+        /// Chấm điểm 160 hướng nhìn: (1) mũi tên electron nằm ngang mặt nhìn (thấy trọn đường bay), (2) nguyên tử tham gia không bị
+        /// nguyên tử khác che và không chồng lên nhau, (3) gần hướng đang nhìn và hơi nhìn từ trên xuống (chuyển góc ít, dễ theo dõi).
+        /// Trả về phép xoay đưa hướng tốt nhất về phía camera.
+        /// </summary>
+        public Quaternion TinhGocNhin()
+        {
+            if (KichBan == null || KichBan.TrangThai.Count == 0) return Xoay;
+            TrangThai3D s;
+            List<MuiTen> mts;
+            if (DangNhanhSai && NhanhHienTai != null) { s = KichBan.TrangThai[Mathf.Clamp(NhanhHienTai.TuTrangThai, 0, KichBan.TrangThai.Count - 1)]; mts = NhanhHienTai.MuiTen; }
+            else { var b = BuocHienTai; if (b == null) return Xoay; s = KichBan.TrangThai[Mathf.Clamp(b.Tu, 0, KichBan.TrangThai.Count - 1)]; mts = b.MuiTen; }
+            var pos = s.ToaDo;
+            var tatCa = new List<Vector3>(pos.Values);
+            if (tatCa.Count == 0) return Xoay;
+            var thamGia = new List<Vector3>();
+            var muiTen = new List<(Vector3 a, Vector3 e)>();
+            Vector3 TB(int[] ds)
+            {
+                Vector3 t = Vector3.zero; int n = 0;
+                if (ds != null) foreach (var x in ds) if (pos.TryGetValue("m" + x, out var q)) { t += q; n++; if (!thamGia.Contains(q)) thamGia.Add(q); }
+                return n > 0 ? t / n : Vector3.zero;
+            }
+            foreach (var mt in mts) { var a = TB(mt.Tu); var e = TB(mt.Den); if ((e - a).sqrMagnitude > 1e-4f) muiTen.Add((a, e)); }
+            if (thamGia.Count == 0) thamGia.AddRange(tatCa);
+            Vector3 vNay = Quaternion.Inverse(Xoay) * Vector3.back;
+            float tot = float.NegativeInfinity;
+            Vector3 vTot = vNay;
+            foreach (var v in HuongThu)
+            {
+                float d = 0f;
+                foreach (var (a, e) in muiTen)
+                {
+                    var u = e - a;
+                    d += 1.4f * (u - Vector3.Dot(u, v) * v).magnitude / (u.magnitude + 1e-3f);
+                }
+                foreach (var p in thamGia)
+                {
+                    foreach (var q in tatCa)
+                    {
+                        var w = q - p;
+                        float doc = Vector3.Dot(w, v);
+                        if (doc < 0.05f) continue;                       // q ở sau p (xa camera hơn) thì không che
+                        float ngang = (w - doc * v).magnitude;
+                        if (ngang < 0.7f) d -= 1.3f * (1f - ngang / 0.7f);
+                    }
+                }
+                for (int i = 0; i < thamGia.Count; i++)
+                    for (int j = i + 1; j < thamGia.Count; j++)
+                    {
+                        var w = thamGia[j] - thamGia[i];
+                        float ngang = (w - Vector3.Dot(w, v) * v).magnitude;
+                        if (ngang < 0.9f) d -= 0.8f * (1f - ngang / 0.9f);
+                    }
+                d += 0.35f * Vector3.Dot(v, vNay) + 0.15f * v.y;
+                if (d > tot) { tot = d; vTot = v; }
+            }
+            var len = Mathf.Abs(Vector3.Dot(vTot, Vector3.up)) > 0.95f ? Vector3.forward : Vector3.up;
+            return Quaternion.Inverse(Quaternion.LookRotation(-vTot, len));
         }
 
         void DatCamera()
@@ -178,7 +315,8 @@ namespace Khkt.CoChe
             float cx = VungNhin.center.x, cy = VungNhin.center.y;
             float dx = (cx - 0.5f) * 2f * KhoangCach * tanf * Cam.aspect;
             float dy = (cy - 0.5f) * 2f * KhoangCach * tanf;
-            Cam.transform.SetPositionAndRotation(Tam + new Vector3(-dx, -dy, -KhoangCach), Quaternion.identity);
+            Vector3 tam = W(tamNay);
+            Cam.transform.SetPositionAndRotation(tam + new Vector3(-dx, -dy, -KhoangCach), Quaternion.identity);
         }
 
         // ------------------------------------------------------------------ hình học
