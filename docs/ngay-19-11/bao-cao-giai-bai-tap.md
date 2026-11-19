@@ -139,3 +139,43 @@ Góp ý: bo tròn quá (công tắc viên thuốc, mục bước nền tròn) nh
 
 Chụp lại app thật (bản có bo góc mới): kích hoạt cửa sổ app rồi gửi **mã phím** (key code) thay vì ký tự – bộ gõ tiếng Việt
 đã nuốt phím số khi gửi ký tự. Đủ 5 trang: `app_mac_that_1_chu.png`, `_2_chuoi`, `_3_co_che`, `_4_3d`, `_5_hoa_ly`.
+
+## 8. Luồng đáp án kiểu trợ lý AI (19/11, theo `thiet-ke-luong-dap-an.md`)
+
+Tệp mới `Scripts/Menu/GiaiBaiTap/DapAn.cs`:
+- **DongThoiGian** – mục "Kết quả" của mỗi trang thành dòng thời gian: mỗi lần giải là một **khối** (nhãn "Lần giải n",
+  bong bóng câu hỏi có ảnh đề thu nhỏ, thẻ đáp án). Khối mới nối xuống cuối, khối cũ giữ làm lịch sử (tối đa 20). Chưa giải
+  lần nào thì hiện thẻ trống có hướng dẫn.
+- **KhoiDapAn** – đang giải: **khung xương** 3 thanh nhấp nháy + dòng **tiến trình từng bước** (✓ xong, ● đang làm, mờ = chưa,
+  đếm giây). Có đáp án: **hình** đứng đầu → kết luận một dòng + huy hiệu kiểm chứng → tóm tắt → hàng nút → chip gợi ý tiếp;
+  các phần hiện lần lượt cách 60 ms. **Hỏi tiếp** mở ô hỏi ngay dưới thẻ (`/co-che/hoi-dap`, gửi kèm đề và các bước).
+- **Trượt mượt**: bấm Giải → trượt tới khối mới; đáp án về → trượt tới đầu hình, **trừ khi người dùng đã tự cuộn đi**
+  (0,45 s, ease-out bậc 3, theo `unscaledDeltaTime`, không cấp phát mỗi khung).
+- **BangLon** – bảng 75% × 80% giữa màn, nền mờ, đóng bằng ✕ / Esc / bấm nền, mở: mờ dần + phóng nhẹ.
+- **HinhDapAn** – hình đáp án vẽ bằng uGUI (nét, không cần máy chủ vẽ): **chuỗi** = ô chất – mũi tên có điều kiện – ô chất,
+  tự xuống dòng (bảng lớn thêm tên chất); **3D tĩnh** = bóng–que chiếu từ góc đẹp, xa vẽ trước gần sau, màu CPK, ánh sáng;
+  **giấy** = SoDoGiay véc-tơ trên nền giấy.
+
+Theo từng mục:
+- **Chuỗi**: khối có hình chuỗi; nút Mở lớn / Giải thích (bảng lớn: hình chuỗi lớn + từng bước, bước có cơ chế mẫu có nút
+  Xem cơ chế), Hỏi tiếp, Xuất PNG, Báo sai; chip "Xem cơ chế: A → B", "Vì sao … cần …?".
+- **Cơ chế**: vẽ đề mới hoặc mở bài mẫu đều thành khối có sơ đồ giấy; Mở lớn = bảng lớn (tờ giấy lớn + nút **Xem 3D ⇄ Giấy**
+  mở khung 3D/thanh tốc độ/phóng toàn màn đã làm ở mục 6 + danh sách bước bấm để nhảy bước); Giải thích (trình phát, tab Giải
+  thích), Hỏi tiếp, Xuất PNG, Báo sai; chip "Xem electron chạy trong 3D".
+- **Mô hình 3D**: Dựng → khối có ảnh 3D tĩnh, công thức, M, số nguyên tử, SMILES, nguồn; Mở lớn = khung xoay 3D (MoHinh3DMoDun).
+- **Xuất PNG** chung: chụp đúng vùng hình bằng camera của canvas ở 2× độ phân giải → `~/Pictures/VERA Lab/`.
+
+Kiểm tra: KhktUiVerify viết lại phần Giải bài tập – giải chuỗi có hình 5 ô chất, giải lần 2 thêm khối dưới + trang tự trượt,
+Mở lớn chuỗi có nút Xem cơ chế, đóng bảng, hỏi tiếp dưới thẻ (máy chủ giả), báo sai; cơ chế có sơ đồ giấy, Mở lớn có Xem 3D,
+Giải thích mở tab Giải thích; 3D có 9 nguyên tử ethanol, Mở lớn mở khung xoay. Kết quả xem mục 9.
+
+Giới hạn: bảng lớn của Cơ chế chứa tờ giấy + nút mở khung 3D (khung 3D vẫn là lớp phủ của trình phát), chưa nhúng 3D thẳng vào
+bảng 75%; ô đề vẫn ở trên trang (thiết kế cho phép "trên hoặc dưới"), chưa dính đáy.
+
+## 9. Kết quả kiểm tra mục 8
+
+- KhktUiVerify **72/72**, KhktCoCheVerify **66/66**; app Mac xuất thành công.
+- Ảnh: `anh/giai-bai-tap/dap_an_*.png` (khối đáp án chuỗi, lịch sử 2 lần giải, bảng lớn chuỗi, hỏi tiếp, khối cơ chế có sơ đồ
+  giấy, bảng lớn cơ chế, khối 3D tĩnh).
+- App thật: không có phím tắt để bấm "Giải" (cần chuột; System Events không bấm chuột được vào Unity) nên chưa chụp khối đáp án
+  trong app thật; mã giống hệt bản kiểm thử.

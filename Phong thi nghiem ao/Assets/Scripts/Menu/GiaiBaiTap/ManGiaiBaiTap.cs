@@ -64,7 +64,7 @@ namespace Khkt.Menu
         void Update()
         {
             var kb = UnityEngine.InputSystem.Keyboard.current;
-            if (kb == null || CoCheMoDun.DangMo || MoHinh3DMoDun.DangMo || (baoSai != null && baoSai.DangMo)) return;
+            if (kb == null || CoCheMoDun.DangMo || MoHinh3DMoDun.DangMo || (baoSai != null && baoSai.DangMo) || (bangLon != null && bangLon.DangMo)) return;
             var sel = UnityEngine.EventSystems.EventSystem.current?.currentSelectedGameObject;
             if (sel != null && sel.GetComponent<InputField>() is InputField f && f.isFocused && f.gameObject.activeInHierarchy) return;
             var phim = new[] { kb.digit1Key, kb.digit2Key, kb.digit3Key, kb.digit4Key, kb.digit5Key };
@@ -115,6 +115,7 @@ namespace Khkt.Menu
 
             trangThai = GlassKit.Label(goc, "Thông báo", "", 17, Error, false, TextAnchor.MiddleCenter, new Vector2(0, 24), new Vector2(1400, 30), new Vector2(0.5f, 0));
             trangThai.rectTransform.pivot = new Vector2(0.5f, 0);
+            bangLon = BangLon.Tao(goc);
             baoSai = HopBaoSai.Tao(goc);
         }
 
@@ -321,10 +322,9 @@ namespace Khkt.Menu
             trangThaiChuoi.horizontalOverflow = HorizontalWrapMode.Wrap;
             t.LanLuot.Add(khoiNut);
 
-            // 03 kết quả
-            t.GhiBuoc(2, t.DauMuc("03", "Kết quả", "Mỗi bước một thẻ: bấm để mở chi tiết; bước có cơ chế mẫu thì xem được 3D ⇄ Giấy."));
-            yKetQuaChuoi = t.Y;
-            VeKetQuaChuoi(null);
+            // 03 kết quả: dòng thời gian các lần giải (câu hỏi ở trên, đáp án hiện dần bên dưới)
+            t.GhiBuoc(2, t.DauMuc("03", "Kết quả", "Mỗi lần giải là một khối: đề ở trên, đáp án vẽ thành hình bên dưới. Bấm Mở lớn để xem chi tiết."));
+            dongChuoi = DongThoiGian.Tao(t, "Chưa có kết quả", "Nhập đề ở mục <b>01</b>, chọn tuỳ chọn ở mục <b>02</b> rồi bấm <b>Giải chuỗi</b>. Đáp án hiện ngay dưới đây.");
             return t;
         }
 
@@ -379,6 +379,13 @@ namespace Khkt.Menu
             if (loi) MenuAnim.Shake(trangThaiChuoi.rectTransform);
         }
 
+        DongThoiGian dongChuoi, dongCoChe, dong3D;
+        public DongThoiGian DongChuoi => dongChuoi;
+        public DongThoiGian DongCoChe => dongCoChe;
+        public DongThoiGian Dong3D => dong3D;
+        public BangLon Bang => bangLon;
+        BangLon bangLon;
+
         public void GiaiChuoi()
         {
             if (DangGiaiChuoi) return;
@@ -390,151 +397,197 @@ namespace Khkt.Menu
             if (dungAnh) sb.Append("\"anh_base64\":\"").Append(Convert.ToBase64String(anhChuoiDu)).Append("\",");
             else sb.Append("\"chuoi\":").Append(MayChuCoChe.ChuoiJson(chuoi)).Append(',');
             sb.Append("\"muc_do\":\"").Append(md[mucDo]).Append("\",\"muc_thong_minh\":\"").Append(tm[mucThongMinh]).Append("\",\"tra_cuu\":").Append(traCuu ? "true" : "false").Append('}');
-            StartCoroutine(GoiChuoi(sb.ToString(), dungAnh));
+            var k = dongChuoi.Them(dungAnh ? "Ảnh đề chuỗi" : chuoi.Replace("->", "→"), dungAnh ? xemAnhChuoi.texture : null);
+            StartCoroutine(GoiChuoi(sb.ToString(), dungAnh, k));
         }
 
-        IEnumerator GoiChuoi(string than, bool coAnh)
+        IEnumerator GoiChuoi(string than, bool coAnh, KhoiDapAn k)
         {
             DangGiaiChuoi = true;
             nutGiaiChuoi.interactable = false;
             float t0 = Time.realtimeSinceStartup;
             bool xong = false, ok = false;
             string kq = "";
-            StartCoroutine(MayChuCoChe.Goi("POST", "/co-che/giai-chuoi", than, coAnh ? 200f : 120f, (o, k) => { ok = o; kq = k; xong = true; }));
+            StartCoroutine(MayChuCoChe.Goi("POST", "/co-che/giai-chuoi", than, coAnh ? 200f : 120f, (o, x) => { ok = o; kq = x; xong = true; }));
+            string[] buocLam = coAnh ? new[] { "Đọc ảnh đề", "Tìm từng chất", "Kiểm chứng", "Vẽ chuỗi" } : new[] { "Tách chuỗi", "Tìm từng chất", "Kiểm chứng", "Vẽ chuỗi" };
             while (!xong)
             {
-                DatTrangThaiChuoi($"Đang giải… {Time.realtimeSinceStartup - t0:0} s" + (coAnh ? " (đọc ảnh đề rồi giải)" : ""), false);
-                yield return new WaitForSecondsRealtime(0.25f);
+                float s = Time.realtimeSinceStartup - t0;
+                int b = Mathf.Min(buocLam.Length - 1, (int)(s / 1.5f));
+                k.DatTienTrinh(TienTrinh(buocLam, b, s));
+                DatTrangThaiChuoi($"Đang giải… {s:0} s", false);
+                yield return new WaitForSecondsRealtime(0.2f);
             }
             DangGiaiChuoi = false;
             nutGiaiChuoi.interactable = true;
-            if (!ok) { DatTrangThaiChuoi("Chưa giải được: " + kq, true); yield break; }
+            if (!ok) { k.DatLoi(kq); DatTrangThaiChuoi("Chưa giải được – xem khối đáp án.", true); yield break; }
             try
             {
                 var d = D(Doc(kq));
                 kqChuoi = kq;
-                moBuocChuoi.Clear();
-                VeKetQuaChuoi(d);
+                DatDapAnChuoi(k, d);
                 DatTrangThaiChuoi($"Xong · {SoBuocChuoi} bước · {Time.realtimeSinceStartup - t0:0.0} s", false);
-                trang[1].CuonToi(yKetQuaChuoi + 120);
             }
-            catch (Exception e) { DatTrangThaiChuoi("Kết quả lỗi định dạng: " + e.Message, true); }
+            catch (Exception e) { k.DatLoi("Kết quả lỗi định dạng: " + e.Message); }
         }
 
-        /// <summary>Vẽ lại mục Kết quả (trống hoặc danh sách bước) và chân trang; gọi lại khi gập/mở bước.</summary>
-        void VeKetQuaChuoi(Dictionary<string, object> d)
+        /// <summary>Dòng tiến trình kiểu trợ lý AI: bước đã xong ✓, bước đang làm ●, bước sau mờ.</summary>
+        static string TienTrinh(string[] ds, int dang, float giay)
         {
-            var t = trang[1];
-            for (int i = t.NoiDung.childCount - 1; i >= 0; i--)
+            var sb = new StringBuilder();
+            string mo = ColorUtility.ToHtmlStringRGB(InkMute), nhan = ColorUtility.ToHtmlStringRGB(Accent);
+            for (int i = 0; i < ds.Length; i++)
             {
-                var c = t.NoiDung.GetChild(i);
-                if (c.name == "Khối kết quả" || c.name == "Chân trang") Destroy(c.gameObject);
+                if (i > 0) sb.Append("   ");
+                if (i < dang) sb.Append("✓ ").Append(ds[i]);
+                else if (i == dang) sb.Append($"<color=#{nhan}><b>● {ds[i]}…</b></color>");
+                else sb.Append($"<color=#{mo}>{ds[i]}</color>");
             }
-            t.Y = yKetQuaChuoi;
-            SoBuocChuoi = 0;
-            if (d == null)
-            {
-                var k0 = t.Khoi("Khối kết quả", 250, 10);
-                ketQuaChuoi = k0;
-                var than0 = TrangCuon.The(k0, "Thẻ trống", 0, 250);
-                var o = Fill(than0, "Biểu tượng", new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -44), new Vector2(56, 56), Well, 14f);
-                Ring(o.transform, "Viền", Hair, 14f);
-                GlassKit.Label(o.transform, "Ký hiệu", "⬡", 26, InkMute, false, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(56, 56));
-                var a = GlassKit.Label(than0, "Tiêu đề", "Chưa có kết quả", 24, Ink, true, TextAnchor.UpperCenter, new Vector2(0, -116), new Vector2(800, 34), new Vector2(0.5f, 1));
-                a.rectTransform.pivot = new Vector2(0.5f, 1);
-                var b = GlassKit.Label(than0, "Hướng dẫn", "Nhập đề ở mục <b>01</b>, chọn tuỳ chọn ở mục <b>02</b> rồi bấm <b>Giải chuỗi</b>. Lời giải từng bước sẽ hiện ở đây.", 16, InkDim, false, TextAnchor.UpperCenter, new Vector2(0, -158), new Vector2(760, 50), new Vector2(0.5f, 1));
-                b.rectTransform.pivot = new Vector2(0.5f, 1); b.supportRichText = true; b.horizontalOverflow = HorizontalWrapMode.Wrap;
-                t.ChanTrang();
-                t.ChotChieuCao();
-                return;
-            }
+            return sb.Append($"   <color=#{mo}>{giay:0} s</color>").ToString();
+        }
+
+        static List<(string tu, string den, string dk, string ten)> BuocChuoi(Dictionary<string, object> d)
+        {
             var chat = new Dictionary<string, string>();
             foreach (var o in L(Lay(d, "chat"))) { var c = D(o); chat[S(c, "ki_hieu")] = S(c, "ten"); }
-            var ds = L(Lay(d, "buoc"));
-            while (moBuocChuoi.Count < ds.Count) moBuocChuoi.Add(false);
-            float cao = 76;
-            for (int i = 0; i < ds.Count; i++) cao += (moBuocChuoi[i] ? 196 : 78) + 10;
-            string docAnh = S(d, "chuoi_doc_tu_anh");
-            if (docAnh != "") cao += 34;
-            var k = t.Khoi("Khối kết quả", cao, 10);
-            ketQuaChuoi = k;
-            bool kc = B(d, "da_kiem_chung");
-            TrangCuon.HuyHieu(k, "Huy hiệu kiểm chứng", kc ? "Đã kiểm chứng toàn bộ" : "Có bước chưa kiểm chứng", new Vector2(0, -10), kc ? BioSoft : WarnSoft, kc ? Bio : Warn);
-            GlassKit.Label(k, "Số bước", $"{ds.Count} bước", 15, InkMute, false, TextAnchor.MiddleLeft, new Vector2(kc ? 210 : 236, -10), new Vector2(200, 28));
-            bool tatCaMo = moBuocChuoi.Count > 0 && moBuocChuoi.TrueForAll(x => x);
-            float xp = 0;
-            foreach (var (ten, chu, bam) in new (string, string, Action)[] {
-                ("Nút Mở tất cả", tatCaMo ? "Thu gọn tất cả" : "Mở tất cả", () => { bool m = !tatCaMo; for (int j = 0; j < moBuocChuoi.Count; j++) moBuocChuoi[j] = m; VeKetQuaChuoi(D(Doc(kqChuoi))); }),
-                ("Nút Sao chép lời giải", "Sao chép", () => { GUIUtility.systemCopyBuffer = VanBanLoiGiai(d); DatTrangThaiChuoi("Đã sao chép lời giải.", false); }),
-                ("Nút Báo sai chuỗi", "Báo sai", () => baoSai.Mo("chuoi", "", S(d, "chuoi"), -1, "")) })
-            {
-                float w = 30 + chu.Length * 9f;
-                var b = MakeButton(k, ten, chu, new Vector2(-xp, -6), new Vector2(w, 38), bam, 1, RadiusButton, new Vector2(1, 1));
-                ((RectTransform)b.transform).pivot = new Vector2(1, 1);
-                b.transform.Find("Chữ").GetComponent<Text>().fontSize = 15;
-                xp += w + 8;
-            }
-            float y = -60;
-            if (docAnh != "")
-            {
-                GlassKit.Label(k, "Chuỗi đọc từ ảnh", "Chuỗi đọc từ ảnh: " + docAnh.Replace("->", "→"), 15, InkDim, false, TextAnchor.UpperLeft, new Vector2(0, y), new Vector2(1500, 24));
-                y -= 34;
-            }
-            var maCoChe = new HashSet<string>(GoiCoChe.DanhSachTrongMay());
-            for (int i = 0; i < ds.Count; i++)
-            {
-                var b = D(ds[i]);
-                bool mo = moBuocChuoi[i];
-                float h = mo ? 196 : 78;
-                int ii = i;
-                var the = Card(k, "Bước chuỗi " + (i + 1), 0, 1, y, h, 0, true, TrangCuon.BoThe);
-                MakeCardClickable(the, () => { moBuocChuoi[ii] = !moBuocChuoi[ii]; VeKetQuaChuoi(D(Doc(kqChuoi))); }, 1.5f);
-                var than = Body(the);
-                string tu = S(b, "tu"), den = S(b, "den");
-                bool kcb = S(b, "kiem_chung") == "da_kiem_chung";
-                var so = Fill(than, "Số", new Vector2(0, 1), new Vector2(0, 1), new Vector2(22, -19), new Vector2(40, 40), AccentSoft, 10f);
-                GlassKit.Label(so.transform, "Chữ", (i + 1).ToString(), 17, Accent, true, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(40, 40));
-                string tenDen = chat.TryGetValue(den, out var tn) && tn != "" ? $"  <color=#{ColorUtility.ToHtmlStringRGB(InkMute)}>({tn})</color>" : "";
-                var pt = GlassKit.Label(than, "Phương trình", $"<b>{tu}  →  {den}</b>{tenDen}", 19, Ink, false, TextAnchor.UpperLeft, new Vector2(80, -14), new Vector2(900, 28));
-                pt.supportRichText = true;
-                GlassKit.Label(than, "Loại", S(b, "phan_ung"), 15, InkDim, false, TextAnchor.UpperLeft, new Vector2(80, -44), new Vector2(900, 22));
-                TrangCuon.HuyHieu(than, "Huy hiệu", kcb ? "đã kiểm chứng" : "chưa kiểm chứng", new Vector2(-60, -24), kcb ? BioSoft : WarnSoft, kcb ? Bio : Warn)
-                    .anchorMin = new Vector2(1, 1);
-                var hh = (RectTransform)than.Find("Huy hiệu"); hh.anchorMax = new Vector2(1, 1); hh.pivot = new Vector2(1, 1);
-                GlassKit.Label(than, "Mở", mo ? "▴" : "▾", 18, InkMute, false, TextAnchor.MiddleCenter, new Vector2(-18, -22), new Vector2(30, 32), new Vector2(1, 1)).rectTransform.pivot = new Vector2(1, 1);
-                if (mo)
-                {
-                    var vachCt = Fill(than, "Vạch", new Vector2(0, 1), new Vector2(0, 1), new Vector2(80, -80), new Vector2(10, 1), Hair, 0).rectTransform;
-                    vachCt.anchorMax = new Vector2(1, 1); vachCt.sizeDelta = new Vector2(-102, 1);
-                    string ct = $"<b>Điều kiện:</b> {S(b, "dieu_kien", "–")}\n<b>Kiểu phản ứng:</b> {(S(b, "loai") == "" ? "–" : S(b, "loai"))}" +
-                                (tn != null && tn != "" ? $"\n<b>Chất tạo thành:</b> {den} – {tn}" : "");
-                    TrangCuon.ChuRong(than, "Chi tiết", ct, 16, InkDim, false, 80, -96, 84, 290);
-                    string ma = Lay(b, "ma_co_che") as string;
-                    if (!string.IsNullOrEmpty(ma) && maCoChe.Contains(ma))
-                    {
-                        string nhan = S(b, "khop_mau") == "dung_mau" ? "Xem cơ chế 3D ⇄ Giấy" : "Cơ chế tương tự";
-                        var nx = MakeButton(than, "Nút Xem cơ chế " + (i + 1), nhan + "  →", new Vector2(-22, 20), new Vector2(240, 44), () => { CoCheMoDun.MoMau(ma); }, 0, RadiusButton, new Vector2(1, 0));
-                        ((RectTransform)nx.transform).pivot = new Vector2(1, 0);
-                    }
-                }
-                y -= h + 10;
-                SoBuocChuoi++;
-            }
-            t.ChanTrang();
-            t.ChotChieuCao();
-        }
-
-        static string VanBanLoiGiai(Dictionary<string, object> d)
-        {
-            var sb = new StringBuilder(S(d, "chuoi")).Append('\n');
-            int i = 1;
+            var ds = new List<(string, string, string, string)>();
             foreach (var o in L(Lay(d, "buoc")))
             {
                 var b = D(o);
-                sb.Append($"{i++}. {S(b, "tu")} → {S(b, "den")}: {S(b, "phan_ung")} ({S(b, "dieu_kien")})\n");
+                ds.Add((S(b, "tu"), S(b, "den"), S(b, "dieu_kien"), chat.TryGetValue(S(b, "den"), out var tn) ? tn : ""));
             }
-            return sb.ToString();
+            return ds;
         }
+
+        void DatDapAnChuoi(KhoiDapAn k, Dictionary<string, object> d)
+        {
+            var buoc = BuocChuoi(d);
+            var ds = L(Lay(d, "buoc"));
+            SoBuocChuoi = ds.Count;
+            bool kc = B(d, "da_kiem_chung");
+            string chuoi = S(d, "chuoi").Replace("->", "→");
+            var loai = new List<string>();
+            foreach (var o in ds) { var p = S(D(o), "phan_ung"); if (p != "" && loai.Count < 4) loai.Add(p); }
+            string doc = S(d, "chuoi_doc_tu_anh");
+            string tomTat = (doc != "" ? "Máy đọc từ ảnh: " + doc.Replace("->", "→") + ".  " : "") + string.Join(" · ", loai) + (ds.Count > 4 ? " · …" : "");
+            var maCoChe = new HashSet<string>(GoiCoChe.DanhSachTrongMay());
+            var chip = new List<(string, Action)>();
+            for (int i = 0; i < ds.Count && chip.Count < 2; i++)
+            {
+                var b = D(ds[i]);
+                string ma = Lay(b, "ma_co_che") as string;
+                if (!string.IsNullOrEmpty(ma) && maCoChe.Contains(ma)) chip.Add(($"Xem cơ chế: {S(b, "tu")} → {S(b, "den")}", () => CoCheMoDun.MoMau(ma)));
+            }
+            if (ds.Count > 0) { var b0 = D(ds[0]); string q = $"Vì sao {S(b0, "tu")} → {S(b0, "den")} cần {S(b0, "dieu_kien", "điều kiện đó")}?"; chip.Add((q, () => k.BatHoiTiep(q))); }
+            k.DatDapAn((rt, w) => HinhDapAn.Chuoi(rt, buoc, w),
+                $"{ds.Count} bước  ·  {chuoi}", kc ? "Đã kiểm chứng" : "Có bước chưa kiểm chứng", kc, tomTat,
+                new List<(string, string, int, Action)> {
+                    ("Nút Mở lớn", "⤢  Mở lớn", 0, () => MoLonChuoi(d)),
+                    ("Nút Giải thích", "Giải thích", 1, () => MoLonChuoi(d)),
+                    ("Nút Hỏi tiếp", "Hỏi tiếp", 1, () => k.BatHoiTiep()),
+                    ("Nút Xuất PNG", "Xuất PNG", 1, () => StartCoroutine(XuatPng(k.Hinh, "chuoi"))),
+                    ("Nút Báo sai chuỗi", "Báo sai", 1, () => baoSai.Mo("chuoi", "", S(d, "chuoi"), -1, "")) },
+                chip, (cau, tra) => StartCoroutine(HoiDap(cau, "Chuỗi " + S(d, "chuoi"), "", ds, tra)));
+        }
+
+        /// <summary>Bảng lớn của chuỗi: hình chuỗi to (có tên chất) + từng bước chi tiết, bước có cơ chế mẫu mở được 3D ⇄ Giấy.</summary>
+        void MoLonChuoi(Dictionary<string, object> d)
+        {
+            bangLon.Mo("Chuỗi phản ứng  ·  " + S(d, "chuoi").Replace("->", "→"), than =>
+            {
+                var nd = BangLon.VungCuon(than, 2000);
+                float rong = Mathf.Max(800, than.rect.width - 10);
+                var hinh = MenuKit.Stretch(nd, "Hình lớn", new Vector2(0, 1), new Vector2(1, 1), new Vector2(0, -10), Vector2.zero);
+                float cao = HinhDapAn.Chuoi(hinh, BuocChuoi(d), rong, 1.3f);
+                hinh.offsetMin = new Vector2(0, -cao);
+                float y = -cao - 24;
+                var maCoChe = new HashSet<string>(GoiCoChe.DanhSachTrongMay());
+                int i = 0;
+                foreach (var o in L(Lay(d, "buoc")))
+                {
+                    var b = D(o);
+                    i++;
+                    bool kcb = S(b, "kiem_chung") == "da_kiem_chung";
+                    var the = Card(nd, "Bước lớn " + i, 0, 1, y, 96, 0, false, TrangCuon.BoThe);
+                    var th = Body(the);
+                    var so = Fill(th, "Số", new Vector2(0, 1), new Vector2(0, 1), new Vector2(20, -24), new Vector2(40, 40), AccentSoft, 10f);
+                    GlassKit.Label(so.transform, "Chữ", i.ToString(), 17, Accent, true, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(40, 40));
+                    GlassKit.Label(th, "Phương trình", $"{S(b, "tu")}  →  {S(b, "den")}    {S(b, "phan_ung")}", 18, Ink, true, TextAnchor.UpperLeft, new Vector2(80, -16), new Vector2(1000, 28)).horizontalOverflow = HorizontalWrapMode.Overflow;
+                    GlassKit.Label(th, "Chi tiết", $"Điều kiện: {S(b, "dieu_kien", "–")}   ·   kiểu: {S(b, "loai", "–")}   ·   {(kcb ? "đã kiểm chứng" : "chưa kiểm chứng")}", 15, kcb ? InkDim : Warn, false, TextAnchor.UpperLeft, new Vector2(80, -52), new Vector2(1000, 24)).horizontalOverflow = HorizontalWrapMode.Overflow;
+                    string ma = Lay(b, "ma_co_che") as string;
+                    if (!string.IsNullOrEmpty(ma) && maCoChe.Contains(ma))
+                    {
+                        var nx = MakeButton(th, "Nút Xem cơ chế " + i, (S(b, "khop_mau") == "dung_mau" ? "Xem cơ chế" : "Cơ chế tương tự") + "  →", new Vector2(-20, 0), new Vector2(200, 42), () => { bangLon.Dong(); CoCheMoDun.MoMau(ma); }, 0, TrangCuon.BoNut, new Vector2(1, 0.5f));
+                        ((RectTransform)nx.transform).pivot = new Vector2(1, 0.5f);
+                    }
+                    y -= 106;
+                }
+                nd.sizeDelta = new Vector2(0, -y + 20);
+            });
+        }
+
+        /// <summary>Hỏi tiếp (dùng /co-che/hoi-dap): gửi kèm đề và các bước của đáp án đang xem.</summary>
+        IEnumerator HoiDap(string cau, string ten, string de, List<object> buoc, Action<string> tra)
+        {
+            var sb = new StringBuilder("{\"cau_hoi\":").Append(MayChuCoChe.ChuoiJson(cau)).Append(",\"ten\":").Append(MayChuCoChe.ChuoiJson(ten))
+                .Append(",\"de\":").Append(MayChuCoChe.ChuoiJson(de)).Append(",\"buoc\":[");
+            for (int i = 0; i < buoc.Count; i++)
+            {
+                var b = D(buoc[i]);
+                sb.Append(i > 0 ? "," : "").Append("{\"ten\":").Append(MayChuCoChe.ChuoiJson($"{S(b, "tu")} → {S(b, "den")}"))
+                  .Append(",\"ghi_chu\":").Append(MayChuCoChe.ChuoiJson($"{S(b, "phan_ung")} ({S(b, "dieu_kien")})")).Append('}');
+            }
+            sb.Append("]}");
+            yield return MayChuCoChe.Goi("POST", "/co-che/hoi-dap", sb.ToString(), 160f, (ok, kq) =>
+            {
+                if (!ok) { tra("Chưa hỏi được: " + kq); return; }
+                try { tra(S(D(Doc(kq)), "tra_loi")); } catch (Exception e) { tra("Trả lời lỗi định dạng: " + e.Message); }
+            });
+        }
+
+        /// <summary>Xuất PNG một vùng (hình đáp án) bằng camera của canvas, gấp đôi độ phân giải, lưu vào Ảnh/VERA Lab.</summary>
+        public IEnumerator XuatPng(RectTransform vung, string ten)
+        {
+            DuongPngCuoi = "";
+            var cv = GetComponentInParent<Canvas>()?.rootCanvas;
+            var cam = cv != null ? cv.worldCamera : null;
+            if (cam == null || vung == null) { Bao("Không xuất được ảnh trên màn này."); yield break; }
+            yield return null;
+            var c = new Vector3[4];
+            vung.GetWorldCorners(c);
+            var cu = cam.targetTexture;
+            int W = cam.pixelWidth, H = cam.pixelHeight;
+            Vector2 a = RectTransformUtility.WorldToScreenPoint(cam, c[0]), b = RectTransformUtility.WorldToScreenPoint(cam, c[2]);
+            var rt = RenderTexture.GetTemporary(W * 2, H * 2, 24, RenderTextureFormat.ARGB32);
+            float kx = 2f * W / Mathf.Max(1, cam.pixelWidth), ky = 2f * H / Mathf.Max(1, cam.pixelHeight);
+            cam.targetTexture = rt;
+            foreach (var t in cv.GetComponentsInChildren<Text>()) t.SetAllDirty();
+            Canvas.ForceUpdateCanvases();
+            cam.Render();
+            cam.targetTexture = cu;
+            var r = Rect.MinMaxRect(Mathf.Clamp(a.x * kx - 12, 0, W * 2), Mathf.Clamp(a.y * ky - 12, 0, H * 2), Mathf.Clamp(b.x * kx + 12, 0, W * 2), Mathf.Clamp(b.y * ky + 12, 0, H * 2));
+            var truoc = RenderTexture.active;
+            RenderTexture.active = rt;
+            var tex = new Texture2D(Mathf.Max(1, (int)r.width), Mathf.Max(1, (int)r.height), TextureFormat.RGB24, false);
+            tex.ReadPixels(r, 0, 0);
+            tex.Apply();
+            RenderTexture.active = truoc;
+            RenderTexture.ReleaseTemporary(rt);
+            foreach (var t in cv.GetComponentsInChildren<Text>()) t.SetAllDirty();
+            try
+            {
+                string goc = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyPictures);
+                string thu = string.IsNullOrEmpty(goc) ? System.IO.Path.Combine(Application.persistentDataPath, "Anh") : System.IO.Path.Combine(goc, "VERA Lab");
+                System.IO.Directory.CreateDirectory(thu);
+                DuongPngCuoi = System.IO.Path.Combine(thu, $"{ten}_{DateTime.Now:yyyyMMdd_HHmmss}.png");
+                System.IO.File.WriteAllBytes(DuongPngCuoi, tex.EncodeToPNG());
+                Bao("Đã lưu ảnh: " + DuongPngCuoi, false);
+            }
+            catch (Exception e) { Bao("Không lưu được ảnh: " + e.Message); }
+            Destroy(tex);
+        }
+
+        public string DuongPngCuoi { get; private set; } = "";
 
         // ================================================================== CƠ CHẾ
         InputField oDe;
@@ -622,9 +675,8 @@ namespace Khkt.Menu
             trangThaiDe.horizontalOverflow = HorizontalWrapMode.Wrap;
             t.LanLuot.Add(khoiNut);
 
-            t.GhiBuoc(2, t.DauMuc("03", "Kết quả", "Danh sách bước của cơ chế; mở trình phát để xem electron chạy, giải thích chi tiết và hỏi đáp."));
-            yKetQuaDe = t.Y;
-            VeKetQuaDe(null, "");
+            t.GhiBuoc(2, t.DauMuc("03", "Kết quả", "Mỗi lần vẽ là một khối: đề ở trên, sơ đồ cơ chế trên giấy bên dưới. Mở lớn để xem 3D ⇄ Giấy."));
+            dongCoChe = DongThoiGian.Tao(t, "Chưa có cơ chế", "Nhập phản ứng ở mục <b>01</b> rồi bấm <b>Vẽ cơ chế</b>, hoặc mở một <b>bài mẫu</b>.");
             return t;
         }
 
@@ -685,8 +737,8 @@ namespace Khkt.Menu
             BaiCoChe b;
             try { b = md.Nap(ma); }
             catch (Exception e) { DatTrangThaiDe("Không mở được bài mẫu: " + e.Message, true); return; }
-            VeKetQuaDe(b, "Mẫu đã kiểm chứng");
-            CoCheMoDun.MoVoiBai(b);
+            var k = dongCoChe.Them("Bài mẫu: " + b.Ten, null);
+            DatDapAnCoChe(k, b, "Mẫu đã kiểm chứng", true);
         }
 
         void ChonAnhDe()
@@ -752,97 +804,81 @@ namespace Khkt.Menu
         {
             DangVeCoChe = true;
             nutVe.interactable = false;
+            var k = dongCoChe.Them(de.Length > 0 ? de : "Ảnh đề cơ chế", anh != null ? xemAnhDe.texture : null);
             float t0 = Time.realtimeSinceStartup;
             bool xong = false, ok = false;
             string kq = "";
-            StartCoroutine(MayChuCoChe.GiaiDe(de, anh, loaiCoChe, CoCheMoDun.ChoGiaiDe, (o, k) => { ok = o; kq = k; xong = true; }));
+            StartCoroutine(MayChuCoChe.GiaiDe(de, anh, loaiCoChe, CoCheMoDun.ChoGiaiDe, (o, x) => { ok = o; kq = x; xong = true; }));
+            string[] buocLam = anh != null ? new[] { "Đọc ảnh đề", "AI viết cơ chế", "RDKit kiểm từng mũi tên", "Dựng 3D và giấy" } : new[] { "AI viết cơ chế", "RDKit kiểm từng mũi tên", "Dựng 3D và giấy" };
             while (!xong)
             {
-                DatTrangThaiDe($"Đang vẽ cơ chế… {Time.realtimeSinceStartup - t0:0} s (AI viết → RDKit kiểm → dựng 3D và giấy)", false);
+                float s = Time.realtimeSinceStartup - t0;
+                k.DatTienTrinh(TienTrinh(buocLam, Mathf.Min(buocLam.Length - 1, (int)(s / 12f)), s));
+                DatTrangThaiDe($"Đang vẽ cơ chế… {s:0} s", false);
                 yield return new WaitForSecondsRealtime(0.25f);
             }
             DangVeCoChe = false;
             nutVe.interactable = true;
-            if (!ok) { DatTrangThaiDe("Chưa vẽ được: " + kq, true); yield break; }
+            if (!ok) { k.DatLoi(kq); DatTrangThaiDe("Chưa vẽ được – xem khối đáp án.", true); yield break; }
             try
             {
                 var b = BaiCoChe.TuJson(kq);
                 if (b.KichBan == null || b.KichBan.Buoc.Count == 0) throw new Exception("kết quả không có bước nào");
                 var tt = D(Lay(D(Doc(kq)), "thong_tin"));
                 int sua = I(Lay(tt, "so_lan_sua"));
-                string nguon = "AI viết · RDKit đã kiểm" + (sua > 0 ? $" (tự sửa {sua} lần)" : "");
                 CoCheMoDun.DamBaoCo().GhiDeDaGiai(b);
-                VeKetQuaDe(b, nguon);
-                string mh = S(tt, "mo_hinh");
-                DatTrangThaiDe($"Xong: {b.KichBan.Buoc.Count} bước" + (mh != "" ? " · " + mh : "") + $" · {Time.realtimeSinceStartup - t0:0.0} s", false);
-                trang[2].CuonToi(yKetQuaDe + 120);
+                DatDapAnCoChe(k, b, "AI viết · RDKit đã kiểm" + (sua > 0 ? $" (sửa {sua} lần)" : ""), false);
+                DatTrangThaiDe($"Xong: {b.KichBan.Buoc.Count} bước · {Time.realtimeSinceStartup - t0:0.0} s", false);
             }
-            catch (Exception e) { DatTrangThaiDe("Kết quả lỗi định dạng: " + e.Message, true); }
+            catch (Exception e) { k.DatLoi("Kết quả lỗi định dạng: " + e.Message); }
         }
 
-        void VeKetQuaDe(BaiCoChe b, string nguon)
+        void DatDapAnCoChe(KhoiDapAn k, BaiCoChe b, string nguon, bool mau)
         {
-            var t = trang[2];
             BaiKetQua = b;
-            for (int i = t.NoiDung.childCount - 1; i >= 0; i--)
+            var sd = b.SoDo;
+            float tiLe = sd != null && sd.X1 - sd.X0 > 1 ? (sd.Y1 - sd.Y0) / (sd.X1 - sd.X0) : 0.4f;
+            var ten = new List<string>();
+            foreach (var bu in b.KichBan.Buoc) ten.Add(bu.Ten);
+            string tomTat = (string.IsNullOrEmpty(b.KichBan.Loai) ? "" : b.KichBan.Loai + " · ") + $"{b.KichBan.Buoc.Count} bước: " + string.Join(" → ", ten);
+            var buocJson = new List<object>();
+            foreach (var bu in b.KichBan.Buoc) buocJson.Add(new Dictionary<string, object> { { "tu", bu.Ten }, { "den", "" }, { "phan_ung", bu.GhiChu }, { "dieu_kien", "" } });
+            k.DatDapAn((rt, w) => { float h = Mathf.Clamp(w * tiLe, 220, 520); HinhDapAn.Giay(rt, b, w, h); return h; },
+                b.Ten, nguon, mau, tomTat,
+                new List<(string, string, int, Action)> {
+                    ("Nút Mở lớn", "⤢  Mở lớn", 0, () => MoLonCoChe(b)),
+                    ("Nút Giải thích", "Giải thích", 1, () => CoCheMoDun.MoVoiBai(b, 1)),
+                    ("Nút Hỏi tiếp", "Hỏi tiếp", 1, () => k.BatHoiTiep()),
+                    ("Nút Xuất PNG", "Xuất PNG", 1, () => StartCoroutine(XuatPng(k.Hinh, "co_che_" + b.Ma))),
+                    ("Nút Báo sai cơ chế", "Báo sai", 1, () => baoSai.Mo("co_che", b.Ma, b.Ten, -1, "")) },
+                new List<(string, Action)> { ("Xem electron chạy trong 3D", () => CoCheMoDun.MoVoiBai(b, -1, 0)), ("Vì sao bước 1 xảy ra như vậy?", () => k.BatHoiTiep("Vì sao bước 1 xảy ra như vậy?")) },
+                (cau, tra) => StartCoroutine(HoiDap(cau, b.Ten, b.De ?? "", buocJson, tra)));
+        }
+
+        /// <summary>Bảng lớn của cơ chế: tờ giấy to + nút Xem 3D ⇄ Giấy (khung 3D, thanh tốc độ, phóng toàn màn) + các bước.</summary>
+        void MoLonCoChe(BaiCoChe b)
+        {
+            bangLon.Mo("Cơ chế  ·  " + b.Ten, than =>
             {
-                var c = t.NoiDung.GetChild(i);
-                if (c.name == "Khối kết quả" || c.name == "Chân trang") Destroy(c.gameObject);
-            }
-            t.Y = yKetQuaDe;
-            if (b == null)
-            {
-                var k0 = t.Khoi("Khối kết quả", 230, 10);
-                var th0 = TrangCuon.The(k0, "Thẻ trống", 0, 230);
-                var a = GlassKit.Label(th0, "Tiêu đề", "Chưa có cơ chế", 24, Ink, true, TextAnchor.UpperCenter, new Vector2(0, -70), new Vector2(800, 34), new Vector2(0.5f, 1));
-                a.rectTransform.pivot = new Vector2(0.5f, 1);
-                var h = GlassKit.Label(th0, "Hướng dẫn", "Nhập phản ứng ở mục <b>01</b> rồi bấm <b>Vẽ cơ chế</b>, hoặc mở một <b>bài mẫu</b>.", 16, InkDim, false, TextAnchor.UpperCenter, new Vector2(0, -114), new Vector2(800, 50), new Vector2(0.5f, 1));
-                h.rectTransform.pivot = new Vector2(0.5f, 1); h.supportRichText = true;
-                t.ChanTrang();
-                t.ChotChieuCao();
-                return;
-            }
-            var ds = b.KichBan.Buoc;
-            float cao = 150 + ds.Count * 64 + 24;
-            var k = t.Khoi("Khối kết quả", cao, 10);
-            var th = TrangCuon.The(k, "Thẻ kết quả", 0, cao);
-            bool mau = nguon.StartsWith("Mẫu");
-            TrangCuon.HuyHieu(th, "Huy hiệu nguồn", nguon, new Vector2(28, -24), mau ? BioSoft : AccentSoft, mau ? Bio : Accent);
-            var ten = GlassKit.Label(th, "Tên cơ chế", b.Ten, 26, Ink, true, TextAnchor.UpperLeft, new Vector2(28, -62), new Vector2(1000, 36));
-            ten.horizontalOverflow = HorizontalWrapMode.Overflow;
-            GlassKit.Label(th, "Kiểu", (b.KichBan.Loai ?? "") + (string.IsNullOrEmpty(b.KichBan.DieuKien) ? "" : " · " + b.KichBan.DieuKien), 15, InkMute, false, TextAnchor.UpperLeft, new Vector2(28, -102), new Vector2(1000, 22));
-            float xp = 28;
-            foreach (var (tn, chu, kieu, bam) in new (string, string, int, Action)[] {
-                ("Nút Mở 3D Giấy", "Mở 3D ⇄ Giấy  →", 0, () => CoCheMoDun.MoVoiBai(b)),
-                ("Nút Giải thích chi tiết", "Giải thích chi tiết", 1, () => CoCheMoDun.MoVoiBai(b, 1)),
-                ("Nút Hỏi đáp", "Hỏi đáp", 1, () => CoCheMoDun.MoVoiBai(b, 2)),
-                ("Nút Báo sai cơ chế", "Báo sai", 1, () => baoSai.Mo("co_che", b.Ma, b.Ten, -1, "")) })
-            {
-                float w = 34 + chu.Length * 9.4f;
-                var nb = MakeButton(th, tn, chu, new Vector2(-xp, -24), new Vector2(w, 46), bam, kieu, RadiusButton, new Vector2(1, 1));
-                ((RectTransform)nb.transform).pivot = new Vector2(1, 1);
-                nb.transform.Find("Chữ").GetComponent<Text>().fontSize = 15;
-                xp += w + 10;
-            }
-            float y = -146;
-            for (int i = 0; i < ds.Count; i++)
-            {
-                var bu = ds[i];
-                int ii = i;
-                var hang = MakeButton(th, "Bước cơ chế " + (i + 1), "", new Vector2(28, y), new Vector2(100, 56), () => CoCheMoDun.MoVoiBai(b, 0, ii), 1, RadiusButton);
-                var hrt = (RectTransform)hang.transform; hrt.anchorMax = new Vector2(1, 1); hrt.offsetMax = new Vector2(-28, hrt.offsetMax.y);
-                var chu = hang.transform.Find("Chữ").GetComponent<Text>();
-                chu.supportRichText = true; chu.alignment = TextAnchor.MiddleLeft; chu.fontSize = 16; chu.fontStyle = FontStyle.Normal; chu.color = InkDim;
-                chu.rectTransform.anchorMin = Vector2.zero; chu.rectTransform.anchorMax = Vector2.one; chu.rectTransform.offsetMin = new Vector2(18, 0); chu.rectTransform.offsetMax = new Vector2(-18, 0);
-                chu.horizontalOverflow = HorizontalWrapMode.Wrap;
-                string nhan = bu.BuocCham ? "  <color=#" + ColorUtility.ToHtmlStringRGB(Warn) + ">· bước chậm</color>" : "";
-                string gc = bu.GhiChu ?? "";
-                if (gc.Length > 150) gc = gc.Substring(0, 148) + "…";
-                chu.text = $"<color=#{ColorUtility.ToHtmlStringRGB(Accent)}><b>{i + 1}</b></color>   <color=#{ColorUtility.ToHtmlStringRGB(Ink)}><b>{bu.Ten}</b></color>{nhan}   {gc}";
-                y -= 64;
-            }
-            t.ChanTrang();
-            t.ChotChieuCao();
+                float W = Mathf.Max(800, than.rect.width), H = Mathf.Max(400, than.rect.height);
+                var giay = MenuKit.Stretch(than, "Vùng giấy", new Vector2(0, 0), new Vector2(0.7f, 1), Vector2.zero, new Vector2(-12, 0));
+                HinhDapAn.Giay(giay, b, 0, -1);
+                var ben = MenuKit.Stretch(than, "Cột bước", new Vector2(0.7f, 0), new Vector2(1, 1), new Vector2(12, 0), Vector2.zero);
+                var x3 = MakeButton(ben, "Nút Xem 3D lớn", "▶  Xem 3D ⇄ Giấy", new Vector2(0, 0), new Vector2(W * 0.3f - 12, 48), () => { bangLon.Dong(); CoCheMoDun.MoVoiBai(b, -1, 0); }, 0, TrangCuon.BoNut);
+                float y = -66;
+                for (int i = 0; i < b.KichBan.Buoc.Count; i++)
+                {
+                    var bu = b.KichBan.Buoc[i];
+                    int ii = i;
+                    var hang = MakeButton(ben, "Bước cơ chế lớn " + (i + 1), "", new Vector2(0, y), new Vector2(W * 0.3f - 12, 72), () => { bangLon.Dong(); CoCheMoDun.MoVoiBai(b, 0, ii); }, 1, TrangCuon.BoNut);
+                    var chu = hang.transform.Find("Chữ").GetComponent<Text>();
+                    chu.alignment = TextAnchor.MiddleLeft; chu.fontSize = 14; chu.fontStyle = FontStyle.Normal; chu.supportRichText = true; chu.horizontalOverflow = HorizontalWrapMode.Wrap;
+                    chu.rectTransform.anchorMin = Vector2.zero; chu.rectTransform.anchorMax = Vector2.one; chu.rectTransform.offsetMin = new Vector2(14, 4); chu.rectTransform.offsetMax = new Vector2(-14, -4);
+                    string gc = bu.GhiChu ?? ""; if (gc.Length > 80) gc = gc.Substring(0, 78) + "…";
+                    chu.text = $"<b>{i + 1}. {bu.Ten}</b>\n<color=#{ColorUtility.ToHtmlStringRGB(InkDim)}>{gc}</color>";
+                    y -= 80;
+                }
+            });
         }
 
         // ================================================================== MÔ HÌNH 3D
@@ -873,17 +909,51 @@ namespace Khkt.Menu
             MakeButton(kn, "Nút Dựng mô hình 3D", "Dựng mô hình 3D  →", Vector2.zero, new Vector2(250, 56), Dung3D, 0, RadiusButton);
             GlassKit.Label(kn, "Gợi ý", "Trong khung 3D: kéo để xoay · cuộn để phóng to · Đặt lại góc · Ẩn H.", 15, InkMute, false, TextAnchor.MiddleLeft, new Vector2(272, 0), new Vector2(1100, 56));
             t.LanLuot.Add(kn);
-            t.ChanTrang();
-            t.ChotChieuCao();
+            t.GhiBuoc(0, t.Y);
+            t.DauMuc("02", "Kết quả", "Mỗi chất một khối: ảnh 3D tĩnh, công thức, khối lượng mol. Mở lớn để xoay 360°, phóng to, ẩn H.");
+            dong3D = DongThoiGian.Tao(t, "Chưa dựng chất nào", "Gõ tên hoặc công thức rồi bấm <b>Dựng mô hình 3D</b>, hoặc bấm một chip mẫu.");
             return t;
         }
+
+        public bool DangDung3D { get; private set; }
 
         void Dung3D()
         {
             string q = (oChat.text ?? "").Trim();
-            if (Mo3D != null && q.Length == 0) { Mo3D(); return; }
-            MoHinh3DMoDun.Mo();
-            if (q.Length > 0) MoHinh3DMoDun.Instance?.XemChat(q);
+            if (q.Length == 0 || DangDung3D) return;
+            StartCoroutine(GoiDung3D(q));
+        }
+
+        IEnumerator GoiDung3D(string q)
+        {
+            DangDung3D = true;
+            var k = dong3D.Them(q, null);
+            float t0 = Time.realtimeSinceStartup;
+            bool xong = false, ok = false;
+            string kq = "";
+            StartCoroutine(MayChuCoChe.Goi("POST", "/co-che/mo-hinh-3d", "{\"van_ban\":" + MayChuCoChe.ChuoiJson(q) + "}", 40f, (o, x) => { ok = o; kq = x; xong = true; }));
+            string[] buocLam = { "Tìm chất", "Dựng cấu dạng RDKit", "Vẽ" };
+            while (!xong)
+            {
+                float s = Time.realtimeSinceStartup - t0;
+                k.DatTienTrinh(TienTrinh(buocLam, Mathf.Min(2, (int)(s / 1.2f)), s));
+                yield return new WaitForSecondsRealtime(0.2f);
+            }
+            DangDung3D = false;
+            if (!ok) { k.DatLoi(kq); yield break; }
+            try
+            {
+                var d = D(Doc(kq));
+                string nguon = S(d, "nguon") switch { "bang_sgk" => "Bảng SGK (đã kiểm chứng)", "pubchem" => "PubChem", "smiles" => "SMILES bạn nhập", var x => x };
+                k.DatDapAn((rt, w) => HinhDapAn.Ba(rt, d, w, 380), $"{S(d, "ten")}  ·  {S(d, "cong_thuc")}", nguon, S(d, "nguon") == "bang_sgk",
+                    $"M = {F(Lay(d, "khoi_luong")):0.00} g/mol  ·  {L(Lay(d, "nguyen_tu")).Count} nguyên tử (kể cả H)  ·  SMILES {S(d, "smiles")}",
+                    new List<(string, string, int, Action)> {
+                        ("Nút Mở lớn", "⤢  Mở lớn (xoay 3D)", 0, () => { MoHinh3DMoDun.Mo(); MoHinh3DMoDun.Instance?.XemChat(q); }),
+                        ("Nút Xuất PNG", "Xuất PNG", 1, () => StartCoroutine(XuatPng(k.Hinh, "mo_hinh_3d"))),
+                        ("Nút Báo sai 3D", "Báo sai", 1, () => baoSai.Mo("mo_hinh_3d", "", q, -1, "")) },
+                    null, null);
+            }
+            catch (Exception e) { k.DatLoi("Kết quả lỗi định dạng: " + e.Message); }
         }
 
         // ================================================================== HÓA LÝ

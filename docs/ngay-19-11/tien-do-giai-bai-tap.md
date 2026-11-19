@@ -20,3 +20,5 @@ Chạy: `KHKT_UI_SHOTS=<thư mục> ~/AppBuild/VERA_claude/dong_bo_va_chay.sh ~/
 - Còn lại (theo mục 4 của tệp thiết kế): DongThoiGian.cs + KhoiDapAn, BangLon.cs (75% giữa màn, nền mờ, Esc), ChupHinh.cs
   (chụp giấy/3D thành ảnh), gắn vào 3 trang (ô đề dính đáy, tuỳ chọn gập), Cơ chế "Mở lớn" chứa khung 3D ⇄ giấy, kiểm thử
   KhktUiRunner + KhktCoCheVerify, xuất app Mac, báo cáo, commit. Không sửa MainMenu.cs (phiên khác đang làm lab/giải phẫu).
+
+- 19/11 (làm tiếp sau TẠM DỪNG): đã viết xong luồng đáp án (DapAn.cs, gắn 3 trang, kiểm thử 72/72 + 66/66, app Mac). Xem báo cáo mục 8–9.

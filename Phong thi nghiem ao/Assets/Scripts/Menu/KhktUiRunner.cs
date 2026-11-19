@@ -332,17 +332,41 @@ namespace Khkt.Menu
             yield return null;
             Bam(gbt.transform, "Chuỗi mẫu 1");               // tab Chuỗi mẫu: bấm là giải ngay
             float t0 = Time.realtimeSinceStartup;
-            while (gbt.SoBuocChuoi == 0 && Time.realtimeSinceStartup - t0 < 4f) yield return null;
-            Check(gbt.SoBuocChuoi == 4, "Giải chuỗi mẫu: 4 thẻ bước", gbt.SoBuocChuoi.ToString());
-            Bam(gbt.transform, "Nút Mở tất cả");
-            yield return Cho(0.4f);
-            Check(gbt.GetComponentsInChildren<Button>(true).Any(b => b.name == "Nút Xem cơ chế 4"), "Mở tất cả: bước có cơ chế mẫu hiện nút Xem cơ chế");
+            while ((gbt.DongChuoi.Khoi.Count == 0 || !gbt.DongChuoi.Khoi[0].CoDapAn) && Time.realtimeSinceStartup - t0 < 4f) yield return null;
+            yield return Cho(0.7f);
+            var k1 = gbt.DongChuoi.Khoi.Count > 0 ? gbt.DongChuoi.Khoi[0] : null;
+            Check(k1 != null && k1.CoDapAn && gbt.SoBuocChuoi == 4 && k1.Hinh != null && k1.Hinh.GetComponentsInChildren<Text>(true).Count(x => x.name == "Chữ") >= 5,
+                  "Giải chuỗi: khối đáp án có hình chuỗi (5 ô chất) và 4 bước", gbt.SoBuocChuoi.ToString());
             yield return Chup(menu, "chuoi_ket_qua_Trang");
-            Bam(gbt.transform, "Nút Báo sai chuỗi");
+            Bam(gbt.transform, "Giải chuỗi");
+            gbt.GiaiChuoi();
+            t0 = Time.realtimeSinceStartup;
+            while ((gbt.DongChuoi.Khoi.Count < 2 || !gbt.DongChuoi.Khoi[1].CoDapAn) && Time.realtimeSinceStartup - t0 < 4f) yield return null;
+            yield return Cho(0.7f);
+            Check(gbt.DongChuoi.Khoi.Count == 2 && gbt.DongChuoi.Khoi[1].YTren < gbt.DongChuoi.Khoi[0].YTren, "Giải lần 2: thêm khối mới bên dưới, khối cũ giữ làm lịch sử");
+            var ndChuoi = gbt.GetComponentsInChildren<ScrollRect>(true).FirstOrDefault(r => r.name == "Trang Chuỗi phản ứng");
+            Check(ndChuoi != null && ndChuoi.content.anchoredPosition.y > 300, "Trang tự trượt xuống khối đáp án mới", ndChuoi != null ? ndChuoi.content.anchoredPosition.y.ToString("0") : "");
+            yield return Chup(menu, "chuoi_lich_su_Trang");
+            Bam(gbt.DongChuoi.Khoi[1].transform, "Nút Mở lớn");
+            yield return Cho(0.5f);
+            Check(gbt.Bang.DangMo && gbt.Bang.Than.GetComponentsInChildren<Button>(true).Any(b => b.name == "Nút Xem cơ chế 4"), "Mở lớn: bảng 75% có hình chuỗi lớn + bước có nút Xem cơ chế");
+            yield return Chup(menu, "chuoi_bang_lon_Trang");
+            Bam(gbt.transform, "Nút Đóng bảng lớn");
+            yield return Cho(0.4f);
+            Check(!gbt.Bang.DangMo, "Đóng bảng lớn");
+            Bam(gbt.DongChuoi.Khoi[1].transform, "Nút Hỏi tiếp");
+            yield return Cho(0.3f);
+            var oHoi = gbt.DongChuoi.Khoi[1].GetComponentsInChildren<InputField>(true).FirstOrDefault(x => x.name == "Ô hỏi tiếp");
+            if (oHoi != null) { oHoi.text = "Vì sao cần H2SO4?"; oHoi.onSubmit.Invoke(oHoi.text); }
+            t0 = Time.realtimeSinceStartup;
+            while (gbt.DongChuoi.Khoi[1].TraLoiCuoi == "" && Time.realtimeSinceStartup - t0 < 3f) yield return null;
+            Check(gbt.DongChuoi.Khoi[1].TraLoiCuoi.Contains("xúc tác"), "Hỏi tiếp ngay dưới thẻ đáp án (máy chủ giả)", gbt.DongChuoi.Khoi[1].TraLoiCuoi);
+            yield return Cho(0.4f);
+            yield return Chup(menu, "chuoi_hoi_tiep_Trang");
+            Bam(gbt.DongChuoi.Khoi[1].transform, "Nút Báo sai chuỗi");
             yield return Cho(0.4f);
             var hop = gbt.GetComponentInChildren<HopBaoSai>(true);
             Check(hop != null && hop.DangMo, "Kết quả chuỗi: nút Báo sai mở hộp báo sai");
-            yield return Chup(menu, "bao_sai_Trang");
             hop?.Gui("Bước 2 thiếu điều kiện");
             yield return Cho(0.3f);
             Check(hop != null && hop.KetQuaCuoi.Contains("ok"), "Gửi báo sai chuỗi");
@@ -365,13 +389,20 @@ namespace Khkt.Menu
             yield return null;
             Bam(gbt.transform, "Nút Vẽ cơ chế");
             t0 = Time.realtimeSinceStartup;
-            while (gbt.BaiKetQua == null && Time.realtimeSinceStartup - t0 < 4f) yield return null;
-            Check(gbt.BaiKetQua != null && gbt.GetComponentsInChildren<Button>(true).Count(b => b.name.StartsWith("Bước cơ chế ")) == gbt.BaiKetQua.KichBan.Buoc.Count,
-                  "Vẽ cơ chế (máy chủ giả, loại SN2): kết quả có danh sách bước", gbt.BaiKetQua?.Ten);
+            while ((gbt.DongCoChe.Khoi.Count == 0 || !gbt.DongCoChe.Khoi[gbt.DongCoChe.Khoi.Count - 1].CoDapAn) && Time.realtimeSinceStartup - t0 < 4f) yield return null;
+            yield return Cho(0.7f);
+            var kc = gbt.DongCoChe.Khoi.LastOrDefault();
+            Check(kc != null && kc.CoDapAn && gbt.BaiKetQua != null && kc.Hinh.GetComponentInChildren<Khkt.CoChe.SoDoGiay>(true) != null,
+                  "Vẽ cơ chế (máy chủ giả, loại SN2): khối đáp án có sơ đồ giấy", gbt.BaiKetQua?.Ten);
             Check(guiLoai == "SN2", "Gửi kiểu cơ chế đã chọn", guiLoai);
-            yield return Cho(0.5f);
             yield return Chup(menu, "co_che_ket_qua_Trang");
-            Bam(gbt.transform, "Nút Giải thích chi tiết");
+            Bam(kc.transform, "Nút Mở lớn");
+            yield return Cho(0.5f);
+            Check(gbt.Bang.DangMo && gbt.Bang.Than.GetComponentsInChildren<Button>(true).Any(b => b.name == "Nút Xem 3D lớn"), "Cơ chế Mở lớn: bảng 75% có tờ giấy lớn + Xem 3D ⇄ Giấy + các bước");
+            yield return Chup(menu, "co_che_bang_lon_Trang");
+            Bam(gbt.transform, "Nút Đóng bảng lớn");
+            yield return Cho(0.4f);
+            Bam(kc.transform, "Nút Giải thích");
             yield return Cho(1.0f);
             Check(Khkt.CoChe.CoCheMoDun.DangMo && Khkt.CoChe.CoCheMoDun.Instance.GiaiThichMo && Khkt.CoChe.CoCheMoDun.Instance.TabBen == 1,
                   "Giải thích chi tiết mở trình phát 3D ⇄ Giấy ở tab Giải thích");
@@ -384,9 +415,18 @@ namespace Khkt.Menu
             yield return Cho(0.6f);
             Check(gbt.TrangDang == ManGiaiBaiTap.Trang.MoHinh3D, "Thanh điều hướng mở trang Mô hình 3D");
             yield return Chup(menu, "mo_hinh_3d_Trang");
+            var oChat = gbt.GetComponentsInChildren<InputField>(true).FirstOrDefault(x => x.name == "Ô chất");
+            if (oChat != null) oChat.text = "ethanol";
             Bam(gbt.transform, "Nút Dựng mô hình 3D");
+            t0 = Time.realtimeSinceStartup;
+            while ((gbt.Dong3D.Khoi.Count == 0 || !gbt.Dong3D.Khoi[0].CoDapAn) && Time.realtimeSinceStartup - t0 < 4f) yield return null;
+            yield return Cho(0.7f);
+            int soNt = gbt.Dong3D.Khoi.Count > 0 && gbt.Dong3D.Khoi[0].Hinh != null ? gbt.Dong3D.Khoi[0].Hinh.GetComponentsInChildren<Image>(true).Count(x => x.name.StartsWith("Nguyên tử")) : 0;
+            Check(soNt == 9, "Dựng 3D: khối đáp án có ảnh 3D tĩnh (9 nguyên tử ethanol)", soNt.ToString());
+            yield return Chup(menu, "mo_hinh_3d_ket_qua_Trang");
+            Bam(gbt.Dong3D.Khoi[0].transform, "Nút Mở lớn");
             yield return Cho(1.0f);
-            Check(Khkt.CoChe.MoHinh3DMoDun.DangMo, "Dựng mô hình 3D mở mô-đun 3D");
+            Check(Khkt.CoChe.MoHinh3DMoDun.DangMo, "3D Mở lớn mở khung xoay 3D");
             Khkt.CoChe.MoHinh3DMoDun.Dong();
             yield return Frames(3);
             Bam(gbt.transform, "Điều hướng Hóa lý");
@@ -422,6 +462,14 @@ namespace Khkt.Menu
                     return (200, Khkt.CoChe.GoiCoChe.GiaiJson(File.ReadAllBytes(Path.Combine(Khkt.CoChe.GoiCoChe.ThuMuc, "sn2_ch3br.verapack"))));
                 case "/co-che/bao-sai":
                     return (200, "{\"ok\":true,\"ma\":\"gia\"}");
+                case "/co-che/hoi-dap":
+                    return (200, "{\"tra_loi\":\"H2SO4 đặc là chất xúc tác, hút nước làm cân bằng chuyển dịch.\",\"goi_y\":[],\"nguon\":\"ai\"}");
+                case "/co-che/mo-hinh-3d":
+                    return (200, "{\"ten\":\"ethanol\",\"cong_thuc\":\"C2H6O\",\"khoi_luong\":46.07,\"smiles\":\"CCO\",\"nguon\":\"bang_sgk\",\"nguyen_tu\":[" +
+                        "{\"e\":\"C\",\"x\":-1.2,\"y\":0.1,\"z\":0},{\"e\":\"C\",\"x\":0.2,\"y\":-0.4,\"z\":0.1},{\"e\":\"O\",\"x\":1.2,\"y\":0.5,\"z\":-0.1}," +
+                        "{\"e\":\"H\",\"x\":-1.9,\"y\":-0.6,\"z\":0.4},{\"e\":\"H\",\"x\":-1.3,\"y\":1.0,\"z\":0.6},{\"e\":\"H\",\"x\":-1.5,\"y\":0.4,\"z\":-1.0}," +
+                        "{\"e\":\"H\",\"x\":0.3,\"y\":-1.1,\"z\":0.9},{\"e\":\"H\",\"x\":0.4,\"y\":-1.0,\"z\":-0.8},{\"e\":\"H\",\"x\":2.0,\"y\":0.0,\"z\":0.0}]," +
+                        "\"lien_ket\":[{\"a\":0,\"b\":1,\"bac\":1},{\"a\":1,\"b\":2,\"bac\":1},{\"a\":0,\"b\":3,\"bac\":1},{\"a\":0,\"b\":4,\"bac\":1},{\"a\":0,\"b\":5,\"bac\":1},{\"a\":1,\"b\":6,\"bac\":1},{\"a\":1,\"b\":7,\"bac\":1},{\"a\":2,\"b\":8,\"bac\":1}]}");
                 case "/co-che/suc-khoe":
                     return (200, "{\"ok\":true,\"mo_hinh\":\"gia\",\"so_bai\":8}");
                 case "/co-che/giai-thich-chi-tiet":

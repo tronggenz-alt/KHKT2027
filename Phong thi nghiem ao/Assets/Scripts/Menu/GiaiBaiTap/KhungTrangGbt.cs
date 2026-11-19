@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Khkt.Demo;
 using Khkt.Menu.Dashboard;
@@ -182,7 +183,7 @@ namespace Khkt.Menu
         }
 
         /// <summary>Chân trang như CHEMISTRY: tên app trái, các nguồn phải.</summary>
-        public void ChanTrang()
+        public RectTransform ChanTrang()
         {
             Y -= 20;
             var k = Khoi("Chân trang", 60);
@@ -192,6 +193,38 @@ namespace Khkt.Menu
             a.supportRichText = true;
             var b = GlassKit.Label(k, "Nguồn", GianChu("PubChem · RDKit · Claude · Gemini"), 14, InkMute, false, TextAnchor.MiddleRight, new Vector2(0, -12), new Vector2(600, 40), new Vector2(1, 1));
             b.rectTransform.pivot = new Vector2(1, 1);
+            return k;
+        }
+
+        // ------------------------------------------------------------------ trượt mượt (0,45 s, ease-out bậc 3, theo thời gian thật)
+        Coroutine truot;
+        float yDaDat = -1f;
+
+        /// <summary>Cuộn để mốc yTren (toạ độ nội dung, âm) nằm sát đỉnh khung nhìn. tonTrong: bỏ qua nếu người dùng đã tự cuộn đi.</summary>
+        public void TruotToi(float yTren, bool tonTrong = false)
+        {
+            if (tonTrong && yDaDat >= 0 && Mathf.Abs(NoiDung.anchoredPosition.y - yDaDat) > 60f) return;
+            float toiDa = Mathf.Max(0, NoiDung.rect.height - ((RectTransform)Cuon.viewport).rect.height);
+            float den = Mathf.Clamp(-yTren - 16f, 0, toiDa);
+            if (!isActiveAndEnabled) { NoiDung.anchoredPosition = new Vector2(0, den); yDaDat = den; return; }
+            if (truot != null) StopCoroutine(truot);
+            truot = StartCoroutine(Truot(den));
+        }
+
+        IEnumerator Truot(float den)
+        {
+            float tu = NoiDung.anchoredPosition.y;
+            Cuon.velocity = Vector2.zero;
+            const float lau = 0.45f;
+            for (float t = 0; t < lau; t += Time.unscaledDeltaTime)
+            {
+                float u = 1f - Mathf.Pow(1f - t / lau, 3f);
+                NoiDung.anchoredPosition = new Vector2(0, Mathf.Lerp(tu, den, u));
+                yield return null;
+            }
+            NoiDung.anchoredPosition = new Vector2(0, den);
+            yDaDat = den;
+            truot = null;
         }
 
         // ------------------------------------------------------------------ điều khiển
