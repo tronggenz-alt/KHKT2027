@@ -35,6 +35,11 @@ namespace Khkt.CoChe
         public float TocDo = 1f;                 // thanh trượt 0,25× – 3× ở khung 3D
         /// <summary>Tự chọn góc nhìn mỗi bước (thấy rõ đường electron và nguyên tử tham gia, không bị che). Kéo chuột thì tắt tới bước sau.</summary>
         public bool TuDongGoc = true;
+        /// <summary>Kiểu 3Dmol của CHEMISTRY (PubChem): cầu nhỏ (0,27 × bán kính van der Waals), que dày 0,14 Å, bảng màu CHEMISTRY.</summary>
+        public bool KieuChemistry;
+        /// <summary>Tự xoay chậm quanh trục đứng (như spin("y") của 3Dmol); kéo chuột thì dừng tới khi thả.</summary>
+        public bool TuXoay;
+        public float TocXoay = 24f;
         /// <summary>Khi hình 3D hiện trong một khung (RenderTexture): đổi điểm chuột (pixel màn hình) → toạ độ 0..1 trong khung, null nếu ngoài khung.</summary>
         public System.Func<Vector2, Vector2?> ViTriChuot;
         Quaternion xoayDich = Quaternion.Euler(12f, -18f, 0f);
@@ -145,10 +150,11 @@ namespace Khkt.CoChe
             if (KichBan == null || Cam == null) return;
             DieuKhien();
             CapNhatDich();
+            if (TuXoay && !keo) Xoay = Quaternion.AngleAxis(TocXoay * Time.unscaledDeltaTime, Vector3.up) * Xoay;
             if (TuDongGoc && !keo)
             {
                 float k = 1f - Mathf.Exp(-2.2f * Time.unscaledDeltaTime);
-                Xoay = Quaternion.Slerp(Xoay, xoayDich, k);
+                if (!TuXoay) Xoay = Quaternion.Slerp(Xoay, xoayDich, k);
                 tamNay = Vector3.Lerp(tamNay, tamDich, k);
                 KhoangCach = Mathf.Lerp(KhoangCach, khoangDich * Mathf.Clamp(1.6f / Mathf.Max(0.3f, Cam.aspect), 1f, 1.8f), k);
             }
@@ -335,6 +341,21 @@ namespace Khkt.CoChe
         public static Color Mau(string e) => MauCPK.TryGetValue(e, out var c) ? c : new Color(1f, 0.55f, 0.75f);
         public static float BK(string e) => BanKinh.TryGetValue(e, out var r) ? r : 0.42f;
 
+        // bảng màu và bán kính van der Waals theo trình xem 3Dmol của CHEMISTRY (app.js layMau3D)
+        static readonly Dictionary<string, Color> MauChem = new Dictionary<string, Color>
+        {
+            {"C", new Color32(0x2c, 0x30, 0x38, 0xff)}, {"H", new Color32(0xf4, 0xf4, 0xf5, 0xff)}, {"O", new Color32(0xe6, 0x39, 0x46, 0xff)},
+            {"N", new Color32(0x3a, 0x86, 0xff, 0xff)}, {"S", new Color32(0xff, 0xb7, 0x03, 0xff)}, {"Cl", new Color32(0x06, 0xd6, 0xa0, 0xff)},
+            {"Br", new Color32(0x9d, 0x02, 0x08, 0xff)}, {"F", new Color32(0x70, 0xe0, 0x00, 0xff)}, {"P", new Color32(0xfb, 0x85, 0x00, 0xff)},
+            {"I", new Color32(0x72, 0x09, 0xb7, 0xff)},
+        };
+        static readonly Dictionary<string, float> BanKinhVdW = new Dictionary<string, float>
+        {
+            {"H", 1.2f}, {"C", 1.7f}, {"N", 1.55f}, {"O", 1.52f}, {"F", 1.47f}, {"Cl", 1.75f}, {"Br", 1.85f}, {"I", 1.98f}, {"S", 1.8f}, {"P", 1.8f},
+        };
+        public static Color MauCH(string e) => MauChem.TryGetValue(e, out var c) ? c : Mau(e);
+        public static float VdW(string e) => BanKinhVdW.TryGetValue(e, out var r) ? r : 1.7f;
+
         void DamBaoTaiNguyen()
         {
             // nguyên tử luôn tròn mịn (ít nhất 48 mảnh): mỗi phân tử chỉ vài chục quả cầu, vẽ instancing nên không tốn
@@ -374,8 +395,8 @@ namespace Khkt.CoChe
         {
             if (matNt.TryGetValue(e, out var m)) return m;
             m = new Material(matGoc) { enableInstancing = true, name = "CoChe_" + e };
-            m.SetColor("_BaseColor", Mau(e));
-            m.SetColor("_Color", Mau(e));
+            m.SetColor("_BaseColor", KieuChemistry ? MauCH(e) : Mau(e));
+            m.SetColor("_Color", KieuChemistry ? MauCH(e) : Mau(e));
             m.SetFloat("_Smoothness", 0.62f);
             matNt[e] = m;
             return m;
@@ -466,7 +487,7 @@ namespace Khkt.CoChe
                 if (s <= 0.01f) continue;
                 string e = Nguyen(kv.Key);
                 if (AnH && e == "H") s *= 0.35f;
-                float d = BK(e) * 2f * s;
+                float d = (KieuChemistry ? VdW(e) * 0.27f : BK(e)) * 2f * s;
                 if (!nhom.TryGetValue(e, out var l)) nhom[e] = l = new List<Matrix4x4>();
                 l.Add(Matrix4x4.TRS(W(kv.Value), Quaternion.identity, new Vector3(d, d, d)));
                 SoNguyenTuDangVe++;
@@ -569,7 +590,7 @@ namespace Khkt.CoChe
             var ngang = Vector3.Cross(d / dai, Vector3.forward);
             if (ngang.sqrMagnitude < 1e-6f) ngang = Vector3.right;
             ngang.Normalize();
-            float r = 0.075f * g * (bac > 1 ? 0.75f : 1f);
+            float r = (KieuChemistry ? 0.14f : 0.075f) * g * (bac > 1 ? 0.62f : 1f);
             float[] lech = bac >= 3 ? new[] { -0.14f, 0f, 0.14f } : bac == 2 ? new[] { -0.09f, 0.09f } : new[] { 0f };
             foreach (var o in lech)
                 lk.Add(Matrix4x4.TRS(wa + ngang * o, quay, new Vector3(r, dai, r)));

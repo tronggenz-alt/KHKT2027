@@ -25,6 +25,8 @@ namespace Khkt.Menu
         public const float BoNho = 8f, BoNut = 12f, BoThe = 16f, BoTheLon = 20f;
 
         public RectTransform Goc, NoiDung;
+        RectTransform vp;
+        public InputField ODeDay { get; private set; }
         public ScrollRect Cuon;
         public float Y;                         // đỉnh khối kế tiếp (âm dần)
         public readonly List<RectTransform> LanLuot = new List<RectTransform>();
@@ -48,7 +50,7 @@ namespace Khkt.Menu
             var sr = g.gameObject.AddComponent<ScrollRect>();
             sr.viewport = vp; sr.content = nd; sr.horizontal = false; sr.vertical = true;
             sr.movementType = ScrollRect.MovementType.Clamped; sr.scrollSensitivity = 42f; sr.inertia = true; sr.decelerationRate = 0.12f;
-            t.NoiDung = nd; t.Cuon = sr;
+            t.NoiDung = nd; t.Cuon = sr; t.vp = vp;
             t.Y = -36f;
             g.gameObject.SetActive(false);
             return t;
@@ -196,6 +198,29 @@ namespace Khkt.Menu
             return k;
         }
 
+        // ------------------------------------------------------------------ ô đề dính đáy (như ô chat của trợ lý AI)
+        /// <summary>Thanh dính đáy trang: ô đề một dòng + nút chính. Enter hoặc bấm nút thì gui(chữ). Khung cuộn chừa chỗ phía dưới.</summary>
+        public InputField ThanhSoan(string goiY, string nhanNut, Action<string> gui)
+        {
+            const float Cao = 92f;
+            var thanh = Stretch(Goc, "Ô đề dính đáy", new Vector2(0, 0), new Vector2(1, 0), Vector2.zero, new Vector2(0, Cao));
+            var nen = thanh.gameObject.AddComponent<Image>();
+            nen.color = WithAlpha(PaperAlt, 0.96f); nen.raycastTarget = true;
+            var vach = Fill(thanh, "Vạch trên", new Vector2(0, 1), new Vector2(0, 1), Vector2.zero, new Vector2(10, 1), Hair, 0).rectTransform;
+            vach.anchorMax = new Vector2(1, 1); vach.sizeDelta = new Vector2(0, 1);
+            var o = TextField(thanh, "Ô đề nhanh", goiY, new Vector2(Le, -18), new Vector2(100, 54), 17);
+            var ort = (RectTransform)o.transform; ort.anchorMax = new Vector2(1, 1); ort.offsetMax = new Vector2(-(Le + 200), ort.offsetMax.y);
+            void Gui() { var c = (o.text ?? "").Trim(); if (c.Length == 0) return; o.text = ""; gui(c); }
+            o.onSubmit.AddListener(_ => Gui());
+            var nut = MakeButton(thanh, "Nút Giải nhanh", nhanNut + "  →", new Vector2(-Le, -18), new Vector2(188, 54), Gui, 0, BoNut, new Vector2(1, 1));
+            ((RectTransform)nut.transform).pivot = new Vector2(1, 1);
+            var g = GlassKit.Label(thanh, "Gợi ý phím", "Enter để giải  ·  ⌘/Ctrl + Enter ở ô nhiều dòng", 12, InkMute, false, TextAnchor.UpperLeft, new Vector2(Le + 4, -76), new Vector2(600, 16));
+            g.horizontalOverflow = HorizontalWrapMode.Overflow;
+            vp.offsetMin = new Vector2(0, Cao);
+            ODeDay = o;
+            return o;
+        }
+
         // ------------------------------------------------------------------ trượt mượt (0,45 s, ease-out bậc 3, theo thời gian thật)
         Coroutine truot;
         float yDaDat = -1f;
@@ -299,10 +324,11 @@ namespace Khkt.Menu
         /// <summary>Chip viên nang nhỏ (ví dụ, gợi ý). Chiều rộng theo chữ.</summary>
         public static Button Chip(Transform cha, string ten, string chu, Vector2 pos, Action bam, int coChu = 14)
         {
-            float w = Mathf.Min(560, 30 + chu.Length * coChu * 0.56f);
+            float w = Mathf.Min(620, 34 + chu.Length * coChu * 0.6f);
             var b = MakeButton(cha, ten, chu, pos, new Vector2(w, 36), bam, 1, BoNut);
             var t = b.transform.Find("Chữ").GetComponent<Text>();
             t.fontSize = coChu; t.color = InkDim; t.fontStyle = FontStyle.Normal;
+            t.horizontalOverflow = HorizontalWrapMode.Overflow;          // chip không bao giờ gãy 2 dòng
             return b;
         }
 
@@ -312,7 +338,7 @@ namespace Khkt.Menu
             float x = x0, y = y0;
             foreach (var (ten, chu, bam) in ds)
             {
-                float w = Mathf.Min(560, 30 + chu.Length * coChu * 0.56f);
+                float w = Mathf.Min(620, 34 + chu.Length * coChu * 0.6f);
                 if (x > x0 && x + w > rong) { x = x0; y -= 44; }
                 Chip(cha, ten, chu, new Vector2(x, y), bam, coChu);
                 x += w + 8;

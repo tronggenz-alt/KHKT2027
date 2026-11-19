@@ -22,3 +22,7 @@ Chạy: `KHKT_UI_SHOTS=<thư mục> ~/AppBuild/VERA_claude/dong_bo_va_chay.sh ~/
   KhktUiRunner + KhktCoCheVerify, xuất app Mac, báo cáo, commit. Không sửa MainMenu.cs (phiên khác đang làm lab/giải phẫu).
 
 - 19/11 (làm tiếp sau TẠM DỪNG): đã viết xong luồng đáp án (DapAn.cs, gắn 3 trang, kiểm thử 72/72 + 66/66, app Mac). Xem báo cáo mục 8–9.
+
+## TẠM DỪNG tối 19/11 (hạn mức 64%, mốc 70%)
+- Xong: 3D kiểu CHEMISTRY, ô đề dính đáy, phím Enter/⌘↵, 3D nhúng trong bảng lớn Cơ chế (logic + kiểm thử 77/77), app Mac xuất.
+- Dở: khung 3D trong bảng lớn hiện tối trong ảnh kiểm thử – kiểm `Xem3DNho` (khoảng cách camera, hiển thị RawImage), xem trong app thật bằng chuột.

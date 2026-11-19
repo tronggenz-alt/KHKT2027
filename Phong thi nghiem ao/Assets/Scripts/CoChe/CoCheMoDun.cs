@@ -776,7 +776,7 @@ namespace Khkt.CoChe
         }
 
         /// <summary>Thanh trượt uGUI tự dựng (nền, phần đã kéo, núm tròn).</summary>
-        static Slider TaoThanhTruot(Transform cha, Vector2 pos, Vector2 co, float min, float max, float gt, System.Action<float> doi)
+        public static Slider TaoThanhTruot(Transform cha, Vector2 pos, Vector2 co, float min, float max, float gt, System.Action<float> doi)
         {
             var rt = GlassKit.Rect(cha, "Thanh trượt", new Vector2(0, 1), new Vector2(0, 1), pos, co);
             var nen = KeoGian(rt, "Nền", new Vector2(0, co.y * 0.5f - 3), new Vector2(0, -(co.y * 0.5f - 3)));

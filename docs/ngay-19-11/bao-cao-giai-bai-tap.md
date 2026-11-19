@@ -179,3 +179,20 @@ bảng 75%; ô đề vẫn ở trên trang (thiết kế cho phép "trên hoặc
   giấy, bảng lớn cơ chế, khối 3D tĩnh).
 - App thật: không có phím tắt để bấm "Giải" (cần chuột; System Events không bấm chuột được vào Unity) nên chưa chụp khối đáp án
   trong app thật; mã giống hệt bản kiểm thử.
+
+## 10. Chỉnh chu thêm (tối 19/11)
+
+- **3D kiểu CHEMISTRY (3Dmol/PubChem)**: ảnh 3D trong thẻ đáp án nay là `Anh3DXoay` – nền sáng, bóng–que cầu 0,27 × bán kính
+  van der Waals, que 0,14 Å **hai nửa màu theo nguyên tử**, bảng màu CHEMISTRY (C #2c3038, O #e63946, N #3a86ff…), H trắng có
+  viền, nhãn nguyên tố (trừ H) trên nền giấy mờ, **tự xoay quanh trục đứng 24°/s** (không cấp phát mỗi khung). Khung xoay 3D
+  (Mở lớn) cũng chuyển sang nền sáng, kiểu CHEMISTRY, tự xoay (`TrinhPhat3D.KieuChemistry`, `TuXoay`; trình phát Cơ chế giữ kiểu cũ).
+- **Ô đề dính đáy** ở Chuỗi, Cơ chế, Mô hình 3D (như ô chat): gõ + Enter hoặc nút chính là giải, khung cuộn chừa chỗ.
+- **Phím Giải**: Enter khi không gõ / ở ô một dòng; ⌘ hoặc Ctrl + Enter ở ô nhiều dòng.
+- **3D ngay trong bảng lớn Cơ chế** (`Xem3DNho`): nút Giấy | 3D, ‹ Phát/Dừng ›, thanh tốc độ 0,25×–3×, Toàn màn hình (mở
+  trình phát ở đúng bước), bấm bước → 3D tới bước đó; đóng bảng thì giải phóng camera và RenderTexture.
+- Chip gợi ý không còn gãy 2 dòng.
+- Kiểm tra: KhktUiVerify **77/77** (thêm: ô đề dính đáy thêm khối, 3D trong bảng vẽ nguyên tử và phát, đóng bảng giải phóng,
+  ảnh 3D kiểu CHEMISTRY); app Mac xuất được.
+- **Chưa xong (TẠM DỪNG vì hạn mức 64%, mốc dừng 70%)**: ảnh kiểm thử của khung 3D trong bảng lớn vẫn gần như tối (đo được
+  phân tử ở RenderTexture nhưng rất ít điểm ảnh, ảnh chụp menu không thấy rõ). Cần kiểm tiếp: khoảng cách camera/khung hình của
+  `Xem3DNho` và hiển thị RawImage; xem trong app thật bằng chuột.

@@ -60,13 +60,25 @@ namespace Khkt.Menu
 
         public void An() => KhoiDau.AnMan(goc);
 
+        /// <summary>Giải đề của trang đang mở (phím Enter / ⌘↵).</summary>
+        public void GiaiTrangDang()
+        {
+            if (TrangDang == Trang.Chuoi) { if (oChuoi != null) oChuoi.text = (oChuoi.text ?? "").TrimEnd('\n', '\r'); GiaiChuoi(); }
+            else if (TrangDang == Trang.CoChe) { if (oDe != null) oDe.text = (oDe.text ?? "").TrimEnd('\n', '\r'); VeCoChe(); }
+            else if (TrangDang == Trang.MoHinh3D) Dung3D();
+        }
+
         /// <summary>Phím tắt (khi không gõ chữ và không có lớp phủ): 1–5 chuyển trang, Esc về trang chủ.</summary>
         void Update()
         {
             var kb = UnityEngine.InputSystem.Keyboard.current;
             if (kb == null || CoCheMoDun.DangMo || MoHinh3DMoDun.DangMo || (baoSai != null && baoSai.DangMo) || (bangLon != null && bangLon.DangMo)) return;
             var sel = UnityEngine.EventSystems.EventSystem.current?.currentSelectedGameObject;
-            if (sel != null && sel.GetComponent<InputField>() is InputField f && f.isFocused && f.gameObject.activeInHierarchy) return;
+            bool dangGo = sel != null && sel.GetComponent<InputField>() is InputField f && f.isFocused && f.gameObject.activeInHierarchy;
+            bool enter = kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame;
+            bool phimLenh = kb.leftCommandKey.isPressed || kb.rightCommandKey.isPressed || kb.leftCtrlKey.isPressed || kb.rightCtrlKey.isPressed;
+            if (enter && (phimLenh || !dangGo)) { GiaiTrangDang(); return; }       // Enter (không gõ) hoặc ⌘/Ctrl + Enter (ô nhiều dòng)
+            if (dangGo) return;
             var phim = new[] { kb.digit1Key, kb.digit2Key, kb.digit3Key, kb.digit4Key, kb.digit5Key };
             for (int i = 0; i < phim.Length; i++) if (phim[i].wasPressedThisFrame) { MoTrang((Trang)i); return; }
             if (kb.escapeKey.wasPressedThisFrame && TrangDang != Trang.Chu) MoTrang(Trang.Chu);
@@ -324,6 +336,10 @@ namespace Khkt.Menu
 
             // 03 kết quả: dòng thời gian các lần giải (câu hỏi ở trên, đáp án hiện dần bên dưới)
             t.GhiBuoc(2, t.DauMuc("03", "Kết quả", "Mỗi lần giải là một khối: đề ở trên, đáp án vẽ thành hình bên dưới. Bấm Mở lớn để xem chi tiết."));
+            t.ThanhSoan("Gõ chuỗi rồi Enter, ví dụ: C2H4 -> C2H5OH -> CH3CHO", "Giải chuỗi", c =>
+            {
+                oChuoi.text = c; tabChuoi.Chon(0, false); ChonTabChuoi(0); GiaiChuoi();
+            });
             dongChuoi = DongThoiGian.Tao(t, "Chưa có kết quả", "Nhập đề ở mục <b>01</b>, chọn tuỳ chọn ở mục <b>02</b> rồi bấm <b>Giải chuỗi</b>. Đáp án hiện ngay dưới đây.");
             return t;
         }
@@ -676,6 +692,10 @@ namespace Khkt.Menu
             t.LanLuot.Add(khoiNut);
 
             t.GhiBuoc(2, t.DauMuc("03", "Kết quả", "Mỗi lần vẽ là một khối: đề ở trên, sơ đồ cơ chế trên giấy bên dưới. Mở lớn để xem 3D ⇄ Giấy."));
+            t.ThanhSoan("Gõ phản ứng rồi Enter, ví dụ: CH3CH2Br + OH⁻  ·  propen + HBr", "Vẽ cơ chế", c =>
+            {
+                oDe.text = c; tabDe.Chon(0, false); ChonTabDe(0); VeCoChe();
+            });
             dongCoChe = DongThoiGian.Tao(t, "Chưa có cơ chế", "Nhập phản ứng ở mục <b>01</b> rồi bấm <b>Vẽ cơ chế</b>, hoặc mở một <b>bài mẫu</b>.");
             return t;
         }
@@ -855,30 +875,69 @@ namespace Khkt.Menu
                 (cau, tra) => StartCoroutine(HoiDap(cau, b.Ten, b.De ?? "", buocJson, tra)));
         }
 
-        /// <summary>Bảng lớn của cơ chế: tờ giấy to + nút Xem 3D ⇄ Giấy (khung 3D, thanh tốc độ, phóng toàn màn) + các bước.</summary>
+        public Xem3DNho Bang3D { get; private set; }
+
+        /// <summary>
+        /// Bảng lớn của cơ chế: trái là tờ giấy hoặc 3D chạy ngay trong bảng (Giấy | 3D), phải là điều khiển 3D (‹ Phát ›, tốc độ
+        /// 0,25×–3×, toàn màn hình) và các bước (bấm → 3D tới bước đó).
+        /// </summary>
         void MoLonCoChe(BaiCoChe b)
         {
             bangLon.Mo("Cơ chế  ·  " + b.Ten, than =>
             {
-                float W = Mathf.Max(800, than.rect.width), H = Mathf.Max(400, than.rect.height);
-                var giay = MenuKit.Stretch(than, "Vùng giấy", new Vector2(0, 0), new Vector2(0.7f, 1), Vector2.zero, new Vector2(-12, 0));
+                float W = Mathf.Max(800, than.rect.width);
+                var trai = MenuKit.Stretch(than, "Vùng trái", new Vector2(0, 0), new Vector2(0.7f, 1), Vector2.zero, new Vector2(-12, 0));
+                var giay = MenuKit.Full(trai, "Vùng giấy");
                 HinhDapAn.Giay(giay, b, 0, -1);
+                var khung3 = MenuKit.Full(trai, "Vùng 3D");
+                khung3.gameObject.AddComponent<RectMask2D>();
+                khung3.gameObject.SetActive(false);
                 var ben = MenuKit.Stretch(than, "Cột bước", new Vector2(0.7f, 0), new Vector2(1, 1), new Vector2(12, 0), Vector2.zero);
-                var x3 = MakeButton(ben, "Nút Xem 3D lớn", "▶  Xem 3D ⇄ Giấy", new Vector2(0, 0), new Vector2(W * 0.3f - 12, 48), () => { bangLon.Dong(); CoCheMoDun.MoVoiBai(b, -1, 0); }, 0, TrangCuon.BoNut);
-                float y = -66;
+                float cw = W * 0.3f - 12;
+                RectTransform dieuKhien = null;
+                Button nutGiay = null, nut3D = null;
+                void Chon(bool la3D)
+                {
+                    giay.gameObject.SetActive(!la3D);
+                    khung3.gameObject.SetActive(la3D);
+                    if (la3D && Bang3D == null) Bang3D = Xem3DNho.Tao(khung3, b.KichBan, GetComponentInParent<Canvas>().rootCanvas.worldCamera);
+                    Bang3D?.Hien(la3D);
+                    dieuKhien.gameObject.SetActive(la3D);
+                    Face(nutGiay).color = la3D ? Paper : AccentSoft;
+                    Face(nut3D).color = la3D ? AccentSoft : Paper;
+                }
+                nutGiay = MakeButton(ben, "Nút Bảng giấy", "Giấy", new Vector2(0, 0), new Vector2(cw * 0.5f - 4, 44), () => Chon(false), 1, TrangCuon.BoNut);
+                nut3D = MakeButton(ben, "Nút Bảng 3D", "▶  3D", new Vector2(cw * 0.5f + 4, 0), new Vector2(cw * 0.5f - 4, 44), () => Chon(true), 1, TrangCuon.BoNut);
+                dieuKhien = GlassKit.Rect(ben, "Điều khiển 3D", new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, -56), new Vector2(cw, 104));
+                MakeButton(dieuKhien, "Nút Bước trước bảng", "‹", new Vector2(0, 0), new Vector2(44, 44), () => Bang3D?.TP.BuocTruoc(), 1, TrangCuon.BoNut);
+                var nutPhat = MakeButton(dieuKhien, "Nút Phát bảng", "Phát / Dừng", new Vector2(50, 0), new Vector2(cw - 100 - 12, 44), () => Bang3D?.TP.PhatDung(), 0, TrangCuon.BoNut);
+                MakeButton(dieuKhien, "Nút Bước sau bảng", "›", new Vector2(cw - 44, 0), new Vector2(44, 44), () => Bang3D?.TP.BuocSau(), 1, TrangCuon.BoNut);
+                GlassKit.Label(dieuKhien, "Nhãn tốc độ", "Tốc độ", 14, InkDim, false, TextAnchor.MiddleLeft, new Vector2(0, -56), new Vector2(60, 40));
+                var chuToc = GlassKit.Label(dieuKhien, "Giá trị tốc độ", "1.00×", 14, Ink, false, TextAnchor.MiddleRight, new Vector2(cw - 56, -56), new Vector2(56, 40));
+                CoCheMoDun.TaoThanhTruot(dieuKhien, new Vector2(64, -66), new Vector2(cw - 132, 20), 0.25f, 3f, 1f, v => { if (Bang3D != null) Bang3D.TP.TocDo = v; chuToc.text = v.ToString("0.00") + "×"; });
+                var nutTo = MakeButton(ben, "Nút Toàn màn hình bảng", "⤢  Toàn màn hình", new Vector2(0, -170), new Vector2(cw, 44), () =>
+                {
+                    int bu = Bang3D != null ? Bang3D.TP.ChiSoBuoc : 0;
+                    bangLon.Dong();
+                    CoCheMoDun.MoVoiBai(b, -1, bu);
+                    CoCheMoDun.Instance?.DatToanMan(true);
+                }, 1, TrangCuon.BoNut);
+                float y = -226;
                 for (int i = 0; i < b.KichBan.Buoc.Count; i++)
                 {
                     var bu = b.KichBan.Buoc[i];
                     int ii = i;
-                    var hang = MakeButton(ben, "Bước cơ chế lớn " + (i + 1), "", new Vector2(0, y), new Vector2(W * 0.3f - 12, 72), () => { bangLon.Dong(); CoCheMoDun.MoVoiBai(b, 0, ii); }, 1, TrangCuon.BoNut);
+                    var hang = MakeButton(ben, "Bước cơ chế lớn " + (i + 1), "", new Vector2(0, y), new Vector2(cw, 66), () => { Chon(true); Bang3D.TP.DenBuoc(ii, true); }, 1, TrangCuon.BoNut);
                     var chu = hang.transform.Find("Chữ").GetComponent<Text>();
                     chu.alignment = TextAnchor.MiddleLeft; chu.fontSize = 14; chu.fontStyle = FontStyle.Normal; chu.supportRichText = true; chu.horizontalOverflow = HorizontalWrapMode.Wrap;
                     chu.rectTransform.anchorMin = Vector2.zero; chu.rectTransform.anchorMax = Vector2.one; chu.rectTransform.offsetMin = new Vector2(14, 4); chu.rectTransform.offsetMax = new Vector2(-14, -4);
-                    string gc = bu.GhiChu ?? ""; if (gc.Length > 80) gc = gc.Substring(0, 78) + "…";
+                    string gc = bu.GhiChu ?? ""; if (gc.Length > 70) gc = gc.Substring(0, 68) + "…";
                     chu.text = $"<b>{i + 1}. {bu.Ten}</b>\n<color=#{ColorUtility.ToHtmlStringRGB(InkDim)}>{gc}</color>";
-                    y -= 80;
+                    y -= 72;
                 }
+                Chon(false);
             });
+            bangLon.KhiDong = () => { if (Bang3D != null) { Destroy(Bang3D.gameObject); Bang3D = null; } };
         }
 
         // ================================================================== MÔ HÌNH 3D
@@ -911,6 +970,7 @@ namespace Khkt.Menu
             t.LanLuot.Add(kn);
             t.GhiBuoc(0, t.Y);
             t.DauMuc("02", "Kết quả", "Mỗi chất một khối: ảnh 3D tĩnh, công thức, khối lượng mol. Mở lớn để xoay 360°, phóng to, ẩn H.");
+            t.ThanhSoan("Gõ tên hoặc công thức rồi Enter, ví dụ: ethanol · CH3COOH · CCO", "Dựng 3D", c => { oChat.text = c; Dung3D(); });
             dong3D = DongThoiGian.Tao(t, "Chưa dựng chất nào", "Gõ tên hoặc công thức rồi bấm <b>Dựng mô hình 3D</b>, hoặc bấm một chip mẫu.");
             return t;
         }

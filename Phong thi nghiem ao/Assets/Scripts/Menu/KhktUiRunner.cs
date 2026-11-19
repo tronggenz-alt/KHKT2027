@@ -371,6 +371,15 @@ namespace Khkt.Menu
             yield return Cho(0.3f);
             Check(hop != null && hop.KetQuaCuoi.Contains("ok"), "Gửi báo sai chuỗi");
             yield return Cho(1.6f);
+            // ô đề dính đáy (như ô chat): gõ + Enter là giải, thêm khối mới
+            var tcChuoi = gbt.GetComponentsInChildren<TrangCuon>(true).FirstOrDefault(x => x.name == "Trang Chuỗi phản ứng");
+            int truocDay = gbt.DongChuoi.Khoi.Count;
+            if (tcChuoi != null && tcChuoi.ODeDay != null) { tcChuoi.ODeDay.text = "CH4 -> CH3Cl -> CH3OH -> HCHO"; tcChuoi.ODeDay.onSubmit.Invoke(tcChuoi.ODeDay.text); }
+            t0 = Time.realtimeSinceStartup;
+            while ((gbt.DongChuoi.Khoi.Count == truocDay || !gbt.DongChuoi.Khoi[gbt.DongChuoi.Khoi.Count - 1].CoDapAn) && Time.realtimeSinceStartup - t0 < 4f) yield return null;
+            Check(tcChuoi != null && tcChuoi.ODeDay != null && gbt.DongChuoi.Khoi.Count == truocDay + 1, "Ô đề dính đáy: Enter giải và thêm khối mới", $"{truocDay} → {gbt.DongChuoi.Khoi.Count}");
+            yield return Cho(0.7f);
+            yield return Chup(menu, "chuoi_o_de_day_Trang");
 
             // Cơ chế
             Bam(gbt.transform, "Điều hướng Cơ chế");
@@ -398,10 +407,23 @@ namespace Khkt.Menu
             yield return Chup(menu, "co_che_ket_qua_Trang");
             Bam(kc.transform, "Nút Mở lớn");
             yield return Cho(0.5f);
-            Check(gbt.Bang.DangMo && gbt.Bang.Than.GetComponentsInChildren<Button>(true).Any(b => b.name == "Nút Xem 3D lớn"), "Cơ chế Mở lớn: bảng 75% có tờ giấy lớn + Xem 3D ⇄ Giấy + các bước");
+            Check(gbt.Bang.DangMo && gbt.Bang.Than.GetComponentsInChildren<Button>(true).Any(b => b.name == "Nút Bảng 3D"), "Cơ chế Mở lớn: bảng 75% có tờ giấy lớn + nút 3D + các bước");
             yield return Chup(menu, "co_che_bang_lon_Trang");
+            Bam(gbt.Bang.Than, "Nút Bảng 3D");
+            yield return Cho(0.3f);
+            Check(gbt.Bang3D != null && gbt.Bang3D.TP.SoNguyenTuDangVe > 0, "3D chạy ngay trong bảng lớn (trình phát nhúng, vẽ nguyên tử)", gbt.Bang3D != null ? gbt.Bang3D.TP.SoNguyenTuDangVe.ToString() : "null");
+            Bam(gbt.Bang.Than, "Nút Phát bảng");
+            yield return Cho(0.6f);
+            Check(gbt.Bang3D != null && (gbt.Bang3D.TP.DangPhat || gbt.Bang3D.TP.T > 0f), "Nút Phát trong bảng phát cơ chế 3D");
+            gbt.Bang3D?.TP.DenBuoc(1); gbt.Bang3D?.TP.DatT(0.4f);
+            yield return null;
+            gbt.Bang3D?.VeNgay();
+            var doAnh = gbt.Bang3D != null ? gbt.Bang3D.DoAnh() : (Color.clear, 0);
+            Check(doAnh.Item2 > 20, "Khung 3D trong bảng có hình phân tử (điểm ảnh khác nền trên hàng giữa)", $"{doAnh.Item2} điểm, giữa {doAnh.Item1}");
+            yield return Chup(menu, "co_che_bang_lon_3d_Trang");
             Bam(gbt.transform, "Nút Đóng bảng lớn");
             yield return Cho(0.4f);
+            Check(gbt.Bang3D == null, "Đóng bảng lớn giải phóng trình phát 3D nhúng");
             Bam(kc.transform, "Nút Giải thích");
             yield return Cho(1.0f);
             Check(Khkt.CoChe.CoCheMoDun.DangMo && Khkt.CoChe.CoCheMoDun.Instance.GiaiThichMo && Khkt.CoChe.CoCheMoDun.Instance.TabBen == 1,
@@ -422,7 +444,7 @@ namespace Khkt.Menu
             while ((gbt.Dong3D.Khoi.Count == 0 || !gbt.Dong3D.Khoi[0].CoDapAn) && Time.realtimeSinceStartup - t0 < 4f) yield return null;
             yield return Cho(0.7f);
             int soNt = gbt.Dong3D.Khoi.Count > 0 && gbt.Dong3D.Khoi[0].Hinh != null ? gbt.Dong3D.Khoi[0].Hinh.GetComponentsInChildren<Image>(true).Count(x => x.name.StartsWith("Nguyên tử")) : 0;
-            Check(soNt == 9, "Dựng 3D: khối đáp án có ảnh 3D tĩnh (9 nguyên tử ethanol)", soNt.ToString());
+            Check(soNt == 9 && gbt.Dong3D.Khoi[0].Hinh.GetComponentInChildren<Anh3DXoay>() != null, "Dựng 3D: ảnh 3D kiểu 3Dmol của CHEMISTRY (9 nguyên tử ethanol, tự xoay)", soNt.ToString());
             yield return Chup(menu, "mo_hinh_3d_ket_qua_Trang");
             Bam(gbt.Dong3D.Khoi[0].transform, "Nút Mở lớn");
             yield return Cho(1.0f);

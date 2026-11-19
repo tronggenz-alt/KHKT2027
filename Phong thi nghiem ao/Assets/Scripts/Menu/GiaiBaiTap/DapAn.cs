@@ -301,6 +301,7 @@ namespace Khkt.Menu
         /// <summary>Mở bảng: xoá nội dung cũ, gọi dung(than) dựng nội dung mới.</summary>
         public void Mo(string tieu, Action<RectTransform> dung)
         {
+            var kd = KhiDong; KhiDong = null; kd?.Invoke();
             for (int i = than.childCount - 1; i >= 0; i--) Destroy(than.GetChild(i).gameObject);
             tieuDe.text = tieu;
             goc.gameObject.SetActive(true);
@@ -312,9 +313,12 @@ namespace Khkt.Menu
             MenuAnim.Pop(khung);
         }
 
+        public Action KhiDong;
+
         public void Dong()
         {
             if (!DangMo) return;
+            var kd = KhiDong; KhiDong = null; kd?.Invoke();
             var g = MenuAnim.Group(goc);
             g.blocksRaycasts = false;
             MenuAnim.Fade(g, g.alpha, 0f, 0.18f, 0f, () => goc.gameObject.SetActive(false));
@@ -336,7 +340,7 @@ namespace Khkt.Menu
             nd.SetParent(vp, false);
             nd.anchorMin = new Vector2(0, 1); nd.anchorMax = new Vector2(1, 1); nd.pivot = new Vector2(0.5f, 1);
             nd.anchoredPosition = Vector2.zero; nd.sizeDelta = new Vector2(0, caoNoiDung);
-            var sr = cha.gameObject.GetComponent<ScrollRect>() ?? cha.gameObject.AddComponent<ScrollRect>();
+            if (!cha.TryGetComponent<ScrollRect>(out var sr)) sr = cha.gameObject.AddComponent<ScrollRect>();
             sr.viewport = vp; sr.content = nd; sr.horizontal = false; sr.movementType = ScrollRect.MovementType.Clamped; sr.scrollSensitivity = 42f;
             return nd;
         }
@@ -387,49 +391,15 @@ namespace Khkt.Menu
             return -y + hang - 16 * co;
         }
 
-        /// <summary>Ảnh 3D tĩnh: chiếu nguyên tử (bóng–que) từ một góc đẹp, vẽ xa trước gần sau. Trả về chiều cao.</summary>
+        /// <summary>Ảnh 3D kiểu trình xem 3Dmol của CHEMISTRY: nền sáng, bóng–que (cầu 0,27 vdW, que 0,14 Å hai nửa màu), nhãn nguyên tố, tự xoay chậm.</summary>
         public static float Ba(RectTransform cha, Dictionary<string, object> d, float rong, float cao)
         {
             var nt = L(Lay(d, "nguyen_tu"));
             if (nt.Count == 0) return 40;
-            var nen = Fill(cha, "Nền 3D", new Vector2(0, 1), new Vector2(0, 1), Vector2.zero, new Vector2(rong, cao), new Color32(0x0b, 0x10, 0x20, 0xff), 12f);
-            var q = Quaternion.Euler(18f, -28f, 0f);
-            var p = new Vector3[nt.Count];
-            var e = new string[nt.Count];
-            Vector3 mn = Vector3.one * 1e9f, mx = -Vector3.one * 1e9f;
-            for (int i = 0; i < nt.Count; i++)
-            {
-                var a = D(nt[i]);
-                e[i] = S(a, "e", "C");
-                p[i] = q * new Vector3(F(Lay(a, "x")), F(Lay(a, "y")), -F(Lay(a, "z")));
-                mn = Vector3.Min(mn, p[i]); mx = Vector3.Max(mx, p[i]);
-            }
-            var tam = (mn + mx) * 0.5f;
-            float k = Mathf.Min((rong - 80) / Mathf.Max(0.5f, mx.x - mn.x), (cao - 60) / Mathf.Max(0.5f, mx.y - mn.y));
-            k = Mathf.Min(k, 120f);
-            Vector2 C(int i) => new Vector2(rong * 0.5f + (p[i].x - tam.x) * k, -cao * 0.5f + (p[i].y - tam.y) * k);
-            foreach (var o in L(Lay(d, "lien_ket")))
-            {
-                var l = D(o);
-                int a = I(Lay(l, "a")), b = I(Lay(l, "b"));
-                if (a < 0 || b < 0 || a >= p.Length || b >= p.Length) continue;
-                Vector2 pa = C(a), pb = C(b), v = pb - pa;
-                var rt = GlassKit.Rect(nen.transform, "Liên kết", new Vector2(0, 1), new Vector2(0, 0.5f), pa, new Vector2(v.magnitude, Mathf.Max(3f, k * 0.09f)));
-                var im = rt.gameObject.AddComponent<Image>(); im.color = new Color32(0xa7, 0xaf, 0xbd, 0xff); im.raycastTarget = false;
-                rt.localRotation = Quaternion.Euler(0, 0, Mathf.Atan2(v.y, v.x) * Mathf.Rad2Deg);
-            }
-            var thuTu = new List<int>();
-            for (int i = 0; i < p.Length; i++) thuTu.Add(i);
-            thuTu.Sort((a, b) => p[b].z.CompareTo(p[a].z));                       // xa (z lớn) vẽ trước
-            foreach (var i in thuTu)
-            {
-                float r = TrinhPhat3D.BK(e[i]) * k * 1.1f;
-                var c = Fill(nen.transform, "Nguyên tử " + e[i], new Vector2(0, 1), new Vector2(0.5f, 0.5f), C(i), new Vector2(r * 2, r * 2), TrinhPhat3D.Mau(e[i]), r);
-                var sang = Fill(c.transform, "Ánh", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-r * 0.32f, r * 0.32f), new Vector2(r * 0.7f, r * 0.7f), new Color(1, 1, 1, 0.35f), r * 0.35f);
-                sang.raycastTarget = false;
-                if (e[i] != "C" && e[i] != "H")
-                    GlassKit.Label(c.transform, "Ký hiệu", e[i], Mathf.Clamp(Mathf.RoundToInt(r * 0.8f), 11, 20), Color.white, true, TextAnchor.MiddleCenter, new Vector2(-r, r), new Vector2(r * 2, r * 2));
-            }
+            var nen = Fill(cha, "Nền 3D", new Vector2(0, 1), new Vector2(0, 1), Vector2.zero, new Vector2(rong, cao), Well, 12f);
+            Ring(nen.transform, "Viền", Hair, 12f);
+            var x = nen.gameObject.AddComponent<Anh3DXoay>();
+            x.Dung(d, rong, cao);
             return cao;
         }
 
@@ -448,6 +418,226 @@ namespace Khkt.Menu
             g.raycastTarget = false;
             g.Dat(b.SoDo);
             return g;
+        }
+    }
+}
+
+namespace Khkt.Menu
+{
+    /// <summary>
+    /// Ảnh 3D bóng–que vẽ bằng uGUI, tự xoay quanh trục đứng (24°/s) như spin("y") của 3Dmol trong CHEMISTRY.
+    /// Mỗi khung chỉ đặt lại vị trí/kích thước/góc các Image có sẵn và sắp lại thứ tự xa–gần bằng mảng dựng sẵn (không cấp phát).
+    /// </summary>
+    public class Anh3DXoay : MonoBehaviour
+    {
+        public float TocDo = 24f;
+        Vector3[] p0;
+        string[] e;
+        RectTransform[] cau, nhan, nuaA, nuaB;
+        int[] lkA, lkB, thuTu;
+        float[] z;
+        Vector2[] p2;
+        float k, goc = -28f, rong, cao;
+        RectTransform lopCau;
+
+        public int SoNguyenTu => p0 != null ? p0.Length : 0;
+
+        public void Dung(Dictionary<string, object> d, float rong, float cao)
+        {
+            this.rong = rong; this.cao = cao;
+            var nt = L(Lay(d, "nguyen_tu"));
+            int n = nt.Count;
+            p0 = new Vector3[n]; e = new string[n]; z = new float[n]; p2 = new Vector2[n]; thuTu = new int[n];
+            Vector3 tam = Vector3.zero;
+            for (int i = 0; i < n; i++)
+            {
+                var a = D(nt[i]);
+                e[i] = S(a, "e", "C");
+                p0[i] = new Vector3(F(Lay(a, "x")), F(Lay(a, "y")), -F(Lay(a, "z")));
+                tam += p0[i];
+                thuTu[i] = i;
+            }
+            tam /= Mathf.Max(1, n);
+            float R = 0.5f;
+            for (int i = 0; i < n; i++) { p0[i] -= tam; R = Mathf.Max(R, p0[i].magnitude + TrinhPhat3D.VdW(e[i]) * 0.27f); }
+            k = Mathf.Min(rong * 0.8f, cao) * 0.6f / R;
+            var lk = L(Lay(d, "lien_ket"));
+            var a2 = new List<int>(); var b2 = new List<int>();
+            foreach (var o in lk) { var l = D(o); int a = I(Lay(l, "a")), b = I(Lay(l, "b")); if (a >= 0 && b >= 0 && a < n && b < n) { a2.Add(a); b2.Add(b); } }
+            lkA = a2.ToArray(); lkB = b2.ToArray();
+            var lopQue = MenuKit.Full(transform, "Que");
+            nuaA = new RectTransform[lkA.Length]; nuaB = new RectTransform[lkA.Length];
+            for (int i = 0; i < lkA.Length; i++)
+            {
+                nuaA[i] = Que(lopQue, TrinhPhat3D.MauCH(e[lkA[i]]));
+                nuaB[i] = Que(lopQue, TrinhPhat3D.MauCH(e[lkB[i]]));
+            }
+            lopCau = MenuKit.Full(transform, "Cầu");
+            cau = new RectTransform[n];
+            for (int i = 0; i < n; i++)
+            {
+                float r = TrinhPhat3D.VdW(e[i]) * 0.27f * k;
+                var c = Fill(lopCau, "Nguyên tử " + e[i], new Vector2(0, 1), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(r * 2, r * 2), TrinhPhat3D.MauCH(e[i]), r);
+                c.raycastTarget = false;
+                if (e[i] == "H") { c.color = Color.white; Ring(c.transform, "Viền", new Color(0, 0, 0, 0.32f), r); }
+                Fill(c.transform, "Ánh", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-r * 0.3f, r * 0.3f), new Vector2(r * 0.8f, r * 0.8f), new Color(1, 1, 1, 0.28f), r * 0.4f).raycastTarget = false;
+                cau[i] = c.rectTransform;
+            }
+            var lopNhan = MenuKit.Full(transform, "Nhãn");
+            nhan = new RectTransform[n];
+            for (int i = 0; i < n; i++)
+            {
+                if (e[i] == "H") continue;
+                float w = 14 + e[i].Length * 9;
+                var nn = Fill(lopNhan, "Nhãn " + e[i], new Vector2(0, 1), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(w, 20), WithAlpha(Paper, 0.8f), 6f);
+                nn.raycastTarget = false;
+                GlassKit.Label(nn.transform, "Chữ", e[i], 13, Ink, true, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(w, 20)).raycastTarget = false;
+                nhan[i] = nn.rectTransform;
+            }
+            VeKhung();
+        }
+
+        static RectTransform Que(Transform cha, Color mau)
+        {
+            var rt = GlassKit.Rect(cha, "Nửa que", new Vector2(0, 1), new Vector2(0, 0.5f), Vector2.zero, new Vector2(10, 4));
+            var im = rt.gameObject.AddComponent<Image>();
+            im.color = mau; im.raycastTarget = false;
+            return rt;
+        }
+
+        void Update()
+        {
+            if (p0 == null) return;
+            goc += TocDo * Time.unscaledDeltaTime;
+            VeKhung();
+        }
+
+        void VeKhung()
+        {
+            var q = Quaternion.Euler(14f, goc, 0f);
+            var c = new Vector2(rong * 0.5f, -cao * 0.5f);
+            for (int i = 0; i < p0.Length; i++)
+            {
+                var p = q * p0[i];
+                p2[i] = c + new Vector2(p.x, p.y) * k;
+                z[i] = p.z;
+                cau[i].anchoredPosition = p2[i];
+                if (nhan[i] != null) nhan[i].anchoredPosition = p2[i];
+            }
+            float day = 0.28f * k;
+            for (int i = 0; i < lkA.Length; i++)
+            {
+                Vector2 a = p2[lkA[i]], b = p2[lkB[i]], m = (a + b) * 0.5f;
+                Dat(nuaA[i], a, m, day);
+                Dat(nuaB[i], m, b, day);
+            }
+            // sắp xa (z lớn) vẽ trước: sắp chèn trên mảng dựng sẵn, rồi đặt thứ tự anh em
+            for (int i = 1; i < thuTu.Length; i++)
+            {
+                int v = thuTu[i], j = i - 1;
+                while (j >= 0 && z[thuTu[j]] < z[v]) { thuTu[j + 1] = thuTu[j]; j--; }
+                thuTu[j + 1] = v;
+            }
+            for (int i = 0; i < thuTu.Length; i++)
+                if (cau[thuTu[i]].GetSiblingIndex() != i) cau[thuTu[i]].SetSiblingIndex(i);
+        }
+
+        static void Dat(RectTransform r, Vector2 tu, Vector2 den, float day)
+        {
+            var v = den - tu;
+            r.anchoredPosition = tu;
+            r.sizeDelta = new Vector2(v.magnitude, day);
+            r.localRotation = Quaternion.Euler(0, 0, Mathf.Atan2(v.y, v.x) * Mathf.Rad2Deg);
+        }
+    }
+
+    /// <summary>
+    /// Trình phát 3D cơ chế nhúng trong một khung uGUI (bảng lớn): camera riêng vẽ vào RenderTexture hiện bằng RawImage,
+    /// kéo chuột trong khung để xoay. Huỷ đối tượng này thì giải phóng camera và RenderTexture.
+    /// </summary>
+    public class Xem3DNho : MonoBehaviour
+    {
+        public TrinhPhat3D TP { get; private set; }
+        Camera cam;
+        RenderTexture rt;
+        RectTransform khung;
+        Camera camUi;
+        RawImage anh;
+
+        public static Xem3DNho Tao(RectTransform khung, KichBan3D kb, Camera camUi)
+        {
+            var go = new GameObject("Trình phát 3D trong bảng");
+            var x = go.AddComponent<Xem3DNho>();
+            x.khung = khung; x.camUi = camUi;
+            var cgo = new GameObject("Camera");
+            cgo.transform.SetParent(go.transform, false);
+            x.cam = cgo.AddComponent<Camera>();
+            x.cam.clearFlags = CameraClearFlags.SolidColor;
+            x.cam.backgroundColor = CoCheMoDun.NenToi;
+            x.cam.cullingMask = 1 << TrinhPhat3D.LopVe;
+            x.cam.fieldOfView = 32f; x.cam.nearClipPlane = 0.05f; x.cam.farClipPlane = 300f;
+            x.cam.depth = -50;
+            // đèn riêng cho lớp vẽ 3D: cảnh nền (menu) có thể không có đèn, phân tử Lit sẽ tối đen
+            var lgo = new GameObject("Đèn 3D bảng");
+            lgo.transform.SetParent(go.transform, false);
+            lgo.transform.rotation = Quaternion.Euler(38f, -32f, 0f);
+            var den = lgo.AddComponent<Light>();
+            den.type = LightType.Directional; den.intensity = 1.15f; den.color = Color.white;
+            den.cullingMask = 1 << TrinhPhat3D.LopVe; den.shadows = LightShadows.None;
+            Khkt.Rendering.CameraKhongHauKy.Gan(x.cam);
+            var cv = khung.GetComponentInParent<Canvas>();
+            float sf = cv != null ? cv.rootCanvas.scaleFactor : 1f;
+            int w = Mathf.Clamp(Mathf.RoundToInt(khung.rect.width * sf), 64, 2048), h = Mathf.Clamp(Mathf.RoundToInt(khung.rect.height * sf), 64, 2048);
+            x.rt = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4, name = "Bang3D" };
+            x.rt.Create();
+            x.cam.targetTexture = x.rt;
+            if (!khung.TryGetComponent(out x.anh)) x.anh = khung.gameObject.AddComponent<RawImage>();
+            x.anh.texture = x.rt; x.anh.raycastTarget = false; x.anh.color = Color.white;
+            x.TP = go.AddComponent<TrinhPhat3D>();
+            x.TP.Cam = x.cam;
+            x.TP.VungNhin = new Rect(0, 0, 1, 1);
+            x.TP.ViTriChuot = x.Chuot;
+            x.TP.Nap(kb);
+            return x;
+        }
+
+        Vector2? Chuot(Vector2 p)
+        {
+            if (khung == null || !khung.gameObject.activeInHierarchy) return null;
+            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(khung, p, camUi, out var lp)) return null;
+            var r = khung.rect;
+            var n = new Vector2((lp.x - r.xMin) / Mathf.Max(1, r.width), (lp.y - r.yMin) / Mathf.Max(1, r.height));
+            return n.x >= 0 && n.x <= 1 && n.y >= 0 && n.y <= 1 ? n : (Vector2?)null;
+        }
+
+        /// <summary>Vẽ ngay một khung (kiểm thử/chụp ảnh ở batchmode, nơi camera không tự vẽ theo vòng lặp).</summary>
+        public void VeNgay() { if (cam != null) cam.Render(); }
+
+        /// <summary>Kiểm thử: màu điểm ảnh giữa khung 3D và số điểm ảnh khác màu nền (đo trên một hàng ngang giữa ảnh).</summary>
+        public (Color giua, int khacNen) DoAnh()
+        {
+            var cu = RenderTexture.active;
+            RenderTexture.active = rt;
+            var t = new Texture2D(rt.width, 1, TextureFormat.RGBA32, false);
+            t.ReadPixels(new Rect(0, rt.height / 2, rt.width, 1), 0, 0);
+            t.Apply();
+            RenderTexture.active = cu;
+            int n = 0;
+            var nen = (Color)cam.backgroundColor;
+            for (int i = 0; i < rt.width; i++) { var c = t.GetPixel(i, 0); if (Mathf.Abs(c.r - nen.r) + Mathf.Abs(c.g - nen.g) + Mathf.Abs(c.b - nen.b) > 0.08f) n++; }
+            var g = t.GetPixel(rt.width / 2, 0);
+            Destroy(t);
+            return (g, n);
+        }
+
+        /// <summary>Bật/tắt vẽ (khung đang ẩn thì không tốn GPU).</summary>
+        public void Hien(bool co) { if (cam != null) cam.enabled = co; }
+
+        void OnDestroy()
+        {
+            if (cam != null) cam.targetTexture = null;
+            if (anh != null) anh.texture = null;
+            if (rt != null) { rt.Release(); Destroy(rt); }
         }
     }
 }
