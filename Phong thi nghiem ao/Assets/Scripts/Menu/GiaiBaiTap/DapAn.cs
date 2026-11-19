@@ -563,6 +563,7 @@ namespace Khkt.Menu
         RectTransform khung;
         Camera camUi;
         RawImage anh;
+        Light den, sunCu;
 
         public static Xem3DNho Tao(RectTransform khung, KichBan3D kb, Camera camUi)
         {
@@ -584,16 +585,20 @@ namespace Khkt.Menu
             var den = lgo.AddComponent<Light>();
             den.type = LightType.Directional; den.intensity = 1.15f; den.color = Color.white;
             den.cullingMask = 1 << TrinhPhat3D.LopVe; den.shadows = LightShadows.None;
+            x.den = den;
+            x.sunCu = RenderSettings.sun;
+            RenderSettings.sun = den;                 // URP lấy RenderSettings.sun làm đèn chính → phân tử chắc chắn được chiếu
             Khkt.Rendering.CameraKhongHauKy.Gan(x.cam);
-            var cv = khung.GetComponentInParent<Canvas>();
-            float sf = cv != null ? cv.rootCanvas.scaleFactor : 1f;
-            int w = Mathf.Clamp(Mathf.RoundToInt(khung.rect.width * sf), 64, 2048), h = Mathf.Clamp(Mathf.RoundToInt(khung.rect.height * sf), 64, 2048);
+            // cỡ ảnh theo TỈ LỆ khung (không theo điểm ảnh màn lúc tạo – màn batchmode/màn nhỏ cho ảnh quá thô): rộng 1600
+            float tl = khung.rect.height > 1 ? khung.rect.width / khung.rect.height : 1.5f;
+            int w = 1600, h = Mathf.Clamp(Mathf.RoundToInt(1600f / Mathf.Max(0.3f, tl)), 200, 2048);
             x.rt = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4, name = "Bang3D" };
             x.rt.Create();
             x.cam.targetTexture = x.rt;
             if (!khung.TryGetComponent(out x.anh)) x.anh = khung.gameObject.AddComponent<RawImage>();
             x.anh.texture = x.rt; x.anh.raycastTarget = false; x.anh.color = Color.white;
             x.TP = go.AddComponent<TrinhPhat3D>();
+            x.TP.TuSang = 0.3f;
             x.TP.Cam = x.cam;
             x.TP.VungNhin = new Rect(0, 0, 1, 1);
             x.TP.ViTriChuot = x.Chuot;
@@ -613,6 +618,16 @@ namespace Khkt.Menu
         /// <summary>Vẽ ngay một khung (kiểm thử/chụp ảnh ở batchmode, nơi camera không tự vẽ theo vòng lặp).</summary>
         public void VeNgay() { if (cam != null) cam.Render(); }
 
+        /// <summary>Kiểm thử: lưu nội dung RenderTexture ra PNG.</summary>
+        public void LuuAnh(string duong)
+        {
+            var cu = RenderTexture.active; RenderTexture.active = rt;
+            var t = new Texture2D(rt.width, rt.height, TextureFormat.RGB24, false);
+            t.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0); t.Apply();
+            RenderTexture.active = cu;
+            System.IO.File.WriteAllBytes(duong, t.EncodeToPNG()); Destroy(t);
+        }
+
         /// <summary>Kiểm thử: màu điểm ảnh giữa khung 3D và số điểm ảnh khác màu nền (đo trên một hàng ngang giữa ảnh).</summary>
         public (Color giua, int khacNen) DoAnh()
         {
@@ -627,6 +642,7 @@ namespace Khkt.Menu
             for (int i = 0; i < rt.width; i++) { var c = t.GetPixel(i, 0); if (Mathf.Abs(c.r - nen.r) + Mathf.Abs(c.g - nen.g) + Mathf.Abs(c.b - nen.b) > 0.08f) n++; }
             var g = t.GetPixel(rt.width / 2, 0);
             Destroy(t);
+            Debug.Log($"[BANG3D] cam {cam.transform.position} kc {TP.KhoangCach:0.0} rt {rt.width}x{rt.height} nt {TP.SoNguyenTuDangVe} hat {TP.SoHatDangVe} tam {TrinhPhat3D.Tam}");
             return (g, n);
         }
 
@@ -635,6 +651,7 @@ namespace Khkt.Menu
 
         void OnDestroy()
         {
+            if (RenderSettings.sun == den) RenderSettings.sun = sunCu;      // trả đèn chính cũ của cảnh
             if (cam != null) cam.targetTexture = null;
             if (anh != null) anh.texture = null;
             if (rt != null) { rt.Release(); Destroy(rt); }

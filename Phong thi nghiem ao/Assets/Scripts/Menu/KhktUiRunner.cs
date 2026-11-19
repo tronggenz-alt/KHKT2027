@@ -419,7 +419,11 @@ namespace Khkt.Menu
             yield return null;
             gbt.Bang3D?.VeNgay();
             var doAnh = gbt.Bang3D != null ? gbt.Bang3D.DoAnh() : (Color.clear, 0);
-            Check(doAnh.Item2 > 20, "Khung 3D trong bảng có hình phân tử (điểm ảnh khác nền trên hàng giữa)", $"{doAnh.Item2} điểm, giữa {doAnh.Item1}");
+            Check(doAnh.Item2 > 150, "Khung 3D trong bảng có hình phân tử (điểm ảnh khác nền trên hàng giữa)", $"{doAnh.Item2} điểm, giữa {doAnh.Item1}");
+            gbt.Bang3D?.LuuAnh(Path.Combine(outDir, "bang3d_rt_ve_ngay.png"));
+            yield return Frames(5);
+            if (gbt.Bang3D != null) { var d5 = gbt.Bang3D.DoAnh(); Debug.Log($"[BANG3D] sau 5 khung: {d5.Item2} điểm"); gbt.Bang3D.LuuAnh(Path.Combine(outDir, "bang3d_rt_5_khung.png")); }
+            gbt.Bang3D?.VeNgay();
             yield return Chup(menu, "co_che_bang_lon_3d_Trang");
             Bam(gbt.transform, "Nút Đóng bảng lớn");
             yield return Cho(0.4f);

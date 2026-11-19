@@ -196,3 +196,14 @@ bảng 75%; ô đề vẫn ở trên trang (thiết kế cho phép "trên hoặc
 - **Chưa xong (TẠM DỪNG vì hạn mức 64%, mốc dừng 70%)**: ảnh kiểm thử của khung 3D trong bảng lớn vẫn gần như tối (đo được
   phân tử ở RenderTexture nhưng rất ít điểm ảnh, ảnh chụp menu không thấy rõ). Cần kiểm tiếp: khoảng cách camera/khung hình của
   `Xem3DNho` và hiển thị RawImage; xem trong app thật bằng chuột.
+
+### 10b. Sửa khung 3D trong bảng lớn (làm tiếp, người dùng cho chạy tới 85%)
+- Nguyên nhân khung "đen": RenderTexture lấy theo điểm ảnh màn lúc tạo (màn batchmode 640×480 → 315×341, quá thô) và camera
+  đứng quá xa vì công thức căn khung nhân thêm khi khung gần vuông → phân tử chỉ vài chục điểm ảnh.
+- Sửa: RenderTexture rộng cố định 1600 theo đúng tỉ lệ khung (MSAA 4×); khoảng cách camera căn theo chiều hẹp của khung
+  (`max(1, 1/tỉ lệ)`, áp cho cả trình phát Cơ chế nên phân tử trong khung nhỏ/toàn màn cũng to hơn); thêm đèn riêng làm đèn
+  chính (`RenderSettings.sun`) khi bảng mở và nguyên tử tự phát sáng nhẹ 30% để không bao giờ tối đen; đóng bảng trả đèn cũ.
+- Kiểm: KhktUiVerify 77/77; nội dung RenderTexture khi vẽ: `anh/giai-bai-tap/dap_an_co_che_bang_lon_3d_noi_dung.png`
+  (thấy rõ CH₃Br, OH⁻, electron). Ảnh chụp menu ở batchmode vẫn thấy khung tối vì ở batchmode camera không tự vẽ theo vòng lặp
+  (cùng lý do các kiểm thử Cơ chế phải gọi Render() thủ công); app thật dùng cùng cách với khung 3D nhỏ của Cơ chế đã hiện đúng.
+  Chưa xem được bảng lớn trong app thật vì phải bấm chuột.

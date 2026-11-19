@@ -39,6 +39,8 @@ namespace Khkt.CoChe
         public bool KieuChemistry;
         /// <summary>Tự xoay chậm quanh trục đứng (như spin("y") của 3Dmol); kéo chuột thì dừng tới khi thả.</summary>
         public bool TuXoay;
+        /// <summary>Nguyên tử/liên kết tự phát sáng nhẹ (emission) – dùng khi cảnh có thể không có đèn (bảng lớn trên menu).</summary>
+        public float TuSang;
         public float TocXoay = 24f;
         /// <summary>Khi hình 3D hiện trong một khung (RenderTexture): đổi điểm chuột (pixel màn hình) → toạ độ 0..1 trong khung, null nếu ngoài khung.</summary>
         public System.Func<Vector2, Vector2?> ViTriChuot;
@@ -53,7 +55,7 @@ namespace Khkt.CoChe
         {
             CapNhatDich();
             Xoay = xoayDich; tamNay = tamDich;
-            KhoangCach = khoangDich * (Cam != null ? Mathf.Clamp(1.6f / Mathf.Max(0.3f, Cam.aspect), 1f, 1.8f) : 1f);
+            KhoangCach = khoangDich * (Cam != null ? Mathf.Max(1f, 1f / Mathf.Max(0.3f, Cam.aspect)) : 1f);
         }
         public float KhoangCach = 13f;
         public Quaternion Xoay = Quaternion.Euler(12f, -18f, 0f);
@@ -156,7 +158,7 @@ namespace Khkt.CoChe
                 float k = 1f - Mathf.Exp(-2.2f * Time.unscaledDeltaTime);
                 if (!TuXoay) Xoay = Quaternion.Slerp(Xoay, xoayDich, k);
                 tamNay = Vector3.Lerp(tamNay, tamDich, k);
-                KhoangCach = Mathf.Lerp(KhoangCach, khoangDich * Mathf.Clamp(1.6f / Mathf.Max(0.3f, Cam.aspect), 1f, 1.8f), k);
+                KhoangCach = Mathf.Lerp(KhoangCach, khoangDich * Mathf.Max(1f, 1f / Mathf.Max(0.3f, Cam.aspect)), k);
             }
             float dt = Time.unscaledDeltaTime * TocDo;
             if (DangNhanhSai)
@@ -398,6 +400,12 @@ namespace Khkt.CoChe
             m.SetColor("_BaseColor", KieuChemistry ? MauCH(e) : Mau(e));
             m.SetColor("_Color", KieuChemistry ? MauCH(e) : Mau(e));
             m.SetFloat("_Smoothness", 0.62f);
+            if (TuSang > 0f)
+            {
+                m.EnableKeyword("_EMISSION");
+                m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+                m.SetColor("_EmissionColor", (KieuChemistry ? MauCH(e) : Mau(e)) * TuSang);
+            }
             matNt[e] = m;
             return m;
         }

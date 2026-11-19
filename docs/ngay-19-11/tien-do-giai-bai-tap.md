@@ -33,3 +33,4 @@ Chạy: `KHKT_UI_SHOTS=<thư mục> ~/AppBuild/VERA_claude/dong_bo_va_chay.sh ~/
   1. Trong `Xem3DNho` dùng vật liệu nguyên tử không cần đèn (Unlit có tô bóng giả) hoặc bật Emission = 35% màu nguyên tử;
   2. Hoặc đặt `RenderSettings.ambientLight` sáng khi bảng mở và trả lại khi đóng.
   Rồi chạy KhktUiVerify (kiểm "Khung 3D trong bảng có hình phân tử" phải > 2000 điểm khác nền) và xem ảnh co_che_bang_lon_3d.
+- Đã sửa (cho chạy tới 85%): khung 3D trong bảng lớn – RenderTexture 1600 theo tỉ lệ, căn khoảng cách camera, đèn chính riêng + tự phát sáng. Còn: xem trong app thật bằng chuột.
