@@ -100,7 +100,8 @@ namespace Khkt.Avatar
 
     /// <summary>
     /// Bảng dữ liệu tư thế bàn tay theo loại dụng cụ thí nghiệm và giới hạn góc khớp sinh lý.
-    /// Chuyển tư thế mượt trong 0,15 s, không cho phép khớp gập ngược.
+    /// Chuyển tư thế mượt trong 0,15 s (theo thời gian, không phụ thuộc FPS; ngón lệch pha nhẹ ở HandRig),
+    /// không cho phép khớp gập ngược; ngón cái CMC có thể dạng ra ngoài (−35°) đến đối chiếu (68°).
     /// </summary>
     public static class HandPoseTable
     {
@@ -113,7 +114,7 @@ namespace Khkt.Avatar
         public const float FingerDipMinFlex = 0f, FingerDipMaxFlex = 80f;
 
         public const float ThumbCmcMinFlex = -6f, ThumbCmcMaxFlex = 55f;
-        public const float ThumbCmcMinOppose = 12f, ThumbCmcMaxOppose = 68f;
+        public const float ThumbCmcMinOppose = -35f, ThumbCmcMaxOppose = 68f;   // âm = dạng ngón cái ra ngoài (xòe tay)
         public const float ThumbCmcMinPronate = 0f, ThumbCmcMaxPronate = 65f;
         public const float ThumbMcpMinFlex = 0f, ThumbMcpMaxFlex = 62f;
         public const float ThumbIpMinFlex = 0f, ThumbIpMaxFlex = 82f;
@@ -123,7 +124,7 @@ namespace Khkt.Avatar
             // 0. Xoe
             ClampAll(new HandPoseData
             {
-                thumb = new ThumbPose(6f, 22f, 18f, 6f, 8f),
+                thumb = new ThumbPose(4f, -24f, 14f, 6f, 6f),
                 index = new FingerPose(6f, -9f, 8f, 4f),
                 middle = new FingerPose(5f, -2f, 7f, 4f),
                 ring = new FingerPose(7f, 4f, 10f, 6f),
@@ -133,7 +134,7 @@ namespace Khkt.Avatar
             // 1. Nghi
             ClampAll(new HandPoseData
             {
-                thumb = new ThumbPose(14f, 30f, 28f, 16f, 18f),
+                thumb = new ThumbPose(20f, 0f, 30f, 18f, 20f),
                 index = new FingerPose(20f, -5f, 26f, 16f),
                 middle = new FingerPose(24f, -1f, 32f, 18f),
                 ring = new FingerPose(28f, 3f, 36f, 22f),
@@ -169,8 +170,8 @@ namespace Khkt.Avatar
                 middle = new FingerPose(50f, 0f, 64f, 38f),
                 ring = new FingerPose(54f, 3f, 68f, 42f),
                 pinky = new FingerPose(58f, 6f, 72f, 44f),
-                wristEulerOffset = new Vector3(-6f, 0f, -72f),
-                palmLocalOffset = new Vector3(0.036f, -0.020f, -0.024f)
+                wristEulerOffset = new Vector3(-5f, 0f, -67f),
+                palmLocalOffset = new Vector3(0.025f, -0.018f, -0.006f)
             }),
             // 5. Pipet (xoay nghiêng cầm kẹp 3 ngón quanh thân/cổ pipet)
             ClampAll(new HandPoseData
