@@ -69,3 +69,8 @@ Chạy: `KHKT_UI_SHOTS=<thư mục> ~/AppBuild/VERA_claude/dong_bo_va_chay.sh ~/
   s0/e0 ra màn hình và kiểm: đầu mũi tên cách tâm nguyên tử đích ≤ bán kính vẽ + 0,3; thân không cắt quả cầu nguyên tử nào
   khác (khoảng cách điểm Bézier tới tâm > bán kính); điểm đầu nằm sát nguồn; mũi tên có chiều dài chiếu > 20 px (không bị nhìn
   thẳng trục). Chụp lưới ảnh 4 góc/bài để xem bằng mắt. Rồi làm Mô hình 3D kiểu Geometry.
+- 20/11 (yêu cầu mới, THAY cho "remake Mô hình 3D"): người dùng muốn **đưa nguyên vẹn mô hình 3D của bản web CHEMISTRY**
+  (nghe là "bóp chim" = web chem) vào trang Mô hình 3D, không làm lại, không đổi gì (bản Unity hiện nhìn "nhựa").
+  Hướng: nhúng trang 3D của web (3Dmol) bằng plugin webview có sẵn `Plugins/macOS/BioWebViewMac.bundle` (đang dùng ở
+  Bio/Portal/BioWebViewBridge.cs, GiaiPhauMoDun.cs). Cần tìm mã trang 3D của web CHEMISTRY (không thấy "3dmol" trong
+  ~/Developer/Antigravity ngoài mo_hinh_3d.py; thử nhánh chemistry/ban-web hoặc ~/Documents/Antigravity).
