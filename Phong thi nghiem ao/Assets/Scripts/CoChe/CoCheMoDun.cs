@@ -1199,10 +1199,12 @@ namespace Khkt.CoChe
         public IEnumerator XuatAnhGiay()
         {
             if (BaiHienTai == null) yield break;
+            float t0 = Time.realtimeSinceStartup;
+            while (DangChuyen && Time.realtimeSinceStartup - t0 < 3f) yield return null;      // đang chuyển dở: chờ xong rồi mới về giấy
             if (!CheDoGiay)
             {
                 DatCheDo(true);
-                float t0 = Time.realtimeSinceStartup;
+                t0 = Time.realtimeSinceStartup;
                 while ((DangChuyen || !CheDoGiay) && Time.realtimeSinceStartup - t0 < 3f) yield return null;
             }
             var to = (RectTransform)lopToGiay.transform;

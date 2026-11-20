@@ -781,11 +781,14 @@ namespace Khkt.CoChe
         Material matMuiTen;
         readonly List<Matrix4x4> thanMt = new List<Matrix4x4>(256), dauMt = new List<Matrix4x4>(8);
         public int SoDoanMuiTen => thanMt.Count;
+        Mesh ongMt;
+        readonly List<Vector3> dinhOng = new List<Vector3>(512);
+        readonly List<int> tamGiacOng = new List<int>(3072);
         public bool HienMuiTen3D = true;
 
         void VeMuiTen3D(List<MuiTen> ds)
         {
-            thanMt.Clear(); dauMt.Clear();
+            thanMt.Clear(); dauMt.Clear(); dinhOng.Clear(); tamGiacOng.Clear();
             if (!HienMuiTen3D || ds == null || ds.Count == 0 || matChan == null) return;
             float a = DangNhanhSai ? 1f : 1f - Mathf.SmoothStep(0f, 1f, (T - 0.72f) / 0.25f);
             if (a <= 0.01f) return;
@@ -802,21 +805,47 @@ namespace Khkt.CoChe
                 Vector3 huong = (tip - truocTip).sqrMagnitude > 1e-6f ? (tip - truocTip).normalized : Vector3.up;
                 const float DaiDau = 0.24f;
                 Vector3 goc = tip - huong * DaiDau;
-                Vector3 truoc = W(Bezier(s0, c0, e0, 0.04f));
-                for (int i = 1; i <= So; i++)
+                // thân: một ỐNG LIỀN (6 cạnh) theo đường cong – cả các mũi tên gộp 1 lưới, 1 lần vẽ (trước: hàng chục trụ rời → giảm FPS)
+                int dau0 = dinhOng.Count;
+                Vector3 truocP = W(Bezier(s0, c0, e0, 0.04f)), phap = Vector3.zero;
+                for (int i = 0; i <= So; i++)
                 {
                     float u = Mathf.Lerp(0.04f, uTip, i / (float)So);
                     Vector3 p = W(Bezier(s0, c0, e0, u));
-                    if (Vector3.Dot(p - goc, huong) > 0f) p = goc;          // thân dừng ở chân đầu mũi tên
-                    Vector3 d = p - truoc; float dai = d.magnitude;
-                    if (dai > 1e-4f) thanMt.Add(Matrix4x4.TRS(truoc, Quaternion.FromToRotation(Vector3.up, d / dai), new Vector3(0.018f, dai + 0.006f, 0.018f)));
-                    truoc = p;
-                    if (p == goc) break;
+                    if (Vector3.Dot(p - goc, huong) > 0f) p = goc;
+                    Vector3 t = i == 0 ? (W(Bezier(s0, c0, e0, u + 0.01f)) - p) : (p - truocP);
+                    if (t.sqrMagnitude < 1e-8f) t = huong;
+                    t.Normalize();
+                    if (i == 0 || phap == Vector3.zero) phap = Vector3.Cross(t, Mathf.Abs(t.y) < 0.9f ? Vector3.up : Vector3.right).normalized;
+                    phap = Vector3.Cross(Vector3.Cross(t, phap), t).normalized;   // khung trượt theo đường cong, không xoắn
+                    Vector3 phap2 = Vector3.Cross(t, phap);
+                    for (int c = 0; c < 6; c++)
+                    {
+                        float g = c * Mathf.PI / 3f;
+                        dinhOng.Add(p + (phap * Mathf.Cos(g) + phap2 * Mathf.Sin(g)) * 0.018f);
+                    }
+                    if (i > 0)
+                        for (int c = 0; c < 6; c++)
+                        {
+                            int a0 = dau0 + (i - 1) * 6 + c, a1 = dau0 + (i - 1) * 6 + (c + 1) % 6, b0 = a0 + 6, b1 = a1 + 6;
+                            tamGiacOng.Add(a0); tamGiacOng.Add(b0); tamGiacOng.Add(a1);
+                            tamGiacOng.Add(a1); tamGiacOng.Add(b0); tamGiacOng.Add(b1);
+                        }
+                    truocP = p;
                 }
                 float rDau = mt.SoE == 1 ? 0.055f : 0.075f;                 // mũi tên 1 e (nửa đầu) nhỏ hơn
                 dauMt.Add(Matrix4x4.TRS(goc, Quaternion.FromToRotation(Vector3.up, huong), new Vector3(rDau, DaiDau, rDau)));
             }
-            VeNhom(matMuiTen, tru, thanMt);
+            if (dinhOng.Count > 0)
+            {
+                if (ongMt == null) { ongMt = new Mesh { name = "OngMuiTen" }; ongMt.MarkDynamic(); }
+                ongMt.Clear();
+                ongMt.SetVertices(dinhOng);
+                ongMt.SetTriangles(tamGiacOng, 0);
+                ongMt.RecalculateBounds();
+                Graphics.RenderMesh(Rp(matMuiTen), ongMt, 0, Matrix4x4.identity);
+                thanMt.Add(Matrix4x4.identity);                       // đếm cho kiểm thử: có thân mũi tên
+            }
             VeNhom(matMuiTen, non, dauMt);
         }
 

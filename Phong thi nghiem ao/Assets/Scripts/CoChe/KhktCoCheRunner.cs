@@ -248,7 +248,7 @@ namespace Khkt.CoChe
             md.BatGiaiThich(false);
             yield return md.XuatAnhGiay();
             bool coAnh = md.DuongAnhXuatCuoi != "" && File.Exists(md.DuongAnhXuatCuoi) && new FileInfo(md.DuongAnhXuatCuoi).Length > 5000;
-            Check(coAnh && md.CheDoGiay, "Xuất ảnh PNG sơ đồ giấy", md.DuongAnhXuatCuoi);
+            Check(coAnh && md.CheDoGiay, "Xuất ảnh PNG sơ đồ giấy", $"{md.DuongAnhXuatCuoi} có={File.Exists(md.DuongAnhXuatCuoi)} cỡ={(File.Exists(md.DuongAnhXuatCuoi) ? new FileInfo(md.DuongAnhXuatCuoi).Length : -1)} giấy={md.CheDoGiay} chuyển={md.DangChuyen}");
             if (coAnh) { File.Copy(md.DuongAnhXuatCuoi, Path.Combine(outDir, "xuat_anh_giay.png"), true); File.Delete(md.DuongAnhXuatCuoi); }
             var hop = md.GetComponentInChildren<Khkt.Menu.HopBaoSai>(true);
             md.GetComponentsInChildren<Button>(true).FirstOrDefault(b => b.name == "Nút Báo sai")?.onClick.Invoke();

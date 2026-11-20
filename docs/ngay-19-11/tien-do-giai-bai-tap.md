@@ -52,3 +52,5 @@ Chạy: `KHKT_UI_SHOTS=<thư mục> ~/AppBuild/VERA_claude/dong_bo_va_chay.sh ~/
    `XuatAnhGiay` sau khi về giấy: có thể cần chờ thêm 1–2 khung để tờ giấy (alpha 1) dựng lại trước khi chụp.
 2. FPS đo ở bài propellane (mức Cao) giảm từ ~400–560 xuống ~90–110 sau khi thêm mũi tên 3D: kiểm vật liệu `CoChe_MuiTen3D`
    (bản sao matChan) có thật sự vẽ instancing không; nếu không, gộp thân mũi tên thành 1 Mesh dựng mỗi khung hoặc dùng LineRenderer.
+- 20/11 21h: ĐÃ SỬA cả hai mục dở trên: (1) Xuất PNG – chờ hiệu ứng chuyển xong rồi mới về giấy (lệnh về giấy bị bỏ qua khi đang chuyển dở);
+  (2) thân mũi tên 3D gộp thành 1 ống liền/khung (1 lần vẽ). FPS đo thấp lúc đó chủ yếu do máy đang tải nặng (load average 17–32 vì các phiên khác).

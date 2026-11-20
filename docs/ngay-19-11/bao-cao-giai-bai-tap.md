@@ -326,3 +326,8 @@ bảng 75%; ô đề vẫn ở trên trang (thiết kế cho phép "trên hoặc
 
 ## 24. Ẩn H chỉ ẩn H gắn vào C (20/11)
 - Ẩn H chỉ ẩn H của mạch carbon; H của tác nhân (H₂O, NH₃, OH⁻, HBr…) vẫn hiện (nguyên tử, liên kết, nhãn, chấm Lewis) – `TrinhPhat3D.LaHAn`.
+
+## 25. Sửa Xuất PNG và tối ưu mũi tên 3D (20/11)
+- Xuất PNG bấm lúc khung 3D đang chuyển dở: chờ chuyển xong rồi mới về giấy và chụp.
+- Thân mũi tên 3D: một ống liền 6 cạnh/mũi tên, gộp mọi mũi tên thành 1 lưới dùng lại bộ đệm (1 lần vẽ thay hàng chục trụ rời).
+- FPS kiểm thử lúc đo thấp do máy đang tải nặng (load average 17–32 vì nhiều phiên chạy cùng lúc).
