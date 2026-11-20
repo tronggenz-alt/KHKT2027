@@ -100,13 +100,15 @@ namespace Khkt.Menu
         public RectTransform Hinh { get; private set; }
         Text tienTrinh, chuHoiTiep;
         InputField oHoi;
-        float caoHinh, caoTomTat, caoHoiTiep, caoLoiGiai;
+        float caoHinh, caoTomTat, caoHoiTiep, caoLoiGiai, cao3D, yNut;
+        RectTransform khu3D;
+        public bool Khu3DMo => khu3D != null && khu3D.gameObject.activeSelf;
         bool coChip;
         readonly List<Image> thanhXuong = new List<Image>();
         Action<string, Action<string>> hoi;
         const float CaoCauHoi = 64f;
 
-        public float ChieuCao => CaoCauHoi + 14 + (CoDapAn ? 24 + caoHinh + 18 + 34 + caoTomTat + caoLoiGiai + 18 + 44 + 24 + caoHoiTiep : Loi ? 120 : 196) + (coChip ? 52 : 0);
+        public float ChieuCao => CaoCauHoi + 14 + (CoDapAn ? 24 + caoHinh + 18 + 34 + caoTomTat + caoLoiGiai + 18 + 44 + 24 + (Khu3DMo ? cao3D + 16 : 0) + caoHoiTiep : Loi ? 120 : 196) + (coChip ? 52 : 0);
 
         public static KhoiDapAn Tao(RectTransform noiDung, DongThoiGian dong, string cauHoi, Texture anhDe, int so)
         {
@@ -213,6 +215,7 @@ namespace Khkt.Menu
                 y -= caoLoiGiai;
             }
             y -= 18;
+            yNut = y;
             float x = 24, xp = 24;
             foreach (var (ten, chu, kieu, bam) in nut)
             {
@@ -250,6 +253,37 @@ namespace Khkt.Menu
             dong.XepLai();
             MenuAnim.Fade(MenuAnim.Group(the), 0.2f, 1f, 0.3f);
             dong.TruotToiDapAn(this);
+        }
+
+        /// <summary>
+        /// Mở / đóng khu 3D ngay dưới hàng nút (lần đầu gọi dung(khu) để dựng nội dung; đóng thì gọi dong()).
+        /// Ô hỏi tiếp (nếu mở) dời xuống dưới khu 3D.
+        /// </summary>
+        public void BatKhu3D(float cao, Action<RectTransform> dung, Action dong)
+        {
+            bool mo = !Khu3DMo;
+            if (khu3D == null)
+            {
+                cao3D = cao;
+                khu3D = MenuKit.Stretch(the, "Khu 3D", new Vector2(0, 1), new Vector2(1, 1), new Vector2(24, yNut - 44 - 16 - cao), new Vector2(-24, yNut - 44 - 16));
+            }
+            khu3D.gameObject.SetActive(mo);
+            if (mo && khu3D.childCount == 0) dung?.Invoke(khu3D);
+            if (!mo) dong?.Invoke();
+            DoiHoiTiep();
+            dong3DNhan?.Invoke(mo);
+            this.dong.XepLai();
+            if (mo) { MenuAnim.Fade(MenuAnim.Group(khu3D), 0f, 1f, 0.25f); this.dong.TruotToiDapAn(this); }
+        }
+
+        public Action<bool> dong3DNhan;
+
+        void DoiHoiTiep()
+        {
+            if (hoiTiep == null) return;
+            float lui = Khu3DMo ? cao3D + 16 : 0;
+            hoiTiep.offsetMin = new Vector2(24, yNut - 44 - 24 - 140 - lui);
+            hoiTiep.offsetMax = new Vector2(-24, yNut - 44 - 16 - lui);
         }
 
         /// <summary>Mở / đóng ô hỏi tiếp ngay dưới hàng nút.</summary>

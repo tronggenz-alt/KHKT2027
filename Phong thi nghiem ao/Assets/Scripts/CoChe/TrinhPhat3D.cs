@@ -396,7 +396,7 @@ namespace Khkt.CoChe
                 matLk.SetColor("_BaseColor", new Color32(0xa7, 0xaf, 0xbd, 0xff));
                 matLk.SetColor("_Color", new Color32(0xa7, 0xaf, 0xbd, 0xff));
                 matQuang = new Material(matChan) { enableInstancing = true, name = "CoChe_Quang" };
-                matQuang.SetColor("_BaseColor", new Color(1f, 0.82f, 0.4f, 0.16f));
+                matQuang.SetColor("_BaseColor", new Color(1f, 0.82f, 0.4f, 0.10f));
             }
         }
 
@@ -525,13 +525,13 @@ namespace Khkt.CoChe
             quang.Clear();
             if (tE > 0f && tE < 1.0f && muiTen != null)
             {
-                int vet = Mathf.Clamp(toiDa / Mathf.Max(1, muiTen.Count * 2), 2, 5);
-                float quay = Time.unscaledTime * 7.5f;
+                int vet = Mathf.Clamp(toiDa / Mathf.Max(1, muiTen.Count * 2), 2, 4);
+                float quay = Time.unscaledTime * 2.6f;     // 20/11: cặp e xoay chậm quanh đường bay – nhìn rõ 2 hạt, không thành một cục
                 foreach (var mt in muiTen)
                 {
                     if (!DiemMuiTen(mt, out var s0, out var c0, out var e0)) continue;
                     float dung = DangNhanhSai && NhanhHienTai != null ? DiemChan(s0, c0, e0) : 1f;
-                    float u = Mathf.Min(MuotHon(Mathf.Clamp01(tE)), dung);
+                    float u = Mathf.Min(0.5f - 0.5f * Mathf.Cos(Mathf.PI * Mathf.Clamp01(tE)), dung);   // dạng sin: tăng–giảm tốc êm, đều hơn
                     if (u <= 0f) continue;
                     Vector3 huong = (Bezier(s0, c0, e0, Mathf.Min(1f, u + 0.02f)) - Bezier(s0, c0, e0, Mathf.Max(0f, u - 0.02f))).normalized;
                     if (huong.sqrMagnitude < 1e-6f) huong = (e0 - s0).normalized;
@@ -541,18 +541,18 @@ namespace Khkt.CoChe
                     for (int k = 0; k < mt.SoE && hat.Count < toiDa; k++)
                     {
                         float pha = quay + k * Mathf.PI;
-                        Vector3 lech = mt.SoE == 2 ? (vg1 * Mathf.Cos(pha) + vg2 * Mathf.Sin(pha)) * 0.11f : Vector3.zero;
+                        Vector3 lech = mt.SoE == 2 ? (vg1 * Mathf.Cos(pha) + vg2 * Mathf.Sin(pha)) * 0.15f : Vector3.zero;   // 2 hạt cách nhau ~0,3 Å, hở rõ
                         Vector3 p = Bezier(s0, c0, e0, u) + lech;
-                        float co = 0.16f * hien;
+                        float co = 0.12f * hien;
                         hat.Add(Matrix4x4.TRS(W(p), Quaternion.identity, Vector3.one * co));
-                        quang.Add(Matrix4x4.TRS(W(p), Quaternion.identity, Vector3.one * co * 3.0f));
+                        quang.Add(Matrix4x4.TRS(W(p), Quaternion.identity, Vector3.one * co * 1.7f));   // quầng nhỏ riêng từng hạt
                         for (int v = 1; v <= vet; v++)                       // vệt: cầu trong suốt nhỏ dần theo đường đã đi
                         {
-                            float uu = u - v * 0.028f;
+                            float uu = u - v * 0.022f;
                             if (uu <= 0f) break;
                             float g = 1f - v / (float)(vet + 1);
                             Vector3 pv = Bezier(s0, c0, e0, uu) + lech * g;
-                            quang.Add(Matrix4x4.TRS(W(pv), Quaternion.identity, Vector3.one * co * (0.6f + 1.6f * g)));
+                            quang.Add(Matrix4x4.TRS(W(pv), Quaternion.identity, Vector3.one * co * (0.35f + 0.65f * g)));   // vệt mảnh, nhỏ dần
                         }
                     }
                 }

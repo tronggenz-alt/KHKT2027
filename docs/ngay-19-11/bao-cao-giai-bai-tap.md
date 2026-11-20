@@ -226,3 +226,14 @@ bảng 75%; ô đề vẫn ở trên trang (thiết kế cho phép "trên hoặc
 - Kiểm: KhktUiVerify 76/76, KhktCoCheVerify 66/66, app Mac xuất được.
 - **Chưa làm** (cần sửa phía máy chủ dựng sơ đồ `so_do_giay`): công thức dài vẽ dạng khung (đường gấp khúc, giữ N, O, nhóm
   như NO₂) và chỉnh vị trí đầu/đuôi mũi tên cong cho khỏi đè chữ.
+
+## 12. Góp ý test lần 2 (20/11)
+- Núm thanh tốc độ **tròn đều 20×20** (Slider của Unity kéo neo dọc của núm theo vùng chứa → vùng núm đặt cao 0), có viền màu
+  nhấn, mặt trắng, bóng nhẹ.
+- Đáp án Cơ chế chỉ còn **lời giải trên giấy như bài thi** (sơ đồ + mũi tên), bỏ tóm tắt và phần chữ; nút **▶ Xem 3D** mở khu 3D
+  ngay dưới (bấm lại "▲ Ẩn 3D" để đóng); khung 3D **bo góc 14** (Mask theo hình bo); Toàn màn hình nằm trong thanh điều khiển 3D.
+  Tờ giấy trong trình phát cũng bỏ tiêu đề gạch lượn sóng.
+- **Electron**: hạt nhỏ hơn (0,12), hai hạt của cặp cách xa hơn (0,3 Å) → phân biệt rõ 1 hay 2 e; quầng vàng nhỏ riêng từng hạt
+  (1,7× thay 3×, mờ hơn); vệt đuôi mảnh; cặp xoay chậm (2,6 thay 7,5 rad/s); đường bay tăng–giảm tốc dạng sin (êm hơn).
+  Ảnh: `anh/giai-bai-tap/electron_moi_hai_hat.png`.
+- Kiểm: KhktUiVerify 77/77, KhktCoCheVerify 66/66, app Mac xuất được.

@@ -406,12 +406,16 @@ namespace Khkt.Menu
             Check(guiLoai == "SN2", "Gửi kiểu cơ chế đã chọn", guiLoai);
             yield return Chup(menu, "co_che_ket_qua_Trang");
             yield return Cho(0.4f);
-            Check(gbt.Xem3DMoi != null && gbt.Xem3DMoi.TP.SoNguyenTuDangVe > 0 && kc.Hinh.GetComponentsInChildren<RectTransform>(true).Any(r => r.name == "Khung 3D đáp án"),
-                  "Cơ chế: 3D chạy ngay dưới tờ giấy trong khối đáp án");
+            Check(gbt.Xem3DMoi == null && !kc.Khu3DMo, "Cơ chế: đáp án chỉ là lời giải trên giấy, 3D chưa mở");
+            Bam(kc.transform, "Nút Xem 3D");
+            yield return Cho(0.5f);
+            Check(kc.Khu3DMo && gbt.Xem3DMoi != null && gbt.Xem3DMoi.TP.SoNguyenTuDangVe > 0 && kc.GetComponentsInChildren<RectTransform>(true).Any(r => r.name == "Khung 3D đáp án"),
+                  "Nút Xem 3D mở khung 3D ngay dưới đáp án");
             if (gbt.Xem3DMoi != null) { gbt.Xem3DMoi.TP.DatT(0.4f); yield return null; gbt.Xem3DMoi.VeNgay(); }
             var da = gbt.Xem3DMoi != null ? gbt.Xem3DMoi.DoAnh() : (Color.clear, 0);
-            Check(da.Item2 > 300, "Khung 3D trong đáp án có hình phân tử", $"{da.Item2} điểm");
-            Check(kc.GetComponentsInChildren<Text>(true).Any(x => x.name == "Lời giải" && x.text.Contains("1.")), "Cơ chế: phần Lời giải bằng chữ dưới hình");
+            Check(da.Item2 > 150, "Khung 3D trong đáp án có hình phân tử", $"{da.Item2} điểm");
+            var num = kc.GetComponentsInChildren<RectTransform>(true).FirstOrDefault(r => r.name == "Núm");
+            Check(num != null && Mathf.Abs(num.rect.width - num.rect.height) < 0.5f, "Núm thanh tốc độ tròn đều", num != null ? $"{num.rect.width:0}×{num.rect.height:0}" : "");
             int nutChinh = kc.GetComponentsInChildren<Button>(true).Count(x => x.name.StartsWith("Nút ") && x.transform.parent.name == "Thân");
             Check(nutChinh <= 4, "Cơ chế: ít nút (2 nút chính + 2 liên kết nhỏ)", nutChinh.ToString());
             yield return Chup(menu, "co_che_3d_duoi_giay_Trang");
