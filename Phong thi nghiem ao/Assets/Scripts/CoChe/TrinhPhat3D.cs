@@ -569,15 +569,51 @@ namespace Khkt.CoChe
             if (matQuang != null) VeNhom(matQuang, cauE, quang);
             if (DangNhanhSai && NhanhHienTai != null && NhanhHienTai.BanKinhChan > 0f)
             {
-                var c = matChan.GetColor("_BaseColor");
-                c.a = 0.35f + 0.15f * Mathf.Sin(Time.unscaledTime * 6f);
-                matChan.SetColor("_BaseColor", c);
-                var n = Xoay * NhanhHienTai.PhapTuyen;
-                n.z *= Mathf.Max(Phang, 0.02f);
-                var rp = Rp(matChan);
-                float r = NhanhHienTai.BanKinhChan * 2f;
-                Graphics.RenderMesh(rp, dia, 0, Matrix4x4.TRS(W(NhanhHienTai.TamChan), Quaternion.LookRotation(n.sqrMagnitude > 1e-6f ? n : Vector3.forward), new Vector3(r, r, r)));
+                // 20/11, theo bản demo đã duyệt (nguyen_mau/co_che_3d/sn2_sn1.html): QUẢ CẦU chắn đỏ trong suốt bán kính 2,3 Å bao quanh
+                // nguyên tử bị tấn công (cả các nhóm che chắn) + lưới khung đa diện; đậm dần khi electron chạm tới.
+                float vaCham = Mathf.Clamp01((tNhanh - 0.6f) / 0.2f);
+                float nhip = 0.85f + 0.15f * Mathf.Sin(Time.unscaledTime * 5f);
+                Vector3 tamM = NhanhHienTai.TamChan - NhanhHienTai.PhapTuyen * 1.55f;      // vị trí nguyên tử đích
+                const float R = 2.3f;
+                matChan.SetColor("_BaseColor", new Color(1f, 0.23f, 0.23f, (0.06f + 0.12f * vaCham) * nhip));
+                Graphics.RenderMesh(Rp(matChan), cau, 0, Matrix4x4.TRS(W(tamM), Quaternion.identity, Vector3.one * R * 2f));
+                if (matLuoi == null) matLuoi = new Material(matChan) { name = "CoChe_LuoiChan", enableInstancing = true };
+                matLuoi.SetColor("_BaseColor", new Color(1f, 0.42f, 0.42f, (0.3f + 0.45f * vaCham) * nhip));
+                luoiChan.Clear();
+                foreach (var (ca, cb) in CanhCau)
+                {
+                    Vector3 wa = W(tamM + ca * R * 1.005f), wb = W(tamM + cb * R * 1.005f), d = wb - wa;
+                    float dai = d.magnitude;
+                    if (dai < 1e-4f) continue;
+                    luoiChan.Add(Matrix4x4.TRS(wa, Quaternion.FromToRotation(Vector3.up, d / dai), new Vector3(0.014f, dai, 0.014f)));
+                }
+                VeNhom(matLuoi, tru, luoiChan);
             }
+        }
+
+        Material matLuoi;
+        readonly List<Matrix4x4> luoiChan = new List<Matrix4x4>(130);
+        static readonly (Vector3, Vector3)[] CanhCau = TaoCanhCau();
+
+        /// <summary>Cạnh của hình cầu 20 mặt chia 1 lần (42 đỉnh, 120 cạnh) – lưới khung của quả cầu chắn.</summary>
+        static (Vector3, Vector3)[] TaoCanhCau()
+        {
+            float t = (1f + Mathf.Sqrt(5f)) / 2f;
+            var v = new List<Vector3> { new Vector3(-1, t, 0), new Vector3(1, t, 0), new Vector3(-1, -t, 0), new Vector3(1, -t, 0), new Vector3(0, -1, t), new Vector3(0, 1, t),
+                                        new Vector3(0, -1, -t), new Vector3(0, 1, -t), new Vector3(t, 0, -1), new Vector3(t, 0, 1), new Vector3(-t, 0, -1), new Vector3(-t, 0, 1) };
+            for (int i = 0; i < v.Count; i++) v[i] = v[i].normalized;
+            int[] f = { 0,11,5, 0,5,1, 0,1,7, 0,7,10, 0,10,11, 1,5,9, 5,11,4, 11,10,2, 10,7,6, 7,1,8, 3,9,4, 3,4,2, 3,2,6, 3,6,8, 3,8,9, 4,9,5, 2,4,11, 6,2,10, 8,6,7, 9,8,1 };
+            var giua = new Dictionary<long, int>();
+            int G(int a, int b) { long k = a < b ? ((long)a << 32) | (uint)b : ((long)b << 32) | (uint)a; if (giua.TryGetValue(k, out int i)) return i; v.Add(((v[a] + v[b]) * 0.5f).normalized); giua[k] = v.Count - 1; return v.Count - 1; }
+            var canh = new HashSet<long>();
+            var ds = new List<(Vector3, Vector3)>();
+            void C(int a, int b) { long k = a < b ? ((long)a << 32) | (uint)b : ((long)b << 32) | (uint)a; if (canh.Add(k)) ds.Add((v[a], v[b])); }
+            for (int i = 0; i < f.Length; i += 3)
+            {
+                int a = f[i], b = f[i + 1], c = f[i + 2], ab = G(a, b), bc = G(b, c), ca = G(c, a);
+                C(a, ab); C(ab, b); C(b, bc); C(bc, c); C(c, ca); C(ca, a); C(ab, bc); C(bc, ca); C(ca, ab);
+            }
+            return ds.ToArray();
         }
 
         string Nguyen(string id)

@@ -284,3 +284,8 @@ bảng 75%; ô đề vẫn ở trên trang (thiết kế cho phép "trên hoặc
   bản 3D thì mới tự dựng bằng RDKit (ETKDG + MMFF). Kết quả có `nguon_3d` = `pubchem_3d` | `rdkit`; lưu đệm theo SMILES.
 - Ảnh 3D trong thẻ đáp án **kéo chuột để xoay** (mọi hướng), **cuộn để phóng to**; thả tay 3 giây thì tự lắc chậm lại.
 - Kiểm: Python mô hình 3D đạt; KhktUiVerify đạt; app Mac xuất được.
+
+## 18. Màn chắn hướng sai là quả cầu (theo bản demo đã duyệt, 20/11)
+- Thay đĩa dẹt bằng **quả cầu chắn** như `nguyen_mau/co_che_3d/sn2_sn1.html`: mặt cầu đỏ trong suốt bán kính 2,3 Å đặt tại
+  nguyên tử bị tấn công (bao luôn các nhóm che chắn), phủ **lưới khung đa diện** (hình cầu 20 mặt chia 1 lần, 120 cạnh); độ đậm
+  tăng khi electron chạm tới (0,06 → 0,18 mặt, 0,3 → 0,75 lưới), nhịp nhẹ. Ảnh `huong_sai_qua_cau_chan.png`.
