@@ -485,7 +485,12 @@ def dung(cc: dict) -> dict:
         chi_so_buoc[k + 1] = j2
         canh_cua[k + 1] = CanhDung(mol_ke, ten_ke, gan)
 
-    nhanh = [dung_nhanh_sai(ns, trang, chi_so_buoc, canh_cua, nhan, nt) for ns in cc.get("nhanh_sai", [])]
+    nhanh = []
+    for ns in cc.get("nhanh_sai", []) or []:            # nhánh sai do AI viết: lỗi thì bỏ nhánh đó, không làm hỏng cả bài
+        try:
+            nhanh.append(dung_nhanh_sai(ns, trang, chi_so_buoc, canh_cua, nhan, nt))
+        except Exception:  # noqa: BLE001
+            continue
 
     # đưa tâm về gốc toạ độ (cả nhánh sai, màn chắn)
     tam = np.mean([v for s in trang for v in s["toa_do"].values()], axis=0)

@@ -925,6 +925,15 @@ namespace Khkt.Menu
                 if (baiXem3D != b || Xem3DMoi == null) return;
                 Xem3DMoi.TP.HienE = !Xem3DMoi.TP.HienE; Face(nutE).color = Xem3DMoi.TP.HienE ? AccentSoft : Paper;
             }, 1, TrangCuon.BoNut);
+            if (b.KichBan.NhanhSai.Count > 0)
+            {
+                int chiSo = 0;
+                MakeButton(dk, "Nút Hướng sai đáp án", "✕  Hướng sai", new Vector2(800, 0), new Vector2(124, 44), () =>
+                {
+                    if (baiXem3D != b || Xem3DMoi == null) return;
+                    Xem3DMoi.TP.PhatNhanhSai(chiSo++ % b.KichBan.NhanhSai.Count);   // electron bay tới hướng không thể và bị màn chắn chặn
+                }, 1, TrangCuon.BoNut);
+            }
             var to = MakeButton(dk, "Nút Toàn màn hình 3D", "⤢  Toàn màn hình", Vector2.zero, new Vector2(170, 44), () =>
             {
                 int bu = Xem3DMoi != null && baiXem3D == b ? Xem3DMoi.TP.ChiSoBuoc : 0;

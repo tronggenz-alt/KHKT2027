@@ -163,6 +163,8 @@ namespace Khkt.CoChe
                 CoCheMoDun.MoVoiBai(md.Nap("sn1_tbubr"));
                 yield return Frames(3);
                 Check(md.CheDoGiay && !md.Khung3DMo, "Mở bài: hiện bản giấy trước, khung 3D đóng");
+                var nutSai = md.GetComponentsInChildren<Button>(true).FirstOrDefault(b => b.name == "Nút Hướng sai 3D");
+                Check(nutSai != null && nutSai.gameObject.activeSelf, "Bài có nhánh sai: nút Hướng sai hiện trong khung 3D");
                 Shot("luong_giay_truoc");
                 var nut3d = md.GetComponentsInChildren<Button>(true).FirstOrDefault(b => b.name == "Nút Xem 3D");
                 nut3d?.onClick.Invoke();
@@ -170,27 +172,19 @@ namespace Khkt.CoChe
                 while ((md.DangChuyen || md.CheDoGiay) && Time.realtimeSinceStartup - tq < 3f) yield return null;
                 yield return Frames(3);
                 var r = md.VungCam3D;
-                Check(nut3d != null && md.Khung3DMo && !md.ToanMan && r.width > 0.3f && r.width < 0.7f && r.yMin < 0.2f && r.yMax < 0.5f,
-                      "Nút Xem 3D bật khung 3D nhỏ phía dưới", $"rect {r}");
-                md.TrinhPhat.DenBuoc(0); md.TrinhPhat.DatT(0.35f);
+                Check(nut3d != null && md.Khung3DMo && md.ToanMan && r.width > 0.97f && r.height > 0.8f,
+                      "Nút Xem 3D vào thẳng 3D toàn màn hình (không còn dạng vừa giấy vừa 3D)", $"rect {r}");
+                nutSai?.onClick.Invoke();
                 yield return Frames(2);
-                md.TrinhPhat.DatNgayGocDich();
-                yield return null;
-                Shot("khung_3d_nho");
-                md.GetComponentsInChildren<Button>(true).FirstOrDefault(b => b.name == "Nút Phóng to")?.onClick.Invoke();
-                yield return new WaitForSecondsRealtime(0.45f);
+                Check(md.TrinhPhat.DangNhanhSai, "Bấm Hướng sai: electron bay về hướng không thể, bị màn chắn chặn");
+                md.TrinhPhat.DatTNhanh(0.8f);
                 yield return Frames(2);
-                r = md.VungCam3D;
-                Check(md.ToanMan && r.width > 0.97f && r.height > 0.8f, "Nút Phóng to: 3D ra toàn màn hình", $"rect {r}");
+                Shot("huong_sai_man_chan");
                 md.TrinhPhat.DenBuoc(1); md.TrinhPhat.DatT(0.3f);
                 yield return null;
                 md.TrinhPhat.DatNgayGocDich();
                 yield return null;
                 Shot("khung_3d_toan_man");
-                md.GetComponentsInChildren<Button>(true).FirstOrDefault(b => b.name == "Nút Phóng to")?.onClick.Invoke();
-                yield return new WaitForSecondsRealtime(0.45f);
-                yield return Frames(2);
-                Check(!md.ToanMan && md.VungCam3D.width < 0.7f, "Thu nhỏ về khung");
                 var sl = md.GetComponentsInChildren<Slider>(true).FirstOrDefault();
                 if (sl != null) sl.value = 0.25f;
                 Check(sl != null && Mathf.Abs(md.TrinhPhat.TocDo - 0.25f) < 1e-3f && sl.minValue <= 0.25f && sl.maxValue >= 3f, "Thanh tốc độ kéo liên tục 0,25× – 3×", $"{md.TrinhPhat.TocDo}");
@@ -215,10 +209,10 @@ namespace Khkt.CoChe
                     }
                 }
                 Check(gocTong == 0 || gocOk >= gocTong * 0.8f, "Góc nhìn tự chọn: mũi tên electron nằm ngang mặt nhìn", $"{gocOk}/{gocTong}");
-                md.GetComponentsInChildren<Button>(true).FirstOrDefault(b => b.name == "Nút Quay lại bảng giấy")?.onClick.Invoke();
+                md.GetComponentsInChildren<Button>(true).FirstOrDefault(b => b.name == "Nút Phóng to")?.onClick.Invoke();   // "Thu nhỏ" = về hẳn bảng giấy
                 tq = Time.realtimeSinceStartup;
                 while ((md.DangChuyen || !md.CheDoGiay) && Time.realtimeSinceStartup - tq < 3f) yield return null;
-                Check(md.CheDoGiay && !md.Khung3DMo && !md.Cam3D.enabled, "Quay lại bảng giấy đóng khung 3D");
+                Check(md.CheDoGiay && !md.Khung3DMo && !md.Cam3D.enabled, "Thu nhỏ: về hẳn bảng giấy, đóng khung 3D");
             }
 
             // 4. ô Giải thích mặc định đóng; Hỏi AI (máy chủ giả)

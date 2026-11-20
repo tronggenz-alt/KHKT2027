@@ -119,8 +119,13 @@ SCHEMA_CO_CHE = {
             "required": ["chat", "mui_ten", "chuyen_h", "trang_thai_chuyen_tiep", "buoc_cham", "thuan_nghich", "nhan_trung_gian",
                          "cong_huong", "dieu_kien", "ghi_chu"], "additionalProperties": False}},
         "san_pham": {"type": "array", "items": {"type": "string"}},
+        # hướng tấn công KHÔNG thể xảy ra (bị màn chắn chặn trong phim 3D): dich = [map nguyên tử tấn công, map nguyên tử đích]
+        "nhanh_sai": {"type": "array", "items": {"type": "object", "properties": {
+            "tu_buoc": {"type": "integer"}, "dich": _SO_NGUYEN, "ten": {"type": "string"}, "ly_do": {"type": "string"},
+            "kieu_chan": {"type": "string"}},
+            "required": ["tu_buoc", "dich", "ten", "ly_do", "kieu_chan"], "additionalProperties": False}},
     },
-    "required": ["ten", "loai", "dieu_kien", "giai_thich", "nhan_hien_thi", "buoc", "san_pham"],
+    "required": ["ten", "loai", "dieu_kien", "giai_thich", "nhan_hien_thi", "buoc", "san_pham", "nhanh_sai"],
     "additionalProperties": False,
 }
 
@@ -157,7 +162,11 @@ QUY TẮC DỮ LIỆU (app kiểm tra bằng RDKit và mô phỏng từng mũi t
    "chat" bước i+1; bước cuối ra "san_pham" (san_pham cũng CÓ map). Bước sau được thêm chất mới (map mới) và bỏ sản phẩm phụ đã tách ra.
    Tâm lập thể không tham gia phản ứng phải giữ nguyên @/@@.
 4. ghi_chu: 1–2 câu tiếng Việt cho mỗi bước. "dieu_kien" của bước: chỉ ghi khi khác điều kiện chung.
-5. Đề có NHIỀU phản ứng: chỉ viết cơ chế cho phản ứng người dùng chỉ định, không chỉ định thì phản ứng ĐẦU TIÊN cần vẽ cơ chế."""
+5. Đề có NHIỀU phản ứng: chỉ viết cơ chế cho phản ứng người dùng chỉ định, không chỉ định thì phản ứng ĐẦU TIÊN cần vẽ cơ chế.
+6. "nhanh_sai": 0–2 HƯỚNG TẤN CÔNG KHÔNG THỂ xảy ra mà học sinh hay nhầm (vd SN2 vào C bậc III bị cản trở không gian;
+   nucleophin tấn công phía trước thay vì phía sau; cộng ngược Markovnikov; tấn công vào C không mang điện tích dương).
+   tu_buoc = số thứ tự bước (bắt đầu từ 1) mà tại đó học sinh có thể nhầm; dich = [map nguyên tử tấn công, map nguyên tử bị
+   tấn công SAI]; ten ngắn (≤ 8 từ), ly_do 1 câu; kieu_chan = "can_tro_khong_gian" | "sai_huong" | "khong_ben". Không có thì []."""
 
 SYSTEM_DOC_ANH = """Bạn đọc ẢNH ĐỀ Hoá hữu cơ (chương trình THPT Việt Nam, kể cả đề HSG tỉnh/quốc gia) để app vẽ CƠ CHẾ phản ứng. KHÔNG giải đề.
 Trả về DUY NHẤT một JSON đúng schema:

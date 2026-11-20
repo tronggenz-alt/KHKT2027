@@ -767,7 +767,28 @@ namespace Khkt.Menu
                     if (!n.gameObject.activeSelf) n.gameObject.SetActive(true);
                 }
             for (int i = dung; i < nhan.Count; i++) if (nhan[i].gameObject.activeSelf) nhan[i].gameObject.SetActive(false);
+            // hướng sai đang phát: dải đỏ góc trên trái "✕ Không thể: tên – lý do" (electron bị màn chắn chặn lại)
+            bool sai = TP.DangNhanhSai && TP.NhanhHienTai != null;
+            if (sai && chuSai == null)
+            {
+                var nen = Fill(lopNhan, "Chú thích hướng sai", new Vector2(0, 1), new Vector2(0, 1), new Vector2(12, -12), new Vector2(10, 34), new Color32(0xdc, 0x26, 0x26, 0xe6), 8f);
+                nen.raycastTarget = false;
+                chuSai = GlassKit.Label(nen.transform, "Chữ", "", 14, Color.white, true, TextAnchor.MiddleLeft, new Vector2(12, 0), new Vector2(1200, 34));
+                chuSai.horizontalOverflow = HorizontalWrapMode.Overflow; chuSai.raycastTarget = false;
+            }
+            if (chuSai != null)
+            {
+                var nen = (RectTransform)chuSai.transform.parent;
+                nen.gameObject.SetActive(sai);
+                if (sai)
+                {
+                    string c = "✕  Không thể: " + TP.NhanhHienTai.Ten + (string.IsNullOrEmpty(TP.NhanhHienTai.LyDo) ? "" : " – " + TP.NhanhHienTai.LyDo);
+                    if (chuSai.text != c) { chuSai.text = c; nen.sizeDelta = new Vector2(Mathf.Min(r.width - 24, chuSai.preferredWidth + 24), 34); }
+                }
+            }
         }
+
+        Text chuSai;
 
         /// <summary>Bật/tắt vẽ (khung đang ẩn thì không tốn GPU).</summary>
         public void Hien(bool co) { if (cam != null) cam.enabled = co; }

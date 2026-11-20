@@ -602,6 +602,8 @@ namespace Khkt.CoChe
             Giay.Dat(b.SoDo);
             Giay.DanhDauBuoc(TrinhPhat.ChiSoBuoc);
             nutNhanh.gameObject.SetActive(b.KichBan.NhanhSai.Count > 0);
+            if (nutNhanh3D != null) nutNhanh3D.gameObject.SetActive(b.KichBan.NhanhSai.Count > 0);
+            chiSoNhanh = 0;
             deBai.text = b.De.Length > 220 ? b.De.Substring(0, 217) + "…" : b.De;
             for (int i = 0; i < nutBai.Count; i++)
                 nutBai[i].GetComponent<Image>().color = DanhSachMa[i] == ma ? new Color(0.23f, 0.51f, 0.96f, 0.35f) : new Color(1f, 1f, 1f, 0.04f);
@@ -635,10 +637,12 @@ namespace Khkt.CoChe
             {
                 khung3D.gameObject.SetActive(true);
                 Cam3D.enabled = true;
+                ToanMan = true;                                       // 20/11: bỏ dạng vừa giấy vừa 3D – Xem 3D là toàn màn hình
+                if (nutPhongTo != null) nutPhongTo.GetComponentInChildren<Text>().text = "⤡  Thu nhỏ";
                 khung3D.SetAsLastSibling();
                 if (giaiThich != null) giaiThich.SetAsLastSibling();
                 dsBai.SetAsLastSibling();
-                DatKhung(ToanMan ? 1f : 0f);
+                DatKhung(1f);
             }
             const float lau = 0.38f;
             for (float t = 0; t < lau; t += Time.unscaledDeltaTime)
@@ -667,8 +671,8 @@ namespace Khkt.CoChe
             nhomKhung.alpha = g;
             nhomKhung.blocksRaycasts = g > 0.5f;
             khung3D.localScale = Vector3.one * Mathf.Lerp(0.94f, 1f, g);
-            toGiay.localScale = Vector3.one * Mathf.Lerp(1f, 0.6f, g);
-            toGiay.anchoredPosition = Vector2.Lerp(new Vector2(0, -18), new Vector2(0, 178), g);
+            toGiay.localScale = Vector3.one;                      // tờ giấy giữ nguyên (3D phủ toàn màn hình phía trên)
+            toGiay.anchoredPosition = new Vector2(0, -18);
             if (nutXem3D != null) nutXem3D.gameObject.SetActive(g < 0.5f);
         }
 
@@ -682,7 +686,8 @@ namespace Khkt.CoChe
         CanvasGroup nhomKhung;
         Text chuDauKhung, chuTocKhung;
         Slider thanhToc;
-        Button nutPhongTo, nutXem3D, nutBaiKhac;
+        Button nutPhongTo, nutXem3D, nutBaiKhac, nutNhanh3D;
+        int chiSoNhanh;
         float fKhung;
         Coroutine chayKhung;
         const float KhungRong = 1040f, KhungCao = 450f;
@@ -726,7 +731,8 @@ namespace Khkt.CoChe
             chuDauKhung.supportRichText = true;
             var quay = NutKinh(dauKhung, "Nút Quay lại bảng giấy", "Quay lại bảng giấy", new Vector2(-10, -6), new Vector2(190, 38), () => DatCheDo(true), 15, new Vector2(1, 1));
             ((RectTransform)quay.transform).pivot = new Vector2(1, 1);
-            nutPhongTo = NutKinh(dauKhung, "Nút Phóng to", "⤢  Phóng to", new Vector2(-208, -6), new Vector2(150, 38), () => DatToanMan(!ToanMan), 15, new Vector2(1, 1));
+            quay.gameObject.SetActive(false);                     // 20/11: "Thu nhỏ" đã về hẳn bảng giấy – bỏ nút trùng
+            nutPhongTo = NutKinh(dauKhung, "Nút Phóng to", "⤢  Phóng to", new Vector2(-10, -6), new Vector2(150, 38), () => DatToanMan(!ToanMan), 15, new Vector2(1, 1));
             ((RectTransform)nutPhongTo.transform).pivot = new Vector2(1, 1);
 
             vungXem = KeoGian(khung3D, "Vùng xem 3D", new Vector2(0, 72), new Vector2(0, -50));
@@ -748,7 +754,7 @@ namespace Khkt.CoChe
             nutPhat = NutKinh(thanhKhung, "Nút Phát 3D", "Phát", new Vector2(x, y), new Vector2(84, 44), () => TrinhPhat.PhatDung(), 15); x += 90;
             NutKinh(thanhKhung, "Nút Bước sau 3D", "›", new Vector2(x, y), new Vector2(44, 44), () => TrinhPhat.BuocSau(), 20); x += 62;
             truc = GlassKit.Rect(thanhKhung, "Trục bước 3D", new Vector2(0, 1), new Vector2(0, 1), new Vector2(x, -33), new Vector2(100, 8));
-            truc.anchorMax = new Vector2(1, 1); truc.offsetMax = new Vector2(-(14 + 96 + 12 + 286 + 8 + 96 + 16), truc.offsetMax.y);
+            truc.anchorMax = new Vector2(1, 1); truc.offsetMax = new Vector2(-(14 + 96 + 12 + 286 + 8 + 96 + 8 + 118 + 16), truc.offsetMax.y);
             var tocRt = GlassKit.Rect(thanhKhung, "Tốc độ 3D", new Vector2(1, 1), new Vector2(1, 1), new Vector2(-(14 + 96 + 12), -14), new Vector2(230 + 56, 44));
             GlassKit.Label(tocRt, "Nhãn", "Tốc độ", 14, ChuPhu, false, TextAnchor.MiddleLeft, Vector2.zero, new Vector2(60, 44));
             thanhToc = TaoThanhTruot(tocRt, new Vector2(60, -12), new Vector2(160, 20), 0.25f, 3f, 1f, v => { TrinhPhat.TocDo = v; chuTocKhung.text = v.ToString("0.00") + "×"; });
@@ -756,6 +762,12 @@ namespace Khkt.CoChe
             nutAnH = NutKinh(thanhKhung, "Nút Ẩn H 3D", "Ẩn H", new Vector2(-14, -14), new Vector2(96, 44), BatAnH, 15, new Vector2(1, 1));
             var nutE = NutKinh(thanhKhung, "Nút Hiện e 3D", "Hiện e", new Vector2(-(14 + 96 + 12 + 286 + 8), -14), new Vector2(96, 44), null, 15, new Vector2(1, 1));
             ((RectTransform)nutE.transform).pivot = new Vector2(1, 1);
+            nutNhanh3D = NutKinh(thanhKhung, "Nút Hướng sai 3D", "✕ Hướng sai", new Vector2(-(14 + 96 + 12 + 286 + 8 + 96 + 8), -14), new Vector2(118, 44), () =>
+            {
+                if (BaiHienTai == null || BaiHienTai.KichBan.NhanhSai.Count == 0) return;
+                TrinhPhat.PhatNhanhSai(chiSoNhanh++ % BaiHienTai.KichBan.NhanhSai.Count);
+            }, 15, new Vector2(1, 1));
+            ((RectTransform)nutNhanh3D.transform).pivot = new Vector2(1, 1);
             nutE.onClick.AddListener(() => { TrinhPhat.HienE = !TrinhPhat.HienE; nutE.GetComponent<Image>().color = TrinhPhat.HienE ? new Color(0.23f, 0.51f, 0.96f, 0.35f) : new Color(1f, 1f, 1f, 0.04f); });
             ((RectTransform)nutAnH.transform).pivot = new Vector2(1, 1);
             ((RectTransform)tocRt).pivot = new Vector2(1, 1);
@@ -822,6 +834,7 @@ namespace Khkt.CoChe
         /// <summary>Phóng khung 3D ra toàn màn hình hoặc thu về khung nhỏ (0,3 s). Toàn màn hình chỉ có 3D + thanh điều khiển.</summary>
         public void DatToanMan(bool toanMan)
         {
+            if (!toanMan) { if (!CheDoGiay) DatCheDo(true); return; }      // Thu nhỏ = về hẳn bảng giấy
             if (CheDoGiay) DatCheDo(false);
             ToanMan = toanMan;
             nutPhongTo.GetComponentInChildren<Text>().text = toanMan ? "⤡  Thu nhỏ" : "⤢  Phóng to";

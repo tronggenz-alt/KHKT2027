@@ -266,3 +266,13 @@ bảng 75%; ô đề vẫn ở trên trang (thiết kế cho phép "trên hoặc
 - Máy chủ (`giai_de.MUC_TU_DUY`): mỗi nấc đổi effort của Claude (low/medium/high), thứ tự mô hình Gemini (Nhanh: flash trước;
   Cân bằng/Kỹ/Tối đa: pro trước) và **giới hạn thời gian một cơ chế** (60/120/150/180 s, không vượt 3 phút). App chờ thêm 30 s.
 - Kiểm: Python 41/41 (giữ đúng hành vi cũ ở nấc Cân bằng), KhktUiVerify 81/81, app Mac xuất được.
+
+## 16. Hướng sai (màn chắn) và bỏ dạng vừa giấy vừa 3D (20/11)
+- **Hướng sai**: nút "✕ Hướng sai" (khung 3D dưới đáp án và trình phát toàn màn; chỉ hiện khi bài có nhánh sai): electron bay về
+  hướng không thể (vd SN2 vào C bậc III) và bị **đĩa màn chắn đỏ** chặn lại; dải đỏ "✕ Không thể: tên – lý do". Bấm tiếp để qua
+  nhánh sai khác. Ảnh `huong_sai_man_chan.png`.
+- **Đề mới cũng có hướng sai**: khuôn trả lời của AI (`giai_de.SCHEMA_CO_CHE`) thêm `nhanh_sai` (0–2 hướng học sinh hay nhầm:
+  cản trở không gian, tấn công phía trước, ngược Markovnikov…); máy dựng 3D bỏ qua nhánh AI viết lỗi, không hỏng cả bài.
+- **Trình phát**: bỏ dạng vừa giấy vừa 3D – "Xem 3D" vào thẳng 3D toàn màn hình, "Thu nhỏ" về hẳn bảng giấy (bỏ nút trùng
+  "Quay lại bảng giấy").
+- Kiểm: Python 42/42, KhktCoCheVerify, KhktUiVerify đạt (xem mục kết quả commit), app Mac xuất được.
