@@ -331,3 +331,8 @@ bảng 75%; ô đề vẫn ở trên trang (thiết kế cho phép "trên hoặc
 - Xuất PNG bấm lúc khung 3D đang chuyển dở: chờ chuyển xong rồi mới về giấy và chụp.
 - Thân mũi tên 3D: một ống liền 6 cạnh/mũi tên, gộp mọi mũi tên thành 1 lưới dùng lại bộ đệm (1 lần vẽ thay hàng chục trụ rời).
 - FPS kiểm thử lúc đo thấp do máy đang tải nặng (load average 17–32 vì nhiều phiên chạy cùng lúc).
+
+## 26. Không tự chạy; mũi tên 3D không đâm vào nguyên tử (20/11)
+- Bấm "Xem 3D" chỉ mở khung ở bước 1, bấm Phát mới chạy.
+- Đầu mũi tên 3D dừng ngoài quả cầu nguyên tử đích (bán kính vẽ + 0,1 Å); đuôi mũi tên từ cặp e bắt đầu ngoài quả cầu nguyên tử nguồn. Ảnh mui_ten_3d_khong_dam.png.
+- Kiểm: KhktCoCheVerify 66/66, KhktUiVerify 82/82.

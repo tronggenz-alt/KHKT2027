@@ -962,7 +962,7 @@ namespace Khkt.Menu
             foreach (Transform c in k3) if (c.name == "Nút Xem lại 3D") Destroy(c.gameObject);
             Xem3DMoi = Xem3DNho.Tao(k3, b.KichBan, GetComponentInParent<Canvas>().rootCanvas.worldCamera);
             khung3DMoi = k3; baiXem3D = b;
-            Xem3DMoi.TP.DenBuoc(0, true);                        // tự phát từ bước 1
+            Xem3DMoi.TP.DenBuoc(0, false);                       // 20/11: không tự chạy – bấm Phát mới phát
         }
 
         static string LoiGiaiCoChe(BaiCoChe b)

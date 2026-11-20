@@ -800,17 +800,31 @@ namespace Khkt.CoChe
             {
                 if (!DiemMuiTen(mt, out var s0, out var c0, out var e0)) continue;
                 float uTip = DangNhanhSai && NhanhHienTai != null ? Mathf.Min(0.97f, DiemChan(s0, c0, e0)) : 0.97f;
-                if (uTip <= 0.1f) continue;
+                // 20/11: đầu mũi tên dừng NGOÀI quả cầu nguyên tử đích; đuôi (từ cặp e) bắt đầu ngoài quả cầu nguyên tử nguồn
+                if (mt.DenLoai != "lien_ket" && mt.Den != null && mt.Den.Length > 0)
+                {
+                    float rDich = BanKinhVe("m" + mt.Den[0]) + 0.1f;
+                    while (uTip > 0.2f && Vector3.Distance(Bezier(s0, c0, e0, uTip), e0) < rDich) uTip -= 0.01f;
+                }
+                else while (uTip > 0.2f && Vector3.Distance(Bezier(s0, c0, e0, uTip), e0) < 0.1f) uTip -= 0.01f;
+                float uDau = 0.04f;
+                if (mt.TuLoai != "lien_ket" && mt.Tu != null && mt.Tu.Length > 0)
+                {
+                    Vector3 pNguon = Tim(mt.Tu[0]);
+                    float rNguon = BanKinhVe("m" + mt.Tu[0]) + 0.06f;
+                    while (uDau < uTip - 0.15f && Vector3.Distance(Bezier(s0, c0, e0, uDau), pNguon) < rNguon) uDau += 0.01f;
+                }
+                if (uTip <= 0.1f || uTip - uDau < 0.1f) continue;
                 Vector3 tip = W(Bezier(s0, c0, e0, uTip)), truocTip = W(Bezier(s0, c0, e0, uTip - 0.05f));
                 Vector3 huong = (tip - truocTip).sqrMagnitude > 1e-6f ? (tip - truocTip).normalized : Vector3.up;
                 const float DaiDau = 0.24f;
                 Vector3 goc = tip - huong * DaiDau;
                 // thân: một ỐNG LIỀN (6 cạnh) theo đường cong – cả các mũi tên gộp 1 lưới, 1 lần vẽ (trước: hàng chục trụ rời → giảm FPS)
                 int dau0 = dinhOng.Count;
-                Vector3 truocP = W(Bezier(s0, c0, e0, 0.04f)), phap = Vector3.zero;
+                Vector3 truocP = W(Bezier(s0, c0, e0, uDau)), phap = Vector3.zero;
                 for (int i = 0; i <= So; i++)
                 {
-                    float u = Mathf.Lerp(0.04f, uTip, i / (float)So);
+                    float u = Mathf.Lerp(uDau, uTip, i / (float)So);
                     Vector3 p = W(Bezier(s0, c0, e0, u));
                     if (Vector3.Dot(p - goc, huong) > 0f) p = goc;
                     Vector3 t = i == 0 ? (W(Bezier(s0, c0, e0, u + 0.01f)) - p) : (p - truocP);
@@ -847,6 +861,13 @@ namespace Khkt.CoChe
                 thanMt.Add(Matrix4x4.identity);                       // đếm cho kiểm thử: có thân mũi tên
             }
             VeNhom(matMuiTen, non, dauMt);
+        }
+
+        /// <summary>Bán kính quả cầu nguyên tử đang vẽ (toạ độ mô hình).</summary>
+        float BanKinhVe(string id)
+        {
+            string e = Nguyen(id);
+            return KieuChemistry ? VdW(e) * 0.27f : BK(e);
         }
 
         /// <summary>Hình nón đáy tròn bán kính 1 ở y = 0, đỉnh y = 1 (khớp quy ước trụ: tỉ lệ x = bán kính, y = chiều dài).</summary>
