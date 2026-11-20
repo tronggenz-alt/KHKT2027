@@ -455,8 +455,12 @@ namespace Khkt.Menu
             t0 = Time.realtimeSinceStartup;
             while ((gbt.Dong3D.Khoi.Count == 0 || !gbt.Dong3D.Khoi[0].CoDapAn) && Time.realtimeSinceStartup - t0 < 4f) yield return null;
             yield return Cho(0.7f);
-            int soNt = gbt.Dong3D.Khoi.Count > 0 && gbt.Dong3D.Khoi[0].Hinh != null ? gbt.Dong3D.Khoi[0].Hinh.GetComponentsInChildren<Image>(true).Count(x => x.name.StartsWith("Nguyên tử")) : 0;
-            Check(soNt == 9 && gbt.Dong3D.Khoi[0].Hinh.GetComponentInChildren<Anh3DXoay>() != null, "Dựng 3D: ảnh 3D kiểu 3Dmol của CHEMISTRY (9 nguyên tử ethanol, tự xoay)", soNt.ToString());
+            var xn = gbt.Dong3D.Khoi.Count > 0 && gbt.Dong3D.Khoi[0].Hinh != null ? gbt.Dong3D.Khoi[0].Hinh.GetComponentInChildren<Xem3DNho>(true) : null;
+            if (xn != null) { yield return null; xn.VeNgay(); }
+            int soNt = xn != null ? xn.TP.SoNguyenTuDangVe : 0;
+            var doNho = xn != null ? xn.DoAnh() : (Color.clear, 0);
+            Check(xn != null && xn.TP.KieuJmol && soNt == 9 && doNho.Item2 > 100, "Dựng 3D: khung kết quả vẽ 3D thật như khung lớn (bóng–que Jmol, 9 nguyên tử ethanol)", $"{soNt} nt, {doNho.Item2} điểm");
+            if (xn != null && !string.IsNullOrEmpty(outDir)) xn.LuuAnh(Path.Combine(outDir, "mo_hinh_3d_khung_nho.png"));
             yield return Chup(menu, "mo_hinh_3d_ket_qua_Trang");
             Bam(gbt.Dong3D.Khoi[0].transform, "Nút Mở lớn");
             yield return Cho(1.0f);

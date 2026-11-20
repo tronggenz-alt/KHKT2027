@@ -468,11 +468,14 @@ namespace Khkt.Menu
         {
             var nt = L(Lay(d, "nguyen_tu"));
             if (nt.Count == 0) return 40;
-            var nen = Fill(cha, "Nền 3D", new Vector2(0, 1), new Vector2(0, 1), Vector2.zero, new Vector2(rong, cao), CoCheMoDun.NenToi, 12f);
-            Ring(nen.transform, "Viền", Hair, 12f);
-            nen.raycastTarget = true;                              // nhận kéo/cuộn chuột
-            var x = nen.gameObject.AddComponent<Anh3DXoay>();
-            x.Dung(d, rong, cao);
+            // 20/11: khung ngoài hiện y như khung 3D lớn – bóng–que Jmol vẽ 3D thật (RenderTexture), nền tối, kéo/cuộn để xoay/phóng to
+            var vo = Fill(cha, "Nền 3D", new Vector2(0, 1), new Vector2(0, 1), Vector2.zero, new Vector2(rong, cao), new Color32(0x12, 0x12, 0x15, 0xff), 12f);
+            Ring(vo.transform, "Viền", Hair, 12f);
+            var khung = MenuKit.Full(vo.rectTransform, "Khung 3D chất");
+            var cv = cha.GetComponentInParent<Canvas>();
+            var x = Xem3DNho.Tao(khung, Khkt.CoChe.MoHinh3DMoDun.TaoKichBan(d), cv != null ? cv.rootCanvas.worldCamera : null);
+            x.KieuMoHinh();
+            x.transform.SetParent(vo.transform, false);            // khung bị xoá thì trình vẽ cũng xoá theo
             return cao;
         }
 
@@ -727,6 +730,16 @@ namespace Khkt.Menu
             return x;
         }
 
+        /// <summary>Kiểu khung Mô hình 3D: bóng–que Jmol, nền tối, không nhãn chữ, hiện mọi H.</summary>
+        public void KieuMoHinh()
+        {
+            khongNhan = true;
+            TP.KieuChemistry = true; TP.KieuJmol = true; TP.AnH = false; TP.TuSang = 0.06f;
+            cam.backgroundColor = new Color32(0x12, 0x12, 0x15, 0xff);
+            TP.Nap(TP.KichBan); TP.DatT(1f);
+        }
+        bool khongNhan;
+
         Vector2? Chuot(Vector2 p)
         {
             if (khung == null || !khung.gameObject.activeInHierarchy) return null;
@@ -776,9 +789,10 @@ namespace Khkt.Menu
         {
             if (TP == null || khung == null || cam == null) return;
             // tối ưu 20/11: khung cuộn ra ngoài màn hình, bị trình phát toàn màn che, hoặc đang ẩn → không vẽ 3D (tiết kiệm GPU)
-            bool thay = khung.gameObject.activeInHierarchy && !CoCheMoDun.DangMo && TrenManHinh();
+            bool thay = khung.gameObject.activeInHierarchy && !CoCheMoDun.DangMo && !Khkt.CoChe.MoHinh3DMoDun.DangMo && TrenManHinh();
             if (cam.enabled != thay) cam.enabled = thay;
             if (!thay) return;
+            if (khongNhan) return;
             if (lopNhan == null) { lopNhan = MenuKit.Full(khung, "Nhãn nguyên tử"); lopNhan.SetAsLastSibling(); }
             int dung = 0;
             var r = khung.rect;

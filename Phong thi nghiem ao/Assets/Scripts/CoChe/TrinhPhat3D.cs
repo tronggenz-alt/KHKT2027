@@ -327,7 +327,14 @@ namespace Khkt.CoChe
                 chuotTruoc = p;
                 Xoay = Quaternion.AngleAxis(-d.x * 0.35f, Vector3.up) * Quaternion.AngleAxis(d.y * 0.35f, Vector3.right) * Xoay;
             }
-            float cuon = m.scroll.ReadValue().y;
+            var cuon2 = m.scroll.ReadValue();
+            float cuon = cuon2.y;
+            if (trongVung && Mathf.Abs(cuon2.x) > 0.01f && Mathf.Abs(cuon2.x) >= Mathf.Abs(cuon2.y))
+            {   // trackpad: vuốt hai ngón sang ngang = xoay quanh trục đứng (vuốt dọc vẫn là phóng to/thu nhỏ)
+                Xoay = Quaternion.AngleAxis(-Mathf.Clamp(cuon2.x, -40f, 40f) * 0.6f, Vector3.up) * Xoay;
+                TuDongGoc = false;
+                cuon = 0f;
+            }
             if (trongVung && Mathf.Abs(cuon) > 0.01f)
             {   // zoom theo độ dài cú cuộn: trackpad (nhiều nhịp nhỏ) mượt, con lăn chuột (nhịp lớn) vẫn vừa phải
                 KhoangCach = Mathf.Clamp(KhoangCach * Mathf.Exp(-Mathf.Clamp(cuon, -30f, 30f) * 0.012f), 3f, 60f);

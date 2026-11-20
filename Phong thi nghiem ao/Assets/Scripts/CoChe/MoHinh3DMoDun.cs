@@ -92,7 +92,9 @@ namespace Khkt.CoChe
 
             TrinhPhat = gameObject.AddComponent<TrinhPhat3D>();
             TrinhPhat.Cam = Cam;
-            TrinhPhat.KieuChemistry = true; TrinhPhat.KieuJmol = true;          // bóng–que: cầu 0,27×vdW, que 0,14 Å hai màu
+            TrinhPhat.KieuChemistry = true; TrinhPhat.KieuJmol = true;
+            // kéo chuột / trackpad để xoay khi con trỏ nằm trong vùng nhìn (dưới thanh nút, trên ô nhập)
+            TrinhPhat.ViTriChuot = p => vungNhin != null && RectTransformUtility.RectangleContainsScreenPoint(vungNhin, p, Cam) ? p : (Vector2?)null;          // bóng–que: cầu 0,27×vdW, que 0,14 Å hai màu
 
             // 20/11: bố cục giống mục 04 "Mô hình 3D" của CHEMISTRY – nền tối toàn màn hình, nút nổi ở trên (như Cơ chế 3D toàn màn hình)
             vungNhin = Gian(goc, "Vùng nhìn", new Vector2(0, 90), new Vector2(0, -84));
@@ -127,11 +129,27 @@ namespace Khkt.CoChe
             var rd = (RectTransform)dong.transform; rd.anchorMin = rd.anchorMax = rd.pivot = new Vector2(1, 1);
 
             // ô nhập nổi ở đáy
-            oNhap = GlassKit.MakeInput(goc, "Ô nhập chất", "Tên chất, công thức hoặc SMILES rồi Enter (vd: ethanol, CH3COOH, CCO)", new Vector2(28, 0), new Vector2(720, 52), 17);
-            var ro = (RectTransform)oNhap.transform; ro.anchorMin = ro.anchorMax = ro.pivot = new Vector2(0, 0); ro.anchoredPosition = new Vector2(28, 22);
+            // ô tìm chất + nút Xem 3D nổi ở đáy, cùng kiểu viên nút tối của thanh trên
+            var khungNhap = Pill(goc, "Ô nhập chất (khung)", Vector2.zero, new Vector2(720, 52), NenNut);
+            khungNhap.anchorMin = khungNhap.anchorMax = khungNhap.pivot = new Vector2(0, 0); khungNhap.anchoredPosition = new Vector2(28, 22);
+            var chuNhap = GlassKit.Label(khungNhap, "Chữ", "", 17, new Color32(0xfa, 0xfa, 0xfa, 0xff), false, TextAnchor.MiddleLeft, new Vector2(18, 0), new Vector2(684, 52));
+            chuNhap.supportRichText = false; chuNhap.raycastTarget = false;
+            var goiY = GlassKit.Label(khungNhap, "Gợi ý", "Tên chất, công thức hoặc SMILES rồi Enter (vd: ethanol, CH3COOH, CCO)", 17, new Color32(0x71, 0x71, 0x7a, 0xff), false, TextAnchor.MiddleLeft, new Vector2(18, 0), new Vector2(684, 52));
+            goiY.raycastTarget = false;
+            oNhap = khungNhap.gameObject.AddComponent<InputField>();
+            oNhap.name = "Ô nhập chất";
+            khungNhap.name = "Ô nhập chất";
+            oNhap.textComponent = chuNhap; oNhap.placeholder = goiY;
+            oNhap.targetGraphic = khungNhap.GetComponent<Image>();
+            oNhap.caretColor = new Color32(0xfa, 0xfa, 0xfa, 0xff); oNhap.customCaretColor = true;
+            oNhap.selectionColor = new Color(0.36f, 0.55f, 1f, 0.35f);
+            oNhap.lineType = InputField.LineType.SingleLine;
+            var mauO = oNhap.colors; mauO.normalColor = Color.white; mauO.highlightedColor = new Color(1.25f, 1.25f, 1.3f); mauO.selectedColor = new Color(1.4f, 1.4f, 1.5f); oNhap.colors = mauO;
             oNhap.onSubmit.AddListener(XemChat);
-            var xem = GlassKit.MakeButton(goc, "Nút Xem 3D", "Xem 3D", Vector2.zero, new Vector2(130, 52), () => XemChat(oNhap.text), true, 16);
+            var xem = NutNoi(goc, "Nút Xem 3D", "Xem 3D", Vector2.zero, new Vector2(130, 52), () => XemChat(oNhap.text), true);
             var rx = (RectTransform)xem.transform; rx.anchorMin = rx.anchorMax = rx.pivot = new Vector2(0, 0); rx.anchoredPosition = new Vector2(760, 22);
+            xem.GetComponent<Image>().color = new Color32(0xfa, 0xfa, 0xfa, 0xff);                      // nút chính: nền sáng chữ tối như ô đang chọn
+            var cx = xem.GetComponentInChildren<Text>(); cx.color = new Color32(0x09, 0x09, 0x0b, 0xff); cx.fontStyle = FontStyle.Bold;
             trangThai = GlassKit.Label(goc, "Trạng thái", "", 15, phu, false, TextAnchor.MiddleLeft, Vector2.zero, new Vector2(900, 30));
             var rt = trangThai.rectTransform; rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0, 0); rt.anchoredPosition = new Vector2(30, 80);
             trangThai.horizontalOverflow = HorizontalWrapMode.Wrap;
@@ -252,7 +270,8 @@ namespace Khkt.CoChe
         }
 
         /// <summary>Đổi kết quả máy chủ thành kịch bản 1 trạng thái, 1 bước (không mũi tên) để TrinhPhat3D vẽ tĩnh.</summary>
-        void Hien(Dictionary<string, object> d)
+        /// <summary>Kịch bản 3D một trạng thái từ kết quả /co-che/mo-hinh-3d (dùng chung cho khung lớn và khung nhỏ ở trang kết quả).</summary>
+        public static KichBan3D TaoKichBan(Dictionary<string, object> d)
         {
             var kb = new KichBan3D { Ten = S(d, "ten") };
             var tt = new TrangThai3D { Ten = kb.Ten };
@@ -273,6 +292,13 @@ namespace Khkt.CoChe
             }
             kb.TrangThai.Add(tt);
             kb.Buoc.Add(new Buoc3D { Tu = 0, Den = 0, Ten = kb.Ten });
+            return kb;
+        }
+
+        void Hien(Dictionary<string, object> d)
+        {
+            var kb = TaoKichBan(d);
+            var ds = L(Lay(d, "nguyen_tu"));
             TrinhPhat.Nap(kb);
             TrinhPhat.DatT(1f);
             TenHienTai = kb.Ten;
