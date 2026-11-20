@@ -207,3 +207,22 @@ bảng 75%; ô đề vẫn ở trên trang (thiết kế cho phép "trên hoặc
   (thấy rõ CH₃Br, OH⁻, electron). Ảnh chụp menu ở batchmode vẫn thấy khung tối vì ở batchmode camera không tự vẽ theo vòng lặp
   (cùng lý do các kiểm thử Cơ chế phải gọi Render() thủ công); app thật dùng cùng cách với khung 3D nhỏ của Cơ chế đã hiện đúng.
   Chưa xem được bảng lớn trong app thật vì phải bấm chuột.
+
+## 11. Theo góp ý khi test app (20/11)
+
+- **3D hiện ngay dưới đáp án Cơ chế**: khối đáp án = tờ giấy → khung 3D tự phát (‹ Phát/Dừng ›, thanh tốc độ, kéo để xoay) →
+  **Lời giải** bằng chữ (theo giai đoạn: Khơi mào / Phát triển mạch…, mỗi bước "n. tên – ghi chú"). Chỉ khối mới nhất giữ trình
+  phát chạy; khối cũ có nút "Xem lại 3D" (không tốn nhiều camera khi có lịch sử dài).
+- **Sơ đồ giấy**: bỏ tiêu đề có gạch lượn sóng trong hình (lời giải đưa xuống phần chữ); chữ có chỉ số dưới/trên (H₃C, Br⁻)
+  dùng phông của app vì phông Times của máy thiếu ký tự chỉ số → trước đây lệch.
+- **Ít nút**: Cơ chế = Hỏi tiếp · Xem 3D toàn màn hình; Chuỗi = Xem chi tiết từng bước · Hỏi tiếp; Mô hình 3D = Xoay 3D toàn màn
+  hình. "Xuất ảnh · Báo sai" thành liên kết chữ nhỏ bên phải. Bỏ chip câu hỏi, bỏ "Giải thích" trùng lặp.
+- **Hết chồng đè**: khối "Lần giải" từng đè lên ô nhập (trang Mô hình 3D) vì hiệu ứng trượt giữ vị trí cũ khi trang xếp lại →
+  khối và thẻ chỉ còn hiệu ứng mờ dần.
+- **Bo góc vừa phải toàn app**: dạng viên thuốc (RadiusPill) nay bo 12, thẻ 16, thẻ lớn 20 (MenuKit, dùng chung mọi màn).
+- **Thanh kéo**: rãnh mảnh 4 điểm + núm tròn đều 18 điểm có viền màu nhấn (trước bị kéo thành ellipse).
+- **3D kiểu CHEMISTRY**: mặt phẳng phân tử (vd benzen) quay chính diện, lắc ±40° thay vì xoay hết vòng (không bao giờ nhìn
+  ngang mép), cầu nhỏ hơn; camera 3D căn theo khung chữ nhật của phân tử sau khi xoay (khung dẹt không còn đứng quá xa).
+- Kiểm: KhktUiVerify 76/76, KhktCoCheVerify 66/66, app Mac xuất được.
+- **Chưa làm** (cần sửa phía máy chủ dựng sơ đồ `so_do_giay`): công thức dài vẽ dạng khung (đường gấp khúc, giữ N, O, nhóm
+  như NO₂) và chỉnh vị trí đầu/đuôi mũi tên cong cho khỏi đè chữ.

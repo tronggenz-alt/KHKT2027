@@ -405,33 +405,19 @@ namespace Khkt.Menu
                   "Vẽ cơ chế (máy chủ giả, loại SN2): khối đáp án có sơ đồ giấy", gbt.BaiKetQua?.Ten);
             Check(guiLoai == "SN2", "Gửi kiểu cơ chế đã chọn", guiLoai);
             yield return Chup(menu, "co_che_ket_qua_Trang");
-            Bam(kc.transform, "Nút Mở lớn");
-            yield return Cho(0.5f);
-            Check(gbt.Bang.DangMo && gbt.Bang.Than.GetComponentsInChildren<Button>(true).Any(b => b.name == "Nút Bảng 3D"), "Cơ chế Mở lớn: bảng 75% có tờ giấy lớn + nút 3D + các bước");
-            yield return Chup(menu, "co_che_bang_lon_Trang");
-            Bam(gbt.Bang.Than, "Nút Bảng 3D");
-            yield return Cho(0.3f);
-            Check(gbt.Bang3D != null && gbt.Bang3D.TP.SoNguyenTuDangVe > 0, "3D chạy ngay trong bảng lớn (trình phát nhúng, vẽ nguyên tử)", gbt.Bang3D != null ? gbt.Bang3D.TP.SoNguyenTuDangVe.ToString() : "null");
-            Bam(gbt.Bang.Than, "Nút Phát bảng");
-            yield return Cho(0.6f);
-            Check(gbt.Bang3D != null && (gbt.Bang3D.TP.DangPhat || gbt.Bang3D.TP.T > 0f), "Nút Phát trong bảng phát cơ chế 3D");
-            gbt.Bang3D?.TP.DenBuoc(1); gbt.Bang3D?.TP.DatT(0.4f);
-            yield return null;
-            gbt.Bang3D?.VeNgay();
-            var doAnh = gbt.Bang3D != null ? gbt.Bang3D.DoAnh() : (Color.clear, 0);
-            Check(doAnh.Item2 > 150, "Khung 3D trong bảng có hình phân tử (điểm ảnh khác nền trên hàng giữa)", $"{doAnh.Item2} điểm, giữa {doAnh.Item1}");
-            gbt.Bang3D?.LuuAnh(Path.Combine(outDir, "bang3d_rt_ve_ngay.png"));
-            yield return Frames(5);
-            if (gbt.Bang3D != null) { var d5 = gbt.Bang3D.DoAnh(); Debug.Log($"[BANG3D] sau 5 khung: {d5.Item2} điểm"); gbt.Bang3D.LuuAnh(Path.Combine(outDir, "bang3d_rt_5_khung.png")); }
-            gbt.Bang3D?.VeNgay();
-            yield return Chup(menu, "co_che_bang_lon_3d_Trang");
-            Bam(gbt.transform, "Nút Đóng bảng lớn");
             yield return Cho(0.4f);
-            Check(gbt.Bang3D == null, "Đóng bảng lớn giải phóng trình phát 3D nhúng");
-            Bam(kc.transform, "Nút Giải thích");
+            Check(gbt.Xem3DMoi != null && gbt.Xem3DMoi.TP.SoNguyenTuDangVe > 0 && kc.Hinh.GetComponentsInChildren<RectTransform>(true).Any(r => r.name == "Khung 3D đáp án"),
+                  "Cơ chế: 3D chạy ngay dưới tờ giấy trong khối đáp án");
+            if (gbt.Xem3DMoi != null) { gbt.Xem3DMoi.TP.DatT(0.4f); yield return null; gbt.Xem3DMoi.VeNgay(); }
+            var da = gbt.Xem3DMoi != null ? gbt.Xem3DMoi.DoAnh() : (Color.clear, 0);
+            Check(da.Item2 > 300, "Khung 3D trong đáp án có hình phân tử", $"{da.Item2} điểm");
+            Check(kc.GetComponentsInChildren<Text>(true).Any(x => x.name == "Lời giải" && x.text.Contains("1.")), "Cơ chế: phần Lời giải bằng chữ dưới hình");
+            int nutChinh = kc.GetComponentsInChildren<Button>(true).Count(x => x.name.StartsWith("Nút ") && x.transform.parent.name == "Thân");
+            Check(nutChinh <= 4, "Cơ chế: ít nút (2 nút chính + 2 liên kết nhỏ)", nutChinh.ToString());
+            yield return Chup(menu, "co_che_3d_duoi_giay_Trang");
+            Bam(kc.transform, "Nút Toàn màn hình 3D");
             yield return Cho(1.0f);
-            Check(Khkt.CoChe.CoCheMoDun.DangMo && Khkt.CoChe.CoCheMoDun.Instance.GiaiThichMo && Khkt.CoChe.CoCheMoDun.Instance.TabBen == 1,
-                  "Giải thích chi tiết mở trình phát 3D ⇄ Giấy ở tab Giải thích");
+            Check(Khkt.CoChe.CoCheMoDun.DangMo && Khkt.CoChe.CoCheMoDun.Instance.ToanMan, "Nút Xem 3D toàn màn hình mở trình phát toàn màn");
             Khkt.CoChe.CoCheMoDun.Instance?.BatGiaiThich(false);
             Khkt.CoChe.CoCheMoDun.Dong();
             yield return Frames(3);

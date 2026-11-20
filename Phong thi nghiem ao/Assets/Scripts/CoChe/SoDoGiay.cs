@@ -41,6 +41,9 @@ namespace Khkt.CoChe
         int buocDangXem = -1;
 
         /// <summary>Tô khối giai đoạn chứa bước 3D đang xem (vạch trái đỏ, nền rất nhạt – như .buoc.dang-xem của bản demo). −1 = bỏ tô.</summary>
+        /// <summary>Ẩn tiêu đề giai đoạn có gạch lượn sóng (thẻ đáp án đưa lời giải xuống phần chữ riêng).</summary>
+        public bool AnTieuDe;
+
         public void DanhDauBuoc(int buoc)
         {
             if (buoc == buocDangXem) return;
@@ -122,7 +125,10 @@ namespace Khkt.CoChe
             rt.anchoredPosition = p;
             rt.sizeDelta = new Vector2(Mathf.Max(20f, t.Length * co * 0.9f + co), co * 1.6f);
             var tx = go.AddComponent<Text>();
-            Font coChan = sd != null && sd.CoChan ? CoCheMoDun.PhongCoChan(dam) : null;
+            // chữ có chỉ số trên/dưới (CH₃, Br⁻…): phông của app (Be Vietnam Pro có đủ ₀–₉ ⁺ ⁻), phông có chân của hệ máy thì thiếu → lệch
+            bool coChiSo = false;
+            foreach (var ch in t) if ((ch >= '\u2080' && ch <= '\u2089') || ch == '\u207A' || ch == '\u207B' || ch == '\u00B2' || ch == '\u00B3' || (ch >= '\u2070' && ch <= '\u2079')) { coChiSo = true; break; }
+            Font coChan = sd != null && sd.CoChan && !coChiSo ? CoCheMoDun.PhongCoChan(dam) : null;
             tx.font = coChan != null ? coChan : dam ? GlassKit.Semibold : GlassKit.Regular;
             tx.fontSize = Mathf.Max(8, Mathf.RoundToInt(co));
             tx.fontStyle = nghieng ? FontStyle.Italic : FontStyle.Normal;
@@ -163,7 +169,7 @@ namespace Khkt.CoChe
             }
             foreach (var g in sd.GiaiDoanDs)
             {
-                if (string.IsNullOrEmpty(g.TieuDe)) continue;
+                if (string.IsNullOrEmpty(g.TieuDe) || AnTieuDe) continue;
                 var tx = ThemChu(g.TieuDe, X(g.Xy), co * 1.12f, TextAnchor.MiddleLeft, true, true);
                 tx.rectTransform.sizeDelta = new Vector2(Mathf.Max(tx.preferredWidth + 8f, 40f), co * 1.8f);
                 GachLuonSong(X(g.Xy) + new Vector2(0, -co * 0.85f), tx.preferredWidth);

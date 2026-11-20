@@ -54,7 +54,7 @@ namespace Khkt.Menu
             Khoi.Add(k);
             rong.gameObject.SetActive(false);
             XepLai();
-            MenuAnim.Enter(k.Goc, 0f, 16f, 0.35f);
+            var nhom = MenuAnim.Group(k.Goc); MenuAnim.Fade(nhom, 0f, 1f, 0.3f);   // chỉ mờ dần: trượt vị trí sẽ đè khi trang xếp lại
             t.TruotToi(k.YTren);
             return k;
         }
@@ -100,13 +100,13 @@ namespace Khkt.Menu
         public RectTransform Hinh { get; private set; }
         Text tienTrinh, chuHoiTiep;
         InputField oHoi;
-        float caoHinh, caoTomTat, caoHoiTiep;
+        float caoHinh, caoTomTat, caoHoiTiep, caoLoiGiai;
         bool coChip;
         readonly List<Image> thanhXuong = new List<Image>();
         Action<string, Action<string>> hoi;
         const float CaoCauHoi = 64f;
 
-        public float ChieuCao => CaoCauHoi + 14 + (CoDapAn ? 24 + caoHinh + 18 + 34 + caoTomTat + 18 + 44 + 24 + caoHoiTiep : Loi ? 120 : 196) + (coChip ? 52 : 0);
+        public float ChieuCao => CaoCauHoi + 14 + (CoDapAn ? 24 + caoHinh + 18 + 34 + caoTomTat + caoLoiGiai + 18 + 44 + 24 + caoHoiTiep : Loi ? 120 : 196) + (coChip ? 52 : 0);
 
         public static KhoiDapAn Tao(RectTransform noiDung, DongThoiGian dong, string cauHoi, Texture anhDe, int so)
         {
@@ -173,7 +173,6 @@ namespace Khkt.Menu
             var t = TrangCuon.ChuRong(the, "Lỗi", "<b>Chưa giải được.</b>  " + chu, 16, Error, false, 24, -24, 80, 24);
             t.supportRichText = true;
             dong.XepLai();
-            MenuAnim.Enter(t.rectTransform, 0f, 8f, 0.3f);
         }
 
         /// <summary>
@@ -181,7 +180,7 @@ namespace Khkt.Menu
         /// </summary>
         public void DatDapAn(Func<RectTransform, float, float> veHinh, string ketLuan, string huyHieu, bool kiemChung, string tomTat,
                              IList<(string ten, string chu, int kieu, Action bam)> nut, IList<(string chu, Action bam)> chip,
-                             Action<string, Action<string>> hoiFn)
+                             Action<string, Action<string>> hoiFn, string loiGiai = null)
         {
             CoDapAn = true;
             hoi = hoiFn;
@@ -201,10 +200,31 @@ namespace Khkt.Menu
             y -= 34;
             caoTomTat = string.IsNullOrEmpty(tomTat) ? 0 : 48;
             if (caoTomTat > 0) TrangCuon.ChuRong(the, "Tóm tắt", tomTat, 15, InkDim, false, 24, y, 46, 24).verticalOverflow = VerticalWrapMode.Truncate;
-            y -= caoTomTat + 18;
-            float x = 24;
+            y -= caoTomTat;
+            caoLoiGiai = 0;
+            if (!string.IsNullOrEmpty(loiGiai))
+            {
+                int dong = 1;
+                foreach (var dg in loiGiai.Split('\n')) dong += 1 + dg.Length / 150;
+                caoLoiGiai = 34 + dong * 24;
+                TrangCuon.NhanNho(the, "Nhãn lời giải", "Lời giải", new Vector2(24, y - 14), 300, Accent);
+                var lg = TrangCuon.ChuRong(the, "Lời giải", loiGiai, 16, Ink, false, 24, y - 38, dong * 24, 24);
+                lg.lineSpacing = 1.1f;
+                y -= caoLoiGiai;
+            }
+            y -= 18;
+            float x = 24, xp = 24;
             foreach (var (ten, chu, kieu, bam) in nut)
             {
+                if (kieu == 2)
+                {   // việc phụ (Xuất ảnh, Báo sai): chữ nhỏ bên phải, không tranh chỗ với nút chính
+                    float wl = 20 + chu.Length * 7.6f;
+                    var l = MakeButton(the, ten, chu, new Vector2(-xp, y), new Vector2(wl, 40), bam, 2, TrangCuon.BoNut, new Vector2(1, 1));
+                    ((RectTransform)l.transform).pivot = new Vector2(1, 1);
+                    var lt = l.transform.Find("Chữ").GetComponent<Text>(); lt.fontSize = 14; lt.color = InkDim; lt.fontStyle = FontStyle.Normal;
+                    xp += wl + 4;
+                    continue;
+                }
                 float w = 30 + chu.Length * 8.6f;
                 var b = MakeButton(the, ten, chu, new Vector2(x, y), new Vector2(w, 40), bam, kieu, TrangCuon.BoNut);
                 b.transform.Find("Chữ").GetComponent<Text>().fontSize = 15;
@@ -228,10 +248,7 @@ namespace Khkt.Menu
                 TrangCuon.XepChip(hang, ds, 0, -2, rong, 14);
             }
             dong.XepLai();
-            // các phần hiện lần lượt cách 60 ms
-            int i = 0;
-            foreach (Transform c in the)
-                if (c.gameObject.activeSelf && c != xuong) MenuAnim.Enter((RectTransform)c, (i++) * 0.06f, 10f, 0.32f);
+            MenuAnim.Fade(MenuAnim.Group(the), 0.2f, 1f, 0.3f);
             dong.TruotToiDapAn(this);
         }
 
@@ -243,7 +260,7 @@ namespace Khkt.Menu
             hoiTiep.gameObject.SetActive(mo);
             caoHoiTiep = mo ? 150 : 0;
             dong.XepLai();
-            if (mo) { MenuAnim.Enter(hoiTiep, 0f, 8f, 0.28f); oHoi.ActivateInputField(); }
+            if (mo) oHoi.ActivateInputField();
             if (cauHoi != null) GuiHoi(cauHoi);
         }
 
@@ -259,7 +276,7 @@ namespace Khkt.Menu
             {
                 TraLoiCuoi = tl;
                 chuHoiTiep.text = $"<b>{cau}</b>\n{tl}";
-                MenuAnim.Enter(chuHoiTiep.rectTransform, 0f, 6f, 0.3f);
+
             });
         }
     }
@@ -416,6 +433,7 @@ namespace Khkt.Menu
             rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one; rt.offsetMin = new Vector2(18, 14); rt.offsetMax = new Vector2(-18, -14);
             var g = go.AddComponent<SoDoGiay>();
             g.raycastTarget = false;
+            g.AnTieuDe = true;                         // lời giải đưa xuống phần chữ bên dưới, không gạch lượn sóng trên hình
             g.Dat(b.SoDo);
             return g;
         }
@@ -437,7 +455,7 @@ namespace Khkt.Menu
         int[] lkA, lkB, thuTu;
         float[] z;
         Vector2[] p2;
-        float k, goc = -28f, rong, cao;
+        float k, goc, thoiGian, rong, cao;
         RectTransform lopCau;
 
         public int SoNguyenTu => p0 != null ? p0.Length : 0;
@@ -459,8 +477,21 @@ namespace Khkt.Menu
             }
             tam /= Mathf.Max(1, n);
             float R = 0.5f;
-            for (int i = 0; i < n; i++) { p0[i] -= tam; R = Mathf.Max(R, p0[i].magnitude + TrinhPhat3D.VdW(e[i]) * 0.27f); }
-            k = Mathf.Min(rong * 0.8f, cao) * 0.6f / R;
+            for (int i = 0; i < n; i++) p0[i] -= tam;
+            // quay mặt phẳng "dẹt nhất" của phân tử (benzen, vòng…) ra chính diện: pháp tuyến = hướng ít trải nhất (lặp lũy thừa trên ma trận hiệp phương sai đảo dấu)
+            float xx = 0, yy = 0, zz = 0, xy = 0, xz = 0, yz = 0;
+            foreach (var p in p0) { xx += p.x * p.x; yy += p.y * p.y; zz += p.z * p.z; xy += p.x * p.y; xz += p.x * p.z; yz += p.y * p.z; }
+            float tr = xx + yy + zz;
+            var v = new Vector3(0.3f, 0.4f, 0.87f);
+            for (int it = 0; it < 40; it++)
+            {
+                var w = new Vector3((tr - xx) * v.x - xy * v.y - xz * v.z, -xy * v.x + (tr - yy) * v.y - yz * v.z, -xz * v.x - yz * v.y + (tr - zz) * v.z);
+                if (w.sqrMagnitude < 1e-8f) break;
+                v = w.normalized;
+            }
+            var quayMat = Quaternion.FromToRotation(v, Vector3.back);
+            for (int i = 0; i < n; i++) { p0[i] = quayMat * p0[i]; R = Mathf.Max(R, p0[i].magnitude + TrinhPhat3D.VdW(e[i]) * 0.27f); }
+            k = Mathf.Min(rong * 0.8f, cao) * 0.5f / R;
             var lk = L(Lay(d, "lien_ket"));
             var a2 = new List<int>(); var b2 = new List<int>();
             foreach (var o in lk) { var l = D(o); int a = I(Lay(l, "a")), b = I(Lay(l, "b")); if (a >= 0 && b >= 0 && a < n && b < n) { a2.Add(a); b2.Add(b); } }
@@ -479,7 +510,7 @@ namespace Khkt.Menu
                 float r = TrinhPhat3D.VdW(e[i]) * 0.27f * k;
                 var c = Fill(lopCau, "Nguyên tử " + e[i], new Vector2(0, 1), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(r * 2, r * 2), TrinhPhat3D.MauCH(e[i]), r);
                 c.raycastTarget = false;
-                if (e[i] == "H") { c.color = Color.white; Ring(c.transform, "Viền", new Color(0, 0, 0, 0.32f), r); }
+                if (e[i] == "H") { c.color = Color.white; Ring(c.transform, "Viền", new Color(0, 0, 0, 0.22f), r); }
                 Fill(c.transform, "Ánh", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-r * 0.3f, r * 0.3f), new Vector2(r * 0.8f, r * 0.8f), new Color(1, 1, 1, 0.28f), r * 0.4f).raycastTarget = false;
                 cau[i] = c.rectTransform;
             }
@@ -508,13 +539,14 @@ namespace Khkt.Menu
         void Update()
         {
             if (p0 == null) return;
-            goc += TocDo * Time.unscaledDeltaTime;
+            thoiGian += Time.unscaledDeltaTime;
+            goc = 40f * Mathf.Sin(thoiGian * 0.55f);          // lắc qua lại ±40° quanh trục đứng: luôn thấy rõ, không bao giờ nhìn ngang mép
             VeKhung();
         }
 
         void VeKhung()
         {
-            var q = Quaternion.Euler(14f, goc, 0f);
+            var q = Quaternion.Euler(12f, goc, 0f);
             var c = new Vector2(rong * 0.5f, -cao * 0.5f);
             for (int i = 0; i < p0.Length; i++)
             {
@@ -633,14 +665,15 @@ namespace Khkt.Menu
         {
             var cu = RenderTexture.active;
             RenderTexture.active = rt;
-            var t = new Texture2D(rt.width, 1, TextureFormat.RGBA32, false);
-            t.ReadPixels(new Rect(0, rt.height / 2, rt.width, 1), 0, 0);
+            var t = new Texture2D(rt.width, rt.height, TextureFormat.RGBA32, false);
+            t.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
             t.Apply();
             RenderTexture.active = cu;
             int n = 0;
             var nen = (Color)cam.backgroundColor;
-            for (int i = 0; i < rt.width; i++) { var c = t.GetPixel(i, 0); if (Mathf.Abs(c.r - nen.r) + Mathf.Abs(c.g - nen.g) + Mathf.Abs(c.b - nen.b) > 0.08f) n++; }
-            var g = t.GetPixel(rt.width / 2, 0);
+            for (int yy = 0; yy < rt.height; yy += 8)                       // đếm trên lưới thưa cả ảnh (không chỉ hàng giữa)
+                for (int i = 0; i < rt.width; i += 8) { var c = t.GetPixel(i, yy); if (Mathf.Abs(c.r - nen.r) + Mathf.Abs(c.g - nen.g) + Mathf.Abs(c.b - nen.b) > 0.08f) n++; }
+            var g = t.GetPixel(rt.width / 2, rt.height / 2);
             Destroy(t);
             Debug.Log($"[BANG3D] cam {cam.transform.position} kc {TP.KhoangCach:0.0} rt {rt.width}x{rt.height} nt {TP.SoNguyenTuDangVe} hat {TP.SoHatDangVe} tam {TrinhPhat3D.Tam}");
             return (g, n);

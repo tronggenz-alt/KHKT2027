@@ -778,17 +778,23 @@ namespace Khkt.CoChe
         /// <summary>Thanh trượt uGUI tự dựng (nền, phần đã kéo, núm tròn).</summary>
         public static Slider TaoThanhTruot(Transform cha, Vector2 pos, Vector2 co, float min, float max, float gt, System.Action<float> doi)
         {
+            // kiểu thanh trượt máy đo: rãnh mảnh 4 điểm, phần đã kéo màu nhấn, núm TRÒN ĐỀU 18 điểm có viền (không kéo giãn thành ellipse)
             var rt = GlassKit.Rect(cha, "Thanh trượt", new Vector2(0, 1), new Vector2(0, 1), pos, co);
-            var nen = KeoGian(rt, "Nền", new Vector2(0, co.y * 0.5f - 3), new Vector2(0, -(co.y * 0.5f - 3)));
-            var ni = nen.gameObject.AddComponent<Image>(); ni.sprite = GlassKit.Solid; ni.type = Image.Type.Sliced; ni.color = new Color(1, 1, 1, 0.16f);
-            var vungDay = KeoGian(rt, "Vùng đầy", new Vector2(0, co.y * 0.5f - 3), new Vector2(0, -(co.y * 0.5f - 3)));
+            var bat = rt.gameObject.AddComponent<Image>(); bat.color = new Color(1, 1, 1, 0.001f);       // vùng bấm cao cả thanh
+            var nen = GlassKit.Rect(rt, "Rãnh", new Vector2(0, 0.5f), new Vector2(0, 0.5f), Vector2.zero, new Vector2(co.x, 4));
+            nen.anchorMax = new Vector2(1, 0.5f); nen.sizeDelta = new Vector2(0, 4);
+            var ni = nen.gameObject.AddComponent<Image>(); ni.sprite = Khkt.Menu.Dashboard.MenuKit.Round(2f); ni.type = Image.Type.Sliced; ni.color = new Color(0.6f, 0.65f, 0.74f, 0.45f); ni.raycastTarget = false;
+            var vungDay = GlassKit.Rect(rt, "Vùng đầy", new Vector2(0, 0.5f), new Vector2(0, 0.5f), Vector2.zero, new Vector2(co.x, 4));
+            vungDay.anchorMax = new Vector2(1, 0.5f); vungDay.sizeDelta = new Vector2(0, 4);
             var day = KeoGian(vungDay, "Đầy", Vector2.zero, Vector2.zero);
-            var di = day.gameObject.AddComponent<Image>(); di.sprite = GlassKit.Solid; di.type = Image.Type.Sliced; di.color = XanhNhan;
-            var vungNum = KeoGian(rt, "Vùng núm", new Vector2(8, 0), new Vector2(-8, 0));
+            var di = day.gameObject.AddComponent<Image>(); di.sprite = Khkt.Menu.Dashboard.MenuKit.Round(2f); di.type = Image.Type.Sliced; di.color = XanhNhan; di.raycastTarget = false;
+            var vungNum = KeoGian(rt, "Vùng núm", new Vector2(9, 0), new Vector2(-9, 0));
             var num = GlassKit.Rect(vungNum, "Núm", new Vector2(0, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(18, 18));
-            var nimg = num.gameObject.AddComponent<Image>(); nimg.sprite = GlassKit.Solid; nimg.type = Image.Type.Sliced; nimg.pixelsPerUnitMultiplier = 0.4f; nimg.color = Color.white;
+            var vien = num.gameObject.AddComponent<Image>(); vien.sprite = Khkt.Menu.Dashboard.MenuKit.Round(9f); vien.type = Image.Type.Sliced; vien.color = XanhNhan;
+            var mat = GlassKit.Rect(num, "Mặt núm", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(12, 12));
+            var mi = mat.gameObject.AddComponent<Image>(); mi.sprite = Khkt.Menu.Dashboard.MenuKit.Round(6f); mi.type = Image.Type.Sliced; mi.color = Color.white; mi.raycastTarget = false;
             var sl = rt.gameObject.AddComponent<Slider>();
-            sl.fillRect = day; sl.handleRect = num; sl.targetGraphic = nimg;
+            sl.fillRect = day; sl.handleRect = num; sl.targetGraphic = vien;
             sl.direction = Slider.Direction.LeftToRight;
             sl.minValue = min; sl.maxValue = max; sl.value = gt;
             sl.navigation = new Navigation { mode = Navigation.Mode.None };

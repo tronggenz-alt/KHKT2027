@@ -494,15 +494,14 @@ namespace Khkt.Menu
                 string ma = Lay(b, "ma_co_che") as string;
                 if (!string.IsNullOrEmpty(ma) && maCoChe.Contains(ma)) chip.Add(($"Xem cơ chế: {S(b, "tu")} → {S(b, "den")}", () => CoCheMoDun.MoMau(ma)));
             }
-            if (ds.Count > 0) { var b0 = D(ds[0]); string q = $"Vì sao {S(b0, "tu")} → {S(b0, "den")} cần {S(b0, "dieu_kien", "điều kiện đó")}?"; chip.Add((q, () => k.BatHoiTiep(q))); }
+
             k.DatDapAn((rt, w) => HinhDapAn.Chuoi(rt, buoc, w),
                 $"{ds.Count} bước  ·  {chuoi}", kc ? "Đã kiểm chứng" : "Có bước chưa kiểm chứng", kc, tomTat,
                 new List<(string, string, int, Action)> {
-                    ("Nút Mở lớn", "⤢  Mở lớn", 0, () => MoLonChuoi(d)),
-                    ("Nút Giải thích", "Giải thích", 1, () => MoLonChuoi(d)),
+                    ("Nút Mở lớn", "Xem chi tiết từng bước", 0, () => MoLonChuoi(d)),
                     ("Nút Hỏi tiếp", "Hỏi tiếp", 1, () => k.BatHoiTiep()),
-                    ("Nút Xuất PNG", "Xuất PNG", 1, () => StartCoroutine(XuatPng(k.Hinh, "chuoi"))),
-                    ("Nút Báo sai chuỗi", "Báo sai", 1, () => baoSai.Mo("chuoi", "", S(d, "chuoi"), -1, "")) },
+                    ("Nút Xuất PNG", "Xuất ảnh", 2, () => StartCoroutine(XuatPng(k.Hinh, "chuoi"))),
+                    ("Nút Báo sai chuỗi", "Báo sai", 2, () => baoSai.Mo("chuoi", "", S(d, "chuoi"), -1, "")) },
                 chip, (cau, tra) => StartCoroutine(HoiDap(cau, "Chuỗi " + S(d, "chuoi"), "", ds, tra)));
         }
 
@@ -863,16 +862,84 @@ namespace Khkt.Menu
             string tomTat = (string.IsNullOrEmpty(b.KichBan.Loai) ? "" : b.KichBan.Loai + " · ") + $"{b.KichBan.Buoc.Count} bước: " + string.Join(" → ", ten);
             var buocJson = new List<object>();
             foreach (var bu in b.KichBan.Buoc) buocJson.Add(new Dictionary<string, object> { { "tu", bu.Ten }, { "den", "" }, { "phan_ung", bu.GhiChu }, { "dieu_kien", "" } });
-            k.DatDapAn((rt, w) => { float h = Mathf.Clamp(w * tiLe, 220, 520); HinhDapAn.Giay(rt, b, w, h); return h; },
+            k.DatDapAn((rt, w) => VeGiayVa3D(rt, w, b, tiLe),
                 b.Ten, nguon, mau, tomTat,
                 new List<(string, string, int, Action)> {
-                    ("Nút Mở lớn", "⤢  Mở lớn", 0, () => MoLonCoChe(b)),
-                    ("Nút Giải thích", "Giải thích", 1, () => CoCheMoDun.MoVoiBai(b, 1)),
-                    ("Nút Hỏi tiếp", "Hỏi tiếp", 1, () => k.BatHoiTiep()),
-                    ("Nút Xuất PNG", "Xuất PNG", 1, () => StartCoroutine(XuatPng(k.Hinh, "co_che_" + b.Ma))),
-                    ("Nút Báo sai cơ chế", "Báo sai", 1, () => baoSai.Mo("co_che", b.Ma, b.Ten, -1, "")) },
-                new List<(string, Action)> { ("Xem electron chạy trong 3D", () => CoCheMoDun.MoVoiBai(b, -1, 0)), ("Vì sao bước 1 xảy ra như vậy?", () => k.BatHoiTiep("Vì sao bước 1 xảy ra như vậy?")) },
-                (cau, tra) => StartCoroutine(HoiDap(cau, b.Ten, b.De ?? "", buocJson, tra)));
+                    ("Nút Hỏi tiếp", "Hỏi tiếp", 0, () => k.BatHoiTiep()),
+                    ("Nút Toàn màn hình 3D", "⤢  Xem 3D toàn màn hình", 1, () =>
+                    {
+                        int bu = Xem3DMoi != null && baiXem3D == b ? Xem3DMoi.TP.ChiSoBuoc : 0;
+                        CoCheMoDun.MoVoiBai(b, -1, bu);
+                        CoCheMoDun.Instance?.DatToanMan(true);
+                    }),
+                    ("Nút Xuất PNG", "Xuất ảnh", 2, () => StartCoroutine(XuatPng(k.Hinh, "co_che_" + b.Ma))),
+                    ("Nút Báo sai cơ chế", "Báo sai", 2, () => baoSai.Mo("co_che", b.Ma, b.Ten, -1, "")) },
+                null, (cau, tra) => StartCoroutine(HoiDap(cau, b.Ten, b.De ?? "", buocJson, tra)), LoiGiaiCoChe(b));
+        }
+
+        // ---- 3D ngay dưới tờ giấy trong khối đáp án (chỉ khối mới nhất giữ trình phát chạy; khối cũ có nút "Xem lại 3D")
+        public Xem3DNho Xem3DMoi { get; private set; }
+        RectTransform khung3DMoi;
+        BaiCoChe baiXem3D;
+
+        float VeGiayVa3D(RectTransform rt, float w, BaiCoChe b, float tiLe)
+        {
+            float hp = Mathf.Clamp(w * tiLe, 200, 420), h3 = Mathf.Clamp(w * 0.32f, 300, 440);
+            var giay = MenuKit.Stretch(rt, "Vùng giấy", new Vector2(0, 1), new Vector2(1, 1), new Vector2(0, -hp), Vector2.zero);
+            HinhDapAn.Giay(giay, b, 0, -1);                      // tờ giấy rộng bằng khung 3D bên dưới
+            var k3 = MenuKit.Stretch(rt, "Khung 3D đáp án", new Vector2(0, 1), new Vector2(1, 1), new Vector2(0, -hp - 14 - h3), new Vector2(0, -hp - 14));
+            k3.gameObject.AddComponent<RectMask2D>();
+            var dk = MenuKit.Stretch(rt, "Điều khiển 3D đáp án", new Vector2(0, 1), new Vector2(1, 1), new Vector2(0, -hp - 14 - h3 - 54), new Vector2(0, -hp - 14 - h3 - 10));
+            MakeButton(dk, "Nút Bước trước 3D", "‹", Vector2.zero, new Vector2(44, 44), () => { if (baiXem3D == b) Xem3DMoi?.TP.BuocTruoc(); }, 1, TrangCuon.BoNut);
+            MakeButton(dk, "Nút Phát 3D", "Phát / Dừng", new Vector2(50, 0), new Vector2(130, 44), () => { if (baiXem3D != b) TaoXem3D(k3, b); else Xem3DMoi?.TP.PhatDung(); }, 0, TrangCuon.BoNut);
+            MakeButton(dk, "Nút Bước sau 3D", "›", new Vector2(186, 0), new Vector2(44, 44), () => { if (baiXem3D == b) Xem3DMoi?.TP.BuocSau(); }, 1, TrangCuon.BoNut);
+            GlassKit.Label(dk, "Nhãn tốc độ", "Tốc độ", 14, InkDim, false, TextAnchor.MiddleLeft, new Vector2(250, 0), new Vector2(60, 44));
+            var chuToc = GlassKit.Label(dk, "Giá trị tốc độ", "1.00×", 14, Ink, false, TextAnchor.MiddleLeft, new Vector2(546, 0), new Vector2(60, 44));
+            CoCheMoDun.TaoThanhTruot(dk, new Vector2(310, -12), new Vector2(226, 20), 0.25f, 3f, 1f, v => { if (baiXem3D == b && Xem3DMoi != null) Xem3DMoi.TP.TocDo = v; chuToc.text = v.ToString("0.00") + "×"; });
+            GlassKit.Label(dk, "Gợi ý", "Kéo trong khung để xoay", 13, InkMute, false, TextAnchor.MiddleRight, new Vector2(-4, 0), new Vector2(300, 44), new Vector2(1, 1)).rectTransform.pivot = new Vector2(1, 1);
+            TaoXem3D(k3, b);
+            return hp + 14 + h3 + 54;
+        }
+
+        void TaoXem3D(RectTransform k3, BaiCoChe b)
+        {
+            if (Xem3DMoi != null)
+            {
+                var cu = khung3DMoi; var baiCu = baiXem3D;
+                Destroy(Xem3DMoi.gameObject);
+                if (cu != null && cu != k3)
+                {
+                    var nut = MakeButton(cu, "Nút Xem lại 3D", "▶  Xem lại 3D", Vector2.zero, new Vector2(180, 48), null, 0, TrangCuon.BoNut, new Vector2(0.5f, 0.5f));
+                    ((RectTransform)nut.transform).pivot = new Vector2(0.5f, 0.5f);
+                    nut.onClick.AddListener(() => { Destroy(nut.gameObject); TaoXem3D(cu, baiCu); });
+                }
+            }
+            foreach (Transform c in k3) if (c.name == "Nút Xem lại 3D") Destroy(c.gameObject);
+            Xem3DMoi = Xem3DNho.Tao(k3, b.KichBan, GetComponentInParent<Canvas>().rootCanvas.worldCamera);
+            khung3DMoi = k3; baiXem3D = b;
+            Xem3DMoi.TP.DenBuoc(0, true);                        // tự phát từ bước 1
+        }
+
+        static string LoiGiaiCoChe(BaiCoChe b)
+        {
+            var sb = new StringBuilder();
+            var gd = b.SoDo != null ? b.SoDo.GiaiDoanDs : null;
+            var daGhi = new HashSet<int>();
+            if (gd != null)
+                foreach (var g in gd)
+                {
+                    if (g.NhanhSai >= 0 || g.Buoc.Count == 0) continue;
+                    if (!string.IsNullOrEmpty(g.TieuDe)) sb.Append("<b>").Append(g.TieuDe.TrimEnd(':', ' ')).Append("</b>\n");
+                    foreach (var i in g.Buoc) if (i >= 0 && i < b.KichBan.Buoc.Count && daGhi.Add(i)) DongBuoc(sb, b, i);
+                }
+            for (int i = 0; i < b.KichBan.Buoc.Count; i++) if (daGhi.Add(i)) DongBuoc(sb, b, i);
+            return sb.ToString().TrimEnd('\n');
+        }
+
+        static void DongBuoc(StringBuilder sb, BaiCoChe b, int i)
+        {
+            var bu = b.KichBan.Buoc[i];
+            sb.Append($"<b>{i + 1}. {bu.Ten}</b>" + (bu.BuocCham ? " (bước chậm)" : "") + $" – {bu.GhiChu}\n");
         }
 
         public Xem3DNho Bang3D { get; private set; }
@@ -1008,9 +1075,9 @@ namespace Khkt.Menu
                 k.DatDapAn((rt, w) => HinhDapAn.Ba(rt, d, w, 380), $"{S(d, "ten")}  ·  {S(d, "cong_thuc")}", nguon, S(d, "nguon") == "bang_sgk",
                     $"M = {F(Lay(d, "khoi_luong")):0.00} g/mol  ·  {L(Lay(d, "nguyen_tu")).Count} nguyên tử (kể cả H)  ·  SMILES {S(d, "smiles")}",
                     new List<(string, string, int, Action)> {
-                        ("Nút Mở lớn", "⤢  Mở lớn (xoay 3D)", 0, () => { MoHinh3DMoDun.Mo(); MoHinh3DMoDun.Instance?.XemChat(q); }),
-                        ("Nút Xuất PNG", "Xuất PNG", 1, () => StartCoroutine(XuatPng(k.Hinh, "mo_hinh_3d"))),
-                        ("Nút Báo sai 3D", "Báo sai", 1, () => baoSai.Mo("mo_hinh_3d", "", q, -1, "")) },
+                        ("Nút Mở lớn", "Xoay 3D toàn màn hình", 0, () => { MoHinh3DMoDun.Mo(); MoHinh3DMoDun.Instance?.XemChat(q); }),
+                        ("Nút Xuất PNG", "Xuất ảnh", 2, () => StartCoroutine(XuatPng(k.Hinh, "mo_hinh_3d"))),
+                        ("Nút Báo sai 3D", "Báo sai", 2, () => baoSai.Mo("mo_hinh_3d", "", q, -1, "")) },
                     null, null);
             }
             catch (Exception e) { k.DatLoi("Kết quả lỗi định dạng: " + e.Message); }

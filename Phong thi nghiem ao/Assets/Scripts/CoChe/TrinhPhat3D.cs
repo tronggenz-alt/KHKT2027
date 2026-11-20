@@ -55,7 +55,7 @@ namespace Khkt.CoChe
         {
             CapNhatDich();
             Xoay = xoayDich; tamNay = tamDich;
-            KhoangCach = khoangDich * (Cam != null ? Mathf.Max(1f, 1f / Mathf.Max(0.3f, Cam.aspect)) : 1f);
+            KhoangCach = khoangDich;
         }
         public float KhoangCach = 13f;
         public Quaternion Xoay = Quaternion.Euler(12f, -18f, 0f);
@@ -158,7 +158,7 @@ namespace Khkt.CoChe
                 float k = 1f - Mathf.Exp(-2.2f * Time.unscaledDeltaTime);
                 if (!TuXoay) Xoay = Quaternion.Slerp(Xoay, xoayDich, k);
                 tamNay = Vector3.Lerp(tamNay, tamDich, k);
-                KhoangCach = Mathf.Lerp(KhoangCach, khoangDich * Mathf.Max(1f, 1f / Mathf.Max(0.3f, Cam.aspect)), k);
+                KhoangCach = Mathf.Lerp(KhoangCach, khoangDich, k);
             }
             float dt = Time.unscaledDeltaTime * TocDo;
             if (DangNhanhSai)
@@ -235,10 +235,17 @@ namespace Khkt.CoChe
                 Vector3 mn = ds[0], mx = ds[0];
                 foreach (var p in ds) { mn = Vector3.Min(mn, p); mx = Vector3.Max(mx, p); }
                 tamDich = (mn + mx) * 0.5f;
-                float r = 1.2f;
-                foreach (var p in ds) r = Mathf.Max(r, (p - tamDich).magnitude + 0.5f);
+                // căn theo khung chữ nhật của các chất SAU KHI xoay về góc nhìn đã chọn: ngang chia tỉ lệ khung, dọc theo FOV
+                float nuaX = 1.2f, nuaY = 1.2f;
+                foreach (var p in ds)
+                {
+                    var q = xoayDich * (p - tamDich);
+                    nuaX = Mathf.Max(nuaX, Mathf.Abs(q.x) + 0.6f);
+                    nuaY = Mathf.Max(nuaY, Mathf.Abs(q.y) + 0.6f);
+                }
                 float tanf = Mathf.Tan((Cam != null ? Cam.fieldOfView : 32f) * 0.5f * Mathf.Deg2Rad);
-                khoangDich = Mathf.Clamp(r / tanf * 1.08f, 5f, 60f);
+                float tl = Cam != null ? Mathf.Max(0.3f, Cam.aspect) : 1.6f;
+                khoangDich = Mathf.Clamp(Mathf.Max(nuaY / tanf, nuaX / (tanf * tl)) * 1.12f + 2f, 5f, 60f);
             }
         }
 

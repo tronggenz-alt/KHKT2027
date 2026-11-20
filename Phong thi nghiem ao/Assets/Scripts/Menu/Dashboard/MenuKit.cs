@@ -317,8 +317,8 @@ namespace Khkt.Menu.Dashboard
 
         // ------------------------------------------------------------------ bán kính (điểm giao diện, tham chiếu 1920×1080)
         public const float RadiusButton = 12f;
-        public const float RadiusCard = 20f;
-        public const float RadiusLarge = 28f;
+        public const float RadiusCard = 16f;      // 20/11: bo vừa phải toàn app
+        public const float RadiusLarge = 20f;
         /// <summary>Viên nang: góc tự thu bằng nửa chiều cao (giá trị ≤ 1 cũng hiểu là viên nang).</summary>
         public const float RadiusPill = 1f;
 
@@ -368,7 +368,7 @@ namespace Khkt.Menu.Dashboard
         const float ShapeScale = 2f;
         const int PillRadius = 32;
 
-        static int RadiusKey(float radius) => radius <= 1f ? PillRadius : Mathf.Clamp(Mathf.RoundToInt(radius), 2, 48);
+        static int RadiusKey(float radius) => radius <= 1f ? 12 : Mathf.Clamp(Mathf.RoundToInt(radius), 2, 48);
 
         static float SdRoundBox(float px, float py, float hx, float hy, float r)
         {
