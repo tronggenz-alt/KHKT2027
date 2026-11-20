@@ -70,7 +70,7 @@
 
 | Bộ | Kết quả |
 |---|---|
-| `Khkt.EditorTools.KhktTayMoiVerify.Run` (mới) | `passes=31 failures=0 runtimeErrors=0` – **ALL PASSED** |
+| `Khkt.EditorTools.KhktTayMoiVerify.Run` (mới) | `passes=32 failures=0 runtimeErrors=0` – **ALL PASSED** (gồm bộ đệm đĩa) |
 | `Khkt.EditorTools.KhktN18Verify.RunG2` | `passes=16 failures=0 runtimeErrors=0` – **ALL PASSED** |
 | `KhktWave6Verify.Run` | 63 đạt, 1 lỗi + hết giờ ở **bước 7.7** "Guest entered DashboardShell" (màn menu chính, bấm "Nút Dùng thử" → `DashboardShell` null, `KhktWave6Runner.cs:1182`). Bước này không có bàn tay; `MainMenu.cs`/`KhktUiRunner.cs` vừa được phiên Giải bài tập sửa trong ngày → ngoài phạm vi, cần phiên đó xem lại. Mọi bước phòng lab (1–7.4) đạt. |
 
@@ -113,18 +113,24 @@ cổ tay áo, mép cuộn.
 - Không cấp phát bộ nhớ mỗi khung (đo: 0 byte / 200 khung cầm bình nón có IK; 0 byte / 200 lần ánh xạ MediaPipe).
 - CPU tay + cánh tay + IK: 0,27–0,76 ms/khung (Editor, chưa tối ưu như bản app).
 - GPU: thêm ~2 × 28,6 nghìn đỉnh skinning + 2 × 5,4 nghìn đỉnh tay áo ở mức Cao (Thấp: 7,1 nghìn / 2,6 nghìn).
-- **Xuất app Mac** (`Khkt.EditorTools.MacBuild.Build`): Succeeded, 0 lỗi, 278,5 s, 248,1 MB → `~/AppBuild/VERA_mac/VERA Lab.app`.
+- **Xuất app Mac** (`Khkt.EditorTools.MacBuild.Build`): Succeeded, 0 lỗi, 248,4 MB (lần cuối 45,4 s) → `~/AppBuild/VERA_mac/VERA Lab.app`.
 
 ## 6. Việc còn lại / ghi chú
 
-- **Đo khung hình chưa hợp lệ, cần đo lại:** `-vera-do -vera-muc=tudong -vera-nhan=tay_moi` cho p50 16,73 ms, **p95 33,30 ms**
-  (mốc 18/11 cùng màn hình 3840×2160, mức Cao, vSync=2: p95 17,60 ms). Nhưng suốt 90 s đo có **một bản VERA Lab khác đang chạy
-  song song** (PID 70352, mở lúc 23:09, không do phiên này mở) nên GPU bị chia đôi. Chưa kết luận được về hiệu năng GPU.
-  Đóng mọi cửa sổ VERA Lab rồi đo lại:
-  `"$HOME/AppBuild/VERA_mac/VERA Lab.app/Contents/MacOS/VERA Lab" -vera-do -vera-muc=tudong -vera-nhan=tay_moi_lan2`.
-  Nếu p95 vẫn vượt mốc: hạ lưới mức Cao từ 1,5 mm xuống 1,8 mm (`TayNguoiLuoi.CellSize`) hoặc tắt bóng đổ của tay.
-- Lần đầu mở app, hai bàn tay hiện sau khi luồng nền dựng xong (vài giây, lúc màn giới thiệu còn mở). Nên thêm bộ nhớ đệm
-  lưới ra đĩa (`persistentDataPath`) để các lần sau hiện tức thì.
+- **Đo khung hình – A/B cùng điều kiện.** Suốt buổi tối có một bản VERA Lab khác chạy song song (PID 70352, mở 23:09, ~28% CPU,
+  không do phiên này mở, không tắt) nên mọi lần đo đều bị nhiễu so với mốc 18/11 (p95 17,60 ms). Để tách chi phí của tay, thêm cờ
+  `-vera-an-tay` (ẩn tay + cánh tay) và đo xen kẽ 4 × 90 s cùng màn hình 3840×2160, mức Cao, vSync=2:
+
+  | Lần | Có tay | Ẩn tay |
+  |---|---|---|
+  | 1 | TB 19,41 ms · p50 16,67 · **p95 33,32** · p99 41,00 | TB 24,99 ms · p50 24,99 · **p95 33,52** · p99 41,80 |
+  | 2 | TB 21,60 ms · p50 17,05 · **p95 33,36** · p99 33,98 | TB 20,28 ms · p50 16,73 · **p95 33,27** · p99 33,59 |
+
+  → Ẩn tay vẫn p95 ≈ 33,3 ms: chênh lệch của tay mới nằm trong mức nhiễu; p95 cao là do máy đang chạy song song một bản app khác
+  (vSync=2 nên khung trễ nhảy thẳng lên 33,3 ms). Muốn có số so trực tiếp với mốc 17,6 ms: đóng mọi cửa sổ VERA Lab rồi chạy
+  `"$HOME/AppBuild/VERA_mac/VERA Lab.app/Contents/MacOS/VERA Lab" -vera-do -vera-muc=tudong -vera-nhan=tay_moi_sach`.
+- **Bộ đệm lưới trên đĩa** (`persistentDataPath/tay_luoi/*.bin`, commit `8dd32aed`): lần đầu dựng trên luồng nền (~5 s trong Editor,
+  tay hiện khi màn giới thiệu còn mở); các lần sau đọc lại **66 ms**. Kiểm thử mới thêm 1 mục → **32/32**.
 - Bước 7.7 của Wave6 lỗi ở màn menu chính (ngoài phạm vi tay), cần phiên Giải bài tập/giao diện xem.
 - Bộ `KhktN18Verify.RunG2` ghi đè ảnh `docs/ngay-18-11/anh/g2/sau_*.png` mỗi lần chạy; các ảnh đó đang bị đổi trong thư mục
   làm việc (không đưa vào commit này). Muốn giữ ảnh cũ: `git checkout -- docs/ngay-18-11/anh/g2`.

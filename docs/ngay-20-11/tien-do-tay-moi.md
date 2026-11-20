@@ -18,3 +18,10 @@ nên KHÔNG chuyển nhánh: sửa ngay trong thư mục chính, khi commit dùn
 ## Kết quả (20/11 tối)
 - KhktTayMoiVerify 31/31, G2 16/16, Wave6 63 đạt + 1 lỗi ngoài phạm vi (bước 7.7 menu chính). App Mac xuất OK.
 - Còn lại: đo lại `-vera-do` khi không có bản VERA Lab nào khác chạy (lần đo 23:43 bị nhiễu). Xem bao-cao-tay-moi.md mục 6.
+
+## Lượt bổ sung (20/11, ~23:55, được dùng hết hạn mức)
+- Commit `8dd32aed`: bộ đệm lưới trên đĩa (`persistentDataPath/tay_luoi/*.bin`, đọc 66 ms thay vì dựng 4,9 s); KhktTayMoiVerify 32/32.
+- Thêm cờ `-vera-an-tay` (ẩn tay + cánh tay) để đo A/B chi phí khung hình, vì một bản VERA Lab khác (PID 70352) cứ chạy song song.
+- Đang: xuất lại app, đo 4 lần 90 s (có tay / ẩn tay × 2). Nhãn đo `tay_ab_*` trong
+  `~/Library/Application Support/DefaultCompany/VERA Lab/do_khung/`.
+- XONG: app xuất lại OK; đo A/B: có tay p95 33,32/33,36 ms, ẩn tay 33,52/33,27 ms → tay không làm tăng p95; nhiễu do bản VERA Lab khác. Còn lại duy nhất: đo sạch khi không có app khác chạy.

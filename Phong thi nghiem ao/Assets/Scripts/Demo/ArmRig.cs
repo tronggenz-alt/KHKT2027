@@ -149,9 +149,31 @@ namespace Khkt.Demo
         void LateUpdate() => Step(Time.unscaledDeltaTime);
 
         /// <summary>Một bước cập nhật hai cánh tay (gọi từ LateUpdate; kiểm thử gọi trực tiếp).</summary>
+        static int hideFlag = -1;
+        /// <summary>Cờ dòng lệnh -vera-an-tay: ẩn tay và cánh tay (đo A/B chi phí khung hình của tay).</summary>
+        public static bool HiddenByCli
+        {
+            get
+            {
+                if (hideFlag < 0)
+                {
+                    hideFlag = 0;
+                    foreach (var a in System.Environment.GetCommandLineArgs())
+                        if (string.Equals(a, "-vera-an-tay", System.StringComparison.OrdinalIgnoreCase)) hideFlag = 1;
+                }
+                return hideFlag == 1;
+            }
+        }
+
         public void Step(float dt)
         {
             if (cameraTransform == null) return;
+            if (HiddenByCli)
+            {
+                for (int i = 0; i < 2; i++) if (arms[i] != null && arms[i].root.activeSelf) arms[i].root.SetActive(false);
+                if (hand != null && hand.hand != null && hand.hand.gameObject.activeSelf) hand.hand.gameObject.SetActive(false);
+                return;
+            }
             dt = Mathf.Clamp(dt, 1e-4f, 0.1f);
             UpdateMotion(dt);
 
