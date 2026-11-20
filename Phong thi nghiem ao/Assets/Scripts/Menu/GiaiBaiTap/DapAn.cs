@@ -718,6 +718,7 @@ namespace Khkt.Menu
             x.anh.texture = x.rt; x.anh.raycastTarget = true; x.anh.color = Color.white;
             if (!khung.TryGetComponent<NuotCuon>(out _)) khung.gameObject.AddComponent<NuotCuon>();   // cuộn trong khung = zoom 3D, không cuộn trang
             x.TP = go.AddComponent<TrinhPhat3D>();
+            x.TP.AnH = true;                            // chỉ hiện H tham gia bước
             x.TP.TuSang = 0.3f;
             x.TP.Cam = x.cam;
             x.TP.VungNhin = new Rect(0, 0, 1, 1);

@@ -211,6 +211,7 @@ namespace Khkt.CoChe
             goc = (RectTransform)cgo.transform;
 
             TrinhPhat = gameObject.AddComponent<TrinhPhat3D>();
+            TrinhPhat.AnH = true;                       // mặc định chỉ hiện H tham gia bước (H bị lấy, H của tác nhân)
             TrinhPhat.Cam = Cam;
             TrinhPhat.DoiBuoc += CapNhatChuThich;
 
@@ -295,6 +296,7 @@ namespace Khkt.CoChe
             var nutToc = NutKinh(kb, "Tốc độ", "1×", new Vector2(x, y), new Vector2(64, 44), DoiToc, 15); x += 72;
             chuToc = nutToc.GetComponentInChildren<Text>();
             nutAnH = NutKinh(kb, "Ẩn H", "Ẩn H", new Vector2(x, y), new Vector2(84, 44), BatAnH, 15); x += 92;
+            nutAnH.GetComponent<Image>().color = new Color(0.23f, 0.51f, 0.96f, 0.35f);
             nutNhanh = NutKinh(kb, "Nhánh sai", "Nhánh sai", new Vector2(x, y), new Vector2(118, 44), () => { DatCheDo(false); TrinhPhat.PhatNhanhSai(); }, 15); x += 126;
             NutKinh(kb, "Giải thích", "Giải thích", new Vector2(x, y), new Vector2(116, 44), () => BatGiaiThich(!GiaiThichMo), 15); x += 124;
             nutHoiAI = NutKinh(kb, "Hỏi AI", "Hỏi AI", new Vector2(x, y), new Vector2(118, 44), () => { BatGiaiThich(true); HoiAI(); }, 15);
@@ -768,6 +770,7 @@ namespace Khkt.CoChe
             thanhToc = TaoThanhTruot(tocRt, new Vector2(60, -12), new Vector2(160, 20), 0.25f, 3f, 1f, v => { TrinhPhat.TocDo = v; chuTocKhung.text = v.ToString("0.00") + "×"; });
             chuTocKhung = GlassKit.Label(tocRt, "Giá trị", "1.00×", 15, ChuSang, false, TextAnchor.MiddleRight, new Vector2(226, 0), new Vector2(58, 44));
             nutAnH = NutKinh(thanhKhung, "Nút Ẩn H 3D", "Ẩn H", new Vector2(-14, -14), new Vector2(96, 44), BatAnH, 15, new Vector2(1, 1));
+            nutAnH.GetComponent<Image>().color = new Color(0.23f, 0.51f, 0.96f, 0.35f);
             var nutE = NutKinh(thanhKhung, "Nút Hiện e 3D", "Hiện e", new Vector2(-(14 + 96 + 12 + 286 + 8), -14), new Vector2(96, 44), null, 15, new Vector2(1, 1));
             ((RectTransform)nutE.transform).pivot = new Vector2(1, 1);
             nutE.onClick.AddListener(() => { TrinhPhat.HienE = !TrinhPhat.HienE; nutE.GetComponent<Image>().color = TrinhPhat.HienE ? new Color(0.23f, 0.51f, 0.96f, 0.35f) : new Color(1f, 1f, 1f, 0.04f); });

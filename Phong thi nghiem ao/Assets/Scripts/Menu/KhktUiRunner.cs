@@ -419,7 +419,7 @@ namespace Khkt.Menu
             Bam(kc.transform, "Nút Hiện e đáp án");
             Bam(kc.transform, "Nút Ẩn H đáp án");
             yield return Frames(3);
-            Check(gbt.Xem3DMoi != null && gbt.Xem3DMoi.TP.HienE && gbt.Xem3DMoi.TP.SoChamLewis >= 6 && gbt.Xem3DMoi.TP.AnH, "Hiện e (Lewis) và Ẩn H trong khung 3D đáp án", gbt.Xem3DMoi != null ? gbt.Xem3DMoi.TP.SoChamLewis.ToString() : "");
+            Check(gbt.Xem3DMoi != null && gbt.Xem3DMoi.TP.HienE && gbt.Xem3DMoi.TP.SoChamLewis >= 6 && !gbt.Xem3DMoi.TP.AnH, "Hiện e (Lewis) và bật lại H (mặc định Ẩn H) trong khung 3D đáp án", gbt.Xem3DMoi != null ? gbt.Xem3DMoi.TP.SoChamLewis.ToString() : "");
             Check(gbt.Xem3DMoi != null && !gbt.Xem3DMoi.GetComponentsInChildren<Text>(true).Any() && kc.GetComponentsInChildren<Text>(true).Any(x => x.name == "Nhãn" && x.gameObject.activeInHierarchy && x.text.StartsWith("C")), "Nhãn ký hiệu trên nguyên tử C");
             if (gbt.Xem3DMoi != null) { gbt.Xem3DMoi.VeNgay(); gbt.Xem3DMoi.LuuAnh(Path.Combine(outDir, "khung3d_lewis.png")); }
             var num = kc.GetComponentsInChildren<RectTransform>(true).FirstOrDefault(r => r.name == "Núm");

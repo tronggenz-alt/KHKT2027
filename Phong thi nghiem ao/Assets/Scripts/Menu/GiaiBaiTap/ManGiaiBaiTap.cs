@@ -921,6 +921,7 @@ namespace Khkt.Menu
                 if (baiXem3D != b || Xem3DMoi == null) return;
                 Xem3DMoi.TP.AnH = !Xem3DMoi.TP.AnH; Face(nutAnH).color = Xem3DMoi.TP.AnH ? AccentSoft : Paper;
             }, 1, TrangCuon.BoNut);
+            Face(nutAnH).color = AccentSoft;
             nutE = MakeButton(dk, "Nút Hiện e đáp án", "Hiện e", new Vector2(706, 0), new Vector2(86, 44), () =>
             {
                 if (baiXem3D != b || Xem3DMoi == null) return;

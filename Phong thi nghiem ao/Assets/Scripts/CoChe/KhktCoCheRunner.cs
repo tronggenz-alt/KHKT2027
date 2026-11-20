@@ -128,7 +128,33 @@ namespace Khkt.CoChe
                         tp.DenBuoc(0);
                     }
                     if (muc == MucDoHoa.Cao)
-                    {
+                    {   // mũi tên 3D: mọi bước × 24 góc nhìn × Ẩn H bật/tắt — mũi chạm đích, đuôi sát nguồn, không xuyên nguyên tử, đủ dài
+                        int loiGoc = 0, lanKiem = 0, hAnSai = 0; var ghiGoc = new System.Text.StringBuilder();
+                        var xoayCu = tp.Xoay;
+                        foreach (bool anH in new[] { false, true })
+                        {
+                            tp.AnH = anH;
+                            for (int i = 0; i < tp.SoBuoc; i++)
+                            {
+                                tp.DenBuoc(i); tp.DatT(0.5f); yield return null;
+                                foreach (var m in tp.BuocHienTai.MuiTen)
+                                {
+                                    foreach (var x in m.Tu) if (tp.LaHAn("m" + x)) hAnSai++;
+                                    foreach (var x in m.Den) if (tp.LaHAn("m" + x)) hAnSai++;
+                                }
+                                for (int g = 0; g < 24; g++)
+                                {
+                                    tp.Xoay = Quaternion.Euler(g < 12 ? -28f : 28f, (g % 12) * 30f, 0f);
+                                    var gh = new System.Text.StringBuilder();
+                                    int l = tp.KiemMuiTenHinhHoc(gh); lanKiem++;
+                                    if (l > 0) { loiGoc++; if (ghiGoc.Length < 600) ghiGoc.Append($"b{i} g{g}: {gh} "); }
+                                }
+                            }
+                        }
+                        tp.AnH = false; tp.Xoay = xoayCu;
+                        Debug.Log($"[CC_GOC] {ma}: {loiGoc}/{lanKiem} góc có lỗi; {ghiGoc}");
+                        Check(loiGoc * 10 <= lanKiem, $"Mũi tên 3D đúng ở ≥90% góc nhìn: {ma}", $"{loiGoc}/{lanKiem} lỗi");
+                        Check(hAnSai == 0, $"H tham gia bước luôn hiện khi Ẩn H: {ma}", $"{hAnSai}");
                         md.DatCheDo(false);
                         float t3 = Time.realtimeSinceStartup;
                         while (md.DangChuyen && Time.realtimeSinceStartup - t3 < 3f) yield return null;

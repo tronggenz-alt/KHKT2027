@@ -99,7 +99,7 @@ namespace Khkt.CoChe
         {
             KichBan = kb;
             bangLkDem.Clear(); hGanC.Clear();
-            ChiSoBuoc = 0;
+            ChiSoBuoc = 0; phuongAnCu.Clear();
             T = 0f;
             DangPhat = false;
             DangNhanhSai = false;
@@ -890,6 +890,52 @@ namespace Khkt.CoChe
         /// đầu mũi tên nằm đúng trên MẶT CẦU nguyên tử đích ở phía đường cong tới; từ cặp e thì rời mặt cầu nguyên tử nguồn,
         /// từ liên kết thì nhấc lên khỏi liên kết một chút; liên kết → nguyên tử: vồng lên rồi úp xuống nguyên tử.
         /// </summary>
+        /// <summary>Kiểm hình học mũi tên 3D của bước hiện tại ở góc nhìn hiện tại (dùng cho kiểm thử). Trả về số lỗi.</summary>
+        public int KiemMuiTenHinhHoc(System.Text.StringBuilder ghi)
+        {
+            int loi = 0;
+            var b = BuocHienTai; if (b == null) return 0;
+            Vector3 nhin = Quaternion.Inverse(Xoay) * Vector3.forward;
+            foreach (var mt in b.MuiTen)
+            {
+                if (!DiemMuiTen(mt, out var s0, out var c0, out var e0)) continue;
+                var thamGia = new HashSet<string>();
+                foreach (var x in mt.Tu) thamGia.Add("m" + x);
+                foreach (var x in mt.Den) thamGia.Add("m" + x);
+                string ten = $"{string.Join("-", mt.Tu)}→{string.Join("-", mt.Den)}";
+                float rS = dmSLk ? 0f : BanKinhVe("m" + mt.Tu[0]), rE = dmELk ? 0f : BanKinhVe("m" + dmDen);
+                float dS = Vector3.Distance(s0, dmSGoc) - rS, dE = Vector3.Distance(e0, dmEGoc) - rE;
+                if (dS > 0.45f) { loi++; ghi?.Append($"[{ten}] đầu xa nguồn {dS:0.00}; "); }
+                if (dE > 0.45f) { loi++; ghi?.Append($"[{ten}] mũi xa đích {dE:0.00}; "); }
+                if (dE < -0.05f) { loi++; ghi?.Append($"[{ten}] mũi đâm vào đích {dE:0.00}; "); }
+                // độ dài nhìn thấy (chiếu lên mặt phẳng màn hình)
+                float dai = 0f; Vector3 tr = s0;
+                for (int i = 1; i <= 20; i++) { var p = Bezier(s0, c0, e0, i / 20f); var dd = p - tr; dai += (dd - Vector3.Dot(dd, nhin) * nhin).magnitude; tr = p; }
+                if (dai < 0.6f) { loi++; ghi?.Append($"[{ten}] quá ngắn trên màn {dai:0.00}; "); }
+                // thân không xuyên nguyên tử khác
+                foreach (var kv in viTri)
+                {
+                    if (thamGia.Contains(kv.Key) || LaHAn(kv.Key)) continue;
+                    float r = BanKinhVe(kv.Key) * 0.85f;
+                    for (int i = 2; i <= 18; i++)
+                        if (Vector3.Distance(Bezier(s0, c0, e0, i / 20f), kv.Value) < r) { loi++; ghi?.Append($"[{ten}] xuyên {kv.Key}; "); break; }
+                }
+            }
+            return loi;
+        }
+
+        // ================= TƯ DUY VẼ MŨI TÊN CONG 3D (xem docs/ngay-19-11/tu-duy-ve-mui-ten-3d.md) =================
+        // 1. Phân loại mũi tên theo (nguồn, đích): 6 KIỂU, mỗi kiểu có luật đặt đuôi / mũi / độ vồng riêng.
+        // 2. Mặt phẳng cong luôn ⊥ hướng nhìn (nhìn góc nào cũng thấy cung, không thấy "que thẳng").
+        // 3. Sinh 6 phương án (vồng phía ngoài/phía trong × độ vồng 1; 1,5; 2,2) → chấm điểm phạt → chọn ít phạt nhất:
+        //    xuyên nguyên tử khác (+10 mỗi lần), độ dài nhìn thấy < 0,8 Å (+10 × thiếu), vồng vào trong (+0,6),
+        //    vồng cao hơn mức chuẩn (+0,4 × bậc); giữ phương án cũ nếu chênh < 0,8 (chống nhảy khi camera lắc).
+        public enum KieuMuiTen { NtDenNt, NtDenLkCuaNo, NtDenLk, LkDenDauCuaNo, LkDenLk, LkDenNt }
+        public KieuMuiTen KieuCuoi { get; private set; }
+        Vector3 dmSGoc, dmEGoc; int dmDen; bool dmSLk, dmELk;
+        readonly Dictionary<MuiTen, int> phuongAnCu = new Dictionary<MuiTen, int>();
+        static readonly float[] heSoVong = { 1f, 1.5f, 2.2f };
+
         bool DiemMuiTen(MuiTen mt, out Vector3 s, out Vector3 c, out Vector3 e)
         {
             s = c = e = Vector3.zero;
@@ -899,34 +945,110 @@ namespace Khkt.CoChe
             Vector3 tam = Vector3.zero;
             foreach (var p in viTri.Values) tam += p;
             tam /= Mathf.Max(1, viTri.Count);
+
+            // ---- 1. phân loại
             bool sLk = mt.TuLoai == "lien_ket" && mt.Tu.Length >= 2, eLk = mt.DenLoai == "lien_ket" && mt.Den.Length >= 2;
             Vector3 sGoc = sLk ? (Tim(mt.Tu[0]) + Tim(mt.Tu[1])) * 0.5f : Tim(mt.Tu[0]);
             int denNt = mt.Den[0];
             if (eLk && Vector3.Distance(Tim(mt.Den[0]), Tim(mt.Den[1])) > 1.9f)
-            {   // đích là liên kết ĐANG HÌNH THÀNH (2 nguyên tử còn xa): mũi tên chỉ vào nguyên tử nhận (không thuộc phía nguồn)
+            {   // liên kết ĐANG HÌNH THÀNH giữa 2 nguyên tử còn xa → chỉ vào nguyên tử NHẬN (không thuộc phía nguồn)
                 bool o0 = System.Array.IndexOf(mt.Tu, mt.Den[0]) >= 0, o1 = System.Array.IndexOf(mt.Tu, mt.Den[1]) >= 0;
                 denNt = o0 && !o1 ? mt.Den[1] : o1 && !o0 ? mt.Den[0]
                       : (Vector3.Distance(sGoc, Tim(mt.Den[0])) > Vector3.Distance(sGoc, Tim(mt.Den[1])) ? mt.Den[0] : mt.Den[1]);
                 eLk = false;
             }
             Vector3 eGoc = eLk ? (Tim(mt.Den[0]) + Tim(mt.Den[1])) * 0.5f : Tim(denNt);
+            KieuMuiTen kieu;
+            if (!sLk) kieu = !eLk ? KieuMuiTen.NtDenNt : System.Array.IndexOf(mt.Den, mt.Tu[0]) >= 0 ? KieuMuiTen.NtDenLkCuaNo : KieuMuiTen.NtDenLk;
+            else kieu = eLk ? KieuMuiTen.LkDenLk : System.Array.IndexOf(mt.Tu, denNt) >= 0 ? KieuMuiTen.LkDenDauCuaNo : KieuMuiTen.LkDenNt;
+            KieuCuoi = kieu;
+            dmSGoc = sGoc; dmEGoc = eGoc; dmDen = denNt; dmSLk = sLk; dmELk = eLk;
+
             Vector3 d = eGoc - sGoc;
             float L = d.magnitude;
             Vector3 dn = L > 1e-3f ? d / L : Vector3.right;
             Vector3 nhin = Quaternion.Inverse(Xoay) * Vector3.forward;              // hướng nhìn trong toạ độ mô hình
+            if (kieu == KieuMuiTen.NtDenLkCuaNo || kieu == KieuMuiTen.LkDenDauCuaNo)
+            {   // nguồn và đích gần như trùng: hướng "đi" lấy theo trục liên kết (nguyên tử nguồn → nguyên tử kia)
+                int a0 = kieu == KieuMuiTen.NtDenLkCuaNo ? mt.Tu[0] : (mt.Tu[0] == denNt ? mt.Tu[1] : mt.Tu[0]);
+                int a1 = kieu == KieuMuiTen.NtDenLkCuaNo ? (mt.Den[0] == mt.Tu[0] ? mt.Den[1] : mt.Den[0]) : denNt;
+                var truc = Tim(a1) - Tim(a0);
+                if (truc.sqrMagnitude > 1e-4f) dn = truc.normalized;
+            }
             Vector3 phap = Vector3.Cross(dn, nhin);
             if (phap.sqrMagnitude < 1e-4f) phap = Vector3.Cross(dn, Vector3.up);
             if (phap.sqrMagnitude < 1e-4f) phap = Vector3.Cross(dn, Vector3.right);
             phap.Normalize();
-            if (Vector3.Dot(phap, (sGoc + eGoc) * 0.5f - tam) < 0f) phap = -phap;   // cong ra phía ngoài phân tử
-            // độ vồng: dây dài vồng vừa (22% L, 0,35–1,2 Å); liên kết → nguyên tử / liên kết → liên kết vồng thấp sát liên kết
-            float h = sLk ? 0.35f : Mathf.Clamp(L * 0.22f, 0.35f, 1.2f);
-            c = (sGoc + eGoc) * 0.5f + phap * h * 2f;                               // đỉnh cung Bézier bậc 2 ≈ h
-            // đầu/đuôi cùng ở phía vồng: đi ra khỏi nguồn theo hướng (phía vồng + hướng tới đích), tới đích theo (phía vồng − hướng đi)
-            if (sLk) s = sGoc + phap * 0.25f;
-            else s = sGoc + (phap * 0.75f + dn * 0.65f).normalized * (BanKinhVe("m" + mt.Tu[0]) + 0.08f);
-            if (eLk) e = eGoc + phap * 0.25f;
-            else e = eGoc + (phap * 0.75f - dn * 0.65f).normalized * (BanKinhVe("m" + denNt) + 0.06f);
+            if (Vector3.Dot(phap, (sGoc + eGoc) * 0.5f - tam) < 0f) phap = -phap;   // phía "ngoài" phân tử
+
+            float rS = sLk ? 0f : BanKinhVe("m" + mt.Tu[0]), rE = eLk ? 0f : BanKinhVe("m" + denNt);
+            var thamGia = new HashSet<string>();
+            foreach (var x in mt.Tu) thamGia.Add("m" + x);
+            foreach (var x in mt.Den) thamGia.Add("m" + x);
+
+            // ---- 2+3. sinh phương án, chấm điểm
+            int cu = phuongAnCu.TryGetValue(mt, out var pc) ? pc : 0;
+            float tot = float.MaxValue; int chon = 0;
+            Vector3 bs = default, bc = default, be = default;
+            for (int pa = 0; pa < 6; pa++)
+            {
+                Vector3 p = pa < 3 ? phap : -phap;
+                float k = heSoVong[pa % 3];
+                Vector3 s1, c1, e1;
+                switch (kieu)
+                {
+                    case KieuMuiTen.NtDenLkCuaNo:          // cặp e tự do → liên kết π với nguyên tử bên cạnh: cung nhỏ cuộn ra rồi đáp giữa liên kết
+                        s1 = sGoc + (p * 0.9f - dn * 0.45f).normalized * (rS + 0.08f);
+                        e1 = eGoc + p * 0.3f;
+                        c1 = (s1 + e1) * 0.5f + p * Mathf.Max(0.7f, rS * 1.4f) * k;
+                        break;
+                    case KieuMuiTen.LkDenDauCuaNo:         // liên kết → một đầu của nó (nhóm rời đi): cung ôm sang mặt cầu đích phía xa
+                        s1 = sGoc + p * 0.3f - dn * 0.1f;
+                        e1 = eGoc + (p * 0.8f + dn * 0.6f).normalized * (rE + 0.06f);
+                        c1 = (s1 + e1) * 0.5f + p * Mathf.Max(0.9f, rE * 1.6f) * k;
+                        break;
+                    case KieuMuiTen.LkDenLk:               // liên kết → liên kết kề (C–H → C=C, π dịch chuyển): vồng cao
+                        s1 = sGoc + p * 0.3f - dn * 0.15f;
+                        e1 = eGoc + p * 0.3f + dn * 0.15f;
+                        c1 = (sGoc + eGoc) * 0.5f + p * Mathf.Max(0.6f, L * 0.5f) * 2f * k;
+                        break;
+                    case KieuMuiTen.LkDenNt:               // π / σ tấn công nguyên tử xa
+                        s1 = sGoc + p * 0.3f;
+                        e1 = eGoc + (p * 0.75f - dn * 0.65f).normalized * (rE + 0.06f);
+                        c1 = (sGoc + eGoc) * 0.5f + p * Mathf.Clamp(L * 0.3f, 0.5f, 1.2f) * 2f * k;
+                        break;
+                    case KieuMuiTen.NtDenLk:               // nguyên tử → liên kết khác (hiếm)
+                        s1 = sGoc + (p * 0.75f + dn * 0.65f).normalized * (rS + 0.08f);
+                        e1 = eGoc + p * 0.3f;
+                        c1 = (sGoc + eGoc) * 0.5f + p * Mathf.Clamp(L * 0.25f, 0.45f, 1.2f) * 2f * k;
+                        break;
+                    default:                               // nguyên tử → nguyên tử (Nu tấn công E)
+                        s1 = sGoc + (p * 0.75f + dn * 0.65f).normalized * (rS + 0.08f);
+                        e1 = eGoc + (p * 0.75f - dn * 0.65f).normalized * (rE + 0.06f);
+                        c1 = (sGoc + eGoc) * 0.5f + p * Mathf.Clamp(L * 0.22f, 0.35f, 1.2f) * 2f * k;
+                        break;
+                }
+                // điểm phạt
+                float phat = (pa >= 3 ? 0.6f : 0f) + 0.4f * (pa % 3);
+                float dai = 0f; Vector3 tr = s1;
+                for (int i = 1; i <= 16; i++)
+                {
+                    var q = Bezier(s1, c1, e1, i / 16f); var dd = q - tr; tr = q;
+                    dai += (dd - Vector3.Dot(dd, nhin) * nhin).magnitude;
+                    if (i < 2 || i > 14) continue;
+                    foreach (var kv in viTri)
+                    {
+                        if (thamGia.Contains(kv.Key) || LaHAn(kv.Key)) continue;
+                        float r = BanKinhVe(kv.Key) * 0.9f;
+                        if ((q - kv.Value).sqrMagnitude < r * r) phat += 10f;
+                    }
+                }
+                if (dai < 0.8f) phat += (0.8f - dai) * 10f;
+                if (pa == cu) phat -= 0.8f;
+                if (phat < tot) { tot = phat; chon = pa; bs = s1; bc = c1; be = e1; }
+            }
+            phuongAnCu[mt] = chon;
+            s = bs; c = bc; e = be;
             return true;
         }
 
