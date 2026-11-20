@@ -519,7 +519,7 @@ namespace Khkt.Menu
 
         public void OnScroll(UnityEngine.EventSystems.PointerEventData e)
         {
-            phong = Mathf.Clamp(phong * (e.scrollDelta.y > 0 ? 1.1f : 0.91f), 0.5f, 3f);
+            phong = Mathf.Clamp(phong * Mathf.Exp(Mathf.Clamp(e.scrollDelta.y, -30f, 30f) * 0.012f), 0.5f, 3f);   // mượt với trackpad
             VeKhungLai();
         }
 
@@ -715,7 +715,8 @@ namespace Khkt.Menu
             x.rt.Create();
             x.cam.targetTexture = x.rt;
             if (!khung.TryGetComponent(out x.anh)) x.anh = khung.gameObject.AddComponent<RawImage>();
-            x.anh.texture = x.rt; x.anh.raycastTarget = false; x.anh.color = Color.white;
+            x.anh.texture = x.rt; x.anh.raycastTarget = true; x.anh.color = Color.white;
+            if (!khung.TryGetComponent<NuotCuon>(out _)) khung.gameObject.AddComponent<NuotCuon>();   // cuộn trong khung = zoom 3D, không cuộn trang
             x.TP = go.AddComponent<TrinhPhat3D>();
             x.TP.TuSang = 0.3f;
             x.TP.Cam = x.cam;
@@ -850,5 +851,14 @@ namespace Khkt.Menu
             if (lopNhan != null) Destroy(lopNhan.gameObject);
             if (rt != null) { rt.Release(); Destroy(rt); }
         }
+    }
+}
+
+namespace Khkt.Menu
+{
+    /// <summary>Nuốt sự kiện cuộn khi con trỏ ở trong khung 3D (để cuộn/vuốt trackpad là zoom 3D, trang không cuộn theo).</summary>
+    public class NuotCuon : MonoBehaviour, UnityEngine.EventSystems.IScrollHandler
+    {
+        public void OnScroll(UnityEngine.EventSystems.PointerEventData e) { }
     }
 }

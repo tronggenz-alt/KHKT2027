@@ -235,7 +235,10 @@ namespace Khkt.CoChe
             }
             float cuon = m.scroll.ReadValue().y;
             if (trongVung && Mathf.Abs(cuon) > 0.01f)
-            { KhoangCach = Mathf.Clamp(KhoangCach * (cuon > 0 ? 0.9f : 1.1f), 4f, 60f); TuDongGoc = false; }
+            {   // zoom theo độ dài cú cuộn: trackpad (nhiều nhịp nhỏ) mượt, con lăn chuột (nhịp lớn) vẫn vừa phải
+                KhoangCach = Mathf.Clamp(KhoangCach * Mathf.Exp(-Mathf.Clamp(cuon, -30f, 30f) * 0.012f), 3f, 60f);
+                TuDongGoc = false;
+            }
         }
 
         // ------------------------------------------------------------------ góc nhìn tự động (19/11)

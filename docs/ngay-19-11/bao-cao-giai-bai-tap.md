@@ -306,3 +306,11 @@ bảng 75%; ô đề vẫn ở trên trang (thiết kế cho phép "trên hoặc
 - Chuỗi nhãn nguyên tử lưu đệm; phím tắt 1–5 không tạo mảng mỗi khung; nút Phát giữ sẵn ô chữ (không tìm lại mỗi khung).
 - Lỗi nhỏ: nhãn trên C/H (nay màu sáng) đổi sang chữ tối cho dễ đọc.
 - Đo: KhktCoCheVerify ~480 → **564 khung/giây** (cùng máy, cùng cảnh); KhktCoCheVerify 66/66, KhktUiVerify 82/82; app Mac xuất được.
+
+## 21. Zoom trackpad, toàn màn hình nút lơ lửng (20/11)
+- **Zoom bằng trackpad / con lăn** theo độ dài cú cuộn (mượt, không nhảy 10% mỗi nhịp). Con trỏ trong khung 3D dưới đáp án thì
+  cuộn = zoom 3D, trang không cuộn theo (`NuotCuon`). Ảnh 3D Mô hình 3D cũng zoom mượt như vậy.
+- **Toàn màn hình**: bỏ hai dải nền trên/dưới – 3D phủ kín nền đen, các nút **lơ lửng** (nền kính tối bo 12, sáng lên khi rê chuột).
+  Ảnh `toan_man_nut_lo_lung.png`.
+- Đỡ giật khi ở toàn màn hình: tắt tờ giấy bị che phía sau (không vẽ thừa).
+- Kiểm: KhktCoCheVerify 66/66, KhktUiVerify 82/82, app Mac xuất được.

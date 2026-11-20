@@ -635,6 +635,7 @@ namespace Khkt.CoChe
         {
             DangChuyen = true;
             dsBai.gameObject.SetActive(false);
+            if (sangGiay) toGiay.gameObject.SetActive(true);
             if (!sangGiay)
             {
                 khung3D.gameObject.SetActive(true);
@@ -655,6 +656,7 @@ namespace Khkt.CoChe
                 yield return null;
             }
             DatHienKhung(sangGiay ? 0f : 1f);
+            toGiay.gameObject.SetActive(sangGiay);                // 3D toàn màn che hết: tắt tờ giấy để không phải vẽ phía sau
             if (sangGiay)
             {
                 khung3D.gameObject.SetActive(false);
@@ -732,7 +734,7 @@ namespace Khkt.CoChe
             dauKhung = KeoGian(khung3D, "Đầu khung", Vector2.zero, Vector2.zero);
             dauKhung.anchorMin = new Vector2(0, 1); dauKhung.offsetMin = new Vector2(0, -50); dauKhung.offsetMax = Vector2.zero;
             var nd = dauKhung.gameObject.AddComponent<Image>();
-            nd.color = new Color32(18, 24, 44, 255); nd.raycastTarget = true;
+            nd.color = new Color(0, 0, 0, 0); nd.raycastTarget = false;
             chuDauKhung = GlassKit.Label(dauKhung, "Bước", "", 16, ChuSang, false, TextAnchor.MiddleLeft, new Vector2(18, 0), new Vector2(560, 50));
             chuDauKhung.supportRichText = true;
             var quay = NutKinh(dauKhung, "Nút Quay lại bảng giấy", "Quay lại bảng giấy", new Vector2(-10, -6), new Vector2(190, 38), () => DatCheDo(true), 15, new Vector2(1, 1));
@@ -741,7 +743,7 @@ namespace Khkt.CoChe
             nutPhongTo = NutKinh(dauKhung, "Nút Phóng to", "⤢  Phóng to", new Vector2(-10, -6), new Vector2(150, 38), () => DatToanMan(!ToanMan), 15, new Vector2(1, 1));
             ((RectTransform)nutPhongTo.transform).pivot = new Vector2(1, 1);
 
-            vungXem = KeoGian(khung3D, "Vùng xem 3D", new Vector2(0, 72), new Vector2(0, -50));
+            vungXem = KeoGian(khung3D, "Vùng xem 3D", Vector2.zero, Vector2.zero);       // 20/11: 3D phủ kín, nút lơ lửng phía trên
             vungXem.gameObject.AddComponent<RectMask2D>();
             anh3D = vungXem.gameObject.AddComponent<RawImage>();
             anh3D.raycastTarget = false;
@@ -754,7 +756,7 @@ namespace Khkt.CoChe
             thanhKhung = KeoGian(khung3D, "Thanh điều khiển 3D", Vector2.zero, Vector2.zero);
             thanhKhung.anchorMax = new Vector2(1, 0); thanhKhung.offsetMin = Vector2.zero; thanhKhung.offsetMax = new Vector2(0, 72);
             var nt = thanhKhung.gameObject.AddComponent<Image>();
-            nt.color = new Color32(18, 24, 44, 255); nt.raycastTarget = true;
+            nt.color = new Color(0, 0, 0, 0); nt.raycastTarget = false;
             float x = 14, y = -14;
             NutKinh(thanhKhung, "Nút Bước trước 3D", "‹", new Vector2(x, y), new Vector2(44, 44), () => TrinhPhat.BuocTruoc(), 20); x += 50;
             nutPhat = NutKinh(thanhKhung, "Nút Phát 3D", "Phát", new Vector2(x, y), new Vector2(84, 44), () => TrinhPhat.PhatDung(), 15); x += 90;
@@ -771,8 +773,24 @@ namespace Khkt.CoChe
             nutE.onClick.AddListener(() => { TrinhPhat.HienE = !TrinhPhat.HienE; nutE.GetComponent<Image>().color = TrinhPhat.HienE ? new Color(0.23f, 0.51f, 0.96f, 0.35f) : new Color(1f, 1f, 1f, 0.04f); });
             ((RectTransform)nutAnH.transform).pivot = new Vector2(1, 1);
             ((RectTransform)tocRt).pivot = new Vector2(1, 1);
+            dauKhung.SetAsLastSibling(); thanhKhung.SetAsLastSibling();
+            // nút lơ lửng: nền kính tối có viền mảnh, nổi trên 3D đen
+            foreach (var b in dauKhung.GetComponentsInChildren<Button>(true)) NutLoLung(b);
+            foreach (var b in thanhKhung.GetComponentsInChildren<Button>(true)) NutLoLung(b);
+            var nenToc = GlassKit.Rect(thanhKhung.Find("Tốc độ 3D"), "Nền", Vector2.zero, Vector2.zero, Vector2.zero, Vector2.zero);
+            nenToc.anchorMin = Vector2.zero; nenToc.anchorMax = Vector2.one; nenToc.offsetMin = new Vector2(-10, 0); nenToc.offsetMax = new Vector2(6, 0); nenToc.SetAsFirstSibling();
+            var nti = nenToc.gameObject.AddComponent<Image>(); nti.sprite = Khkt.Menu.Dashboard.MenuKit.Round(12f); nti.type = Image.Type.Sliced; nti.color = new Color(0.08f, 0.10f, 0.15f, 0.78f); nti.raycastTarget = false;
             khung3D.gameObject.SetActive(false);
             DatKhung(0f);
+        }
+
+        static void NutLoLung(Button b)
+        {
+            var img = b.GetComponent<Image>();
+            if (img == null) return;
+            img.sprite = Khkt.Menu.Dashboard.MenuKit.Round(12f); img.type = Image.Type.Sliced; img.pixelsPerUnitMultiplier = 1f;
+            img.color = new Color(0.08f, 0.10f, 0.15f, 0.78f);
+            var cl = b.colors; cl.highlightedColor = new Color(1.6f, 1.6f, 1.6f, 1f); cl.pressedColor = new Color(0.8f, 0.8f, 0.8f, 1f); b.colors = cl;
         }
 
         RawImage anh3D;
