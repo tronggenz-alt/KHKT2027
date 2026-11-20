@@ -129,6 +129,18 @@ namespace Khkt.EditorTools
                     "Mức chi tiết lưới theo HardwareProfile (Siêu nét > Cao > Vừa > Thấp)",
                     $"đỉnh={lodVerts[0]}/{lodVerts[1]}/{lodVerts[2]}/{lodVerts[3]} dựng ms={lodMs[0]:0}/{lodMs[1]:0}/{lodMs[2]:0}/{lodMs[3]:0}");
 
+                // ---------------- 4b. Bộ nhớ đệm lưới trên đĩa ----------------
+                {
+                    TayNguoiLuoi.ClearCache();   // chỉ bộ nhớ RAM; tệp trên đĩa còn
+                    var rd = NewTestRig("TAY_TestDisk", tempObjects);
+                    float td = Time.realtimeSinceStartup;
+                    while (!rd.MeshReady && Time.realtimeSinceStartup - td < 40f) yield return null;
+                    Check(rd.MeshReady && rd.MeshFromDisk && rd.LastMeshBuildMs < 1000f,
+                        "Lưới bàn tay đọc lại từ bộ đệm trên đĩa (lần mở app sau hiện tay ngay)",
+                        $"từ đĩa={rd.MeshFromDisk} thời gian={rd.LastMeshBuildMs:0} ms, đỉnh={rd.MeshVertexCount} (dựng mới: {rig.LastMeshBuildMs:0} ms)");
+                    rd.gameObject.SetActive(false);
+                }
+
                 // ---------------- 5. MediaPipe 21 điểm: khứ hồi chính xác ----------------
                 {
                     var go = new GameObject("TAY_TestMediaPipe");

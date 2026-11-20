@@ -91,6 +91,8 @@ namespace Khkt.Demo
         public float LastMeshBuildMs { get; private set; }
         public int MeshVertexCount { get; private set; }
         public int MeshLod { get; private set; } = -1;
+        /// <summary>Lưới lấy từ bộ nhớ đệm trên đĩa (không phải dựng lại).</summary>
+        public bool MeshFromDisk { get; private set; }
 
         // Tỉ lệ giải phẫu đốt ngón tay (m): Trỏ, Giữa, Nhẫn, Út — đốt gần > giữa > xa
         static readonly float[] ProxLen = { 0.040f, 0.045f, 0.042f, 0.033f };
@@ -370,6 +372,7 @@ namespace Khkt.Demo
             sleeveCuffRenderer.shadowCastingMode = shadows;
 
             LastMeshBuildMs = set.buildMs;
+            MeshFromDisk = set.fromDisk;
             MeshVertexCount = set.vertexCount;
             MeshLod = lod;
 

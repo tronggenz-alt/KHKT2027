@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -364,6 +365,7 @@ namespace Khkt.Avatar
             public Mesh gloveCuff;
             public readonly Mesh[] nails = new Mesh[5];
             public float buildMs;
+            public bool fromDisk;
             public int vertexCount;
         }
 
@@ -382,6 +384,7 @@ namespace Khkt.Avatar
             public PartData hand, cuff;
             public readonly PartData[] nails = new PartData[5];
             public float ms;
+            public bool fromDisk;
         }
 
         static readonly Dictionary<long, HandMeshSet> cache = new Dictionary<long, HandMeshSet>();
@@ -400,7 +403,8 @@ namespace Khkt.Avatar
             if (!jobs.TryGetValue(key, out var job))
             {
                 var sdf = new HandSdf(bind);
-                job = Task.Run(() => BuildHandData(sdf, bind, lod));
+                string file = CacheFile(bind, lod);
+                job = Task.Run(() => LoadOrBuild(sdf, bind, lod, file));
                 jobs[key] = job;
             }
             if (wait) job.Wait();
@@ -408,6 +412,7 @@ namespace Khkt.Avatar
             jobs.Remove(key);
             if (job.IsFaulted) { Debug.LogException(job.Exception); return null; }
             set = Finish(job.Result);
+            LastFromDisk = job.Result.fromDisk;
             cache[key] = set;
             return set;
         }
@@ -438,7 +443,7 @@ namespace Khkt.Avatar
 
         static HandMeshSet Finish(HandData d)
         {
-            var set = new HandMeshSet { buildMs = d.ms, vertexCount = d.hand.pos.Length };
+            var set = new HandMeshSet { buildMs = d.ms, vertexCount = d.hand.pos.Length, fromDisk = d.fromDisk };
             set.hand = MakeMesh(d.hand, false);
             set.gloveCuff = MakeMesh(d.cuff, true);
             FixOutwardNormals(set.gloveCuff, new Vector3(0f, -0.0008f, 0f));
@@ -450,6 +455,149 @@ namespace Khkt.Avatar
         {
             float t = Mathf.Clamp01((x - e0) / (e1 - e0));
             return t * t * (3f - 2f * t);
+        }
+
+        // ------------------------------------------------------------------
+        // Bộ nhớ đệm lưới trên đĩa: lần đầu dựng (vài giây, luồng nền) rồi ghi; các lần sau đọc trong vài chục ms
+        // ------------------------------------------------------------------
+        const int CacheVersion = 3;   // tăng khi đổi hình học / trọng số / màu đỉnh
+
+        static string CacheFile(HandBind b, int lod)
+        {
+            try
+            {
+                // băm toàn bộ hình học tư thế gốc → đổi kích thước tay là tự dựng lại
+                unchecked
+                {
+                    int h = 17 * 31 + CacheVersion;
+                    h = h * 31 + b.side; h = h * 31 + lod;
+                    for (int f = 0; f < 4; f++)
+                    {
+                        h = h * 31 + H(b.mcp[f]); h = h * 31 + H(b.dir[f]); h = h * 31 + H(b.up[f]);
+                        h = h * 31 + H(b.w[f]); h = h * 31 + H(b.l1[f]); h = h * 31 + H(b.l2[f]); h = h * 31 + H(b.l3[f]);
+                    }
+                    h = h * 31 + H(b.thumbC); h = h * 31 + H(b.thumbDir); h = h * 31 + H(b.thumbUp);
+                    h = h * 31 + H(b.thumbW); h = h * 31 + H(b.tl1); h = h * 31 + H(b.tl2); h = h * 31 + H(b.tl3);
+                    h = h * 31 + H(b.wristCenter);
+                    string dir = Path.Combine(Application.persistentDataPath, "tay_luoi");
+                    return Path.Combine(dir, $"ban_tay_v{CacheVersion}_{(b.side == 0 ? "phai" : "trai")}_lod{lod}_{h:x8}.bin");
+                }
+            }
+            catch { return null; }
+        }
+
+        static int H(float v) => Mathf.RoundToInt(v * 100000f);
+        static int H(Vector3 v) => unchecked(H(v.x) * 73856093 ^ H(v.y) * 19349663 ^ H(v.z) * 83492791);
+
+        /// <summary>Xóa bộ nhớ đệm trên đĩa (kiểm thử dựng lại từ đầu).</summary>
+        public static void ClearDiskCache()
+        {
+            try
+            {
+                string dir = Path.Combine(Application.persistentDataPath, "tay_luoi");
+                if (Directory.Exists(dir)) Directory.Delete(dir, true);
+            }
+            catch (Exception e) { Debug.LogWarning("[TayNguoi] Không xóa được bộ đệm lưới: " + e.Message); }
+        }
+
+        /// <summary>Lần dựng gần nhất có đọc từ đĩa không (cho kiểm thử).</summary>
+        public static bool LastFromDisk { get; private set; }
+
+        static HandData LoadOrBuild(HandSdf sdf, HandBind b, int lod, string file)
+        {
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            if (file != null && File.Exists(file))
+            {
+                try
+                {
+                    using var br = new BinaryReader(File.OpenRead(file));
+                    if (br.ReadInt32() == CacheVersion)
+                    {
+                        var d = new HandData { hand = ReadPart(br), cuff = ReadPart(br) };
+                        for (int i = 0; i < 5; i++) d.nails[i] = ReadPart(br);
+                        d.ms = (float)sw.Elapsed.TotalMilliseconds;
+                        d.fromDisk = true;
+                        return d;
+                    }
+                }
+                catch { /* tệp hỏng → dựng lại */ }
+            }
+            var data = BuildHandData(sdf, b, lod);
+            if (file != null)
+            {
+                try
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(file));
+                    string tmp = file + ".tmp";
+                    using (var bw = new BinaryWriter(File.Create(tmp)))
+                    {
+                        bw.Write(CacheVersion);
+                        WritePart(bw, data.hand); WritePart(bw, data.cuff);
+                        for (int i = 0; i < 5; i++) WritePart(bw, data.nails[i]);
+                    }
+                    if (File.Exists(file)) File.Delete(file);
+                    File.Move(tmp, file);
+                }
+                catch { /* không ghi được (đĩa đầy, chỉ đọc) → vẫn dùng lưới vừa dựng */ }
+            }
+            return data;
+        }
+
+        static void WritePart(BinaryWriter w, PartData d)
+        {
+            w.Write(d.name ?? "");
+            int n = d.pos.Length;
+            w.Write(n);
+            WriteV3(w, d.pos); w.Write(d.nrm != null); if (d.nrm != null) WriteV3(w, d.nrm);
+            w.Write(ReferenceEquals(d.bindPos, d.pos)); if (!ReferenceEquals(d.bindPos, d.pos)) WriteV3(w, d.bindPos);
+            for (int i = 0; i < n; i++) { var c = d.col[i]; w.Write(c.r); w.Write(c.g); w.Write(c.b); w.Write(c.a); }
+            for (int i = 0; i < n; i++) { w.Write(d.uv[i].x); w.Write(d.uv[i].y); }
+            w.Write(d.wts != null);
+            if (d.wts != null)
+                for (int i = 0; i < n; i++)
+                {
+                    var b = d.wts[i];
+                    w.Write((byte)b.boneIndex0); w.Write((byte)b.boneIndex1); w.Write((byte)b.boneIndex2); w.Write((byte)b.boneIndex3);
+                    w.Write(b.weight0); w.Write(b.weight1); w.Write(b.weight2); w.Write(b.weight3);
+                }
+            w.Write(d.tris.Length);
+            for (int i = 0; i < d.tris.Length; i++) w.Write(d.tris[i]);
+        }
+
+        static PartData ReadPart(BinaryReader r)
+        {
+            var d = new PartData { name = r.ReadString() };
+            int n = r.ReadInt32();
+            d.pos = ReadV3(r, n);
+            if (r.ReadBoolean()) d.nrm = ReadV3(r, n);
+            d.bindPos = r.ReadBoolean() ? d.pos : ReadV3(r, n);
+            d.col = new Color[n];
+            for (int i = 0; i < n; i++) d.col[i] = new Color(r.ReadSingle(), r.ReadSingle(), r.ReadSingle(), r.ReadSingle());
+            d.uv = new Vector2[n];
+            for (int i = 0; i < n; i++) d.uv[i] = new Vector2(r.ReadSingle(), r.ReadSingle());
+            if (r.ReadBoolean())
+            {
+                d.wts = new BoneWeight[n];
+                for (int i = 0; i < n; i++)
+                {
+                    var b = new BoneWeight { boneIndex0 = r.ReadByte(), boneIndex1 = r.ReadByte(), boneIndex2 = r.ReadByte(), boneIndex3 = r.ReadByte() };
+                    b.weight0 = r.ReadSingle(); b.weight1 = r.ReadSingle(); b.weight2 = r.ReadSingle(); b.weight3 = r.ReadSingle();
+                    d.wts[i] = b;
+                }
+            }
+            int tc = r.ReadInt32();
+            d.tris = new int[tc];
+            for (int i = 0; i < tc; i++) d.tris[i] = r.ReadInt32();
+            return d;
+        }
+
+        static void WriteV3(BinaryWriter w, Vector3[] a) { for (int i = 0; i < a.Length; i++) { w.Write(a[i].x); w.Write(a[i].y); w.Write(a[i].z); } }
+
+        static Vector3[] ReadV3(BinaryReader r, int n)
+        {
+            var a = new Vector3[n];
+            for (int i = 0; i < n; i++) a[i] = new Vector3(r.ReadSingle(), r.ReadSingle(), r.ReadSingle());
+            return a;
         }
 
         static HandData BuildHandData(HandSdf sdf, HandBind b, int lod)
