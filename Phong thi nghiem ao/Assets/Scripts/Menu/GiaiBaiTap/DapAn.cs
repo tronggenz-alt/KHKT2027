@@ -735,7 +735,7 @@ namespace Khkt.Menu
         }
 
         /// <summary>Vẽ ngay một khung (kiểm thử/chụp ảnh ở batchmode, nơi camera không tự vẽ theo vòng lặp).</summary>
-        public void VeNgay() { if (cam != null) cam.Render(); }
+        public void VeNgay() { if (cam != null) { cam.enabled = true; cam.Render(); } }
 
         /// <summary>Kiểm thử: lưu nội dung RenderTexture ra PNG.</summary>
         public void LuuAnh(string duong)
@@ -773,6 +773,10 @@ namespace Khkt.Menu
         void LateUpdate()
         {
             if (TP == null || khung == null || cam == null) return;
+            // tối ưu 20/11: khung cuộn ra ngoài màn hình, bị trình phát toàn màn che, hoặc đang ẩn → không vẽ 3D (tiết kiệm GPU)
+            bool thay = khung.gameObject.activeInHierarchy && !CoCheMoDun.DangMo && TrenManHinh();
+            if (cam.enabled != thay) cam.enabled = thay;
+            if (!thay) return;
             if (lopNhan == null) { lopNhan = MenuKit.Full(khung, "Nhãn nguyên tử"); lopNhan.SetAsLastSibling(); }
             int dung = 0;
             var r = khung.rect;
@@ -786,7 +790,7 @@ namespace Khkt.Menu
                     if (sp.z <= 0f) continue;
                     var lp = new Vector2((sp.x / Mathf.Max(1, cam.pixelWidth) - 0.5f) * r.width, (sp.y / Mathf.Max(1, cam.pixelHeight) - 0.5f) * r.height);
                     int dt = TP.DienTichHienTai(kv.Key);
-                    string chu = e + (dt == 0 ? "" : dt > 0 ? "⊕" : "⊖");
+                    string chu = TrinhPhat3D.NhanNT(e, dt);
                     while (nhan.Count <= dung)
                     {
                         var t = GlassKit.Label(lopNhan, "Nhãn", "", 14, Color.white, true, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(44, 22), new Vector2(0.5f, 0.5f));
@@ -796,7 +800,8 @@ namespace Khkt.Menu
                     }
                     var n = nhan[dung++];
                     if (n.text != chu) n.text = chu;
-                    n.color = e == "H" ? new Color32(0x33, 0x3a, 0x48, 0xff) : Color.white;
+                    var mauChu = e == "C" || e == "H" ? (Color)new Color32(0x14, 0x18, 0x22, 0xff) : Color.white;
+                    if (n.color != mauChu) n.color = mauChu;
                     n.fontSize = e == "H" ? 11 : 14;
                     n.rectTransform.anchoredPosition = lp;
                     if (!n.gameObject.activeSelf) n.gameObject.SetActive(true);
@@ -824,6 +829,15 @@ namespace Khkt.Menu
         }
 
         Text chuSai;
+        readonly Vector3[] gocKhung = new Vector3[4];
+
+        bool TrenManHinh()
+        {
+            khung.GetWorldCorners(gocKhung);
+            Vector2 a = RectTransformUtility.WorldToScreenPoint(camUi, gocKhung[0]), b = RectTransformUtility.WorldToScreenPoint(camUi, gocKhung[2]);
+            float W = camUi != null ? camUi.pixelWidth : Screen.width, H = camUi != null ? camUi.pixelHeight : Screen.height;
+            return b.x > 0 && a.x < W && b.y > 0 && a.y < H;
+        }
 
         /// <summary>Bật/tắt vẽ (khung đang ẩn thì không tốn GPU).</summary>
         public void Hien(bool co) { if (cam != null) cam.enabled = co; }

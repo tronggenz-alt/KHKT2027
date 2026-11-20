@@ -298,3 +298,11 @@ bảng 75%; ô đề vẫn ở trên trang (thiết kế cho phép "trên hoặc
   Ảnh `nen_den_mau_noi.png`.
 - Kiểm: KhktCoCheVerify 66/66 (thêm: phát tới bước có hướng sai tự phát hướng sai rồi đi tiếp hướng đúng), KhktUiVerify 82/82,
   app Mac xuất được.
+
+## 20. Tối ưu cho mượt (giữ nguyên bố cục, 20/11)
+- **Khung 3D dưới đáp án chỉ vẽ khi đang nằm trên màn hình** và không bị trình phát toàn màn che (trước đây vẽ ảnh 1600 điểm
+  MSAA 4× mỗi khung hình kể cả khi đã cuộn đi chỗ khác).
+- **Bảng liên kết mỗi trạng thái dựng 1 lần** rồi lưu đệm (trước dựng lại 2 lần/khung hình kèm chuỗi mới → rác bộ nhớ, giật GC).
+- Chuỗi nhãn nguyên tử lưu đệm; phím tắt 1–5 không tạo mảng mỗi khung; nút Phát giữ sẵn ô chữ (không tìm lại mỗi khung).
+- Lỗi nhỏ: nhãn trên C/H (nay màu sáng) đổi sang chữ tối cho dễ đọc.
+- Đo: KhktCoCheVerify ~480 → **564 khung/giây** (cùng máy, cùng cảnh); KhktCoCheVerify 66/66, KhktUiVerify 82/82; app Mac xuất được.

@@ -96,6 +96,7 @@ namespace Khkt.CoChe
         public void Nap(KichBan3D kb)
         {
             KichBan = kb;
+            bangLkDem.Clear();
             ChiSoBuoc = 0;
             T = 0f;
             DangPhat = false;
@@ -536,8 +537,8 @@ namespace Khkt.CoChe
             }
 
             // liên kết: có ở cả hai → đổi bậc giữa chừng; chỉ ở sau → mọc dần; chỉ ở trước → co lại
-            var bacA = BangLk(a);
-            var bacB = dichNhanh != null ? bacA : BangLk(b);
+            var bacA = BangLkNho(a);
+            var bacB = dichNhanh != null ? bacA : BangLkNho(b);
             foreach (var kv in bacA)
             {
                 bool coB = bacB.TryGetValue(kv.Key, out int bb);
@@ -638,6 +639,24 @@ namespace Khkt.CoChe
             if (KichBan.NguyenTu.TryGetValue(id, out var e)) return e;
             if (NhanhHienTai != null && NhanhHienTai.NguyenTuThem.TryGetValue(id, out e)) return e;
             return id.StartsWith("H") ? "H" : "C";
+        }
+
+        // tối ưu 20/11: bảng liên kết của mỗi trạng thái chỉ dựng 1 lần (trước đây dựng lại 2 lần mỗi khung hình → rác bộ nhớ)
+        readonly Dictionary<TrangThai3D, Dictionary<string, int>> bangLkDem = new Dictionary<TrangThai3D, Dictionary<string, int>>();
+        Dictionary<string, int> BangLkNho(TrangThai3D s)
+        {
+            if (!bangLkDem.TryGetValue(s, out var d)) bangLkDem[s] = d = BangLk(s);
+            return d;
+        }
+
+        static readonly Dictionary<(string, int), string> nhanDem = new Dictionary<(string, int), string>();
+        /// <summary>Chữ nhãn nguyên tử (ký hiệu + điện tích ⊕/⊖), lưu đệm để không tạo chuỗi mới mỗi khung hình.</summary>
+        public static string NhanNT(string e, int dt)
+        {
+            if (nhanDem.TryGetValue((e, dt), out var t)) return t;
+            t = e + (dt == 0 ? "" : dt > 0 ? (dt > 1 ? dt + "⊕" : "⊕") : (dt < -1 ? (-dt) + "⊖" : "⊖"));
+            nhanDem[(e, dt)] = t;
+            return t;
         }
 
         static Dictionary<string, int> BangLk(TrangThai3D s)

@@ -527,9 +527,10 @@ namespace Khkt.CoChe
                     var lp = new Vector2((sp.x / Mathf.Max(1, TrinhPhat.Cam.pixelWidth) - 0.5f) * kr.width, (sp.y / Mathf.Max(1, TrinhPhat.Cam.pixelHeight) - 0.5f) * kr.height);
                     if (Mathf.Abs(lp.x) > kr.width * 0.5f || Mathf.Abs(lp.y) > kr.height * 0.5f) continue;
                     var t = LayNhan(dung++);
-                    string chu = coChu ? e : "";
-                    if (dt != 0) chu += dt > 0 ? (dt > 1 ? dt + "⊕" : "⊕") : (dt < -1 ? (-dt) + "⊖" : "⊖");
+                    string chu = TrinhPhat3D.NhanNT(coChu ? e : "", dt);
                     if (t.text != chu) t.text = chu;
+                    var mauChu = e == "C" || e == "H" ? (Color)new Color32(0x14, 0x18, 0x22, 0xff) : Color.white;   // chữ tối trên nguyên tử màu sáng
+                    if (t.color != mauChu) t.color = mauChu;
                     t.rectTransform.anchoredPosition = lp + new Vector2(0, 2);
                     if (!t.gameObject.activeSelf) t.gameObject.SetActive(true);
                 }
@@ -692,6 +693,7 @@ namespace Khkt.CoChe
         Slider thanhToc;
         Button nutPhongTo, nutXem3D, nutBaiKhac, nutNhanh3D;
         int chiSoNhanh;
+        Text chuPhat;
         float fKhung;
         Coroutine chayKhung;
         const float KhungRong = 1040f, KhungCao = 450f;
@@ -933,6 +935,7 @@ namespace Khkt.CoChe
         void Update()
         {
             if (nutPhat == null) return;
+            if (chuPhat == null || chuPhat.transform.parent != nutPhat.transform) chuPhat = nutPhat.GetComponentInChildren<Text>();
             // phím tắt (khi không gõ chữ): V = Xem 3D ⇄ bảng giấy, F = phóng to ⇄ thu nhỏ khung 3D
             var kb = Keyboard.current;
             var sel = EventSystem.current != null ? EventSystem.current.currentSelectedGameObject : null;
@@ -942,9 +945,8 @@ namespace Khkt.CoChe
                 if (kb.vKey.wasPressedThisFrame) DatCheDo(!CheDoGiay);
                 else if (kb.fKey.wasPressedThisFrame) DatToanMan(!ToanMan);
             }
-            var ten = nutPhat.GetComponentInChildren<Text>();
             string can = TrinhPhat.DangPhat ? "Dừng" : "Phát";
-            if (ten.text != can) ten.text = can;
+            if (chuPhat.text != can) chuPhat.text = can;
             CapNhatTruc();
             if (chuDauKhung != null && BaiHienTai != null)
             {

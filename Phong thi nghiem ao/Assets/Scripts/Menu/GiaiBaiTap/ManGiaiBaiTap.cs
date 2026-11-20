@@ -80,8 +80,9 @@ namespace Khkt.Menu
             bool phimLenh = kb.leftCommandKey.isPressed || kb.rightCommandKey.isPressed || kb.leftCtrlKey.isPressed || kb.rightCtrlKey.isPressed;
             if (enter && (phimLenh || !dangGo)) { GiaiTrangDang(); return; }       // Enter (không gõ) hoặc ⌘/Ctrl + Enter (ô nhiều dòng)
             if (dangGo) return;
-            var phim = new[] { kb.digit1Key, kb.digit2Key, kb.digit3Key, kb.digit4Key, kb.digit5Key };
-            for (int i = 0; i < phim.Length; i++) if (phim[i].wasPressedThisFrame) { MoTrang((Trang)i); return; }
+            int so = kb.digit1Key.wasPressedThisFrame ? 0 : kb.digit2Key.wasPressedThisFrame ? 1 : kb.digit3Key.wasPressedThisFrame ? 2
+                   : kb.digit4Key.wasPressedThisFrame ? 3 : kb.digit5Key.wasPressedThisFrame ? 4 : -1;      // không tạo mảng mỗi khung hình
+            if (so >= 0) { MoTrang((Trang)so); return; }
             if (kb.escapeKey.wasPressedThisFrame && TrangDang != Trang.Chu) MoTrang(Trang.Chu);
         }
 
