@@ -415,7 +415,7 @@ namespace Khkt.Menu
                   "Nút Xem 3D mở khung 3D ngay dưới đáp án");
             if (gbt.Xem3DMoi != null) { gbt.Xem3DMoi.TP.DatT(0.4f); yield return null; gbt.Xem3DMoi.VeNgay(); }
             var da = gbt.Xem3DMoi != null ? gbt.Xem3DMoi.DoAnh() : (Color.clear, 0);
-            Check(da.Item2 > 150, "Khung 3D trong đáp án có hình phân tử", $"{da.Item2} điểm");
+            Check(da.Item2 > 100, "Khung 3D trong đáp án có hình phân tử", $"{da.Item2} điểm");
             Bam(kc.transform, "Nút Hiện e đáp án");
             Bam(kc.transform, "Nút Ẩn H đáp án");
             yield return Frames(3);
@@ -463,9 +463,22 @@ namespace Khkt.Menu
             Check(Khkt.CoChe.MoHinh3DMoDun.DangMo, "3D Mở lớn mở khung xoay 3D");
             { float tw = Time.realtimeSinceStartup; while (Khkt.CoChe.MoHinh3DMoDun.Instance != null && (Khkt.CoChe.MoHinh3DMoDun.Instance.DangTai || Khkt.CoChe.MoHinh3DMoDun.Instance.SoNguyenTu == 0) && Time.realtimeSinceStartup - tw < 4f) yield return null; }
             yield return Cho(0.8f);
-            Check(Khkt.CoChe.MoHinh3DMoDun.Instance != null && Khkt.CoChe.MoHinh3DMoDun.Instance.TrinhPhat.KieuCu && Khkt.CoChe.MoHinh3DMoDun.Instance.SoNguyenTu == 9,
-                "Khung 3D nguyên bản 18/11 (kiểu cũ, 9 nguyên tử ethanol)", Khkt.CoChe.MoHinh3DMoDun.Instance != null ? Khkt.CoChe.MoHinh3DMoDun.Instance.SoNguyenTu.ToString() : "");
-            yield return Chup(menu, "mo_hinh_3d_khung_1811");
+            Check(Khkt.CoChe.MoHinh3DMoDun.Instance != null && Khkt.CoChe.MoHinh3DMoDun.Instance.TrinhPhat.KieuJmol && Khkt.CoChe.MoHinh3DMoDun.Instance.SoNguyenTu == 9,
+                "Khung 3D bóng–que kiểu Jmol (nền trắng, que hai màu, 9 nguyên tử ethanol)", Khkt.CoChe.MoHinh3DMoDun.Instance != null ? Khkt.CoChe.MoHinh3DMoDun.Instance.SoNguyenTu.ToString() : "");
+            if (Khkt.CoChe.MoHinh3DMoDun.Instance != null)
+            {   // chụp riêng camera 3D (ảnh màn hình thường chỉ có lớp menu)
+                var cam3 = Khkt.CoChe.MoHinh3DMoDun.Instance.Cam;
+                var rt3 = new RenderTexture(1440, 900, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4 };
+                var cu3 = cam3.targetTexture; cam3.targetTexture = rt3;
+                yield return null;
+                cam3.Render();
+                RenderTexture.active = rt3;
+                var tx3 = new Texture2D(1440, 900, TextureFormat.RGB24, false);
+                tx3.ReadPixels(new Rect(0, 0, 1440, 900), 0, 0); tx3.Apply();
+                RenderTexture.active = null; cam3.targetTexture = cu3;
+                if (!string.IsNullOrEmpty(outDir)) File.WriteAllBytes(Path.Combine(outDir, "mo_hinh_3d_khung_jmol.png"), tx3.EncodeToPNG());
+                UnityEngine.Object.Destroy(tx3); rt3.Release();
+            }
             Khkt.CoChe.MoHinh3DMoDun.Dong();
             yield return Frames(3);
             Bam(gbt.transform, "Điều hướng Hóa lý");

@@ -74,3 +74,7 @@ Chạy: `KHKT_UI_SHOTS=<thư mục> ~/AppBuild/VERA_claude/dong_bo_va_chay.sh ~/
   Hướng: nhúng trang 3D của web (3Dmol) bằng plugin webview có sẵn `Plugins/macOS/BioWebViewMac.bundle` (đang dùng ở
   Bio/Portal/BioWebViewBridge.cs, GiaiPhauMoDun.cs). Cần tìm mã trang 3D của web CHEMISTRY (không thấy "3dmol" trong
   ~/Developer/Antigravity ngoài mo_hinh_3d.py; thử nhánh chemistry/ban-web hoặc ~/Documents/Antigravity).
+- 20/11 (cuối): mũi tên 3D theo bộ luật chung `docs/ngay-19-11/tu-duy-ve-mui-ten-3d.md` (6 kiểu, chấm điểm 6 phương án), kiểm
+  8 bài × mọi bước × 24 góc: 0 lỗi; Cơ chế mặc định Ẩn H (chỉ hiện H tham gia bước). Mô hình 3D: khung 3D thật kiểu bóng–que
+  Jmol (que hai màu, cầu 0,27×vdW), bố cục như mục 04 của CHEMISTRY: nền tối, thanh nút nổi (Bóng-que/Que/Đặc/Dây, Màu
+  Jmol/Carbon tối/Rasmol, Nhãn, Tự xoay, Ẩn H, Đóng), ô nhập nổi ở đáy; tự mở khi dựng xong. Chưa có: Bề mặt (VDW/SAS/SES).

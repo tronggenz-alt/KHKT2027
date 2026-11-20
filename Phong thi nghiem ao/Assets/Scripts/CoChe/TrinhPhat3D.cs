@@ -39,6 +39,35 @@ namespace Khkt.CoChe
         public bool KieuChemistry;
         /// <summary>Vẽ đúng như bản Mô hình 3D ngày 18/11 (bảng màu CPK cũ, không tự phát sáng).</summary>
         public bool KieuCu;
+        /// <summary>Bóng–que kiểu Jmol (Mô hình 3D): màu Jmol, que tô hai nửa theo màu hai nguyên tử, bề mặt mờ mềm.</summary>
+        public bool KieuJmol;
+        static readonly Dictionary<string, Color> MauJmol = new Dictionary<string, Color>
+        {
+            {"H", new Color32(0xff, 0xff, 0xff, 0xff)}, {"C", new Color32(0x90, 0x90, 0x90, 0xff)}, {"N", new Color32(0x30, 0x50, 0xf8, 0xff)},
+            {"O", new Color32(0xff, 0x0d, 0x0d, 0xff)}, {"F", new Color32(0x90, 0xe0, 0x50, 0xff)}, {"Cl", new Color32(0x1f, 0xf0, 0x1f, 0xff)},
+            {"Br", new Color32(0xa6, 0x29, 0x29, 0xff)}, {"I", new Color32(0x94, 0x00, 0x94, 0xff)}, {"S", new Color32(0xff, 0xff, 0x30, 0xff)},
+            {"P", new Color32(0xff, 0x80, 0x00, 0xff)}, {"Na", new Color32(0xab, 0x5c, 0xf2, 0xff)}, {"K", new Color32(0x8f, 0x40, 0xd4, 0xff)},
+        };
+        /// <summary>Kiểu vẽ như web CHEMISTRY: 0 Bóng-que, 1 Que, 2 Đặc, 3 Dây.</summary>
+        public int KieuVe;
+        /// <summary>Bảng màu: 0 Jmol, 1 Carbon tối, 2 Rasmol.</summary>
+        public int BangMau { get => bangMau; set { if (bangMau == value) return; bangMau = value; foreach (var m in matNt.Values) if (m != null) Destroy(m); matNt.Clear(); } }
+        int bangMau;
+        float BkChem(string e) => KieuVe == 1 ? 0.19f : KieuVe == 2 ? VdW(e) : KieuVe == 3 ? 0.04f : VdW(e) * 0.27f;
+        float RQue => KieuVe == 1 ? 0.19f : KieuVe == 3 ? 0.035f : 0.14f;
+        static readonly Dictionary<string, Color> MauCarbonToi = new Dictionary<string, Color>
+        {
+            {"C", new Color32(0x2c, 0x30, 0x38, 0xff)}, {"H", Color.white}, {"O", new Color32(0xe6, 0x39, 0x46, 0xff)}, {"N", new Color32(0x3a, 0x86, 0xff, 0xff)},
+            {"S", new Color32(0xff, 0xb7, 0x03, 0xff)}, {"Cl", new Color32(0x06, 0xd6, 0xa0, 0xff)}, {"Br", new Color32(0x9d, 0x02, 0x08, 0xff)},
+            {"F", new Color32(0x70, 0xe0, 0x00, 0xff)}, {"P", new Color32(0xfb, 0x85, 0x00, 0xff)}, {"I", new Color32(0x72, 0x09, 0xb7, 0xff)},
+        };
+        static readonly Dictionary<string, Color> MauRasmol = new Dictionary<string, Color>
+        {
+            {"C", new Color32(0xc8, 0xc8, 0xc8, 0xff)}, {"H", Color.white}, {"O", new Color32(0xf0, 0x00, 0x00, 0xff)}, {"N", new Color32(0x8f, 0x8f, 0xff, 0xff)},
+            {"S", new Color32(0xff, 0xc8, 0x32, 0xff)}, {"Cl", new Color32(0x00, 0xff, 0x00, 0xff)}, {"Br", new Color32(0xa5, 0x2a, 0x2a, 0xff)},
+            {"F", new Color32(0xda, 0xa5, 0x20, 0xff)}, {"P", new Color32(0xff, 0xa5, 0x00, 0xff)}, {"I", new Color32(0xa0, 0x20, 0xf0, 0xff)},
+        };
+        readonly Dictionary<string, List<Matrix4x4>> lkNua = new Dictionary<string, List<Matrix4x4>>();
         static readonly Dictionary<string, Color> MauCu = new Dictionary<string, Color>
         {
             {"H", new Color(0.95f, 0.95f, 0.95f)}, {"C", new Color(0.25f, 0.27f, 0.30f)}, {"N", new Color(0.19f, 0.31f, 0.97f)},
@@ -474,10 +503,11 @@ namespace Khkt.CoChe
         {
             if (matNt.TryGetValue(e, out var m)) return m;
             m = new Material(matGoc) { enableInstancing = true, name = "CoChe_" + e };
-            Color mauNt = KieuCu ? (MauCu.TryGetValue(e, out var mc) ? mc : new Color(1f, 0.55f, 0.75f)) : KieuChemistry ? MauCH(e) : Mau(e);
+            var bm = bangMau == 1 ? MauCarbonToi : bangMau == 2 ? MauRasmol : MauJmol;
+            Color mauNt = KieuJmol ? (bm.TryGetValue(e, out var mj) ? mj : Mau(e)) : KieuCu ? (MauCu.TryGetValue(e, out var mc) ? mc : new Color(1f, 0.55f, 0.75f)) : KieuChemistry ? MauCH(e) : Mau(e);
             m.SetColor("_BaseColor", mauNt);
             m.SetColor("_Color", mauNt);
-            m.SetFloat("_Smoothness", 0.62f);
+            m.SetFloat("_Smoothness", KieuJmol ? 0.45f : 0.62f);
             float sang = TuSang > 0f ? TuSang : KieuCu ? 0f : 0.12f;
             if (sang > 0f)
             {
@@ -518,6 +548,7 @@ namespace Khkt.CoChe
             DamBaoTaiNguyen();
             foreach (var l in nhom.Values) l.Clear();
             lk.Clear();
+            foreach (var l in lkNua.Values) l.Clear();
             hat.Clear();
             viTri.Clear();
             coNt.Clear();
@@ -575,7 +606,7 @@ namespace Khkt.CoChe
                 if (s <= 0.01f) continue;
                 string e = Nguyen(kv.Key);
                 if (LaHAn(kv.Key)) continue;                       // Ẩn H: chỉ H gắn vào C (H của H₂O, NH₃, OH⁻… vẫn hiện)
-                float d = (KieuChemistry ? VdW(e) * 0.27f : BK(e)) * 2f * s;
+                float d = (KieuChemistry ? BkChem(e) : BK(e)) * 2f * s;
                 if (!nhom.TryGetValue(e, out var l)) nhom[e] = l = new List<Matrix4x4>();
                 l.Add(Matrix4x4.TRS(W(kv.Value), Quaternion.identity, new Vector3(d, d, d)));
                 SoNguyenTuDangVe++;
@@ -627,6 +658,7 @@ namespace Khkt.CoChe
             // vẽ
             foreach (var kv in nhom) VeNhom(MatNguyenTu(kv.Key), cau, kv.Value);
             VeNhom(matLk != null ? matLk : MatNguyenTu("C"), tru, lk);
+            foreach (var kv in lkNua) if (kv.Value.Count > 0) VeNhom(MatNguyenTu(kv.Key), tru, kv.Value);
             VeNhom(matE, cauE, hat);
             VeLewis(m < 0.5f ? bacA : bacB, m < 0.5f ? a : b);
             if (lewis.Count > 0) VeNhom(matE, cauE, lewis);
@@ -746,7 +778,7 @@ namespace Khkt.CoChe
                 daChon.Clear();
                 if (huongLk.TryGetValue(kv.Key, out var hl)) daChon.AddRange(hl);
                 int coSan = daChon.Count;
-                float r = (KieuChemistry ? VdW(e) * 0.27f : BK(e)) + 0.17f;
+                float r = (KieuChemistry ? BkChem(e) : BK(e)) + 0.17f;
                 for (int i = 0; i < cap + le; i++)
                 {
                     Vector3 tot = Vector3.up; float diem = -9f;
@@ -783,8 +815,21 @@ namespace Khkt.CoChe
             var ngang = Vector3.Cross(d / dai, Vector3.forward);
             if (ngang.sqrMagnitude < 1e-6f) ngang = Vector3.right;
             ngang.Normalize();
-            float r = (KieuChemistry ? 0.14f : 0.075f) * g * (bac > 1 ? 0.62f : 1f);
+            float r = (KieuChemistry ? RQue : 0.075f) * g * (bac > 1 ? 0.62f : 1f);
             float[] lech = bac >= 3 ? new[] { -0.14f, 0f, 0.14f } : bac == 2 ? new[] { -0.09f, 0.09f } : new[] { 0f };
+            if (KieuJmol && KieuVe == 2) return;                         // Đặc: chỉ quả cầu vdW
+            if (KieuJmol)
+            {   // que hai nửa: nửa gần nguyên tử nào mang màu nguyên tử đó (như Jmol/3Dmol)
+                string ea = Nguyen(ia), eb = Nguyen(ib);
+                if (!lkNua.TryGetValue(ea, out var la)) lkNua[ea] = la = new List<Matrix4x4>();
+                if (!lkNua.TryGetValue(eb, out var lb)) lkNua[eb] = lb = new List<Matrix4x4>();
+                foreach (var o in lech)
+                {
+                    la.Add(Matrix4x4.TRS(wa + ngang * o, quay, new Vector3(r, dai * 0.5f, r)));
+                    lb.Add(Matrix4x4.TRS(wa + d * 0.5f + ngang * o, quay, new Vector3(r, dai * 0.5f, r)));
+                }
+                return;
+            }
             foreach (var o in lech)
                 lk.Add(Matrix4x4.TRS(wa + ngang * o, quay, new Vector3(r, dai, r)));
         }
@@ -871,7 +916,7 @@ namespace Khkt.CoChe
         float BanKinhVe(string id)
         {
             string e = Nguyen(id);
-            return KieuChemistry ? VdW(e) * 0.27f : BK(e);
+            return KieuChemistry ? BkChem(e) : BK(e);
         }
 
         /// <summary>Hình nón đáy tròn bán kính 1 ở y = 0, đỉnh y = 1 (khớp quy ước trụ: tỉ lệ x = bán kính, y = chiều dài).</summary>

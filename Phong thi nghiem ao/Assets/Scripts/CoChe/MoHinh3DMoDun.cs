@@ -68,7 +68,7 @@ namespace Khkt.CoChe
             camGo.transform.SetParent(transform, false);
             Cam = camGo.AddComponent<Camera>();
             Cam.clearFlags = CameraClearFlags.SolidColor;
-            Cam.backgroundColor = new Color32(0x0b, 0x10, 0x20, 0xff);          // nguyên bản 18/11 (nền xanh tối)
+            Cam.backgroundColor = new Color32(0x12, 0x12, 0x15, 0xff);          // nền tối như mục 3D của CHEMISTRY
             Cam.cullingMask = 1 << TrinhPhat3D.LopVe;
             Cam.fieldOfView = 32f;
             Cam.nearClipPlane = 0.05f;
@@ -92,38 +92,95 @@ namespace Khkt.CoChe
 
             TrinhPhat = gameObject.AddComponent<TrinhPhat3D>();
             TrinhPhat.Cam = Cam;
-            TrinhPhat.KieuCu = true;                                            // giữ nguyên cách vẽ 18/11
+            TrinhPhat.KieuChemistry = true; TrinhPhat.KieuJmol = true;          // bóng–que: cầu 0,27×vdW, que 0,14 Å hai màu
 
-            vungNhin = Gian(goc, "Vùng nhìn", new Vector2(0, 40), new Vector2(-440, -190));
+            // 20/11: bố cục giống mục 04 "Mô hình 3D" của CHEMISTRY – nền tối toàn màn hình, nút nổi ở trên (như Cơ chế 3D toàn màn hình)
+            vungNhin = Gian(goc, "Vùng nhìn", new Vector2(0, 90), new Vector2(0, -84));
             khungNhan = Gian(goc, "Nhãn nguyên tử", Vector2.zero, Vector2.zero);
+            khungNhan.gameObject.SetActive(false);
 
-            var sang = new Color32(0xe8, 0xec, 0xf5, 0xff);
-            var phu = new Color32(0x9a, 0xa5, 0xbd, 0xff);
-            GlassKit.Label(goc, "Tiêu đề", "Mô hình 3D", 27, sang, true, TextAnchor.UpperLeft, new Vector2(28, -22), new Vector2(800, 38));
-            GlassKit.Label(goc, "Mô tả", "Gõ tên chất (tiếng Việt hoặc tiếng Anh), công thức thu gọn hoặc SMILES · kéo để xoay 360° · cuộn để phóng to",
-                           15, phu, false, TextAnchor.UpperLeft, new Vector2(28, -64), new Vector2(1300, 22));
-            oNhap = GlassKit.MakeInput(goc, "Ô nhập chất", "Ví dụ: ethanol, CH3COOH, benzen, CCO", new Vector2(28, -100), new Vector2(620, 50), 17);
-            oNhap.onSubmit.AddListener(XemChat);
-            GlassKit.MakeButton(goc, "Nút Xem 3D", "Xem 3D", new Vector2(660, -100), new Vector2(130, 50), () => XemChat(oNhap.text), true, 16);
-            float x = 806;
-            foreach (var m in Mau)
+            Color sang = new Color32(0xfa, 0xfa, 0xfa, 0xff), phu = new Color32(0xa1, 0xa1, 0xaa, 0xff);
+            var thanh = GlassKit.Rect(goc, "Thanh nổi", new Vector2(0, 1), new Vector2(1, 1), new Vector2(0, -84), new Vector2(0, 0));
+            thanh.anchorMin = new Vector2(0, 1); thanh.anchorMax = new Vector2(1, 1); thanh.pivot = new Vector2(0.5f, 1f);
+            thanh.offsetMin = new Vector2(0, -84); thanh.offsetMax = Vector2.zero;
+            var nenThanh = thanh.gameObject.AddComponent<Image>(); nenThanh.color = new Color32(0x09, 0x09, 0x0b, 0xe6); nenThanh.raycastTarget = false;
+            tenChat = GlassKit.Label(thanh, "Tên chất", "ethanol", 21, sang, true, TextAnchor.MiddleLeft, new Vector2(28, -20), new Vector2(260, 44));
+            tenChat.horizontalOverflow = HorizontalWrapMode.Overflow;
+            thongTin = GlassKit.Label(thanh, "Thông số", "", 17, phu, false, TextAnchor.MiddleLeft, new Vector2(262, -20), new Vector2(240, 44));
+            thongTin.supportRichText = true;
+
+            float x = 510;
+            var nhomKieu = Pill(thanh, "Nhóm kiểu", new Vector2(x, -18), new Vector2(4 * 104 + 8, 48), NenNut);
+            string[] kieu = { "Bóng-que", "Que", "Đặc", "Dây" };
+            for (int k = 0; k < 4; k++)
             {
-                string mm = m;
-                var b = GlassKit.MakeChip(goc, "Mẫu " + m, m, new Vector2(x, -104), new Vector2(Mathf.Max(80, 16 + m.Length * 10), 42), () => { oNhap.text = mm; XemChat(mm); }, false, 14);
-                x += ((RectTransform)b.transform).sizeDelta.x + 8;
+                int kk = k;
+                nutKieu[k] = NutNoi(nhomKieu, "Kiểu " + kieu[k], kieu[k], new Vector2(4 + k * 104, -4), new Vector2(100, 40), () => DatKieu(kk), false);
             }
-            GlassKit.MakeButton(goc, "Đóng", "Đóng", new Vector2(-110, -22), new Vector2(100, 44), Dong, false, 15, new Vector2(1, 1));
+            x += 4 * 104 + 8 + 14;
+            nutMau = NutNoi(thanh, "Màu", "Màu Jmol  ▾", new Vector2(x, -18), new Vector2(170, 48), DoiMau, true); x += 184;
+            nutNhan = NutNoi(thanh, "Nhãn", "☐  Nhãn", new Vector2(x, -18), new Vector2(118, 48), () => { khungNhan.gameObject.SetActive(!khungNhan.gameObject.activeSelf); CapNhatNut(); }, true); x += 132;
+            nutXoay = NutNoi(thanh, "Tự xoay", "☐  Tự xoay", new Vector2(x, -18), new Vector2(140, 48), () => { TrinhPhat.TuXoay = !TrinhPhat.TuXoay; CapNhatNut(); }, true); x += 154;
+            nutAnH = NutNoi(thanh, "Ẩn H", "☐  Ẩn H", new Vector2(x, -18), new Vector2(120, 48), () => { TrinhPhat.AnH = !TrinhPhat.AnH; CapNhatNut(); }, true);
+            var dong = NutNoi(thanh, "Đóng", "Đóng", new Vector2(-28, -18), new Vector2(110, 48), Dong, true);
+            var rd = (RectTransform)dong.transform; rd.anchorMin = rd.anchorMax = rd.pivot = new Vector2(1, 1);
 
-            // thẻ thông tin bên phải
-            var the = GlassKit.Fill(goc, "Thông tin chất", new Vector2(-420, -190), new Vector2(392, 520), GlassKit.Surface, new Vector2(1, 1), true).rectTransform;
-            tenChat = GlassKit.Label(the, "Tên chất", "Chưa có chất", 22, GlassKit.Ink, true, TextAnchor.UpperLeft, new Vector2(22, -20), new Vector2(350, 60));
-            tenChat.horizontalOverflow = HorizontalWrapMode.Wrap;
-            thongTin = GlassKit.Label(the, "Thông số", "", 16, GlassKit.Ink, false, TextAnchor.UpperLeft, new Vector2(22, -90), new Vector2(350, 260));
-            thongTin.horizontalOverflow = HorizontalWrapMode.Wrap;
-            nutAnH = GlassKit.MakeChip(the, "Ẩn H", "Ẩn H", new Vector2(22, -380), new Vector2(110, 44), () => { TrinhPhat.AnH = !TrinhPhat.AnH; GlassKit.SetChip(nutAnH, TrinhPhat.AnH); });
-            GlassKit.MakeButton(the, "Góc nhìn", "Đặt lại góc", new Vector2(142, -380), new Vector2(150, 44), () => { if (TrinhPhat.KichBan != null) TrinhPhat.Nap(TrinhPhat.KichBan); });
-            trangThai = GlassKit.Label(the, "Trạng thái", "", 14, GlassKit.Dim, false, TextAnchor.UpperLeft, new Vector2(22, -440), new Vector2(350, 70));
+            // ô nhập nổi ở đáy
+            oNhap = GlassKit.MakeInput(goc, "Ô nhập chất", "Tên chất, công thức hoặc SMILES rồi Enter (vd: ethanol, CH3COOH, CCO)", new Vector2(28, 0), new Vector2(720, 52), 17);
+            var ro = (RectTransform)oNhap.transform; ro.anchorMin = ro.anchorMax = ro.pivot = new Vector2(0, 0); ro.anchoredPosition = new Vector2(28, 22);
+            oNhap.onSubmit.AddListener(XemChat);
+            var xem = GlassKit.MakeButton(goc, "Nút Xem 3D", "Xem 3D", Vector2.zero, new Vector2(130, 52), () => XemChat(oNhap.text), true, 16);
+            var rx = (RectTransform)xem.transform; rx.anchorMin = rx.anchorMax = rx.pivot = new Vector2(0, 0); rx.anchoredPosition = new Vector2(760, 22);
+            trangThai = GlassKit.Label(goc, "Trạng thái", "", 15, phu, false, TextAnchor.MiddleLeft, Vector2.zero, new Vector2(900, 30));
+            var rt = trangThai.rectTransform; rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0, 0); rt.anchoredPosition = new Vector2(30, 80);
             trangThai.horizontalOverflow = HorizontalWrapMode.Wrap;
+            CapNhatNut();
+        }
+
+        static readonly Color NenNut = new Color32(0x12, 0x12, 0x15, 0xf2);
+        readonly Button[] nutKieu = new Button[4];
+        Button nutMau, nutNhan, nutXoay;
+        static readonly string[] TenMau = { "Màu Jmol", "Carbon tối", "Rasmol" };
+
+        static RectTransform Pill(Transform cha, string ten, Vector2 pos, Vector2 size, Color mau)
+        {
+            var r = GlassKit.Rect(cha, ten, new Vector2(0, 1), new Vector2(0, 1), pos, size);
+            r.pivot = new Vector2(0, 1); r.anchoredPosition = pos;
+            var im = r.gameObject.AddComponent<Image>();
+            im.sprite = Khkt.Menu.Dashboard.MenuKit.Round(12f); im.type = Image.Type.Sliced; im.color = mau;
+            var ol = r.gameObject.AddComponent<Outline>(); ol.effectColor = new Color32(0x27, 0x27, 0x2a, 0xff); ol.effectDistance = new Vector2(1, -1);
+            return r;
+        }
+
+        Button NutNoi(Transform cha, string ten, string chu, Vector2 pos, Vector2 size, UnityEngine.Events.UnityAction bam, bool vien)
+        {
+            var r = Pill(cha, ten, pos, size, vien ? NenNut : new Color(0, 0, 0, 0));
+            if (!vien) Destroy(r.GetComponent<Outline>());
+            var b = r.gameObject.AddComponent<Button>();
+            b.targetGraphic = r.GetComponent<Image>();
+            b.onClick.AddListener(bam);
+            var t = GlassKit.Label(r, "Chữ", chu, 17, new Color32(0xfa, 0xfa, 0xfa, 0xff), false, TextAnchor.MiddleCenter, Vector2.zero, size);
+            t.raycastTarget = false; t.horizontalOverflow = HorizontalWrapMode.Overflow;
+            return b;
+        }
+
+        void DatKieu(int k) { TrinhPhat.KieuVe = k; CapNhatNut(); }
+        void DoiMau() { TrinhPhat.BangMau = (TrinhPhat.BangMau + 1) % 3; CapNhatNut(); }
+
+        void CapNhatNut()
+        {
+            Color den = new Color32(0x09, 0x09, 0x0b, 0xff), sang = new Color32(0xfa, 0xfa, 0xfa, 0xff), phu = new Color32(0xa1, 0xa1, 0xaa, 0xff);
+            for (int k = 0; k < 4; k++)
+            {
+                if (nutKieu[k] == null) continue;
+                bool chon = TrinhPhat.KieuVe == k;
+                nutKieu[k].GetComponent<Image>().color = chon ? sang : new Color(0, 0, 0, 0);
+                nutKieu[k].GetComponentInChildren<Text>().color = chon ? den : phu;
+            }
+            if (nutMau != null) nutMau.GetComponentInChildren<Text>().text = TenMau[TrinhPhat.BangMau] + "  ▾";
+            if (nutNhan != null) nutNhan.GetComponentInChildren<Text>().text = (khungNhan.gameObject.activeSelf ? "☑" : "☐") + "  Nhãn";
+            if (nutXoay != null) nutXoay.GetComponentInChildren<Text>().text = (TrinhPhat.TuXoay ? "☑" : "☐") + "  Tự xoay";
+            if (nutAnH != null) nutAnH.GetComponentInChildren<Text>().text = (TrinhPhat.AnH ? "☑" : "☐") + "  Ẩn H";
         }
 
         static RectTransform Gian(Transform cha, string ten, Vector2 offMin, Vector2 offMax)
@@ -218,9 +275,10 @@ namespace Khkt.CoChe
             SoNguyenTu = ds.Count;
             tenChat.text = string.IsNullOrEmpty(kb.Ten) ? "(không tên)" : kb.Ten;
             string nguon = S(d, "nguon") switch { "bang_sgk" => "bảng chất SGK (đã kiểm chứng)", "pubchem" => "PubChem", "smiles" => "SMILES bạn nhập", var s => s };
-            thongTin.text = $"<b>Công thức phân tử:</b> {CongThuc(S(d, "cong_thuc"))}\n<b>Khối lượng mol:</b> {F(Lay(d, "khoi_luong")):0.00} g/mol\n" +
-                            $"<b>Số nguyên tử:</b> {ds.Count} (kể cả H)\n<b>SMILES:</b> {S(d, "smiles")}\n<b>Nguồn:</b> {nguon}\n\n" +
-                            "<color=#9aa5bd>Cấu dạng tính bằng RDKit (ETKDG + MMFF).</color>";
+            thongTin.text = $"{CongThuc(S(d, "cong_thuc"))} · {F(Lay(d, "khoi_luong")):0.00} g/mol";
+            float rongTen = Mathf.Min(260f, tenChat.preferredWidth);
+            thongTin.rectTransform.anchoredPosition = new Vector2(28 + rongTen + 14, thongTin.rectTransform.anchoredPosition.y);
+            _ = nguon;
             trangThai.text = "";
         }
 
