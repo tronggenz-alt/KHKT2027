@@ -323,3 +323,6 @@ bảng 75%; ô đề vẫn ở trên trang (thiết kế cho phép "trên hoặc
 
 ## 23. Góc nhìn tự lắc (20/11)
 - Trình phát cơ chế tự lắc chậm ±18° quanh góc nhìn tốt nhất của từng bước (`TrinhPhat3D.LacGoc`), kéo chuột thì dừng tới bước sau.
+
+## 24. Ẩn H chỉ ẩn H gắn vào C (20/11)
+- Ẩn H chỉ ẩn H của mạch carbon; H của tác nhân (H₂O, NH₃, OH⁻, HBr…) vẫn hiện (nguyên tử, liên kết, nhãn, chấm Lewis) – `TrinhPhat3D.LaHAn`.

@@ -98,7 +98,7 @@ namespace Khkt.CoChe
         public void Nap(KichBan3D kb)
         {
             KichBan = kb;
-            bangLkDem.Clear();
+            bangLkDem.Clear(); hGanC.Clear();
             ChiSoBuoc = 0;
             T = 0f;
             DangPhat = false;
@@ -114,6 +114,26 @@ namespace Khkt.CoChe
         }
 
         readonly HashSet<int> daPhatNhanh = new HashSet<int>();
+
+        // ---- Ẩn H chỉ áp cho H gắn vào C (mạch chính); H của tác nhân (H₂O, NH₃, OH⁻, HBr…) vẫn hiện
+        TrangThai3D trangDang;
+        readonly Dictionary<TrangThai3D, HashSet<string>> hGanC = new Dictionary<TrangThai3D, HashSet<string>>();
+        public bool LaHAn(string id)
+        {
+            if (!AnH || trangDang == null || KichBan == null) return false;
+            if (!hGanC.TryGetValue(trangDang, out var ds))
+            {
+                ds = new HashSet<string>();
+                foreach (var l in trangDang.LienKet)
+                {
+                    string ea = Nguyen(l.A), eb = Nguyen(l.B);
+                    if (ea == "H" && eb == "C") ds.Add(l.A);
+                    else if (eb == "H" && ea == "C") ds.Add(l.B);
+                }
+                hGanC[trangDang] = ds;
+            }
+            return ds.Contains(id);
+        }
         public int SoNhanhDaPhat => daPhatNhanh.Count;
 
         public void DenBuoc(int i, bool phat = false)
@@ -530,13 +550,14 @@ namespace Khkt.CoChe
                     if (!a.ToaDo.ContainsKey(kv.Key)) { viTri[kv.Key] = kv.Value; coNt[kv.Key] = m; }
             }
 
+            trangDang = a;
             SoNguyenTuDangVe = 0;
             foreach (var kv in viTri)
             {
                 float s = coNt[kv.Key];
                 if (s <= 0.01f) continue;
                 string e = Nguyen(kv.Key);
-                if (AnH && e == "H") continue;                     // 20/11: Ẩn H là ẩn hẳn (cả liên kết tới H)
+                if (LaHAn(kv.Key)) continue;                       // Ẩn H: chỉ H gắn vào C (H của H₂O, NH₃, OH⁻… vẫn hiện)
                 float d = (KieuChemistry ? VdW(e) * 0.27f : BK(e)) * 2f * s;
                 if (!nhom.TryGetValue(e, out var l)) nhom[e] = l = new List<Matrix4x4>();
                 l.Add(Matrix4x4.TRS(W(kv.Value), Quaternion.identity, new Vector3(d, d, d)));
@@ -700,7 +721,7 @@ namespace Khkt.CoChe
             {
                 if (coNt.TryGetValue(kv.Key, out var c) && c < 0.5f) continue;
                 string e = Nguyen(kv.Key);
-                if (AnH && e == "H") continue;
+                if (LaHAn(kv.Key)) continue;
                 if (!HoaTri.TryGetValue(e, out int ht)) continue;
                 int n = ht - (tongBac.TryGetValue(kv.Key, out var tb) ? tb : 0) - (st.DienTich.TryGetValue(kv.Key, out var dt) ? dt : 0);
                 if (n <= 0) continue;
@@ -737,7 +758,7 @@ namespace Khkt.CoChe
             int k = khoa.IndexOf('|');
             string ia = khoa.Substring(0, k), ib = khoa.Substring(k + 1);
             if (!viTri.TryGetValue(ia, out var pa) || !viTri.TryGetValue(ib, out var pb)) return;
-            if (AnH && (Nguyen(ia) == "H" || Nguyen(ib) == "H")) return;
+            if (LaHAn(ia) || LaHAn(ib)) return;
             Vector3 wa = W(pa), wb = W(pb), d = wb - wa;
             float dai = d.magnitude;
             if (dai < 1e-4f) return;

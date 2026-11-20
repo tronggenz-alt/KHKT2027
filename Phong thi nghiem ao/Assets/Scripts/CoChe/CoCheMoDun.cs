@@ -519,7 +519,7 @@ namespace Khkt.CoChe
                     string e = TrinhPhat.NguyenTo(kv.Key);
                     int dt = TrinhPhat.DienTichHienTai(kv.Key);
                     bool coChu = true;                                    // 20/11: ghi ký hiệu mọi nguyên tử (cả C, H) cho dễ nhận biết
-                    if (TrinhPhat.AnH && e == "H") continue;
+                    if (TrinhPhat.LaHAn(kv.Key)) continue;
                     if (TrinhPhat.CoNguyenTu(kv.Key) < 0.5f) continue;
                     var sp = TrinhPhat.Cam.WorldToScreenPoint(TrinhPhat.TheGioi(kv.Value));
                     if (sp.z <= 0f) continue;
