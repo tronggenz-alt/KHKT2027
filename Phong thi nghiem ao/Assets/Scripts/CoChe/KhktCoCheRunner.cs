@@ -163,8 +163,7 @@ namespace Khkt.CoChe
                 CoCheMoDun.MoVoiBai(md.Nap("sn1_tbubr"));
                 yield return Frames(3);
                 Check(md.CheDoGiay && !md.Khung3DMo, "Mở bài: hiện bản giấy trước, khung 3D đóng");
-                var nutSai = md.GetComponentsInChildren<Button>(true).FirstOrDefault(b => b.name == "Nút Hướng sai 3D");
-                Check(nutSai != null && nutSai.gameObject.activeSelf, "Bài có nhánh sai: nút Hướng sai hiện trong khung 3D");
+
                 Shot("luong_giay_truoc");
                 var nut3d = md.GetComponentsInChildren<Button>(true).FirstOrDefault(b => b.name == "Nút Xem 3D");
                 nut3d?.onClick.Invoke();
@@ -174,9 +173,16 @@ namespace Khkt.CoChe
                 var r = md.VungCam3D;
                 Check(nut3d != null && md.Khung3DMo && md.ToanMan && r.width > 0.97f && r.height > 0.8f,
                       "Nút Xem 3D vào thẳng 3D toàn màn hình (không còn dạng vừa giấy vừa 3D)", $"rect {r}");
-                nutSai?.onClick.Invoke();
+                // phát tới bước có hướng sai: tự phát hướng sai trước (bị chặn), xong tự đi hướng đúng
+                var tpn = md.TrinhPhat;
+                int bSai = tpn.KichBan.Buoc.FindIndex(x => x.Tu == tpn.KichBan.NhanhSai[0].TuTrangThai);
+                tpn.DenBuoc(Mathf.Max(0, bSai), true);
                 yield return Frames(2);
-                Check(md.TrinhPhat.DangNhanhSai, "Bấm Hướng sai: electron bay về hướng không thể, bị màn chắn chặn");
+                Check(tpn.DangNhanhSai && tpn.DangPhat, "Phát tới bước có hướng sai: tự phát hướng sai trước (không cần nút)");
+                float tw = Time.realtimeSinceStartup;
+                while (tpn.DangNhanhSai && Time.realtimeSinceStartup - tw < 8f) yield return null;
+                Check(!tpn.DangNhanhSai && tpn.DangPhat && tpn.ChiSoBuoc == Mathf.Max(0, bSai), "Hướng sai xong: tiếp tục đi hướng đúng ở cùng bước");
+                tpn.DenBuoc(Mathf.Max(0, bSai), true); yield return Frames(2);
                 md.TrinhPhat.DatTNhanh(0.8f);
                 yield return Frames(2);
                 Shot("huong_sai_man_chan");

@@ -110,8 +110,12 @@ namespace Khkt.CoChe
             DoiBuoc?.Invoke();
         }
 
+        readonly HashSet<int> daPhatNhanh = new HashSet<int>();
+        public int SoNhanhDaPhat => daPhatNhanh.Count;
+
         public void DenBuoc(int i, bool phat = false)
         {
+            daPhatNhanh.Clear();                                   // xem lại bước thì phát lại cả hướng sai
             if (KichBan == null) return;
             DangNhanhSai = false;
             ChiSoBuoc = Mathf.Clamp(i, 0, SoBuoc - 1);
@@ -171,6 +175,17 @@ namespace Khkt.CoChe
                 KhoangCach = Mathf.Lerp(KhoangCach, khoangDich, k);
             }
             float dt = Time.unscaledDeltaTime * TocDo;
+            // 20/11: tới bước có hướng sai trong lúc PHÁT thì tự phát hướng sai trước (electron bị quả cầu chặn), xong mới đi hướng đúng
+            if (DangPhat && !DangNhanhSai && T <= 0f && KichBan.NhanhSai.Count > 0 && BuocHienTai != null)
+                for (int i = 0; i < KichBan.NhanhSai.Count; i++)
+                    if (KichBan.NhanhSai[i].TuTrangThai == BuocHienTai.Tu && daPhatNhanh.Add(i))
+                    {
+                        NhanhHienTai = KichBan.NhanhSai[i];
+                        DangNhanhSai = true;
+                        tNhanh = 0f;
+                        DoiBuoc?.Invoke();
+                        break;
+                    }
             if (DangNhanhSai)
             {
                 tNhanh += dt / 3.4f;
@@ -347,9 +362,10 @@ namespace Khkt.CoChe
         // ------------------------------------------------------------------ hình học
         static readonly Dictionary<string, Color> MauCPK = new Dictionary<string, Color>
         {
-            {"H", new Color(0.95f, 0.95f, 0.95f)}, {"C", new Color(0.25f, 0.27f, 0.30f)}, {"N", new Color(0.19f, 0.31f, 0.97f)},
-            {"O", new Color(0.93f, 0.16f, 0.12f)}, {"F", new Color(0.56f, 0.88f, 0.31f)}, {"Cl", new Color(0.12f, 0.80f, 0.20f)},
-            {"Br", new Color(0.65f, 0.16f, 0.16f)}, {"I", new Color(0.58f, 0.0f, 0.58f)}, {"S", new Color(0.95f, 0.85f, 0.20f)},
+            // 20/11: màu tươi, sáng để nổi trên nền đen (C xám sáng thay vì xám đậm chìm vào nền)
+            {"H", new Color(0.97f, 0.97f, 0.99f)}, {"C", new Color(0.58f, 0.62f, 0.68f)}, {"N", new Color(0.30f, 0.50f, 1.00f)},
+            {"O", new Color(1.00f, 0.27f, 0.25f)}, {"F", new Color(0.56f, 0.95f, 0.31f)}, {"Cl", new Color(0.20f, 0.90f, 0.45f)},
+            {"Br", new Color(0.86f, 0.30f, 0.22f)}, {"I", new Color(0.58f, 0.0f, 0.58f)}, {"S", new Color(0.95f, 0.85f, 0.20f)},
             {"P", new Color(1f, 0.5f, 0f)}, {"Na", new Color(0.67f, 0.36f, 0.95f)}, {"K", new Color(0.56f, 0.25f, 0.83f)},
         };
         static readonly Dictionary<string, float> BanKinh = new Dictionary<string, float>
@@ -363,7 +379,7 @@ namespace Khkt.CoChe
         // bảng màu và bán kính van der Waals theo trình xem 3Dmol của CHEMISTRY (app.js layMau3D)
         static readonly Dictionary<string, Color> MauChem = new Dictionary<string, Color>
         {
-            {"C", new Color32(0x2c, 0x30, 0x38, 0xff)}, {"H", new Color32(0xf4, 0xf4, 0xf5, 0xff)}, {"O", new Color32(0xe6, 0x39, 0x46, 0xff)},
+            {"C", new Color32(0x9a, 0xa3, 0xad, 0xff)}, {"H", new Color32(0xf4, 0xf4, 0xf5, 0xff)}, {"O", new Color32(0xe6, 0x39, 0x46, 0xff)},
             {"N", new Color32(0x3a, 0x86, 0xff, 0xff)}, {"S", new Color32(0xff, 0xb7, 0x03, 0xff)}, {"Cl", new Color32(0x06, 0xd6, 0xa0, 0xff)},
             {"Br", new Color32(0x9d, 0x02, 0x08, 0xff)}, {"F", new Color32(0x70, 0xe0, 0x00, 0xff)}, {"P", new Color32(0xfb, 0x85, 0x00, 0xff)},
             {"I", new Color32(0x72, 0x09, 0xb7, 0xff)},
@@ -417,11 +433,12 @@ namespace Khkt.CoChe
             m.SetColor("_BaseColor", KieuChemistry ? MauCH(e) : Mau(e));
             m.SetColor("_Color", KieuChemistry ? MauCH(e) : Mau(e));
             m.SetFloat("_Smoothness", 0.62f);
-            if (TuSang > 0f)
+            float sang = TuSang > 0f ? TuSang : 0.12f;
+            if (sang > 0f)
             {
                 m.EnableKeyword("_EMISSION");
                 m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
-                m.SetColor("_EmissionColor", (KieuChemistry ? MauCH(e) : Mau(e)) * TuSang);
+                m.SetColor("_EmissionColor", (KieuChemistry ? MauCH(e) : Mau(e)) * sang);
             }
             matNt[e] = m;
             return m;

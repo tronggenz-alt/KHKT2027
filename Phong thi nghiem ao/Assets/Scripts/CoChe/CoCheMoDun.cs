@@ -163,7 +163,7 @@ namespace Khkt.CoChe
         // Bố cục giống nguyen_mau/co_che_3d/sn2_sn1.html: phân tử chiếm cả màn nền xanh đậm, đầu trang góc trái (tên bài, đề),
         // nút gạt 3D | Giấy góc phải, khung bước bằng kính ở giữa đáy (nhãn, tên bước, mô tả, thanh tiến trình chia đoạn, nút phát).
         // Chế độ Giấy: cả trang màu giấy, tờ đáp án ở giữa (phông có chân), nút "Giải thích từng bước".
-        public static readonly Color NenToi = new Color32(0x0b, 0x10, 0x20, 0xff);
+        public static readonly Color NenToi = new Color32(0x04, 0x05, 0x08, 0xff);   // 20/11: nền 3D đen để phân tử nổi bật
         public static readonly Color NenGiay = new Color32(0xf6, 0xf1, 0xe6, 0xff);
         static readonly Color Kinh = new Color32(18, 24, 44, 205);
         static readonly Color VienKinh = new Color(1f, 1f, 1f, 0.12f);
@@ -758,7 +758,7 @@ namespace Khkt.CoChe
             nutPhat = NutKinh(thanhKhung, "Nút Phát 3D", "Phát", new Vector2(x, y), new Vector2(84, 44), () => TrinhPhat.PhatDung(), 15); x += 90;
             NutKinh(thanhKhung, "Nút Bước sau 3D", "›", new Vector2(x, y), new Vector2(44, 44), () => TrinhPhat.BuocSau(), 20); x += 62;
             truc = GlassKit.Rect(thanhKhung, "Trục bước 3D", new Vector2(0, 1), new Vector2(0, 1), new Vector2(x, -33), new Vector2(100, 8));
-            truc.anchorMax = new Vector2(1, 1); truc.offsetMax = new Vector2(-(14 + 96 + 12 + 286 + 8 + 96 + 8 + 118 + 16), truc.offsetMax.y);
+            truc.anchorMax = new Vector2(1, 1); truc.offsetMax = new Vector2(-(14 + 96 + 12 + 286 + 8 + 96 + 16), truc.offsetMax.y);
             var tocRt = GlassKit.Rect(thanhKhung, "Tốc độ 3D", new Vector2(1, 1), new Vector2(1, 1), new Vector2(-(14 + 96 + 12), -14), new Vector2(230 + 56, 44));
             GlassKit.Label(tocRt, "Nhãn", "Tốc độ", 14, ChuPhu, false, TextAnchor.MiddleLeft, Vector2.zero, new Vector2(60, 44));
             thanhToc = TaoThanhTruot(tocRt, new Vector2(60, -12), new Vector2(160, 20), 0.25f, 3f, 1f, v => { TrinhPhat.TocDo = v; chuTocKhung.text = v.ToString("0.00") + "×"; });
@@ -766,12 +766,6 @@ namespace Khkt.CoChe
             nutAnH = NutKinh(thanhKhung, "Nút Ẩn H 3D", "Ẩn H", new Vector2(-14, -14), new Vector2(96, 44), BatAnH, 15, new Vector2(1, 1));
             var nutE = NutKinh(thanhKhung, "Nút Hiện e 3D", "Hiện e", new Vector2(-(14 + 96 + 12 + 286 + 8), -14), new Vector2(96, 44), null, 15, new Vector2(1, 1));
             ((RectTransform)nutE.transform).pivot = new Vector2(1, 1);
-            nutNhanh3D = NutKinh(thanhKhung, "Nút Hướng sai 3D", "✕ Hướng sai", new Vector2(-(14 + 96 + 12 + 286 + 8 + 96 + 8), -14), new Vector2(118, 44), () =>
-            {
-                if (BaiHienTai == null || BaiHienTai.KichBan.NhanhSai.Count == 0) return;
-                TrinhPhat.PhatNhanhSai(chiSoNhanh++ % BaiHienTai.KichBan.NhanhSai.Count);
-            }, 15, new Vector2(1, 1));
-            ((RectTransform)nutNhanh3D.transform).pivot = new Vector2(1, 1);
             nutE.onClick.AddListener(() => { TrinhPhat.HienE = !TrinhPhat.HienE; nutE.GetComponent<Image>().color = TrinhPhat.HienE ? new Color(0.23f, 0.51f, 0.96f, 0.35f) : new Color(1f, 1f, 1f, 0.04f); });
             ((RectTransform)nutAnH.transform).pivot = new Vector2(1, 1);
             ((RectTransform)tocRt).pivot = new Vector2(1, 1);

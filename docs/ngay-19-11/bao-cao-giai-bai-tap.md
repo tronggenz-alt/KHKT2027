@@ -289,3 +289,12 @@ bảng 75%; ô đề vẫn ở trên trang (thiết kế cho phép "trên hoặc
 - Thay đĩa dẹt bằng **quả cầu chắn** như `nguyen_mau/co_che_3d/sn2_sn1.html`: mặt cầu đỏ trong suốt bán kính 2,3 Å đặt tại
   nguyên tử bị tấn công (bao luôn các nhóm che chắn), phủ **lưới khung đa diện** (hình cầu 20 mặt chia 1 lần, 120 cạnh); độ đậm
   tăng khi electron chạm tới (0,06 → 0,18 mặt, 0,3 → 0,75 lưới), nhịp nhẹ. Ảnh `huong_sai_qua_cau_chan.png`.
+
+## 19. Hướng sai tự phát khi Phát; nền 3D đen, màu nổi (20/11)
+- Bỏ nút "Hướng sai": khi **Phát** tới bước có hướng sai, phim **tự phát hướng sai trước** (electron bay tới, bị quả cầu chắn
+  chặn), xong **tự đi tiếp hướng đúng** của cùng bước. Xem lại bước (‹ ›, bấm dòng bước) thì phát lại cả hướng sai.
+- **Nền 3D đen** (#040508) ở mọi khung 3D (dưới đáp án, trình phát, Mô hình 3D – cả ảnh trong thẻ lẫn khung xoay lớn).
+- **Màu nổi trên nền đen**: C xám sáng (#949EAD thay xám đậm chìm nền), O/N/Br/Cl tươi hơn, mọi nguyên tử phát sáng nhẹ 12%.
+  Ảnh `nen_den_mau_noi.png`.
+- Kiểm: KhktCoCheVerify 66/66 (thêm: phát tới bước có hướng sai tự phát hướng sai rồi đi tiếp hướng đúng), KhktUiVerify 82/82,
+  app Mac xuất được.

@@ -68,7 +68,7 @@ namespace Khkt.CoChe
             camGo.transform.SetParent(transform, false);
             Cam = camGo.AddComponent<Camera>();
             Cam.clearFlags = CameraClearFlags.SolidColor;
-            Cam.backgroundColor = Khkt.Menu.Dashboard.MenuKit.Well;          // nền sáng như trình xem 3Dmol của CHEMISTRY (#fafafa)
+            Cam.backgroundColor = CoCheMoDun.NenToi;                          // 20/11: nền đen, phân tử nổi bật
             Cam.cullingMask = 1 << TrinhPhat3D.LopVe;
             Cam.fieldOfView = 32f;
             Cam.nearClipPlane = 0.05f;
@@ -98,7 +98,7 @@ namespace Khkt.CoChe
             vungNhin = Gian(goc, "Vùng nhìn", new Vector2(0, 40), new Vector2(-440, -190));
             khungNhan = Gian(goc, "Nhãn nguyên tử", Vector2.zero, Vector2.zero);
 
-            Color sang = Khkt.Menu.Dashboard.MenuKit.Ink, phu = Khkt.Menu.Dashboard.MenuKit.InkDim;
+            Color sang = new Color32(0xf2, 0xf4, 0xf8, 0xff), phu = new Color32(0x9a, 0xa5, 0xbd, 0xff);
             GlassKit.Label(goc, "Tiêu đề", "Mô hình 3D", 27, sang, true, TextAnchor.UpperLeft, new Vector2(28, -22), new Vector2(800, 38));
             GlassKit.Label(goc, "Mô tả", "Gõ tên chất (tiếng Việt hoặc tiếng Anh), công thức thu gọn hoặc SMILES · kéo để xoay 360° · cuộn để phóng to",
                            15, phu, false, TextAnchor.UpperLeft, new Vector2(28, -64), new Vector2(1300, 22));

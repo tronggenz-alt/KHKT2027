@@ -468,7 +468,7 @@ namespace Khkt.Menu
         {
             var nt = L(Lay(d, "nguyen_tu"));
             if (nt.Count == 0) return 40;
-            var nen = Fill(cha, "Nền 3D", new Vector2(0, 1), new Vector2(0, 1), Vector2.zero, new Vector2(rong, cao), Well, 12f);
+            var nen = Fill(cha, "Nền 3D", new Vector2(0, 1), new Vector2(0, 1), Vector2.zero, new Vector2(rong, cao), CoCheMoDun.NenToi, 12f);
             Ring(nen.transform, "Viền", Hair, 12f);
             nen.raycastTarget = true;                              // nhận kéo/cuộn chuột
             var x = nen.gameObject.AddComponent<Anh3DXoay>();
@@ -594,7 +594,7 @@ namespace Khkt.Menu
                 float r = TrinhPhat3D.VdW(e[i]) * 0.27f * k;
                 var c = Fill(lopCau, "Nguyên tử " + e[i], new Vector2(0, 1), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(r * 2, r * 2), TrinhPhat3D.MauCH(e[i]), r);
                 c.raycastTarget = false;
-                if (e[i] == "H") { c.color = Color.white; Ring(c.transform, "Viền", new Color(0, 0, 0, 0.22f), r); }
+                if (e[i] == "H") c.color = Color.white;
                 Fill(c.transform, "Ánh", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-r * 0.3f, r * 0.3f), new Vector2(r * 0.8f, r * 0.8f), new Color(1, 1, 1, 0.28f), r * 0.4f).raycastTarget = false;
                 cau[i] = c.rectTransform;
             }
