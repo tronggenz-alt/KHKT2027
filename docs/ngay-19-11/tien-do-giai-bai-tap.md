@@ -54,3 +54,12 @@ Chạy: `KHKT_UI_SHOTS=<thư mục> ~/AppBuild/VERA_claude/dong_bo_va_chay.sh ~/
    (bản sao matChan) có thật sự vẽ instancing không; nếu không, gộp thân mũi tên thành 1 Mesh dựng mỗi khung hoặc dùng LineRenderer.
 - 20/11 21h: ĐÃ SỬA cả hai mục dở trên: (1) Xuất PNG – chờ hiệu ứng chuyển xong rồi mới về giấy (lệnh về giấy bị bỏ qua khi đang chuyển dở);
   (2) thân mũi tên 3D gộp thành 1 ống liền/khung (1 lần vẽ). FPS đo thấp lúc đó chủ yếu do máy đang tải nặng (load average 17–32 vì các phiên khác).
+
+## TẠM DỪNG 20/11 (hạn mức 5 giờ 74%, đặt lại lúc 22:40)
+- Xong (đã commit): mũi tên 3D – đích là liên kết đang hình thành (2 nguyên tử còn xa > 1,9 Å) thì chỉ vào nguyên tử nhận
+  (π vòng → N⊕ khi nitro hoá, π → H của HBr đã tới đích); H tham gia bước hiện tại luôn hiện dù bật Ẩn H; pháp tuyến cong theo
+  hướng nhìn; khoảng camera ×1,3 + 2,5 (không quá sát). KhktCoCheVerify 66/66. Ảnh: scratchpad sau_cc/mt6.png.
+- Chưa: xuất lại app Mac với bản này; xem thử bằng chuột trong app thật.
+- Việc tiếp: **làm lại "Mô hình 3D"** kiểu Geometry cũ (CHEMISTRY/3Dmol): dùng cảnh 3D thật (Xem3DNho + đèn KieuChemistry,
+  bóng mờ/ambient occlusion giả, sương theo độ sâu, viền tối nhẹ) thay ảnh phẳng Anh3DXoay; vật liệu mờ không bóng nhựa
+  (smoothness thấp, specular nhỏ), kéo xoay + cuộn phóng.

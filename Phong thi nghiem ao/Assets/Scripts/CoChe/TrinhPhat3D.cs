@@ -121,6 +121,13 @@ namespace Khkt.CoChe
         public bool LaHAn(string id)
         {
             if (!AnH || trangDang == null || KichBan == null) return false;
+            var mtDang = DangNhanhSai && NhanhHienTai != null ? NhanhHienTai.MuiTen : BuocHienTai?.MuiTen;
+            if (mtDang != null)                                     // H tham gia mũi tên của bước đang xem: luôn hiện
+                foreach (var m in mtDang)
+                {
+                    if (m.Tu != null) foreach (var x in m.Tu) if (id == "m" + x) return false;
+                    if (m.Den != null) foreach (var x in m.Den) if (id == "m" + x) return false;
+                }
             if (!hGanC.TryGetValue(trangDang, out var ds))
             {
                 ds = new HashSet<string>();
@@ -298,7 +305,7 @@ namespace Khkt.CoChe
                 }
                 float tanf = Mathf.Tan((Cam != null ? Cam.fieldOfView : 32f) * 0.5f * Mathf.Deg2Rad);
                 float tl = Cam != null ? Mathf.Max(0.3f, Cam.aspect) : 1.6f;
-                khoangDich = Mathf.Clamp(Mathf.Max(nuaY / tanf, nuaX / (tanf * tl)) * 1.12f + 2f, 5f, 60f);
+                khoangDich = Mathf.Clamp(Mathf.Max(nuaY / tanf, nuaX / (tanf * tl)) * 1.3f + 2.5f, 6f, 60f);   // chừa lề: không quá sát
             }
         }
 
@@ -813,7 +820,7 @@ namespace Khkt.CoChe
                 {
                     float u = Mathf.Lerp(uDau, uTip, i / (float)So);
                     Vector3 p = W(Bezier(s0, c0, e0, u));
-                    if (Vector3.Dot(p - goc, huong) > 0f) p = goc;
+                    if (i > So / 2 && Vector3.Dot(p - goc, huong) > 0f) p = goc;   // chỉ chặn ở nửa cuối (cung vồng mạnh không bị cụt)
                     Vector3 t = i == 0 ? (W(Bezier(s0, c0, e0, u + 0.01f)) - p) : (p - truocP);
                     if (t.sqrMagnitude < 1e-8f) t = huong;
                     t.Normalize();
@@ -894,7 +901,15 @@ namespace Khkt.CoChe
             tam /= Mathf.Max(1, viTri.Count);
             bool sLk = mt.TuLoai == "lien_ket" && mt.Tu.Length >= 2, eLk = mt.DenLoai == "lien_ket" && mt.Den.Length >= 2;
             Vector3 sGoc = sLk ? (Tim(mt.Tu[0]) + Tim(mt.Tu[1])) * 0.5f : Tim(mt.Tu[0]);
-            Vector3 eGoc = eLk ? (Tim(mt.Den[0]) + Tim(mt.Den[1])) * 0.5f : Tim(mt.Den[0]);
+            int denNt = mt.Den[0];
+            if (eLk && Vector3.Distance(Tim(mt.Den[0]), Tim(mt.Den[1])) > 1.9f)
+            {   // đích là liên kết ĐANG HÌNH THÀNH (2 nguyên tử còn xa): mũi tên chỉ vào nguyên tử nhận (không thuộc phía nguồn)
+                bool o0 = System.Array.IndexOf(mt.Tu, mt.Den[0]) >= 0, o1 = System.Array.IndexOf(mt.Tu, mt.Den[1]) >= 0;
+                denNt = o0 && !o1 ? mt.Den[1] : o1 && !o0 ? mt.Den[0]
+                      : (Vector3.Distance(sGoc, Tim(mt.Den[0])) > Vector3.Distance(sGoc, Tim(mt.Den[1])) ? mt.Den[0] : mt.Den[1]);
+                eLk = false;
+            }
+            Vector3 eGoc = eLk ? (Tim(mt.Den[0]) + Tim(mt.Den[1])) * 0.5f : Tim(denNt);
             Vector3 d = eGoc - sGoc;
             float L = d.magnitude;
             Vector3 dn = L > 1e-3f ? d / L : Vector3.right;
@@ -904,12 +919,14 @@ namespace Khkt.CoChe
             if (phap.sqrMagnitude < 1e-4f) phap = Vector3.Cross(dn, Vector3.right);
             phap.Normalize();
             if (Vector3.Dot(phap, (sGoc + eGoc) * 0.5f - tam) < 0f) phap = -phap;   // cong ra phía ngoài phân tử
-            float h = Mathf.Max(0.55f, L * 0.4f);
-            c = (sGoc + eGoc) * 0.5f + phap * h * 2f;                               // điểm điều khiển Bézier (đỉnh cung ≈ h)
-            if (sLk) s = sGoc + phap * 0.22f;
-            else s = sGoc + (c - sGoc).normalized * (BanKinhVe("m" + mt.Tu[0]) + 0.1f);
-            if (eLk) e = eGoc + phap * 0.15f;
-            else e = eGoc + (c - eGoc).normalized * (BanKinhVe("m" + mt.Den[0]) + 0.06f);
+            // độ vồng: dây dài vồng vừa (22% L, 0,35–1,2 Å); liên kết → nguyên tử / liên kết → liên kết vồng thấp sát liên kết
+            float h = sLk ? 0.35f : Mathf.Clamp(L * 0.22f, 0.35f, 1.2f);
+            c = (sGoc + eGoc) * 0.5f + phap * h * 2f;                               // đỉnh cung Bézier bậc 2 ≈ h
+            // đầu/đuôi cùng ở phía vồng: đi ra khỏi nguồn theo hướng (phía vồng + hướng tới đích), tới đích theo (phía vồng − hướng đi)
+            if (sLk) s = sGoc + phap * 0.25f;
+            else s = sGoc + (phap * 0.75f + dn * 0.65f).normalized * (BanKinhVe("m" + mt.Tu[0]) + 0.08f);
+            if (eLk) e = eGoc + phap * 0.25f;
+            else e = eGoc + (phap * 0.75f - dn * 0.65f).normalized * (BanKinhVe("m" + denNt) + 0.06f);
             return true;
         }
 
