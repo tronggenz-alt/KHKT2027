@@ -76,6 +76,53 @@ namespace Khkt.CoChe
             SetVerticesDirty();
         }
 
+        // ------------------------------------------------------------------ dạng khung (20/11)
+        // Mạch có ≥ 5 nguyên tử C viết rõ (C, CH, CH₂, CH₃…) thì vẽ dạng khung: ẩn chữ C, mạch ngang thành đường gấp khúc;
+        // dị nguyên tố (O, N, Br…) và nhóm (NO₂, COOH, C₆H₅…) giữ nguyên. Chỉ đổi bản sao trong máy vẽ (nt), không đổi dữ liệu bài.
+        readonly List<(Vector2 goc, Vector2 doi)> dichNut = new List<(Vector2, Vector2)>();
+        public int SoNutAn { get; private set; }
+
+        static readonly System.Text.RegularExpressions.Regex LaCacbon =
+            new System.Text.RegularExpressions.Regex("^(C|CH|HC|CH[23₂₃]|H[23₂₃]C)$");
+
+        void DangKhung()
+        {
+            dichNut.Clear();
+            SoNutAn = 0;
+            var daXet = new HashSet<N>();
+            foreach (var goc0 in nt.Values)
+            {
+                if (daXet.Contains(goc0)) continue;
+                var tp = new List<N>();
+                var hang = new Queue<N>(); hang.Enqueue(goc0); daXet.Add(goc0);
+                while (hang.Count > 0) { var a = hang.Dequeue(); tp.Add(a); foreach (var b in a.Ke) if (daXet.Add(b)) hang.Enqueue(b); }
+                var cs = tp.FindAll(a => LaCacbon.IsMatch(a.T ?? ""));
+                if (cs.Count < 5) continue;
+                // gấp khúc: đi theo x, nút C nối ngang với nút trước thì so le lên/xuống 0,3 độ dài liên kết
+                cs.Sort((a, b) => a.P.x.CompareTo(b.P.x));
+                int le = 0;
+                foreach (var a in cs)
+                {
+                    bool ngang = a.Ke.Exists(b => Mathf.Abs(b.P.y - a.P.y) < 0.15f && Mathf.Abs(b.P.x - a.P.x) > 0.3f);
+                    Vector2 doi = Vector2.zero;
+                    if (ngang) { float dai = 1f; foreach (var b in a.Ke) dai = Mathf.Min(dai, Mathf.Max(0.4f, Mathf.Abs(b.P.x - a.P.x))); doi = new Vector2(0, (le++ % 2 == 0 ? 0.28f : -0.28f) * dai); }
+                    if (doi != Vector2.zero) dichNut.Add((a.P, doi));
+                    a.P += doi;
+                    a.T = "";
+                    SoNutAn++;
+                }
+            }
+        }
+
+        /// <summary>Điểm phụ (đầu/đuôi mũi tên, cặp e, điện tích) dời theo nguyên tử gần nhất nếu nguyên tử đó vừa bị dời (dạng khung).</summary>
+        Vector2 Doi(Vector2 p)
+        {
+            if (dichNut.Count == 0) return p;
+            float tot = 0.55f; Vector2 d = Vector2.zero;
+            foreach (var (g, dd) in dichNut) { float k = Vector2.Distance(g, p); if (k < tot) { tot = k; d = dd; } }
+            return p + d;
+        }
+
         static float NuaRong(string t) => string.IsNullOrEmpty(t) ? 0f : t.Length * 0.17f + 0.1f;
 
         void ChuanHoa()
@@ -85,6 +132,7 @@ namespace Khkt.CoChe
             foreach (var kv in sd.NutDs) nt[kv.Key] = new N { P = kv.Value.P, T = kv.Value.Nhan ?? "" };
             foreach (var l in sd.NetDs)
                 if (nt.TryGetValue(l.A, out var a) && nt.TryGetValue(l.B, out var b)) { a.Ke.Add(b); b.Ke.Add(a); }
+            DangKhung();
             foreach (var a in nt.Values)
             {
                 if (a.T.Length > 1 && a.Ke.Count == 1) a.Can = a.Ke[0].P.x > a.P.x + 0.3f ? "phai" : "trai";
@@ -158,11 +206,11 @@ namespace Khkt.CoChe
                 else if (a.Can == "phai") ThemChu(a.T, X(new Vector2(a.P.x + KyTu, a.P.y)), co, TextAnchor.MiddleRight);
                 else ThemChu(a.T, X(a.P), co, TextAnchor.MiddleCenter);
             }
-            foreach (var d in sd.Dt) ThemChu(d.T.Replace("⁺", "+").Replace("⁻", "−"), X(d.P), co * 0.78f, TextAnchor.MiddleCenter);
+            foreach (var d in sd.Dt) ThemChu(d.T.Replace("⁺", "+").Replace("⁻", "−"), X(Doi(d.P)), co * 0.78f, TextAnchor.MiddleCenter);
             foreach (var d in sd.DtVong)
             {
                 // dấu trong vòng tròn: phông không chân của app (đủ "−" U+2212), cỡ theo bán kính vòng, không nhỏ hơn 9 px
-                var tx = ThemChu(d.T, X(d.P), co, TextAnchor.MiddleCenter, true);
+                var tx = ThemChu(d.T, X(Doi(d.P)), co, TextAnchor.MiddleCenter, true);
                 tx.font = GlassKit.Semibold;
                 tx.fontSize = Mathf.Max(9, Mathf.RoundToInt((d.T.Length > 1 ? 11f : 13f) * S / 34f));
                 tx.fontStyle = FontStyle.Normal;
@@ -269,14 +317,14 @@ namespace Khkt.CoChe
             {
                 float r = c.GocDo * Mathf.Deg2Rad;
                 Vector2 v = new Vector2(-Mathf.Sin(r), Mathf.Cos(r)) * 0.09f;
-                Tron(vh, X(c.P + v), 2.2f * S / 34f, MauMuc);
-                Tron(vh, X(c.P - v), 2.2f * S / 34f, MauMuc);
+                Tron(vh, X(Doi(c.P) + v), 2.2f * S / 34f, MauMuc);
+                Tron(vh, X(Doi(c.P) - v), 2.2f * S / 34f, MauMuc);
             }
             foreach (var d in sd.DtVong)                                        // điện tích trong vòng tròn: viền mực, lòng màu giấy
             {
                 float r = Mathf.Max(5.5f, (d.T.Length > 1 ? 8.5f : 6.8f) * S / 34f);
-                Tron(vh, X(d.P), r, MauMuc);
-                Tron(vh, X(d.P), r - Mathf.Max(1f, 1.2f * S / 34f), MauGiay);
+                Tron(vh, X(Doi(d.P)), r, MauMuc);
+                Tron(vh, X(Doi(d.P)), r - Mathf.Max(1f, 1.2f * S / 34f), MauGiay);
             }
             foreach (var m in sd.Mt) MuiTenCong(vh, m, net * 0.82f);
             foreach (var p in sd.Pu) MuiTenPhanUng(vh, p, net * 0.88f);
@@ -289,33 +337,61 @@ namespace Khkt.CoChe
             return Mathf.Abs(d.x) > 0.7f ? NuaRong(a.T) + 0.02f : 0.32f;
         }
 
+        readonly List<Vector2> diemCong = new List<Vector2>(64);
+
+        /// <summary>
+        /// Mũi tên cong kiểu đáp án thi (20/11): độ cong tối thiểu rõ (mũi tên ngắn không thành móc), chừa khoảng hở ở hai đầu để
+        /// không đè chữ, thân trơn 40 đoạn, đầu mũi tên tam giác đặc theo tiếp tuyến cuối; "nua_dau" (1 e) chỉ nửa đầu phía ngoài.
+        /// </summary>
         void MuiTenCong(VertexHelper vh, SoDoGiayDuLieu.MuiTenCong m, float w)
         {
-            Vector2 A = X(m.Tu), C = X(m.Qua), B = X(m.Den);
-            Vector2 truoc = A;
-            Color mau = m.Gach ? MauGach : MauMuiTen;
-            int so = m.Gach ? 36 : 24;
-            for (int i = 1; i <= so; i++)
+            float k = S / 34f;
+            Vector2 A = X(Doi(m.Tu)), B = X(Doi(m.Den)), C = X(m.Qua + (Doi(m.Tu) - m.Tu + Doi(m.Den) - m.Den) * 0.5f);
+            Vector2 day = B - A;
+            float dai = day.magnitude;
+            if (dai < 1f) return;
+            Vector2 n = new Vector2(-day.y, day.x) / dai, giua = (A + B) * 0.5f;
+            float cao = Vector2.Dot(C - giua, n);
+            if (Mathf.Abs(cao) < 1e-3f) cao = n.y >= 0 ? 1f : -1f;            // không có hướng cong: cong lên trên
+            float can = Mathf.Clamp(Mathf.Abs(cao), Mathf.Max(0.35f * dai, 16f * k), 0.75f * dai + 10f * k);
+            C = giua + n * Mathf.Sign(cao) * can * 2f;                       // điểm điều khiển gấp đôi độ cao đỉnh cung
+            diemCong.Clear();
+            const int so = 40;
+            for (int i = 0; i <= so; i++)
             {
                 float u = i / (float)so;
-                Vector2 p = (1 - u) * (1 - u) * A + 2 * u * (1 - u) * C + u * u * B;
-                if (!m.Gach || (i % 3) != 0) Doan(vh, truoc, p, w, mau);           // nét đứt: bỏ 1/3 số đoạn
-                truoc = p;
+                diemCong.Add((1 - u) * (1 - u) * A + 2 * u * (1 - u) * C + u * u * B);
             }
-            if (m.Cheo)                                                          // dấu ✕ đỏ ở giữa đường cong
+            // cắt hai đầu theo độ dài cung: chừa 5 điểm ở đuôi, 7 điểm ở đầu (đầu mũi tên không chạm chữ)
+            float tong = 0; for (int i = 1; i <= so; i++) tong += Vector2.Distance(diemCong[i - 1], diemCong[i]);
+            float cat0 = Mathf.Min(5f * k, tong * 0.15f), cat1 = Mathf.Min(7f * k, tong * 0.2f);
+            Color mau = m.Gach ? MauGach : MauMuiTen;
+            float daDi = 0; Vector2 truoc = diemCong[0]; bool batDau = false; Vector2 cuoi = diemCong[so], keCuoi = diemCong[so - 1];
+            for (int i = 1; i <= so; i++)
             {
-                Vector2 g0 = 0.25f * A + 0.5f * C + 0.25f * B;
-                float k0 = 7f * S / 34f;
+                float d = Vector2.Distance(diemCong[i - 1], diemCong[i]);
+                float d0 = daDi; daDi += d;
+                if (daDi < cat0) continue;
+                Vector2 p = diemCong[i];
+                if (!batDau) { truoc = Vector2.Lerp(diemCong[i - 1], diemCong[i], Mathf.Clamp01((cat0 - d0) / Mathf.Max(1e-4f, d))); batDau = true; }
+                if (daDi > tong - cat1) { p = Vector2.Lerp(diemCong[i - 1], diemCong[i], Mathf.Clamp01((tong - cat1 - d0) / Mathf.Max(1e-4f, d))); }
+                if (!m.Gach || (i % 3) != 0) Doan(vh, truoc, p, w * 1.1f, mau);
+                keCuoi = truoc; cuoi = p; truoc = p;
+                if (daDi > tong - cat1) break;
+            }
+            if (m.Cheo)
+            {
+                Vector2 g0 = diemCong[so / 2];
+                float k0 = 7f * k;
                 Doan(vh, g0 + new Vector2(-k0, -k0), g0 + new Vector2(k0, k0), w * 1.7f, MauDoNhan);
                 Doan(vh, g0 + new Vector2(-k0, k0), g0 + new Vector2(k0, -k0), w * 1.7f, MauDoNhan);
             }
-            Vector2 t = (B - C).normalized;
+            Vector2 t = (cuoi - keCuoi).sqrMagnitude > 1e-6f ? (cuoi - keCuoi).normalized : (B - C).normalized;
             Vector2 pn = new Vector2(-t.y, t.x);
-            Vector2 g = (A + B) * 0.5f;
-            if (Vector2.Dot(C - g, pn) < 0) pn = -pn;
-            float k = S / 34f;
-            Doan(vh, B, B - t * 8f * k + pn * 4.5f * k, w, mau);
-            if (m.Kieu != "nua_dau") Doan(vh, B, B - t * 8f * k - pn * 4.5f * k, w, mau);
+            if (Vector2.Dot(C - giua, pn) < 0) pn = -pn;                       // phía ngoài cung
+            Vector2 dinh = cuoi + t * 6f * k, day0 = dinh - t * 10f * k;
+            if (m.Kieu == "nua_dau") TamGiac(vh, dinh, day0, day0 + pn * 5f * k, mau);
+            else TamGiac(vh, dinh, day0 + pn * 5f * k, day0 - pn * 5f * k, mau);
         }
 
         void MuiTenPhanUng(VertexHelper vh, SoDoGiayDuLieu.MuiTenPU p, float w)

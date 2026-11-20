@@ -237,3 +237,16 @@ bảng 75%; ô đề vẫn ở trên trang (thiết kế cho phép "trên hoặc
   (1,7× thay 3×, mờ hơn); vệt đuôi mảnh; cặp xoay chậm (2,6 thay 7,5 rad/s); đường bay tăng–giảm tốc dạng sin (êm hơn).
   Ảnh: `anh/giai-bai-tap/electron_moi_hai_hat.png`.
 - Kiểm: KhktUiVerify 77/77, KhktCoCheVerify 66/66, app Mac xuất được.
+
+## 13. Electron đơn giản, mũi tên cong làm lại, dạng khung (20/11)
+- **Electron**: chỉ còn chấm vàng nhỏ bay theo đường cong từ chỗ cho đến chỗ nhận (cặp e = 2 chấm cố định hai bên đường bay,
+  tách theo mặt màn hình nên không bao giờ chồng nhau); bỏ xoay, quầng sáng, vệt đuôi.
+- **Mũi tên cong** (`SoDoGiay.MuiTenCong`): độ cong tối thiểu 35% chiều dài (mũi tên ngắn không còn thành móc), chừa hở 5 điểm ở
+  đuôi và 7 điểm ở đầu để không đè chữ, thân trơn 40 đoạn, đầu **tam giác đặc theo tiếp tuyến cuối**, mũi tên 1 e chỉ có nửa
+  đầu phía ngoài cung. Ảnh: `anh/giai-bai-tap/mui_ten_va_electron_moi.png`.
+- **Dạng khung cho công thức dài**: mạch có ≥ 5 nguyên tử C viết rõ (C, CH, CH₂, CH₃…) thì ẩn chữ C và mạch ngang thành đường
+  gấp khúc; dị nguyên tố (O, N, Br…) và nhóm (NO₂, COOH, C₆H₅…) giữ nguyên; mũi tên, cặp e, điện tích dời theo nguyên tử. Chỉ
+  đổi trong máy vẽ, không đổi dữ liệu bài. 8 bài mẫu hiện có đều dưới 5 C nên vẫn vẽ đầy đủ (đúng yêu cầu: ngắn thì vẽ full).
+- Kiểm: KhktCoCheVerify 66/66, KhktUiVerify 77/77, app Mac xuất được.
+- Còn lại: vị trí đầu mũi tên do máy chủ đặt (ví dụ Br⁻ → C⁺ ở bài cộng HBr chạm gần liên kết C–CH₃) – cần chỉnh ở dữ liệu
+  `so_do_giay` của bài.

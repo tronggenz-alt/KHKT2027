@@ -540,20 +540,11 @@ namespace Khkt.CoChe
                     float hien = Mathf.SmoothStep(0f, 1f, u / 0.12f) * Mathf.Lerp(1f, 0.82f, Mathf.SmoothStep(0f, 1f, (u - 0.85f) / 0.15f));
                     for (int k = 0; k < mt.SoE && hat.Count < toiDa; k++)
                     {
-                        float pha = quay + k * Mathf.PI;
-                        Vector3 lech = mt.SoE == 2 ? (vg1 * Mathf.Cos(pha) + vg2 * Mathf.Sin(pha)) * 0.15f : Vector3.zero;   // 2 hạt cách nhau ~0,3 Å, hở rõ
-                        Vector3 p = Bezier(s0, c0, e0, u) + lech;
-                        float co = 0.12f * hien;
-                        hat.Add(Matrix4x4.TRS(W(p), Quaternion.identity, Vector3.one * co));
-                        quang.Add(Matrix4x4.TRS(W(p), Quaternion.identity, Vector3.one * co * 1.7f));   // quầng nhỏ riêng từng hạt
-                        for (int v = 1; v <= vet; v++)                       // vệt: cầu trong suốt nhỏ dần theo đường đã đi
-                        {
-                            float uu = u - v * 0.022f;
-                            if (uu <= 0f) break;
-                            float g = 1f - v / (float)(vet + 1);
-                            Vector3 pv = Bezier(s0, c0, e0, uu) + lech * g;
-                            quang.Add(Matrix4x4.TRS(W(pv), Quaternion.identity, Vector3.one * co * (0.35f + 0.65f * g)));   // vệt mảnh, nhỏ dần
-                        }
+                        // 20/11: đơn giản – mỗi electron một chấm vàng nhỏ, cặp e là 2 chấm cố định hai bên đường bay, chỉ bay từ A sang B
+                        Vector3 nhin = Quaternion.Inverse(Xoay) * Vector3.forward;                 // hướng nhìn trong toạ độ mô hình
+                        Vector3 ben = Vector3.Cross(huong, nhin); ben = ben.sqrMagnitude > 1e-4f ? ben.normalized : vg1;   // tách trên mặt màn hình
+                        Vector3 lech = mt.SoE == 2 ? ben * (k == 0 ? 0.13f : -0.13f) : Vector3.zero;
+                        hat.Add(Matrix4x4.TRS(W(Bezier(s0, c0, e0, u) + lech), Quaternion.identity, Vector3.one * 0.13f * hien));
                     }
                 }
             }
