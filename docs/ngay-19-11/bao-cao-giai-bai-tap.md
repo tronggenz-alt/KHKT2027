@@ -250,3 +250,12 @@ bảng 75%; ô đề vẫn ở trên trang (thiết kế cho phép "trên hoặc
 - Kiểm: KhktCoCheVerify 66/66, KhktUiVerify 77/77, app Mac xuất được.
 - Còn lại: vị trí đầu mũi tên do máy chủ đặt (ví dụ Br⁻ → C⁺ ở bài cộng HBr chạm gần liên kết C–CH₃) – cần chỉnh ở dữ liệu
   `so_do_giay` của bài.
+
+## 14. Phóng to ảnh, nhãn nguyên tử, Ẩn H, electron Lewis (20/11)
+- **Phóng to 90%**: góc trên phải mỗi hình đáp án có nhãn "⤢ Phóng to"; bấm nhãn hoặc bấm thẳng vào hình → bảng chiếm 90% màn
+  (nền mờ, ✕ / Esc / bấm nền để đóng). Cơ chế: tờ giấy lớn; Chuỗi: hình chuỗi 1,7× (cuộn được); 3D: ảnh 3D lớn. Ảnh `phong_to_90.png`.
+- **Nhãn ký hiệu trên mọi nguyên tử** (C, H, O, Br… kèm ⊕/⊖) ở khung 3D đáp án và trình phát.
+- **Ẩn H là ẩn hẳn**: không còn quả cầu trắng thu nhỏ, liên kết tới H cũng ẩn.
+- **Nút "Hiện e"** (khung 3D đáp án và trình phát): electron không liên kết như cấu trúc Lewis – số e = hoá trị − tổng bậc liên
+  kết − điện tích; cặp = 2 chấm, e lẻ (gốc tự do) = 1 chấm; đặt theo hướng xa các liên kết nhất. Ảnh `khung3d_lewis_an_h.png`.
+- Kiểm: KhktUiVerify 80/80, KhktCoCheVerify 66/66, app Mac xuất được.

@@ -42,6 +42,16 @@ namespace Khkt.CoChe
         /// <summary>Nguyên tử/liên kết tự phát sáng nhẹ (emission) – dùng khi cảnh có thể không có đèn (bảng lớn trên menu).</summary>
         public float TuSang;
         public float TocXoay = 24f;
+        /// <summary>Hiện electron không liên kết như cấu trúc Lewis (cặp = 2 chấm, electron lẻ = 1 chấm) quanh mỗi nguyên tử.</summary>
+        public bool HienE;
+        public int SoChamLewis { get; private set; }
+        readonly List<Matrix4x4> lewis = new List<Matrix4x4>();
+        readonly Dictionary<string, int> tongBac = new Dictionary<string, int>();
+        readonly Dictionary<string, List<Vector3>> huongLk = new Dictionary<string, List<Vector3>>();
+        readonly List<Vector3> daChon = new List<Vector3>(8);
+        static readonly Dictionary<string, int> HoaTri = new Dictionary<string, int>
+        { {"H", 1}, {"C", 4}, {"N", 5}, {"O", 6}, {"F", 7}, {"Cl", 7}, {"Br", 7}, {"I", 7}, {"S", 6}, {"P", 5} };
+        static readonly Vector3[] HuongUng = TaoHuongThu(26);
         /// <summary>Khi hình 3D hiện trong một khung (RenderTexture): đổi điểm chuột (pixel màn hình) → toạ độ 0..1 trong khung, null nếu ngoài khung.</summary>
         public System.Func<Vector2, Vector2?> ViTriChuot;
         Quaternion xoayDich = Quaternion.Euler(12f, -18f, 0f);
@@ -501,7 +511,7 @@ namespace Khkt.CoChe
                 float s = coNt[kv.Key];
                 if (s <= 0.01f) continue;
                 string e = Nguyen(kv.Key);
-                if (AnH && e == "H") s *= 0.35f;
+                if (AnH && e == "H") continue;                     // 20/11: Ẩn H là ẩn hẳn (cả liên kết tới H)
                 float d = (KieuChemistry ? VdW(e) * 0.27f : BK(e)) * 2f * s;
                 if (!nhom.TryGetValue(e, out var l)) nhom[e] = l = new List<Matrix4x4>();
                 l.Add(Matrix4x4.TRS(W(kv.Value), Quaternion.identity, new Vector3(d, d, d)));
@@ -554,6 +564,8 @@ namespace Khkt.CoChe
             foreach (var kv in nhom) VeNhom(MatNguyenTu(kv.Key), cau, kv.Value);
             VeNhom(matLk != null ? matLk : MatNguyenTu("C"), tru, lk);
             VeNhom(matE, cauE, hat);
+            VeLewis(m < 0.5f ? bacA : bacB, m < 0.5f ? a : b);
+            if (lewis.Count > 0) VeNhom(matE, cauE, lewis);
             if (matQuang != null) VeNhom(matQuang, cauE, quang);
             if (DangNhanhSai && NhanhHienTai != null && NhanhHienTai.BanKinhChan > 0f)
             {
@@ -580,6 +592,63 @@ namespace Khkt.CoChe
             var d = new Dictionary<string, int>();
             foreach (var l in s.LienKet) d[string.CompareOrdinal(l.A, l.B) < 0 ? l.A + "|" + l.B : l.B + "|" + l.A] = l.Bac;
             return d;
+        }
+
+        /// <summary>Cặp electron không liên kết: số e = hoá trị − tổng bậc liên kết − điện tích; đặt theo hướng xa các liên kết nhất.</summary>
+        void VeLewis(Dictionary<string, int> bac, TrangThai3D st)
+        {
+            lewis.Clear();
+            SoChamLewis = 0;
+            if (!HienE || st == null) return;
+            tongBac.Clear();
+            foreach (var l in huongLk.Values) l.Clear();
+            foreach (var kv in bac)
+            {
+                int k = kv.Key.IndexOf('|');
+                string ia = kv.Key.Substring(0, k), ib = kv.Key.Substring(k + 1);
+                tongBac[ia] = (tongBac.TryGetValue(ia, out var x) ? x : 0) + kv.Value;
+                tongBac[ib] = (tongBac.TryGetValue(ib, out var y) ? y : 0) + kv.Value;
+                if (viTri.TryGetValue(ia, out var pa) && viTri.TryGetValue(ib, out var pb) && (pb - pa).sqrMagnitude > 1e-6f)
+                {
+                    if (!huongLk.TryGetValue(ia, out var la)) huongLk[ia] = la = new List<Vector3>(4);
+                    if (!huongLk.TryGetValue(ib, out var lb)) huongLk[ib] = lb = new List<Vector3>(4);
+                    la.Add((pb - pa).normalized); lb.Add((pa - pb).normalized);
+                }
+            }
+            Vector3 nhin = Quaternion.Inverse(Xoay) * Vector3.forward;
+            foreach (var kv in viTri)
+            {
+                if (coNt.TryGetValue(kv.Key, out var c) && c < 0.5f) continue;
+                string e = Nguyen(kv.Key);
+                if (AnH && e == "H") continue;
+                if (!HoaTri.TryGetValue(e, out int ht)) continue;
+                int n = ht - (tongBac.TryGetValue(kv.Key, out var tb) ? tb : 0) - (st.DienTich.TryGetValue(kv.Key, out var dt) ? dt : 0);
+                if (n <= 0) continue;
+                int cap = n / 2, le = n % 2;
+                daChon.Clear();
+                if (huongLk.TryGetValue(kv.Key, out var hl)) daChon.AddRange(hl);
+                int coSan = daChon.Count;
+                float r = (KieuChemistry ? VdW(e) * 0.27f : BK(e)) + 0.17f;
+                for (int i = 0; i < cap + le; i++)
+                {
+                    Vector3 tot = Vector3.up; float diem = -9f;
+                    foreach (var h in HuongUng)
+                    {
+                        float gan = 1f;                                   // cos góc với hướng đã dùng gần nhất (nhỏ = xa)
+                        foreach (var d in daChon) gan = Mathf.Min(gan, -Vector3.Dot(h, d));
+                        float g = daChon.Count == 0 ? -Mathf.Abs(Vector3.Dot(h, nhin)) : gan - 0.3f * Mathf.Abs(Vector3.Dot(h, nhin));
+                        if (g > diem) { diem = g; tot = h; }
+                    }
+                    daChon.Add(tot);
+                    Vector3 tam = kv.Value + tot * r;
+                    Vector3 ben = Vector3.Cross(tot, nhin); ben = ben.sqrMagnitude > 1e-4f ? ben.normalized * 0.065f : Vector3.zero;
+                    bool don = i >= cap;                                  // electron lẻ (gốc tự do)
+                    if (don) lewis.Add(Matrix4x4.TRS(W(tam), Quaternion.identity, Vector3.one * 0.085f));
+                    else { lewis.Add(Matrix4x4.TRS(W(tam + ben), Quaternion.identity, Vector3.one * 0.08f)); lewis.Add(Matrix4x4.TRS(W(tam - ben), Quaternion.identity, Vector3.one * 0.08f)); }
+                }
+                SoChamLewis = lewis.Count;
+                _ = coSan;
+            }
         }
 
         void VeLienKet(string khoa, int bac, float g)

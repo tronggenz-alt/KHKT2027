@@ -414,11 +414,23 @@ namespace Khkt.Menu
             if (gbt.Xem3DMoi != null) { gbt.Xem3DMoi.TP.DatT(0.4f); yield return null; gbt.Xem3DMoi.VeNgay(); }
             var da = gbt.Xem3DMoi != null ? gbt.Xem3DMoi.DoAnh() : (Color.clear, 0);
             Check(da.Item2 > 150, "Khung 3D trong đáp án có hình phân tử", $"{da.Item2} điểm");
+            Bam(kc.transform, "Nút Hiện e đáp án");
+            Bam(kc.transform, "Nút Ẩn H đáp án");
+            yield return Frames(3);
+            Check(gbt.Xem3DMoi != null && gbt.Xem3DMoi.TP.HienE && gbt.Xem3DMoi.TP.SoChamLewis >= 6 && gbt.Xem3DMoi.TP.AnH, "Hiện e (Lewis) và Ẩn H trong khung 3D đáp án", gbt.Xem3DMoi != null ? gbt.Xem3DMoi.TP.SoChamLewis.ToString() : "");
+            Check(gbt.Xem3DMoi != null && !gbt.Xem3DMoi.GetComponentsInChildren<Text>(true).Any() && kc.GetComponentsInChildren<Text>(true).Any(x => x.name == "Nhãn" && x.gameObject.activeInHierarchy && x.text.StartsWith("C")), "Nhãn ký hiệu trên nguyên tử C");
+            if (gbt.Xem3DMoi != null) { gbt.Xem3DMoi.VeNgay(); gbt.Xem3DMoi.LuuAnh(Path.Combine(outDir, "khung3d_lewis.png")); }
             var num = kc.GetComponentsInChildren<RectTransform>(true).FirstOrDefault(r => r.name == "Núm");
             Check(num != null && Mathf.Abs(num.rect.width - num.rect.height) < 0.5f, "Núm thanh tốc độ tròn đều", num != null ? $"{num.rect.width:0}×{num.rect.height:0}" : "");
             int nutChinh = kc.GetComponentsInChildren<Button>(true).Count(x => x.name.StartsWith("Nút ") && x.transform.parent.name == "Thân");
             Check(nutChinh <= 4, "Cơ chế: ít nút (2 nút chính + 2 liên kết nhỏ)", nutChinh.ToString());
             yield return Chup(menu, "co_che_3d_duoi_giay_Trang");
+            Bam(kc.transform, "Nút Phóng to hình");
+            yield return Cho(0.5f);
+            Check(gbt.Bang.DangMo && Mathf.Approximately(gbt.Bang.TiLeMo, 0.9f) && gbt.Bang.Than.GetComponentInChildren<Khkt.CoChe.SoDoGiay>(true) != null, "Bấm ảnh lời giải: phóng to chiếm 90% màn hình");
+            yield return Chup(menu, "co_che_phong_to_Trang");
+            Bam(gbt.transform, "Nút Đóng bảng lớn");
+            yield return Cho(0.4f);
             Bam(kc.transform, "Nút Toàn màn hình 3D");
             yield return Cho(1.0f);
             Check(Khkt.CoChe.CoCheMoDun.DangMo && Khkt.CoChe.CoCheMoDun.Instance.ToanMan, "Nút Xem 3D toàn màn hình mở trình phát toàn màn");

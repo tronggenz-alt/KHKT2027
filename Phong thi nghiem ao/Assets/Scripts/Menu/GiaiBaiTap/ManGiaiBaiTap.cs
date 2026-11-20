@@ -503,7 +503,15 @@ namespace Khkt.Menu
                     ("Nút Hỏi tiếp", "Hỏi tiếp", 1, () => k.BatHoiTiep()),
                     ("Nút Xuất PNG", "Xuất ảnh", 2, () => StartCoroutine(XuatPng(k.Hinh, "chuoi"))),
                     ("Nút Báo sai chuỗi", "Báo sai", 2, () => baoSai.Mo("chuoi", "", S(d, "chuoi"), -1, "")) },
-                chip, (cau, tra) => StartCoroutine(HoiDap(cau, "Chuỗi " + S(d, "chuoi"), "", ds, tra)));
+                chip, (cau, tra) => StartCoroutine(HoiDap(cau, "Chuỗi " + S(d, "chuoi"), "", ds, tra)), null,
+                () => bangLon.Mo("Chuỗi phản ứng  ·  " + chuoi, than =>
+                {
+                    var nd = BangLon.VungCuon(than, 1000);
+                    var h = MenuKit.Stretch(nd, "Hình phóng to", new Vector2(0, 1), new Vector2(1, 1), new Vector2(0, -10), new Vector2(0, -10));
+                    float cao = HinhDapAn.Chuoi(h, buoc, Mathf.Max(800, than.rect.width - 20), 1.7f);
+                    h.offsetMin = new Vector2(0, -10 - cao);
+                    nd.sizeDelta = new Vector2(0, cao + 30);
+                }, 0.9f));
         }
 
         /// <summary>Bảng lớn của chuỗi: hình chuỗi to (có tên chất) + từng bước chi tiết, bước có cơ chế mẫu mở được 3D ⇄ Giấy.</summary>
@@ -870,7 +878,8 @@ namespace Khkt.Menu
                     ("Nút Hỏi tiếp", "Hỏi tiếp", 1, () => k.BatHoiTiep()),
                     ("Nút Xuất PNG", "Xuất ảnh", 2, () => StartCoroutine(XuatPng(k.Hinh, "co_che_" + b.Ma))),
                     ("Nút Báo sai cơ chế", "Báo sai", 2, () => baoSai.Mo("co_che", b.Ma, b.Ten, -1, "")) },
-                null, (cau, tra) => StartCoroutine(HoiDap(cau, b.Ten, b.De ?? "", buocJson, tra)));
+                null, (cau, tra) => StartCoroutine(HoiDap(cau, b.Ten, b.De ?? "", buocJson, tra)), null,
+                () => bangLon.Mo("Cơ chế  ·  " + b.Ten, than => HinhDapAn.Giay(than, b, 0, -1), 0.9f));
             k.dong3DNhan = mo => { var n = k.GetComponentsInChildren<Button>(true).FirstOrDefault(x => x.name == "Nút Xem 3D"); if (n != null) n.transform.Find("Chữ").GetComponent<Text>().text = mo ? "▲  Ẩn 3D" : "▶  Xem 3D"; };
         }
 
@@ -895,6 +904,17 @@ namespace Khkt.Menu
             GlassKit.Label(dk, "Nhãn tốc độ", "Tốc độ", 14, InkDim, false, TextAnchor.MiddleLeft, new Vector2(252, 0), new Vector2(60, 44));
             var chuToc = GlassKit.Label(dk, "Giá trị tốc độ", "1.00×", 14, Ink, false, TextAnchor.MiddleLeft, new Vector2(552, 0), new Vector2(60, 44));
             CoCheMoDun.TaoThanhTruot(dk, new Vector2(312, -12), new Vector2(228, 20), 0.25f, 3f, 1f, v => { if (baiXem3D == b && Xem3DMoi != null) Xem3DMoi.TP.TocDo = v; chuToc.text = v.ToString("0.00") + "×"; });
+            Button nutAnH = null, nutE = null;
+            nutAnH = MakeButton(dk, "Nút Ẩn H đáp án", "Ẩn H", new Vector2(624, 0), new Vector2(76, 44), () =>
+            {
+                if (baiXem3D != b || Xem3DMoi == null) return;
+                Xem3DMoi.TP.AnH = !Xem3DMoi.TP.AnH; Face(nutAnH).color = Xem3DMoi.TP.AnH ? AccentSoft : Paper;
+            }, 1, TrangCuon.BoNut);
+            nutE = MakeButton(dk, "Nút Hiện e đáp án", "Hiện e", new Vector2(706, 0), new Vector2(86, 44), () =>
+            {
+                if (baiXem3D != b || Xem3DMoi == null) return;
+                Xem3DMoi.TP.HienE = !Xem3DMoi.TP.HienE; Face(nutE).color = Xem3DMoi.TP.HienE ? AccentSoft : Paper;
+            }, 1, TrangCuon.BoNut);
             var to = MakeButton(dk, "Nút Toàn màn hình 3D", "⤢  Toàn màn hình", Vector2.zero, new Vector2(170, 44), () =>
             {
                 int bu = Xem3DMoi != null && baiXem3D == b ? Xem3DMoi.TP.ChiSoBuoc : 0;
@@ -1087,7 +1107,8 @@ namespace Khkt.Menu
                         ("Nút Mở lớn", "Xoay 3D toàn màn hình", 0, () => { MoHinh3DMoDun.Mo(); MoHinh3DMoDun.Instance?.XemChat(q); }),
                         ("Nút Xuất PNG", "Xuất ảnh", 2, () => StartCoroutine(XuatPng(k.Hinh, "mo_hinh_3d"))),
                         ("Nút Báo sai 3D", "Báo sai", 2, () => baoSai.Mo("mo_hinh_3d", "", q, -1, "")) },
-                    null, null);
+                    null, null, null,
+                    () => bangLon.Mo(S(d, "ten") + "  ·  " + S(d, "cong_thuc"), than => HinhDapAn.Ba(MenuKit.Full(than, "Ảnh 3D lớn"), d, than.rect.width, than.rect.height), 0.9f));
             }
             catch (Exception e) { k.DatLoi("Kết quả lỗi định dạng: " + e.Message); }
         }

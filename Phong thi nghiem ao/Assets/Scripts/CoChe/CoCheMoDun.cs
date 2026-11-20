@@ -517,8 +517,8 @@ namespace Khkt.CoChe
                 {
                     string e = TrinhPhat.NguyenTo(kv.Key);
                     int dt = TrinhPhat.DienTichHienTai(kv.Key);
-                    bool coChu = e != "C" && e != "H";
-                    if (!coChu && dt == 0) continue;
+                    bool coChu = true;                                    // 20/11: ghi ký hiệu mọi nguyên tử (cả C, H) cho dễ nhận biết
+                    if (TrinhPhat.AnH && e == "H") continue;
                     if (TrinhPhat.CoNguyenTu(kv.Key) < 0.5f) continue;
                     var sp = TrinhPhat.Cam.WorldToScreenPoint(TrinhPhat.TheGioi(kv.Value));
                     if (sp.z <= 0f) continue;
@@ -748,12 +748,15 @@ namespace Khkt.CoChe
             nutPhat = NutKinh(thanhKhung, "Nút Phát 3D", "Phát", new Vector2(x, y), new Vector2(84, 44), () => TrinhPhat.PhatDung(), 15); x += 90;
             NutKinh(thanhKhung, "Nút Bước sau 3D", "›", new Vector2(x, y), new Vector2(44, 44), () => TrinhPhat.BuocSau(), 20); x += 62;
             truc = GlassKit.Rect(thanhKhung, "Trục bước 3D", new Vector2(0, 1), new Vector2(0, 1), new Vector2(x, -33), new Vector2(100, 8));
-            truc.anchorMax = new Vector2(1, 1); truc.offsetMax = new Vector2(-(14 + 96 + 12 + 230 + 64), truc.offsetMax.y);
+            truc.anchorMax = new Vector2(1, 1); truc.offsetMax = new Vector2(-(14 + 96 + 12 + 286 + 8 + 96 + 16), truc.offsetMax.y);
             var tocRt = GlassKit.Rect(thanhKhung, "Tốc độ 3D", new Vector2(1, 1), new Vector2(1, 1), new Vector2(-(14 + 96 + 12), -14), new Vector2(230 + 56, 44));
             GlassKit.Label(tocRt, "Nhãn", "Tốc độ", 14, ChuPhu, false, TextAnchor.MiddleLeft, Vector2.zero, new Vector2(60, 44));
             thanhToc = TaoThanhTruot(tocRt, new Vector2(60, -12), new Vector2(160, 20), 0.25f, 3f, 1f, v => { TrinhPhat.TocDo = v; chuTocKhung.text = v.ToString("0.00") + "×"; });
             chuTocKhung = GlassKit.Label(tocRt, "Giá trị", "1.00×", 15, ChuSang, false, TextAnchor.MiddleRight, new Vector2(226, 0), new Vector2(58, 44));
             nutAnH = NutKinh(thanhKhung, "Nút Ẩn H 3D", "Ẩn H", new Vector2(-14, -14), new Vector2(96, 44), BatAnH, 15, new Vector2(1, 1));
+            var nutE = NutKinh(thanhKhung, "Nút Hiện e 3D", "Hiện e", new Vector2(-(14 + 96 + 12 + 286 + 8), -14), new Vector2(96, 44), null, 15, new Vector2(1, 1));
+            ((RectTransform)nutE.transform).pivot = new Vector2(1, 1);
+            nutE.onClick.AddListener(() => { TrinhPhat.HienE = !TrinhPhat.HienE; nutE.GetComponent<Image>().color = TrinhPhat.HienE ? new Color(0.23f, 0.51f, 0.96f, 0.35f) : new Color(1f, 1f, 1f, 0.04f); });
             ((RectTransform)nutAnH.transform).pivot = new Vector2(1, 1);
             ((RectTransform)tocRt).pivot = new Vector2(1, 1);
             khung3D.gameObject.SetActive(false);

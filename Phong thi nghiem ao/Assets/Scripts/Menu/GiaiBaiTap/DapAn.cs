@@ -182,7 +182,7 @@ namespace Khkt.Menu
         /// </summary>
         public void DatDapAn(Func<RectTransform, float, float> veHinh, string ketLuan, string huyHieu, bool kiemChung, string tomTat,
                              IList<(string ten, string chu, int kieu, Action bam)> nut, IList<(string chu, Action bam)> chip,
-                             Action<string, Action<string>> hoiFn, string loiGiai = null)
+                             Action<string, Action<string>> hoiFn, string loiGiai = null, Action phongTo = null)
         {
             CoDapAn = true;
             hoi = hoiFn;
@@ -191,6 +191,16 @@ namespace Khkt.Menu
             Hinh = MenuKit.Stretch(the, "Hình đáp án", new Vector2(0, 1), new Vector2(1, 1), new Vector2(24, -24 - 10), new Vector2(-24, -24));
             caoHinh = Mathf.Max(60, veHinh(Hinh, rong));
             Hinh.offsetMin = new Vector2(24, -24 - caoHinh);
+            if (phongTo != null)
+            {
+                // bấm vào hình (hoặc nhãn góc trên phải) → mở hình chiếm 90% màn hình
+                var phu = MenuKit.Full(Hinh, "Lớp bấm phóng to");
+                var pi = phu.gameObject.AddComponent<Image>(); pi.color = new Color(1, 1, 1, 0.001f);
+                var pb = phu.gameObject.AddComponent<Button>(); pb.transition = Selectable.Transition.None; pb.onClick.AddListener(() => phongTo());
+                var tag = MakeButton(Hinh, "Nút Phóng to hình", "⤢  Phóng to", new Vector2(-10, -10), new Vector2(118, 34), phongTo, 1, 8f, new Vector2(1, 1));
+                ((RectTransform)tag.transform).pivot = new Vector2(1, 1);
+                var tt = tag.transform.Find("Chữ").GetComponent<Text>(); tt.fontSize = 13; tt.fontStyle = FontStyle.Normal; tt.color = InkDim;
+            }
             float y = -24 - caoHinh - 18;
             var kl = GlassKit.Label(the, "Kết luận", ketLuan, 20, Ink, true, TextAnchor.UpperLeft, new Vector2(24, y), new Vector2(1200, 30));
             kl.horizontalOverflow = HorizontalWrapMode.Overflow; kl.supportRichText = true;
@@ -322,6 +332,7 @@ namespace Khkt.Menu
         Text tieuDe;
         public bool DangMo => goc != null && goc.gameObject.activeSelf;
         public RectTransform Than => than;
+        public float TiLeMo { get; private set; }
 
         public static BangLon Tao(RectTransform cha)
         {
@@ -350,8 +361,15 @@ namespace Khkt.Menu
         }
 
         /// <summary>Mở bảng: xoá nội dung cũ, gọi dung(than) dựng nội dung mới.</summary>
-        public void Mo(string tieu, Action<RectTransform> dung)
+        public void Mo(string tieu, Action<RectTransform> dung) => Mo(tieu, dung, 0.75f);
+
+        /// <summary>Mở bảng chiếm tiLe bề ngang (0,75 bảng lớn thường; 0,9 khi phóng to hình đáp án).</summary>
+        public void Mo(string tieu, Action<RectTransform> dung, float tiLe)
         {
+            float lx = (1f - tiLe) * 0.5f, ly = tiLe >= 0.85f ? 0.05f : 0.1f;
+            khung.anchorMin = new Vector2(lx, ly); khung.anchorMax = new Vector2(1f - lx, 1f - ly);
+            khung.offsetMin = khung.offsetMax = Vector2.zero;
+            TiLeMo = tiLe;
             var kd = KhiDong; KhiDong = null; kd?.Invoke();
             for (int i = than.childCount - 1; i >= 0; i--) Destroy(than.GetChild(i).gameObject);
             tieuDe.text = tieu;
@@ -713,6 +731,44 @@ namespace Khkt.Menu
             return (g, n);
         }
 
+        // nhãn ký hiệu trên mọi nguyên tử (C, H, O, Br…) + điện tích, đặt theo vị trí chiếu của camera 3D lên khung
+        readonly List<Text> nhan = new List<Text>();
+        RectTransform lopNhan;
+
+        void LateUpdate()
+        {
+            if (TP == null || khung == null || cam == null) return;
+            if (lopNhan == null) { lopNhan = MenuKit.Full(khung, "Nhãn nguyên tử"); lopNhan.SetAsLastSibling(); }
+            int dung = 0;
+            var r = khung.rect;
+            if (cam.enabled && TP.KichBan != null)
+                foreach (var kv in TP.ViTriNguyenTu)
+                {
+                    if (TP.CoNguyenTu(kv.Key) < 0.5f) continue;
+                    string e = TP.NguyenTo(kv.Key);
+                    if (TP.AnH && e == "H") continue;
+                    var sp = cam.WorldToScreenPoint(TP.TheGioi(kv.Value));
+                    if (sp.z <= 0f) continue;
+                    var lp = new Vector2((sp.x / Mathf.Max(1, cam.pixelWidth) - 0.5f) * r.width, (sp.y / Mathf.Max(1, cam.pixelHeight) - 0.5f) * r.height);
+                    int dt = TP.DienTichHienTai(kv.Key);
+                    string chu = e + (dt == 0 ? "" : dt > 0 ? "⊕" : "⊖");
+                    while (nhan.Count <= dung)
+                    {
+                        var t = GlassKit.Label(lopNhan, "Nhãn", "", 14, Color.white, true, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(44, 22), new Vector2(0.5f, 0.5f));
+                        t.rectTransform.pivot = new Vector2(0.5f, 0.5f); t.raycastTarget = false;
+                        var sh = t.gameObject.AddComponent<Shadow>(); sh.effectColor = new Color(0, 0, 0, 0.8f);
+                        nhan.Add(t);
+                    }
+                    var n = nhan[dung++];
+                    if (n.text != chu) n.text = chu;
+                    n.color = e == "H" ? new Color32(0x33, 0x3a, 0x48, 0xff) : Color.white;
+                    n.fontSize = e == "H" ? 11 : 14;
+                    n.rectTransform.anchoredPosition = lp;
+                    if (!n.gameObject.activeSelf) n.gameObject.SetActive(true);
+                }
+            for (int i = dung; i < nhan.Count; i++) if (nhan[i].gameObject.activeSelf) nhan[i].gameObject.SetActive(false);
+        }
+
         /// <summary>Bật/tắt vẽ (khung đang ẩn thì không tốn GPU).</summary>
         public void Hien(bool co) { if (cam != null) cam.enabled = co; }
 
@@ -721,6 +777,7 @@ namespace Khkt.Menu
             if (RenderSettings.sun == den) RenderSettings.sun = sunCu;      // trả đèn chính cũ của cảnh
             if (cam != null) cam.targetTexture = null;
             if (anh != null) anh.texture = null;
+            if (lopNhan != null) Destroy(lopNhan.gameObject);
             if (rt != null) { rt.Release(); Destroy(rt); }
         }
     }
