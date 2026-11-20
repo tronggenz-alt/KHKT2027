@@ -554,6 +554,7 @@ namespace Khkt.CoChe
             // tăng tốc – hãm êm (smootherstep), lớn dần khi rời nguyên tử và thu lại khi tới đích; vệt sáng mờ dần phía sau (vẽ trong suốt).
             int toiDa = Mathf.Max(8, HardwareProfile.SoHatToiDa);
             quang.Clear();
+            VeMuiTen3D(muiTen);
             if (tE > 0f && tE < 1.0f && muiTen != null)
             {
                 int vet = Mathf.Clamp(toiDa / Mathf.Max(1, muiTen.Count * 2), 2, 4);
@@ -747,6 +748,69 @@ namespace Khkt.CoChe
         }
 
         static float MuotHon(float x) => x * x * x * (x * (6f * x - 15f) + 10f);
+
+        // ------------------------------------------------------------------ mũi tên cong 3D (20/11)
+        // Như mũi tên trên giấy: đường cong trắng, MẢNH đi đúng đường bay của electron (từ liên kết / cặp e tới nguyên tử / liên kết),
+        // đầu nón nhỏ ở đích. Hiện từ đầu bước, mờ dần khi liên kết đã chuyển xong; hướng sai thì dừng ở quả cầu chắn.
+        Mesh non;
+        Material matMuiTen;
+        readonly List<Matrix4x4> thanMt = new List<Matrix4x4>(256), dauMt = new List<Matrix4x4>(8);
+        public int SoDoanMuiTen => thanMt.Count;
+        public bool HienMuiTen3D = true;
+
+        void VeMuiTen3D(List<MuiTen> ds)
+        {
+            thanMt.Clear(); dauMt.Clear();
+            if (!HienMuiTen3D || ds == null || ds.Count == 0 || matChan == null) return;
+            float a = DangNhanhSai ? 1f : 1f - Mathf.SmoothStep(0f, 1f, (T - 0.72f) / 0.25f);
+            if (a <= 0.01f) return;
+            if (non == null) non = TaoNon(16);
+            if (matMuiTen == null) matMuiTen = new Material(matChan) { name = "CoChe_MuiTen3D", enableInstancing = true };
+            matMuiTen.SetColor("_BaseColor", new Color(1f, 1f, 1f, 0.92f * a));
+            const int So = 26;
+            foreach (var mt in ds)
+            {
+                if (!DiemMuiTen(mt, out var s0, out var c0, out var e0)) continue;
+                float uTip = DangNhanhSai && NhanhHienTai != null ? Mathf.Min(0.97f, DiemChan(s0, c0, e0)) : 0.97f;
+                if (uTip <= 0.1f) continue;
+                Vector3 tip = W(Bezier(s0, c0, e0, uTip)), truocTip = W(Bezier(s0, c0, e0, uTip - 0.05f));
+                Vector3 huong = (tip - truocTip).sqrMagnitude > 1e-6f ? (tip - truocTip).normalized : Vector3.up;
+                const float DaiDau = 0.24f;
+                Vector3 goc = tip - huong * DaiDau;
+                Vector3 truoc = W(Bezier(s0, c0, e0, 0.04f));
+                for (int i = 1; i <= So; i++)
+                {
+                    float u = Mathf.Lerp(0.04f, uTip, i / (float)So);
+                    Vector3 p = W(Bezier(s0, c0, e0, u));
+                    if (Vector3.Dot(p - goc, huong) > 0f) p = goc;          // thân dừng ở chân đầu mũi tên
+                    Vector3 d = p - truoc; float dai = d.magnitude;
+                    if (dai > 1e-4f) thanMt.Add(Matrix4x4.TRS(truoc, Quaternion.FromToRotation(Vector3.up, d / dai), new Vector3(0.018f, dai + 0.006f, 0.018f)));
+                    truoc = p;
+                    if (p == goc) break;
+                }
+                float rDau = mt.SoE == 1 ? 0.055f : 0.075f;                 // mũi tên 1 e (nửa đầu) nhỏ hơn
+                dauMt.Add(Matrix4x4.TRS(goc, Quaternion.FromToRotation(Vector3.up, huong), new Vector3(rDau, DaiDau, rDau)));
+            }
+            VeNhom(matMuiTen, tru, thanMt);
+            VeNhom(matMuiTen, non, dauMt);
+        }
+
+        /// <summary>Hình nón đáy tròn bán kính 1 ở y = 0, đỉnh y = 1 (khớp quy ước trụ: tỉ lệ x = bán kính, y = chiều dài).</summary>
+        static Mesh TaoNon(int canh)
+        {
+            var v = new List<Vector3>(); var tri = new List<int>();
+            v.Add(new Vector3(0, 1, 0)); v.Add(Vector3.zero);
+            for (int i = 0; i < canh; i++) { float g = i * Mathf.PI * 2f / canh; v.Add(new Vector3(Mathf.Cos(g), 0, Mathf.Sin(g))); }
+            for (int i = 0; i < canh; i++)
+            {
+                int a = 2 + i, b = 2 + (i + 1) % canh;
+                tri.Add(0); tri.Add(b); tri.Add(a);                         // mặt bên
+                tri.Add(1); tri.Add(a); tri.Add(b);                         // đáy
+            }
+            var m = new Mesh { name = "Non" };
+            m.SetVertices(v); m.SetTriangles(tri, 0); m.RecalculateNormals(); m.RecalculateBounds();
+            return m;
+        }
 
         static Vector3 Bezier(Vector3 a, Vector3 c, Vector3 b, float u) => (1 - u) * (1 - u) * a + 2 * u * (1 - u) * c + u * u * b;
 

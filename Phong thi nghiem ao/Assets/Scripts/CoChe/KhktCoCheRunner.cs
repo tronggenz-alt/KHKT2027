@@ -111,7 +111,7 @@ namespace Khkt.CoChe
                         bool coMuiTen = tp.BuocHienTai.MuiTen.Count > 0;
                         tp.DatT(0.3f);
                         yield return null;
-                        bool hatOk = !coMuiTen || tp.SoHatDangVe > 0;
+                        bool hatOk = !coMuiTen || (tp.SoHatDangVe > 0 && tp.SoDoanMuiTen > 0);   // có cặp e VÀ mũi tên 3D
                         if (tp.SoHatDangVe > HardwareProfile.SoHatToiDa) hatQua++;
                         tp.DatT(1f);
                         yield return null;

@@ -635,7 +635,7 @@ namespace Khkt.CoChe
         {
             DangChuyen = true;
             dsBai.gameObject.SetActive(false);
-            if (sangGiay) toGiay.gameObject.SetActive(true);
+            if (sangGiay) lopToGiay.alpha = 1f;
             if (!sangGiay)
             {
                 khung3D.gameObject.SetActive(true);
@@ -656,7 +656,7 @@ namespace Khkt.CoChe
                 yield return null;
             }
             DatHienKhung(sangGiay ? 0f : 1f);
-            toGiay.gameObject.SetActive(sangGiay);                // 3D toàn màn che hết: tắt tờ giấy để không phải vẽ phía sau
+            lopToGiay.alpha = sangGiay ? 1f : 0f;                 // 3D toàn màn che hết: tờ giấy trong suốt (Unity bỏ qua khi vẽ), không tắt hẳn
             if (sangGiay)
             {
                 khung3D.gameObject.SetActive(false);

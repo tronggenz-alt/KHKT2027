@@ -45,3 +45,10 @@ Chạy: `KHKT_UI_SHOTS=<thư mục> ~/AppBuild/VERA_claude/dong_bo_va_chay.sh ~/
    giai đoạn tràn; biến số = khoảng cách ngang giữa chất, hướng cong mũi tên (lên/xuống), độ cong, vị trí điều kiện trên/dưới
    mũi tên phản ứng. Chạy ở máy chủ khi dựng `so_do_giay` (thử ~200 phương án, giữ phương án ít điểm phạt nhất) và một bài kiểm
    thử đo điểm phạt trước/sau trên 8 bài mẫu + đề mới. Có thể chạy định kỳ trên kho đề đã giải để chỉnh trọng số phạt.
+
+## Dở (20/11 tối) – làm tiếp
+1. KhktCoCheVerify trượt 1 kiểm: "Xuất ảnh PNG sơ đồ giấy" (đường dẫn có nhưng tệp không đạt điều kiện >5 KB / chế độ giấy).
+   Bắt đầu trượt từ lần thêm mũi tên 3D + tờ giấy trong suốt khi toàn màn (`CoCheMoDun.Chuyen`: lopToGiay.alpha). Kiểm
+   `XuatAnhGiay` sau khi về giấy: có thể cần chờ thêm 1–2 khung để tờ giấy (alpha 1) dựng lại trước khi chụp.
+2. FPS đo ở bài propellane (mức Cao) giảm từ ~400–560 xuống ~90–110 sau khi thêm mũi tên 3D: kiểm vật liệu `CoChe_MuiTen3D`
+   (bản sao matChan) có thật sự vẽ instancing không; nếu không, gộp thân mũi tên thành 1 Mesh dựng mỗi khung hoặc dùng LineRenderer.

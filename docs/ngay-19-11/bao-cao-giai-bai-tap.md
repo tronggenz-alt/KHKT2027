@@ -314,3 +314,9 @@ bảng 75%; ô đề vẫn ở trên trang (thiết kế cho phép "trên hoặc
   Ảnh `toan_man_nut_lo_lung.png`.
 - Đỡ giật khi ở toàn màn hình: tắt tờ giấy bị che phía sau (không vẽ thừa).
 - Kiểm: KhktCoCheVerify 66/66, KhktUiVerify 82/82, app Mac xuất được.
+
+## 22. Mũi tên cong 3D (20/11)
+- Trong 3D, mỗi mũi tên của bước vẽ thành **đường cong trắng mảnh** (trụ 0,018 Å nối 26 đoạn theo đúng đường Bézier electron
+  bay, như mũi tên trên giấy) + **đầu nón** nhỏ ở đích (mũi tên 1 e đầu nhỏ hơn). Hiện từ đầu bước, mờ dần khi liên kết chuyển
+  xong; hướng sai thì dừng ở quả cầu chắn. Cặp e vẫn bay dọc mũi tên. Ảnh `mui_ten_3d.png`.
+- Kiểm: KhktCoCheVerify 65/66 – kiểm "Phát hết các bước" nay đòi cả mũi tên 3D (đạt).
