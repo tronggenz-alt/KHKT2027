@@ -34,3 +34,14 @@ Chạy: `KHKT_UI_SHOTS=<thư mục> ~/AppBuild/VERA_claude/dong_bo_va_chay.sh ~/
   2. Hoặc đặt `RenderSettings.ambientLight` sáng khi bảng mở và trả lại khi đóng.
   Rồi chạy KhktUiVerify (kiểm "Khung 3D trong bảng có hình phân tử" phải > 2000 điểm khác nền) và xem ảnh co_che_bang_lon_3d.
 - Đã sửa (cho chạy tới 85%): khung 3D trong bảng lớn – RenderTexture 1600 theo tỉ lệ, căn khoảng cách camera, đèn chính riêng + tự phát sáng. Còn: xem trong app thật bằng chuột.
+
+## Còn lại (20/11) – thiết kế để làm tiếp
+1. **Nhiều AI cùng giải (nấc Tối đa)**: chạy song song Claude + Gemini pro (và Gemini flash nếu còn giờ) trong cùng giới hạn
+   3 phút; mỗi lời giải qua RDKit (`kiem_tra_co_che`); chọn bản đạt kiểm tra có điểm cao nhất (ít bước sửa, đủ mũi tên, khớp
+   sản phẩm); nếu hai bản đều đạt mà khác nhau → hỏi AI thứ ba làm trọng tài (≤ 30 s). Viết trong `giai_de.giai_de` bằng
+   `asyncio.gather` + `asyncio.wait_for(…, muc["cho"])`, test giả lập 2 AI.
+2. **"Tự luyện" bố cục tờ giấy cho rõ nhất**: không phải huấn luyện mô hình mà là **tối ưu bố cục có chấm điểm**, chạy lặp:
+   điểm phạt = chữ chồng chữ, mũi tên cắt chữ/cắt nét, đầu mũi tên quá gần chữ, khoảng cách giữa các chất không đều, khung
+   giai đoạn tràn; biến số = khoảng cách ngang giữa chất, hướng cong mũi tên (lên/xuống), độ cong, vị trí điều kiện trên/dưới
+   mũi tên phản ứng. Chạy ở máy chủ khi dựng `so_do_giay` (thử ~200 phương án, giữ phương án ít điểm phạt nhất) và một bài kiểm
+   thử đo điểm phạt trước/sau trên 8 bài mẫu + đề mới. Có thể chạy định kỳ trên kho đề đã giải để chỉnh trọng số phạt.

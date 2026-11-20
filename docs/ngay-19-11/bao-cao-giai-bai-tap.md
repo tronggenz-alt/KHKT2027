@@ -259,3 +259,10 @@ bảng 75%; ô đề vẫn ở trên trang (thiết kế cho phép "trên hoặc
 - **Nút "Hiện e"** (khung 3D đáp án và trình phát): electron không liên kết như cấu trúc Lewis – số e = hoá trị − tổng bậc liên
   kết − điện tích; cặp = 2 chấm, e lẻ (gốc tự do) = 1 chấm; đặt theo hướng xa các liên kết nhất. Ảnh `khung3d_lewis_an_h.png`.
 - Kiểm: KhktUiVerify 80/80, KhktCoCheVerify 66/66, app Mac xuất được.
+
+## 15. Thanh mức tư duy cho Cơ chế (20/11)
+- Trang Cơ chế, mục 02: thanh **Mức tư duy** 4 nấc – Nhanh (≤ 1 phút) · Cân bằng (≤ 2 phút) · Kỹ (≤ 2,5 phút) · **Tối đa · HSG
+  quốc gia (≤ 3 phút)**. Gửi `muc_tu_duy` (0–3) lên `/co-che/giai-de`.
+- Máy chủ (`giai_de.MUC_TU_DUY`): mỗi nấc đổi effort của Claude (low/medium/high), thứ tự mô hình Gemini (Nhanh: flash trước;
+  Cân bằng/Kỹ/Tối đa: pro trước) và **giới hạn thời gian một cơ chế** (60/120/150/180 s, không vượt 3 phút). App chờ thêm 30 s.
+- Kiểm: Python 41/41 (giữ đúng hành vi cũ ở nấc Cân bằng), KhktUiVerify 81/81, app Mac xuất được.

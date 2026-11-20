@@ -623,6 +623,10 @@ namespace Khkt.Menu
         TrangCuon.TheTab tabDe;
         string loaiCoChe = "";
         float yKetQuaDe;
+        int mucTuDuy = 1;
+        MenuTabs tabTuDuy;
+        public int MucTuDuy => mucTuDuy;
+        static readonly float[] ChoTuDuy = { 60f, 120f, 150f, 180f };
         bool daNapMau;
         public BaiCoChe BaiKetQua { get; private set; }
         public bool DangVeCoChe { get; private set; }
@@ -688,10 +692,16 @@ namespace Khkt.Menu
 
             // 02 kiểu cơ chế
             t.GhiBuoc(1, t.DauMuc("02", "Kiểu cơ chế", "Để Tự động nếu chưa chắc; chọn đúng kiểu giúp AI viết nhanh và đúng hơn."));
-            var khoiTc = t.Khoi("Khối kiểu cơ chế", 196, 30);
-            var tcThan = TrangCuon.The(khoiTc, "Thẻ kiểu cơ chế", 0, 196);
+            var khoiTc = t.Khoi("Khối kiểu cơ chế", 262, 30);
+            var tcThan = TrangCuon.The(khoiTc, "Thẻ kiểu cơ chế", 0, 262);
             TrangCuon.NhanNho(tcThan, "Nhãn", "Loại cơ chế", new Vector2(28, -24), 300);
             VeChipLoai(tcThan);
+            // mức tư duy: nghĩ càng kỹ càng lâu, tối đa 3 phút cho một cơ chế (mức Tối đa: đề HSG quốc gia)
+            TrangCuon.NhanNho(tcThan, "Nhãn tư duy", "Mức tư duy", new Vector2(28, -170), 300);
+            var gtTd = GlassKit.Label(tcThan, "Giải thích tư duy", "Nhanh ≤ 1 phút · Cân bằng ≤ 2 phút · Kỹ ≤ 2,5 phút · Tối đa (HSG quốc gia) ≤ 3 phút", 13, InkMute, false, TextAnchor.MiddleLeft, new Vector2(700, -196), new Vector2(800, 40));
+            gtTd.horizontalOverflow = HorizontalWrapMode.Overflow;
+            tabTuDuy = Tabs(tcThan, "Mức tư duy", new[] { "Tư duy Nhanh", "Tư duy Cân bằng", "Tư duy Kỹ", "Tư duy Tối đa" }, new[] { "Nhanh", "Cân bằng", "Kỹ", "Tối đa · HSG QG" },
+                            new Vector2(28, -196), new Vector2(150, 40), false, 4f, 1, i => mucTuDuy = i);
             t.LanLuot.Add(khoiTc);
             var khoiNut = t.Khoi("Khối nút vẽ", 60, 60);
             nutVe = MakeButton(khoiNut, "Nút Vẽ cơ chế", "Vẽ cơ chế  →", Vector2.zero, new Vector2(210, 56), VeCoChe, 0, RadiusButton);
@@ -836,7 +846,7 @@ namespace Khkt.Menu
             float t0 = Time.realtimeSinceStartup;
             bool xong = false, ok = false;
             string kq = "";
-            StartCoroutine(MayChuCoChe.GiaiDe(de, anh, loaiCoChe, CoCheMoDun.ChoGiaiDe, (o, x) => { ok = o; kq = x; xong = true; }));
+            StartCoroutine(MayChuCoChe.GiaiDe(de, anh, loaiCoChe, ChoTuDuy[mucTuDuy] + 30f, (o, x) => { ok = o; kq = x; xong = true; }, mucTuDuy));
             string[] buocLam = anh != null ? new[] { "Đọc ảnh đề", "AI viết cơ chế", "RDKit kiểm từng mũi tên", "Dựng 3D và giấy" } : new[] { "AI viết cơ chế", "RDKit kiểm từng mũi tên", "Dựng 3D và giấy" };
             while (!xong)
             {

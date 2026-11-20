@@ -395,6 +395,7 @@ namespace Khkt.Menu
             var oDe = gbt.GetComponentsInChildren<InputField>(true).FirstOrDefault(x => x.name == "Ô đề");
             if (oDe != null) oDe.text = "CH3Br + NaOH loãng";
             Bam(gbt.transform, "Loại SN2");
+            Bam(gbt.transform, "Tư duy Tối đa");
             yield return null;
             Bam(gbt.transform, "Nút Vẽ cơ chế");
             t0 = Time.realtimeSinceStartup;
@@ -404,6 +405,7 @@ namespace Khkt.Menu
             Check(kc != null && kc.CoDapAn && gbt.BaiKetQua != null && kc.Hinh.GetComponentInChildren<Khkt.CoChe.SoDoGiay>(true) != null,
                   "Vẽ cơ chế (máy chủ giả, loại SN2): khối đáp án có sơ đồ giấy", gbt.BaiKetQua?.Ten);
             Check(guiLoai == "SN2", "Gửi kiểu cơ chế đã chọn", guiLoai);
+            Check(guiMuc == "3" && gbt.MucTuDuy == 3, "Gửi mức tư duy Tối đa (HSG quốc gia)", guiMuc);
             yield return Chup(menu, "co_che_ket_qua_Trang");
             yield return Cho(0.4f);
             Check(gbt.Xem3DMoi == null && !kc.Khu3DMo, "Cơ chế: đáp án chỉ là lời giải trên giấy, 3D chưa mở");
@@ -471,7 +473,7 @@ namespace Khkt.Menu
             Check(!gbt.DangHien && FindAnyObjectByType<ManChonLuong>().DangHien, "Về màn chính từ Giải bài tập");
         }
 
-        static string guiLoai = "";
+        static string guiLoai = "", guiMuc = "";
 
         /// <summary>Máy chủ giả cho trang Giải bài tập: giải chuỗi 4 bước, giải đề trả gói bài mẫu SN2, báo sai.</summary>
         static (long, string) MayChuGia(string pt, string duong, string than)
@@ -487,6 +489,8 @@ namespace Khkt.Menu
                 case "/co-che/giai-de":
                     var m = System.Text.RegularExpressions.Regex.Match(than, "\"loai\":\"([A-Z_0-9]*)\"");
                     guiLoai = m.Success ? m.Groups[1].Value : "";
+                    var mm = System.Text.RegularExpressions.Regex.Match(than, "\"muc_tu_duy\":(\\d)");
+                    guiMuc = mm.Success ? mm.Groups[1].Value : "";
                     return (200, Khkt.CoChe.GoiCoChe.GiaiJson(File.ReadAllBytes(Path.Combine(Khkt.CoChe.GoiCoChe.ThuMuc, "sn2_ch3br.verapack"))));
                 case "/co-che/bao-sai":
                     return (200, "{\"ok\":true,\"ma\":\"gia\"}");

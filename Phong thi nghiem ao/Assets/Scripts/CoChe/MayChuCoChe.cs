@@ -51,9 +51,10 @@ namespace Khkt.CoChe
         /// POST /co-che/giai-de: đề chữ và/hoặc ảnh đề (gửi base64 trong JSON) → JSON bài (cùng khung gói .verapack, không mã hóa),
         /// mở bằng BaiCoChe.TuJson. Lỗi: thông điệp tiếng Việt của máy chủ (detail.thong_diep + vài dòng chi_tiet) thay vì chỉ mã HTTP.
         /// </summary>
-        public static IEnumerator GiaiDe(string vanBan, byte[] anh, string loai, float cho, Action<bool, string> xong)
+        public static IEnumerator GiaiDe(string vanBan, byte[] anh, string loai, float cho, Action<bool, string> xong, int mucTuDuy = -1)
         {
             var sb = new StringBuilder("{\"van_ban\":").Append(ChuoiJson(vanBan ?? ""));
+            if (mucTuDuy >= 0) sb.Append(",\"muc_tu_duy\":").Append(mucTuDuy);
             if (!string.IsNullOrEmpty(loai)) sb.Append(",\"loai\":").Append(ChuoiJson(loai));
             if (anh != null && anh.Length > 0) sb.Append(",\"anh_base64\":\"").Append(Convert.ToBase64String(anh)).Append('"');
             string than = sb.Append('}').ToString();

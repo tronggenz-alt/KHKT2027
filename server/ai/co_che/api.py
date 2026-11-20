@@ -185,6 +185,7 @@ async def giai_de_api(request: Request) -> dict:
     if kieu.startswith("multipart/form-data"):
         async with request.form() as form:
             van_ban, loai = str(form.get("van_ban") or ""), str(form.get("loai") or "")
+            muc = form.get("muc_tu_duy") or 1
             tep = form.get("anh")
             if tep is not None and hasattr(tep, "read"):
                 anh = await tep.read(giai_de.ANH_TOI_DA + 1)
@@ -199,6 +200,7 @@ async def giai_de_api(request: Request) -> dict:
         except ValueError:
             raise _loi_giai_de(giai_de.LoiGiaiDe("Thân yêu cầu không phải JSON.", "sai_json", 400)) from None
         van_ban, loai = str(d.get("van_ban") or ""), str(d.get("loai") or "")
+        muc = d.get("muc_tu_duy", 1)
         b64 = str(d.get("anh_base64") or "")
         if b64:
             b64 = b64.split(",", 1)[1] if b64.startswith("data:") else b64
@@ -208,7 +210,9 @@ async def giai_de_api(request: Request) -> dict:
                 raise _loi_giai_de(giai_de.LoiGiaiDe("anh_base64 không hợp lệ.", "sai_base64", 400)) from None
     if len(van_ban) > giai_de.VAN_BAN_TOI_DA:
         raise _loi_giai_de(giai_de.LoiGiaiDe(f"Đề quá dài (tối đa {giai_de.VAN_BAN_TOI_DA} ký tự).", "de_qua_dai", 400))
-    cho = float(os.environ.get("VERA_GIAI_DE_CHO") or giai_de.CHO_MAC_DINH)
+    m = giai_de.muc_tu_duy(muc)
+    giai_de.muc_hien_tai.set(max(0, min(3, int(muc) if str(muc).isdigit() else 1)))
+    cho = min(float(os.environ.get("VERA_GIAI_DE_CHO") or giai_de.CHO_MAC_DINH), m["cho"])   # ≤ 3 phút cho một cơ chế
     try:
         return await asyncio.wait_for(giai_de.giai_de(van_ban, anh or None, loai), cho)
     except giai_de.LoiGiaiDe as e:

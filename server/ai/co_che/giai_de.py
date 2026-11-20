@@ -54,6 +54,24 @@ CANH_LON_NHAT = 1600                # px – ảnh lớn hơn được thu nhỏ
 DO_SANG_TOI_THIEU = 28
 VAN_BAN_TOI_DA = 4000
 CHO_MAC_DINH = 300.0                # giây cho cả lượt giải (đọc ảnh + viết + sửa + dựng 3D/giấy)
+
+# Mức tư duy (thanh trượt ở app, 20/11): 0 Nhanh · 1 Cân bằng · 2 Kỹ · 3 Tối đa (đề HSG quốc gia).
+# Mỗi mức: effort của Claude, thứ tự mô hình Gemini (pro nghĩ kỹ hơn, flash nhanh hơn), thời gian tối đa cho MỘT cơ chế (≤ 3 phút).
+MUC_TU_DUY = {
+    0: {"ten": "nhanh", "effort": "low", "gemini": ["gemini-flash-latest", "gemini-flash-lite-latest"], "cho": 60.0},
+    1: {"ten": "can_bang", "effort": "medium", "gemini": ["gemini-pro-latest", "gemini-flash-latest"], "cho": 120.0},
+    2: {"ten": "ky", "effort": "high", "gemini": ["gemini-pro-latest", "gemini-flash-latest"], "cho": 150.0},
+    3: {"ten": "toi_da", "effort": "high", "gemini": ["gemini-pro-latest", "gemini-flash-latest"], "cho": 180.0},
+}
+import contextvars as _cv  # noqa: E402
+muc_hien_tai: _cv.ContextVar[int] = _cv.ContextVar("muc_tu_duy", default=1)
+
+
+def muc_tu_duy(muc) -> dict:
+    try:
+        return MUC_TU_DUY[max(0, min(3, int(muc)))]
+    except (TypeError, ValueError):
+        return MUC_TU_DUY[1]
 CHO_MOI_LAN_GOI = 180.0             # giây cho một lần gọi Claude
 CHO_GEMINI = 90.0                   # giây cho một lần gọi một mô hình Gemini (quá thì thử mô hình sau)
 VAN_DE_ANH = ("", "khong_phai_de_hoa", "mo", "toi", "bi_cat", "khac")
@@ -215,7 +233,7 @@ async def goi_claude(system: str, messages: list, schema: dict) -> str:
             model=ten_mo_hinh(), max_tokens=16000,
             system=[{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
             messages=messages,
-            output_config={"effort": os.environ.get("CLAUDE_EFFORT_CO_CHE", "medium"),
+            output_config={"effort": os.environ.get("CLAUDE_EFFORT_CO_CHE") or muc_tu_duy(muc_hien_tai.get())["effort"],
                            "format": {"type": "json_schema", "schema": schema}},
         )
     except anthropic.AuthenticationError as e:
@@ -246,7 +264,8 @@ _gemini_tam_bo: dict[str, float] = {}
 
 
 def ds_mo_hinh_gemini() -> list[str]:
-    ds = [os.environ.get("GEMINI_MODEL_CO_CHE") or "", "gemini-pro-latest", "gemini-flash-latest", "gemini-flash-lite-latest"]
+    ds = [os.environ.get("GEMINI_MODEL_CO_CHE") or "", *muc_tu_duy(muc_hien_tai.get())["gemini"],
+          "gemini-pro-latest", "gemini-flash-latest", "gemini-flash-lite-latest"]
     ds = [m for i, m in enumerate(ds) if m and m not in ds[:i]]
     con = [m for m in ds if _gemini_tam_bo.get(m, 0) <= time.time()]
     return con or ds
