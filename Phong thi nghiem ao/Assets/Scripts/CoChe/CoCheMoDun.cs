@@ -117,6 +117,7 @@ namespace Khkt.CoChe
             if (b == null) return;
             DamBaoCo();
             Mo();
+            Instance.DongKhiThuNho = false; Instance.SauKhiThuNho = null;
             Instance.DaNap[b.Ma] = b;
             if (Instance.BaiHienTai != b) Instance.MoBai(b);
             if (buoc >= 0 && buoc < Instance.TrinhPhat.SoBuoc) { Instance.TrinhPhat.DenBuoc(buoc); if (Instance.CheDoGiay) Instance.DatCheDo(false); }
@@ -679,6 +680,9 @@ namespace Khkt.CoChe
         // ------------------------------------------------------------------ khung 3D nhỏ ⇄ toàn màn hình
         public Camera Cam3D { get; private set; }
         public bool ToanMan { get; private set; }
+        /// <summary>Đặt bởi trang đáp án: bấm Thu nhỏ thì đóng hẳn trình phát và gọi SauKhiThuNho(bước đang xem).</summary>
+        public bool DongKhiThuNho;
+        public System.Action<int> SauKhiThuNho;
         public bool Khung3DMo => khung3D != null && khung3D.gameObject.activeSelf && !CheDoGiay;
         /// <summary>Ô xem 3D trên màn (tỉ lệ 0..1 của đích kết xuất).</summary>
         public Rect VungCam3D => vungManHinh;
@@ -834,7 +838,20 @@ namespace Khkt.CoChe
         /// <summary>Phóng khung 3D ra toàn màn hình hoặc thu về khung nhỏ (0,3 s). Toàn màn hình chỉ có 3D + thanh điều khiển.</summary>
         public void DatToanMan(bool toanMan)
         {
-            if (!toanMan) { if (!CheDoGiay) DatCheDo(true); return; }      // Thu nhỏ = về hẳn bảng giấy
+            if (!toanMan)
+            {
+                if (DongKhiThuNho)
+                {   // mở toàn màn hình từ trang đáp án Giải bài tập: Thu nhỏ = đóng hẳn trình phát, về lại trang đáp án (đúng bước đang xem)
+                    int bu = TrinhPhat.ChiSoBuoc;
+                    var cb = SauKhiThuNho;
+                    DongKhiThuNho = false; SauKhiThuNho = null;
+                    Dong();
+                    cb?.Invoke(bu);
+                    return;
+                }
+                if (!CheDoGiay) DatCheDo(true);                    // mở từ chỗ khác (phím M…): Thu nhỏ = về bảng giấy
+                return;
+            }
             if (CheDoGiay) DatCheDo(false);
             ToanMan = toanMan;
             nutPhongTo.GetComponentInChildren<Text>().text = toanMan ? "⤡  Thu nhỏ" : "⤢  Phóng to";

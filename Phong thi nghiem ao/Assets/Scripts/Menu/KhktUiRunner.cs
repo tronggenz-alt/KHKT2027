@@ -436,6 +436,10 @@ namespace Khkt.Menu
             Bam(kc.transform, "Nút Toàn màn hình 3D");
             yield return Cho(1.0f);
             Check(Khkt.CoChe.CoCheMoDun.DangMo && Khkt.CoChe.CoCheMoDun.Instance.ToanMan, "Nút Xem 3D toàn màn hình mở trình phát toàn màn");
+            Khkt.CoChe.CoCheMoDun.Instance.GetComponentsInChildren<Button>(true).FirstOrDefault(x => x.name == "Nút Phóng to")?.onClick.Invoke();
+            yield return Cho(0.5f);
+            Check(!Khkt.CoChe.CoCheMoDun.DangMo && gbt.DangHien && kc.Khu3DMo, "Thu nhỏ từ toàn màn hình: về lại trang đáp án (khung 3D dưới lời giải)");
+            Khkt.CoChe.CoCheMoDun.Mo();
             Khkt.CoChe.CoCheMoDun.Instance?.BatGiaiThich(false);
             Khkt.CoChe.CoCheMoDun.Dong();
             yield return Frames(3);

@@ -939,6 +939,11 @@ namespace Khkt.Menu
                 int bu = Xem3DMoi != null && baiXem3D == b ? Xem3DMoi.TP.ChiSoBuoc : 0;
                 CoCheMoDun.MoVoiBai(b, -1, bu);
                 CoCheMoDun.Instance?.DatToanMan(true);
+                if (CoCheMoDun.Instance != null)
+                {
+                    CoCheMoDun.Instance.DongKhiThuNho = true;              // Thu nhỏ → về lại trang đáp án này
+                    CoCheMoDun.Instance.SauKhiThuNho = buoc => { if (Xem3DMoi != null && baiXem3D == b) Xem3DMoi.TP.DenBuoc(buoc); };
+                }
             }, 1, TrangCuon.BoNut, new Vector2(1, 1));
             ((RectTransform)to.transform).pivot = new Vector2(1, 1);
             TaoXem3D(anh, b);
