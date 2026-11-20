@@ -63,3 +63,9 @@ Chạy: `KHKT_UI_SHOTS=<thư mục> ~/AppBuild/VERA_claude/dong_bo_va_chay.sh ~/
 - Việc tiếp: **làm lại "Mô hình 3D"** kiểu Geometry cũ (CHEMISTRY/3Dmol): dùng cảnh 3D thật (Xem3DNho + đèn KieuChemistry,
   bóng mờ/ambient occlusion giả, sương theo độ sâu, viền tối nhẹ) thay ảnh phẳng Anh3DXoay; vật liệu mờ không bóng nhựa
   (smoothness thấp, specular nhỏ), kéo xoay + cuộn phóng.
+- 20/11: đã xuất lại app Mac có bản sửa mũi tên (~/AppBuild/VERA_mac/VERA Lab.app). Dừng ở 75%.
+- Người dùng yêu cầu thêm: **sửa kỹ, kiểm thử nhiều trường hợp và nhiều góc nhìn**. Kế hoạch: trong KhktCoCheRunner, với mọi bài
+  mẫu (SN1, SN2, E1, E2, cộng HBr, nitro hoá, este hoá, aldol…) và mọi bước, xoay camera qua ~24 hướng; với mỗi mũi tên chiếu
+  s0/e0 ra màn hình và kiểm: đầu mũi tên cách tâm nguyên tử đích ≤ bán kính vẽ + 0,3; thân không cắt quả cầu nguyên tử nào
+  khác (khoảng cách điểm Bézier tới tâm > bán kính); điểm đầu nằm sát nguồn; mũi tên có chiều dài chiếu > 20 px (không bị nhìn
+  thẳng trục). Chụp lưới ảnh 4 góc/bài để xem bằng mắt. Rồi làm Mô hình 3D kiểu Geometry.
