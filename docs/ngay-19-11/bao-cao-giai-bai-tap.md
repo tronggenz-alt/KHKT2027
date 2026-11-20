@@ -276,3 +276,11 @@ bảng 75%; ô đề vẫn ở trên trang (thiết kế cho phép "trên hoặc
 - **Trình phát**: bỏ dạng vừa giấy vừa 3D – "Xem 3D" vào thẳng 3D toàn màn hình, "Thu nhỏ" về hẳn bảng giấy (bỏ nút trùng
   "Quay lại bảng giấy").
 - Kiểm: Python 42/42, KhktCoCheVerify, KhktUiVerify đạt (xem mục kết quả commit), app Mac xuất được.
+
+## 17. Thu nhỏ về trang đáp án; 3D từ PubChem, kéo xoay được (20/11)
+- Mở "Toàn màn hình" từ khối đáp án Cơ chế → bấm **Thu nhỏ** là đóng hẳn trình phát, về lại trang đáp án (khung 3D dưới lời
+  giải nhảy tới đúng bước vừa xem). Mở trình phát từ chỗ khác (phím M) thì Thu nhỏ vẫn về bảng giấy.
+- **Mô hình 3D lấy cấu dạng chuẩn của PubChem** (`record_type=3d`, như trình xem 3Dmol của web CHEMISTRY cũ); không có mạng/không có
+  bản 3D thì mới tự dựng bằng RDKit (ETKDG + MMFF). Kết quả có `nguon_3d` = `pubchem_3d` | `rdkit`; lưu đệm theo SMILES.
+- Ảnh 3D trong thẻ đáp án **kéo chuột để xoay** (mọi hướng), **cuộn để phóng to**; thả tay 3 giây thì tự lắc chậm lại.
+- Kiểm: Python mô hình 3D đạt; KhktUiVerify đạt; app Mac xuất được.

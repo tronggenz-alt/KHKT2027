@@ -191,12 +191,15 @@ namespace Khkt.Menu
             Hinh = MenuKit.Stretch(the, "Hình đáp án", new Vector2(0, 1), new Vector2(1, 1), new Vector2(24, -24 - 10), new Vector2(-24, -24));
             caoHinh = Mathf.Max(60, veHinh(Hinh, rong));
             Hinh.offsetMin = new Vector2(24, -24 - caoHinh);
-            if (phongTo != null)
+            if (phongTo != null && Hinh.GetComponentInChildren<Anh3DXoay>(true) == null)   // ảnh 3D: kéo để xoay, chỉ nhãn góc mới phóng to
             {
                 // bấm vào hình (hoặc nhãn góc trên phải) → mở hình chiếm 90% màn hình
                 var phu = MenuKit.Full(Hinh, "Lớp bấm phóng to");
                 var pi = phu.gameObject.AddComponent<Image>(); pi.color = new Color(1, 1, 1, 0.001f);
                 var pb = phu.gameObject.AddComponent<Button>(); pb.transition = Selectable.Transition.None; pb.onClick.AddListener(() => phongTo());
+            }
+            if (phongTo != null)
+            {
                 var tag = MakeButton(Hinh, "Nút Phóng to hình", "⤢  Phóng to", new Vector2(-10, -10), new Vector2(118, 34), phongTo, 1, 8f, new Vector2(1, 1));
                 ((RectTransform)tag.transform).pivot = new Vector2(1, 1);
                 var tt = tag.transform.Find("Chữ").GetComponent<Text>(); tt.fontSize = 13; tt.fontStyle = FontStyle.Normal; tt.color = InkDim;
@@ -467,6 +470,7 @@ namespace Khkt.Menu
             if (nt.Count == 0) return 40;
             var nen = Fill(cha, "Nền 3D", new Vector2(0, 1), new Vector2(0, 1), Vector2.zero, new Vector2(rong, cao), Well, 12f);
             Ring(nen.transform, "Viền", Hair, 12f);
+            nen.raycastTarget = true;                              // nhận kéo/cuộn chuột
             var x = nen.gameObject.AddComponent<Anh3DXoay>();
             x.Dung(d, rong, cao);
             return cao;
@@ -498,8 +502,36 @@ namespace Khkt.Menu
     /// Ảnh 3D bóng–que vẽ bằng uGUI, tự xoay quanh trục đứng (24°/s) như spin("y") của 3Dmol trong CHEMISTRY.
     /// Mỗi khung chỉ đặt lại vị trí/kích thước/góc các Image có sẵn và sắp lại thứ tự xa–gần bằng mảng dựng sẵn (không cấp phát).
     /// </summary>
-    public class Anh3DXoay : MonoBehaviour
+    public class Anh3DXoay : MonoBehaviour, UnityEngine.EventSystems.IDragHandler, UnityEngine.EventSystems.IScrollHandler, UnityEngine.EventSystems.IBeginDragHandler
     {
+        // kéo để xoay (như 3Dmol), cuộn để phóng to; thả tay 3 s thì tự lắc chậm lại
+        float yawTay, pitchTay = 12f, phong = 1f, nghi = 99f;
+
+        public void OnBeginDrag(UnityEngine.EventSystems.PointerEventData e) => nghi = 0f;
+
+        public void OnDrag(UnityEngine.EventSystems.PointerEventData e)
+        {
+            yawTay -= e.delta.x * 0.45f;
+            pitchTay = Mathf.Clamp(pitchTay + e.delta.y * 0.45f, -85f, 85f);
+            nghi = 0f;
+            VeKhung();
+        }
+
+        public void OnScroll(UnityEngine.EventSystems.PointerEventData e)
+        {
+            phong = Mathf.Clamp(phong * (e.scrollDelta.y > 0 ? 1.1f : 0.91f), 0.5f, 3f);
+            VeKhungLai();
+        }
+
+        void VeKhungLai()
+        {
+            for (int i = 0; i < cau.Length; i++)
+            {
+                float r = TrinhPhat3D.VdW(e[i]) * 0.27f * k * phong;
+                cau[i].sizeDelta = new Vector2(r * 2, r * 2);
+            }
+            VeKhung();
+        }
         public float TocDo = 24f;
         Vector3[] p0;
         string[] e;
@@ -591,6 +623,8 @@ namespace Khkt.Menu
         void Update()
         {
             if (p0 == null) return;
+            nghi += Time.unscaledDeltaTime;
+            if (nghi < 3f) return;                             // đang/vừa kéo tay: giữ nguyên góc người dùng chọn
             thoiGian += Time.unscaledDeltaTime;
             goc = 40f * Mathf.Sin(thoiGian * 0.55f);          // lắc qua lại ±40° quanh trục đứng: luôn thấy rõ, không bao giờ nhìn ngang mép
             VeKhung();
@@ -598,7 +632,8 @@ namespace Khkt.Menu
 
         void VeKhung()
         {
-            var q = Quaternion.Euler(12f, goc, 0f);
+            var q = Quaternion.Euler(pitchTay, goc + yawTay, 0f);
+            float k = this.k * phong;
             var c = new Vector2(rong * 0.5f, -cao * 0.5f);
             for (int i = 0; i < p0.Length; i++)
             {

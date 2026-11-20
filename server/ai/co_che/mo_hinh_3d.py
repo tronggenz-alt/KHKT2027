@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import re
+import os
 import ssl
 import urllib.parse
 import urllib.request
@@ -74,10 +75,39 @@ def nhan_dien(van_ban: str) -> dict:
     raise LoiMoHinh(f"Chưa nhận ra chất \"{q}\". Thử tên tiếng Anh (ethanol), công thức thu gọn (CH3COOH) hoặc SMILES (CCO).")
 
 
+PUBCHEM_3D = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/{}/SDF?record_type=3d"
+_cache_3d: dict[str, object] = {}
+
+
+def _pubchem_3d(smiles: str, cho: float = 8.0):
+    """Cấu dạng 3D CHUẨN của PubChem (như trình xem 3Dmol của CHEMISTRY) → Mol có H và toạ độ; lỗi/không mạng → None."""
+    import sys
+    import urllib.parse
+    if "unittest" in sys.modules or os.environ.get("VERA_TAT_PUBCHEM_3D"):
+        return None                                       # kiểm thử: không gọi mạng, toạ độ RDKit cố định
+    if smiles in _cache_3d:
+        return _cache_3d[smiles]
+    m = None
+    try:
+        req = urllib.request.Request(PUBCHEM_3D.format(urllib.parse.quote(smiles, safe="")), headers={"User-Agent": "VERA-Lab"})
+        with urllib.request.urlopen(req, timeout=cho, context=_ssl()) as r:
+            sdf = r.read().decode("utf-8", "replace")
+        m = Chem.MolFromMolBlock(sdf.split("$$$$")[0], removeHs=False)
+        if m is not None and m.GetNumConformers() == 0:
+            m = None
+    except Exception:  # noqa: BLE001
+        m = None
+    _cache_3d[smiles] = m
+    return m
+
+
 def dung_3d(smiles: str, ten: str = "", nguon: str = "") -> dict:
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:
         raise LoiMoHinh("SMILES không hợp lệ.")
+    pc = _pubchem_3d(Chem.MolToSmiles(mol))
+    if pc is not None and pc.GetNumAtoms() <= SO_NGUYEN_TU_TOI_DA:
+        return _ra_ket_qua(mol, pc, ten, nguon, "pubchem_3d")
     mh = Chem.AddHs(mol)
     if mh.GetNumAtoms() > SO_NGUYEN_TU_TOI_DA:
         raise LoiMoHinh(f"Phân tử quá lớn để xem 3D (tối đa {SO_NGUYEN_TU_TOI_DA} nguyên tử kể cả H).")
@@ -91,6 +121,10 @@ def dung_3d(smiles: str, ten: str = "", nguon: str = "") -> dict:
         AllChem.MMFFOptimizeMolecule(mh, maxIters=400)
     except Exception:  # noqa: BLE001 – không có tham số MMFF thì giữ cấu dạng ETKDG
         pass
+    return _ra_ket_qua(mol, mh, ten, nguon, "rdkit")
+
+
+def _ra_ket_qua(mol, mh, ten: str, nguon: str, nguon_3d: str) -> dict:
     conf = mh.GetConformer()
     tam = [sum(conf.GetAtomPosition(i)[k] for i in range(mh.GetNumAtoms())) / mh.GetNumAtoms() for k in range(3)]
     nguyen_tu = []
@@ -105,7 +139,7 @@ def dung_3d(smiles: str, ten: str = "", nguon: str = "") -> dict:
     return {
         "ten": ten, "smiles": Chem.MolToSmiles(mol), "nguon": nguon,
         "cong_thuc": CalcMolFormula(mol), "khoi_luong": round(Descriptors.MolWt(mol), 2),
-        "so_nguyen_tu": mh.GetNumAtoms(), "nguyen_tu": nguyen_tu, "lien_ket": lien_ket,
+        "so_nguyen_tu": mh.GetNumAtoms(), "nguyen_tu": nguyen_tu, "lien_ket": lien_ket, "nguon_3d": nguon_3d,
     }
 
 
