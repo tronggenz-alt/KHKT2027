@@ -42,6 +42,8 @@ namespace Khkt.CoChe
         /// <summary>Nguyên tử/liên kết tự phát sáng nhẹ (emission) – dùng khi cảnh có thể không có đèn (bảng lớn trên menu).</summary>
         public float TuSang;
         public float TocXoay = 24f;
+        /// <summary>Tự lắc góc nhìn chậm quanh góc tốt nhất (mặc định bật cho cơ chế).</summary>
+        public bool LacGoc = true;
         /// <summary>Hiện electron không liên kết như cấu trúc Lewis (cặp = 2 chấm, electron lẻ = 1 chấm) quanh mỗi nguyên tử.</summary>
         public bool HienE;
         public int SoChamLewis { get; private set; }
@@ -171,7 +173,9 @@ namespace Khkt.CoChe
             if (TuDongGoc && !keo)
             {
                 float k = 1f - Mathf.Exp(-2.2f * Time.unscaledDeltaTime);
-                if (!TuXoay) Xoay = Quaternion.Slerp(Xoay, xoayDich, k);
+                // 20/11: tự lắc chậm ±18° quanh góc nhìn tốt nhất của bước – thấy chiều sâu, dễ hình dung chuyển động
+                var dich = LacGoc ? Quaternion.AngleAxis(18f * Mathf.Sin(Time.unscaledTime * 0.45f), Vector3.up) * xoayDich : xoayDich;
+                if (!TuXoay) Xoay = Quaternion.Slerp(Xoay, dich, k);
                 tamNay = Vector3.Lerp(tamNay, tamDich, k);
                 KhoangCach = Mathf.Lerp(KhoangCach, khoangDich, k);
             }

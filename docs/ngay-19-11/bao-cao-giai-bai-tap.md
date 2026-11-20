@@ -320,3 +320,6 @@ bảng 75%; ô đề vẫn ở trên trang (thiết kế cho phép "trên hoặc
   bay, như mũi tên trên giấy) + **đầu nón** nhỏ ở đích (mũi tên 1 e đầu nhỏ hơn). Hiện từ đầu bước, mờ dần khi liên kết chuyển
   xong; hướng sai thì dừng ở quả cầu chắn. Cặp e vẫn bay dọc mũi tên. Ảnh `mui_ten_3d.png`.
 - Kiểm: KhktCoCheVerify 65/66 – kiểm "Phát hết các bước" nay đòi cả mũi tên 3D (đạt).
+
+## 23. Góc nhìn tự lắc (20/11)
+- Trình phát cơ chế tự lắc chậm ±18° quanh góc nhìn tốt nhất của từng bước (`TrinhPhat3D.LacGoc`), kéo chuột thì dừng tới bước sau.
