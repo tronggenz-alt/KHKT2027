@@ -523,6 +523,7 @@ namespace Khkt.CoChe
                     bool coChu = true;                                    // 20/11: ghi ký hiệu mọi nguyên tử (cả C, H) cho dễ nhận biết
                     if (TrinhPhat.LaHAn(kv.Key)) continue;
                     if (TrinhPhat.CoNguyenTu(kv.Key) < 0.5f) continue;
+                    if (TrinhPhat.BiChe(kv.Key)) continue;
                     var sp = TrinhPhat.Cam.WorldToScreenPoint(TrinhPhat.TheGioi(kv.Value));
                     if (sp.z <= 0f) continue;
                     var kr = khungNhan.rect;
@@ -782,7 +783,7 @@ namespace Khkt.CoChe
             foreach (var b in thanhKhung.GetComponentsInChildren<Button>(true)) NutLoLung(b);
             var nenToc = GlassKit.Rect(thanhKhung.Find("Tốc độ 3D"), "Nền", Vector2.zero, Vector2.zero, Vector2.zero, Vector2.zero);
             nenToc.anchorMin = Vector2.zero; nenToc.anchorMax = Vector2.one; nenToc.offsetMin = new Vector2(-10, 0); nenToc.offsetMax = new Vector2(6, 0); nenToc.SetAsFirstSibling();
-            var nti = nenToc.gameObject.AddComponent<Image>(); nti.sprite = Khkt.Menu.Dashboard.MenuKit.Round(12f); nti.type = Image.Type.Sliced; nti.color = new Color(0.08f, 0.10f, 0.15f, 0.78f); nti.raycastTarget = false;
+            var nti = nenToc.gameObject.AddComponent<Image>(); nti.sprite = Khkt.Menu.Dashboard.MenuKit.Round(6f); nti.type = Image.Type.Sliced; nti.color = new Color(0.08f, 0.10f, 0.15f, 0.78f); nti.raycastTarget = false;
             khung3D.gameObject.SetActive(false);
             DatKhung(0f);
         }
@@ -791,7 +792,7 @@ namespace Khkt.CoChe
         {
             var img = b.GetComponent<Image>();
             if (img == null) return;
-            img.sprite = Khkt.Menu.Dashboard.MenuKit.Round(12f); img.type = Image.Type.Sliced; img.pixelsPerUnitMultiplier = 1f;
+            img.sprite = Khkt.Menu.Dashboard.MenuKit.Round(6f); img.type = Image.Type.Sliced; img.pixelsPerUnitMultiplier = 1f;
             img.color = new Color(0.08f, 0.10f, 0.15f, 0.78f);
             var cl = b.colors; cl.highlightedColor = new Color(1.6f, 1.6f, 1.6f, 1f); cl.pressedColor = new Color(0.8f, 0.8f, 0.8f, 1f); b.colors = cl;
         }

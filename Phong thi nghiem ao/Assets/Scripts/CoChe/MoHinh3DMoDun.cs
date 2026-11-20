@@ -168,7 +168,7 @@ namespace Khkt.CoChe
             var r = GlassKit.Rect(cha, ten, new Vector2(0, 1), new Vector2(0, 1), pos, size);
             r.pivot = new Vector2(0, 1); r.anchoredPosition = pos;
             var im = r.gameObject.AddComponent<Image>();
-            im.sprite = Khkt.Menu.Dashboard.MenuKit.Round(12f); im.type = Image.Type.Sliced; im.color = mau;
+            im.sprite = Khkt.Menu.Dashboard.MenuKit.Round(6f); im.type = Image.Type.Sliced; im.color = mau;
             var ol = r.gameObject.AddComponent<Outline>(); ol.effectColor = new Color32(0x27, 0x27, 0x2a, 0xff); ol.effectDistance = new Vector2(1, -1);
             return r;
         }
@@ -338,7 +338,8 @@ namespace Khkt.CoChe
                 foreach (var kv in TrinhPhat.ViTriNguyenTu)
                 {
                     string e = TrinhPhat.NguyenTo(kv.Key);
-                    if (e == "C" || e == "H") continue;
+                    if (e == "H") continue;
+                    if (TrinhPhat.BiChe(kv.Key)) continue;
                     var sp = Cam.WorldToScreenPoint(TrinhPhat.TheGioi(kv.Value));
                     if (sp.z <= 0f || !RectTransformUtility.ScreenPointToLocalPointInRectangle(khungNhan, sp, Cam, out var lp)) continue;
                     while (nhan.Count <= dung)

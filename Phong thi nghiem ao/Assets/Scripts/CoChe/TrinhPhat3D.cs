@@ -567,6 +567,31 @@ namespace Khkt.CoChe
             return s.DienTich.TryGetValue(id, out var d) ? d : 0;
         }
 
+        /// <summary>
+        /// Nguyên tử bị nguyên tử khác che (nhìn từ camera): tia camera → tâm nguyên tử cắt quả cầu đang hiện nằm phía trước
+        /// mặt cầu của nó → nhãn chữ của nó không được hiện (tránh "nhìn xuyên" thấy chữ H sau quả cầu C).
+        /// </summary>
+        public bool BiChe(string id)
+        {
+            if (Cam == null || !viTri.TryGetValue(id, out var p)) return false;
+            Vector3 C = Cam.transform.position, P = W(p), dir = P - C;
+            float dP = dir.magnitude;
+            if (dP < 1e-4f) return false;
+            dir /= dP;
+            float matTruoc = dP - BanKinhVe(id) * 0.6f;                      // gần mặt trước quả cầu của nó
+            foreach (var kv in viTri)
+            {
+                if (kv.Key == id || LaHAn(kv.Key) || CoNguyenTu(kv.Key) < 0.5f) continue;
+                Vector3 q = W(kv.Value) - C;
+                float t = Vector3.Dot(q, dir);
+                if (t <= 0f || t >= dP) continue;
+                float rQ = BanKinhVe(kv.Key), vg2 = (q - dir * t).sqrMagnitude;
+                if (vg2 >= rQ * rQ) continue;
+                if (t - Mathf.Sqrt(rQ * rQ - vg2) < matTruoc) return true;
+            }
+            return false;
+        }
+
         Vector3 W(Vector3 p)
         {
             var q = Xoay * p;

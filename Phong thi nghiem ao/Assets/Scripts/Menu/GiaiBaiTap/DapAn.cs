@@ -802,6 +802,7 @@ namespace Khkt.Menu
                     if (TP.CoNguyenTu(kv.Key) < 0.5f) continue;
                     string e = TP.NguyenTo(kv.Key);
                     if (TP.LaHAn(kv.Key)) continue;
+                    if (TP.BiChe(kv.Key)) continue;
                     var sp = cam.WorldToScreenPoint(TP.TheGioi(kv.Value));
                     if (sp.z <= 0f) continue;
                     var lp = new Vector2((sp.x / Mathf.Max(1, cam.pixelWidth) - 0.5f) * r.width, (sp.y / Mathf.Max(1, cam.pixelHeight) - 0.5f) * r.height);
