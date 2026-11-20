@@ -109,7 +109,7 @@ namespace Khkt.CoChe
             thongTin = GlassKit.Label(thanh, "Thông số", "", 17, phu, false, TextAnchor.MiddleLeft, new Vector2(262, -20), new Vector2(240, 44));
             thongTin.supportRichText = true;
 
-            float x = 510;
+            float x = 470;
             var nhomKieu = Pill(thanh, "Nhóm kiểu", new Vector2(x, -18), new Vector2(4 * 104 + 8, 48), NenNut);
             string[] kieu = { "Bóng-que", "Que", "Đặc", "Dây" };
             for (int k = 0; k < 4; k++)
@@ -118,11 +118,12 @@ namespace Khkt.CoChe
                 nutKieu[k] = NutNoi(nhomKieu, "Kiểu " + kieu[k], kieu[k], new Vector2(4 + k * 104, -4), new Vector2(100, 40), () => DatKieu(kk), false);
             }
             x += 4 * 104 + 8 + 14;
-            nutMau = NutNoi(thanh, "Màu", "Màu Jmol  ▾", new Vector2(x, -18), new Vector2(170, 48), DoiMau, true); x += 184;
-            nutNhan = NutNoi(thanh, "Nhãn", "☐  Nhãn", new Vector2(x, -18), new Vector2(118, 48), () => { khungNhan.gameObject.SetActive(!khungNhan.gameObject.activeSelf); CapNhatNut(); }, true); x += 132;
-            nutXoay = NutNoi(thanh, "Tự xoay", "☐  Tự xoay", new Vector2(x, -18), new Vector2(140, 48), () => { TrinhPhat.TuXoay = !TrinhPhat.TuXoay; CapNhatNut(); }, true); x += 154;
-            nutAnH = NutNoi(thanh, "Ẩn H", "☐  Ẩn H", new Vector2(x, -18), new Vector2(120, 48), () => { TrinhPhat.AnH = !TrinhPhat.AnH; CapNhatNut(); }, true);
-            var dong = NutNoi(thanh, "Đóng", "Đóng", new Vector2(-28, -18), new Vector2(110, 48), Dong, true);
+            nutBeMat = NutNoi(thanh, "Bề mặt", "Tắt bề mặt  ▾", new Vector2(x, -18), new Vector2(176, 48), DoiBeMat, true); x += 186;
+            nutMau = NutNoi(thanh, "Màu", "Màu Jmol  ▾", new Vector2(x, -18), new Vector2(150, 48), DoiMau, true); x += 160;
+            nutNhan = NutNoi(thanh, "Nhãn", "☐  Nhãn", new Vector2(x, -18), new Vector2(104, 48), () => { khungNhan.gameObject.SetActive(!khungNhan.gameObject.activeSelf); CapNhatNut(); }, true); x += 112;
+            nutXoay = NutNoi(thanh, "Tự xoay", "☐  Tự xoay", new Vector2(x, -18), new Vector2(124, 48), () => { TrinhPhat.TuXoay = !TrinhPhat.TuXoay; CapNhatNut(); }, true); x += 132;
+            nutAnH = NutNoi(thanh, "Ẩn H", "☐  Ẩn H", new Vector2(x, -18), new Vector2(104, 48), () => { TrinhPhat.AnH = !TrinhPhat.AnH; CapNhatNut(); }, true);
+            var dong = NutNoi(thanh, "Đóng", "Đóng", new Vector2(-24, -18), new Vector2(96, 48), Dong, true);
             var rd = (RectTransform)dong.transform; rd.anchorMin = rd.anchorMax = rd.pivot = new Vector2(1, 1);
 
             // ô nhập nổi ở đáy
@@ -139,7 +140,9 @@ namespace Khkt.CoChe
 
         static readonly Color NenNut = new Color32(0x12, 0x12, 0x15, 0xf2);
         readonly Button[] nutKieu = new Button[4];
-        Button nutMau, nutNhan, nutXoay;
+        Button nutMau, nutNhan, nutXoay, nutBeMat;
+        static readonly string[] TenBeMat = { "Tắt bề mặt", "Bề mặt VDW", "Dung môi (SAS)", "Phân tử (SES)" };
+        void DoiBeMat() { TrinhPhat.BeMat = (BeMatPhanTu.Loai)(((int)TrinhPhat.BeMat + 1) % 4); CapNhatNut(); }
         static readonly string[] TenMau = { "Màu Jmol", "Carbon tối", "Rasmol" };
 
         static RectTransform Pill(Transform cha, string ten, Vector2 pos, Vector2 size, Color mau)
@@ -177,6 +180,7 @@ namespace Khkt.CoChe
                 nutKieu[k].GetComponent<Image>().color = chon ? sang : new Color(0, 0, 0, 0);
                 nutKieu[k].GetComponentInChildren<Text>().color = chon ? den : phu;
             }
+            if (nutBeMat != null) nutBeMat.GetComponentInChildren<Text>().text = TenBeMat[(int)TrinhPhat.BeMat] + "  ▾";
             if (nutMau != null) nutMau.GetComponentInChildren<Text>().text = TenMau[TrinhPhat.BangMau] + "  ▾";
             if (nutNhan != null) nutNhan.GetComponentInChildren<Text>().text = (khungNhan.gameObject.activeSelf ? "☑" : "☐") + "  Nhãn";
             if (nutXoay != null) nutXoay.GetComponentInChildren<Text>().text = (TrinhPhat.TuXoay ? "☑" : "☐") + "  Tự xoay";

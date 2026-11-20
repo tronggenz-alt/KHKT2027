@@ -67,6 +67,31 @@ namespace Khkt.CoChe
             {"S", new Color32(0xff, 0xc8, 0x32, 0xff)}, {"Cl", new Color32(0x00, 0xff, 0x00, 0xff)}, {"Br", new Color32(0xa5, 0x2a, 0x2a, 0xff)},
             {"F", new Color32(0xda, 0xa5, 0x20, 0xff)}, {"P", new Color32(0xff, 0xa5, 0x00, 0xff)}, {"I", new Color32(0xa0, 0x20, 0xf0, 0xff)},
         };
+        // ---- bề mặt phân tử (VDW / SAS / SES) như 3Dmol, độ mờ 0,76, màu theo nguyên tố
+        public BeMatPhanTu.Loai BeMat;
+        public Mesh LuoiBeMat => luoiBeMat;
+        Mesh luoiBeMat; object beMatKhoa; BeMatPhanTu.Loai beMatLoai; int beMatMau = -1;
+        Material matBeMatGoc;
+
+        void VeBeMat()
+        {
+            if (BeMat == BeMatPhanTu.Loai.Tat || viTri.Count == 0) return;
+            if (luoiBeMat == null || beMatKhoa != (object)KichBan || beMatLoai != BeMat || beMatMau != bangMau)
+            {
+                if (luoiBeMat != null) Destroy(luoiBeMat);
+                var tam = new List<Vector3>(); var bk = new List<float>(); var nt = new List<string>();
+                foreach (var kv in viTri) { string e = Nguyen(kv.Key); tam.Add(kv.Value); bk.Add(VdW(e)); nt.Add(e); }
+                var bm = bangMau == 1 ? MauCarbonToi : bangMau == 2 ? MauRasmol : MauJmol;
+                luoiBeMat = BeMatPhanTu.Dung(tam, bk, nt, BeMat, e => bm.TryGetValue(e, out var c) ? c : Mau(e));
+                beMatKhoa = KichBan; beMatLoai = BeMat; beMatMau = bangMau;
+            }
+            if (luoiBeMat == null) return;
+            if (matBeMatGoc == null) matBeMatGoc = Resources.Load<Material>("CoCheVe/BeMat");
+            if (matBeMatGoc == null) return;
+            var mt = Matrix4x4.Translate(Tam) * Matrix4x4.Scale(new Vector3(1f, 1f, Mathf.Max(Phang, 0.02f))) * Matrix4x4.Rotate(Xoay);
+            Graphics.RenderMesh(Rp(matBeMatGoc), luoiBeMat, 0, mt);
+        }
+
         readonly Dictionary<string, List<Matrix4x4>> lkNua = new Dictionary<string, List<Matrix4x4>>();
         static readonly Dictionary<string, Color> MauCu = new Dictionary<string, Color>
         {
@@ -659,6 +684,7 @@ namespace Khkt.CoChe
             foreach (var kv in nhom) VeNhom(MatNguyenTu(kv.Key), cau, kv.Value);
             VeNhom(matLk != null ? matLk : MatNguyenTu("C"), tru, lk);
             foreach (var kv in lkNua) if (kv.Value.Count > 0) VeNhom(MatNguyenTu(kv.Key), tru, kv.Value);
+            VeBeMat();
             VeNhom(matE, cauE, hat);
             VeLewis(m < 0.5f ? bacA : bacB, m < 0.5f ? a : b);
             if (lewis.Count > 0) VeNhom(matE, cauE, lewis);

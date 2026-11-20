@@ -477,6 +477,19 @@ namespace Khkt.Menu
                 tx3.ReadPixels(new Rect(0, 0, 1440, 900), 0, 0); tx3.Apply();
                 RenderTexture.active = null; cam3.targetTexture = cu3;
                 if (!string.IsNullOrEmpty(outDir)) File.WriteAllBytes(Path.Combine(outDir, "mo_hinh_3d_khung_jmol.png"), tx3.EncodeToPNG());
+                // bề mặt phân tử: VDW, SAS, SES đều dựng được lưới; chụp VDW để xem
+                var tp3 = Khkt.CoChe.MoHinh3DMoDun.Instance.TrinhPhat;
+                var soDinh = new System.Collections.Generic.List<int>();
+                foreach (var lb in new[] { Khkt.CoChe.BeMatPhanTu.Loai.SAS, Khkt.CoChe.BeMatPhanTu.Loai.SES, Khkt.CoChe.BeMatPhanTu.Loai.VDW })
+                {
+                    tp3.BeMat = lb; yield return null; yield return null;
+                    soDinh.Add(tp3.LuoiBeMat != null ? tp3.LuoiBeMat.vertexCount : 0);
+                }
+                Check(soDinh.TrueForAll(v => v > 300), "Bề mặt phân tử SAS / SES / VDW dựng được lưới", string.Join(" / ", soDinh));
+                cam3.targetTexture = rt3; yield return null; cam3.Render();
+                RenderTexture.active = rt3; tx3.ReadPixels(new Rect(0, 0, 1440, 900), 0, 0); tx3.Apply(); RenderTexture.active = null; cam3.targetTexture = cu3;
+                if (!string.IsNullOrEmpty(outDir)) File.WriteAllBytes(Path.Combine(outDir, "mo_hinh_3d_be_mat.png"), tx3.EncodeToPNG());
+                tp3.BeMat = Khkt.CoChe.BeMatPhanTu.Loai.Tat;
                 UnityEngine.Object.Destroy(tx3); rt3.Release();
             }
             Khkt.CoChe.MoHinh3DMoDun.Dong();

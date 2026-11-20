@@ -977,10 +977,12 @@ namespace Khkt.Menu
         void BuildLoading(RectTransform p)
         {
             var s = NewScreen(p, Screen.Loading, "Đang tải", "Đang mở phòng thí nghiệm", "Lần đầu có thể mất khoảng một phút trên máy yếu.", ContentW, 340f);
-            var track = Fill(s, "Thanh nền", new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, -124), new Vector2(ContentW, 10), Well, RadiusPill);
-            Ring(track.transform, "Viền", Hair, RadiusPill);
+            // 20/11: thanh tải bo cong nhẹ (3 điểm) thay cho viên nang tròn hai đầu
+            const float BoThanhTai = 3f;
+            var track = Fill(s, "Thanh nền", new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, -124), new Vector2(ContentW, 10), Well, BoThanhTai);
+            Ring(track.transform, "Viền", Hair, BoThanhTai);
             var fill = Stretch(track.rectTransform, "Thanh tiến độ", new Vector2(0, 0), new Vector2(0, 1), Vector2.zero, Vector2.zero);
-            loadBar = Paint(fill, Color.white, RadiusPill);
+            loadBar = Paint(fill, Color.white, BoThanhTai);
             Gradient(loadBar, AccentDeep, Accent, 90f);
             loadBar.enabled = false;
             loadText = GlassKit.Label(s, "Phần trăm", "0 %", 28, Ink, true, TextAnchor.UpperLeft, new Vector2(0, -146), new Vector2(ContentW, 40));
