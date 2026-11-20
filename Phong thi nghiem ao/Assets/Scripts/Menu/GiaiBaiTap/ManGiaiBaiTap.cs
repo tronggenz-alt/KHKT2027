@@ -1125,7 +1125,9 @@ namespace Khkt.Menu
                         ("Nút Xuất PNG", "Xuất ảnh", 2, () => StartCoroutine(XuatPng(k.Hinh, "mo_hinh_3d"))),
                         ("Nút Báo sai 3D", "Báo sai", 2, () => baoSai.Mo("mo_hinh_3d", "", q, -1, "")) },
                     null, null, null,
-                    () => bangLon.Mo(S(d, "ten") + "  ·  " + S(d, "cong_thuc"), than => HinhDapAn.Ba(MenuKit.Full(than, "Ảnh 3D lớn"), d, than.rect.width, than.rect.height), 0.9f));
+                    () => { MoHinh3DMoDun.Mo(); MoHinh3DMoDun.Instance?.XemChat(q); });
+                // mô hình 3D nguyên bản 18/11 (khung 3D thật, có chiều sâu) mở ngay khi dựng xong
+                if (!Application.isBatchMode) { MoHinh3DMoDun.Mo(); MoHinh3DMoDun.Instance?.XemChat(q); }
             }
             catch (Exception e) { k.DatLoi("Kết quả lỗi định dạng: " + e.Message); }
         }

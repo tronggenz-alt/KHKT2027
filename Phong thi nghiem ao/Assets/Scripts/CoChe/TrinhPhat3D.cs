@@ -37,6 +37,15 @@ namespace Khkt.CoChe
         public bool TuDongGoc = true;
         /// <summary>Kiểu 3Dmol của CHEMISTRY (PubChem): cầu nhỏ (0,27 × bán kính van der Waals), que dày 0,14 Å, bảng màu CHEMISTRY.</summary>
         public bool KieuChemistry;
+        /// <summary>Vẽ đúng như bản Mô hình 3D ngày 18/11 (bảng màu CPK cũ, không tự phát sáng).</summary>
+        public bool KieuCu;
+        static readonly Dictionary<string, Color> MauCu = new Dictionary<string, Color>
+        {
+            {"H", new Color(0.95f, 0.95f, 0.95f)}, {"C", new Color(0.25f, 0.27f, 0.30f)}, {"N", new Color(0.19f, 0.31f, 0.97f)},
+            {"O", new Color(0.93f, 0.16f, 0.12f)}, {"F", new Color(0.56f, 0.88f, 0.31f)}, {"Cl", new Color(0.12f, 0.80f, 0.20f)},
+            {"Br", new Color(0.65f, 0.16f, 0.16f)}, {"I", new Color(0.58f, 0.0f, 0.58f)}, {"S", new Color(0.95f, 0.85f, 0.20f)},
+            {"P", new Color(1f, 0.5f, 0f)}, {"Na", new Color(0.67f, 0.36f, 0.95f)}, {"K", new Color(0.56f, 0.25f, 0.83f)},
+        };
         /// <summary>Tự xoay chậm quanh trục đứng (như spin("y") của 3Dmol); kéo chuột thì dừng tới khi thả.</summary>
         public bool TuXoay;
         /// <summary>Nguyên tử/liên kết tự phát sáng nhẹ (emission) – dùng khi cảnh có thể không có đèn (bảng lớn trên menu).</summary>
@@ -465,15 +474,16 @@ namespace Khkt.CoChe
         {
             if (matNt.TryGetValue(e, out var m)) return m;
             m = new Material(matGoc) { enableInstancing = true, name = "CoChe_" + e };
-            m.SetColor("_BaseColor", KieuChemistry ? MauCH(e) : Mau(e));
-            m.SetColor("_Color", KieuChemistry ? MauCH(e) : Mau(e));
+            Color mauNt = KieuCu ? (MauCu.TryGetValue(e, out var mc) ? mc : new Color(1f, 0.55f, 0.75f)) : KieuChemistry ? MauCH(e) : Mau(e);
+            m.SetColor("_BaseColor", mauNt);
+            m.SetColor("_Color", mauNt);
             m.SetFloat("_Smoothness", 0.62f);
-            float sang = TuSang > 0f ? TuSang : 0.12f;
+            float sang = TuSang > 0f ? TuSang : KieuCu ? 0f : 0.12f;
             if (sang > 0f)
             {
                 m.EnableKeyword("_EMISSION");
                 m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
-                m.SetColor("_EmissionColor", (KieuChemistry ? MauCH(e) : Mau(e)) * sang);
+                m.SetColor("_EmissionColor", mauNt * sang);
             }
             matNt[e] = m;
             return m;

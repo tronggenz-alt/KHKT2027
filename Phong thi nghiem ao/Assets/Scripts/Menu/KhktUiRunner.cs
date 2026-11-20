@@ -461,6 +461,11 @@ namespace Khkt.Menu
             Bam(gbt.Dong3D.Khoi[0].transform, "Nút Mở lớn");
             yield return Cho(1.0f);
             Check(Khkt.CoChe.MoHinh3DMoDun.DangMo, "3D Mở lớn mở khung xoay 3D");
+            { float tw = Time.realtimeSinceStartup; while (Khkt.CoChe.MoHinh3DMoDun.Instance != null && (Khkt.CoChe.MoHinh3DMoDun.Instance.DangTai || Khkt.CoChe.MoHinh3DMoDun.Instance.SoNguyenTu == 0) && Time.realtimeSinceStartup - tw < 4f) yield return null; }
+            yield return Cho(0.8f);
+            Check(Khkt.CoChe.MoHinh3DMoDun.Instance != null && Khkt.CoChe.MoHinh3DMoDun.Instance.TrinhPhat.KieuCu && Khkt.CoChe.MoHinh3DMoDun.Instance.SoNguyenTu == 9,
+                "Khung 3D nguyên bản 18/11 (kiểu cũ, 9 nguyên tử ethanol)", Khkt.CoChe.MoHinh3DMoDun.Instance != null ? Khkt.CoChe.MoHinh3DMoDun.Instance.SoNguyenTu.ToString() : "");
+            yield return Chup(menu, "mo_hinh_3d_khung_1811");
             Khkt.CoChe.MoHinh3DMoDun.Dong();
             yield return Frames(3);
             Bam(gbt.transform, "Điều hướng Hóa lý");

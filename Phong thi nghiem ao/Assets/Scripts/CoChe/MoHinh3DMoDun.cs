@@ -68,7 +68,7 @@ namespace Khkt.CoChe
             camGo.transform.SetParent(transform, false);
             Cam = camGo.AddComponent<Camera>();
             Cam.clearFlags = CameraClearFlags.SolidColor;
-            Cam.backgroundColor = CoCheMoDun.NenToi;                          // 20/11: nền đen, phân tử nổi bật
+            Cam.backgroundColor = new Color32(0x0b, 0x10, 0x20, 0xff);          // nguyên bản 18/11 (nền xanh tối)
             Cam.cullingMask = 1 << TrinhPhat3D.LopVe;
             Cam.fieldOfView = 32f;
             Cam.nearClipPlane = 0.05f;
@@ -92,13 +92,13 @@ namespace Khkt.CoChe
 
             TrinhPhat = gameObject.AddComponent<TrinhPhat3D>();
             TrinhPhat.Cam = Cam;
-            TrinhPhat.KieuChemistry = true;
-            TrinhPhat.TuXoay = true;
+            TrinhPhat.KieuCu = true;                                            // giữ nguyên cách vẽ 18/11
 
             vungNhin = Gian(goc, "Vùng nhìn", new Vector2(0, 40), new Vector2(-440, -190));
             khungNhan = Gian(goc, "Nhãn nguyên tử", Vector2.zero, Vector2.zero);
 
-            Color sang = new Color32(0xf2, 0xf4, 0xf8, 0xff), phu = new Color32(0x9a, 0xa5, 0xbd, 0xff);
+            var sang = new Color32(0xe8, 0xec, 0xf5, 0xff);
+            var phu = new Color32(0x9a, 0xa5, 0xbd, 0xff);
             GlassKit.Label(goc, "Tiêu đề", "Mô hình 3D", 27, sang, true, TextAnchor.UpperLeft, new Vector2(28, -22), new Vector2(800, 38));
             GlassKit.Label(goc, "Mô tả", "Gõ tên chất (tiếng Việt hoặc tiếng Anh), công thức thu gọn hoặc SMILES · kéo để xoay 360° · cuộn để phóng to",
                            15, phu, false, TextAnchor.UpperLeft, new Vector2(28, -64), new Vector2(1300, 22));
@@ -250,28 +250,24 @@ namespace Khkt.CoChe
                 foreach (var kv in TrinhPhat.ViTriNguyenTu)
                 {
                     string e = TrinhPhat.NguyenTo(kv.Key);
-                    if (e == "H") continue;
+                    if (e == "C" || e == "H") continue;
                     var sp = Cam.WorldToScreenPoint(TrinhPhat.TheGioi(kv.Value));
                     if (sp.z <= 0f || !RectTransformUtility.ScreenPointToLocalPointInRectangle(khungNhan, sp, Cam, out var lp)) continue;
                     while (nhan.Count <= dung)
                     {
-                        // nhãn nguyên tố kiểu 3Dmol: chữ mực trên nền giấy mờ 80%, đặt giữa nguyên tử, nằm trên cùng
-                        var nen = GlassKit.Rect(khungNhan, "Nhãn", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(30, 22));
-                        var ni = nen.gameObject.AddComponent<Image>();
-                        ni.sprite = Khkt.Menu.Dashboard.MenuKit.Round(6f); ni.type = Image.Type.Sliced;
-                        ni.color = Khkt.Menu.Dashboard.MenuKit.WithAlpha(Khkt.Menu.Dashboard.MenuKit.Paper, 0.8f); ni.raycastTarget = false;
-                        var t = GlassKit.Label(nen, "Chữ", "", 13, Khkt.Menu.Dashboard.MenuKit.Ink, true, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(30, 22), new Vector2(0.5f, 0.5f));
+                        var t = GlassKit.Label(khungNhan, "Nhãn", "", 15, Color.white, true, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(50, 24), new Vector2(0.5f, 0.5f));
                         t.rectTransform.pivot = new Vector2(0.5f, 0.5f);
                         t.raycastTarget = false;
+                        var sh = t.gameObject.AddComponent<Shadow>();
+                        sh.effectColor = new Color(0, 0, 0, 0.75f);
                         nhan.Add(t);
                     }
                     var n = nhan[dung++];
                     if (n.text != e) n.text = e;
-                    var nr = (RectTransform)n.transform.parent;
-                    nr.anchoredPosition = lp;
-                    if (!nr.gameObject.activeSelf) nr.gameObject.SetActive(true);
+                    n.rectTransform.anchoredPosition = lp;
+                    if (!n.gameObject.activeSelf) n.gameObject.SetActive(true);
                 }
-            for (int i = dung; i < nhan.Count; i++) { var nr = nhan[i].transform.parent.gameObject; if (nr.activeSelf) nr.SetActive(false); }
+            for (int i = dung; i < nhan.Count; i++) if (nhan[i].gameObject.activeSelf) nhan[i].gameObject.SetActive(false);
         }
 
         void OnDestroy()
