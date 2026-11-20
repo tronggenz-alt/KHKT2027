@@ -336,3 +336,9 @@ bảng 75%; ô đề vẫn ở trên trang (thiết kế cho phép "trên hoặc
 - Bấm "Xem 3D" chỉ mở khung ở bước 1, bấm Phát mới chạy.
 - Đầu mũi tên 3D dừng ngoài quả cầu nguyên tử đích (bán kính vẽ + 0,1 Å); đuôi mũi tên từ cặp e bắt đầu ngoài quả cầu nguyên tử nguồn. Ảnh mui_ten_3d_khong_dam.png.
 - Kiểm: KhktCoCheVerify 66/66, KhktUiVerify 82/82.
+
+## 27. Toạ độ mũi tên 3D làm lại (20/11)
+- Đầu mũi tên nằm đúng trên mặt cầu nguyên tử đích, ở phía đường cong tới (trước: lệch 0,3 Å vào trong rồi cắt lùi → có lúc lơ lửng không chạm).
+- Hướng cong vuông góc với hướng nhìn (luôn thấy rõ đường cong), ra phía ngoài phân tử, cao tối thiểu 0,55 Å.
+- Từ cặp e: rời mặt cầu nguyên tử nguồn; từ liên kết: nhấc 0,22 Å khỏi liên kết rồi vồng lên, úp xuống nguyên tử đích (vd N=O → O).
+- Kiểm: KhktCoCheVerify 66/66. Ảnh mui_ten_3d_toa_do_moi.png.

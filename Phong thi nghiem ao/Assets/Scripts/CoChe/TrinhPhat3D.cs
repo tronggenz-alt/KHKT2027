@@ -799,21 +799,8 @@ namespace Khkt.CoChe
             foreach (var mt in ds)
             {
                 if (!DiemMuiTen(mt, out var s0, out var c0, out var e0)) continue;
-                float uTip = DangNhanhSai && NhanhHienTai != null ? Mathf.Min(0.97f, DiemChan(s0, c0, e0)) : 0.97f;
-                // 20/11: đầu mũi tên dừng NGOÀI quả cầu nguyên tử đích; đuôi (từ cặp e) bắt đầu ngoài quả cầu nguyên tử nguồn
-                if (mt.DenLoai != "lien_ket" && mt.Den != null && mt.Den.Length > 0)
-                {
-                    float rDich = BanKinhVe("m" + mt.Den[0]) + 0.1f;
-                    while (uTip > 0.2f && Vector3.Distance(Bezier(s0, c0, e0, uTip), e0) < rDich) uTip -= 0.01f;
-                }
-                else while (uTip > 0.2f && Vector3.Distance(Bezier(s0, c0, e0, uTip), e0) < 0.1f) uTip -= 0.01f;
-                float uDau = 0.04f;
-                if (mt.TuLoai != "lien_ket" && mt.Tu != null && mt.Tu.Length > 0)
-                {
-                    Vector3 pNguon = Tim(mt.Tu[0]);
-                    float rNguon = BanKinhVe("m" + mt.Tu[0]) + 0.06f;
-                    while (uDau < uTip - 0.15f && Vector3.Distance(Bezier(s0, c0, e0, uDau), pNguon) < rNguon) uDau += 0.01f;
-                }
+                float uTip = DangNhanhSai && NhanhHienTai != null ? Mathf.Min(1f, DiemChan(s0, c0, e0)) : 1f;
+                float uDau = 0f;
                 if (uTip <= 0.1f || uTip - uDau < 0.1f) continue;
                 Vector3 tip = W(Bezier(s0, c0, e0, uTip)), truocTip = W(Bezier(s0, c0, e0, uTip - 0.05f));
                 Vector3 huong = (tip - truocTip).sqrMagnitude > 1e-6f ? (tip - truocTip).normalized : Vector3.up;
@@ -891,6 +878,11 @@ namespace Khkt.CoChe
 
         Vector3 Tim(int map) => viTri.TryGetValue("m" + map, out var p) ? p : Vector3.zero;
 
+        /// <summary>
+        /// Toạ độ mũi tên cong (20/11, làm lại): cong VUÔNG GÓC với hướng nhìn (luôn thấy rõ đường cong), ra phía ngoài phân tử;
+        /// đầu mũi tên nằm đúng trên MẶT CẦU nguyên tử đích ở phía đường cong tới; từ cặp e thì rời mặt cầu nguyên tử nguồn,
+        /// từ liên kết thì nhấc lên khỏi liên kết một chút; liên kết → nguyên tử: vồng lên rồi úp xuống nguyên tử.
+        /// </summary>
         bool DiemMuiTen(MuiTen mt, out Vector3 s, out Vector3 c, out Vector3 e)
         {
             s = c = e = Vector3.zero;
@@ -900,25 +892,24 @@ namespace Khkt.CoChe
             Vector3 tam = Vector3.zero;
             foreach (var p in viTri.Values) tam += p;
             tam /= Mathf.Max(1, viTri.Count);
-            if (mt.TuLoai == "lien_ket" && mt.Tu.Length >= 2) s = (Tim(mt.Tu[0]) + Tim(mt.Tu[1])) * 0.5f;
-            else
-            {
-                var p = Tim(mt.Tu[0]);
-                var huong = (p - tam).sqrMagnitude > 1e-4f ? (p - tam).normalized : Vector3.up;
-                s = p + huong * 0.45f;
-            }
-            if (mt.DenLoai == "lien_ket" && mt.Den.Length >= 2) e = (Tim(mt.Den[0]) + Tim(mt.Den[1])) * 0.5f;
-            else
-            {
-                var p = Tim(mt.Den[0]);
-                e = p + (s - p).normalized * 0.3f;
-            }
-            var giua = (s + e) * 0.5f;
-            var phap = Vector3.Cross(e - s, Vector3.forward);
-            if (phap.sqrMagnitude < 1e-6f) phap = Vector3.up;
-            phap = phap.normalized;
-            if (Vector3.Dot(phap, giua - tam) < 0f) phap = -phap;
-            c = giua + phap * Mathf.Max(0.6f, (e - s).magnitude * 0.45f);
+            bool sLk = mt.TuLoai == "lien_ket" && mt.Tu.Length >= 2, eLk = mt.DenLoai == "lien_ket" && mt.Den.Length >= 2;
+            Vector3 sGoc = sLk ? (Tim(mt.Tu[0]) + Tim(mt.Tu[1])) * 0.5f : Tim(mt.Tu[0]);
+            Vector3 eGoc = eLk ? (Tim(mt.Den[0]) + Tim(mt.Den[1])) * 0.5f : Tim(mt.Den[0]);
+            Vector3 d = eGoc - sGoc;
+            float L = d.magnitude;
+            Vector3 dn = L > 1e-3f ? d / L : Vector3.right;
+            Vector3 nhin = Quaternion.Inverse(Xoay) * Vector3.forward;              // hướng nhìn trong toạ độ mô hình
+            Vector3 phap = Vector3.Cross(dn, nhin);
+            if (phap.sqrMagnitude < 1e-4f) phap = Vector3.Cross(dn, Vector3.up);
+            if (phap.sqrMagnitude < 1e-4f) phap = Vector3.Cross(dn, Vector3.right);
+            phap.Normalize();
+            if (Vector3.Dot(phap, (sGoc + eGoc) * 0.5f - tam) < 0f) phap = -phap;   // cong ra phía ngoài phân tử
+            float h = Mathf.Max(0.55f, L * 0.4f);
+            c = (sGoc + eGoc) * 0.5f + phap * h * 2f;                               // điểm điều khiển Bézier (đỉnh cung ≈ h)
+            if (sLk) s = sGoc + phap * 0.22f;
+            else s = sGoc + (c - sGoc).normalized * (BanKinhVe("m" + mt.Tu[0]) + 0.1f);
+            if (eLk) e = eGoc + phap * 0.15f;
+            else e = eGoc + (c - eGoc).normalized * (BanKinhVe("m" + mt.Den[0]) + 0.06f);
             return true;
         }
 
