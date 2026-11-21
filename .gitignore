@@ -70,3 +70,9 @@ Phong thi nghiem ao/Assets/Scripts/Editor/KhktPlayVerify.*
 Phong thi nghiem ao/Assets/Scripts/Editor/HdTools/HdMaterialEnhancer.cs.meta
 
 .venv/
+
+# Nhân vật, chuyển động tải từ Mixamo (Adobe không cho phát tán file gốc): chỉ giữ ở máy, xem Assets/Lab/NguoiChoi/DOC_TRUOC.txt
+Phong thi nghiem ao/Assets/Lab/NguoiChoi/Resources/
+Phong thi nghiem ao/Assets/Lab/NguoiChoi/Resources.meta
+Phong thi nghiem ao/Assets/Lab/NguoiChoi/Textures/
+Phong thi nghiem ao/Assets/Lab/NguoiChoi/Textures.meta

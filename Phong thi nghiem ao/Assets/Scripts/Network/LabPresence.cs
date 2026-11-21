@@ -27,6 +27,8 @@ namespace Khkt.Network
             public Transform head, body, hand;
             public Transform label;
             public Text labelText;
+            /// <summary>Thân người 3D (null: chưa có file nhân vật, dùng hình khối).</summary>
+            public RemoteAvatar avatar;
             public Vector3 headPos, handPos;
             public float yaw, pitch;
             public Quaternion handRot = Quaternion.identity;
@@ -370,8 +372,9 @@ namespace Khkt.Network
         {
             float k = 1f - Mathf.Exp(-14f * Time.deltaTime);
             Transform camT = viewer != null ? viewer.cameraTransform : null;
-            foreach (var r in remotes.Values)
+            foreach (var kv in remotes)
             {
+                var r = kv.Value;
                 if (r.root == null) continue;
                 // dịch chuyển trạm thì nhảy luôn, không trôi xuyên tường
                 r.head.position = (r.head.position - r.headPos).sqrMagnitude > 9f ? r.headPos : Vector3.Lerp(r.head.position, r.headPos, k);
@@ -379,7 +382,12 @@ namespace Khkt.Network
                 r.hand.position = (r.hand.position - r.handPos).sqrMagnitude > 9f ? r.handPos : Vector3.Lerp(r.hand.position, r.handPos, k);
                 r.hand.rotation = Quaternion.Slerp(r.hand.rotation, r.handRot, k);
                 r.body.SetPositionAndRotation(r.head.position + Vector3.down * 0.72f, Quaternion.Euler(0, r.yaw, 0));
-                r.label.position = r.head.position + Vector3.up * 0.26f;
+                if (r.avatar != null)
+                {
+                    r.avatar.Drive(r.head.position, r.head.rotation, r.hand.position, r.hand.rotation, IsHolding(kv.Key));
+                    r.label.position = r.avatar.HeadTop + Vector3.up * 0.12f;
+                }
+                else r.label.position = r.head.position + Vector3.up * 0.26f;
                 if (camT != null) r.label.rotation = Quaternion.LookRotation(r.label.position - camT.position);
             }
         }
@@ -630,12 +638,23 @@ namespace Khkt.Network
                 handMat = Lit(new Color(0.27f, 0.56f, 0.93f));
             }
             var r = new Remote { root = new GameObject("Người cùng phòng " + id) };
-            r.body = Part(PrimitiveType.Capsule, r.root.transform, "Thân", new Vector3(0.36f, 0.56f, 0.24f), bodyMat);
-            r.head = Part(PrimitiveType.Sphere, r.root.transform, "Đầu", Vector3.one * 0.21f, bodyMat);
-            // Tấm che mặt cho biết người đó đang nhìn hướng nào
-            var visor = Part(PrimitiveType.Cube, r.head, "Mặt", new Vector3(0.75f, 0.28f, 0.2f), handMat);
-            visor.localPosition = new Vector3(0, 0.08f, 0.44f);
-            r.hand = Part(PrimitiveType.Sphere, r.root.transform, "Tay", new Vector3(0.09f, 0.04f, 0.13f), handMat);
+            r.avatar = RemoteAvatar.Create(r.root.transform, "Thân người");
+            if (r.avatar != null)
+            {
+                // có nhân vật 3D: đầu, tay, thân chỉ còn là điểm theo dõi không hiện, hình là nhân vật
+                r.body = Marker(r.root.transform, "Thân");
+                r.head = Marker(r.root.transform, "Đầu");
+                r.hand = Marker(r.root.transform, "Tay");
+            }
+            else
+            {
+                r.body = Part(PrimitiveType.Capsule, r.root.transform, "Thân", new Vector3(0.36f, 0.56f, 0.24f), bodyMat);
+                r.head = Part(PrimitiveType.Sphere, r.root.transform, "Đầu", Vector3.one * 0.21f, bodyMat);
+                // Tấm che mặt cho biết người đó đang nhìn hướng nào
+                var visor = Part(PrimitiveType.Cube, r.head, "Mặt", new Vector3(0.75f, 0.28f, 0.2f), handMat);
+                visor.localPosition = new Vector3(0, 0.08f, 0.44f);
+                r.hand = Part(PrimitiveType.Sphere, r.root.transform, "Tay", new Vector3(0.09f, 0.04f, 0.13f), handMat);
+            }
 
             var labelGo = new GameObject("Tên", typeof(Canvas));
             labelGo.transform.SetParent(r.root.transform, false);
@@ -667,6 +686,19 @@ namespace Khkt.Network
             m.SetColor("_BaseColor", c);
             m.SetFloat("_Smoothness", 0.35f);
             return m;
+        }
+
+        static Transform Marker(Transform parent, string name)
+        {
+            var t = new GameObject(name).transform;
+            t.SetParent(parent, false);
+            return t;
+        }
+
+        bool IsHolding(ulong who)
+        {
+            foreach (var kv in owners) if (kv.Value == who) return true;
+            return false;
         }
 
         static Transform Part(PrimitiveType type, Transform parent, string name, Vector3 scale, Material mat)
