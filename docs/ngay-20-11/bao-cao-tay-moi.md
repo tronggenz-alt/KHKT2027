@@ -224,3 +224,34 @@ Bộ kiểm thử bỏ qua riêng lỗi mạng của gói Editor *Unity AI Assis
 Kết quả cuối lượt (2): `KhktTayMoiVerify` **48/48**, `KhktN18Verify.RunG2` **16/16** (cổ tay áo lệch 1,86 mm), Wave6 63 đạt + bước 7.7 menu như cũ,
 xuất app Mac Succeeded (248,1 MB). Ở chế độ ngắm theo kịch bản (`OverrideAimPoint`, chỉ cho kiểm thử/tự động) tay tới thẳng chỗ ngắm,
 không đi đường cong, để số đo ổn định.
+
+## 9. Lượt 3 (21/11 tối): tay nghỉ kiểu game, vươn tay lấy đồ, tay áo blouse thật
+
+Phản hồi: "tay đi theo chuột nhìn rất robot; ống tay áo (nhất là khuỷu) xấu; cổ tay còn lỏng; bấm vào vật thì tay phải
+vươn ra lấy như game góc nhìn thứ ba (Genshin)". Tài liệu chung về tay góc nhìn thứ nhất (không có tài liệu chính thức của
+Valorant/Genshin): tay rảnh có **tư thế nghỉ cố định + thở nhẹ**; lấy đồ là **chuẩn bị → vươn → nắm → mang về**, tay chỉ bám
+vào vật mạnh dần đúng lúc nắm.
+
+### Hành vi mới (`ArmRig`, `HandController`)
+| Việc | Trước | Nay |
+|---|---|---|
+| Tay rảnh, di chuột | bàn tay đi theo điểm ngắm của chuột | **giữ tư thế nghỉ**: hai bàn tay cong ở hai bên phía dưới tầm nhìn (theo ~½ góc cúi đầu), thở ~0,23 Hz, lệch 4 mm; chuột không kéo tay |
+| Bấm lấy vật | vật bay vào tay | tay **vươn tới theo cung** (lò xo tới hạn, nhấc 4,5–7,5 cm giữa đường, cổ tay xoay về hướng cầm sớm), bàn tay **mở chữ C**, gần tới mới **khép ngón ôm vật** (IK); vật **đứng yên chờ** tới lúc nắm (~0,55 s với vật cách 55 cm) rồi được **nhấc lên và mang về** (0,42 s, cung 3,5 cm) |
+| Bấm nút / khóa / bản lề (tay rảnh) | tay đi theo chuột | tay đưa tới chạm rồi tự về (0,75 s) |
+| Đặt / trả vật | — | tay thu về tư thế nghỉ |
+| Đi bộ | — | như lượt 2 (buông, vung ngược pha) |
+
+- Cổ tay **chắc hơn**: độ trễ quán tính giảm (tối đa 16° → 9°), bật về nhanh hơn (ω 13 → 17).
+- Ngắm theo kịch bản (kiểm thử/tự động) giữ như cũ: tay tới thẳng chỗ ngắm, không diễn cảnh vươn tay.
+
+### Ống tay áo blouse làm lại (`TayNguoiLuoi.SleeveFold`, `ArmRig.ApplyArm`)
+- Bỏ các vòng nếp đều và sóng dọc (trông như ống bơm hơi). Mặt vải **gần như phẳng** khi duỗi, chỉ vài nếp rủ dài 0,5–1 mm.
+- **Khuỷu gập tròn**: xương khuỷu tay áo xoay **nửa góc** gập, vùng trộn trọng số rộng 10 cm → vải ôm vòng cung qua khuỷu, nửa ngoài không bị bóp dẹt
+  (khoảng cách vải–xương nhỏ nhất 47 mm ở 94°).
+- Khi gập: vải **dồn thành nếp chữ V** ở mặt trong khuỷu + hai nếp chéo "cánh bướm", **mặt ngoài căng phồng nhẹ** qua mỏm khuỷu.
+- Nếp xoắn khi lật cẳng tay mềm hơn (một nếp chéo dài); ống rộng hơn kiểu áo blouse (bắp tay 6,0 → khuỷu 5,25 → cổ tay áo 4,3 cm).
+
+### Kiểm thử thêm (`KhktTayMoiVerify` 51/51)
+Tay rảnh giữ tư thế nghỉ (lệch 4,1 mm / 2 s, không vươn) · bấm lấy vật: vật xê dịch 0,0 mm trước khi nắm, tay tới cách điểm cầm 17 mm,
+nắm sau 0,55 s, mang về khít (0 mm), bước tay ≤ 42 mm/khung 60 FPS · trả vật xong tay về nghỉ · khuỷu tay áo không bị bóp dẹt.
+Ảnh: `anh/tay-moi/sau_hv_0_vuon_tay_lay_*`, `sau_hv_1_tu_the_nghi_*`.

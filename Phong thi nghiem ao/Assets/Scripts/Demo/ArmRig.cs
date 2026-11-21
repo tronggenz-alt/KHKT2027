@@ -96,6 +96,12 @@ namespace Khkt.Demo
         public float PronationRawDeg(int side) => arms[side] != null ? arms[side].pronationRaw : 0f;
         public float WristDeviationDeg(int side) => arms[side] != null ? arms[side].wristDev : 0f;
         public SkinnedMeshRenderer SleeveRenderer(int side) => arms[side] != null ? arms[side].sleeve : null;
+        /// <summary>Vai, khuỷu, cổ tay (miệng tay áo) khung gần nhất.</summary>
+        public void JointPositions(int side, out Vector3 shoulder, out Vector3 elbow, out Vector3 wrist)
+        {
+            var a = arms[side];
+            shoulder = a != null ? a.shoulder : Vector3.zero; elbow = a != null ? a.elbow : Vector3.zero; wrist = a != null ? a.wrist : Vector3.zero;
+        }
         public HandRig LeftHand => arms[1] != null ? arms[1].leftRestHand : null;
         /// <summary>Độ lệch lắc/trễ hiện tại áp cho vai (thế giới, m).</summary>
         public Vector3 SwayOffset { get; private set; }
@@ -312,11 +318,12 @@ namespace Khkt.Demo
         // Hành vi theo hoàn cảnh (như người thật): với tới vật theo đường cong, rảnh thì thả tay xuống,
         // đi bộ thì buông tay và vung theo bước, tay phải rót/hút thì tay trái đỡ cốc.
         // ------------------------------------------------------------------
-        float relaxW, relaxVel, idleTimer, leftRelaxW, leftRelaxVel;
+        float relaxW, relaxVel, leftRelaxW, leftRelaxVel, engageW, engageVel;
+        bool engageReady;
         float poleBackWeight;
-        Vector3 lastCtrlPos, lastOutPos, reachPos, reachVel;
+        Vector3 lastCtrlPos, lastOutPos;
         Quaternion lastCtrlRot = Quaternion.identity, lastOutRot = Quaternion.identity;
-        bool ctrlReady, reachReady;
+        bool ctrlReady;
         float assistW, assistVel;
         Transform assistCached;
         Collider[] assistCols = System.Array.Empty<Collider>();
@@ -325,7 +332,9 @@ namespace Khkt.Demo
         Vector3 assistPoint;
         Quaternion assistRot = Quaternion.identity;
 
-        /// <summary>Mức thả lỏng tay phải (0 = đang với/thao tác, 1 = buông xuống).</summary>
+        /// <summary>Mức tay phải rời chỗ nghỉ để làm việc (0 = nghỉ, 1 = tới tay cầm/vật).</summary>
+        public float EngageWeight => engageW;
+        /// <summary>Mức thả lỏng tay phải khi đi bộ (0 = tư thế nghỉ trước người, 1 = buông xuống).</summary>
         public float RelaxWeight => relaxW;
         /// <summary>Mức tay trái đang đỡ cốc/bình (0..1).</summary>
         public float AssistWeight => assistW;
@@ -368,35 +377,41 @@ namespace Khkt.Demo
 
                 bool empty = hand.Held == null;
                 bool scripted = hand.OverrideAimPoint != null;
-                if ((reachReady && (ctrlPos - reachPos).sqrMagnitude > 0.004f * 0.004f) || hand.Current != HandController.Act.None) idleTimer = 0f;
-                else idleTimer += dt;
-                float relaxTarget = empty && !scripted && hand.Current == HandController.Act.None && (walking || idleTimer > 2.5f) ? 1f : 0f;
-                if (!empty || scripted) idleTimer = 0f;
-                Spring(ref relaxW, ref relaxVel, relaxTarget, relaxTarget > relaxW ? 4.5f : 10f, dt);
+                // Tay chỉ rời chỗ nghỉ khi có việc (cầm, thao tác, bấm vào vật); di chuột không kéo tay theo
+                bool engaged = hand.HandEngaged;
+                bool instant = scripted && !hand.Fetching;
+                if (instant || !engageReady) { engageW = engaged ? 1f : 0f; engageVel = 0f; engageReady = true; }
+                else Spring(ref engageW, ref engageVel, engaged ? 1f : 0f, engaged ? 9f : 7f, dt);
+                engageW = Mathf.Clamp01(engageW);
+
+                // Đi bộ (tay rảnh): buông xuống, vung theo bước
+                float relaxTarget = !engaged && walking ? 1f : 0f;
+                Spring(ref relaxW, ref relaxVel, relaxTarget, relaxTarget > relaxW ? 4.5f : 8f, dt);
                 relaxW = Mathf.Clamp01(relaxW);
-                if (!empty) { relaxW = 0f; relaxVel = 0f; }   // đang cầm vật: tay phải khớp đúng vật
 
-                // Với tới: lò xo bậc hai (vận tốc hình chuông như tay người) + nhấc nhẹ lên khi di chuyển nhanh (quỹ đạo cong)
-                // ngắm theo kịch bản (kiểm thử/tự động) thì tay tới thẳng chỗ ngắm
-                if (!empty || scripted || !reachReady || (ctrlPos - reachPos).sqrMagnitude > 1f) { reachPos = ctrlPos; reachVel = Vector3.zero; reachReady = true; }
-                else Spring(ref reachPos, ref reachVel, ctrlPos, 15f, dt);
-                Vector3 arc = Vector3.up * Mathf.Min(reachVel.magnitude * 0.03f, 0.03f);
-                Vector3 activePos = empty ? reachPos + arc : ctrlPos;
-
-                // Thả lỏng: tay buông trước hông, vung theo bước khi đi
-                Vector3 relaxPos = camPos + flat * new Vector3(0.23f, -0.83f + 0.015f * Mathf.Abs(swing), 0.05f + 0.13f * swing);
+                RestPose(0, flat, camPos, swing, out Vector3 restPos, out Quaternion restRot);
+                Vector3 hangPos = camPos + flat * new Vector3(0.23f, -0.83f + 0.015f * Mathf.Abs(swing), 0.05f + 0.13f * swing);
                 // tay buông: lòng bàn tay quay vào đùi, ngón cái hướng trước (cẳng tay trung tính)
-                Quaternion relaxRot = flat * Quaternion.Euler(78f - 14f * swing, -6f, -80f);
+                Quaternion hangRot = flat * Quaternion.Euler(78f - 14f * swing, -6f, -80f);
+                Vector3 idlePos = Vector3.Lerp(restPos, hangPos, relaxW) + HandSway(0);
+                Quaternion idleRot = Quaternion.Slerp(restRot, hangRot, relaxW);
 
-                Vector3 pos = Vector3.Lerp(activePos, relaxPos, relaxW);
-                Quaternion rot = Quaternion.Slerp(ctrlRot, relaxRot, relaxW);
-                if (empty && !scripted) pos += HandSway(0);
+                // Vươn tay theo cung: khuỷu nâng, bàn tay nhấc lên giữa đường; cổ tay xoay về hướng cầm sớm hơn
+                // lò xo tới hạn có đuôi dài: coi như tới nơi ở 92% để tay chạm vật dứt khoát
+                float w = Mathf.Clamp01(engageW / 0.92f);
+                hand.ReachProgress = engaged ? w : 0f;
+                float lift = Mathf.Sin(w * Mathf.PI) * (0.045f + 0.03f * Mathf.Clamp01((ctrlPos - idlePos).magnitude / 0.5f));
+                Vector3 pos = Vector3.Lerp(idlePos, ctrlPos, w) + Vector3.up * lift;
+                float wr = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(w / 0.7f));
+                Quaternion rot = Quaternion.Slerp(idleRot, ctrlRot, wr);
+                if (w < 0.35f && empty) rig.SetTargetPose(HandPoseId.Nghi);
+                if (scripted && empty) pos = ctrlPos;   // ngắm theo kịch bản (kiểm thử/tự động): tay tới thẳng chỗ ngắm
                 t.SetPositionAndRotation(pos, rot);
                 lastOutPos = t.position; lastOutRot = t.rotation;
                 handLocalOut0 = cameraTransform.InverseTransformPoint(t.position);
 
                 rig.Tick(dt);
-                poleBackWeight = relaxW;
+                poleBackWeight = relaxW * (1f - engageW);
                 PlaceConnectedArm(a, side, rig, dt);
                 SyncFingerTelemetryFromRig(a, rig);
                 return;
@@ -411,8 +426,8 @@ namespace Khkt.Demo
                 // Đứng: tay trái đặt gọn trước bàn; đi bộ: buông xuống, vung ngược pha tay phải
                 Spring(ref leftRelaxW, ref leftRelaxVel, walking ? 1f : 0f, 5f, dt);
                 leftRelaxW = Mathf.Clamp01(leftRelaxW);
-                Vector3 restPos = camPos + flat * new Vector3(-0.22f, -0.31f, 0.36f) + HandSway(1);
-                Quaternion restRot = flat * Quaternion.Euler(14f, 18f, -12f);
+                RestPose(1, flat, camPos, swing, out Vector3 restPos, out Quaternion restRot);
+                restPos += HandSway(1);
                 Vector3 hangPos = camPos + flat * new Vector3(-0.23f, -0.83f + 0.015f * Mathf.Abs(swing), 0.05f - 0.13f * swing);
                 Quaternion hangRot = flat * Quaternion.Euler(78f + 14f * swing, 6f, 80f);
                 Vector3 pos = Vector3.Lerp(restPos, hangPos, leftRelaxW);
@@ -441,6 +456,23 @@ namespace Khkt.Demo
                 poleBackWeight = leftRelaxW * (1f - assistW);
                 PlaceConnectedArm(a, side, rig, dt);
             }
+        }
+
+        /// <summary>
+        /// Tư thế nghỉ hai tay (kiểu tay góc nhìn thứ nhất của game): hai bàn tay cong tự nhiên ở hai bên phía dưới tầm nhìn,
+        /// đi theo một nửa góc cúi/ngửa của đầu (vẫn thấy tay khi nhìn thẳng), thở nhẹ (~0,23 Hz).
+        /// </summary>
+        void RestPose(int side, Quaternion flat, Vector3 camPos, float swing, out Vector3 pos, out Quaternion rot)
+        {
+            float pitch = Mathf.DeltaAngle(0f, cameraTransform.eulerAngles.x);
+            Quaternion frame = flat * Quaternion.Euler(Mathf.Clamp(pitch * 0.55f, -12f, 30f), 0f, 0f);
+            float sg = side == 0 ? 1f : -1f;
+            float tt = Time.time;
+            float breath = Mathf.Sin(tt * (Mathf.PI * 2f * 0.23f)) * 0.0045f;
+            float drift = Mathf.Sin(tt * 0.61f + side * 1.7f) * 0.0018f;
+            pos = camPos + frame * new Vector3(0.195f * sg + drift, -0.195f + breath, 0.42f + breath * 0.4f);
+            // cổ tay hơi nghiêng cho mép ngón cái nhô lên (dáng cầm nghỉ tự nhiên, thấy ngón cong)
+            rot = frame * Quaternion.Euler(18f + breath * 120f, -16f * sg, -26f * sg);
         }
 
         /// <summary>Điểm và hướng tay trái ôm bên trái vật chứa (lòng bàn tay quay vào thành cốc, ngón vòng ra trước).</summary>
@@ -713,7 +745,8 @@ namespace Khkt.Demo
             Quaternion foreRot = Quaternion.LookRotation(foreDir, innerF);
             var b = a.bones;
             b[TayNguoiLuoi.SleeveBoneUpper].SetPositionAndRotation(sh, upperRot);
-            b[TayNguoiLuoi.SleeveBoneElbow].SetPositionAndRotation(elbow, foreRot);
+            // xương khuỷu tay áo xoay nửa góc gập: vải ôm vòng cung qua khuỷu thay vì gãy gập
+            b[TayNguoiLuoi.SleeveBoneElbow].SetPositionAndRotation(elbow, Quaternion.Slerp(upperRot, foreRot, 0.5f));
             b[TayNguoiLuoi.SleeveBoneTwist1].SetPositionAndRotation(elbow + foreDir * (ForeLen * 0.36f), Quaternion.AngleAxis(twist * 0.36f, foreDir) * foreRot);
             b[TayNguoiLuoi.SleeveBoneTwist2].SetPositionAndRotation(elbow + foreDir * (ForeLen * 0.68f), Quaternion.AngleAxis(twist * 0.68f, foreDir) * foreRot);
             b[TayNguoiLuoi.SleeveBoneCuff].SetPositionAndRotation(w, Quaternion.AngleAxis(twist, foreDir) * foreRot);

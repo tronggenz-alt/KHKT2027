@@ -594,14 +594,15 @@ namespace Khkt.Demo
                 Vector3 vel = (pos - lastPos) / dt;
                 if (vel.sqrMagnitude > 9f) vel = Vector3.zero;          // dịch chuyển tức thời (đổi chỗ đứng)
                 Vector3 lv = transform.InverseTransformDirection(vel);
-                lagTarget = new Vector3(Mathf.Clamp(lv.y * 22f + lv.z * 5f, -16f, 16f),
-                                        Mathf.Clamp(-lv.x * 16f, -12f, 12f),
-                                        Mathf.Clamp(lv.x * 9f, -8f, 8f));
+                // cổ tay người chắc (cơ cẳng tay giữ): trễ nhỏ, bật về nhanh – không lắc lư như khớp lỏng
+                lagTarget = new Vector3(Mathf.Clamp(lv.y * 14f + lv.z * 3f, -9f, 9f),
+                                        Mathf.Clamp(-lv.x * 9f, -6f, 6f),
+                                        Mathf.Clamp(lv.x * 5f, -4f, 4f));
             }
             lastPos = pos;
             lastPosValid = true;
             if (dt <= 0f) return;
-            Spring(ref lagEuler, ref lagEulerVel, lagTarget, 13f, dt);
+            Spring(ref lagEuler, ref lagEulerVel, lagTarget, 17f, dt);
             Spring(ref contactFade, ref contactFadeVel, TargetContactObject == null && !drivingByLandmarks ? 1f : 0f, 10f, dt);
             float k = Mathf.Clamp01(contactFade);
             lagApplied = lagEuler * k;

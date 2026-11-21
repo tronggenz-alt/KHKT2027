@@ -83,6 +83,23 @@ namespace Khkt.Demo
         Quaternion bandRef = Quaternion.identity;
         bool bandRefSet;
         Quaternion handRotSmoothed = Quaternion.identity;
+
+        // Lấy đồ như người thật (kiểu game góc nhìn thứ ba): bấm vào vật → tay vươn tới (vật đứng yên chờ),
+        // ngón ôm lấy rồi mới mang vật về tư thế cầm. Logic cầm (Held) có ngay; chỉ phần hình là có quãng đường.
+        bool fetching, fetchGrabbed;
+        float fetchTime, fetchCarryT, tapUntil = -1f;
+        Vector3 fetchPos;
+        Quaternion fetchRot = Quaternion.identity;
+        /// <summary>Tay đang vươn tới vật vừa bấm lấy (vật chưa rời chỗ) hoặc đang mang vật về.</summary>
+        public bool Fetching => fetching;
+        /// <summary>Tay đã chạm và nắm vật (giai đoạn mang về).</summary>
+        public bool FetchGrabbed => fetchGrabbed;
+        /// <summary>Tiến độ vươn tay 0..1 (ArmRig ghi mỗi khung).</summary>
+        public float ReachProgress { get; set; } = 1f;
+        /// <summary>Kiểm thử: luôn diễn cảnh vươn tay lấy (kể cả khi ngắm theo kịch bản).</summary>
+        public bool ForceFetchAnimation { get; set; }
+        /// <summary>Tay phải cần rời chỗ nghỉ: đang cầm, đang thao tác, vừa bấm vào vật, hoặc ngắm theo kịch bản.</summary>
+        public bool HandEngaged => Held != null || Acting || Time.time < tapUntil || OverrideAimPoint.HasValue;
         bool handRotReady;
         public const float TurnPitchMax = 75f, TurnYawMax = 70f, TurnRollMin = -170f, TurnRollMax = 150f;
         /// <summary>Đang giữ V xoay vật bằng chuột (DesktopViewer tạm không xoay camera).</summary>
@@ -185,6 +202,9 @@ namespace Khkt.Demo
             bool released = !down && wasDown;
             wasDown = down;
             if (pressed) pressTime = Time.time;
+            // bấm vào nút/khóa/vật (tay rảnh): tay đưa tới chạm rồi về
+            if (pressed && Held == null && hasHit && Current != Act.None && Current != Act.Pick) tapUntil = Time.time + 0.75f;
+            if (down && Held == null && Current == Act.Stopcock) tapUntil = Time.time + 0.4f;
 
             if (uiOpen)
             {
@@ -789,6 +809,13 @@ namespace Khkt.Demo
             heldYaw = 0;
             heldTurn = heldTurnShown = Vector3.zero;
             bandRefSet = false;
+            // diễn cảnh vươn tay lấy (bỏ qua khi ngắm theo kịch bản – kiểm thử cần tay ở đúng chỗ ngay)
+            fetching = (ForceFetchAnimation || !OverrideAimPoint.HasValue) && hand != null && hand.isActiveAndEnabled;
+            fetchGrabbed = false;
+            fetchTime = fetchCarryT = 0f;
+            fetchPos = g.transform.position;
+            fetchRot = g.transform.rotation;
+            ReachProgress = 0f;
             // vật ở khu đang được gỡ (cầm hộ từ xa): đánh thức về khu người xem đang đứng
             if (!g.gameObject.activeInHierarchy && viewCamera != null) Khkt.Rendering.ZoneStreamer.Wake(g.transform, viewCamera.transform.position);
         }
@@ -1289,7 +1316,31 @@ namespace Khkt.Demo
             Vector3 gripTarget = free;
             Quaternion handFollow = Quaternion.identity;   // bàn tay xoay cùng vật (rót, lật, gập cổ tay)
 
-            if (Held != null)
+            if (Held == null) fetching = fetchGrabbed = false;
+            float fetchS = 1f;
+            if (Held != null && fetching)
+            {
+                fetchTime += dt;
+                if (!fetchGrabbed && (ReachProgress > 0.97f || fetchTime > 1.1f)) { fetchGrabbed = true; fetchCarryT = 0f; }
+                if (fetchGrabbed)
+                {
+                    fetchCarryT += dt;
+                    float u = Mathf.Clamp01(fetchCarryT / 0.42f);
+                    fetchS = u * u * u * (u * (u * 6f - 15f) + 10f);
+                    if (u >= 1f) fetching = false;
+                }
+                else fetchS = 0f;
+            }
+
+            if (Held != null && fetching && !fetchGrabbed)
+            {
+                // Vật nằm yên chỗ cũ, tay đang vươn tới điểm cầm trên vật
+                Held.transform.SetPositionAndRotation(fetchPos, fetchRot);
+                UpdateStream(Vector3.zero, Vector3.zero, false);
+                gripTarget = fetchPos + Vector3.up * Held.gripHeightM;
+                handPos = gripTarget;
+            }
+            else if (Held != null)
             {
                 Transform t = Held.transform;
                 // Cầm bình trên tay: nhãn hóa chất và vạch chia hướng trực diện về phía mắt người chơi, nghiêng nhẹ 7° để nhìn rõ dung dịch
@@ -1337,7 +1388,15 @@ namespace Khkt.Demo
                     Quaternion turn = HeldTurnRotation(cam);
                     objRot = turn * upright;
                     handFollow = turn;
-                    objPos = Vector3.Lerp(t.position, free - (turn * Vector3.up) * Held.gripHeightM, 1f - Mathf.Exp(-20f * dt));
+                    Vector3 carry = free - (turn * Vector3.up) * Held.gripHeightM;
+                    objPos = fetching ? carry : Vector3.Lerp(t.position, carry, 1f - Mathf.Exp(-20f * dt));
+                }
+                if (fetching)
+                {
+                    // mang vật từ chỗ cũ về tư thế cầm: nhấc lên trước rồi đưa về (cung nhẹ)
+                    objPos = Vector3.Lerp(fetchPos, objPos, fetchS) + Vector3.up * (Mathf.Sin(fetchS * Mathf.PI) * 0.035f);
+                    objRot = Quaternion.Slerp(fetchRot, objRot, fetchS);
+                    handFollow = Quaternion.Slerp(Quaternion.identity, handFollow, fetchS);
                 }
                 if (!(pouring && TargetContainer != null)) UpdateStream(Vector3.zero, Vector3.zero, false);
                 t.SetPositionAndRotation(objPos, objRot);
@@ -1353,10 +1412,14 @@ namespace Khkt.Demo
             if (hand != null)
             {
                 hand.curl = Held != null ? 1f : Current == Act.Pick || Current == Act.Swirl ? 0.3f : 0f;
+                bool reachingOut = Held != null && fetching && !fetchGrabbed;
                 hand.TargetContactObject = Held != null
-                    ? Held.transform
+                    ? (reachingOut && ReachProgress < 0.85f ? null : Held.transform)
                     : (Current == Act.Stopcock && stopcock != null ? stopcock.transform : null);
-                hand.SetTargetPose(Khkt.Avatar.HandPoseTable.ClassifyToolPose(Held, Current, Current == Act.Pick || Current == Act.Swirl));
+                // đang vươn tới: bàn tay mở hình chữ C đón vật, gần tới mới khép ngón ôm vật
+                hand.SetTargetPose(reachingOut && ReachProgress < 0.78f
+                    ? Khkt.Avatar.HandPoseId.MoCam
+                    : Khkt.Avatar.HandPoseTable.ClassifyToolPose(Held, Current, Current == Act.Pick || Current == Act.Swirl));
                 // Tay rảnh: bàn tay hướng theo tầm với (từ vai tới tay) như cổ tay người; tay cầm vật: xoay cùng vật
                 Quaternion target;
                 if (Held == null)

@@ -407,8 +407,8 @@ namespace Khkt.EditorTools
             if (flask == null) { Check(false, "Tìm thấy bình nón để thử xoay"); yield break; }
             viewer.SetPose(basePos, baseYaw, 18f);
             if (hand.Held != null) hand.ReturnHome();
+            hand.OverrideAimPoint = Aim(cam, 0.44f, -0.08f, 0.05f);   // ngắm trước khi cầm: bỏ cảnh vươn tay
             hand.Pick(flask);
-            hand.OverrideAimPoint = Aim(cam, 0.44f, -0.08f, 0.05f);
             hand.OverrideHeldTurn = Vector3.zero;
             yield return WaitSeconds(0.7f);
             HandRig rig = hand.hand;
@@ -505,17 +505,114 @@ namespace Khkt.EditorTools
             HandRig rig = hand.hand;
             try
             {
-                // (a) Rảnh > 2,5 s: tay buông xuống thả lỏng
+                // (a) Tay rảnh: giữ tư thế nghỉ cong hai bên, di chuột / đổi chỗ ngắm không kéo tay theo
                 if (hand.Held != null) hand.ReturnHome();
                 hand.OverrideAimPoint = null;
                 viewer.SetPose(basePos, baseYaw, -8f);
-                yield return WaitSeconds(4.0f);
-                float relax = arm.RelaxWeight;
-                float drop = cam.transform.position.y - rig.transform.position.y;
-                Check(relax > 0.8f || hand.Current != HandController.Act.None, "Không thao tác > 2,5 s: tay phải buông xuống thả lỏng",
-                    $"mức thả lỏng={relax:0.00}, tay thấp hơn mắt {drop * 100f:0} cm, thao tác hiện tại={hand.Current}");
-                ShotOutside(cam, sc, rt, tex, System.IO.Path.Combine(outDir, "sau_hv_1_tha_long_goc_ngoai.png"));
-                RenderToFile(cam, rt, tex, System.IO.Path.Combine(outDir, "sau_hv_1_tha_long_goc_nguoi_choi.png"));
+                yield return WaitSeconds(1.5f);
+                Vector3 r0 = arm.HandLocalOut(0);
+                float restMove = 0f, engMax = 0f;
+                float tA = Time.realtimeSinceStartup;
+                while (Time.realtimeSinceStartup - tA < 2.0f)
+                {
+                    yield return null;
+                    restMove = Mathf.Max(restMove, (arm.HandLocalOut(0) - r0).magnitude);
+                    engMax = Mathf.Max(engMax, arm.EngageWeight);
+                }
+                Vector3 rl = arm.HandLocalOut(0);
+                Check(restMove < 0.015f && engMax < 0.05f && rl.x > 0.08f && rl.y < -0.10f && rl.z > 0.25f,
+                    "Tay rảnh giữ tư thế nghỉ bên phải phía dưới tầm nhìn, chỉ thở nhẹ – không bám theo chuột",
+                    $"dao động {restMove * 1000f:0.0} mm trong 2 s, mức vươn tối đa {engMax:0.00}, vị trí (hệ mắt) {rl.x:0.00}/{rl.y:0.00}/{rl.z:0.00} m");
+                ShotOutside(cam, sc, rt, tex, System.IO.Path.Combine(outDir, "sau_hv_1_tu_the_nghi_goc_ngoai.png"));
+                RenderToFile(cam, rt, tex, System.IO.Path.Combine(outDir, "sau_hv_1_tu_the_nghi_goc_nguoi_choi.png"));
+
+                // (a2) Bấm lấy vật: tay vươn tới theo cung (vật đứng yên chờ), ngón ôm lấy rồi mới mang về
+                {
+                    viewer.SetPose(basePos, baseYaw, 30f);
+                    yield return WaitSeconds(0.6f);
+                    Grabbable fg = NearestGrabbable("coc", cam.transform.position) ?? NearestGrabbable("binh", cam.transform.position);
+                    if (fg != null && (fg.transform.position - cam.transform.position).magnitude < 1.2f)
+                    {
+                        Vector3 objStart = fg.transform.position;
+                        Vector3 gripPt = objStart + Vector3.up * fg.gripHeightM;
+                        float startDist = rig.Grip != null ? Vector3.Distance(rig.Grip.position, gripPt) : 9f;
+                        hand.ForceFetchAnimation = true;
+                        hand.Pick(fg);
+                        float objMoveBefore = 0f, minHandDist = 9f, liftMax = 0f, tGrab = -1f;
+                        bool pathOk = true;
+                        Vector3 prevGrip = rig.Grip != null ? rig.Grip.position : Vector3.zero;
+                        float maxStep = 0f;
+                        float tF = Time.realtimeSinceStartup;
+                        bool shotReach = false, skipStep = true;
+                        while (Time.realtimeSinceStartup - tF < 2.0f)
+                        {
+                            yield return null;
+                            if (hand.Held != fg) { pathOk = false; break; }
+                            Vector3 gp = rig.Grip != null ? rig.Grip.position : Vector3.zero;
+                            // bước tay mỗi khung quy về 60 FPS (Editor có khung chậm khi chụp ảnh)
+                            float fdt = Mathf.Max(Time.unscaledDeltaTime, 1f / 240f);
+                            if (!skipStep) maxStep = Mathf.Max(maxStep, (gp - prevGrip).magnitude * (1f / 60f) / fdt);
+                            skipStep = false;
+                            prevGrip = gp;
+                            if (!hand.FetchGrabbed && hand.Fetching)
+                            {
+                                objMoveBefore = Mathf.Max(objMoveBefore, (fg.transform.position - objStart).magnitude);
+                                minHandDist = Mathf.Min(minHandDist, Vector3.Distance(gp, gripPt));
+                                if (!shotReach && arm.EngageWeight > 0.5f)
+                                {
+                                    shotReach = true;
+                                    RenderToFile(cam, rt, tex, System.IO.Path.Combine(outDir, "sau_hv_0_vuon_tay_lay_goc_nguoi_choi.png"));
+                                    ShotOutside(cam, sc, rt, tex, System.IO.Path.Combine(outDir, "sau_hv_0_vuon_tay_lay_goc_ngoai.png"));
+                                    skipStep = true;
+                                }
+                            }
+                            else if (tGrab < 0f) tGrab = Time.realtimeSinceStartup - tF;
+                            if (hand.Fetching) liftMax = Mathf.Max(liftMax, fg.transform.position.y - objStart.y);
+                            if (!hand.Fetching && tGrab > 0f && Time.realtimeSinceStartup - tF > tGrab + 0.6f) break;
+                        }
+                        hand.ForceFetchAnimation = false;
+                        float carryGap = rig.Grip != null && hand.Held != null ? Vector3.Distance(rig.Grip.position, hand.Held.transform.position + hand.Held.transform.up * hand.Held.gripHeightM) : 9f;
+                        Check(pathOk && objMoveBefore < 0.001f && minHandDist < 0.03f && tGrab > 0.2f && tGrab < 1.15f && !hand.Fetching && carryGap < 0.02f && maxStep < 0.06f,
+                            "Bấm lấy vật: tay vươn tới vật (vật đứng yên chờ), nắm rồi mang về – không hút vật vào tay",
+                            $"cách vật lúc đầu {startDist * 100f:0} cm, tay tới gần nhất {minHandDist * 1000f:0} mm, nắm sau {tGrab:0.00} s, vật xê dịch trước khi nắm {objMoveBefore * 1000f:0.0} mm, " +
+                            $"nhấc cao {liftMax * 1000f:0} mm, bước tay lớn nhất/khung {maxStep * 1000f:0} mm, tay–vật khi cầm {carryGap * 1000f:0} mm");
+                        hand.ReturnHome();
+                        yield return WaitSeconds(1.2f);
+                        Check(arm.EngageWeight < 0.1f, "Đặt/trả vật xong tay thu về tư thế nghỉ", $"mức vươn {arm.EngageWeight:0.00}");
+                    }
+                    else Check(false, "Tìm thấy cốc/bình gần để thử vươn tay lấy");
+                }
+
+                // (a3) Tay áo gập tròn ở khuỷu: vải không bị bóp dẹt vào trục khuỷu
+                {
+                    var sm = arm.SleeveRenderer(0);
+                    arm.JointPositions(0, out Vector3 jS, out Vector3 jE, out Vector3 jW);
+                    float flexNow = arm.ElbowFlexDeg(0);
+                    if (sm != null && sm.sharedMesh != null)
+                    {
+                        var baked = new Mesh();
+                        sm.BakeMesh(baked, true);
+                        var bv = baked.vertices;
+                        var bind = new List<Vector3>();
+                        sm.sharedMesh.GetUVs(1, bind);
+                        float minR = 9f;
+                        float l1 = ArmRig.UpperLen;
+                        Matrix4x4 l2w = sm.transform.localToWorldMatrix;
+                        for (int i = 0; i < bv.Length && i < bind.Count; i++)
+                        {
+                            if (Mathf.Abs(bind[i].z - l1) > 0.03f) continue;
+                            if (new Vector2(bind[i].x, bind[i].y).magnitude < 0.03f) continue;   // mặt trong miệng tay áo
+                            // mặt trong khuỷu (y > 0) vải dồn, chồng vào nhau là đúng; đo nửa ngoài + hai bên (chỗ ống hay bị bóp dẹt)
+                            if (bind[i].y > 0.012f) continue;
+                            Vector3 wp = l2w.MultiplyPoint3x4(bv[i]);
+                            float dd = Mathf.Min(SegDistT(wp, jS, jE), SegDistT(wp, jE, jW));
+                            minR = Mathf.Min(minR, dd);
+                        }
+                        UnityEngine.Object.DestroyImmediate(baked);
+                        Check(minR > 0.040f, "Khuỷu tay áo gập tròn, vải không bị bóp dẹt vào khớp (nửa ngoài + hai bên)",
+                            $"gập khuỷu {flexNow:0}°, khoảng cách nhỏ nhất vải–xương quanh khuỷu {minR * 1000f:0} mm");
+                    }
+                }
 
                 // (b) Đi bộ: hai tay buông và vung ngược pha theo bước, vải trễ theo quán tính
                 viewer.enabled = false;
@@ -613,6 +710,13 @@ namespace Khkt.EditorTools
             sc.transform.position = c + cam.transform.right * 0.65f + Vector3.up * 0.15f + cam.transform.forward * 0.45f;
             sc.transform.LookAt(c + cam.transform.forward * 0.15f - Vector3.up * 0.35f, Vector3.up);
             RenderToFile(sc, rt, tex, path);
+        }
+
+        static float SegDistT(Vector3 p, Vector3 a, Vector3 b)
+        {
+            Vector3 ab = b - a;
+            float t = ab.sqrMagnitude > 1e-10f ? Mathf.Clamp01(Vector3.Dot(p - a, ab) / ab.sqrMagnitude) : 0f;
+            return Vector3.Distance(p, a + ab * t);
         }
 
         static Grabbable NearestGrabbable(string kind, Vector3 from)

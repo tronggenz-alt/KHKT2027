@@ -1196,7 +1196,7 @@ namespace Khkt.Avatar
                     Vector3 pf = new Vector3(Mathf.Cos(th) * (rad + foldFlex) * ex, Mathf.Sin(th) * (rad + foldFlex) * ey, row.z);
                     // nếp xoắn chéo trên cẳng tay khi lật (sấp/ngửa)
                     float twistMask = full && row.kind == 0 ? SS(l1 + 0.03f, l1 + 0.08f, row.z) * (1f - SS(zCuff - 0.03f, zCuff, row.z)) : 0f;
-                    float tw = twistMask * 0.0032f * Mathf.Sin(th * 2f + row.z * 48f) + twistMask * 0.0012f * Mathf.Sin(th * 5f + row.z * 95f);
+                    float tw = twistMask * 0.0017f * Mathf.Sin(th * 2f + row.z * 34f) + twistMask * 0.0005f * Mathf.Sin(th * 3f + row.z * 52f);
                     Vector3 ptw = new Vector3(Mathf.Cos(th) * (rad + tw) * ex, Mathf.Sin(th) * (rad + tw) * ey, row.z);
                     int idx = r * seg + s;
                     pos[idx] = p;
@@ -1280,64 +1280,75 @@ namespace Khkt.Avatar
             float zEnd = l1 + l2, zCuff = zEnd - CuffBandLen;
             float r;
             if (full && z < 0f) r = 0.061f;
-            else if (full && z < l1) r = Mathf.Lerp(0.060f, 0.0505f, SS(0f, l1, z));
+            else if (full && z < l1) r = Mathf.Lerp(0.060f, 0.0525f, SS(0f, l1, z));
             else
             {
                 float fz = full ? (z - l1) / Mathf.Max(0.01f, zCuff - l1) : 1f - (zCuff - z) / Mathf.Max(0.01f, zCuff - (zEnd - l2));
-                r = Mathf.Lerp(0.0500f, 0.0418f, SS(0f, 1f, fz));
+                r = Mathf.Lerp(0.0522f, 0.0440f, SS(0f, 1f, fz));
             }
             if (z > zCuff - 0.006f)
             {
                 // dải cổ tay áo: dày hơn một chút, rãnh may ở chỗ nối
                 float band = SS(zCuff - 0.006f, zCuff + 0.002f, z);
-                r = Mathf.Lerp(r, 0.0412f, band) + 0.0010f * band;
+                r = Mathf.Lerp(r, 0.0428f, band) + 0.0010f * band;
                 r -= 0.0009f * Mathf.Exp(-Mathf.Pow((z - zCuff) / 0.0012f, 2f));
             }
             return r;
         }
 
+        /// <summary>
+        /// Nếp vải tay áo blouse: mặt vải gần như phẳng khi duỗi tay (chỉ vài nếp rủ dài, mềm); khi gập khuỷu (blendshape)
+        /// vải dồn thành 4–5 nếp hình chữ V ở mặt trong khuỷu, mặt ngoài căng phồng nhẹ ở mỏm khuỷu – như áo thật.
+        /// </summary>
         static float SleeveFold(float th, float z, float l1, float l2, bool full, float zCuff, out float flexExtra, out float seam)
         {
             float d = 0f;
             flexExtra = 0f;
             float cuffMask = 1f - SS(zCuff - 0.012f, zCuff - 0.002f, z);
-            // mặt trong khuỷu là +y (θ = 90°)
-            float inner = 0.5f + 0.5f * Mathf.Cos(th - Mathf.PI * 0.5f);
+            // mặt trong khuỷu là +y (θ = 90°); góc lệch khỏi mặt trong (0..π)
+            float angIn = Mathf.Abs(Mathf.DeltaAngle(th * Mathf.Rad2Deg, 90f)) * Mathf.Deg2Rad;
+            float inner = 0.5f + 0.5f * Mathf.Cos(angIn);
+            float outer = 1f - inner;
             if (full)
             {
-                float me = Mathf.Exp(-Mathf.Pow((z - l1) / 0.055f, 2f));
-                float ring = Mathf.Sin(z * (Mathf.PI * 2f / 0.027f) + 1.3f * Mathf.Sin(th * 2f + 0.4f) + 0.8f * Mathf.Sin(th * 3.1f));
-                d += me * (0.35f + 0.65f * inner) * 0.0042f * ring;
-                flexExtra = me * (0.25f + 0.75f * inner) * (0.0050f * ring - 0.0016f * inner);
-                // nếp nhăn mảnh dày đặc ở mặt trong khuỷu (vải bị dồn)
-                float fine = Mathf.Sin(z * (Mathf.PI * 2f / 0.0095f) + 2.0f * Mathf.Sin(th * 3.3f));
-                float mi = Mathf.Exp(-Mathf.Pow((z - l1) / 0.035f, 2f)) * inner * inner;
-                d += mi * 0.0011f * fine;
-                flexExtra += mi * 0.0016f * fine;
-                // nếp rủ dọc bắp tay & cẳng tay
-                d += 0.0022f * Mathf.Sin(th * 3f + z * 9f + 0.8f) * (1f - me) * cuffMask;
-                d += 0.0013f * Mathf.Sin(th * 5f - z * 14f + 2.1f) * cuffMask;
+                float me = Mathf.Exp(-Mathf.Pow((z - l1) / 0.060f, 2f));
+                // duỗi: hai nếp mềm ở mặt trong khuỷu (vải thừa)
+                float soft = Mathf.Sin((z - l1) * (Mathf.PI * 2f / 0.040f) + angIn * 1.2f);
+                d += me * inner * inner * 0.0011f * soft;
+                // gập: nếp chữ V dồn ở mặt trong – đỉnh chữ V hướng về giữa khuỷu, sâu dần về phía nếp gập
+                float chevron = Mathf.Sin((z - l1) * (Mathf.PI * 2f / 0.024f) - angIn * 2.1f);
+                float mIn = Mathf.Exp(-Mathf.Pow((z - l1) / 0.050f, 2f)) * SS(0.15f, 0.85f, inner);
+                flexExtra += mIn * (0.0042f * chevron + 0.0030f);          // vải dồn phồng ra + gợn nếp
+                // hai nếp chéo chạy từ khuỷu ra hai bên (nếp “cánh bướm”)
+                float diag = Mathf.Sin((z - l1) * 55f + (th - Mathf.PI * 0.5f) * 2.4f);
+                flexExtra += Mathf.Exp(-Mathf.Pow((z - l1) / 0.075f, 2f)) * inner * outer * 4f * 0.0016f * diag;
+                // mặt ngoài: căng qua mỏm khuỷu, phồng nhẹ, không nếp
+                flexExtra += Mathf.Exp(-Mathf.Pow((z - l1) / 0.035f, 2f)) * outer * outer * 0.0030f;
+                // nếp rủ dài, mềm dọc bắp tay & cẳng tay (biên độ nhỏ, tần số thấp)
+                d += 0.0010f * Mathf.Sin(th * 2f + z * 5f + 0.8f) * (1f - me) * cuffMask;
+                d += 0.0005f * Mathf.Sin(th * 3f - z * 9f + 2.1f) * cuffMask;
             }
             else
             {
-                d += 0.0016f * Mathf.Sin(th * 3f + z * 31f + 0.8f) * cuffMask;
+                d += 0.0008f * Mathf.Sin(th * 2f + z * 20f + 0.8f) * cuffMask;
             }
-            // nếp dúm ngay trên cổ tay áo
-            float mc = Mathf.Exp(-Mathf.Pow((z - (zCuff - 0.012f)) / 0.020f, 2f));
-            d += mc * 0.0024f * Mathf.Sin(th * 7f + 0.5f + z * 40f) * cuffMask;
-            // gợn vải ngẫu nhiên nhẹ
-            d += 0.0007f * (Mathf.PerlinNoise(th * 1.7f + 3.1f, z * 26f) - 0.5f) * cuffMask;
+            // vải hơi dồn ngay trên cổ tay áo (3 nếp nông)
+            float mc = Mathf.Exp(-Mathf.Pow((z - (zCuff - 0.014f)) / 0.016f, 2f));
+            d += mc * 0.0011f * Mathf.Sin(th * 3f + 0.5f + z * 30f) * cuffMask;
+            // thớ vải: gợn rất nhẹ
+            d += 0.0003f * (Mathf.PerlinNoise(th * 1.7f + 3.1f, z * 20f) - 0.5f) * cuffMask;
             // đường may dọc mặt dưới (θ = -90°)
             float ang = Mathf.DeltaAngle(th * Mathf.Rad2Deg, -90f) * Mathf.Deg2Rad;
             seam = Mathf.Exp(-(ang * ang) / (0.035f * 0.035f)) * cuffMask;
-            d -= 0.0006f * seam;
+            d -= 0.0005f * seam;
             return d;
         }
 
         static BoneWeight SleeveWeights(float z, float l1, float l2)
         {
             Span<float> w = stackalloc float[SleeveBoneCount];
-            float wu = 1f - SS(l1 - 0.045f, l1 + 0.045f, z);
+            // khuỷu tay áo gập tròn: xương khuỷu xoay nửa góc, vùng trộn rộng (vải không gập gãy như ống)
+            float wu = 1f - SS(l1 - 0.070f, l1 + 0.030f, z);
             w[SleeveBoneUpper] = wu;
             float rest = 1f - wu;
             float zf = Mathf.Max(z, l1);
