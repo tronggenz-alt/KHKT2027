@@ -181,7 +181,7 @@ namespace Khkt.Environment
                 bool locked = lookEnabled && !ui && !kb.leftAltKey.isPressed && Application.isFocused;
                 if (locked != MouseLook || (locked && Cursor.lockState != CursorLockMode.Locked && !Application.isBatchMode)) ApplyCursor(locked);
 
-                if (locked || (!ui && mouse.rightButton.isPressed))
+                if ((locked || (!ui && mouse.rightButton.isPressed)) && !Khkt.Demo.HandController.RotatingHeld)
                 {
                     Vector2 d = mouse.delta.ReadValue() * lookSensitivity;
                     yaw += d.x;

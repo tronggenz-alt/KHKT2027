@@ -306,6 +306,34 @@ namespace Khkt.EditorTools
                     yield return WaitFrames(10);
                 }
 
+                // ---------------- 11. Xoay vật trong tay như tay người ----------------
+                yield return CoTurnTests(viewer, hand, arm, cam, basePos, baseYaw);
+
+                // ---------------- 12. Chuẩn bị nắm + quán tính cổ tay ----------------
+                {
+                    HandPoseData from = HandPoseTable.Get(HandPoseId.Xoe), to = HandPoseTable.Get(HandPoseId.ChumCam);
+                    float minIdx = 999f, minOpp = 999f;
+                    for (float e = 0f; e <= HandPoseTable.TransitionDurationS + 1e-4f; e += 0.004f)
+                    {
+                        var d = HandRig.BlendStaggered(from, to, e);
+                        minIdx = Mathf.Min(minIdx, d.index.mcpFlex);
+                        minOpp = Mathf.Min(minOpp, d.thumb.cmcOppose);
+                    }
+                    var end = HandRig.BlendStaggered(from, to, HandPoseTable.TransitionDurationS);
+                    Check(minIdx < from.index.mcpFlex - 5f && minOpp < from.thumb.cmcOppose - 5f && Mathf.Abs(end.index.mcpFlex - to.index.mcpFlex) < 0.01f,
+                        "Chuẩn bị nắm: ngón duỗi/xòe và ngón cái dạng ra trước rồi mới khép (vẫn đúng 0,15 s)",
+                        $"MCP trỏ thấp nhất {minIdx:0.0}° (đầu {from.index.mcpFlex:0}°, cuối {to.index.mcpFlex:0}°), CMC cái thấp nhất {minOpp:0.0}°");
+
+                    HandRig L = NewTestRig("TAY_TestLag", tempObjects);
+                    L.SetTargetPose(HandPoseId.Nghi, true);
+                    float lagMax = 0f;
+                    for (int i = 0; i < 15; i++) { L.transform.position += Vector3.up * (1.0f / 60f); L.StepPoseAndContact(1f / 60f); lagMax = Mathf.Max(lagMax, L.WristLagDeg.magnitude); }
+                    for (int i = 0; i < 60; i++) L.StepPoseAndContact(1f / 60f);
+                    float lagRest = L.WristLagDeg.magnitude;
+                    Check(lagMax > 5f && lagRest < 0.5f, "Cổ tay trễ theo quán tính khi tay di chuyển nhanh rồi bật về",
+                        $"tay đi lên 1 m/s: cổ tay lệch tối đa {lagMax:0.0}°, sau 1 s còn {lagRest:0.00}°");
+                }
+
                 // ---------------- 10. Không cấp phát + chi phí CPU mỗi khung ----------------
                 {
                     var flask = FindGrabbable("binh_non");
@@ -342,6 +370,95 @@ namespace Khkt.EditorTools
 
             Application.logMessageReceived -= OnUnityLog;
             FinishVerify(true);
+        }
+
+        static IEnumerator CoTurnTests(DesktopViewer viewer, HandController hand, ArmRig arm, Camera cam, Vector3 basePos, float baseYaw)
+        {
+            var flask = FindGrabbable("binh_non");
+            if (flask == null) { Check(false, "Tìm thấy bình nón để thử xoay"); yield break; }
+            viewer.SetPose(basePos, baseYaw, 18f);
+            if (hand.Held != null) hand.ReturnHome();
+            hand.Pick(flask);
+            hand.OverrideAimPoint = Aim(cam, 0.44f, -0.08f, 0.05f);
+            hand.OverrideHeldTurn = Vector3.zero;
+            yield return WaitSeconds(0.7f);
+            HandRig rig = hand.hand;
+            Quaternion obj0 = flask.transform.rotation, hand0 = rig.transform.rotation;
+            float neutralElbowLat = Vector3.Dot(arm.RightElbow - arm.RightShoulder, cam.transform.right);
+            Vector3[] turns =
+            {
+                new Vector3(0f, 0f, -80f), new Vector3(0f, 0f, 80f), new Vector3(0f, 0f, -150f), new Vector3(0f, 0f, 130f),
+                new Vector3(55f, 0f, 0f), new Vector3(-45f, 0f, 0f), new Vector3(0f, 50f, 0f), new Vector3(30f, -30f, -60f)
+            };
+            string[] names = { "lat_trai_80", "lat_phai_80", "lat_trai_150", "lat_phai_130", "gap_co_tay_55", "duoi_co_tay_45", "lech_50", "ket_hop" };
+            string outDir = ShotDir();
+            var sideGo = new GameObject("TAY_SideCam2");
+            var sideCam = sideGo.AddComponent<Camera>();
+            sideCam.enabled = false; sideCam.fieldOfView = 40f; sideCam.nearClipPlane = 0.01f; sideCam.cullingMask = cam.cullingMask;
+            var rt = new RenderTexture(ShotW, ShotH, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4 };
+            var tex = new Texture2D(ShotW, ShotH, TextureFormat.RGB24, false);
+            float worstObj = 0f, worstHand = 0f, worstGap = 0f, maxElbowShift = 0f, rawMin = 999f, rawMax = -999f;
+            int pen = 0;
+            float errMax = 0f;
+            try
+            {
+                for (int i = 0; i < turns.Length; i++)
+                {
+                    Vector3 t = turns[i];
+                    hand.OverrideHeldTurn = t;
+                    yield return WaitSeconds(0.7f);
+                    yield return WaitFrames(3);
+                    Vector3 fwd = new Vector3(cam.transform.forward.x, 0f, cam.transform.forward.z).normalized;
+                    Vector3 right = Vector3.Cross(Vector3.up, fwd).normalized;
+                    Quaternion exp = Quaternion.AngleAxis(t.y, Vector3.up) * Quaternion.AngleAxis(t.x, right) * Quaternion.AngleAxis(-t.z, fwd);
+                    float eo = Quaternion.Angle(flask.transform.rotation * Quaternion.Inverse(obj0), exp);
+                    float eh = Quaternion.Angle(rig.transform.rotation * Quaternion.Inverse(hand0), exp);
+                    float gap = CuffGapMm(arm, rig);
+                    float lat = Vector3.Dot(arm.RightElbow - arm.RightShoulder, cam.transform.right);
+                    worstObj = Mathf.Max(worstObj, eo); worstHand = Mathf.Max(worstHand, eh); worstGap = Mathf.Max(worstGap, gap);
+                    maxElbowShift = Mathf.Max(maxElbowShift, Mathf.Abs(lat - neutralElbowLat));
+                    float raw = arm.PronationRawDeg(0);
+                    rawMin = Mathf.Min(rawMin, raw); rawMax = Mathf.Max(rawMax, raw);
+                    pen += rig.LastPenetrationCount; errMax = Mathf.Max(errMax, rig.LastMaxSurfaceErrorMm);
+                    Debug.Log($"[TAY_XOAY] {names[i]}: vật lệch {eo:0.0}°, tay lệch {eh:0.0}°, hở {gap:0.00} mm, khuỷu {arm.ElbowFlexDeg(0):0}°, cổ tay gập {arm.WristDeviationDeg(0):0}°, " +
+                              $"sấp thật {raw:0}°, khuỷu dang {(lat - neutralElbowLat) * 100f:0.0} cm, IK pen={rig.LastPenetrationCount} err={rig.LastMaxSurfaceErrorMm:0.0} mm");
+                    if (i == 0 || i == 1 || i == 3 || i == 4 || i == 7)
+                    {
+                        RenderToFile(cam, rt, tex, System.IO.Path.Combine(outDir, $"sau_xoay_{names[i]}_goc_nguoi_choi.png"));
+                        Vector3 pivot = rig.transform.position;
+                        sideCam.transform.position = pivot + cam.transform.right * 0.26f + cam.transform.forward * 0.08f + Vector3.up * 0.10f;
+                        sideCam.transform.LookAt(pivot - cam.transform.forward * 0.04f, Vector3.up);
+                        RenderToFile(sideCam, rt, tex, System.IO.Path.Combine(outDir, $"sau_xoay_{names[i]}_goc_nghieng.png"));
+                        Vector3 c = cam.transform.position;
+                        sideCam.fieldOfView = 55f;
+                        sideCam.transform.position = c + cam.transform.right * 0.60f + Vector3.up * 0.22f + cam.transform.forward * 0.30f;
+                        sideCam.transform.LookAt(c + cam.transform.forward * 0.30f - Vector3.up * 0.25f, Vector3.up);
+                        RenderToFile(sideCam, rt, tex, System.IO.Path.Combine(outDir, $"sau_xoay_{names[i]}_goc_ngoai.png"));
+                        sideCam.fieldOfView = 40f;
+                    }
+                }
+            }
+            finally
+            {
+                hand.OverrideHeldTurn = null;
+                hand.OverrideAimPoint = null;
+                if (hand.Held != null) hand.ReturnHome();
+                rt.Release();
+                UnityEngine.Object.Destroy(rt); UnityEngine.Object.Destroy(tex); UnityEngine.Object.Destroy(sideGo);
+            }
+            Check(worstObj < 2.5f && worstHand < 3.5f, "Xoay vật trong tay: lật ±80…150°, gập/duỗi cổ tay, lệch, kết hợp – vật và bàn tay xoay đúng góc yêu cầu",
+                $"sai lệch vật ≤ {worstObj:0.0}°, bàn tay ≤ {worstHand:0.0}°");
+            Check(worstGap <= 1.0f, "Ống tay áo vẫn khít cổ tay khi xoay vật", $"hở tối đa {worstGap:0.00} mm");
+            Check(maxElbowShift > 0.03f, "Lật vật quá tầm cẳng tay thì khuỷu tự dang ra/khép vào (xoay vai) như người thật",
+                $"khuỷu dịch ngang tối đa {maxElbowShift * 100f:0.0} cm; sấp/ngửa thật {rawMin:0}…{rawMax:0}°");
+            Check(pen == 0, "Xoay vật không làm ngón xuyên bình", $"pen={pen}, sai lệch IK lớn nhất {errMax:0.0} mm");
+        }
+
+        /// <summary>Miệng tay áo có nằm đúng sau khớp cổ tay không (mm): |khoảng miệng áo–tâm cổ tay − khoảng WristAttach–tâm cổ tay|.</summary>
+        static float CuffGapMm(ArmRig arm, HandRig rig)
+        {
+            Vector3 wc = rig.ForearmBone.position;
+            return Mathf.Abs(Vector3.Distance(arm.RightWrist, wc) - Vector3.Distance(rig.WristAttach.position, wc)) * 1000f;
         }
 
         static float R(System.Random r, float a, float b) => a + (float)r.NextDouble() * (b - a);

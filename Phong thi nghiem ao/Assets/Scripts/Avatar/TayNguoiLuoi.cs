@@ -29,8 +29,8 @@ namespace Khkt.Avatar
         public static int BoneFinger(int f, int p) => 1 + f * 3 + p;
 
         /// <summary>Mức chi tiết lưới: 0 Siêu nét, 1 Cao, 2 Vừa, 3 Thấp.</summary>
-        public static float CellSize(int lod) => lod switch { 0 => 0.00125f, 1 => 0.0015f, 2 => 0.0021f, _ => 0.0030f };
-        public static int SleeveSegments(int lod) => lod switch { 0 => 48, 1 => 40, 2 => 30, _ => 20 };
+        public static float CellSize(int lod) => lod switch { 0 => 0.0010f, 1 => 0.00125f, 2 => 0.0018f, _ => 0.0026f };
+        public static int SleeveSegments(int lod) => lod switch { 0 => 72, 1 => 56, 2 => 36, _ => 22 };
 
         /// <summary>Hình học tư thế gốc của bàn tay (toạ độ gốc lưới = gốc bàn tay ở tư thế gốc).</summary>
         public sealed class HandBind
@@ -460,7 +460,7 @@ namespace Khkt.Avatar
         // ------------------------------------------------------------------
         // Bộ nhớ đệm lưới trên đĩa: lần đầu dựng (vài giây, luồng nền) rồi ghi; các lần sau đọc trong vài chục ms
         // ------------------------------------------------------------------
-        const int CacheVersion = 3;   // tăng khi đổi hình học / trọng số / màu đỉnh
+        const int CacheVersion = 5;   // tăng khi đổi hình học / trọng số / màu đỉnh
 
         static string CacheFile(HandBind b, int lod)
         {
@@ -847,7 +847,7 @@ namespace Khkt.Avatar
 
             // Phần "gan tay" gần cổ tay đi theo xương cẳng tay (cổ tay ảo nằm trong ống tay áo)
             float palmW = w[BonePalm];
-            float tw = SS(b.wristCenter.z + 0.012f, b.wristCenter.z - 0.012f, p.z);
+            float tw = SS(b.wristCenter.z + 0.016f, b.wristCenter.z - 0.016f, p.z);
             w[BonePalm] = palmW * (1f - tw);
             w[BoneWrist] += palmW * tw;
 
@@ -978,7 +978,7 @@ namespace Khkt.Avatar
             Vector3 right = Vector3.Cross(up, fwd).normalized;
             Quaternion toLocal = sdf.nailToLocal[f];
 
-            int nu = lod <= 1 ? 9 : 7, nv = lod <= 1 ? 11 : 8;
+            int nu = lod <= 1 ? 13 : 7, nv = lod <= 1 ? 16 : 8;
             float halfW = w3 * 0.40f;
             float z0 = l3 * 0.30f, zLim = l3 * 0.78f, z1 = l3 * 0.96f;
             var pos = new Vector3[nu * (nv + 1)];
@@ -1076,7 +1076,7 @@ namespace Khkt.Avatar
                     pos[idx] = p;
                     col[idx] = new Color(r >= 3 && r <= 5 ? 0.6f : 0f, 0f, 1f, 0.2f);
                     uv0[idx] = new Vector2(p.z - (zc - 0.0075f), 0f);
-                    float tw = SS(zc + 0.012f, zc - 0.012f, p.z);
+                    float tw = SS(zc + 0.016f, zc - 0.016f, p.z);
                     wts[idx] = new BoneWeight { boneIndex0 = BoneWrist, weight0 = tw, boneIndex1 = BonePalm, weight1 = 1f - tw };
                 }
             var tris = new List<int>();
@@ -1155,8 +1155,8 @@ namespace Khkt.Avatar
             float zEnd = l1 + l2;
             float zStart = full ? -0.06f : zEnd - l2;
             float zCuff = zEnd - CuffBandLen;
-            float dzBase = lod <= 1 ? 0.0075f : lod == 2 ? 0.010f : 0.015f;
-            float dzFine = lod <= 1 ? 0.0032f : lod == 2 ? 0.0045f : 0.0075f;
+            float dzBase = lod == 0 ? 0.0045f : lod == 1 ? 0.0060f : lod == 2 ? 0.010f : 0.015f;
+            float dzFine = lod == 0 ? 0.0018f : lod == 1 ? 0.0024f : lod == 2 ? 0.0045f : 0.0075f;
 
             var rows = new List<Row>();
             float z = zStart;

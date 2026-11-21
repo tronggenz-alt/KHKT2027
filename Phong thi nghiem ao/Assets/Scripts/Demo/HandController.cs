@@ -78,6 +78,19 @@ namespace Khkt.Demo
         Vector3 handPos;
         float tilt;
         float heldYaw;  // xoay bộ phận đang cầm (lăn chuột / R E) để chọn chiều khi lắp
+        // Xoay vật đang cầm như tay người (độ, theo khung camera): x = gập/duỗi cổ tay, y = lệch trái/phải, z = lật (sấp/ngửa)
+        Vector3 heldTurn, heldTurnShown;
+        Quaternion bandRef = Quaternion.identity;
+        bool bandRefSet;
+        Quaternion handRotSmoothed = Quaternion.identity;
+        bool handRotReady;
+        public const float TurnPitchMax = 75f, TurnYawMax = 70f, TurnRollMin = -170f, TurnRollMax = 150f;
+        /// <summary>Đang giữ V xoay vật bằng chuột (DesktopViewer tạm không xoay camera).</summary>
+        public static bool RotatingHeld { get; private set; }
+        /// <summary>Góc xoay vật đang cầm đang hiển thị (độ: gập cổ tay, lệch, lật).</summary>
+        public Vector3 HeldTurnDeg => heldTurnShown;
+        /// <summary>Kiểm thử tự động: ép góc xoay vật đang cầm.</summary>
+        public Vector3? OverrideHeldTurn { get; set; }
         Transform pourStream;
         readonly HashSet<(GameObject heldObj, LabContainer target, string riskKey)> confirmedSafety = new HashSet<(GameObject, LabContainer, string)>();
         float safetyBlockedUntil;
@@ -515,6 +528,8 @@ namespace Khkt.Demo
                 }
             }
 
+            UpdateHeldTurn(kb, mouse, uiOpen, dt);
+
             // Lắp ráp: xoay bộ phận đang cầm, bóng mờ xem trước chỗ lắp
             if (HeldPart != null && !uiOpen)
             {
@@ -772,6 +787,8 @@ namespace Khkt.Demo
             g.SetHeld(true);
             tilt = 0;
             heldYaw = 0;
+            heldTurn = heldTurnShown = Vector3.zero;
+            bandRefSet = false;
             // vật ở khu đang được gỡ (cầm hộ từ xa): đánh thức về khu người xem đang đứng
             if (!g.gameObject.activeInHierarchy && viewCamera != null) Khkt.Rendering.ZoneStreamer.Wake(g.transform, viewCamera.transform.position);
         }
@@ -1193,6 +1210,69 @@ namespace Khkt.Demo
             return false;
         }
 
+        // ---------- Xoay vật trong tay (cổ tay + sấp/ngửa) ----------
+
+        /// <summary>
+        /// V + rê chuột: xoay tự do; J/L lật trái/phải (sấp/ngửa cẳng tay), I/K gập/duỗi cổ tay, U/O lệch trái/phải, N về thẳng.
+        /// Tay cầm VERA Band có IMU: vặn/gập cổ tay thật → vật xoay theo (so với hướng lúc cầm lên). Giới hạn theo tầm vận động người.
+        /// </summary>
+        void UpdateHeldTurn(Keyboard kb, Mouse mouse, bool uiOpen, float dt)
+        {
+            RotatingHeld = false;
+            bool canTurn = Held != null && HeldPart == null && !uiOpen;
+            if (canTurn)
+            {
+                if (kb != null)
+                {
+                    if (kb.vKey.isPressed && mouse != null)
+                    {
+                        RotatingHeld = true;
+                        Vector2 md = mouse.delta.ReadValue() * 0.35f;
+                        heldTurn.x -= md.y;
+                        heldTurn.z += md.x;
+                    }
+                    float rate = 120f * dt;
+                    heldTurn.z += ((kb.lKey.isPressed ? 1 : 0) - (kb.jKey.isPressed ? 1 : 0)) * rate;
+                    heldTurn.x += ((kb.kKey.isPressed ? 1 : 0) - (kb.iKey.isPressed ? 1 : 0)) * rate;
+                    heldTurn.y += ((kb.oKey.isPressed ? 1 : 0) - (kb.uKey.isPressed ? 1 : 0)) * rate;
+                    if (kb.nKey.wasPressedThisFrame) heldTurn = Vector3.zero;
+                }
+                // VERA Band: hướng IMU so với lúc cầm lên → lật (quanh trục tới) và gập (quanh trục ngang)
+                var src = PadInput.ControllerConnected ? PadInput.Controller : null;
+                if (src != null && !src.Latest.Pressed(ControllerButtons.ImuError))
+                {
+                    Quaternion q = src.Latest.UnityRotation;
+                    if (!bandRefSet) { bandRef = q; bandRefSet = true; }
+                    Quaternion rel = Quaternion.Inverse(bandRef) * q;
+                    float roll = TwistDeg(rel, Vector3.forward), pitch = TwistDeg(rel, Vector3.right);
+                    if (Mathf.Abs(roll) > 4f || Mathf.Abs(pitch) > 4f) heldTurn = new Vector3(pitch, heldTurn.y, -roll);
+                }
+                heldTurn.x = Mathf.Clamp(heldTurn.x, -TurnPitchMax, TurnPitchMax);
+                heldTurn.y = Mathf.Clamp(heldTurn.y, -TurnYawMax, TurnYawMax);
+                heldTurn.z = Mathf.Clamp(heldTurn.z, TurnRollMin, TurnRollMax);
+            }
+            if (OverrideHeldTurn.HasValue) heldTurn = OverrideHeldTurn.Value;
+            // làm mượt theo thời gian (không phụ thuộc FPS)
+            heldTurnShown = Vector3.Lerp(heldTurnShown, heldTurn, 1f - Mathf.Exp(-14f * dt));
+        }
+
+        static float TwistDeg(Quaternion q, Vector3 axis)
+        {
+            float p = q.x * axis.x + q.y * axis.y + q.z * axis.z;
+            float a = 2f * Mathf.Atan2(p, q.w) * Mathf.Rad2Deg;
+            return Mathf.DeltaAngle(0f, a);
+        }
+
+        /// <summary>Phép xoay người dùng áp cho vật (khung camera): lật quanh hướng nhìn, gập quanh trục ngang camera, lệch quanh trục đứng.</summary>
+        Quaternion HeldTurnRotation(Transform cam)
+        {
+            Vector3 t = heldTurnShown;
+            if (t.sqrMagnitude < 1e-6f) return Quaternion.identity;
+            Vector3 fwd = Flat(cam.forward);
+            Vector3 right = Vector3.Cross(Vector3.up, fwd).normalized;
+            return Quaternion.AngleAxis(t.y, Vector3.up) * Quaternion.AngleAxis(t.x, right) * Quaternion.AngleAxis(-t.z, fwd);
+        }
+
         // ---------- Tư thế tay và vật đang cầm ----------
 
         void UpdatePose(float dt)
@@ -1207,6 +1287,7 @@ namespace Khkt.Demo
             bool pouring = Current == Act.Pour || Current == Act.Spray || Current == Act.Scoop || Current == Act.Bubble;
             tilt = Mathf.MoveTowards(tilt, pouring && Acting ? 105f : pouring ? 35f : 0f, 160f * dt);
             Vector3 gripTarget = free;
+            Quaternion handFollow = Quaternion.identity;   // bàn tay xoay cùng vật (rót, lật, gập cổ tay)
 
             if (Held != null)
             {
@@ -1237,6 +1318,7 @@ namespace Khkt.Demo
                     Vector3 side = -Flat(cam.right);
                     Vector3 axis = Vector3.Cross(Vector3.up, side).normalized;
                     objRot = Quaternion.AngleAxis(tilt, axis) * upright;
+                    handFollow = Quaternion.AngleAxis(tilt, axis);
                     Vector3 heldMouthLocal = HeldMouthLocal();
                     Vector3 wantMouth = mouth + Vector3.up * (0.035f + 0.02f * (1 - tilt / 105f)) + side * 0.01f;
                     objPos = wantMouth - objRot * heldMouthLocal;
@@ -1252,7 +1334,10 @@ namespace Khkt.Demo
                 }
                 else
                 {
-                    objPos = Vector3.Lerp(t.position, free - Vector3.up * Held.gripHeightM, 1f - Mathf.Exp(-20f * dt));
+                    Quaternion turn = HeldTurnRotation(cam);
+                    objRot = turn * upright;
+                    handFollow = turn;
+                    objPos = Vector3.Lerp(t.position, free - (turn * Vector3.up) * Held.gripHeightM, 1f - Mathf.Exp(-20f * dt));
                 }
                 if (!(pouring && TargetContainer != null)) UpdateStream(Vector3.zero, Vector3.zero, false);
                 t.SetPositionAndRotation(objPos, objRot);
@@ -1272,7 +1357,21 @@ namespace Khkt.Demo
                     ? Held.transform
                     : (Current == Act.Stopcock && stopcock != null ? stopcock.transform : null);
                 hand.SetTargetPose(Khkt.Avatar.HandPoseTable.ClassifyToolPose(Held, Current, Current == Act.Pick || Current == Act.Swirl));
-                hand.transform.rotation = handRot;
+                // Tay rảnh: bàn tay hướng theo tầm với (từ vai tới tay) như cổ tay người; tay cầm vật: xoay cùng vật
+                Quaternion target;
+                if (Held == null)
+                {
+                    Vector3 shoulder = cam.position + facing * new Vector3(0.185f, -0.245f, -0.06f);
+                    Vector3 reachDir = handPos - shoulder;
+                    if (reachDir.sqrMagnitude < 1e-6f) reachDir = facing * Vector3.forward;
+                    Vector3 aim = Vector3.Slerp(facing * Vector3.forward, reachDir.normalized, 0.55f);
+                    target = Quaternion.LookRotation(aim, Vector3.up) * Quaternion.Euler(10f, -12f, 0f);
+                }
+                else target = handFollow * handRot;
+                if (!handRotReady) { handRotSmoothed = target; handRotReady = true; }
+                handRotSmoothed = Quaternion.Slerp(handRotSmoothed, target, 1f - Mathf.Exp(-(Held != null ? 40f : 16f) * dt));
+                hand.transform.rotation = handRotSmoothed;
+                handRot = handRotSmoothed;
                 Vector3 gripLocal = hand.Grip != null ? hand.Grip.localPosition : Vector3.zero;
                 hand.transform.position = handPos - handRot * gripLocal;
             }
@@ -1413,6 +1512,7 @@ namespace Khkt.Demo
             }
             if (HeldPart != null) Hints.Add(("Lăn chuột / R E", "Xoay bộ phận"));
             if (Held != null && Current != Act.Place) Hints.Add(("Q", "Trả về chỗ cũ"));
+            if (Held != null && HeldPart == null) Hints.Add(("V + chuột / J L I K", "Xoay vật trong tay"));
             if (PadInput.UsingTouch)
             {
                 for (int i = 0; i < Hints.Count; i++)

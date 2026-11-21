@@ -68,8 +68,11 @@ namespace Khkt.Demo
             public readonly Vector3[] fingers = new Vector3[21];
             public readonly Vector3[] filteredLocal = new Vector3[21];
             public float poleAngle, poleVel;
+            public Vector3 shoulderShift, shoulderShiftVel;
+            public Vector3 lastForeDir;
+            public bool foreReady;
             public bool poleReady;
-            public float elbowFlex, pronation, wristDev;
+            public float elbowFlex, pronation, pronationRaw, wristDev;
             public int lod = -1;
         }
 
@@ -85,6 +88,8 @@ namespace Khkt.Demo
         /// <summary>Góc gập khuỷu (độ, 0 = duỗi thẳng), xoay sấp (độ, 0 = ngón cái hướng lên), độ gập cổ tay (độ).</summary>
         public float ElbowFlexDeg(int side) => arms[side] != null ? arms[side].elbowFlex : 0f;
         public float PronationDeg(int side) => arms[side] != null ? arms[side].pronation : 0f;
+        /// <summary>Góc sấp/ngửa thật của bàn tay so với cẳng tay (chưa kẹp) – để kiểm thử.</summary>
+        public float PronationRawDeg(int side) => arms[side] != null ? arms[side].pronationRaw : 0f;
         public float WristDeviationDeg(int side) => arms[side] != null ? arms[side].wristDev : 0f;
         public SkinnedMeshRenderer SleeveRenderer(int side) => arms[side] != null ? arms[side].sleeve : null;
         public HandRig LeftHand => arms[1] != null ? arms[1].leftRestHand : null;
@@ -443,9 +448,31 @@ namespace Khkt.Demo
 
         void PlaceConnectedArm(Arm a, int side, HandRig rig, float dt)
         {
-            Vector3 w = rig.WristAttach != null ? rig.WristAttach.position : rig.transform.position;
             Vector3 handFwd = rig.WristAttach != null ? rig.WristAttach.forward : rig.transform.forward;
-            Vector3 sh = Shoulder(side);
+            // Miệng tay áo nằm trên trục cẳng tay ngay sau khớp cổ tay: cổ tay thẳng thì trùng WristAttach,
+            // cổ tay gập nhiều thì bàn tay gập ra ngoài cổ áo (không để vòng tay áo trùm lên gan tay)
+            Vector3 w = rig.WristAttach != null ? rig.WristAttach.position : rig.transform.position;
+            if (rig.ForearmBone != null && rig.WristAttach != null && a.foreReady)
+            {
+                Vector3 wc = rig.ForearmBone.position;
+                float back = Vector3.Distance(wc, w);
+                float devPrev = Vector3.Angle(a.lastForeDir, handFwd);
+                float t = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(30f, 60f, devPrev));
+                Vector3 axis = Vector3.Slerp(handFwd, a.lastForeDir, t).normalized;
+                w = wc - axis * back;
+            }
+            Vector3 handUpV = rig.WristAttach != null ? rig.WristAttach.up : rig.transform.up;
+            Vector3 sh0 = Shoulder(side);
+            // Xương đòn: vai nhô ra khi với xa, nâng lên khi tay cao (lò xo, không giật)
+            Vector3 d0 = w - sh0;
+            float dist0 = d0.magnitude;
+            Vector3 dir0 = dist0 > 1e-6f ? d0 / dist0 : cameraTransform.forward;
+            Vector3 shiftTarget = dir0 * Mathf.Clamp((dist0 - 0.40f) * 0.20f, -0.02f, 0.04f)
+                                + Vector3.up * Mathf.Clamp((w.y - sh0.y + 0.10f) * 0.14f, 0f, 0.035f);
+            if (!a.poleReady) a.shoulderShift = shiftTarget;
+            Spring(ref a.shoulderShift, ref a.shoulderShiftVel, shiftTarget, 10f, dt);
+            Vector3 sh = sh0 + a.shoulderShift;
+            Vector3 lateralCam = cameraTransform.right * (side == 0 ? 1f : -1f);
 
             // Vai đưa trước (với xa) hoặc lùi (quá gần) để cổ tay áo luôn khít cổ tay, khuỷu không gập quá 150°
             Vector3 to = w - sh;
@@ -458,7 +485,7 @@ namespace Khkt.Demo
             // Chọn hướng khuỷu để cẳng tay thẳng hàng với bàn tay nhất (cổ tay ít gập) nhưng gần tư thế tự nhiên
             float natural = NaturalPole(side);
             float best = natural, bestCost = float.MaxValue;
-            for (float al = -20f; al <= 100f; al += 10f) Evaluate(al);
+            for (float al = -20f; al <= 140f; al += 10f) Evaluate(al);
             float coarse = best;
             for (float al = coarse - 7.5f; al <= coarse + 7.5f; al += 2.5f) Evaluate(al);
 
@@ -477,6 +504,20 @@ namespace Khkt.Demo
                 float dev = Vector3.Angle(fore, handFwd);
                 float over = Mathf.Max(0f, dev - 25f);
                 float c = over * over + 0.04f * (al - natural) * (al - natural);
+                // Cẳng tay chỉ sấp/ngửa được −80…+88°: lật vật quá tầm thì khuỷu dang ra / khép vào (xoay vai) như người thật
+                Vector3 innerF = Vector3.ProjectOnPlane(-p, fore);
+                Vector3 dorsal = Vector3.ProjectOnPlane(handUpV, fore);
+                if (innerF.sqrMagnitude > 1e-8f && dorsal.sqrMagnitude > 1e-8f)
+                {
+                    innerF.Normalize(); dorsal.Normalize();
+                    Vector3 lat = -Vector3.Cross(fore, innerF) * (side == 0 ? 1f : -1f);
+                    float phi = Mathf.Atan2(Vector3.Dot(dorsal, innerF), Vector3.Dot(dorsal, lat)) * Mathf.Rad2Deg;
+                    float ex = Mathf.Max(0f, phi - PronationMaxDeg) + Mathf.Max(0f, PronationMinDeg - phi);
+                    c += ex * ex * 1.5f;
+                }
+                // Khuỷu không cắt qua thân (không sang quá đường giữa)
+                float elbowLat = Vector3.Dot(e - sh, lateralCam);
+                if (elbowLat < -0.05f) c += (-0.05f - elbowLat) * (-0.05f - elbowLat) * 4e5f;
                 if (c < bestCost) { bestCost = c; best = al; }
             }
         }
@@ -497,6 +538,8 @@ namespace Khkt.Demo
             innerF.Normalize();
 
             a.elbowFlex = Vector3.Angle(upperDir, foreDir);
+            a.lastForeDir = foreDir;
+            a.foreReady = true;
 
             // Xoay sấp/ngửa: góc của mu bàn tay quanh trục cẳng tay (0 = ngón cái hướng lên, + = sấp)
             Vector3 handUp = rig != null && rig.WristAttach != null ? rig.WristAttach.up : innerF;
@@ -506,6 +549,7 @@ namespace Khkt.Demo
             dorsal.Normalize();
             Vector3 lateral = -Vector3.Cross(foreDir, innerF) * (side == 0 ? 1f : -1f);
             float phi = Mathf.Atan2(Vector3.Dot(dorsal, innerF), Vector3.Dot(dorsal, lateral)) * Mathf.Rad2Deg;
+            a.pronationRaw = phi;
             a.pronation = Mathf.Clamp(phi, PronationMinDeg, PronationMaxDeg);
             a.wristDev = Vector3.Angle(foreDir, handFwd);
 
@@ -527,7 +571,6 @@ namespace Khkt.Demo
             {
                 Vector3 f = foreDir;
                 float dev = Vector3.Angle(f, handFwd);
-                if (dev > 70f) f = Vector3.Slerp(handFwd, foreDir, 70f / dev).normalized;
                 Vector3 up = Vector3.ProjectOnPlane(handUp, f);
                 if (up.sqrMagnitude < 1e-8f) up = innerF;
                 rig.ForearmBone.rotation = Quaternion.LookRotation(f, up);

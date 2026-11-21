@@ -355,7 +355,7 @@ namespace Khkt.EditorTools
         {
             var arm = UnityEngine.Object.FindAnyObjectByType<ArmRig>();
             if (arm == null || rig.WristAttach == null) return;
-            float gap = Vector3.Distance(arm.RightWrist, rig.WristAttach.position) * 1000f;
+            float gap = CuffGapMm(arm, rig);
             float flex = arm.ElbowFlexDeg(0), pron = arm.PronationDeg(0), dev = arm.WristDeviationDeg(0);
             armMaxGapMm = Mathf.Max(armMaxGapMm, gap);
             armMaxFlex = Mathf.Max(armMaxFlex, flex); armMinFlex = Mathf.Min(armMinFlex, flex);

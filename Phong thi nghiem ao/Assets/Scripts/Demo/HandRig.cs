@@ -143,6 +143,16 @@ namespace Khkt.Demo
         readonly RaycastHit[] rayBuf = new RaycastHit[16];
         float thumbPronateMemory = 26f;
 
+        // Động lực học thứ cấp: cổ tay trễ theo quán tính, ngón lắc theo (lò xo tới hạn giải đúng → độc lập FPS)
+        Vector3 lastPos;
+        bool lastPosValid;
+        Vector3 lagEuler, lagEulerVel;
+        float contactFade = 1f, contactFadeVel;
+        Vector3 lagApplied;
+        float fingerLagApplied;
+        /// <summary>Độ trễ cổ tay hiện tại (độ, x gập, y lệch, z xoay) do quán tính.</summary>
+        public Vector3 WristLagDeg => lagApplied;
+
         void Awake()
         {
             if (!ActiveRigs.Contains(this)) ActiveRigs.Add(this);
@@ -521,6 +531,7 @@ namespace Khkt.Demo
             }
             else activePoseData = target;
 
+            UpdateSecondary(dt);
             if (TargetContactObject == null && !PoseOverride.HasValue)
                 ApplyPoseData(WithIdle(activePoseData));
             else
@@ -535,20 +546,99 @@ namespace Khkt.Demo
             }
         }
 
+        static void Spring(ref Vector3 x, ref Vector3 v, Vector3 target, float omega, float dt)
+        {
+            float e = Mathf.Exp(-omega * dt);
+            Vector3 d = x - target;
+            Vector3 tmp = (v + omega * d) * dt;
+            v = (v - omega * tmp) * e;
+            x = target + (d + tmp) * e;
+        }
+
+        static void Spring(ref float x, ref float v, float target, float omega, float dt)
+        {
+            float e = Mathf.Exp(-omega * dt);
+            float d = x - target;
+            float tmp = (v + omega * d) * dt;
+            v = (v - omega * tmp) * e;
+            x = target + (d + tmp) * e;
+        }
+
+        /// <summary>
+        /// Quán tính: tay đi lên → cổ tay gập xuống (ngón trễ lại), đi ngang → cổ tay lệch ngược chiều, rồi bật về.
+        /// Tắt dần khi đang ôm dụng cụ (IK bề mặt cần gan tay đứng yên).
+        /// </summary>
+        void UpdateSecondary(float dt)
+        {
+            Vector3 pos = transform.position;
+            Vector3 lagTarget = Vector3.zero;
+            if (lastPosValid && dt > 1e-5f)
+            {
+                Vector3 vel = (pos - lastPos) / dt;
+                if (vel.sqrMagnitude > 9f) vel = Vector3.zero;          // dịch chuyển tức thời (đổi chỗ đứng)
+                Vector3 lv = transform.InverseTransformDirection(vel);
+                lagTarget = new Vector3(Mathf.Clamp(lv.y * 22f + lv.z * 5f, -16f, 16f),
+                                        Mathf.Clamp(-lv.x * 16f, -12f, 12f),
+                                        Mathf.Clamp(lv.x * 9f, -8f, 8f));
+            }
+            lastPos = pos;
+            lastPosValid = true;
+            if (dt <= 0f) return;
+            Spring(ref lagEuler, ref lagEulerVel, lagTarget, 13f, dt);
+            Spring(ref contactFade, ref contactFadeVel, TargetContactObject == null && !drivingByLandmarks ? 1f : 0f, 10f, dt);
+            float k = Mathf.Clamp01(contactFade);
+            lagApplied = lagEuler * k;
+            fingerLagApplied = lagEuler.x * 0.45f * k;
+        }
+
+        /// <summary>Đặt lại trạng thái quán tính (sau khi dịch chuyển tức thời).</summary>
+        public void ResetSecondary() { lastPosValid = false; lagEuler = lagEulerVel = Vector3.zero; lagApplied = Vector3.zero; fingerLagApplied = 0f; }
+
         /// <summary>Nội suy tư thế theo thời gian đã trôi (dùng cho kiểm thử độc lập FPS).</summary>
         public static HandPoseData BlendStaggered(HandPoseData from, HandPoseData to, float elapsed)
         {
             float uw = Phase(elapsed, 0f);
+            // Chuẩn bị nắm (pre-shaping) như tay người: khi chuyển sang tư thế nắm chặt hơn, các ngón duỗi/xòe ra
+            // một chút ở nửa đầu rồi mới khép vào; ngón cái dạng ra trước khi đối chiếu.
+            float closing = Mathf.Clamp01((Curl(to) - Curl(from)) / 120f);
             return new HandPoseData
             {
-                thumb = ThumbPose.Lerp(from.thumb, to.thumb, Phase(elapsed, ThumbDelay)),
-                index = FingerPose.Lerp(from.index, to.index, Phase(elapsed, FingerDelay[0])),
-                middle = FingerPose.Lerp(from.middle, to.middle, Phase(elapsed, FingerDelay[1])),
-                ring = FingerPose.Lerp(from.ring, to.ring, Phase(elapsed, FingerDelay[2])),
-                pinky = FingerPose.Lerp(from.pinky, to.pinky, Phase(elapsed, FingerDelay[3])),
+                thumb = PreThumb(ThumbPose.Lerp(from.thumb, to.thumb, Phase(elapsed, ThumbDelay)), Bump(elapsed, ThumbDelay) * closing),
+                index = PreFinger(FingerPose.Lerp(from.index, to.index, Phase(elapsed, FingerDelay[0])), Bump(elapsed, FingerDelay[0]) * closing, -1f),
+                middle = PreFinger(FingerPose.Lerp(from.middle, to.middle, Phase(elapsed, FingerDelay[1])), Bump(elapsed, FingerDelay[1]) * closing, -0.3f),
+                ring = PreFinger(FingerPose.Lerp(from.ring, to.ring, Phase(elapsed, FingerDelay[2])), Bump(elapsed, FingerDelay[2]) * closing, 0.3f),
+                pinky = PreFinger(FingerPose.Lerp(from.pinky, to.pinky, Phase(elapsed, FingerDelay[3])), Bump(elapsed, FingerDelay[3]) * closing, 1f),
                 wristEulerOffset = Vector3.Lerp(from.wristEulerOffset, to.wristEulerOffset, uw),
                 palmLocalOffset = Vector3.Lerp(from.palmLocalOffset, to.palmLocalOffset, uw)
             };
+        }
+
+        static float Curl(HandPoseData d) =>
+            d.index.mcpFlex + d.index.pipFlex + d.middle.mcpFlex + d.middle.pipFlex + d.ring.mcpFlex + d.ring.pipFlex + d.pinky.mcpFlex + d.pinky.pipFlex;
+
+        /// <summary>Hình chuông 0→1→0 trong 65% đầu của pha chuyển (0 khi bắt đầu và khi kết thúc).</summary>
+        static float Bump(float elapsed, float delay)
+        {
+            float T = HandPoseTable.TransitionDurationS;
+            float u = Mathf.Clamp01((elapsed - delay) / (T - MaxDelay));
+            return u < 0.65f ? Mathf.Sin(u / 0.65f * Mathf.PI) : 0f;
+        }
+
+        static FingerPose PreFinger(FingerPose f, float b, float spreadDir)
+        {
+            f.mcpFlex -= 16f * b;
+            f.pipFlex -= 12f * b;
+            f.dipFlex -= 6f * b;
+            f.mcpSpread += 5f * b * spreadDir;
+            return f;
+        }
+
+        static ThumbPose PreThumb(ThumbPose t, float b)
+        {
+            t.cmcOppose -= 14f * b;
+            t.mcpFlex -= 10f * b;
+            t.ipFlex -= 10f * b;
+            return t;
         }
 
         /// <summary>Chuyển động "sống" rất nhẹ khi tay rảnh: ngón co duỗi vài độ theo nhịp thở, lệch pha từng ngón.</summary>
@@ -565,6 +655,11 @@ namespace Khkt.Demo
             d.ring.pipFlex += 1.3f * Mathf.Sin(t * 0.9f + 1.4f);
             d.pinky.pipFlex += 1.5f * Mathf.Sin(t * 0.9f + 2.0f);
             d.thumb.mcpFlex += 1.0f * Mathf.Sin(t * 0.8f + 1.1f);
+            d.thumb.cmcOppose += 1.2f * Mathf.Sin(t * 0.55f + 0.4f);
+            // cổ tay đung đưa rất nhẹ (nhiễu chậm) cho tay "sống"
+            d.wristEulerOffset += new Vector3((Mathf.PerlinNoise(t * 0.35f, 1.7f) - 0.5f) * 3.0f,
+                                              (Mathf.PerlinNoise(t * 0.30f, 5.3f) - 0.5f) * 2.4f,
+                                              (Mathf.PerlinNoise(t * 0.25f, 9.1f) - 0.5f) * 2.0f);
             return d;
         }
 
@@ -573,12 +668,16 @@ namespace Khkt.Demo
             d = HandPoseTable.ClampAll(d);
             float sign = side == 0 ? 1f : -1f;
             palmRoot.localPosition = new Vector3(d.palmLocalOffset.x * sign, d.palmLocalOffset.y, d.palmLocalOffset.z);
-            palmRoot.localEulerAngles = new Vector3(d.wristEulerOffset.x, d.wristEulerOffset.y * sign, d.wristEulerOffset.z * sign);
+            palmRoot.localRotation = Quaternion.Euler(d.wristEulerOffset.x, d.wristEulerOffset.y * sign, d.wristEulerOffset.z * sign)
+                                     * Quaternion.Euler(lagApplied.x, lagApplied.y * sign, lagApplied.z * sign);
 
             for (int i = 0; i < 4; i++)
             {
                 FingerPose f = d.GetFinger(i);
-                ApplyFingerAngles(i, f.mcpFlex, f.mcpSpread * sign, f.pipFlex, f.dipFlex);
+                // Ngón khép lại khi gập (hội tụ về phía xương thuyền như khi nắm tay) + ngón trễ theo quán tính cổ tay
+                float conv = 1f - 0.55f * Mathf.Clamp01(f.mcpFlex / 90f);
+                float lag = fingerLagApplied * (0.7f + 0.15f * i);
+                ApplyFingerAngles(i, f.mcpFlex + lag, f.mcpSpread * conv * sign, f.pipFlex + lag * 0.6f, f.dipFlex + lag * 0.3f);
             }
 
             ApplyThumbAngles(d.thumb, sign);
