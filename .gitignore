@@ -90,3 +90,9 @@ Phong thi nghiem ao/Assets/Resources/CoChe.meta
 
 # báo sai của học sinh (máy chủ cơ chế ghi, không đưa lên kho)
 data/bao_sai/
+
+# Nhân vật, chuyển động tải từ Mixamo (Adobe không cho phát tán file gốc): chỉ giữ ở máy, xem Assets/Lab/NguoiChoi/DOC_TRUOC.txt
+Phong thi nghiem ao/Assets/Lab/NguoiChoi/Resources/
+Phong thi nghiem ao/Assets/Lab/NguoiChoi/Resources.meta
+Phong thi nghiem ao/Assets/Lab/NguoiChoi/Textures/
+Phong thi nghiem ao/Assets/Lab/NguoiChoi/Textures.meta

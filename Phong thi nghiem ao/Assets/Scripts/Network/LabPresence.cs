@@ -27,6 +27,8 @@ namespace Khkt.Network
             public string name = "";
             public GameObject root;
             public HumanoidAvatar avatar;
+            /// <summary>Người 3D Mixamo (Assets/Lab/NguoiChoi): có file thì thay thân dựng bằng mã, bảng tên vẫn của HumanoidAvatar.</summary>
+            public RemoteAvatar person;
             public Vector3 headPos, handPos;
             public float yaw, pitch;
             public Quaternion handRot = Quaternion.identity;
@@ -384,8 +386,9 @@ namespace Khkt.Network
         {
             float k = 1f - Mathf.Exp(-14f * Time.deltaTime);
             Transform camT = viewer != null ? viewer.cameraTransform : (Camera.main != null ? Camera.main.transform : null);
-            foreach (var r in remotes.Values)
+            foreach (var kv in remotes)
             {
+                var r = kv.Value;
                 if (r.root == null || r.avatar == null) continue;
                 // dịch chuyển trạm thì nhảy luôn, không trôi xuyên tường
                 bool snap = (r.dispHead - r.headPos).sqrMagnitude > 9f;
@@ -397,6 +400,16 @@ namespace Khkt.Network
 
                 r.avatar.ApplyPose(r.dispHead, r.dispYaw, r.dispPitch, r.dispHand, r.dispHandRot, null, camT);
                 if (camT != null) r.avatar.UpdateLod(camT.position);
+                if (r.person != null)
+                {
+                    r.person.Drive(r.dispHead, Quaternion.Euler(r.dispPitch, r.dispYaw, 0), r.dispHand, r.dispHandRot, IsHolding(kv.Key));
+                    var plate = r.avatar.NameplateTransform;
+                    if (plate != null)
+                    {
+                        plate.position = r.person.HeadTop + Vector3.up * 0.14f;
+                        if (camT != null) plate.rotation = Quaternion.LookRotation(plate.position - camT.position);
+                    }
+                }
             }
         }
 
@@ -646,12 +659,18 @@ namespace Khkt.Network
             var root = new GameObject("Người cùng phòng " + id);
             var avatar = root.AddComponent<HumanoidAvatar>();
             avatar.Initialize(displayName, isTeacher);
+            // Máy có file nhân vật Mixamo: người 3D đó thay thân dựng bằng mã (ẩn đi, chỉ giữ bảng tên)
+            var person = RemoteAvatar.Create(root.transform, "Thân người 3D");
+            if (person != null)
+                foreach (var rend in avatar.GetComponentsInChildren<Renderer>(true))
+                    if (!rend.transform.IsChildOf(person.transform)) rend.enabled = false;
 
             return new Remote
             {
                 name = displayName,
                 root = root,
                 avatar = avatar,
+                person = person,
                 isTeacher = isTeacher
             };
         }
@@ -693,8 +712,15 @@ namespace Khkt.Network
 
             Transform camT = viewer != null ? viewer.cameraTransform : (Camera.main != null ? Camera.main.transform : null);
             r.avatar.ApplyPose(headPos, yaw, pitch, handPos, handRot, null, camT);
+            if (r.person != null) r.person.Drive(headPos, Quaternion.Euler(pitch, yaw, 0), handPos, handRot, false);
             if (camT != null) r.avatar.UpdateLod(camT.position);
             return r.avatar;
+        }
+
+        bool IsHolding(ulong who)
+        {
+            foreach (var kv in owners) if (kv.Value == who) return true;
+            return false;
         }
 
         void BuildHud()
