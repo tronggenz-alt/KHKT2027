@@ -208,13 +208,14 @@ namespace Khkt.EditorTools
                     }
                     JointRots(A, qa); JointRots(B, qb);
                     float mid = MaxAngle(qa, qb);
-                    for (int i = 0; i < 2; i++) A.StepPoseAndContact(1f / 30f);
-                    for (int i = 0; i < 10; i++) B.StepPoseAndContact(1f / 150f);
+                    float dur = A.CurrentTransitionS;
+                    for (int i = 0; i < 8; i++) A.StepPoseAndContact(1f / 30f);
+                    for (int i = 0; i < 40; i++) B.StepPoseAndContact(1f / 150f);
                     JointRots(A, qa); JointRots(B, qb);
                     float end = MaxAngle(qa, qb);
-                    Check(mid < 0.3f && end < 0.05f && Mathf.Approximately(HandPoseTable.TransitionDurationS, 0.15f),
-                        "Ngón tay nội suy mượt 0,15 s cố định, 30 FPS và 150 FPS cho cùng tư thế",
-                        $"lệch giữa chừng={mid:0.000}° cuối={end:0.000}° bước lớn nhất@150FPS={maxStep:0.0}°");
+                    Check(mid < 0.3f && end < 0.05f && Mathf.Approximately(HandPoseTable.TransitionDurationS, 0.15f) && dur > 0.2f && dur <= 0.32f,
+                        "Ngón tay nội suy mượt, thời lượng cố định theo độ lớn chuyển (0,15–0,32 s), 30 FPS và 150 FPS cho cùng tư thế",
+                        $"Xòe→Chụm: {dur:0.000} s; lệch giữa chừng={mid:0.000}° cuối={end:0.000}° bước lớn nhất@150FPS={maxStep:0.0}°");
                     Check(maxStep < 12f, "Không giật: mỗi khung 150 FPS đổi < 12° ở khớp nào", $"{maxStep:0.0}°");
 
                     // Lò xo lắc tay: nghiệm đúng → cùng kết quả ở 30 và 150 FPS
@@ -313,15 +314,16 @@ namespace Khkt.EditorTools
                 {
                     HandPoseData from = HandPoseTable.Get(HandPoseId.Xoe), to = HandPoseTable.Get(HandPoseId.ChumCam);
                     float minIdx = 999f, minOpp = 999f;
-                    for (float e = 0f; e <= HandPoseTable.TransitionDurationS + 1e-4f; e += 0.004f)
+                    float T = HandRig.TransitionFor(from, to);
+                    for (float e = 0f; e <= T + 1e-4f; e += 0.004f)
                     {
-                        var d = HandRig.BlendStaggered(from, to, e);
+                        var d = HandRig.BlendStaggered(from, to, e, T);
                         minIdx = Mathf.Min(minIdx, d.index.mcpFlex);
                         minOpp = Mathf.Min(minOpp, d.thumb.cmcOppose);
                     }
-                    var end = HandRig.BlendStaggered(from, to, HandPoseTable.TransitionDurationS);
+                    var end = HandRig.BlendStaggered(from, to, T, T);
                     Check(minIdx < from.index.mcpFlex - 5f && minOpp < from.thumb.cmcOppose - 5f && Mathf.Abs(end.index.mcpFlex - to.index.mcpFlex) < 0.01f,
-                        "Chuẩn bị nắm: ngón duỗi/xòe và ngón cái dạng ra trước rồi mới khép (vẫn đúng 0,15 s)",
+                        "Chuẩn bị nắm: ngón duỗi/xòe và ngón cái dạng ra trước rồi mới khép (thời lượng cố định)",
                         $"MCP trỏ thấp nhất {minIdx:0.0}° (đầu {from.index.mcpFlex:0}°, cuối {to.index.mcpFlex:0}°), CMC cái thấp nhất {minOpp:0.0}°");
 
                     HandRig L = NewTestRig("TAY_TestLag", tempObjects);

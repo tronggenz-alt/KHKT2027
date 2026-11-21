@@ -132,6 +132,9 @@ namespace Khkt.Demo
         HandPoseId blendTargetPose = HandPoseId.Xoe;
         HandPoseData blendFromData, activePoseData;
         float blendElapsed = HandPoseTable.TransitionDurationS;
+        float blendDuration = HandPoseTable.TransitionDurationS;
+        /// <summary>Thời lượng của lần chuyển tư thế đang chạy (s).</summary>
+        public float CurrentTransitionS => blendDuration;
         float shownCurl = -1f;
         float idleTime;
         bool built;
@@ -461,11 +464,12 @@ namespace Khkt.Demo
                 blendTargetPose = wanted;
                 activePoseData = HandPoseTable.Get(wanted);
                 blendFromData = activePoseData;
-                blendElapsed = HandPoseTable.TransitionDurationS;
+                blendElapsed = blendDuration = HandPoseTable.TransitionDurationS;
                 ApplyPoseData(activePoseData);
                 return;
             }
             if (wanted == blendTargetPose) return;
+            blendDuration = TransitionFor(activePoseData, HandPoseTable.Get(wanted));
             blendFromData = activePoseData;
             blendTargetPose = wanted;
             CurrentPose = wanted;
@@ -502,17 +506,27 @@ namespace Khkt.Demo
 
         public void ClearLandmarkControl() => drivingByLandmarks = false;
 
-        // Lệch pha từng ngón (s): ngón cái dẫn, rồi trỏ → út; tổng thời gian luôn đúng TransitionDurationS
-        static readonly float[] FingerDelay = { 0.000f, 0.010f, 0.020f, 0.030f };
+        // Lệch pha từng ngón (tỉ lệ thời lượng): ngón cái dẫn, rồi trỏ → út; tổng thời gian luôn đúng thời lượng chuyển
+        static readonly float[] FingerDelay = { 0.000f, 0.067f, 0.133f, 0.200f };
         const float ThumbDelay = 0.0f;
-        const float MaxDelay = 0.030f;
+        const float MaxDelay = 0.200f;
+
+        /// <summary>
+        /// Thời lượng chuyển tư thế cố định theo độ lớn thay đổi (giống tay người: chỉnh nhẹ nhanh, nắm/xòe trọn chậm hơn):
+        /// 0,15 s (TransitionDurationS) cho thay đổi nhỏ → 0,32 s cho nắm trọn bàn tay. Không phụ thuộc FPS.
+        /// </summary>
+        public static float TransitionFor(HandPoseData from, HandPoseData to)
+        {
+            float d = Mathf.Abs(Curl(to) - Curl(from)) + Mathf.Abs(to.thumb.cmcOppose - from.thumb.cmcOppose);
+            return Mathf.Lerp(HandPoseTable.TransitionDurationS, 0.32f, Mathf.Clamp01(d / 260f));
+        }
 
         static float Smoother(float u) => u * u * u * (u * (u * 6f - 15f) + 10f);
 
-        static float Phase(float elapsed, float delay)
+        static float Phase(float elapsed, float delay, float T)
         {
-            float T = HandPoseTable.TransitionDurationS;
-            return Smoother(Mathf.Clamp01((elapsed - delay) / (T - MaxDelay)));
+            float dl = delay * T, md = MaxDelay * T;
+            return Smoother(Mathf.Clamp01((elapsed - dl) / (T - md)));
         }
 
         /// <summary>Cập nhật chuyển tư thế (0,15 s, không phụ thuộc FPS) rồi chạy raycast + IK chống xuyên vật.</summary>
@@ -524,10 +538,10 @@ namespace Khkt.Demo
             idleTime += dt;
 
             HandPoseData target = HandPoseTable.Get(blendTargetPose);
-            if (blendElapsed < HandPoseTable.TransitionDurationS)
+            if (blendElapsed < blendDuration)
             {
-                blendElapsed = Mathf.Min(HandPoseTable.TransitionDurationS, blendElapsed + dt);
-                activePoseData = BlendStaggered(blendFromData, target, blendElapsed);
+                blendElapsed = Mathf.Min(blendDuration, blendElapsed + dt);
+                activePoseData = BlendStaggered(blendFromData, target, blendElapsed, blendDuration);
             }
             else activePoseData = target;
 
@@ -595,19 +609,20 @@ namespace Khkt.Demo
         public void ResetSecondary() { lastPosValid = false; lagEuler = lagEulerVel = Vector3.zero; lagApplied = Vector3.zero; fingerLagApplied = 0f; }
 
         /// <summary>Nội suy tư thế theo thời gian đã trôi (dùng cho kiểm thử độc lập FPS).</summary>
-        public static HandPoseData BlendStaggered(HandPoseData from, HandPoseData to, float elapsed)
+        public static HandPoseData BlendStaggered(HandPoseData from, HandPoseData to, float elapsed, float duration = HandPoseTable.TransitionDurationS)
         {
-            float uw = Phase(elapsed, 0f);
+            float T = duration;
+            float uw = Phase(elapsed, 0f, T);
             // Chuẩn bị nắm (pre-shaping) như tay người: khi chuyển sang tư thế nắm chặt hơn, các ngón duỗi/xòe ra
             // một chút ở nửa đầu rồi mới khép vào; ngón cái dạng ra trước khi đối chiếu.
             float closing = Mathf.Clamp01((Curl(to) - Curl(from)) / 120f);
             return new HandPoseData
             {
-                thumb = PreThumb(ThumbPose.Lerp(from.thumb, to.thumb, Phase(elapsed, ThumbDelay)), Bump(elapsed, ThumbDelay) * closing),
-                index = PreFinger(FingerPose.Lerp(from.index, to.index, Phase(elapsed, FingerDelay[0])), Bump(elapsed, FingerDelay[0]) * closing, -1f),
-                middle = PreFinger(FingerPose.Lerp(from.middle, to.middle, Phase(elapsed, FingerDelay[1])), Bump(elapsed, FingerDelay[1]) * closing, -0.3f),
-                ring = PreFinger(FingerPose.Lerp(from.ring, to.ring, Phase(elapsed, FingerDelay[2])), Bump(elapsed, FingerDelay[2]) * closing, 0.3f),
-                pinky = PreFinger(FingerPose.Lerp(from.pinky, to.pinky, Phase(elapsed, FingerDelay[3])), Bump(elapsed, FingerDelay[3]) * closing, 1f),
+                thumb = PreThumb(ThumbPose.Lerp(from.thumb, to.thumb, Phase(elapsed, ThumbDelay, T)), Bump(elapsed, ThumbDelay, T) * closing),
+                index = PreFinger(FingerPose.Lerp(from.index, to.index, Phase(elapsed, FingerDelay[0], T)), Bump(elapsed, FingerDelay[0], T) * closing, -1f),
+                middle = PreFinger(FingerPose.Lerp(from.middle, to.middle, Phase(elapsed, FingerDelay[1], T)), Bump(elapsed, FingerDelay[1], T) * closing, -0.3f),
+                ring = PreFinger(FingerPose.Lerp(from.ring, to.ring, Phase(elapsed, FingerDelay[2], T)), Bump(elapsed, FingerDelay[2], T) * closing, 0.3f),
+                pinky = PreFinger(FingerPose.Lerp(from.pinky, to.pinky, Phase(elapsed, FingerDelay[3], T)), Bump(elapsed, FingerDelay[3], T) * closing, 1f),
                 wristEulerOffset = Vector3.Lerp(from.wristEulerOffset, to.wristEulerOffset, uw),
                 palmLocalOffset = Vector3.Lerp(from.palmLocalOffset, to.palmLocalOffset, uw)
             };
@@ -617,10 +632,9 @@ namespace Khkt.Demo
             d.index.mcpFlex + d.index.pipFlex + d.middle.mcpFlex + d.middle.pipFlex + d.ring.mcpFlex + d.ring.pipFlex + d.pinky.mcpFlex + d.pinky.pipFlex;
 
         /// <summary>Hình chuông 0→1→0 trong 65% đầu của pha chuyển (0 khi bắt đầu và khi kết thúc).</summary>
-        static float Bump(float elapsed, float delay)
+        static float Bump(float elapsed, float delay, float T)
         {
-            float T = HandPoseTable.TransitionDurationS;
-            float u = Mathf.Clamp01((elapsed - delay) / (T - MaxDelay));
+            float u = Mathf.Clamp01((elapsed - delay * T) / (T - MaxDelay * T));
             return u < 0.65f ? Mathf.Sin(u / 0.65f * Mathf.PI) : 0f;
         }
 

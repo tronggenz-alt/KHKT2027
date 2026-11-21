@@ -136,3 +136,46 @@ cổ tay áo, mép cuộn.
   làm việc (không đưa vào commit này). Muốn giữ ảnh cũ: `git checkout -- docs/ngay-18-11/anh/g2`.
 - Windows: mã không dùng API riêng Mac (Task.Run, Mesh API chung); chưa có mô-đun Windows trên máy để dựng thử.
 - iPad: mức Thấp/Vừa phù hợp; chưa xuất thử (iPad xếp sau cùng).
+
+---
+
+## 7. Lượt 21/11: chuyển động tự nhiên hơn + xoay vật như tay người
+
+Phản hồi: chuyển động còn "cứng ngắc". Nguyên nhân tìm được: hướng bàn tay luôn cố định theo camera (`facing × (20°, −12°, 0)`);
+khi rót (bình nghiêng 105°) bàn tay không nghiêng theo; người dùng không xoay được vật đang cầm; ngón chỉ nhảy giữa vài tư thế
+trong 0,15 s (nhanh hơn tay người ~2 lần); vai, cổ tay không có quán tính.
+
+### Xoay vật trong tay (`HandController`)
+| Điều khiển | Tác dụng |
+|---|---|
+| Giữ **V** + rê chuột | xoay tự do (dọc: gập/duỗi cổ tay, ngang: lật) – camera tạm đứng yên |
+| **J / L** | lật trái / phải (sấp/ngửa cẳng tay), 120°/s |
+| **I / K** | gập / duỗi cổ tay |
+| **U / O** | lệch trái / phải |
+| **N** | đưa vật về thẳng |
+| Tay cầm **VERA Band** (IMU) | vặn/gập cổ tay thật → vật xoay theo, so với hướng lúc cầm lên |
+
+- Giới hạn theo tầm vận động người: gập ±75°, lệch ±70°, lật −170…+150° (phần vượt tầm cẳng tay do vai/khuỷu gánh).
+- Vật xoay quanh điểm nắm; **bàn tay xoay cùng vật** (kể cả khi rót). Gợi ý trên màn hình: "V + chuột / J L I K – Xoay vật trong tay".
+- Đổi mặc định: tay rảnh hướng theo tầm với từ vai (cổ tay thẳng hàng cẳng tay), xoay mượt theo thời gian.
+
+### Chuyển động khớp
+- **Cổ tay có quán tính:** tay đi lên thì cổ tay gập xuống, đi ngang thì lệch ngược, rồi bật về (lò xo tới hạn, độc lập FPS);
+  ngón tay trễ theo; tắt dần khi đang ôm dụng cụ.
+- **Chuẩn bị nắm (pre-shaping):** khi chuyển sang tư thế nắm, ngón duỗi/xòe và ngón cái dạng ra trước rồi mới khép.
+- **Thời lượng theo độ lớn chuyển:** chỉnh nhẹ 0,15 s, nắm/xòe trọn tới 0,32 s; ngón lệch pha cái → trỏ → út.
+- **Ngón hội tụ khi gập** (như nắm tay thật), cổ tay đung đưa rất nhẹ khi rảnh.
+- **Vai (xương đòn)** nhô ra khi với xa, nâng lên khi tay cao.
+- **Khuỷu** chọn hướng có tính giới hạn sấp/ngửa (−80…+88°): lật vật quá tầm thì khuỷu tự dang ra/khép vào (xoay vai);
+  khuỷu không cắt qua thân.
+- **Miệng tay áo nằm trên trục cẳng tay** sau khớp cổ tay: cổ tay gập mạnh thì bàn tay gập ra ngoài cổ áo; da cổ tay uốn trên
+  vùng rộng hơn (±16 mm).
+
+### Độ chi tiết
+- Lưới bàn tay: Siêu nét / Cao / Vừa / Thấp = **64 232 / 41 130 / 19 848 / 9 518 đỉnh** (trước: 41 130 / 28 578 / 14 565 / 7 110).
+- Ống tay áo: 72 / 56 / 36 / 22 cạnh, bước 1,8–2,4 mm ở khuỷu và cổ tay áo; móng tay lưới 13 × 16.
+- Lần đầu dựng trên luồng nền (Cao ~8 s trong Editor), sau đó đọc từ bộ đệm đĩa.
+
+### Ảnh mới
+`anh/tay-moi/sau_xoay_*_goc_nguoi_choi.png`, `*_goc_nghieng.png`, `*_goc_ngoai.png`: lật trái 80°, lật phải 80°, lật phải 130°,
+gập cổ tay 55°, kết hợp (gập 30°, lệch −30°, lật −60°).
