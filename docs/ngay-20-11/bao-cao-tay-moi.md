@@ -179,3 +179,12 @@ trong 0,15 s (nhanh hơn tay người ~2 lần); vai, cổ tay không có quán 
 ### Ảnh mới
 `anh/tay-moi/sau_xoay_*_goc_nguoi_choi.png`, `*_goc_nghieng.png`, `*_goc_ngoai.png`: lật trái 80°, lật phải 80°, lật phải 130°,
 gập cổ tay 55°, kết hợp (gập 30°, lệch −30°, lật −60°).
+
+### Kiểm thử lượt 21/11
+| Bộ | Kết quả |
+|---|---|
+| `KhktTayMoiVerify.Run` | **38/38** (thêm: xoay vật 8 góc – vật & bàn tay đúng góc, sai lệch 0,0°; khuỷu tự đổi hướng tới 17,7 cm khi lật quá tầm; không xuyên bình; chuẩn bị nắm; quán tính cổ tay 12,9° rồi về 0°; Xòe→Chụm 0,32 s, bước lớn nhất 4,0°/khung ở 150 FPS – trước 11°) |
+| `KhktN18Verify.RunG2` | **16/16** |
+| `KhktWave6Verify.Run` | 63 đạt; vẫn chỉ lỗi bước 7.7 menu chính như 20/11 (không liên quan tay) – mọi bước phòng lab đạt với HandController mới |
+| Xuất app Mac | Succeeded, 0 lỗi, 41,8 s, 248,4 MB |
+| Đo A/B 2 × 2 × 90 s (vẫn có bản VERA Lab PID 70352 chạy song song) | lần 2 (ổn định): có tay p95 25,51 ms / TB 20,52 ms – ẩn tay p95 25,09 ms / TB 20,01 ms → tay mới tốn ≈ 0,5 ms/khung. Lần 1 nhiễu (ẩn tay có khung treo 5,6 s). |
