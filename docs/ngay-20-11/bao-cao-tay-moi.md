@@ -188,3 +188,4 @@ gập cổ tay 55°, kết hợp (gập 30°, lệch −30°, lật −60°).
 | `KhktWave6Verify.Run` | 63 đạt; vẫn chỉ lỗi bước 7.7 menu chính như 20/11 (không liên quan tay) – mọi bước phòng lab đạt với HandController mới |
 | Xuất app Mac | Succeeded, 0 lỗi, 41,8 s, 248,4 MB |
 | Đo A/B 2 × 2 × 90 s (vẫn có bản VERA Lab PID 70352 chạy song song) | lần 2 (ổn định): có tay p95 25,51 ms / TB 20,52 ms – ẩn tay p95 25,09 ms / TB 20,01 ms → tay mới tốn ≈ 0,5 ms/khung. Lần 1 nhiễu (ẩn tay có khung treo 5,6 s). |
+| Đo do người dùng chạy 21/11 12:18 (`-vera-nhan=tay_moi_sach`, bản app tối 20/11, vẫn có PID 70352 chạy song song) | **p95 16,76 ms** (mốc 17,60 ms) · TB 17,92 ms · GC 2,62 KB/khung. Một khung treo 23,9 s ở giây 54, khu 12, lúc tour đổi khu: cpu_ms 16,8, gpu_ms 12,8 bình thường → app bị dừng từ ngoài (mất tiêu điểm/ngủ), không phải tay. |
