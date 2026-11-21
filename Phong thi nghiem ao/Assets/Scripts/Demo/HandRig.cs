@@ -135,6 +135,7 @@ namespace Khkt.Demo
         float blendDuration = HandPoseTable.TransitionDurationS;
         /// <summary>Thời lượng của lần chuyển tư thế đang chạy (s).</summary>
         public float CurrentTransitionS => blendDuration;
+        int lastExplicitPoseFrame = -10;
         float shownCurl = -1f;
         float idleTime;
         bool built;
@@ -458,6 +459,7 @@ namespace Khkt.Demo
         {
             EnsureBuilt();
             HandPoseId wanted = PoseOverride ?? pose;
+            lastExplicitPoseFrame = Time.frameCount;
             if (immediate)
             {
                 CurrentPose = wanted;
@@ -494,7 +496,8 @@ namespace Khkt.Demo
             else if (!Mathf.Approximately(curl, shownCurl))
             {
                 shownCurl = curl;
-                if (TargetContactObject == null && CurrentPose <= HandPoseId.ChumCam)
+                // chỉ dùng khi không ai chọn tư thế rõ ràng (HandController chọn theo hoàn cảnh mỗi khung)
+                if (TargetContactObject == null && CurrentPose <= HandPoseId.ChumCam && Time.frameCount - lastExplicitPoseFrame > 1)
                 {
                     if (curl > 0.6f) SetTargetPose(HandPoseId.ChumCam);
                     else if (curl > 0.15f) SetTargetPose(HandPoseId.Nghi);
@@ -771,13 +774,30 @@ namespace Khkt.Demo
                 float sign = side == 0 ? 1f : -1f;
                 float glove = WearGloves ? 0.0006f : 0f;
 
-                for (int i = 0; i < fingerCount; i++)
-                {
-                    FingerPose basePose = activePoseData.GetFinger(i);
-                    SolveSingleFingerContact(i, basePose, sign, toolCenter, toolAxis, maxExtent, padRadius[i] + glove);
-                }
+                Vector3 palmBase = palmRoot.position;
+                SolveDigits(fingerCount, sign, toolCenter, toolAxis, maxExtent, glove);
 
-                SolveThumbContact(activePoseData.thumb, sign, toolCenter, toolAxis, maxExtent, padRadius[4] + glove);
+                // Như tay người: ngón chưa chạm tới thì dịch cả bàn tay một chút về phía vật rồi đặt lại ngón (≤ 1,5 cm)
+                for (int it = 0; it < 3 && LastMaxSurfaceErrorMm > 2.2f && residualCount > 0; it++)
+                {
+                    float err0 = LastMaxSurfaceErrorMm;
+                    int pen0 = LastPenetrationCount;
+                    Vector3 palm0 = palmRoot.position;
+                    Vector3 shift = Vector3.ClampMagnitude(residualSum / residualCount * 0.9f, 0.012f);
+                    if ((palm0 + shift - palmBase).sqrMagnitude > 0.02f * 0.02f) break;   // tổng dịch ≤ 2 cm
+                    palmRoot.position = palm0 + shift;
+                    LastMaxSurfaceErrorMm = 0f;
+                    LastPenetrationCount = 0;
+                    SolveDigits(fingerCount, sign, toolCenter, toolAxis, maxExtent, glove);
+                    if (LastPenetrationCount > pen0 || LastMaxSurfaceErrorMm > err0)
+                    {
+                        palmRoot.position = palm0;
+                        LastMaxSurfaceErrorMm = 0f;
+                        LastPenetrationCount = 0;
+                        SolveDigits(fingerCount, sign, toolCenter, toolAxis, maxExtent, glove);
+                        break;
+                    }
+                }
             }
             finally
             {
@@ -787,6 +807,25 @@ namespace Khkt.Demo
                     if (col != null) col.enabled = cachedPrevEnabled[c];
                 }
             }
+        }
+
+        Vector3 residualSum;
+        int residualCount;
+
+        void SolveDigits(int fingerCount, float sign, Vector3 toolCenter, Vector3 toolAxis, float maxExtent, float glove)
+        {
+            residualSum = Vector3.zero;
+            residualCount = 0;
+            for (int i = 0; i < fingerCount; i++)
+                SolveSingleFingerContact(i, activePoseData.GetFinger(i), sign, toolCenter, toolAxis, maxExtent, padRadius[i] + glove);
+            SolveThumbContact(activePoseData.thumb, sign, toolCenter, toolAxis, maxExtent, padRadius[4] + glove);
+        }
+
+        void AddResidual(Vector3 tip, RaycastHit hit, float padR)
+        {
+            Vector3 want = hit.point + hit.normal * padR;
+            residualSum += want - tip;
+            residualCount++;
         }
 
         void SolveSingleFingerContact(int i, FingerPose f, float sign, Vector3 toolCenter, Vector3 toolAxis, float maxExtent, float padR)
@@ -871,6 +910,7 @@ namespace Khkt.Demo
             ApplyFingerAngles(i, bestMcp, bestSpread, bestPip, finalDip);
 
             Vector3 finalTip = fingerTips[i].position;
+            AddResidual(finalTip, bestHit, padR);
             if (Vector3.Dot(finalTip - bestHit.point, bestHit.normal) < padR - 0.0022f)
                 LastPenetrationCount++;
 
@@ -961,6 +1001,7 @@ namespace Khkt.Demo
 
             ApplyThumbAngles(cur, sign);
             Vector3 finalTip = thumbTip.position;
+            AddResidual(finalTip, bestHit, thumbPadR);
             if (Vector3.Dot(finalTip - bestHit.point, bestHit.normal) < thumbPadR - 0.0022f)
                 LastPenetrationCount++;
 

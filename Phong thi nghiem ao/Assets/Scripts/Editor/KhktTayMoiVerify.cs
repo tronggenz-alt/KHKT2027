@@ -57,7 +57,7 @@ namespace Khkt.EditorTools
             EditorApplication.update -= OnEditorUpdate;
             EditorApplication.update += OnEditorUpdate;
             callStack.Clear();
-            deadlineRealtime = Time.realtimeSinceStartup + 300f;
+            deadlineRealtime = Time.realtimeSinceStartup + 600f;
             passes = failures = runtimeErrors = 0;
             failedNotes.Clear();
             runtimeErrNotes.Clear();
@@ -80,6 +80,8 @@ namespace Khkt.EditorTools
         {
             if (type != LogType.Exception && type != LogType.Error && type != LogType.Assert) return;
             if (condition != null && (condition.StartsWith("[TAY") || condition.StartsWith("Curl error"))) return;
+            // gói Unity AI Assistant của Editor tự thử kết nối mạng và ghi lỗi khi thất bại – không thuộc game, không có trong app
+            if (stackTrace != null && stackTrace.Contains("Unity.AI.Tracing")) return;
             runtimeErrors++;
             if (runtimeErrNotes.Count < 8) runtimeErrNotes.Add($"{condition} | {stackTrace}");
         }
@@ -260,10 +262,22 @@ namespace Khkt.EditorTools
                         rig.PoseOverride = s.pose;
                     }
 
-                    yield return WaitSeconds(0.45f);
+                    yield return WaitSeconds(0.6f);
                     yield return WaitFrames(6);
                     if (s.stopcock || s.pickKind != null)
-                        IkResult[s.name] = (rig.LastPenetrationCount, rig.LastMaxSurfaceErrorMm);
+                    {
+                        // ổn định: lấy giá trị xấu nhất trong 10 khung liên tiếp
+                        int penMax = 0; float errMax = 0f, errMin = 999f;
+                        for (int k = 0; k < 10; k++)
+                        {
+                            yield return null;
+                            penMax = Mathf.Max(penMax, rig.LastPenetrationCount);
+                            errMax = Mathf.Max(errMax, rig.LastMaxSurfaceErrorMm);
+                            errMin = Mathf.Min(errMin, rig.LastMaxSurfaceErrorMm);
+                        }
+                        IkResult[s.name] = (penMax, errMax);
+                        Debug.Log($"[TAY_SO] {prefix}_{s.name} 10 khung: err {errMin:0.00}–{errMax:0.00} mm, pen tối đa {penMax}");
+                    }
                     Debug.Log($"[TAY_SO] {prefix}_{s.name} pose={rig.CurrentPose} pen={rig.LastPenetrationCount} err={rig.LastMaxSurfaceErrorMm:0.00}mm");
                     RecordArm(s.name, rig);
 

@@ -460,7 +460,7 @@ namespace Khkt.Avatar
         // ------------------------------------------------------------------
         // Bộ nhớ đệm lưới trên đĩa: lần đầu dựng (vài giây, luồng nền) rồi ghi; các lần sau đọc trong vài chục ms
         // ------------------------------------------------------------------
-        const int CacheVersion = 5;   // tăng khi đổi hình học / trọng số / màu đỉnh
+        const int CacheVersion = 6;   // tăng khi đổi hình học / trọng số / màu đỉnh
 
         static string CacheFile(HandBind b, int lod)
         {
@@ -510,11 +510,12 @@ namespace Khkt.Avatar
             {
                 try
                 {
-                    using var br = new BinaryReader(File.OpenRead(file));
-                    if (br.ReadInt32() == CacheVersion)
+                    byte[] buf = File.ReadAllBytes(file);
+                    int off = 4;
+                    if (BitConverter.ToInt32(buf, 0) == CacheVersion)
                     {
-                        var d = new HandData { hand = ReadPart(br), cuff = ReadPart(br) };
-                        for (int i = 0; i < 5; i++) d.nails[i] = ReadPart(br);
+                        var d = new HandData { hand = ReadPart(buf, ref off), cuff = ReadPart(buf, ref off) };
+                        for (int i = 0; i < 5; i++) d.nails[i] = ReadPart(buf, ref off);
                         d.ms = (float)sw.Elapsed.TotalMilliseconds;
                         d.fromDisk = true;
                         return d;
@@ -543,61 +544,49 @@ namespace Khkt.Avatar
             return data;
         }
 
+        // Ghi/đọc cả mảng một lượt (MemoryMarshal) – nhanh hơn ghi từng số ~20 lần
+        static void WriteArr<T>(BinaryWriter w, T[] a) where T : struct
+        {
+            w.Write(a == null ? -1 : a.Length);
+            if (a != null && a.Length > 0) w.Write(System.Runtime.InteropServices.MemoryMarshal.AsBytes(new ReadOnlySpan<T>(a)));
+        }
+
+        static T[] ReadArr<T>(byte[] buf, ref int off) where T : struct
+        {
+            int n = BitConverter.ToInt32(buf, off); off += 4;
+            if (n < 0) return null;
+            var a = new T[n];
+            int bytes = n * System.Runtime.CompilerServices.Unsafe.SizeOf<T>();
+            new ReadOnlySpan<byte>(buf, off, bytes).CopyTo(System.Runtime.InteropServices.MemoryMarshal.AsBytes(new Span<T>(a)));
+            off += bytes;
+            return a;
+        }
+
         static void WritePart(BinaryWriter w, PartData d)
         {
-            w.Write(d.name ?? "");
-            int n = d.pos.Length;
-            w.Write(n);
-            WriteV3(w, d.pos); w.Write(d.nrm != null); if (d.nrm != null) WriteV3(w, d.nrm);
-            w.Write(ReferenceEquals(d.bindPos, d.pos)); if (!ReferenceEquals(d.bindPos, d.pos)) WriteV3(w, d.bindPos);
-            for (int i = 0; i < n; i++) { var c = d.col[i]; w.Write(c.r); w.Write(c.g); w.Write(c.b); w.Write(c.a); }
-            for (int i = 0; i < n; i++) { w.Write(d.uv[i].x); w.Write(d.uv[i].y); }
-            w.Write(d.wts != null);
-            if (d.wts != null)
-                for (int i = 0; i < n; i++)
-                {
-                    var b = d.wts[i];
-                    w.Write((byte)b.boneIndex0); w.Write((byte)b.boneIndex1); w.Write((byte)b.boneIndex2); w.Write((byte)b.boneIndex3);
-                    w.Write(b.weight0); w.Write(b.weight1); w.Write(b.weight2); w.Write(b.weight3);
-                }
-            w.Write(d.tris.Length);
-            for (int i = 0; i < d.tris.Length; i++) w.Write(d.tris[i]);
+            WriteArr(w, System.Text.Encoding.UTF8.GetBytes(d.name ?? ""));
+            WriteArr(w, d.pos);
+            WriteArr(w, d.nrm);
+            w.Write(ReferenceEquals(d.bindPos, d.pos));
+            if (!ReferenceEquals(d.bindPos, d.pos)) WriteArr(w, d.bindPos);
+            WriteArr(w, d.col);
+            WriteArr(w, d.uv);
+            WriteArr(w, d.wts);
+            WriteArr(w, d.tris);
         }
 
-        static PartData ReadPart(BinaryReader r)
+        static PartData ReadPart(byte[] buf, ref int off)
         {
-            var d = new PartData { name = r.ReadString() };
-            int n = r.ReadInt32();
-            d.pos = ReadV3(r, n);
-            if (r.ReadBoolean()) d.nrm = ReadV3(r, n);
-            d.bindPos = r.ReadBoolean() ? d.pos : ReadV3(r, n);
-            d.col = new Color[n];
-            for (int i = 0; i < n; i++) d.col[i] = new Color(r.ReadSingle(), r.ReadSingle(), r.ReadSingle(), r.ReadSingle());
-            d.uv = new Vector2[n];
-            for (int i = 0; i < n; i++) d.uv[i] = new Vector2(r.ReadSingle(), r.ReadSingle());
-            if (r.ReadBoolean())
-            {
-                d.wts = new BoneWeight[n];
-                for (int i = 0; i < n; i++)
-                {
-                    var b = new BoneWeight { boneIndex0 = r.ReadByte(), boneIndex1 = r.ReadByte(), boneIndex2 = r.ReadByte(), boneIndex3 = r.ReadByte() };
-                    b.weight0 = r.ReadSingle(); b.weight1 = r.ReadSingle(); b.weight2 = r.ReadSingle(); b.weight3 = r.ReadSingle();
-                    d.wts[i] = b;
-                }
-            }
-            int tc = r.ReadInt32();
-            d.tris = new int[tc];
-            for (int i = 0; i < tc; i++) d.tris[i] = r.ReadInt32();
+            var d = new PartData { name = System.Text.Encoding.UTF8.GetString(ReadArr<byte>(buf, ref off)) };
+            d.pos = ReadArr<Vector3>(buf, ref off);
+            d.nrm = ReadArr<Vector3>(buf, ref off);
+            bool same = buf[off] != 0; off += 1;
+            d.bindPos = same ? d.pos : ReadArr<Vector3>(buf, ref off);
+            d.col = ReadArr<Color>(buf, ref off);
+            d.uv = ReadArr<Vector2>(buf, ref off);
+            d.wts = ReadArr<BoneWeight>(buf, ref off);
+            d.tris = ReadArr<int>(buf, ref off);
             return d;
-        }
-
-        static void WriteV3(BinaryWriter w, Vector3[] a) { for (int i = 0; i < a.Length; i++) { w.Write(a[i].x); w.Write(a[i].y); w.Write(a[i].z); } }
-
-        static Vector3[] ReadV3(BinaryReader r, int n)
-        {
-            var a = new Vector3[n];
-            for (int i = 0; i < n; i++) a[i] = new Vector3(r.ReadSingle(), r.ReadSingle(), r.ReadSingle());
-            return a;
         }
 
         static HandData BuildHandData(HandSdf sdf, HandBind b, int lod)
@@ -1175,6 +1164,7 @@ namespace Khkt.Avatar
             int rc = rows.Count;
             var pos = new Vector3[rc * seg];
             var posFlex = new Vector3[pos.Length];
+            var posTwist = new Vector3[pos.Length];
             var col = new Color[pos.Length];
             var uv0 = new Vector2[pos.Length];
             var wts = new BoneWeight[pos.Length];
@@ -1204,16 +1194,25 @@ namespace Khkt.Avatar
                     float ex = 1.0f, ey = 0.93f;
                     Vector3 p = new Vector3(Mathf.Cos(th) * rad * ex, Mathf.Sin(th) * rad * ey, row.z);
                     Vector3 pf = new Vector3(Mathf.Cos(th) * (rad + foldFlex) * ex, Mathf.Sin(th) * (rad + foldFlex) * ey, row.z);
+                    // nếp xoắn chéo trên cẳng tay khi lật (sấp/ngửa)
+                    float twistMask = full && row.kind == 0 ? SS(l1 + 0.03f, l1 + 0.08f, row.z) * (1f - SS(zCuff - 0.03f, zCuff, row.z)) : 0f;
+                    float tw = twistMask * 0.0032f * Mathf.Sin(th * 2f + row.z * 48f) + twistMask * 0.0012f * Mathf.Sin(th * 5f + row.z * 95f);
+                    Vector3 ptw = new Vector3(Mathf.Cos(th) * (rad + tw) * ex, Mathf.Sin(th) * (rad + tw) * ey, row.z);
                     int idx = r * seg + s;
                     pos[idx] = p;
                     posFlex[idx] = pf;
+                    posTwist[idx] = ptw;
                     float cuffSeam = 0f;
                     if (row.kind == 0 && row.z > zCuff - 0.002f)
                     {
                         cuffSeam = Mathf.Max(Mathf.Exp(-Mathf.Pow((row.z - (zCuff + 0.0035f)) / 0.0008f, 2f)),
                                              Mathf.Exp(-Mathf.Pow((row.z - (zEnd - 0.0035f)) / 0.0008f, 2f)));
                     }
-                    col[idx] = new Color(Mathf.Max(seam, cuffSeam), 0f, ao, 0f);
+                    // G = độ chùng vải (0 ở vai, cổ tay áo, mặt trong; 1 giữa bắp tay/cẳng tay) cho shader rủ/trễ
+                    float loose = row.kind != 0 ? 0f : full
+                        ? SS(0.02f, 0.10f, row.z) * (1f - SS(zCuff - 0.05f, zCuff - 0.005f, row.z))
+                        : (1f - SS(zCuff - 0.04f, zCuff - 0.005f, row.z)) * 0.6f;
+                    col[idx] = new Color(Mathf.Max(seam, cuffSeam), loose, ao, 0f);
                     uv0[idx] = new Vector2(th * baseR, row.z);
                     wts[idx] = full ? SleeveWeights(Mathf.Min(row.z, zEnd), l1, l2) : new BoneWeight { boneIndex0 = SleeveBoneCuff, weight0 = 1f };
                 }
@@ -1263,6 +1262,13 @@ namespace Khkt.Avatar
                 var dn = new Vector3[pos.Length];
                 for (int i = 0; i < pos.Length; i++) { dv[i] = posFlex[i] - pos[i]; dn[i] = nf[i] - baseNormals[i]; }
                 m.AddBlendShapeFrame("gập khuỷu", 100f, dv, dn, null);
+                tmp.vertices = posTwist;
+                tmp.RecalculateNormals();
+                nf = tmp.normals;
+                var dv2 = new Vector3[pos.Length];
+                var dn2 = new Vector3[pos.Length];
+                for (int i = 0; i < pos.Length; i++) { dv2[i] = posTwist[i] - pos[i]; dn2[i] = nf[i] - baseNormals[i]; }
+                m.AddBlendShapeFrame("xoắn cẳng tay", 100f, dv2, dn2, null);
                 if (Application.isPlaying) UnityEngine.Object.Destroy(tmp); else UnityEngine.Object.DestroyImmediate(tmp);
             }
             m.RecalculateBounds();
@@ -1303,6 +1309,11 @@ namespace Khkt.Avatar
                 float ring = Mathf.Sin(z * (Mathf.PI * 2f / 0.027f) + 1.3f * Mathf.Sin(th * 2f + 0.4f) + 0.8f * Mathf.Sin(th * 3.1f));
                 d += me * (0.35f + 0.65f * inner) * 0.0042f * ring;
                 flexExtra = me * (0.25f + 0.75f * inner) * (0.0050f * ring - 0.0016f * inner);
+                // nếp nhăn mảnh dày đặc ở mặt trong khuỷu (vải bị dồn)
+                float fine = Mathf.Sin(z * (Mathf.PI * 2f / 0.0095f) + 2.0f * Mathf.Sin(th * 3.3f));
+                float mi = Mathf.Exp(-Mathf.Pow((z - l1) / 0.035f, 2f)) * inner * inner;
+                d += mi * 0.0011f * fine;
+                flexExtra += mi * 0.0016f * fine;
                 // nếp rủ dọc bắp tay & cẳng tay
                 d += 0.0022f * Mathf.Sin(th * 3f + z * 9f + 0.8f) * (1f - me) * cuffMask;
                 d += 0.0013f * Mathf.Sin(th * 5f - z * 14f + 2.1f) * cuffMask;
@@ -1336,6 +1347,74 @@ namespace Khkt.Avatar
             else if (zf <= k3) { float t = (zf - k2) / (k3 - k2); w[SleeveBoneTwist2] += rest * (1f - t); w[SleeveBoneCuff] += rest * t; }
             else w[SleeveBoneCuff] += rest;
             return Top4(w);
+        }
+
+        static Mesh buttonMesh;
+
+        /// <summary>Cúc áo nhỏ (đĩa bo mép, 4 lỗ chỉ) – trục +z là pháp tuyến mặt cúc.</summary>
+        public static Mesh ButtonMesh()
+        {
+            if (buttonMesh != null) return buttonMesh;
+            const int seg = 20;
+            float r = 0.0056f, h = 0.0017f;
+            var v = new List<Vector3>(); var c = new List<Color>(); var t = new List<int>();
+            // mặt trên (hơi lõm ở giữa) + mép bo + mặt đáy
+            v.Add(new Vector3(0f, 0f, h * 0.65f)); c.Add(new Color(0f, 0f, 0.85f, 0f));
+            for (int ring = 1; ring <= 3; ring++)
+            {
+                float rr = r * ring / 3f;
+                float z = ring == 3 ? h : h * (0.65f + 0.12f * ring);
+                for (int i = 0; i < seg; i++)
+                {
+                    float a = i * Mathf.PI * 2f / seg;
+                    Vector3 p = new Vector3(Mathf.Cos(a) * rr, Mathf.Sin(a) * rr, z);
+                    // 4 lỗ chỉ: tối hơn
+                    float hole = 0f;
+                    for (int k = 0; k < 4; k++)
+                    {
+                        float ha = k * Mathf.PI * 0.5f + Mathf.PI * 0.25f;
+                        Vector2 hc = new Vector2(Mathf.Cos(ha), Mathf.Sin(ha)) * r * 0.30f;
+                        hole = Mathf.Max(hole, 1f - Mathf.Clamp01((new Vector2(p.x, p.y) - hc).magnitude / (r * 0.16f)));
+                    }
+                    v.Add(p); c.Add(new Color(0f, 0f, 1f - 0.6f * hole, 0f));
+                }
+            }
+            int rim = v.Count;
+            for (int i = 0; i < seg; i++)
+            {
+                float a = i * Mathf.PI * 2f / seg;
+                v.Add(new Vector3(Mathf.Cos(a) * r, Mathf.Sin(a) * r, 0f)); c.Add(new Color(0f, 0f, 0.7f, 0f));
+            }
+            for (int i = 0; i < seg; i++) { int i1 = (i + 1) % seg; t.Add(0); t.Add(1 + i1); t.Add(1 + i); }
+            for (int ring = 0; ring < 2; ring++)
+                for (int i = 0; i < seg; i++)
+                {
+                    int i1 = (i + 1) % seg, a0 = 1 + ring * seg, a1 = 1 + (ring + 1) * seg;
+                    t.Add(a0 + i); t.Add(a0 + i1); t.Add(a1 + i);
+                    t.Add(a0 + i1); t.Add(a1 + i1); t.Add(a1 + i);
+                }
+            for (int i = 0; i < seg; i++)
+            {
+                int i1 = (i + 1) % seg, a0 = 1 + 2 * seg;
+                t.Add(a0 + i); t.Add(a0 + i1); t.Add(rim + i);
+                t.Add(a0 + i1); t.Add(rim + i1); t.Add(rim + i);
+            }
+            buttonMesh = new Mesh { name = "Cúc cổ tay áo" };
+            buttonMesh.SetVertices(v);
+            buttonMesh.SetColors(c);
+            buttonMesh.SetUVs(1, v);
+            buttonMesh.SetTriangles(t, 0);
+            buttonMesh.RecalculateNormals();
+            // bảo đảm mặt trên hướng +z
+            var n = buttonMesh.normals;
+            if (n[0].z < 0f)
+            {
+                for (int i = 0; i < t.Count; i += 3) (t[i + 1], t[i + 2]) = (t[i + 2], t[i + 1]);
+                buttonMesh.SetTriangles(t, 0);
+                buttonMesh.RecalculateNormals();
+            }
+            buttonMesh.RecalculateBounds();
+            return buttonMesh;
         }
 
         /// <summary>Bindpose cho 5 xương tay áo (xương đặt trên trục z, không xoay).</summary>

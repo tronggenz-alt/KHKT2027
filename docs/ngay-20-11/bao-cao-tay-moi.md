@@ -189,3 +189,38 @@ gập cổ tay 55°, kết hợp (gập 30°, lệch −30°, lật −60°).
 | Xuất app Mac | Succeeded, 0 lỗi, 41,8 s, 248,4 MB |
 | Đo A/B 2 × 2 × 90 s (vẫn có bản VERA Lab PID 70352 chạy song song) | lần 2 (ổn định): có tay p95 25,51 ms / TB 20,52 ms – ẩn tay p95 25,09 ms / TB 20,01 ms → tay mới tốn ≈ 0,5 ms/khung. Lần 1 nhiễu (ẩn tay có khung treo 5,6 s). |
 | Đo do người dùng chạy 21/11 12:18 (`-vera-nhan=tay_moi_sach`, bản app tối 20/11, vẫn có PID 70352 chạy song song) | **p95 16,76 ms** (mốc 17,60 ms) · TB 17,92 ms · GC 2,62 KB/khung. Một khung treo 23,9 s ở giây 54, khu 12, lúc tour đổi khu: cpu_ms 16,8, gpu_ms 12,8 bình thường → app bị dừng từ ngoài (mất tiêu điểm/ngủ), không phải tay. |
+
+---
+
+## 8. Lượt 21/11 (2): tay cư xử theo hoàn cảnh như người thật + vải áo sống động
+
+Phản hồi: "lúc di chuyển tay chỉ có một kiểu cử động; vải áo còn sơ sài". Hướng làm: nghĩ như người đang đi và đang làm.
+
+### Hành vi tay theo hoàn cảnh (`ArmRig`, `HandPoseTable`)
+| Hoàn cảnh | Tay phải | Tay trái |
+|---|---|---|
+| Đưa tay tới dụng cụ | đi theo **quỹ đạo cong**, vận tốc hình chuông (lò xo bậc hai), bàn tay **mở đón hình chữ C** (tư thế mới `MoCam`) | đặt trước bàn |
+| Không thao tác > 2,5 s | **buông xuống** ngang hông, lòng bàn tay quay vào đùi, ngón thả lỏng (`Nghi` thay cho `Xoe`) | đặt trước bàn |
+| Đi bộ | buông xuống, **vung theo bước** (~22 cm), khuỷu hướng ra sau, gập 35–46° | vung **ngược pha** |
+| Rót / hút / nhỏ giọt / đo / sục khí vào một cốc | làm việc | **đưa sang đỡ cốc**, ngón ôm thành cốc (IK, không xuyên); xong việc trở về |
+| Cầm vật | khớp đúng vật, không buông | — |
+
+- Khi ngón chưa chạm tới vật, **bàn tay tự dịch** về phía vật (≤ 2 cm, tối đa 3 lần, chỉ giữ nếu tốt hơn), như người điều chỉnh lại tay khi cầm. Cầm lần lượt **8 ống nghiệm** trong cảnh: sai lệch lớn nhất 2,43 mm (trước: 2 ống 3,96 mm).
+- Khuỷu: khi cánh tay gần thẳng đứng (buông), hướng khuỷu chuyển dần ra sau như người thật.
+
+### Vải áo (`TayNguoi.shader`, `TayNguoiLuoi`, `ArmRig`)
+- **Rủ theo trọng lực** trong shader: mặt dưới ống tay chùng xuống theo hướng tay thật lúc đó (độ chùng theo vùng, 0 ở cổ tay áo).
+- **Quán tính:** vải văng nhẹ khi tay cử động hoặc đổi tốc độ (tính trong hệ thân người → đi đều thì không trễ); 4,6 mm khi đi.
+- **Nếp xoắn chéo** khi lật cẳng tay (blendshape thứ hai, theo góc xoắn); **nếp nhăn mảnh dày** ở mặt trong khuỷu.
+- **Cúc cổ tay áo** (đĩa bo mép, 4 lỗ chỉ).
+
+### Kiểm thử thêm
+Tư thế theo hoàn cảnh · tay buông khi rảnh (mức 0,97, thấp hơn mắt 72 cm) · đi bộ vung tay 22,9 / 21,4 cm, khuỷu 46° / 35° ·
+vải văng 4,6 mm · tay trái đỡ cốc (cách cốc 2,8 cm, IK 0,6 mm, không xuyên) rồi trở về · nếp xoắn + cúc · cầm mọi ống nghiệm/pipet.
+Bộ kiểm thử bỏ qua riêng lỗi mạng của gói Editor *Unity AI Assistant* (`connection.state_change`, không thuộc game).
+
+Ảnh: `anh/tay-moi/sau_hv_1_tha_long_*`, `sau_hv_2_di_bo_goc_ngoai.png`, `sau_hv_3_tay_trai_do_coc_*`.
+
+Kết quả cuối lượt (2): `KhktTayMoiVerify` **48/48**, `KhktN18Verify.RunG2` **16/16** (cổ tay áo lệch 1,86 mm), Wave6 63 đạt + bước 7.7 menu như cũ,
+xuất app Mac Succeeded (248,1 MB). Ở chế độ ngắm theo kịch bản (`OverrideAimPoint`, chỉ cho kiểm thử/tự động) tay tới thẳng chỗ ngắm,
+không đi đường cong, để số đo ổn định.

@@ -23,6 +23,8 @@ Shader "Khkt/TayNguoi"
         _AoStrength ("AO đỉnh", Range(0, 1)) = 0.85
         _Inflate ("Phồng theo pháp tuyến (m)", Float) = 0
         _Translucency ("Sáng xuyên", Range(0, 1)) = 0
+        _ClothSag ("Vải rủ theo trọng lực (m)", Float) = 0.0035
+        _ClothLag ("Vải trễ quán tính (m, thế giới)", Vector) = (0, 0, 0, 0)
     }
 
     SubShader
@@ -48,6 +50,8 @@ Shader "Khkt/TayNguoi"
             float _AoStrength;
             float _Inflate;
             float _Translucency;
+            float _ClothSag;
+            float4 _ClothLag;
         CBUFFER_END
         ENDHLSL
 
@@ -99,14 +103,23 @@ Shader "Khkt/TayNguoi"
                 UNITY_SETUP_INSTANCE_ID(v);
                 UNITY_TRANSFER_INSTANCE_ID(v, o);
                 float3 p = v.positionOS.xyz + v.normalOS * _Inflate;
-                VertexPositionInputs pi = GetVertexPositionInputs(p);
-                o.positionCS = pi.positionCS;
-                o.positionWS = pi.positionWS;
-                o.normalWS = TransformObjectToWorldNormal(v.normalOS);
+                float3 posWS = TransformObjectToWorld(p);
+                float3 nWS = TransformObjectToWorldNormal(v.normalOS);
+                if (_Mode > 1.5)
+                {
+                    // Vải: chùng xuống theo trọng lực (mặt dưới ống tay rủ nhiều hơn) + trễ theo quán tính, theo độ chùng (G)
+                    float loose = v.color.g;
+                    float under = saturate(-nWS.y);
+                    posWS.y -= _ClothSag * loose * (0.35 + 0.65 * under);
+                    posWS += _ClothLag.xyz * loose * (0.5 + 0.5 * under);
+                }
+                o.positionCS = TransformWorldToHClip(posWS);
+                o.positionWS = posWS;
+                o.normalWS = nWS;
                 o.color = v.color;
                 o.bindPos = v.bindPos;
                 o.uv0 = v.uv0;
-                o.fog = ComputeFogFactor(pi.positionCS.z);
+                o.fog = ComputeFogFactor(o.positionCS.z);
                 return o;
             }
 

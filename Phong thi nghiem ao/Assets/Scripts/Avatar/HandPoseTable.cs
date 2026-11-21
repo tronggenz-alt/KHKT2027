@@ -15,7 +15,9 @@ namespace Khkt.Avatar
         KhoaBuret = 6,
         Kep = 7,
         Que = 8,
-        ChiTay = 9
+        ChiTay = 9,
+        /// <summary>Mở chuẩn bị cầm: bàn tay hình chữ C, ngón cái dạng ra – khi đưa tay tới dụng cụ.</summary>
+        MoCam = 10
     }
 
     /// <summary>Góc khớp của một ngón tay (đơn vị độ).</summary>
@@ -224,6 +226,16 @@ namespace Khkt.Avatar
                 ring = new FingerPose(80f, 2f, 95f, 66f),
                 pinky = new FingerPose(84f, 5f, 96f, 68f),
                 wristEulerOffset = new Vector3(-4f, 0f, 0f)
+            }),
+            // 10. MoCam (mở chuẩn bị cầm, hình chữ C)
+            ClampAll(new HandPoseData
+            {
+                thumb = new ThumbPose(10f, -18f, 32f, 8f, 6f),
+                index = new FingerPose(16f, -7f, 22f, 10f),
+                middle = new FingerPose(18f, -2f, 24f, 12f),
+                ring = new FingerPose(20f, 3f, 26f, 13f),
+                pinky = new FingerPose(23f, 9f, 28f, 14f),
+                wristEulerOffset = new Vector3(-8f, 0f, 0f)
             })
         };
 
@@ -289,10 +301,12 @@ namespace Khkt.Avatar
                 return HandPoseId.ChumCam;
             }
 
-            if (hoverInteractive) return HandPoseId.ChumCam;
-            if (act == HandController.Act.Pick || act == HandController.Act.Swirl || act == HandController.Act.BioTarget)
-                return HandPoseId.ChiTay;
-            return HandPoseId.Xoe;
+            // Như tay người: đưa tay tới vật thì mở ra đón (hình chữ C); lắc bình thì chụm; không làm gì thì thả lỏng
+            if (act == HandController.Act.Pick) return HandPoseId.MoCam;
+            if (act == HandController.Act.Swirl) return HandPoseId.ChumCam;
+            if (hoverInteractive) return HandPoseId.MoCam;
+            if (act == HandController.Act.BioTarget) return HandPoseId.ChiTay;
+            return HandPoseId.Nghi;
         }
     }
 }
