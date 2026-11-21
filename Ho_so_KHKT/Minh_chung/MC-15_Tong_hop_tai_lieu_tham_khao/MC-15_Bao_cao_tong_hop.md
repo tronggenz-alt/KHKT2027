@@ -7,7 +7,7 @@ Bảng đầy đủ: [`MC-15_Bang_nguon.csv`](MC-15_Bang_nguon.csv).
 ## 1. Thực trạng thiết bị thí nghiệm (mốc 11 – 31/07/2026)
 
 - **Thông tư 39/2021/TT-BGDĐT (caselaw.vn)**, ban hành 30/12/2021. Bộ GDĐT ban hành Danh mục thiết bị dạy học tối thiểu cấp THPT, có danh mục riêng cho môn Hóa học, Sinh học.  
-  Nguồn: <https://caselaw.vn/van-ban-phap-luat/401858-thong-tu-so-39-2021-tt-bgddt-ngay-30-12-2021-cua-bo-truong-bo-giao-duc-va-dao-tao-ve-danh-muc-thiet-bi-day-hoc-toi-thieu-cap-trung-hoc-pho-thong> · Ảnh: [`anh_trang_nguon/MC-15.01_Thong_tu_39_2021_thiet_bi_toi_thieu_THPT.png`](anh_trang_nguon/MC-15.01_Thong_tu_39_2021_thiet_bi_toi_thieu_THPT.png)
+  Nguồn: <https://caselaw.vn/van-ban-phap-luat/401858-thong-tu-so-39-2021-tt-bgddt-ngay-30-12-2021-cua-bo-truong-bo-giao-duc-va-dao-tao-ve-danh-muc-thiet-bi-day-hoc-toi-thieu-cap-trung-hoc-pho-thong> · Ảnh: [`anh_trang_nguon/MC-15.01_Thong_tu_39_thiet_bi_toi_thieu_THPT.png`](anh_trang_nguon/MC-15.01_Thong_tu_39_thiet_bi_toi_thieu_THPT.png)
 - **Báo Đại Đoàn Kết – Gỡ khó trang thiết bị dạy học**, đăng 29/09/2023. Năm thứ 4 áp dụng GDPT 2018 vẫn thiếu trang thiết bị dạy học; THPT Mèo Vạc (Hà Giang) thiếu thiết bị, nhiều bài giáo viên cho học sinh thực hành qua mô phỏng; chương trình mới yêu cầu học từ thực nghiệm ở Vật lý, Hóa học, Sinh học.  
   Nguồn: <https://daidoanket.vn/go-kho-trang-thiet-bi-day-hoc-10262707.html> · Ảnh: [`anh_trang_nguon/MC-15.02_Dai_Doan_Ket_go_kho_thiet_bi_day_hoc.png`](anh_trang_nguon/MC-15.02_Dai_Doan_Ket_go_kho_thiet_bi_day_hoc.png)
 

@@ -1,0 +1,88 @@
+﻿MÔ TẢ CÁC ẢNH MINH CHỨNG MC-11.1 – MC-11.8 (NGÀY 18 – 19/11/2026)
+
+Nội dung chuyển nguyên văn từ Nhật ký nghiên cứu sang thư mục minh chứng; ảnh là tệp .jpeg cùng thư mục.
+
+
+
+Các minh chứng MC-11.1 đến MC-11.8 dưới đây là ảnh chụp từ ứng dụng VERA Lab chạy trên máy Mac của HS2 và từ bộ kiểm thử tự động, minh họa công việc ghi ở các dòng 18/11 và 19/11/2026 của Phần III. Tệp gốc lưu trong thư mục docs/ngay-18-11 và docs/ngay-19-11 của kho mã (MC-11).
+
+
+
+Ngày 18/11/2026, nhóm thêm hồ sơ phần cứng cho ứng dụng (minh chứng MC-11.1). Trong Cài đặt – Hiển thị, người dùng chọn một trong năm mức đồ họa (Tự động, Thấp, Vừa, Cao, Siêu nét) và bấm Đo thử 30 giây để xem máy chạy mượt tới đâu. Số đo trên bản xuất cho máy Mac: 95% khung hình dưới 17,6 ms ở độ phân giải 4K, trước khi sửa là 33,3 ms (minh chứng MC-11, MC-12).
+
+
+
+Minh chứng MC-11.1: Bảng Cài đặt – Hiển thị với năm mức đồ họa và nút đo thử 30 giây (18/11/2026)
+
+Tệp: MC-11.1_Cai_dat_hien_thi_5_muc_do_hoa.jpeg
+
+
+
+Cùng ngày, giao diện ngoài phòng thí nghiệm được làm lại (minh chứng MC-11.2). Vấn đề phát sinh: toàn bộ giao diện bị xám đục vì hậu kỳ tonemapping áp lên cả camera chỉ vẽ giao diện, làm màu trắng chỉ còn 208/255. Nhóm sửa tận gốc trong hồ sơ phần cứng, đo lại trên ứng dụng thật được 255/255; bảng điều khiển có năm thẻ Phòng Hóa, Phòng Sinh, Giải bài tập, Thực vật 3D, Giải phẫu.
+
+
+
+Minh chứng MC-11.2: Bảng điều khiển trên ứng dụng Mac thật với năm thẻ mô-đun (18/11/2026)
+
+Tệp: MC-11.2_Bang_dieu_khien_5_the_mo-dun.jpeg
+
+
+
+Mô-đun thực vật 3D (minh chứng MC-11.3) gồm cây đậu hai lá mầm, ba lát cắt rễ – thân – lá và bảy thanh trượt ánh sáng, CO₂, nhiệt độ, độ ẩm không khí, độ ẩm đất, gió, góc đèn. Kết quả quang hợp, thoát hơi nước tính theo thời gian thực; bộ kiểm thử mô phỏng đạt 12/12 và kiểm thử trong Unity đạt 26/26.
+
+
+
+Minh chứng MC-11.3: Mô hình 3D cây đậu hai lá mầm với bảy thanh trượt môi trường (18/11/2026)
+
+Tệp: MC-11.3_Thuc_vat_3D_cay_dau.jpeg
+
+
+
+Mô-đun giải phẫu người (minh chứng MC-11.4) cho bật tắt tám hệ cơ quan, bóc lớp từ da vào trong, cắt theo ba mặt phẳng và đọc thẻ kiến thức của 15 cơ quan; lần mở đầu chỉ mất 0,19 giây. Ngày 19/11, theo góp ý, nhóm chuyển sang dùng bản BIO-LAB 3D đầy đủ tính năng hơn, mở ngay trong ứng dụng trên máy Mac.
+
+
+
+Minh chứng MC-11.4: Mô hình giải phẫu người 3D: bóc lớp, hệ tuần hoàn và thẻ kiến thức về tim (18/11/2026)
+
+Tệp: MC-11.4_Giai_phau_nguoi_3D.jpeg
+
+
+
+Khi đưa cơ chế phản ứng vào VERA Lab, nhóm phát hiện sơ đồ giấy tự sinh chưa giống bản thử đã duyệt (minh chứng MC-11.5): công thức vẽ dạng khung xương, thiếu cặp electron tự do và thiếu tiêu đề từng giai đoạn, khó đọc với học sinh. Đây là vấn đề cần điều chỉnh ghi nhận trong ngày.
+
+
+
+Minh chứng MC-11.5: Sơ đồ giấy tự sinh của bài SN1 trước khi sửa: công thức khung xương, chưa có cặp electron (18/11/2026)
+
+Tệp: MC-11.5_So_do_giay_SN1_truoc_khi_sua.jpeg
+
+
+
+Ngày 19/11, bộ vẽ được viết lại theo kiểu đáp án bài thi (minh chứng MC-11.6): công thức thu gọn, chấm cặp electron trên dị tố, điện tích trong vòng tròn, khối “Không theo SN2” và “Cơ chế SN1” có tiêu đề gạch chân, nhãn chậm/nhanh trên mũi tên. Cả 8 bài mẫu và cơ chế do AI sinh đều vẽ theo cách mới; bộ kiểm thử sơ đồ giấy đạt 9/9.
+
+
+
+Minh chứng MC-11.6: Sơ đồ giấy bài SN1 sau khi sửa: công thức thu gọn, cặp electron, điện tích trong vòng, tiêu đề giai đoạn (19/11/2026)
+
+Tệp: MC-11.6_So_do_giay_SN1_sau_khi_sua.jpeg
+
+
+
+Theo yêu cầu của nhóm, khi giải một bài, ứng dụng hiện tờ giấy trước; bấm Xem 3D thì một khung nhỏ bật ra ở phía dưới, chỉ gồm hình 3D và thanh điều khiển (minh chứng MC-11.7). Góc nhìn tự chọn để thấy rõ electron ở từng bước, thanh tốc độ chỉnh từ 0,25× đến 3×, nút phóng to đưa 3D ra toàn màn hình và nút quay lại bảng giấy.
+
+
+
+Minh chứng MC-11.7: Cơ chế SN1: tờ giấy hiện trước, khung xem 3D chuyển động electron ở phía dưới (19/11/2026)
+
+Tệp: MC-11.7_Co_che_SN1_giay_va_khung_3D.jpeg
+
+
+
+Cuối ngày 19/11, ứng dụng có màn hình đầu theo bản phác của nhóm (minh chứng MC-11.8): nền tối giản, logo góc trái, hai thẻ lớn Giải bài tập và Phòng Lab. Kiểm thử giao diện tự động đạt 77/77 mục; ứng dụng Mac được xuất lại từ mã đã commit (minh chứng MC-12, MC-06).
+
+
+
+Minh chứng MC-11.8: Màn hình đầu với hai lối vào Giải bài tập và Phòng Lab (19/11/2026)
+
+Tệp: MC-11.8_Man_hinh_dau_hai_loi_vao.jpeg
+
