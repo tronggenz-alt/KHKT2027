@@ -1,0 +1,136 @@
+Lịch sử commit kho github.com/tronggenz-alt/KHKT2027 (mọi nhánh), xuất ngày 14/11/2026
+Cột: ngày giờ | tác giả | mã commit | nội dung
+
+27/10/2026 14:43 | Trong Nguyen | 5cbf6b2 | Initial commit
+27/10/2026 21:48 | tronggenz | 36c9a33 | Phòng thí nghiệm ảo VERA Lab: mã nguồn ban đầu
+27/10/2026 21:53 | tronggenz | 27ce253 | Gộp kho GitHub (README tạo sẵn) với mã nguồn dự án
+27/10/2026 22:25 | tronggenz | 73e0d09 | Cập nhật thông tin phần cứng: tay cầm V2 Halo thay Mega + MPU6050
+28/10/2026 12:45 | tronggenz | 640a577 | Máy phân tích đợt 1 + 2: màn hình vận hành cho cả 6 máy
+28/10/2026 21:53 | tronggenz | 12e77ea | Máy phân tích đợt 3 + 4, ảnh phòng lab mới, contracts.md cho tầng 2
+28/10/2026 22:14 | tronggenz | d1d2644 | contracts.md: thêm nhiệm vụ phòng robot (bàn lập trình khối lệnh)
+28/10/2026 22:21 | tronggenz | f8fc13d | contracts.md: bắt buộc đẩy lên GitHub ngay sau mỗi lần build xong
+28/10/2026 22:23 | tronggenz | 6247812 | An toàn kho: cấm force-push, không commit cảnh sinh ra, chặn tệp bí mật
+28/10/2026 22:25 | trddtronh_ | 5e6066b | Release CHEMISTRY v1.1.0
+28/10/2026 22:26 | trddtronh_ | 2bd08f5 | Release CHEMISTRY v1.1.0: cap nhat handoff
+30/10/2026 20:20 | trddtronh_ | a994589 | phong_sinh: prompt Antigravity dựng tầng 2 khu sinh học
+30/10/2026 20:35 | trddtronh_ | 1037cb9 | docs(tang2): de xuat thiet ke loi thang va ke hoach dung tang 2 (GD1)
+30/10/2026 22:38 | trddtronh_ | 54f35d8 | feat(tang2): hoàn tất dựng Tầng 2 – Khu sinh học (GĐ 1-8: kiến trúc, nội thất 8 khu, vật liệu 2 chủ đề, hoạt cảnh, mô phỏng C# thuần, hồ sơ máy & AI)
+30/10/2026 23:18 | trddtronh_ | a85e916 | build(tang2): luu toan bo scene khu vuc tang 2 va occlusion culling vao git
+31/10/2026 12:46 | trddtronh_ | 330ac6a | tang2: sửa giật, nhấp nháy, thang bộ kẹt; thang máy chạy thật; thêm logo và đồ sinh học
+31/10/2026 13:14 | Trong Nguyen | b976b33 | Merge pull request #1 from tronggenz-alt/tang2/phong-sinh
+31/10/2026 13:22 | Trong Nguyen | aa5e17b | Fix typo in README title
+31/10/2026 16:14 | trddtronh_ | 47563ab | docs(tang2): khoi tao nhat ky backend va ke hoach cac giai doan B0-B10
+31/10/2026 16:29 | trddtronh_ | 8c4bdc5 | docs(tang2): G0 ra soat 83 dung cu, phim tat va chup anh hien trang truoc khi sua
+31/10/2026 16:45 | trddtronh_ | 7f3709e | feat(tang2): G1 mo rong hanh lang tang 2 tu 2,2 m len 3,6 m va chup 10 anh doi chieu
+31/10/2026 16:52 | trddtronh_ | 9035dcb | feat(tang2): hoan tat B1 - danh muc dung_cu.json 108 ma, ho so may va bo test
+31/10/2026 16:56 | trddtronh_ | 11e266a | feat(tang2): G2 khung tuong tac dung chung BioKnob, BioButton, BioHinge, BioTool, BioSample, BioTransfer
+31/10/2026 16:58 | trddtronh_ | beb9e0a | feat(tang2): hoan tat B2 - tieu ban, vi sinh, moi truong, sinh pham va 15 bai thi nghiem
+31/10/2026 17:01 | trddtronh_ | dbac82d | chore(tang2): gop du lieu B1-B2 tu tang2/dung-cu-backend vao tang2/dung-cu-giao-dien
+31/10/2026 19:37 | trddtronh_ | 7cf2c8f | feat(tang2): hoan tat B3 - bo sung chat sinh hoc va phan ung catalase trong ChemEngine
+31/10/2026 19:43 | trddtronh_ | fbada6d | feat(tang2): hoan tat B4 - BioSampleData, Dilution, StreakPlate, ContaminationRules, GramStain
+31/10/2026 19:43 | trddtronh_ | 918c295 | Merge branch 'tang2/dung-cu-backend' into tang2/dung-cu-giao-dien
+31/10/2026 19:47 | trddtronh_ | 118540b | feat(tang2): hoan tat B5 - PipetteAccuracy, Centrifugation, mo rong Pcr va Electrophoresis
+31/10/2026 19:51 | trddtronh_ | 3d41f5b | feat(tang2): hoan tat B6 - Transpiration, Phototropism, DnaExtraction, Catalase, Optics.Brightness, Fermentation
+31/10/2026 19:55 | trddtronh_ | 982372f | feat(tang2): hoan tat B7 - CSDL SQLite sinh_db.py cho 8 bang phong sinh va bo test
+31/10/2026 19:55 | trddtronh_ | eef11ef | Merge branch 'tang2/dung-cu-backend' into tang2/dung-cu-giao-dien
+31/10/2026 19:59 | trddtronh_ | 3c3b10e | feat(tang2): hoan tat B8 - FastAPI sinh_api.py, route /sinh, xuat CSV BOM va bo test web
+31/10/2026 20:27 | trddtronh_ | f6e0742 | feat(tang2): hoan tat B9 - tich hop AI SOP dung cu sinh hoc, ALIASES va kiem tra an toan BSL-1
+31/10/2026 20:44 | trddtronh_ | 8b69600 | feat(tang2): hoan tat B10 - tai lieu backend 21-dung-cu-sinh-hoc.md va bao cao ban giao
+31/10/2026 20:45 | trddtronh_ | 7198e16 | feat(tang2): hoan tat G3-G12 - he thong tuong tac 108 dung cu, bo lap rap tang 2, web sinh.html va BioLabSync
+31/10/2026 20:45 | trddtronh_ | a23afb9 | Merge branch 'tang2/dung-cu-backend' (B8-B10) into tang2/dung-cu-giao-dien
+31/10/2026 21:17 | trddtronh_ | 50dd508 | feat(tang2): hoan tat G13-G14 - kiem thu tu dong, anh chup dung cu va bao cao ban giao giao dien
+31/10/2026 21:48 | trddtronh_ | c594b82 | docs: hoan thanh giai doan 0 - khao sat va ke hoach tich hop mediapipe
+31/10/2026 21:51 | trddtronh_ | 0bd71a7 | feat(mediapipe): hoan thanh giai doan 1 - tai va kiem thu mo hinh mediapipe
+31/10/2026 21:55 | trddtronh_ | fefcf49 | feat(mediapipe): hoan thanh giai doan 2 - tinh toan thuan dau mat tay va kiem thu
+31/10/2026 22:01 | trddtronh_ | 8972931 | feat(mediapipe): hoan thanh giai doan 3 - chuong trinh nhan dien mediapipe_tracker.py da luong
+31/10/2026 22:03 | trddtronh_ | c4e14fb | fix(tang2): bo sung BioFloor2InteractiveTools khoi tao 108 dung cu 3D truc quan co Grabbable va tu dong nap khi Play
+31/10/2026 22:12 | trddtronh_ | 09a2a0b | feat(unity): hoan thanh giai doan 4 va 5 - dieu khien dau, mat, zoom va cu chi tay MediaPipeHandSource
+31/10/2026 22:18 | trddtronh_ | 485fa41 | feat(mediapipe): hoan thanh giai doan 6 - blendshapes, double-blink, model maker colab va thu cu chi lab
+31/10/2026 22:22 | trddtronh_ | fa9b4f2 | feat(perf): hoan thanh giai doan 7 - do hieu nang 3 che do, bo cam giac FeelPreset va kiem thu do ben
+31/10/2026 22:27 | trddtronh_ | 9b079a7 | docs: hoan thanh giai doan 8 - tai lieu mediapipe, readme, handoff va huong dan dong goi
+01/11/2026 19:51 | trddtronh_ | 96397e0 | Merge branch 'mediapipe' into claude/gemini-refinement-7bf2e3
+01/11/2026 20:03 | trddtronh_ | 99227ee | fix: sua loi mediapipe, backend su-kien theo hop dong, them mo phong ghep gen
+01/11/2026 20:29 | trddtronh_ | 4910a3f | feat(tang2): phong ghep ma ADN chay that, sap xep lai dung cu sinh hoc
+01/11/2026 20:41 | trddtronh_ | 7abbb31 | fix: loi null gia GetComponent, mediapipe khong treo khi webcam bi chan, bai kiem thu Unity phong_adn, tai lieu
+01/11/2026 20:48 | trddtronh_ | 70da921 | fix(tang2): tach 87 lop MonoBehaviour ra file trung ten de Unity luu duoc thanh phan
+01/11/2026 20:53 | trddtronh_ | bdf35f9 | docs(tang2): anh bai thu phong_adn (tat ca dat), nhan tieng Viet ong kiem tra plasmid
+02/11/2026 17:09 | tronggenz | d5c87dd | Gộp nhánh claude/gemini-refinement-7bf2e3: dụng cụ sinh học tầng 2, ghép gen, MediaPipe
+02/11/2026 17:17 | tronggenz | ee5509d | Dựng lại cảnh từ code sau khi gộp, thêm baocao.md
+02/11/2026 17:40 | tronggenz | ad0aa42 | Trang giới thiệu VERA Lab (15 ảnh), chế độ chụp ảnh landing
+02/11/2026 20:45 | trddtronh_ | 3d08d96 | Thêm script xuất bản iOS ra project Xcode
+02/11/2026 20:59 | trddtronh_ | 38cac9f | Gộp điều khiển cảm ứng iPad từ Antigravity, dựng lại cảnh
+02/11/2026 21:05 | trddtronh_ | e07c84a | Sửa tiêu chuẩn 6 của bài test iPad để thử đúng việc từ chối đặt vật
+03/11/2026 00:00 | trddtronh_ | 34e22e0 | Mốc gốc: Khóa tọa độ và cấu hình bản build HD song song
+03/11/2026 00:05 | trddtronh_ | 4194176 | Giai đoạn 1: Bản định hướng mỹ thuật Art Bible và danh mục tài nguyên CC0
+03/11/2026 00:06 | trddtronh_ | d16e409 | docs(hd): Giai đoạn 1 - Bản định hướng mỹ thuật (Art Bible) và nguồn tài nguyên CC0
+03/11/2026 00:13 | trddtronh_ | c3cfcc2 | feat(hd): Giai đoạn 2 - Nền kết xuất Forward+, SSAO, 4 cascade shadows 4096, 3 mức đồ họa và bảng đo hiệu năng
+03/11/2026 00:13 | trddtronh_ | a72988a | Giai đoạn 2: Nâng cấp nền kết xuất URP Forward+, SSAO, 4 cascade soft shadow, 3 mức chất lượng và HUD đo hiệu năng
+03/11/2026 00:19 | trddtronh_ | 41437d2 | Giai đoạn 3: Nâng cấp vật liệu nền PBR, sinh bộ map procedural 1024x1024 CC0 và nâng cấp 543 vật liệu
+03/11/2026 00:19 | trddtronh_ | 3e8c34f | feat(hd): Giai đoạn 3 - Hệ thống vật liệu PBR siêu thực cho 543 vật liệu kèm 12 bộ texture 1024x1024
+03/11/2026 00:23 | trddtronh_ | 1eb40ab | Giai đoạn 4: Tinh chỉnh ánh sáng, nâng độ sáng trần đạt chuẩn 0.55-0.75, vệt nắng xiên sắc nét và tích hợp công cụ đo Rec. 709
+03/11/2026 00:23 | trddtronh_ | baf7a64 | feat(hd): Giai đoạn 4 - Nghệ thuật chiếu sáng chuẩn PBR phòng Lab và Nhà Kính đạt tiêu chuẩn độ sáng
+03/11/2026 00:28 | trddtronh_ | 4d641b7 | Giai đoạn 5: Bổ sung 28 chi tiết kiến trúc HD nhóm HD_* cho phòng lab, nhà kính và ngoại thất
+03/11/2026 00:34 | trddtronh_ | c370b13 | feat(do-hoa): Hoàn tất mục 4 - Bộ đo, kiểm chứng, khóa ngưỡng và mốc nền v00
+03/11/2026 00:39 | trddtronh_ | ebf7d32 | feat(hd): Hoàn tất toàn diện nâng cấp đồ họa siêu thực VERA Lab HD (Giai đoạn 0-10)
+03/11/2026 00:41 | trddtronh_ | 35faadf | docs: Cập nhật nhật ký Giai đoạn 6 (Cây xanh siêu thực) và Giai đoạn 7 (Dụng cụ & Máy móc)
+03/11/2026 00:44 | trddtronh_ | 9fe62db | feat(pbr): Cập nhật tinh chỉnh vật liệu thủy tinh borosilicate, đèn led hiển thị và chậu đất nung
+03/11/2026 07:45 | trddtronh_ | 3acf5d4 | Giao diện HD và tinh chỉnh đồ họa: đúng trạng thái bản đã cài lên iPad
+03/11/2026 07:45 | trddtronh_ | 52b88fa | Gộp thành một bản duy nhất: app tên VERA Lab, bundle com.trantrong.veralab
+03/11/2026 07:55 | trddtronh_ | 5115d22 | docs: Thêm prompt nâng cấp bề mặt, sửa vệt chéo và làm nét tranh tường
+03/11/2026 08:06 | trddtronh_ | 468ddce | Giai đoạn 0: Chuẩn bị, khóa mốc 0 lỗi, công cụ đo sọc FFT và bộ ảnh trước
+03/11/2026 08:11 | trddtronh_ | a0ecff4 | feat(ui): Cập nhật kích thước nút chuẩn Apple Touch Target >= 44pt và kiểm kê nut_cap_nhat.json
+03/11/2026 08:18 | trddtronh_ | deb842b | Giai đoạn 1: Thí nghiệm tách nguyên nhân vệt sọc tại góc hành lang
+03/11/2026 08:25 | trddtronh_ | cf1271b | feat(graphics): Hoàn tất Giai đoạn 5 - Làm nét tranh tường, áp phích và chi tiết bề mặt
+03/11/2026 08:34 | trddtronh_ | d362f2d | Giai đoạn 2: Thay toàn bộ vân bị sọc, bỏ normal map tường/trần, sửa sàn trùng ron 2x2
+03/11/2026 08:35 | trddtronh_ | 9d1c2c5 | feat(graphics): Hoàn tất Giai đoạn 2, 3, 4 - Thay toàn bộ vân sọc, bỏ normal map tường/trần/tủ, đồng bộ ron sàn, chuẩn hóa độ bóng PBR
+03/11/2026 08:36 | trddtronh_ | 4a4a9d4 | Merge tag 'xong-giao-dien' into test-gop
+03/11/2026 08:36 | trddtronh_ | 9f4e409 | feat: Gộp Giai đoạn 5 (Tranh tường, áp phích, bảng tuần hoàn nét cao) vào bản nâng cấp
+03/11/2026 08:37 | trddtronh_ | 08915d9 | feat(graphics): Hoàn thiện Giai đoạn 3 & 4 - Hiệu chỉnh độ bóng PBR và tích hợp đầy đủ bộ nâng cấp bề mặt
+03/11/2026 09:35 | trddtronh_ | d50de09 | wip: Lưu các thay đổi dở dang trước khi tách nhánh do-hoa-bong-net
+03/11/2026 09:58 | trddtronh_ | 1dc2e22 | feat(graphics): Hoàn tất Giai đoạn 6 - Dựng lại cảnh, nướng phản chiếu, kiểm định 0 lỗi tọa độ và tổng kết Giai đoạn 8
+03/11/2026 10:18 | trddtronh_ | 26a671a | fix(graphics): Mục 6 - Xóa vạch ngang ở cửa tầng 1, cắt chừa chân tường inox và granite
+03/11/2026 10:25 | trddtronh_ | a72dd91 | fix(graphics): Mục 1 - Khắc phục triệt để vệt đen chân đồ vật bằng SSAO full-res DepthNormals và cân bằng shadow bias
+03/11/2026 10:28 | trddtronh_ | 09c3186 | feat(graphics): Mục 2 - Tối ưu phản chiếu góc nhìn PBR và đầu dò phản chiếu hộp cho thiết bị di động
+03/11/2026 10:43 | trddtronh_ | e4817f4 | feat(graphics): Mục 3 - Nâng cấp shader thủy tinh chân thực Fresnel, khúc xạ và bóng nhạt
+03/11/2026 10:49 | trddtronh_ | 02bfe71 | feat(graphics): Mục 4 - Bật MSAA 4x, RenderScale 1.0 và lọc dị hướng 16x cho mức Ultra
+03/11/2026 11:01 | trddtronh_ | eb4f323 | perf(graphics): Mục 5 - Mở khóa 60 FPS cho iPad Air M3, tối ưu lô vẽ Kho sinh phẩm và bổ sung thước đo hiệu năng từng khu
+03/11/2026 11:21 | trddtronh_ | db7c30b | feat(graphics): Mục 7 - Nâng cấp chi tiết cây cảnh procedural, gân lá và shader xuyên sáng
+03/11/2026 11:23 | trddtronh_ | 33a4b9b | Gộp be-mat-van vào do-hoa-bong-net, giữ bản mới hơn khi xung đột
+03/11/2026 11:24 | trddtronh_ | 3a782ce | feat(ui): Mục 8 - Dời bảng hiệu năng sang góc trái, mặc định ẩn và bật bằng chạm 3 ngón
+03/11/2026 13:10 | trddtronh_ | 0820d03 | docs(graphics): Báo cáo tổng kết nâng cấp đồ họa, bóng đổ, thủy tinh và hiệu năng cho iPad Air M3
+03/11/2026 13:12 | trddtronh_ | 86d8aab | Merge branch 'gop-be-mat-van' into do-hoa-bong-net
+03/11/2026 13:42 | trddtronh_ | 667a46d | Sửa MarkStatic đánh dấu tĩnh cả nhánh con của vật động
+03/11/2026 13:54 | trddtronh_ | 1a24f9e | Sửa LeafMesh sinh đỉnh NaN làm hỏng toàn bộ lá cây
+03/11/2026 20:34 | tronggenz | 730715a | Tối ưu đồ họa: giảm 28-35% thời gian mỗi khung, giữ nguyên hình
+03/11/2026 20:34 | tronggenz | bcdc961 | Lab Sinh thao tác tự do: sinh phẩm là vật thật, kết quả tính theo thành phần
+03/11/2026 20:35 | tronggenz | 9dfc5c6 | Trang giới thiệu 3D và kế hoạch web quản lý, Unity Relay
+07/11/2026 06:34 | tronggenz | a249c54 | Màn hình chính, tài khoản, phòng học chung qua Relay, lớp học điều khiển từ web, bảng F9
+07/11/2026 07:05 | tronggenz | 8e8c856 | Web quản lý giáo viên, học sinh; landing page mới; tay cầm VERA Drop, VERA Arc; phần còn lại của các phiên
+07/11/2026 17:37 | tronggenz | e05f51b | Tay cầm BMI160 (firmware chống trôi, cửa sổ xem 3D); cập nhật contracts.md hiện trạng
+07/11/2026 22:17 | trddtronh_ | b6fdee8 | feat(bio): Nâng cấp toàn diện 7 chặng Khu Sinh học Tầng 2 tương tác 1:1, kính hiển vi, ghép ADN, bài thực hành
+07/11/2026 22:23 | trddtronh_ | acf1228 | Merge origin/main into upgrade_vera_lab_biology: Kết hợp đầy đủ tính năng mới từ GitHub và nâng cấp Sinh học Tầng 2
+07/11/2026 22:28 | trddtronh_ | 52f95bd | fix: Dọn sạch conflict marker trong IntroScreen.cs
+07/11/2026 22:29 | trddtronh_ | d1853df | fix(ai): Thêm property serverUrl liên kết GameSession.ServerUrl
+07/11/2026 23:42 | trddtronh_ | a3500ba | fix(ios): replace nested BioSlide and BioPetriDish MonoBehaviours with GlassSlide and PetriDish to fix level1 serialization corruption
+07/11/2026 23:47 | trddtronh_ | d3fe836 | merge(graphics): gộp toàn bộ nâng cấp đồ họa HD, bóng đổ, khử răng cưa và vân PBR từ do-hoa-bong-net
+08/11/2026 09:47 | trddtronh_ | 12c75df | fix(lab): resolve ceiling columns, architect stairs, 1024px microscope & glass materials
+08/11/2026 10:24 | trddtronh_ | 8664469 | chore(ios): set display name to LAB and configure mobile assets
+08/11/2026 10:33 | trddtronh_ | 520a9c4 | merge(graphics+fixes): kết hợp toàn bộ đồ họa HD mới nhất, bóng đổ, PBR từ upgrade_vera_lab_biology và các sửa đổi sáng nay (cột đen, cầu thang, kính hiển vi 1024px, bình thủy tinh, tên LAB)
+08/11/2026 11:18 | trddtronh_ | d308a36 | feat(graphics): nướng toàn bộ cảnh với đồ họa HD, đồng bộ reflection probes, meshes cây LOD và hoàn tất 5 chặng kiểm thử
+08/11/2026 11:36 | trddtronh_ | 058d2db | chore: cập nhật thiết lập Mobile_RPAsset
+08/11/2026 12:48 | trddtronh_ | bf86e69 | feat: hoàn thành nâng cấp 7 chặng đồ họa, kính hiển vi SDF, vi khí hậu nhà kính và giao diện dock
+09/11/2026 14:10 | tronggenz | df32c69 | Web quản lý chạy cố định trên verlab.pages.dev (Cloudflare Pages Functions + D1, gói miễn phí)
+09/11/2026 20:36 | tronggenz | 377da25 | Nhận diện tay chạy trong Unity, hai tay ảo mặc định, máy chủ trực tuyến mặc định, TIEN_DO.md
+11/11/2026 23:19 | trddtronh_ | 9e31df4 | feat(ai): kho RAG Hóa – Sinh THPT cho mô hình 32B, thứ tự nhà cung cấp, kịch bản GPU thuê
+12/11/2026 01:30 | trddtronh_ | a606882 | wip(rag): lưu tài liệu Hóa – Sinh đã soạn trước khi tắt máy
+12/11/2026 12:46 | trddtronh_ | 540588c | feat(bio-portal): GĐ1 - Cổng vào Phòng Sinh học 3D (vòng sáng và thẻ lời mời)
+12/11/2026 12:53 | trddtronh_ | 69a4b04 | feat(bio-portal): GĐ2 - Dựng phòng ảo tĩnh HoloBioRoom và chuyển cảnh mờ chéo đơn giản
+12/11/2026 13:01 | trddtronh_ | 418cc86 | feat(bio-portal): GĐ3 - Chuyển cảnh mở và đóng đầy đủ với shader HexWipe, HoloReveal, HoloBeam
+12/11/2026 21:32 | trddtronh_ | 1aa5ca3 | merge: gộp nhận diện tay (toi-uu/lab-sinh-tu-do) vào bản đồ họa mới nhất
+12/11/2026 21:52 | trddtronh_ | 10d4b36 | feat(bio-portal): GĐ4 - Tích hợp 15 cơ quan, thẻ kiến thức kính mờ, ôn tập trắc nghiệm, 6 cảnh hiển vi 3D và ghi công BodyParts3D
+12/11/2026 21:57 | trddtronh_ | 5e50a33 | feat(bio-portal): GĐ5 - Thêm kiểm thử tự động KhktAutoTest (cong_sinh_hoc), benchmark hiệu năng và tài liệu docs/27
+12/11/2026 22:15 | trddtronh_ | f4d19f4 | merge: gộp nhận diện tay từ GitHub (toi-uu/lab-sinh-tu-do), tối ưu hóa iPad UI/HD từ claude và Cổng Sinh học 3D
+12/11/2026 23:42 | trddtronh_ | ae37169 | fix(ios): add NSCameraUsageDescription, fix DontDestroyOnLoad and ParticleSystemShape for iOS build
+13/11/2026 19:48 | trddtronh_ | de52bb6 | feat: giao diện VERA Instrument, bảng điều khiển máy, kính hiển vi mới, cổng liên kết 3D, bài demo giám khảo, sửa nháy vật liệu
+14/11/2026 21:50 | trddtronh_ | 4ad121b | merge: gộp kho RAG Hóa – Sinh THPT vào bản mới nhất
+14/11/2026 21:50 | trddtronh_ | b577317 | feat(rag): bổ sung chuyên đề và bộ kiểm tra Hóa – Sinh 10–12

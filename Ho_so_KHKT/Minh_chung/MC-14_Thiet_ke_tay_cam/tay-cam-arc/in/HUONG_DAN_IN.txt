@@ -1,0 +1,21 @@
+﻿TAY CẦM VERA ARC - HƯỚNG DẪN IN 3D
+
+Đơn vị trong file STL: mm. In đúng tỉ lệ 100%. Các file đã xoay sẵn đúng hướng in.
+
+File            Số lượng  Chi tiết                        Màu đề xuất             Kích thước (mm)      Hướng in
+than.stl        1         Thân, gồm 2 nửa trong 1 file    Trắng                   163,2 x 105,3 x 34,6 mặt ghép xuống bàn, đỡ bên trong
+vong.stl        1         Vòng tròn có logo               Xanh ngọc huỳnh quang   56,4 x 71 x 11       dựng đứng trên mép sau, không cần vật đỡ
+day_tren.stl    1         Đáy trên (mặt tối bầu dục)      Đen                     68,1 x 46,5 x 19,3   mặt đỉnh xuống bàn
+day_duoi.stl    1         Đáy dưới (nắp khoang pin)       Đen                     33,5 x 22,6 x 2,5    nằm phẳng, gai khóa hướng lên
+co.stl          1         Cò                              Bạc hoặc xám            13,8 x 25,7 x 15,6   nằm nghiêng, mặt bên xuống bàn, đỡ dưới tay cò
+chen.stl        1         Chén lục giác quanh joystick    Xanh ngọc huỳnh quang   29,4 x 34 x 7,1      mặt lớn xuống bàn
+thanh.stl       3         Ống thanh móc dây               Đen                     4 x 4 x 12,5         dựng đứng
+nut_phu.stl     4         Nắp nút phụ                     Bạc hoặc xám            8,6 x 8,6 x 5,1      in 4 cái, mặt gờ xuống bàn
+
+Nhờ bên in lưu ý:
+- than.stl có 2 nửa thân rời nhau trong cùng 1 file, cần in cả 2. Giữ mặt ghép phẳng.
+- Vật liệu đề xuất: PLA hoặc PETG, lớp 0,16 mm, 3 lớp vách, độ đặc 20%.
+- 2 nửa thân cần vật đỡ bên trong phần đầu. Giữ mặt ngoài sạch.
+- vong.stl in dựng đứng, không cần vật đỡ. Mặt ngoài có logo và chữ VERA LAB khắc sâu 0,6 mm, chữ hoa cao khoảng 4,4 mm, nên chọn lớp mỏng để chữ rõ.
+- Lỗ nhỏ: lỗ mồi vít Ø1,7, lỗ qua vít Ø2,2-2,3, lỗ trục cò Ø2,2, cổng nút Ø7. Giữ đúng kích thước, không tự khoét rộng.
+- Ray của day_duoi.stl chỉ có khe 0,2 mm với thân. Nếu máy in sai số lớn, báo lại trước khi in.

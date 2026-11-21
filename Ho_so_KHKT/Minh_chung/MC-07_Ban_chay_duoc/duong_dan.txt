@@ -1,0 +1,4 @@
+Trang giới thiệu và web quản lý: https://verlab.pages.dev
+Mã nguồn: https://github.com/tronggenz-alt/KHKT2027
+VERA_Lab.zip: giải nén rồi chạy PhongThiNghiemAo.exe (Windows).
+VERA_Lab.zip (118 MB, quá giới hạn 100 MB/tệp của GitHub) tải tại bản phát hành: https://github.com/tronggenz-alt/KHKT2027/releases/tag/ho-so-khkt

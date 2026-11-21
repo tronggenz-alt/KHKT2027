@@ -1,0 +1,21 @@
+Số commit theo tác giả và ngày:
+      1 2026-10-27 | Trong Nguyen
+      3 2026-10-27 | tronggenz
+      2 2026-10-28 | trddtronh_
+      5 2026-10-28 | tronggenz
+      4 2026-10-30 | trddtronh_
+      2 2026-10-31 | Trong Nguyen
+     30 2026-10-31 | trddtronh_
+      6 2026-11-01 | trddtronh_
+      3 2026-11-02 | trddtronh_
+      3 2026-11-02 | tronggenz
+     41 2026-11-03 | trddtronh_
+      3 2026-11-03 | tronggenz
+      6 2026-11-07 | trddtronh_
+      3 2026-11-07 | tronggenz
+      6 2026-11-08 | trddtronh_
+      2 2026-11-09 | tronggenz
+      1 2026-11-11 | trddtronh_
+      9 2026-11-12 | trddtronh_
+      1 2026-11-13 | trddtronh_
+      2 2026-11-14 | trddtronh_

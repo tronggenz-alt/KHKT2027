@@ -1,0 +1,20 @@
+﻿Chỉ số,Giá trị,Đơn vị,Tiêu chí,Đạt
+Thời gian đo,180.0,s,"tay cầm nằm yên, không ai chạm",
+Số gói nhận / giây,50.0,gói/s,4 mẫu 200 Hz mỗi gói ⇒ 50,Đạt
+Mất gói,0.0,%,< 1% (PDF tr.8),Đạt
+Tuổi dữ liệu lúc dùng: trung vị,12.6,ms,,
+Tuổi dữ liệu lúc dùng: P95,21.9,ms,< 30 ms,Đạt
+Khứ hồi lệnh USB (gửi p → nhận #INFO): trung vị,16.5,ms,18/18 lần có trả lời,Đạt
+Xử lý mỗi khung (luật + vẽ cảnh): trung vị,5.3,ms,"< 16,7 ms (60 khung/s)",Đạt
+Xử lý mỗi khung: P99,13.55,ms,"< 16,7 ms",Đạt
+Tia trôi yaw (cuối − đầu),0.0,°,< 1° / 10 phút,Đạt
+Tia trôi pitch (cuối − đầu),-0.031,°,,
+Rung tia khi nằm yên (trung vị cửa sổ 1 s),0.0099,°,"< 0,15° (PDF tr.8)",Đạt
+Joystick thô X: trung bình ± độ lệch chuẩn,-0.001 ± 0.001,−1..1,≈ 0,Đạt
+Joystick thô Y: trung bình ± độ lệch chuẩn,-0.105 ± 0.198,−1..1,≈ 0,CHƯA
+Khung joystick vượt vùng chết 8% (ma),85.9,% khung,0%,CHƯA
+Người tự đi xa chỗ đứng,7.999,m,0 m,CHƯA
+Người tự quay,1.8,°,0°,CHƯA
+Mức cảm ứng A / B lớn nhất (0–255),7 / 3,,< 38 (ngưỡng lơ lửng),Đạt
+"Sự kiện ma (chạm, nhấp, cầm, đổi chế độ...)",0,lần,0,Đạt
+Tỉ lệ khung mạch báo 'nằm yên',98.3,%,≈ 100%,Đạt

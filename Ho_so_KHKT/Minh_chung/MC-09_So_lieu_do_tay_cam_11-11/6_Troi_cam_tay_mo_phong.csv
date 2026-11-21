@@ -1,0 +1,4 @@
+﻿Mã,Cấu hình,KB1 có đặt bàn – nhiễu datasheet,KB1 – nhiễu đo thật,KB2 cầm liên tục – datasheet,KB2 – đo thật,Giảm so với M1 (đo thật)
+M1,Madgwick + bù sai số tĩnh,"39,9°","39,8°","46,4°","46,4°",–
+M2,Firmware cũ (học lại khi nằm yên),"7,9°","7,8°","45,4°","45,3°",80% / 2%
+F1,Firmware mới,"1,7°","1,69°","4,5°","4,44°",96% / 90%

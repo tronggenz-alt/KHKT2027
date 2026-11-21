@@ -1,0 +1,112 @@
+[
+ {
+  "file": "than",
+  "ten": "Thân, 2 nửa",
+  "mau": "Trắng",
+  "kich_thuoc": [
+   165.2,
+   119.5,
+   33.6
+  ],
+  "gam_pla": 34.7,
+  "chi_tiet": [
+   {
+    "ma": "than_phai",
+    "so": 1,
+    "cach_in": "mặt ghép xuống bàn, đỡ bên trong"
+   },
+   {
+    "ma": "than_trai",
+    "so": 1,
+    "cach_in": "mặt ghép xuống bàn, đỡ bên trong"
+   }
+  ],
+  "so_khoi": 2
+ },
+ {
+  "file": "day_tren",
+  "ten": "Đáy trên (mặt tối bầu dục)",
+  "mau": "Đen",
+  "kich_thuoc": [
+   69.8,
+   48.1,
+   19.3
+  ],
+  "gam_pla": 7.4,
+  "chi_tiet": [
+   {
+    "ma": "nap",
+    "so": 1,
+    "cach_in": "mặt đỉnh xuống bàn"
+   }
+  ],
+  "so_khoi": 1
+ },
+ {
+  "file": "day_duoi",
+  "ten": "Đáy dưới (nắp khoang pin)",
+  "mau": "Đen",
+  "kich_thuoc": [
+   34.9,
+   22.6,
+   2.4
+  ],
+  "gam_pla": 1.5,
+  "chi_tiet": [
+   {
+    "ma": "nap_pin",
+    "so": 1,
+    "cach_in": "nằm phẳng, gai khóa hướng lên"
+   }
+  ],
+  "so_khoi": 1
+ },
+ {
+  "file": "chi_tiet_xanh",
+  "ten": "Tấm mu tay có logo, chén lục giác",
+  "mau": "Xanh ngọc huỳnh quang",
+  "kich_thuoc": [
+   69.4,
+   34.0,
+   40.0
+  ],
+  "gam_pla": 3.9,
+  "chi_tiet": [
+   {
+    "ma": "tam_mu_tay",
+    "so": 1,
+    "cach_in": "dựng đứng trên cạnh dưới, nên có brim"
+   },
+   {
+    "ma": "chen",
+    "so": 1,
+    "cach_in": "mặt lớn xuống bàn"
+   }
+  ],
+  "so_khoi": 2
+ },
+ {
+  "file": "chi_tiet_bac",
+  "ten": "Cò, 4 nắp nút phụ",
+  "mau": "Bạc hoặc xám",
+  "kich_thuoc": [
+   80.2,
+   25.7,
+   15.6
+  ],
+  "gam_pla": 3.9,
+  "chi_tiet": [
+   {
+    "ma": "co",
+    "so": 1,
+    "cach_in": "nằm nghiêng, mặt bên xuống bàn, đỡ dưới tay cò"
+   },
+   {
+    "ma": "nut_phu",
+    "so": 4,
+    "cach_in": "in 4 cái, mặt gờ xuống bàn"
+   }
+  ],
+  "so_khoi": 5
+ }
+]
