@@ -208,6 +208,13 @@ namespace Khkt.Simulation.Chem
             return s;
         }
 
+        static SpeciesDef Cx(string id, string formula, int z, double mm, double strength)
+        {
+            var s = AddRaw(id, formula, SpeciesKind.Complex, z, mm, null);
+            s.ColorStrength = strength;
+            return s;
+        }
+
         static SpeciesDef Ppt(string id, string color, string name = null, double mm = 0)
         {
             var s = AddRaw(id, id, SpeciesKind.Precipitate, 0, mm, name);
@@ -277,14 +284,15 @@ namespace Khkt.Simulation.Chem
             Ion("Be2+", "Be2+", 2, 9.01);
             Ion("Bi3+", "Bi3+", 3, 208.98);
             Ion("Ti4+", "Ti4+", 4, 47.87);
+            Ion("AuCl4-", "[AuCl4]-", -1, 338.8, "#E8C23A", 30);
 
             Hydroxide("Mg2+", "Mg(OH)2", "#F4F4F2", 2, 5.6e-12);
-            Hydroxide("Ca2+", "Ca(OH)2", "#F4F4F2", 2, 5.5e-6);
+            Hydroxide("Ca2+", "Ca(OH)2", "#F4F4F2", 2, 3.7e-5);  // theo nồng độ: nước vôi trong bão hòa ≈ 0,021 M
             Hydroxide("Sr2+", "Sr(OH)2", "#F4F4F2", 2, 3.2e-4);
             Hydroxide("Al3+", "Al(OH)3", "#F2F4F6", 3, 1.3e-33, 40, 1, 1e-5);
             Hydroxide("Fe2+", "Fe(OH)2", "#D3DCC0", 2, 4.9e-17, 0, 0, 3e-10);
             Hydroxide("Fe3+", "Fe(OH)3", "#9C4A1A", 3, 1e-36, 0, 0, 6.3e-3);  // Fe(OH)₃ vô định hình mới sinh (tan hơn dạng già 2,8·10⁻³⁹)
-            Hydroxide("Cu2+", "Cu(OH)2", "#4A9BE0", 2, 2.2e-20, 0, 0, 1e-8);
+            Hydroxide("Cu2+", "Cu(OH)2", "#4A9BE0", 2, 4.8e-20, 0, 0, 2e-7);  // Cu(OH)₂ mới sinh; pKa thủy phân ≈ 6,7: CuSO₄ 0,4 M pH ≈ 4,3, chưa vẩn đục
             Hydroxide("Zn2+", "Zn(OH)2", "#F4F4F2", 2, 3e-17, 0.13, 2, 1e-9);
             Hydroxide("Pb2+", "Pb(OH)2", "#F4F4F2", 2, 1.4e-20, 0.05, 1, 1e-8);
             Hydroxide("Ag+", "Ag2O", "#4A3A2E", 1, 2e-8);
@@ -293,7 +301,7 @@ namespace Khkt.Simulation.Chem
             Hydroxide("Ni2+", "Ni(OH)2", "#5BA35B", 2, 5.5e-16);
             Hydroxide("Co2+", "Co(OH)2", "#C0607A", 2, 1.6e-15);
             Hydroxide("Mn2+", "Mn(OH)2", "#EFE8DC", 2, 1.9e-13);
-            Hydroxide("Cr3+", "Cr(OH)3", "#7A9A78", 3, 6.3e-31, 0.04, 1, 1e-4);
+            Hydroxide("Cr3+", "Cr(OH)3", "#7A9A78", 3, 6.3e-31, 0.4, 1, 1e-4);
             Hydroxide("Sn2+", "Sn(OH)2", "#F4F4F2", 2, 5.4e-27, 0.01, 1, 1e-4);
             Hydroxide("Sn4+", "Sn(OH)4", "#F4F4F2", 4, 1e-56, 1e-3, 2, 1e-2);
             Hydroxide("Cd2+", "Cd(OH)2", "#F4F4F2", 2, 7.2e-15);
@@ -342,7 +350,7 @@ namespace Khkt.Simulation.Chem
             Weak("CrVI", "cromat/đicromat", -1, 115.99, 3.2e-7);
             Weak("NH3", "amoniac/amoni", 1, 17.03, 5.6e-10);
             Weak("Ac", "axetat", 0, 59.04, 1.8e-5);
-            Weak("Fo", "fomat", 0, 45.02, 1.8e-4);
+            Weak("Fo", "fomat", 0, 45.02, 1.8e-4).Tags.Add("andehit");   // axit fomic có nhóm -CHO: tráng bạc, làm mất màu nước brom
             Weak("Ox", "oxalat", 0, 88.02, 5.9e-2, 6.4e-5);
             Weak("Cit", "xitrat", 0, 189.1, 7.4e-4, 1.7e-5, 4e-7);
             Weak("Tart", "tactrat", 0, 148.07, 9.2e-4, 4.3e-5);
@@ -380,6 +388,11 @@ namespace Khkt.Simulation.Chem
             var c5 = AddRaw("FeSCN", "[Fe(SCN)]2+", SpeciesKind.Complex, 2, 113.9, null); c5.Color = Rgb.Hex("#A0101A"); c5.ColorStrength = 900;
             var c6 = AddRaw("CuPol", "phức đồng(II) - poliol", SpeciesKind.Complex, 0, 300, null); c6.Color = Rgb.Hex("#1E50C8"); c6.ColorStrength = 45;
             var c7 = AddRaw("FePhenol", "phức sắt(III) - phenolat", SpeciesKind.Complex, 3, 300, null); c7.Color = Rgb.Hex("#6A1A8A"); c7.ColorStrength = 300;
+            // phức thêm (bảng hằng số bền ChemComplexes): màu theo ChemPalette
+            Cx("CuCl4", "[CuCl4]2-", -2, 205.4, 8); Cx("CoCl4", "[CoCl4]2-", -2, 200.7, 60); Cx("CoSCN", "[Co(SCN)4]2-", -2, 291.2, 120);
+            Cx("FeF6", "[FeF6]3-", -3, 169.8, 0); Cx("FePO4c", "[Fe(HPO4)]+", 1, 151.8, 0); Cx("AgS2O3", "[Ag(S2O3)2]3-", -3, 332.1, 0);
+            Cx("AgCN2", "[Ag(CN)2]-", -1, 159.9, 0); Cx("CoNH3", "[Co(NH3)6]2+", 2, 161.1, 6);
+            Cx("CrO5", "CrO5", 0, 132.0, 300); Cx("CuCN2", "[Cu(CN)2]-", -1, 115.6, 0); Cx("I2tb", "I2-hồ tinh bột", 0, 254, 4000);
 
             // ---------- Chất chỉ thị ----------
             foreach (var (id, name) in new[] { ("mo", "metyl da cam"), ("mr", "metyl đỏ"), ("btb", "bromothymol xanh"), ("bcg", "bromocresol xanh"), ("tb", "thymol xanh"), ("ay", "alizarin vàng"), ("univ", "chỉ thị vạn năng"), ("starch", "hồ tinh bột") })
@@ -404,6 +417,10 @@ namespace Khkt.Simulation.Chem
             Ppt("Ag2C2", "#E9D96A", "bạc axetilua"); Ppt("TBP", "#F7F7F5", "2,4,6-tribromphenol"); Ppt("TBA", "#F7F7F5", "2,4,6-tribromanilin");
             Ppt("MnO2(kt)", "#4A3626", "mangan đioxit"); Ppt("ProteinDT", "#F2EFE6", "protein đông tụ"); Ppt("NesslerKT", "#B5651D", "kết tủa nâu (Nessler)");
             Ppt("C(than)", "#121212", "than (cacbon)"); Ppt("I2(r)", "#2A1A30", "iot rắn"); Ppt("Fe(OH)3kt", "#9C4A1A");
+            Ppt("AgCN", "#F7F7F5", "bạc xianua"); Ppt("HgI2", "#D8301A", "thủy ngân(II) iotua"); Ppt("CaSO3", "#FAFAFA");
+            Ppt("CHI3", "#F2D23C", "iođofom", 393.7);
+            Ppt("PhenolKT", "#F4F2EA", "phenol (tách ra, vẩn đục)"); Ppt("AnilinKT", "#F4EEDC", "anilin (tách lớp)");
+            Ppt("MillonDo", "#A3201A", "kết tủa Millon");
 
             // ---------- Chất rắn (kim loại, phi kim, oxit, hợp chất đặc biệt) ----------
             Metal("Li(s)", "Li+", 1, -3.04, "#CFCFCF", 6.94, "liti");
@@ -452,9 +469,20 @@ namespace Khkt.Simulation.Chem
                 ("Ca3N2(s)", "Ca3N2", "#8A7A6A", 148.25, "canxi nitrua"), ("NaNH2(s)", "NaNH2", "#F4F4F0", 39.0, "natri amiđua"),
                 ("NaH(s)", "NaH", "#B0B0B0", 24.0, "natri hiđrua"), ("LiAlH4(s)", "LiAlH4", "#F4F4F0", 37.95, null), ("NaBH4(s)", "NaBH4", "#F4F4F0", 37.83, null),
                 ("Na2O2(s)", "Na2O2", "#F5ECC8", 77.98, "natri peoxit"), ("K2O2(s)", "K2O2", "#F5ECC8", 110.2, "kali peoxit"), ("BaO2(s)", "BaO2", "#F4F4F0", 169.3, "bari peoxit"),
-                ("SiO2gel(s)", "SiO2·xH2O", "#4E8DF5", 60.08, "silica gel"),
+                ("SiO2gel(s)", "SiO2·xH2O", "#4E8DF5", 60.08, "silica gel"), ("P2O5(s)", "P2O5", "#FAFAFA", 141.9, "điphotpho pentaoxit"),
             })
                 Solid(id, f, color, mm, name);
+
+            // ---------- Khí ít tan, không phản ứng với nước (sục vào thì thoát ra; bình khô thì giữ lại cho phản ứng khí - rắn) ----------
+            foreach (var (g, mm, name) in new (string, double, string)[] { ("H2", 2.016, "hiđro"), ("O2", 32.0, "oxi"), ("N2", 28.01, "nitơ"), ("CO", 28.01, "cacbon monoxit"),
+                                                                     ("NO", 30.01, "nitơ monoxit"), ("N2O", 44.01, "đinitơ oxit"), ("CH4", 16.04, "metan"), ("C2H6", 30.07, "etan"),
+                                                                     ("C3H8", 44.1, "propan"), ("C4H10", 58.12, "butan"), ("F2", 38.0, "flo"), ("HClk", 36.46, "hiđro clorua") })
+            {
+                var s = AddRaw("khi:" + g, g == "HClk" ? "HCl" : g, SpeciesKind.Molecule, 0, mm, "khí " + name);
+                s.Tags.Add("khi_tro");
+            }
+
+            foreach (var s in all) ChemPalette.ApplyTo(s);
         }
     }
 }

@@ -88,3 +88,20 @@ Bài này gồm:
 **Chưa thử trên phần cứng:**
 - Gói v3 qua Wi-Fi (firmware chưa đặt tên Wi-Fi).
 - Một lần chạy app thật với người cầm tay cầm qua USB.
+
+
+## Trang "Tay cầm" ở sảnh chính (19/11/2026)
+
+Sau khi đăng nhập hoặc dùng thử, thanh bên có mục **Tay cầm** (`Menu/Dashboard/PageController.cs`). Mục này dùng để thử tay cầm trước khi vào lab.
+
+- **Kết nối:**
+  - tự dò cổng USB (`SerialControllerSource`, thử 115200 rồi 921600 baud) và Wi-Fi (`UdpControllerSource`, cổng 4210);
+  - đèn xanh khi đang nhận dữ liệu, vàng khi lỗi cảm biến hướng, đỏ khi chưa thấy tay cầm;
+  - hiện số gói/giây, nhiệt độ chip, dòng `#` mới nhất của firmware;
+  - nút **Cân con quay** (lệnh `c`), **Hiệu chỉnh joystick** (lệnh `h`), **Đặt hướng về 0** (lệnh `z`).
+- **Hướng tay cầm:** mô hình 3D quay theo tay cầm thật (camera riêng vẽ vào RenderTexture). Có góc xoay / chúc / nghiêng so với lúc đặt về 0.
+- **Joystick và nút:** chấm theo cần gạt, đèn nhấn cần, thanh mức nút cảm ứng A, B, có vạch ngưỡng bấm 50%.
+- **Thao tác thử:** 13 ô tự đánh dấu khi làm đúng. Gồm đẩy cần 4 hướng, nhấn cần, chạm A, chạm B, chúc mũi lên / xuống 30°, nghiêng trái / phải 30°, xoay trái / phải 45°.
+- **Số đo:** con quay (°/s), gia tốc (g), mức cảm ứng, cờ trạng thái.
+
+Nguồn tay cầm chỉ được tạo khi mở trang và bị huỷ khi rời trang, nên vào lab không bị giữ cổng COM hay UDP. Nếu một chương trình khác đang nghe cổng 4210 (ví dụ `xem_tay_cam_v3.py`), trang không nhận được tay cầm Wi-Fi; tắt chương trình đó trước. Tương tự, Serial Monitor hay phòng thử Python đang mở COM thì trang không đọc được USB. Bài thử `man_hinh_chinh` có 6 kiểm tra cho trang này (đạt 83/83 trên bản đã commit cộng với trang mới).

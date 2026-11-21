@@ -8,6 +8,7 @@ export interface Env {
   CLAUDE_MODEL?: string;
   CLAUDE_EFFORT?: string;
   AI_PROVIDER?: string;
+  PHONG?: DurableObjectNamespace; // Durable Object phòng trực tuyến (Worker verlab-phong)
 }
 
 export interface NguoiDung {

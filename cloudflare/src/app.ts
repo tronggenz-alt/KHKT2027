@@ -6,6 +6,7 @@ import "./kho_hoa";
 import { Ctx, Env, HttpLoi, json, timTuyen } from "./khung";
 import "./lop";
 import "./phong_hoc";
+import "./phong_truc_tuyen";
 import "./sinh";
 
 export async function xuLy(req: Request, env: Env): Promise<Response> {
@@ -30,6 +31,8 @@ export async function xuLy(req: Request, env: Env): Promise<Response> {
       res = json({ detail: "Lỗi máy chủ" }, 500);
     }
   }
+  // WebSocket đã nối với Durable Object: trả nguyên, không bọc lại
+  if (res.status === 101) return res;
   // Máy dùng chung: trình duyệt không được giữ lại trang, dữ liệu của người vừa đăng xuất
   const h = new Headers(res.headers);
   h.set("Cache-Control", "no-store");

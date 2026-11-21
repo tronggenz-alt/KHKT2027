@@ -51,7 +51,7 @@ static class ChemEngineTests
 
     static int Main()
     {
-        Console.OutputEncoding = System.Text.Encoding.UTF8;
+        if (Environment.GetEnvironmentVariable("KHKT_CHEM_OUT") == null) Console.OutputEncoding = System.Text.Encoding.UTF8;  // Mono (Unity): đổi mã hóa làm mất Console.SetOut
         Console.WriteLine("pH các dung dịch quen thuộc");
         Near(Ph(Sol(25, ("Cl-", 0.1))), 1.0, 0.02, "HCl 0,1 M: pH 1");
         Near(Ph(Sol(25, ("Na+", 0.1))), 13.0, 0.02, "NaOH 0,1 M: pH 13");

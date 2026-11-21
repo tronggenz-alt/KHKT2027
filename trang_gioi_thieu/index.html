@@ -33,8 +33,9 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Chakra+Petch:wght@600;700&family=JetBrains+Mono:wght@500&display=swap">
 <link rel="stylesheet" href="kieu.css">
+<link rel="stylesheet" href="luoi.css">
 <script>document.documentElement.classList.add('js');</script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 <script type="application/ld+json">
@@ -122,25 +123,35 @@
 
 <!-- ═════════════════════════ TỔNG QUAN ═════════════════════════ -->
 <section class="tab" id="gioi-thieu" data-ten="Tổng quan" aria-labelledby="h-gioi-thieu">
-  <div class="mo-dau">
-    <div class="khung mo-dau-chu">
-      <a class="thong-diep" href="#/san-pham"><span class="nhan-moi">Mới</span><span>Lớp học điều khiển từ web, phòng học chung và thao tác bằng bàn tay</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-      <h1 id="h-gioi-thieu" tabindex="-1">Tự tay làm thí nghiệm Hóa – Sinh, <span class="nhan-chu-chinh">ngay trên máy tính thông dụng</span></h1>
-      <p class="dan">VERA Lab là tòa nhà thí nghiệm ảo hai tầng tích hợp AI. Học sinh đi lại, cầm dụng cụ, pha hóa chất và vận hành máy phân tích; kết quả được tính từ chính những gì các em đã làm. Giáo viên điều khiển cả lớp từ trình duyệt.</p>
-      <div class="nhom-nut">
-        <a class="nut chinh lon co-mui" href="#/tham-quan">Tham quan phòng lab</a>
-        <a class="nut vien lon" href="/quan-ly">Đăng nhập lớp học</a>
-      </div>
-      <ul class="cam-ket" aria-label="Điểm chính">
-        <li>Không cần kính VR</li>
-        <li>Chạy trên card đồ họa tích hợp</li>
-        <li>Chuột, webcam hoặc tay cầm tự chế</li>
-      </ul>
+  <!-- Mở đầu dạng lưới: mỗi ô có đường kẻ 1px, góc vuông nhấn màu -->
+  <div class="luoi-dau">
+    <div class="hang-nhan">
+      <p class="o-luoi nhan-mono"><i class="vuong"></i>Dự án Khoa học Kỹ thuật · THPT Chuyên Lê Quý Đôn, Gia Lai</p>
+      <p class="o-luoi nhan-mono can-phai"><span>Hóa học</span><span>Sinh học</span><span>AI</span></p>
     </div>
 
-    <div class="khung">
-      <div class="cua-so-app">
-        <div class="dau-cua-so" aria-hidden="true"><i></i><i></i><i></i><span>VERA Lab · Mô hình tòa nhà dựng từ mặt bằng ứng dụng</span></div>
+    <h1 id="h-gioi-thieu" class="o-luoi tieu-de-lon co-video" tabindex="-1">
+      <span class="vid-nen" aria-hidden="true"><video id="vid-nen" autoplay muted loop playsinline preload="auto" poster="video/nen.jpg"><source src="video/nen.mp4" type="video/mp4"><source src="video/nen.webm" type="video/webm"></video></span>
+      <span class="chu-lon">VERA&nbsp;LAB</span>
+      <span class="tieu-de-phu"><i class="vuong"></i>Tự tay làm thí nghiệm Hóa – Sinh, ngay trên máy tính thông dụng</span>
+      <i class="goc g1" aria-hidden="true"></i><i class="goc g2" aria-hidden="true"></i><i class="goc g3" aria-hidden="true"></i><i class="goc g4" aria-hidden="true"></i>
+    </h1>
+
+    <div class="hang-chinh">
+      <div class="o-luoi o-loi">
+        <p class="dan">Phòng thí nghiệm ảo hai tầng Hóa – Sinh. Tự tay làm, kết quả tính từ chính thao tác của em. Giáo viên điều khiển cả lớp từ trình duyệt.</p>
+        <div class="nhom-nut">
+          <a class="nut chinh lon co-mui" href="#/tham-quan">Tham quan phòng lab</a>
+          <a class="nut vien lon" href="/quan-ly">Đăng nhập lớp học</a>
+        </div>
+        <ul class="cam-ket-icon" aria-label="Điểm chính">
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="12" rx="1.5"/><path d="M8.5 20h7M12 16.5V20"/></svg>Không cần kính VR</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1.5"/><path d="M9.5 9.5h5v5h-5zM9 2.5V6M15 2.5V6M9 18v3.5M15 18v3.5M2.5 9H6M2.5 15H6M18 9h3.5M18 15h3.5"/></svg>Chạy trên card đồ họa tích hợp</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12M11 11V4a1.5 1.5 0 0 1 3 0v7M14 11V5.5a1.5 1.5 0 0 1 3 0V13M17 9.5a1.5 1.5 0 0 1 3 0V15a6.5 6.5 0 0 1-6.5 6.5h-1A6.5 6.5 0 0 1 7 18l-2.6-4.3a1.5 1.5 0 0 1 2.5-1.6L8 13"/></svg>Chuột, webcam hoặc tay cầm tự chế</li>
+        </ul>
+      </div>
+
+      <div class="o-luoi o-san-khau">
         <figure class="san-khau" id="san-khau" data-che="toa">
           <img class="anh-hoa" src="anh/hero.jpg" alt="Phòng thí nghiệm Hóa, ảnh chụp trong ứng dụng VERA Lab" width="1600" height="855">
           <img class="anh-sinh" src="anh/hero_sinh.jpg" alt="Phòng thí nghiệm Sinh, ảnh chụp trong ứng dụng VERA Lab" width="1600" height="855" loading="lazy">
@@ -155,23 +166,108 @@
             <button type="button" data-che="sinh" aria-pressed="false">Lab Sinh</button>
           </div>
         </figure>
+        <i class="ngoac n1" aria-hidden="true"></i><i class="ngoac n2" aria-hidden="true"></i><i class="ngoac n3" aria-hidden="true"></i><i class="ngoac n4" aria-hidden="true"></i>
       </div>
+
+      <div class="o-luoi o-anh-that">
+        <div class="khung-truot" id="truot-that" aria-roledescription="băng ảnh" aria-label="Ảnh thực tế của tay cầm VERA Band">
+          <figure class="truot hien-truot"><img src="anh/tc_mat_truoc.jpg" alt="Tay cầm VERA Band sau khi in 3D và lắp ráp, cầm trên tay" width="900" height="1200"><figcaption>VERA Band in 3D và lắp ráp xong</figcaption></figure>
+          <figure class="truot"><img src="anh/tc_mat_sau.jpg" alt="Mặt sau tay cầm VERA Band với cò bóp có lò xo hồi" width="900" height="1200" loading="lazy"><figcaption>Mặt sau: cò bóp có lò xo hồi</figcaption></figure>
+          <figure class="truot"><img src="anh/tc_ben_trong.jpg" alt="Bên trong tay cầm khi mở hai nửa vỏ, dây nối các linh kiện" width="900" height="1200" loading="lazy"><figcaption>Mở vỏ: dây nối, cụm cần gạt và cò</figcaption></figure>
+          <figure class="truot"><img src="anh/tc_dung_that.jpg" alt="Cầm tay cầm VERA Band điều khiển phòng thí nghiệm ảo trên laptop" width="693" height="953" loading="lazy"><figcaption>Điều khiển phòng lab ảo bằng tay cầm thật</figcaption></figure>
+        </div>
+        <div class="dieu-khien-truot">
+          <span class="nhan-mono">Ảnh thực tế</span>
+          <span class="dem-truot nhan-mono" id="dem-truot">01 / 04</span>
+          <button type="button" class="nut-truot" data-buoc="-1" aria-label="Ảnh trước"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3.5 5.5 8l4.5 4.5"/></svg></button>
+          <button type="button" class="nut-truot" data-buoc="1" aria-label="Ảnh sau"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="hang-cong-nghe" aria-label="Công nghệ sử dụng">
+      <p class="o-luoi nhan-mono">Xây dựng bằng</p>
+      <div class="o-luoi bang-o"><ul class="day-o"><li><i class="lg" style="--lg:url(anh/logo/unity.svg)"></i>Unity 6</li><li><i class="lg" style="--lg:url(anh/logo/dotnet.svg)"></i>C#</li><li><i class="lg" style="--lg:url(anh/logo/mediapipe.svg)"></i>MediaPipe</li><li><i class="lg" style="--lg:url(anh/logo/opencv.svg)"></i>OpenCV</li><li><i class="lg" style="--lg:url(anh/logo/python.svg)"></i>Python</li><li><i class="lg" style="--lg:url(anh/logo/fastapi.svg)"></i>FastAPI</li><li><i class="lg" style="--lg:url(anh/logo/espressif.svg)"></i>ESP32</li><li><i class="lg" style="--lg:url(anh/logo/arduino.svg)"></i>Arduino</li><li><i class="lg" style="--lg:url(anh/logo/threedotjs.svg)"></i>three.js</li><li><i class="lg" style="--lg:url(anh/logo/sqlite.svg)"></i>SQLite</li><li><i class="lg" style="--lg:url(anh/logo/cloudflare.svg)"></i>Cloudflare</li></ul><ul class="day-o" aria-hidden="true"><li><i class="lg" style="--lg:url(anh/logo/unity.svg)"></i>Unity 6</li><li><i class="lg" style="--lg:url(anh/logo/dotnet.svg)"></i>C#</li><li><i class="lg" style="--lg:url(anh/logo/mediapipe.svg)"></i>MediaPipe</li><li><i class="lg" style="--lg:url(anh/logo/opencv.svg)"></i>OpenCV</li><li><i class="lg" style="--lg:url(anh/logo/python.svg)"></i>Python</li><li><i class="lg" style="--lg:url(anh/logo/fastapi.svg)"></i>FastAPI</li><li><i class="lg" style="--lg:url(anh/logo/espressif.svg)"></i>ESP32</li><li><i class="lg" style="--lg:url(anh/logo/arduino.svg)"></i>Arduino</li><li><i class="lg" style="--lg:url(anh/logo/threedotjs.svg)"></i>three.js</li><li><i class="lg" style="--lg:url(anh/logo/sqlite.svg)"></i>SQLite</li><li><i class="lg" style="--lg:url(anh/logo/cloudflare.svg)"></i>Cloudflare</li></ul></div>
     </div>
   </div>
 
   <div class="khung">
-    <div class="dai-so" aria-label="Quy mô hệ thống">
-      <div><b>2</b><span>tầng Hóa và Sinh</span></div>
-      <div><b>13</b><span>khu chức năng</span></div>
-      <div><b>720</b><span>hóa chất tra cứu được</span></div>
-      <div><b>14</b><span>máy phân tích theo quy trình thật</span></div>
-      <div><b>108</b><span>dụng cụ sinh học</span></div>
-      <div><b>16</b><span>bài thí nghiệm Sinh</span></div>
+    <div class="dai-so luoi-so" aria-label="Quy mô hệ thống">
+      <div data-hien><i class="vuong"></i><b>2</b><span>tầng Hóa và Sinh</span></div>
+      <div data-hien><i class="vuong"></i><b>13</b><span>khu chức năng</span></div>
+      <div data-hien><i class="vuong"></i><b>720</b><span>hóa chất tra cứu được</span></div>
+      <div data-hien><i class="vuong"></i><b>14</b><span>máy phân tích theo quy trình thật</span></div>
+      <div data-hien><i class="vuong"></i><b>108</b><span>dụng cụ sinh học</span></div>
+      <div data-hien><i class="vuong"></i><b>16</b><span>bài thí nghiệm Sinh</span></div>
     </div>
 
-    <div class="bang-chay" aria-label="Công nghệ sử dụng">
-      <p>Xây dựng bằng</p>
-      <div class="cua-so"><ul class="day"><li>Unity 6</li><li>URP</li><li>C#</li><li>MediaPipe</li><li>Netcode · Unity Relay</li><li>Python</li><li>FastAPI</li><li>OpenCV</li><li>ESP32</li><li>BMI160</li><li>three.js</li><li>Cloudflare Pages</li><li>D1</li></ul><ul class="day" aria-hidden="true"><li>Unity 6</li><li>URP</li><li>C#</li><li>MediaPipe</li><li>Netcode · Unity Relay</li><li>Python</li><li>FastAPI</li><li>OpenCV</li><li>ESP32</li><li>BMI160</li><li>three.js</li><li>Cloudflare Pages</li><li>D1</li></ul></div>
+    <!-- Bên trong phòng lab -->
+    <div class="doan">
+      <div class="dau-doan-luoi" data-hien>
+        <p class="nhan-mono"><i class="vuong"></i>Bên trong phòng lab</p>
+        <h2>Hai tầng, đủ khu như phòng thí nghiệm thật</h2>
+      </div>
+      <div class="luoi-anh-that">
+        <figure class="the-anh rong" data-hien data-nghieng><img src="anh/hoa_lab.jpg" alt="Phòng thí nghiệm Hóa học tầng 1 của VERA Lab" width="1200" height="641" loading="lazy"><figcaption><span class="mon">Hóa</span>Phòng thí nghiệm Hóa, tầng 1</figcaption></figure>
+        <figure class="the-anh" data-hien data-nghieng><img src="anh/sinh_lab.jpg" alt="Phòng thí nghiệm Sinh học tầng 2 của VERA Lab" width="1200" height="641" loading="lazy"><figcaption><span class="mon sinh">Sinh</span>Phòng thí nghiệm Sinh, tầng 2</figcaption></figure>
+        <figure class="the-anh" data-hien data-nghieng><img src="anh/hoa_may.jpg" alt="Phòng máy phân tích của VERA Lab" width="1200" height="641" loading="lazy"><figcaption><span class="mon">Hóa</span>Phòng 14 máy phân tích</figcaption></figure>
+        <figure class="the-anh" data-hien data-nghieng><img src="anh/sinh_hienvi.jpg" alt="Bàn kính hiển vi trong phòng Sinh" width="1200" height="641" loading="lazy"><figcaption><span class="mon sinh">Sinh</span>Bàn kính hiển vi</figcaption></figure>
+        <figure class="the-anh" data-hien data-nghieng><img src="anh/hoa_kho.jpg" alt="Phòng hóa chất với kệ 720 chất" width="1200" height="641" loading="lazy"><figcaption><span class="mon">Hóa</span>Kho 720 hóa chất</figcaption></figure>
+        <figure class="the-anh" data-hien data-nghieng><img src="anh/sinh_phantu.jpg" alt="Phòng sinh học phân tử với máy PCR và điện di" width="1200" height="641" loading="lazy"><figcaption><span class="mon sinh">Sinh</span>Sinh học phân tử: PCR, điện di</figcaption></figure>
+      </div>
+    </div>
+
+    <!-- Trí tuệ nhân tạo -->
+    <div class="doan">
+      <div class="dau-doan-luoi" data-hien>
+        <p class="nhan-mono"><i class="vuong"></i>Trí tuệ nhân tạo</p>
+        <h2>Một cổng gọi, nhiều mô hình AI</h2>
+        <p class="dan">AI chỉ lập kế hoạch; bộ kiểm tra duyệt từng bước rồi robot mới làm. Khóa AI nằm ở máy chủ.</p>
+      </div>
+      <div class="luoi-ai">
+        <div class="o-ai chinh" data-hien>
+          <img src="anh/logo/qwen-color.svg" alt="" width="64" height="64">
+          <p class="nhan-mono">Mô hình chính</p>
+          <b>Qwen 14B</b>
+          <span>Mô hình nguồn mở 14 tỉ tham số cho trợ lý và robot</span>
+        </div>
+        <div class="o-ai" data-hien><img src="anh/logo/gemini-color.svg" alt="" width="40" height="40"><b>Gemini</b><span>Google</span></div>
+        <div class="o-ai" data-hien><i class="lg lon" style="--lg:url(anh/logo/groq.svg)"></i><b>Groq</b><span>Suy luận nhanh</span></div>
+        <div class="o-ai" data-hien><img src="anh/logo/deepseek-color.svg" alt="" width="40" height="40"><b>DeepSeek</b><span>Lập luận</span></div>
+        <div class="o-ai" data-hien><i class="lg lon" style="--lg:url(anh/logo/openai.svg)"></i><b>OpenAI</b><span>Tùy chọn</span></div>
+        <div class="o-ai" data-hien><img src="anh/logo/claude-color.svg" alt="" width="40" height="40"><b>Claude</b><span>Tùy chọn</span></div>
+        <div class="o-ai cong" data-hien><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h13l-3-3M20 17H7l3 3"/></svg><b>Tự chuyển khi lỗi</b><span>Một khóa hoặc nhà cung cấp gặp lỗi, cổng gọi tự chuyển sang lựa chọn kế tiếp; ứng dụng không phải sửa.</span></div>
+        <figure class="o-ai so-do" data-hien><img src="anh/so_do_rag.jpg" alt="Sơ đồ kiến trúc RAG – LLM của trợ lý AI: xây kho tri thức và trả lời, lập kế hoạch" width="1400" height="976" loading="lazy"><figcaption><span class="so-hinh">H.12</span>Kiến trúc RAG – LLM: kho tri thức, trả lời và lập kế hoạch</figcaption></figure>
+      </div>
+    </div>
+
+    <!-- Báo chí -->
+    <div class="doan">
+      <div class="dau-doan-luoi" data-hien>
+        <p class="nhan-mono"><i class="vuong"></i>Báo chí nói gì</p>
+        <h2>Vì sao cần VERA Lab</h2>
+      </div>
+      <div class="luoi-bao">
+        <a class="the-bao" data-hien href="https://www.vietnamplus.vn/tinh-gia-lai-kien-nghi-thu-hoi-hon-450-trieu-dong-chi-sai-tai-8-truong-hoc-post1139516.vnp" target="_blank" rel="noopener"><span class="nhan-mono">VietnamPlus · 01/10/2026</span><b>Hóa chất được cấp không sử dụng, để lâu hết hạn</b><small>Thanh tra 8 trường có cấp THPT ở Gia Lai</small></a>
+        <a class="the-bao" data-hien href="https://vjol.info.vn/tctbgd/article/download/86486/73583" target="_blank" rel="noopener"><span class="nhan-mono">Tạp chí Thiết bị Giáo dục · 2023</span><b>Cấp THPT còn thiếu 5.328 phòng học bộ môn</b><small>Thiết bị tối thiểu mới đáp ứng 58,9%</small></a>
+        <a class="the-bao" data-hien href="https://jos.hueuni.edu.vn/index.php/hujos-ssh/article/download/6340/1458/26788" target="_blank" rel="noopener"><span class="nhan-mono">Tạp chí Khoa học ĐH Huế · 2021</span><b>Chỉ 27,7% giáo viên Hóa thường dùng thí nghiệm khi dạy bài mới</b><small>Khảo sát 285 giáo viên, giảng viên</small></a>
+        <a class="the-bao" data-hien href="https://www.sggp.org.vn/de-phong-su-co-tai-phong-thi-nghiem-sinh-hoa-post510865.html" target="_blank" rel="noopener"><span class="nhan-mono">Sài Gòn Giải Phóng · 2019</span><b>3 vụ tai nạn trong giờ thí nghiệm, 8 học sinh bị thương</b><small>Nghệ An, Cần Thơ, Hà Nội, 2017–2019</small></a>
+      </div>
+    </div>
+
+    <!-- Mô-đun mới: Giải bài tập -->
+    <div class="doan">
+      <div class="dau-doan-luoi" data-hien>
+        <p class="nhan-mono"><i class="vuong"></i>Mới trong ứng dụng</p>
+        <h2>Giải bài tập trên mô hình 3D</h2>
+        <p class="dan">Chuỗi phản ứng, cơ chế cho Hóa; cây đậu, cơ thể người 3D cho Sinh.</p>
+      </div>
+      <div class="luoi-moi bon">
+        <figure class="o-moi" data-hien><div class="khung-moi"><img src="anh/moi_caydau.jpg" alt="Mô hình 3D cây đậu hai lá mầm với các thanh trượt môi trường" width="801" height="910" loading="lazy"></div><figcaption><b><span class="mon sinh">Sinh</span>Cây đậu 3D</b>Bảy thanh trượt môi trường, quan sát quang hợp và thoát hơi nước</figcaption></figure>
+        <figure class="o-moi" data-hien><div class="khung-moi"><img src="anh/moi_giaiphau.jpg" alt="Mô hình giải phẫu người 3D với hệ tuần hoàn" width="801" height="940" loading="lazy"></div><figcaption><b><span class="mon sinh">Sinh</span>Giải phẫu người 3D</b>Bóc lớp, hệ tuần hoàn và thẻ kiến thức về tim</figcaption></figure>
+        <figure class="o-moi" data-hien><div class="khung-moi"><img src="anh/moi_chuoi.jpg" alt="Giải chuỗi phản ứng từ C2H4 tới CH3COOC2H5 thành các thẻ có điều kiện" width="1400" height="875" loading="lazy"></div><figcaption><b><span class="mon">Hóa</span>Chuỗi phản ứng</b>Đáp án thành thẻ có điều kiện từng bước</figcaption></figure>
+        <figure class="o-moi" data-hien><div class="khung-moi"><img src="anh/moi_sn2.jpg" alt="Cơ chế SN2 trình bày trên tờ giấy như đáp án bài thi" width="1400" height="875" loading="lazy"></div><figcaption><b><span class="mon">Hóa</span>Cơ chế</b>AI viết, RDKit kiểm tra, trình bày như đáp án</figcaption></figure>
+        </div>
     </div>
 
     <!-- Tính năng: lưới ô -->
@@ -751,7 +847,7 @@
             <p class="the-muc">Trạng thái</p>
             <h3>Bản nháp, đang chờ duyệt dáng</h3>
             <p>So với VERA Band: vùng nắm rộng từ 47 lên 53 mm, khuyên quai cách gốc ngón cái 4,68 mm thay vì 0,42 mm, đế thấp từ 17 xuống 12 mm, thêm bướu đỡ lòng bàn tay. Các số này đo trên mô hình 3D; nhóm chưa in, chưa cân và chưa thử trên tay thật.</p>
-            <p>Mạch ESP32 + BMI160 dùng cho tay cầm đã được đo riêng, chưa lắp vào vỏ: để yên 10 phút chỉ trôi 0,071°, so với 108,7° nếu không khử nhiễu.</p>
+            <p>Bản trước, VERA Band, đã in 3D, lắp mạch ESP32 + BMI160 và điều khiển được phòng lab ảo: trỏ chọn, bóp cò cầm ống nghiệm, nghiêng để rót (báo cáo, H.24–H.26 và H.41). Mạch đo riêng khi để yên 10 phút chỉ trôi 0,071°, so với 108,7° nếu không khử nhiễu.</p>
             <a class="lien-ket" href="#/kiem-chung" data-mo-tab="t-k6">Xem kết quả khử nhiễu cảm biến</a>
           </div>
         </div>
@@ -898,7 +994,7 @@
         <li>Phòng học chung mới đồng bộ vị trí và vật đang cầm, chưa đồng bộ dung dịch, phản ứng và máy phân tích.</li>
         <li>Độ chính xác nhận diện tay với webcam thật trong lúc chơi chưa được đo. Theo dõi đầu bằng Python có thể bị Smart App Control chặn.</li>
         <li>Máy PCR, điện di và ghép gen vẫn dùng luồng riêng, chưa nối với lab Sinh tự do.</li>
-        <li>Tay cầm VERA Band 2 còn là bản nháp: chưa in, chưa cân, chưa thử trên tay thật; độ vừa tay mới đo trên mô hình 3D. Mạch cảm biến đã đo khi nằm yên, nhưng trục Y joystick đang lỗi đấu nối; nút cảm ứng khi chạm và kết nối Wi-Fi chưa đo.</li>
+        <li>VERA Band đã in và điều khiển được phòng lab ảo; bản VERA Band 2 còn là bản nháp: chưa in, chưa cân, chưa thử trên tay thật, độ vừa tay mới đo trên mô hình 3D. Mạch cảm biến đã đo khi nằm yên, nhưng trục Y joystick đang lỗi đấu nối; nút cảm ứng khi chạm và kết nối Wi-Fi chưa đo.</li>
         <li>Trôi hướng khi cầm tay mới có số mô phỏng (dùng nhiễu đo thật), chưa đo bằng tay người.</li>
       </ul>
     </div>
@@ -1028,7 +1124,7 @@
 
 <script src="trang.js"></script>
 <script src="hieu_ung.js"></script>
-<script src="nen_chim.js"></script>
+<script src="chuyen_dong.js"></script>
 <script type="module" src="canh3d.js"></script>
 <script>
   // Thư viện 3D không tải được thì hiện bản không 3D

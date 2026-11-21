@@ -89,7 +89,10 @@ namespace Khkt.Input
                 Publish(s);
             }
             while (parser.Messages.TryDequeue(out var m))
+            {
+                LastFirmwareMessage = m;
                 if (logFirmwareMessages) Debug.Log($"[Tay cầm {openPort}] {m}");
+            }
             if (newPort)
             {
                 newPort = false;
@@ -139,6 +142,10 @@ namespace Khkt.Input
         public void CalibrateGyro() => outgoing.Enqueue("C\n");
         /// <summary>Lấy vị trí nghỉ hiện tại của joystick làm tâm (bản ESP32): buông tay khỏi cần.</summary>
         public void CenterJoysticks() => outgoing.Enqueue("J\n");
+        /// <summary>Gửi một lệnh chữ tới firmware (tay cầm VERA: c, h, z, k...). Tự thêm xuống dòng.</summary>
+        public void SendCommand(string cmd) => outgoing.Enqueue(cmd.EndsWith("\n") ? cmd : cmd + "\n");
+        /// <summary>Dòng '#' gần nhất firmware gửi (hiệu chuẩn, lỗi IMU...).</summary>
+        public string LastFirmwareMessage { get; private set; } = "";
 
         /// <summary>Tốc độ cổng thử thêm khi baudRate không thấy tay cầm: firmware tay cầm VERA (từ 18/11/2026) chạy 921600 baud.</summary>
         public int veraBaudRate = 921600;
@@ -343,6 +350,8 @@ namespace Khkt.Input
         public override void ResetOrientation() { }
         public void CalibrateGyro() { }
         public void CenterJoysticks() { }
+        public void SendCommand(string cmd) { }
+        public string LastFirmwareMessage => "";
     }
 }
 #endif

@@ -53,6 +53,7 @@ namespace Khkt.Menu
             User = null;
             Token = null;
             GuestActive = false;
+            ApiKeyStore.Forget();
         }
     }
 }

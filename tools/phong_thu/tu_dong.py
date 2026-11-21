@@ -1,4 +1,5 @@
-"""Bot tự làm cả 7 bài trong phòng thử, chạy không cần màn hình: kiểm tra luật tương tác chạy đúng từ đầu đến cuối,
+"""Bot tự làm cả 7 bài trong phòng thử (kiểm tra cảm biến, trỏ menu, lấy chất, nhỏ pipet, rót
+chất, lắc khuấy, vặn nắp), chạy không cần màn hình: kiểm tra luật tương tác chạy đúng từ đầu đến cuối,
 chụp ảnh từng bài, xuất bảng như khi người thật làm.
 
     python tools/phong_thu/tu_dong.py [--ra thư_mục] [--khong-rung]
@@ -29,6 +30,7 @@ import bai_thu  # noqa: E402
 import chay  # noqa: E402
 from f1_truc_tuyen import F1  # noqa: E402
 from nguon import NguonAo, TrangThai, tu_bit, van_toc_tu_q  # noqa: E402
+from canh import HOA_CHAT_MENU  # noqa: E402
 from xu_ly import quay  # noqa: E402
 
 DT = 1 / 60
@@ -227,36 +229,165 @@ class Bot:
         if not giu_tay:
             yield from self.nhap("can")  # về chế độ ĐI
 
+    # ---------- đi lại ----------
+    def quay_toi(self, app, yaw_dich, s_max=6.0):
+        c = app.canh
+        for _ in range(int(s_max / DT)):
+            lech = (yaw_dich - c.cam_yaw + 180) % 360 - 180
+            if abs(lech) < 3:
+                break
+            self.ng.jx, self.ng.jy = float(np.clip(-lech / 25, -1, 1)), 0.0
+            yield
+        self.ng.jx = self.ng.jy = 0.0
+
+    def di_toi(self, app, x, z, s_max=12.0):
+        c = app.canh
+        for _ in range(int(s_max / DT)):
+            d = np.array([x, 0, z]) - c.cam_vi_tri
+            kc = math.hypot(d[0], d[2])
+            if kc < 0.06:
+                break
+            muon = math.degrees(math.atan2(-d[0], d[2]))
+            lech = (muon - c.cam_yaw + 180) % 360 - 180
+            self.ng.jx = float(np.clip(-lech / 25, -1, 1))
+            self.ng.jy = float(np.clip(kc * 2, 0.15, 1)) if abs(lech) < 15 else 0.0
+            yield
+        self.ng.jx = self.ng.jy = 0.0
+        yield from self.cho(0.1)
+
+    def chinh_dau(self, app, dich, s_max=3.0):
+        """Đang cầm pipet (chế độ TAY): nhìn đầu pipet, chỉnh tới điểm dich như người: lệch ngang tia thì xoay cổ tay,
+        lệch dọc tia thì gạt cần đẩy ra / kéo vào."""
+        tt = app.canh.tuong_tac
+        dich = np.asarray(dich, float)
+        for _ in range(int(s_max / DT)):
+            if tt.cam is None or tt.tam_cam is None:
+                break
+            e = dich - tt.cam.p
+            if math.hypot(e[0], e[2]) < 0.0015 and abs(e[1]) < 0.01:
+                break
+            tia = tt.tam_cam - app.canh.tay()
+            tia /= max(np.linalg.norm(tia), 1e-9)
+            doc = float(e @ tia)
+            yd, pd = app.canh.huong_toi(tt.tam_cam + e - tia * doc)
+            k = 0.3 / max(app.ct.do_nhay, 0.25)
+            self.ng.yaw += (yd - app.ct.ra[0]) * k
+            self.ng.pitch += (pd - app.ct.ra[1]) * k
+            # gạt ít nhất 0,2 cho qua vùng chết 8% của cần (gạt nhẹ hơn thì cần không nhận)
+            self.ng.jy = math.copysign(min(1.0, max(0.2, abs(doc) * 8)), doc) if tt.che_do == "TAY" and abs(doc) > 0.001 else 0.0
+            yield
+        self.ng.jy = 0.0
+        yield from self.cho(0.2)
+
     # ---------- 7 bài ----------
     def bai_1(self, app):
-        c = app.canh
-        x, y, _ = c.bia[4]
-        yield from self.ngam(app, (x, y, c.mat_tuong_z), 0.8)
-        yield from self.cho(3.4)
-        self.anh.append("1_tro.png")
-        for _ in range(8):
-            i = c.bia_sang
-            if i is None:
-                break
-            x, y, _ = c.bia[i]
-            yield from self.ngam(app, (x, y, c.mat_tuong_z), 0.55)
-            yield from self.nhap("A")
-            yield from self.cho(0.1)
+        b = app.bai
+        while b.pha == "yen":
+            yield
+        self.anh.append("1_yen.png")
+        yield from self.lan(64, 0.6)
+        yield from self.cho(0.2)
+        yield from self.lan(-64, 0.9)
+        self.anh.append("1_lan.png")
+        yield from self.cho(0.2)
+        yield from self.lan(0, 0.5)
+        while b.pha != "joy":
+            yield
+        for i, (_, (ex, ey)) in enumerate(b.HUONG):
+            self.ng.jx, self.ng.jy = ex, ey
+            yield from self.cho(0.45)
+            if i == 1:
+                self.anh.append("1_joystick.png")
+            self.ng.jx = self.ng.jy = 0.0
+            yield from self.cho(0.9)
+        while b.pha != "nut":
+            yield
+        yield from self.nhap("can", 0.15)
+        for nut in "AB":
+            while b.pha != "nhip_" + nut:
+                yield
+            for k in range(b.NHIP):
+                while app.t - b.t_pha < b.CHO_NHIP + k * b.CHU_KY - 0.06:
+                    yield
+                yield from self.nhap(nut, 0.15)
+                if k == 3 and nut == "A":
+                    self.anh.append("1_nhip.png")
 
     def bai_2(self, app):
-        c = app.canh
-        for i, v in enumerate(list(c.vat)):
-            yield from self.ngam(app, v.tam(), 0.6)
-            self.ng.nut["B"] = True
-            yield from self.cho(0.2)
-            x, z, _, _ = c.o_dat[i]
-            yield from self.dua_vat_toi(app, (x, 0.9 + v.h / 2 + 0.003, z))
-            if i == 1:
-                self.anh.append("2_cam_dat.png")
-            self.ng.nut["B"] = False
-            yield from self.cho(0.3)
+        b = app.bai
+        bm = app.canh.bang_menu
+        while b.pha == "bang":
+            _, x, y, _, _ = bm.o[bm.dich]
+            yield from self.ngam(app, (x, y, bm.z), 0.5)
+            yield from self.cho(0.35)   # người dừng tia trên ô một chút rồi mới chạm
+            if b.k == 2:
+                self.anh.append("2_bang_menu.png")
+            yield from self.nhap("A", 0.12)
+            yield from self.cho(0.1)
+        n = len(HOA_CHAT_MENU)
+        for k in range(3):
+            i = HOA_CHAT_MENU.index(b.yeu_cau_tron[k])
+            self.ng.nut["A"] = True
+            yield from self.cho(0.75)
+            a = math.radians(i * 360 / n)
+            self.ng.jx, self.ng.jy = 0.95 * math.sin(a), 0.95 * math.cos(a)
+            yield from self.cho(0.35)
+            if k == 1:
+                self.anh.append("2_menu_tron.png")
+            self.ng.nut["A"] = False
+            yield from self.cho(0.05)
+            self.ng.jx = self.ng.jy = 0.0
+            yield from self.cho(0.4)
 
     def bai_3(self, app):
+        c = app.canh
+        b = app.bai
+        for k in range(2):
+            lo = next(v for v in c.vat if v.ten == b.yeu_cau[k])
+            yield from self.di_toi(app, -1.8, 0.05)
+            yield from self.di_toi(app, -1.8, lo.p[2] - 0.2)
+            yield from self.quay_toi(app, 90)
+            if k == 0:
+                self.anh.append("3_ke.png")
+            yield from self.ngam(app, lo.tam(), 0.6)
+            self.ng.nut["B"] = True
+            yield from self.cho(0.25)
+            x, z, _, _ = c.o_dat[k]
+            d = np.array([x, 0, z]) - c.cam_vi_tri
+            yield from self.quay_toi(app, math.degrees(math.atan2(-d[0], d[2])))
+            yield from self.dua_vat_toi(app, (x, 0.9 + lo.h / 2 + 0.004, z), 0.7)
+            if k == 1:
+                self.anh.append("3_dat.png")
+            self.ng.nut["B"] = False
+            yield from self.cho(0.35)
+
+    def bai_4(self, app):
+        c = app.canh
+        b = app.bai
+        lo, pipet, ong2 = c.vat[0], c.vat[1], c.vat[3]
+        yield from self.ngam(app, pipet.tam(), 0.6)
+        self.ng.nut["B"] = True
+        yield from self.cho(0.25)
+        nua = np.array([0, pipet.h / 2, 0])
+        yield from self.dua_vat_toi(app, lo.dinh() - np.array([0, 0.02, 0]) + nua, 0.6, giu_tay=True)
+        self.ng.nut["A"] = True
+        yield from self.cho(1.0)
+        self.anh.append("4_hut.png")
+        self.ng.nut["A"] = False
+        yield from self.cho(0.15)
+        yield from self.dua_vat_toi(app, ong2.dinh() + np.array([0, 0.02, 0]) + nua, 0.6, giu_tay=True)
+        yield from self.chinh_dau(app, ong2.dinh() + np.array([0, 0.02, 0]))
+        for i in range(b.SO_GIOT):
+            yield from self.nhap("A", 0.12)
+            yield from self.cho(0.25)
+            if i == 2:
+                self.anh.append("4_nho_giot.png")
+        yield from self.nhap("can")
+        yield from self.cho(0.3)
+        self.ng.nut["B"] = False
+        yield from self.cho(0.3)
+
+    def bai_5(self, app):
         c = app.canh
         coc, od = c.vat
         yield from self.ngam(app, coc.tam(), 0.6)
@@ -267,8 +398,7 @@ class Bot:
         dinh = od.dinh()
         # nghiêng quanh tâm: miệng lệch sang phải h/2·sin g, vòi thêm r·cos(g/2); hạ (h/2)(1 − cos g)
         lech = coc.h / 2 * math.sin(g) + coc.r * math.cos(g / 2)
-        # miệng lệch theo hướng "phải" của TIA (vuông góc với tia trên mặt ngang, như canh._rot), không phải trục x:
-        # tia đi chéo nên lệch theo x làm vòi sai 2,9 cm theo chiều sâu, rót hết ra ngoài (sửa 11/11/2026)
+        # miệng lệch theo hướng "phải" của TIA (vuông góc với tia trên mặt ngang, như canh._rot)
         ngang = np.array(dinh, float) - c.tay()
         ngang[1] = 0.0
         ngang /= max(np.linalg.norm(ngang), 1e-9)
@@ -278,8 +408,7 @@ class Bot:
         tt = app.canh.tuong_tac
 
         def nhin_dong_chay():
-            """Nhìn dòng chảy, chỉnh cho rơi đúng miệng ống đong (cả lúc nhỏ giọt ở chế độ tinh):
-            lệch ngang với tia thì xoay cổ tay, lệch dọc tia thì gạt cần đẩy ra / kéo vào (chế độ TAY)."""
+            """Nhìn dòng chảy, chỉnh cho rơi đúng miệng ống đong: lệch ngang thì xoay cổ tay, lệch dọc thì gạt cần."""
             self.ng.jy = 0.0
             if tt.dong_chay and tt.tam_cam is not None:
                 voi = tt.dong_chay[0][0]
@@ -295,7 +424,7 @@ class Bot:
                     self.ng.jy = float(np.clip(doc * 8, -1, 1))
 
         anh = False
-        yield from self.lan(37, 0.35)  # nghiêng vừa qua ngưỡng chảy: nhỏ giọt, nhìn dòng để ngắm trước
+        yield from self.lan(37, 0.35)
         for _ in range(int(0.6 / DT)):
             nhin_dong_chay()
             yield
@@ -303,7 +432,7 @@ class Bot:
         for _ in range(int(20 / DT)):
             nhin_dong_chay()
             if not anh and od.the_tich > 20:
-                self.anh.append("3_rot.png")
+                self.anh.append("5_rot.png")
                 anh = True
             if od.the_tich >= 43:
                 break
@@ -323,7 +452,7 @@ class Bot:
         self.ng.nut["B"] = False
         yield from self.cho(0.3)
 
-    def bai_4(self, app):
+    def bai_6(self, app):
         c = app.canh
         ong, coc, dua = c.vat
         yield from self.ngam(app, ong.tam(), 0.6)
@@ -332,7 +461,7 @@ class Bot:
         yield from self.ngam(app, ong.tam() + np.array([0, 0.15, 0]), 0.5)
         self.ng.lac = 2.2
         yield from self.cho(1.0)
-        self.anh.append("4_lac.png")
+        self.anh.append("6_lac.png")
         yield from self.cho(1.6)
         self.ng.lac = 0.0
         yield from self.cho(0.3)
@@ -345,12 +474,12 @@ class Bot:
         P = coc.p + np.array([0, dua.h / 2 + 0.02, 0])
         yield from self.dua_vat_toi(app, P, 0.7)
         yd0, pd0 = self.ng.yaw, self.ng.pitch
-        for i in range(int(4.0 / DT)):  # vẽ vòng tròn bán kính 2°, 1 vòng / giây
+        for i in range(int(4.0 / DT)):  # vẽ vòng tròn bán kính 1,6°, 1 vòng / giây
             a = 2 * math.pi * i * DT
             self.ng.yaw = yd0 + 1.6 * math.cos(a)
             self.ng.pitch = pd0 + 1.6 * math.sin(a)
             if i == int(1.6 / DT):
-                self.anh.append("4_khuay.png")
+                self.anh.append("6_khuay.png")
             if coc.chat_ran == 0:
                 break
             yield
@@ -359,7 +488,7 @@ class Bot:
         self.ng.nut["B"] = False
         yield from self.cho(0.3)
 
-    def bai_5(self, app):
+    def bai_7(self, app):
         b = app.canh.vat[0]
         nap = b.p + np.array([0, b.h + 0.012, 0])
         yield from self.ngam(app, nap, 0.6)
@@ -370,66 +499,13 @@ class Bot:
             yield from self.cho(0.12)
             yield from self.lan(-70, 0.45)
             if lan == 2:
-                self.anh.append("5_van.png")
+                self.anh.append("7_van.png")
             self.ng.nut["B"] = False
-            yield from self.cho(0.1)
+            yield from self.cho(0.15)
             yield from self.lan(70, 0.4)
             yield from self.cho(0.1)
             yield from self.ngam(app, nap, 0.2, lap=False)
         yield from self.lan(0, 0.3)
-
-    def bai_6(self, app):
-        c = app.canh
-        mx, mz = c.moc_san
-        for _ in range(int(15 / DT)):
-            d = np.array([mx, 0, mz]) - c.cam_vi_tri
-            kc = math.hypot(d[0], d[2])
-            if kc < 0.15:
-                break
-            muon = math.degrees(math.atan2(-d[0], d[2]))
-            lech = (muon - c.cam_yaw + 180) % 360 - 180
-            self.ng.jx = float(np.clip(-lech / 25, -1, 1))
-            self.ng.jy = float(np.clip(kc * 1.5, 0, 1)) if abs(lech) < 20 else 0.0
-            if kc < 2.0 and "6_di.png" not in self.anh:
-                self.anh.append("6_di.png")
-            yield
-        for _ in range(int(5 / DT)):
-            lech = (0 - c.cam_yaw + 180) % 360 - 180
-            if abs(lech) < 5:
-                break
-            self.ng.jx, self.ng.jy = float(np.clip(-lech / 25, -1, 1)), 0.0
-            yield
-        self.ng.jx = self.ng.jy = 0.0
-        yield from self.cho(0.3)
-
-    def bai_7(self, app):
-        b = app.bai
-        n = len(chay.cm.HOA_CHAT_MENU)
-        for k in range(3):
-            i = chay.cm.HOA_CHAT_MENU.index(b.yeu_cau[k])
-            self.ng.nut["A"] = True
-            yield from self.cho(0.6)
-            a = math.radians(i * 360 / n)
-            self.ng.jx, self.ng.jy = 0.95 * math.sin(a), 0.95 * math.cos(a)
-            yield from self.cho(0.35)
-            if k == 1:
-                self.anh.append("7_menu.png")
-            self.ng.nut["A"] = False
-            yield from self.cho(0.05)
-            self.ng.jx = self.ng.jy = 0.0
-            yield from self.cho(0.4)
-        yield from self.nhap("A", 0.1)
-        yield from self.nhap("A", 0.1)
-        yield from self.cho(0.5)
-        self.ng.muc_a = 90  # ngón cái lơ lửng: hiện gợi ý
-        yield from self.cho(0.4)
-        self.ng.muc_a = 0
-        self.ng.nut["A"] = True
-        yield from self.cho(0.15)
-        self.ng.nut["A"] = False
-        yield from self.cho(0.1)
-        yield from self.nhap("B", 0.15)
-        yield from self.cho(0.5)
 
 
 def main():
@@ -466,8 +542,11 @@ def main():
             app.chup(f"{app.bai.ma}_ket_qua.png")
     app.chup("8_tong_ket.png")
     print()
-    for ma, ten_bai, ten, gt, dv, tc, d in app.ket_qua:
-        print(f"{ma} | {ten_bai} | {ten} | {gt} {dv} | {tc} | {'Đạt' if d else 'CHƯA'}")
+    for ma, ten_bai, ten, gt, dv, tc, d, cb in app.ket_qua:
+        print(f"{ma} | {ten_bai} | {cb} | {ten} | {gt} {dv} | {tc} | {'Đạt' if d else 'CHƯA'}")
+    print()
+    for cb, (d, n) in app.tong_cam_bien().items():
+        print(f"{cb}: {d}/{n} đạt")
     if isinstance(ng, NguonBotThat) and ng.sai:
         S = np.array(ng.sai)
         np.savetxt(os.path.join(ra, "sai_huong_f1.csv"), S, delimiter=",", fmt="%.4f",

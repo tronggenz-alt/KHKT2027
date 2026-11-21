@@ -185,6 +185,9 @@ namespace Khkt.Input
         public void CenterJoysticks() => Send("J\n");
         public void RequestInfo() => Send("I\n");
 
+        /// <summary>Gửi một lệnh chữ tới firmware qua cổng lệnh UDP. Tự thêm xuống dòng.</summary>
+        public void SendCommand(string cmd) => Send(cmd.EndsWith("\n") ? cmd : cmd + "\n");
+
         void Send(string cmd)
         {
             var c = client;

@@ -27,6 +27,20 @@ namespace Khkt.Simulation.Chem
             return s;
         }
 
+        /// <summary>Vật liệu trơ (polime, bông thủy tinh...): chất rắn không tan, không phản ứng.</summary>
+        public static SpeciesDef RegisterInert(int stt, string name, string formula, Rgb color, double molarMass)
+        {
+            string id = "tro:" + stt;
+            var s = SpeciesRegistry.Get(id);
+            if (s != null) return s;
+            s = SpeciesRegistry.Add(id, string.IsNullOrEmpty(formula) ? name : formula, SpeciesKind.Solid, 0, molarMass, name);
+            s.Color = color;
+            s.ColorStrength = 1;
+            s.ChemStt = stt;
+            s.Tags.Add("tro");
+            return s;
+        }
+
         /// <summary>Hóa chất rắn vừa cho vào bình: tan dần thành các loài trong composition (theo 1 mol).</summary>
         public static SpeciesDef RegisterLump(int stt, string name, string formula, (string id, double n)[] composition, double molarMass, Rgb color, double heatKJ, IEnumerable<string> tags = null)
         {
@@ -35,6 +49,7 @@ namespace Khkt.Simulation.Chem
             if (s != null) return s;
             s = SpeciesRegistry.Add(id, formula, SpeciesKind.Lump, 0, molarMass, name);
             s.Composition = composition;
+            if (!string.IsNullOrEmpty(formula)) s.Tags.Add("f:" + formula);
             s.Color = color;
             s.ColorStrength = 1;
             s.ChemStt = stt;
@@ -78,31 +93,15 @@ namespace Khkt.Simulation.Chem
             for (int i = 0; i < mix.Count; i++)
             {
                 var d = mix.SpeciesAt(i);
-                if (d.Kind == SpeciesKind.Lump || (d.Kind == SpeciesKind.Solid && d.Id != "AgMirror" && d.Id != "Au(s)" && d.Id != "SiO2(s)")) return true;
+                if (d.Kind == SpeciesKind.Lump || (d.Kind == SpeciesKind.Solid && d.Id != "AgMirror" && !d.HasTag("tro"))) return true;
                 if (stepIds.Contains(d.Id)) return true;
+                if (d.Kind == SpeciesKind.Precipitate && AcidSoluble.ContainsKey(d.Id)) return true;
+                if (tempC > 45 && mix.Count > 1) return true;
+                if (d.ChemStt > 0 && d.Kind != SpeciesKind.Lump && (d.HasTag("este") || Ascii(d) == "C6H6")) return true;
                 if (tempC > 45 && (d.HasTag("protein") || d.HasTag("este") || d.HasTag("aren_ankyl") || d.HasTag("amino_axit"))) return true;
             }
             return false;
         }
-
-        static readonly (string id, double rate, double heatKJ)[] waterMetals =
-        {
-            ("K(s)", 8e-3, 196), ("Na(s)", 4e-3, 184), ("Li(s)", 2e-3, 222), ("Ba(s)", 3e-3, 390), ("Ca(s)", 1.5e-3, 414),
-        };
-
-        static readonly Dictionary<string, (double rate, double phAcid, double phBase, double heatKJ)> acidMetals = new Dictionary<string, (double, double, double, double)>
-        {
-            ["Mg(s)"] = (2.5e-3, 7, 99, 467), ["Al(s)"] = (5e-4, 3.5, 12.5, 531), ["Zn(s)"] = (7e-4, 4.5, 13, 153), ["Mn(s)"] = (6e-4, 4, 99, 221),
-            ["Cr(s)"] = (1e-4, 2.5, 99, 143), ["Fe(s)"] = (2.5e-4, 3, 99, 87), ["Co(s)"] = (8e-5, 2.5, 99, 56), ["Ni(s)"] = (6e-5, 2.5, 99, 54),
-            ["Sn(s)"] = (8e-5, 2, 99, 9), ["Pb(s)"] = (3e-5, 1.5, 99, 0),
-        };
-
-        static readonly (string ion, string product, double e, double E)[] oxidantIons =
-        {
-            ("Hg2+", "Hg(l)", 2, 0.85), ("Ag+", "Ag(s)", 1, 0.80), ("Fe3+", "Fe2+", 1, 0.77), ("Cu2+", "Cu(s)", 2, 0.34),
-            ("Pb2+", "Pb(s)", 2, -0.13), ("Sn2+", "Sn(s)", 2, -0.14), ("Ni2+", "Ni(s)", 2, -0.25), ("Co2+", "Co(s)", 2, -0.28),
-            ("Fe2+", "Fe(s)", 2, -0.44), ("Zn2+", "Zn(s)", 2, -0.76),
-        };
 
         static readonly Dictionary<string, ((string id, double n)[] ions, double phAcid, double phBase)> oxides = new Dictionary<string, ((string, double)[], double, double)>
         {
@@ -160,105 +159,27 @@ namespace Khkt.Simulation.Chem
                     foreach (var (id, k) in d.Composition) b.Add(id, k * dn);
                     res.HeatJ += d.HeatKJ * 1000 * dn;
                     changed = true;
+                    if (n - dn <= 1e-12) LumpDissolved(w, d);
                     continue;
                 }
                 if (d.Kind != SpeciesKind.Solid) continue;
 
-                // Kim loại kiềm, kiềm thổ + nước
-                foreach (var (id, rate, heat) in waterMetals)
+                // Kim loại kiềm trong ancol, phenol (nhóm -OH có H linh động; mẫu theo nhóm chức)
+                if (MetalData.TryGetValue(d.Id, out var mAlc) && mAlc.water && OrganicFraction(b, V) > 0.5)
                 {
-                    if (d.Id != id) continue;
-                    double dn = Math.Min(n, rate * dt);
-                    b.Add(s, -dn);
-                    b.Add(d.IonId, dn);
-                    res.HeatJ += heat * 1000 * dn;
-                    double total = dn;
-                    bool violent = (id == "K(s)" || id == "Na(s)") && n > 0.004;
-                    Emit(w, EventKind.Gas, "khi:H2:" + id, id == "K(s)" ? "Kali chạy trên mặt nước, bốc cháy ngọn lửa tím" : id == "Na(s)" ? "Natri chạy trên mặt nước, sủi khí H₂, tỏa nhiều nhiệt" : $"{d.Name} tan, sủi khí H₂",
-                         "Kim loại kiềm (kiềm thổ) khử nước, dung dịch thu được làm phenolphtalein hóa hồng.", $"2{d.Formula} + 2H₂O → 2{d.Formula}OH + H₂↑".Replace("2Ca", "Ca").Replace("2Ba", "Ba"),
-                         violent ? Severity.Danger : Severity.Warning, violent ? "chay_no" : "bong", "H2", total * d.IonCharge / 2.0);
-                    changed = true;
-                }
-
-                if (acidMetals.TryGetValue(d.Id, out var am))
-                {
-                    double ph = w.Ph;
-                    double nitrate = w.C("NO3-");
-                    bool oxidizingAcid = nitrate > 0.3 && ph < 1.5;
-                    bool passive = (d.Id == "Al(s)" || d.Id == "Fe(s)" || d.Id == "Cr(s)") && ((nitrate > 8 && ph < 0) || (w.C("SO4") > 12 && env.TempC < 60));
-                    if (passive)
+                    var alc = MainTagged(b, "ancol") ?? MainTagged(b, "phenol");
+                    string F = Ascii(alc);
+                    if (alc != null && F != null)
                     {
-                        Emit(w, EventKind.Reaction, "thudong:" + d.Id, $"{d.Name} không tan (bị thụ động hóa)", "Al, Fe, Cr bị thụ động trong HNO₃ đặc nguội, H₂SO₄ đặc nguội.");
-                    }
-                    else if (oxidizingAcid)
-                    {
-                        changed |= MetalNitric(w, s, d, dt);
-                    }
-                    else if (ph < am.phAcid || (d.Id == "Mg(s)" && env.TempC > 70))
-                    {
-                        double factor = Math.Min(3, Math.Max(0.02, w.h / 0.1));
-                        if (d.Id == "Mg(s)" && ph >= am.phAcid) factor = 0.05;  // Mg + nước nóng
-                        double dn = Math.Min(n, am.rate * factor * dt * stir);
-                        b.Add(s, -dn);
-                        b.Add(d.IonId, dn);
-                        res.HeatJ += am.heatKJ * 1000 * dn;
-                        Emit(w, EventKind.Gas, "khi:H2:" + d.Id, $"{Cap(d.Name)} tan dần, sủi bọt khí H₂", "Kim loại đứng trước H trong dãy hoạt động hóa học đẩy được H₂ khỏi axit loãng.",
-                             $"{d.Formula} + {(d.IonCharge == 1 ? "" : d.IonCharge.ToString())}H⁺ → {SpeciesRegistry.Get(d.IonId).Formula} + {(d.IonCharge == 2 ? "" : (d.IonCharge / 2.0).ToString("0.#"))}H₂↑",
-                             Severity.Info, null, "H2", dn * d.IonCharge / 2.0);
+                        double dnA = Math.Min(n, mAlc.rate * 0.2 * dt);
+                        b.Add(s, -dnA);
+                        b.Add(d.IonId, dnA);
+                        string prod = F.EndsWith("OH") ? F.Substring(0, F.Length - 2) + "O" + d.Formula : null;
+                        Emit(w, EventKind.Gas, "na_ancol", $"{Cap(d.Name)} tan dần, sủi bọt khí H₂ (êm hơn trong nước)", "Ancol, phenol có nguyên tử H linh động trong nhóm -OH tác dụng với kim loại kiềm.",
+                             prod != null ? Equation.Balance(new[] { F, d.Formula }, new[] { prod, "H2" }) : null, Severity.Warning, "chay_no", "H2", dnA / 2);
                         changed = true;
                     }
-                    else if (ph > am.phBase)
-                    {
-                        double oh = Kw / w.h;
-                        double dn = Math.Min(n, am.rate * Math.Min(3, oh / 0.5) * dt * stir);
-                        b.Add(s, -dn);
-                        b.Add(d.IonId, dn);
-                        res.HeatJ += am.heatKJ * 1000 * dn * 0.6;
-                        Emit(w, EventKind.Gas, "khi:H2:kiem:" + d.Id, $"{Cap(d.Name)} tan trong kiềm, sủi bọt khí H₂", "Al, Zn (hiđroxit lưỡng tính) tan được trong dung dịch kiềm mạnh.",
-                             d.Id == "Al(s)" ? "2Al + 2NaOH + 6H₂O → 2Na[Al(OH)₄] + 3H₂↑" : "Zn + 2NaOH + 2H₂O → Na₂[Zn(OH)₄] + H₂↑", Severity.Info, null, "H2", dn * d.IonCharge / 2.0);
-                        changed = true;
-                    }
-                }
-                else if ((d.Id == "Cu(s)" || d.Id == "Ag(s)" || d.Id == "Hg(l)") && w.C("NO3-") > 0.3 && w.Ph < 1.5)
-                {
-                    changed |= MetalNitric(w, s, d, dt);
-                }
-                else if ((d.Id == "Cu(s)" || d.Id == "Ag(s)") && w.C("SO4") > 10 && env.TempC > 80)
-                {
-                    double dn = Math.Min(n, 1.5e-4 * dt);
-                    b.Add(s, -dn);
-                    b.Add(d.IonId, dn);
-                    b.Add("SO4", -dn * d.IonCharge / 2.0);
-                    Emit(w, EventKind.Gas, "khi:SO2:" + d.Id, $"{Cap(d.Name)} tan trong H₂SO₄ đặc nóng, khí SO₂ mùi hắc", "H₂SO₄ đặc nóng có tính oxi hóa mạnh, tác dụng cả với kim loại đứng sau H.",
-                         "Cu + 2H₂SO₄(đặc) → CuSO₄ + SO₂↑ + 2H₂O", Severity.Warning, "khi_doc", "SO2", dn * d.IonCharge / 2.0);
-                    changed = true;
-                }
-
-                // Kim loại mạnh đẩy kim loại yếu ra khỏi dung dịch muối
-                if (!double.IsNaN(d.E0) && d.IonId != null && d.E0 > -2.5)
-                {
-                    foreach (var (ion, product, e, E) in oxidantIons)
-                    {
-                        if (E <= d.E0 + 0.05) continue;
-                        double cIon = w.C(ion);
-                        if (cIon <= 1e-6 || b.Get(s) <= 0) continue;
-                        double rate = 6e-4 * Math.Min(1, cIon / 0.05) * stir;
-                        double dnM = Math.Min(b.Get(s), rate * dt);
-                        double dnIon = dnM * d.IonCharge / e;
-                        if (dnIon > b.Get(ion)) { dnIon = b.Get(ion); dnM = dnIon * e / d.IonCharge; }
-                        b.Add(s, -dnM);
-                        b.Add(d.IonId, dnM);
-                        b.Add(ion, -dnIon);
-                        b.Add(product, dnIon);
-                        var pd = SpeciesRegistry.Get(product);
-                        string title = product.EndsWith("(s)") || product.EndsWith("(l)")
-                            ? $"{Cap(pd.Name)} bám lên bề mặt {d.Name}" + (ion == "Cu2+" ? ", màu xanh nhạt dần" : "")
-                            : $"{Cap(d.Name)} tan trong dung dịch {SpeciesRegistry.Get(ion).Formula}";
-                        Emit(w, EventKind.Reaction, $"daykl:{d.Id}:{ion}", title, "Kim loại mạnh hơn đẩy kim loại yếu hơn ra khỏi dung dịch muối (dãy điện hóa).",
-                             $"{(d.IonCharge * 1.0 / e == 1 ? "" : "")}{d.Formula} + {SpeciesRegistry.Get(ion).Formula} → {SpeciesRegistry.Get(d.IonId).Formula} + {pd.Formula}",
-                             amount: dnIon, color: pd.Color);
-                        changed = true;
-                    }
+                    continue;
                 }
 
                 // Oxit tan trong axit (oxit lưỡng tính tan cả trong kiềm)
@@ -274,17 +195,6 @@ namespace Khkt.Simulation.Chem
                              acid ? "Oxit bazơ tác dụng với axit tạo muối và nước." : "Oxit lưỡng tính tan trong dung dịch kiềm mạnh.", amount: dn, color: d.Color);
                         changed = true;
                     }
-                }
-                // MnO2, PbO2 + HCl đặc → Cl2
-                if ((d.Id == "MnO2(s)" || d.Id == "PbO2(s)") && w.C("Cl-") > 4 && w.Ph < 0.5 && env.TempC > (d.Id == "MnO2(s)" ? 40 : 0))
-                {
-                    double dn = Math.Min(n, 2e-4 * dt);
-                    b.Add(s, -dn);
-                    b.Add(d.Id == "MnO2(s)" ? "Mn2+" : "Pb2+", dn);
-                    b.Add("Cl-", -2 * dn);
-                    Emit(w, EventKind.Gas, "khi:Cl2:" + d.Id, "Khí Cl₂ vàng lục thoát ra (độc!)", "Điều chế clo: MnO₂ oxi hóa HCl đặc khi đun nóng.",
-                         d.Id == "MnO2(s)" ? "MnO₂ + 4HCl → MnCl₂ + Cl₂↑ + 2H₂O" : "PbO₂ + 4HCl → PbCl₂ + Cl₂↑ + 2H₂O", Severity.Danger, "khi_doc", "Cl2", dn);
-                    changed = true;
                 }
                 // Chất rắn phản ứng với nước
                 if (waterSolids.TryGetValue(d.Id, out var ws))
@@ -311,6 +221,10 @@ namespace Khkt.Simulation.Chem
                     ppDrops *= (float)Math.Exp(-0.15 * dt);
                 }
             }
+
+            changed |= RedoxTable(w, true, dt, stir);
+            changed |= ThptStep(w, dt, env);
+            if (env.TempC > 25) changed |= Aromatic(w, dt, env.TempC);
 
             // Biến tính enzyme catalase khi đun nóng >= 65 °C
             double catRaw = b.Get("catalase");
@@ -403,8 +317,9 @@ namespace Khkt.Simulation.Chem
                     b.Add("Ag+", -(dAg - fromCx));
                     TakeTag(b, "@andehit", dAg / 2);
                     b.Add("AgMirror", dAg);
+                    var ald1 = MainTagged(b, "andehit") ?? MainTagged(b, "andehit_kiem");
                     Emit(w, EventKind.Reaction, "trangbac", "Lớp bạc sáng như gương bám lên thành ống (tráng bạc)", "Nhóm -CHO khử ion bạc trong thuốc thử Tollens khi đun nhẹ.",
-                         "RCHO + 2[Ag(NH₃)₂]OH → RCOONH₄ + 2Ag↓ + 3NH₃ + H₂O", amount: dAg, color: SpeciesRegistry.Get("AgMirror").Color);
+                         (ald1 != null ? TollensEquation(Ascii(ald1)) : null) ?? "RCHO + 2[Ag(NH₃)₂]OH → RCOONH₄ + 2Ag↓ + 3NH₃ + H₂O", amount: dAg, color: SpeciesRegistry.Get("AgMirror").Color);
                     changed = true;
                 }
             }
@@ -421,8 +336,9 @@ namespace Khkt.Simulation.Chem
                     b.Add("Cu(OH)2", -(dCu - fromCx));
                     TakeTag(b, "@andehit", dCu / 2);
                     b.Add("Cu2O", dCu / 2);
+                    var ald2 = MainTagged(b, "andehit") ?? MainTagged(b, "andehit_kiem");
                     Emit(w, EventKind.Precipitate, "kt:Cu2O", "Kết tủa đỏ gạch Cu₂O", "Anđehit (glucozơ) khử Cu(II) trong kiềm khi đun nóng (Fehling, Benedict).",
-                         "RCHO + 2Cu(OH)₂ + NaOH → RCOONa + Cu₂O↓ + 3H₂O", amount: dCu / 2, color: SpeciesRegistry.Get("Cu2O").Color);
+                         (ald2 != null ? FehlingEquation(Ascii(ald2)) : null) ?? "RCHO + 2Cu(OH)₂ + NaOH → RCOONa + Cu₂O↓ + 3H₂O", amount: dCu / 2, color: SpeciesRegistry.Get("Cu2O").Color);
                     changed = true;
                 }
                 double prot = TagAmount(b, "protein");
@@ -445,7 +361,7 @@ namespace Khkt.Simulation.Chem
                         b.Add(d.HasTag("chat_beo") ? "xaphong" : "Ac", d.HasTag("chat_beo") ? 3 * dn : dn);
                         b.Add("Na+", 0);
                         Emit(w, EventKind.Reaction, "xaphonghoa", d.HasTag("chat_beo") ? "Xà phòng hóa: lớp chất béo tan dần" : "Este bị thủy phân trong kiềm, lớp este tan dần",
-                             "Phản ứng một chiều trong môi trường kiềm.", d.HasTag("chat_beo") ? "(RCOO)₃C₃H₅ + 3NaOH → 3RCOONa + C₃H₅(OH)₃" : "RCOOR' + NaOH → RCOONa + R'OH", amount: dn);
+                             "Phản ứng một chiều trong môi trường kiềm.", SaponificationEquation(d) ?? (d.HasTag("chat_beo") ? "(RCOO)₃C₃H₅ + 3NaOH → 3RCOONa + C₃H₅(OH)₃" : "RCOOR' + NaOH → RCOONa + R'OH"), amount: dn);
                         changed = true;
                     }
                 }
@@ -502,24 +418,23 @@ namespace Khkt.Simulation.Chem
             return res;
         }
 
-        static bool MetalNitric(Work w, int s, SpeciesDef d, double dt)
+        /// <summary>Hóa chất rắn vừa tan hết: báo hòa tan, kèm màu dung dịch nếu thành phần có màu.</summary>
+        static void LumpDissolved(Work w, SpeciesDef d)
         {
-            double n = w.b.Get(s);
-            bool conc = w.C("NO3-") > 6;
-            double rate = (d.Id == "Cu(s)" || d.Id == "Ag(s)" ? 3e-4 : 5e-4) * (conc ? 2 : 1);
-            double dn = Math.Min(n, rate * dt);
-            double electrons = dn * d.IonCharge;
-            double no3 = conc ? electrons : electrons / 3;  // NO2: 1 e, NO: 3 e
-            if (no3 > w.b.Get("NO3-")) return false;
-            w.b.Add(s, -dn);
-            w.b.Add(d.IonId, dn);
-            w.b.Add("NO3-", -no3);
-            string gas = conc ? "NO2" : "NO";
-            Emit(w, EventKind.Gas, $"khi:{gas}:{d.Id}", conc ? $"{Cap(d.Name)} tan, khí NO₂ màu nâu đỏ (độc!)" : $"{Cap(d.Name)} tan, khí NO hóa nâu ở miệng ống",
-                 "HNO₃ oxi hóa được hầu hết kim loại (kể cả Cu, Ag) nhưng không giải phóng H₂." + (d.Id == "Cu(s)" ? " Dung dịch chuyển xanh (Cu²⁺)." : ""),
-                 conc ? "Cu + 4HNO₃(đặc) → Cu(NO₃)₂ + 2NO₂↑ + 2H₂O" : "3Cu + 8HNO₃(loãng) → 3Cu(NO₃)₂ + 2NO↑ + 4H₂O",
-                 Severity.Warning, "khi_doc", gas, no3);
-            return true;
+            string color = null;
+            double best = 0;
+            if (d.Composition != null)
+                foreach (var (id, _) in d.Composition)
+                {
+                    var sp = SpeciesRegistry.Get(id);
+                    string name = ChemPalette.NameOf(id);
+                    if (sp == null || name == null || name == "không màu" || name.StartsWith("hồng rất nhạt") || sp.ColorStrength <= best) continue;
+                    best = sp.ColorStrength;
+                    color = name.Split('(')[0].Trim();
+                }
+            string what = Cap(d.Name);
+            Emit(w, EventKind.Dissolve, "hoatan:" + d.ChemStt, color != null ? $"{what} tan hết, dung dịch có màu {color}" : $"{what} tan hết trong nước",
+                 d.HeatKJ < -10 ? "Quá trình hòa tan thu nhiệt: dung dịch lạnh đi." : d.HeatKJ > 30 ? "Quá trình hòa tan tỏa nhiệt." : "Hòa tan là biến đổi vật lí (chất tan phân tán thành ion / phân tử).");
         }
 
         static string Cap(string s) => string.IsNullOrEmpty(s) ? s : char.ToUpper(s[0]) + s.Substring(1);

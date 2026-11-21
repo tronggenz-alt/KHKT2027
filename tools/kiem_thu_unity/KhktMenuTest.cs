@@ -314,6 +314,22 @@ public class KhktMenuTest : MonoBehaviour
         Check("chuyển trang và vệt chọn tới đúng mục", shell.CurrentPage == "bai_tap" && Vector2.Distance(pill.anchoredPosition, navItem.anchoredPosition) < 0.5f, pill.anchoredPosition.ToString());
         yield return ShotDone("trang_chinh_chua_lam");
 
+        // Trang thử tay cầm: mở được, có mô hình 3D và danh sách thao tác; rời trang thì trả cổng tay cầm
+        Click("Mục: Tay cầm");
+        yield return WaitAnim();
+        yield return new WaitForSecondsRealtime(2f);
+        var tc = shell.Controller;
+        Check("có trang Tay cầm và chuyển tới được", shell.CurrentPage == "tay_cam" && tc != null && tc.gameObject.activeInHierarchy, shell.CurrentPage);
+        Check("trang Tay cầm: có dòng trạng thái kết nối", Status("Trạng thái").Length > 0, Status("Trạng thái"));
+        Check("trang Tay cầm: mô hình 3D vẽ ra ảnh", FindObjectsByType<RawImage>().Any(r => r.name == "Ảnh 3D" && r.texture != null));
+        Check("trang Tay cầm: đủ 13 ô thao tác thử", FindObjectsByType<Image>().Count(i => i.name.StartsWith("Ô ")) == 13);
+        Check("trang Tay cầm: đang dò tay cầm USB", FindAnyObjectByType<Khkt.Input.SerialControllerSource>() != null);
+        yield return ShotDone("trang_tay_cam");
+        Click("Mục: Tổng quan");
+        yield return WaitAnim();
+        yield return null;
+        Check("rời trang Tay cầm: huỷ nguồn tay cầm, trả cổng COM", FindAnyObjectByType<Khkt.Input.SerialControllerSource>() == null);
+
         // Bấm dồn dập giữa chừng chuyển động: không được lệch vị trí, không kẹt
         var greet = (RectTransform)shell.transform.Find("Vùng nội dung/Trang: Tổng quan/Lời chào");
         Vector2 greetHome = new Vector2(56, -44);

@@ -1,0 +1,19 @@
+# Worker "verlab-phong": chỉ chứa Durable Object PhongTrucTuyen cho phòng học trực tuyến (WebSocket realtime).
+# Không có đường dẫn công khai (workers_dev = false): chỉ Pages Functions của verlab.pages.dev gọi vào qua binding PHONG,
+# sau khi đã kiểm đăng nhập và quyền. Gói miễn phí dùng được Durable Object kiểu SQLite.
+#
+#   cd cloudflare/phong && npx wrangler deploy        đăng (làm trước khi đăng Pages)
+#   cd cloudflare/phong && npx wrangler dev           chạy cục bộ cùng `wrangler pages dev` (hai tiến trình tự tìm nhau)
+name = "verlab-phong"
+main = "phong.ts"
+compatibility_date = "2026-09-01"
+workers_dev = false
+preview_urls = false
+
+[[durable_objects.bindings]]
+name = "PHONG"
+class_name = "PhongTrucTuyen"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["PhongTrucTuyen"]

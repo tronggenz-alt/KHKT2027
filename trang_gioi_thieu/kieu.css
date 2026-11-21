@@ -114,7 +114,7 @@
 /* ───────── Nền tảng ───────── */
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; background: var(--nen); scroll-padding-top: calc(var(--cao-thanh) + 16px); }
-body { margin: 0; background: transparent; color: var(--chu); font: 400 16.5px/1.6 "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; overflow-x: clip; }
+body { margin: 0; background: var(--nen); color: var(--chu); font: 400 16.5px/1.6 "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; overflow-x: clip; }
 body, .thanh, footer, .o, .o-so, .the-nguon, .the-tho, .o-tb, .the-phong, .o-hdh, .cac-buoc li, .moc { transition: background-color .25s, border-color .25s, color .25s; }
 /* Nền chìm (nen_chim.js): mạng lục giác vẽ sau mọi nội dung. Màu nền nằm ở html, body để trong cho nền chìm lộ ra. */
 .nen-chim { position: fixed; inset: 0; z-index: -1; width: 100%; height: 100%; pointer-events: none; }

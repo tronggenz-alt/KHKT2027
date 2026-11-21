@@ -38,8 +38,13 @@ const QUYEN: Record<string, string> = {
   "GET /lab/sinh/huong-dan/{ma}": DA_DANG_NHAP,
   "GET /lab/sinh/bai-thi-nghiem": DA_DANG_NHAP,
   "GET /lab/sinh/dat-lich": DA_DANG_NHAP,
+  // phòng trực tuyến: khách không tài khoản cũng vào được nếu giáo viên cho phép, các điểm cuối tự kiểm quyền
+  "GET /phong-hoc": CONG_KHAI,
+  "POST /api/vao-phong": CONG_KHAI,
+  "GET /api/vao-phong/ket-noi": CONG_KHAI,
+  "GET /api/vao-phong/anh": CONG_KHAI,
 };
-const TRANG = new Set(["/giao-vien", "/trinh-chieu", "/truc-tiep", "/buoi-hoc", "/hoa", "/sinh", "/hoc-sinh"]);
+const TRANG = new Set(["/giao-vien", "/phong-truc-tuyen", "/trinh-chieu", "/truc-tiep", "/buoi-hoc", "/hoa", "/sinh", "/hoc-sinh"]);
 const KHI_PHAI_DOI = new Set(["/dang-nhap", "/quan-ly", "/auth/toi", "/auth/doi-mat-khau", "/auth/dang-xuat"]);
 
 function maBearer(req: Request): string | null {

@@ -155,29 +155,45 @@ class ConTro:
 
 
 class CuChiNut:
-    """Bộ máy trạng thái 1 nút cảm ứng: nhấp (<250 ms), nhấp đúp (2 nhấp trong 350 ms), giữ (≥500 ms), lơ lửng."""
+    """Bộ máy trạng thái 1 nút cảm ứng: nhấp (< 350 ms), nhấp đúp (2 lần nhả cách < 500 ms), giữ (≥ 600 ms), lơ lửng,
+    chập chờn (nhả rồi chạm lại trong < 120 ms: tay không làm nhanh thế được, là tín hiệu cảm ứng nhảy).
+
+    Ngưỡng cũ 250 / 500 ms quá chặt với nút cảm ứng điện dung: phiên thật 18/11/2026 có nhiều lần chạm 250–500 ms
+    không thành "nhấp" mà thành "giữ" (mở nhầm menu tròn).
+    """
+    NHAP = 0.35
+    GIU = 0.6
+    DUP = 0.5   # giữa 2 lần nhả
+    CHAP_CHON = 0.12
 
     def __init__(self, ten):
         self.ten = ten
         self.bam = False
         self.t_bam = 0.0
+        self.t_nha = -9.0
         self.da_giu = False
         self.t_nhap_cuoi = -9.0
+        self.chap_chon = 0
+        self.lo_lung = False
 
     def cap_nhat(self, bam, muc, t):
         su_kien = []
         if bam and not self.bam:
+            if t - self.t_nha < self.CHAP_CHON:
+                self.chap_chon += 1
+                su_kien.append(self.ten + "_chap_chon")
             self.t_bam = t
             self.da_giu = False
             su_kien.append(self.ten + "_bam")
         elif not bam and self.bam:
             su_kien.append(self.ten + "_nha")
-            if t - self.t_bam < 0.25:
+            self.t_nha = t
+            if t - self.t_bam < self.NHAP:
                 su_kien.append(self.ten + "_nhap")
-                if t - self.t_nhap_cuoi < 0.35:
+                if t - self.t_nhap_cuoi < self.DUP:
                     su_kien.append(self.ten + "_nhap_dup")
                 self.t_nhap_cuoi = t
-        if bam and not self.da_giu and t - self.t_bam >= 0.5:
+        if bam and not self.da_giu and t - self.t_bam >= self.GIU:
             self.da_giu = True
             su_kien.append(self.ten + "_giu")
         self.bam = bam

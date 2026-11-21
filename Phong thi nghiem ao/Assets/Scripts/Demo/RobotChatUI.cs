@@ -89,6 +89,13 @@ namespace Khkt.Demo
             lines.Add(who == "Bạn" ? $"<color=#9FE7FF><b>Bạn:</b></color> {text}" : $"<color=#8CF2B4><b>{who}:</b></color> {text}");
             if (lines.Count > 14) lines.RemoveAt(0);
             log.text = string.Join("\n", lines);
+            // Chữ tràn thì Unity cắt các dòng cuối (tin mới nhất): bỏ bớt tin cũ ở trên cho tới khi vừa khung
+            float h = log.rectTransform.rect.height;
+            while (lines.Count > 1 && h > 0 && log.preferredHeight > h)
+            {
+                lines.RemoveAt(0);
+                log.text = string.Join("\n", lines);
+            }
             history.Add($"{who}: {text}");
             if (history.Count > 10) history.RemoveAt(0);
         }
@@ -132,7 +139,8 @@ namespace Khkt.Demo
             }
             var ai = AiClient.Instance;
             var robot = LabRobot.Instance;
-            status.text = (ai != null && ai.Online ? $"<color=#73F29E>●</color> AI đám mây: {ai.Provider} {ai.Model}" : "<color=#FFC759>●</color> Ngoại tuyến: hiểu lệnh cơ bản (chạy server/ai để có AI)")
+            status.text = (ai != null && ai.Direct && ai.LastDirectError.Length > 0 ? "<color=#FF8A7A>●</color> Khóa AI riêng lỗi: hiểu lệnh cơ bản (xem trang Trợ lý AI ở sảnh)"
+                           : ai != null && ai.Online ? $"<color=#73F29E>●</color> AI đám mây: {ai.Provider} {ai.Model}" : "<color=#FFC759>●</color> Ngoại tuyến: hiểu lệnh cơ bản (chạy server/ai để có AI)")
                           + (robot != null ? "  ·  " + robot.StatusText : "") + (waiting ? "  ·  đang nghĩ..." : "");
             float age = Time.time - bubbleTime;
             bubbleGroup.alpha = IsOpen ? 0 : Mathf.Clamp01(Mathf.Min(age * 5f, (9f - age) / 1.5f));
@@ -159,6 +167,8 @@ namespace Khkt.Demo
                 }, err =>
                 {
                     waiting = false;
+                    // Khóa riêng lỗi: nói rõ thay vì lặng lẽ chuyển sang máy chủ (che mất khóa sai / hết hạn mức)
+                    if (ai.Direct) Add("Robot", $"Không gọi được AI bằng khóa riêng: {err}. Mình làm theo lệnh cơ bản.");
                     Local(text);
                 });
             }

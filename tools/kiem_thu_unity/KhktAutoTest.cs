@@ -89,6 +89,63 @@ public class KhktAutoTest : MonoBehaviour
 #endif
             yield break;
         }
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "video_nen")
+        {
+            // video nền cho phần đầu trang giới thiệu: camera lướt chậm qua các khu hai tầng, không có bàn tay ảo,
+            // mỗi khung lưu thành ảnh JPG (30 khung/giây theo thời gian video), ghép thành video bằng ffmpeg sau
+            hand.enabled = false;
+            foreach (var r in hand.hand.GetComponentsInChildren<Renderer>()) r.enabled = false;
+            hand.enabled = true;
+            // hai cánh tay ảo (ArmRig) là đối tượng gốc riêng, cũng phải ẩn
+            var rig = FindAnyObjectByType<Khkt.Demo.ArmRig>();
+            if (rig != null) rig.enabled = false;
+            System.Action anTay = () =>
+            {
+                foreach (var g in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects())
+                    if (g.activeSelf && g.name.StartsWith("Cánh tay")) g.SetActive(false);
+                foreach (var r in hand.hand.GetComponentsInChildren<Renderer>()) r.enabled = false;
+            };
+            const int fps = 30;
+            var doan = new (string ten, Vector3 p0, Vector3 p1, Vector3 n0, Vector3 n1, float giay)[]
+            {
+                ("hoa_toan_canh", new Vector3(1.6f, 0, 0.9f), new Vector3(5f, 0, 2.6f), new Vector3(12f, 1f, 9f), new Vector3(14f, 1f, 10f), 4.5f),
+                ("hoa_ban_hoc_sinh", new Vector3(15.5f, 0, 5f), new Vector3(12f, 0, 4.2f), new Vector3(6f, 0.9f, 8.5f), new Vector3(4f, 0.9f, 9f), 4f),
+                ("hoa_kho", new Vector3(16.3f, 0, 5f), new Vector3(19.3f, 0, 4.2f), new Vector3(20f, 1.55f, 7.7f), new Vector3(24.5f, 1.3f, 9f), 4f),
+                ("hanh_lang", new Vector3(4.2f, 0, -1.3f), new Vector3(11f, 0, -1.15f), new Vector3(16f, 1.5f, -0.4f), new Vector3(24f, 1.5f, -0.4f), 4f),
+                ("phong_may", new Vector3(12.2f, 0, -3f), new Vector3(9.4f, 0, -3.3f), new Vector3(2f, 1f, -6.8f), new Vector3(1f, 1f, -7f), 4f),
+                ("sinh_toan_canh", new Vector3(1.4f, 3.8f, 1.2f), new Vector3(4.2f, 3.8f, 2.6f), new Vector3(12f, 4.8f, 9f), new Vector3(14f, 4.8f, 10f), 4.5f),
+                ("sinh_hien_vi", new Vector3(8.4f, 3.8f, 2.6f), new Vector3(7.3f, 3.8f, 2.4f), new Vector3(5.2f, 4.7f, 2.3f), new Vector3(5.2f, 4.65f, 2.3f), 4f),
+                ("sinh_phan_tu", new Vector3(1.2f, 3.8f, -4.3f), new Vector3(4.2f, 3.8f, -4.6f), new Vector3(10f, 4.7f, -7.8f), new Vector3(12f, 4.7f, -8f), 4f),
+                ("nha_kinh", new Vector3(14.5f, 3.8f, -4.3f), new Vector3(17.2f, 3.8f, -4.6f), new Vector3(25f, 4.9f, -7.5f), new Vector3(26f, 4.9f, -7.5f), 4.5f),
+            };
+            int stt = 0;
+            foreach (var d in doan)
+            {
+                int n = Mathf.RoundToInt(d.giay * fps);
+                for (int i = 0; i < n; i++)
+                {
+                    float u = i / (float)(n - 1);
+                    u = u * u * (3f - 2f * u) * 0.35f + u * 0.65f;  // vào ra hơi chậm, giữa đều
+                    Vector3 nhin = Vector3.Lerp(d.n0, d.n1, u), dung = Vector3.Lerp(d.p0, d.p1, u), huong = dung - nhin;
+                    viewer.GoNear(nhin, huong, new Vector2(huong.x, huong.z).magnitude);
+                    if (i == 0) yield return Frames(20); else yield return null;
+                    anTay();
+                    Canvas.ForceUpdateCanvases();
+                    cam.Render();
+                    RenderTexture.active = rt;
+                    tex.ReadPixels(new Rect(0, 0, 1600, 900), 0, 0);
+                    tex.Apply();
+                    RenderTexture.active = null;
+                    File.WriteAllBytes(Path.Combine(outDir, $"k{stt++:00000}.jpg"), tex.EncodeToJPG(92));
+                }
+                Log($"[video_nen] {d.ten}: {n} khung");
+            }
+            Log($"[video_nen] Xong {stt} khung sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
         if (Environment.GetEnvironmentVariable("KHKT_TEST") == "goc_nhin")
         {
             hand.enabled = false;  // ảnh phòng không có bàn tay ảo
@@ -383,6 +440,22 @@ public class KhktAutoTest : MonoBehaviour
         {
             yield return RobotFloor2Test(proc);
             Log($"Xong kiểm thử robot tầng 2 sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "anh_chat")
+        {
+            yield return KhktAiChatShot.Run(cam, outDir, Shot);
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "khoa_ai")
+        {
+            yield return KhktAiKeyTest.Run(cam, outDir);
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.Exit(0);
 #endif
@@ -2772,20 +2845,33 @@ public class KhktAutoTest : MonoBehaviour
     }
 
     // Gói giả như tracker gửi: điểm cho theo trục camera Unity (phải, lên, trước), đổi sang trục MediaPipe (đổi dấu, mm)
-    static string ArmJson(Vector3 elbowL, Vector3 wristL, int elbowConf, int wristConf, Vector3 handDir, bool pinch, System.Random rnd, float noiseM)
+    /// <summary>
+    /// Gói tay giả như tracker gửi: bàn tay phải dáng người thật (HandAnatomy), ngón hướng theo handDir, mu bàn tay hướng lên
+    /// (palmUp: ngửa bàn tay). pinch: ngón cái chạm ngón trỏ; curl/fist: độ co ngón.
+    /// </summary>
+    static string ArmJson(Vector3 elbowL, Vector3 wristL, int elbowConf, int wristConf, Vector3 handDir, bool pinch, System.Random rnd, float noiseM,
+        float curl = 0.08f, float fist = 0f, bool palmUp = false)
     {
         Vector3 N() => noiseM <= 0 ? Vector3.zero : new Vector3((float)(rnd.NextDouble() - 0.5), (float)(rnd.NextDouble() - 0.5), (float)(rnd.NextDouble() - 0.5)) * 2 * noiseM;
         string Mm(Vector3 v) => $"{Mathf.RoundToInt(-v.x * 1000)},{Mathf.RoundToInt(-v.y * 1000)},{Mathf.RoundToInt(-v.z * 1000)}";
         var arm = $"{{\"ben\":\"phai\",\"d\":[{Mm(Vector3.zero)},{Mm(elbowL + N())},{Mm(wristL + N())}],\"tin\":[99,{elbowConf},{wristConf}]}}";
-        // bàn tay xòe: 5 ngón song song theo handDir, xếp ngang
-        Vector3 side = Vector3.Cross(Vector3.up, handDir).normalized;
-        if (side.sqrMagnitude < 0.5f) side = Vector3.right;
-        var pts = new System.Collections.Generic.List<string> { Mm(Vector3.zero) };
-        for (int f = 0; f < 5; f++)
+        var local = new Vector3[21];
+        if (pinch) Khkt.Demo.HandAnatomy.Pose(local, 0.42f, 0.1f, 1f, 1f);
+        else Khkt.Demo.HandAnatomy.Pose(local, curl, 0.45f * (1f - fist), fist > 0 ? 1f : 0.15f, 1f, fist);
+        if (pinch)
         {
-            Vector3 b0 = side * (f - 2) * 0.02f + handDir * (f == 0 ? 0.02f : 0.07f);
-            for (int j = 0; j < 4; j++) pts.Add(Mm(b0 + handDir * j * 0.025f + N() * 0.3f));
+            // kéo đầu ngón cái tới đầu ngón trỏ, giữ chiều dài đốt (chụm ngón như MediaPipe thấy)
+            Vector3 target = local[8] + (local[3] - local[8]).normalized * 0.012f;
+            Vector3 d = (target - local[2]).normalized;
+            local[3] = local[2] + Vector3.Slerp((local[3] - local[2]).normalized, d, 0.6f) * (local[3] - local[2]).magnitude;
+            local[4] = local[3] + (target - local[3]).normalized * (local[4] - local[3]).magnitude;
         }
+        Vector3 back = Vector3.ProjectOnPlane(Vector3.up, handDir);
+        if (back.sqrMagnitude < 0.05f) back = Vector3.back;   // tay dựng đứng: mu bàn tay quay về phía người dùng
+        if (palmUp) back = -back;
+        var rot = Quaternion.LookRotation(handDir, back.normalized);
+        var pts = new System.Collections.Generic.List<string>();
+        for (int i = 0; i < 21; i++) pts.Add(Mm(rot * local[i] + (i == 0 ? Vector3.zero : N() * 0.3f)));
         var hand = $"{{\"ben\":\"phai\",\"w\":[{string.Join(",", pts)}],\"x\":500,\"y\":500,\"p\":{(pinch ? 1 : 0)},\"g\":\"\"}}";
         return $"{{\"t\":0,\"tay\":[{hand}],\"canh\":[{arm}]}}";
     }
@@ -2857,6 +2943,22 @@ public class KhktAutoTest : MonoBehaviour
         ArmCheck("không thấy khuỷu: cổ tay tới đúng đích bằng IK", Vector3.Distance(rig.RightWrist, want) < 0.01f, $"lệch {Vector3.Distance(rig.RightWrist, want) * 1000:0} mm");
         ArmCheck("IK: khuỷu thấp hơn đường vai - cổ tay", Vector3.Dot(rig.RightElbow - (rig.RightShoulder + rig.RightWrist) * 0.5f, Vector3.up) < 0);
 
+        // 4b) Dáng bàn tay: nắm tay, ngửa bàn tay (khuỷu gập vừa, cẳng tay chếch lên trước mặt)
+        Vector3 elbowP = new Vector3(0.0f, -0.1f, 0.26f), wristP = elbowP + new Vector3(-0.07f, 0.1f, 0.21f).normalized * 0.25f;
+        Vector3 foreP = (wristP - elbowP).normalized;
+        yield return SendArm(0.8f, () => ArmJson(elbowP, wristP, 95, 95, foreP, false, rnd, 0, 1f, 1f));
+        float fistTip = Vector3.Distance(rig.FingerJoint(12), rig.FingerJoint(0)), openTip = 0.19f;
+        ArmCheck("nắm tay: đầu ngón giữa gập về gần cổ tay", fistTip < openTip * 0.6f, $"đầu ngón giữa cách cổ tay {fistTip * 1000:0} mm");
+        Shot("canh_tay_nam_tay");
+        yield return SendArm(0.8f, () => ArmJson(elbowP, wristP, 95, 95, foreP, false, rnd, 0, 0.12f, 0f, true));
+        Vector3 palmN = Vector3.Cross(rig.FingerJoint(9) - rig.FingerJoint(0), rig.FingerJoint(5) - rig.FingerJoint(17));
+        Log($"[tay] Ngửa bàn tay: pháp tuyến lòng bàn tay · trục lên camera = {Vector3.Dot(palmN.normalized, cam.up):0.00}");
+        Shot("canh_tay_ngua_ban_tay");
+        // cổ tay không gập quá giới hạn dù số đo bàn tay chỉ ngược hẳn về phía khuỷu
+        yield return SendArm(0.6f, () => ArmJson(elbowP, wristP, 95, 95, -foreP, false, rnd, 0));
+        float bendDeg = Vector3.Angle(rig.FingerJoint(9) - rig.FingerJoint(0), rig.RightWrist - rig.RightElbow);
+        ArmCheck("cổ tay gập không quá 80°", bendDeg < 84f, $"{bendDeg:0}°");
+
         // 5) Trỏ lòng bàn tay vào vật gần nhất trước mặt rồi chụm: cầm được
         var g = Khkt.Rendering.ZoneRoot.FindAll<Khkt.Interaction.Grabbable>()
             .Where(x => x.gameObject.activeInHierarchy && Vector3.Dot(x.transform.position - cam.position, cam.forward) > 0.3f)
@@ -2878,6 +2980,34 @@ public class KhktAutoTest : MonoBehaviour
         // 6) Mất tín hiệu: trả lại điều khiển cũ
         yield return Seconds(0.8f);
         ArmCheck("mất tín hiệu: ẩn cánh tay, trả lại bàn tay cũ", !rig.Driving && hand.OverrideAimPoint == null && !Khkt.Input.MediaPipeHandSource.SuppressController);
+
+        // 7) Không có webcam, cầm vật bằng chuột: tay phải với tới đúng chỗ găng, tay trái hạ xuống, không quá 2 bàn tay
+        if (g != null && hand.hand != null)
+        {
+            if (hand.Held != null) hand.ReturnHome();
+            yield return Frames(5);
+            hand.Pick(g);
+            yield return Seconds(1.2f);
+            ArmCheck("cầm bằng chuột: không quá 2 bàn tay", rig.VisibleHands <= 2, $"{rig.VisibleHands}");
+            float wristGap = Vector3.Distance(rig.RightWrist, hand.hand.WristWorld);
+            Log($"[tay] Cầm bằng chuột: cổ tay ảo cách cổ găng {wristGap * 1000:0} mm, đang cầm {(hand.Held != null ? hand.Held.name : "-")}");
+            Shot("canh_tay_cam_vat_chuot");
+            // găng tay của chuột đứng riêng (khi tay ảo không với tới): tắt tạm cánh tay để chụp
+            rig.enabled = false;
+            var roots = new System.Collections.Generic.List<GameObject>();
+            foreach (var t in FindObjectsByType<Transform>(FindObjectsSortMode.None))
+                if (t.parent == null && t.name.Contains("(MediaPipe)") && t.gameObject.activeSelf) { roots.Add(t.gameObject); t.gameObject.SetActive(false); }
+            var gloveR = hand.hand.GetComponentsInChildren<Renderer>(true);
+            var gloveWas = new bool[gloveR.Length];
+            for (int i = 0; i < gloveR.Length; i++) { gloveWas[i] = gloveR[i].enabled; gloveR[i].enabled = true; }
+            yield return Frames(3);
+            Shot("gang_chuot_cam_vat");
+            for (int i = 0; i < gloveR.Length; i++) gloveR[i].enabled = gloveWas[i];
+            foreach (var r in roots) r.SetActive(true);
+            rig.enabled = true;
+            hand.ReturnHome();
+            yield return Frames(5);
+        }
         Log($"[tay] Tổng: đạt {armPass}, hỏng {armFail}");
     }
 

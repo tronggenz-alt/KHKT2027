@@ -39,6 +39,11 @@ Cập nhật: 10/11/2026. Đây là bản tóm tắt để ai mở dự án (ng�
   - chạy cố định trên `https://verlab.pages.dev` (Cloudflare Pages Functions + D1, mã ở `cloudflare/`);
   - bản FastAPI cục bộ `server/` vẫn giữ (cổng 8000).
   - Xem docs/25-web-quan-ly-cloudflare.
+- **Phòng học trực tuyến trên trình duyệt** (21/11/2026, docs/32):
+  - giáo viên tạo phòng có mã 6 ký tự và mã QR; học sinh vào ở `/phong-hoc`, khách vào được nếu giáo viên cho phép;
+  - giáo viên nhận realtime qua WebSocket + Durable Object (Worker `verlab-phong`): ai đang trong phòng, ai rời tab, ai không thao tác, giơ tay, câu trả lời, độ trễ;
+  - giáo viên chiếu chữ hoặc bài giảng, khóa màn hình, hỏi nhanh, nhắn, mời ra, bật chế độ kiểm tra; đóng phòng thì lưu bản tổng kết;
+  - kiểm thử cục bộ đạt 66/66 (`cloudflare/kiem_thu_phong.mjs`). **Chưa đăng lên verlab.pages.dev**, chưa thử với cả lớp thật.
 - **Giao diện web "Phòng điều hành"** (tối, màu nhấn #38d6c4): làm theo 6 giai đoạn, xong giai đoạn 1.
 
 ### Tay cầm VR (phần cứng)
