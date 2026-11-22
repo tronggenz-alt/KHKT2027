@@ -22,7 +22,11 @@ from matplotlib.font_manager import FontProperties
 from matplotlib.textpath import TextPath
 
 GOC = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-THU_MUC = os.path.join(GOC, "docs", "tay-cam-band-2")
+# Hệ số phóng cả tay cầm (VERA_TI_LE=1.3: to hơn 30% cho đủ chỗ linh kiện và dây). Vỏ, vị trí, vách phóng đều;
+# những gì phải đúng cỡ thật (lỗ vít M2, ô nút 6 × 6, trụ và độ sâu mạch joystick, trụ đỡ ESP32) chia cho K trước,
+# nên sau khi phóng vẫn đúng milimét. Bản 1.0 là VERA Band 2 gốc.
+K = float(os.environ.get("VERA_TI_LE", "1.0"))
+THU_MUC = os.path.join(GOC, "docs", "tay-cam-band-2" if abs(K - 1) < 1e-9 else f"tay-cam-band-2-x{round(K * 100)}")
 SEG = 96
 
 VACH = 1.5              # bề dày vỏ (≈ 4 đường in với đầu 0,4 mm)
@@ -38,14 +42,26 @@ t_mat = np.array([math.cos(math.radians(NGHIENG)), 0, math.sin(math.radians(NGHI
 R_MAT = np.column_stack([t_mat, [0, 1, 0], n_mat])
 P_DINH = np.array([8.0, 0, 96.0])       # mặt đỉnh đi qua điểm này
 TAM_CAN = P_DINH - 5.0 * t_mat          # tâm cần joystick, giữa mặt bầu dục
-KY_SAU = 20.5                           # tâm mạch KY-023 nằm dưới mặt đỉnh chừng này
-R_CHEN = 17.0                           # chén lõm lục giác quanh cần, bán kính đỉnh
+KY_SAU = 20.5 / K                       # tâm mạch KY-023 nằm dưới mặt đỉnh 20,5 mm thật (không phóng)
+# chén lõm lục giác quanh cần (mm thật): bán kính đỉnh ở miệng và ở lỗ đáy cho cần joystick lọt qua.
+# Bản phóng nới cả hai thêm 2,5 / 2 mm (người dùng báo cần và nắp joystick lọt chật); 19,5 là mức lớn nhất
+# còn chừa mặt tối liền phía trên 4 trụ đỡ KY-023 (trụ cách tâm 18,6 mm)
+R_CHEN = 17.0 if abs(K - 1) < 1e-9 else 19.5
+R_DAY_CHEN = 12.5 if abs(K - 1) < 1e-9 else 14.5
 LUN_MAT = 0.4                           # mặt tối lún so với vành trắng
 DAY_MAT = 2.0                           # bề dày mặt tối
 
 # linh kiện (x, y, z theo hệ thân)
 ESP = {"x": (-22.5, 32.5), "z": 63.0}   # DevKitC 55 × 28 nằm ngang trong đầu, cổng micro-USB quay ra lưng, chân header cắt ngắn xuống dưới
 HA_AP = {"x": (-26.0, -9.0), "y": (-11.0, 11.0), "z": (69.0, 73.0)}     # MP1584 22 × 17, nằm trên ESP32, sau mạch joystick
+
+
+def esp_x(x):
+    """Điểm x trên mạch ESP32 (hệ gốc) sau khi phóng: đuôi mạch x0 phóng theo vỏ, phần còn lại giữ mm thật."""
+    x0 = ESP["x"][0]
+    return x0 + (x - x0) / K
+
+
 # khoang pin vuông 9V (PP3 48,5 × 26,5 × 17,5) dựng đứng trong cán, kẹp pin ở trên
 BAY_XC = -1.0
 BAY_X = 14.25           # lỗ lọt pin dư 1 mm mỗi bên
@@ -466,7 +482,7 @@ def _cong_khoet():
     """Lỗ Ø7 qua vách, buồng gờ nắp Ø9, ô vuông giữ nút 6 × 6 mở phía dưới cho chân và dây."""
     # 3 khối khoét lấn vào nhau 0,1 mm: nếu chỉ áp mặt thì sai số số học để lại màng mỏng bằng 0 bịt ngang lỗ, phần mềm cắt lớp báo lỗi
     return (Manifold.cylinder(6.6, 3.5, 3.5, 40).translate([0, 0, -2.6]) + Manifold.cylinder(1.4, 4.5, 4.5, 40).translate([0, 0, -3.9])
-            + cuc(6.3, 6.3, 6.3, 0, 0, -6.95))
+            + cuc(6.3 / K, 6.3 / K, 6.3, 0, 0, -6.95))
 
 
 def nut_don():
@@ -523,14 +539,15 @@ def than_nua(phia):
     t = t + go
     # 4 trụ đỡ mặt dưới ESP32 (giữa 2 hàng chân), 4 vấu chặn mép trên mạch
     zb = ESP["z"]
+    ex = esp_x
     for sy in (-1, 1):
-        t = t + (hop(-22.0, -17.0, sy * 7 - 2, sy * 7 + 2, 40, zb) ^ khoi(0.5))
-        y0, y1 = (8.5, 13.0) if sy > 0 else (-13.0, -8.5)
-        t = t + (hop(29.5, 32.5, y0, y1, 40, zb) ^ khoi(0.5))
+        t = t + (hop(ex(-22.0), ex(-17.0), (sy * 7 - 2) / K, (sy * 7 + 2) / K, 40, zb) ^ khoi(0.5))
+        y0, y1 = (8.5 / K, 13.0 / K) if sy > 0 else (-13.0 / K, -8.5 / K)
+        t = t + (hop(ex(29.5), ex(32.5), y0, y1, 40, zb) ^ khoi(0.5))
     for x in (-6.0, 18.0):
         for sy in (-1, 1):
-            y0, y1 = (13.0, 40.0) if sy > 0 else (-40.0, -13.0)
-            t = t + (hop(x - 3, x + 3, y0, y1, zb + 1.8, zb + 4.0) ^ khoi(0.5))
+            y0, y1 = (13.0 / K, 40.0) if sy > 0 else (-40.0, -13.0 / K)
+            t = t + (hop(ex(x - 3), ex(x + 3), y0, y1, zb + 1.8 / K, zb + 4.0 / K) ^ khoi(0.5))
     # vách ngăn pin với cò, hốc Hall, khe luồn chân, chỗ tựa lò xo
     vach = hop(X_VACH[0], X_VACH[1], -11, 11, 30, 60) ^ khoi(0.5)
     vach = vach - cuc(1.9, 4.4, 3.4, X_HALL - 0.85, Y_NC, Z_NC) - cuc(3, 3.6, 14, X_HALL - 0.85, Y_NC, Z_NC + 8)
@@ -566,14 +583,14 @@ def than_nua(phia):
     # 2 lỗ vít M2 giữ mặt tối, ở lưng đầu, có hốc nông cho đầu vít
     for y in (-Y_VIT_MAT, Y_VIT_MAT):
         tn = mep_t(y, N_VIT_MAT, -1)
-        t = t - tru_mat(1.15, tn - 2, tn + 6, y, N_VIT_MAT) - tru_mat(2.1, tn - 2, tn + 0.5, y, N_VIT_MAT)
+        t = t - tru_mat(1.15 / K, tn - 2, tn + 6, y, N_VIT_MAT) - tru_mat(2.1 / K, tn - 2, tn + 0.5, y, N_VIT_MAT)
     # lỗ vít ghép: nửa trái có hốc đầu vít và lỗ thoát, nửa phải có lỗ mồi cho vít tự ren
     if phia > 0:
         for x, z, _ in VIT:
-            t = t - tru_y(2.1, Y_VAI, 40, x, z) - tru_y(1.1, -0.1, Y_VAI + 0.1, x, z)
+            t = t - tru_y(2.1 / K, Y_VAI, 40, x, z) - tru_y(1.1 / K, -0.1, Y_VAI + 0.1, x, z)
     else:
         for x, z, _ in VIT:
-            t = t - tru_y(0.85, -_sau_moi(x, z), 0.1, x, z)
+            t = t - tru_y(0.85 / K, -_sau_moi(x, z), 0.1, x, z)
     t = t - khe_duoi()
     for ma, R, o in _vi_tri_cong():
         if ma == ma_mui:
@@ -591,7 +608,8 @@ def _sau_moi(x, z):
 
 def _hex(ri_ro_z):
     """Khối xoay 6 cạnh quanh tâm cần, đỉnh lục giác hướng theo trục t như logo."""
-    return Manifold.revolve(CrossSection([ri_ro_z]), 6).rotate([0, 0, 90]).transform(bien_doi(R_MAT, TAM_CAN))
+    # thu 1/K: sau khi phóng cả bộ, chén và lỗ quanh cần giữ đúng cỡ gốc, khớp 4 trụ đỡ joystick cỡ thật
+    return Manifold.revolve(CrossSection([ri_ro_z]), 6).scale([1 / K, 1 / K, 1 / K]).rotate([0, 0, 90]).transform(bien_doi(R_MAT, TAM_CAN))
 
 
 def nap():
@@ -602,20 +620,21 @@ def nap():
     for y in (-Y_VIT_MAT, Y_VIT_MAT):
         c = c + (_tab_sau(y) ^ khoi(VACH + 0.25))
         tn = mep_t(y, N_VIT_MAT, -1)
-        c = c - tru_mat(0.95, tn - 2, tn + 12, y, N_VIT_MAT)
+        c = c - tru_mat(0.95 / K, tn - 2, tn + 12, y, N_VIT_MAT)
     # móc phía trước, luồn dưới gờ thân
     tt = mep_t(0, -LUN_MAT - DAY_MAT - 1.0, 1)
     c = c + (hop_mat(tt - 10.0, tt - 6.5, -3, 3, -7.0, -LUN_MAT - DAY_MAT + 0.01) ^ khoi(VACH + 0.25))
     c = c + (hop_mat(tt - 10.0, tt - 2.0, -3, 3, -7.0, -5.0) ^ khoi(VACH + 0.25))
     # lỗ lục giác cho chén, 4 trụ đỡ mạch KY-023
-    c = c - _hex([[0, -8.0], [12.5, -8.0], [R_CHEN + 0.2, -1.5], [R_CHEN + 0.2, 2], [0, 2]])
+    lo_chen = _hex([[0, -8.0], [R_DAY_CHEN, -8.0], [R_CHEN + 0.2, -1.5], [R_CHEN + 0.2, 2], [0, 2]])
+    c = c - lo_chen
     tam_ky = TAM_CAN - KY_SAU * n_mat
     tru = None
-    for sx in (-15, 15):
-        for sy in (-11, 11):
-            k = tru_z(1.7, 0.8, KY_SAU - LUN_MAT - 0.5, sx, sy, 20).transform(bien_doi(R_MAT, tam_ky))
+    for sx in (-15 / K, 15 / K):
+        for sy in (-11 / K, 11 / K):
+            k = tru_z(1.7 / K, 0.8 / K, KY_SAU - LUN_MAT - 0.5, sx, sy, 20).transform(bien_doi(R_MAT, tam_ky))
             tru = k if tru is None else tru + k
-    c = c + tru
+    c = c + tru - lo_chen   # đỉnh trụ nhô lên trong lỗ chén bị cắt bỏ, chân trụ vẫn dính mặt dưới mặt tối
     # 2 cổng mở rộng cho ngón cái
     for ma, R, o in _vi_tri_cong():
         if ma in ("P1", "P2"):
@@ -628,7 +647,7 @@ def nap():
 
 def chen():
     """Chén lõm lục giác màu nhấn quanh cần joystick, lấy hình từ logo."""
-    return _hex([[12.5, -7.5], [R_CHEN, -1.5], [R_CHEN, -LUN_MAT], [R_CHEN - 1.0, -LUN_MAT], [12.5, -5.4]])
+    return _hex([[R_DAY_CHEN, -7.5], [R_CHEN, -1.5], [R_CHEN, -LUN_MAT], [R_CHEN - 1.0, -LUN_MAT], [R_DAY_CHEN, -5.4]])
 
 
 def co():
@@ -656,6 +675,59 @@ def nap_pin():
 
 
 def khoi_linh_kien():
+    """Linh kiện đúng cỡ thật, đặt vào chỗ tương ứng trong vỏ đã phóng."""
+    ra = []
+    for ma, ten, mau, m in _linh_kien_goc():
+        if abs(K - 1) < 1e-9:
+            ra.append((ma, ten, mau, m))
+            continue
+        if ma in ("esp32", "bmi160"):
+            # đuôi mạch (cổng USB) theo vỏ, mặt dưới mạch theo trụ đỡ; BMI160 dán trên ESP32 đi cùng
+            d = [ESP["x"][0] * (K - 1), 0, ESP["z"] * (K - 1)]
+        elif ma == "ky023":
+            # tâm mạch trong vỏ đã phóng: K·TAM_CAN − 20,5 mm thật theo pháp tuyến mặt đỉnh
+            d = list((K - 1) * (TAM_CAN - KY_SAU * n_mat))
+        elif ma == "quai":
+            ra.append((ma, ten, mau, m.scale([K, K, K])))   # quai đi theo khuyên và khe đã phóng (dùng băng 25 mm)
+            continue
+        elif ma == "vit":
+            ra.append((ma, ten, mau, _vit_that().scale([K, K, K])))
+            continue
+        elif ma == "nut6x6":
+            ra.append((ma, ten, mau, _doi_tung_manh(m)))
+            continue
+        else:
+            bb = m.bounding_box()
+            c = np.array([(bb[0] + bb[3]) / 2, (bb[1] + bb[4]) / 2, (bb[2] + bb[5]) / 2])
+            d = list(c * (K - 1))
+        ra.append((ma, ten, mau, m.translate(d)))
+    return ra
+
+
+def _vit_that():
+    """Vít dựng trước khi phóng: bán kính, bề dày đầu chia K (sau khi phóng đúng M2), chiều dài theo vách đã phóng."""
+    vit = None
+    for x, z, _ in VIT:
+        k = tru_y(0.8 / K, -_sau_moi(x, z) + 0.5, Y_VAI, x, z) + tru_y(1.9 / K, Y_VAI, Y_VAI + 1.4 / K, x, z)
+        vit = k if vit is None else vit + k
+    for y in (-Y_VIT_MAT, Y_VIT_MAT):
+        tn = mep_t(y, N_VIT_MAT, -1)
+        vit = vit + tru_mat(0.8 / K, tn + 0.5, tn + 7.0, y, N_VIT_MAT) + tru_mat(1.9 / K, tn - 0.9 / K, tn + 0.5, y, N_VIT_MAT)
+    return vit
+
+
+def _doi_tung_manh(m):
+    """Các mảnh rời (từng vít, từng nút, từng đoạn quai) giữ cỡ, dời tâm mỗi mảnh theo K."""
+    ra = None
+    for p in m.decompose():
+        bb = p.bounding_box()
+        c = np.array([(bb[0] + bb[3]) / 2, (bb[1] + bb[4]) / 2, (bb[2] + bb[5]) / 2])
+        p = p.translate(list(c * (K - 1)))
+        ra = p if ra is None else ra + p
+    return ra
+
+
+def _linh_kien_goc():
     e, h = ESP, HA_AP
     x0, x1, zb = e["x"][0], e["x"][1], e["z"]
     esp = (hop(x0, x1, -14, 14, zb, zb + 1.6)
@@ -794,7 +866,11 @@ def trong_tam(m):
 
 
 def chi_tiet_in():
-    """(mã, tên, màu, khối ở tư thế lắp, ma trận về hướng in, hướng tách rời, cách in)."""
+    """(mã, tên, màu, khối ở tư thế lắp, ma trận về hướng in, hướng tách rời, cách in). Đã phóng theo K."""
+    return [(ma, ten, mau, m.scale([K, K, K]), R, [v * K for v in tach], cach) for ma, ten, mau, m, R, tach, cach in _chi_tiet_goc()]
+
+
+def _chi_tiet_goc():
     Rv = R_MAT.T
     return [
         ("than_phai", "Thân, nửa phải", "#eef2f4", than_nua(-1), quay("x", -90), [0, -40, 0], "mặt ghép xuống bàn, đỡ bên trong"),
@@ -844,7 +920,7 @@ def main():
     khoi_in, gam, cach = {}, {}, {}
     for ma, ten, mau, m, R, tach, cach_in in chi_tiet_in():
         ca_bo = m if ca_bo is None else ca_bo + m
-        in_m = dat_len_ban(nut_don() if ma == "nut_phu" else m.transform(bien_doi(R, [0, 0, 0])))
+        in_m = dat_len_ban(nut_don().scale([K, K, K]) if ma == "nut_phu" else m.transform(bien_doi(R, [0, 0, 0])))
         v = in_m.volume() / 1000
         if ma == "nut_phu":
             v *= 4
@@ -878,9 +954,9 @@ def main():
     tam = mo / tong
     print(f"cả bộ {kt} mm, nhựa {nhua:.0f} g, tổng ≈ {tong:.0f} g, trọng tâm x {tam[0]:.1f} y {tam[1]:.1f} z {tam[2]:.1f}")
     if xem:
-        ghi_stl(khoi_chu_tam(SAU_CHU, -0.05), os.path.join(xem, "chu.stl"))
+        ghi_stl(khoi_chu_tam(SAU_CHU, -0.05).scale([K, K, K]), os.path.join(xem, "chu.stl"))
         tt.append({"ma": "chu", "ten": "Logo và chữ khắc (tô màu khi xem)", "mau": "#15191d", "tach": [0, -30, 0], "chi_xem": True})
-        ghi_stl(ban_tay(), os.path.join(xem, "ban_tay.stl"))
+        ghi_stl(ban_tay().scale([K, K, K]), os.path.join(xem, "ban_tay.stl"))
         with open(os.path.join(xem, "canh.json"), "w", encoding="utf-8") as fh:
             json.dump({"chi_tiet": tt, "goi_in": goi_in, "kich_thuoc": kt, "nhua_g": round(nhua), "tong_g": round(tong), "rong_quai": RONG_QUAI}, fh, ensure_ascii=False, indent=1)
     with open(os.path.join(THU_MUC, "thong_so.json"), "w", encoding="utf-8") as fh:

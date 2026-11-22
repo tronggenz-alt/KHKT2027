@@ -14,6 +14,13 @@ import mo_hinh_band2 as mh  # noqa: E402
 
 KHE_TOI_THIEU = 0.3
 
+
+def quay_co_k(m, goc):
+    """Xoay cò quanh trục đã phóng theo hệ số K của mô hình."""
+    R = mh.quay("y", goc)
+    p = mh.CHOT * mh.K
+    return m.transform(mh.bien_doi(R, p - R @ p))
+
 # cặp được thiết kế để chạm nhau (kẹp, tựa, dán, lồng)
 DUOC_CHAM = {
     frozenset({"than"}): "2 nửa thân áp vào nhau ở mặt ghép",
@@ -96,16 +103,16 @@ def main():
     c, nc = ct["co"], ct["nam_cham"]
     than = ct["than_phai"] + ct["than_trai"]
     for g in np.linspace(0, mh.GOC_BOP, 7):
-        cg = mh.quay_co(c, g)
+        cg = quay_co_k(c, g)
         v, khe = kiem_cap(cg, than)
         _, khe_e = kiem_cap(cg, ct["esp32"])
-        _, khe_nc = kiem_cap(mh.quay_co(nc, g), ct["hall"])
+        _, khe_nc = kiem_cap(quay_co_k(nc, g), ct["hall"])
         print(f"  {g:5.1f}°: chồng {v:7.3f} mm³, khe thân {khe:5.2f}, khe ESP32 {khe_e:5.2f}, nam châm ↔ Hall {khe_nc:5.2f} mm")
         if v > (0.2 if g >= mh.GOC_BOP else 0.01):
             loi.append((f"co@{g:.1f}°", "than", round(v, 3)))
         if khe_e < KHE_TOI_THIEU:
             loi.append((f"co@{g:.1f}°", "esp32", round(khe_e, 3)))
-    v, _ = kiem_cap(mh.quay_co(c, mh.GOC_BOP + 1.0), than)
+    v, _ = kiem_cap(quay_co_k(c, mh.GOC_BOP + 1.0), than)
     print(f"  quá góc chặn 1°: chồng {v:.3f} mm³ ({'vấu đã chạm, đúng' if v > 0 else 'CHƯA chạm: chỉnh vấu'})")
     if v <= 0:
         loi.append(("vấu cò", "chưa chạm", 0))
@@ -125,7 +132,7 @@ def main():
     print("\nKhe dưới phải là lỗ thông, quai 20 × 1,4 lọt qua:")
     # 2 góc mái khe vát VAT_KHE: phần rộng đủ 20,4 mm cao 1,9 mm (quai dày 1,4), phần sát mái hẹp lại theo góc vát
     ruot = (mh.hop(mh.KHE_X[0] + 0.3, mh.KHE_X[1] - 0.3, mh.KHE_Y[0] + mh.VAT_KHE, mh.KHE_Y[1] - 0.3, mh.Z_DAY - 2, mh.Z_DAY + mh.CAO_PHINH + 1.5)
-            + mh.hop(mh.KHE_X[0] + mh.VAT_KHE + 0.3, mh.KHE_X[1] - mh.VAT_KHE - 0.3, mh.KHE_Y[0] + 0.3, mh.KHE_Y[1] - 0.3, mh.Z_DAY - 2, mh.Z_DAY + mh.CAO_PHINH + 1.5))
+            + mh.hop(mh.KHE_X[0] + mh.VAT_KHE + 0.3, mh.KHE_X[1] - mh.VAT_KHE - 0.3, mh.KHE_Y[0] + 0.3, mh.KHE_Y[1] - 0.3, mh.Z_DAY - 2, mh.Z_DAY + mh.CAO_PHINH + 1.5)).scale([mh.K, mh.K, mh.K])   # khe đã phóng theo K
     for ma in ("than_phai", "than_trai"):
         v, _ = kiem_cap(ruot, ct[ma])
         print(f"  khe ↔ {ma}: chồng {v:.3f} mm³")
@@ -133,7 +140,7 @@ def main():
             loi.append(("khe dưới", ma, round(v, 3)))
     print("\n2 khe của tấm mu tay phải thông, quai 20 × 1,4 lọt qua:")
     for z0, z1 in mh.TAM_KHE_Z:
-        ruot = mh.hop(mh.KHE_X[0] + 1.8, mh.KHE_X[1] + 1.2, -90, 0, z0 + 0.3, z1 - 0.3)
+        ruot = mh.hop(mh.KHE_X[0] + 1.8, mh.KHE_X[1] + 1.2, -90, 0, z0 + 0.3, z1 - 0.3).scale([mh.K, mh.K, mh.K])
         v, _ = kiem_cap(ruot, ct["tam_mu_tay"])
         print(f"  khe z {z0:g}–{z1:g}: chồng {v:.3f} mm³")
         if v > 0.01:
