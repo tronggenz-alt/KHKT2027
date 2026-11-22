@@ -1,11 +1,11 @@
 // index.js – ghép các module thành chế độ "Giải thích từng bước có mũi tên" cho Phòng Lab Sinh học 3D.
 // Trang 3D chỉ cần: taoGiaiThichTungBuoc(phụ_thuộc) rồi gọi .capNhat(dt) trong vòng render chung.
 //   StepPlayer (trạng thái bước) → sự kiện → ArrowRenderer (mũi tên) · CameraDirector (camera) · HighlightManager (sáng / mờ) · ExplainPanel (khung chữ)
-import { CAU_HINH } from "./config.js?v=4";
+import { CAU_HINH } from "./config.js?v=5";
 import { QUY_TRINH, QUY_TRINH_MAC_DINH } from "./data/index.js";
 import { chuanHoaQuyTrinh } from "./kiem-tra.js";
 import { StepPlayer } from "./step-player.js";
-import { ArrowRenderer } from "./arrow-renderer.js?v=4";
+import { ArrowRenderer } from "./arrow-renderer.js?v=5";
 import { CameraDirector } from "./camera-director.js";
 import { HighlightManager } from "./highlight-manager.js";
 import { ExplainPanel } from "./explain-panel.js";

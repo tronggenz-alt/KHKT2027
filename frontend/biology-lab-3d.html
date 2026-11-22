@@ -4814,7 +4814,7 @@ $("#nut-dat-lai").addEventListener("click", datLaiTatCa);
 //      Chỉ có khi trang do máy chủ phục vụ; mở file trực tiếp → ẩn nút chế độ này.
 // =====================================================================================================================
 const GT_MOD = location.protocol.startsWith("http")
-  ? await import("/static/sinh-hoc/giai-thich/index.js?v=4").catch((e) => { console.warn("Không tải được chế độ giải thích từng bước:", e.message); return null; })
+  ? await import("/static/sinh-hoc/giai-thich/index.js?v=5").catch((e) => { console.warn("Không tải được chế độ giải thích từng bước:", e.message); return null; })
   : null;
 // Điểm neo giải phẫu chính xác (tâm buồng tim, ngã ba mạch lớn, tâm nội tạng) dành riêng cho đầu/cuối mũi tên 3D
 const DIEM_MUI_TEN = {

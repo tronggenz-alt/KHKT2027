@@ -7,7 +7,7 @@
 // - clear() xoá + dispose() toàn bộ (gọi khi đổi quy trình / đóng chế độ).
 import * as THREE from "three";
 import { CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
-import { CAU_HINH } from "./config.js?v=4";
+import { CAU_HINH } from "./config.js?v=5";
 
 const C = CAU_HINH.muiTen, X = CAU_HINH.xung;
 const TREN = new THREE.Vector3(0, 1, 0);
@@ -55,14 +55,14 @@ export class ArrowRenderer {
   }
   get dauVienGeo() {
     if (!this._dauVienGeo) {
-      this._dauVienGeo = new THREE.ConeGeometry(C.banKinhDau * 1.24, C.daiDau * 1.12, 16);
-      this._dauVienGeo.translate(0, -C.daiDau * 0.52, 0);
+      this._dauVienGeo = new THREE.ConeGeometry(C.banKinhDau * 1.20, C.daiDau * 1.09, 16);
+      this._dauVienGeo.translate(0, -C.daiDau * 0.51, 0);
     }
     return this._dauVienGeo;
   }
-  get diemGeo() { return (this._diemGeo ||= new THREE.SphereGeometry(C.banKinhDiem || 0.014, 14, 10)); }
-  get vongGeo() { return (this._vongGeo ||= new THREE.RingGeometry(X.banKinh * 0.58, X.banKinh, 40)); }
-  get vongVienGeo() { return (this._vongVienGeo ||= new THREE.RingGeometry(X.banKinh * 0.48, X.banKinh * 1.12, 40)); }
+  get diemGeo() { return (this._diemGeo ||= new THREE.SphereGeometry(C.banKinhDiem || 0.0072, 14, 10)); }
+  get vongGeo() { return (this._vongGeo ||= new THREE.RingGeometry(X.banKinh * 0.68, X.banKinh, 40)); }
+  get vongVienGeo() { return (this._vongVienGeo ||= new THREE.RingGeometry(X.banKinh * 0.60, X.banKinh * 1.10, 40)); }
 
   // ---------- dựng một bước ----------
   _dung(chiSo, step) {
@@ -141,9 +141,9 @@ export class ArrowRenderer {
     const hatChay = new THREE.Mesh(this.diemGeo, this._vl("#ffffff", "hat"));
 
     diemDauVien.position.copy(p1);
-    diemDauVien.scale.setScalar(1.25);
+    diemDauVien.scale.setScalar(1.22);
     diemDau.position.copy(p1);
-    diemDau.scale.setScalar(0.92);
+    diemDau.scale.setScalar(0.90);
     hatChay.scale.setScalar(0.76);
 
     vien.renderOrder = 995;
