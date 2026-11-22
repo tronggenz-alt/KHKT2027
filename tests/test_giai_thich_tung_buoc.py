@@ -28,11 +28,16 @@ def test_module_tach_rieng_va_co_chu_thich():
         assert "PointLight" not in ma, ten
     mt = (THU_MUC / "arrow-renderer.js").read_text(encoding="utf-8")
     assert "clear()" in mt and ".dispose()" in mt and "this._vatLieu" in mt
+    # Số bước + chữ phải nằm chung trong 1 thẻ .the-buoc-3d và chỉ hiện ở đúng bước đang chạy
+    assert "the-buoc-3d" in mt and "so-buoc-3d" in mt and "nhan-buoc-3d" in mt
+    assert 'const hienNhan = kieu === "dang";' in mt
 
 
 def test_trang_dung_module_va_vong_render_chung():
     s = TRANG.read_text(encoding="utf-8")
     assert 'await import("/static/sinh-hoc/giai-thich/index.js' in s and "giaiThichTungBuoc?.capNhat(dt);" in s
+    for css in (".the-buoc-3d", ".so-buoc-3d", ".nhan-buoc-3d"):
+        assert css in s, f"thiếu CSS {css} cho nhãn bước 3D"
     # dữ liệu / code cũ đã chuyển hết sang module (không còn dữ liệu cứng, chuỗi setTimeout, đèn nhấp nháy)
     for cu in ("MAU_TUAN_HOAN_NHO", "MAU_TUAN_HOAN_LON", "taoMuiTen3D", "timerTuChay", "chuanHoaTenBP", "khoiTaoKeoKhung"):
         assert cu not in s, cu

@@ -48,15 +48,19 @@ export class ArrowRenderer {
   _dung(chiSo, step) {
     const b = { muiTen: [], xung: [], nhan: [], kieu: "" };
     if (step.tai_cho) {
+      _p.set(0, 0, 0);
       for (const id of step.from) {
+        const vt = this.viTri(id);
         const vong = new THREE.Mesh(this.vongGeo, this._vl(step.color, "xung"));
-        vong.position.copy(this.viTri(id));
+        vong.position.copy(vt);
         vong.renderOrder = 999;
         vong.userData.mau = step.color;
         this.nhom.add(vong);
         b.xung.push(vong);
+        _p.add(vt);
       }
-      this._themNhan(b, chiSo, step, this.viTri(step.from[0]), _n.set(0.04, 0.05, 0.02));
+      if (step.from.length > 0) _p.multiplyScalar(1 / step.from.length);
+      this._themNhan(b, chiSo, step, _p, _n.set(0, 0.14, 0.06));
     } else {
       const cap = [];
       if (step.from.length === 1) for (const den of step.to) cap.push([step.from[0], den]);
@@ -68,7 +72,7 @@ export class ArrowRenderer {
         dau.duong.getTangentAt(0.5, _tt);
         _n.crossVectors(_tt, TREN);
         if (_n.lengthSq() < 1e-6) _n.set(1, 0, 0);
-        _n.normalize().multiplyScalar(0.04).add(_tt.set(0, 0.015, 0.015));
+        _n.normalize().multiplyScalar(0.03).add(_tt.set(0, 0.085, 0.05));
         this._themNhan(b, chiSo, step, _p, _n);
       }
     }
@@ -93,20 +97,24 @@ export class ArrowRenderer {
   }
 
   _themNhan(b, chiSo, step, viTri, lech) {
-    const so = document.createElement("div");
+    // Gộp số bước + tiêu đề trong MỘT CSS2DObject (flex ngang) để số không bao giờ đè lên chữ
+    const the = document.createElement("div");
+    the.className = "the-buoc-3d";
+    the.style.setProperty("--mau-buoc", step.color);
+    const so = document.createElement("span");
     so.className = "so-buoc-3d";
     so.style.background = step.color;
     so.textContent = String(chiSo + 1);
-    const nhan = document.createElement("div");
+    const nhan = document.createElement("span");
     nhan.className = "nhan-buoc-3d";
-    nhan.style.borderLeftColor = step.color;
     nhan.textContent = step.title;
-    for (const [el, dx] of [[so, 0], [nhan, 0.07]]) {
-      const o = new CSS2DObject(el);
-      o.position.copy(viTri).add(lech).x += dx;
-      this.nhom.add(o);
-      b.nhan.push(o);
-    }
+    the.append(so, nhan);
+    const o = new CSS2DObject(the);
+    o.position.copy(viTri).add(lech);
+    o.visible = false;
+    the.style.display = "none";
+    this.nhom.add(o);
+    b.nhan.push(o);
   }
 
   // ---------- cập nhật mỗi khung hình ----------
@@ -118,11 +126,14 @@ export class ArrowRenderer {
       const u = k < chiSo ? 1 : tienDo;
       for (const mt of b.muiTen) this._capNhatMuiTen(mt, u, kieu, b.kieu !== kieu);
       for (const v of b.xung) this._capNhatXung(v, kieu, giay, u);
-      if (b.kieu !== kieu) {
-        for (const o of b.nhan) o.element.style.opacity = kieu === "qua" ? String(C.doMoNhanDaQua) : "1";
-        b.kieu = kieu;
+      // Chỉ hiển thị nhãn chữ của ĐÚNG bước hiện tại; ẩn nhãn các bước đã qua để không chồng chữ
+      const hienNhan = kieu === "dang";
+      for (const o of b.nhan) {
+        o.visible = hienNhan;
+        o.element.style.display = hienNhan ? "" : "none";
+        o.element.style.opacity = hienNhan ? "1" : "0";
       }
-      for (const o of b.nhan) o.visible = kieu === "qua" || u > 0.35;   // nhãn hiện khi mũi tên đã mọc quá 1/3
+      if (b.kieu !== kieu) b.kieu = kieu;
     }
   }
 
