@@ -58,15 +58,20 @@ namespace Khkt.Demo
             var data = Object.FindAnyObjectByType<NavGridData>();
             bool baked = data != null && data.nx == nx && data.nz == nz && data.walk != null && data.walk.Length == nx * nz
                          && data.walk2 != null && data.walk2.Length == nx * nz;
+            // Cảnh dựng từ trước khi có lưới hai tầng (lưới một tầng, hẹp hơn, cùng gốc): dùng lại nguyên cho tầng 1 như cũ,
+            // tầng 2 và lõi thang coi như chưa đi được, tới khi dựng lại cảnh. Không tính lại bằng va chạm vì các khu ở xa đã gỡ.
+            bool legacy = !baked && data != null && data.walk != null && data.nz == nz && data.nx > 0 && data.nx <= nx && data.walk.Length == data.nx * nz;
             if (data != null && !baked)
-                Debug.LogWarning("[KHKT] Lưới đi robot nướng sẵn là bản cũ (một tầng): hãy dựng lại cảnh (KHKT > Dựng phòng thí nghiệm). Tạm tính lưới theo các khu đang tải.");
+                Debug.LogWarning("[KHKT] Lưới đi robot nướng sẵn là bản cũ (một tầng): robot chỉ đi được ở tầng 1. Hãy dựng lại cảnh (KHKT > Dựng phòng thí nghiệm).");
             for (int f = 0; f < Floors; f++)
             {
                 walk[f] = new bool[nx, nz];
                 var src = f == 0 ? data?.walk : data?.walk2;
                 for (int i = 0; i < nx; i++)
                     for (int k = 0; k < nz; k++)
-                        walk[f][i, k] = baked ? src[i * nz + k] != 0 : Free(CellCenter(i, k, f), 0.2f);
+                        walk[f][i, k] = baked ? src[i * nz + k] != 0
+                                      : legacy ? f == 0 && i < data.nx && data.walk[i * nz + k] != 0
+                                      : Free(CellCenter(i, k, f), 0.2f);
             }
             LinkStairs();
         }

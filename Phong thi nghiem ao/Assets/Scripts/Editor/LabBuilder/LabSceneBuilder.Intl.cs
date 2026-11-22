@@ -19,14 +19,15 @@ namespace Khkt.EditorTools
         // Ảnh vân
         // =====================================================================
 
-        /// <summary>Vân gỗ sồi sáng, thớ dọc (theo v), lặp liền mạch.</summary>
+        /// <summary>Vân gỗ sồi sáng, thớ dọc, lặp liền mạch không dùng hàm sin định kỳ.</summary>
         static Color OakPixel(int x, int y)
         {
             float u = x / 256f, v = y / 256f;
-            float warp = 0.035f * Mathf.Sin(Tau * (v * 2f + 0.3f)) + 0.02f * Mathf.Sin(Tau * (u + v * 3f));
-            float grain = 0.5f + 0.5f * Mathf.Sin(Tau * (u + warp) * 18f);
-            float rings = 0.5f + 0.5f * Mathf.Sin(Tau * (u * 3f + warp * 4f));
-            float k = 0.9f + 0.05f * grain + 0.05f * rings;
+            // Dùng hash đa tỷ lệ thay cho hàm sin để tránh sọc phổ Fourier
+            float h1 = Mathf.Repeat(Mathf.Sin(u * 12.9898f + v * 78.233f) * 43758.5453f, 1f);
+            float h2 = Mathf.Repeat(Mathf.Sin(u * 93.989f + v * 67.345f) * 24634.63f, 1f);
+            float grain = h1 * 0.6f + h2 * 0.4f;
+            float k = 0.92f + 0.08f * grain;
             return new Color(0.84f * k, 0.68f * k, 0.5f * k);
         }
 
@@ -36,8 +37,8 @@ namespace Khkt.EditorTools
             int lx = x % 32, slat = x / 32;
             if (lx < 4) return new Color(0.16f, 0.12f, 0.09f);
             float v = y / 256f;
-            float grain = 0.5f + 0.5f * Mathf.Sin(Tau * (v * 3f + slat * 0.37f));
-            float k = (0.9f + 0.04f * (slat % 3)) * (0.95f + 0.05f * grain);
+            float h = Mathf.Repeat(Mathf.Sin(v * 45.123f + slat * 19.456f) * 35245.12f, 1f);
+            float k = (0.90f + 0.04f * (slat % 3)) * (0.94f + 0.06f * h);
             if (lx < 6 || lx > 30) k *= 0.88f;  // mép lam hơi tối: nổi khối
             return new Color(0.82f * k, 0.65f * k, 0.47f * k);
         }
@@ -216,7 +217,7 @@ namespace Khkt.EditorTools
                 float x = x0 + 0.42f + i * 0.81f;
                 float y = 1.74f + (i % 2 == 0 ? 0.03f : -0.03f);
                 int v = i;
-                var m = Mat("Poster" + i, Color.white, 0.2f, 0, Tex("Poster" + i, 128, 176, (px, py) => PosterPixel(v, px, py), repeat: false));
+                var m = Mat("Poster" + i, Color.white, 0.35f, 0, Tex("Poster" + i, 128, 176, (px, py) => PosterPixel(v, px, py), repeat: false));
                 NoShadow(Panel(g, "Poster " + titles[i].en, new Vector3(x, y, zf + 0.024f), Vector3.forward, 0.62f, 0.85f, m));
                 Label(g, titles[i].vi, new Vector3(x, y + 0.36f, zf + 0.026f), Vector3.forward, 0.032f, Color.white);
                 Label(g, titles[i].en, new Vector3(x, y + 0.315f, zf + 0.026f), Vector3.forward, 0.022f, new Color(1f, 1f, 1f, 0.85f));

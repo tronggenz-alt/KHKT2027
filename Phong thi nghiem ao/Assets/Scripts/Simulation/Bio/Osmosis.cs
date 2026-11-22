@@ -56,5 +56,15 @@ namespace Khkt.Simulation.Bio
             double x = (sucroseMolarity - 0.35) * 12.0;
             return 100.0 / (1.0 + Math.Exp(-x));
         }
+
+        public static double NaClPercentToMolar(double percentW_V)
+        {
+            return (percentW_V * 10.0) / 58.44;
+        }
+
+        public static double PlasmolysisFraction(double molarity)
+        {
+            return PlasmolysisPercentage(molarity) / 100.0;
+        }
     }
 }

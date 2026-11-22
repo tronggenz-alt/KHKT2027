@@ -13,7 +13,7 @@ namespace Khkt.Demo.Bio
     /// 5.1.16 & 5.4.5. Máy lắc ống nghiệm Vortex — mã: may_vortex
     /// </summary>
     [DisallowMultipleComponent]
-    public class VortexMixer : MonoBehaviour, IInteractable, IScrollAdjustable
+    public class VortexMixer : MonoBehaviour, IInteractable, IScrollAdjustable, IMachinePanel
     {
         public int speedLevel = 5; // 0..10
         public bool continuousMode = false;
@@ -44,6 +44,27 @@ namespace Khkt.Demo.Bio
             BioFeedback.PlayClick();
             BioFeedback.LogAction("may_vortex", "lac_tron_ong_nghiem",
                 $"Đã lắc trộn đồng nhất dung dịch trên máy Vortex ở mức {speedLevel}/10.");
+        }
+
+        [NonSerialized] public float panelSeconds = 3f;
+
+        public MachineSpec PanelSpec()
+        {
+            var s = new MachineSpec { code = "MÁY · VORTEX", title = "Máy lắc Vortex", subtitle = "Trộn đều dung dịch trong ống bằng chuyển động xoáy" };
+            s.parameters.Add(MachineParam.Slider("Mức tốc độ", "/10", 1f, 10f, 1f, () => speedLevel, v => speedLevel = Mathf.RoundToInt(v), "0",
+                v => v < 4f ? "Lắc nhẹ: hòa tan lại tủ ADN, trộn enzyme" : v < 9f ? "Lắc vừa: trộn đều đệm, huyền phù tế bào" : "Lắc tối đa: lâu quá 5 giây sẽ làm đứt gãy ADN bộ gen"));
+            s.parameters.Add(MachineParam.Slider("Thời gian lắc", "giây", 1f, 15f, 1f, () => panelSeconds, v => panelSeconds = v, "0"));
+            s.parameters.Add(MachineParam.Choice("Chế độ", new[] { "Chạm", "Liên tục" }, () => continuousMode ? 1 : 0, i => continuousMode = i == 1));
+            s.runLabel = () => "Lắc trộn";
+            s.status = () => $"Tốc độ {speedLevel}/10 · Chế độ {(continuousMode ? "liên tục" : "chạm")}";
+            s.run = () =>
+            {
+                VortexSample(null, panelSeconds);
+                return speedLevel >= 9 && panelSeconds > 5f
+                    ? $"Đã lắc {BioFeedback.FormatVi(panelSeconds, "0")} giây ở mức {speedLevel}/10. Lưu ý: với ADN bộ gen, lắc mạnh và lâu như vậy làm đứt sợi ADN (vệt kéo dài khi điện di)."
+                    : $"Đã lắc {BioFeedback.FormatVi(panelSeconds, "0")} giây ở mức {speedLevel}/10: dung dịch đồng nhất.";
+            };
+            return s;
         }
 
         public void Use(GameObject user)

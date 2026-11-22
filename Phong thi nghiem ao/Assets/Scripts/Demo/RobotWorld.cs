@@ -142,7 +142,10 @@ namespace Khkt.Demo
                 if (!Near(s.transform.position)) continue;
                 list.Add((d, new SceneObject { id = Next("cho_dat"), ten = s.label, loai = "chỗ đặt nhận: " + string.Join(", ", s.accepts), chua = s.Occupant != null ? "đang có vật" : "trống" }, s));
             }
-            list.Sort((a, b) => a.d.CompareTo(b.d));
+            // Tầng 2: chai sinh phẩm gốc và hộp cấp là thứ thí nghiệm nào cũng cần nên xếp trước (rồi mới tới vật gần nhất),
+            // kẻo hàng trăm đĩa Petri, tiêu bản quanh người dùng chiếm hết chỗ trong danh sách.
+            if (userFloor == 1) list.Sort((a, b) => (a.d - (Essential(a.c) ? 1000f : 0f)).CompareTo(b.d - (Essential(b.c) ? 1000f : 0f)));
+            else list.Sort((a, b) => a.d.CompareTo(b.d));
             var objs = new List<SceneObject>();
             var seenKeys = new HashSet<string>();
             foreach (var (d, o, c) in list)
@@ -245,8 +248,18 @@ namespace Khkt.Demo
             var v = c.GetComponent<BioVessel>();
             if (v != null) return v.isStock ? "s:" + v.stockId : v.mix.IsEmpty ? "e:" + v.label : null;
             var tool = c.GetComponent<BioTool>();
-            if (tool != null && c is Grabbable) return string.IsNullOrEmpty(tool.reagentOrSampleId) ? "t:" + tool.displayName : null;
+            if (tool != null && c is Grabbable) return "t:" + tool.displayName + ":" + tool.reagentOrSampleId;
+            // đĩa Petri, tiêu bản, lam kính... có hàng trăm cái trùng tên (chỉ khác số thứ tự): ghi cái gần nhất của mỗi tên
+            if (c is Grabbable) return "m:" + c.name.TrimEnd(' ', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '(', ')');
+            if (c is PlaceSocket socket) return "c:" + socket.label;
             return null;
+        }
+
+        static bool Essential(Component c)
+        {
+            if (c is BioDispenser) return true;
+            var v = c.GetComponent<BioVessel>();
+            return v != null && v.isStock;
         }
 
         static void AddBioFixtures(List<(float d, SceneObject o, Component c)> list, Func<Vector3, float, bool> near, Func<Vector3, float> dist, Func<string, string> next, float farExtra)

@@ -7,19 +7,23 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-DOTNET="/Users/trantrong/Documents/6000.6.7f1/Unity.app/Contents/Resources/Scripting/DotNetSdk/dotnet"
-if [ ! -f "$DOTNET" ]; then
-    # Thử tìm dotnet hệ thống nếu Unity không ở đường dẫn mặc định
-    if which dotnet >/dev/null 2>&1; then
-        DOTNET="$(which dotnet)"
-    else
-        echo "Lỗi: Không tìm thấy dotnet tại $DOTNET và trong PATH." >&2
-        exit 1
+# Unity nằm ở đâu: biến UNITY_APP nếu có, không thì thử lần lượt các chỗ đã dùng
+# (bản trong ~/Documents đã dời đi từ khi chuyển dự án khỏi iCloud nên kịch bản cũ không chạy được nữa).
+UNITY_SDK=""
+for app in "${UNITY_APP:-}" "$HOME/AppBuild/UnityEditor/Unity.app" "$HOME/Documents/6000.6.7f1/Unity.app" /Applications/Unity/Hub/Editor/*/Unity.app; do
+    if [ -n "$app" ] && [ -f "$app/Contents/Resources/Scripting/DotNetSdk/dotnet" ]; then
+        UNITY_SDK="$app/Contents/Resources/Scripting/DotNetSdk"
+        break
     fi
+done
+if [ -z "$UNITY_SDK" ]; then
+    echo "Lỗi: không tìm thấy Unity (đặt UNITY_APP=/đường/dẫn/Unity.app rồi chạy lại)." >&2
+    exit 1
 fi
+DOTNET="$UNITY_SDK/dotnet"
 
-CSC=$(find /Users/trantrong/Documents/6000.6.7f1/Unity.app/Contents/Resources/Scripting/DotNetSdk -name "csc.dll" 2>/dev/null | grep bincore | head -n 1)
-REF_DIR=$(find /Users/trantrong/Documents/6000.6.7f1/Unity.app/Contents/Resources/Scripting/DotNetSdk/packs/Microsoft.NETCore.App.Ref -type d -name "net8.0" 2>/dev/null | sort | tail -n 1)
+CSC=$(find "$UNITY_SDK" -name "csc.dll" 2>/dev/null | grep bincore | head -n 1)
+REF_DIR=$(find "$UNITY_SDK/packs/Microsoft.NETCore.App.Ref" -type d -name "net8.0" 2>/dev/null | sort | tail -n 1)
 
 OUT_DIR="/tmp/khkt_chem_tests"
 mkdir -p "$OUT_DIR"
@@ -55,7 +59,7 @@ echo "\"$ROOT/$TEST_FILE\"" >> "$OUT_DIR/build.rsp"
 
 "$DOTNET" "$CSC" @"$OUT_DIR/build.rsp"
 
-RUNTIME=$(basename "$(ls -d /Users/trantrong/Documents/6000.6.7f1/Unity.app/Contents/Resources/Scripting/DotNetSdk/shared/Microsoft.NETCore.App/* 2>/dev/null | tail -n 1)")
+RUNTIME=$(basename "$(ls -d "$UNITY_SDK"/shared/Microsoft.NETCore.App/* 2>/dev/null | tail -n 1)")
 cat << EOF > "$OUT_DIR/ChemTests.runtimeconfig.json"
 { "runtimeOptions": { "tfm": "net8.0", "framework": { "name": "Microsoft.NETCore.App", "version": "$RUNTIME" } } }
 EOF

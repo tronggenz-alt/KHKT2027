@@ -1,4 +1,8 @@
 using System.Collections.Generic;
+using Khkt.Demo;
+using Khkt.Demo.Bio;
+using Khkt.Interaction;
+using Khkt.Interaction.Bio;
 using UnityEditor;
 using UnityEngine;
 using static Khkt.EditorTools.LabKit;
@@ -32,9 +36,10 @@ namespace Khkt.EditorTools
             bioSpecimenPale = Mat("T2_MauVatNhat", new Color(0.82f, 0.72f, 0.6f), 0.5f);
             bioBiohazard = Mat("T2_CamNguyHai", new Color(0.95f, 0.42f, 0.08f), 0.45f);
             bioNitrile = Mat("T2_GangNitrile", new Color(0.35f, 0.5f, 0.92f), 0.35f);
-            bioLeaf = Mat("T2_LaCay", new Color(0.22f, 0.5f, 0.17f), 0.35f);
-            bioLeafDark = Mat("T2_LaCayDam", new Color(0.12f, 0.36f, 0.12f), 0.3f);
-            bioLeafLight = Mat("T2_LaCayNon", new Color(0.45f, 0.7f, 0.25f), 0.35f);
+            var leafTex = Tex("T2_LaGradient", 128, 128, LeafVeinPixel, repeat: false);
+            bioLeaf = Mat("T2_LaCay", new Color(0.22f, 0.5f, 0.17f), 0.35f, 0, leafTex);
+            bioLeafDark = Mat("T2_LaCayDam", new Color(0.12f, 0.36f, 0.12f), 0.3f, 0, leafTex);
+            bioLeafLight = Mat("T2_LaCayNon", new Color(0.45f, 0.7f, 0.25f), 0.35f, 0, leafTex);
             bioSoil = Mat("T2_DatTrong", new Color(0.22f, 0.15f, 0.1f), 0.08f);
             bioTerracotta = Mat("T2_ChauDatNung", new Color(0.66f, 0.36f, 0.22f), 0.2f);
             bioPotGrey = Mat("T2_ChauXam", new Color(0.36f, 0.38f, 0.4f), 0.3f);
@@ -56,10 +61,10 @@ namespace Khkt.EditorTools
             bioWater = Mat("T2_NuocTrong", new Color(0.72f, 0.88f, 0.95f, 0.3f), 0.95f, 0, transparent: true);
             posterBio = new[]
             {
-                Mat("T2_ApPhichTeBao", Color.white, 0.2f, 0, Tex("T2_ApPhichTeBao", 256, 352, CellPosterPixel, repeat: false)),
-                Mat("T2_ApPhichChuKy", Color.white, 0.2f, 0, Tex("T2_ApPhichChuKy", 256, 352, CycleTexPixel, repeat: false)),
-                Mat("T2_ApPhichCaySuSong", Color.white, 0.2f, 0, Tex("T2_ApPhichCaySuSong", 256, 352, TreeOfLifePixel, repeat: false)),
-                Mat("T2_ApPhichADN", Color.white, 0.2f, 0, Tex("T2_ApPhichADN", 256, 352, DnaPosterPixel, repeat: false)),
+                Mat("T2_ApPhichTeBao", Color.white, 0.35f, 0, Tex("T2_ApPhichTeBao", 256, 352, CellPosterPixel, repeat: false)),
+                Mat("T2_ApPhichChuKy", Color.white, 0.35f, 0, Tex("T2_ApPhichChuKy", 256, 352, CycleTexPixel, repeat: false)),
+                Mat("T2_ApPhichCaySuSong", Color.white, 0.35f, 0, Tex("T2_ApPhichCaySuSong", 256, 352, TreeOfLifePixel, repeat: false)),
+                Mat("T2_ApPhichADN", Color.white, 0.35f, 0, Tex("T2_ApPhichADN", 256, 352, DnaPosterPixel, repeat: false)),
             };
         }
 
@@ -76,8 +81,10 @@ namespace Khkt.EditorTools
         static Transform Microscope(Transform p, string name, Vector3 pos, float yaw, bool interactive, bool info = false)
         {
             var g = Group(name, p, pos, yaw);
-            var baseMesh = Lathe("T2_DeKinhHienVi", 24, V(0, 0), V(0.085f, 0), V(0.088f, 0.006f), V(0.088f, 0.03f), V(0.08f, 0.042f), V(0, 0.042f));
-            MeshObj(g, "Đế", baseMesh, new Vector3(-0.01f, 0, 0), bioWhite, true, null, 1f).transform.localScale = new Vector3(1.15f, 1f, 0.9f);
+            var baseMesh = Lathe("T2_DeKinhHienVi", 24, V(0, 0), V(0.085f, 0), V(0.085f, 0), V(0.088f, 0.006f), V(0.088f, 0.03f), V(0.08f, 0.042f), V(0, 0.042f));
+            var baseObj = MeshObj(g, "Đế", baseMesh, new Vector3(-0.01f, 0, 0), bioWhite, true, null, 1f);
+            baseObj.transform.localScale = new Vector3(1.15f, 1f, 0.9f);
+            NoShadow(baseObj);
             NoShadow(Cyl(g, "Đèn LED đế", new Vector3(0.015f, 0.044f, 0), 0.016f, 0.004f, tubeGlow));
             // thân cong: ba đoạn nghiêng
             Box(g, "Thân dưới", new Vector3(-0.06f, 0.1f, 0), new Vector3(0.05f, 0.12f, 0.055f), bioWhite, false);
@@ -90,12 +97,42 @@ namespace Khkt.EditorTools
                 Cyl(g, "Núm chỉnh tinh", new Vector3(-0.06f, 0.1f, s * 0.052f), 0.012f, 0.014f, bioChrome, false, new Vector3(90, 0, 0));
             }
             // bàn kính + kẹp mẫu + bộ dịch mẫu + tiêu bản
-            Box(g, "Bàn kính", new Vector3(0.015f, 0.145f, 0), new Vector3(0.13f, 0.012f, 0.12f), bioBlack, false);
+            var stageGo = Box(g, "Bàn kính", new Vector3(0.015f, 0.145f, 0), new Vector3(0.13f, 0.012f, 0.12f), bioBlack, true);
             Box(g, "Bộ dịch mẫu", new Vector3(0.005f, 0.155f, 0.05f), new Vector3(0.09f, 0.008f, 0.012f), bioChrome, false);
-            Cyl(g, "Núm dịch mẫu", new Vector3(0.0f, 0.12f, 0.066f), 0.008f, 0.03f, bioBlack);
-            NoShadow(Box(g, "Tiêu bản", new Vector3(0.02f, 0.1525f, -0.005f), new Vector3(0.026f, 0.002f, 0.076f), labGlass, false));
-            Box(g, "Nhãn tiêu bản", new Vector3(0.02f, 0.1535f, -0.033f), new Vector3(0.024f, 0.001f, 0.018f), labelPaper, false);
-            Cyl(g, "Tụ quang", new Vector3(0.018f, 0.125f, 0), 0.018f, 0.025f, bioBlack);
+            var xyKnob = Cyl(g, "Núm dịch mẫu", new Vector3(0.0f, 0.12f, 0.066f), 0.008f, 0.03f, bioBlack);
+
+            var stageSockGo = new GameObject("Ổ đặt tiêu bản");
+            stageSockGo.transform.SetParent(g, false);
+            stageSockGo.transform.localPosition = new Vector3(0.02f, 0.1515f, -0.005f);
+            var stageSock = stageSockGo.AddComponent<PlaceSocket>();
+            stageSock.label = "Bàn kính hiển vi";
+            stageSock.accepts = new[] { "tieu_ban", "lam_kinh" };
+            stageSock.allowReplaceOccupant = true;
+            var stageSockCol = stageSockGo.AddComponent<BoxCollider>();
+            stageSockCol.isTrigger = true;
+            stageSockCol.center = new Vector3(0, 0.006f, 0);
+            stageSockCol.size = new Vector3(0.045f, 0.016f, 0.085f);
+            stageSock.zone = stageSockCol;
+
+            var slideGrp = Group("Tiêu bản", g, new Vector3(0.02f, 0.1515f, -0.005f));
+            NoShadow(Box(slideGrp, "Kính", new Vector3(0, 0.001f, 0), new Vector3(0.026f, 0.002f, 0.076f), labGlass, false));
+            Box(slideGrp, "Nhãn tiêu bản", new Vector3(0, 0.002f, -0.028f), new Vector3(0.024f, 0.001f, 0.018f), labelPaper, false);
+            var slideCol = slideGrp.gameObject.AddComponent<BoxCollider>();
+            slideCol.center = new Vector3(0, 0.003f, 0);
+            slideCol.size = new Vector3(0.026f, 0.006f, 0.076f);
+            var slideGrab = slideGrp.gameObject.AddComponent<Grabbable>();
+            slideGrab.kind = "tieu_ban";
+            slideGrab.gripHeightM = 0.01f;
+            slideGrab.liesOnTable = false;
+            slideGrab.lyingRadiusM = 0.013f;
+            slideGrab.lengthM = 0.076f;
+            slideGrab.massG = 5f;
+            var bioSlide = slideGrp.gameObject.AddComponent<GlassSlide>();
+            bioSlide.slideId = name.Contains("vật kính dầu") ? "vi_khuan_nhuom_gram" : "bieu_bi_hanh";
+            bioSlide.labelText = name.Contains("vật kính dầu") ? "Vi khuẩn nhuộm Gram" : "Biểu bì vảy hành";
+            stageSock.Put(slideGrab);
+
+            var condenser = Cyl(g, "Tụ quang", new Vector3(0.018f, 0.125f, 0), 0.018f, 0.025f, bioBlack);
             // đầu quan sát + hai thị kính nghiêng 30° về phía người dùng
             Box(g, "Đầu quan sát", new Vector3(0.005f, 0.31f, 0), new Vector3(0.075f, 0.04f, 0.06f), bioWhite, false);
             foreach (int s in new[] { -1, 1 })
@@ -122,6 +159,11 @@ namespace Khkt.EditorTools
             {
                 var c = g.gameObject.AddComponent<Khkt.Demo.Bio.MicroscopeController>();
                 c.nosepiece = nose;
+                c.stage = stageGo.transform;
+                c.stageSocket = stageSock;
+                c.xyKnob = xyKnob.transform;
+                c.condenser = condenser.transform;
+                c.isTeacherCamera = name.Contains("giáo viên");
                 var col = g.gameObject.AddComponent<BoxCollider>();
                 col.center = new Vector3(0, 0.19f, 0);
                 col.size = new Vector3(0.2f, 0.38f, 0.16f);
@@ -196,7 +238,22 @@ namespace Khkt.EditorTools
             for (int i = 0; i < 3; i++)
             {
                 float y = 0.12f + i * (h - 0.25f) / 3f;
-                Box(g, "Kệ lưới", new Vector3(0.05f, y, -0.03f), new Vector3(d - 0.15f, 0.006f, w - 0.14f), steel, false);
+                Box(g, "Kệ lưới", new Vector3(0.05f, y, -0.03f), new Vector3(d - 0.15f, 0.006f, w - 0.14f), steel, true);
+                if (i == 1)
+                {
+                    var sockGo = new GameObject("Ổ đặt mẫu ủ");
+                    sockGo.transform.SetParent(g, false);
+                    sockGo.transform.localPosition = new Vector3(0.05f, y + 0.004f, -0.03f);
+                    var sock = sockGo.AddComponent<PlaceSocket>();
+                    sock.label = "Kệ tủ ấm 37 °C";
+                    sock.accepts = new[] { "dia_petri", "ong_nghiem", "ong_ly_tam", "binh_non", "coc", "dung_cu_sinh" };
+                    sock.allowReplaceOccupant = true;
+                    var sc = sockGo.AddComponent<BoxCollider>();
+                    sc.isTrigger = true;
+                    sc.center = new Vector3(0, 0.05f, 0);
+                    sc.size = new Vector3(d - 0.18f, 0.1f, w - 0.18f);
+                    sock.zone = sc;
+                }
             }
             Box(g, "Tay nắm", new Vector3(d / 2 + 0.045f, h / 2, w / 2 - 0.1f), new Vector3(0.03f, 0.18f, 0.025f), steel, false);
             Box(g, "Bảng điều khiển", new Vector3(d / 2 + 0.01f, h - 0.05f, 0), new Vector3(0.02f, 0.06f, w - 0.06f), bioBlack, false);
@@ -228,10 +285,16 @@ namespace Khkt.EditorTools
             Box(gauge, "Kim", new Vector3(0.02f, 0.012f, 0.01f), new Vector3(0.002f, 0.03f, 0.004f), red, false, new Vector3(35, 0, 0));
             Cyl(g, "Van xả", new Vector3(-0.12f, 1.0f, -0.12f), 0.012f, 0.08f, bioChrome);
             var panel = Group("Bảng điều khiển", g, new Vector3(0.22f, 0.45f, 0), 0);
-            Box(panel, "Hộp", Vector3.zero, new Vector3(0.08f, 0.22f, 0.26f), bioWhite);
-            NoShadow(Box(panel, "Màn số", new Vector3(0.041f, 0.05f, 0), new Vector3(0.004f, 0.05f, 0.14f), bioDisplayRed, false));
+            var boxObj = Box(panel, "Hộp", Vector3.zero, new Vector3(0.08f, 0.22f, 0.26f), bioWhite);
+            NoShadow(boxObj);
+            // Viền bezel tối màu 3mm quanh màn hình & màn số lõm 1mm
+            Box(panel, "Viền bezel", new Vector3(0.0405f, 0.05f, 0), new Vector3(0.002f, 0.056f, 0.146f), bioBlack, false);
+            NoShadow(Box(panel, "Màn số", new Vector3(0.0395f, 0.05f, 0), new Vector3(0.002f, 0.05f, 0.14f), bioDisplayRed, false));
             Label(panel, "121 °C · 15 phút", new Vector3(0.045f, 0.052f, 0), Vector3.right, 0.016f, new Color(1f, 0.45f, 0.35f));
-            Cyl(panel, "Nút khởi động", new Vector3(0.042f, -0.05f, 0), 0.016f, 0.008f, safetyGreen, false, new Vector3(0, 0, 90));
+            // Núm xoay điều chỉnh có khấc rãnh
+            Cyl(panel, "Núm chỉnh nhiệt", new Vector3(0.042f, -0.015f, -0.05f), 0.014f, 0.012f, bioBlack, false, new Vector3(0, 0, 90));
+            Box(panel, "Vạch chỉ", new Vector3(0.049f, -0.015f, -0.05f), new Vector3(0.002f, 0.008f, 0.003f), signWhite, false);
+            Cyl(panel, "Nút khởi động", new Vector3(0.042f, -0.05f, 0.04f), 0.016f, 0.008f, safetyGreen, false, new Vector3(0, 0, 90));
             Info(g, "Nồi hấp tiệt trùng đứng", "Hơi nước bão hòa 121 °C, áp suất dư ~1 bar trong 15 – 20 phút diệt mọi vi sinh vật kể cả bào tử: tiệt trùng môi trường nuôi cấy, dụng cụ, rác thải sinh học.",
                  "Đổ đủ nước cất, không đậy kín chai môi trường, chờ áp suất về 0 mới mở nắp.");
             return g;
@@ -241,10 +304,16 @@ namespace Khkt.EditorTools
         static Transform BenchCentrifuge(Transform p, Vector3 pos, float yaw, float s = 1f)
         {
             var g = Group("Máy ly tâm", p, pos, yaw);
-            RoundBox(g, "Thân máy", new Vector3(0, 0.12f * s, 0), new Vector3(0.36f * s, 0.24f * s, 0.32f * s), 0.03f * s, bioWhite);
+            var bodyObj = RoundBox(g, "Thân máy", new Vector3(0, 0.12f * s, 0), new Vector3(0.36f * s, 0.24f * s, 0.32f * s), 0.03f * s, bioWhite);
+            NoShadow(bodyObj);
             MeshObj(g, "Nắp", Lathe("T2_NapLyTam", 24, V(0, 0), V(0.13f, 0), V(0.12f, 0.03f), V(0, 0.04f)), new Vector3(-0.02f * s, 0.24f * s, 0), translucentPlastic, false, null, s);
             Box(g, "Bảng phím", new Vector3(0.17f * s, 0.11f * s, 0), new Vector3(0.03f * s, 0.12f * s, 0.24f * s), bioBlack, false, new Vector3(0, 0, 20));
-            NoShadow(Box(g, "Màn số", new Vector3(0.186f * s, 0.13f * s, -0.04f * s), new Vector3(0.004f, 0.03f * s, 0.09f * s), bioDisplayBlue, false, new Vector3(0, 0, 20)));
+            // Viền bezel 3mm & màn số lõm 1mm
+            Box(g, "Viền bezel", new Vector3(0.185f * s, 0.13f * s, -0.04f * s), new Vector3(0.002f, 0.036f * s, 0.096f * s), bioBlack, false, new Vector3(0, 0, 20));
+            NoShadow(Box(g, "Màn số", new Vector3(0.184f * s, 0.13f * s, -0.04f * s), new Vector3(0.002f, 0.03f * s, 0.09f * s), bioDisplayBlue, false, new Vector3(0, 0, 20)));
+            // Núm xoay RPM & TIME
+            Cyl(g, "Núm RPM", new Vector3(0.186f * s, 0.09f * s, 0.04f * s), 0.012f * s, 0.008f, bioChrome, false, new Vector3(0, 0, 110));
+            Cyl(g, "Núm TIME", new Vector3(0.186f * s, 0.09f * s, -0.04f * s), 0.012f * s, 0.008f, bioChrome, false, new Vector3(0, 0, 110));
             Info(g, "Máy ly tâm", "Quay nhanh tạo lực ly tâm (tới vài nghìn × g) tách cặn tế bào, kết tủa DNA khỏi dịch.", "Đặt ống đối xứng, cân bằng khối lượng; đóng nắp trước khi chạy.");
             return g;
         }
@@ -256,9 +325,15 @@ namespace Khkt.EditorTools
             Box(g, "Thân bể", new Vector3(0, 0.1f, 0), new Vector3(0.32f, 0.2f, 0.5f), steel);
             Box(g, "Mặt nước", new Vector3(0, 0.17f, 0), new Vector3(0.28f, 0.004f, 0.46f), bioWater, false);
             Box(g, "Nắp gập", new Vector3(-0.15f, 0.27f, 0), new Vector3(0.02f, 0.14f, 0.48f), steel, false, new Vector3(0, 0, -12));
-            Box(g, "Hộp điều khiển", new Vector3(0.2f, 0.06f, 0), new Vector3(0.08f, 0.12f, 0.5f), bioWhite);
-            NoShadow(Box(g, "Màn số", new Vector3(0.241f, 0.08f, -0.1f), new Vector3(0.004f, 0.03f, 0.1f), bioDisplayRed, false));
+            var ctrlBox = Box(g, "Hộp điều khiển", new Vector3(0.2f, 0.06f, 0), new Vector3(0.08f, 0.12f, 0.5f), bioWhite);
+            NoShadow(ctrlBox);
+            // Viền bezel 3mm quanh màn LED & màn số lõm 1mm
+            Box(g, "Viền bezel", new Vector3(0.2405f, 0.08f, -0.1f), new Vector3(0.002f, 0.036f, 0.106f), bioBlack, false);
+            NoShadow(Box(g, "Màn số", new Vector3(0.2395f, 0.08f, -0.1f), new Vector3(0.002f, 0.03f, 0.1f), bioDisplayRed, false));
             Label(g, temp, new Vector3(0.245f, 0.082f, -0.1f), Vector3.right, 0.016f, new Color(1f, 0.45f, 0.35f));
+            // Núm xoay nhiệt độ có khấc rãnh
+            Cyl(g, "Núm xoay nhiệt", new Vector3(0.242f, 0.04f, -0.1f), 0.012f, 0.008f, bioBlack, false, new Vector3(0, 0, 90));
+            Box(g, "Vạch chỉ", new Vector3(0.247f, 0.046f, -0.1f), new Vector3(0.002f, 0.006f, 0.002f), signWhite, false);
             TubeRack(g, new Vector3(0, 0.172f, 0.08f), 5, bioOrangeCap);
             Info(g, "Bể ổn nhiệt", "Giữ nhiệt độ nước ổn định (30 – 95 °C) để ủ mẫu: enzyme ở 37 °C, ly giải tế bào ở 60 °C khi tách chiết DNA.");
             return g;
@@ -268,12 +343,25 @@ namespace Khkt.EditorTools
         static Transform AnalyticalBalance(Transform p, Vector3 pos, float yaw)
         {
             var g = Group("Cân phân tích", p, pos, yaw);
-            RoundBox(g, "Đế cân", new Vector3(0, 0.04f, 0), new Vector3(0.34f, 0.08f, 0.22f), 0.01f, bioWhite);
+            var baseBal = RoundBox(g, "Đế cân", new Vector3(0, 0.04f, 0), new Vector3(0.34f, 0.08f, 0.22f), 0.01f, bioWhite);
+            NoShadow(baseBal);
             NoShadow(Box(g, "Lồng kính", new Vector3(-0.03f, 0.18f, 0), new Vector3(0.24f, 0.2f, 0.2f), cabinetGlass));
             Box(g, "Khung lồng", new Vector3(-0.03f, 0.285f, 0), new Vector3(0.25f, 0.012f, 0.21f), bioWhite, false);
-            Cyl(g, "Đĩa cân", new Vector3(-0.03f, 0.085f, 0), 0.04f, 0.006f, steel);
-            NoShadow(Box(g, "Màn số", new Vector3(0.155f, 0.06f, 0), new Vector3(0.03f, 0.03f, 0.12f), bioDisplayGreen, false, new Vector3(0, 0, 25)));
-            Label(g, "0,0000 g", new Vector3(0.172f, 0.068f, 0), Vector3.right, 0.016f, new Color(0.6f, 1f, 0.6f));
+            var pan = Cyl(g, "Đĩa cân", new Vector3(-0.03f, 0.085f, 0), 0.04f, 0.006f, steel);
+            // Viền bezel tối màu quanh màn số & màn số lõm 1mm
+            Box(g, "Viền bezel", new Vector3(0.154f, 0.06f, 0), new Vector3(0.031f, 0.036f, 0.126f), bioBlack, false, new Vector3(0, 0, 25));
+            NoShadow(Box(g, "Màn số", new Vector3(0.153f, 0.06f, 0), new Vector3(0.029f, 0.03f, 0.12f), bioDisplayGreen, false, new Vector3(0, 0, 25)));
+            var lbl = Label(g, "0,0000 g", new Vector3(0.172f, 0.068f, 0), Vector3.right, 0.016f, new Color(0.6f, 1f, 0.6f));
+            // Nút TARE và CAL kim loại mạ chrome
+            Cyl(g, "Nút TARE", new Vector3(0.165f, 0.035f, 0.04f), 0.008f, 0.004f, bioChrome, false, new Vector3(0, 0, 25));
+            Cyl(g, "Nút CAL", new Vector3(0.165f, 0.035f, -0.04f), 0.008f, 0.004f, bioChrome, false, new Vector3(0, 0, 25));
+            var bs = g.gameObject.AddComponent<BalanceScale>();
+            bs.pan = pan.transform;
+            bs.display = lbl.GetComponent<TextMesh>();
+            bs.decimals = 4;
+            bs.maxGrams = 220f;
+            bs.zoneSize = new Vector3(0.15f, 0.18f, 0.15f);
+            Info(g, "Cân phân tích", "Cân chính xác 4 chữ số thập phân (±0,0001 g) trong lồng kính chắn gió.", "Đặt vật lên đĩa cân để đọc khối lượng; bấm vào cân để trừ bì.");
             return g;
         }
 
@@ -281,13 +369,29 @@ namespace Khkt.EditorTools
         static Transform PhMeter(Transform p, Vector3 pos, float yaw)
         {
             var g = Group("Máy đo pH", p, pos, yaw);
-            RoundBox(g, "Thân máy", new Vector3(0, 0.035f, 0), new Vector3(0.18f, 0.07f, 0.2f), 0.01f, bioWhite);
-            NoShadow(Box(g, "Màn hình", new Vector3(0.091f, 0.04f, 0), new Vector3(0.004f, 0.04f, 0.12f), bioDisplayBlue, false));
-            Label(g, "pH 7,02", new Vector3(0.095f, 0.042f, 0), Vector3.right, 0.02f, new Color(0.7f, 0.85f, 1f));
+            var phBase = RoundBox(g, "Thân máy", new Vector3(0, 0.035f, 0), new Vector3(0.18f, 0.07f, 0.2f), 0.01f, bioWhite);
+            NoShadow(phBase);
+            // Viền bezel tối màu 3mm & màn hình lõm 1mm
+            Box(g, "Viền bezel", new Vector3(0.0905f, 0.04f, 0), new Vector3(0.003f, 0.046f, 0.126f), bioBlack, false);
+            NoShadow(Box(g, "Màn hình", new Vector3(0.0895f, 0.04f, 0), new Vector3(0.002f, 0.04f, 0.12f), bioDisplayBlue, false));
+            var lbl = Label(g, "pH 7,02", new Vector3(0.095f, 0.042f, 0), Vector3.right, 0.02f, new Color(0.7f, 0.85f, 1f));
+            // Núm xoay CAL có vạch chỉ số
+            Cyl(g, "Núm CAL", new Vector3(0.092f, 0.02f, -0.06f), 0.009f, 0.008f, bioBlack, false, new Vector3(0, 0, 90));
+            Box(g, "Vạch chỉ", new Vector3(0.096f, 0.024f, -0.06f), new Vector3(0.002f, 0.005f, 0.002f), signWhite, false);
             Cyl(g, "Cột giá", new Vector3(-0.06f, 0.18f, 0.12f), 0.008f, 0.3f, steel);
             Box(g, "Cần giá", new Vector3(0.0f, 0.3f, 0.12f), new Vector3(0.12f, 0.015f, 0.02f), steel, false);
-            Cyl(g, "Điện cực", new Vector3(0.05f, 0.22f, 0.12f), 0.006f, 0.16f, labGlass);
-            MeshObj(g, "Cốc bảo quản", Beaker("Coc100", 0.026f, 0.07f), new Vector3(0.05f, 0, 0.12f), labGlass);
+            var electrode = Cyl(g, "Điện cực", new Vector3(0.05f, 0.22f, 0.12f), 0.006f, 0.16f, labGlass);
+            var coc = Vessel(g, "Cốc bảo quản", new Vector3(0.05f, 0, 0.12f), Beaker("Coc100", 0.026f, 0.07f),
+                             new[] { V(0.024f, 0.002f), V(0.024f, 0.068f) }, 100f, 0.07f, "coc", 0.04f, liquidClear);
+            coc.bottomRadiusM = 0.024f;
+            coc.fill.volumeMl = 50f;
+            coc.GetComponent<Grabbable>().massG = 75f;
+            var probe = electrode.gameObject.AddComponent<MeterProbe>();
+            probe.kind = MeterProbe.Kind.PH;
+            probe.tip = electrode.transform;
+            probe.display = lbl.GetComponent<TextMesh>();
+            probe.Read(coc);
+            Info(g, "Máy đo pH để bàn", "Đo pH dung dịch bằng điện cực thủy tinh kết hợp.", "Cầm điện cực hoặc đưa vật chứa lại gần để đo pH hiển thị trên màn hình.");
             return g;
         }
 
@@ -300,72 +404,227 @@ namespace Khkt.EditorTools
             Box(g, "Núm tốc độ", new Vector3(0.06f, 0.035f, 0), new Vector3(0.01f, 0.025f, 0.025f), bioBlack, false);
         }
 
+        /// <summary>Đèn bàn thí nghiệm có đốm sáng ấm chân thực khi lại gần (< 2.5m).</summary>
+        static Transform TaskLamp(Transform p, Vector3 pos, float yaw = 0f)
+        {
+            var g = Group("Đèn bàn thí nghiệm", p, pos, yaw);
+            var baseGo = Cyl(g, "Đế đèn", new Vector3(0, 0.006f, 0), 0.042f, 0.012f, bioBlack);
+            NoShadow(baseGo);
+            Cyl(g, "Cổ đứng", new Vector3(0, 0.12f, 0), 0.005f, 0.22f, bioChrome);
+            Cyl(g, "Cổ nghiêng", new Vector3(0.04f, 0.25f, 0), 0.0045f, 0.12f, bioChrome, false, new Vector3(0, 0, -35));
+            var hood = Lathe("T2_ChaoDenBan", 16, V(0, 0), V(0.012f, 0), V(0.012f, 0.02f), V(0.035f, 0.07f), V(0.036f, 0.075f), V(0, 0.075f));
+            MeshObj(g, "Chao đèn", hood, new Vector3(0.08f, 0.29f, 0), bioWhite, false, new Vector3(0, 0, 135));
+            var led = Cyl(g, "Bóng LED", new Vector3(0.08f, 0.285f, 0), 0.014f, 0.006f, tubeGlow, false, new Vector3(0, 0, 135));
+            NoShadow(led);
+
+            var lightGo = new GameObject("Vùng sáng ấm");
+            lightGo.transform.SetParent(g, false);
+            lightGo.transform.localPosition = new Vector3(0.10f, 0.28f, 0);
+            var l = lightGo.AddComponent<Light>();
+            l.type = LightType.Spot;
+            l.color = new Color(1f, 0.94f, 0.82f);
+            l.range = 2.2f;
+            l.spotAngle = 65f;
+            l.innerSpotAngle = 35f;
+            l.intensity = 1.3f;
+            l.shadows = LightShadows.None;
+            lightGo.transform.localEulerAngles = new Vector3(65f, 0, 0);
+
+            var spotCtrl = lightGo.AddComponent<TaskLampSpot>();
+            spotCtrl.spotLight = l;
+            spotCtrl.maxDistance = 2.5f;
+            return g;
+        }
+
         // =====================================================================
         // Đồ nhỏ: đĩa petri, giá ống, pipet, bình mẫu ngâm, chai thuốc nhuộm
         // =====================================================================
 
         /// <summary>Chồng đĩa petri có thạch (lật ngược như khi ủ), kind 0: khuẩn lạc kem, 1: vàng, 2: thạch trống.</summary>
-        static void PetriStack(Transform p, Vector3 pos, int count, int kind)
+        static Transform PetriStack(Transform p, Vector3 pos, int count, int kind)
         {
             var g = Group("Chồng đĩa petri", p, pos);
-            var dish = Lathe("T2_DiaPetri", 24, V(0, 0), V(0.045f, 0), V(0.045f, 0.014f), V(0.043f, 0.014f), V(0.043f, 0.002f), V(0, 0.002f));
             for (int i = 0; i < count; i++)
             {
                 float y = i * 0.0155f;
-                NoShadow(MeshObj(g, "Đĩa petri", dish, new Vector3(0, y, 0), bioPetri));
-                NoShadow(Cyl(g, "Thạch", new Vector3(0, y + 0.006f, 0), 0.042f, 0.008f, bioAgar));
-                if (kind == 2) continue;
-                var r = new System.Random(i * 13 + kind * 7 + Mathf.RoundToInt(pos.x * 100 + pos.z * 37));
+                PetriDish(g, count == 1 ? "Đĩa petri" : $"Đĩa petri {i + 1}", new Vector3(0, y, 0), kind, i);
+            }
+            return g;
+        }
+
+        static Transform PetriDish(Transform p, string name, Vector3 localPos, int kind, int seedOffset = 0)
+        {
+            var dish = Group(name, p, localPos);
+            var dishMesh = Lathe("T2_DiaPetri", 24, V(0, 0), V(0.045f, 0), V(0.045f, 0.014f), V(0.043f, 0.014f), V(0.043f, 0.002f), V(0, 0.002f));
+            NoShadow(MeshObj(dish, "Thân đĩa", dishMesh, Vector3.zero, bioPetri, true));
+            NoShadow(Cyl(dish, "Thạch", new Vector3(0, 0.006f, 0), 0.042f, 0.008f, bioAgar, false));
+            if (kind != 2)
+            {
+                var r = new System.Random(seedOffset * 13 + kind * 7 + 101);
                 for (int c = 0; c < 6; c++)
                 {
                     float a = (float)r.NextDouble() * Mathf.PI * 2, d = 0.032f * Mathf.Sqrt((float)r.NextDouble());
                     float s = 0.004f + 0.006f * (float)r.NextDouble();
-                    NoShadow(Ball(g, "Khuẩn lạc", new Vector3(Mathf.Cos(a) * d, y + 0.0105f, Mathf.Sin(a) * d), new Vector3(s, 0.002f, s), kind == 0 ? bioColony : bioColonyYellow));
+                    NoShadow(Ball(dish, "Khuẩn lạc", new Vector3(Mathf.Cos(a) * d, 0.0105f, Mathf.Sin(a) * d), new Vector3(s, 0.002f, s), kind == 0 ? bioColony : bioColonyYellow, false));
                 }
             }
+            var col = dish.gameObject.AddComponent<BoxCollider>();
+            col.center = new Vector3(0, 0.0075f, 0);
+            col.size = new Vector3(0.09f, 0.015f, 0.09f);
+            var gr = dish.gameObject.AddComponent<Grabbable>();
+            gr.kind = "dia_petri";
+            gr.gripHeightM = 0.01f;
+            gr.massG = 45f;
+            gr.liesOnTable = false;
+            var pd = dish.gameObject.AddComponent<PetriDish>();
+            pd.mediaId = "thach_lb";
+            pd.labelText = kind == 0 ? "E. coli K-12 · 10⁻⁵" : kind == 1 ? "Vi khuẩn sữa chua" : "Thạch LB vô trùng";
+            return dish;
         }
 
         /// <summary>Giá nhựa có n ống ly tâm / ống nghiệm nắp màu.</summary>
-        static void TubeRack(Transform p, Vector3 pos, int n, Material cap)
+        static Transform TubeRack(Transform p, Vector3 pos, int n, Material cap, string rackName = "Giá ống")
         {
-            var g = Group("Giá ống", p, pos);
+            var g = Group(rackName, p, pos);
             float len = 0.025f * n + 0.02f;
-            Box(g, "Giá", new Vector3(0, 0.02f, 0), new Vector3(0.05f, 0.04f, len), Mat("T2_GiaNhuaTrang", new Color(0.92f, 0.92f, 0.9f), 0.4f), false);
+            Box(g, "Khung giá", new Vector3(0, 0.02f, 0), new Vector3(0.05f, 0.04f, len), Mat("T2_GiaNhuaTrang", new Color(0.92f, 0.92f, 0.9f), 0.4f), true);
+
+            var rackCol = g.gameObject.AddComponent<BoxCollider>();
+            rackCol.center = new Vector3(0, 0.02f, 0);
+            rackCol.size = new Vector3(0.05f, 0.04f, len);
+            var rackGrab = g.gameObject.AddComponent<Grabbable>();
+            rackGrab.kind = "gia_ong";
+            rackGrab.gripHeightM = 0.04f;
+            rackGrab.massG = 80f + n * 15f;
+            rackGrab.lengthM = len;
+
             var tube = Lathe("T2_OngLyTam", 12, V(0, 0), V(0.004f, 0.002f), V(0.007f, 0.012f), V(0.007f, 0.07f), V(0, 0.07f));
             for (int i = 0; i < n; i++)
             {
                 float z = -len / 2 + 0.02f + i * 0.025f;
-                NoShadow(MeshObj(g, "Ống", tube, new Vector3(0, 0.01f, z), translucentPlastic));
-                NoShadow(Cyl(g, "Nắp", new Vector3(0, 0.083f, z), 0.0085f, 0.012f, cap));
+                var socketGo = new GameObject($"Lỗ cắm {i + 1}");
+                socketGo.transform.SetParent(g, false);
+                socketGo.transform.localPosition = new Vector3(0, 0.01f, z);
+                var sock = socketGo.AddComponent<PlaceSocket>();
+                sock.label = $"Lỗ cắm {i + 1}";
+                sock.accepts = new[] { "ong_ly_tam", "ong_nghiem" };
+                var sockTrigger = socketGo.AddComponent<BoxCollider>();
+                sockTrigger.isTrigger = true;
+                sockTrigger.center = new Vector3(0, 0.035f, 0);
+                sockTrigger.size = new Vector3(0.02f, 0.07f, 0.02f);
+                sock.zone = sockTrigger;
+
+                var tubeObj = Group($"Ống ly tâm {i + 1}", g, new Vector3(0, 0.01f, z));
+                NoShadow(MeshObj(tubeObj, "Thân", tube, Vector3.zero, translucentPlastic, true));
+                NoShadow(Cyl(tubeObj, "Nắp", new Vector3(0, 0.073f, 0), 0.0085f, 0.012f, cap, true));
+
+                var tubeCol = tubeObj.gameObject.AddComponent<CapsuleCollider>();
+                tubeCol.center = new Vector3(0, 0.04f, 0);
+                tubeCol.radius = 0.009f;
+                tubeCol.height = 0.085f;
+
+                var tubeGrab = tubeObj.gameObject.AddComponent<Grabbable>();
+                tubeGrab.kind = "ong_ly_tam";
+                tubeGrab.gripHeightM = 0.04f;
+                tubeGrab.liesOnTable = true;
+                tubeGrab.lyingRadiusM = 0.0085f;
+                tubeGrab.lengthM = 0.085f;
+                tubeGrab.massG = 15f;
+
+                var fill = LiquidObject(tubeObj, "Dung dịch", new[] { V(0.003f, 0.002f), V(0.0062f, 0.012f), V(0.0062f, 0.068f) }, liquidClear);
+                fill.volumeMl = 5f;
+                var lc = tubeObj.gameObject.AddComponent<LabContainer>();
+                lc.label = $"Ống ly tâm {i + 1}";
+                lc.capacityMl = 15f;
+                lc.bottomRadiusM = 0.0062f;
+                lc.fill = fill;
+                lc.liquidRenderer = fill.GetComponent<Renderer>();
+                lc.mouth = Child(tubeObj, "Miệng", new Vector3(0, 0.072f, 0));
+
+                sock.Put(tubeGrab);
             }
+            return g;
         }
 
         /// <summary>Giá micropipet 3 cây (P20 vàng, P200 xanh, P1000 xanh dương) + hộp đầu côn.</summary>
-        static void PipetteStation(Transform p, Vector3 pos, float yaw)
+        static Transform PipetteStation(Transform p, Vector3 pos, float yaw)
         {
             var g = Group("Bộ micropipet", p, pos, yaw);
             Box(g, "Giá", new Vector3(-0.05f, 0.15f, 0), new Vector3(0.04f, 0.3f, 0.2f), bioWhite);
-            Box(g, "Chân giá", new Vector3(0, 0.005f, 0), new Vector3(0.14f, 0.01f, 0.2f), bioWhite, false);
+            Box(g, "Chân giá", new Vector3(0, 0.005f, 0), new Vector3(0.14f, 0.01f, 0.2f), bioWhite, true);
             var colors = new[] { bioYellowTip, Mat("T2_PipetXanhLa", new Color(0.3f, 0.75f, 0.35f), 0.45f), bioBlueTip };
+            string[] pNames = { "P20", "P200", "P1000" };
             var pip = Lathe("T2_ThanPipet", 12, V(0, 0), V(0.002f, 0.0f), V(0.006f, 0.06f), V(0.012f, 0.08f), V(0.014f, 0.2f), V(0.008f, 0.23f), V(0, 0.23f));
             for (int i = 0; i < 3; i++)
             {
                 float z = -0.06f + i * 0.06f;
-                MeshObj(g, "Micropipet", pip, new Vector3(-0.02f, 0.06f, z), bioWhite);
-                Cyl(g, "Nút đẩy", new Vector3(-0.02f, 0.3f, z), 0.008f, 0.02f, colors[i]);
+                var sockGo = new GameObject($"Giá treo {pNames[i]}");
+                sockGo.transform.SetParent(g, false);
+                sockGo.transform.localPosition = new Vector3(-0.02f, 0.06f, z);
+                var sock = sockGo.AddComponent<PlaceSocket>();
+                sock.label = $"Giá treo {pNames[i]}";
+                sock.accepts = new[] { "pipet", "dung_cu_sinh" };
+                sock.allowReplaceOccupant = true;
+                var sockCol = sockGo.AddComponent<BoxCollider>();
+                sockCol.isTrigger = true;
+                sockCol.center = new Vector3(0, 0.12f, 0);
+                sockCol.size = new Vector3(0.04f, 0.24f, 0.04f);
+                sock.zone = sockCol;
+
+                var pipGo = Group($"Micropipet {pNames[i]}", g, new Vector3(-0.02f, 0.06f, z));
+                MeshObj(pipGo, "Thân", pip, Vector3.zero, bioWhite, true);
+                Cyl(pipGo, "Nút đẩy", new Vector3(0, 0.24f, 0), 0.008f, 0.02f, colors[i], true);
+
+                var pipCol = pipGo.gameObject.AddComponent<CapsuleCollider>();
+                pipCol.center = new Vector3(0, 0.12f, 0);
+                pipCol.radius = 0.014f;
+                pipCol.height = 0.25f;
+
+                var fill = LiquidObject(pipGo, "Dung dịch trong pipet", new[] { V(0.001f, 0.002f), V(0.003f, 0.055f) }, liquidClear);
+                var pipBox = pipGo.gameObject.AddComponent<LabContainer>();
+                pipBox.label = $"Micropipet {pNames[i]}";
+                pipBox.capacityMl = i == 0 ? 0.02f : i == 1 ? 0.2f : 1.0f;
+                pipBox.bottomRadiusM = 0.003f;
+                pipBox.fill = fill;
+                pipBox.liquidRenderer = fill.GetComponent<Renderer>();
+                var pipette = pipGo.gameObject.AddComponent<Pipette>();
+                pipette.container = pipBox;
+                pipette.tip = Child(pipGo, "Đầu pipet", Vector3.zero);
+                pipette.markHeightM = 0.045f;
+
+                var gr = pipGo.gameObject.AddComponent<Grabbable>();
+                gr.kind = "pipet";
+                gr.gripHeightM = 0.14f;
+                gr.liesOnTable = false;
+                gr.lyingRadiusM = 0.014f;
+                gr.lengthM = 0.25f;
+                gr.massG = 95f;
+
+                sock.Put(gr);
             }
             for (int i = 0; i < 2; i++)
             {
-                var box = Group("Hộp đầu côn", g, new Vector3(0.1f, 0, -0.07f + i * 0.14f));
-                Box(box, "Hộp", new Vector3(0, 0.03f, 0), new Vector3(0.08f, 0.06f, 0.12f), i == 0 ? bioYellowTip : bioBlueTip, false);
+                var box = Group($"Hộp đầu côn {(i == 0 ? "vàng" : "xanh")}", g, new Vector3(0.1f, 0, -0.07f + i * 0.14f));
+                Box(box, "Hộp", new Vector3(0, 0.03f, 0), new Vector3(0.08f, 0.06f, 0.12f), i == 0 ? bioYellowTip : bioBlueTip, true);
                 NoShadow(Box(box, "Nắp trong", new Vector3(0, 0.062f, 0), new Vector3(0.08f, 0.004f, 0.12f), translucentPlastic, false));
+
+                var boxCol = box.gameObject.AddComponent<BoxCollider>();
+                boxCol.center = new Vector3(0, 0.032f, 0);
+                boxCol.size = new Vector3(0.08f, 0.065f, 0.12f);
+
+                var gr = box.gameObject.AddComponent<Grabbable>();
+                gr.kind = "hop_dau_con";
+                gr.gripHeightM = 0.035f;
+                gr.massG = 80f;
             }
+            return g;
         }
 
         /// <summary>Bình mẫu ngâm formalin: lọ thủy tinh, nắp đen, mẫu vật bên trong (0 cá, 1 ếch, 2 rắn cuộn, 3 tim, 4 cây non).</summary>
-        static void SpecimenJar(Transform p, Vector3 pos, int kind, float s = 1f)
+        static Transform SpecimenJar(Transform p, Vector3 pos, int kind, float s = 1f)
         {
-            var g = Group("Bình mẫu ngâm", p, pos);
+            string[] names = { "Cá", "Ếch", "Rắn cuộn", "Tim lợn", "Cây non" };
+            var g = Group($"Bình mẫu ngâm {names[Mathf.Clamp(kind, 0, 4)]}", p, pos);
             float r = 0.07f * s, h = 0.24f * s;
             NoShadow(MeshObj(g, "Bình", Lathe("T2_BinhMauNgam", 24, V(0, 0), V(0.07f, 0), V(0.072f, 0.01f), V(0.072f, 0.22f), V(0.064f, 0.235f), V(0.064f, 0.24f), V(0, 0.24f)), Vector3.zero, labGlass, false, null, s));
             NoShadow(Cyl(g, "Dịch ngâm", new Vector3(0, h * 0.43f, 0), r * 0.94f, h * 0.84f, bioFormalin));
@@ -395,39 +654,225 @@ namespace Khkt.EditorTools
                         Ball(g, "Lá", new Vector3(sd * 0.02f * s, h * 0.6f, 0), new Vector3(0.035f, 0.015f, 0.02f) * s, bioLeafLight);
                     break;
             }
+
+            var capCol = g.gameObject.AddComponent<CapsuleCollider>();
+            capCol.center = new Vector3(0, (h + 0.025f * s) * 0.5f, 0);
+            capCol.radius = r;
+            capCol.height = h + 0.025f * s;
+
+            var gr = g.gameObject.AddComponent<Grabbable>();
+            gr.kind = "binh_ngam";
+            gr.gripHeightM = 0.12f * s;
+            gr.massG = 450f * s;
+            gr.liesOnTable = false;
+            return g;
         }
 
         /// <summary>Chai thuốc nhuộm nhỏ giọt (nắp màu, nhãn): xanh methylen, lugol, tím tinh thể, safranin...</summary>
-        static void StainBottle(Transform p, Vector3 pos, Material liquid, string label)
+        static Transform StainBottle(Transform p, Vector3 pos, Material liquid, string label)
         {
             var g = Group("Chai " + label, p, pos);
-            NoShadow(MeshObj(g, "Chai", DropperBottleMesh(), Vector3.zero, amber));
-            Cyl(g, "Nắp nhỏ giọt", new Vector3(0, 0.07f, 0), 0.009f, 0.025f, liquid);
+            NoShadow(MeshObj(g, "Chai", DropperBottleMesh(), Vector3.zero, amber, true));
+            Cyl(g, "Nắp nhỏ giọt", new Vector3(0, 0.07f, 0), 0.009f, 0.025f, liquid, true);
             Box(g, "Nhãn", new Vector3(0.0185f, 0.03f, 0), new Vector3(0.002f, 0.03f, 0.022f), labelPaper, false);
+
+            var col = g.gameObject.AddComponent<CapsuleCollider>();
+            col.center = new Vector3(0, 0.045f, 0);
+            col.radius = 0.02f;
+            col.height = 0.09f;
+
+            var fill = LiquidObject(g, "Dung dịch", new[] { V(0.016f, 0.003f), V(0.016f, 0.05f) }, liquid ?? liquidClear);
+            fill.volumeMl = 20f;
+            var lc = g.gameObject.AddComponent<LabContainer>();
+            lc.label = "Chai " + label;
+            lc.capacityMl = 30f;
+            lc.bottomRadiusM = 0.016f;
+            lc.isStock = true;
+            lc.fill = fill;
+            lc.liquidRenderer = fill.GetComponent<Renderer>();
+            lc.mouth = Child(g, "Miệng", new Vector3(0, 0.088f, 0));
+
+            var dropper = g.gameObject.AddComponent<Dropper>();
+            dropper.tip = Child(g, "Đầu nhỏ giọt", new Vector3(0, 0.088f, 0));
+
+            string rId = label.Contains("methylen") ? "xanh_methylen"
+                       : label.Contains("Lugol") ? "iot_lugol"
+                       : label.Contains("Tím") ? "tim_ket_tinh"
+                       : label.Contains("Safranin") ? "safranin"
+                       : label.Contains("Cồn") ? "con_95" : "thuoc_nhuom";
+            var bt = g.gameObject.AddComponent<BioTool>();
+            bt.toolId = "lo_thuoc_thu_nho_giot";
+            bt.kind = BioToolKind.StainDropper;
+            bt.displayName = "Lọ " + label;
+            bt.reagentOrSampleId = rId;
+            bt.reagentDisplayName = label;
+            var rdb = g.gameObject.AddComponent<ReagentDropperBottle>();
+            rdb.reagentId = rId;
+            rdb.reagentName = label;
+
+            var gr = g.gameObject.AddComponent<Grabbable>();
+            gr.kind = "lo_nho_giot";
+            gr.gripHeightM = 0.05f;
+            gr.massG = 65f;
+            gr.liesOnTable = false;
+            return g;
         }
 
         /// <summary>Khay inox dụng cụ: kẹp, dao mổ, kim mũi mác, lam kính, lamen.</summary>
-        static void InstrumentTray(Transform p, Vector3 pos, float yaw)
+        static Transform InstrumentTray(Transform p, Vector3 pos, float yaw)
         {
             var g = Group("Khay dụng cụ", p, pos, yaw);
-            Box(g, "Khay", new Vector3(0, 0.006f, 0), new Vector3(0.18f, 0.012f, 0.26f), steel, false);
-            Box(g, "Kẹp", new Vector3(0.04f, 0.015f, -0.02f), new Vector3(0.008f, 0.004f, 0.14f), bioChrome, false, new Vector3(0, 8, 0));
-            Box(g, "Dao mổ", new Vector3(-0.01f, 0.015f, 0.0f), new Vector3(0.01f, 0.004f, 0.15f), bioChrome, false, new Vector3(0, -6, 0));
-            Box(g, "Kim mũi mác", new Vector3(-0.05f, 0.015f, 0.02f), new Vector3(0.006f, 0.004f, 0.13f), bioChrome, false, new Vector3(0, 4, 0));
+            Box(g, "Khay inox", new Vector3(0, 0.006f, 0), new Vector3(0.18f, 0.012f, 0.26f), steel, true);
+
+            // Kẹp
+            var kep = Group("Kẹp y tế", g, new Vector3(0.04f, 0.012f, -0.02f), 8f);
+            Box(kep, "Thân kẹp", new Vector3(0, 0.002f, 0), new Vector3(0.008f, 0.004f, 0.14f), bioChrome, true);
+            var kepCol = kep.gameObject.AddComponent<BoxCollider>();
+            kepCol.center = new Vector3(0, 0.005f, 0);
+            kepCol.size = new Vector3(0.016f, 0.01f, 0.14f);
+            var kepBt = kep.gameObject.AddComponent<BioTool>();
+            kepBt.toolId = "kep_panh";
+            kepBt.kind = BioToolKind.Forceps;
+            kepBt.displayName = "Kẹp y tế";
+            kep.gameObject.AddComponent<Forceps>();
+            var kepGrab = kep.gameObject.AddComponent<Grabbable>();
+            kepGrab.kind = "kep";
+            kepGrab.gripHeightM = 0.01f;
+            kepGrab.liesOnTable = false;
+            kepGrab.lyingRadiusM = 0.01f;
+            kepGrab.lengthM = 0.14f;
+            kepGrab.massG = 25f;
+
+            // Dao mổ
+            var dao = Group("Dao mổ", g, new Vector3(-0.01f, 0.012f, 0.0f), -6f);
+            Box(dao, "Thân dao", new Vector3(0, 0.002f, 0), new Vector3(0.01f, 0.004f, 0.15f), bioChrome, true);
+            var daoCol = dao.gameObject.AddComponent<BoxCollider>();
+            daoCol.center = new Vector3(0, 0.005f, 0);
+            daoCol.size = new Vector3(0.018f, 0.01f, 0.15f);
+            var daoBt = dao.gameObject.AddComponent<BioTool>();
+            daoBt.toolId = "dao_mo";
+            daoBt.kind = BioToolKind.Scalpel;
+            daoBt.displayName = "Dao mổ";
+            dao.gameObject.AddComponent<RazorBlade>();
+            var daoGrab = dao.gameObject.AddComponent<Grabbable>();
+            daoGrab.kind = "dao_mo";
+            daoGrab.gripHeightM = 0.01f;
+            daoGrab.liesOnTable = false;
+            daoGrab.lyingRadiusM = 0.01f;
+            daoGrab.lengthM = 0.15f;
+            daoGrab.massG = 30f;
+
+            // Kim mũi mác
+            var kim = Group("Kim mũi mác", g, new Vector3(-0.05f, 0.012f, 0.02f), 4f);
+            Box(kim, "Thân kim", new Vector3(0, 0.002f, 0), new Vector3(0.006f, 0.004f, 0.13f), bioChrome, true);
+            var kimCol = kim.gameObject.AddComponent<BoxCollider>();
+            kimCol.center = new Vector3(0, 0.005f, 0);
+            kimCol.size = new Vector3(0.014f, 0.01f, 0.13f);
+            var kimBt = kim.gameObject.AddComponent<BioTool>();
+            kimBt.toolId = "kim_mui_mac";
+            kimBt.kind = BioToolKind.DissectingNeedle;
+            kimBt.displayName = "Kim mũi mác";
+            kim.gameObject.AddComponent<DissectingNeedle>();
+            var kimGrab = kim.gameObject.AddComponent<Grabbable>();
+            kimGrab.kind = "kim_mui_mac";
+            kimGrab.gripHeightM = 0.01f;
+            kimGrab.liesOnTable = false;
+            kimGrab.lyingRadiusM = 0.01f;
+            kimGrab.lengthM = 0.13f;
+            kimGrab.massG = 15f;
+
+            // 3 lam kính
             for (int i = 0; i < 3; i++)
-                NoShadow(Box(g, "Lam kính", new Vector3(0.0f, 0.0135f + i * 0.0015f, -0.09f), new Vector3(0.026f, 0.0012f, 0.076f), labGlass, false, new Vector3(0, i * 7, 0)));
+            {
+                var lam = Group($"Lam kính {i + 1}", g, new Vector3(0.0f, 0.012f + i * 0.002f, -0.09f), i * 7f);
+                NoShadow(Box(lam, "Kính", new Vector3(0, 0.001f, 0), new Vector3(0.026f, 0.0012f, 0.076f), labGlass, true));
+                var lamCol = lam.gameObject.AddComponent<BoxCollider>();
+                lamCol.center = new Vector3(0, 0.003f, 0);
+                lamCol.size = new Vector3(0.026f, 0.006f, 0.076f);
+                var lamSlide = lam.gameObject.AddComponent<GlassSlide>();
+                lamSlide.slideId = "lam_kinh_trang";
+                lamSlide.labelText = "Lam kính trắng";
+                var lamGrab = lam.gameObject.AddComponent<Grabbable>();
+                lamGrab.kind = "lam_kinh";
+                lamGrab.gripHeightM = 0.01f;
+                lamGrab.liesOnTable = false;
+                lamGrab.lyingRadiusM = 0.013f;
+                lamGrab.lengthM = 0.076f;
+                lamGrab.massG = 5f;
+            }
+            return g;
         }
 
         /// <summary>Hộp đựng tiêu bản cố định (nắp mở, các tiêu bản xếp đứng).</summary>
-        static void SlideBox(Transform p, Vector3 pos, float yaw, bool info = false)
+        static Transform SlideBox(Transform p, Vector3 pos, float yaw, bool info = false)
         {
             var g = Group("Hộp tiêu bản", p, pos, yaw);
-            Box(g, "Hộp", new Vector3(0, 0.017f, 0), new Vector3(0.1f, 0.034f, 0.2f), Mat("T2_HopTieuBan", new Color(0.25f, 0.2f, 0.16f), 0.35f));
+            Box(g, "Thân hộp", new Vector3(0, 0.017f, 0), new Vector3(0.1f, 0.034f, 0.2f), Mat("T2_HopTieuBan", new Color(0.25f, 0.2f, 0.16f), 0.35f), true);
             Box(g, "Nắp mở", new Vector3(-0.065f, 0.06f, 0), new Vector3(0.006f, 0.09f, 0.2f), Mat("T2_HopTieuBan", new Color(0.25f, 0.2f, 0.16f), 0.35f), false, new Vector3(0, 0, -15));
+
+            var boxCol = g.gameObject.AddComponent<BoxCollider>();
+            boxCol.center = new Vector3(0, 0.017f, 0);
+            boxCol.size = new Vector3(0.1f, 0.034f, 0.2f);
+
+            string[] slideNames = {
+                "Biểu bì hành", "Co nguyên sinh", "Nguyên phân rễ hành", "Khí khổng lá thài lài",
+                "Vi khuẩn nhuộm Gram", "Nấm men Saccharomyces", "Tế bào niêm mạc miệng", "Sarcomere cơ vân",
+                "Synapse thần kinh", "Phết máu người"
+            };
+            string[] slideIds = {
+                "bieu_bi_hanh", "co_nguyen_sinh", "nguyen_phan_re_hanh", "khi_khong_la_thao",
+                "vi_khuan_gram", "nam_men", "tb_niem_mac_mieng", "tb_co_van",
+                "tb_than_kinh", "tieu_ban_mau"
+            };
+
             for (int i = 0; i < 10; i++)
-                NoShadow(Box(g, "Tiêu bản", new Vector3(0.005f, 0.04f, -0.085f + i * 0.019f), new Vector3(0.076f, 0.026f, 0.0012f), labGlass, false));
+            {
+                float z = -0.085f + i * 0.019f;
+                var socketGo = new GameObject($"Khe tiêu bản {i + 1}");
+                socketGo.transform.SetParent(g, false);
+                socketGo.transform.localPosition = new Vector3(0.005f, 0.027f, z);
+                socketGo.transform.localRotation = Quaternion.Euler(0f, 90f, 90f);
+                var sock = socketGo.AddComponent<PlaceSocket>();
+                sock.label = $"Khe tiêu bản {i + 1}";
+                sock.accepts = new[] { "tieu_ban", "lam_kinh" };
+                sock.allowReplaceOccupant = true;
+                var sockCol = socketGo.AddComponent<BoxCollider>();
+                sockCol.isTrigger = true;
+                sockCol.center = new Vector3(0, 0.003f, 0);
+                sockCol.size = new Vector3(0.03f, 0.018f, 0.08f);
+                sock.zone = sockCol;
+
+                var slide = Group($"Tiêu bản {slideNames[i]}", g, new Vector3(0.005f, 0.027f, z));
+                NoShadow(Box(slide, "Kính", new Vector3(0, 0.001f, 0), new Vector3(0.026f, 0.0012f, 0.076f), labGlass, true));
+                Box(slide, "Nhãn", new Vector3(0, 0.0018f, 0.028f), new Vector3(0.022f, 0.0006f, 0.018f), labelPaper, false);
+
+                var slideCol = slide.gameObject.AddComponent<BoxCollider>();
+                slideCol.center = new Vector3(0, 0.003f, 0);
+                slideCol.size = new Vector3(0.026f, 0.006f, 0.076f);
+
+                var bioSlide = slide.gameObject.AddComponent<GlassSlide>();
+                bioSlide.slideId = slideIds[i];
+                bioSlide.labelText = slideNames[i];
+                if (bioSlide.sample != null)
+                {
+                    bioSlide.sample.sampleId = slideIds[i];
+                    bioSlide.sample.sampleName = slideNames[i];
+                    bioSlide.sample.hasCoverslip = true;
+                }
+
+                var slideGrab = slide.gameObject.AddComponent<Grabbable>();
+                slideGrab.kind = "tieu_ban";
+                slideGrab.gripHeightM = 0.01f;
+                slideGrab.liesOnTable = false;
+                slideGrab.lyingRadiusM = 0.013f;
+                slideGrab.lengthM = 0.076f;
+                slideGrab.massG = 5f;
+
+                sock.Put(slideGrab);
+            }
             if (info) Info(g, "Hộp tiêu bản cố định", "Tiêu bản nhuộm H&E: phế nang phổi, nephron (thận), synapse thần kinh, sarcomere (cơ vân), tế bào viền dạ dày, tiểu thùy gan; tiêu bản biểu bì hành, khí khổng, phết máu, vi khuẩn sữa chua (Gram +), nấm men.",
                  "Cùng 6 cảnh hiển vi của Phòng Lab Sinh học 3D trên web.");
+            return g;
         }
 
         // =====================================================================
@@ -501,29 +946,32 @@ namespace Khkt.EditorTools
 
         static readonly Dictionary<string, Mesh> plantMeshes = new Dictionary<string, Mesh>();
 
-        /// <summary>Lưới cây: count lá cong xếp hoa thị quanh trục, mỗi tầng xoay góc vàng, lá ngoài ngả ra, lá trong dựng đứng.</summary>
-        static Mesh PlantMesh(string name, int count, float leafLen, float leafW, float height, float droop)
+        /// <summary>Lưới cây: count lá cong xếp hoa thị quanh trục, mỗi tầng xoay góc vàng, lá ngoài ngả ra, lá trong dựng đứng. Hỗ trợ LOD.</summary>
+        static Mesh PlantMesh(string name, int count, float leafLen, float leafW, float height, float droop, bool isLod = false)
         {
-            if (plantMeshes.TryGetValue(name, out var cached) && cached != null) return cached;
-            var leaf = LeafMesh("T2_La_" + name, leafLen, leafW, droop);
+            string key = isLod ? name + "_LOD1" : name;
+            if (plantMeshes.TryGetValue(key, out var cached) && cached != null) return cached;
+
+            int actualCount = isLod ? Mathf.Max(3, count / 2) : count;
+            var leaf = LeafMesh("T2_La_" + key, leafLen, leafW, droop, isLod);
             var combine = new List<CombineInstance>();
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < actualCount; i++)
             {
-                float t = (float)i / Mathf.Max(1, count - 1);
+                float t = (float)i / Mathf.Max(1, actualCount - 1);
                 float yaw = i * 137.5f, pitch = Mathf.Lerp(-70f, -15f, t), y = height * (1f - t) * 0.8f;
                 var m = Matrix4x4.TRS(new Vector3(0, y, 0), Quaternion.Euler(0, yaw, 0) * Quaternion.Euler(pitch, 0, 0), Vector3.one * Mathf.Lerp(0.75f, 1.1f, t));
                 combine.Add(new CombineInstance { mesh = leaf, transform = m });
             }
-            string path = $"{RootT2}/Meshes/T2_Cay_{name}.asset";
+            string path = $"{RootT2}/Meshes/T2_Cay_{key}.asset";
             var mesh = AssetDatabase.LoadAssetAtPath<Mesh>(path);
             bool isNew = mesh == null;
-            if (isNew) mesh = new Mesh { name = "T2_Cay_" + name };
+            if (isNew) mesh = new Mesh { name = "T2_Cay_" + key };
             else mesh.Clear();
             mesh.CombineMeshes(combine.ToArray(), true, true);
             mesh.RecalculateBounds();
             if (isNew) AssetDatabase.CreateAsset(mesh, path);
             else EditorUtility.SetDirty(mesh);
-            plantMeshes[name] = mesh;
+            plantMeshes[key] = mesh;
             return mesh;
         }
 
@@ -534,23 +982,83 @@ namespace Khkt.EditorTools
             float potR = kind == 4 ? 0.18f : kind == 2 ? 0.07f : kind == 3 ? 0.05f : 0.11f;
             float potH = kind == 4 ? 0.45f : kind == 2 ? 0.08f : kind == 3 ? 0.07f : 0.16f;
             potR *= scale; potH *= scale;
+
+            // Đĩa lót hứng nước dưới đáy chậu
+            Cyl(g, "Đĩa lót", new Vector3(0, 0.008f * scale, 0), potR * 0.98f, 0.016f * scale, potMat ?? (kind == 4 ? potWhite : bioTerracotta), false);
+
             var pot = Lathe($"T2_Chau{kind}", 20, V(0, 0), V(potR * 0.75f, 0), V(potR * 0.78f, 0.01f), V(potR, potH * 0.92f), V(potR * 1.06f, potH * 0.95f), V(potR * 1.06f, potH), V(potR * 0.95f, potH), V(0, potH * 0.85f));
             MeshObj(g, "Chậu", pot, Vector3.zero, potMat ?? (kind == 4 ? potWhite : bioTerracotta), kind == 4);
-            Cyl(g, "Đất", new Vector3(0, potH * 0.86f, 0), potR * 0.92f, 0.01f, bioSoil);
-            Mesh m;
+            // Đất ẩm sẫm màu
+            Cyl(g, "Đất ẩm", new Vector3(0, potH * 0.86f, 0), potR * 0.92f, 0.015f * scale, bioSoil);
+            Mesh m0, m1;
             Material leafMat;
             switch (kind)
             {
-                case 0: m = PlantMesh("Mon", 9, 0.3f, 0.2f, 0.25f, 0.06f); leafMat = bioLeaf; break;
-                case 1: m = PlantMesh("DuongXi", 14, 0.32f, 0.07f, 0.12f, 0.1f); leafMat = bioLeafDark; break;
-                case 2: m = PlantMesh("XaLach", 12, 0.1f, 0.08f, 0.05f, 0.02f); leafMat = bioLeafLight; break;
-                case 3: m = PlantMesh("DauNon", 6, 0.06f, 0.04f, 0.12f, 0.01f); leafMat = bioLeafLight; break;
-                default: m = PlantMesh("CayCao", 18, 0.34f, 0.12f, 0.9f, 0.08f); leafMat = bioLeaf; break;
+                case 0:
+                    m0 = PlantMesh("Mon", 9, 0.3f, 0.2f, 0.25f, 0.06f, false);
+                    m1 = PlantMesh("Mon", 9, 0.3f, 0.2f, 0.25f, 0.06f, true);
+                    leafMat = bioLeaf;
+                    break;
+                case 1:
+                    m0 = PlantMesh("DuongXi", 14, 0.32f, 0.07f, 0.12f, 0.1f, false);
+                    m1 = PlantMesh("DuongXi", 14, 0.32f, 0.07f, 0.12f, 0.1f, true);
+                    leafMat = bioLeafDark;
+                    break;
+                case 2:
+                    m0 = PlantMesh("XaLach", 12, 0.1f, 0.08f, 0.05f, 0.02f, false);
+                    m1 = PlantMesh("XaLach", 12, 0.1f, 0.08f, 0.05f, 0.02f, true);
+                    leafMat = bioLeafLight;
+                    break;
+                case 3:
+                    m0 = PlantMesh("DauNon", 6, 0.06f, 0.04f, 0.12f, 0.01f, false);
+                    m1 = PlantMesh("DauNon", 6, 0.06f, 0.04f, 0.12f, 0.01f, true);
+                    leafMat = bioLeafLight;
+                    break;
+                default:
+                    m0 = PlantMesh("CayCao", 18, 0.34f, 0.12f, 0.9f, 0.08f, false);
+                    m1 = PlantMesh("CayCao", 18, 0.34f, 0.12f, 0.9f, 0.08f, true);
+                    leafMat = bioLeaf;
+                    break;
             }
             if (kind == 3) Cyl(g, "Thân non", new Vector3(0, potH + 0.06f * scale, 0), 0.003f, 0.12f * scale, bioLeafLight);
-            if (kind == 4) Cyl(g, "Thân cây", new Vector3(0, potH + 0.35f * scale, 0), 0.015f * scale, 0.7f * scale, trunk);
-            var leaves = MeshObj(g, "Tán lá", m, new Vector3(0, potH * 0.9f + (kind == 4 ? 0.25f * scale : 0), 0), leafMat, false, null, scale);
-            if (kind == 2 || kind == 3) NoShadow(leaves);
+            if (kind == 4)
+            {
+                // Thân chính phân cành tự nhiên
+                Cyl(g, "Thân chính", new Vector3(0, potH + 0.25f * scale, 0), 0.018f * scale, 0.5f * scale, trunk);
+                Cyl(g, "Thân ngọn", new Vector3(0.015f * scale, potH + 0.52f * scale, 0), 0.012f * scale, 0.35f * scale, trunk, false, new Vector3(0, 0, -8));
+                // Cành nhánh nghiêng mềm mại
+                Cyl(g, "Cành 1", new Vector3(0.05f * scale, potH + 0.36f * scale, 0), 0.008f * scale, 0.16f * scale, trunk, false, new Vector3(0, 35, 30));
+                Cyl(g, "Cành 2", new Vector3(-0.05f * scale, potH + 0.44f * scale, 0.01f * scale), 0.008f * scale, 0.15f * scale, trunk, false, new Vector3(0, -50, -28));
+            }
+            var leafPos = new Vector3(0, potH * 0.9f + (kind == 4 ? 0.25f * scale : 0), 0);
+            var leaves0 = MeshObj(g, "Tán lá", m0, leafPos, leafMat, false, null, scale);
+            var leaves1 = MeshObj(g, "Tán lá (LOD1)", m1, leafPos, leafMat, false, null, scale);
+            if (kind == 2 || kind == 3)
+            {
+                NoShadow(leaves0);
+                NoShadow(leaves1);
+            }
+
+            var lodGroup = g.gameObject.AddComponent<LODGroup>();
+            var lods = new LOD[2];
+            lods[0] = new LOD(0.20f, new Renderer[] { leaves0.GetComponent<Renderer>() });
+            lods[1] = new LOD(0.04f, new Renderer[] { leaves1.GetComponent<Renderer>() });
+            lodGroup.SetLODs(lods);
+            lodGroup.RecalculateBounds();
+
+            if (kind < 4 && scale <= 1.2f)
+            {
+                var col = g.gameObject.AddComponent<CapsuleCollider>();
+                col.center = new Vector3(0, potH * 0.5f, 0);
+                col.radius = potR * 1.05f;
+                col.height = potH;
+
+                var gr = g.gameObject.AddComponent<Grabbable>();
+                gr.kind = "chau_cay";
+                gr.gripHeightM = potH * 0.5f;
+                gr.massG = 250f * scale;
+                gr.liesOnTable = false;
+            }
         }
 
         // =====================================================================
@@ -558,6 +1066,33 @@ namespace Khkt.EditorTools
         // =====================================================================
 
         static bool Ell(float x, float y, float cx, float cy, float rx, float ry) => (x - cx) * (x - cx) / (rx * rx) + (y - cy) * (y - cy) / (ry * ry) < 1f;
+
+        /// <summary>Vân lá cây sinh học: gân chính, gân phụ và gradient xanh non ở ngọn tới xanh sẫm ở cuống.</summary>
+        static Color LeafVeinPixel(int x, int y)
+        {
+            float tY = y / 127f; // 0 ở cuống, 1 ở chóp
+            float dx = Mathf.Abs(x - 64f);
+
+            // Màu gradient từ gốc (sẫm) tới ngọn (sáng non)
+            Color baseCol = Color.Lerp(new Color(0.12f, 0.33f, 0.11f), new Color(0.32f, 0.62f, 0.18f), tY);
+
+            // Gân lá chính giữa
+            if (dx < 1.8f)
+            {
+                float veinAlpha = 1f - (dx / 1.8f);
+                return Color.Lerp(baseCol, new Color(0.52f, 0.75f, 0.28f), veinAlpha * 0.7f);
+            }
+
+            // Gân phụ nghiêng ~40 độ
+            float veinPattern = Mathf.Abs((y - dx * 0.85f) % 18f);
+            if (veinPattern < 1.4f && dx < 50f)
+            {
+                float veinAlpha = (1f - veinPattern / 1.4f) * (1f - dx / 50f);
+                return Color.Lerp(baseCol, new Color(0.42f, 0.68f, 0.24f), veinAlpha * 0.45f);
+            }
+
+            return baseCol;
+        }
 
         /// <summary>Áp phích "Cấu trúc tế bào": tế bào động vật (tròn) và thực vật (vuông có thành, lục lạp, không bào).</summary>
         static Color CellPosterPixel(int x, int y)

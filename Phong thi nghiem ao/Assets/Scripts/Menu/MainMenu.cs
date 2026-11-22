@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Khkt.Demo;
+using Khkt.Environment.Tang2;
 using Khkt.Menu.Dashboard;
 using Khkt.Network;
 using UnityEngine;
@@ -36,7 +37,8 @@ namespace Khkt.Menu
         public Texture2D logo;
         public Texture2D schoolLogo;
 
-        const float PanelW = 640, ContentX = 80, ContentW = 480, FieldH = 52;
+        const float LeftW = 880f, ContentW = 520f, FieldH = 52f;
+        const string TouchSensPrefKey = "KHKT_TOUCH_SENSITIVITY";
 
         public Screen Current { get; private set; }
         public float LoadProgress { get; private set; }
@@ -48,14 +50,23 @@ namespace Khkt.Menu
         readonly Dictionary<Screen, Text> status = new Dictionary<Screen, Text>();
 
         RawImage bgImage;
-        InputField loginUser, loginPass, regClass, regName, regUser, regPass, regPass2, pwOld, pwNew, pwNew2, serverField;
-        Text loadText;
+        InputField loginUser, loginPass, regClass, regName, regUser, regPass, regPass2, pwOld, pwNew, pwNew2, serverField, aiUrlField;
+        Text loadText, loginServerText, aiStatusText;
         RectTransform uiRoot, loginRoot, panelRoot;
         DashboardShell dashboard;
         bool panelVisible;
         Image loadBar;
         InputField roomJoinField;
         GameObject hostRelayButton, hostLanButton;
+        Button[] settingsTabs;
+        GameObject[] settingsPanes;
+        int currentSettingsTab;
+        Image[] themeCardBorders;
+        Text[] themeCardLabels;
+        Toggle transToggle, motionToggle, soundToggle;
+        Slider touchSensSlider;
+        Button clickImmediateChip, clickPanelChip;
+        Button[] fontScaleChips, panelSizeChips;
         bool busy;
 
         void Awake()
@@ -114,10 +125,14 @@ namespace Khkt.Menu
             }
             ShowPanel();
             MenuAnim.Enter((RectTransform)screens[s].transform, 0f, 14f, 0.28f);
+            if (s == Screen.Login && loginServerText != null) loginServerText.text = "Máy chủ: " + GameSession.ServerUrl;
             if (s == Screen.Room) RefreshRoom();
-            if (s == Screen.Settings) serverField.text = GameSession.ServerUrl;
-            if (fields.TryGetValue(s, out var list) && list.Count > 0 && EventSystem.current != null)
-                EventSystem.current.SetSelectedGameObject(list[0].gameObject);
+            if (s == Screen.Settings) RefreshSettings();
+            if (fields.TryGetValue(s, out var list) && EventSystem.current != null)
+            {
+                var firstActive = list.Find(f => f != null && f.gameObject.activeInHierarchy);
+                if (firstActive != null) EventSystem.current.SetSelectedGameObject(firstActive.gameObject);
+            }
         }
 
         /// <summary>Trang chính phủ lên, bảng đăng nhập mờ đi rồi tắt hẳn để không tốn công vẽ.</summary>
@@ -166,12 +181,13 @@ namespace Khkt.Menu
             var g = MenuAnim.Group(loginRoot);
             g.blocksRaycasts = true;
             MenuAnim.Fade(g, g.alpha, 1f, 0.32f);
-            MenuAnim.Slide(panelRoot, new Vector2(-48, 0), Vector2.zero, 0.42f);
         }
 
         void FocusNextField()
         {
-            if (!fields.TryGetValue(Current, out var list) || list.Count == 0 || EventSystem.current == null) return;
+            if (!fields.TryGetValue(Current, out var raw) || EventSystem.current == null) return;
+            var list = raw.FindAll(f => f != null && f.gameObject.activeInHierarchy);
+            if (list.Count == 0) return;
             var sel = EventSystem.current.currentSelectedGameObject;
             int i = sel != null ? list.FindIndex(f => f.gameObject == sel) : -1;
             var next = list[(i + 1) % list.Count];
@@ -325,7 +341,31 @@ namespace Khkt.Menu
                 return;
             }
             GameSession.ServerUrl = url;
+            if (loginServerText != null) loginServerText.text = "Máy chủ: " + GameSession.ServerUrl;
             Say(Screen.Settings, "Đã lưu địa chỉ máy chủ.", false);
+        }
+
+        void DoSaveAiUrl()
+        {
+            if (aiUrlField == null) return;
+            string url = aiUrlField.text.Trim();
+            if (string.IsNullOrEmpty(url)) url = "http://127.0.0.1:8000";
+            if (!ValidServerUrl(url))
+            {
+                if (aiStatusText != null)
+                {
+                    aiStatusText.color = Error;
+                    aiStatusText.text = "Địa chỉ phải bắt đầu bằng http:// hoặc https://";
+                }
+                return;
+            }
+            PlayerPrefs.SetString(AiClient.ServerUrlPrefKey, url);
+            PlayerPrefs.Save();
+            if (aiStatusText != null)
+            {
+                aiStatusText.color = Bio;
+                aiStatusText.text = "Đã lưu địa chỉ trợ lý AI.";
+            }
         }
 
         void DoCheckServer()
@@ -409,28 +449,32 @@ namespace Khkt.Menu
             scaler.matchWidthOrHeight = 0.5f;
             UiBridge.EnsureInteractive(canvas);
             uiRoot = (RectTransform)cgo.transform;
-            // Bảng đăng nhập và ảnh nền chung một gốc để cùng mờ đi khi sang trang chính
+            // Bảng đăng nhập gồm 2 cột: cột trái giới thiệu (880 px), cột phải biểu mẫu (1040 px)
             loginRoot = Full(uiRoot, "Đăng nhập và ảnh nền");
             var root = loginRoot;
 
-            var bgRt = Stretch(root, "Ảnh nền", new Vector2(0, 0), new Vector2(1, 1), new Vector2(PanelW, 0), Vector2.zero);
-            bgImage = bgRt.gameObject.AddComponent<RawImage>();
-            bgImage.texture = background;
-            bgImage.color = background != null ? Color.white : PaperAlt;
-            bgImage.raycastTarget = false;
+            var leftCol = Stretch(root, "Cột trái", new Vector2(0, 0), new Vector2(0, 1), Vector2.zero, new Vector2(LeftW, 0));
+            var leftBase = leftCol.gameObject.AddComponent<Image>();
+            leftBase.color = PaperAlt;
+            leftBase.raycastTarget = true;
+            var leftTint = Full(leftCol, "Nền nhấn dịu").gameObject.AddComponent<Image>();
+            leftTint.color = AccentSoft;
+            leftTint.raycastTarget = false;
+            var colLine = Stretch(leftCol, "Kẻ ngăn cột", new Vector2(1, 0), Vector2.one, new Vector2(-1, 0), Vector2.zero).gameObject.AddComponent<Image>();
+            colLine.color = Line;
+            colLine.raycastTarget = false;
 
-            var caption = Fill(bgRt, "Chú thích", new Vector2(0, 0), new Vector2(0, 0), new Vector2(36, 36), new Vector2(620, 64), new Color(0.04f, 0.05f, 0.06f, 0.8f), RadiusCard);
-            GlassKit.Label(caption.transform, "Chữ", "Tự tay làm thí nghiệm Hóa học, Sinh học trong phòng lab ảo", 20, Color.white, false,
-                           TextAnchor.MiddleLeft, new Vector2(22, 0), new Vector2(580, 64));
+            BuildLeftShowcase(leftCol);
 
-            var panel = Stretch(root, "Bảng bên trái", new Vector2(0, 0), new Vector2(0, 1), Vector2.zero, new Vector2(PanelW, 0));
+            var panel = Stretch(root, "Cột phải", new Vector2(0, 0), new Vector2(1, 1), new Vector2(LeftW, 0), Vector2.zero);
             panelRoot = panel;
             var bg = panel.gameObject.AddComponent<Image>();
             bg.color = Paper;
             bg.raycastTarget = true;
 
-            BuildHeader(panel);
-            BuildFooter(panel);
+            var quitBtn = MakeButton(panel, "Nút Thoát", "Thoát", new Vector2(-36, -28), new Vector2(96, 44), Application.Quit, 2, RadiusButton, new Vector2(1, 1));
+            ((RectTransform)quitBtn.transform).pivot = new Vector2(1, 1);
+
             BuildLogin(panel);
             BuildRegister(panel);
             BuildChangePassword(panel);
@@ -443,111 +487,369 @@ namespace Khkt.Menu
             loginRoot.gameObject.SetActive(false);
         }
 
-        void BuildHeader(RectTransform p)
+        void BuildLeftShowcase(RectTransform left)
         {
+            const float PadX = 72f;
+            float innerW = LeftW - PadX * 2f;
+
             if (logo != null)
             {
-                var l = GlassKit.Rect(p, "Logo", new Vector2(0, 1), new Vector2(0, 1), new Vector2(ContentX, -60), new Vector2(60, 60));
+                var l = GlassKit.Rect(left, "Logo", new Vector2(0, 1), new Vector2(0, 1), new Vector2(PadX, -56), new Vector2(60, 60));
                 var img = l.gameObject.AddComponent<RawImage>();
                 img.texture = logo;
                 img.raycastTarget = false;
             }
-            GlassKit.Label(p, "Tên", "VERA Lab", 32, Ink, true, TextAnchor.UpperLeft, new Vector2(ContentX + 74, -56), new Vector2(380, 42));
-            GlassKit.Label(p, "Tên đầy đủ", "Virtual Experiment & Reality-based AI Lab", 16, InkDim, false, TextAnchor.UpperLeft, new Vector2(ContentX + 74, -98), new Vector2(420, 24));
-        }
+            GlassKit.Label(left, "Tên", "VERA Lab", 34, Ink, true, TextAnchor.UpperLeft, new Vector2(PadX + 74, -54), new Vector2(540, 42));
+            GlassKit.Label(left, "Tên đầy đủ", "Virtual Experiment & Reality-based AI Lab", 16, InkDim, false, TextAnchor.UpperLeft, new Vector2(PadX + 74, -96), new Vector2(580, 24));
 
-        void BuildFooter(RectTransform p)
-        {
-            // ghim đáy bảng: chiều cao canvas đổi theo tỉ lệ màn hình
-            var foot = GlassKit.Rect(p, "Chân trang", new Vector2(0, 0), new Vector2(0, 0), Vector2.zero, new Vector2(PanelW, 110));
+            // Khung minh họa bo góc chứa ảnh lab
+            var artFrame = Fill(left, "Khung minh họa", new Vector2(0, 1), new Vector2(0, 1), new Vector2(PadX, -152), new Vector2(innerW, 540), Paper, RadiusCard);
+            var mask = artFrame.gameObject.AddComponent<Mask>();
+            mask.showMaskGraphic = true;
+            var bgRt = Stretch(artFrame.transform, "Ảnh nền", Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            bgImage = bgRt.gameObject.AddComponent<RawImage>();
+            bgImage.texture = background;
+            bgImage.color = background != null ? MenuKit.Hex(0xffffff) : PaperAlt;
+            bgImage.raycastTarget = false;
+            var borderRt = GlassKit.Rect(left, "Viền khung minh họa", new Vector2(0, 1), new Vector2(0, 1), new Vector2(PadX, -152), new Vector2(innerW, 540));
+            var borderImg = borderRt.gameObject.AddComponent<Image>();
+            borderImg.sprite = GlassKit.Border;
+            borderImg.type = Image.Type.Sliced;
+            borderImg.pixelsPerUnitMultiplier = RadiusCard;
+            borderImg.color = Line;
+            borderImg.raycastTarget = false;
+
+            GlassKit.Label(left, "Giới thiệu", "Tự tay làm thí nghiệm Hóa học, Sinh học trong phòng lab ảo.", 20, Ink, false, TextAnchor.UpperLeft, new Vector2(PadX, -718), new Vector2(innerW, 64));
+
             if (schoolLogo != null)
             {
                 float w = 52f * schoolLogo.width / Mathf.Max(1, schoolLogo.height);
-                var l = GlassKit.Rect(foot, "Logo trường", new Vector2(0, 0), new Vector2(0, 0), new Vector2(ContentX, 36), new Vector2(w, 52));
+                var l = GlassKit.Rect(left, "Logo trường", new Vector2(0, 0), new Vector2(0, 0), new Vector2(PadX, 44), new Vector2(w, 52));
                 var img = l.gameObject.AddComponent<RawImage>();
                 img.texture = schoolLogo;
                 img.raycastTarget = false;
             }
-            MakeButton(foot, "Nút mở Cài đặt", "Cài đặt", new Vector2(PanelW - 240, -26), new Vector2(84, 36), () => { if (!busy) Show(Screen.Settings); }, 2);
-            MakeButton(foot, "Nút Thoát", "Thoát", new Vector2(PanelW - 150, -26), new Vector2(70, 36), Application.Quit, 2);
         }
 
-        RectTransform NewScreen(RectTransform p, Screen s, string name, string title, string subtitle)
+        RectTransform NewScreen(RectTransform p, Screen s, string name, string title, string subtitle, float w = ContentW, float h = 760f)
         {
-            var rt = GlassKit.Rect(p, name, new Vector2(0, 1), new Vector2(0, 1), new Vector2(ContentX, -170), new Vector2(ContentW, 820));
+            var rt = GlassKit.Rect(p, name, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(w, h));
             screens[s] = rt.gameObject;
             fields[s] = new List<InputField>();
-            GlassKit.Label(rt, "Tiêu đề", title, 36, Ink, true, TextAnchor.UpperLeft, Vector2.zero, new Vector2(ContentW, 48));
-            if (subtitle != null) GlassKit.Label(rt, "Mô tả", subtitle, 17, InkDim, false, TextAnchor.UpperLeft, new Vector2(0, -52), new Vector2(ContentW, 48));
+            GlassKit.Label(rt, "Tiêu đề", title, 34, Ink, true, TextAnchor.UpperLeft, Vector2.zero, new Vector2(w, 46));
+            if (subtitle != null) GlassKit.Label(rt, "Mô tả", subtitle, 17, InkDim, false, TextAnchor.UpperLeft, new Vector2(0, -50), new Vector2(w, 44));
             rt.gameObject.SetActive(false);
             return rt;
         }
 
         void BuildLogin(RectTransform p)
         {
-            var s = NewScreen(p, Screen.Login, "Đăng nhập", "Đăng nhập", "Dùng tài khoản VERA Lab của bạn.");
-            loginUser = MakeField(s, Screen.Login, "Ô đăng nhập: tên", "Tên đăng nhập", -96, false);
-            loginPass = MakeField(s, Screen.Login, "Ô đăng nhập: mật khẩu", "Mật khẩu", -182, true);
-            status[Screen.Login] = MakeStatus(s, "Thông báo đăng nhập", -268);
-            MakeButton(s, "Nút Đăng nhập", "Đăng nhập", new Vector2(0, -320), new Vector2(ContentW, 54), DoLogin, 0);
-            MakeButton(s, "Nút chuyển Tạo tài khoản", "Tạo tài khoản bằng mã lớp", new Vector2(0, -386), new Vector2(ContentW, 54), () => { if (!busy) Show(Screen.Register); }, 1);
-            MakeButton(s, "Nút Dùng thử", "Dùng thử không cần tài khoản", new Vector2(0, -452), new Vector2(ContentW, 54), DoGuest, 1);
+            var s = NewScreen(p, Screen.Login, "Đăng nhập", "Đăng nhập", "Dùng tài khoản VERA Lab của bạn.", ContentW, 650f);
+            loginUser = MakeField(s, Screen.Login, "Ô đăng nhập: tên", "Tên đăng nhập", -104, false);
+            loginPass = MakeField(s, Screen.Login, "Ô đăng nhập: mật khẩu", "Mật khẩu", -192, true);
+            status[Screen.Login] = MakeStatus(s, "Thông báo đăng nhập", -280);
+            MakeButton(s, "Nút Đăng nhập", "Đăng nhập", new Vector2(0, -334), new Vector2(ContentW, 54), DoLogin, 0);
+            MakeButton(s, "Nút chuyển Tạo tài khoản", "Đăng ký", new Vector2(0, -400), new Vector2(ContentW, 54), () => { if (!busy) Show(Screen.Register); }, 1);
+            MakeButton(s, "Nút Dùng thử", "Dùng thử không cần tài khoản", new Vector2(0, -466), new Vector2(ContentW, 54), DoGuest, 1);
+
+            var rule = GlassKit.Rect(s, "Kẻ máy chủ", new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, -550), new Vector2(ContentW, 1));
+            var rImg = rule.gameObject.AddComponent<Image>();
+            rImg.color = Line;
+            rImg.raycastTarget = false;
+
+            loginServerText = GlassKit.Label(s, "Trạng thái máy chủ", "Máy chủ: " + GameSession.ServerUrl, 15, InkDim, false, TextAnchor.MiddleLeft, new Vector2(0, -568), new Vector2(ContentW - 116, 44));
+            loginServerText.verticalOverflow = VerticalWrapMode.Truncate;
+            loginServerText.resizeTextForBestFit = true;
+            loginServerText.resizeTextMinSize = 12;
+            loginServerText.resizeTextMaxSize = 15;
+            MakeButton(s, "Nút Đổi máy chủ", "Đổi", new Vector2(ContentW - 104, -568), new Vector2(104, 44), () =>
+            {
+                if (busy) return;
+                SelectSettingsTab(4);
+                Show(Screen.Settings);
+            }, 1);
+
             submit[Screen.Login] = DoLogin;
         }
 
         void BuildRegister(RectTransform p)
         {
-            var s = NewScreen(p, Screen.Register, "Tạo tài khoản", "Tạo tài khoản", null);
-            regClass = MakeField(s, Screen.Register, "Ô đăng ký: mã lớp", "Mã lớp (giáo viên cung cấp)", -60, false);
-            regName = MakeField(s, Screen.Register, "Ô đăng ký: họ tên", "Họ và tên", -144, false);
-            regUser = MakeField(s, Screen.Register, "Ô đăng ký: tên đăng nhập", "Tên đăng nhập", -228, false);
-            regPass = MakeField(s, Screen.Register, "Ô đăng ký: mật khẩu", "Mật khẩu", -312, true);
-            regPass2 = MakeField(s, Screen.Register, "Ô đăng ký: nhập lại", "Nhập lại mật khẩu", -396, true);
-            status[Screen.Register] = MakeStatus(s, "Thông báo đăng ký", -482);
-            MakeButton(s, "Nút Tạo tài khoản", "Tạo tài khoản", new Vector2(0, -534), new Vector2(ContentW, 54), DoRegister, 0);
-            MakeButton(s, "Nút quay lại từ đăng ký", "Quay lại", new Vector2(0, -600), new Vector2(ContentW, 54), () => { if (!busy) Show(Screen.Login); }, 1);
+            var s = NewScreen(p, Screen.Register, "Tạo tài khoản", "Tạo tài khoản", null, ContentW, 700f);
+            regClass = MakeField(s, Screen.Register, "Ô đăng ký: mã lớp", "Mã lớp (giáo viên cung cấp)", -64, false);
+            regName = MakeField(s, Screen.Register, "Ô đăng ký: họ tên", "Họ và tên", -148, false);
+            regUser = MakeField(s, Screen.Register, "Ô đăng ký: tên đăng nhập", "Tên đăng nhập", -232, false);
+            regPass = MakeField(s, Screen.Register, "Ô đăng ký: mật khẩu", "Mật khẩu", -316, true);
+            regPass2 = MakeField(s, Screen.Register, "Ô đăng ký: nhập lại", "Nhập lại mật khẩu", -400, true);
+            status[Screen.Register] = MakeStatus(s, "Thông báo đăng ký", -486);
+            MakeButton(s, "Nút Tạo tài khoản", "Tạo tài khoản", new Vector2(0, -540), new Vector2(ContentW, 54), DoRegister, 0);
+            MakeButton(s, "Nút quay lại từ đăng ký", "Quay lại", new Vector2(0, -606), new Vector2(ContentW, 54), () => { if (!busy) Show(Screen.Login); }, 1);
             submit[Screen.Register] = DoRegister;
             back[Screen.Register] = () => Show(Screen.Login);
         }
 
         void BuildChangePassword(RectTransform p)
         {
-            var s = NewScreen(p, Screen.ChangePassword, "Đổi mật khẩu", "Đổi mật khẩu", "Tài khoản này cần đặt mật khẩu mới trước khi dùng.");
-            pwOld = MakeField(s, Screen.ChangePassword, "Ô đổi: mật khẩu hiện tại", "Mật khẩu hiện tại", -96, true);
-            pwNew = MakeField(s, Screen.ChangePassword, "Ô đổi: mật khẩu mới", "Mật khẩu mới", -182, true);
-            pwNew2 = MakeField(s, Screen.ChangePassword, "Ô đổi: nhập lại", "Nhập lại mật khẩu mới", -268, true);
-            status[Screen.ChangePassword] = MakeStatus(s, "Thông báo đổi mật khẩu", -354);
-            MakeButton(s, "Nút Đổi mật khẩu", "Đổi mật khẩu", new Vector2(0, -406), new Vector2(ContentW, 54), DoChangePassword, 0);
-            MakeButton(s, "Nút đăng xuất khi đổi", "Đăng xuất", new Vector2(0, -472), new Vector2(ContentW, 54), DoSignOut, 1);
+            var s = NewScreen(p, Screen.ChangePassword, "Đổi mật khẩu", "Đổi mật khẩu", "Tài khoản này cần đặt mật khẩu mới trước khi dùng.", ContentW, 600f);
+            pwOld = MakeField(s, Screen.ChangePassword, "Ô đổi: mật khẩu hiện tại", "Mật khẩu hiện tại", -104, true);
+            pwNew = MakeField(s, Screen.ChangePassword, "Ô đổi: mật khẩu mới", "Mật khẩu mới", -192, true);
+            pwNew2 = MakeField(s, Screen.ChangePassword, "Ô đổi: nhập lại", "Nhập lại mật khẩu mới", -280, true);
+            status[Screen.ChangePassword] = MakeStatus(s, "Thông báo đổi mật khẩu", -368);
+            MakeButton(s, "Nút Đổi mật khẩu", "Đổi mật khẩu", new Vector2(0, -422), new Vector2(ContentW, 54), DoChangePassword, 0);
+            MakeButton(s, "Nút đăng xuất khi đổi", "Đăng xuất", new Vector2(0, -488), new Vector2(ContentW, 54), DoSignOut, 1);
             submit[Screen.ChangePassword] = DoChangePassword;
         }
 
         void BuildSettings(RectTransform p)
         {
-            var s = NewScreen(p, Screen.Settings, "Cài đặt", "Cài đặt", "Địa chỉ máy chủ tài khoản. Giáo viên hoặc nhà trường sẽ cung cấp địa chỉ này.");
-            serverField = MakeField(s, Screen.Settings, "Ô địa chỉ máy chủ", "Địa chỉ máy chủ", -110, false);
-            status[Screen.Settings] = MakeStatus(s, "Thông báo cài đặt", -196);
-            MakeButton(s, "Nút Lưu địa chỉ", "Lưu", new Vector2(0, -248), new Vector2(ContentW, 54), DoSaveServer, 0);
-            MakeButton(s, "Nút Kiểm tra kết nối", "Kiểm tra kết nối", new Vector2(0, -314), new Vector2(ContentW, 54), DoCheckServer, 1);
-            float half = (ContentW - 12) / 2;
-            MakeButton(s, "Nút Máy chủ trực tuyến", "Máy chủ trực tuyến", new Vector2(0, -380), new Vector2(half, 54), () => serverField.text = GameSession.CloudServerUrl, 1);
-            MakeButton(s, "Nút Mặc định", "Máy chủ trên máy này", new Vector2(half + 12, -380), new Vector2(half, 54), () => serverField.text = GameSession.LocalServerUrl, 1);
+            const float SetW = 920f, SetH = 740f, SideW = 210f, PaneX = 248f, PaneW = SetW - PaneX;
+            var s = NewScreen(p, Screen.Settings, "Cài đặt", "Cài đặt", "Tùy chỉnh giao diện, âm thanh, điều khiển, trợ lý AI và máy chủ.", SetW, SetH);
+
+            var topRule = GlassKit.Rect(s, "Kẻ đầu", new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, -98), new Vector2(SetW, 1));
+            var trImg = topRule.gameObject.AddComponent<Image>();
+            trImg.color = Line;
+            trImg.raycastTarget = false;
+
+            var sideRule = GlassKit.Rect(s, "Kẻ cột mục", new Vector2(0, 1), new Vector2(0, 1), new Vector2(SideW + 18, -114), new Vector2(1, 520));
+            var srImg = sideRule.gameObject.AddComponent<Image>();
+            srImg.color = Line;
+            srImg.raycastTarget = false;
+
+            string[] tabTitles = { "Hiển thị", "Âm thanh", "Điều khiển", "Trợ lý AI", "Máy chủ" };
+            settingsTabs = new Button[tabTitles.Length];
+            settingsPanes = new GameObject[tabTitles.Length];
+            for (int i = 0; i < tabTitles.Length; i++)
+            {
+                int idx = i;
+                settingsTabs[i] = GlassKit.MakeChip(s, "Mục " + tabTitles[i], tabTitles[i], new Vector2(0, -114 - i * 58), new Vector2(SideW, 50), () => SelectSettingsTab(idx), i == 0, 16);
+                var tabLabel = settingsTabs[i].transform.Find("Chữ")?.GetComponent<Text>();
+                if (tabLabel != null)
+                {
+                    tabLabel.alignment = TextAnchor.MiddleLeft;
+                    tabLabel.rectTransform.anchoredPosition = new Vector2(14, 0);
+                    tabLabel.rectTransform.sizeDelta = new Vector2(SideW - 28, 50);
+                }
+
+                var paneRt = GlassKit.Rect(s, "Nội dung " + tabTitles[i], new Vector2(0, 1), new Vector2(0, 1), new Vector2(PaneX, -114), new Vector2(PaneW, 530));
+                settingsPanes[i] = paneRt.gameObject;
+            }
+
+            // Tab 0: Hiển thị (3 thẻ xem trước giao diện + Nền đặc + Giảm chuyển động + Cỡ chữ + Cỡ bảng dụng cụ)
+            var t0 = (RectTransform)settingsPanes[0].transform;
+            GlassKit.Label(t0, "Nhãn giao diện", "Giao diện", 17, Ink, true, TextAnchor.UpperLeft, Vector2.zero, new Vector2(PaneW, 26));
+            var modes = new[] { UiTheme.Mode.XanhMuc, UiTheme.Mode.Trang, UiTheme.Mode.Den };
+            themeCardBorders = new Image[modes.Length];
+            themeCardLabels = new Text[modes.Length];
+            float cardW = (PaneW - 24f) / 3f;
+            for (int i = 0; i < modes.Length; i++)
+            {
+                var mode = modes[i];
+                BuildThemePreviewCard(t0, i, mode, new Vector2(i * (cardW + 12f), -30), new Vector2(cardW, 148));
+            }
+            transToggle = GlassKit.MakeToggle(t0, "ToggleTrans", "Nền đặc chống lóa", new Vector2(0, -194), new Vector2(PaneW, 46), GlassKit.ReducedTransparency, v => GlassKit.ReducedTransparency = v);
+            motionToggle = GlassKit.MakeToggle(t0, "ToggleMotion", "Giảm chuyển động", new Vector2(0, -248), new Vector2(PaneW, 46), ReducedMotion.IsEnabled, v => ReducedMotion.IsEnabled = v);
+            fontScaleChips = BuildChipRow(t0, "CoChu", "Cỡ chữ", new[] { "Chuẩn", "Lớn", "Rất lớn" }, -312f, PaneW, UiTheme.FontScaleMode, SelectFontScale);
+            panelSizeChips = BuildChipRow(t0, "CoBang", "Cỡ bảng dụng cụ", new[] { "60%", "75%", "Kín màn hình" }, -404f, PaneW, UiTheme.PanelSizeMode, SelectPanelSize);
+
+            // Tab 1: Âm thanh
+            var t1 = (RectTransform)settingsPanes[1].transform;
+            GlassKit.Label(t1, "Nhãn âm thanh", "Âm thanh hệ thống", 17, Ink, true, TextAnchor.UpperLeft, Vector2.zero, new Vector2(PaneW, 26));
+            soundToggle = GlassKit.MakeToggle(t1, "ToggleSound", "Âm thanh phản hồi nút bấm", new Vector2(0, -40), new Vector2(PaneW, 46), NutHieuUng.SoundEnabled, v => NutHieuUng.SoundEnabled = v);
+
+            // Tab 2: Điều khiển
+            var t2 = (RectTransform)settingsPanes[2].transform;
+            GlassKit.Label(t2, "Nhãn bấm dụng cụ", "Bấm vào dụng cụ", 17, Ink, true, TextAnchor.UpperLeft, Vector2.zero, new Vector2(PaneW, 26));
+            float half = (PaneW - 12f) / 2f;
+            int clickMode = PlayerPrefs.GetInt(UiTheme.ClickModePrefKey, 0);
+            clickImmediateChip = GlassKit.MakeChip(t2, "Nút Cầm ngay", "Cầm ngay", new Vector2(0, -36), new Vector2(half, 46), () => SelectClickMode(0), clickMode == 0, 15);
+            clickPanelChip = GlassKit.MakeChip(t2, "Nút Mở bảng", "Mở bảng", new Vector2(half + 12f, -36), new Vector2(half, 46), () => SelectClickMode(1), clickMode == 1, 15);
+            float savedSens = Mathf.Clamp(PlayerPrefs.GetFloat(TouchSensPrefKey, 0.18f), 0.05f, 0.50f);
+            touchSensSlider = GlassKit.MakeSlider(t2, "Thanh độ nhạy", "Độ nhạy vuốt nhìn", new Vector2(0, -108), new Vector2(PaneW, 64), 0.05f, 0.50f, savedSens, OnTouchSensChanged, v => v.ToString("0.00"));
+
+            // Tab 3: Trợ lý AI
+            var t3 = (RectTransform)settingsPanes[3].transform;
+            string savedAiUrl = PlayerPrefs.GetString(AiClient.ServerUrlPrefKey, "http://127.0.0.1:8000");
+            aiUrlField = MakeField(t3, Screen.Settings, "Ô địa chỉ AI", "Địa chỉ máy chủ AI (trợ lý & robot)", 0, false, PaneW);
+            aiUrlField.text = savedAiUrl;
+            MakeButton(t3, "Nút Lưu AI", "Lưu", new Vector2(0, -98), new Vector2(200, 48), DoSaveAiUrl, 0);
+            aiStatusText = GlassKit.Label(t3, "Trạng thái AI", "", 15, Bio, false, TextAnchor.UpperLeft, new Vector2(0, -160), new Vector2(PaneW, 38));
+
+            // Tab 4: Máy chủ
+            var t4 = (RectTransform)settingsPanes[4].transform;
+            serverField = MakeField(t4, Screen.Settings, "Ô địa chỉ máy chủ", "Địa chỉ máy chủ tài khoản", 0, false, PaneW);
+            status[Screen.Settings] = MakeStatus(t4, "Thông báo cài đặt", -86, PaneW);
+            MakeButton(t4, "Nút Lưu địa chỉ", "Lưu", new Vector2(0, -138), new Vector2(half, 48), DoSaveServer, 0);
+            MakeButton(t4, "Nút Kiểm tra kết nối", "Kiểm tra kết nối", new Vector2(half + 12f, -138), new Vector2(half, 48), DoCheckServer, 1);
+            MakeButton(t4, "Nút Máy chủ trực tuyến", "Máy chủ trực tuyến", new Vector2(0, -198), new Vector2(half, 48), () => serverField.text = GameSession.CloudServerUrl, 1);
+            MakeButton(t4, "Nút Mặc định", "Máy chủ trên máy này", new Vector2(half + 12f, -198), new Vector2(half, 48), () => serverField.text = GameSession.LocalServerUrl, 1);
+
             System.Action leave = () => { if (!busy) Show(GameSession.HasIdentity ? Screen.Home : Screen.Login); };
-            MakeButton(s, "Nút quay lại từ cài đặt", "Quay lại", new Vector2(0, -446), new Vector2(ContentW, 54), leave, 1);
-            submit[Screen.Settings] = DoSaveServer;
+            MakeButton(s, "Nút quay lại từ cài đặt", "Quay lại", new Vector2(0, -SetH + 54), new Vector2(200, 52), leave, 1);
+            submit[Screen.Settings] = () => { if (currentSettingsTab == 3) DoSaveAiUrl(); else if (currentSettingsTab == 4) DoSaveServer(); };
             back[Screen.Settings] = leave;
+
+            SelectSettingsTab(0);
+        }
+
+        void BuildThemePreviewCard(Transform parent, int index, UiTheme.Mode mode, Vector2 pos, Vector2 size)
+        {
+            bool active = UiTheme.Current == mode;
+            var border = Fill(parent, "Thẻ giao diện " + mode, new Vector2(0, 1), new Vector2(0, 1), pos, size, active ? Accent : Line, RadiusButton);
+            var inner = Fill(border.transform, "Nền thẻ", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, size - new Vector2(4, 4), Paper, RadiusButton);
+            inner.raycastTarget = true;
+
+            var btn = border.gameObject.AddComponent<Button>();
+            btn.navigation = new Navigation { mode = Navigation.Mode.None };
+            btn.targetGraphic = inner;
+            btn.onClick.AddListener(() => SelectTheme(mode));
+
+            ThemeSwatchPalette(mode, out var swBg, out var swCard, out var swAccent, out var swInk);
+            var swW = size.x - 24f;
+            var swBox = Fill(inner.transform, "Xem trước", new Vector2(0, 1), new Vector2(0, 1), new Vector2(10, -10), new Vector2(swW, 86), swBg, RadiusButton);
+            Fill(swBox.transform, "Thẻ mẫu", new Vector2(0, 1), new Vector2(0, 1), new Vector2(10, -10), new Vector2(swW - 20f, 44), swCard, RadiusButton);
+            Fill(swBox.transform, "Nhấn mẫu", new Vector2(0, 1), new Vector2(0, 1), new Vector2(10, -60), new Vector2(56, 16), swAccent, RadiusButton);
+            Fill(swBox.transform, "Chữ mẫu 1", new Vector2(0, 1), new Vector2(0, 1), new Vector2(18, -20), new Vector2(swW - 60f, 8), swInk, RadiusButton);
+            Fill(swBox.transform, "Chữ mẫu 2", new Vector2(0, 1), new Vector2(0, 1), new Vector2(18, -34), new Vector2(swW - 92f, 6), WithAlpha(swInk, 0.5f), RadiusButton);
+
+            string title = mode == UiTheme.Mode.XanhMuc ? "Xanh mực VERA" : UiTheme.ModeLabel(mode);
+            var lbl = GlassKit.Label(inner.transform, "Nhãn", title, 15, active ? Accent : Ink, active, TextAnchor.MiddleCenter, new Vector2(8, -102), new Vector2(size.x - 20f, 38));
+            themeCardBorders[index] = border;
+            themeCardLabels[index] = lbl;
+        }
+
+        static void ThemeSwatchPalette(UiTheme.Mode mode, out Color bg, out Color card, out Color accent, out Color ink)
+        {
+            switch (mode)
+            {
+                case UiTheme.Mode.Trang:
+                    bg = MenuKit.Hex(0xf5f5f7);
+                    card = MenuKit.Hex(0xffffff);
+                    accent = MenuKit.Hex(0x0b63d1);
+                    ink = MenuKit.Hex(0x1d1d1f);
+                    break;
+                case UiTheme.Mode.Den:
+                    bg = MenuKit.Hex(0x08080a);
+                    card = MenuKit.Hex(0x1c1c1f);
+                    accent = MenuKit.Hex(0x4da3ff);
+                    ink = MenuKit.Hex(0xf5f5f7);
+                    break;
+                default:
+                    bg = MenuKit.Hex(0x0a1322);
+                    card = MenuKit.Hex(0x111d31);
+                    accent = MenuKit.Hex(0x33d6ff);
+                    ink = MenuKit.Hex(0xeaf1ff);
+                    break;
+            }
+        }
+
+        void SelectSettingsTab(int idx)
+        {
+            currentSettingsTab = Mathf.Clamp(idx, 0, settingsPanes.Length - 1);
+            for (int i = 0; i < settingsPanes.Length; i++)
+            {
+                bool on = i == currentSettingsTab;
+                if (settingsPanes[i] != null) settingsPanes[i].SetActive(on);
+                if (settingsTabs[i] != null) GlassKit.SetChip(settingsTabs[i], on);
+            }
+        }
+
+        void RefreshSettings()
+        {
+            serverField.text = GameSession.ServerUrl;
+            if (aiUrlField != null)
+                aiUrlField.text = PlayerPrefs.GetString(AiClient.ServerUrlPrefKey, "http://127.0.0.1:8000");
+            if (aiStatusText != null) aiStatusText.text = "";
+            if (transToggle != null) transToggle.SetIsOnWithoutNotify(GlassKit.ReducedTransparency);
+            if (motionToggle != null) motionToggle.SetIsOnWithoutNotify(ReducedMotion.IsEnabled);
+            if (soundToggle != null) soundToggle.SetIsOnWithoutNotify(NutHieuUng.SoundEnabled);
+            if (touchSensSlider != null)
+                touchSensSlider.SetValueWithoutNotify(Mathf.Clamp(PlayerPrefs.GetFloat(TouchSensPrefKey, 0.18f), 0.05f, 0.50f));
+
+            var modes = new[] { UiTheme.Mode.XanhMuc, UiTheme.Mode.Trang, UiTheme.Mode.Den };
+            if (themeCardBorders != null)
+            {
+                for (int i = 0; i < modes.Length && i < themeCardBorders.Length; i++)
+                {
+                    bool on = UiTheme.Current == modes[i];
+                    if (themeCardBorders[i] != null) themeCardBorders[i].color = on ? Accent : Line;
+                    if (themeCardLabels[i] != null)
+                    {
+                        themeCardLabels[i].color = on ? Accent : Ink;
+                        themeCardLabels[i].font = on ? GlassKit.Semibold : GlassKit.Regular;
+                    }
+                }
+            }
+            int clickMode = PlayerPrefs.GetInt(UiTheme.ClickModePrefKey, 0);
+            if (clickImmediateChip != null) GlassKit.SetChip(clickImmediateChip, clickMode == 0);
+            if (clickPanelChip != null) GlassKit.SetChip(clickPanelChip, clickMode == 1);
+            SetChipRow(fontScaleChips, UiTheme.FontScaleMode);
+            SetChipRow(panelSizeChips, UiTheme.PanelSizeMode);
+            SelectSettingsTab(currentSettingsTab);
+        }
+
+        void OnTouchSensChanged(float v)
+        {
+            PlayerPrefs.SetFloat(TouchSensPrefKey, Mathf.Clamp(v, 0.05f, 0.50f));
+            PlayerPrefs.Save();
+        }
+
+        void SelectTheme(UiTheme.Mode mode)
+        {
+            if (busy || UiTheme.Current == mode) return;
+            UiTheme.Set(mode);
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+
+        void SelectClickMode(int mode)
+        {
+            PlayerPrefs.SetInt(UiTheme.ClickModePrefKey, mode);
+            PlayerPrefs.Save();
+            if (clickImmediateChip != null) GlassKit.SetChip(clickImmediateChip, mode == 0);
+            if (clickPanelChip != null) GlassKit.SetChip(clickPanelChip, mode == 1);
+        }
+
+        Button[] BuildChipRow(RectTransform parent, string key, string label, string[] options, float topY, float rowWidth, int active, System.Action<int> onSelect)
+        {
+            GlassKit.Label(parent, "Label" + key, label, 17, Ink, true, TextAnchor.UpperLeft, new Vector2(0, topY), new Vector2(rowWidth, 26));
+            var chips = new Button[options.Length];
+            float gap = 12f;
+            float w = (rowWidth - gap * (options.Length - 1)) / options.Length;
+            for (int i = 0; i < options.Length; i++)
+            {
+                int idx = i;
+                chips[i] = GlassKit.MakeChip(parent, "Chip" + key + i, options[i], new Vector2(i * (w + gap), topY - 30f), new Vector2(w, 46), () => onSelect(idx), active == i);
+            }
+            return chips;
+        }
+
+        void SelectFontScale(int mode)
+        {
+            UiTheme.SetFontScale(mode);
+            SetChipRow(fontScaleChips, UiTheme.FontScaleMode);
+        }
+
+        void SelectPanelSize(int mode)
+        {
+            UiTheme.SetPanelSize(mode);
+            SetChipRow(panelSizeChips, UiTheme.PanelSizeMode);
+        }
+
+        static void SetChipRow(Button[] chips, int active)
+        {
+            if (chips == null) return;
+            for (int i = 0; i < chips.Length; i++)
+                if (chips[i] != null) GlassKit.SetChip(chips[i], active == i);
         }
 
         void BuildRoom(RectTransform p)
         {
-            var s = NewScreen(p, Screen.Room, "Phòng học chung", "Phòng học chung", "Cùng vào một phòng lab với cả lớp.");
-            roomJoinField = MakeField(s, Screen.Room, "Ô mã phòng", "Mã phòng hoặc địa chỉ IP", -96, false);
-            MakeButton(s, "Nút Vào phòng", "Vào phòng", new Vector2(0, -182), new Vector2(ContentW, 54), DoJoinRoom, 0);
-            status[Screen.Room] = MakeStatus(s, "Thông báo phòng", -246);
-            hostRelayButton = MakeButton(s, "Nút Mở phòng Internet", "Mở phòng qua Internet", new Vector2(0, -300), new Vector2(ContentW, 54), () => DoHostRoom(true), 1).gameObject;
-            hostLanButton = MakeButton(s, "Nút Mở phòng LAN", "Mở phòng trong mạng LAN", new Vector2(0, -366), new Vector2(ContentW, 54), () => DoHostRoom(false), 1).gameObject;
+            var s = NewScreen(p, Screen.Room, "Phòng học chung", "Phòng học chung", "Cùng vào một phòng lab với cả lớp.", ContentW, 560f);
+            roomJoinField = MakeField(s, Screen.Room, "Ô mã phòng", "Mã phòng hoặc địa chỉ IP", -104, false);
+            MakeButton(s, "Nút Vào phòng", "Vào phòng", new Vector2(0, -190), new Vector2(ContentW, 54), DoJoinRoom, 0);
+            status[Screen.Room] = MakeStatus(s, "Thông báo phòng", -254);
+            hostRelayButton = MakeButton(s, "Nút Mở phòng Internet", "Mở phòng qua Internet", new Vector2(0, -308), new Vector2(ContentW, 54), () => DoHostRoom(true), 1).gameObject;
+            hostLanButton = MakeButton(s, "Nút Mở phòng LAN", "Mở phòng trong mạng LAN", new Vector2(0, -374), new Vector2(ContentW, 54), () => DoHostRoom(false), 1).gameObject;
             System.Action leave = () => { if (!busy) Show(Screen.Home); };
-            MakeButton(s, "Nút quay lại từ phòng", "Quay lại", new Vector2(0, -432), new Vector2(ContentW, 54), leave, 1);
+            MakeButton(s, "Nút quay lại từ phòng", "Quay lại", new Vector2(0, -440), new Vector2(ContentW, 54), leave, 1);
             submit[Screen.Room] = DoJoinRoom;
             back[Screen.Room] = leave;
         }
@@ -612,7 +914,7 @@ namespace Khkt.Menu
 
         void BuildLoading(RectTransform p)
         {
-            var s = NewScreen(p, Screen.Loading, "Đang tải", "Đang mở phòng thí nghiệm", "Lần đầu có thể mất khoảng một phút trên máy yếu.");
+            var s = NewScreen(p, Screen.Loading, "Đang tải", "Đang mở phòng thí nghiệm", "Lần đầu có thể mất khoảng một phút trên máy yếu.", ContentW, 300f);
             var track = Fill(s, "Thanh nền", new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, -120), new Vector2(ContentW, 12), PaperHover, 10f);
             var fill = Stretch(track.rectTransform, "Thanh tiến độ", new Vector2(0, 0), new Vector2(0, 1), Vector2.zero, Vector2.zero);
             loadBar = fill.gameObject.AddComponent<Image>();
@@ -624,14 +926,14 @@ namespace Khkt.Menu
             loadText = GlassKit.Label(s, "Phần trăm", "0 %", 17, InkDim, false, TextAnchor.UpperLeft, new Vector2(0, -144), new Vector2(ContentW, 28));
         }
 
-        InputField MakeField(Transform parent, Screen s, string name, string label, float y, bool password)
+        InputField MakeField(Transform parent, Screen s, string name, string label, float y, bool password, float width = ContentW)
         {
-            GlassKit.Label(parent, name + " (nhãn)", label, 16, Ink, true, TextAnchor.UpperLeft, new Vector2(0, y), new Vector2(ContentW, 24));
-            var size = new Vector2(ContentW, FieldH);
+            GlassKit.Label(parent, name + " (nhãn)", label, 16, Ink, true, TextAnchor.UpperLeft, new Vector2(0, y), new Vector2(width, 24));
+            var size = new Vector2(width, FieldH);
             var outer = Fill(parent, name, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, y - 26), size, Line, RadiusButton);
-            var inner = Fill(outer.transform, "Nền", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, size - new Vector2(3, 3), Paper, RadiusButton);
+            var inner = Fill(outer.transform, "Nền", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, size - new Vector2(3, 3), MenuKit.Hex(0xffffff), RadiusButton);
             inner.raycastTarget = true;
-            var text = GlassKit.Label(outer.transform, "Chữ", "", 18, Ink, false, TextAnchor.MiddleLeft, new Vector2(14, 0), new Vector2(ContentW - 28, FieldH));
+            var text = GlassKit.Label(outer.transform, "Chữ", "", 18, Ink, false, TextAnchor.MiddleLeft, new Vector2(14, 0), new Vector2(width - 28, FieldH));
             text.supportRichText = false;
             text.horizontalOverflow = HorizontalWrapMode.Overflow;
             var f = outer.gameObject.AddComponent<InputField>();
@@ -639,11 +941,12 @@ namespace Khkt.Menu
             f.targetGraphic = inner;
             f.caretColor = Accent;
             f.customCaretColor = true;
-            f.selectionColor = new Color(Accent.r, Accent.g, Accent.b, 0.25f);
+            f.selectionColor = WithAlpha(Accent, 0.25f);
             var colors = f.colors;
-            colors.normalColor = Color.white;
-            colors.highlightedColor = PaperAlt;
-            colors.selectedColor = AccentSoft;
+            colors.normalColor = Paper;
+            colors.highlightedColor = PaperHover;
+            colors.pressedColor = PaperHover;
+            colors.selectedColor = Color.Lerp(Paper, Accent, 0.08f);
             f.colors = colors;
             f.lineType = InputField.LineType.SingleLine;
             if (password)
@@ -655,9 +958,9 @@ namespace Khkt.Menu
             return f;
         }
 
-        static Text MakeStatus(Transform parent, string name, float y)
+        static Text MakeStatus(Transform parent, string name, float y, float width = ContentW)
         {
-            return GlassKit.Label(parent, name, "", 16, Error, false, TextAnchor.UpperLeft, new Vector2(0, y), new Vector2(ContentW, 46));
+            return GlassKit.Label(parent, name, "", 16, Error, false, TextAnchor.UpperLeft, new Vector2(0, y), new Vector2(width, 46));
         }
     }
 }

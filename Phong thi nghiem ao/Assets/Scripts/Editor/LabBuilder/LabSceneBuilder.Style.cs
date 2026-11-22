@@ -210,15 +210,69 @@ namespace Khkt.EditorTools
             }
         }
 
-        /// <summary>Cây xanh trong chậu trắng cao (trang trí phòng hiện đại).</summary>
+        static readonly System.Collections.Generic.Dictionary<string, Mesh> modernPlantMeshes = new System.Collections.Generic.Dictionary<string, Mesh>();
+
+        public static Mesh ModernPlantMesh(string name, bool isLod)
+        {
+            if (modernPlantMeshes.TryGetValue(name, out var cached) && cached != null) return cached;
+
+            int count = isLod ? 10 : 22;
+            var leafMesh = LeafMesh($"T1_ModernLeaf_{(isLod ? "LOD1" : "LOD0")}", 0.30f, 0.13f, 0.06f, isLod);
+            var combine = new System.Collections.Generic.List<CombineInstance>();
+
+            for (int i = 0; i < count; i++)
+            {
+                float t = (float)i / Mathf.Max(1, count - 1);
+                float yaw = i * 137.5f;
+                // Lá tầng dưới ngả rộng và rủ xuống, lá tầng trên đứng và non hơn
+                float pitch = Mathf.Lerp(-55f, -18f, t);
+                float y = Mathf.Lerp(0.08f, 0.52f, t);
+                float leafScale = Mathf.Lerp(1.1f, 0.75f, t);
+                var m = Matrix4x4.TRS(new Vector3(0, y, 0), Quaternion.Euler(0, yaw, 0) * Quaternion.Euler(pitch, 0, 0), Vector3.one * leafScale);
+                combine.Add(new CombineInstance { mesh = leafMesh, transform = m });
+            }
+
+            string path = $"Assets/Lab/Tang2/Meshes/{name}.asset";
+            var mesh = AssetDatabase.LoadAssetAtPath<Mesh>(path);
+            bool isNew = mesh == null;
+            if (isNew) mesh = new Mesh { name = name };
+            else mesh.Clear();
+            mesh.CombineMeshes(combine.ToArray(), true, true);
+            mesh.RecalculateBounds();
+            if (isNew) AssetDatabase.CreateAsset(mesh, path);
+            else EditorUtility.SetDirty(mesh);
+            modernPlantMeshes[name] = mesh;
+            return mesh;
+        }
+
+        /// <summary>Cây xanh trong chậu trắng cao (trang trí phòng hiện đại với tán lá thật, gân lá, thân cành và LOD).</summary>
         static void ModernPlant(Transform p, Vector3 pos, float scale = 1f)
         {
             var g = Group("Cây xanh", p, pos);
             var potMesh = Lathe("ChauTrangCao", 24, V(0, 0), V(0.16f, 0), V(0.16f, 0), V(0.19f, 0.5f), V(0.2f, 0.52f), V(0.2f, 0.55f), V(0, 0.55f));
             MeshObj(g, "Chậu", potMesh, Vector3.zero, potWhite, true, null, scale);
-            Ball(g, "Tán lá", new Vector3(0, 0.95f, 0) * scale, new Vector3(0.55f, 0.75f, 0.55f) * scale, foliage);
-            Ball(g, "Tán lá", new Vector3(0.12f, 1.2f, 0.05f) * scale, new Vector3(0.38f, 0.5f, 0.38f) * scale, foliageDark);
-            Ball(g, "Tán lá", new Vector3(-0.1f, 1.1f, -0.08f) * scale, new Vector3(0.34f, 0.45f, 0.34f) * scale, foliage);
+
+            // 1. Mặt đất màu ẩm bên trong miệng chậu
+            Cyl(g, "Đất", new Vector3(0, 0.53f * scale, 0), 0.185f * scale, 0.02f * scale, pot);
+
+            // 2. Thân cây gỗ chính và các nhánh cành uốn lượn
+            Cyl(g, "Thân cây", new Vector3(0, 0.68f * scale, 0), 0.016f * scale, 0.30f * scale, trunk);
+            Cyl(g, "Cành", new Vector3(0.04f, 0.86f, 0.03f) * scale, 0.011f * scale, 0.20f * scale, trunk, false, new Vector3(15, 45, 0));
+            Cyl(g, "Cành", new Vector3(-0.04f, 0.84f, -0.03f) * scale, 0.010f * scale, 0.18f * scale, trunk, false, new Vector3(-18, -120, 0));
+
+            // 3. Tán lá chi tiết với gân lá, độ cong, xuyên sáng và LOD
+            var m0 = ModernPlantMesh("T1_ModernPlant_LOD0", false);
+            var m1 = ModernPlantMesh("T1_ModernPlant_LOD1", true);
+
+            var canopy0 = MeshObj(g, "Tán lá", m0, new Vector3(0, 0.65f * scale, 0), foliage, false, null, scale);
+            var canopy1 = MeshObj(g, "Tán lá (LOD1)", m1, new Vector3(0, 0.65f * scale, 0), foliageDark, false, null, scale);
+
+            var lodGroup = g.gameObject.AddComponent<LODGroup>();
+            var lods = new LOD[2];
+            lods[0] = new LOD(0.25f, new Renderer[] { canopy0.GetComponent<Renderer>() });
+            lods[1] = new LOD(0.04f, new Renderer[] { canopy1.GetComponent<Renderer>() });
+            lodGroup.SetLODs(lods);
+            lodGroup.RecalculateBounds();
         }
 
         // ---------------------------------------------------------------------

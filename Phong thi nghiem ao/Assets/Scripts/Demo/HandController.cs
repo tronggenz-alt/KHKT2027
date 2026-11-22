@@ -2,7 +2,9 @@ using System.Collections.Generic;
 using Khkt.Input;
 using Khkt.Interaction;
 using Khkt.Interaction.Bio;
+using Khkt.Simulation;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 namespace Khkt.Demo
@@ -69,10 +71,22 @@ namespace Khkt.Demo
         float pressTime = -1f, dropCooldown;
         bool wasDown;
         bool swirlStarted;
+        GameObject inspectHoldTarget;
+        float inspectHoldTimer;
+        bool inspectHoldOpened;
+        bool inspectProgressShown;
         Vector3 handPos;
         float tilt;
         float heldYaw;  // xoay bộ phận đang cầm (lăn chuột / R E) để chọn chiều khi lắp
         Transform pourStream;
+        readonly HashSet<(GameObject heldObj, LabContainer target, string riskKey)> confirmedSafety = new HashSet<(GameObject, LabContainer, string)>();
+        float safetyBlockedUntil;
+
+        static readonly string[] WaterReactiveIds =
+        {
+            "K(s)", "Na(s)", "Li(s)", "Ba(s)", "Ca(s)",
+            "CaC2(s)", "Al4C3(s)", "NaH(s)", "LiAlH4(s)", "NaBH4(s)"
+        };
 
         void Awake() => Active = this;
 
@@ -101,6 +115,7 @@ namespace Khkt.Demo
 
         void OnDestroy()
         {
+            CancelInspectHold();
             PadInput.ControllerChanged -= OnControllerChanged;
             PadInput.Notice -= OnPadNotice;
             VeraPointer.Message -= OnPadNotice;
@@ -188,6 +203,8 @@ namespace Khkt.Demo
             released = aR;
         }
 
+        void OnDisable() => CancelInspectHold();
+
         void OnPadNotice(string text) => Say(text);
 
         void OnControllerChanged(bool connected, string who)
@@ -196,12 +213,39 @@ namespace Khkt.Demo
             else Say("Mất kết nối tay cầm", LabProcedure.Tone.Warn);
         }
 
+        static bool IsOpenPanelOnClick => PlayerPrefs.GetInt(UiTheme.ClickModePrefKey, 0) == 1;
+
+        GameObject GetInspectTarget()
+        {
+            if (Held != null || (!ToolPanel.Enabled && !ToolPanel.ForceEnableForTest)) return null;
+            if ((Current == Act.Pick || Current == Act.Swirl) && hoverGrab != null)
+            {
+                if (hoverGrab.GetComponentInParent<IMachinePanel>() != null) return null;
+                return hoverGrab.gameObject;
+            }
+            if (Current == Act.Stopcock && stopcock != null && stopcock.buret != null)
+                return stopcock.buret.gameObject;
+            return null;
+        }
+
+        void CancelInspectHold()
+        {
+            inspectHoldTimer = 0f;
+            inspectHoldTarget = null;
+            if (inspectProgressShown)
+            {
+                LabToasts.HideProgress();
+                inspectProgressShown = false;
+            }
+        }
+
         void Update()
         {
             var mouse = Mouse.current;
             var kb = Keyboard.current;
-            bool uiOpen = Khkt.Environment.DesktopViewer.UiCapture > 0;
+            bool uiOpen = Khkt.Environment.DesktopViewer.UiCapture > 0 || ToolPanel.IsOpen || MachinePanel.IsOpen || ModernUI.IsSafetyModalOpen;
             bool looking = uiOpen || (mouse != null && mouse.rightButton.isPressed && !Khkt.Environment.DesktopViewer.MouseLook);
+            bool pointerOnUi = !OverrideHold && !Khkt.Environment.DesktopViewer.MouseLook && EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
             float dt = Time.deltaTime;
 
             if (!looking) Raycast(mouse);
@@ -211,7 +255,7 @@ namespace Khkt.Demo
             PadInput.AimHasTarget = Current != Act.None;
 
             bool shift = OverrideShift || (kb != null && (kb.leftShiftKey.isPressed || kb.rightShiftKey.isPressed)) || PadInput.Shift;
-            bool down = OverrideHold || (!looking && mouse != null && mouse.leftButton.isPressed) || (!uiOpen && PadInput.Use);
+            bool down = OverrideHold || (!looking && !pointerOnUi && mouse != null && mouse.leftButton.isPressed) || (!uiOpen && PadInput.Use);
             bool pressed = down && !wasDown;
             bool released = !down && wasDown;
             wasDown = down;
@@ -219,20 +263,84 @@ namespace Khkt.Demo
             else if (vera != null) vera.FineMode = false;
             if (pressed) pressTime = Time.time;
 
+            if (uiOpen)
+            {
+                CancelInspectHold();
+                inspectHoldOpened = false;
+            }
+
+            bool openPanelOnClick = IsOpenPanelOnClick;
+            var inspectTarget = !uiOpen ? GetInspectTarget() : null;
+
             Acting = false;
             dropCooldown -= dt;
             switch (Current)
             {
                 case Act.Pick:
-                    if (pressed) Pick(hoverGrab);
+                    if (openPanelOnClick && inspectTarget != null)
+                    {
+                        if (pressed)
+                        {
+                            CancelInspectHold();
+                            ToolPanel.OpenObject(inspectTarget);
+                        }
+                    }
+                    else if (inspectTarget != null)
+                    {
+                        if (pressed)
+                        {
+                            inspectHoldTarget = inspectTarget;
+                            inspectHoldTimer = 0f;
+                            inspectHoldOpened = false;
+                        }
+                        if (down && !inspectHoldOpened && inspectHoldTarget == inspectTarget)
+                        {
+                            inspectHoldTimer += dt;
+                            if (inspectHoldTimer >= 0.12f)
+                            {
+                                LabToasts.Progress("Mở chi tiết", Mathf.Clamp01(inspectHoldTimer / 0.4f));
+                                inspectProgressShown = true;
+                            }
+                            if (inspectHoldTimer >= 0.4f)
+                            {
+                                inspectHoldOpened = true;
+                                CancelInspectHold();
+                                ToolPanel.OpenObject(inspectTarget);
+                            }
+                        }
+                        else if (down && inspectHoldTarget != inspectTarget)
+                        {
+                            CancelInspectHold();
+                        }
+                        if (released)
+                        {
+                            bool shouldPick = !inspectHoldOpened && inspectHoldTarget == inspectTarget && pressTime >= 0;
+                            CancelInspectHold();
+                            inspectHoldOpened = false;
+                            if (shouldPick) Pick(hoverGrab);
+                        }
+                    }
+                    else
+                    {
+                        if (pressed) Pick(hoverGrab);
+                    }
                     break;
                 case Act.Swirl:
-                    // Giữ lâu là lắc bình tại chỗ, bấm nhanh là cầm lên
+                    // Giữ lâu là lắc bình tại chỗ, bấm nhanh là cầm lên (hoặc mở bảng chi tiết nếu bật chế độ Mở bảng)
                     if (down && pressTime >= 0 && Time.time - pressTime > 0.2f) { swirlStarted = true; Acting = true; }
-                    if (released && !swirlStarted && pressTime >= 0) Pick(hoverGrab);
+                    if (released && !swirlStarted && pressTime >= 0)
+                    {
+                        if (openPanelOnClick && inspectTarget != null) ToolPanel.OpenObject(inspectTarget);
+                        else Pick(hoverGrab);
+                    }
                     break;
                 case Act.Use:
-                    if (pressed) usable.Use();
+                    if (pressed)
+                    {
+                        // máy có bảng điều khiển: mở bảng chỉnh thông số rồi mới chạy
+                        if (MachinePanel.Enabled && usable is IMachinePanel machine) MachinePanel.Open(machine);
+                        else usable.Use();
+                    }
                     break;
                 case Act.Stopcock:
                     if (mouse != null)
@@ -242,6 +350,48 @@ namespace Khkt.Demo
                     }
                     float padY = PadInput.Look.y;  // đẩy cần nhìn lên: mở thêm, kéo xuống: đóng bớt
                     if (Mathf.Abs(padY) > 0.05f) stopcock.buret.AdjustOpening(padY * keyRate * (shift ? 0.25f : 1f) * dt);
+
+                    if (openPanelOnClick && inspectTarget != null)
+                    {
+                        if (pressed)
+                        {
+                            CancelInspectHold();
+                            ToolPanel.OpenObject(inspectTarget);
+                        }
+                    }
+                    else if (inspectTarget != null)
+                    {
+                        if (pressed)
+                        {
+                            inspectHoldTarget = inspectTarget;
+                            inspectHoldTimer = 0f;
+                            inspectHoldOpened = false;
+                        }
+                        if (down && !inspectHoldOpened && inspectHoldTarget == inspectTarget)
+                        {
+                            inspectHoldTimer += dt;
+                            if (inspectHoldTimer >= 0.12f)
+                            {
+                                LabToasts.Progress("Mở chi tiết", Mathf.Clamp01(inspectHoldTimer / 0.4f));
+                                inspectProgressShown = true;
+                            }
+                            if (inspectHoldTimer >= 0.4f)
+                            {
+                                inspectHoldOpened = true;
+                                CancelInspectHold();
+                                ToolPanel.OpenObject(inspectTarget);
+                            }
+                        }
+                        else if (down && inspectHoldTarget != inspectTarget)
+                        {
+                            CancelInspectHold();
+                        }
+                        if (released)
+                        {
+                            CancelInspectHold();
+                            inspectHoldOpened = false;
+                        }
+                    }
                     break;
                 case Act.Place:
                     if (pressed) PlaceInSocket(TargetSocket);
@@ -250,7 +400,12 @@ namespace Khkt.Demo
                     if (pressed) PlaceOnSurface(hit.point);
                     break;
                 case Act.Pour:
-                    if (down) { Acting = true; Pour(dt); }
+                    if (down && Time.unscaledTime >= safetyBlockedUntil)
+                    {
+                        if (TryGateUnsafeAction(Held.gameObject, TargetContainer, Act.Pour)) break;
+                        Acting = true;
+                        Pour(dt);
+                    }
                     break;
                 case Act.Suck:
                     if (down)
@@ -263,32 +418,41 @@ namespace Khkt.Demo
                     }
                     break;
                 case Act.PipetteDrain:
-                    if (down)
+                    if (down && Time.unscaledTime >= safetyBlockedUntil)
                     {
+                        if (TryGateUnsafeAction(Held.gameObject, TargetContainer, Act.PipetteDrain)) break;
                         Acting = true;
                         Held.GetComponent<Pipette>().Drain(TargetContainer, dt, trim: shift);
                     }
                     break;
                 case Act.Drop:
-                    if (pressed && dropCooldown <= 0)
+                    if (pressed && dropCooldown <= 0 && Time.unscaledTime >= safetyBlockedUntil)
                     {
+                        if (TryGateUnsafeAction(Held.gameObject, TargetContainer, Act.Drop)) break;
                         Held.GetComponent<Dropper>().DropInto(TargetContainer);
                         dropCooldown = 0.25f;
                     }
                     break;
                 case Act.Spray:
-                    if (down) { Acting = true; Held.GetComponent<WashBottle>().SprayInto(TargetContainer, dt); }
+                    if (down && Time.unscaledTime >= safetyBlockedUntil)
+                    {
+                        if (TryGateUnsafeAction(Held.gameObject, TargetContainer, Act.Spray)) break;
+                        Acting = true;
+                        Held.GetComponent<WashBottle>().SprayInto(TargetContainer, dt);
+                    }
                     break;
                 case Act.Scoop:
-                    if (pressed && dropCooldown <= 0)
+                    if (pressed && dropCooldown <= 0 && Time.unscaledTime >= safetyBlockedUntil)
                     {
+                        if (TryGateUnsafeAction(Held.gameObject, TargetContainer, Act.Scoop)) break;
                         if (!Held.GetComponent<ChemicalBottle>().ScoopInto(TargetContainer)) Say("Lọ đã hết hóa chất");
                         dropCooldown = 0.3f;
                     }
                     break;
                 case Act.Bubble:
-                    if (down)
+                    if (down && Time.unscaledTime >= safetyBlockedUntil)
                     {
+                        if (TryGateUnsafeAction(Held.gameObject, TargetContainer, Act.Bubble)) break;
                         Acting = true;
                         var cb = Held.GetComponent<ChemicalBottle>();
                         cb.BubbleInto(TargetContainer, dt);
@@ -352,6 +516,11 @@ namespace Khkt.Demo
                     }
                     break;
             }
+            if ((Current != Act.Pick && Current != Act.Stopcock) || !down)
+            {
+                CancelInspectHold();
+                if (!down) inspectHoldOpened = false;
+            }
             if (Current != Act.BioTarget || !down)
             {
                 bioHoldTimer = 0f;
@@ -393,16 +562,47 @@ namespace Khkt.Demo
                 float keys = kb != null ? (kb.upArrowKey.isPressed ? 1 : 0) - (kb.downArrowKey.isPressed ? 1 : 0) : 0;
                 if (!uiOpen) keys = Mathf.Clamp(keys + PadInput.StopcockAxis, -1, 1);
                 if (keys != 0) procedure.buret.AdjustOpening(keys * keyRate * (shift ? 0.25f : 1f) * dt);
-                if (kb != null && kb.spaceKey.wasPressedThisFrame) procedure.buret.Close();
+                if (((kb != null && kb.spaceKey.wasPressedThisFrame) || (!uiOpen && PadInput.CloseStopcockPressed)))
+                {
+                    procedure.buret.Close();
+                    PadInput.CloseStopcockPressed = false;
+                }
             }
             if (((kb != null && kb.qKey.wasPressedThisFrame) || (!uiOpen && PadInput.BackPressed)) && Held != null) ReturnHome();
             if (!uiOpen)
             {
+                bool onFloor2 = viewCamera != null && viewCamera.transform.position.y > 3.0f;
+                var bioProc = onFloor2 ? Khkt.Demo.Bio.BioLabProcedure.Instance : null;
                 bool enter = kb != null && (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame);
-                if (procedure != null && (enter || PadInput.RecordPressed)) procedure.RecordReading();
-                if (kb != null && procedure != null && procedure.Active && kb.rKey.wasPressedThisFrame && HeldPart == null) procedure.NewRun();
+                if (enter || PadInput.RecordPressed)
+                {
+                    if (bioProc != null && bioProc.Active) bioProc.RecordReading();
+                    else if (procedure != null) procedure.RecordReading();
+                }
+                if (HeldPart == null && ((kb != null && kb.rKey.wasPressedThisFrame) || PadInput.NewRunPressed))
+                {
+                    if (bioProc != null && bioProc.Active)
+                    {
+                        bioProc.NewRun();
+                        PadInput.NewRunPressed = false;
+                    }
+                    else if (procedure != null && procedure.Active)
+                    {
+                        procedure.NewRun();
+                        PadInput.NewRunPressed = false;
+                    }
+                }
                 if (ui != null && ((kb != null && kb.hKey.wasPressedThisFrame) || PadInput.HelpPressed)) ui.ToggleHelp();
-                if (kb != null && ui != null && kb.gKey.wasPressedThisFrame) ui.ToggleGraph();
+                if (ui != null && ((kb != null && kb.gKey.wasPressedThisFrame) || PadInput.ToggleGraphPressed))
+                {
+                    ui.ToggleGraph();
+                    PadInput.ToggleGraphPressed = false;
+                }
+                if (PadInput.NextThemePressed)
+                {
+                    Khkt.Environment.Tang2.BioThemeSwitcher.Instance?.ToggleTheme();
+                    PadInput.NextThemePressed = false;
+                }
             }
 
             // Lắp ráp: xoay bộ phận đang cầm, bóng mờ xem trước chỗ lắp
@@ -411,6 +611,8 @@ namespace Khkt.Demo
                 float turn = 0;
                 if (mouse != null && !looking) turn += Mathf.Sign(mouse.scroll.ReadValue().y) * (Mathf.Abs(mouse.scroll.ReadValue().y) > 0.01f ? 1 : 0);
                 if (kb != null) turn += (kb.rKey.wasPressedThisFrame ? 1 : 0) - (kb.eKey.wasPressedThisFrame ? 1 : 0);
+                turn += PadInput.HeldYawStep;
+                PadInput.HeldYawStep = 0;
                 heldYaw += turn * 15f;
             }
             var fab = Khkt.Assembly.FabricationWorkspace.Instance;
@@ -424,7 +626,15 @@ namespace Khkt.Demo
 
             UpdatePose(dt);
             UpdatePadFeedback();
-            BuildHints();
+            // Gợi ý thao tác ghép chuỗi mới mỗi lần dựng: dựng lại ngay khi đổi vật / đổi thao tác, còn lại 10 lần/giây
+            // (đủ cho số đo, "Đang quay..." chạy theo) thay vì mỗi khung hình.
+            int sig = HintSignature();
+            if (sig != hintSig || Time.unscaledTime >= hintNextAt)
+            {
+                hintSig = sig;
+                hintNextAt = Time.unscaledTime + 0.1f;
+                BuildHints();
+            }
             if (outline != null) outline.SetTarget(TargetSocket != null ? null : HoverRoot);
             foreach (var s in sockets)
                 s.Highlight(Held != null && s.Accepts(Held), s == TargetSocket);
@@ -458,6 +668,23 @@ namespace Khkt.Demo
                 hit = rayHits[i];
                 hasHit = true;
             }
+            if (!hasHit && PadInput.UsingTouch)
+            {
+                // Vì lam kính, kim rất nhỏ, thêm hút ngắm nhẹ chỉ ở chế độ cảm ứng:
+                // tia thẳng không trúng vật cầm được thì SphereCast bán kính khoảng 1,5 cm
+                RaycastHit sphereHit;
+                if (Physics.SphereCast(ray, 0.015f, out sphereHit, reach, ~0, QueryTriggerInteraction.Collide))
+                {
+                    if (sphereHit.collider.GetComponentInParent<Grabbable>() != null ||
+                        sphereHit.collider.GetComponentInParent<PlaceSocket>() != null ||
+                        sphereHit.collider.GetComponentInParent<IDemoUsable>() != null ||
+                        sphereHit.collider.GetComponent<StopcockHandle>() != null)
+                    {
+                        hit = sphereHit;
+                        hasHit = true;
+                    }
+                }
+            }
             lastRay = ray;  // tia thật: bàn tay và vật đang cầm đi theo tia này (không theo tia đã nắn, để vật không giật)
 
             // Hút mục tiêu: chỉ cho tay cầm (VERA, tay cầm chơi game trỏ tâm màn hình), không cho con trỏ chuột tự do
@@ -573,10 +800,67 @@ namespace Khkt.Demo
                 if (Held.GetComponent<TestPaper>() != null) { Current = Act.PaperTest; return; }
                 if (heldContainer != null) { Current = Act.Pour; return; }
             }
-            if (surface != null) { Current = Act.PlaceSurface; HoverRoot = null; }
+            if (surface != null)
+            {
+                if (hit.normal.y > 0.7f)
+                {
+                    Current = Act.PlaceSurface;
+                    HoverRoot = null;
+                }
+            }
         }
 
         // ---------- Cầm, đặt ----------
+
+        public void PickFromPanel(GameObject go)
+        {
+            if (go == null) return;
+            var raw = go.GetComponentInParent<Grabbable>();
+            var g = Khkt.Assembly.ApparatusPart.WorldGrab(raw);
+            if (g == null) g = raw;
+            if (g == null || Held == g) return;
+            if (Held != null) ReturnHome();
+            if (Held != null) return;
+            Pick(g);
+        }
+
+        public bool ReturnToHomeFromPanel(GameObject go)
+        {
+            if (go == null) return false;
+            var raw = go.GetComponentInParent<Grabbable>();
+            var g = Khkt.Assembly.ApparatusPart.WorldGrab(raw);
+            if (g == null) g = raw;
+            if (g == null) return false;
+            if (Held == g)
+            {
+                ReturnHome();
+                return Held == null;
+            }
+            if (!CanPutDown(g)) return false;
+            var buret = g.GetComponent<BuretStopcock>();
+            if (buret != null && buret.HasLiquid && g.Socket != null && g.Socket.mountsBuret)
+            {
+                procedure?.Say("Buret đang chứa dung dịch: xả hết rồi mới tháo khỏi giá", LabProcedure.Tone.Warn);
+                return false;
+            }
+            if (g.Socket != null) g.SetSocket(null);
+            if (g.HomeSocket != null && g.HomeSocket.Occupant == null)
+            {
+                g.HomeSocket.Put(g);
+            }
+            else
+            {
+                g.transform.SetPositionAndRotation(g.HomePosition, g.HomeRotation);
+                int homeZone = Khkt.Rendering.ZoneMap.At(g.HomePosition);
+                var homeRoot = Khkt.Rendering.ZoneRoot.Of(homeZone);
+                if (homeRoot != null)
+                {
+                    g.transform.SetParent(homeRoot.transform, true);
+                    if (homeRoot.Parked) g.gameObject.SetActive(false);
+                }
+            }
+            return true;
+        }
 
         public void Pick(Grabbable g)
         {
@@ -594,6 +878,8 @@ namespace Khkt.Demo
                 return;
             }
             Held = g;
+            var go = g.gameObject;
+            confirmedSafety.RemoveWhere(k => k.heldObj == go);
             g.SetHeld(true);
             tilt = 0;
             heldYaw = 0;
@@ -627,17 +913,142 @@ namespace Khkt.Demo
 
         public void PlaceOnSurface(Vector3 point)
         {
-            if (Held == null || !CanPutDown(Held)) return;
+            if (Held == null)
+            {
+                Debug.Log("[PlaceOnSurface-REJECT] Held is null");
+                return;
+            }
+            if (!CanPutDown(Held))
+            {
+                Debug.Log($"[PlaceOnSurface-REJECT] CanPutDown({Held.name}) is false");
+                return;
+            }
+
+            RaycastHit surfaceHit = hit;
+            bool validSurface = hasHit;
+            // Luôn kiểm tra raycast xuống ngay tại điểm point để xác nhận có mặt bàn đỡ bên dưới
+            if (Physics.Raycast(point + Vector3.up * 0.05f, Vector3.down, out var downHit, 0.2f, ~0, QueryTriggerInteraction.Ignore))
+            {
+                surfaceHit = downHit;
+                validSurface = true;
+            }
+            else
+            {
+                validSurface = false;
+            }
+
+            if (!validSurface || surfaceHit.collider == null || surfaceHit.collider.GetComponentInParent<PlaceSurface>() == null)
+            {
+                Debug.Log($"[PlaceOnSurface-REJECT] Không có PlaceSurface tại {point}. validSurface={validSurface}, hitCol={surfaceHit.collider?.name}");
+                procedure?.Say("Không tìm thấy mặt bàn ở vị trí này", LabProcedure.Tone.Warn);
+                return;
+            }
+
+            if (surfaceHit.normal.y <= 0.7f)
+            {
+                Debug.Log($"[PlaceOnSurface-REJECT] normal.y = {surfaceHit.normal.y:0.00} <= 0.7f");
+                procedure?.Say("Không thể đặt vật vào cạnh hoặc mặt nghiêng", LabProcedure.Tone.Warn);
+                return;
+            }
+
             var g = Held;
+            Vector3 placePos = surfaceHit.point; // Dùng chính xác tọa độ tiếp xúc vật lý mặt bàn
+
+            // 1. Kiểm tra ranh giới mặt bàn: điểm đặt phải nằm trọn trong mặt bàn
+            float itemRadius = g.liesOnTable ? g.lengthM * 0.5f : Mathf.Max(0.02f, g.lyingRadiusM > 0 ? g.lyingRadiusM : 0.03f);
+            if (surfaceHit.collider is BoxCollider boxCol)
+            {
+                Vector3 localPoint = boxCol.transform.InverseTransformPoint(placePos);
+                Vector3 halfSize = boxCol.size * 0.5f;
+                float marginX = itemRadius;
+                float marginZ = itemRadius;
+
+                if (halfSize.x > marginX * 1.05f && Mathf.Abs(localPoint.x - boxCol.center.x) > halfSize.x - marginX)
+                {
+                    Debug.Log($"[PlaceOnSurface-REJECT] Quá gần mép bàn X (localX={localPoint.x:0.000}, halfSize.x={halfSize.x:0.000}, marginX={marginX:0.000})");
+                    procedure?.Say("Vị trí quá gần mép bàn", LabProcedure.Tone.Warn);
+                    return;
+                }
+                if (halfSize.z > marginZ * 1.05f && Mathf.Abs(localPoint.z - boxCol.center.z) > halfSize.z - marginZ)
+                {
+                    Debug.Log($"[PlaceOnSurface-REJECT] Quá gần mép bàn Z (localZ={localPoint.z:0.000}, halfSize.z={halfSize.z:0.000}, marginZ={marginZ:0.000})");
+                    procedure?.Say("Vị trí quá gần mép bàn", LabProcedure.Tone.Warn);
+                    return;
+                }
+            }
+
+            // 2. Physics.OverlapBox kiểm tra va chạm với vật đã có
+            Vector3 testPos;
+            Quaternion testRot;
+            Vector3 halfBox;
+
+            if (g.liesOnTable)
+            {
+                Vector3 d = Flat(viewCamera != null ? viewCamera.transform.right : Vector3.right);
+                if (d.sqrMagnitude < 1e-4f) d = Vector3.forward;
+                else d = d.normalized;
+                testPos = placePos + Vector3.up * g.lyingRadiusM;
+                testRot = Quaternion.FromToRotation(Vector3.up, d);
+                halfBox = new Vector3(g.lyingRadiusM, g.lyingRadiusM, g.lengthM * 0.5f);
+            }
+            else
+            {
+                float h = g.gripHeightM > 0 ? g.gripHeightM : 0.08f;
+                testPos = placePos + Vector3.up * (h * 0.5f);
+                testRot = Quaternion.Euler(0, g.HomeRotation.eulerAngles.y + heldYaw, 0);
+                halfBox = new Vector3(itemRadius, h * 0.5f, itemRadius);
+            }
+
+            var overlaps = Physics.OverlapBox(testPos, halfBox * 0.85f, testRot, ~0, QueryTriggerInteraction.Ignore);
+            bool blocked = false;
+            Collider blockedBy = null;
+            foreach (var c in overlaps)
+            {
+                if (c == surfaceHit.collider) continue;
+                if (c.transform.IsChildOf(g.transform)) continue;
+                if (c.isTrigger) continue;
+                if (c is CharacterController || c.GetComponentInParent<Khkt.Environment.DesktopViewer>() != null) continue; // Người chơi không tự cản mình
+                if (c.GetComponentInParent<PlaceSurface>() != null) continue; // mặt bàn / mảnh ghép mặt bàn
+                if (surfaceHit.collider.transform.parent != null && c.transform.IsChildOf(surfaceHit.collider.transform.parent)) continue; // cùng cụm bàn
+                if (c.transform.IsChildOf(surfaceHit.collider.transform.root) && c.GetComponentInParent<Grabbable>() == null && c.GetComponentInParent<IDemoUsable>() == null) continue; // chi tiết kiến trúc bàn/phòng
+                blocked = true;
+                blockedBy = c;
+                break;
+            }
+
+            if (blocked)
+            {
+                Debug.Log($"[PlaceOnSurface-REJECT] Bị vướng {blockedBy?.name} (parent: {blockedBy?.transform.parent?.name}) tại {testPos}");
+                procedure?.Say("Vị trí bị vướng vật khác", LabProcedure.Tone.Warn);
+                return;
+            }
+
+            // 3. Tiến hành đặt vật xuống
             Held = null;
             g.SetHeld(false);
             if (g.liesOnTable)
             {
-                Vector3 d = Flat(viewCamera.transform.right);
-                g.transform.SetPositionAndRotation(point + Vector3.up * g.lyingRadiusM - d * g.lengthM / 2,
+                Vector3 d = Flat(viewCamera != null ? viewCamera.transform.right : Vector3.right);
+                if (d.sqrMagnitude < 1e-4f) d = Vector3.forward;
+                else d = d.normalized;
+                g.transform.SetPositionAndRotation(placePos + Vector3.up * g.lyingRadiusM - d * g.lengthM / 2,
                                                    Quaternion.FromToRotation(Vector3.up, d));
             }
-            else g.transform.SetPositionAndRotation(point + Vector3.up * 0.001f, Quaternion.Euler(0, g.HomeRotation.eulerAngles.y + heldYaw, 0));
+            else
+            {
+                // Bình thủy tinh đặt xuống bàn: xoay nhãn và vạch chia thể tích (+x) hướng về phía mắt người chơi
+                Vector3 lookDir = Flat((viewCamera != null ? viewCamera.transform.position : Vector3.zero) - placePos);
+                float faceYaw = lookDir.sqrMagnitude > 1e-4f ? (Quaternion.LookRotation(lookDir, Vector3.up).eulerAngles.y - 90f) : g.HomeRotation.eulerAngles.y;
+                g.transform.SetPositionAndRotation(placePos, Quaternion.Euler(0, faceYaw + heldYaw, 0));
+            }
+
+            int currentZone = Khkt.Rendering.ZoneMap.At(g.transform.position);
+            var zRoot = Khkt.Rendering.ZoneRoot.Of(currentZone);
+            if (zRoot != null && !zRoot.Parked && g.transform.parent != zRoot.transform)
+            {
+                g.transform.SetParent(zRoot.transform, true);
+            }
+
             var part = g.GetComponent<Khkt.Assembly.ApparatusPart>();
             if (part != null) Khkt.Assembly.ApparatusPart.NotifyChanged(part.Root);
         }
@@ -664,8 +1075,21 @@ namespace Khkt.Demo
             var g = Held;
             Held = null;
             g.SetHeld(false);
-            if (g.HomeSocket != null && g.HomeSocket.Occupant == null) g.HomeSocket.Put(g);
-            else g.transform.SetPositionAndRotation(g.HomePosition, g.HomeRotation);
+            if (g.HomeSocket != null && g.HomeSocket.Occupant == null)
+            {
+                g.HomeSocket.Put(g);
+            }
+            else
+            {
+                g.transform.SetPositionAndRotation(g.HomePosition, g.HomeRotation);
+                int homeZone = Khkt.Rendering.ZoneMap.At(g.HomePosition);
+                var homeRoot = Khkt.Rendering.ZoneRoot.Of(homeZone);
+                if (homeRoot != null)
+                {
+                    g.transform.SetParent(homeRoot.transform, true);
+                    if (homeRoot.Parked) g.gameObject.SetActive(false);
+                }
+            }
         }
 
         bool CanPutDown(Grabbable g)
@@ -704,6 +1128,182 @@ namespace Khkt.Demo
             if (spill > 0) procedure?.Say($"Tràn! {to.label} đã đầy", LabProcedure.Tone.Warn);
         }
 
+        bool TryGateUnsafeAction(GameObject heldObj, LabContainer target, Act act)
+        {
+            if (heldObj == null) return false;
+            if (!EvaluateSafetyRisk(heldObj, target, act, out string riskKey, out string title, out string reason, out string safeHint))
+                return false;
+
+            var key = (heldObj, target, riskKey);
+            if (confirmedSafety.Contains(key)) return false;
+
+            Acting = false;
+            safetyBlockedUntil = Time.unscaledTime + 0.35f;
+            var capturedBottle = act == Act.Scoop ? heldObj.GetComponent<ChemicalBottle>() : null;
+            var capturedDropper = act == Act.Drop ? heldObj.GetComponent<Dropper>() : null;
+            var capturedTarget = target;
+
+            ModernUI.ShowSafetyWarning(
+                title,
+                reason,
+                onProceed: () =>
+                {
+                    confirmedSafety.Add(key);
+                    safetyBlockedUntil = Time.unscaledTime + 0.05f;
+                    if (act == Act.Scoop && capturedBottle != null && capturedTarget != null && Held != null && Held.gameObject == heldObj)
+                    {
+                        if (!capturedBottle.ScoopInto(capturedTarget)) Say("Lọ đã hết hóa chất");
+                        dropCooldown = 0.3f;
+                    }
+                    else if (act == Act.Drop && capturedDropper != null && capturedTarget != null && Held != null && Held.gameObject == heldObj)
+                    {
+                        capturedDropper.DropInto(capturedTarget);
+                        dropCooldown = 0.25f;
+                    }
+                },
+                onChangeApproach: () =>
+                {
+                    safetyBlockedUntil = Time.unscaledTime + 0.5f;
+                    Say(safeHint, LabProcedure.Tone.Warn);
+                });
+            return true;
+        }
+
+        static bool EvaluateSafetyRisk(GameObject heldObj, LabContainer target, Act act,
+            out string riskKey, out string title, out string reason, out string safeHint)
+        {
+            riskKey = title = reason = safeHint = null;
+            var bottle = heldObj.GetComponent<ChemicalBottle>();
+            var fromContainer = heldObj.GetComponent<LabContainer>();
+            bool isSpray = act == Act.Spray;
+
+            Solution fromSol = default;
+            if (fromContainer != null && fromContainer.VolumeMl > 0.01f)
+            {
+                fromSol = fromContainer.Total;
+            }
+            else if (act == Act.Drop)
+            {
+                var dropper = heldObj.GetComponent<Dropper>();
+                if (dropper != null && dropper.source != null && dropper.source.VolumeMl > 0.01f)
+                    fromSol = dropper.source.Total;
+                else if (dropper != null && dropper.catalogStt > 0 && ChemicalCatalog.Instance != null)
+                {
+                    var ce = ChemicalCatalog.Instance.Get(dropper.catalogStt);
+                    if (ce != null) fromSol = ChemicalCatalog.Instance.Make(ce, 1f);
+                }
+            }
+
+            // 1. Sục bình khí độc ngoài tủ hút
+            if (act == Act.Bubble && bottle != null && bottle.IsGas && bottle.Entry != null &&
+                (bottle.Entry.HasHazard("doc") || bottle.Entry.HasHazard("khi_doc")))
+            {
+                bool inHood = target != null ? target.InFumeHood : FumeHoodZone.Covers(heldObj.transform.position);
+                if (!inHood)
+                {
+                    string formula = !string.IsNullOrEmpty(bottle.Entry.Formula) ? bottle.Entry.Formula : bottle.DisplayName;
+                    riskKey = "khi_doc_bubble";
+                    title = $"Nguy cơ rò rỉ khí độc {formula} ngoài tủ hút!";
+                    reason = $"Sục khí {bottle.DisplayName} bên ngoài tủ hút làm khí độc thoát ra không khí phòng thí nghiệm.\nCách an toàn: đặt bình nhận vào bên trong Tủ hút khí độc trước khi sục khí.";
+                    safeHint = $"Đã hủy: hãy đưa bình vào trong Tủ hút khí độc trước khi sục {formula}.";
+                    return true;
+                }
+            }
+
+            if (target == null) return false;
+
+            var toMix = target.Total.Mix;
+            double toVolL = target.VolumeMl > 0.01f ? target.VolumeMl / 1000.0 : 0.0;
+            bool targetInHood = target.InFumeHood;
+            double fromSulfuricM = fromSol.volumeMl > 0.01f ? fromSol.Mix.Get("SO4") / (fromSol.volumeMl / 1000.0) : 0.0;
+            double toSulfuricM = toVolL > 0 ? toMix.Get("SO4") / toVolL : 0.0;
+
+            // 2. Đổ nước hoặc dung dịch loãng vào H2SO4 đặc (> 6 M): sôi bắn axit
+            if ((act == Act.Pour || act == Act.PipetteDrain || isSpray) && target.VolumeMl > 0.5f)
+            {
+                bool incomingAqueous = isSpray || fromSol.volumeMl > 0.1f;
+                if (incomingAqueous && toSulfuricM > 6.0 && fromSulfuricM < 3.0)
+                {
+                    riskKey = "ban_be_h2so4";
+                    title = "Nguy cơ sôi bắn axit H₂SO₄ đặc!";
+                    reason = "Đổ nước hoặc dung dịch loãng vào axit sunfuric đặc (> 6 M) tỏa nhiệt cực mạnh, dễ làm dung dịch sôi bắn gây bỏng.\nCách an toàn: lấy nước cất làm nền trước rồi rót từ từ axit đặc theo thành bình và khuấy đều.";
+                    safeHint = "Đã hủy: không đổ nước vào H₂SO₄ đặc — hãy lấy nước trước rồi rót từ từ axit vào nước.";
+                    return true;
+                }
+            }
+
+            // 3. Trộn hóa chất sinh khí cực độc (Cl2, HCN) ngoài tủ hút
+            if (!targetInHood)
+            {
+                bool toAcid = target.VolumeMl > 0.2f && target.BulkPh < 5.0;
+                bool fromAcid = fromSol.volumeMl > 0.2f && fromSol.Ph < 5.0;
+                if (toAcid || fromAcid)
+                {
+                    bool hasClO = toMix.Get("ClO") > 1e-4 || fromSol.Mix.Get("ClO") > 1e-4;
+                    bool hasCl = toMix.Get("Cl-") > 1e-4 || fromSol.Mix.Get("Cl-") > 1e-4;
+                    double toClM = toVolL > 0 ? toMix.Get("Cl-") / toVolL : 0.0;
+                    double fromClM = fromSol.volumeMl > 0.01f ? fromSol.Mix.Get("Cl-") / (fromSol.volumeMl / 1000.0) : 0.0;
+                    bool hasChlorineOx = toMix.Get("MnO2(s)") > 1e-4 || fromSol.Mix.Get("MnO2(s)") > 1e-4 ||
+                                         toMix.Get("PbO2(s)") > 1e-4 || fromSol.Mix.Get("PbO2(s)") > 1e-4 ||
+                                         toMix.Get("MnO4-") > 1e-4 || fromSol.Mix.Get("MnO4-") > 1e-4;
+                    if ((hasClO && hasCl) || (hasChlorineOx && (toClM > 3.0 || fromClM > 3.0)))
+                    {
+                        riskKey = "khi_doc_cl2";
+                        title = "Nguy cơ giải phóng khí độc Cl₂ ngoài tủ hút!";
+                        reason = "Hỗn hợp phản ứng sinh khí Clo (Cl₂) vàng lục rất độc gây tổn thương đường hô hấp.\nCách an toàn: di chuyển bình phản ứng vào trong Tủ hút khí độc trước khi trộn.";
+                        safeHint = "Đã hủy: hãy đưa bình vào Tủ hút khí độc trước khi trộn phản ứng sinh Cl₂.";
+                        return true;
+                    }
+
+                    bool hasCN = toMix.Get("CN-") > 1e-5 || fromSol.Mix.Get("CN-") > 1e-5;
+                    if (hasCN)
+                    {
+                        riskKey = "khi_doc_hcn";
+                        title = "Nguy cơ sinh khí cực độc HCN ngoài tủ hút!";
+                        reason = "Muối xyanua gặp axit giải phóng khí hydro xyanua (HCN) cực độc.\nCách an toàn: chỉ thực hiện thí nghiệm trong Tủ hút khí độc đang bật quạt hút.";
+                        safeHint = "Đã hủy: phản ứng có xyanua và axit bắt buộc thực hiện trong Tủ hút khí độc.";
+                        return true;
+                    }
+                }
+            }
+
+            // 4. Kim loại kiềm / chất rắn phản ứng mãnh liệt với nước (cháy nổ)
+            bool targetHasWater = target.VolumeMl > 0.5f;
+            if (act == Act.Scoop && targetHasWater)
+            {
+                bool solidReactive = HasAnySpecies(fromSol, WaterReactiveIds) ||
+                    (bottle != null && bottle.Entry != null && (bottle.Entry.HasHazard("chay_no") || bottle.Entry.HasHazard("phan_ung_nuoc")));
+                if (solidReactive)
+                {
+                    string solidName = bottle != null ? bottle.DisplayName : "chất rắn hoạt động mạnh";
+                    riskKey = "chay_no_nuoc";
+                    title = "Nguy cơ phản ứng mãnh liệt / cháy nổ với nước!";
+                    reason = $"Cho {solidName} tiếp xúc trực tiếp với nước sẽ tỏa nhiệt mạnh và giải phóng khí dễ cháy (H₂ hoặc C₂H₂).\nCách an toàn: chỉ lấy lượng rất nhỏ, làm trong tủ hút và tránh xa nguồn lửa.";
+                    safeHint = $"Đã hủy: {solidName} phản ứng mạnh với nước — thao tác lượng nhỏ trong tủ hút, tránh xa ngọn lửa.";
+                    return true;
+                }
+            }
+            else if ((isSpray || fromSol.volumeMl > 0.2f) && HasAnySpecies(target.Total, WaterReactiveIds))
+            {
+                riskKey = "chay_no_nuoc";
+                title = "Nguy cơ phản ứng mãnh liệt / cháy nổ với nước!";
+                reason = "Bình nhận đang chứa kim loại kiềm hoặc chất phản ứng mạnh với nước, sinh khí dễ cháy (H₂ / C₂H₂) và tỏa nhiệt lớn.\nCách an toàn: kiểm soát lượng nước nhỏ trong tủ hút và đảm bảo không có ngọn lửa gần đó.";
+                safeHint = "Đã hủy: trong bình có chất phản ứng mạnh với nước — hãy đặt vào tủ hút và giữ xa nguồn lửa.";
+                return true;
+            }
+
+            return false;
+        }
+
+        static bool HasAnySpecies(Solution sol, string[] ids)
+        {
+            if (ids == null) return false;
+            var mix = sol.Mix;
+            for (int i = 0; i < ids.Length; i++)
+                if (mix.Get(ids[i]) > 1e-4) return true;
+            return false;
+        }
+
         // ---------- Tư thế tay và vật đang cầm ----------
 
         void UpdatePose(float dt)
@@ -722,7 +1322,9 @@ namespace Khkt.Demo
             if (Held != null)
             {
                 Transform t = Held.transform;
-                Quaternion upright = Quaternion.Euler(0, facing.eulerAngles.y + (HeldPart != null ? heldYaw : 0f), 0);
+                // Cầm bình trên tay: nhãn hóa chất và vạch chia hướng trực diện về phía mắt người chơi, nghiêng nhẹ 7° để nhìn rõ dung dịch
+                Quaternion facingCam = Quaternion.Euler(7f, facing.eulerAngles.y - 90f + (HeldPart != null ? heldYaw : 0f), 0);
+                Quaternion upright = (HeldPart != null) ? Quaternion.Euler(0, facing.eulerAngles.y + heldYaw, 0) : facingCam;
                 Vector3 objPos;
                 Quaternion objRot = upright;
                 if ((Current == Act.Suck || Current == Act.PipetteDrain || Current == Act.Measure || Current == Act.PaperTest) && TargetContainer != null)
@@ -803,7 +1405,13 @@ namespace Khkt.Demo
         Vector3 HeldMouthLocal()
         {
             var c = Held.GetComponent<LabContainer>();
-            if (c != null && c.mouth != null) return Held.transform.InverseTransformPoint(c.mouth.position);
+            if (c != null && c.mouth != null)
+            {
+                Vector3 mouthLocal = Held.transform.InverseTransformPoint(c.mouth.position);
+                float r = c.bottomRadiusM > 0.01f ? c.bottomRadiusM : 0.035f;
+                mouthLocal.x += r * 0.95f; // Tâm xoay tại đúng mỏ rót (spout) ở mép miệng bình
+                return mouthLocal;
+            }
             var w = Held.GetComponent<WashBottle>();
             if (w != null && w.nozzle != null) return Held.transform.InverseTransformPoint(w.nozzle.position);
             return Vector3.up * 0.15f;
@@ -830,6 +1438,29 @@ namespace Khkt.Demo
 
         // ---------- Gợi ý thao tác ----------
 
+        int hintSig;
+        float hintNextAt;
+
+        static int H(object o) => o != null ? o.GetHashCode() : 0;
+
+        /// <summary>Dấu vết của mọi thứ quyết định nội dung gợi ý: đổi là phải dựng lại ngay.</summary>
+        int HintSignature()
+        {
+            unchecked
+            {
+                int h = (int)Current;
+                h = h * 31 + (HoverRoot != null ? HoverRoot.GetHashCode() : 0);
+                h = h * 31 + (Held != null ? Held.GetHashCode() : 0);
+                h = h * 31 + (TargetContainer != null ? TargetContainer.GetHashCode() : 0);
+                h = h * 31 + (TargetSocket != null ? TargetSocket.GetHashCode() : 0);
+                h = h * 31 + H(AttachTarget);
+                h = h * 31 + (hasHit && hit.collider != null ? hit.collider.GetHashCode() : 0);
+                int pad = (PadInput.UsingTouch ? 1 : 0) | (PadInput.SingleStick ? 2 : 0) | (PadInput.AimFromCenter ? 4 : 0)
+                        | (PadInput.UsingGamepad ? 8 : 0) | ((int)PadInput.Mode << 4);
+                return h * 31 + pad;
+            }
+        }
+
         void BuildHints()
         {
             Hints.Clear();
@@ -841,12 +1472,29 @@ namespace Khkt.Demo
                 var info = t.GetComponentInParent<EquipmentInfo>();
                 return info != null ? info.title : t.name;
             }
+            var inspectNow = GetInspectTarget();
+            bool openOnClickNow = IsOpenPanelOnClick;
             switch (Current)
             {
-                case Act.Pick: Hints.Add(("Nhấn", "Cầm " + Lower(Name(hoverGrab.transform)))); break;
-                case Act.Swirl: Hints.Add(("Giữ", "Lắc bình")); Hints.Add(("Nhấn", "Cầm lên")); break;
+                case Act.Pick:
+                    if (openOnClickNow && inspectNow != null)
+                        Hints.Add(("Nhấn", "Mở chi tiết " + Lower(Name(hoverGrab.transform))));
+                    else
+                    {
+                        Hints.Add(("Nhấn", "Cầm " + Lower(Name(hoverGrab.transform))));
+                        if (inspectNow != null) Hints.Add(("Giữ", "Mở chi tiết"));
+                    }
+                    break;
+                case Act.Swirl:
+                    Hints.Add(("Giữ", "Lắc bình"));
+                    Hints.Add(("Nhấn", openOnClickNow && inspectNow != null ? "Mở chi tiết" : "Cầm lên"));
+                    break;
                 case Act.Use: Hints.Add(("Nhấn", Clean(usable.UseHint))); break;
-                case Act.Stopcock: Hints.Add(("Lăn chuột", "Mở / đóng khóa")); Hints.Add(("↑ ↓", "Tinh chỉnh")); break;
+                case Act.Stopcock:
+                    Hints.Add(("Lăn chuột", "Mở / đóng khóa"));
+                    Hints.Add(("↑ ↓", "Tinh chỉnh"));
+                    if (inspectNow != null) Hints.Add((openOnClickNow ? "Nhấn" : "Giữ", "Bảng buret"));
+                    break;
                 case Act.Place: Hints.Add(("Nhấn", "Đặt vào " + Lower(TargetSocket.label))); break;
                 case Act.PlaceSurface: Hints.Add(("Nhấn", "Đặt xuống")); break;
                 case Act.Pour: Hints.Add(("Giữ", "Rót vào " + Lower(TargetContainer.label))); break;
@@ -872,6 +1520,12 @@ namespace Khkt.Demo
             }
             if (HeldPart != null) Hints.Add(("Lăn chuột / R E", "Xoay bộ phận"));
             if (Held != null && Current != Act.Place) Hints.Add(("Q", "Trả về chỗ cũ"));
+            if (PadInput.UsingTouch)
+            {
+                for (int i = 0; i < Hints.Count; i++)
+                    Hints[i] = (TouchKey(Hints[i].key), Hints[i].text);
+                return;
+            }
             if (PadInput.SingleStick && PadInput.AimFromCenter)
             {
                 // Tay cầm 1 cần: chế độ ĐI chỉ đi lại, chế độ TAY mới thao tác (PadInput)
@@ -902,6 +1556,23 @@ namespace Khkt.Demo
                 case "Giữ": return "Giữ cần";
                 case "Shift + Giữ": return "Shift + giữ cần";
                 case "Lăn chuột": return "Cần ↑ ↓";
+                default: return key;
+            }
+        }
+
+        /// <summary>Gợi ý nút cảm ứng trên iPad.</summary>
+        static string TouchKey(string key)
+        {
+            switch (key)
+            {
+                case "Nhấn": return "Chạm";
+                case "Giữ": return "Giữ nút tay";
+                case "Shift + Giữ": return "Chậm + Giữ";
+                case "Lăn chuột": return "Nút vặn";
+                case "↑ ↓": return "Nút vặn";
+                case "Lăn chuột / R E": return "Nút xoay";
+                case "Q": return "Nút trả về";
+                case "Space": return "Đóng khóa";
                 default: return key;
             }
         }

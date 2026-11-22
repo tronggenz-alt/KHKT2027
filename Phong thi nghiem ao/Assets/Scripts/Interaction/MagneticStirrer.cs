@@ -23,9 +23,10 @@ namespace Khkt.Interaction
             if (Time.time - lastScan > 1f)
             {
                 lastScan = Time.time;
-                nearby.Clear();
-                foreach (var c in Khkt.Rendering.ZoneRoot.FindAll<LabContainer>())
-                    if (c.reactive && Vector3.Distance(c.transform.position, z.position) < 1.5f) nearby.Add(c);
+                Khkt.Rendering.LiveSet<LabContainer>.Collect(nearby, LabContainer.IsReactive);
+                Vector3 zp = z.position;
+                for (int i = nearby.Count - 1; i >= 0; i--)
+                    if ((nearby[i].transform.position - zp).sqrMagnitude >= 1.5f * 1.5f) nearby.RemoveAt(i);
             }
             foreach (var c in nearby)
             {

@@ -1,0 +1,76 @@
+{
+  "id": "phoi",
+  "ten": "Phổi và đường dẫn khí",
+  "can_duyet": true,
+  "chuong_trinh": "Sinh học 11 – Hô hấp ở động vật (CT GDPT 2018); nền tảng KHTN 8",
+  "vi_tri": [
+    "Hai lá phổi nằm trong lồng ngực, hai bên tim, phía trên cơ hoành.",
+    "Đường dẫn khí: mũi → hầu → thanh quản → khí quản → phế quản → tiểu phế quản → phế nang."
+  ],
+  "cau_tao": [
+    "Phổi phải có 3 thuỳ, phổi trái có 2 thuỳ (chừa chỗ cho tim).",
+    "Đơn vị cấu tạo của phổi là phế nang – túi khí rất nhỏ, thành chỉ một lớp tế bào, bao quanh bởi mạng mao mạch dày đặc.",
+    "Hàng trăm triệu phế nang tạo nên bề mặt trao đổi khí rất rộng và luôn ẩm ướt.",
+    "Phổi được bao bởi hai lớp màng (lá thành và lá tạng); khoang màng phổi ở giữa có áp suất âm giúp phổi nở theo lồng ngực.",
+    "Khí quản có các vòng sụn hình chữ C giữ đường dẫn khí luôn mở; niêm mạc có lông và chất nhầy giữ bụi."
+  ],
+  "chuc_nang": [
+    "Trao đổi khí: nhận O₂ từ không khí vào máu và thải CO₂ từ máu ra ngoài.",
+    "Đường dẫn khí làm ẩm, làm ấm và lọc sạch không khí trước khi vào phổi."
+  ],
+  "co_che": [
+    "Hít vào: cơ hoành co (hạ xuống) và cơ liên sườn ngoài co (nâng xương sườn) → thể tích lồng ngực tăng → áp suất trong phổi giảm → không khí đi vào.",
+    "Thở ra bình thường: các cơ hô hấp giãn, lồng ngực thu nhỏ → không khí bị đẩy ra; khi thở ra gắng sức có thêm cơ liên sườn trong và cơ bụng.",
+    "Trao đổi khí ở phế nang theo cơ chế khuếch tán: O₂ đi từ phế nang (phân áp cao) vào máu, CO₂ đi từ máu (phân áp cao) ra phế nang.",
+    "O₂ được vận chuyển trong máu chủ yếu nhờ hemoglobin trong hồng cầu.",
+    "Điều hoà hô hấp: trung khu hô hấp nằm ở hành não và cầu não; khi nồng độ CO₂ (H⁺) trong máu tăng, thụ thể hoá học báo về trung khu làm nhịp thở nhanh và sâu hơn."
+  ],
+  "lien_he": [
+    "Khói thuốc lá chứa CO, nicotine, hắc ín: làm tê liệt lông rung, gây viêm phế quản, ung thư phổi; CO gắn bền với hemoglobin làm giảm vận chuyển O₂.",
+    "Bệnh thường gặp: viêm phổi, lao phổi, hen phế quản, bệnh phổi tắc nghẽn mạn tính.",
+    "Đeo khẩu trang nơi nhiều bụi, trồng cây xanh, tập thở sâu và luyện tập thể thao giúp tăng dung tích sống."
+  ],
+  "diem_thi": [
+    "Đặc điểm của bề mặt trao đổi khí: rộng, mỏng, ẩm, có nhiều mao mạch và có sự lưu thông khí.",
+    "Cơ chế thông khí nhờ cơ hô hấp và sự thay đổi thể tích lồng ngực.",
+    "So sánh hiệu quả trao đổi khí: chim có phổi và hệ túi khí nên trao đổi khí hiệu quả nhất ở động vật trên cạn.",
+    "Vì sao ngộ độc CO nguy hiểm; ảnh hưởng của nồng độ CO₂ trong máu tới nhịp thở."
+  ],
+  "trac_nghiem": [
+    {
+      "cau": "Khi hít vào bình thường, cơ nào sau đây co?",
+      "lua_chon": ["Cơ hoành và cơ liên sườn ngoài", "Cơ bụng và cơ liên sườn trong", "Chỉ có cơ bụng", "Cơ liên sườn trong, còn cơ hoành giãn"],
+      "dap_an": "A",
+      "giai_thich": "Cơ hoành co hạ xuống, cơ liên sườn ngoài co nâng xương sườn lên làm lồng ngực rộng ra."
+    },
+    {
+      "cau": "Trao đổi khí giữa phế nang và máu diễn ra theo cơ chế",
+      "lua_chon": ["vận chuyển chủ động", "khuếch tán do chênh lệch phân áp", "thực bào", "ẩm bào"],
+      "dap_an": "B",
+      "giai_thich": "O₂ và CO₂ khuếch tán từ nơi có phân áp cao đến nơi có phân áp thấp, không tốn năng lượng ATP."
+    },
+    {
+      "cau": "Khi nồng độ CO₂ trong máu tăng, nhịp thở thay đổi như thế nào?",
+      "lua_chon": ["Giảm", "Không đổi", "Tăng", "Ngừng thở"],
+      "dap_an": "C",
+      "giai_thich": "CO₂ tăng làm pH máu giảm, thụ thể hoá học báo về trung khu hô hấp làm tăng nhịp và độ sâu hô hấp để thải bớt CO₂."
+    },
+    {
+      "cau": "Ngộ độc khí CO nguy hiểm vì CO",
+      "lua_chon": ["phá huỷ thành phế nang", "làm tắc khí quản", "làm cơ hoành ngừng co", "gắn bền với hemoglobin, làm giảm vận chuyển O₂"],
+      "dap_an": "D",
+      "giai_thich": "CO có ái lực với hemoglobin cao hơn O₂ rất nhiều và tạo liên kết bền, nên máu không vận chuyển đủ O₂ đến tế bào."
+    },
+    {
+      "cau": "Động vật nào sau đây trao đổi khí hiệu quả nhất?",
+      "lua_chon": ["Ếch", "Thằn lằn", "Chim bồ câu", "Thỏ"],
+      "dap_an": "C",
+      "giai_thich": "Chim có hệ túi khí giúp không khí giàu O₂ đi qua phổi theo một chiều, liên tục cả khi hít vào và thở ra."
+    }
+  ],
+  "goi_y_hoi": [
+    "Vì sao phế nang thích nghi với trao đổi khí?",
+    "Hít vào và thở ra diễn ra thế nào?",
+    "Vì sao hút thuốc lá có hại cho phổi?"
+  ]
+}

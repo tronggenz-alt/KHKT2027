@@ -59,7 +59,7 @@ namespace Khkt.Demo.Bio
                 return existing;
             }
             var go = new GameObject("BioLabSync");
-            DontDestroyOnLoad(go);
+            if (Application.isPlaying) DontDestroyOnLoad(go);
             Instance = go.AddComponent<BioLabSync>();
             return Instance;
         }

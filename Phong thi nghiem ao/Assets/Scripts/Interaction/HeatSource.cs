@@ -29,8 +29,7 @@ namespace Khkt.Interaction
             if (Time.time - lastScan > 2f)
             {
                 lastScan = Time.time;
-                all.Clear();
-                foreach (var c in Khkt.Rendering.ZoneRoot.FindAll<LabContainer>()) if (c.reactive) all.Add(c);
+                Khkt.Rendering.LiveSet<LabContainer>.Collect(all, LabContainer.IsReactive);
             }
             Transform z = zone != null ? zone : transform;
             foreach (var c in all)

@@ -1,6 +1,6 @@
-// Nền card kiểu kính mờ (glassmorphism) cho giao diện: lấy ảnh cảnh phía sau (Opaque Texture của URP),
-// làm mờ, phủ một lớp màu trắng trong, thêm viền sáng mảnh và ánh sáng nhẹ ở mép trên.
-// Ảnh sprite: kênh A = hình chữ nhật bo góc, kênh R = đường viền.
+// Nền bảng của bộ giao diện VERA Instrument: lấy ảnh cảnh phía sau (Opaque Texture của URP), làm mờ, phủ màu xanh mực,
+// vẽ lưới bản vẽ kỹ thuật rất nhạt (ô nhỏ 24 px, ô lớn 96 px), viền mảnh, ke góc và vạch nhấn ở mép trên.
+// Ảnh sprite: kênh A = tấm vát góc, R = đường viền, G = ke góc, B = vạch nhấn mép trên.
 // Cần camera bật Opaque Texture (ModernUI tự bật) và Canvas ở chế độ Screen Space - Camera.
 Shader "Khkt/KinhMo"
 {
@@ -11,6 +11,8 @@ Shader "Khkt/KinhMo"
         _Dark ("Làm tối nền", Range(0, 1)) = 0.35
         _BorderColor ("Viền", Color) = (1, 1, 1, 0.55)
         _Blur ("Độ mờ (pixel)", Float) = 14
+        _AccentColor ("Màu nhấn (ke góc, vạch trên)", Color) = (0.2, 0.84, 1, 0.9)
+        _Grid ("Độ đậm lưới bản vẽ", Range(0, 2)) = 1
 
         _StencilComp ("Stencil Comparison", Float) = 8
         _Stencil ("Stencil ID", Float) = 0
@@ -66,8 +68,10 @@ Shader "Khkt/KinhMo"
             float4 _CameraOpaqueTexture_TexelSize;
             fixed4 _Tint;
             fixed4 _BorderColor;
+            fixed4 _AccentColor;
             float _Dark;
             float _Blur;
+            float _Grid;
 
             v2f vert(appdata v)
             {
@@ -100,8 +104,15 @@ Shader "Khkt/KinhMo"
                 float3 bg = sum / w;
                 bg *= (1 - _Dark);
                 float3 col = lerp(bg, _Tint.rgb, _Tint.a);
-                col += smoothstep(0.55, 1.0, i.uv.y) * 0.035;             // ánh sáng nhẹ mép trên
-                col = lerp(col, _BorderColor.rgb, s.r * _BorderColor.a);  // viền mảnh
+                // lưới bản vẽ theo điểm ảnh màn hình: đứng yên khi bảng trượt, không rung khi phóng to thu nhỏ
+                float2 gp = i.pos.xy;
+                float2 minor = abs(frac(gp / 24.0) - 0.5) * 24.0;
+                float2 major = abs(frac(gp / 96.0) - 0.5) * 96.0;
+                float gMinor = 1.0 - saturate(min(minor.x, minor.y) - 11.2);
+                float gMajor = 1.0 - saturate(min(major.x, major.y) - 47.0);
+                col += float3(0.35, 0.62, 1.0) * (gMinor * 0.022 + gMajor * 0.035) * _Grid;
+                col = lerp(col, _BorderColor.rgb, s.r * _BorderColor.a);              // viền mảnh
+                col = lerp(col, _AccentColor.rgb, saturate(s.g + s.b) * _AccentColor.a);  // ke góc và vạch nhấn
                 col *= i.color.rgb;
                 return fixed4(col, s.a * i.color.a);
             }

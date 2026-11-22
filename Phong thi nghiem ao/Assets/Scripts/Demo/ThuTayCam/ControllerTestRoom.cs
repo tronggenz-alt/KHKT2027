@@ -1,3 +1,6 @@
+// Phòng thử tay cầm còn dở: phần partial chứa bảng dung dịch (Solution, Solutions) và vòng điều khiển chưa được viết,
+// nên tạm tắt khỏi biên dịch. Bật lại bằng cách thêm VERA_PHONG_THU_TAY_CAM vào Scripting Define Symbols khi viết xong.
+#if VERA_PHONG_THU_TAY_CAM
 using System.Collections.Generic;
 using Khkt.Input;
 using UnityEngine;
@@ -860,3 +863,4 @@ namespace Khkt.Demo
         }
     }
 }
+#endif

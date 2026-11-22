@@ -1,0 +1,26 @@
+{
+  "01_mat_ban_epoxy.png": {
+    "mean_lum": 0.4795,
+    "specular_highlights_pct": 0.0,
+    "medium_reflections_pct": 20.737,
+    "contrast_std": 0.1573
+  },
+  "02_san_goc_xien.png": {
+    "mean_lum": 0.4288,
+    "specular_highlights_pct": 0.0,
+    "medium_reflections_pct": 13.664,
+    "contrast_std": 0.1407
+  },
+  "03_canh_ban_inox.png": {
+    "mean_lum": 0.3832,
+    "specular_highlights_pct": 0.0,
+    "medium_reflections_pct": 16.339,
+    "contrast_std": 0.1817
+  },
+  "04_man_hinh_may.png": {
+    "mean_lum": 0.523,
+    "specular_highlights_pct": 0.0,
+    "medium_reflections_pct": 20.516,
+    "contrast_std": 0.1031
+  }
+}

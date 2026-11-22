@@ -55,17 +55,17 @@ namespace Khkt.Demo.Instruments
         public override void Build()
         {
             SetTemp = DefaultTemp;
-            bSrc = S.AddButton("", 0, 0, () => { SourceIdx = (SourceIdx + 1) % Sources.Count; Reset(); }, false, 2, 12);
-            bTake = S.AddButton("", 2, 0, () => { TakeMl = TakeMl == 10 ? 5 : TakeMl == 5 ? 20 : 10; Reset(); }, false, 1, 13);
+            bSrc = S.AddButton("", 0, 0, () => { SourceIdx = (SourceIdx + 1) % Sources.Count; Reset(); }, false, 2, 14);
+            bTake = S.AddButton("", 2, 0, () => { TakeMl = TakeMl == 10 ? 5 : TakeMl == 5 ? 20 : 10; Reset(); }, false, 1, 14);
             bTemp = S.AddButton("", 0, 1, NextTemp);
-            bDish = S.AddButton("Cân chén rỗng (m₀)", 1, 1, WeighDish, false, 1, 13);
-            bFill = S.AddButton("Cho mẫu, cân (m₁)", 2, 1, Fill, false, 1, 13);
-            bChar = S.AddButton("Than hóa trên bếp", 0, 2, Char, false, 1, 13);
+            bDish = S.AddButton("Cân chén rỗng (m₀)", 1, 1, WeighDish, false, 1, 14);
+            bFill = S.AddButton("Cho mẫu, cân (m₁)", 2, 1, Fill, false, 1, 14);
+            bChar = S.AddButton("Than hóa trên bếp", 0, 2, Char, false, 1, 14);
             bHeat = S.AddButton("", 1, 2, Heat, true, 2);
-            bCool = S.AddButton("", 0, 3, NextCool, false, 2, 12);
+            bCool = S.AddButton("", 0, 3, NextCool, false, 2, 14);
             bWeigh = S.AddButton("Cân (m₂)", 2, 3, Weigh, true);
-            bCalc = S.AddButton("Tính kết quả", 0, 4, Calc, false, 1, 13);
-            status = S.AddText("", 5, 0, 3, 13);
+            bCalc = S.AddButton("Tính kết quả", 0, 4, Calc, false, 1, 14);
+            status = S.AddText("", 5, 0, 3, 14);
             S.SetResults("Cân chén rỗng, cho mẫu vào cân, rồi " + HeatVerb.ToLowerInvariant() + " từng đợt, làm nguội trong bình hút ẩm và cân lại đến khối lượng không đổi.");
         }
 
@@ -83,7 +83,7 @@ namespace Khkt.Demo.Instruments
             InstrumentScreen.SetButton(bCool, Cooling == Cool.Desiccator ? "Làm nguội: trong bình hút ẩm" : Cooling == Cool.Air ? "Làm nguội: ngoài không khí" : "Làm nguội: không (cân ngay khi nóng)", !Heating);
             InstrumentScreen.SetButton(bWeigh, null, !double.IsNaN(FilledG) && !Heating && Minutes > 0);
             InstrumentScreen.SetButton(bCalc, null, Weighings.Count > 0);
-            status.text = $"{(Ashing ? "Lò" : "Tủ")}: {(Heating ? SetTemp.ToString("0") : "25")} °C · đã {HeatVerb.ToLowerInvariant()} {Minutes:0} phút · {Weighings.Count} lần cân" + (Constant ? " · <color=#73F29E>khối lượng không đổi</color>" : "");
+            status.text = $"{(Ashing ? "Lò" : "Tủ")}: {(Heating ? SetTemp.ToString("0") : "25")} °C · đã {HeatVerb.ToLowerInvariant()} {Minutes:0} phút · {Weighings.Count} lần cân" + (Constant ? $" · <color={GlassKit.HexGood}>khối lượng không đổi</color>" : "");
             S.SetResults(BuildResults());
         }
 
@@ -213,7 +213,7 @@ namespace Khkt.Demo.Instruments
         string BuildResults()
         {
             var sb = new StringBuilder();
-            sb.Append($"<color=#9FB3C8>Mẫu:</color> {Sources[SourceIdx % Sources.Count].name}{(sample != null ? $" · {sample.Name}" : "")}\n");
+            sb.Append($"<color={GlassKit.HexDim}>Mẫu:</color> {Sources[SourceIdx % Sources.Count].name}{(sample != null ? $" · {sample.Name}" : "")}\n");
             if (!double.IsNaN(DishG)) sb.Append($"m₀ (chén) = {Fmt(DishG, "0.0000")} g\n");
             if (!double.IsNaN(FilledG)) sb.Append($"m₁ (chén + mẫu) = {Fmt(FilledG, "0.0000")} g · mẫu {Fmt(FilledG - DishG, "0.0000")} g\n");
             if (Weighings.Count > 0)
@@ -235,29 +235,29 @@ namespace Khkt.Demo.Instruments
             SchemKit.Begin(p);
             float glow = Heating ? Mathf.InverseLerp(25, 1000, (float)SetTemp) : 0;
             var c = new Vector2(250, 175);
-            SchemKit.Box(p, c.x - 170, c.y - 140, 340, 280, new Color(0.18f, 0.2f, 0.24f));
-            p.FillRect(c.x - 140, c.y - 110, 280, 220, Color.Lerp(new Color(0.08f, 0.1f, 0.12f), Ashing ? new Color(0.9f, 0.35f, 0.1f) : new Color(0.45f, 0.3f, 0.2f), glow * 1.2f));
-            for (int i = 0; i < 6; i++) p.Line(c.x - 140 + i * 56, c.y - 110, c.x - 140 + i * 56, c.y - 100, Heating ? new Color(1f, 0.5f, 0.2f) : SchemKit.Off, 3);
+            SchemKit.Box(p, c.x - 170, c.y - 140, 340, 280, SchemKit.Body);
+            p.FillRect(c.x - 140, c.y - 110, 280, 220, Color.Lerp(SchemKit.BodyAlt, Ashing ? new Color(0.9f, 0.35f, 0.1f) : new Color(0.45f, 0.3f, 0.2f), glow * 1.2f));
+            for (int i = 0; i < 6; i++) p.Line(c.x - 140 + i * 56, c.y - 110, c.x - 140 + i * 56, c.y - 100, Heating ? SchemKit.Hot : SchemKit.Off, 3);
             if (!double.IsNaN(FilledG))
             {
-                p.FillPoly(new[] { new Vector2(c.x - 40, c.y - 40), new Vector2(c.x + 40, c.y - 40), new Vector2(c.x + 28, c.y - 70), new Vector2(c.x - 28, c.y - 70) }, new Color(0.9f, 0.9f, 0.88f));
+                p.FillPoly(new[] { new Vector2(c.x - 40, c.y - 40), new Vector2(c.x + 40, c.y - 40), new Vector2(c.x + 28, c.y - 70), new Vector2(c.x - 28, c.y - 70) }, SchemKit.Metal);
                 double carb = 0;
                 if (sample != null) CurrentMass(out _, out carb);
                 p.FillRect(c.x - 30, c.y - 46, 60, 6, carb > 0.5 ? new Color(0.15f, 0.15f, 0.15f) : new Color(0.95f, 0.95f, 0.9f));
-                if (Heating && !Ashing) for (int i = 0; i < 3; i++) p.Disc(c.x - 20 + i * 20, c.y - 20 + Mathf.Repeat(time * 40 + i * 30, 90), 4, new Color(0.8f, 0.9f, 1f, 0.5f));
+                if (Heating && !Ashing) { var sc = SchemKit.Flow; for (int i = 0; i < 3; i++) p.Disc(c.x - 20 + i * 20, c.y - 20 + Mathf.Repeat(time * 40 + i * 30, 90), 4, new Color(sc.r, sc.g, sc.b, 0.5f)); }
             }
             // bình hút ẩm và cân
             var d = new Vector2(620, 120);
-            p.FillPoly(new[] { new Vector2(d.x - 80, d.y - 60), new Vector2(d.x + 80, d.y - 60), new Vector2(d.x + 60, d.y + 60), new Vector2(d.x - 60, d.y + 60) }, new Color(0.6f, 0.75f, 0.9f, 0.25f));
-            for (int i = 0; i < 12; i++) p.Disc(d.x - 50 + i * 9, d.y - 45, 3, new Color(0.3f, 0.5f, 0.95f));
+            p.FillPoly(new[] { new Vector2(d.x - 80, d.y - 60), new Vector2(d.x + 80, d.y - 60), new Vector2(d.x + 60, d.y + 60), new Vector2(d.x - 60, d.y + 60) }, SchemKit.Water);
+            for (int i = 0; i < 12; i++) p.Disc(d.x - 50 + i * 9, d.y - 45, 3, SchemKit.Flow);
             var b = new Vector2(850, 110);
-            SchemKit.Box(p, b.x - 80, b.y - 50, 160, 100, new Color(0.85f, 0.87f, 0.9f));
-            p.FillRect(b.x - 60, b.y + 10, 120, 30, new Color(0.1f, 0.25f, 0.15f));
+            SchemKit.Box(p, b.x - 80, b.y - 50, 160, 100, SchemKit.Body);
+            p.FillRect(b.x - 60, b.y + 10, 120, 30, Color.Lerp(SchemKit.BodyAlt, SchemKit.Good, 0.25f));
             var doc = Doc;
-            S.SchemLabel("lo", doc.PartName("buong") + $"\n<color=#FFB27A>{(Heating ? SetTemp.ToString("0") : "25")} °C</color>", c.x, c.y + 125, 12);
-            S.SchemLabel("binh", doc.PartName("binh_hut_am"), d.x, d.y + 80, 11);
-            S.SchemLabel("can", doc.PartName("can") + (Weighings.Count > 0 ? $"\n<color=#73F29E>{Fmt(Weighings[Weighings.Count - 1].g, "0.0000")} g</color>" : ""), b.x, b.y - 75, 11);
-            S.SchemLabel("trang_thai", Heating ? $"<color=#FFC966>ĐANG {HeatVerb.ToUpperInvariant()} {SetTemp:0} °C</color>" : "<color=#73F29E>SẴN SÀNG</color>", 700, 320, 14);
+            S.SchemLabel("lo", doc.PartName("buong") + $"\n<color={GlassKit.Hex(SchemKit.Hot)}>{(Heating ? SetTemp.ToString("0") : "25")} °C</color>", c.x, c.y + 125, 14);
+            S.SchemLabel("binh", doc.PartName("binh_hut_am"), d.x, d.y + 80, 14);
+            S.SchemLabel("can", doc.PartName("can") + (Weighings.Count > 0 ? $"\n<color={GlassKit.HexGood}>{Fmt(Weighings[Weighings.Count - 1].g, "0.0000")} g</color>" : ""), b.x, b.y - 75, 14);
+            S.SchemLabel("trang_thai", Heating ? $"<color={GlassKit.HexWarn}>ĐANG {HeatVerb.ToUpperInvariant()} {SetTemp:0} °C</color>" : $"<color={GlassKit.HexGood}>SẴN SÀNG</color>", 700, 320, 14);
         }
 
         public override void DrawPlot(Painter p)
@@ -276,10 +276,10 @@ namespace Khkt.Demo.Instruments
                 pts.Add(InstrumentScreen.Map(p, t, DishG + CurrentMass(out _, out _), 0, tMax, lo, hi));
             }
             Minutes = minsSave;
-            if (pts.Count > 1) p.Poly(pts, new Color(1f, 0.7f, 0.4f, 0.7f), 2);
-            foreach (var (min, g) in Weighings) { var q = InstrumentScreen.Map(p, min, g, 0, tMax, lo, hi); p.Disc(q.x, q.y, 6, SchemKit.Good); }
+            if (pts.Count > 1) p.Poly(pts, InstrumentScreen.TraceGold, 2);
+            foreach (var (min, g) in Weighings) { var q = InstrumentScreen.Map(p, min, g, 0, tMax, lo, hi); p.Disc(q.x, q.y, 6, InstrumentScreen.TraceGreen); }
             var z = InstrumentScreen.Map(p, 0, DishG, 0, tMax, lo, hi);
-            p.FillRect(0, z.y, p.W, 1, new Color(1, 1, 1, 0.3f));
+            p.FillRect(0, z.y, p.W, 1, InstrumentScreen.TraceDim);
         }
     }
 
@@ -316,10 +316,10 @@ namespace Khkt.Demo.Instruments
             var sb = new StringBuilder();
             sb.Append($"Độ ẩm = (m₁ − m₂) / (m₁ − m₀) × 100 = {Fmt(lost, "0.0000")} / {Fmt(sampleG, "0.0000")} × 100 = <b>{Fmt(moist, "0.00")}%</b>\n");
             sb.Append($"Chất khô = <b>{Fmt(100 - moist, "0.00")}%</b> ({Fmt(m2 - m0, "0.0000")} g)\n");
-            sb.Append($"<color=#9FB3C8>Giá trị thật của mẫu: độ ẩm {Fmt(trueMoist, "0.00")}% (gồm cả chất dễ bay hơi như etanol)</color>\n");
-            if (SetTemp > 120 && sample.Dry.Any(p => p.Organic || p.Id.StartsWith("org:"))) sb.Append("<color=#FFC966>Sấy quá nóng: đường bị caramen hóa, mất thêm khối lượng, độ ẩm tính ra cao hơn thật.</color>\n");
-            if (SetTemp < 100) sb.Append("<color=#FFC966>Sấy dưới 100 °C: nước bay hơi rất chậm, chưa khô hết.</color>\n");
-            if (sample.VolatileG > 0.01) sb.Append("<color=#9FB3C8>Mẫu có etanol / chất dễ bay hơi: \"độ ẩm\" theo phương pháp sấy gồm cả phần này.</color>\n");
+            sb.Append($"<color={GlassKit.HexDim}>Giá trị thật của mẫu: độ ẩm {Fmt(trueMoist, "0.00")}% (gồm cả chất dễ bay hơi như etanol)</color>\n");
+            if (SetTemp > 120 && sample.Dry.Any(p => p.Organic || p.Id.StartsWith("org:"))) sb.Append($"<color={GlassKit.HexWarn}>Sấy quá nóng: đường bị caramen hóa, mất thêm khối lượng, độ ẩm tính ra cao hơn thật.</color>\n");
+            if (SetTemp < 100) sb.Append($"<color={GlassKit.HexWarn}>Sấy dưới 100 °C: nước bay hơi rất chậm, chưa khô hết.</color>\n");
+            if (sample.VolatileG > 0.01) sb.Append($"<color={GlassKit.HexDim}>Mẫu có etanol / chất dễ bay hơi: \"độ ẩm\" theo phương pháp sấy gồm cả phần này.</color>\n");
             return sb.ToString();
         }
     }
@@ -356,14 +356,14 @@ namespace Khkt.Demo.Instruments
             CurrentMass(out var residue, out double carbon);
             var sb = new StringBuilder();
             sb.Append($"Tro (%) = (m₂ − m₀) / (m₁ − m₀) × 100 = {Fmt(ashG, "0.0000")} / {Fmt(sampleG, "0.0000")} × 100 = <b>{Fmt(ashG / sampleG * 100, "0.00")}%</b>\n");
-            sb.Append($"<color=#9FB3C8>Thành phần tro (mô phỏng): {(residue.Count == 0 ? "không còn tro" : string.Join(", ", residue.Select(r => $"{r.Name} {Fmt(r.Mg, "0.0")} mg")))}</color>\n");
-            if (carbon > 0.5) sb.Append($"<color=#FFC966>Tro còn đen ({Fmt(carbon, "0.0")} mg cacbon chưa cháy): nung thêm, hoặc nhỏ vài giọt H₂O₂ / HNO₃ rồi nung lại.</color>\n");
+            sb.Append($"<color={GlassKit.HexDim}>Thành phần tro (mô phỏng): {(residue.Count == 0 ? "không còn tro" : string.Join(", ", residue.Select(r => $"{r.Name} {Fmt(r.Mg, "0.0")} mg")))}</color>\n");
+            if (carbon > 0.5) sb.Append($"<color={GlassKit.HexWarn}>Tro còn đen ({Fmt(carbon, "0.0")} mg cacbon chưa cháy): nung thêm, hoặc nhỏ vài giọt H₂O₂ / HNO₃ rồi nung lại.</color>\n");
             if (sample.Dry.Any(p => p.Id == "CaCO3"))
             {
                 double caco3 = sample.Dry.Where(p => p.Id == "CaCO3").Sum(p => p.Mg) / 1000;
                 double lostCo2 = caco3 * 1000 - residue.Where(r => r.Id == "CaCO3" || r.Id == "CaO(r)").Sum(r => r.Mg);
                 sb.Append($"CaCO₃ → CaO + CO₂: đã mất {Fmt(lostCo2, "0.0")} mg CO₂ ({Fmt(lostCo2 / (caco3 * 1000) * 100, "0.0")}%; phân hủy hết là 43,97%)\n");
-                if (SetTemp < 700) sb.Append("<color=#9FB3C8>Ở 550 °C CaCO₃ chưa phân hủy: tro của mẫu chứa đá vôi vẫn là CaCO₃.</color>\n");
+                if (SetTemp < 700) sb.Append($"<color={GlassKit.HexDim}>Ở 550 °C CaCO₃ chưa phân hủy: tro của mẫu chứa đá vôi vẫn là CaCO₃.</color>\n");
             }
             return sb.ToString();
         }

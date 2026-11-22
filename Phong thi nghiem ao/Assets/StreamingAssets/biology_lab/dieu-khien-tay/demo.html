@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo Điều Khiển Bằng Tay - Mô Hình 3D Người</title>
+  <link rel="stylesheet" href="/static/dieu-khien-tay/dieu-khien-tay.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: radial-gradient(circle at 50% 35%, #1e2230 0%, #0d0f14 100%);
+      color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+    }
+    #khung-3d {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .demo-thanh-dieu-khien {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: rgba(15, 17, 23, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 12px 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      max-width: 420px;
+    }
+    .demo-tieu-de {
+      font-size: 15px;
+      font-weight: 700;
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .demo-hang-nut {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .demo-nut {
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.06);
+      color: #f1f5f9;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .demo-nut:hover {
+      background: rgba(255,255,255,0.15);
+      border-color: rgba(255,255,255,0.3);
+    }
+    .demo-nut.active {
+      background: rgba(34, 197, 94, 0.2);
+      border-color: #22c55e;
+      color: #4ade80;
+    }
+    .demo-thong-tin {
+      font-size: 11.5px;
+      color: #94a3b8;
+      line-height: 1.4;
+    }
+    .demo-chon-co-quan {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fb923c;
+      min-height: 18px;
+    }
+  </style>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "/static/vendor/three/three.module.js",
+      "three/addons/": "/static/vendor/three/addons/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="khung-3d"></div>
+
+  <div class="demo-thanh-dieu-khien">
+    <div class="demo-tieu-de">
+      <span>🖐️ Điều Khiển Mô Hình 3D Bằng Cử Chỉ Tay</span>
+    </div>
+    <div class="demo-hang-nut">
+      <button id="btn-bat-cam" class="demo-nut">Bật Camera</button>
+      <button id="btn-ve-dau" class="demo-nut">Về góc đầu (r)</button>
+      <button id="btn-phat-keo" class="demo-nut">Phát lại: Kéo lướt</button>
+      <button id="btn-phat-zoom" class="demo-nut">Phát lại: Zoom</button>
+    </div>
+    <div class="demo-chon-co-quan" id="lbl-co-quan">Chạm nhẹ vào mô hình để chọn cơ quan</div>
+    <div class="demo-thong-tin" id="lbl-hud">Đang tải Three.js…</div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import cuChiModule from '/static/dieu-khien-tay/cu-chi.js';
+    import { taoBoApOrbit } from '/static/dieu-khien-tay/ap-orbit.js';
+    import { taoDieuKhienTay } from '/static/dieu-khien-tay/theo-doi-tay.js';
+
+    const { DieuKhien, HANG_SO } = cuChiModule;
+
+    const khung3D = document.getElementById('khung-3d');
+    const lblHud = document.getElementById('lbl-hud');
+    const lblCoQuan = document.getElementById('lbl-co-quan');
+    const btnBatCam = document.getElementById('btn-bat-cam');
+    const btnVeDau = document.getElementById('btn-ve-dau');
+    const btnPhatKeo = document.getElementById('btn-phat-keo');
+    const btnPhatZoom = document.getElementById('btn-phat-zoom');
+
+    // 1. Khởi tạo Three.js Scene, Camera, Renderer
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
+    // Đặt camera ở GOC_DAU (yaw -25°, pitch 8°, khoảng cách 3.9)
+    const sphericalGoc = new THREE.Spherical(3.9, (90 - 8) * Math.PI / 180, 25 * Math.PI / 180);
+    const posGoc = new THREE.Vector3().setFromSpherical(sphericalGoc);
+    camera.position.copy(posGoc);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    khung3D.appendChild(renderer.domElement);
+
+    // 2. OrbitControls cấu hình giống hệt trang Sinh học 3D
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.minDistance = 0.45;
+    controls.maxDistance = 10.0;
+    controls.maxPolarAngle = Math.PI * 0.94;
+    controls.target.set(0, 0, 0);
+
+    // 3. Chiếu sáng
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+    scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    dirLight.position.set(-2, 4, 3);
+    scene.add(dirLight);
+
+    const backLight = new THREE.DirectionalLight(0x38bdf8, 0.4);
+    backLight.position.set(2, -1, -2);
+    scene.add(backLight);
+
+    // 4. Dựng người nộm (kích thước & màu sắc y hệt dung_nguoi_nom() Python)
+    const nhomNguoi = new THREE.Group();
+    scene.add(nhomNguoi);
+
+    const matDa = new THREE.MeshStandardMaterial({ color: 0xebc3a5, roughness: 0.5 });
+    const matAo = new THREE.MeshStandardMaterial({ color: 0x2878aa, roughness: 0.6 });
+    const matQuan = new THREE.MeshStandardMaterial({ color: 0x374150, roughness: 0.7 });
+    const matGiay = new THREE.MeshStandardMaterial({ color: 0x282a2d, roughness: 0.8 });
+    const matMat = new THREE.MeshStandardMaterial({ color: 0x1e1e28, roughness: 0.3 });
+
+    function taoKhoiElip(tam, banKinh, matLieu, ten = 'BoPhan') {
+      const geo = new THREE.SphereGeometry(1, 24, 16);
+      const mesh = new THREE.Mesh(geo, matLieu);
+      mesh.scale.set(banKinh[0], banKinh[1], banKinh[2]);
+      mesh.position.set(tam[0], tam[1], tam[2]);
+      mesh.name = ten;
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      nhomNguoi.add(mesh);
+      return mesh;
+    }
+
+    // Đầu, mũi, mắt
+    taoKhoiElip([0, 0.78, 0], [0.10, 0.125, 0.11], matDa, 'Đầu');
+    taoKhoiElip([0, 0.765, 0.108], [0.016, 0.025, 0.022], matDa, 'Mũi');
+    taoKhoiElip([-0.035, 0.80, 0.097], [0.014, 0.014, 0.012], matMat, 'Mắt trái');
+    taoKhoiElip([0.035, 0.80, 0.097], [0.014, 0.014, 0.012], matMat, 'Mắt phải');
+
+    // Thân (ngực, bụng, hông)
+    taoKhoiElip([0, 0.45, 0], [0.19, 0.17, 0.115], matAo, 'Lồng ngực');
+    taoKhoiElip([0, 0.27, 0], [0.155, 0.13, 0.10], matAo, 'Bụng');
+    taoKhoiElip([0, 0.10, 0], [0.17, 0.10, 0.11], matQuan, 'Hông');
+
+    // Các cơ quan nội tạng thử nghiệm tia chạm nhẹ
+    const matTim = new THREE.MeshStandardMaterial({ color: 0xe11d48, roughness: 0.3, emissive: 0x4c0519 });
+    const timMesh = taoKhoiElip([0.03, 0.46, 0.09], [0.045, 0.055, 0.045], matTim, 'Trái tim');
+
+    const matPhoi = new THREE.MeshStandardMaterial({ color: 0xf472b6, roughness: 0.4, transparent: true, opacity: 0.85 });
+    const phoiTrai = taoKhoiElip([-0.09, 0.47, 0.07], [0.05, 0.09, 0.045], matPhoi, 'Lá phổi trái');
+    const phoiPhai = taoKhoiElip([0.11, 0.47, 0.07], [0.05, 0.09, 0.045], matPhoi, 'Lá phổi phải');
+
+    // Cánh tay, chân
+    for (const s of [-1, 1]) {
+      taoKhoiElip([s * 0.215, 0.555, 0], [0.065, 0.06, 0.065], matAo, s < 0 ? 'Vai trái' : 'Vai phải');
+      taoKhoiElip([s * 0.27, 0.28, -0.01], [0.043, 0.13, 0.043], matDa, s < 0 ? 'Cánh tay trái' : 'Cánh tay phải');
+      taoKhoiElip([s * 0.305, -0.04, 0.035], [0.03, 0.065, 0.045], matDa, s < 0 ? 'Bàn tay trái' : 'Bàn tay phải');
+
+      taoKhoiElip([s * 0.10, -0.18, 0.01], [0.065, 0.20, 0.065], matQuan, s < 0 ? 'Đùi trái' : 'Đùi phải');
+      taoKhoiElip([s * 0.10, -0.62, -0.01], [0.052, 0.22, 0.052], matQuan, s < 0 ? 'Cẳng chân trái' : 'Cẳng chân phải');
+      taoKhoiElip([s * 0.10, -0.875, 0.045], [0.045, 0.032, 0.11], matGiay, s < 0 ? 'Bàn chân trái' : 'Bàn chân phải');
+    }
+
+    // Bệ xoay có múi cam chỉ mặt trước (+Z)
+    const beGeo = new THREE.CylinderGeometry(0.55, 0.55, 0.04, 36);
+    const beMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.8 });
+    const beMesh = new THREE.Mesh(beGeo, beMat);
+    beMesh.position.set(0, -0.91, 0);
+    nhomNguoi.add(beMesh);
+
+    // Múi cam chỉ hướng trước
+    const muiGeo = new THREE.CylinderGeometry(0.55, 0.55, 0.042, 6, 1, false, -Math.PI / 12, Math.PI / 6);
+    const muiMat = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.5 });
+    const muiMesh = new THREE.Mesh(muiGeo, muiMat);
+    muiMesh.position.set(0, -0.91, 0);
+    nhomNguoi.add(muiMesh);
+
+    // 5. Khởi tạo bộ điều khiển cử chỉ tay & bộ áp OrbitControls
+    const raycaster = new THREE.Raycaster();
+    const chuotVec = new THREE.Vector2();
+
+    function chonTaiDiem(clientX, clientY) {
+      const rect = renderer.domElement.getBoundingClientRect();
+      chuotVec.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+      chuotVec.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(chuotVec, camera);
+      const giao = raycaster.intersectObjects(nhomNguoi.children, true);
+      if (giao.length > 0) {
+        const obj = giao[0].object;
+        lblCoQuan.textContent = `🎯 Đã chọn: ${obj.name || 'Bộ phận'}`;
+        // Hiệu ứng chớp sáng
+        if (obj.material && obj.material.emissive) {
+          const gocEmissive = obj.material.emissive.getHex();
+          obj.material.emissive.setHex(0xfb923c);
+          setTimeout(() => {
+            obj.material.emissive.setHex(gocEmissive);
+          }, 350);
+        }
+        return obj.name;
+      }
+      return null;
+    }
+
+    const dieuKhien = new DieuKhien({
+      veGocDauNoiBo: true,
+      khiSuKien: (sk) => {
+        if (sk.kieu === 'cham_chon') {
+          const rect = renderer.domElement.getBoundingClientRect();
+          const cx = rect.left + sk.x * rect.width;
+          const cy = rect.top + sk.y * rect.height;
+          chonTaiDiem(cx, cy);
+        }
+      }
+    });
+
+    const boApOrbit = taoBoApOrbit({
+      THREE,
+      camera,
+      controls,
+      dieuKhien,
+      doMuot: 0.03
+    });
+
+    const dieuKhienTay = await taoDieuKhienTay({
+      khung3D,
+      dieuKhien
+    });
+
+    // 6. Gắn sự kiện nút bấm demo
+    btnBatCam.addEventListener('click', async () => {
+      if (dieuKhienTay.trangThai.bat) {
+        dieuKhienTay.tat();
+        btnBatCam.textContent = 'Bật Camera';
+        btnBatCam.classList.remove('active');
+      } else {
+        await dieuKhienTay.bat();
+        if (dieuKhienTay.trangThai.bat) {
+          btnBatCam.textContent = 'Tắt Camera';
+          btnBatCam.classList.add('active');
+        }
+      }
+    });
+
+    btnVeDau.addEventListener('click', () => {
+      dieuKhien.veGocDau();
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'r' || e.key === 'R') {
+        dieuKhien.veGocDau();
+      }
+    });
+
+    btnPhatKeo.addEventListener('click', () => {
+      dieuKhienTay.bat({ phatLai: '/static/dieu-khien-tay/du-lieu-thu/keo_luot.json' });
+    });
+
+    btnPhatZoom.addEventListener('click', () => {
+      dieuKhienTay.bat({ phatLai: '/static/dieu-khien-tay/du-lieu-thu/zoom_hai_tay.json' });
+    });
+
+    // Bấm chuột trên canvas cũng gọi chonTaiDiem
+    renderer.domElement.addEventListener('pointerup', (e) => {
+      chonTaiDiem(e.clientX, e.clientY);
+    });
+
+    // 7. Vòng lặp render Three.js
+    let demKhung = 0;
+    let tDemFps = performance.now();
+    let currentFps = 60;
+    let tKhungTruoc = performance.now();
+
+    function vongLap(tHienTai) {
+      requestAnimationFrame(vongLap);
+
+      const dt = Math.min(0.1, (tHienTai - tKhungTruoc) / 1000);
+      tKhungTruoc = tHienTai;
+
+      // Đo FPS render
+      demKhung++;
+      if (tHienTai - tDemFps >= 1000) {
+        currentFps = demKhung * 1000 / (tHienTai - tDemFps);
+        demKhung = 0;
+        tDemFps = tHienTai;
+      }
+
+      // Áp cử chỉ tay LÊN TRƯỚC controls.update()
+      boApOrbit.capNhat(dt);
+      controls.update();
+
+      renderer.render(scene, camera);
+
+      // Cập nhật thông số HUD
+      const tt = dieuKhienTay.trangThai;
+      const camPos = camera.position;
+      const kc = camPos.distanceTo(controls.target);
+      const spherical = new THREE.Spherical().setFromVector3(camPos.clone().sub(controls.target));
+      const yawDeg = Math.round(THREE.MathUtils.radToDeg(spherical.theta));
+      const pitchDeg = Math.round(THREE.MathUtils.radToDeg(spherical.phi));
+
+      lblHud.textContent = `FPS: ${Math.round(currentFps)} | Camera: ${tt.camera || 'Chưa bật'} | Yaw: ${yawDeg}° | Pitch: ${pitchDeg}° | KC: ${kc.toFixed(2)}`;
+    }
+    requestAnimationFrame(vongLap);
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Tự động phát nếu có query ?phat=<ten>
+    const params = new URLSearchParams(window.location.search);
+    const tenPhat = params.get('phat');
+    if (tenPhat) {
+      dieuKhienTay.bat({ phatLai: `/static/dieu-khien-tay/du-lieu-thu/${tenPhat}.json` });
+    }
+
+    // 8. Public API cho Playwright và kiểm thử
+    window.BioLab = {
+      dieuKhienTay,
+      dieuKhien,
+      boApOrbit,
+      camera,
+      controls,
+      chonTaiDiem,
+      get fps() { return currentFps; },
+      get gocCamera() {
+        const spherical = new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));
+        return {
+          phuongVi: THREE.MathUtils.radToDeg(spherical.theta),
+          cuc: THREE.MathUtils.radToDeg(spherical.phi),
+          khoangCach: spherical.radius
+        };
+      },
+      get trangThai() {
+        return {
+          tay: dieuKhienTay.trangThai
+        };
+      }
+    };
+  </script>
+</body>
+</html>

@@ -30,7 +30,13 @@ namespace Khkt.Environment.Tang2
         {
             if (stemOrigin == null) { enabled = false; return; }
             if (shared == null) shared = bubbleMaterial;
-            if (shared == null) { enabled = false; return; }
+            if (shared == null)
+            {
+                // Unlit có thể bị lược khỏi bản dựng (iOS) vì không vật liệu nào trong cảnh dùng
+                var sh = Shader.Find("Universal Render Pipeline/Unlit") ?? Shader.Find("Universal Render Pipeline/Lit");
+                if (sh == null) { enabled = false; return; }
+                shared = new Material(sh) { name = "Bọt O2", color = new Color(0.9f, 0.97f, 1f, 1f) };
+            }
             var mesh = Resources.GetBuiltinResource<Mesh>("Sphere.fbx");
             bubbles = new Transform[Pool];
             age = new float[Pool];

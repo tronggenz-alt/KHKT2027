@@ -1,0 +1,345 @@
+{
+  "tailwind.3.4.16.js": {
+    "ten": "tailwind.3.4.16.js",
+    "url": "https://cdn.tailwindcss.com/3.4.16",
+    "phien_ban": "3.4.16",
+    "sha256": "3f81aa7f6ecdb1acc14c202e513dfee00b6c7703cd81ce1be25bf5215a92e8cb",
+    "kich_thuoc_bytes": 451131
+  },
+  "gsap.3.12.5.min.js": {
+    "ten": "gsap.3.12.5.min.js",
+    "url": "https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js",
+    "phien_ban": "3.12.5",
+    "sha256": "28033e449a31ebcc396e5be8b13b63152bf03094288fb5867034321927bce087",
+    "kich_thuoc_bytes": 72214
+  },
+  "three/three.module.js": {
+    "ten": "three.module.js",
+    "url": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "phien_ban": "0.160.0",
+    "sha256": "76dea8151bc9352aef3528b4262e249b2604f62543828328db978d060d61a495",
+    "kich_thuoc_bytes": 1272972
+  },
+  "three/addons/controls/OrbitControls.js": {
+    "ten": "OrbitControls.js",
+    "url": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js",
+    "phien_ban": "0.160.0",
+    "sha256": "5a44a9e86a2a0fb11933eed69bc2cd33c76a496854c1aed6ed776efa87d7b064",
+    "kich_thuoc_bytes": 29868
+  },
+  "three/addons/renderers/CSS2DRenderer.js": {
+    "ten": "CSS2DRenderer.js",
+    "url": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/renderers/CSS2DRenderer.js",
+    "phien_ban": "0.160.0",
+    "sha256": "a4f0f79184c043f6b9d2654d8ba051e49a7d631d34e8f437c1804798a68c379f",
+    "kich_thuoc_bytes": 4407
+  },
+  "three/addons/lines/Line2.js": {
+    "ten": "Line2.js",
+    "url": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/lines/Line2.js",
+    "phien_ban": "0.160.0",
+    "sha256": "f926f3c903983abbf10e7a30dc5908df71dc6a20117eb67f0f758344d4a76f93",
+    "kich_thuoc_bytes": 433
+  },
+  "three/addons/lines/LineMaterial.js": {
+    "ten": "LineMaterial.js",
+    "url": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/lines/LineMaterial.js",
+    "phien_ban": "0.160.0",
+    "sha256": "eed69bd471547ca0d15e0e87722530317d5d514f533585948086515c5f308234",
+    "kich_thuoc_bytes": 11281
+  },
+  "three/addons/lines/LineGeometry.js": {
+    "ten": "LineGeometry.js",
+    "url": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/lines/LineGeometry.js",
+    "phien_ban": "0.160.0",
+    "sha256": "b7e1952c8891dc7840a9119ce03eeb547825663c831851bd73baf305d4c61c46",
+    "kich_thuoc_bytes": 1458
+  },
+  "three/addons/lines/LineSegmentsGeometry.js": {
+    "ten": "LineSegmentsGeometry.js",
+    "url": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/lines/LineSegmentsGeometry.js",
+    "phien_ban": "0.160.0",
+    "sha256": "59419cee5eccbaacfab5939871308ee262a63761815f72ff49cbd217fd84fdb7",
+    "kich_thuoc_bytes": 4632
+  },
+  "three/addons/lines/LineSegments2.js": {
+    "ten": "LineSegments2.js",
+    "url": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/lines/LineSegments2.js",
+    "phien_ban": "0.160.0",
+    "sha256": "5009e85ffbd09e86003509f7d1001642cfe7594d42192facdde516fcd4418d24",
+    "kich_thuoc_bytes": 9330
+  },
+  "three/addons/environments/RoomEnvironment.js": {
+    "ten": "RoomEnvironment.js",
+    "url": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/environments/RoomEnvironment.js",
+    "phien_ban": "0.160.0",
+    "sha256": "e21f41b7ef2016f2984a5d27850b42dffa797a6a194a138e288b06576d765a7b",
+    "kich_thuoc_bytes": 3735
+  },
+  "three/addons/geometries/RoundedBoxGeometry.js": {
+    "ten": "RoundedBoxGeometry.js",
+    "url": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/geometries/RoundedBoxGeometry.js",
+    "phien_ban": "0.160.0",
+    "sha256": "d20aeaf7077c459a8d952d215738d7b44fba028440bb862d84b622a34f0c80bb",
+    "kich_thuoc_bytes": 4625
+  },
+  "three/addons/loaders/GLTFLoader.js": {
+    "ten": "GLTFLoader.js",
+    "url": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js",
+    "phien_ban": "0.160.0",
+    "sha256": "d073b438e6a07e1359741dd5d6c76c953420cc0d4fd84eb1bdde94315540e6a3",
+    "kich_thuoc_bytes": 108522
+  },
+  "three/addons/utils/BufferGeometryUtils.js": {
+    "ten": "BufferGeometryUtils.js",
+    "url": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/utils/BufferGeometryUtils.js",
+    "phien_ban": "0.160.0",
+    "sha256": "9be041e96308775d00e2695cc607645b9a9b64fd7c0e759dd8f7c00a8d92becb",
+    "kich_thuoc_bytes": 31906
+  },
+  "mathjax.3.2.2.js": {
+    "ten": "mathjax.3.2.2.js",
+    "url": "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js",
+    "phien_ban": "3.2.2",
+    "sha256": "0a6ded5abbce13331658dd239f34382abd06492c74b71b61e8caa8112ec55fa5",
+    "kich_thuoc_bytes": 1160989
+  },
+  "three/addons/loaders/DRACOLoader.js": {
+    "ten": "DRACOLoader.js",
+    "url": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/DRACOLoader.js",
+    "phien_ban": "0.160.0",
+    "sha256": "65c114ecb7b349cdc59c75b2c92d19cca672a138060dba0f60f64262fa40408c",
+    "kich_thuoc_bytes": 13628
+  },
+  "three/draco/draco_decoder.js": {
+    "ten": "draco_decoder.js",
+    "url": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/draco/gltf/draco_decoder.js",
+    "phien_ban": "0.160.0",
+    "sha256": "8625489da79a805f4f2a7d511c3e52d8b4085608a9d2a4d5f4f9de5db0aea04f",
+    "kich_thuoc_bytes": 512465
+  },
+  "three/draco/draco_decoder.wasm": {
+    "ten": "draco_decoder.wasm",
+    "url": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/draco/gltf/draco_decoder.wasm",
+    "phien_ban": "0.160.0",
+    "sha256": "a680d927bed9cb864ddbd63521868891af2bfbe755092761b4837487618df8ac",
+    "kich_thuoc_bytes": 192420
+  },
+  "three/draco/draco_wasm_wrapper.js": {
+    "ten": "draco_wasm_wrapper.js",
+    "url": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/draco/gltf/draco_wasm_wrapper.js",
+    "phien_ban": "0.160.0",
+    "sha256": "8bb2952d2ba7d67e1414f8df819410cb0434a666be53f671fff75f68843d76f6",
+    "kich_thuoc_bytes": 58456
+  },
+  "motion/motion.12.4.7.js": {
+    "ten": "motion.12.4.7.js",
+    "url": "https://cdn.jsdelivr.net/npm/motion@12.4.7/dist/motion.js",
+    "phien_ban": "12.4.7",
+    "sha256": "eb22657ff427ab55b0f72c13c12e2f391794c9468a9d8e43734801e0f614834e",
+    "kich_thuoc_bytes": 68109
+  },
+  "mathjax-fonts/woff-v2/MathJax_AMS-Regular.woff": {
+    "ten": "mathjax-fonts/woff-v2/MathJax_AMS-Regular.woff",
+    "url": "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2/MathJax_AMS-Regular.woff",
+    "phien_ban": "3.2.2",
+    "sha256": "3de784d07b9fa8f104c10928a878ee879cf3305cae5195cba663c9c2bb0195eb",
+    "kich_thuoc_bytes": 40808
+  },
+  "mathjax-fonts/woff-v2/MathJax_Calligraphic-Bold.woff": {
+    "ten": "mathjax-fonts/woff-v2/MathJax_Calligraphic-Bold.woff",
+    "url": "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2/MathJax_Calligraphic-Bold.woff",
+    "phien_ban": "3.2.2",
+    "sha256": "af04542b29eaac04550a140c5f1760a649783989426f2540855bf4157819367d",
+    "kich_thuoc_bytes": 9908
+  },
+  "mathjax-fonts/woff-v2/MathJax_Calligraphic-Regular.woff": {
+    "ten": "mathjax-fonts/woff-v2/MathJax_Calligraphic-Regular.woff",
+    "url": "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2/MathJax_Calligraphic-Regular.woff",
+    "phien_ban": "3.2.2",
+    "sha256": "26683bf201fb258a2237d9754616de9d4ecf4cc1cd39dd1902476df7d75f1d16",
+    "kich_thuoc_bytes": 9600
+  },
+  "mathjax-fonts/woff-v2/MathJax_Fraktur-Bold.woff": {
+    "ten": "mathjax-fonts/woff-v2/MathJax_Fraktur-Bold.woff",
+    "url": "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2/MathJax_Fraktur-Bold.woff",
+    "phien_ban": "3.2.2",
+    "sha256": "721921bab0d001ebff0206c24cb5de6ca136467bf1843a7aa32030ba061d1e92",
+    "kich_thuoc_bytes": 22340
+  },
+  "mathjax-fonts/woff-v2/MathJax_Fraktur-Regular.woff": {
+    "ten": "mathjax-fonts/woff-v2/MathJax_Fraktur-Regular.woff",
+    "url": "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2/MathJax_Fraktur-Regular.woff",
+    "phien_ban": "3.2.2",
+    "sha256": "870673df72e70f87c91a5a317d558c2c3b54392264ad79bbadc6d424ae8765fe",
+    "kich_thuoc_bytes": 21480
+  },
+  "mathjax-fonts/woff-v2/MathJax_Main-Bold.woff": {
+    "ten": "mathjax-fonts/woff-v2/MathJax_Main-Bold.woff",
+    "url": "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2/MathJax_Main-Bold.woff",
+    "phien_ban": "3.2.2",
+    "sha256": "88b98cad3688915e50da55553ff6ad185e0dce134b47f176e91b100f8a9b175c",
+    "kich_thuoc_bytes": 34464
+  },
+  "mathjax-fonts/woff-v2/MathJax_Main-Italic.woff": {
+    "ten": "mathjax-fonts/woff-v2/MathJax_Main-Italic.woff",
+    "url": "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2/MathJax_Main-Italic.woff",
+    "phien_ban": "3.2.2",
+    "sha256": "355254db9ca10a09a3b5f0929d74eb4670f44fbe864c07526a06213e0a0caf6c",
+    "kich_thuoc_bytes": 20832
+  },
+  "mathjax-fonts/woff-v2/MathJax_Main-Regular.woff": {
+    "ten": "mathjax-fonts/woff-v2/MathJax_Main-Regular.woff",
+    "url": "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2/MathJax_Main-Regular.woff",
+    "phien_ban": "3.2.2",
+    "sha256": "1cb1c39ea642f26a4dfed230b4aea1c3c218689421f6e9c0a7c1811693c4fa07",
+    "kich_thuoc_bytes": 34160
+  },
+  "mathjax-fonts/woff-v2/MathJax_Math-BoldItalic.woff": {
+    "ten": "mathjax-fonts/woff-v2/MathJax_Math-BoldItalic.woff",
+    "url": "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2/MathJax_Math-BoldItalic.woff",
+    "phien_ban": "3.2.2",
+    "sha256": "8ea8dbb1b02e6f730f55b4cb5d413b785b9f5c39807d0a0fa7da206a0824a457",
+    "kich_thuoc_bytes": 19776
+  },
+  "mathjax-fonts/woff-v2/MathJax_Math-Italic.woff": {
+    "ten": "mathjax-fonts/woff-v2/MathJax_Math-Italic.woff",
+    "url": "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2/MathJax_Math-Italic.woff",
+    "phien_ban": "3.2.2",
+    "sha256": "a009bea404f7a500ded48f8b9ad9cf16e12504b3195dd9e25975289b8256b0f0",
+    "kich_thuoc_bytes": 19360
+  },
+  "mathjax-fonts/woff-v2/MathJax_Math-Regular.woff": {
+    "ten": "mathjax-fonts/woff-v2/MathJax_Math-Regular.woff",
+    "url": "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2/MathJax_Math-Regular.woff",
+    "phien_ban": "3.2.2",
+    "sha256": "c01d3321e89b403c4b811aa153c4e618eda3421f92d8a072a02c8d190782a191",
+    "kich_thuoc_bytes": 19288
+  },
+  "mathjax-fonts/woff-v2/MathJax_SansSerif-Bold.woff": {
+    "ten": "mathjax-fonts/woff-v2/MathJax_SansSerif-Bold.woff",
+    "url": "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2/MathJax_SansSerif-Bold.woff",
+    "phien_ban": "3.2.2",
+    "sha256": "32792104b5ef69eded905b6d1598ed05d8087684d38e7a94d52e3c38ba16f47e",
+    "kich_thuoc_bytes": 15944
+  },
+  "mathjax-fonts/woff-v2/MathJax_SansSerif-Italic.woff": {
+    "ten": "mathjax-fonts/woff-v2/MathJax_SansSerif-Italic.woff",
+    "url": "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2/MathJax_SansSerif-Italic.woff",
+    "phien_ban": "3.2.2",
+    "sha256": "fc6ddf5df402b263cfb158aed8e89972542c34b719cd87b1db30461985f7bd5b",
+    "kich_thuoc_bytes": 14628
+  },
+  "mathjax-fonts/woff-v2/MathJax_SansSerif-Regular.woff": {
+    "ten": "mathjax-fonts/woff-v2/MathJax_SansSerif-Regular.woff",
+    "url": "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2/MathJax_SansSerif-Regular.woff",
+    "phien_ban": "3.2.2",
+    "sha256": "b418136e3b384baaadecb70bd3c48a8da9825210130b2897db808c44efc883cb",
+    "kich_thuoc_bytes": 12660
+  },
+  "mathjax-fonts/woff-v2/MathJax_Script-Regular.woff": {
+    "ten": "mathjax-fonts/woff-v2/MathJax_Script-Regular.woff",
+    "url": "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2/MathJax_Script-Regular.woff",
+    "phien_ban": "3.2.2",
+    "sha256": "af96f67d7accf5fd2a4a682d0b9f8b339f8ea6fe34c310c1694c8ba7f6ddc96f",
+    "kich_thuoc_bytes": 11852
+  },
+  "mathjax-fonts/woff-v2/MathJax_Size1-Regular.woff": {
+    "ten": "mathjax-fonts/woff-v2/MathJax_Size1-Regular.woff",
+    "url": "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2/MathJax_Size1-Regular.woff",
+    "phien_ban": "3.2.2",
+    "sha256": "c49810b53ecc0d87d8028762c518924197dd9d3f905b08f99ea241301085b9cb",
+    "kich_thuoc_bytes": 5792
+  },
+  "mathjax-fonts/woff-v2/MathJax_Size2-Regular.woff": {
+    "ten": "mathjax-fonts/woff-v2/MathJax_Size2-Regular.woff",
+    "url": "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2/MathJax_Size2-Regular.woff",
+    "phien_ban": "3.2.2",
+    "sha256": "30e889b58cbc51adfbb038ab1a96dc4025aa3542a3cff7712fc55ece510675e2",
+    "kich_thuoc_bytes": 5464
+  },
+  "mathjax-fonts/woff-v2/MathJax_Size3-Regular.woff": {
+    "ten": "mathjax-fonts/woff-v2/MathJax_Size3-Regular.woff",
+    "url": "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2/MathJax_Size3-Regular.woff",
+    "phien_ban": "3.2.2",
+    "sha256": "5cda41563a095bd70c78e2dda13d0f8cb922c71c90fffd0a0044c65173a66e83",
+    "kich_thuoc_bytes": 3244
+  },
+  "mathjax-fonts/woff-v2/MathJax_Size4-Regular.woff": {
+    "ten": "mathjax-fonts/woff-v2/MathJax_Size4-Regular.woff",
+    "url": "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2/MathJax_Size4-Regular.woff",
+    "phien_ban": "3.2.2",
+    "sha256": "3bc6ecaae7ecf6f8d7f8ea07bddbaca8601e2cb6e89d6aef58e78d9f6d8a398f",
+    "kich_thuoc_bytes": 5148
+  },
+  "mathjax-fonts/woff-v2/MathJax_Typewriter-Regular.woff": {
+    "ten": "mathjax-fonts/woff-v2/MathJax_Typewriter-Regular.woff",
+    "url": "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2/MathJax_Typewriter-Regular.woff",
+    "phien_ban": "3.2.2",
+    "sha256": "c56da8d69f1a0208b8e0703656c3264b6dd748bd452524c82b0385b60f6a68c1",
+    "kich_thuoc_bytes": 17604
+  },
+  "mathjax-fonts/woff-v2/MathJax_Vector-Bold.woff": {
+    "ten": "mathjax-fonts/woff-v2/MathJax_Vector-Bold.woff",
+    "url": "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2/MathJax_Vector-Bold.woff",
+    "phien_ban": "3.2.2",
+    "sha256": "36e0d72d8a7afc696a3e7a5c7369807634640de9b02257bca447bdf126221a27",
+    "kich_thuoc_bytes": 1116
+  },
+  "mathjax-fonts/woff-v2/MathJax_Vector-Regular.woff": {
+    "ten": "mathjax-fonts/woff-v2/MathJax_Vector-Regular.woff",
+    "url": "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2/MathJax_Vector-Regular.woff",
+    "phien_ban": "3.2.2",
+    "sha256": "72bc573386dd1d48c5bbd286302ca9e3400c5eb0f298e7cfbf945b9d08fc688f",
+    "kich_thuoc_bytes": 1136
+  },
+  "mathjax-fonts/woff-v2/MathJax_Zero.woff": {
+    "ten": "mathjax-fonts/woff-v2/MathJax_Zero.woff",
+    "url": "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2/MathJax_Zero.woff",
+    "phien_ban": "3.2.2",
+    "sha256": "481e39042508ae313a60618af1e37146ab93e9324c98e4c78b8f17fe55d41e0b",
+    "kich_thuoc_bytes": 1368
+  },
+  "mediapipe/tasks-vision-1.1.0/vision_bundle.mjs": {
+    "ten": "vision_bundle.mjs",
+    "url": "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.1.0/vision_bundle.mjs",
+    "phien_ban": "1.1.0",
+    "sha256": "9d5fc9ef74b22329cf9aa88dc543956d192b8c254210b187271614713eb5b10c",
+    "kich_thuoc_bytes": 156135
+  },
+  "mediapipe/tasks-vision-1.1.0/wasm/vision_wasm_internal.js": {
+    "ten": "vision_wasm_internal.js",
+    "url": "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.1.0/wasm/vision_wasm_internal.js",
+    "phien_ban": "1.1.0",
+    "sha256": "7c652617b5bef832f42878ce8c5f752b0724bca6054e4bc1013a37d4b1949723",
+    "kich_thuoc_bytes": 335393
+  },
+  "mediapipe/tasks-vision-1.1.0/wasm/vision_wasm_internal.wasm": {
+    "ten": "vision_wasm_internal.wasm",
+    "url": "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.1.0/wasm/vision_wasm_internal.wasm",
+    "phien_ban": "1.1.0",
+    "sha256": "782eda3ec1f414fdb4f1d66a8b59093eb4d5ab437e06117796abf05962d68eef",
+    "kich_thuoc_bytes": 12997248
+  },
+  "mediapipe/hand_landmarker.task": {
+    "ten": "hand_landmarker.task",
+    "url": "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+    "phien_ban": "1.0",
+    "sha256": "fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1",
+    "kich_thuoc_bytes": 7819105
+  },
+  "mediapipe/tasks-vision-1.1.0/wasm/vision_wasm_module_internal.js": {
+    "ten": "vision_wasm_module_internal.js",
+    "url": "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.1.0/wasm/vision_wasm_module_internal.js",
+    "phien_ban": "1.1.0",
+    "sha256": "70eff3956521b7de058d7173a4935c95e4a223c26ea624b9f5a936d3a043dcb0",
+    "kich_thuoc_bytes": 335431
+  },
+  "mediapipe/tasks-vision-1.1.0/wasm/vision_wasm_module_internal.wasm": {
+    "ten": "vision_wasm_module_internal.wasm",
+    "url": "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.1.0/wasm/vision_wasm_module_internal.wasm",
+    "phien_ban": "1.1.0",
+    "sha256": "ee03b14a878e6c3c053a1bfa62e166dc45244be54dc0bbe61c578f710b771f6a",
+    "kich_thuoc_bytes": 12997272
+  }
+}

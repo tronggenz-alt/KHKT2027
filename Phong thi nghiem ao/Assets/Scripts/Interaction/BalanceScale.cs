@@ -28,6 +28,9 @@ namespace Khkt.Interaction
 
         readonly System.Collections.Generic.List<Grabbable> nearby = new System.Collections.Generic.List<Grabbable>();
         float lastScan = -10f;
+        string format;
+        int shownCenti = int.MinValue;
+        bool shownErr;
 
         void Update()
         {
@@ -35,13 +38,16 @@ namespace Khkt.Interaction
             Transform z = pan != null ? pan : transform;
             if (Time.time - lastScan > 0.5f)
             {
+                // Lấy từ sổ đăng ký (không quét cả cảnh mỗi nửa giây): chỉ giữ dụng cụ đang bật trong vòng 2,5 m quanh đĩa cân
                 lastScan = Time.time;
-                nearby.Clear();
-                foreach (var gr in FindObjectsByType<Grabbable>())
-                    if (Vector3.Distance(gr.transform.position, z.position) < 2.5f) nearby.Add(gr);
+                Khkt.Rendering.LiveSet<Grabbable>.Collect(nearby, null, activeOnly: true);
+                Vector3 zp = z.position;
+                for (int i = nearby.Count - 1; i >= 0; i--)
+                    if ((nearby[i].transform.position - zp).sqrMagnitude >= 2.5f * 2.5f) nearby.RemoveAt(i);
             }
-            foreach (var gr in nearby)
+            for (int i = 0; i < nearby.Count; i++)
             {
+                var gr = nearby[i];
                 if (gr == null || gr.IsHeld) continue;
                 Vector3 l = z.InverseTransformPoint(gr.transform.position);
                 if (Mathf.Abs(l.x) > zoneSize.x / 2 || l.y < -0.01f || l.y > zoneSize.y || Mathf.Abs(l.z) > zoneSize.z / 2) continue;
@@ -52,8 +58,17 @@ namespace Khkt.Interaction
             Grams = g;
             if (display != null)
             {
+                // Chỉ dựng lại chữ khi số hiển thị thật sự đổi (trước đây mỗi khung hình tạo chuỗi mới và dựng lại lưới chữ)
+                bool err = g > maxGrams;
                 float shown = g - tare;
-                display.text = g > maxGrams ? "Err" : shown.ToString("0." + new string('0', decimals), Vi) + " g";
+                int centi = Mathf.RoundToInt(shown * Mathf.Pow(10f, decimals));
+                if (err != shownErr || centi != shownCenti || format == null)
+                {
+                    format ??= "0." + new string('0', decimals);
+                    shownErr = err;
+                    shownCenti = centi;
+                    display.text = err ? "Err" : shown.ToString(format, Vi) + " g";
+                }
             }
         }
 

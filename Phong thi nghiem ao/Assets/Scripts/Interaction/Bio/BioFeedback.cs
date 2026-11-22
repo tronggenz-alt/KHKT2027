@@ -40,15 +40,6 @@ namespace Khkt.Interaction.Bio
         AudioSource audioSource;
         AudioClip clipClick, clipButton, clipSuccess, clipWarning, clipCrack, clipKorotkoff, clipPop;
 
-        string toastTitle = "";
-        string toastBody = "";
-        string toastSub = "";
-        bool toastIsError;
-        float toastTimer;
-
-        GUIStyle boxStyle, titleStyle, bodyStyle, subStyle;
-        Texture2D bgNormalTex, bgErrorTex;
-
         public static BioFeedback Ensure()
         {
             if (Instance != null) return Instance;
@@ -59,7 +50,7 @@ namespace Khkt.Interaction.Bio
                 return existing;
             }
             var go = new GameObject("BioFeedback");
-            DontDestroyOnLoad(go);
+            if (Application.isPlaying) DontDestroyOnLoad(go);
             Instance = go.AddComponent<BioFeedback>();
             return Instance;
         }
@@ -208,20 +199,27 @@ namespace Khkt.Interaction.Bio
         /// <summary>Mỗi thông báo thực hành (nội dung, có phải cảnh báo không): robot trợ lý nghe để nói lại kết quả thao tác của nó.</summary>
         public static event Action<string, bool> OnToast;
 
+        /// <summary>
+        /// Thông báo thao tác (thẻ kính ở giữa phía trên, do LabToasts vẽ). isError: thẻ đỏ "Cảnh báo thao tác";
+        /// subtitle: dòng giải thích bên dưới (với lỗi là lý do khoa học).
+        /// </summary>
         public static void ShowToast(string message, bool isError = false, float seconds = 4.2f, string subtitle = "")
         {
-            OnToast?.Invoke(message ?? "", isError);
-            var inst = Ensure();
-            inst.toastTitle = isError ? "CẢNH BÁO THAO TÁC SINH HỌC" : "THÔNG BÁO THỰC HÀNH SINH HỌC";
-            inst.toastBody = message ?? "";
-            inst.toastSub = subtitle ?? "";
-            inst.toastIsError = isError;
-            inst.toastTimer = Mathf.Max(1.5f, seconds);
+            if (string.IsNullOrEmpty(message)) return;
+            OnToast?.Invoke(message, isError);
+            bool hasSub = !string.IsNullOrEmpty(subtitle);
+            if (isError)
+                Khkt.Demo.LabToasts.Push(message, Khkt.Demo.LabToasts.Tone.Error, seconds, "Cảnh báo thao tác", hasSub ? "Vì sao: " + subtitle : null);
+            else
+                Khkt.Demo.LabToasts.Push(message, Khkt.Demo.LabToasts.Tone.Info, seconds, null, hasSub ? subtitle : null);
         }
 
         public static void LogAction(string equipmentId, string actionCode, string detail)
         {
-            ShowToast(detail, false, 3.2f, $"Thiết bị: {equipmentId}");
+            // Thao tác đúng: thẻ xanh có dấu ✓. Không in mã thiết bị (lo_dau_soi, dao_lam...): đó là mã nội bộ gửi lên máy chủ,
+            // bản cũ hiện thành dòng "Giải thích khoa học: Thiết bị: lo_dau_soi".
+            if (!string.IsNullOrEmpty(detail))
+                Khkt.Demo.LabToasts.Push(detail, Khkt.Demo.LabToasts.Tone.Good, 3.2f);
             OnActionLogged?.Invoke(equipmentId ?? "", actionCode ?? "", detail ?? "");
         }
 
@@ -249,77 +247,6 @@ namespace Khkt.Interaction.Bio
         public static string FormatVi(double value, string format = "0.0")
         {
             return value.ToString(format, ViCulture);
-        }
-
-        void Update()
-        {
-            if (toastTimer > 0f)
-                toastTimer -= Time.unscaledDeltaTime;
-        }
-
-        void EnsureStyles()
-        {
-            if (boxStyle != null) return;
-            bgNormalTex = MakeTex(new Color(0.06f, 0.22f, 0.16f, 0.92f));
-            bgErrorTex = MakeTex(new Color(0.42f, 0.09f, 0.08f, 0.94f));
-
-            boxStyle = new GUIStyle(GUI.skin.box)
-            {
-                padding = new RectOffset(14, 14, 10, 10),
-                alignment = TextAnchor.UpperLeft
-            };
-            titleStyle = new GUIStyle(GUI.skin.label)
-            {
-                fontSize = 13,
-                fontStyle = FontStyle.Bold,
-                normal = { textColor = new Color(0.95f, 0.98f, 0.96f) }
-            };
-            bodyStyle = new GUIStyle(GUI.skin.label)
-            {
-                fontSize = 14,
-                wordWrap = true,
-                normal = { textColor = Color.white }
-            };
-            subStyle = new GUIStyle(GUI.skin.label)
-            {
-                fontSize = 12,
-                wordWrap = true,
-                fontStyle = FontStyle.Italic,
-                normal = { textColor = new Color(0.86f, 0.92f, 0.88f) }
-            };
-        }
-
-        static Texture2D MakeTex(Color c)
-        {
-            var t = new Texture2D(2, 2);
-            t.SetPixels(new[] { c, c, c, c });
-            t.Apply();
-            return t;
-        }
-
-        void OnGUI()
-        {
-            if (toastTimer <= 0f || string.IsNullOrEmpty(toastBody)) return;
-            EnsureStyles();
-
-            float w = Mathf.Min(540f, Screen.width - 40f);
-            float h = string.IsNullOrEmpty(toastSub) ? 74f : 102f;
-            float x = (Screen.width - w) * 0.5f;
-            float y = Screen.height - h - 26f;
-
-            boxStyle.normal.background = toastIsError ? bgErrorTex : bgNormalTex;
-            titleStyle.normal.textColor = toastIsError ? new Color(1f, 0.78f, 0.35f) : new Color(0.52f, 0.96f, 0.72f);
-
-            GUILayout.BeginArea(new Rect(x, y, w, h), boxStyle);
-            GUILayout.Label(toastTitle, titleStyle);
-            GUILayout.Space(2f);
-            GUILayout.Label(toastBody, bodyStyle);
-            if (!string.IsNullOrEmpty(toastSub))
-            {
-                GUILayout.Space(2f);
-                GUILayout.Label("Giải thích khoa học: " + toastSub, subStyle);
-            }
-            GUILayout.EndArea();
         }
     }
 }

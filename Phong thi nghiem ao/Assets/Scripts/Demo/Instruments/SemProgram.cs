@@ -64,25 +64,25 @@ namespace Khkt.Demo.Instruments
 
         public override void Build()
         {
-            bSrc = S.AddButton("", 0, 0, () => { Src.Next(); Mounted = false; Coated = false; imageKey = ""; }, false, 2, 13);
-            bMount = S.AddButton("Gắn mẫu lên đế", 2, 0, Mount, false, 1, 13);
+            bSrc = S.AddButton("", 0, 0, () => { Src.Next(); Mounted = false; Coated = false; imageKey = ""; }, false, 2, 14);
+            bMount = S.AddButton("Gắn mẫu lên đế", 2, 0, Mount, false, 1, 14);
             bCoat = S.AddButton("Phủ vàng", 0, 1, Coat);
-            bPump = S.AddButton("Hút chân không", 1, 1, Pump, false, 1, 13);
-            bBeam = S.AddButton("Bật chùm electron", 2, 1, ToggleBeam, true, 1, 13);
+            bPump = S.AddButton("Hút chân không", 1, 1, Pump, false, 1, 14);
+            bBeam = S.AddButton("Bật chùm electron", 2, 1, ToggleBeam, true, 1, 14);
             bKv = S.AddButton("", 0, 2, NextKv);
             bDet = S.AddButton("", 1, 2, () => { Bse = !Bse; S.Done("lay_net"); });
-            bScan = S.AddButton("", 2, 2, () => SlowScan = !SlowScan, false, 1, 13);
+            bScan = S.AddButton("", 2, 2, () => SlowScan = !SlowScan, false, 1, 14);
             bMagDown = S.AddButton("Phóng đại −", 0, 3, () => SetMag(Prev(Mag)));
             bMag = S.AddButton("", 1, 3, null);
             bMagUp = S.AddButton("Phóng đại +", 2, 3, () => SetMag(Next(Mag)));
             bFocusM = S.AddButton("Tiêu cự −", 0, 4, () => { Focus -= 1; });
-            bFocus = S.AddButton("Lấy nét tự động", 1, 4, AutoFocus, false, 1, 13);
+            bFocus = S.AddButton("Lấy nét tự động", 1, 4, AutoFocus, false, 1, 14);
             bFocusP = S.AddButton("Tiêu cự +", 2, 4, () => { Focus += 1; });
             bEds = S.AddButton("Thu phổ EDS", 0, 5, RunEds);
-            bSkip = S.AddButton("", 1, 5, () => { skipCoat = !skipCoat; if (EdsSpectrum != null) EdsQuant = Eds.Quantify(EdsSpectrum, KV, skipCoat ? new[] { "Au", "C" } : null); }, false, 1, 12);
+            bSkip = S.AddButton("", 1, 5, () => { skipCoat = !skipCoat; if (EdsSpectrum != null) EdsQuant = Eds.Quantify(EdsSpectrum, KV, skipCoat ? new[] { "Au", "C" } : null); }, false, 1, 14);
             bPlot = S.AddButton("", 2, 5, () => plotMode = 1 - plotMode);
-            bOff = S.AddButton("Tắt chùm, xả buồng mẫu", 0, 6, Finish, false, 2, 13);
-            status = S.AddText("", 7, 0, 3, 13);
+            bOff = S.AddButton("Tắt chùm, xả buồng mẫu", 0, 6, Finish, false, 2, 14);
+            status = S.AddText("", 7, 0, 3, 14);
             S.SetResults("Chuẩn bị mẫu rắn (lọc / cô cạn ống mẫu ở ổ máy, hoặc mẫu chuẩn), gắn lên đế, hút chân không rồi bật chùm electron.");
         }
 
@@ -218,18 +218,18 @@ namespace Khkt.Demo.Instruments
         string BuildResults()
         {
             var sb = new StringBuilder();
-            sb.Append($"<color=#9FB3C8>Mẫu:</color> {Src.Describe(Sample)}\n");
+            sb.Append($"<color={GlassKit.HexDim}>Mẫu:</color> {Src.Describe(Sample)}\n");
             if (Mounted)
             {
-                sb.Append($"<color=#9FB3C8>Chất rắn trên đế:</color> {string.Join(", ", solids.Select(s => $"{s.Name} {(s.Crystalline ? "" : "(vô định hình)")}"))}\n");
+                sb.Append($"<color={GlassKit.HexDim}>Chất rắn trên đế:</color> {string.Join(", ", solids.Select(s => $"{s.Name} {(s.Crystalline ? "" : "(vô định hình)")}"))}\n");
                 if (Imaging)
                 {
                     sb.Append($"\n<b>Ảnh ×{Mag}</b> (vùng {Fmt(FieldUm, "0.#")} µm): ");
                     var shapes = solids.Where(s => s.Crystalline).Select(s => Xrd.Get(s.Id)).Where(c => c != null).Select(c => $"{c.Name}: {ShapeName(c.Shape)} cỡ ~{Fmt(c.GrainUm, "0.#")} µm").ToList();
                     if (solids.Any(s => !s.Crystalline)) shapes.Add("khối vô định hình, bề mặt nhẵn, nứt nẻ khi khô");
                     sb.Append(string.Join("; ", shapes)).Append('\n');
-                    if (Charging) sb.Append("<color=#FFC966>Ảnh có vệt sáng, trôi: mẫu cách điện tích điện. Phủ vàng, hoặc hạ xuống 5 kV.</color>\n");
-                    if (Math.Abs(Focus) >= 0.5) sb.Append("<color=#FFC966>Ảnh mờ: chưa lấy nét.</color>\n");
+                    if (Charging) sb.Append($"<color={GlassKit.HexWarn}>Ảnh có vệt sáng, trôi: mẫu cách điện tích điện. Phủ vàng, hoặc hạ xuống 5 kV.</color>\n");
+                    if (Math.Abs(Focus) >= 0.5) sb.Append($"<color={GlassKit.HexWarn}>Ảnh mờ: chưa lấy nét.</color>\n");
                 }
             }
             if (EdsQuant != null)
@@ -238,11 +238,11 @@ namespace Khkt.Demo.Instruments
                 foreach (var kv in EdsQuant.OrderByDescending(x => x.Value))
                 {
                     var l = Eds.Get(kv.Key);
-                    sb.Append($"• <color=#61DBFF>{kv.Key}</color> {l?.Name} {Fmt(l?.KeV ?? 0, "0.00")} keV: <b>{Fmt(kv.Value * 100, "0.0")}% nguyên tử</b>\n");
+                    sb.Append($"• <color={GlassKit.HexAccent}>{kv.Key}</color> {l?.Name} {Fmt(l?.KeV ?? 0, "0.00")} keV: <b>{Fmt(kv.Value * 100, "0.0")}% nguyên tử</b>\n");
                 }
-                sb.Append(skipCoat ? "<color=#9FB3C8>Đã bỏ Au (lớp phủ) và C (băng dính cacbon) khi tính %</color>\n" : "<color=#FFC966>Đang tính cả Au, C: đây là lớp phủ / băng dính, không phải thành phần mẫu</color>\n");
+                sb.Append(skipCoat ? $"<color={GlassKit.HexDim}>Đã bỏ Au (lớp phủ) và C (băng dính cacbon) khi tính %</color>\n" : $"<color={GlassKit.HexWarn}>Đang tính cả Au, C: đây là lớp phủ / băng dính, không phải thành phần mẫu</color>\n");
                 var truth = SolidResidue.AtomFractions(solids);
-                sb.Append("<color=#9FB3C8>Thành phần thật (để so): ").Append(string.Join(", ", truth.OrderByDescending(x => x.Value).Select(x => $"{x.Key} {x.Value * 100:0}%"))).Append("</color>\n");
+                sb.Append($"<color={GlassKit.HexDim}>Thành phần thật (để so): ").Append(string.Join(", ", truth.OrderByDescending(x => x.Value).Select(x => $"{x.Key} {x.Value * 100:0}%"))).Append("</color>\n");
             }
             return sb.ToString();
         }
@@ -261,29 +261,31 @@ namespace Khkt.Demo.Instruments
         {
             SchemKit.Begin(p);
             float cx = 250;
-            SchemKit.Box(p, cx - 50, 260, 100, 70, new Color(0.25f, 0.27f, 0.32f));  // súng
-            p.Disc(cx, 295, 7, Beam ? new Color(1f, 0.85f, 0.4f) : SchemKit.Off);
+            SchemKit.Box(p, cx - 50, 260, 100, 70, SchemKit.Body);  // súng
+            p.Disc(cx, 295, 7, Beam ? SchemKit.Hot : SchemKit.Off);
+            var lensCol = Color.Lerp(SchemKit.Body, SchemKit.Hot, 0.35f);
             for (int i = 0; i < 3; i++)
             {
                 float y = 220 - i * 55;
-                SchemKit.Box(p, cx - 70, y - 14, 40, 28, new Color(0.5f, 0.35f, 0.2f));
-                SchemKit.Box(p, cx + 30, y - 14, 40, 28, new Color(0.5f, 0.35f, 0.2f));
+                SchemKit.Box(p, cx - 70, y - 14, 40, 28, lensCol);
+                SchemKit.Box(p, cx + 30, y - 14, 40, 28, lensCol);
             }
-            SchemKit.Box(p, cx - 110, 20, 220, 70, Vacuum >= 0 ? new Color(0.08f, 0.1f, 0.16f) : new Color(0.2f, 0.22f, 0.25f));  // buồng mẫu
-            p.FillRect(cx - 40, 30, 80, 10, new Color(0.7f, 0.72f, 0.75f));  // đế
-            if (Mounted) p.FillRect(cx - 28, 40, 56, 5, Coated ? new Color(0.95f, 0.8f, 0.3f) : new Color(0.9f, 0.9f, 0.88f));
+            SchemKit.Box(p, cx - 110, 20, 220, 70, Vacuum >= 0 ? SchemKit.BodyAlt : SchemKit.Body);  // buồng mẫu
+            p.FillRect(cx - 40, 30, 80, 10, SchemKit.Metal);  // đế
+            if (Mounted) p.FillRect(cx - 28, 40, 56, 5, Coated ? new Color(0.92f, 0.72f, 0.2f) : SchemKit.GlassEdge);
             if (Imaging)
             {
                 float sx = cx + Mathf.Sin(time * 6) * 18;
-                p.Line(cx, 260, cx, 120, new Color(0.5f, 0.85f, 1f, 0.8f), 3);
-                p.Line(cx, 120, sx, 45, new Color(0.5f, 0.85f, 1f, 0.8f), 3);
+                var beamCol = new Color(SchemKit.Flow.r, SchemKit.Flow.g, SchemKit.Flow.b, 0.85f);
+                p.Line(cx, 260, cx, 120, beamCol, 3);
+                p.Line(cx, 120, sx, 45, beamCol, 3);
             }
-            SchemKit.Box(p, cx + 120, 40, 60, 40, new Color(0.2f, 0.3f, 0.25f));    // EDS
-            SchemKit.Box(p, cx - 180, 45, 50, 30, new Color(0.25f, 0.25f, 0.3f));  // SE
-            p.Ring(cx, 100, 22, new Color(0.6f, 0.7f, 0.9f), 3);                     // BSE vành khuyên
+            SchemKit.Box(p, cx + 120, 40, 60, 40, Color.Lerp(SchemKit.Body, SchemKit.Good, 0.25f));    // EDS
+            SchemKit.Box(p, cx - 180, 45, 50, 30, SchemKit.BodyAlt);  // SE
+            p.Ring(cx, 100, 22, SchemKit.Edge, 3);                     // BSE vành khuyên
             // ảnh thu nhỏ trên màn hình bên phải
             var mon = new Vector2(760, 175);
-            SchemKit.Box(p, mon.x - 170, mon.y - 120, 340, 240, new Color(0.03f, 0.03f, 0.03f));
+            SchemKit.Box(p, mon.x - 170, mon.y - 120, 340, 240, SchemKit.BodyAlt);
             if (Imaging && imageCache != null)
             {
                 for (int y = 0; y < 220; y += 2)
@@ -294,15 +296,15 @@ namespace Khkt.Demo.Instruments
                     }
             }
             var d = Doc;
-            S.SchemLabel("sung", d.PartName("sung") + (Beam ? $"\n<color=#FFD27A>{KV} kV</color>" : ""), cx + 150, 300, 11);
-            S.SchemLabel("tk", d.PartName("thau_kinh"), cx + 160, 200, 11);
-            S.SchemLabel("quet", d.PartName("cuon_quet"), cx + 160, 140, 11);
-            S.SchemLabel("buong", d.PartName("buong_mau") + (Vacuum < 0 ? " (mở)" : VacuumOk ? " (chân không)" : " (đang hút)"), cx, 12, 11);
-            S.SchemLabel("eds", "EDS", cx + 150, 92, 11);
-            S.SchemLabel("se", "SE", cx - 155, 88, 11);
-            S.SchemLabel("bse", "BSE", cx + 40, 120, 11);
-            S.SchemLabel("man", "Màn hình ảnh", mon.x, mon.y + 132, 11);
-            S.SchemLabel("trang_thai", !Mounted ? "<color=#8899AA>CHƯA CÓ MẪU</color>" : Vacuum < 0 ? "<color=#FFC966>BUỒNG MẪU MỞ</color>" : !VacuumOk ? $"<color=#FFC966>ĐANG HÚT CHÂN KHÔNG {Vacuum / PumpNeedS:P0}</color>" : !Beam ? "<color=#73F29E>SẴN SÀNG</color>" : "<color=#61DBFF>ĐANG QUÉT ẢNH</color>", 560, 330, 14);
+            S.SchemLabel("sung", d.PartName("sung") + (Beam ? $"\n<color={GlassKit.HexWarn}>{KV} kV</color>" : ""), cx + 150, 300, 14);
+            S.SchemLabel("tk", d.PartName("thau_kinh"), cx + 160, 200, 14);
+            S.SchemLabel("quet", d.PartName("cuon_quet"), cx + 160, 140, 14);
+            S.SchemLabel("buong", d.PartName("buong_mau") + (Vacuum < 0 ? " (mở)" : VacuumOk ? " (chân không)" : " (đang hút)"), cx, 12, 14);
+            S.SchemLabel("eds", "EDS", cx + 150, 92, 14);
+            S.SchemLabel("se", "SE", cx - 155, 88, 14);
+            S.SchemLabel("bse", "BSE", cx + 40, 120, 14);
+            S.SchemLabel("man", "Màn hình ảnh", mon.x, mon.y + 132, 14);
+            S.SchemLabel("trang_thai", !Mounted ? $"<color={GlassKit.Hex(GlassKit.Muted)}>CHƯA CÓ MẪU</color>" : Vacuum < 0 ? $"<color={GlassKit.HexWarn}>BUỒNG MẪU MỞ</color>" : !VacuumOk ? $"<color={GlassKit.HexWarn}>ĐANG HÚT CHÂN KHÔNG {Vacuum / PumpNeedS:P0}</color>" : !Beam ? $"<color={GlassKit.HexGood}>SẴN SÀNG</color>" : $"<color={GlassKit.HexAccent}>ĐANG QUÉT ẢNH</color>", 560, 330, 14);
         }
 
         // =====================================================================
@@ -313,7 +315,7 @@ namespace Khkt.Demo.Instruments
         {
             if (plotMode == 1 && EdsSpectrum != null) { DrawEds(p); return; }
             S.SetPlotAxes(Imaging ? $"Ảnh SEM ({(Bse ? "BSE" : "SE")}, {KV} kV, ×{Mag})" : "Ảnh SEM", "", "", "", "", "", "");
-            if (!Imaging) { p.Clear(new Color(0.02f, 0.02f, 0.02f)); imageKey = ""; return; }
+            if (!Imaging) { p.Clear(InstrumentScreen.PlotBg); imageKey = ""; return; }
             string key = $"{Src.Index}|{Mag}|{KV}|{Bse}|{SlowScan}|{Math.Round(Focus, 1)}|{Coated}|{SolidResidue.TotalMg(solids):0.0}";
             if (key != imageKey || imageCache == null) { RenderImage(p); imageCache = p.Snapshot(); imageKey = key; }
             else p.Restore(imageCache);
@@ -322,7 +324,7 @@ namespace Khkt.Demo.Instruments
             double bar = Math.Pow(10, Math.Floor(Math.Log10(target)));
             if (target / bar >= 5) bar *= 5; else if (target / bar >= 2) bar *= 2;
             float px = (float)(bar / FieldUm * p.W);
-            p.FillRect(p.W - px - 30, 20, px, 6, Color.white);
+            p.FillRect(p.W - px - 30, 20, px, 6, new Color32(245, 247, 250, 255));
             S.SetPlotAxes($"Ảnh SEM ({(Bse ? "BSE" : "SE")}, {KV} kV, ×{Mag}) · thanh tỉ lệ (dưới phải) = {Fmt(bar, bar < 1 ? "0.#" : "0")} µm", "", "", "", "", "", "");
         }
 
@@ -449,14 +451,14 @@ namespace Khkt.Demo.Instruments
             S.SetPlotAxes($"Phổ EDS ({KV} kV)", "Năng lượng (keV)", "Số đếm", "0", "10", "0", Fmt(max, "0"));
             var pts = new List<Vector2>();
             for (int i = 0; i < EdsSpectrum.Length; i += 2) pts.Add(InstrumentScreen.Map(p, i * 0.01, Math.Min(max, EdsSpectrum[i]), 0, 10, 0, max));
-            p.Poly(pts, new Color(0.45f, 0.95f, 0.62f), 1.5f);
+            p.Poly(pts, InstrumentScreen.TraceGreen, 1.5f);
             foreach (var l in Eds.Lines)
             {
                 if (EdsQuant == null || (!EdsQuant.ContainsKey(l.El) && !(skipCoat && (l.El == "Au" || l.El == "C")))) continue;
                 int c = (int)(l.KeV / 0.01);
                 if (c >= EdsSpectrum.Length || EdsSpectrum[Math.Max(0, c)] < max * 0.05) continue;
                 var q = InstrumentScreen.Map(p, l.KeV, Math.Min(max, EdsSpectrum[c]), 0, 10, 0, max);
-                p.FillRect(q.x - 1, q.y + 4, 2, 14, l.El == "Au" || l.El == "C" ? new Color(1f, 0.8f, 0.3f) : new Color(1f, 0.45f, 0.45f));
+                p.FillRect(q.x - 1, q.y + 4, 2, 14, l.El == "Au" || l.El == "C" ? InstrumentScreen.TraceGold : InstrumentScreen.TraceCoral);
             }
         }
     }

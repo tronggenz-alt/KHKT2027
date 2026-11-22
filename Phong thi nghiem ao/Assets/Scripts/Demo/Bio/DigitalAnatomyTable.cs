@@ -23,8 +23,14 @@ namespace Khkt.Demo.Bio
         static readonly string[] Names4 = { "Bộ xương", "Hệ cơ", "Nội tạng", "Da" };
         static readonly string[] Names3 = { "Bộ xương", "Hệ cơ", "Da" };
 
-        public static readonly string[] OrganIds = { "tim", "phoi", "gan", "than", "da-day", "nao" };
-        public static readonly string[] OrganNames = { "Tim (72 nhịp/phút)", "Phổi (16 nhịp/phút)", "Gan & Mật", "Thận (Nephron)", "Dạ dày", "Não & Thần kinh" };
+        public static readonly string[] OrganIds = {
+            "tim", "phoi", "gan", "than", "da-day", "nao",
+            "xuong", "co", "da", "mach-mau", "ruot-non", "ruot-gia", "tuy", "tuy-song", "lach"
+        };
+        public static readonly string[] OrganNames = {
+            "Tim (72 nhịp/phút)", "Phổi (16 nhịp/phút)", "Gan & Mật", "Thận (Nephron)", "Dạ dày", "Não & Thần kinh",
+            "Bộ xương (206 xương)", "Hệ cơ vân", "Da & Giác quan", "Mạch máu (Tuần hoàn)", "Ruột non (Hấp thụ)", "Ruột già", "Tuyến tụy (Insulin)", "Tủy sống", "Lách (Miễn dịch)"
+        };
         public int selectedOrganIndex = 0;
         public float modelYawDeg = 0f;
         public int quizScore = 0;

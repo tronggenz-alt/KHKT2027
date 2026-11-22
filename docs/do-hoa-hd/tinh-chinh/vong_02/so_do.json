@@ -1,0 +1,3463 @@
+{
+  "so_luong_anh": 44,
+  "danh_sach": [
+    {
+      "file": "01_toan_canh_cua_vao.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/01_toan_canh_cua_vao.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.5578,
+          "pct_chay": 0.0,
+          "pct_den": 0.168,
+          "do_bao_hoa": 0.1855,
+          "pct_ruc": 1.888,
+          "do_net": 254.45,
+          "muc_quang": 3.578,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.5468,
+          "pct_chay": 0.0,
+          "pct_den": 0.36,
+          "do_bao_hoa": 0.2014,
+          "pct_ruc": 1.129,
+          "do_net": 546.2,
+          "muc_quang": 4.273,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.5384,
+          "pct_chay": 0.0,
+          "pct_den": 0.273,
+          "do_bao_hoa": 0.1852,
+          "pct_ruc": 1.07,
+          "do_net": 272.35,
+          "muc_quang": 3.148,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.5773,
+          "pct_chay": 0.0,
+          "pct_den": 0.063,
+          "do_bao_hoa": 0.1858,
+          "pct_ruc": 2.706,
+          "do_net": 238.32,
+          "muc_quang": 3.924,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.5834,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1471,
+          "pct_ruc": 1.808,
+          "do_net": 220.98,
+          "muc_quang": 3.381,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.5323,
+          "pct_chay": 0.0,
+          "pct_den": 0.336,
+          "do_bao_hoa": 0.2239,
+          "pct_ruc": 1.967,
+          "do_net": 287.9,
+          "muc_quang": 3.77,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.5578,
+      "pct_chay": 0.0,
+      "pct_den": 0.168,
+      "do_bao_hoa": 0.1855,
+      "pct_ruc": 1.888,
+      "do_net": 254.45,
+      "muc_quang": 3.578,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "02_tuong_bang.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/02_tuong_bang.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.527,
+          "pct_chay": 0.0,
+          "pct_den": 0.389,
+          "do_bao_hoa": 0.1771,
+          "pct_ruc": 1.349,
+          "do_net": 343.67,
+          "muc_quang": 3.539,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.5571,
+          "pct_chay": 0.0,
+          "pct_den": 0.368,
+          "do_bao_hoa": 0.2188,
+          "pct_ruc": 1.75,
+          "do_net": 806.41,
+          "muc_quang": 3.745,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.5302,
+          "pct_chay": 0.0,
+          "pct_den": 0.461,
+          "do_bao_hoa": 0.1927,
+          "pct_ruc": 0.996,
+          "do_net": 300.09,
+          "muc_quang": 3.225,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.5237,
+          "pct_chay": 0.0,
+          "pct_den": 0.317,
+          "do_bao_hoa": 0.1614,
+          "pct_ruc": 1.703,
+          "do_net": 387.67,
+          "muc_quang": 3.768,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.525,
+          "pct_chay": 0.0,
+          "pct_den": 0.187,
+          "do_bao_hoa": 0.1872,
+          "pct_ruc": 1.976,
+          "do_net": 365.65,
+          "muc_quang": 3.559,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.5289,
+          "pct_chay": 0.0,
+          "pct_den": 0.59,
+          "do_bao_hoa": 0.167,
+          "pct_ruc": 0.722,
+          "do_net": 322.02,
+          "muc_quang": 3.507,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.527,
+      "pct_chay": 0.0,
+      "pct_den": 0.389,
+      "do_bao_hoa": 0.1771,
+      "pct_ruc": 1.349,
+      "do_net": 343.67,
+      "muc_quang": 3.539,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "03_ban_hoc_sinh.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/03_ban_hoc_sinh.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.561,
+          "pct_chay": 0.0,
+          "pct_den": 0.12,
+          "do_bao_hoa": 0.1762,
+          "pct_ruc": 1.62,
+          "do_net": 282.43,
+          "muc_quang": 3.63,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.5346,
+          "pct_chay": 0.0,
+          "pct_den": 0.213,
+          "do_bao_hoa": 0.2065,
+          "pct_ruc": 2.619,
+          "do_net": 623.39,
+          "muc_quang": 4.308,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.5313,
+          "pct_chay": 0.0,
+          "pct_den": 0.217,
+          "do_bao_hoa": 0.2079,
+          "pct_ruc": 1.28,
+          "do_net": 337.12,
+          "muc_quang": 3.425,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.5906,
+          "pct_chay": 0.0,
+          "pct_den": 0.022,
+          "do_bao_hoa": 0.1445,
+          "pct_ruc": 1.96,
+          "do_net": 228.67,
+          "muc_quang": 3.796,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.5481,
+          "pct_chay": 0.0,
+          "pct_den": 0.168,
+          "do_bao_hoa": 0.1711,
+          "pct_ruc": 1.638,
+          "do_net": 307.01,
+          "muc_quang": 3.936,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.5739,
+          "pct_chay": 0.0,
+          "pct_den": 0.071,
+          "do_bao_hoa": 0.1812,
+          "pct_ruc": 1.602,
+          "do_net": 257.91,
+          "muc_quang": 3.41,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.561,
+      "pct_chay": 0.0,
+      "pct_den": 0.12,
+      "do_bao_hoa": 0.1762,
+      "pct_ruc": 1.62,
+      "do_net": 282.43,
+      "muc_quang": 3.63,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "04_ban_chuan_do.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/04_ban_chuan_do.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.4912,
+          "pct_chay": 0.0,
+          "pct_den": 0.551,
+          "do_bao_hoa": 0.1011,
+          "pct_ruc": 0.689,
+          "do_net": 182.49,
+          "muc_quang": 2.853,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.5088,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.0626,
+          "pct_ruc": 0.659,
+          "do_net": 92.86,
+          "muc_quang": 2.585,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.5548,
+          "pct_chay": 0.0,
+          "pct_den": 1.103,
+          "do_bao_hoa": 0.1497,
+          "pct_ruc": 1.275,
+          "do_net": 269.42,
+          "muc_quang": 2.367,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.4276,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.0525,
+          "pct_ruc": 0.102,
+          "do_net": 95.67,
+          "muc_quang": 3.914,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.4831,
+          "pct_chay": 0.0,
+          "pct_den": 0.859,
+          "do_bao_hoa": 0.0904,
+          "pct_ruc": 0.947,
+          "do_net": 149.8,
+          "muc_quang": 3.08,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.4993,
+          "pct_chay": 0.0,
+          "pct_den": 0.244,
+          "do_bao_hoa": 0.1118,
+          "pct_ruc": 0.431,
+          "do_net": 215.18,
+          "muc_quang": 2.687,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.4912,
+      "pct_chay": 0.0,
+      "pct_den": 0.551,
+      "do_bao_hoa": 0.1011,
+      "pct_ruc": 0.689,
+      "do_net": 182.49,
+      "muc_quang": 2.853,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "05_khu_tong_hop.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/05_khu_tong_hop.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.5501,
+          "pct_chay": 0.0,
+          "pct_den": 1.275,
+          "do_bao_hoa": 0.1608,
+          "pct_ruc": 1.133,
+          "do_net": 238.15,
+          "muc_quang": 3.215,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.5493,
+          "pct_chay": 0.0,
+          "pct_den": 3.169,
+          "do_bao_hoa": 0.1508,
+          "pct_ruc": 1.969,
+          "do_net": 394.5,
+          "muc_quang": 3.491,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.533,
+          "pct_chay": 0.0,
+          "pct_den": 2.159,
+          "do_bao_hoa": 0.174,
+          "pct_ruc": 1.059,
+          "do_net": 315.11,
+          "muc_quang": 3.125,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.5673,
+          "pct_chay": 0.0,
+          "pct_den": 0.391,
+          "do_bao_hoa": 0.1476,
+          "pct_ruc": 1.207,
+          "do_net": 161.41,
+          "muc_quang": 3.314,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.526,
+          "pct_chay": 0.0,
+          "pct_den": 2.121,
+          "do_bao_hoa": 0.1432,
+          "pct_ruc": 1.37,
+          "do_net": 168.62,
+          "muc_quang": 3.337,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.5743,
+          "pct_chay": 0.0,
+          "pct_den": 0.43,
+          "do_bao_hoa": 0.1784,
+          "pct_ruc": 0.897,
+          "do_net": 307.94,
+          "muc_quang": 3.16,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.5501,
+      "pct_chay": 0.0,
+      "pct_den": 1.275,
+      "do_bao_hoa": 0.1608,
+      "pct_ruc": 1.133,
+      "do_net": 238.15,
+      "muc_quang": 3.215,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "06_tu_hut.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/06_tu_hut.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.5855,
+          "pct_chay": 0.0,
+          "pct_den": 2.035,
+          "do_bao_hoa": 0.1327,
+          "pct_ruc": 0.804,
+          "do_net": 214.02,
+          "muc_quang": 5.646,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.6692,
+          "pct_chay": 0.0,
+          "pct_den": 0.344,
+          "do_bao_hoa": 0.1117,
+          "pct_ruc": 0.317,
+          "do_net": 97.98,
+          "muc_quang": 3.652,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.6128,
+          "pct_chay": 0.0,
+          "pct_den": 2.106,
+          "do_bao_hoa": 0.118,
+          "pct_ruc": 1.399,
+          "do_net": 232.85,
+          "muc_quang": 6.119,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.5581,
+          "pct_chay": 0.0,
+          "pct_den": 1.964,
+          "do_bao_hoa": 0.1474,
+          "pct_ruc": 0.209,
+          "do_net": 195.17,
+          "muc_quang": 5.131,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.5991,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1918,
+          "pct_ruc": 1.43,
+          "do_net": 141.53,
+          "muc_quang": 3.674,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.5719,
+          "pct_chay": 0.0,
+          "pct_den": 4.07,
+          "do_bao_hoa": 0.0736,
+          "pct_ruc": 0.178,
+          "do_net": 286.67,
+          "muc_quang": 9.744,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.5855,
+      "pct_chay": 0.0,
+      "pct_den": 2.035,
+      "do_bao_hoa": 0.1327,
+      "pct_ruc": 0.804,
+      "do_net": 214.02,
+      "muc_quang": 5.646,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "07_loi_vao_kho.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/07_loi_vao_kho.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.5179,
+          "pct_chay": 0.0,
+          "pct_den": 3.144,
+          "do_bao_hoa": 0.211,
+          "pct_ruc": 6.029,
+          "do_net": 182.22,
+          "muc_quang": 3.276,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.5204,
+          "pct_chay": 0.0,
+          "pct_den": 5.723,
+          "do_bao_hoa": 0.1429,
+          "pct_ruc": 4.176,
+          "do_net": 291.22,
+          "muc_quang": 3.523,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.5188,
+          "pct_chay": 0.0,
+          "pct_den": 4.087,
+          "do_bao_hoa": 0.2009,
+          "pct_ruc": 3.126,
+          "do_net": 219.38,
+          "muc_quang": 3.11,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.5171,
+          "pct_chay": 0.0,
+          "pct_den": 2.202,
+          "do_bao_hoa": 0.2212,
+          "pct_ruc": 8.931,
+          "do_net": 145.94,
+          "muc_quang": 3.46,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.5052,
+          "pct_chay": 0.0,
+          "pct_den": 2.141,
+          "do_bao_hoa": 0.2226,
+          "pct_ruc": 0.667,
+          "do_net": 211.05,
+          "muc_quang": 3.297,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.5307,
+          "pct_chay": 0.0,
+          "pct_den": 4.147,
+          "do_bao_hoa": 0.1994,
+          "pct_ruc": 11.39,
+          "do_net": 153.94,
+          "muc_quang": 3.263,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.5179,
+      "pct_chay": 0.0,
+      "pct_den": 3.144,
+      "do_bao_hoa": 0.211,
+      "pct_ruc": 6.029,
+      "do_net": 182.22,
+      "muc_quang": 3.276,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "08_kho_ben_trong.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/08_kho_ben_trong.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.5476,
+          "pct_chay": 0.0,
+          "pct_den": 1.166,
+          "do_bao_hoa": 0.1103,
+          "pct_ruc": 1.903,
+          "do_net": 194.58,
+          "muc_quang": 3.319,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.5918,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1093,
+          "pct_ruc": 0.857,
+          "do_net": 301.72,
+          "muc_quang": 3.42,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.5616,
+          "pct_chay": 0.0,
+          "pct_den": 1.246,
+          "do_bao_hoa": 0.1336,
+          "pct_ruc": 0.632,
+          "do_net": 185.65,
+          "muc_quang": 3.214,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.5336,
+          "pct_chay": 0.0,
+          "pct_den": 1.085,
+          "do_bao_hoa": 0.0869,
+          "pct_ruc": 3.174,
+          "do_net": 204.01,
+          "muc_quang": 3.395,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.5229,
+          "pct_chay": 0.0,
+          "pct_den": 2.331,
+          "do_bao_hoa": 0.1088,
+          "pct_ruc": 3.078,
+          "do_net": 194.66,
+          "muc_quang": 3.607,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.5723,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1118,
+          "pct_ruc": 0.728,
+          "do_net": 194.6,
+          "muc_quang": 3.098,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.5476,
+      "pct_chay": 0.0,
+      "pct_den": 1.166,
+      "do_bao_hoa": 0.1103,
+      "pct_ruc": 1.903,
+      "do_net": 194.58,
+      "muc_quang": 3.319,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "09_hanh_lang.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/09_hanh_lang.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.5092,
+          "pct_chay": 0.0,
+          "pct_den": 0.22,
+          "do_bao_hoa": 0.3938,
+          "pct_ruc": 21.989,
+          "do_net": 279.01,
+          "muc_quang": 6.699,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.5768,
+          "pct_chay": 0.0,
+          "pct_den": 0.052,
+          "do_bao_hoa": 0.2337,
+          "pct_ruc": 3.89,
+          "do_net": 374.17,
+          "muc_quang": 4.524,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.5064,
+          "pct_chay": 0.0,
+          "pct_den": 0.205,
+          "do_bao_hoa": 0.3725,
+          "pct_ruc": 21.736,
+          "do_net": 368.33,
+          "muc_quang": 10.021,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.5121,
+          "pct_chay": 0.0,
+          "pct_den": 0.235,
+          "do_bao_hoa": 0.4152,
+          "pct_ruc": 22.243,
+          "do_net": 189.75,
+          "muc_quang": 2.741,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.49,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.2808,
+          "pct_ruc": 1.624,
+          "do_net": 260.58,
+          "muc_quang": 2.707,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.5284,
+          "pct_chay": 0.0,
+          "pct_den": 0.44,
+          "do_bao_hoa": 0.5069,
+          "pct_ruc": 42.355,
+          "do_net": 297.5,
+          "muc_quang": 10.029,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.5092,
+      "pct_chay": 0.0,
+      "pct_den": 0.22,
+      "do_bao_hoa": 0.3938,
+      "pct_ruc": 21.989,
+      "do_net": 279.01,
+      "muc_quang": 6.699,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "10_phong_may.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/10_phong_may.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.6031,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1146,
+          "pct_ruc": 2.028,
+          "do_net": 138.95,
+          "muc_quang": 2.881,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.6043,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1288,
+          "pct_ruc": 3.386,
+          "do_net": 190.21,
+          "muc_quang": 3.55,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.5858,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.135,
+          "pct_ruc": 3.388,
+          "do_net": 105.55,
+          "muc_quang": 2.047,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.6204,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.0942,
+          "pct_ruc": 0.668,
+          "do_net": 173.44,
+          "muc_quang": 3.271,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.5934,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1094,
+          "pct_ruc": 1.508,
+          "do_net": 136.94,
+          "muc_quang": 2.971,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.6129,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1199,
+          "pct_ruc": 2.548,
+          "do_net": 141.01,
+          "muc_quang": 2.806,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.6031,
+      "pct_chay": 0.0,
+      "pct_den": 0.0,
+      "do_bao_hoa": 0.1146,
+      "pct_ruc": 2.028,
+      "do_net": 138.95,
+      "muc_quang": 2.881,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "11_phong_robot.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/11_phong_robot.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.5947,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1688,
+          "pct_ruc": 3.492,
+          "do_net": 157.24,
+          "muc_quang": 2.398,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.6184,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1785,
+          "pct_ruc": 2.544,
+          "do_net": 118.29,
+          "muc_quang": 2.501,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.5804,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1601,
+          "pct_ruc": 3.786,
+          "do_net": 198.06,
+          "muc_quang": 1.86,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.6091,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1775,
+          "pct_ruc": 3.198,
+          "do_net": 116.55,
+          "muc_quang": 2.767,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.6111,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1848,
+          "pct_ruc": 4.145,
+          "do_net": 87.13,
+          "muc_quang": 2.348,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.5783,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1528,
+          "pct_ruc": 2.839,
+          "do_net": 227.43,
+          "muc_quang": 2.439,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.5947,
+      "pct_chay": 0.0,
+      "pct_den": 0.0,
+      "do_bao_hoa": 0.1688,
+      "pct_ruc": 3.492,
+      "do_net": 157.24,
+      "muc_quang": 2.398,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "12_khu_an_toan.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/12_khu_an_toan.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.605,
+          "pct_chay": 0.0,
+          "pct_den": 0.869,
+          "do_bao_hoa": 0.1489,
+          "pct_ruc": 1.732,
+          "do_net": 128.3,
+          "muc_quang": 2.446,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.6348,
+          "pct_chay": 0.0,
+          "pct_den": 1.02,
+          "do_bao_hoa": 0.1123,
+          "pct_ruc": 0.3,
+          "do_net": 96.03,
+          "muc_quang": 2.957,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.6048,
+          "pct_chay": 0.0,
+          "pct_den": 0.98,
+          "do_bao_hoa": 0.1719,
+          "pct_ruc": 2.827,
+          "do_net": 153.84,
+          "muc_quang": 2.54,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.6053,
+          "pct_chay": 0.0,
+          "pct_den": 0.758,
+          "do_bao_hoa": 0.1259,
+          "pct_ruc": 0.637,
+          "do_net": 102.85,
+          "muc_quang": 2.34,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.5777,
+          "pct_chay": 0.0,
+          "pct_den": 1.611,
+          "do_bao_hoa": 0.1625,
+          "pct_ruc": 3.348,
+          "do_net": 105.52,
+          "muc_quang": 2.394,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.6324,
+          "pct_chay": 0.0,
+          "pct_den": 0.127,
+          "do_bao_hoa": 0.1353,
+          "pct_ruc": 0.116,
+          "do_net": 151.11,
+          "muc_quang": 2.559,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.605,
+      "pct_chay": 0.0,
+      "pct_den": 0.869,
+      "do_bao_hoa": 0.1489,
+      "pct_ruc": 1.732,
+      "do_net": 128.3,
+      "muc_quang": 2.446,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "13_tuong_video_gan.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/13_tuong_video_gan.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.5138,
+          "pct_chay": 0.0,
+          "pct_den": 0.613,
+          "do_bao_hoa": 0.2446,
+          "pct_ruc": 1.533,
+          "do_net": 513.49,
+          "muc_quang": 3.183,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.4134,
+          "pct_chay": 0.0,
+          "pct_den": 1.682,
+          "do_bao_hoa": 0.3147,
+          "pct_ruc": 4.545,
+          "do_net": 1335.62,
+          "muc_quang": 3.131,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.5285,
+          "pct_chay": 0.0,
+          "pct_den": 0.689,
+          "do_bao_hoa": 0.202,
+          "pct_ruc": 2.937,
+          "do_net": 491.6,
+          "muc_quang": 3.084,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.4991,
+          "pct_chay": 0.0,
+          "pct_den": 0.537,
+          "do_bao_hoa": 0.2871,
+          "pct_ruc": 0.128,
+          "do_net": 532.67,
+          "muc_quang": 3.288,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.519,
+          "pct_chay": 0.0,
+          "pct_den": 0.592,
+          "do_bao_hoa": 0.2441,
+          "pct_ruc": 1.689,
+          "do_net": 579.7,
+          "muc_quang": 3.09,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.5086,
+          "pct_chay": 0.0,
+          "pct_den": 0.635,
+          "do_bao_hoa": 0.2451,
+          "pct_ruc": 1.376,
+          "do_net": 447.59,
+          "muc_quang": 3.337,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.5138,
+      "pct_chay": 0.0,
+      "pct_den": 0.613,
+      "do_bao_hoa": 0.2446,
+      "pct_ruc": 1.533,
+      "do_net": 513.49,
+      "muc_quang": 3.183,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "14_tuong_nha_hoa_hoc.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/14_tuong_nha_hoa_hoc.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.5337,
+          "pct_chay": 0.0,
+          "pct_den": 0.202,
+          "do_bao_hoa": 0.1851,
+          "pct_ruc": 0.894,
+          "do_net": 284.23,
+          "muc_quang": 3.811,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.4872,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1876,
+          "pct_ruc": 0.062,
+          "do_net": 675.45,
+          "muc_quang": 5.39,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.5306,
+          "pct_chay": 0.0,
+          "pct_den": 0.189,
+          "do_bao_hoa": 0.179,
+          "pct_ruc": 1.772,
+          "do_net": 128.69,
+          "muc_quang": 4.351,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.5368,
+          "pct_chay": 0.0,
+          "pct_den": 0.214,
+          "do_bao_hoa": 0.1911,
+          "pct_ruc": 0.015,
+          "do_net": 439.89,
+          "muc_quang": 3.337,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.5216,
+          "pct_chay": 0.0,
+          "pct_den": 0.403,
+          "do_bao_hoa": 0.2035,
+          "pct_ruc": 0.792,
+          "do_net": 316.13,
+          "muc_quang": 3.902,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.5458,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1666,
+          "pct_ruc": 0.996,
+          "do_net": 252.42,
+          "muc_quang": 3.694,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.5337,
+      "pct_chay": 0.0,
+      "pct_den": 0.202,
+      "do_bao_hoa": 0.1851,
+      "pct_ruc": 0.894,
+      "do_net": 284.23,
+      "muc_quang": 3.811,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "15_hanh_lang_lich_su.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/15_hanh_lang_lich_su.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.4573,
+          "pct_chay": 0.0,
+          "pct_den": 0.19,
+          "do_bao_hoa": 0.3558,
+          "pct_ruc": 0.831,
+          "do_net": 212.63,
+          "muc_quang": 3.939,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.2544,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.5373,
+          "pct_ruc": 0.0,
+          "do_net": 514.3,
+          "muc_quang": 3.686,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.4935,
+          "pct_chay": 0.0,
+          "pct_den": 0.38,
+          "do_bao_hoa": 0.3379,
+          "pct_ruc": 1.663,
+          "do_net": 138.23,
+          "muc_quang": 4.24,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.4212,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.3737,
+          "pct_ruc": 0.0,
+          "do_net": 288.2,
+          "muc_quang": 3.333,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.452,
+          "pct_chay": 0.0,
+          "pct_den": 0.38,
+          "do_bao_hoa": 0.3553,
+          "pct_ruc": 1.663,
+          "do_net": 240.57,
+          "muc_quang": 3.856,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.4627,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.3563,
+          "pct_ruc": 0.0,
+          "do_net": 184.79,
+          "muc_quang": 4.099,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.4573,
+      "pct_chay": 0.0,
+      "pct_den": 0.19,
+      "do_bao_hoa": 0.3558,
+      "pct_ruc": 0.831,
+      "do_net": 212.63,
+      "muc_quang": 3.939,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "16_tuong_trien_lam.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/16_tuong_trien_lam.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.547,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.2445,
+          "pct_ruc": 5.762,
+          "do_net": 197.97,
+          "muc_quang": 3.764,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.5427,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.3754,
+          "pct_ruc": 11.936,
+          "do_net": 326.61,
+          "muc_quang": 4.055,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.5455,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.2924,
+          "pct_ruc": 6.358,
+          "do_net": 198.61,
+          "muc_quang": 2.968,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.5485,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1966,
+          "pct_ruc": 5.166,
+          "do_net": 197.9,
+          "muc_quang": 4.484,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.535,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.2251,
+          "pct_ruc": 4.363,
+          "do_net": 171.33,
+          "muc_quang": 3.66,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.559,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.264,
+          "pct_ruc": 7.161,
+          "do_net": 225.02,
+          "muc_quang": 3.856,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.547,
+      "pct_chay": 0.0,
+      "pct_den": 0.0,
+      "do_bao_hoa": 0.2445,
+      "pct_ruc": 5.762,
+      "do_net": 197.97,
+      "muc_quang": 3.764,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "17_cua_phong_may.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/17_cua_phong_may.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.5352,
+          "pct_chay": 0.0,
+          "pct_den": 4.309,
+          "do_bao_hoa": 0.2355,
+          "pct_ruc": 0.645,
+          "do_net": 214.91,
+          "muc_quang": 7.568,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.5416,
+          "pct_chay": 0.0,
+          "pct_den": 3.696,
+          "do_bao_hoa": 0.1616,
+          "pct_ruc": 2.58,
+          "do_net": 422.47,
+          "muc_quang": 5.339,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.4835,
+          "pct_chay": 0.0,
+          "pct_den": 6.866,
+          "do_bao_hoa": 0.2591,
+          "pct_ruc": 1.29,
+          "do_net": 298.02,
+          "muc_quang": 9.648,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.5869,
+          "pct_chay": 0.0,
+          "pct_den": 1.752,
+          "do_bao_hoa": 0.2119,
+          "pct_ruc": 0.0,
+          "do_net": 132.49,
+          "muc_quang": 5.612,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.5338,
+          "pct_chay": 0.0,
+          "pct_den": 4.324,
+          "do_bao_hoa": 0.235,
+          "pct_ruc": 0.644,
+          "do_net": 215.03,
+          "muc_quang": 7.657,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.5365,
+          "pct_chay": 0.0,
+          "pct_den": 4.294,
+          "do_bao_hoa": 0.236,
+          "pct_ruc": 0.646,
+          "do_net": 214.76,
+          "muc_quang": 7.52,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.5352,
+      "pct_chay": 0.0,
+      "pct_den": 4.309,
+      "do_bao_hoa": 0.2355,
+      "pct_ruc": 0.645,
+      "do_net": 214.91,
+      "muc_quang": 7.568,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "18_tran_go_hang_ban.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/18_tran_go_hang_ban.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.5328,
+          "pct_chay": 0.0,
+          "pct_den": 0.061,
+          "do_bao_hoa": 0.2076,
+          "pct_ruc": 1.497,
+          "do_net": 297.4,
+          "muc_quang": 3.658,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.5247,
+          "pct_chay": 0.0,
+          "pct_den": 0.145,
+          "do_bao_hoa": 0.1944,
+          "pct_ruc": 1.073,
+          "do_net": 536.48,
+          "muc_quang": 4.616,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.5072,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.2257,
+          "pct_ruc": 0.661,
+          "do_net": 181.71,
+          "muc_quang": 2.526,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.5583,
+          "pct_chay": 0.0,
+          "pct_den": 0.122,
+          "do_bao_hoa": 0.1895,
+          "pct_ruc": 2.332,
+          "do_net": 414.71,
+          "muc_quang": 4.258,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.5426,
+          "pct_chay": 0.0,
+          "pct_den": 0.063,
+          "do_bao_hoa": 0.1842,
+          "pct_ruc": 2.01,
+          "do_net": 311.11,
+          "muc_quang": 3.589,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.5229,
+          "pct_chay": 0.0,
+          "pct_den": 0.06,
+          "do_bao_hoa": 0.231,
+          "pct_ruc": 0.983,
+          "do_net": 283.87,
+          "muc_quang": 3.732,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.5328,
+      "pct_chay": 0.0,
+      "pct_den": 0.061,
+      "do_bao_hoa": 0.2076,
+      "pct_ruc": 1.497,
+      "do_net": 297.4,
+      "muc_quang": 3.658,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "19_ngan_kinh_che_tao.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/19_ngan_kinh_che_tao.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.5293,
+          "pct_chay": 0.0,
+          "pct_den": 2.852,
+          "do_bao_hoa": 0.1685,
+          "pct_ruc": 1.401,
+          "do_net": 190.77,
+          "muc_quang": 3.603,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.5389,
+          "pct_chay": 0.0,
+          "pct_den": 3.113,
+          "do_bao_hoa": 0.1702,
+          "pct_ruc": 0.012,
+          "do_net": 108.73,
+          "muc_quang": 4.125,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.5647,
+          "pct_chay": 0.0,
+          "pct_den": 3.359,
+          "do_bao_hoa": 0.1159,
+          "pct_ruc": 1.288,
+          "do_net": 268.66,
+          "muc_quang": 4.088,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.4938,
+          "pct_chay": 0.0,
+          "pct_den": 2.344,
+          "do_bao_hoa": 0.2211,
+          "pct_ruc": 1.513,
+          "do_net": 113.19,
+          "muc_quang": 3.102,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.5105,
+          "pct_chay": 0.0,
+          "pct_den": 2.253,
+          "do_bao_hoa": 0.2163,
+          "pct_ruc": 0.781,
+          "do_net": 187.96,
+          "muc_quang": 3.339,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.548,
+          "pct_chay": 0.0,
+          "pct_den": 3.45,
+          "do_bao_hoa": 0.1207,
+          "pct_ruc": 2.02,
+          "do_net": 193.6,
+          "muc_quang": 3.89,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.5293,
+      "pct_chay": 0.0,
+      "pct_den": 2.852,
+      "do_bao_hoa": 0.1685,
+      "pct_ruc": 1.401,
+      "do_net": 190.77,
+      "muc_quang": 3.603,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "20_phong_may_toan_canh.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/20_phong_may_toan_canh.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.6088,
+          "pct_chay": 0.0,
+          "pct_den": 0.644,
+          "do_bao_hoa": 0.1157,
+          "pct_ruc": 1.516,
+          "do_net": 121.1,
+          "muc_quang": 2.734,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.6235,
+          "pct_chay": 0.0,
+          "pct_den": 0.132,
+          "do_bao_hoa": 0.1194,
+          "pct_ruc": 2.156,
+          "do_net": 199.6,
+          "muc_quang": 3.565,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.5865,
+          "pct_chay": 0.0,
+          "pct_den": 0.552,
+          "do_bao_hoa": 0.1307,
+          "pct_ruc": 2.753,
+          "do_net": 92.96,
+          "muc_quang": 2.559,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.6311,
+          "pct_chay": 0.0,
+          "pct_den": 0.735,
+          "do_bao_hoa": 0.1006,
+          "pct_ruc": 0.278,
+          "do_net": 149.53,
+          "muc_quang": 2.841,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.6152,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.116,
+          "pct_ruc": 1.801,
+          "do_net": 138.84,
+          "muc_quang": 2.847,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.6024,
+          "pct_chay": 0.0,
+          "pct_den": 1.288,
+          "do_bao_hoa": 0.1153,
+          "pct_ruc": 1.23,
+          "do_net": 103.39,
+          "muc_quang": 2.593,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.6088,
+      "pct_chay": 0.0,
+      "pct_den": 0.644,
+      "do_bao_hoa": 0.1157,
+      "pct_ruc": 1.516,
+      "do_net": 121.1,
+      "muc_quang": 2.734,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "21_phong_may_sem_xrd.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/21_phong_may_sem_xrd.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.6023,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1246,
+          "pct_ruc": 1.203,
+          "do_net": 79.59,
+          "muc_quang": 2.295,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.5932,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1142,
+          "pct_ruc": 0.216,
+          "do_net": 102.76,
+          "muc_quang": 3.807,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.6007,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1438,
+          "pct_ruc": 1.956,
+          "do_net": 50.11,
+          "muc_quang": 1.646,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.604,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1054,
+          "pct_ruc": 0.45,
+          "do_net": 109.07,
+          "muc_quang": 2.572,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.6176,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1273,
+          "pct_ruc": 0.85,
+          "do_net": 81.11,
+          "muc_quang": 2.159,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.5871,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1219,
+          "pct_ruc": 1.556,
+          "do_net": 78.12,
+          "muc_quang": 2.443,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.6023,
+      "pct_chay": 0.0,
+      "pct_den": 0.0,
+      "do_bao_hoa": 0.1246,
+      "pct_ruc": 1.203,
+      "do_net": 79.59,
+      "muc_quang": 2.295,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "22_phong_may_tuong_dong.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/22_phong_may_tuong_dong.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.6126,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1423,
+          "pct_ruc": 3.436,
+          "do_net": 110.59,
+          "muc_quang": 2.15,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.6227,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1094,
+          "pct_ruc": 0.401,
+          "do_net": 109.06,
+          "muc_quang": 3.276,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.6078,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1836,
+          "pct_ruc": 6.519,
+          "do_net": 69.91,
+          "muc_quang": 1.021,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.6173,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1009,
+          "pct_ruc": 0.354,
+          "do_net": 151.3,
+          "muc_quang": 2.817,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.6051,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1404,
+          "pct_ruc": 3.28,
+          "do_net": 107.9,
+          "muc_quang": 2.155,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.6201,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1441,
+          "pct_ruc": 3.592,
+          "do_net": 113.46,
+          "muc_quang": 2.177,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.6126,
+      "pct_chay": 0.0,
+      "pct_den": 0.0,
+      "do_bao_hoa": 0.1423,
+      "pct_ruc": 3.436,
+      "do_net": 110.59,
+      "muc_quang": 2.15,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "23_ban_mau_phan_tich.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/23_ban_mau_phan_tich.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.5456,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.0886,
+          "pct_ruc": 0.606,
+          "do_net": 141.69,
+          "muc_quang": 3.379,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.4711,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.0895,
+          "pct_ruc": 0.873,
+          "do_net": 149.83,
+          "muc_quang": 4.246,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.5714,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.094,
+          "pct_ruc": 1.212,
+          "do_net": 143.78,
+          "muc_quang": 3.745,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.5199,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.0832,
+          "pct_ruc": 0.0,
+          "do_net": 139.83,
+          "muc_quang": 2.836,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.53,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.081,
+          "pct_ruc": 0.719,
+          "do_net": 182.15,
+          "muc_quang": 3.832,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.5612,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.0962,
+          "pct_ruc": 0.493,
+          "do_net": 101.23,
+          "muc_quang": 3.095,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.5456,
+      "pct_chay": 0.0,
+      "pct_den": 0.0,
+      "do_bao_hoa": 0.0886,
+      "pct_ruc": 0.606,
+      "do_net": 141.69,
+      "muc_quang": 3.379,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "24_bom_nhiet_luong.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/24_bom_nhiet_luong.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.6199,
+          "pct_chay": 0.0,
+          "pct_den": 0.36,
+          "do_bao_hoa": 0.1068,
+          "pct_ruc": 0.14,
+          "do_net": 69.55,
+          "muc_quang": 2.13,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.612,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1065,
+          "pct_ruc": 0.11,
+          "do_net": 93.84,
+          "muc_quang": 2.911,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.6147,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1074,
+          "pct_ruc": 0.166,
+          "do_net": 47.03,
+          "muc_quang": 2.889,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.6251,
+          "pct_chay": 0.0,
+          "pct_den": 0.719,
+          "do_bao_hoa": 0.1063,
+          "pct_ruc": 0.114,
+          "do_net": 92.22,
+          "muc_quang": 1.807,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.6224,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1038,
+          "pct_ruc": 0.28,
+          "do_net": 111.61,
+          "muc_quang": 2.001,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.6174,
+          "pct_chay": 0.0,
+          "pct_den": 0.719,
+          "do_bao_hoa": 0.1099,
+          "pct_ruc": 0.0,
+          "do_net": 27.52,
+          "muc_quang": 2.535,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.6199,
+      "pct_chay": 0.0,
+      "pct_den": 0.36,
+      "do_bao_hoa": 0.1068,
+      "pct_ruc": 0.14,
+      "do_net": 69.55,
+      "muc_quang": 2.13,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "c01_thuy_tinh_dung_dich.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/c01_thuy_tinh_dung_dich.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.6105,
+          "pct_chay": 0.0,
+          "pct_den": 1.053,
+          "do_bao_hoa": 0.1391,
+          "pct_ruc": 1.553,
+          "do_net": 141.77,
+          "muc_quang": 2.942,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.6513,
+          "pct_chay": 0.0,
+          "pct_den": 1.379,
+          "do_bao_hoa": 0.1038,
+          "pct_ruc": 0.563,
+          "do_net": 97.78,
+          "muc_quang": 2.738,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.6061,
+          "pct_chay": 0.0,
+          "pct_den": 1.917,
+          "do_bao_hoa": 0.1717,
+          "pct_ruc": 1.055,
+          "do_net": 196.91,
+          "muc_quang": 2.943,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.6148,
+          "pct_chay": 0.0,
+          "pct_den": 0.188,
+          "do_bao_hoa": 0.1065,
+          "pct_ruc": 2.051,
+          "do_net": 86.66,
+          "muc_quang": 2.942,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.5886,
+          "pct_chay": 0.0,
+          "pct_den": 1.922,
+          "do_bao_hoa": 0.1381,
+          "pct_ruc": 2.328,
+          "do_net": 105.22,
+          "muc_quang": 3.247,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.6323,
+          "pct_chay": 0.0,
+          "pct_den": 0.184,
+          "do_bao_hoa": 0.1401,
+          "pct_ruc": 0.778,
+          "do_net": 178.35,
+          "muc_quang": 2.673,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.6105,
+      "pct_chay": 0.0,
+      "pct_den": 1.053,
+      "do_bao_hoa": 0.1391,
+      "pct_ruc": 1.553,
+      "do_net": 141.77,
+      "muc_quang": 2.942,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "c02_vach_chia_buret.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/c02_vach_chia_buret.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.5561,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1149,
+          "pct_ruc": 3.468,
+          "do_net": 103.44,
+          "muc_quang": 3.189,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.477,
+          "pct_chay": 0.0,
+          "pct_den": 0.002,
+          "do_bao_hoa": 0.1363,
+          "pct_ruc": 8.5,
+          "do_net": 116.91,
+          "muc_quang": 4.013,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.5639,
+          "pct_chay": 0.0,
+          "pct_den": 0.001,
+          "do_bao_hoa": 0.1179,
+          "pct_ruc": 3.204,
+          "do_net": 125.08,
+          "muc_quang": 3.02,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.5483,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.112,
+          "pct_ruc": 3.732,
+          "do_net": 81.86,
+          "muc_quang": 3.423,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.4912,
+          "pct_chay": 0.0,
+          "pct_den": 0.001,
+          "do_bao_hoa": 0.0777,
+          "pct_ruc": 1.628,
+          "do_net": 91.99,
+          "muc_quang": 3.487,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.621,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1521,
+          "pct_ruc": 5.307,
+          "do_net": 115.31,
+          "muc_quang": 3.053,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.5561,
+      "pct_chay": 0.0,
+      "pct_den": 0.0,
+      "do_bao_hoa": 0.1149,
+      "pct_ruc": 3.468,
+      "do_net": 103.44,
+      "muc_quang": 3.189,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "c03_chu_nhan_lo.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/c03_chu_nhan_lo.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.6052,
+          "pct_chay": 0.0,
+          "pct_den": 1.016,
+          "do_bao_hoa": 0.15,
+          "pct_ruc": 1.494,
+          "do_net": 352.36,
+          "muc_quang": 2.7,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.6268,
+          "pct_chay": 0.0,
+          "pct_den": 0.207,
+          "do_bao_hoa": 0.1621,
+          "pct_ruc": 0.625,
+          "do_net": 506.31,
+          "muc_quang": 2.343,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.5543,
+          "pct_chay": 0.0,
+          "pct_den": 1.122,
+          "do_bao_hoa": 0.1923,
+          "pct_ruc": 2.51,
+          "do_net": 574.04,
+          "muc_quang": 2.516,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.6561,
+          "pct_chay": 0.0,
+          "pct_den": 0.909,
+          "do_bao_hoa": 0.1077,
+          "pct_ruc": 0.479,
+          "do_net": 130.7,
+          "muc_quang": 2.963,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.6421,
+          "pct_chay": 0.0,
+          "pct_den": 1.48,
+          "do_bao_hoa": 0.1175,
+          "pct_ruc": 1.199,
+          "do_net": 67.66,
+          "muc_quang": 2.94,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.5682,
+          "pct_chay": 0.0,
+          "pct_den": 0.551,
+          "do_bao_hoa": 0.1825,
+          "pct_ruc": 1.79,
+          "do_net": 637.07,
+          "muc_quang": 2.642,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.6052,
+      "pct_chay": 0.0,
+      "pct_den": 1.016,
+      "do_bao_hoa": 0.15,
+      "pct_ruc": 1.494,
+      "do_net": 352.36,
+      "muc_quang": 2.7,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "c04_canh_ban_inox.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/c04_canh_ban_inox.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.3176,
+          "pct_chay": 0.0,
+          "pct_den": 1.841,
+          "do_bao_hoa": 0.2552,
+          "pct_ruc": 0.496,
+          "do_net": 191.89,
+          "muc_quang": 2.47,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.2265,
+          "pct_chay": 0.0,
+          "pct_den": 0.243,
+          "do_bao_hoa": 0.3598,
+          "pct_ruc": 1.177,
+          "do_net": 404.85,
+          "muc_quang": 2.591,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.4265,
+          "pct_chay": 0.0,
+          "pct_den": 3.194,
+          "do_bao_hoa": 0.1901,
+          "pct_ruc": 0.655,
+          "do_net": 127.44,
+          "muc_quang": 2.844,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.2087,
+          "pct_chay": 0.0,
+          "pct_den": 0.487,
+          "do_bao_hoa": 0.3203,
+          "pct_ruc": 0.337,
+          "do_net": 256.92,
+          "muc_quang": 2.104,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.3523,
+          "pct_chay": 0.0,
+          "pct_den": 3.654,
+          "do_bao_hoa": 0.1953,
+          "pct_ruc": 0.896,
+          "do_net": 132.55,
+          "muc_quang": 2.479,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.2829,
+          "pct_chay": 0.0,
+          "pct_den": 0.027,
+          "do_bao_hoa": 0.3151,
+          "pct_ruc": 0.096,
+          "do_net": 251.6,
+          "muc_quang": 2.467,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.3176,
+      "pct_chay": 0.0,
+      "pct_den": 1.841,
+      "do_bao_hoa": 0.2552,
+      "pct_ruc": 0.496,
+      "do_net": 191.89,
+      "muc_quang": 2.47,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "c05_man_hinh_may.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/c05_man_hinh_may.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.6438,
+          "pct_chay": 0.0,
+          "pct_den": 0.683,
+          "do_bao_hoa": 0.1146,
+          "pct_ruc": 1.058,
+          "do_net": 35.05,
+          "muc_quang": 2.078,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.7308,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.0965,
+          "pct_ruc": 0.0,
+          "do_net": 0.79,
+          "muc_quang": 0.0,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.6573,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1208,
+          "pct_ruc": 1.934,
+          "do_net": 22.47,
+          "muc_quang": 1.968,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.6303,
+          "pct_chay": 0.0,
+          "pct_den": 1.365,
+          "do_bao_hoa": 0.1084,
+          "pct_ruc": 0.183,
+          "do_net": 47.64,
+          "muc_quang": 2.357,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.6337,
+          "pct_chay": 0.0,
+          "pct_den": 0.465,
+          "do_bao_hoa": 0.1174,
+          "pct_ruc": 0.788,
+          "do_net": 28.74,
+          "muc_quang": 2.069,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.6538,
+          "pct_chay": 0.0,
+          "pct_den": 0.9,
+          "do_bao_hoa": 0.1117,
+          "pct_ruc": 1.329,
+          "do_net": 41.42,
+          "muc_quang": 2.092,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.6438,
+      "pct_chay": 0.0,
+      "pct_den": 0.683,
+      "do_bao_hoa": 0.1146,
+      "pct_ruc": 1.058,
+      "do_net": 35.05,
+      "muc_quang": 2.078,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "c06_la_cay.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/c06_la_cay.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.5548,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.2412,
+          "pct_ruc": 7.038,
+          "do_net": 42.52,
+          "muc_quang": 1.994,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.5672,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1864,
+          "pct_ruc": 0.004,
+          "do_net": 21.16,
+          "muc_quang": 2.029,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.6602,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1928,
+          "pct_ruc": 13.746,
+          "do_net": 46.84,
+          "muc_quang": 2.498,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.4493,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.2896,
+          "pct_ruc": 0.33,
+          "do_net": 38.34,
+          "muc_quang": 1.595,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.5688,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.2731,
+          "pct_ruc": 10.094,
+          "do_net": 52.46,
+          "muc_quang": 1.705,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.5407,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.2093,
+          "pct_ruc": 3.983,
+          "do_net": 32.59,
+          "muc_quang": 2.765,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.5548,
+      "pct_chay": 0.0,
+      "pct_den": 0.0,
+      "do_bao_hoa": 0.2412,
+      "pct_ruc": 7.038,
+      "do_net": 42.52,
+      "muc_quang": 1.994,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "c07_canh_manh_nguoc_sang.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/c07_canh_manh_nguoc_sang.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.5191,
+          "pct_chay": 0.0,
+          "pct_den": 2.856,
+          "do_bao_hoa": 0.1616,
+          "pct_ruc": 1.911,
+          "do_net": 152.11,
+          "muc_quang": 3.238,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.4922,
+          "pct_chay": 0.0,
+          "pct_den": 3.376,
+          "do_bao_hoa": 0.194,
+          "pct_ruc": 0.757,
+          "do_net": 128.17,
+          "muc_quang": 2.664,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.5307,
+          "pct_chay": 0.0,
+          "pct_den": 4.068,
+          "do_bao_hoa": 0.1289,
+          "pct_ruc": 2.455,
+          "do_net": 203.75,
+          "muc_quang": 3.856,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.5075,
+          "pct_chay": 0.0,
+          "pct_den": 1.644,
+          "do_bao_hoa": 0.1943,
+          "pct_ruc": 1.367,
+          "do_net": 100.56,
+          "muc_quang": 2.625,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.512,
+          "pct_chay": 0.0,
+          "pct_den": 1.199,
+          "do_bao_hoa": 0.1939,
+          "pct_ruc": 0.848,
+          "do_net": 137.95,
+          "muc_quang": 3.374,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.5262,
+          "pct_chay": 0.0,
+          "pct_den": 4.513,
+          "do_bao_hoa": 0.1292,
+          "pct_ruc": 2.974,
+          "do_net": 166.31,
+          "muc_quang": 3.109,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.5191,
+      "pct_chay": 0.0,
+      "pct_den": 2.856,
+      "do_bao_hoa": 0.1616,
+      "pct_ruc": 1.911,
+      "do_net": 152.11,
+      "muc_quang": 3.238,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "c08_san_nhin_xien.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/c08_san_nhin_xien.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.5372,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1288,
+          "pct_ruc": 2.032,
+          "do_net": 83.92,
+          "muc_quang": 3.783,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.5531,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1303,
+          "pct_ruc": 2.805,
+          "do_net": 53.78,
+          "muc_quang": 2.165,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.6247,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1146,
+          "pct_ruc": 1.26,
+          "do_net": 160.81,
+          "muc_quang": 3.906,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.4496,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.143,
+          "pct_ruc": 2.805,
+          "do_net": 7.07,
+          "muc_quang": 1.634,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.5297,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1309,
+          "pct_ruc": 2.093,
+          "do_net": 83.14,
+          "muc_quang": 3.556,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.5446,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1267,
+          "pct_ruc": 1.971,
+          "do_net": 84.68,
+          "muc_quang": 4.026,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.5372,
+      "pct_chay": 0.0,
+      "pct_den": 0.0,
+      "do_bao_hoa": 0.1288,
+      "pct_ruc": 2.032,
+      "do_net": 83.92,
+      "muc_quang": 3.783,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "l01_mat_ngoai.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/l01_mat_ngoai.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.5773,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.2887,
+          "pct_ruc": 5.08,
+          "do_net": 60.68,
+          "muc_quang": 3.642,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.666,
+          "pct_chay": 0.0,
+          "pct_den": 0.001,
+          "do_bao_hoa": 0.1771,
+          "pct_ruc": 5.746,
+          "do_net": 146.01,
+          "muc_quang": 3.776,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.5047,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.3559,
+          "pct_ruc": 0.0,
+          "do_net": 70.2,
+          "muc_quang": 3.573,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.65,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.2215,
+          "pct_ruc": 10.159,
+          "do_net": 51.42,
+          "muc_quang": 3.752,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.5011,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.3241,
+          "pct_ruc": 0.558,
+          "do_net": 60.05,
+          "muc_quang": 3.335,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.6536,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.2533,
+          "pct_ruc": 9.602,
+          "do_net": 61.36,
+          "muc_quang": 4.049,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.5773,
+      "pct_chay": 0.0,
+      "pct_den": 0.0,
+      "do_bao_hoa": 0.2887,
+      "pct_ruc": 5.08,
+      "do_net": 60.68,
+      "muc_quang": 3.642,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "l02_mat_ngoai_tay.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/l02_mat_ngoai_tay.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.5981,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.4022,
+          "pct_ruc": 34.158,
+          "do_net": 49.33,
+          "muc_quang": 4.232,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.7118,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.2529,
+          "pct_ruc": 18.491,
+          "do_net": 58.44,
+          "muc_quang": 4.697,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.5995,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.2519,
+          "pct_ruc": 0.011,
+          "do_net": 79.0,
+          "muc_quang": 4.008,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.5968,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.5526,
+          "pct_ruc": 68.306,
+          "do_net": 19.75,
+          "muc_quang": 4.602,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.5872,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.4194,
+          "pct_ruc": 34.948,
+          "do_net": 46.88,
+          "muc_quang": 3.286,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.609,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.3851,
+          "pct_ruc": 33.369,
+          "do_net": 51.78,
+          "muc_quang": 4.95,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.5981,
+      "pct_chay": 0.0,
+      "pct_den": 0.0,
+      "do_bao_hoa": 0.4022,
+      "pct_ruc": 34.158,
+      "do_net": 49.33,
+      "muc_quang": 4.232,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "l03_sinh_toan_canh.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/l03_sinh_toan_canh.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.5644,
+          "pct_chay": 0.0,
+          "pct_den": 0.037,
+          "do_bao_hoa": 0.1699,
+          "pct_ruc": 1.25,
+          "do_net": 225.35,
+          "muc_quang": 3.88,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.5614,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1944,
+          "pct_ruc": 0.874,
+          "do_net": 492.73,
+          "muc_quang": 4.941,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.5488,
+          "pct_chay": 0.0,
+          "pct_den": 0.056,
+          "do_bao_hoa": 0.1797,
+          "pct_ruc": 0.813,
+          "do_net": 210.19,
+          "muc_quang": 3.04,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.58,
+          "pct_chay": 0.0,
+          "pct_den": 0.017,
+          "do_bao_hoa": 0.1601,
+          "pct_ruc": 1.687,
+          "do_net": 242.45,
+          "muc_quang": 4.355,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.583,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1369,
+          "pct_ruc": 1.505,
+          "do_net": 205.81,
+          "muc_quang": 3.316,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.5458,
+          "pct_chay": 0.0,
+          "pct_den": 0.073,
+          "do_bao_hoa": 0.2029,
+          "pct_ruc": 0.995,
+          "do_net": 245.23,
+          "muc_quang": 4.415,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.5644,
+      "pct_chay": 0.0,
+      "pct_den": 0.037,
+      "do_bao_hoa": 0.1699,
+      "pct_ruc": 1.25,
+      "do_net": 225.35,
+      "muc_quang": 3.88,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "l04_sinh_ban_hoc_sinh.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/l04_sinh_ban_hoc_sinh.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.5665,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1681,
+          "pct_ruc": 1.919,
+          "do_net": 202.51,
+          "muc_quang": 3.343,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.5805,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.171,
+          "pct_ruc": 1.177,
+          "do_net": 358.76,
+          "muc_quang": 5.119,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.5469,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1897,
+          "pct_ruc": 1.02,
+          "do_net": 238.92,
+          "muc_quang": 3.009,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.5861,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1465,
+          "pct_ruc": 2.818,
+          "do_net": 167.69,
+          "muc_quang": 3.587,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.5792,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1705,
+          "pct_ruc": 2.39,
+          "do_net": 240.7,
+          "muc_quang": 3.295,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.5539,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1657,
+          "pct_ruc": 1.448,
+          "do_net": 164.37,
+          "muc_quang": 3.386,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.5665,
+      "pct_chay": 0.0,
+      "pct_den": 0.0,
+      "do_bao_hoa": 0.1681,
+      "pct_ruc": 1.919,
+      "do_net": 202.51,
+      "muc_quang": 3.343,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "l05_vi_sinh.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/l05_vi_sinh.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.6353,
+          "pct_chay": 0.0,
+          "pct_den": 0.012,
+          "do_bao_hoa": 0.1095,
+          "pct_ruc": 0.586,
+          "do_net": 75.13,
+          "muc_quang": 4.251,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.6171,
+          "pct_chay": 0.0,
+          "pct_den": 0.047,
+          "do_bao_hoa": 0.1351,
+          "pct_ruc": 0.879,
+          "do_net": 127.86,
+          "muc_quang": 4.918,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.6357,
+          "pct_chay": 0.0,
+          "pct_den": 0.023,
+          "do_bao_hoa": 0.1008,
+          "pct_ruc": 0.1,
+          "do_net": 47.4,
+          "muc_quang": 3.497,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.6348,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1182,
+          "pct_ruc": 1.071,
+          "do_net": 102.87,
+          "muc_quang": 4.716,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.6109,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1269,
+          "pct_ruc": 0.895,
+          "do_net": 112.61,
+          "muc_quang": 4.001,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.6596,
+          "pct_chay": 0.0,
+          "pct_den": 0.023,
+          "do_bao_hoa": 0.0921,
+          "pct_ruc": 0.276,
+          "do_net": 38.0,
+          "muc_quang": 4.813,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.6353,
+      "pct_chay": 0.0,
+      "pct_den": 0.012,
+      "do_bao_hoa": 0.1095,
+      "pct_ruc": 0.586,
+      "do_net": 75.13,
+      "muc_quang": 4.251,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "l06_kho_sinh_pham.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/l06_kho_sinh_pham.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.6207,
+          "pct_chay": 0.0,
+          "pct_den": 0.275,
+          "do_bao_hoa": 0.0935,
+          "pct_ruc": 0.046,
+          "do_net": 75.13,
+          "muc_quang": 2.082,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.6024,
+          "pct_chay": 0.0,
+          "pct_den": 1.1,
+          "do_bao_hoa": 0.1581,
+          "pct_ruc": 0.167,
+          "do_net": 107.0,
+          "muc_quang": 3.572,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.612,
+          "pct_chay": 0.0,
+          "pct_den": 0.356,
+          "do_bao_hoa": 0.1054,
+          "pct_ruc": 0.064,
+          "do_net": 45.38,
+          "muc_quang": 2.696,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.6294,
+          "pct_chay": 0.0,
+          "pct_den": 0.194,
+          "do_bao_hoa": 0.0817,
+          "pct_ruc": 0.029,
+          "do_net": 104.99,
+          "muc_quang": 1.955,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.6238,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1041,
+          "pct_ruc": 0.043,
+          "do_net": 79.55,
+          "muc_quang": 2.448,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.6175,
+          "pct_chay": 0.0,
+          "pct_den": 0.55,
+          "do_bao_hoa": 0.0829,
+          "pct_ruc": 0.049,
+          "do_net": 70.72,
+          "muc_quang": 1.685,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.6207,
+      "pct_chay": 0.0,
+      "pct_den": 0.275,
+      "do_bao_hoa": 0.0935,
+      "pct_ruc": 0.046,
+      "do_net": 75.13,
+      "muc_quang": 2.082,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "l07_sinh_phan_tu.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/l07_sinh_phan_tu.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.608,
+          "pct_chay": 0.0,
+          "pct_den": 0.434,
+          "do_bao_hoa": 0.1197,
+          "pct_ruc": 0.64,
+          "do_net": 120.82,
+          "muc_quang": 3.917,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.6353,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1096,
+          "pct_ruc": 0.263,
+          "do_net": 191.95,
+          "muc_quang": 5.124,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.6007,
+          "pct_chay": 0.0,
+          "pct_den": 0.49,
+          "do_bao_hoa": 0.1026,
+          "pct_ruc": 0.012,
+          "do_net": 63.01,
+          "muc_quang": 3.29,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.6152,
+          "pct_chay": 0.0,
+          "pct_den": 0.377,
+          "do_bao_hoa": 0.1369,
+          "pct_ruc": 1.267,
+          "do_net": 178.89,
+          "muc_quang": 4.214,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.5722,
+          "pct_chay": 0.0,
+          "pct_den": 0.867,
+          "do_bao_hoa": 0.12,
+          "pct_ruc": 0.884,
+          "do_net": 169.06,
+          "muc_quang": 3.683,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.6437,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1195,
+          "pct_ruc": 0.396,
+          "do_net": 72.64,
+          "muc_quang": 4.265,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.608,
+      "pct_chay": 0.0,
+      "pct_den": 0.434,
+      "do_bao_hoa": 0.1197,
+      "pct_ruc": 0.64,
+      "do_net": 120.82,
+      "muc_quang": 3.917,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "l08_nha_kinh.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/l08_nha_kinh.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.6614,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1634,
+          "pct_ruc": 3.791,
+          "do_net": 163.4,
+          "muc_quang": 3.155,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.6704,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1479,
+          "pct_ruc": 4.85,
+          "do_net": 338.26,
+          "muc_quang": 3.702,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.7576,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.0544,
+          "pct_ruc": 0.075,
+          "do_net": 151.58,
+          "muc_quang": 2.207,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.5653,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.2724,
+          "pct_ruc": 7.507,
+          "do_net": 175.72,
+          "muc_quang": 4.004,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.6939,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1352,
+          "pct_ruc": 2.166,
+          "do_net": 156.47,
+          "muc_quang": 3.037,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.6289,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1916,
+          "pct_ruc": 5.416,
+          "do_net": 170.6,
+          "muc_quang": 3.288,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.6614,
+      "pct_chay": 0.0,
+      "pct_den": 0.0,
+      "do_bao_hoa": 0.1634,
+      "pct_ruc": 3.791,
+      "do_net": 163.4,
+      "muc_quang": 3.155,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "l09_hanh_lang_t2.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/l09_hanh_lang_t2.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.5976,
+          "pct_chay": 0.0,
+          "pct_den": 0.102,
+          "do_bao_hoa": 0.2043,
+          "pct_ruc": 7.674,
+          "do_net": 143.97,
+          "muc_quang": 3.765,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.625,
+          "pct_chay": 0.0,
+          "pct_den": 0.256,
+          "do_bao_hoa": 0.1375,
+          "pct_ruc": 1.235,
+          "do_net": 239.31,
+          "muc_quang": 3.469,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.6178,
+          "pct_chay": 0.0,
+          "pct_den": 0.182,
+          "do_bao_hoa": 0.1973,
+          "pct_ruc": 11.215,
+          "do_net": 221.5,
+          "muc_quang": 4.106,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.5774,
+          "pct_chay": 0.0,
+          "pct_den": 0.022,
+          "do_bao_hoa": 0.2112,
+          "pct_ruc": 4.134,
+          "do_net": 66.64,
+          "muc_quang": 3.326,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.5809,
+          "pct_chay": 0.0,
+          "pct_den": 0.085,
+          "do_bao_hoa": 0.2476,
+          "pct_ruc": 12.665,
+          "do_net": 168.85,
+          "muc_quang": 4.747,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.6143,
+          "pct_chay": 0.0,
+          "pct_den": 0.119,
+          "do_bao_hoa": 0.1609,
+          "pct_ruc": 2.684,
+          "do_net": 119.0,
+          "muc_quang": 3.174,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.5976,
+      "pct_chay": 0.0,
+      "pct_den": 0.102,
+      "do_bao_hoa": 0.2043,
+      "pct_ruc": 7.674,
+      "do_net": 143.97,
+      "muc_quang": 3.765,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "l10_thang_bo.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/l10_thang_bo.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.6879,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1091,
+          "pct_ruc": 0.0,
+          "do_net": 0.66,
+          "muc_quang": 2.023,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.6984,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1074,
+          "pct_ruc": 0.0,
+          "do_net": 0.35,
+          "muc_quang": 0.0,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.6809,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1092,
+          "pct_ruc": 0.0,
+          "do_net": 0.35,
+          "muc_quang": 0.0,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.6949,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.109,
+          "pct_ruc": 0.0,
+          "do_net": 0.98,
+          "muc_quang": 2.023,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.6988,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1085,
+          "pct_ruc": 0.0,
+          "do_net": 0.94,
+          "muc_quang": 2.023,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.677,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1097,
+          "pct_ruc": 0.0,
+          "do_net": 0.39,
+          "muc_quang": 0.0,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.6879,
+      "pct_chay": 0.0,
+      "pct_den": 0.0,
+      "do_bao_hoa": 0.1091,
+      "pct_ruc": 0.0,
+      "do_net": 0.66,
+      "muc_quang": 2.023,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "l11_sanh_thang_may.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/l11_sanh_thang_may.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.4905,
+          "pct_chay": 0.0,
+          "pct_den": 0.828,
+          "do_bao_hoa": 0.1792,
+          "pct_ruc": 0.465,
+          "do_net": 56.22,
+          "muc_quang": 4.503,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.5674,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.219,
+          "pct_ruc": 0.0,
+          "do_net": 52.52,
+          "muc_quang": 5.147,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.5042,
+          "pct_chay": 0.0,
+          "pct_den": 1.652,
+          "do_bao_hoa": 0.1553,
+          "pct_ruc": 0.904,
+          "do_net": 57.04,
+          "muc_quang": 4.486,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.4768,
+          "pct_chay": 0.0,
+          "pct_den": 0.004,
+          "do_bao_hoa": 0.203,
+          "pct_ruc": 0.026,
+          "do_net": 55.58,
+          "muc_quang": 4.511,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.4864,
+          "pct_chay": 0.0,
+          "pct_den": 0.99,
+          "do_bao_hoa": 0.1826,
+          "pct_ruc": 0.527,
+          "do_net": 44.5,
+          "muc_quang": 3.929,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.4946,
+          "pct_chay": 0.0,
+          "pct_den": 0.666,
+          "do_bao_hoa": 0.1757,
+          "pct_ruc": 0.403,
+          "do_net": 67.95,
+          "muc_quang": 5.044,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.4905,
+      "pct_chay": 0.0,
+      "pct_den": 0.828,
+      "do_bao_hoa": 0.1792,
+      "pct_ruc": 0.465,
+      "do_net": 56.22,
+      "muc_quang": 4.503,
+      "pct_hong_tim": 0.0
+    },
+    {
+      "file": "l12_trong_cabin.png",
+      "duong_dan": "/Users/trantrong/VERALabHD/docs/do-hoa-hd/tinh-chinh/vong_02/l12_trong_cabin.png",
+      "kich_thuoc": [
+        2360,
+        1640
+      ],
+      "vung": {
+        "toan_anh": {
+          "do_sang": 0.4982,
+          "pct_chay": 0.0,
+          "pct_den": 0.003,
+          "do_bao_hoa": 0.1512,
+          "pct_ruc": 0.01,
+          "do_net": 22.17,
+          "muc_quang": 3.591,
+          "pct_hong_tim": 0.0
+        },
+        "trung_tam": {
+          "do_sang": 0.3971,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1674,
+          "pct_ruc": 0.0,
+          "do_net": 18.49,
+          "muc_quang": 4.625,
+          "pct_hong_tim": 0.0
+        },
+        "nua_tren": {
+          "do_sang": 0.5838,
+          "pct_chay": 0.0,
+          "pct_den": 0.0,
+          "do_bao_hoa": 0.1171,
+          "pct_ruc": 0.0,
+          "do_net": 23.04,
+          "muc_quang": 3.803,
+          "pct_hong_tim": 0.0
+        },
+        "nua_duoi": {
+          "do_sang": 0.4126,
+          "pct_chay": 0.0,
+          "pct_den": 0.005,
+          "do_bao_hoa": 0.1852,
+          "pct_ruc": 0.021,
+          "do_net": 21.3,
+          "muc_quang": 3.481,
+          "pct_hong_tim": 0.0
+        },
+        "nua_trai": {
+          "do_sang": 0.5093,
+          "pct_chay": 0.0,
+          "pct_den": 0.004,
+          "do_bao_hoa": 0.1449,
+          "pct_ruc": 0.021,
+          "do_net": 24.62,
+          "muc_quang": 3.825,
+          "pct_hong_tim": 0.0
+        },
+        "nua_phai": {
+          "do_sang": 0.4871,
+          "pct_chay": 0.0,
+          "pct_den": 0.001,
+          "do_bao_hoa": 0.1574,
+          "pct_ruc": 0.0,
+          "do_net": 19.72,
+          "muc_quang": 3.357,
+          "pct_hong_tim": 0.0
+        }
+      },
+      "do_sang": 0.4982,
+      "pct_chay": 0.0,
+      "pct_den": 0.003,
+      "do_bao_hoa": 0.1512,
+      "pct_ruc": 0.01,
+      "do_net": 22.17,
+      "muc_quang": 3.591,
+      "pct_hong_tim": 0.0
+    }
+  ],
+  "trung_binh": {
+    "do_sang": 0.5622,
+    "pct_chay": 0.0,
+    "pct_den": 0.6434,
+    "do_bao_hoa": 0.1765,
+    "pct_ruc": 3.1543,
+    "do_net": 166.5423,
+    "muc_quang": 3.4198,
+    "pct_hong_tim": 0.0
+  },
+  "nguong_kiem_tra": {
+    "max_pct_hong_tim": 0.001,
+    "max_pct_chay": 3.0,
+    "max_pct_den": 5.0,
+    "min_do_sang": 0.2,
+    "max_do_sang": 0.85,
+    "max_pct_ruc": 3.0,
+    "max_do_bao_hoa": 0.21,
+    "min_do_net": 150.0,
+    "max_muc_quang": 4.5
+  },
+  "ket_qua": "TRUOT",
+  "vi_pham": [
+    "[17_cua_phong_may.png] LỖI QUẦNG CẠNH ĐƠN LẺ NẶNG: 7.568 > 7.0",
+    "[TRUNG BÌNH] LỖI QUÁ RỰC MÀU: 3.1543% > 3.0%"
+  ]
+}

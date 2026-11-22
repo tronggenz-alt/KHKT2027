@@ -10,6 +10,7 @@ namespace Khkt.Demo.Instruments
         public readonly Texture2D Tex;
         public readonly int W, H;
         readonly Color32[] px;
+        Color32[] blurTmp;
 
         public Painter(int w, int h)
         {
@@ -17,6 +18,12 @@ namespace Khkt.Demo.Instruments
             H = h;
             Tex = new Texture2D(w, h, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear };
             px = new Color32[w * h];
+        }
+
+        public Color32[] Pixels => px;
+        public void SetPixel(int x, int y, Color32 c)
+        {
+            if ((uint)x < W && (uint)y < H) px[y * W + x] = c;
         }
 
         public void Clear(Color c)
@@ -39,7 +46,7 @@ namespace Khkt.Demo.Instruments
         public void Blur(int r)
         {
             if (r <= 0) return;
-            var tmp = new Color32[px.Length];
+            var tmp = blurTmp ??= new Color32[px.Length];  // dùng lại: mỗi lần làm mờ không cấp phát thêm cả một ảnh
             for (int pass = 0; pass < 2; pass++)
             {
                 var src = pass == 0 ? px : tmp;

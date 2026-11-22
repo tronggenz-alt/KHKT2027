@@ -27,6 +27,12 @@ namespace Khkt.Interaction
         [Tooltip("Có tính phản ứng (tắt cho chai trong kho để đỡ tốn công tính)")]
         public bool reactive = true;
 
+        /// <summary>Bộ lọc dùng chung cho LiveSet (tạo một lần, không cấp phát mỗi lượt lọc).</summary>
+        public static readonly System.Predicate<LabContainer> IsReactive = c => c.reactive;
+
+        void Awake() => Khkt.Rendering.LiveSet<LabContainer>.Add(this);
+        void OnDestroy() => Khkt.Rendering.LiveSet<LabContainer>.Remove(this);
+
         [Header("Hiển thị")]
         public LiquidFill fill;
         public Renderer liquidRenderer;

@@ -144,6 +144,12 @@ namespace Khkt.Demo.Bio
         {
             ligation = DnaCloning.Ligate(vectorFragment, insertFragment, ligase, true, ratio, ligTempC, 60);
             ligated = true;
+            if (ligase && ligation.Recombinant == null)
+            {
+                BioFeedback.RecordMistake("tram_ghep_gen", "lech_dau_dinh_enzyme",
+                    "Hai đầu dính của Plasmid và Gen mục tiêu không tương thích (không ghép được)!",
+                    "Để nối định hướng bằng T4 DNA Ligase, cả thể truyền pUC19 và đoạn gen mục tiêu phải được cắt bằng cùng cặp enzyme giới hạn tạo đầu dính bổ sung (ví dụ EcoRI + BamHI).");
+            }
             ResetFrom(2);
             lastNote = ligation.Note + $" Plasmid vòng: {ligation.RecombinantShare:P0} tái tổ hợp, {ligation.SelfLigatedShare:P0} tự đóng vòng, {ligation.UncutShare:P0} không bị cắt.";
             return lastNote;
@@ -246,6 +252,8 @@ namespace Khkt.Demo.Bio
             }
         }
     }
+
+    public class DnaSplicingProgram : GeneCloningProgram { }
 
     /// <summary>Màn hình trạm ghép gen (bước theo data/may/tram_ghep_gen.json).</summary>
     public class GeneCloningProgram : InstrumentProgram

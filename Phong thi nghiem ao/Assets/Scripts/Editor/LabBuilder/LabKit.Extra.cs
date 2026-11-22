@@ -304,17 +304,19 @@ namespace Khkt.EditorTools
 
         /// <summary>
         /// Sinh lưới lá cây uốn cong nhẹ từ gốc đến ngọn với gân giữa và mép cong.
+        /// Hỗ trợ cả LOD (isLod = true: lưới giảm số phân đoạn để tiết kiệm GPU).
         /// </summary>
-        public static Mesh LeafMesh(string name, float length = 0.3f, float width = 0.12f, float curvature = 0.05f)
+        public static Mesh LeafMesh(string name, float length = 0.3f, float width = 0.12f, float curvature = 0.05f, bool isLod = false)
         {
             EnsureT2Folders();
             string path = $"{RootT2}/Meshes/{name}.asset";
-            var cached = AssetDatabase.LoadAssetAtPath<Mesh>(path);
-            if (cached != null) return cached;
+            var mesh = AssetDatabase.LoadAssetAtPath<Mesh>(path);
+            bool isNew = mesh == null;
+            if (isNew) mesh = new Mesh { name = name };
+            else mesh.Clear();
 
-            var mesh = new Mesh { name = name };
-            const int segL = 6;
-            const int segW = 4;
+            int segL = isLod ? 4 : 8;
+            int segW = isLod ? 2 : 6;
 
             var verts = new List<Vector3>();
             var normals = new List<Vector3>();
@@ -326,28 +328,47 @@ namespace Khkt.EditorTools
             {
                 float tL = (float)i / segL;
                 float z = tL * length;
-                // Biên dạng chiếc lá: phồng ở giữa, thon nhọn ở đầu
-                float wCurve = Mathf.Sin(tL * Mathf.PI);
+
+                // Biên dạng chiếc lá: thon ở cuống, nở rộng tự nhiên ở 1/3 thân lá, thon nhọn ở chóp
+                float wCurve = Mathf.Pow(Mathf.Max(0f, Mathf.Sin(tL * Mathf.PI)), 0.7f) * Mathf.Lerp(1.15f, 0.85f, tL);  // Sin(PI) của float hơi âm: Pow ra NaN
                 float curW = width * wCurve;
                 float droop = curvature * tL * tL;
 
                 for (int j = 0; j <= segW; j++)
                 {
                     float tW = (float)j / segW - 0.5f; // -0.5..+0.5
+                    float fold = Mathf.Abs(tW) * 2f; // 0 ở gân chính, 1 ở mép lá
                     float x = tW * curW;
-                    float y = -droop + curvature * 0.3f * (1f - 4f * tW * tW);
+
+                    // Gân lá chính hơi gợn cong, hai bên gập nhẹ hình chữ V tự nhiên
+                    float ribDepth = 0.012f * length * (1f - tL);
+                    float y = -droop - fold * (curvature * 0.5f) + (1f - fold * fold) * ribDepth;
+
+                    // Mép lá uốn lượn nhẹ tự nhiên (chỉ trên LOD0)
+                    if (!isLod)
+                    {
+                        float edgeWave = Mathf.Sin(tL * 16f) * 0.0025f * fold * length;
+                        y += edgeWave;
+                    }
 
                     verts.Add(new Vector3(x, y, z));
                     normals.Add(Vector3.up);
                     uvs.Add(new Vector2(tW + 0.5f, tL));
-                    // Vertex color R lưu trọng số gió để shader LaCay đung đưa ngọn lá
-                    colors.Add(new Color(tL * tL, 0f, 0f, 1f));
+
+                    // Vertex Colors:
+                    // R: Trọng số đung đưa theo gió cho shader LaCay (gốc 0, ngọn 1)
+                    // G: Sắc độ non/già (ngọn lá sáng hơn, gân chính rõ nét)
+                    // B: Biến thiên nhẹ giữa các vùng lá
+                    float windWeight = Mathf.Pow(tL, 1.8f);
+                    float toneG = Mathf.Lerp(0.25f, 0.85f, tL) + (1f - fold) * 0.15f;
+                    float toneB = 0.5f + fold * 0.5f;
+                    colors.Add(new Color(windWeight, toneG, toneB, 1f));
                 }
             }
 
             int rowStride = segW + 1;
             int front = verts.Count;
-            // mặt dưới: bộ đỉnh riêng (pháp tuyến ngược) để RecalculateNormals không triệt tiêu pháp tuyến hai mặt
+            // Mặt dưới: bộ đỉnh riêng (pháp tuyến ngược) để RecalculateNormals không triệt tiêu pháp tuyến hai mặt
             for (int k = 0; k < front; k++)
             {
                 verts.Add(verts[k]);
@@ -376,9 +397,11 @@ namespace Khkt.EditorTools
             mesh.SetColors(colors);
             mesh.SetTriangles(tris, 0);
             mesh.RecalculateNormals();
+            mesh.RecalculateTangents();
             mesh.RecalculateBounds();
 
-            AssetDatabase.CreateAsset(mesh, path);
+            if (isNew) AssetDatabase.CreateAsset(mesh, path);
+            else EditorUtility.SetDirty(mesh);
             return mesh;
         }
     }

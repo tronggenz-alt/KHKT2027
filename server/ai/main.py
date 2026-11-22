@@ -40,7 +40,7 @@ from server.lab import buoi_hoc, dang_nhap, lop_api, sinh_api, trinh_chieu, truc
 from server.lab import db as lab_db
 from server.lab import keypool
 
-from . import machines, providers
+from . import machines, providers, rag
 from .robot_plan import PLAN_SCHEMA, SYSTEM_PLAN, format_scene, validate
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -52,7 +52,9 @@ SYSTEM_QA = (
     "Bạn là trợ giảng hóa học cho học sinh THPT Việt Nam trong phòng thí nghiệm ảo. "
     "Chỉ giải thích dựa trên NGỮ CẢNH được cung cấp (đó là kết quả mô phỏng đã kiểm chứng); "
     "không tự đặt ra phản ứng hay số liệu mới. Nếu ngữ cảnh không đủ, nói rõ là chưa đủ thông tin. "
-    "Trả lời ngắn gọn (tối đa 4 câu), dễ đọc thành tiếng, dùng số liệu của chính học sinh khi có."
+    "Trả lời ngắn gọn (tối đa 4 câu), dễ đọc thành tiếng, dùng số liệu của chính học sinh khi có. "
+    "Khi có TÀI LIỆU THAM KHẢO (kho kiến thức Hóa học, Sinh học THPT của dự án), dùng nó để giải thích bản chất; "
+    "bỏ qua đoạn không liên quan, không trích số thứ tự đoạn."
 )
 
 SYSTEM_ANNOTATE = (
@@ -81,7 +83,9 @@ SYSTEM_ASSIST = (
     "Giữ đúng phạm vi thí nghiệm trường phổ thông: không hướng dẫn điều chế chất nổ, chất độc hay vũ khí; "
     "nếu được hỏi những điều đó, từ chối nhẹ nhàng và gợi ý thí nghiệm an toàn tương ứng. "
     "Khi có QUY TRÌNH MÁY đi kèm (tài liệu vận hành của phòng lab), hướng dẫn đúng thứ tự các bước và nhắc lỗi hay gặp, an toàn của máy đó; "
-    "không tự đặt thêm bước hay thông số. Không dùng markdown."
+    "không tự đặt thêm bước hay thông số. "
+    "Khi có TÀI LIỆU THAM KHẢO (kho kiến thức Hóa học, Sinh học THPT và dữ liệu phòng lab của dự án), dựa vào đó để trả lời "
+    "kiến thức và vị trí, thông số hóa chất, dụng cụ; bỏ qua đoạn không liên quan; nếu tài liệu không đủ thì nói rõ. Không dùng markdown."
 )
 
 ASSIST_SCHEMA = {
@@ -318,7 +322,8 @@ def suc_khoe(request: Request) -> dict:
     p = providers.pick()
     if request.state.nguoi_dung is None and not dang_nhap.tu_may_nay(request):
         return {"ok": p is not None, "nha_cung_cap": "", "mo_hinh": ""}
-    return {"ok": p is not None, "nha_cung_cap": p.NAME if p else "khong", "mo_hinh": p.model_name() if p else ""}
+    return {"ok": p is not None, "nha_cung_cap": p.NAME if p else "khong", "mo_hinh": p.model_name() if p else "",
+            "rag": rag.trang_thai()}
 
 
 @app.get("/may")
@@ -357,8 +362,10 @@ async def hoi(req: CauHoi, request: Request) -> TraLoi:
     if reaction:
         context["phuong_trinh"] = reaction["phuong_trinh"]
         context["the_thong_tin"] = reaction["the_thong_tin"]
+    tai_lieu = await rag.ngu_canh(req.cau_hoi + " " + (reaction["phuong_trinh"] if reaction else ""))
+    user = f"NGỮ CẢNH: {json.dumps(context, ensure_ascii=False)}\n\n" + (f"TÀI LIỆU THAM KHẢO:\n{tai_lieu}\n\n" if tai_lieu else "") + f"CÂU HỎI: {req.cau_hoi}"
     try:
-        text = await p.text(SYSTEM_QA, f"NGỮ CẢNH: {json.dumps(context, ensure_ascii=False)}\n\nCÂU HỎI: {req.cau_hoi}", 300)
+        text = await p.text(SYSTEM_QA, user, 400)
     except Exception:
         return TraLoi(tra_loi=card, nguon="the_thong_tin")  # AI lỗi/chậm: vẫn có thẻ soạn sẵn
     _cache[key] = text
@@ -376,8 +383,10 @@ async def chu_thich(req: ChuThichYeuCau, request: Request) -> ChuThich:
     p = providers.pick()
     if p is None:
         return ChuThich(giai_thich=req.chi_tiet, nguon="the_thong_tin")
+    tai_lieu = await rag.ngu_canh(f"{req.tieu_de} {req.phuong_trinh} {req.chi_tiet}", k=3, max_ky_tu=4000)
     try:
-        text = await p.text(SYSTEM_ANNOTATE, "DỮ KIỆN: " + json.dumps(fact, ensure_ascii=False), 300)
+        text = await p.text(SYSTEM_ANNOTATE, "DỮ KIỆN: " + json.dumps(fact, ensure_ascii=False)
+                            + (f"\n\nTÀI LIỆU THAM KHẢO:\n{tai_lieu}" if tai_lieu else ""), 300)
     except Exception:
         return ChuThich(giai_thich="", nguon="loi")
     text = re.sub(r"\s+", " ", text).strip()
@@ -418,7 +427,9 @@ async def tro_ly(req: TroLyYeuCau, request: Request) -> TroLyTraLoi:
         return TroLyTraLoi(tra_loi="Máy chủ chưa cấu hình mô hình AI; robot dùng lệnh cơ bản.", nguon="khong")
     history = "\n".join(req.lich_su[-8:])
     sop = machines.context(req.cau_hoi, req.ngu_canh)
-    user = f"NGỮ CẢNH THÍ NGHIỆM:\n{req.ngu_canh}\n\n" + (f"QUY TRÌNH MÁY (tài liệu của phòng lab, coi là đúng):\n{sop}\n\n" if sop else "") + f"HỘI THOẠI GẦN ĐÂY:\n{history}\n\nHỌC SINH: {req.cau_hoi}"
+    tai_lieu = await rag.ngu_canh(req.cau_hoi, max_ky_tu=7000 if sop else None)
+    user = (f"NGỮ CẢNH THÍ NGHIỆM:\n{req.ngu_canh}\n\n" + (f"QUY TRÌNH MÁY (tài liệu của phòng lab, coi là đúng):\n{sop}\n\n" if sop else "")
+            + (f"TÀI LIỆU THAM KHẢO:\n{tai_lieu}\n\n" if tai_lieu else "") + f"HỘI THOẠI GẦN ĐÂY:\n{history}\n\nHỌC SINH: {req.cau_hoi}")
     try:
         data = await p.structured(SYSTEM_ASSIST, user, ASSIST_SCHEMA, 1500)
     except Exception as e:  # mạng, khóa API, từ chối: Unity tự chuyển sang hiểu lệnh tại chỗ

@@ -54,6 +54,7 @@ namespace Khkt.Demo.Instruments
         public TextAsset ftirDoc, gcMsDoc, hplcDoc, titratorDoc, ftirLib, gcMsLib, hplcLib;
         public TextAsset xrdDoc, semDoc, nmrDoc, calorimeterDoc, xrdLib, edsLib, nmrLib, calorimetryLib;
         public TextAsset ovenDoc, furnaceDoc, distillerDoc, autoclaveDoc;
+        public TextAsset microscopeDoc, biosafetyCabinetDoc, incubatorDoc, pcrDoc, electrophoresisDoc, gelDoc, geneCloningDoc, od600Doc;
 
         UvVisLibrary uv;
         AasLibrary aas;
@@ -81,7 +82,32 @@ namespace Khkt.Demo.Instruments
         public InstrumentDoc Doc(string code)
         {
             if (docs.TryGetValue(code, out var d)) return d;
-            var ta = code switch { "uv_vis" => uvVisDoc, "aas" => aasDoc, "ftir" => ftirDoc, "gc_ms" => gcMsDoc, "hplc" => hplcDoc, "chuan_do_dien_the" => titratorDoc, "xrd" => xrdDoc, "sem" => semDoc, "nmr" => nmrDoc, "nhiet_luong" => calorimeterDoc, "tu_say" => ovenDoc, "lo_nung" => furnaceDoc, "may_cat_nuoc" => distillerDoc, "noi_hap" => autoclaveDoc, _ => null };
+            var ta = code switch
+            {
+                "uv_vis" => uvVisDoc,
+                "aas" => aasDoc,
+                "ftir" => ftirDoc,
+                "gc_ms" => gcMsDoc,
+                "hplc" => hplcDoc,
+                "chuan_do_dien_the" => titratorDoc,
+                "xrd" => xrdDoc,
+                "sem" => semDoc,
+                "nmr" => nmrDoc,
+                "nhiet_luong" => calorimeterDoc,
+                "tu_say" => ovenDoc,
+                "lo_nung" => furnaceDoc,
+                "may_cat_nuoc" => distillerDoc,
+                "noi_hap" => autoclaveDoc,
+                "kinh_hien_vi" => microscopeDoc,
+                "tu_an_toan_sinh_hoc" => biosafetyCabinetDoc,
+                "tu_am_vi_sinh" => incubatorDoc,
+                "may_pcr" => pcrDoc,
+                "be_dien_di" => electrophoresisDoc,
+                "gel_doc" => gelDoc,
+                "tram_ghep_gen" => geneCloningDoc,
+                "may_do_od600" => od600Doc,
+                _ => null
+            };
             d = ta != null ? InstrumentDoc.Parse(ta.text) : new InstrumentDoc { Code = code, Name = code };
             docs[code] = d;
             return d;

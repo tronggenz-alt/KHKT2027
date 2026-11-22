@@ -1,0 +1,68 @@
+{
+  "id": "mach_mau",
+  "ten": "Hệ mạch máu",
+  "can_duyet": true,
+  "chuong_trinh": "Sinh học 11 – Tuần hoàn ở động vật (CT GDPT 2018)",
+  "vi_tri": [
+    "Phân bố khắp cơ thể. Động mạch chủ đi ra từ tâm thất trái, động mạch phổi đi ra từ tâm thất phải; tĩnh mạch chủ đổ về tâm nhĩ phải, tĩnh mạch phổi đổ về tâm nhĩ trái."
+  ],
+  "cau_tao": [
+    "Động mạch: thành dày, nhiều sợi đàn hồi và cơ trơn, chịu được áp lực máu cao.",
+    "Mao mạch: rất nhỏ, thành chỉ gồm một lớp tế bào biểu mô – nơi trao đổi chất giữa máu và tế bào.",
+    "Tĩnh mạch: thành mỏng hơn, lòng rộng; tĩnh mạch ở chân, tay có van một chiều giúp máu không chảy ngược.",
+    "Hệ tuần hoàn của người là hệ tuần hoàn kín, kép: vòng tuần hoàn nhỏ (tim – phổi) và vòng tuần hoàn lớn (tim – các cơ quan)."
+  ],
+  "chuc_nang": [
+    "Động mạch dẫn máu từ tim đến các cơ quan; tĩnh mạch dẫn máu từ các cơ quan về tim; mao mạch là nơi trao đổi O₂, CO₂, chất dinh dưỡng và chất thải.",
+    "Vòng tuần hoàn nhỏ: tâm thất phải → động mạch phổi → mao mạch phổi (nhận O₂, thải CO₂) → tĩnh mạch phổi → tâm nhĩ trái.",
+    "Vòng tuần hoàn lớn: tâm thất trái → động mạch chủ → mao mạch các cơ quan → tĩnh mạch chủ → tâm nhĩ phải."
+  ],
+  "co_che": [
+    "Huyết áp là áp lực của máu tác dụng lên thành mạch, do tim co đẩy máu tạo ra; huyết áp giảm dần từ động mạch → mao mạch → tĩnh mạch.",
+    "Vận tốc máu tỉ lệ nghịch với tổng tiết diện của mạch: nhanh nhất ở động mạch, chậm nhất ở mao mạch (tổng tiết diện lớn nhất) – thuận lợi cho trao đổi chất.",
+    "Máu về tim theo tĩnh mạch nhờ lực đẩy còn lại của tim, sự co bóp của cơ quanh tĩnh mạch, van tĩnh mạch và sức hút của lồng ngực khi hít vào.",
+    "Huyết áp được điều hoà nhờ thụ thể áp lực ở cung động mạch chủ và xoang động mạch cảnh, cùng trung khu điều hoà tim mạch ở hành não."
+  ],
+  "lien_he": [
+    "Huyết áp bình thường ở người trưởng thành khoảng 110–120 / 70–80 mmHg; từ 140/90 mmHg trở lên là tăng huyết áp.",
+    "Xơ vữa động mạch (mỡ bám vào thành mạch) làm hẹp lòng mạch, dễ gây tai biến mạch máu não, nhồi máu cơ tim.",
+    "Giãn tĩnh mạch chân hay gặp ở người phải đứng lâu; nên vận động, nghỉ chân hợp lí."
+  ],
+  "diem_thi": [
+    "Thứ tự huyết áp: động mạch > mao mạch > tĩnh mạch; vận tốc máu chậm nhất ở mao mạch.",
+    "Động mạch phổi mang máu nghèo O₂, tĩnh mạch phổi mang máu giàu O₂ – câu bẫy thường gặp.",
+    "Đường đi của máu trong hai vòng tuần hoàn; ưu điểm của hệ tuần hoàn kép: máu đi với áp lực cao, tốc độ nhanh, đi được xa.",
+    "Các yếu tố làm thay đổi huyết áp: lực co tim, nhịp tim, khối lượng máu, độ quánh của máu, độ đàn hồi của mạch."
+  ],
+  "trac_nghiem": [
+    {
+      "cau": "Trong hệ mạch của người, vận tốc máu chậm nhất ở",
+      "lua_chon": ["động mạch chủ", "tiểu động mạch", "mao mạch", "tĩnh mạch chủ"],
+      "dap_an": "C",
+      "giai_thich": "Mao mạch có tổng tiết diện lớn nhất nên máu chảy chậm nhất, tạo điều kiện cho trao đổi chất."
+    },
+    {
+      "cau": "Mạch máu nào sau đây chứa máu giàu O₂?",
+      "lua_chon": ["Động mạch phổi", "Tĩnh mạch phổi", "Tĩnh mạch chủ dưới", "Tĩnh mạch chủ trên"],
+      "dap_an": "B",
+      "giai_thich": "Tĩnh mạch phổi đưa máu đã nhận O₂ ở phổi về tâm nhĩ trái."
+    },
+    {
+      "cau": "Huyết áp trong hệ mạch giảm dần theo thứ tự",
+      "lua_chon": ["động mạch → mao mạch → tĩnh mạch", "tĩnh mạch → mao mạch → động mạch", "động mạch → tĩnh mạch → mao mạch", "mao mạch → động mạch → tĩnh mạch"],
+      "dap_an": "A",
+      "giai_thich": "Ma sát của máu với thành mạch và giữa các phần tử máu làm huyết áp giảm dần dọc chiều dài hệ mạch."
+    },
+    {
+      "cau": "Khi cơ thể bị mất nhiều máu, huyết áp thay đổi như thế nào?",
+      "lua_chon": ["Tăng do tim đập nhanh", "Không thay đổi", "Tăng do mạch co lại", "Giảm do khối lượng máu giảm"],
+      "dap_an": "D",
+      "giai_thich": "Khối lượng máu giảm làm áp lực máu lên thành mạch giảm, nên huyết áp giảm."
+    }
+  ],
+  "goi_y_hoi": [
+    "Vì sao máu chảy chậm nhất ở mao mạch?",
+    "Máu đi theo đường nào trong vòng tuần hoàn lớn?",
+    "Vì sao người cao tuổi dễ bị tăng huyết áp?"
+  ]
+}

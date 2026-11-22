@@ -1,0 +1,68 @@
+{
+  "id": "gan",
+  "ten": "Gan và túi mật",
+  "can_duyet": true,
+  "chuong_trinh": "Sinh học 11 – Tiêu hoá; Bài tiết và cân bằng nội môi (CT GDPT 2018)",
+  "vi_tri": [
+    "Gan nằm ở phần trên bên phải khoang bụng, ngay dưới cơ hoành; là tuyến lớn nhất cơ thể (khoảng 1,5 kg ở người trưởng thành).",
+    "Túi mật nằm ở mặt dưới của gan."
+  ],
+  "cau_tao": [
+    "Gan gồm rất nhiều tiểu thuỳ gan; tế bào gan xếp thành dãy quanh tĩnh mạch trung tâm.",
+    "Gan nhận máu từ động mạch gan (giàu O₂) và tĩnh mạch cửa (mang chất dinh dưỡng vừa hấp thụ từ ruột).",
+    "Mật do tế bào gan tiết ra, được dự trữ và cô đặc ở túi mật, đổ vào tá tràng qua ống mật."
+  ],
+  "chuc_nang": [
+    "Tiết mật giúp tiêu hoá và hấp thụ lipid.",
+    "Điều hoà nồng độ glucose máu: dự trữ glucose dưới dạng glycogen và giải phóng lại khi cần.",
+    "Khử độc (rượu, thuốc, chuyển NH₃ thành urea); phân huỷ hồng cầu già.",
+    "Tổng hợp protein huyết tương (albumin, fibrinogen…); dự trữ một số vitamin và sắt."
+  ],
+  "co_che": [
+    "Sau bữa ăn, glucose máu tăng → tuỵ tiết insulin → gan nhận glucose và tổng hợp glycogen → glucose máu giảm về bình thường.",
+    "Khi đói, glucose máu giảm → tuỵ tiết glucagon → gan phân giải glycogen thành glucose đưa vào máu.",
+    "Gan chuyển NH₃ (rất độc, sinh ra khi phân giải amino acid) thành urea ít độc hơn; sau đó thận thải urea ra ngoài.",
+    "Albumin do gan tổng hợp góp phần tạo áp suất thẩm thấu của máu, giữ nước trong lòng mạch."
+  ],
+  "lien_he": [
+    "Viêm gan B, C lây qua đường máu, quan hệ tình dục và từ mẹ sang con; tiêm vaccine viêm gan B để phòng bệnh.",
+    "Uống nhiều rượu bia gây gan nhiễm mỡ, xơ gan, ung thư gan.",
+    "Sỏi mật gây đau vùng bụng trên bên phải."
+  ],
+  "diem_thi": [
+    "Vai trò của gan trong cân bằng nội môi: điều hoà glucose máu (cùng insulin, glucagon) và áp suất thẩm thấu (protein huyết tương).",
+    "Urea được tạo ra ở gan và được thải ra chủ yếu qua thận.",
+    "Người bị xơ gan dễ bị phù vì gan tổng hợp ít albumin làm áp suất thẩm thấu của máu giảm."
+  ],
+  "trac_nghiem": [
+    {
+      "cau": "Urea trong nước tiểu được tạo ra chủ yếu ở",
+      "lua_chon": ["gan", "thận", "bàng quang", "ruột già"],
+      "dap_an": "A",
+      "giai_thich": "Gan chuyển NH₃ độc thành urea; thận chỉ lọc và thải urea ra ngoài."
+    },
+    {
+      "cau": "Khi nồng độ glucose trong máu giảm (lúc đói), gan sẽ",
+      "lua_chon": ["tổng hợp glycogen từ glucose", "phân giải glycogen thành glucose đưa vào máu", "ngừng hoạt động", "tiết insulin"],
+      "dap_an": "B",
+      "giai_thich": "Glucagon từ tuỵ kích thích gan phân giải glycogen thành glucose, làm glucose máu tăng trở lại."
+    },
+    {
+      "cau": "Người bị xơ gan thường bị phù vì",
+      "lua_chon": ["gan tổng hợp quá nhiều albumin", "thận ngừng lọc máu", "gan tổng hợp ít protein huyết tương, áp suất thẩm thấu của máu giảm", "tim đập chậm lại"],
+      "dap_an": "C",
+      "giai_thich": "Albumin giảm làm áp suất thẩm thấu của máu giảm, nước từ máu thoát ra dịch mô gây phù."
+    },
+    {
+      "cau": "Dịch mật được dự trữ ở",
+      "lua_chon": ["gan", "tuỵ", "dạ dày", "túi mật"],
+      "dap_an": "D",
+      "giai_thich": "Gan tiết mật liên tục; mật được dự trữ, cô đặc ở túi mật và đổ vào tá tràng khi có thức ăn."
+    }
+  ],
+  "goi_y_hoi": [
+    "Gan điều hoà glucose máu như thế nào?",
+    "Vì sao uống nhiều rượu bia hại gan?",
+    "Urea được tạo ra ở đâu và thải ra thế nào?"
+  ]
+}

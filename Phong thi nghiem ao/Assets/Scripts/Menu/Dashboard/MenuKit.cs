@@ -62,23 +62,30 @@ namespace Khkt.Menu.Dashboard
         }
     }
 
-    /// <summary>Màu sắc và mảnh giao diện chung của màn hình chính, theo trang giới thiệu (trang_gioi_thieu/kieu.css).</summary>
+    /// <summary>Màu sắc và mảnh giao diện chung của màn hình chính, đọc động theo UiTheme (Trắng / Đen / Xanh mực).</summary>
     public static class MenuKit
     {
-        public static readonly Color Paper = Hex(0xffffff);
-        public static readonly Color PaperAlt = Hex(0xf5f5f7);
-        public static readonly Color PaperHover = Hex(0xececf0);
-        public static readonly Color Ink = Hex(0x1d1d1f);
-        public static readonly Color InkDim = Hex(0x5c5d66);
-        public static readonly Color Line = Hex(0xd9d9de);
-        public static readonly Color Accent = Hex(0x0b63d1);
-        public static readonly Color AccentDeep = Hex(0x084fa8);
-        public static readonly Color AccentSoft = Hex(0xe8f1fd);
-        public static readonly Color Bio = Hex(0x0b7a5b);
-        public static readonly Color BioSoft = Hex(0xe3f4ee);
-        public static readonly Color Warn = Hex(0x9a5b00);
-        public static readonly Color WarnSoft = Hex(0xfdf1dc);
-        public static readonly Color Error = Hex(0xb3261e);
+        public static Color Paper => UiTheme.Pick(Hex(0xffffff), Hex(0x151517), Hex(0x111d31));       // thẻ (đặc 1.0)
+        public static Color PaperAlt => GlassKit.PageBg;                                               // nền trang
+        public static Color PaperHover => UiTheme.Pick(Hex(0xf1f2f5), Hex(0x232326), Hex(0x1a2c49));
+        public static Color Ink => GlassKit.Ink;
+        public static Color InkDim => GlassKit.Dim;
+        public static Color InkMute => GlassKit.Muted;
+        public static Color Line => GlassKit.Line;
+        public static Color Hair => Line;
+        public static Color Accent => GlassKit.Accent;
+        public static Color Blue => Accent;
+        public static Color OnAccent => GlassKit.OnAccent;
+        public static Color AccentDeep => UiTheme.Pick(Hex(0x094fa8), Hex(0x2d86e6), Hex(0x16a8d4));
+        public static Color AccentSoft => GlassKit.AccentSoft;
+        public static Color BlueSoft => AccentSoft;
+        public static Color Amber => GlassKit.Accent2;
+        public static Color Bio => GlassKit.Good;
+        public static Color BioSoft => GlassKit.GoodSoft;
+        public static Color Warn => GlassKit.Warn;
+        public static Color WarnSoft => GlassKit.WarnSoft;
+        public static Color Error => GlassKit.Bad;
+        public static Color ErrorSoft => GlassKit.BadSoft;
 
         // Hệ số thu bán kính của GlassKit.Solid (bán kính gốc 30 px)
         public const float RadiusButton = 3f;  // 10 px
@@ -229,11 +236,15 @@ namespace Khkt.Menu.Dashboard
                 rt.offsetMax = new Vector2(-gap * 0.5f, y);
             }
 
+            float shadowRest = UiTheme.IsLight ? 0.06f : 0.30f;
+            float shadowHover = UiTheme.IsLight ? 0.13f : 0.50f;
             var shadow = Stretch(rt, "Bóng", Vector2.zero, Vector2.one, new Vector2(-26, -32), new Vector2(26, 20));
             var si = shadow.gameObject.AddComponent<Image>();
             si.sprite = SoftShadow;
             si.type = Image.Type.Sliced;
-            si.color = new Color(0.05f, 0.1f, 0.2f, 0.06f);
+            si.color = UiTheme.IsLight
+                ? new Color(0.05f, 0.10f, 0.20f, shadowRest)
+                : new Color(0f, 0.01f, 0.03f, shadowRest);
             si.raycastTarget = false;
 
             var body = Stretch(rt, "Thân", Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
@@ -244,8 +255,8 @@ namespace Khkt.Menu.Dashboard
                 var h2 = rt.gameObject.AddComponent<MenuHover>();
                 h2.hoverScale = 1.008f;
                 h2.shadow = si;
-                h2.shadowRest = 0.06f;
-                h2.shadowHover = 0.13f;
+                h2.shadowRest = shadowRest;
+                h2.shadowHover = shadowHover;
             }
             return rt;
         }
@@ -266,11 +277,12 @@ namespace Khkt.Menu.Dashboard
             }
             target.raycastTarget = true;
             var b = outer.gameObject.AddComponent<Button>();
+            b.navigation = new Navigation { mode = Navigation.Mode.None };
             var colors = b.colors;
-            colors.normalColor = Color.white;
-            colors.selectedColor = Color.white;
-            colors.highlightedColor = style == 0 ? new Color(0.86f, 0.86f, 0.86f) : PaperAlt;
-            colors.pressedColor = style == 0 ? new Color(0.76f, 0.76f, 0.76f) : PaperHover;
+            colors.normalColor = UiTheme.IsLight ? Color.white : new Color(0.90f, 0.90f, 0.90f);
+            colors.selectedColor = colors.normalColor;
+            colors.highlightedColor = UiTheme.IsLight ? new Color(0.94f, 0.95f, 0.97f) : Color.white;
+            colors.pressedColor = UiTheme.IsLight ? new Color(0.84f, 0.87f, 0.92f) : new Color(0.70f, 0.70f, 0.70f);
             colors.fadeDuration = 0.12f;
             b.colors = colors;
             b.targetGraphic = target;
@@ -280,7 +292,7 @@ namespace Khkt.Menu.Dashboard
                 outer.color = new Color(1, 1, 1, 0.001f);
             }
             if (onClick != null) b.onClick.AddListener(() => onClick());
-            var label = GlassKit.Label(outer.transform, "Chữ", text, style == 2 ? 16 : 18, style == 0 ? Color.white : style == 1 ? Ink : style == 3 ? Accent : InkDim, style != 2, TextAnchor.MiddleCenter, Vector2.zero, size);
+            var label = GlassKit.Label(outer.transform, "Chữ", text, style == 2 ? 16 : 18, style == 0 ? OnAccent : style == 1 ? Ink : style == 3 ? Accent : InkDim, style != 2, TextAnchor.MiddleCenter, Vector2.zero, size);
             label.horizontalOverflow = HorizontalWrapMode.Wrap;
             var hover = outer.gameObject.AddComponent<MenuHover>();
             hover.hoverScale = style == 2 ? 1f : 1.012f;
@@ -289,7 +301,7 @@ namespace Khkt.Menu.Dashboard
             {
                 hover.tint = outer;
                 hover.tintRest = outer.color;
-                hover.tintHover = new Color(0.05f, 0.1f, 0.2f, 0.045f);
+                hover.tintHover = GlassKit.Wash(0.08f);
             }
             return b;
         }

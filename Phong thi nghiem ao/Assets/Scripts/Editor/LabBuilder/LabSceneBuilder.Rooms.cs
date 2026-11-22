@@ -470,9 +470,26 @@ namespace Khkt.EditorTools
             var g = Group("Chậu cây", p, pos);
             var potMesh = Lathe("ChauCay", 24, V(0, 0), V(0.13f, 0), V(0.13f, 0), V(0.17f, 0.3f), V(0.19f, 0.31f), V(0.19f, 0.34f), V(0, 0.34f));
             MeshObj(g, "Chậu", potMesh, Vector3.zero, pot, true);
-            Ball(g, "Tán lá", new Vector3(0, 0.6f, 0), new Vector3(0.45f, 0.5f, 0.45f), foliage);
-            Ball(g, "Tán lá", new Vector3(0.1f, 0.78f, 0.05f), new Vector3(0.3f, 0.35f, 0.3f), foliageDark);
-            Ball(g, "Tán lá", new Vector3(-0.1f, 0.72f, -0.06f), new Vector3(0.28f, 0.3f, 0.28f), foliage);
+
+            // 1. Đất trong chậu
+            Cyl(g, "Đất", new Vector3(0, 0.32f, 0), 0.17f, 0.02f, pot);
+
+            // 2. Thân cây
+            Cyl(g, "Thân cây", new Vector3(0, 0.44f, 0), 0.012f, 0.22f, trunk);
+
+            // 3. Tán lá chi tiết với LOD
+            var m0 = ModernPlantMesh("T1_PottedPlant_LOD0", false);
+            var m1 = ModernPlantMesh("T1_PottedPlant_LOD1", true);
+
+            var canopy0 = MeshObj(g, "Tán lá", m0, new Vector3(0, 0.42f, 0), foliage, false, null, 0.65f);
+            var canopy1 = MeshObj(g, "Tán lá (LOD1)", m1, new Vector3(0, 0.42f, 0), foliageDark, false, null, 0.65f);
+
+            var lodGroup = g.gameObject.AddComponent<LODGroup>();
+            var lods = new LOD[2];
+            lods[0] = new LOD(0.25f, new Renderer[] { canopy0.GetComponent<Renderer>() });
+            lods[1] = new LOD(0.04f, new Renderer[] { canopy1.GetComponent<Renderer>() });
+            lodGroup.SetLODs(lods);
+            lodGroup.RecalculateBounds();
         }
 
         static void BuildOutdoor(Transform root)
@@ -509,12 +526,16 @@ namespace Khkt.EditorTools
             var g = Group(name, p);
             float x0 = -sx / 2, x1 = sx / 2, z0 = -sz / 2, z1 = sz / 2;
             float hx0 = hc.x - hs.x / 2, hx1 = hc.x + hs.x / 2, hz0 = hc.y - hs.y / 2, hz1 = hc.y + hs.y / 2;
-            void Piece(float a, float b, float c, float d)
+            void Piece(float a, float b, float c, float d, bool mainPiece = false)
             {
                 if (b - a > 0.001f && d - c > 0.001f)
-                    Box(g, "Mặt bàn", new Vector3((a + b) / 2, y - 0.02f, (c + d) / 2), new Vector3(b - a, 0.04f, d - c), epoxy);
+                {
+                    var go = Box(g, "Mặt bàn", new Vector3((a + b) / 2, y - 0.02f, (c + d) / 2), new Vector3(b - a, 0.04f, d - c), epoxy);
+                    if (!mainPiece && go.TryGetComponent<BoxCollider>(out var bc))
+                        bc.size = new Vector3(0.999f, 1f, 0.999f);
+                }
             }
-            Piece(x0, x1, z0, hz0);
+            Piece(x0, x1, z0, hz0, true);
             Piece(x0, x1, hz1, z1);
             Piece(x0, hx0, hz0, hz1);
             Piece(hx1, x1, hz0, hz1);
@@ -634,8 +655,12 @@ namespace Khkt.EditorTools
             Cyl(p, "Nắp can", pos + Vector3.up * 0.345f, 0.028f, 0.03f, redPlastic);
         }
 
-        static Mesh Erlenmeyer() => Lathe("BinhNon250", 24, V(0, 0), V(0.042f, 0), V(0.042f, 0), V(0.045f, 0.005f), V(0.044f, 0.02f),
-                                          V(0.017f, 0.1f), V(0.016f, 0.105f), V(0.016f, 0.14f), V(0.0175f, 0.143f));
+        static Mesh Erlenmeyer() =>
+            Lathe("BinhNon250", 24,
+                V(0, 0), V(0.042f, 0), V(0.045f, 0.005f), V(0.044f, 0.02f),
+                V(0.017f, 0.1f), V(0.016f, 0.105f), V(0.016f, 0.14f),
+                V(0.0185f, 0.14f), V(0.0185f, 0.144f), V(0.0145f, 0.144f),
+                V(0.0145f, 0.105f), V(0.041f, 0.02f), V(0.041f, 0.004f), V(0, 0.004f));
 
         static Mesh ReagentBottle() => Lathe("ChaiThuoc", 20, V(0, 0), V(0.032f, 0), V(0.032f, 0), V(0.033f, 0.003f), V(0.033f, 0.1f),
                                              V(0.03f, 0.115f), V(0.014f, 0.13f), V(0.013f, 0.135f), V(0.013f, 0.15f), V(0, 0.15f));
@@ -644,10 +669,13 @@ namespace Khkt.EditorTools
                                         V(0.008f, 0.15f), V(0.0085f, 0.152f));
 
         static Mesh Beaker(string name, float r, float h) =>
-            Lathe(name, 24, V(0, 0), V(r, 0), V(r, 0), V(r, h), V(r + 0.0015f, h + 0.002f));
+            Lathe(name, 24,
+                V(0, 0), V(r, 0), V(r, 0),
+                V(r, h), V(r + 0.003f, h), V(r + 0.003f, h + 0.004f), V(r - 0.0015f, h + 0.004f),
+                V(r - 0.0015f, h), V(r - 0.0015f, 0.0035f), V(0, 0.0035f));
 
         static Mesh LiquidIn(string name, float r, float h) =>
-            Lathe(name, 24, V(0, 0.002f), V(r, 0.002f), V(r, 0.002f), V(r, h), V(r, h), V(0, h));
+            Lathe(name, 24, V(0, 0.0035f), V(r - 0.0015f, 0.0035f), V(r - 0.0015f, 0.0035f), V(r - 0.0015f, h), V(r - 0.0015f, h), V(0, h));
 
         static Mesh Cylinder(string name, float r, float h) =>
             Lathe(name, 16, V(0, 0), V(r * 2.2f, 0), V(r * 2.2f, 0.006f), V(r, 0.006f), V(r, 0.006f), V(r, h), V(r * 1.15f, h + 0.004f));

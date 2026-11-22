@@ -67,19 +67,19 @@ namespace Khkt.Demo.Instruments
         public override void Build()
         {
             bPower = S.AddButton("Bật máy", 0, 0, TogglePower, true);
-            bClean = S.AddButton("Lau tinh thể ATR", 1, 0, CleanCrystal, false, 1, 13);
+            bClean = S.AddButton("Lau tinh thể ATR", 1, 0, CleanCrystal, false, 1, 14);
             bBg = S.AddButton("Đo phổ nền", 2, 0, MeasureBackground);
             bScans = S.AddButton("", 0, 1, NextScans);
             bRes = S.AddButton("", 1, 1, NextRes);
             bPlot = S.AddButton("", 2, 1, () => plotMode = (plotMode + 1) % 4);
-            bSample = S.AddButton("", 0, 2, PutSample, false, 2, 13);
-            bStd = S.AddButton("", 2, 2, PutStd, false, 1, 13);
+            bSample = S.AddButton("", 0, 2, PutSample, false, 2, 14);
+            bStd = S.AddButton("", 2, 2, PutStd, false, 1, 14);
             bMeasure = S.AddButton("Đo phổ mẫu", 0, 3, Measure, true);
             bSub = S.AddButton("Trừ phổ nước", 1, 3, SubtractWater);
-            bAnalyze = S.AddButton("Nhận diện, tra thư viện", 2, 3, Analyze, false, 1, 13);
-            bRecord = S.AddButton("Ghi điểm chuẩn etanol", 0, 4, RecordStd, false, 1, 13);
-            bFinish = S.AddButton("Lau tinh thể, kết thúc", 1, 4, Finish, false, 2, 13);
-            status = S.AddText("", 5, 0, 3, 13);
+            bAnalyze = S.AddButton("Nhận diện, tra thư viện", 2, 3, Analyze, false, 1, 14);
+            bRecord = S.AddButton("Ghi điểm chuẩn etanol", 0, 4, RecordStd, false, 1, 14);
+            bFinish = S.AddButton("Lau tinh thể, kết thúc", 1, 4, Finish, false, 2, 14);
+            status = S.AddText("", 5, 0, 3, 14);
             S.SetPlotAxes("Phổ hồng ngoại", "Số sóng (cm⁻¹)", "Độ hấp thụ A", "4000", "650", "", "");
             S.SetResults("Bật máy, chờ ổn định, lau tinh thể rồi đo phổ nền. Đặt ống mẫu vào ổ trên nóc máy ở phòng lab trước khi mở màn hình này.");
         }
@@ -100,7 +100,7 @@ namespace Khkt.Demo.Instruments
             InstrumentScreen.SetButton(bRecord, null, Spectrum.Count > 10 && specName.StartsWith("chuẩn") && !Scanning);
             InstrumentScreen.SetButton(bFinish, null, Ready && !Scanning);
             string st = !Power ? "tắt" : Warm < WarmNeedS ? $"đang ổn định {Warm / WarmNeedS:P0}" : "sẵn sàng";
-            status.text = $"Máy: {st} · laser He-Ne · detector DLATGS · tinh thể: {(OnCrystal == Src.Empty ? Clean ? "sạch" : "<color=#FFC966>còn cặn mẫu cũ</color>" : "có mẫu")}";
+            status.text = $"Máy: {st} · laser He-Ne · detector DLATGS · tinh thể: {(OnCrystal == Src.Empty ? Clean ? "sạch" : $"<color={GlassKit.HexWarn}>còn cặn mẫu cũ</color>" : "có mẫu")}";
             S.SetResults(BuildResults());
         }
 
@@ -371,12 +371,12 @@ namespace Khkt.Demo.Instruments
         string BuildResults()
         {
             var sb = new StringBuilder();
-            sb.Append($"<color=#9FB3C8>Thông số:</color> {Scans} lần quét, độ phân giải {Res} cm⁻¹, ATR kim cương · nhiễu ≈ {Fmt(NoiseSigma * 1000, "0.0")} mA\n");
+            sb.Append($"<color={GlassKit.HexDim}>Thông số:</color> {Scans} lần quét, độ phân giải {Res} cm⁻¹, ATR kim cương · nhiễu ≈ {Fmt(NoiseSigma * 1000, "0.0")} mA\n");
             if (Spectrum.Count > 10)
             {
                 var top = FtirLibrary.Peaks(Spectrum, 0.05).Take(4).OrderByDescending(p => p.nu);
                 sb.Append($"\n<b>Phổ {specName}</b>: dải mạnh {string.Join(", ", top.Select(p => $"{p.nu:0}"))} cm⁻¹\n");
-                if (Spectrum.Max(s => s.a) > 0.3 && Subtracted == null) sb.Append("<color=#FFC966>Dải nước (3330, 1638 cm⁻¹) che chất tan: bấm Trừ phổ nước.</color>\n");
+                if (Spectrum.Max(s => s.a) > 0.3 && Subtracted == null) sb.Append($"<color={GlassKit.HexWarn}>Dải nước (3330, 1638 cm⁻¹) che chất tan: bấm Trừ phổ nước.</color>\n");
             }
             if (Bands != null && Bands.Count > 0)
             {
@@ -385,17 +385,17 @@ namespace Khkt.Demo.Instruments
             }
             if (Unmixed != null)
             {
-                sb.Append("\n<b>Phân tích chuyên sâu: tách hỗn hợp</b>\n<color=#9FB3C8>Phổ = Σ phổ chuẩn × lượng (bình phương tối thiểu không âm, vùng 900 – 1800 và 2800 – 3100 cm⁻¹)</color>\n");
+                sb.Append($"\n<b>Phân tích chuyên sâu: tách hỗn hợp</b>\n<color={GlassKit.HexDim}>Phổ = Σ phổ chuẩn × lượng (bình phương tối thiểu không âm, vùng 900 – 1800 và 2800 – 3100 cm⁻¹)</color>\n");
                 foreach (var u in Unmixed.Take(5))
                 {
                     double molL = (u.Ion ? u.E.IonLiquid : u.E.Liquid) ? u.Amount * u.E.Density * 1000 / u.E.M : u.Amount;
                     string amt = (u.Ion ? u.E.IonLiquid : u.E.Liquid) ? $"{Fmt(u.Amount * 100, "0.0")}% thể tích ≈ {Fmt(molL, "0.00")} mol/L" : $"≈ {Fmt(molL, "0.00")} mol/L";
-                    sb.Append($"• <color=#61DBFF>{u.Label}</color>: {amt}\n");
+                    sb.Append($"• <color={GlassKit.HexAccent}>{u.Label}</color>: {amt}\n");
                 }
-                if (Hits != null) sb.Append($"<color=#9FB3C8>Tra thư viện (vùng vân tay): {string.Join("; ", Hits.Select(h => $"{h.p.Label} {h.hqi:0}"))}</color>\n");
+                if (Hits != null) sb.Append($"<color={GlassKit.HexDim}>Tra thư viện (vùng vân tay): {string.Join("; ", Hits.Select(h => $"{h.p.Label} {h.hqi:0}"))}</color>\n");
             }
             if (!double.IsNaN(EthanolPct)) sb.Append($"\n<b>Định lượng etanol (dải 1045 cm⁻¹)</b>: <b>{Fmt(EthanolPct, "0.0")}% thể tích</b>\n");
-            if (unknown.Count > 0) sb.Append($"\n<color=#FFC966>Chất hữu cơ ngoài thư viện phổ (không bịa dải):</color> {string.Join(", ", unknown.Distinct())}\n");
+            if (unknown.Count > 0) sb.Append($"\n<color={GlassKit.HexWarn}>Chất hữu cơ ngoài thư viện phổ (không bịa dải):</color> {string.Join(", ", unknown.Distinct())}\n");
             return sb.ToString();
         }
 
@@ -412,16 +412,17 @@ namespace Khkt.Demo.Instruments
             float mirrorX = 520 + (Scanning ? Mathf.Sin(time * 9) * 30 : 0);
             var atr = new Vector2(600, 90);
             var det = new Vector2(880, 90);
-            Color ir = new Color(1f, 0.45f, 0.3f, 0.85f);
+            var hot = SchemKit.Hot;
+            Color ir = new Color(hot.r, hot.g, hot.b, 0.85f);
             float ph = time * 80;
             // nguồn
             SchemKit.Box(p, src.x - 40, src.y - 30, 80, 60);
-            p.Disc(src.x, src.y, 12, Ready ? new Color(1f, 0.5f, 0.2f) : SchemKit.Off);
+            p.Disc(src.x, src.y, 12, Ready ? hot : SchemKit.Off);
             // bộ chia chùm (vạch chéo)
-            p.Line(bs.x - 30, bs.y - 30, bs.x + 30, bs.y + 30, new Color(0.8f, 0.85f, 0.95f), 5);
+            p.Line(bs.x - 30, bs.y - 30, bs.x + 30, bs.y + 30, SchemKit.GlassEdge, 5);
             // gương cố định, gương di động
-            p.FillRect(fixedM.x - 40, fixedM.y, 80, 8, new Color(0.85f, 0.9f, 0.95f));
-            p.FillRect(mirrorX, bs.y - 40, 8, 80, new Color(0.85f, 0.9f, 0.95f));
+            p.FillRect(fixedM.x - 40, fixedM.y, 80, 8, SchemKit.Metal);
+            p.FillRect(mirrorX, bs.y - 40, 8, 80, SchemKit.Metal);
             p.FillRect(mirrorX + 8, bs.y - 6, 60, 12, SchemKit.Body);  // trục động cơ
             if (Ready)
             {
@@ -430,22 +431,24 @@ namespace Khkt.Demo.Instruments
                 Beam(p, bs, new Vector2(mirrorX, bs.y), ir, ph);
                 Beam(p, bs, new Vector2(bs.x, atr.y + 20), ir, ph);
                 // laser He-Ne song song
-                p.Line(src.x + 40, src.y + 18, mirrorX, src.y + 18, new Color(1f, 0.2f, 0.2f, 0.7f), 2);
+                var laserCol = InstrumentScreen.TraceCoral;
+                p.Line(src.x + 40, src.y + 18, mirrorX, src.y + 18, new Color(laserCol.r, laserCol.g, laserCol.b, 0.75f), 2);
                 Beam(p, new Vector2(bs.x, atr.y + 20), new Vector2(atr.x - 60, atr.y + 20), ir, ph);
                 Beam(p, new Vector2(atr.x + 60, atr.y + 20), new Vector2(det.x - 30, atr.y + 20), ir, ph);
             }
             // tinh thể ATR (hình thang) + mẫu
-            p.FillPoly(new[] { new Vector2(atr.x - 70, atr.y + 40), new Vector2(atr.x + 70, atr.y + 40), new Vector2(atr.x + 40, atr.y), new Vector2(atr.x - 40, atr.y) }, new Color(0.75f, 0.9f, 1f, 0.45f));
+            p.FillPoly(new[] { new Vector2(atr.x - 70, atr.y + 40), new Vector2(atr.x + 70, atr.y + 40), new Vector2(atr.x + 40, atr.y), new Vector2(atr.x - 40, atr.y) }, SchemKit.Water);
             if (Ready)
             {
                 p.Line(atr.x - 60, atr.y + 20, atr.x, atr.y + 38, ir, 3);
                 p.Line(atr.x, atr.y + 38, atr.x + 60, atr.y + 20, ir, 3);
-                for (int i = 0; i < 5; i++) p.Line(atr.x - 12 + i * 6, atr.y + 40, atr.x - 12 + i * 6, atr.y + 40 + 10 * Mathf.Abs(Mathf.Sin(time * 6 + i)), new Color(1f, 0.6f, 0.4f, 0.5f), 2);
+                var evan = new Color(hot.r, hot.g, hot.b, 0.55f);
+                for (int i = 0; i < 5; i++) p.Line(atr.x - 12 + i * 6, atr.y + 40, atr.x - 12 + i * 6, atr.y + 40 + 10 * Mathf.Abs(Mathf.Sin(time * 6 + i)), evan, 2);
             }
             if (OnCrystal != Src.Empty || !Clean)
             {
                 var lq = Sample != null ? Sample.Look.Liquid : default;
-                Color c = OnCrystal == Src.Sample && Sample != null ? new Color(lq.r, lq.g, lq.b) : new Color(0.85f, 0.9f, 1f);
+                Color c = OnCrystal == Src.Sample && Sample != null ? new Color(lq.r, lq.g, lq.b) : SchemKit.Flow;
                 c.a = OnCrystal == Src.Empty ? 0.25f : 0.7f;
                 p.FillPoly(new[] { new Vector2(atr.x - 35, atr.y + 40), new Vector2(atr.x + 35, atr.y + 40), new Vector2(atr.x + 22, atr.y + 58), new Vector2(atr.x - 22, atr.y + 58) }, c);
             }
@@ -458,14 +461,14 @@ namespace Khkt.Demo.Instruments
                 p.FillRect(det.x + 36, det.y - 10, 8, 60 * Mathf.Clamp01((float)(0.5 + 0.5 * interferogram[i] / mx)), SchemKit.Good);
             }
             var d = Doc;
-            S.SchemLabel("nguon", d.PartName("nguon_ir"), src.x, src.y - 50, 11);
-            S.SchemLabel("bs", d.PartName("chia_chum"), bs.x - 70, bs.y - 40, 11);
-            S.SchemLabel("gcd", d.PartName("guong_co_dinh"), fixedM.x, fixedM.y + 22, 11);
-            S.SchemLabel("gdd", d.PartName("guong_di_dong") + (Scanning ? "\n<color=#61DBFF>đang chạy</color>" : ""), mirrorX + 40, bs.y + 62, 11);
-            S.SchemLabel("laser", d.PartName("laser"), 190, src.y + 34, 10, new Color(1f, 0.55f, 0.55f));
-            S.SchemLabel("atr", d.PartName("atr"), atr.x, atr.y - 18, 11);
-            S.SchemLabel("det", d.PartName("detector"), det.x, det.y + 68, 11);
-            S.SchemLabel("trang_thai", !Power ? "<color=#8899AA>MÁY TẮT</color>" : Warm < WarmNeedS ? $"<color=#FFC966>ĐANG ỔN ĐỊNH {Warm / WarmNeedS:P0}</color>" : Scanning ? "<color=#61DBFF>ĐANG QUÉT: thu giao thoa đồ</color>" : "<color=#73F29E>SẴN SÀNG</color>", 620, 330, 14);
+            S.SchemLabel("nguon", d.PartName("nguon_ir"), src.x, src.y - 50, 14);
+            S.SchemLabel("bs", d.PartName("chia_chum"), bs.x - 70, bs.y - 40, 14);
+            S.SchemLabel("gcd", d.PartName("guong_co_dinh"), fixedM.x, fixedM.y + 22, 14);
+            S.SchemLabel("gdd", d.PartName("guong_di_dong") + (Scanning ? $"\n<color={GlassKit.HexAccent}>đang chạy</color>" : ""), mirrorX + 40, bs.y + 62, 14);
+            S.SchemLabel("laser", d.PartName("laser"), 190, src.y + 34, 14, GlassKit.Bad);
+            S.SchemLabel("atr", d.PartName("atr"), atr.x, atr.y - 18, 14);
+            S.SchemLabel("det", d.PartName("detector"), det.x, det.y + 68, 14);
+            S.SchemLabel("trang_thai", !Power ? $"<color={GlassKit.Hex(GlassKit.Muted)}>MÁY TẮT</color>" : Warm < WarmNeedS ? $"<color={GlassKit.HexWarn}>ĐANG ỔN ĐỊNH {Warm / WarmNeedS:P0}</color>" : Scanning ? $"<color={GlassKit.HexAccent}>ĐANG QUÉT: thu giao thoa đồ</color>" : $"<color={GlassKit.HexGood}>SẴN SÀNG</color>", 620, 330, 14);
         }
 
         static void Beam(Painter p, Vector2 a, Vector2 b, Color c, float phase)
@@ -492,22 +495,23 @@ namespace Khkt.Demo.Instruments
             S.SetPlotAxes(plotMode == 2 && Subtracted != null ? $"Phổ {specName} đã trừ nước" : $"Phổ hồng ngoại {specName}", "Số sóng (cm⁻¹)", "Độ hấp thụ A", "4000", "650", Fmt(yMin, "0.00"), Fmt(yMax, "0.00"));
             // vạch 0
             var z0 = InstrumentScreen.Map(p, NuHi, 0, NuHi, NuLo, yMin, yMax);
-            p.FillRect(0, z0.y, p.W, 1, new Color(1, 1, 1, 0.25f));
+            p.FillRect(0, z0.y, p.W, 1, InstrumentScreen.TraceDim);
             if (Unmixed != null && plotMode == 2)
             {
-                Color[] cols = { new Color(1f, 0.6f, 0.9f, 0.8f), new Color(1f, 0.75f, 0.3f, 0.8f), new Color(0.5f, 1f, 0.6f, 0.8f), new Color(0.6f, 0.7f, 1f, 0.8f) };
+                Color[] cols = { InstrumentScreen.TraceMagenta, InstrumentScreen.TraceGold, InstrumentScreen.TraceGreen, InstrumentScreen.TraceViolet };
                 int k = 0;
                 foreach (var u in Unmixed.Take(4))
                 {
                     var pts = new List<Vector2>();
                     for (double nu = NuHi; nu >= NuLo; nu -= 8) pts.Add(InstrumentScreen.Map(p, nu, Math.Min(yMax, u.A(nu)), NuHi, NuLo, yMin, yMax));
-                    var col = cols[k++ % cols.Length];
+                    var baseCol = cols[k++ % cols.Length];
+                    var col = new Color(baseCol.r, baseCol.g, baseCol.b, 0.85f);
                     for (int i = 1; i < pts.Count; i += 2) p.Line(pts[i - 1].x, pts[i - 1].y, pts[i].x, pts[i].y, col, 2);
                 }
             }
-            if (spec.Count > 1) p.Poly(spec.Select(s => InstrumentScreen.Map(p, s.nu, Math.Max(yMin, Math.Min(yMax, s.a)), NuHi, NuLo, yMin, yMax)).ToList(), new Color(1f, 0.78f, 0.43f), 2);
+            if (spec.Count > 1) p.Poly(spec.Select(s => InstrumentScreen.Map(p, s.nu, Math.Max(yMin, Math.Min(yMax, s.a)), NuHi, NuLo, yMin, yMax)).ToList(), InstrumentScreen.TraceGold, 2);
             if (Bands != null)
-                foreach (var b in Bands) { var q = InstrumentScreen.Map(p, b.nu, Math.Min(yMax, b.a), NuHi, NuLo, yMin, yMax); p.Disc(q.x, q.y, 4, new Color(0.45f, 0.86f, 1f)); }
+                foreach (var b in Bands) { var q = InstrumentScreen.Map(p, b.nu, Math.Min(yMax, b.a), NuHi, NuLo, yMin, yMax); p.Disc(q.x, q.y, 4, InstrumentScreen.TraceCyan); }
         }
 
         void DrawInterferogram(Painter p)
@@ -518,7 +522,7 @@ namespace Khkt.Demo.Instruments
             int show = Scanning ? (int)(interferogram.Count * Mathf.Clamp01(scanT / ScanS)) : interferogram.Count;
             var pts = new List<Vector2>();
             for (int i = 0; i < show; i++) pts.Add(new Vector2(3 + i * (p.W - 6f) / interferogram.Count, p.H / 2f + (float)(interferogram[i] / mx) * (p.H / 2f - 8)));
-            p.Poly(pts, new Color(0.6f, 0.9f, 0.7f), 2);
+            p.Poly(pts, InstrumentScreen.TraceGreen, 2);
         }
 
         void DrawCalibration(Painter p)
@@ -530,9 +534,10 @@ namespace Khkt.Demo.Instruments
                 var f = UvVisLibrary.Linear(Cal.Select(c => (c.c, c.a)).ToList());
                 var a0 = InstrumentScreen.Map(p, 0, f.Intercept, 0, cMax, 0, aMax);
                 var a1 = InstrumentScreen.Map(p, cMax, f.Intercept + f.Slope * cMax, 0, cMax, 0, aMax);
-                p.Line(a0.x, a0.y, a1.x, a1.y, new Color(0.43f, 0.86f, 1f, 0.8f), 2);
+                var cy = InstrumentScreen.TraceCyan;
+                p.Line(a0.x, a0.y, a1.x, a1.y, new Color(cy.r, cy.g, cy.b, 0.85f), 2);
             }
-            foreach (var c in Cal) { var q = InstrumentScreen.Map(p, c.c, c.a, 0, cMax, 0, aMax); p.Disc(q.x, q.y, 6, SchemKit.Good); }
+            foreach (var c in Cal) { var q = InstrumentScreen.Map(p, c.c, c.a, 0, cMax, 0, aMax); p.Disc(q.x, q.y, 6, InstrumentScreen.TraceGreen); }
         }
     }
 }

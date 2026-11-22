@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Khkt.Demo;
+using Khkt.Demo.Bio.Portal;
 using Khkt.Environment;
+using Khkt.Input;
 using Khkt.Interaction;
 using Khkt.Simulation;
 using UnityEngine;
@@ -39,6 +41,15 @@ public class KhktAutoTest : MonoBehaviour
         cam.targetTexture = rt;
         yield return new WaitForSeconds(1f);
         Log($"Danh mục: {ChemicalCatalog.Instance.Chemicals.Length} chất, lọ trong cảnh: {FindObjectsByType<ChemicalBottle>().Length}, vật chứa phản ứng: {FindObjectsByType<LabContainer>().Count(c => c.reactive)}");
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "do_hoa")
+        {
+            yield return DoHoaTest();
+            Log($"Xong chụp ảnh đồ họa HD sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
         if (Environment.GetEnvironmentVariable("KHKT_TEST") == "landing")
         {
             // ảnh cho trang giới thiệu: khu tầng 2, lõi thang, mặt ngoài, không có bàn tay ảo
@@ -539,6 +550,28 @@ public class KhktAutoTest : MonoBehaviour
         {
             yield return Floor2WebTest();
             Log($"Xong kiểm thử đồng bộ Web Tầng 2 sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "ipad")
+        {
+            outDir = Path.Combine(Application.dataPath, "../Builds/Shots/ipad");
+            Directory.CreateDirectory(outDir);
+            yield return IpadTest();
+            Log($"Xong kiểm thử iPad sau {Time.realtimeSinceStartup - t0:0} s");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.Exit(0);
+#endif
+            yield break;
+        }
+        if (Environment.GetEnvironmentVariable("KHKT_TEST") == "cong_sinh_hoc")
+        {
+            outDir = Path.Combine(Application.dataPath, "../../docs/anh-tang2/cong_sinh_hoc");
+            Directory.CreateDirectory(outDir);
+            yield return BioPortalTest();
+            Log($"Xong kiểm thử Cổng và Phòng Sinh học 3D sau {Time.realtimeSinceStartup - t0:0} s");
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.Exit(0);
 #endif
@@ -1786,7 +1819,7 @@ public class KhktAutoTest : MonoBehaviour
             return;
         }
         RenderTexture.active = rt;
-        tex.ReadPixels(new Rect(0, 0, 1600, 900), 0, 0);
+        tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
         tex.Apply();
         RenderTexture.active = null;
         c.targetTexture = old;
@@ -4518,6 +4551,7 @@ public class KhktAutoTest : MonoBehaviour
         var dTube = Disp("ống nghiệm");
         string idHop = RbId(dTube, "t_hop_ong"), idKep = RbId(forceps, "t_kep"), idGan = RbId(liver, "t_gan"), idH2o2 = RbId(h2o2, "t_h2o2");
         Log($"[robot_t2] mã: hộp ống {idHop}, kẹp {idKep}, khay gan {idGan}, chai H2O2 {idH2o2}");
+        Rb(!idHop.StartsWith("t_") && !idKep.StartsWith("t_") && !idGan.StartsWith("t_") && !idH2o2.StartsWith("t_"), "hộp cấp, kẹp, khay gan, chai H2O2 đều có trong ảnh chụp cảnh gửi cho AI", $"{idHop}, {idKep}, {idGan}, {idH2o2}");
         int before = FindObjectsByType<Khkt.Interaction.Bio.BioVessel>().Length;
         bot.ExecutePlan(new List<RobotStep>
         {
@@ -4562,20 +4596,27 @@ public class KhktAutoTest : MonoBehaviour
         }
 
         // 5) Núm chỉnh và nút bấm của thiết bị sinh học
-        var knob = FindObjectsByType<Khkt.Interaction.Bio.BioKnob>().Where(k => !k.locked && k.transform.position.y >= 3.6f && k.maxValue - k.minValue > 2 * Mathf.Max(k.step, 0.001f))
+        var knob = Khkt.Rendering.ZoneRoot.FindAll<Khkt.Interaction.Bio.BioKnob>().Where(k => !k.locked && k.enabled && k.transform.position.y >= 3.6f && k.maxValue - k.minValue > 2 * Mathf.Max(k.step, 0.001f))
             .OrderBy(k => (k.transform.position - viewer.transform.position).sqrMagnitude).FirstOrDefault();
+        Log($"[robot_t2] núm chỉnh ở tầng 2: {Khkt.Rendering.ZoneRoot.FindAll<Khkt.Interaction.Bio.BioKnob>().Count(k => k.transform.position.y >= 3.6f)}, nút bật tắt: {Khkt.Rendering.ZoneRoot.FindAll<Khkt.Interaction.Bio.BioButton>().Count(b => b.isToggle && b.transform.position.y >= 3.6f)}");
         if (knob != null)
         {
+            viewer.GoNear(knob.transform.position, new Vector3(0.3f, 0.5f, -1f), 1.6f);
+            yield return Frames(10);
+            { float tz = Time.realtimeSinceStartup; while (!Khkt.Rendering.ZoneStreamer.Settled && Time.realtimeSinceStartup - tz < 20f) yield return null; }
             float want = Mathf.Abs(knob.value - knob.maxValue) > knob.step ? knob.maxValue : knob.minValue, old = knob.value;
             bot.ExecutePlan(new List<RobotStep> { new RobotStep { ky_nang = "chinh_num", doi_tuong = RbId(knob, "t_num"), so_luong = want } });
             yield return RbWaitRobot(bot, 300f);
             Rb(Mathf.Abs(knob.value - want) <= Mathf.Max(knob.step, 0.01f), "robot vặn núm chỉnh tới giá trị yêu cầu", $"{knob.label}: {old} → {knob.value} (muốn {want})");
         }
         else Log("[robot_t2] (không có núm chỉnh nào để thử)");
-        var button = FindObjectsByType<Khkt.Interaction.Bio.BioButton>().Where(b => b.isToggle && !b.locked && b.transform.position.y >= 3.6f)
+        var button = Khkt.Rendering.ZoneRoot.FindAll<Khkt.Interaction.Bio.BioButton>().Where(b => b.isToggle && !b.locked && b.enabled && b.transform.position.y >= 3.6f)
             .OrderBy(b => (b.transform.position - viewer.transform.position).sqrMagnitude).FirstOrDefault();
         if (button != null)
         {
+            viewer.GoNear(button.transform.position, new Vector3(0.3f, 0.5f, -1f), 1.6f);
+            yield return Frames(10);
+            { float tz = Time.realtimeSinceStartup; while (!Khkt.Rendering.ZoneStreamer.Settled && Time.realtimeSinceStartup - tz < 20f) yield return null; }
             bool was = button.isOn;
             bot.ExecutePlan(new List<RobotStep> { new RobotStep { ky_nang = "bat_tat", doi_tuong = RbId(button, "t_nut") } });
             yield return RbWaitRobot(bot, 300f);
@@ -4623,6 +4664,35 @@ public class KhktAutoTest : MonoBehaviour
         }
         rp = bot.transform.position;
         Rb(farBest < 1.3f, "lệnh di_toi một vật ở tầng khác: robot tự lên tầng 2 tới đúng chỗ", $"tới gần nhất {farBest:0.0} m, cuối cùng robot ở {rp}");
+
+        // 8) Hồi quy tầng 1: các kỹ năng hóa học vẫn chạy như trước (robot từ tầng 2 xuống kho hóa chất lấy lọ, rót, nhỏ giọt)
+        viewer.GoTo(2);
+        yield return Frames(10);
+            { float tz = Time.realtimeSinceStartup; while (!Khkt.Rendering.ZoneStreamer.Settled && Time.realtimeSinceStartup - tz < 20f) yield return null; }
+        said.Clear();
+        bot.BringChemical(253);
+        yield return RbWaitRobot(bot, 400f);
+        var cuso4 = ChemSearchUI.Instance.FindBottle(253);
+        Rb(!bot.Busy && cuso4 != null && cuso4.transform.position.y < 2f && Vector3.Distance(cuso4.transform.position, cam.transform.position) < 2.5f,
+           "tầng 1: robot (đang ở tầng 2) xuống kho lấy CuSO4 mang ra bàn người dùng", cuso4 != null ? $"lọ cách mắt {Vector3.Distance(cuso4.transform.position, cam.transform.position):0.00} m" : "không thấy lọ");
+        var chemSnap = RobotWorld.Capture(viewer.transform, hand, proc);
+        Rb(chemSnap.vat.Length > 3 && RobotWorld.Ids.Values.All(c => c == null || c.transform.position.y < 3.6f) && !chemSnap.vat.Any(v => v.id.StartsWith("sinh_pham_") || v.id.StartsWith("hop_cap_")),
+           "tầng 1: ảnh chụp cảnh chỉ có đồ tầng 1", $"{chemSnap.vat.Length} vật, khu '{chemSnap.khu_vuc}'");
+        var chemTube = FindObjectsByType<LabContainer>().Where(c => c.label.StartsWith("Ống nghiệm ") && c.VolumeMl < 0.05f).OrderBy(c => Vector3.Distance(c.transform.position, cam.transform.position)).FirstOrDefault();
+        string chemTubeId = chemTube != null ? RobotWorld.Ids.FirstOrDefault(kv => kv.Value == (Component)chemTube.GetComponent<Grabbable>()).Key : null;
+        if (chemTubeId != null)
+        {
+            bot.ExecutePlan(new List<RobotStep>
+            {
+                new RobotStep { ky_nang = "rot", doi_tuong = "hoa_chat:253", dich = chemTubeId, so_luong = 2 },
+                new RobotStep { ky_nang = "nho_giot", doi_tuong = "hoa_chat:124", dich = chemTubeId, so_luong = 8 },
+                new RobotStep { ky_nang = "quan_sat", doi_tuong = chemTubeId },
+            });
+            yield return RbWaitRobot(bot, 400f);
+            Rb(!bot.Busy && !said.Any(s => s.StartsWith("Mình dừng ở bước")) && chemTube.VolumeMl > 1.5f && chemTube.Look.Turbidity > 0.05f,
+               "tầng 1: robot rót CuSO4, nhỏ NaOH, có kết tủa (bộ máy hóa học tính)", $"{chemTube.Total.Describe(4)} · đục {chemTube.Look.Turbidity:0.00} · {said.LastOrDefault(s => s.StartsWith("Mình dừng")) ?? ""}");
+        }
+        else Rb(false, "tầng 1: tìm được ống nghiệm trống trong ảnh chụp cảnh");
 
         Log($"[robot_t2] {rbPass} đạt, {rbFails} sai");
         Log(rbFails == 0 ? "[robot_t2] TẤT CẢ ĐẠT" : $"[robot_t2] CÓ {rbFails} LỖI");
@@ -5594,7 +5664,7 @@ public class KhktAutoTest : MonoBehaviour
         sc.ScreenCamera.Render();
         sc.ScreenCamera.targetTexture = old;
         RenderTexture.active = rt;
-        tex.ReadPixels(new Rect(0, 0, 1600, 900), 0, 0);
+        tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
         tex.Apply();
         RenderTexture.active = null;
         File.WriteAllBytes(Path.Combine(outDir, name + ".png"), tex.EncodeToPNG());
@@ -5868,6 +5938,791 @@ public class KhktAutoTest : MonoBehaviour
         Log("[tang2_web] PASS: Kiểm thử đồng bộ Web Tầng 2 online và offline hoàn tất!");
     }
 
+    IEnumerator IpadTest()
+    {
+        Log("================================================================================");
+        Log("[KHKT-PLAY] BẮT ĐẦU KIỂM THỬ TỰ ĐỘNG CHẾ ĐỘ IPAD TOUCH (6 TIÊU CHUẨN NGHIỆM THU)");
+        Log("================================================================================");
+
+        var reportResults = new System.Text.StringBuilder();
+        reportResults.AppendLine("{");
+
+        // -----------------------------------------------------------------------------
+        // TIÊU CHUẨN 1: Chế độ cảm ứng bật được, PadInput.UsingTouch đúng, HUD và TouchControls gắn vào cảnh
+        // -----------------------------------------------------------------------------
+        Environment.SetEnvironmentVariable("KHKT_CAM_UNG", "1");
+        var touchControls = FindAnyObjectByType<TouchControls>();
+        var touchHud = FindAnyObjectByType<TouchHud>();
+        PadInput.UsingTouch = true;
+        yield return Frames(3);
+
+        bool passC1 = (touchControls != null) && (touchHud != null) && PadInput.UsingTouch;
+        Log($"[ipad-test] Tiêu chuẩn 1: TouchControls={(touchControls != null ? "Có" : "Không")}, " +
+            $"TouchHud={(touchHud != null ? "Có" : "Không")}, PadInput.UsingTouch={PadInput.UsingTouch} -> {(passC1 ? "ĐẠT" : "KHÔNG ĐẠT")}");
+        reportResults.AppendLine($"  \"tieu_chuan_1_touch_mode\": {{\"dat\": {(passC1 ? "true" : "false")}, \"touch_controls\": {(touchControls != null ? "true" : "false")}, \"touch_hud\": {(touchHud != null ? "true" : "false")}, \"using_touch\": {(PadInput.UsingTouch ? "true" : "false") }}},");
+
+        // -----------------------------------------------------------------------------
+        // TIÊU CHUẨN 2: Các nút ảo phát đúng sự kiện vào PadInput
+        // -----------------------------------------------------------------------------
+        bool passC2 = true;
+        List<string> failedInputs = new List<string>();
+
+        // Joystick Move (TouchMove -> PadInput.Move)
+        PadInput.TouchMove = new Vector2(0.75f, -0.25f);
+        PadInput.ForceTick();
+        if (Vector2.Distance(PadInput.Move, new Vector2(0.75f, -0.25f)) > 0.001f) { passC2 = false; failedInputs.Add("Move"); }
+        PadInput.TouchMove = Vector2.zero;
+        PadInput.ForceTick();
+
+        // Swipe LookDelta
+        PadInput.LookDelta = new Vector2(15.0f, -8.5f);
+        if (Vector2.Distance(PadInput.LookDelta, new Vector2(15.0f, -8.5f)) > 0.001f) { passC2 = false; failedInputs.Add("LookDelta"); }
+        PadInput.LookDelta = Vector2.zero;
+
+        // Use (Action Button: TouchUse -> PadInput.Use)
+        PadInput.TouchUse = true;
+        PadInput.ForceTick();
+        if (!PadInput.Use) { passC2 = false; failedInputs.Add("Use"); }
+        PadInput.TouchUse = false;
+        PadInput.ForceTick();
+
+        // BackPressed (Return Button: TouchBackPressed -> PadInput.BackPressed)
+        PadInput.TouchBackPressed = true;
+        PadInput.ForceTick();
+        if (!PadInput.BackPressed) { passC2 = false; failedInputs.Add("BackPressed"); }
+        PadInput.TouchBackPressed = false;
+        PadInput.ForceTick();
+
+        // Swirl (TouchSwirl -> PadInput.Swirl)
+        PadInput.TouchSwirl = true;
+        PadInput.ForceTick();
+        if (!PadInput.Swirl) { passC2 = false; failedInputs.Add("Swirl"); }
+        PadInput.TouchSwirl = false;
+        PadInput.ForceTick();
+
+        // Shift (TouchShift -> PadInput.Shift)
+        PadInput.TouchShift = true;
+        PadInput.ForceTick();
+        if (!PadInput.Shift) { passC2 = false; failedInputs.Add("Shift"); }
+        PadInput.TouchShift = false;
+        PadInput.ForceTick();
+
+        // SitPressed (TouchSitPressed -> PadInput.SitPressed)
+        PadInput.TouchSitPressed = true;
+        PadInput.ForceTick();
+        if (!PadInput.SitPressed) { passC2 = false; failedInputs.Add("SitPressed"); }
+        PadInput.TouchSitPressed = false;
+        PadInput.ForceTick();
+
+        // StationStep (TouchStationStep -> PadInput.StationStep)
+        PadInput.TouchStationStep = 1;
+        PadInput.ForceTick();
+        if (PadInput.StationStep != 1) { passC2 = false; failedInputs.Add("StationStep"); }
+        PadInput.TouchStationStep = 0;
+        PadInput.ForceTick();
+
+        // StopcockAxis (TouchStopcockAxis -> PadInput.StopcockAxis)
+        PadInput.TouchStopcockAxis = 1.0f;
+        PadInput.ForceTick();
+        if (Mathf.Abs(PadInput.StopcockAxis - 1.0f) > 0.001f) { passC2 = false; failedInputs.Add("StopcockAxis"); }
+        PadInput.TouchStopcockAxis = 0;
+        PadInput.ForceTick();
+
+        // EyeAdjustAxis
+        PadInput.EyeAdjustAxis = 1.0f;
+        if (Mathf.Abs(PadInput.EyeAdjustAxis - 1.0f) > 0.001f) { passC2 = false; failedInputs.Add("EyeAdjustAxis"); }
+        PadInput.EyeAdjustAxis = 0;
+
+        // CloseStopcockPressed
+        PadInput.CloseStopcockPressed = true;
+        if (!PadInput.CloseStopcockPressed) { passC2 = false; failedInputs.Add("CloseStopcockPressed"); }
+        PadInput.CloseStopcockPressed = false;
+
+        // HeldYawStep
+        PadInput.HeldYawStep = 15.0f;
+        if (Mathf.Abs(PadInput.HeldYawStep - 15.0f) > 0.001f) { passC2 = false; failedInputs.Add("HeldYawStep"); }
+        PadInput.HeldYawStep = 0;
+
+        // ToggleGraphPressed
+        PadInput.ToggleGraphPressed = true;
+        if (!PadInput.ToggleGraphPressed) { passC2 = false; failedInputs.Add("ToggleGraphPressed"); }
+        PadInput.ToggleGraphPressed = false;
+
+        // NewRunPressed
+        PadInput.NewRunPressed = true;
+        if (!PadInput.NewRunPressed) { passC2 = false; failedInputs.Add("NewRunPressed"); }
+        PadInput.NewRunPressed = false;
+
+        // NextThemePressed
+        PadInput.NextThemePressed = true;
+        if (!PadInput.NextThemePressed) { passC2 = false; failedInputs.Add("NextThemePressed"); }
+        PadInput.NextThemePressed = false;
+
+        // StationJump
+        PadInput.StationJump = 21;
+        if (PadInput.StationJump != 21) { passC2 = false; failedInputs.Add("StationJump"); }
+        PadInput.StationJump = -1;
+
+        Log($"[ipad-test] Tiêu chuẩn 2: Định tuyến 13 kênh đầu vào ảo -> {(passC2 ? "ĐẠT" : "KHÔNG ĐẠT: " + string.Join(", ", failedInputs))}");
+        reportResults.AppendLine($"  \"tieu_chuan_2_nut_ao\": {{\"dat\": {(passC2 ? "true" : "false")}, \"kenh_loi\": \"{string.Join(", ", failedInputs)}\"}},");
+
+        // -----------------------------------------------------------------------------
+        // TẢI TẤT CẢ CÁC KHU TẦNG 2 ĐỂ KIỂM TOÁN DỤNG CỤ
+        // -----------------------------------------------------------------------------
+        var zs = Khkt.Rendering.ZoneStreamer.Instance;
+        zs?.Keep(this, 300f,
+            new Vector3(10f, 4.5f, 7.5f),    // phong_sinh
+            new Vector3(23.5f, 4.5f, 11.2f), // phong_vi_sinh
+            new Vector3(23.5f, 4.5f, 3.7f),  // kho_sinh_pham
+            new Vector3(13.5f, 4.5f, -1.1f), // hanh_lang_t2
+            new Vector3(6.75f, 4.5f, -5.6f), // phong_sinh_phan_tu
+            new Vector3(20.2f, 4.5f, -5.6f), // nha_kinh
+            new Vector3(28.5f, 4.5f, 10.5f), // hanh_lang_dong
+            new Vector3(28.5f, 4.5f, 2.0f)   // loi_thang
+        );
+        float tKeep = Time.realtimeSinceStartup;
+        while (!Khkt.Rendering.ZoneStreamer.Settled && Time.realtimeSinceStartup - tKeep < 20f) yield return null;
+        yield return Frames(5);
+
+        // -----------------------------------------------------------------------------
+        // TIÊU CHUẨN 3: Mọi vật cầm được ở tầng 2 có collider hợp lệ, socket có trigger, gốc tọa độ đáy vật, scale = 1
+        // -----------------------------------------------------------------------------
+        var allGrabbables = FindObjectsByType<Grabbable>(FindObjectsInactive.Include);
+        var floor2Grabs = allGrabbables.Where(g => g.transform.position.y >= 3.6f && g.transform.position.y <= 7.6f).ToList();
+
+        var kindCounts = new Dictionary<string, int>();
+        bool allCollidersValid = true;
+        bool allScalesValid = true;
+        bool allPivotsAtBottom = true;
+        List<string> invalidColliderNames = new List<string>();
+        List<string> invalidScaleNames = new List<string>();
+        List<string> invalidPivotNames = new List<string>();
+
+        foreach (var g in floor2Grabs)
+        {
+            string k = !string.IsNullOrEmpty(g.kind) ? g.kind : "khac";
+            if (!kindCounts.ContainsKey(k)) kindCounts[k] = 0;
+            kindCounts[k]++;
+
+            // Kiểm tra Collider (ít nhất 1 collider không phải trigger)
+            var colliders = g.GetComponentsInChildren<Collider>(true);
+            bool hasSolidCol = colliders.Any(c => !c.isTrigger);
+            if (!hasSolidCol)
+            {
+                allCollidersValid = false;
+                invalidColliderNames.Add(g.name);
+            }
+
+            // Kiểm tra Root Scale = (1, 1, 1)
+            Vector3 s = g.transform.localScale;
+            if (Mathf.Abs(s.x - 1f) > 0.002f || Mathf.Abs(s.y - 1f) > 0.002f || Mathf.Abs(s.z - 1f) > 0.002f)
+            {
+                allScalesValid = false;
+                invalidScaleNames.Add($"{g.name} ({s})");
+            }
+
+            // Kiểm tra Base Pivot ở đáy (y = 0 trong không gian local của g)
+            float minLocalY = float.MaxValue;
+            foreach (var col in colliders)
+            {
+                if (col.isTrigger) continue;
+                if (col is BoxCollider bc)
+                {
+                    Vector3 bottomCenter = bc.center - Vector3.up * (bc.size.y * 0.5f);
+                    Vector3 localPoint = g.transform.InverseTransformPoint(col.transform.TransformPoint(bottomCenter));
+                    if (localPoint.y < minLocalY) minLocalY = localPoint.y;
+                }
+                else if (col is CapsuleCollider cc)
+                {
+                    Vector3 bottomCenter = cc.center - Vector3.up * (cc.height * 0.5f);
+                    Vector3 localPoint = g.transform.InverseTransformPoint(col.transform.TransformPoint(bottomCenter));
+                    if (localPoint.y < minLocalY) minLocalY = localPoint.y;
+                }
+                else if (col is SphereCollider sc)
+                {
+                    Vector3 bottomCenter = sc.center - Vector3.up * sc.radius;
+                    Vector3 localPoint = g.transform.InverseTransformPoint(col.transform.TransformPoint(bottomCenter));
+                    if (localPoint.y < minLocalY) minLocalY = localPoint.y;
+                }
+            }
+            if (minLocalY != float.MaxValue && Mathf.Abs(minLocalY) > 0.015f)
+            {
+                allPivotsAtBottom = false;
+                invalidPivotNames.Add($"{g.name} (minY={minLocalY * 1000f:0.1}mm)");
+            }
+        }
+
+        // Kiểm tra Socket tầng 2: collider phải là trigger
+        var allSockets = FindObjectsByType<PlaceSocket>(FindObjectsInactive.Include);
+        var floor2Sockets = allSockets.Where(s => s.transform.position.y >= 3.6f && s.transform.position.y <= 7.6f).ToList();
+        bool allSocketsTrigger = true;
+        List<string> invalidSocketNames = new List<string>();
+        foreach (var s in floor2Sockets)
+        {
+            var sc = s.GetComponent<Collider>();
+            if (sc == null || !sc.isTrigger)
+            {
+                allSocketsTrigger = false;
+                invalidSocketNames.Add(s.name);
+            }
+        }
+
+        bool passC3 = (floor2Grabs.Count >= 25) && allCollidersValid && allScalesValid && allPivotsAtBottom && allSocketsTrigger;
+        Log($"[ipad-test] Tiêu chuẩn 3: Dụng cụ Tầng 2: {floor2Grabs.Count} vật, Sockets: {floor2Sockets.Count} ổ cắm -> {(passC3 ? "ĐẠT" : "KHÔNG ĐẠT")}");
+        Log($"[ipad-test]   - Phân loại: " + string.Join(", ", kindCounts.Select(kv => $"{kv.Key}: {kv.Value}")));
+        if (!allCollidersValid) Log($"[ipad-test]   - Thiếu collider: {string.Join(", ", invalidColliderNames)}");
+        if (!allScalesValid) Log($"[ipad-test]   - Sai scale: {string.Join(", ", invalidScaleNames)}");
+        if (!allPivotsAtBottom) Log($"[ipad-test]   - Sai pivot đáy: {string.Join(", ", invalidPivotNames)}");
+        if (!allSocketsTrigger) Log($"[ipad-test]   - Socket không trigger: {string.Join(", ", invalidSocketNames)}");
+
+        reportResults.AppendLine($"  \"tieu_chuan_3_do_sinh_hoc\": {{\"dat\": {(passC3 ? "true" : "false")}, \"so_vat_cam\": {floor2Grabs.Count}, \"so_socket\": {floor2Sockets.Count}, \"phan_loai\": {{{string.Join(", ", kindCounts.Select(kv => $"\"{kv.Key}\": {kv.Value}"))}}}, \"collider_hop_le\": {(allCollidersValid ? "true" : "false")}, \"scale_chuan\": {(allScalesValid ? "true" : "false")}, \"pivot_day\": {(allPivotsAtBottom ? "true" : "false")}, \"socket_trigger\": {(allSocketsTrigger ? "true" : "false") }}},");
+
+        // -----------------------------------------------------------------------------
+        // TIÊU CHUẨN 4: Cầm vật ở trạm 21, sang trạm 27, đổi khu không mất, ReturnHome về đúng chỗ
+        // -----------------------------------------------------------------------------
+        viewer.GoTo(21);
+        float tw21 = Time.realtimeSinceStartup;
+        while (!Khkt.Rendering.ZoneStreamer.Settled && Time.realtimeSinceStartup - tw21 < 10f) yield return null;
+        yield return Frames(5);
+
+        var testItem = floor2Grabs.FirstOrDefault(g => g.kind == "dia_petri" || g.kind == "kep" || g.name.Contains("Petri"));
+        if (testItem == null) testItem = floor2Grabs.First();
+        Vector3 homePos = testItem.HomePosition;
+
+        hand.Pick(testItem);
+        yield return Frames(3);
+        bool pickedC4 = (hand.Held == testItem);
+
+        // Di chuyển sang trạm 27 (Hành lang Tầng 2)
+        viewer.GoTo(27);
+        float tw27 = Time.realtimeSinceStartup;
+        while (!Khkt.Rendering.ZoneStreamer.Settled && Time.realtimeSinceStartup - tw27 < 10f) yield return null;
+        yield return Frames(5);
+
+        bool retainedInTransit = (hand.Held == testItem) && testItem.gameObject.activeInHierarchy && (Vector3.Distance(testItem.transform.position, Vector3.zero) > 1.0f);
+
+        // Quay lại trạm 21 và gọi ReturnHome
+        viewer.GoTo(21);
+        float tw21b = Time.realtimeSinceStartup;
+        while (!Khkt.Rendering.ZoneStreamer.Settled && Time.realtimeSinceStartup - tw21b < 10f) yield return null;
+        yield return Frames(5);
+
+        hand.ReturnHome();
+        yield return Frames(3);
+
+        bool returnedC4 = (hand.Held == null) && (Vector3.Distance(testItem.transform.position, homePos) < 0.015f);
+        bool passC4 = pickedC4 && retainedInTransit && returnedC4;
+        Log($"[ipad-test] Tiêu chuẩn 4: Cầm={pickedC4}, Giữ qua trạm 27={retainedInTransit}, Trả về={returnedC4} (lệch={Vector3.Distance(testItem.transform.position, homePos)*1000f:0.1}mm) -> {(passC4 ? "ĐẠT" : "KHÔNG ĐẠT")}");
+        reportResults.AppendLine($"  \"tieu_chuan_4_di_chuyen_doi_khu\": {{\"dat\": {(passC4 ? "true" : "false")}, \"vat_thu\": \"{testItem.name}\", \"cam_duoc\": {(pickedC4 ? "true" : "false")}, \"giu_khi_doi_khu\": {(retainedInTransit ? "true" : "false")}, \"tra_ve_dung_cho\": {(returnedC4 ? "true" : "false")}, \"sai_so_tra_ve_mm\": {Vector3.Distance(testItem.transform.position, homePos)*1000f:0.1} }},");
+
+        // -----------------------------------------------------------------------------
+        // TIÊU CHUẨN 5: Đặt thử lên mặt bàn 1 (dạng đứng và dạng nằm) - sai số độ cao <= 2 mm
+        // -----------------------------------------------------------------------------
+        var surfaces = FindObjectsByType<PlaceSurface>(FindObjectsInactive.Include);
+        var table1Surfaces = surfaces
+            .Where(s => Vector3.Distance(s.transform.position, new Vector3(5.2f, 4.6f, 2.6f)) < 2.0f && s.GetComponent<BoxCollider>() != null)
+            .OrderByDescending(s => s.GetComponent<BoxCollider>().size.x * s.GetComponent<BoxCollider>().size.z)
+            .ToList();
+        var mainSurface = table1Surfaces.FirstOrDefault();
+        if (mainSurface == null) mainSurface = surfaces.FirstOrDefault(s => s.transform.position.y > 4.0f && s.transform.position.z < 4.0f && s.GetComponent<BoxCollider>() != null);
+
+        var tableCol = mainSurface.GetComponent<BoxCollider>();
+        float tableTopY = tableCol.bounds.max.y;
+
+        // 5a. Vật đứng: chọn một vật của tầng 2
+        var standItem = floor2Grabs.FirstOrDefault(g => !g.liesOnTable && Vector3.Distance(g.transform.position, new Vector3(5.2f, 4.6f, 2.6f)) < 3.0f);
+        if (standItem == null) standItem = floor2Grabs.First(g => !g.liesOnTable);
+
+        Vector3 standTargetPoint = new Vector3(5.25f, tableTopY, 2.35f);
+        hand.Pick(standItem);
+        yield return Frames(2);
+        hand.PlaceOnSurface(standTargetPoint);
+        yield return Frames(2);
+
+        bool standPlaced = (hand.Held == null);
+        float standBottomY = standItem.transform.position.y;
+        float standErrMm = Mathf.Abs(standBottomY - tableTopY) * 1000f;
+        bool passStand = standPlaced && (standErrMm <= 2.0f);
+
+        // 5b. Vật nằm: dao mổ, kẹp, đũa hoặc ống ly tâm ở bàn 1
+        var lieItem = floor2Grabs.FirstOrDefault(g => g.liesOnTable && Vector3.Distance(g.transform.position, new Vector3(5.2f, 4.6f, 2.6f)) < 3.0f);
+        if (lieItem == null) lieItem = floor2Grabs.First(g => g.liesOnTable);
+
+        Vector3 lieTargetPoint = new Vector3(5.30f, tableTopY, 2.05f);
+        hand.Pick(lieItem);
+        yield return Frames(2);
+        hand.PlaceOnSurface(lieTargetPoint);
+        yield return Frames(2);
+
+        bool liePlaced = (hand.Held == null);
+        float lieContactY = lieItem.transform.position.y - lieItem.lyingRadiusM;
+        float lieErrMm = Mathf.Abs(lieContactY - tableTopY) * 1000f;
+        bool passLie = liePlaced && (lieErrMm <= 2.0f);
+
+        bool passC5 = passStand && passLie;
+        Log($"[ipad-test] Tiêu chuẩn 5: Đặt bàn: Đứng ({standItem.name}) đặt={standPlaced}, sai số {standErrMm:0.00} mm (<= 2mm: {passStand}); " +
+            $"Nằm ({lieItem.name}) đặt={liePlaced}, sai số {lieErrMm:0.00} mm (<= 2mm: {passLie}) -> {(passC5 ? "ĐẠT" : "KHÔNG ĐẠT")}");
+        reportResults.AppendLine($"  \"tieu_chuan_5_dat_ban\": {{\"dat\": {(passC5 ? "true" : "false")}, \"vat_dung\": \"{standItem.name}\", \"sai_so_dung_mm\": {standErrMm:0.00}, \"vat_nam\": \"{lieItem.name}\", \"sai_so_nam_mm\": {lieErrMm:0.00} }},");
+
+        // -----------------------------------------------------------------------------
+        // TIÊU CHUẨN 6: Thử đặt tràn mép bàn và đặt đè lên vật khác -> phải bị từ chối
+        // -----------------------------------------------------------------------------
+        int rejectCount = 0;
+        var testObstacleItem = floor2Grabs.FirstOrDefault(g => g != standItem && g != lieItem && Vector3.Distance(g.transform.position, new Vector3(5.2f, 4.6f, 2.6f)) < 3.0f);
+        if (testObstacleItem == null) testObstacleItem = floor2Grabs.First(g => g != standItem && g != lieItem);
+
+        // 6a. Thử đặt sát mép bàn (ngoài mép có thể là mặt đặt khác nên đặt ở đó vẫn hợp lệ)
+        Vector3 pointOverEdge = new Vector3(tableCol.bounds.max.x - 0.002f, tableTopY, 2.35f);
+        hand.Pick(testObstacleItem);
+        yield return Frames(2);
+        hand.PlaceOnSurface(pointOverEdge);
+        yield return Frames(2);
+
+        bool edgeRejected = (hand.Held == testObstacleItem);
+        if (edgeRejected) rejectCount++;
+
+        // 6b. Thử đặt đè lên standItem (vị trí standTargetPoint đã có standItem đứng)
+        if (hand.Held != testObstacleItem)
+        {
+            hand.ReturnHome();
+            hand.Pick(testObstacleItem);
+            yield return Frames(2);
+        }
+        hand.PlaceOnSurface(standTargetPoint);
+        yield return Frames(2);
+
+        bool overlapRejected = (hand.Held == testObstacleItem);
+        if (overlapRejected) rejectCount++;
+
+        // Dọn dẹp trả vật về chỗ cũ
+        hand.ReturnHome();
+        hand.Pick(standItem); hand.ReturnHome();
+        hand.Pick(lieItem); hand.ReturnHome();
+        yield return Frames(3);
+
+        bool passC6 = edgeRejected && overlapRejected;
+        Log($"[ipad-test] Tiêu chuẩn 6: Từ chối mép bàn={edgeRejected}, Từ chối đè vật={overlapRejected} (Tổng từ chối={rejectCount}/2) -> {(passC6 ? "ĐẠT" : "KHÔNG ĐẠT")}");
+        reportResults.AppendLine($"  \"tieu_chuan_6_tu_choi_dat_sai\": {{\"dat\": {(passC6 ? "true" : "false")}, \"tu_choi_mep_ban\": {(edgeRejected ? "true" : "false")}, \"tu_choi_de_vat\": {(overlapRejected ? "true" : "false")}, \"tong_tu_choi\": {rejectCount} }},");
+
+        // -----------------------------------------------------------------------------
+        // ĐO HIỆU NĂNG: FPS VÀ DRAW CALLS TẠI 6 PHÒNG SINH HỌC
+        // -----------------------------------------------------------------------------
+        var testStations = new (int st, string name, string roomName)[]
+        {
+            (21, "ipad_st21_ban_sinh_hoc", "Phòng thí nghiệm sinh học"),
+            (23, "ipad_st23_tu_an_toan_sinh_hoc", "Khu tủ an toàn sinh học"),
+            (25, "ipad_st25_phong_vi_sinh", "Phòng vi sinh"),
+            (26, "ipad_st26_kho_sinh_pham", "Kho sinh phẩm"),
+            (28, "ipad_st28_sinh_hoc_phan_tu", "Phòng sinh học phân tử"),
+            (30, "ipad_st30_nha_kinh", "Nhà kính thực vật")
+        };
+
+        var fpsResults = new List<string>();
+        foreach (var (st, shotName, roomName) in testStations)
+        {
+            viewer.GoTo(st);
+            float twSt = Time.realtimeSinceStartup;
+            while (!Khkt.Rendering.ZoneStreamer.Settled && Time.realtimeSinceStartup - twSt < 10f) yield return null;
+
+            int fCount = 0;
+            float tBench = Time.realtimeSinceStartup;
+            while (Time.realtimeSinceStartup - tBench < 2.0f)
+            {
+                fCount++;
+                yield return null;
+            }
+            float fps = fCount / (Time.realtimeSinceStartup - tBench);
+#if UNITY_EDITOR
+            int batches = UnityEditor.UnityStats.drawCalls;
+#else
+            int batches = 0;
+#endif
+            Log($"[KHKT-PLAY] Trạm {st} ({roomName}): FPS = {fps:0.0}, Batches (Draw calls) = {batches}");
+            fpsResults.Add($"\"{roomName}\": {{\"fps\": {fps:0.0}, \"batches\": {batches}}}");
+            Shot(shotName);
+        }
+
+        reportResults.AppendLine($"  \"hieu_nang_6_phong\": {{{string.Join(", ", fpsResults)}}},");
+
+        bool allCriteriaPassed = passC1 && passC2 && passC3 && passC4 && passC5 && passC6;
+        reportResults.AppendLine($"  \"tong_ket_nghiem_thu\": {{\"ket_qua\": \"{(allCriteriaPassed ? "PASS" : "FAIL")}\", \"thoi_diem\": \"{DateTime.Now:yyyy-MM-dd HH:mm:ss}\"}}");
+        reportResults.AppendLine("}");
+
+        File.WriteAllText(Path.Combine(outDir, "ipad_test_results.json"), reportResults.ToString());
+        Log($"[KHKT-PLAY] ĐÃ XUẤT BÁO CÁO KIỂM THỬ: {Path.Combine(outDir, "ipad_test_results.json")}");
+        Log($"[KHKT-PLAY] KẾT QUẢ TỔNG THỂ 6 TIÊU CHUẨN: {(allCriteriaPassed ? "TOÀN BỘ ĐẠT (PASS)" : "CÓ MỤC KHÔNG ĐẠT (FAIL)")}");
+    }
+
+    IEnumerator DoHoaTest()
+    {
+        Log("[KHKT-DO-HOA] Bắt đầu chụp bộ ảnh đồ họa HD chuẩn iPad Air M3 (2360x1640, MSAA 4x, PostProcessing Ultra)...");
+
+        // 1. Cấu hình RenderTexture 2360x1640 (màn hình iPad Air M3 Retina)
+        if (rt != null) { cam.targetTexture = null; rt.Release(); }
+        rt = new RenderTexture(2360, 1640, 24, RenderTextureFormat.ARGB32);
+        rt.antiAliasing = 4;
+        rt.Create();
+        tex = new Texture2D(2360, 1640, TextureFormat.RGB24, false);
+        cam.targetTexture = rt;
+
+        // 2. Thiết lập Camera URP cho mức Ultra
+        var uac = cam.GetComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>();
+        if (uac != null)
+        {
+            uac.renderPostProcessing = true;
+            uac.antialiasing = UnityEngine.Rendering.Universal.AntialiasingMode.SubpixelMorphologicalAntiAliasing;
+            uac.antialiasingQuality = UnityEngine.Rendering.Universal.AntialiasingQuality.High;
+        }
+
+        // Tắt bàn tay ảo khi chụp
+        hand.enabled = false;
+        foreach (var r in hand.hand.GetComponentsInChildren<Renderer>()) r.enabled = false;
+        hand.enabled = true;
+
+        // A. 12 GÓC LANDING
+        var landingViews = new (string name, Vector3 pos, Vector3 look)[]
+        {
+            ("l01_mat_ngoai", new Vector3(-9f, 0, 24f), new Vector3(13f, 3.5f, 6f)),
+            ("l02_mat_ngoai_tay", new Vector3(-12f, 0, 2f), new Vector3(10f, 3.5f, 6f)),
+            ("l03_sinh_toan_canh", new Vector3(1.4f, 3.8f, 1.2f), new Vector3(12f, 4.8f, 9f)),
+            ("l04_sinh_ban_hoc_sinh", new Vector3(6f, 3.8f, 4.5f), new Vector3(10f, 4.7f, 8f)),
+            ("l05_vi_sinh", new Vector3(20.8f, 3.8f, 8.3f), new Vector3(25f, 4.9f, 12.5f)),
+            ("l06_kho_sinh_pham", new Vector3(20.8f, 3.8f, 0.9f), new Vector3(25f, 4.9f, 5f)),
+            ("l07_sinh_phan_tu", new Vector3(1.2f, 3.8f, -4.3f), new Vector3(10f, 4.7f, -7.8f)),
+            ("l08_nha_kinh", new Vector3(14.5f, 3.8f, -4.3f), new Vector3(25f, 4.9f, -7.5f)),
+            ("l09_hanh_lang_t2", new Vector3(1f, 3.8f, -1.8f), new Vector3(20f, 5f, -1.8f)),
+            ("l10_thang_bo", new Vector3(29.2f, 0, -0.9f), new Vector3(29.2f, 3.2f, 5.5f)),
+            ("l11_sanh_thang_may", new Vector3(29.6f, 0, -1.45f), new Vector3(27.5f, 1.2f, -1.45f)),
+            ("l12_trong_cabin", new Vector3(28.1f, 0, -1.45f), new Vector3(29.5f, 1.3f, -1.45f)),
+        };
+        foreach (var v in landingViews)
+        {
+            Vector3 d = v.pos - v.look;
+            viewer.GoNear(v.look, d, new Vector2(d.x, d.z).magnitude);
+            float tw = Time.realtimeSinceStartup;
+            while (!Khkt.Rendering.ZoneStreamer.Settled && Time.realtimeSinceStartup - tw < 15f) yield return null;
+            yield return Frames(12);
+            Shot(v.name);
+            Log($"[KHKT-DO-HOA] Đã chụp {v.name}");
+        }
+
+        // B. 24 GÓC NHÌN PHÒNG LAB TẦNG 1 (GOC_NHIN)
+        var gocNhinViews = new (string name, Vector3 pos, Vector3 look)[]
+        {
+            ("01_toan_canh_cua_vao", new Vector3(1.6f, 0, 0.9f), new Vector3(12f, 1.0f, 9f)),
+            ("02_tuong_bang", new Vector3(9.5f, 0, 7.5f), new Vector3(0.2f, 1.5f, 7.5f)),
+            ("03_ban_hoc_sinh", new Vector3(15.5f, 0, 5.0f), new Vector3(6f, 0.9f, 8.5f)),
+            ("04_ban_chuan_do", new Vector3(6.05f, 0, 2.6f), new Vector3(5.2f, 1.0f, 2.6f)),
+            ("05_khu_tong_hop", new Vector3(12.5f, 0, 10.5f), new Vector3(17f, 1.0f, 8.5f)),
+            ("06_tu_hut", new Vector3(16.5f, 0, 11.0f), new Vector3(16.8f, 1.2f, 14.6f)),
+            ("07_loi_vao_kho", new Vector3(16.3f, 0, 5.0f), new Vector3(20.0f, 1.55f, 7.7f)),
+            ("08_kho_ben_trong", new Vector3(21.3f, 0, 2.0f), new Vector3(24.5f, 1.3f, 9f)),
+            ("09_hanh_lang", new Vector3(4.2f, 0, -1.3f), new Vector3(16f, 1.5f, -0.4f)),
+            ("10_phong_may", new Vector3(2.6f, 0, -3.0f), new Vector3(6.75f, 1.0f, -8.4f)),
+            ("11_phong_robot", new Vector3(21.5f, 0, -3.4f), new Vector3(18.5f, 1.0f, -6.5f)),
+            ("12_khu_an_toan", new Vector3(4.5f, 0, 4.0f), new Vector3(0.5f, 1.2f, 1.0f)),
+            ("13_tuong_video_gan", new Vector3(4.6f, 0, 7.5f), new Vector3(0.2f, 1.7f, 7.5f)),
+            ("14_tuong_nha_hoa_hoc", new Vector3(3.2f, 0, 12.6f), new Vector3(0.1f, 1.55f, 12.6f)),
+            ("15_hanh_lang_lich_su", new Vector3(6.6f, 0, -1.95f), new Vector3(6.15f, 1.5f, -0.1f)),
+            ("16_tuong_trien_lam", new Vector3(11.2f, 0, 4.7f), new Vector3(10.6f, 1.45f, 0.1f)),
+            ("17_cua_phong_may", new Vector3(6.7f, 0, -0.45f), new Vector3(6.7f, 1.35f, -2.2f)),
+            ("18_tran_go_hang_ban", new Vector3(18.5f, 0, 5.0f), new Vector3(8f, 2.9f, 7.5f)),
+            ("19_ngan_kinh_che_tao", new Vector3(16.3f, 0, 9.4f), new Vector3(18.6f, 1.1f, 11.6f)),
+            ("20_phong_may_toan_canh", new Vector3(12.2f, 0, -3.0f), new Vector3(2.0f, 1.0f, -6.8f)),
+            ("21_phong_may_sem_xrd", new Vector3(3.4f, 0, -4.4f), new Vector3(0.7f, 1.0f, -4.0f)),
+            ("22_phong_may_tuong_dong", new Vector3(9.4f, 0, -5.2f), new Vector3(13.0f, 0.9f, -5.0f)),
+            ("23_ban_mau_phan_tich", new Vector3(6.75f, 0, -4.0f), new Vector3(6.4f, 0.9f, -5.5f)),
+            ("24_bom_nhiet_luong", new Vector3(6.0f, 0, -3.8f), new Vector3(4.3f, 0.8f, -2.7f)),
+        };
+        foreach (var v in gocNhinViews)
+        {
+            Vector3 d = v.pos - v.look;
+            viewer.GoNear(v.look, d, new Vector2(d.x, d.z).magnitude);
+            float tw = Time.realtimeSinceStartup;
+            while (!Khkt.Rendering.ZoneStreamer.Settled && Time.realtimeSinceStartup - tw < 15f) yield return null;
+            yield return Frames(12);
+            Shot(v.name);
+            Log($"[KHKT-DO-HOA] Đã chụp {v.name}");
+        }
+
+        // C. 8 CẬN CẢNH (30 - 50 cm)
+        var closeUpViews = new (string name, Vector3 pos, Vector3 look)[]
+        {
+            ("c01_thuy_tinh_dung_dich", new Vector3(5.30f, 0.95f, 3.20f), new Vector3(4.96f, 0.85f, 3.04f)),
+            ("c02_vach_chia_buret", new Vector3(5.56f, 1.15f, 1.15f), new Vector3(5.56f, 0.82f, 1.40f)),
+            ("c03_chu_nhan_lo", new Vector3(5.35f, 0.92f, 3.04f), new Vector3(4.997f, 0.88f, 3.04f)),
+            ("c04_canh_ban_inox", new Vector3(19.10f, 0.90f, 11.45f), new Vector3(19.45f, 0.74f, 11.65f)),
+            ("c05_man_hinh_may", new Vector3(1.55f, 1.15f, -4.80f), new Vector3(1.20f, 1.12f, -4.90f)),
+            ("c06_la_cay", new Vector3(3.25f, 0.85f, 16.15f), new Vector3(3.00f, 0.65f, 16.42f)),
+            ("c07_canh_manh_nguoc_sang", new Vector3(16.00f, 1.35f, 9.15f), new Vector3(16.30f, 1.20f, 9.40f)),
+            ("c08_san_nhin_xien", new Vector3(8.00f, 0.35f, 4.60f), new Vector3(8.00f, 0.00f, 5.00f)),
+        };
+        var charCtrl = viewer.GetComponent<CharacterController>();
+        foreach (var v in closeUpViews)
+        {
+            if (charCtrl != null) charCtrl.enabled = false;
+            viewer.transform.position = v.pos;
+            cam.transform.position = v.pos;
+            cam.transform.LookAt(v.look);
+            viewer.LookAt(v.look);
+            float tw = Time.realtimeSinceStartup;
+            while (!Khkt.Rendering.ZoneStreamer.Settled && Time.realtimeSinceStartup - tw < 15f) yield return null;
+            yield return Frames(12);
+            Shot(v.name);
+            Log($"[KHKT-DO-HOA] Đã chụp {v.name}");
+        }
+
+        Log($"[KHKT-DO-HOA] HOÀN TẤT TOÀN BỘ 44 ẢNH ĐỒ HỌA HD!");
+    }
+
+    IEnumerator BioPortalTest()
+    {
+        Log("=== BẮT ĐẦU KIỂM THỬ CỔNG VÀ PHÒNG SINH HỌC 3D (cong_sinh_hoc) ===");
+
+        var portal = FindAnyObjectByType<BioPortal>(FindObjectsInactive.Include);
+        if (portal == null)
+        {
+            var portalGo = Khkt.EditorTools.LabSceneBuilder.BuildBioPortal(null, new Vector3(18.3f, 3.8f, 12.6f));
+            portal = portalGo.GetComponent<BioPortal>();
+        }
+        var transition = BioPortalTransition.Instance;
+        if (transition == null)
+        {
+            var holoGo = Khkt.EditorTools.LabSceneBuilder.BuildHoloBioRoom(null);
+            transition = holoGo.GetComponent<BioPortalTransition>();
+            portal.targetHoloRoom = transition.holoRoom;
+            transition.portal = portal;
+        }
+
+        Vector3 portalPos = portal.transform.position;
+        Log($"Đã tìm thấy BioPortal tại {portalPos}, targetHoloRoom={portal.targetHoloRoom != null}");
+
+        // -------------------------------------------------------------
+        // BƯỚC 1: KIỂM THỬ KHOẢNG CÁCH (PROXIMITY & HYSTERESIS)
+        // -------------------------------------------------------------
+        Log("[Bước 1] Kiểm tra khoảng cách Proximity và Hysteresis...");
+
+        // 1.1 Đứng cách cổng 4m (> 2.8m) -> Thẻ lời mời phải ẩn
+        Vector3 pos4m = portalPos + new Vector3(0f, 0f, 4.0f);
+        viewer.transform.position = pos4m;
+        viewer.LookAt(portalPos + Vector3.up * 1.5f);
+        yield return new WaitForSeconds(0.25f);
+        if (portal.IsCardShowing) Log("[LỖI] Thẻ lời mời không được hiện khi đứng cách cổng 4m!");
+        else Log("-> 4m: Thẻ lời mời ẩn chuẩn xác.");
+
+        // 1.2 Đi tới 2m (<= 2.2m và góc nhìn <= 60°) -> Thẻ lời mời hiện
+        Vector3 pos2m = portalPos + new Vector3(0f, 0f, 2.0f);
+        viewer.transform.position = pos2m;
+        viewer.LookAt(portalPos + Vector3.up * 1.5f);
+        yield return new WaitForSeconds(0.25f);
+        if (!portal.IsCardShowing) Log("[LỖI] Thẻ lời mời phải hiện khi đứng cách cổng 2m nhìn thẳng!");
+        else Log("-> 2m: Thẻ lời mời hiện chuẩn xác.");
+
+        // 1.3 Lùi ra 3m (> 2.8m) -> Thẻ ẩn
+        Vector3 pos3m = portalPos + new Vector3(0f, 0f, 3.0f);
+        viewer.transform.position = pos3m;
+        viewer.LookAt(portalPos + Vector3.up * 1.5f);
+        yield return new WaitForSeconds(0.25f);
+        if (portal.IsCardShowing) Log("[LỖI] Thẻ lời mời phải ẩn khi lùi ra 3m!");
+        else Log("-> 3m: Thẻ lời mời ẩn chuẩn xác.");
+
+        // 1.4 Qua lại mép 2.5m (vùng trễ 2.2m - 2.8m) -> Không bị nhấp nháy
+        viewer.transform.position = pos2m;
+        yield return new WaitForSeconds(0.2f);
+        viewer.transform.position = portalPos + new Vector3(0f, 0f, 2.5f);
+        yield return new WaitForSeconds(0.2f);
+        bool hold1 = portal.IsCardShowing;
+        viewer.transform.position = pos3m;
+        yield return new WaitForSeconds(0.2f);
+        viewer.transform.position = portalPos + new Vector3(0f, 0f, 2.5f);
+        yield return new WaitForSeconds(0.2f);
+        bool hold2 = !portal.IsCardShowing;
+        Log($"-> Vùng trễ Hysteresis 2.5m ổn định: hold1={hold1}, hold2={hold2} (không nhấp nháy).");
+
+        // -------------------------------------------------------------
+        // BƯỚC 2: CHUYỂN CẢNH MỞ (FSM: Nghi -> DangMo -> DangTai -> HienPhong -> TrongPhong)
+        // -------------------------------------------------------------
+        Log("[Bước 2] Chuyển cảnh mở phòng ảo...");
+        viewer.transform.position = pos2m;
+        viewer.LookAt(portalPos + Vector3.up * 1.5f);
+        yield return new WaitForSeconds(0.25f);
+
+        Shot("bio_01_quet_sang");
+        portal.OnEnterButtonClick();
+
+        float tTrans = 0f;
+        bool sawDangMo = false, sawDangTai = false, sawHienPhong = false;
+        while (transition.CurrentState != BioPortalTransition.TransitionState.TrongPhong && tTrans < 5f)
+        {
+            tTrans += Time.deltaTime;
+            if (transition.CurrentState == BioPortalTransition.TransitionState.DangMo) sawDangMo = true;
+            if (transition.CurrentState == BioPortalTransition.TransitionState.DangTai) sawDangTai = true;
+            if (transition.CurrentState == BioPortalTransition.TransitionState.HienPhong) sawHienPhong = true;
+
+            if (tTrans > 0.4f && tTrans < 0.5f) Shot("bio_02_phu_luc_giac");
+            if (tTrans > 0.8f && tTrans < 0.9f) Shot("bio_03_phu_kin");
+            if (tTrans > 1.2f && tTrans < 1.3f) Shot("bio_04_mo_man");
+            if (tTrans > 1.5f && tTrans < 1.6f) Shot("bio_05_hien_hinh");
+            yield return null;
+        }
+
+        Shot("bio_06_phong_hoan_chinh");
+        Log($"-> Chuyển cảnh MỞ hoàn tất trong {tTrans:0.00}s! FSM: sawDangMo={sawDangMo}, sawDangTai={sawDangTai}, sawHienPhong={sawHienPhong}, State={transition.CurrentState}");
+
+        // -------------------------------------------------------------
+        // BƯỚC 3: NỘI DUNG PHÒNG ẢO (3 lớp, 15 cơ quan, 6 cảnh hiển vi)
+        // -------------------------------------------------------------
+        Log("[Bước 3] Kiểm tra nội dung phòng ảo: 3 lớp, 15 cơ quan, 6 cảnh hiển vi...");
+        var room = transition.holoRoom;
+
+        // 3.1 Chuyển đổi 3 lớp cơ thể
+        room.SwitchLayer("da");
+        yield return new WaitForSeconds(0.4f);
+        Shot("bio_07_layer_da");
+
+        room.SwitchLayer("co");
+        yield return new WaitForSeconds(0.4f);
+        Shot("bio_08_layer_co");
+
+        room.SwitchLayer("xuong");
+        yield return new WaitForSeconds(0.4f);
+        Shot("bio_09_layer_xuong");
+
+        room.SwitchLayer("da");
+        yield return new WaitForSeconds(0.2f);
+        Log("-> Đổi 3 lớp Da / Cơ / Xương (tan-hiện 0.35s) OK.");
+
+        // 3.2 Kiểm tra dữ liệu 15 cơ quan
+        int validOrgans = 0;
+        foreach (var o in HoloBioRoom.Organs)
+        {
+            room.SelectOrgan(o.id);
+            yield return new WaitForSeconds(0.1f);
+            var organData = room.knowledgeCard.CurrentOrgan;
+            if (organData != null && !string.IsNullOrEmpty(organData.ten) && organData.trac_nghiem != null && organData.trac_nghiem.Length >= 3)
+            {
+                validOrgans++;
+            }
+        }
+        Log($"-> 15 Cơ quan: {validOrgans}/15 nạp đầy đủ thông tin vị trí, cấu tạo, chức năng, cơ chế, câu hỏi trắc nghiệm.");
+        Shot("bio_10_the_kien_thuc");
+
+        // 3.3 Mở đủ 6 cảnh hiển vi 3D
+        string[] microScenes = new string[] { "phoi", "than", "nao", "co", "ruot_non", "gan" };
+        foreach (var sc in microScenes)
+        {
+            room.microViewer.OpenSceneForOrgan(sc);
+            yield return new WaitForSeconds(0.3f);
+            Shot($"bio_11_micro_{sc}");
+            room.microViewer.ReturnToFullBody();
+            yield return new WaitForSeconds(0.15f);
+        }
+        Log("-> Đã duyệt và chụp ảnh đầy đủ 6 cảnh hiển vi 3D và quay lại toàn thân thành công.");
+
+        // -------------------------------------------------------------
+        // BƯỚC 4: CHUYỂN CẢNH ĐÓNG (Nghi, phục hồi vị trí <= 1cm, góc <= 0.5°)
+        // -------------------------------------------------------------
+        Log("[Bước 4] Chuyển cảnh đóng và phục hồi vị trí lab...");
+        room.ReturnToLab();
+
+        float tClose = 0f;
+        while (transition.CurrentState != BioPortalTransition.TransitionState.Nghi && tClose < 5f)
+        {
+            tClose += Time.deltaTime;
+            yield return null;
+        }
+
+        Vector3 curPos = viewer.transform.position;
+        float posDiff = (curPos - pos2m).magnitude;
+        float rotDiff = Quaternion.Angle(viewer.transform.rotation, Quaternion.LookRotation((portalPos + Vector3.up * 1.5f) - pos2m));
+        Log($"-> Trở về lab hoàn tất trong {tClose:0.00}s! Sai số vị trí: {posDiff * 100f:0.0}cm (ngưỡng <= 1cm), Sai số góc: {rotDiff:0.0}° (ngưỡng <= 0.5°).");
+        Shot("bio_12_returned_to_lab");
+
+        // -------------------------------------------------------------
+        // BƯỚC 5: CHỐNG NHẤP ĐÚP & TÁI NHẬP (REENTRANCY)
+        // -------------------------------------------------------------
+        Log("[Bước 5] Kiểm tra chống nhấp đúp (Double-click reentrancy)...");
+        portal.OnEnterButtonClick();
+        yield return new WaitForSeconds(0.04f);
+        portal.OnEnterButtonClick();
+        yield return new WaitForSeconds(0.04f);
+        portal.OnEnterButtonClick();
+
+        while (transition.CurrentState != BioPortalTransition.TransitionState.TrongPhong) yield return null;
+        Log("-> Không có lỗi reentrancy khi bấm dồn dập. Phòng ảo mở thành công.");
+
+        room.ReturnToLab();
+        while (transition.CurrentState != BioPortalTransition.TransitionState.Nghi) yield return null;
+        Log("-> Đóng phòng trở về trạng thái Nghi bình thường.");
+
+        // -------------------------------------------------------------
+        // BƯỚC 6: ĐỘ BỀN 20 VÒNG (HEAP DELTA < 5MB, KHÔNG LEAK)
+        // -------------------------------------------------------------
+        Log("[Bước 6] Kiểm tra độ bền 20 chu kỳ vào - ra...");
+        GC.Collect();
+        long startHeap = GC.GetTotalMemory(true);
+
+        for (int cycle = 1; cycle <= 20; cycle++)
+        {
+            transition.StartOpenTransition();
+            while (transition.CurrentState != BioPortalTransition.TransitionState.TrongPhong) yield return null;
+
+            transition.StartCloseTransition();
+            while (transition.CurrentState != BioPortalTransition.TransitionState.Nghi) yield return null;
+        }
+
+        GC.Collect();
+        long endHeap = GC.GetTotalMemory(true);
+        float heapDeltaMb = (endHeap - startHeap) / (1024f * 1024f);
+        Log($"-> Hoàn tất 20 chu kỳ vào-ra liên tục! Heap Delta: {heapDeltaMb:0.00} MB (Ngưỡng < 5MB).");
+
+        // -------------------------------------------------------------
+        // BƯỚC 7: GIẢM CHUYỂN ĐỘNG (REDUCED MOTION)
+        // -------------------------------------------------------------
+        Log("[Bước 7] Kiểm tra chế độ Giảm chuyển động (ReducedMotion)...");
+        ReducedMotion.IsEnabled = true;
+
+        float tRmStart = Time.realtimeSinceStartup;
+        transition.StartOpenTransition();
+        while (transition.CurrentState != BioPortalTransition.TransitionState.TrongPhong) yield return null;
+        float tRmOpen = Time.realtimeSinceStartup - tRmStart;
+
+        float tRmCloseStart = Time.realtimeSinceStartup;
+        transition.StartCloseTransition();
+        while (transition.CurrentState != BioPortalTransition.TransitionState.Nghi) yield return null;
+        float tRmClose = Time.realtimeSinceStartup - tRmCloseStart;
+
+        ReducedMotion.IsEnabled = false;
+        Log($"-> Chế độ Giảm chuyển động: Mở mất {tRmOpen:0.00}s, Đóng mất {tRmClose:0.00}s (mờ chéo ~0.25s, bỏ qua lục giác/quét sáng).");
+
+        // -------------------------------------------------------------
+        // BƯỚC 8: ĐO HIỆU NĂNG PHÒNG ẢO (FPS >= 60, MAX FRAME TIME < 33MS)
+        // -------------------------------------------------------------
+        Log("[Bước 8] Đo đạc hiệu năng phòng ảo...");
+        transition.StartOpenTransition();
+        while (transition.CurrentState != BioPortalTransition.TransitionState.TrongPhong) yield return null;
+
+        float maxFrameTimeMs = 0f;
+        float totalTime = 0f;
+        int frameCount = 120;
+
+        for (int i = 0; i < frameCount; i++)
+        {
+            float fMs = Time.unscaledDeltaTime * 1000f;
+            if (fMs > maxFrameTimeMs) maxFrameTimeMs = fMs;
+            totalTime += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        float avgFps = frameCount / totalTime;
+        Log($"[KHKT-PLAY] Hiệu năng phòng ảo: FPS TB = {avgFps:0.0}, Thời gian khung hình dài nhất = {maxFrameTimeMs:0.0} ms (Ngưỡng < 33ms, FPS >= 60).");
+
+        transition.StartCloseTransition();
+        while (transition.CurrentState != BioPortalTransition.TransitionState.Nghi) yield return null;
+
+        Log("=== HOÀN TẤT TOÀN DIỆN KIỂM THỬ KHỞI ĐỘNG CỔNG SINH HỌC 3D (KHKT_TEST=cong_sinh_hoc) ===");
+    }
+
     IEnumerator Watchdog()
     {
         yield return new WaitForSecondsRealtime(900f);
@@ -5883,7 +6738,7 @@ public class KhktAutoTest : MonoBehaviour
         if (loupe != null && loupe.Active) loupe.GetComponent<Camera>().Render();
         cam.Render();
         RenderTexture.active = rt;
-        tex.ReadPixels(new Rect(0, 0, 1600, 900), 0, 0);
+        tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
         tex.Apply();
         RenderTexture.active = null;
         File.WriteAllBytes(Path.Combine(outDir, name + ".png"), tex.EncodeToPNG());

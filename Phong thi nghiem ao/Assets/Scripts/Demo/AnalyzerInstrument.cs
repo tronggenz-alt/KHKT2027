@@ -17,7 +17,7 @@ namespace Khkt.Demo
     ///   AAS     nồng độ kim loại (mg/L)              GC-MS sắc ký đồ chất hữu cơ dễ bay hơi + m/z
     ///   HPLC    sắc ký đồ chất hữu cơ tan, axit hữu cơ  Chuẩn độ điện thế tự động: đường cong pH, nồng độ
     /// </summary>
-    public class AnalyzerInstrument : MonoBehaviour, IDemoUsable
+    public class AnalyzerInstrument : MonoBehaviour, IDemoUsable, IMachinePanel
     {
         public enum Kind { UvVis, Ftir, Aas, GcMs, Hplc, AutoTitrator, Xrd, Sem, Nmr, Calorimeter, DryingOven, Furnace, Distiller, Autoclave }
 
@@ -26,6 +26,14 @@ namespace Khkt.Demo
         public Renderer screen;
         public TextMesh header, resultText;
         public float runSeconds = 3f;
+
+        // ---- Thông số chỉnh trên bảng điều khiển (MachinePanel). Mặc định cho kết quả như trước. ----
+        [System.NonSerialized] public float scanFromNm = 380f, scanToNm = 780f, slitNm = 2f;   // UV-Vis
+        [System.NonSerialized] public float ftirResolution = 4f, ftirScans = 16f;               // FTIR
+        [System.NonSerialized] public float aasDilution = 1f;                                   // AAS
+        [System.NonSerialized] public float flowMlMin = 1f, ovenC = 180f;                       // HPLC, GC-MS
+        [System.NonSerialized] public float titrantM = 0.1f;                                    // chuẩn độ
+        [System.NonSerialized] public float measureSeconds = 3f;                                // máy khác: thời gian đo
 
         public string LastReport { get; private set; } = "";
         public bool Running { get; private set; }
@@ -104,6 +112,61 @@ namespace Khkt.Demo
             Instruments.InstrumentScreen.Open(this, program, Sample);
         }
 
+        /// <summary>Bảng điều khiển của máy: chỉnh thông số đo rồi chạy phân tích mẫu đang đặt trong ổ.</summary>
+        public MachineSpec PanelSpec()
+        {
+            var s = new MachineSpec { code = "MÁY PHÂN TÍCH · " + kind.ToString().ToUpperInvariant(), title = KindName(kind) };
+            s.subtitle = Sample != null ? "Mẫu trong ổ: " + (string.IsNullOrEmpty(Sample.label) ? Sample.name : Sample.label) : "Chưa có mẫu trong ổ: đặt ống nghiệm có dung dịch vào ổ của máy";
+            switch (kind)
+            {
+                case Kind.UvVis:
+                    s.parameters.Add(MachineParam.Slider("Bước sóng bắt đầu", "nm", 380f, 560f, 10f, () => scanFromNm, v => scanFromNm = v, "0", v => "Vùng khả kiến bắt đầu từ tím (380 nm)"));
+                    s.parameters.Add(MachineParam.Slider("Bước sóng kết thúc", "nm", 600f, 780f, 10f, () => scanToNm, v => scanToNm = v, "0", v => "Vùng khả kiến kết thúc ở đỏ (780 nm)"));
+                    s.parameters.Add(MachineParam.Slider("Độ rộng khe", "nm", 1f, 10f, 1f, () => slitNm, v => slitNm = v, "0", v => v <= 2f ? "Khe hẹp: pic sắc nét, tín hiệu yếu hơn" : "Khe rộng: tín hiệu mạnh nhưng pic bị bè ra"));
+                    break;
+                case Kind.Ftir:
+                    s.parameters.Add(MachineParam.Slider("Độ phân giải", "cm⁻¹", 2f, 16f, 2f, () => ftirResolution, v => ftirResolution = v, "0", v => v <= 4f ? "4 cm⁻¹: chuẩn cho mẫu lỏng và rắn" : "Phân giải thấp: các dải gần nhau chập làm một"));
+                    s.parameters.Add(MachineParam.Slider("Số lần quét", "lần", 4f, 64f, 4f, () => ftirScans, v => ftirScans = v, "0", v => $"Thời gian đo khoảng {BioSeconds(1f + v * 0.12f)} giây · quét nhiều lần thì nền ít nhiễu"));
+                    break;
+                case Kind.Aas:
+                    s.parameters.Add(MachineParam.Slider("Hệ số pha loãng mẫu", "lần", 1f, 100f, 1f, () => aasDilution, v => aasDilution = v, "0", v => v <= 1f ? "Đo thẳng mẫu gốc" : "Mẫu đậm đặc phải pha loãng để nằm trong vùng tuyến tính của đường chuẩn"));
+                    break;
+                case Kind.GcMs:
+                    s.parameters.Add(MachineParam.Slider("Nhiệt độ lò cột", "°C", 80f, 280f, 10f, () => ovenC, v => ovenC = v, "0", v => v < 150f ? "Lò nguội: chất ra chậm, pic tách xa" : "Lò nóng: chất ra nhanh, pic sát nhau"));
+                    s.parameters.Add(MachineParam.Slider("Lưu lượng khí mang He", "mL/phút", 0.5f, 2f, 0.1f, () => flowMlMin, v => flowMlMin = v, "0.0"));
+                    break;
+                case Kind.Hplc:
+                    s.parameters.Add(MachineParam.Slider("Tốc độ dòng pha động", "mL/phút", 0.5f, 2f, 0.1f, () => flowMlMin, v => flowMlMin = v, "0.0", v => v < 1f ? "Dòng chậm: thời gian lưu dài, tách tốt hơn" : "Dòng nhanh: chạy nhanh nhưng áp suất cột tăng"));
+                    break;
+                case Kind.AutoTitrator:
+                    s.parameters.Add(MachineParam.Slider("Nồng độ dung dịch chuẩn", "M", 0.02f, 1f, 0.02f, () => titrantM, v => titrantM = v, "0.00", v => "Máy tự chọn NaOH (mẫu axit) hoặc HCl (mẫu bazơ) ở nồng độ này"));
+                    break;
+                default:
+                    s.parameters.Add(MachineParam.Slider("Thời gian đo", "giây", 2f, 12f, 1f, () => measureSeconds, v => measureSeconds = v, "0", v => "Các thông số chuyên sâu của máy này nằm trong màn hình vận hành chi tiết"));
+                    break;
+            }
+            s.runLabel = () => "Chạy phân tích";
+            s.busy = () => Running;
+            s.status = () => Running ? "Đang phân tích mẫu…" : Sample == null ? "Ổ mẫu trống.\nĐóng bảng, cầm ống nghiệm có dung dịch đặt vào ổ của máy rồi mở lại." : $"Mẫu: {(string.IsNullOrEmpty(Sample.label) ? Sample.name : Sample.label)} · {Sample.VolumeMl.ToString("0.0", Vi)} mL\nSẵn sàng đo.";
+            s.result = () => Running ? "" : LastReport;
+            s.chart = () => tex;
+            s.run = () =>
+            {
+                var sample = Sample;
+                if (sample == null || sample.VolumeMl < 0.3f) return "Chưa có mẫu: đặt ống nghiệm (hoặc cuvet) có dung dịch vào ổ của máy.";
+                LastReport = "";
+                runSeconds = kind == Kind.Ftir ? 1f + ftirScans * 0.12f : kind == Kind.UvVis ? 2f + (scanToNm - scanFromNm) / 200f
+                           : (kind == Kind.Aas || kind == Kind.GcMs || kind == Kind.Hplc || kind == Kind.AutoTitrator) ? 3f : measureSeconds;
+                StartCoroutine(Run(sample));
+                return "";
+            };
+            s.advancedLabel = "Màn hình vận hành chi tiết";
+            s.advanced = Use;
+            return s;
+        }
+
+        static string BioSeconds(float v) => v.ToString("0", Vi);
+
         /// <summary>Chạy nhanh (đặt mẫu, bấm là ra kết quả trên màn hình cạnh máy): robot trợ lý dùng, không mở màn hình vận hành.</summary>
         public void RunQuick()
         {
@@ -159,16 +222,18 @@ namespace Khkt.Demo
             if (s.PinkVisible > 0.05f) ag += s.PinkVisible * 1.2f;  // phenolphtalein hồng hấp thụ ~550 nm
             var pts = new List<Vector2>();
             float max = 0, lmax = 0;
+            float lFrom = Mathf.Min(scanFromNm, scanToNm - 40f), lTo = scanToNm;
+            float widen = (slitNm - 2f) * 2.5f;  // khe rộng làm pic bè ra
             for (int i = 0; i <= 200; i++)
             {
-                float l = 380 + i * 2;
-                float a = ab * G(l, 450, 45) + ag * G(l, 545, 45) + ar * G(l, 650, 55) + look.Turbidity * 0.6f * (500f / l);
+                float l = lFrom + i * (lTo - lFrom) / 200f;
+                float a = ab * G(l, 450, 45 + widen) + ag * G(l, 545, 45 + widen) + ar * G(l, 650, 55 + widen) + look.Turbidity * 0.6f * (500f / l);
                 pts.Add(new Vector2(l, a));
                 if (a > max) { max = a; lmax = l; }
             }
             Clear(new Color32(8, 18, 32, 255));
             Axes();
-            Plot(pts, 380, 780, 0, Mathf.Max(0.2f, max * 1.15f), new Color32(110, 220, 255, 255));
+            Plot(pts, lFrom, lTo, 0, Mathf.Max(0.2f, max * 1.15f), new Color32(110, 220, 255, 255));
             if (max < 0.02f) return "Gần như không hấp thụ ánh sáng khả kiến (dung dịch không màu)";
             return $"λmax ≈ {lmax:0} nm · A = {max.ToString("0.00", Vi)}\nMàu quan sát là màu bù của vùng {Band(lmax)}";
         }
@@ -236,7 +301,7 @@ namespace Khkt.Demo
             {
                 float wn = 4000 - i * 11;
                 float t = 1;
-                foreach (var b in bands) t *= 1 - b.depth * G(wn, b.wn, b.width);
+                foreach (var b in bands) t *= 1 - b.depth * G(wn, b.wn, b.width * (1f + (ftirResolution - 4f) / 12f));
                 pts.Add(new Vector2(4000 - wn, t));
             }
             Clear(new Color32(8, 18, 32, 255));
@@ -283,6 +348,8 @@ namespace Khkt.Demo
                 FillRect(x0, 16, x1, 16 + h, new Color32(120, 230, 160, 255));
                 sb.Append(i == 0 ? "" : " · ").Append($"{list[i].Key} {Fmt(list[i].Value)} mg/L");
             }
+            if (aasDilution > 1.01f)
+                sb.Append($"\nĐo trên mẫu pha loãng {aasDilution:0} lần (kim loại nhiều nhất đọc được {Fmt(max / aasDilution)} mg/L), đã nhân lại hệ số pha loãng.");
             return sb.ToString();
         }
 
@@ -305,6 +372,8 @@ namespace Khkt.Demo
                 // HPLC cột pha đảo: axit hữu cơ (phân cực, mang điện) ra sớm, đường ra sau, chất kém tan ra muộn
                 float rt = gas ? 1.2f + Mathf.Sqrt(M) * 0.9f + (d.HasTag("ancol") ? 0.8f : 0)
                                : 1f + (d.HasTag("khong_tan") ? 9f : 2f) + Mathf.Log(M) * 0.8f + (d.Kind == SpeciesKind.Weak ? -1.6f : 0) + (d.HasTag("cacbohidrat") ? 0.7f : 0);
+                rt *= 1f / Mathf.Max(0.3f, flowMlMin);                       // dòng nhanh thì chất ra sớm
+                if (gas) rt *= Mathf.Sqrt(180f / Mathf.Max(60f, ovenC));     // lò nóng thì chất ra sớm
                 peaks.Add((rt, Mathf.Sqrt((float)c), d.Name, M));
             }
             Clear(new Color32(8, 18, 32, 255));
@@ -314,14 +383,18 @@ namespace Khkt.Demo
             float maxH = 0;
             foreach (var p in peaks) maxH = Mathf.Max(maxH, p.h);
             var pts = new List<Vector2>();
+            float tMax = 18f;
+            foreach (var p in peaks) tMax = Mathf.Max(tMax, p.rt + 2f);
             for (int i = 0; i <= 300; i++)
             {
-                float t = i * 0.06f;
+                float t = i * tMax / 300f;
                 float y = 0.01f;
                 foreach (var p in peaks) y += p.h / maxH * G(t, p.rt, 0.12f);
                 pts.Add(new Vector2(t, y));
             }
-            Plot(pts, 0, 18, 0, 1.15f, gas ? new Color32(255, 150, 200, 255) : new Color32(180, 160, 255, 255));
+            float tEnd = 18f;
+            foreach (var p in peaks) tEnd = Mathf.Max(tEnd, p.rt + 2f);
+            Plot(pts, 0, tEnd, 0, 1.15f, gas ? new Color32(255, 150, 200, 255) : new Color32(180, 160, 255, 255));
             peaks.Sort((a, b) => a.rt.CompareTo(b.rt));
             var sb = new StringBuilder();
             foreach (var p in peaks)
@@ -336,7 +409,7 @@ namespace Khkt.Demo
             double ph0 = ChemEngine.Ph(mix, V0);
             bool acid = ph0 < 7;
             string add = acid ? "Na+" : "Cl-";
-            const double c = 0.1;  // NaOH hoặc HCl 0,1 M
+            double c = Mathf.Clamp(titrantM, 0.01f, 2f);  // nồng độ NaOH hoặc HCl chuẩn (mặc định 0,1 M)
             double PhAt(double v)
             {
                 var b = mix.ToBuilder();
@@ -373,7 +446,7 @@ namespace Khkt.Demo
             Plot(pts, 0, Mathf.Max(1, vmax), 0, 14, new Color32(110, 220, 255, 255));
             if (best < 0.5 || veq <= 0) return $"pH ban đầu {ph0.ToString("0.00", Vi)} · không thấy bước nhảy pH rõ";
             double n = c * veq;
-            return $"pH đầu {ph0.ToString("0.00", Vi)} · V tương đương {(veq * 1000).ToString("0.00", Vi)} ml {(acid ? "NaOH" : "HCl")} 0,1 M\n"
+            return $"pH đầu {ph0.ToString("0.00", Vi)} · V tương đương {(veq * 1000).ToString("0.00", Vi)} ml {(acid ? "NaOH" : "HCl")} {c.ToString("0.00", Vi)} M\n"
                    + $"Lượng {(acid ? "axit" : "bazơ")} (đương lượng) {(n * 1000).ToString("0.000", Vi)} mmol · {(n / V0).ToString("0.0000", Vi)} N";
         }
 

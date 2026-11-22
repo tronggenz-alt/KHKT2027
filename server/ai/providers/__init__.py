@@ -3,6 +3,7 @@
 Thứ tự mặc định: mạng lưới khóa (Groq, DeepSeek, Gemini nhập trên web quản lý) → Claude (khóa Anthropic)
 → API kiểu OpenAI (LLM_BASE_URL). Nhà cung cấp đầu lỗi (mọi khóa đang nghỉ, mạng...) thì tự chuyển sang nhà kế tiếp.
 AI_PROVIDER=mang_luoi_khoa | claude | openai_compat để chỉ dùng một nhà.
+AI_THU_TU=openai_compat,mang_luoi_khoa,claude để đổi thứ tự (ví dụ mô hình 32B tự triển khai trước, API đám mây dự phòng).
 Không có nhà cung cấp nào: máy chủ vẫn chạy, trả thẻ thông tin soạn sẵn; ứng dụng Unity tự hiểu lệnh cơ bản.
 """
 
@@ -51,5 +52,7 @@ def pick() -> Chain | None:
     want = os.environ.get("AI_PROVIDER", "").lower().replace("anthropic", "claude")
     if want in _ALL:
         return Chain([_ALL[want]]) if _ALL[want].available() else None
-    ready = [p for p in (keypool, claude, openai_compat) if p.available()]
+    order = [_ALL[n.strip().lower()] for n in os.environ.get("AI_THU_TU", "").split(",") if n.strip().lower() in _ALL]
+    order += [p for p in (keypool, claude, openai_compat) if p not in order]
+    ready = [p for p in order if p.available()]
     return Chain(ready) if ready else None

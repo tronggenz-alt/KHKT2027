@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Khkt.Demo;
 using UnityEngine;
@@ -11,15 +12,15 @@ namespace Khkt.Menu.Dashboard
     /// </summary>
     public class PageOverview : MonoBehaviour
     {
-        const float Pad = 56f, Gap = 20f, RowH = 62f;
+        const float Pad = 56f, Gap = 20f, RowH = 60f;
         const int MaxRows = 5;
 
         DashboardShell shell;
         RectTransform rt;
-        RectTransform title, subtitle, cardLab, cardRecent, cardComment, metricsRow;
+        RectTransform title, subtitle, cardLab, cardChem, cardBio, cardWip, cardRecent, cardComment, metricsRow;
         readonly List<RectTransform> metricCards = new List<RectTransform>();
 
-        Text titleText, subtitleText, notice;
+        Text titleText, subtitleText, notice, wipDetail, wipBtnLabel;
         Text avgValue, avgNote, doneValue, doneNote, growthValue, growthNote;
         RectTransform recentList;
         Text recentEmpty, commentTitle, commentBody;
@@ -28,6 +29,7 @@ namespace Khkt.Menu.Dashboard
         Image noticeBg;
         RectTransform skeleton;
         bool loading, skeletonShown, hadData;
+        int wipTargetStation = 1;
 
         public Text Status => notice;
         public bool Loading => loading;
@@ -38,20 +40,22 @@ namespace Khkt.Menu.Dashboard
             shell = owner;
             rt = (RectTransform)transform;
 
-            title = GlassKit.Label(rt, "Lời chào", "", 40, MenuKit.Ink, true, TextAnchor.UpperLeft, new Vector2(Pad, -44), new Vector2(900, 54)).rectTransform;
+            title = GlassKit.Label(rt, "Lời chào", "", 38, MenuKit.Ink, true, TextAnchor.UpperLeft, new Vector2(Pad, -32), new Vector2(900, 50)).rectTransform;
             titleText = title.GetComponent<Text>();
-            subtitle = GlassKit.Label(rt, "Dòng lớp", "", 18, MenuKit.InkDim, false, TextAnchor.UpperLeft, new Vector2(Pad, -100), new Vector2(900, 28)).rectTransform;
+            subtitle = GlassKit.Label(rt, "Dòng lớp", "", 18, MenuKit.InkDim, false, TextAnchor.UpperLeft, new Vector2(Pad, -84), new Vector2(900, 26)).rectTransform;
             subtitleText = subtitle.GetComponent<Text>();
 
             BuildNotice();
+            BuildLabCard();
+            BuildShortcutCards();
+            BuildWipCard();
 
             // Hàng số liệu nằm trong khung có lề hai bên để các thẻ chia đều theo phần của chiều rộng
-            metricsRow = Row("Hàng số liệu", -144, 150);
+            metricsRow = Row("Hàng số liệu", -476, 136);
             avgValue = Metric(0, "Thẻ điểm trung bình", "Điểm trung bình", MenuKit.IconScore, MenuKit.AccentSoft, MenuKit.Accent, out avgNote);
             doneValue = Metric(1, "Thẻ bài đã làm", "Bài đã làm", MenuKit.IconDone, MenuKit.BioSoft, MenuKit.Bio, out doneNote);
             growthValue = Metric(2, "Thẻ tiến bộ", "Tiến bộ", MenuKit.IconGrowth, MenuKit.WarnSoft, MenuKit.Warn, out growthNote);
 
-            BuildLabCard();
             BuildBottomCards();
         }
 
@@ -69,41 +73,104 @@ namespace Khkt.Menu.Dashboard
 
         Text Metric(int index, string name, string label, string glyph, Color soft, Color ink, out Text note)
         {
-            var card = MenuKit.Card(metricsRow, name, index / 3f, (index + 1) / 3f, 0, 150, Gap);
+            var card = MenuKit.Card(metricsRow, name, index / 3f, (index + 1) / 3f, 0, 136, Gap);
             metricCards.Add(card);
             var body = MenuKit.Body(card);
-            GlassKit.Label(body, "Nhãn", label, 17, MenuKit.InkDim, false, TextAnchor.UpperLeft, new Vector2(24, -20), new Vector2(260, 26));
+            GlassKit.Label(body, "Nhãn", label, 17, MenuKit.InkDim, false, TextAnchor.UpperLeft, new Vector2(24, -16), new Vector2(260, 24));
             var badge = MenuKit.IconBadge(body, "Ô biểu tượng", glyph, Vector2.zero, 44, soft, ink).rectTransform;
             badge.anchorMin = badge.anchorMax = new Vector2(1, 1);
             badge.pivot = new Vector2(0, 1);
-            badge.anchoredPosition = new Vector2(-68, -20);
-            var value = GlassKit.Label(body, "Số: " + label, "–", 44, MenuKit.Ink, true, TextAnchor.UpperLeft, new Vector2(24, -48), new Vector2(260, 58));
-            note = GlassKit.Label(body, "Ghi chú: " + label, "", 15, MenuKit.InkDim, false, TextAnchor.UpperLeft, new Vector2(24, -112), new Vector2(340, 24));
+            badge.anchoredPosition = new Vector2(-68, -16);
+            var value = GlassKit.Label(body, "Số: " + label, "–", 40, MenuKit.Ink, true, TextAnchor.UpperLeft, new Vector2(24, -40), new Vector2(260, 52));
+            note = GlassKit.Label(body, "Ghi chú: " + label, "", 15, MenuKit.InkDim, false, TextAnchor.UpperLeft, new Vector2(24, -98), new Vector2(400, 24));
             return value;
         }
 
         void BuildNotice()
         {
-            noticeBar = GlassKit.Rect(rt, "Thanh thông báo", new Vector2(1, 1), new Vector2(1, 1), new Vector2(-Pad, -48), new Vector2(560, 52));
+            noticeBar = GlassKit.Rect(rt, "Thanh thông báo", new Vector2(1, 1), new Vector2(1, 1), new Vector2(-Pad, -36), new Vector2(560, 52));
             noticeBg = MenuKit.Paint(noticeBar, MenuKit.WarnSoft, MenuKit.RadiusButton);
             notice = GlassKit.Label(noticeBar, "Thông báo trang chính", "", 16, MenuKit.Warn, false, TextAnchor.MiddleLeft, new Vector2(18, 0), new Vector2(420, 52));
-            retry = MenuKit.MakeButton(noticeBar, "Nút Thử lại", "Thử lại", new Vector2(-10, 0), new Vector2(96, 36), Refresh, 3, MenuKit.RadiusButton, new Vector2(1, 0.5f));
+            retry = MenuKit.MakeButton(noticeBar, "Nút Thử lại", "Thử lại", new Vector2(-10, 0), new Vector2(96, 44), Refresh, 3, MenuKit.RadiusButton, new Vector2(1, 0.5f));
             retry.transform.Find("Chữ").GetComponent<Text>().fontSize = 15;
             noticeBar.gameObject.SetActive(false);
         }
 
         void BuildLabCard()
         {
-            var row = Row("Hàng phòng thí nghiệm", -314, 136);
-            cardLab = MenuKit.Card(row, "Thẻ phòng thí nghiệm", 0f, 1f, 0, 136, Gap);
+            var row = Row("Hàng phòng thí nghiệm", -124, 124);
+            cardLab = MenuKit.Card(row, "Thẻ phòng thí nghiệm", 0f, 1f, 0, 124, Gap);
             var body = MenuKit.Body(cardLab);
             body.GetComponent<Image>().color = MenuKit.Accent;
-            GlassKit.Label(body, "Tiêu đề thẻ", "Phòng thí nghiệm", 26, Color.white, true, TextAnchor.UpperLeft, new Vector2(32, -30), new Vector2(620, 36));
-            GlassKit.Label(body, "Mô tả thẻ", "Tự tay làm thí nghiệm Hóa học, Sinh học trong phòng lab ảo.", 17, MenuKit.WithAlpha(Color.white, 0.86f), false, TextAnchor.UpperLeft, new Vector2(32, -70), new Vector2(700, 28));
-            var size = new Vector2(240, 56);
-            MenuKit.MakeButton(body, "Nút Vào phòng thí nghiệm", "Vào phòng thí nghiệm", new Vector2(-32, 0), size, () => shell.EnterLab?.Invoke(), 3, MenuKit.RadiusButton, new Vector2(1, 0.5f));
-            MenuKit.MakeButton(body, "Nút chuyển Phòng học chung", "Phòng học chung", new Vector2(-284, 0), new Vector2(190, 56), () => shell.OpenRoom?.Invoke(), 0, MenuKit.RadiusButton, new Vector2(1, 0.5f))
-                   .GetComponent<Image>().color = MenuKit.AccentDeep;
+            GlassKit.Label(body, "Tiêu đề thẻ", "Phòng thí nghiệm", 26, MenuKit.OnAccent, true, TextAnchor.UpperLeft, new Vector2(32, -24), new Vector2(620, 36));
+            GlassKit.Label(body, "Mô tả thẻ", "Tự tay làm thí nghiệm Hóa học, Sinh học trong phòng lab ảo.", 17, MenuKit.WithAlpha(MenuKit.OnAccent, 0.94f), false, TextAnchor.UpperLeft, new Vector2(32, -64), new Vector2(700, 28));
+            var size = new Vector2(240, 54);
+            MenuKit.MakeButton(body, "Nút Vào phòng thí nghiệm", "Vào phòng thí nghiệm", new Vector2(-32, 0), size, () => EnterStation(-1), 3, MenuKit.RadiusButton, new Vector2(1, 0.5f));
+            var roomBtn = MenuKit.MakeButton(body, "Nút chuyển Phòng học chung", "Phòng học chung", new Vector2(-284, 0), new Vector2(190, 54), () => shell.OpenRoom?.Invoke(), 0, MenuKit.RadiusButton, new Vector2(1, 0.5f));
+            roomBtn.GetComponent<Image>().color = UiTheme.Pick(MenuKit.AccentDeep, MenuKit.Hex(0x0c2440), MenuKit.Hex(0x07344c));
+            var roomLabel = roomBtn.transform.Find("Chữ")?.GetComponent<Text>();
+            if (roomLabel != null) roomLabel.color = UiTheme.Pick(MenuKit.OnAccent, MenuKit.Ink, MenuKit.Ink);
+        }
+
+        void BuildShortcutCards()
+        {
+            var row = Row("Hàng lối tắt tầng", -262, 114);
+            cardChem = BuildFloorCard(row, "Thẻ phòng Hóa tầng 1", 0f, 0.5f, MenuKit.IconBeaker, MenuKit.AccentSoft, MenuKit.Accent,
+                                      "Phòng Hóa tầng 1", "Thí nghiệm chuẩn độ, pha chế, phân tích phổ", "Vào tầng 1", 2);
+            cardBio = BuildFloorCard(row, "Thẻ phòng Sinh tầng 2", 0.5f, 1f, MenuKit.IconGrowth, MenuKit.BioSoft, MenuKit.Bio,
+                                     "Phòng Sinh tầng 2", "Kính hiển vi, PCR, điện di, ly tâm, mô hình 3D", "Vào tầng 2", 21);
+        }
+
+        RectTransform BuildFloorCard(RectTransform parent, string name, float x0, float x1, string glyph, Color soft, Color ink,
+                                     string heading, string desc, string ctaText, int stationIndex)
+        {
+            var card = MenuKit.Card(parent, name, x0, x1, 0, 114, Gap);
+            var body = MenuKit.Body(card);
+            MenuKit.IconBadge(body, "Ô biểu tượng", glyph, new Vector2(24, -18), 44, soft, ink);
+            GlassKit.Label(body, "Tiêu đề thẻ", heading, 20, MenuKit.Ink, true, TextAnchor.UpperLeft, new Vector2(82, -16), new Vector2(450, 28));
+            GlassKit.Label(body, "Mô tả thẻ", desc, 15, MenuKit.InkDim, false, TextAnchor.UpperLeft, new Vector2(82, -48), new Vector2(450, 48));
+            MenuKit.MakeButton(body, "Nút " + ctaText, ctaText, new Vector2(-24, 0), new Vector2(150, 46), () => EnterStation(stationIndex), 1, MenuKit.RadiusButton, new Vector2(1, 0.5f));
+            return card;
+        }
+
+        void BuildWipCard()
+        {
+            var row = Row("Hàng bài đang làm dở", -390, 72);
+            cardWip = MenuKit.Card(row, "Thẻ bài đang làm dở", 0f, 1f, 0, 72, Gap);
+            var body = MenuKit.Body(cardWip);
+            MenuKit.IconBadge(body, "Ô biểu tượng", MenuKit.IconTask, new Vector2(24, -14), 44, MenuKit.AccentSoft, MenuKit.Accent);
+            GlassKit.Label(body, "Tiêu đề thẻ", "Bài đang làm dở", 18, MenuKit.Ink, true, TextAnchor.UpperLeft, new Vector2(82, -12), new Vector2(460, 26));
+            wipDetail = GlassKit.Label(body, "Chi tiết bài dở", "", 15, MenuKit.InkDim, false, TextAnchor.UpperLeft, Vector2.zero, Vector2.zero);
+            wipDetail.verticalOverflow = VerticalWrapMode.Truncate;
+            var dr = wipDetail.rectTransform;
+            dr.anchorMin = new Vector2(0, 1);
+            dr.anchorMax = new Vector2(1, 1);
+            dr.pivot = new Vector2(0, 1);
+            dr.offsetMin = new Vector2(82, -62);
+            dr.offsetMax = new Vector2(-256, -38);
+            var btn = MenuKit.MakeButton(body, "Nút Bài đang làm dở", "Làm chuẩn độ ngay", new Vector2(-24, 0), new Vector2(212, 46), () => EnterStation(wipTargetStation), 1, MenuKit.RadiusButton, new Vector2(1, 0.5f));
+            wipBtnLabel = btn.transform.Find("Chữ")?.GetComponent<Text>();
+            if (wipBtnLabel != null) wipBtnLabel.fontSize = 16;
+        }
+
+        void RefreshWipCard()
+        {
+            string wipTitle = PlayerPrefs.GetString("KHKT_WIP_TITLE", "").Trim();
+            string wipStep = PlayerPrefs.GetString("KHKT_WIP_STEP", "").Trim();
+            int wipStation = PlayerPrefs.GetInt("KHKT_WIP_STATION", -1);
+            bool hasWip = !string.IsNullOrEmpty(wipTitle);
+            wipTargetStation = hasWip ? (wipStation >= 0 ? wipStation : 1) : 1;
+            wipDetail.text = hasWip
+                ? (string.IsNullOrEmpty(wipStep) ? wipTitle : $"{wipTitle} · {wipStep}")
+                : "Chưa có bài làm dở.";
+            if (wipBtnLabel != null) wipBtnLabel.text = hasWip ? "Làm tiếp" : "Làm chuẩn độ ngay";
+        }
+
+        void EnterStation(int pendingStation)
+        {
+            PlayerPrefs.SetInt("KHKT_PENDING_STATION", pendingStation);
+            PlayerPrefs.Save();
+            shell.EnterLab?.Invoke();
         }
 
         void BuildBottomCards()
@@ -112,32 +179,32 @@ namespace Khkt.Menu.Dashboard
             row.SetParent(rt, false);
             row.anchorMin = Vector2.zero;
             row.anchorMax = Vector2.one;
-            row.offsetMin = new Vector2(Pad - Gap * 0.5f, 40);
-            row.offsetMax = new Vector2(-Pad + Gap * 0.5f, -470);
+            row.offsetMin = new Vector2(Pad - Gap * 0.5f, 28);
+            row.offsetMax = new Vector2(-Pad + Gap * 0.5f, -626);
 
             cardRecent = MenuKit.Card(row, "Thẻ kết quả gần đây", 0f, 0.62f, 0, -0.001f, Gap);
             var body = MenuKit.Body(cardRecent);
-            GlassKit.Label(body, "Tiêu đề thẻ", "Kết quả gần đây", 20, MenuKit.Ink, true, TextAnchor.UpperLeft, new Vector2(24, -20), new Vector2(500, 30));
+            GlassKit.Label(body, "Tiêu đề thẻ", "Kết quả gần đây", 20, MenuKit.Ink, true, TextAnchor.UpperLeft, new Vector2(24, -18), new Vector2(500, 28));
             recentList = new GameObject("Danh sách kết quả", typeof(RectTransform)).GetComponent<RectTransform>();
             recentList.SetParent(body, false);
             recentList.anchorMin = new Vector2(0, 1);
             recentList.anchorMax = new Vector2(1, 1);
             recentList.pivot = new Vector2(0.5f, 1);
-            recentList.offsetMin = new Vector2(24, -60 - RowH * MaxRows);
-            recentList.offsetMax = new Vector2(-24, -60);
-            recentEmpty = GlassKit.Label(body, "Chưa có kết quả", "", 17, MenuKit.InkDim, false, TextAnchor.UpperLeft, new Vector2(24, -66), new Vector2(600, 52));
+            recentList.offsetMin = new Vector2(24, -52 - RowH * MaxRows);
+            recentList.offsetMax = new Vector2(-24, -52);
+            recentEmpty = GlassKit.Label(body, "Chưa có kết quả", "", 17, MenuKit.InkDim, false, TextAnchor.UpperLeft, new Vector2(24, -60), new Vector2(600, 52));
 
             cardComment = MenuKit.Card(row, "Thẻ nhận xét", 0.62f, 1f, 0, -0.001f, Gap);
             var cb = MenuKit.Body(cardComment);
-            GlassKit.Label(cb, "Tiêu đề thẻ", "Nhận xét mới nhất", 20, MenuKit.Ink, true, TextAnchor.UpperLeft, new Vector2(24, -20), new Vector2(420, 30));
-            commentTitle = GlassKit.Label(cb, "Bài được nhận xét", "", 15, MenuKit.InkDim, false, TextAnchor.UpperLeft, new Vector2(24, -60), new Vector2(420, 24));
-            commentBody = GlassKit.Label(cb, "Nội dung nhận xét", "", 18, MenuKit.Ink, false, TextAnchor.UpperLeft, new Vector2(24, -92), new Vector2(420, 220));
+            GlassKit.Label(cb, "Tiêu đề thẻ", "Nhận xét mới nhất", 20, MenuKit.Ink, true, TextAnchor.UpperLeft, new Vector2(24, -18), new Vector2(420, 28));
+            commentTitle = GlassKit.Label(cb, "Bài được nhận xét", "", 15, MenuKit.InkDim, false, TextAnchor.UpperLeft, new Vector2(24, -56), new Vector2(420, 24));
+            commentBody = GlassKit.Label(cb, "Nội dung nhận xét", "", 18, MenuKit.Ink, false, TextAnchor.UpperLeft, new Vector2(24, -88), new Vector2(420, 220));
             commentBody.lineSpacing = 1.2f;
             commentBody.verticalOverflow = VerticalWrapMode.Truncate;
             var cr = commentBody.rectTransform;
             cr.anchorMax = new Vector2(1, 1);
             cr.sizeDelta = new Vector2(-48, 220);
-            cr.anchoredPosition = new Vector2(24, -92);
+            cr.anchoredPosition = new Vector2(24, -88);
         }
 
         // =====================================================================
@@ -152,19 +219,19 @@ namespace Khkt.Menu.Dashboard
             subtitleText.text = u != null ? MenuKit.ClassLine(u) : "Kết quả sẽ không được lưu vào tài khoản.";
 
             bool student = u != null && u.vai_tro == "hoc_sinh";
-            metricsRow.gameObject.SetActive(student);
-            cardRecent.parent.gameObject.SetActive(student);
-            // không có hàng số liệu thì thẻ phòng thí nghiệm dồn lên, tránh khoảng trống giữa trang
-            var labRow = (RectTransform)cardLab.parent;
-            labRow.offsetMax = new Vector2(labRow.offsetMax.x, student ? -314 : -144);
-            labRow.offsetMin = new Vector2(labRow.offsetMin.x, (student ? -314 : -144) - 136);
+            metricsRow.gameObject.SetActive(true);
+            cardRecent.parent.gameObject.SetActive(true);
+            RefreshWipCard();
 
             MenuAnim.Enter(title, 0f, 12f, 0.3f);
-            MenuAnim.Enter(subtitle, 0.04f, 12f, 0.3f);
-            for (int i = 0; i < metricCards.Count; i++) MenuAnim.Enter(metricCards[i], 0.06f + i * 0.05f);
-            MenuAnim.Enter(cardLab, 0.2f);
-            MenuAnim.Enter(cardRecent, 0.26f);
-            MenuAnim.Enter(cardComment, 0.31f);
+            MenuAnim.Enter(subtitle, 0.03f, 12f, 0.3f);
+            MenuAnim.Enter(cardLab, 0.06f);
+            MenuAnim.Enter(cardChem, 0.10f);
+            MenuAnim.Enter(cardBio, 0.14f);
+            MenuAnim.Enter(cardWip, 0.18f);
+            for (int i = 0; i < metricCards.Count; i++) MenuAnim.Enter(metricCards[i], 0.22f + i * 0.04f);
+            MenuAnim.Enter(cardRecent, 0.34f);
+            MenuAnim.Enter(cardComment, 0.38f);
 
             if (student)
             {
@@ -172,7 +239,11 @@ namespace Khkt.Menu.Dashboard
                 else ShowEmptyValues();
                 Refresh();
             }
-            else HideNotice();
+            else
+            {
+                ShowEmptyValues(u == null ? "Chế độ dùng thử chưa lưu điểm." : "Tài khoản giáo viên không có bảng điểm cá nhân.");
+                HideNotice();
+            }
         }
 
         /// <summary>Tải lại ở nền. Đang có số cũ thì giữ nguyên trên màn hình cho tới khi có số mới.</summary>
@@ -211,16 +282,21 @@ namespace Khkt.Menu.Dashboard
             }
         }
 
-        void ShowEmptyValues()
+        void ShowEmptyValues(string nonStudentReason = null)
         {
             MenuAnim.Stop(avgValue);
             MenuAnim.Stop(doneValue);
             avgValue.text = doneValue.text = growthValue.text = "–";
             growthValue.color = MenuKit.Ink;
-            avgNote.text = doneNote.text = growthNote.text = "";
+            bool guestOrTeacher = !string.IsNullOrEmpty(nonStudentReason);
+            avgNote.text = guestOrTeacher ? nonStudentReason : "Chưa có điểm";
+            doneNote.text = guestOrTeacher ? "Đăng nhập tài khoản học sinh để lưu bài" : "Chưa có dữ liệu";
+            growthNote.text = guestOrTeacher ? "Chưa theo dõi tiến bộ" : "Cần thêm bài đã chấm để so sánh";
             ClearRows();
-            recentEmpty.text = "";
-            commentTitle.text = commentBody.text = "";
+            recentEmpty.text = guestOrTeacher ? nonStudentReason : "";
+            commentTitle.text = "";
+            commentBody.text = guestOrTeacher ? "Chưa có nhận xét nào." : "";
+            commentBody.color = MenuKit.InkDim;
         }
 
         void Render(bool instant)
@@ -345,7 +421,7 @@ namespace Khkt.Menu.Dashboard
         {
             notice.text = message;
             notice.color = error ? MenuKit.Error : MenuKit.Bio;
-            noticeBg.color = error ? MenuKit.WithAlpha(MenuKit.Error, 0.08f) : MenuKit.BioSoft;
+            noticeBg.color = error ? MenuKit.ErrorSoft : MenuKit.BioSoft;
             retry.gameObject.SetActive(false);
             noticeBar.gameObject.SetActive(true);
             MenuAnim.Enter(noticeBar, 0f, 8f, 0.24f);

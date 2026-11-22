@@ -89,14 +89,18 @@ namespace Khkt.EditorTools
             AttachSurfaces(root);
             AttachUsables(root);
             BuildDemo(root);
+            BuildHdArchitecture(root);
+            SanitizeCeilingPenetrations(root);
             OptimizeRenderers(root);
             AttachHlod(root);
             AttachImpostors(root);
 
             // Dụng cụ cầm được, có thẻ thông tin hay có hiệu ứng không gộp lô tĩnh (để di chuyển và viền sáng được)
-            MarkStatic(root, t => t.name == WorkshopName || t.name == PartLibraryName || t.name.StartsWith("Cánh quạt") || t.name == "Bộ chuẩn độ" || t.name == "Ngọn lửa" || t.name == "Hệ thống demo"
+            MarkStatic(root, t => t.name == WorkshopName || t.name == PartLibraryName || t.name.StartsWith("Cánh quạt") || t.name == "Bộ chuẩn độ" || t.name == "Ngọn lửa" || t.name == "Nắp đèn cồn" || t.name == "Hệ thống demo"
                                   || t.GetComponent<Khkt.Demo.EquipmentInfo>() != null || t.GetComponent<Khkt.Interaction.Grabbable>() != null
-                                  || t.GetComponent<Khkt.Interaction.LabContainer>() != null || t.name == "Trạm" || t.name.StartsWith("Người xem")
+                                  || t.GetComponent<Khkt.Interaction.LabContainer>() != null || t.GetComponent<Khkt.Interaction.PlaceSocket>() != null
+                                  || t.GetComponent<Khkt.Demo.IDemoUsable>() != null || t.GetComponent<Khkt.Interaction.HeatSource>() != null
+                                  || t.name == "Trạm" || t.name.StartsWith("Người xem")
                                   || t.name.StartsWith("Màn hình") || t.name == "Robot trợ lý" || t.GetComponent<Khkt.Demo.LabScreen>() != null
                                   || t.GetComponent<UvScroll>() != null || t.GetComponent<Khkt.Rendering.AutoDoor>() != null
                                   || t.GetComponent<Khkt.Rendering.ClusterHlod>() != null || IsFloor2Dynamic(t));
@@ -107,6 +111,7 @@ namespace Khkt.EditorTools
 
             // Tách phần tĩnh của từng khu ra cảnh riêng (tải / gỡ cộng dồn lúc chạy), đồ tương tác ở lại cảnh lõi
             var zoneScenes = SplitIntoZones(scene, root);
+            BuildHdArchitecture(root);
             EditorSceneManager.SetActiveScene(scene);
             EditorSceneManager.SaveScene(scene, ScenePath);
             int total = root.GetComponentsInChildren<Transform>(true).Length, zoneObjects = 0;
@@ -215,15 +220,16 @@ namespace Khkt.EditorTools
             // kính trong hơn: kính vẽ hai mặt nên độ đục cộng đôi; đục quá thì phòng bên kia trông như có sương mù
             windowGlass = Mat("KinhCuaSo", new Color(0.55f, 0.7f, 0.8f, 0.06f), 0.95f, 0, transparent: true);
             cabinetGlass = Mat("KinhTu", new Color(0.7f, 0.8f, 0.85f, 0.06f), 0.7f, 0, transparent: true);
-            // Kính vách / cửa sổ / tủ: tắt phản chiếu môi trường. Có đầu dò phản chiếu, mặt kính in cả căn phòng trắng lên
-            // thành một lớp mờ như sương, nhìn sang phòng bên kia không rõ. Vẫn giữ điểm sáng của đèn trên kính.
+            // Kính vách / cửa sổ / tủ: tắt phản chiếu môi trường và đốm chói specular (Mục 4E).
             foreach (var m in new[] { windowGlass, cabinetGlass })
             {
                 m.SetFloat("_EnvironmentReflections", 0f);
                 m.EnableKeyword("_ENVIRONMENTREFLECTIONS_OFF");
+                m.SetFloat("_SpecularHighlights", 0f);
+                m.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
                 EditorUtility.SetDirty(m);
             }
-            labGlass = Mat("ThuyTinh", new Color(0.85f, 0.95f, 1f, 0.22f), 0.95f, 0, transparent: true);
+            labGlass = Mat("ThuyTinh", new Color(0.70f, 0.88f, 0.96f, 0.46f), 0.96f, 0.08f, transparent: true);
             liquidClear = Mat("DungDichTrong", new Color(0.8f, 0.9f, 1f, 0.35f), 0.9f, 0, transparent: true);
             liquidBlue = Mat("DungDichXanh", new Color(0.1f, 0.4f, 0.95f, 0.6f), 0.9f, 0, transparent: true);
             liquidPink = Mat("DungDichHong", new Color(0.95f, 0.35f, 0.65f, 0.5f), 0.9f, 0, transparent: true);
@@ -615,18 +621,20 @@ namespace Khkt.EditorTools
             sun.name = "Mặt trời";
             sun.transform.SetParent(g, false);
             sun.type = LightType.Directional;
-            sun.transform.rotation = Quaternion.Euler(40f, 25f, 0f);  // nắng từ phía nam hắt qua cửa sổ
-            sun.color = new Color(1f, 0.93f, 0.82f);
-            sun.intensity = 1.4f;
+            sun.transform.rotation = Quaternion.Euler(42f, 28f, 0f);  // nắng từ phía nam hắt qua cửa sổ tạo vệt sáng rõ
+            sun.color = new Color(1f, 0.95f, 0.88f);
+            sun.intensity = 1.6f;
             sun.shadows = LightShadows.Soft;
+            sun.shadowBias = 0.025f;
+            sun.shadowNormalBias = 0.12f;
             RenderSettings.sun = sun;
 
-            // Môi trường ấm, dịu hơn trước: tường trắng không bị cháy sáng, gỗ và màu nhận diện hiện rõ
+            // Ánh sáng môi trường chuẩn PBR HD: trần đạt 0.55-0.75, mặt bàn đạt 0.60-0.80
             RenderSettings.ambientMode = AmbientMode.Trilight;
-            RenderSettings.ambientSkyColor = new Color(0.77f, 0.78f, 0.80f);
-            RenderSettings.ambientEquatorColor = new Color(0.71f, 0.69f, 0.66f);
-            RenderSettings.ambientGroundColor = new Color(0.46f, 0.43f, 0.40f);
-            RenderSettings.reflectionIntensity = 0.8f;
+            RenderSettings.ambientSkyColor = new Color(0.85f, 0.86f, 0.88f);
+            RenderSettings.ambientEquatorColor = new Color(0.76f, 0.75f, 0.73f);
+            RenderSettings.ambientGroundColor = new Color(0.58f, 0.56f, 0.54f);
+            RenderSettings.reflectionIntensity = 1.0f;
             BuildPostVolume(g);
         }
 
@@ -644,18 +652,20 @@ namespace Khkt.EditorTools
             var tm = profile.Add<Tonemapping>(true);
             tm.mode.Override(TonemappingMode.Neutral);
             var bloom = profile.Add<Bloom>(true);
-            bloom.threshold.Override(1.1f);
-            bloom.intensity.Override(0.25f);
-            bloom.scatter.Override(0.6f);
-            // lọc chất lượng cao: viền sáng của dải LED mịn, không nhấp nháy theo điểm ảnh. Đo trên Iris Xe: không chậm hơn đo được
-            // (66,3 so với 67,0 FPS, trong sai số). Đặt KHKT_BLOOM_HQ=0 để tắt khi đo so sánh.
-            bloom.highQualityFiltering.Override(System.Environment.GetEnvironmentVariable("KHKT_BLOOM_HQ") != "0");
+            bloom.threshold.Override(1.05f);
+            bloom.intensity.Override(0.30f);
+            bloom.scatter.Override(0.65f);
+            // Trần độ sáng đưa vào Bloom: một điểm ảnh phản chiếu quá sáng (mép inox, thủy tinh) không còn nở thành quầng
+            // chớp tắt khi đổi góc nhìn. Mặc định của URP là 65472 (coi như không chặn).
+            bloom.clamp.Override(6f);
+            // lọc chất lượng cao: viền sáng của dải LED mịn, không nhấp nháy theo điểm ảnh.
+            bloom.highQualityFiltering.Override(true);
             var color = profile.Add<ColorAdjustments>(true);
             color.postExposure.Override(0f);
-            color.contrast.Override(14f);
-            color.saturation.Override(14f);
+            color.contrast.Override(12f);
+            color.saturation.Override(12f);
             var wb = profile.Add<WhiteBalance>(true);
-            wb.temperature.Override(6f);
+            wb.temperature.Override(5f);
             foreach (var c in profile.components) AssetDatabase.AddObjectToAsset(c, profile);
             EditorUtility.SetDirty(profile);
             AssetDatabase.SaveAssets();
@@ -703,7 +713,7 @@ namespace Khkt.EditorTools
                 probe.mode = ReflectionProbeMode.Baked;
                 probe.size = r.size;
                 probe.boxProjection = true;
-                probe.resolution = 128;
+                probe.resolution = 512;
                 probe.hdr = true;
                 string path = $"{Root}/Probes/{r.name}.exr";
                 try
@@ -802,7 +812,8 @@ namespace Khkt.EditorTools
                 }
                 var size = r.bounds.size;
                 float maxDim = Mathf.Max(size.x, Mathf.Max(size.y, size.z));
-                if (maxDim < 0.25f) r.shadowCastingMode = ShadowCastingMode.Off;
+                // Bản HD: chỉ tắt bóng với vật nhỏ hơn 6 cm để cốc, chai, máy trên bàn luôn có bóng tiếp xúc
+                if (maxDim < 0.06f) r.shadowCastingMode = ShadowCastingMode.Off;
                 if (maxDim < 0.2f) r.gameObject.layer = detail;
             }
         }
@@ -906,5 +917,92 @@ namespace Khkt.EditorTools
         }
 
         static Vector2 V(float r, float y) => new Vector2(r, y);
+
+        /// <summary>
+        /// Chặng 1: Quét và loại bỏ 100% các cột/ống/vật thể đâm xuyên trần Tầng 1 hoặc thò từ sàn Tầng 2 xuống.
+        /// </summary>
+        static void SanitizeCeilingPenetrations(Transform root)
+        {
+            var renderers = root.GetComponentsInChildren<Renderer>(true);
+            var toDestroy = new System.Collections.Generic.List<GameObject>();
+            int removedCount = 0;
+
+            // 1. Kiểm tra toàn bộ đối tượng dưới Tầng 2 (F2_Y = 3.8f): không được có đối tượng nào (trừ sàn / dầm / chỉ tầng)
+            // có điểm thấp nhất worldY < 3.72f (localY < -0.08f)
+            var tang2 = root.Find("Tầng 2");
+            if (tang2 != null)
+            {
+                foreach (var r in tang2.GetComponentsInChildren<Renderer>(true))
+                {
+                    if (r == null || !r.enabled) continue;
+                    string rName = r.gameObject.name;
+                    if (rName.StartsWith("Sàn ") || rName.StartsWith("Chỉ tầng") || rName.Contains("mái hiên") || rName.Contains("Dầm biên")) continue;
+
+                    var b = r.bounds;
+                    if (b.min.y < 3.72f)
+                    {
+                        Debug.LogWarning($"[SanitizeCeilingPenetrations] Phát hiện đối tượng Tầng 2 '{GetHierarchyPath(r.transform)}' có điểm thấp nhất y={b.min.y:F3} < 3.72m. Tự động loại bỏ!");
+                        if (!toDestroy.Contains(r.gameObject)) toDestroy.Add(r.gameObject);
+                    }
+                }
+            }
+
+            // 2. Quét bên trong phòng thí nghiệm Tầng 1 (x: 0..27m, z: 0..16m, trừ lõi thang và ngoài trời):
+            // Kiểm tra các khối hẹp (size.x < 0.35f && size.z < 0.35f):
+            // - Đâm xuyên mặt trần Tầng 1: bounds.min.y < 3.55f && bounds.max.y > 3.65f
+            // - Treo lơ lửng từ trần Tầng 1 xuống giữa phòng: bounds.max.y > 3.2f && bounds.min.y < 2.2f tại khu vực bàn học sinh x: 3..19, z: 1..14
+            foreach (var r in renderers)
+            {
+                if (r == null || toDestroy.Contains(r.gameObject)) continue;
+                var b = r.bounds;
+                // Bỏ qua bên ngoài tòa nhà hoặc khu vực thang bộ/thông tầng
+                if (b.center.x < 0.1f || b.center.x > 26.9f || b.center.z < 0.1f || b.center.z > 15.9f) continue;
+                string path = GetHierarchyPath(r.transform);
+                if (path.Contains("Ngoài trời") || path.Contains("NgoaiTroi")) continue;
+                if (b.size.x >= 0.35f || b.size.z >= 0.35f) continue;
+
+                // Trường hợp a: Đâm xuyên qua trần tầng 1
+                if (b.min.y < 3.55f && b.max.y > 3.65f)
+                {
+                    Debug.LogWarning($"[SanitizeCeilingPenetrations] Phát hiện khối hẹp '{path}' (size: {b.size}, bounds.y: {b.min.y:F2}..{b.max.y:F2}) đâm xuyên trần Tầng 1! Tự động loại bỏ!");
+                    if (!toDestroy.Contains(r.gameObject)) toDestroy.Add(r.gameObject);
+                    continue;
+                }
+
+                // Trường hợp b: Cột/ống treo từ trần xuống giữa phòng ở khu vực bàn học sinh
+                if (b.center.x >= 3f && b.center.x <= 19f && b.center.z >= 1f && b.center.z <= 14f)
+                {
+                    if (b.max.y > 3.2f && b.min.y < 2.2f)
+                    {
+                        Debug.LogWarning($"[SanitizeCeilingPenetrations] Phát hiện cột/ống treo bất thường '{path}' (size: {b.size}, bounds.y: {b.min.y:F2}..{b.max.y:F2}) giữa phòng! Tự động loại bỏ!");
+                        if (!toDestroy.Contains(r.gameObject)) toDestroy.Add(r.gameObject);
+                        continue;
+                    }
+                }
+            }
+
+            foreach (var go in toDestroy)
+            {
+                if (go != null)
+                {
+                    UnityEngine.Object.DestroyImmediate(go);
+                    removedCount++;
+                }
+            }
+
+            Debug.Log($"[SanitizeCeilingPenetrations] Hoàn tất quét kiểm tra: đã dọn dẹp {removedCount} đối tượng đâm xuyên trần hoặc sai vị trí.");
+        }
+
+        static string GetHierarchyPath(Transform t)
+        {
+            if (t == null) return "";
+            string path = t.name;
+            while (t.parent != null)
+            {
+                t = t.parent;
+                path = t.name + "/" + path;
+            }
+            return path;
+        }
     }
 }

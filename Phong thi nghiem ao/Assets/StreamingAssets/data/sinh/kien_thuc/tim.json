@@ -1,0 +1,77 @@
+{
+  "id": "tim",
+  "ten": "Tim",
+  "can_duyet": true,
+  "chuong_trinh": "Sinh học 11 – Tuần hoàn ở động vật (CT GDPT 2018); nền tảng KHTN 8",
+  "vi_tri": [
+    "Nằm trong lồng ngực, giữa hai lá phổi, phía trên cơ hoành; mỏm tim hơi lệch về bên trái."
+  ],
+  "cau_tao": [
+    "Tim có 4 ngăn: 2 tâm nhĩ ở trên (nhận máu về tim) và 2 tâm thất ở dưới (bơm máu ra khỏi tim).",
+    "Thành tâm thất trái dày nhất vì phải đẩy máu đi khắp cơ thể (vòng tuần hoàn lớn).",
+    "Van nhĩ thất (van ba lá bên phải, van hai lá bên trái) và van bán nguyệt (van động mạch chủ, van động mạch phổi) giúp máu chảy theo một chiều.",
+    "Hệ dẫn truyền tim gồm nút xoang nhĩ, nút nhĩ thất, bó His và mạng Purkinje.",
+    "Thành tim cấu tạo chủ yếu từ mô cơ tim – một loại mô cơ riêng, khác cơ vân và cơ trơn."
+  ],
+  "chuc_nang": [
+    "Bơm máu, tạo lực đẩy máu chảy liên tục trong hệ mạch.",
+    "Nửa phải tim đưa máu nghèo O₂ lên phổi; nửa trái đưa máu giàu O₂ đi nuôi cơ thể – máu hai nửa tim không trộn lẫn."
+  ],
+  "co_che": [
+    "Tính tự động: nút xoang nhĩ tự phát xung điện theo chu kì → lan khắp hai tâm nhĩ làm tâm nhĩ co → tới nút nhĩ thất → bó His → mạng Purkinje làm tâm thất co.",
+    "Chu kì tim ở người trưởng thành kéo dài khoảng 0,8 s (nhịp tim ~75 lần/phút): tâm nhĩ co 0,1 s → tâm thất co 0,3 s → giãn chung 0,4 s.",
+    "Van đóng – mở do chênh lệch áp suất máu giữa hai bên van, nhờ vậy máu chỉ đi một chiều: tâm nhĩ → tâm thất → động mạch.",
+    "Điều hoà: dây thần kinh giao cảm và hormone adrenaline làm tim đập nhanh, mạnh; dây đối giao cảm làm tim đập chậm, yếu. Trung khu điều hoà tim mạch nằm ở hành não."
+  ],
+  "lien_he": [
+    "Tập thể dục đều đặn giúp cơ tim khoẻ, tăng lượng máu tim bơm đi trong mỗi nhịp.",
+    "Bệnh thường gặp: tăng huyết áp, xơ vữa động mạch vành gây nhồi máu cơ tim, hở hoặc hẹp van tim.",
+    "Hạn chế ăn mặn, nhiều mỡ động vật; không hút thuốc lá để phòng bệnh tim mạch."
+  ],
+  "diem_thi": [
+    "Tính tự động của tim và thứ tự dẫn truyền: nút xoang nhĩ → nút nhĩ thất → bó His → mạng Purkinje.",
+    "Bài tính chu kì tim: thời gian một chu kì (giây) = 60 : nhịp tim; tỉ lệ các pha nhĩ co : thất co : giãn chung = 1 : 3 : 4.",
+    "Tim làm việc suốt đời không mỏi vì mỗi chu kì có thời gian nghỉ đủ phục hồi (tâm nhĩ nghỉ 0,7 s, tâm thất nghỉ 0,5 s).",
+    "Ở động vật, nhịp tim tỉ lệ nghịch với khối lượng cơ thể: động vật càng nhỏ tim đập càng nhanh."
+  ],
+  "trac_nghiem": [
+    {
+      "cau": "Bộ phận nào của hệ dẫn truyền tim có khả năng tự phát xung điện theo chu kì?",
+      "lua_chon": ["Nút xoang nhĩ", "Bó His", "Mạng Purkinje", "Nút nhĩ thất"],
+      "dap_an": "A",
+      "giai_thich": "Nút xoang nhĩ tự phát xung theo chu kì nên giữ vai trò tạo nhịp cho tim; bó His và mạng Purkinje chủ yếu dẫn truyền xung."
+    },
+    {
+      "cau": "Ở người trưởng thành, chu kì tim kéo dài 0,8 s. Thời gian tâm thất co là",
+      "lua_chon": ["0,1 s", "0,3 s", "0,4 s", "0,5 s"],
+      "dap_an": "B",
+      "giai_thich": "Chu kì 0,8 s gồm tâm nhĩ co 0,1 s, tâm thất co 0,3 s và giãn chung 0,4 s."
+    },
+    {
+      "cau": "Một người có nhịp tim 60 lần/phút. Thời gian một chu kì tim của người này là",
+      "lua_chon": ["0,6 s", "0,8 s", "1 s", "1,2 s"],
+      "dap_an": "C",
+      "giai_thich": "Thời gian một chu kì = 60 : 60 = 1 s."
+    },
+    {
+      "cau": "Vì sao tim hoạt động liên tục suốt đời mà không mỏi?",
+      "lua_chon": ["Tim được cấu tạo từ cơ vân", "Tim chỉ co khi cơ thể vận động", "Tim không cần năng lượng ATP", "Mỗi chu kì tim có thời gian nghỉ đủ để phục hồi"],
+      "dap_an": "D",
+      "giai_thich": "Trong chu kì 0,8 s, tâm nhĩ nghỉ 0,7 s và tâm thất nghỉ 0,5 s – đủ để cơ tim phục hồi."
+    },
+    {
+      "cau": "Máu trong tâm thất trái là",
+      "lua_chon": ["máu nghèo O₂, được bơm lên phổi", "máu pha giữa máu giàu và nghèo O₂", "máu giàu O₂, được bơm vào động mạch chủ", "máu nghèo O₂, được bơm vào động mạch chủ"],
+      "dap_an": "C",
+      "giai_thich": "Tâm thất trái nhận máu giàu O₂ từ tâm nhĩ trái (máu từ phổi về) rồi bơm vào động mạch chủ đi nuôi cơ thể."
+    }
+  ],
+  "goi_y_hoi": [
+    "Vì sao thành tâm thất trái dày hơn tâm thất phải?",
+    "Tính tự động của tim là gì?",
+    "Vì sao tim đập nhanh khi chạy bộ?"
+  ],
+  "mo_rong": [
+    "Áp suất tâm thu trong tâm thất trái khoảng 120 mmHg, tâm thất phải khoảng 25 mmHg (số liệu tham khảo, không bắt buộc nhớ)."
+  ]
+}

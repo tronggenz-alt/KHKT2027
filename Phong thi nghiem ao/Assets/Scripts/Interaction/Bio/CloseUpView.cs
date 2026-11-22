@@ -23,8 +23,6 @@ namespace Khkt.Interaction.Bio
         Quaternion startWorldRot, targetWorldRot;
         float transitionT = 1f;
 
-        GUIStyle barStyle;
-        Texture2D barBg;
 
         public static CloseUpView Ensure()
         {
@@ -36,7 +34,7 @@ namespace Khkt.Interaction.Bio
                 return existing;
             }
             var go = new GameObject("BioCloseUpView");
-            DontDestroyOnLoad(go);
+            if (Application.isPlaying) DontDestroyOnLoad(go);
             Instance = go.AddComponent<CloseUpView>();
             return Instance;
         }
@@ -110,24 +108,24 @@ namespace Khkt.Interaction.Bio
         void OnGUI()
         {
             if (!active) return;
-            if (barStyle == null)
+            // Cùng da kính tối và cùng cách phóng theo màn hình với thị kính kính hiển vi
+            Vector2 screen = Khkt.Demo.GuiKit.Begin();
+            bool touch = Khkt.Input.PadInput.UsingTouch;
+            if (barText == null || barTitle != currentTitle || barTouch != touch)
             {
-                barBg = new Texture2D(2, 2);
-                var c = new Color(0.06f, 0.20f, 0.14f, 0.90f);
-                barBg.SetPixels(new[] { c, c, c, c });
-                barBg.Apply();
-                barStyle = new GUIStyle(GUI.skin.box)
-                {
-                    fontSize = 14,
-                    fontStyle = FontStyle.Bold,
-                    alignment = TextAnchor.MiddleCenter,
-                    normal = { background = barBg, textColor = new Color(0.85f, 0.98f, 0.90f) }
-                };
+                barTitle = currentTitle;
+                barTouch = touch;
+                barText = $"Góc nhìn cận cảnh: {currentTitle}  ·  {(touch ? "Chạm [✕ Thoát] để lùi ra" : "[Esc] để lùi ra")}";
             }
 
-            float w = 520f, h = 34f;
-            GUI.Box(new Rect((Screen.width - w) * 0.5f, 16f, w, h),
-                $"Góc nhìn cận cảnh: {currentTitle}  ·  [Esc] để lùi ra", barStyle);
+            float w = Mathf.Min(560f, screen.x - (touch ? 150f : 40f)), h = 44f;
+            float x = (screen.x - w - (touch ? 110f : 0f)) * 0.5f;
+            GUI.Box(new Rect(x, 16f, w, h), barText, Khkt.Demo.GuiKit.Panel);
+            if (touch && GUI.Button(new Rect(x + w + 10f, 16f, 100f, h), "✕ Thoát", Khkt.Demo.GuiKit.Button))
+                Exit();
         }
+
+        string barText, barTitle;
+        bool barTouch;
     }
 }

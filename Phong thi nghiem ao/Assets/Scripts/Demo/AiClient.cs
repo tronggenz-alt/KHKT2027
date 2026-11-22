@@ -18,6 +18,11 @@ namespace Khkt.Demo
     public class AiClient : MonoBehaviour
     {
         [Tooltip("Địa chỉ máy chủ AI (uvicorn server.ai.main:app --port 8000)")]
+        public string serverUrl
+        {
+            get => GameSession.ServerUrl;
+            set => GameSession.ServerUrl = value;
+        }
         public float timeoutS = 25f;
         const float PlanTimeoutS = 90f;  // kế hoạch robot dài; máy chủ thử mô hình mạnh trước, lỗi thì chuyển mô hình khác (tối đa 80 s)
 
@@ -69,7 +74,25 @@ namespace Khkt.Demo
             StartCoroutine(Post("/robot/ke-hoach", req, ok, fail, Mathf.Max(timeoutS, PlanTimeoutS)));
         }
 
-        void Awake() => Instance = this;
+        public const string ServerUrlPrefKey = "KHKT_AI_SERVER_URL";
+        bool firstCheck = true;
+
+        void Awake()
+        {
+            Instance = this;
+            if (PlayerPrefs.HasKey(ServerUrlPrefKey))
+            {
+                string saved = PlayerPrefs.GetString(ServerUrlPrefKey);
+                if (!string.IsNullOrWhiteSpace(saved)) serverUrl = saved;
+            }
+        }
+
+        public void SetServerUrl(string url)
+        {
+            serverUrl = url;
+            PlayerPrefs.SetString(ServerUrlPrefKey, url);
+            PlayerPrefs.Save();
+        }
 
         IEnumerator Start()
         {
@@ -82,7 +105,21 @@ namespace Khkt.Demo
                     ServerOnline = h != null && h.ok;
                     serverProvider = h?.nha_cung_cap ?? "";
                     serverModel = h?.mo_hinh ?? "";
-                }, _ => { ServerOnline = false; Reachable = false; }, 3f);
+                    if (firstCheck && ServerOnline)
+                    {
+                        LabMessages.Say($"Đã kết nối máy chủ AI ({Provider})", LabMessages.Tone.Good);
+                        firstCheck = false;
+                    }
+                }, _ =>
+                {
+                    ServerOnline = false;
+                    Reachable = false;
+                    if (firstCheck)
+                    {
+                        LabMessages.Say("Máy chủ AI ngoại tuyến (phòng lab vẫn chạy bình thường)", LabMessages.Tone.Info);
+                        firstCheck = false;
+                    }
+                }, 3f);
                 yield return new WaitForSecondsRealtime(ServerOnline ? 60f : 15f);
             }
         }

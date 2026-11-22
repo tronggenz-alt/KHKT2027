@@ -58,7 +58,19 @@ namespace Khkt.Rendering
         /// <summary>Nhánh không thuộc tòa nhà (xưởng lắp ráp ảo của khu chế tạo): FindAll bỏ qua.</summary>
         public static readonly List<Transform> Excluded = new List<Transform>();
 
-        /// <summary>Mọi T trong cảnh, kể cả ở khu đang ngủ (bỏ qua vật bị tắt vì lý do khác và nhánh Excluded).</summary>
+        /// <summary>Vật nằm trong một nhánh Excluded (xưởng lắp ráp ảo).</summary>
+        public static bool IsExcluded(Transform t)
+        {
+            for (int i = 0; i < Excluded.Count; i++)
+                if (Excluded[i] != null && t.IsChildOf(Excluded[i])) return true;
+            return false;
+        }
+
+        /// <summary>
+        /// Mọi T trong cảnh, kể cả ở khu đang ngủ. Quét toàn bộ cảnh và cấp phát mảng mới: chỉ gọi khi có sự kiện
+        /// (mở bảng tra cứu, robot lập kế hoạch). Việc lặp lại định kỳ thì dùng LiveSet.
+        /// Bỏ qua vật bị tắt vì lý do khác và nhánh Excluded.
+        /// </summary>
         public static T[] FindAll<T>() where T : Component
         {
             var found = Object.FindObjectsByType<T>(FindObjectsInactive.Include);

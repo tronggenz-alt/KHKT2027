@@ -59,18 +59,18 @@ namespace Khkt.Demo.Instruments
 
         public override void Build()
         {
-            bTube = S.AddButton("Chuẩn bị ống mẫu", 0, 0, PrepareTube, false, 2, 13);
-            bInsert = S.AddButton("Đặt ống vào máy", 2, 0, Insert, false, 1, 13);
+            bTube = S.AddButton("Chuẩn bị ống mẫu", 0, 0, PrepareTube, false, 2, 14);
+            bInsert = S.AddButton("Đặt ống vào máy", 2, 0, Insert, false, 1, 14);
             bShim = S.AddButton("Shim tự động", 0, 1, Shim);
             bScans = S.AddButton("", 1, 1, () => Scans = Scans == 1 ? 8 : Scans == 8 ? 32 : 1);
-            bPresat = S.AddButton("", 2, 1, () => Presat = !Presat, false, 1, 12);
+            bPresat = S.AddButton("", 2, 1, () => Presat = !Presat, false, 1, 14);
             bAcq = S.AddButton("Đo (xung, thu FID)", 0, 2, Acquire, true, 2);
             bPlot = S.AddButton("", 2, 2, () => plotMode = 1 - plotMode);
-            bPhase = S.AddButton("Chỉnh pha tự động", 0, 3, AutoPhase, false, 1, 13);
-            bRef = S.AddButton("Chuẩn ppm (DSS = 0)", 1, 3, Reference, false, 1, 13);
-            bInt = S.AddButton("Tích phân, gán tín hiệu", 2, 3, Integrate, false, 1, 12);
+            bPhase = S.AddButton("Chỉnh pha tự động", 0, 3, AutoPhase, false, 1, 14);
+            bRef = S.AddButton("Chuẩn ppm (DSS = 0)", 1, 3, Reference, false, 1, 14);
+            bInt = S.AddButton("Tích phân, gán tín hiệu", 2, 3, Integrate, false, 1, 14);
             bOut = S.AddButton("Lấy ống ra", 0, 4, TakeOut);
-            status = S.AddText("", 5, 0, 3, 13);
+            status = S.AddText("", 5, 0, 3, 14);
             S.SetResults("Chuẩn bị ống mẫu từ ống nghiệm ở ổ máy (0,45 mL mẫu + 0,05 mL D₂O có chuẩn nội DSS), đặt vào máy, shim rồi đo.");
         }
 
@@ -254,17 +254,17 @@ namespace Khkt.Demo.Instruments
         string BuildResults()
         {
             var sb = new StringBuilder();
-            sb.Append($"<color=#9FB3C8>Ống mẫu:</color> {(TubeReady ? $"0,45 mL {SampleName} + D₂O/DSS" : "chưa chuẩn bị")} · {(Shimmed ? "đã shim" : "chưa shim")} · {(Presat ? "triệt nước" : "không triệt nước")}\n");
+            sb.Append($"<color={GlassKit.HexDim}>Ống mẫu:</color> {(TubeReady ? $"0,45 mL {SampleName} + D₂O/DSS" : "chưa chuẩn bị")} · {(Shimmed ? "đã shim" : "chưa shim")} · {(Presat ? "triệt nước" : "không triệt nước")}\n");
             if (Signals != null)
             {
                 sb.Append("\n<b>Tín hiệu</b> (δ ppm · kiểu tách · J · số H đo được từ tích phân)\n");
                 foreach (var s in Signals.Where(s => s.Owner != "nuoc" || !Presat).Take(9))
-                    sb.Append($"{Fmt(s.Ppm, "0.00")} · {Mult(s.Lines)}{(s.J > 0 && s.Lines > 1 ? $" J {Fmt(s.J, "0")} Hz" : "")} · {(double.IsNaN(s.PerMol) ? "—" : Fmt(s.PerMol, "0.00") + " H")} · <color=#61DBFF>{s.Assign}</color>\n");
+                    sb.Append($"{Fmt(s.Ppm, "0.00")} · {Mult(s.Lines)}{(s.J > 0 && s.Lines > 1 ? $" J {Fmt(s.J, "0")} Hz" : "")} · {(double.IsNaN(s.PerMol) ? "—" : Fmt(s.PerMol, "0.00") + " H")} · <color={GlassKit.HexAccent}>{s.Assign}</color>\n");
                 // định lượng
                 var byOwner = Signals.Where(s => s.Owner != "nuoc" && s.Owner != "dss").GroupBy(s => s.Owner).ToList();
                 if (byOwner.Count > 0)
                 {
-                    sb.Append("\n<b>Phân tích chuyên sâu: qNMR (chuẩn nội DSS)</b>\n<color=#9FB3C8>c = (I / số H) / (I_DSS / 9) × c_DSS / 0,9</color>\n");
+                    sb.Append($"\n<b>Phân tích chuyên sâu: qNMR (chuẩn nội DSS)</b>\n<color={GlassKit.HexDim}>c = (I / số H) / (I_DSS / 9) × c_DSS / 0,9</color>\n");
                     var conc = new Dictionary<string, double>();
                     foreach (var g in byOwner)
                     {
@@ -274,20 +274,20 @@ namespace Khkt.Demo.Instruments
                         double nH = cp?.Signals[best.Index].nH ?? 1;
                         double c = best.H / nH * DssMolL / SampleFrac;
                         conc[g.Key] = c;
-                        sb.Append($"• <color=#61DBFF>{cp?.Name}</color>: {Fmt(c, "0.000")} mol/L ({Fmt(c * MolarMass(g.Key) , c * MolarMass(g.Key) > 100 ? "0" : "0.0")} g/L)\n");
+                        sb.Append($"• <color={GlassKit.HexAccent}>{cp?.Name}</color>: {Fmt(c, "0.000")} mol/L ({Fmt(c * MolarMass(g.Key) , c * MolarMass(g.Key) > 100 ? "0" : "0.0")} g/L)\n");
                     }
                     if (conc.TryGetValue("metanol", out var me) && conc.TryGetValue("etanol", out var et) && et > 0)
                     {
                         double deg = et * 46.07 / 789 * 100;
                         double per = me * 32040 / (deg / 100);
                         sb.Append($"Metanol / etanol = {Fmt(me / et * 100, "0.00")}% mol · độ cồn ≈ {Fmt(deg, "0.0")}% · metanol {Fmt(me * 32040, "0")} mg/L = <b>{Fmt(per, "0")} mg/L cồn 100°</b>");
-                        sb.Append(per > 100 ? " <color=#FF7A7A>(vượt giới hạn 100 mg/L)</color>\n" : "\n");
+                        sb.Append(per > 100 ? $" <color={GlassKit.HexBad}>(vượt giới hạn 100 mg/L)</color>\n" : "\n");
                     }
                 }
             }
-            if (unknown.Count > 0) sb.Append($"\n<color=#FFC966>Chất ngoài thư viện NMR (không bịa tín hiệu):</color> {string.Join(", ", unknown.Distinct())}\n");
+            if (unknown.Count > 0) sb.Append($"\n<color={GlassKit.HexWarn}>Chất ngoài thư viện NMR (không bịa tín hiệu):</color> {string.Join(", ", unknown.Distinct())}\n");
             if (Lib.Compounds.Any(c => c.Estimated) && Signals != null && Signals.Any(s => Lib.ById(s.Owner)?.Estimated == true))
-                sb.Append("<color=#9FB3C8>Một số độ dịch chuyển là giá trị điển hình làm tròn (isoamyl axetat, đường, axit xitric).</color>\n");
+                sb.Append($"<color={GlassKit.HexDim}>Một số độ dịch chuyển là giá trị điển hình làm tròn (isoamyl axetat, đường, axit xitric).</color>\n");
             return sb.ToString();
         }
 
@@ -305,17 +305,18 @@ namespace Khkt.Demo.Instruments
         {
             SchemKit.Begin(p);
             var c = new Vector2(330, 175);
-            SchemKit.Box(p, c.x - 230, c.y - 60, 130, 120, new Color(0.7f, 0.25f, 0.25f));  // cực N
-            SchemKit.Box(p, c.x + 100, c.y - 60, 130, 120, new Color(0.25f, 0.35f, 0.7f));  // cực S
-            for (int i = 0; i < 6; i++) p.Dashed(c.x - 100, c.y - 50 + i * 20, c.x + 100, c.y - 50 + i * 20, new Color(1, 1, 1, 0.15f), 1, 6, 0);
+            SchemKit.Box(p, c.x - 230, c.y - 60, 130, 120, Color.Lerp(SchemKit.Body, InstrumentScreen.TraceCoral, 0.42f));  // cực N
+            SchemKit.Box(p, c.x + 100, c.y - 60, 130, 120, Color.Lerp(SchemKit.Body, SchemKit.Flow, 0.42f));  // cực S
+            for (int i = 0; i < 6; i++) p.Dashed(c.x - 100, c.y - 50 + i * 20, c.x + 100, c.y - 50 + i * 20, InstrumentScreen.TraceDim, 1, 6, 0);
             // ống mẫu + cuộn RF
-            p.FillRect(c.x - 12, c.y - 150, 24, 300, new Color(0.85f, 0.92f, 1f, 0.25f));
+            var glassTint = new Color(SchemKit.GlassEdge.r, SchemKit.GlassEdge.g, SchemKit.GlassEdge.b, 0.22f);
+            p.FillRect(c.x - 12, c.y - 150, 24, 300, glassTint);
             if (Inserted)
             {
-                Color lq = Sample != null ? new Color(Sample.Look.Liquid.r, Sample.Look.Liquid.g, Sample.Look.Liquid.b, 0.6f) : new Color(0.8f, 0.9f, 1f, 0.5f);
+                Color lq = Sample != null ? new Color(Sample.Look.Liquid.r, Sample.Look.Liquid.g, Sample.Look.Liquid.b, 0.6f) : SchemKit.Water;
                 p.FillRect(c.x - 10, c.y - 70, 20, 90, lq);
             }
-            for (int i = 0; i < 6; i++) p.Ring(c.x, c.y - 40 + i * 12, 20, new Color(0.9f, 0.65f, 0.3f), 2);
+            for (int i = 0; i < 6; i++) p.Ring(c.x, c.y - 40 + i * 12, 20, InstrumentScreen.TraceGold, 2);
             // spin tiến động
             if (Inserted)
                 for (int i = 0; i < 5; i++)
@@ -323,27 +324,27 @@ namespace Khkt.Demo.Instruments
                     float a = time * (Acquiring ? 9 : 2) + i * 1.3f;
                     var o = new Vector2(c.x - 50 + i * 25, c.y + 95);
                     float tilt = Acquiring ? 0.9f : 0.25f;
-                    p.Line(o.x, o.y, o.x + Mathf.Cos(a) * 12 * tilt, o.y + 24, new Color(0.6f, 0.9f, 1f), 2);
-                    p.Disc(o.x, o.y, 3, new Color(0.9f, 0.95f, 1f));
+                    p.Line(o.x, o.y, o.x + Mathf.Cos(a) * 12 * tilt, o.y + 24, SchemKit.Flow, 2);
+                    p.Disc(o.x, o.y, 3, SchemKit.Edge);
                 }
             // FID nhỏ ở bên phải
             var f0 = new Vector2(620, 60);
-            SchemKit.Box(p, f0.x, f0.y, 330, 220, new Color(0.06f, 0.08f, 0.1f));
+            SchemKit.Box(p, f0.x, f0.y, 330, 220, SchemKit.BodyAlt);
             if (fidRe != null)
             {
                 int show = Acquiring ? (int)(N * Mathf.Clamp01(acqT / AcqS)) : N;
                 double mx = fidRe.Take(50).Max(Math.Abs);
                 var pts = new List<Vector2>();
                 for (int i = 0; i < show && i < 800; i += 2) pts.Add(new Vector2(f0.x + 5 + i * 320f / 800, f0.y + 110 + (float)(fidRe[i] / mx) * 100));
-                if (pts.Count > 1) p.Poly(pts, new Color(0.45f, 0.95f, 0.62f), 1.5f);
+                if (pts.Count > 1) p.Poly(pts, SchemKit.Good, 1.5f);
             }
             var d = Doc;
-            S.SchemLabel("nam_cham", d.PartName("nam_cham"), c.x, 22, 12);
-            S.SchemLabel("ong", d.PartName("ong_mau"), c.x + 90, c.y + 150, 11);
-            S.SchemLabel("cuon", d.PartName("cuon_rf") + (Acquiring ? "\n<color=#FFD27A>xung 60 MHz</color>" : ""), c.x - 150, c.y + 100, 11);
-            S.SchemLabel("shim", d.PartName("cuon_shim") + (Shimmed ? " · <color=#73F29E>đã shim</color>" : ""), c.x, c.y - 110, 11);
-            S.SchemLabel("fid", "FID (tín hiệu tắt dần)", f0.x + 165, f0.y + 240, 12);
-            S.SchemLabel("trang_thai", !Inserted ? "<color=#8899AA>CHƯA CÓ ỐNG MẪU</color>" : shimT >= 0 ? "<color=#FFC966>ĐANG SHIM</color>" : Acquiring ? "<color=#61DBFF>ĐANG ĐO</color>" : "<color=#73F29E>SẴN SÀNG</color>", 785, 330, 14);
+            S.SchemLabel("nam_cham", d.PartName("nam_cham"), c.x, 22, 14);
+            S.SchemLabel("ong", d.PartName("ong_mau"), c.x + 90, c.y + 150, 14);
+            S.SchemLabel("cuon", d.PartName("cuon_rf") + (Acquiring ? $"\n<color={GlassKit.HexWarn}>xung 60 MHz</color>" : ""), c.x - 150, c.y + 100, 14);
+            S.SchemLabel("shim", d.PartName("cuon_shim") + (Shimmed ? $" · <color={GlassKit.HexGood}>đã shim</color>" : ""), c.x, c.y - 110, 14);
+            S.SchemLabel("fid", "FID (tín hiệu tắt dần)", f0.x + 165, f0.y + 240, 14);
+            S.SchemLabel("trang_thai", !Inserted ? $"<color={GlassKit.Hex(GlassKit.Muted)}>CHƯA CÓ ỐNG MẪU</color>" : shimT >= 0 ? $"<color={GlassKit.HexWarn}>ĐANG SHIM</color>" : Acquiring ? $"<color={GlassKit.HexAccent}>ĐANG ĐO</color>" : $"<color={GlassKit.HexGood}>SẴN SÀNG</color>", 785, 330, 14);
         }
 
         // =====================================================================
@@ -361,7 +362,7 @@ namespace Khkt.Demo.Instruments
                 var pts = new List<Vector2>();
                 int show = Acquiring ? (int)(N * Mathf.Clamp01(acqT / AcqS)) : N;
                 for (int i = 0; i < show; i++) pts.Add(new Vector2(3 + i * (p.W - 6f) / N, p.H / 2f + (float)(fidRe[i] / mx) * (p.H / 2f - 8)));
-                if (pts.Count > 1) p.Poly(pts, new Color(0.45f, 0.95f, 0.62f), 1);
+                if (pts.Count > 1) p.Poly(pts, InstrumentScreen.TraceGreen, 1);
                 return;
             }
             double x0 = 6, x1 = -0.5;  // ppm, giảm dần sang phải
@@ -371,12 +372,12 @@ namespace Khkt.Demo.Instruments
             if (yMin < -yMax) yMin = -yMax;
             S.SetPlotAxes($"Phổ ¹H-NMR 60 MHz · {SampleName}" + (Phased ? "" : " (chưa chỉnh pha)"), "δ (ppm)", "Cường độ", "6", "−0,5", "", "");
             var pts2 = vis.Select(s => InstrumentScreen.Map(p, x0 - s.ppm, Math.Max(yMin, Math.Min(yMax, s.y)), 0, x0 - x1, yMin, yMax)).ToList();
-            p.Poly(pts2, new Color(0.45f, 0.86f, 1f), 1.5f);
+            p.Poly(pts2, InstrumentScreen.TraceCyan, 1.5f);
             if (Signals != null)
                 foreach (var s in Signals.Where(s => s.Owner != "nuoc"))
                 {
                     var q = InstrumentScreen.Map(p, x0 - s.Ppm, yMax * 0.95, 0, x0 - x1, yMin, yMax);
-                    p.FillRect(q.x - 1, q.y - 14, 2, 14, new Color(1f, 0.6f, 0.9f));
+                    p.FillRect(q.x - 1, q.y - 14, 2, 14, InstrumentScreen.TraceMagenta);
                 }
         }
     }
