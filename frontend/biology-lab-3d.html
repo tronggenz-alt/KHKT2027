@@ -3360,18 +3360,113 @@ const dTim = (x, y, z) => V(TIM.x + x, TIM.y + y, TIM.z + z);
 // 7. HỆ HÔ HẤP – PHỔI, KHÍ QUẢN, CÂY PHẾ QUẢN, CƠ HOÀNH
 // =====================================================================================================================
 const phoi = { trai: null, phai: null, coHoanh: null, nhanhPQ: [] };
-const TAM_PHOI = { trai: V(0.19, 2.62, -0.01), phai: V(-0.19, 2.64, -0.01) };
-const BK_PHOI = { trai: V(0.125, 0.27, 0.15), phai: V(0.135, 0.265, 0.155) };
+const TAM_PHOI = { trai: V(0.162, 2.49, 0.018), phai: V(-0.162, 2.50, 0.018) };
+const BK_PHOI = { trai: V(0.128, 0.245, 0.150), phai: V(0.134, 0.245, 0.155) };
 (function dungPhoi() {
   const hinhPhoi = (ben) => (v) => {
-    if (v.y > 0) { const s = 1 - 0.45 * v.y * v.y; v.x *= s; v.z *= s; }       // đỉnh phổi nhọn
-    if (v.y < -0.55) v.y = -0.55 - (v.y + 0.55) * 0.35 + 0.12 * (v.x * v.x + v.z * v.z); // đáy lõm theo vòm cơ hoành
-    if (v.x * ben < 0) v.x *= 0.55;                                               // mặt trung thất phẳng
-    if (ben > 0 && v.x < -0.15 && v.y < 0.1 && v.y > -0.6 && v.z > 0) v.x += 0.35 * (v.z) * (1 - Math.abs(v.y + 0.25) * 2); // khuyết tim
+    if (v.y > 0) { const s = 1 - 0.52 * v.y * v.y; v.x *= s; v.z *= s; }       // đỉnh phổi thon gọn nằm dưới xương sườn 1 & xương đòn
+    if (v.y < -0.55) v.y = -0.55 - (v.y + 0.55) * 0.35 + 0.14 * (v.x * v.x + v.z * v.z); // đáy lõm theo vòm cơ hoành
+    if (v.x * ben < 0) v.x *= 0.62;                                               // mặt trung thất phẳng
+    if (ben > 0 && v.x < -0.12 && v.y < 0.15 && v.y > -0.65 && v.z > -0.1) v.x += 0.36 * Math.max(0, v.z + 0.1) * Math.max(0, 1 - Math.abs(v.y + 0.22) * 1.9); // khuyết tim
+  };
+  // Trục cong giải phẫu của lồng ngực (nghiêng ra trước khi xuống đáy, thu vào trong khi lên đỉnh)
+  const trucPhoi = (tam, bk, dau, wy) => {
+    const uy = Math.max(-1, Math.min(1, (wy - tam.y) / bk.y));
+    return [tam.x - dau * 0.032 * Math.max(0, uy), tam.z - 0.060 * uy];
+  };
+  // Ôm vừa khít mặt trong lồng ngực BodyParts3D thật: không để xương sườn, sụn sườn, xương ức–đòn, cột sống hay xương vai đâm xuyên phổi
+  const nhomLongNguc = BP3D ? BP3D.nhom.filter((g) => ["xuong_suon", "sun_suon", "xuong_uc_don", "cot_song", "xuong_vai"].includes(g.bp)) : [];
+  const omLongNguc = (geo, dau, tam, bk) => {
+    const pos = geo.attributes.position;
+    // Dịch hình học theo độ nghiêng thật của lồng ngực
+    for (let i = 0; i < pos.count; i++) {
+      const lx = pos.getX(i), ly = pos.getY(i), lz = pos.getZ(i);
+      const [cx, cz] = trucPhoi(tam, bk, dau, tam.y + ly);
+      pos.setXYZ(i, lx + (cx - tam.x), ly, lz + (cz - tam.z));
+    }
+    if (nhomLongNguc.length) {
+      const NY = 32, NT = 48, INF = 9.9, leAnToan = 0.024;
+      const yMin = tam.y - bk.y - 0.05, yMax = tam.y + bk.y + 0.05;
+      const rawMin = Array.from({ length: NY }, () => new Float32Array(NT).fill(INF));
+      for (const g of nhomLongNguc) {
+        const arr = g.geo?.attributes?.position?.array;
+        if (!arr) continue;
+        for (let i = 0; i < arr.length; i += 3) {
+          const bx = arr[i], byW = arr[i + 1], bz = arr[i + 2];
+          if (byW < yMin || byW > yMax || bx * dau < -0.02) continue;
+          const by = Math.max(0, Math.min(NY - 1, Math.floor(((byW - yMin) / (yMax - yMin)) * (NY - 1))));
+          const [cx, cz] = trucPhoi(tam, bk, dau, byW);
+          const dx = bx - cx, dz = bz - cz, r = Math.hypot(dx, dz);
+          if (r < 1e-4) continue;
+          const bt = ((Math.floor(((Math.atan2(dz, dx) + Math.PI) / (Math.PI * 2)) * NT) % NT) + NT) % NT;
+          for (let dy = -1; dy <= 1; dy++) {
+            const yy = by + dy;
+            if (yy < 0 || yy >= NY) continue;
+            for (let dt = -1; dt <= 1; dt++) {
+              const tt = (bt + dt + NT) % NT;
+              if (r < rawMin[yy][tt]) rawMin[yy][tt] = r;
+            }
+          }
+        }
+      }
+      let env = rawMin.map((row) => Float32Array.from(row));
+      for (let pass = 0; pass < 8; pass++) {
+        const nxt = env.map((row) => Float32Array.from(row));
+        for (let y = 0; y < NY; y++) for (let t = 0; t < NT; t++) {
+          if (env[y][t] < INF) continue;
+          let m = INF;
+          if (y > 0 && env[y - 1][t] < m) m = env[y - 1][t];
+          if (y + 1 < NY && env[y + 1][t] < m) m = env[y + 1][t];
+          const tp = env[y][(t - 1 + NT) % NT], tn = env[y][(t + 1) % NT];
+          if (tp < m) m = tp;
+          if (tn < m) m = tn;
+          if (m < INF) nxt[y][t] = m;
+        }
+        env = nxt;
+      }
+      for (let pass = 0; pass < 3; pass++) {
+        const sm = env.map((row) => Float32Array.from(row));
+        for (let y = 0; y < NY; y++) for (let t = 0; t < NT; t++) {
+          let sum = 0, cnt = 0;
+          for (let dy = -1; dy <= 1; dy++) {
+            const yy = Math.max(0, Math.min(NY - 1, y + dy));
+            for (let dt = -1; dt <= 1; dt++) {
+              const val = env[yy][(t + dt + NT) % NT];
+              if (val < INF) { sum += val; cnt++; }
+            }
+          }
+          if (cnt) {
+            const avg = sum / cnt;
+            sm[y][t] = rawMin[y][t] < INF ? Math.min(rawMin[y][t], avg) : avg;
+          }
+        }
+        env = sm;
+      }
+      for (let i = 0; i < pos.count; i++) {
+        const wx = tam.x + pos.getX(i), wy = tam.y + pos.getY(i), wz = tam.z + pos.getZ(i);
+        const [cx, cz] = trucPhoi(tam, bk, dau, wy);
+        const dx = wx - cx, dz = wz - cz, r = Math.hypot(dx, dz);
+        if (r < 1e-4) continue;
+        const fy = Math.max(0, Math.min(NY - 1.0001, ((wy - yMin) / (yMax - yMin)) * (NY - 1)));
+        const y0 = Math.floor(fy), y1 = Math.min(NY - 1, y0 + 1), ty = fy - y0;
+        const ft = ((((Math.atan2(dz, dx) + Math.PI) / (Math.PI * 2)) * NT) % NT + NT) % NT;
+        const t0 = Math.floor(ft) % NT, t1 = (t0 + 1) % NT, tt = ft - Math.floor(ft);
+        const rEnv = (env[y0][t0] * (1 - tt) + env[y0][t1] * tt) * (1 - ty) + (env[y1][t0] * (1 - tt) + env[y1][t1] * tt) * ty;
+        const lim = rEnv - leAnToan;
+        if (r > lim && lim > 0.015) {
+          const sc = lim / r;
+          pos.setXYZ(i, (cx + dx * sc) - tam.x, pos.getY(i), (cz + dz * sc) - tam.z);
+        }
+      }
+    }
+    pos.needsUpdate = true;
+    geo.computeVertexNormals();
   };
   for (const ben of ["trai", "phai"]) {
     const dau = ben === "trai" ? 1 : -1;
-    const m = new THREE.Mesh(cauBienDoi(BK_PHOI[ben], hinhPhoi(dau), [64, 48]),
+    const geoPhoi = cauBienDoi(BK_PHOI[ben], hinhPhoi(dau), [64, 48]);
+    omLongNguc(geoPhoi, dau, TAM_PHOI[ben], BK_PHOI[ben]);
+    const m = new THREE.Mesh(geoPhoi,
       vatLieu(ben === "trai" ? "phoi_trai" : "phoi_phai", 0xf6a5b4, { truyen: 0.35, doMo: 0.72, nham: 0.55, bong: 0.3 }));
     m.position.copy(TAM_PHOI[ben]);
     m.renderOrder = 6;
@@ -3380,12 +3475,12 @@ const BK_PHOI = { trai: V(0.125, 0.27, 0.15), phai: V(0.135, 0.265, 0.155) };
     themVao("ho_hap", m);
   }
   // khí quản + vòng sụn
-  const kq = ong([V(0, 3.04, 0.03), V(0, 2.9, 0.015), V(0, 2.77, 0.0)], 0.022, "khi_quan", 0xe2e8f0, { bong: 0.2 });
+  const kq = ong([V(0, 3.04, 0.03), V(0, 2.89, 0.01), V(0, 2.74, -0.015)], 0.022, "khi_quan", 0xe2e8f0, { bong: 0.2 });
   themVao("ho_hap", kq);
   const matSun = vatLieu("khi_quan", 0xe2e8f0);
   for (let i = 0; i < 9; i++) {
     const vong = new THREE.Mesh(new THREE.TorusGeometry(0.024, 0.004, 6, 24, Math.PI * 1.6), matSun);
-    vong.position.set(0, 3.0 - i * 0.026, 0.028 - i * 0.003);
+    vong.position.set(0, 3.0 - i * 0.028, 0.026 - i * 0.0045);
     vong.rotation.set(Math.PI / 2, 0, Math.PI * 0.7);
     dangKy(vong, "khi_quan");
     themVao("ho_hap", vong);
@@ -3401,18 +3496,18 @@ const BK_PHOI = { trai: V(0.125, 0.27, 0.15), phai: V(0.135, 0.265, 0.155) };
     themVao("ho_hap", m);
     if (cap >= 4) return;
     for (let k = 0; k < 2; k++) {
-      const h = huong.clone().add(V((r() - 0.5) * 0.9 + (k ? 0.35 : -0.35) * Math.sign(huong.x || 1), (r() - 0.62) * 0.9, (r() - 0.5) * 0.8)).normalize();
-      nhanh(den, h, dai * 0.72, banKinh * 0.7, cap + 1, ben);
+      const h = huong.clone().add(V((r() - 0.5) * 0.8 + (k ? 0.30 : -0.30) * Math.sign(huong.x || 1), (r() - 0.68) * 0.85, (r() - 0.5) * 0.65)).normalize();
+      nhanh(den, h, dai * 0.68, banKinh * 0.7, cap + 1, ben);
     }
   };
-  const carina = V(0, 2.77, 0.0);
-  nhanh(carina, V(0.75, -0.55, -0.1).normalize(), 0.11, 0.012, 1, "trai");
-  nhanh(carina, V(-0.8, -0.5, -0.1).normalize(), 0.1, 0.013, 1, "phai");
-  // cơ hoành (vòm)
+  const carina = V(0, 2.74, -0.015);
+  nhanh(carina, V(0.70, -0.62, 0.04).normalize(), 0.095, 0.012, 1, "trai");
+  nhanh(carina, V(-0.74, -0.58, 0.04).normalize(), 0.092, 0.013, 1, "phai");
+  // cơ hoành (vòm ôm vừa trong lồng ngực dưới đáy phổi)
   const coHoanh = new THREE.Mesh(new THREE.SphereGeometry(0.42, 48, 16, 0, Math.PI * 2, 0, Math.PI * 0.3),
     vatLieu("co_hoanh", 0xb45c4c, { doMo: 0.55, haiMat: true, nham: 0.6 }));
-  coHoanh.scale.set(0.82, 0.55, 0.52);
-  coHoanh.position.set(0, 2.12, -0.02);
+  coHoanh.scale.set(0.74, 0.54, 0.46);
+  coHoanh.position.set(0, 2.13, 0.035);
   coHoanh.userData.yGoc = coHoanh.position.y;
   dangKy(coHoanh, "co_hoanh");
   phoi.coHoanh = coHoanh;
@@ -3427,10 +3522,10 @@ const BK_PHOI = { trai: V(0.125, 0.27, 0.15), phai: V(0.135, 0.265, 0.155) };
 
   neoBP.thanh_quan = V(0, 3.12, 0.08);
   neoBP.khi_quan = V(0, 2.95, 0.03);
-  neoBP.phe_quan = V(0.08, 2.72, 0.0);
-  neoBP.phoi_trai = V(0.24, 2.7, 0.08);
-  neoBP.phoi_phai = V(-0.25, 2.72, 0.08);
-  neoBP.co_hoanh = V(-0.15, 2.33, 0.12);
+  neoBP.phe_quan = V(0.07, 2.66, 0.0);
+  neoBP.phoi_trai = V(0.17, 2.54, 0.08);
+  neoBP.phoi_phai = V(-0.17, 2.55, 0.08);
+  neoBP.co_hoanh = V(-0.14, 2.32, 0.12);
 })();
 
 // =====================================================================================================================
@@ -3683,10 +3778,10 @@ const tieuHoa = { daDay: null, hamDaDay: null, duongDaDay: null };
   }
   const matSuon = vatLieu("xuong_suon", 0xe5e7eb, { doMo: 0.22, nham: 0.7 });
   for (let i = 0; i < 10; i++) {
-    const y = 2.88 - i * 0.065;
-    const w = 0.2 + 0.13 * Math.sin(Math.min(1, (i + 2) / 7) * Math.PI / 2);
+    const y = 2.86 - i * 0.062;
+    const w = 0.22 + 0.12 * Math.sin(Math.min(1, (i + 2) / 7) * Math.PI / 2);
     for (const s of [1, -1]) {
-      const g = ong([V(0.02 * s, y, -0.17), V(w * 0.8 * s, y - 0.02, -0.15), V(w * s, y - 0.06, 0.0), V(w * 0.7 * s, y - 0.12, 0.17), V(0.03 * s, y - 0.16, 0.2)],
+      const g = ong([V(0.02 * s, y, -0.17), V(w * 0.82 * s, y - 0.02, -0.14), V(w * s, y - 0.06, 0.02), V(w * 0.74 * s, y - 0.11, 0.19), V(0.03 * s, y - 0.15, 0.22)],
         0.007, "xuong_suon", 0xe5e7eb, { doan: 32, vong: 6, chon: false });
       g.material = matSuon;
       themVao("xuong", g);
@@ -4227,7 +4322,7 @@ const dongKhi = { o2: null, co2: null };
       const s = ben === "trai" ? 1 : -1;
       const tam = TAM_PHOI[ben], bk = BK_PHOI[ben];
       const cuoi = tam.clone().add(V((r() * 0.6 + 0.1) * bk.x * s, (r() * 1.2 - 0.6) * bk.y, (r() - 0.5) * 1.2 * bk.z));
-      cacDuong.push([P(0, 3.06, 0.03), P(0, 2.9, 0.015), P(0, 2.77, 0.0), P(0.11 * s, 2.69, -0.01), cuoi]);
+      cacDuong.push([P(0, 3.06, 0.03), P(0, 2.89, 0.01), P(0, 2.74, -0.015), P(0.10 * s, 2.62, 0.0), cuoi]);
     }
     return new DongHat(cacDuong, soLuong, mau, kt, 0);
   };
