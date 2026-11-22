@@ -185,6 +185,9 @@ namespace Khkt.Input
         public void CenterJoysticks() => Send("J\n");
         public void RequestInfo() => Send("I\n");
 
+        /// <summary>Gửi một lệnh chữ tới firmware qua cổng lệnh UDP. Tự thêm xuống dòng.</summary>
+        public void SendCommand(string cmd) => Send(cmd.EndsWith("\n") ? cmd : cmd + "\n");
+
         void Send(string cmd)
         {
             var c = client;
@@ -220,6 +223,8 @@ namespace Khkt.Input
         void ReceiveLoop()
         {
             var packets = new List<RawPacket>();
+            var vera = new List<VeraSample>();
+            double lastVeraS = -10;
             uint lastT = 0;
             bool haveT = false, warned = false;
             while (running)
@@ -279,7 +284,16 @@ namespace Khkt.Input
                 }
 
                 packets.Clear();
-                parser.Feed(data, data.Length, packets);
+                vera.Clear();
+                parser.Feed(data, data.Length, packets, vera);
+                // Tay cầm VERA: hướng đã tính trên mạch (chống trôi yaw, bù nhiệt), không chạy Mahony trên máy tính
+                foreach (var v in vera)
+                {
+                    lastVeraS = now;
+                    samples.Enqueue(ControllerPackets.FromVera(v));
+                }
+                // Firmware VERA gửi kèm gói cũ 29 byte cho game bản trước: đã có gói v3 thì bỏ gói cũ, tránh nhận đôi
+                if (now - lastVeraS < 1.0) continue;
                 foreach (var p in packets)
                 {
                     var s = ControllerPackets.ToState(p, joystickDeadzone, invertJoy1Y, invertJoy2Y);

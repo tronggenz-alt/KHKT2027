@@ -208,6 +208,13 @@ namespace Khkt.Demo
                     : $"<color={HexGood}><b>{who}:</b></color> {text}");
             }
             log.text = sb.ToString();
+            // Chữ tràn thì Unity cắt các dòng cuối (tin mới nhất): bỏ bớt tin cũ ở trên cho tới khi vừa khung
+            float h = log.rectTransform.rect.height;
+            if (entries.Count > 1 && h > 0 && log.preferredHeight > h)
+            {
+                entries.RemoveAt(0);
+                RebuildLog();
+            }
         }
 
         /// <summary>Mở khung trợ lý AI từ bất kỳ bảng dụng cụ/máy nào và gửi ngay câu hỏi theo ngữ cảnh.</summary>
@@ -288,7 +295,8 @@ namespace Khkt.Demo
             nextStatus = Time.unscaledTime + 0.25f;
             var ai = AiClient.Instance;
             var robot = LabRobot.Instance;
-            status.text = (ai != null && ai.Online ? $"<color={HexGood}>●</color> AI đám mây: {ai.Provider} {ai.Model}" : $"<color={HexWarn}>●</color> Ngoại tuyến: hiểu lệnh cơ bản (chạy server/ai để có AI)")
+            status.text = (ai != null && ai.Direct && ai.LastDirectError.Length > 0 ? "<color=#FF8A7A>●</color> Khóa AI riêng lỗi: hiểu lệnh cơ bản (xem trang Trợ lý AI ở sảnh)"
+                           : ai != null && ai.Online ? $"<color={HexGood}>●</color> AI đám mây: {ai.Provider} {ai.Model}" : $"<color={HexWarn}>●</color> Ngoại tuyến: hiểu lệnh cơ bản (chạy server/ai để có AI)")
                           + (robot != null ? "  ·  " + robot.StatusText : "") + (waiting ? "  ·  đang nghĩ..." : "");
         }
 
@@ -313,6 +321,8 @@ namespace Khkt.Demo
                 }, err =>
                 {
                     waiting = false;
+                    // Khóa riêng lỗi: nói rõ thay vì lặng lẽ chuyển sang máy chủ (che mất khóa sai / hết hạn mức)
+                    if (ai.Direct) Add("Robot", $"Không gọi được AI bằng khóa riêng: {err}. Mình làm theo lệnh cơ bản.");
                     Local(text);
                 });
             }

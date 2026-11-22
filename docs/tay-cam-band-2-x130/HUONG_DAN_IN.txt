@@ -1,0 +1,52 @@
+VERA BAND 2 - BẢN PHÓNG TO 130% (21/11/2026) - THÔNG SỐ IN 3D
+Vỏ tay cầm đeo trên bàn tay, to hơn bản Band 2 cũ 30% để đủ chỗ cho ESP32 cắm dây đực-cái, BMI160 và dây I2C,
+joystick KY-023, pin và mạch hạ áp. 5 tệp STL, đơn vị mm, in đúng tỉ lệ 100% (KHÔNG phóng thêm trong phần mềm cắt lớp).
+Nhựa PLA. Tổng khoảng 124 g. Vỏ rỗng bên trong để đặt mạch, xin đừng in đặc.
+
+TỆP                 MÀU NHỰA                KÍCH THƯỚC (mm)        NHỰA     GỒM
+than.stl            Trắng                   211,7 x 163,2 x 43,7   87 g     2 nửa thân (trái, phải)
+day_tren.stl        Đen                     90,8 x 62,6 x 19,2     18 g     1 mặt tối (nắp trên, giữ joystick)
+day_duoi.stl        Đen                     45,2 x 29,4 x 3,2      3 g      1 nắp khoang pin
+chi_tiet_xanh.stl   Xanh ngọc huỳnh quang   83,4 x 39,0 x 52,0     8 g      1 tấm mu tay có logo + 1 chén lục giác
+chi_tiet_bac.stl    Bạc hoặc xám            94,6 x 33,4 x 20,3     9 g      1 cò + 4 nắp nút
+
+Mỗi tệp in 1 lần là đủ số lượng. Kích thước ghi ở trên là của cả tệp, gồm mọi chi tiết đã xếp cạnh nhau.
+Bàn in cần ít nhất 220 x 220 mm cho than.stl. Bàn nhỏ hơn: trong phần mềm cắt lớp chọn "Tách thành các vật"
+(Split to objects) rồi in 2 nửa thân ở 2 lần.
+
+CÁCH ĐẶT KHI IN (như bản cũ)
+- Hai nửa thân: mặt ghép úp xuống bàn in, có đỡ (support) bên trong.
+- Mặt tối: mặt đỉnh úp xuống bàn.
+- Nắp khoang pin: nằm phẳng, gai khóa hướng lên.
+- Tấm mu tay: dựng đứng trên cạnh dưới, nên thêm brim.
+- Chén lục giác: mặt lớn úp xuống bàn.
+- Cò: nằm nghiêng, mặt bên úp xuống bàn, có đỡ dưới tay cò.
+- Nắp nút: mặt có gờ úp xuống bàn.
+
+CHỖ GIỮ ĐÚNG CỠ THẬT (không phóng)
+- Lỗ vít M2: lỗ mồi, lỗ xuyên, hốc đầu vít đúng cỡ M2 như bản cũ.
+- Ô giữ nút bấm 6 x 6 dưới 4 cổng mở rộng.
+- 4 trụ đỡ mạch joystick KY-023 và độ sâu mạch dưới mặt tối: giống hệt bản cũ, nên cần joystick nhô lên khỏi mặt đúng như trước.
+- Chén lục giác quanh cần (sửa 22/11/2026, vì cần và nắp joystick lọt chật): miệng chén rộng 39 (bản cũ 34),
+  lỗ đáy cho cần lọt qua rộng 25,1 giữa 2 cạnh song song (bản cũ 21,7). Lỗ trên mặt tối nới theo.
+- Trụ và vấu đỡ ESP32: bám đuôi mạch (cổng micro-USB quay ra lưng), khoảng cách đúng mm thật.
+
+VẬT TƯ KHÁC VỚI BẢN CŨ (vì vỏ dày và to hơn)
+- Vít ghép 2 nửa thân: M2 x 12 tự ren, 7 con (bản cũ M2 x 10).
+- Vít giữ mặt tối: M2 x 8 hoặc M2 x 10, 2 con.
+- Quai: băng gai dính 25 mm (khuyên và khe rộng 28 mm, quai 20 mm vẫn dùng được nhưng hơi lỏng).
+- Pin 9V: khoang rộng hơn, lót xốp 4-5 mm quanh pin cho khỏi lắc.
+- Cò (nếu sau này lắp cảm biến Hall): trục cò dùng chốt Ø3 mm (lỗ 2,9 mm), nam châm Ø8 x 4 mm, lò xo Ø5-5,5 mm.
+  Khi bóp hết, nam châm cách Hall khoảng 5,4 mm (bản cũ 3,5 mm): chỉnh lại ngưỡng Hall trong firmware.
+- Nắp nút phụ Ø8,6 mm vừa lỗ Ø9,1 mm; nút bấm bên dưới vẫn loại 6 x 6 mm.
+
+KIỂM TRA ĐÃ CHẠY
+- tools/tay_cam_band2/kiem_va_cham.py (VERA_TI_LE=1.3): không có va chạm ngoài ý muốn; khe quai thông;
+  cò xoay 13° rồi chạm vấu; ESP32 cách cò 6,2 mm.
+- Mọi chi tiết là khối kín (không lỗi lưới).
+- Ảnh so sánh cỡ với bản cũ: so_sanh_co.png (cùng thư mục).
+
+TẠO LẠI
+  set VERA_TI_LE=1.3
+  python tools/tay_cam_band2/mo_hinh_band2.py
+Bản vẽ kích thước PDF của bản 130% chưa có (ban_kich_thuoc.py còn đọc thông số gốc).

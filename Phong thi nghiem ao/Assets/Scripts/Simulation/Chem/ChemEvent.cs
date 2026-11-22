@@ -1,6 +1,6 @@
 namespace Khkt.Simulation.Chem
 {
-    public enum EventKind { Precipitate, Dissolve, Gas, Color, Heat, Layer, Reaction, Hazard }
+    public enum EventKind { Precipitate, Dissolve, Gas, Color, Heat, Layer, Reaction, Hazard, NoReaction }
 
     public enum Severity { Info, Notice, Warning, Danger }
 

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -20,6 +20,7 @@ namespace Khkt.Input
             public int[] w;
             public int x, y, p;
             public string g;
+            public int[] lm;
         }
 
         [Serializable]
@@ -49,6 +50,10 @@ namespace Khkt.Input
             public Vector2 wristImage;
             public bool pinch;
             public string gesture = "";
+            /// <summary>21 điểm trên ảnh đã lật như gương (0..1, y hướng xuống), nội suy như hand. hasImage: gói có điểm ảnh.</summary>
+            public readonly Vector2[] image = new Vector2[21];
+            public bool hasImage;
+            internal readonly Vector2[] imgA = new Vector2[21], imgB = new Vector2[21];
 
             // hai mẫu gần nhất để nội suy
             internal readonly Vector3[] handA = new Vector3[21], handB = new Vector3[21];
@@ -62,6 +67,9 @@ namespace Khkt.Input
         public readonly Side Right = new Side(), Left = new Side();
         public bool Active => Right.handSeen || Left.handSeen || Right.armSeen || Left.armSeen;
         public int Packets { get; private set; }
+        /// <summary>Lúc nhận gói mạng gần nhất (realtimeSinceStartup); tracker Python gửi cả khi không thấy tay.</summary>
+        public float LastPacketTime { get; private set; } = -100f;
+        public bool Streaming => Time.realtimeSinceStartup - LastPacketTime < 2f;
 
         UdpClient socket;
         float interval = 1f / 30f;
@@ -124,11 +132,37 @@ namespace Khkt.Input
             s.wristImage = wristImage;
             s.pinch = pinch;
             s.gesture = "";
+            s.hasImage = false;
             Stamp(s, now);
         }
 
         /// <summary>Cho bài thử: đưa gói JSON vào như vừa nhận qua mạng.</summary>
         public void Inject(string json) => Apply(JsonUtility.FromJson<Packet>(json), Time.realtimeSinceStartup);
+
+        /// <summary>
+        /// Bàn tay đầy đủ từ nguồn chạy trong Unity (MediaPipe C#): điểm 3D theo trục camera (m), cổ tay trên ảnh chưa lật,
+        /// nhãn thao tác và 21 điểm ảnh đã lật như gương (giống gói của tay_tracker.py).
+        /// </summary>
+        public void FeedFull(string ben, Vector3[] cameraSpace, Vector2 wristImage, bool pinch, string gesture, Vector2[] mirroredImage)
+        {
+            float now = Time.realtimeSinceStartup;
+            var s = ben == "trai" ? Left : Right;
+            bool stale = now - s.lastHand > StaleSec;
+            Array.Copy(s.handB, s.handA, 21);
+            Array.Copy(cameraSpace, s.handB, 21);
+            if (stale) Array.Copy(s.handB, s.handA, 21);
+            Array.Copy(s.imgB, s.imgA, 21);
+            Array.Copy(mirroredImage, s.imgB, 21);
+            if (stale) Array.Copy(s.imgB, s.imgA, 21);
+            s.lastHand = now;
+            s.wristImage = wristImage;
+            s.pinch = pinch;
+            s.gesture = gesture ?? "";
+            s.hasImage = true;
+            Packets++;
+            LastPacketTime = now;
+            Stamp(s, now);
+        }
 
         // MediaPipe: x sang phải ảnh, y xuống, z ra xa camera, webcam không lật. Người dùng nhìn vào camera nên
         // phải của họ là -x, lên là -y, phía trước (về phía màn hình) là -z: đổi dấu cả ba trục.
@@ -136,7 +170,9 @@ namespace Khkt.Input
 
         void Apply(Packet p, float now)
         {
+            if (p == null) return;
             Packets++;
+            LastPacketTime = now;
             if (p.tay != null)
                 foreach (var h in p.tay)
                 {
@@ -149,6 +185,13 @@ namespace Khkt.Input
                     s.wristImage = new Vector2(h.x * 0.001f, h.y * 0.001f);
                     s.pinch = h.p != 0;
                     s.gesture = h.g ?? "";
+                    s.hasImage = h.lm != null && h.lm.Length >= 63;
+                    if (s.hasImage)
+                    {
+                        Array.Copy(s.imgB, s.imgA, 21);
+                        for (int i = 0; i < 21; i++) s.imgB[i] = new Vector2(h.lm[i * 3], h.lm[i * 3 + 1]) * 0.001f;
+                        if (now - s.timeB > StaleSec) Array.Copy(s.imgB, s.imgA, 21);
+                    }
                     Stamp(s, now);
                 }
             if (p.canh != null)
@@ -183,6 +226,7 @@ namespace Khkt.Input
             float span = Mathf.Max(1e-3f, s.timeB - s.timeA);
             float k = Mathf.Clamp01((now - interval - s.timeA) / span);
             for (int i = 0; i < 21; i++) s.hand[i] = Vector3.Lerp(s.handA[i], s.handB[i], k);
+            for (int i = 0; i < 21; i++) s.image[i] = Vector2.Lerp(s.imgA[i], s.imgB[i], k);
             s.shoulder = Vector3.Lerp(s.shA, s.shB, k);
             s.elbow = Vector3.Lerp(s.elA, s.elB, k);
             s.wrist = Vector3.Lerp(s.wrA, s.wrB, k);

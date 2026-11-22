@@ -1,0 +1,153 @@
+﻿t (s),sự kiện,chi tiết
+0.5,bat_dau_bai,Trỏ và chọn
+5.767,A_bam,
+5.867,A_nha,
+5.867,A_nhap,
+6.833,A_bam,
+6.933,A_nha,
+6.933,A_nhap,
+7.9,A_bam,
+8.0,A_nha,
+8.0,A_nhap,
+8.967,A_bam,
+9.067,A_nha,
+9.067,A_nhap,
+10.033,A_bam,
+10.133,A_nha,
+10.133,A_nhap,
+11.1,A_bam,
+11.2,A_nha,
+11.2,A_nhap,
+12.167,A_bam,
+12.267,A_nha,
+12.267,A_nhap,
+13.233,A_bam,
+13.333,A_nha,
+13.333,A_nhap,
+16.333,bat_dau_bai,Cầm và đặt
+17.2,B_bam,
+17.2,cam,Ống 1
+17.717,B_giu,
+18.35,can_nhan,
+18.35,doi_che_do,TAY
+20.917,can_nhan,
+20.917,doi_che_do,DI
+21.083,B_nha,
+21.083,tha,Ống 1
+22.233,B_bam,
+22.233,cam,Ống 2
+22.75,B_giu,
+23.383,can_nhan,
+23.383,doi_che_do,TAY
+25.95,can_nhan,
+25.95,doi_che_do,DI
+26.117,B_nha,
+26.117,tha,Ống 2
+27.267,B_bam,
+27.267,cam,Ống 3
+27.783,B_giu,
+28.417,can_nhan,
+28.417,doi_che_do,TAY
+30.983,can_nhan,
+30.983,doi_che_do,DI
+31.15,B_nha,
+31.15,tha,Ống 3
+34.167,bat_dau_bai,Rót đúng 50 mL
+35.033,B_bam,
+35.033,cam,Cốc 250 mL
+35.55,B_giu,
+36.183,can_nhan,
+36.183,doi_che_do,TAY
+43.267,A_bam,
+43.783,A_giu,
+44.283,can_lai,
+44.283,can_lai,None
+47.8,A_nha,
+51.6,can_nhan,
+51.6,doi_che_do,DI
+51.767,B_nha,
+51.767,tha,Cốc 250 mL
+54.783,bat_dau_bai,Lắc và khuấy
+55.65,B_bam,
+55.65,cam,Ống nghiệm
+56.167,B_giu,
+58.617,tan,Ống nghiệm
+60.25,can_nhan,
+60.25,doi_che_do,TAY
+60.817,can_nhan,
+60.817,doi_che_do,DI
+60.983,B_nha,
+60.983,tha,Ống nghiệm
+62.133,B_bam,
+62.133,cam,Đũa thuỷ tinh
+62.65,B_giu,
+63.283,can_nhan,
+63.283,doi_che_do,TAY
+65.85,can_nhan,
+65.85,doi_che_do,DI
+67.417,khuay_vong,
+67.417,khuay_vong,Cốc 100 mL
+68.45,khuay_vong,
+68.45,khuay_vong,Cốc 100 mL
+69.45,khuay_vong,
+69.45,khuay_vong,Cốc 100 mL
+69.45,tan,Cốc 100 mL
+69.467,B_nha,
+72.467,bat_dau_bai,Vặn mở nắp
+73.333,B_bam,
+73.333,bat_dau_van,Bình nón
+73.85,B_giu,
+73.9,B_nha,
+74.7,B_bam,
+74.7,bat_dau_van,Bình nón
+75.217,B_giu,
+75.267,B_nha,
+76.067,B_bam,
+76.067,bat_dau_van,Bình nón
+76.583,B_giu,
+76.633,B_nha,
+77.433,B_bam,
+77.433,bat_dau_van,Bình nón
+77.95,B_giu,
+78.0,B_nha,
+78.8,B_bam,
+78.8,bat_dau_van,Bình nón
+79.317,B_giu,
+79.367,B_nha,
+80.167,B_bam,
+80.167,bat_dau_van,Bình nón
+80.533,mo_nap,Bình nón
+80.55,B_nha,
+83.55,bat_dau_bai,Đi lại
+92.3,bat_dau_bai,"Menu tròn, hỏi AI, vuốt"
+92.317,A_bam,
+92.833,A_giu,
+92.833,menu_mo,None
+93.267,A_nha,
+93.267,menu_chon,"NaOH 0,1 M"
+93.717,A_bam,
+94.233,A_giu,
+94.233,menu_mo,None
+94.667,A_nha,
+94.667,menu_chon,"CuSO₄ 0,5 M"
+95.117,A_bam,
+95.633,A_giu,
+95.633,menu_mo,None
+96.067,A_nha,
+96.067,menu_chon,"AgNO₃ 0,1 M"
+96.517,A_bam,
+96.617,A_nha,
+96.617,A_nhap,
+96.683,A_bam,
+96.783,A_nha,
+96.783,A_nhap,
+96.783,A_nhap_dup,
+96.783,hoi_ai,None
+97.75,A_bam,
+97.9,A_nha,
+97.9,A_nhap,
+98.0,B_bam,
+98.0,vuot_AB,
+98.0,vuot,tiep
+98.017,B_nha,
+98.017,B_nhap,

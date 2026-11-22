@@ -68,6 +68,13 @@ CREATE TABLE IF NOT EXISTS buoi_hoc (
 CREATE TABLE IF NOT EXISTS nhip (
     nguoi_dung_id INTEGER PRIMARY KEY, du_lieu TEXT NOT NULL, luc REAL NOT NULL
 );
+-- Phòng học trực tuyến trên trình duyệt: trạng thái realtime nằm trong Durable Object (cloudflare/phong), ở đây chỉ thông tin phòng và tổng kết
+CREATE TABLE IF NOT EXISTS phong_truc_tuyen (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, ma TEXT NOT NULL UNIQUE, ten TEXT NOT NULL, giao_vien_id INTEGER NOT NULL, lop_id INTEGER,
+    cho_khach INTEGER NOT NULL DEFAULT 0, khoa_vao INTEGER NOT NULL DEFAULT 0, mo INTEGER NOT NULL DEFAULT 1,
+    tao_luc REAL NOT NULL, dong_luc REAL, tong_ket TEXT DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS phong_theo_giao_vien ON phong_truc_tuyen (giao_vien_id, mo);
 CREATE TABLE IF NOT EXISTS trang_thai_may (
     ma TEXT PRIMARY KEY, du_lieu TEXT NOT NULL
 );

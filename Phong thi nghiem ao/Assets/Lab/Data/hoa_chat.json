@@ -6378,6 +6378,10 @@
     {
      "s": "Cl-",
      "n": 2
+    },
+    {
+     "s": "Cl-",
+     "n": 0.5
     }
    ],
    "tp_theo_lit": false,
@@ -6457,6 +6461,10 @@
     {
      "s": "Cl-",
      "n": 2
+    },
+    {
+     "s": "Cl-",
+     "n": 2.0
     }
    ],
    "tp_theo_lit": false,
@@ -9063,6 +9071,10 @@
     {
      "s": "NO3-",
      "n": 2
+    },
+    {
+     "s": "NO3-",
+     "n": 0.5
     }
    ],
    "tp_theo_lit": false,
@@ -9106,6 +9118,10 @@
     {
      "s": "NO3-",
      "n": 2
+    },
+    {
+     "s": "NO3-",
+     "n": 2.0
     }
    ],
    "tp_theo_lit": false,
@@ -9361,6 +9377,10 @@
     {
      "s": "NO3-",
      "n": 3
+    },
+    {
+     "s": "NO3-",
+     "n": 2.0
     }
    ],
    "tp_theo_lit": false,
@@ -10176,6 +10196,10 @@
     {
      "s": "SO4",
      "n": 1
+    },
+    {
+     "s": "SO4",
+     "n": 1.0
     }
    ],
    "tp_theo_lit": false,
@@ -11523,8 +11547,10 @@
    "trang_thai": "dd",
    "dang_chua": "chai",
    "nong_do": "bão hòa",
-   "C": 0.0,
-   "cac_C": [],
+   "C": 0.002,
+   "cac_C": [
+    0.002
+   ],
    "M": 162.11,
    "d": 1.0,
    "tp": [
@@ -11534,7 +11560,7 @@
     },
     {
      "s": "CO3",
-     "n": 2
+     "n": 2.3
     }
    ],
    "tp_theo_lit": false,
@@ -11561,8 +11587,10 @@
    "trang_thai": "dd",
    "dang_chua": "chai",
    "nong_do": "bão hòa",
-   "C": 0.0,
-   "cac_C": [],
+   "C": 0.002,
+   "cac_C": [
+    0.002
+   ],
    "M": 146.337,
    "d": 1.0,
    "tp": [
@@ -11572,7 +11600,7 @@
     },
     {
      "s": "CO3",
-     "n": 2
+     "n": 2.3
     }
    ],
    "tp_theo_lit": false,
@@ -11599,8 +11627,10 @@
    "trang_thai": "dd",
    "dang_chua": "chai",
    "nong_do": "bão hòa",
-   "C": 0.0,
-   "cac_C": [],
+   "C": 0.002,
+   "cac_C": [
+    0.002
+   ],
    "M": 259.359,
    "d": 1.0,
    "tp": [
@@ -11610,7 +11640,7 @@
     },
     {
      "s": "CO3",
-     "n": 2
+     "n": 2.3
     }
    ],
    "tp_theo_lit": false,
@@ -16135,23 +16165,23 @@
    "tp": [
     {
      "s": "Cu2+",
-     "n": 0.07
+     "n": 0.069
     },
     {
      "s": "SO4",
-     "n": 0.07
+     "n": 0.069
     },
     {
      "s": "Na+",
-     "n": 1.6
+     "n": 3.65
     },
     {
      "s": "Cit",
-     "n": 0.6
+     "n": 0.59
     },
     {
      "s": "CO3",
-     "n": 0.5
+     "n": 0.94
     }
    ],
    "tp_theo_lit": true,
@@ -24572,7 +24602,7 @@
    "stt": 660,
    "ten": "Baking soda",
    "ten_khong_dau": "baking soda",
-   "cong_thuc": "",
+   "cong_thuc": "NaHCO3",
    "phan_loai": "Chất rắn",
    "nhom": "GD",
    "trang_thai": "ran",
@@ -24610,7 +24640,7 @@
    "stt": 661,
    "ten": "Muối iot",
    "ten_khong_dau": "muoi iot",
-   "cong_thuc": "",
+   "cong_thuc": "NaCl",
    "phan_loai": "Chất rắn",
    "nhom": "GD",
    "trang_thai": "ran",
@@ -24648,7 +24678,7 @@
    "stt": 662,
    "ten": "Phân đạm urê",
    "ten_khong_dau": "phan dam ure",
-   "cong_thuc": "",
+   "cong_thuc": "(NH2)2CO",
    "phan_loai": "Chất rắn",
    "nhom": "GD",
    "trang_thai": "ran",
@@ -24716,7 +24746,7 @@
    "stt": 664,
    "ten": "Phân kali",
    "ten_khong_dau": "phan kali",
-   "cong_thuc": "",
+   "cong_thuc": "KCl",
    "phan_loai": "Chất rắn",
    "nhom": "GD",
    "trang_thai": "ran",
@@ -25200,7 +25230,7 @@
    "stt": 678,
    "ten": "Kẽm đánh răng",
    "ten_khong_dau": "kem danh rang",
-   "cong_thuc": "",
+   "cong_thuc": "CaCO3",
    "phan_loai": "Hỗn hợp",
    "nhom": "GD",
    "trang_thai": "long",

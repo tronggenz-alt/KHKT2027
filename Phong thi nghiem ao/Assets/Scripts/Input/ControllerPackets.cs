@@ -19,6 +19,36 @@ namespace Khkt.Input
             };
         }
 
+        /// <summary>
+        /// Mẫu tay cầm VERA sang ControllerState. Nút cũ được điền để các phần chưa biết VERA vẫn chạy:
+        /// cò = chạm B, nhấn joystick 1 = chạm A, nhấn joystick 2 = nhấn cần, căn lại = firmware vừa đặt yaw về 0.
+        /// Joystick nằm ở Joy2 (cần di chuyển), chưa có vùng chết (PadInput xử lý).
+        /// </summary>
+        public static ControllerState FromVera(in VeraSample v)
+        {
+            var b = ControllerButtons.None;
+            if ((v.Flags & VeraFlags.TouchB) != 0) b |= ControllerButtons.Trigger;
+            if ((v.Flags & VeraFlags.TouchA) != 0) b |= ControllerButtons.Joy1Press;
+            if ((v.Flags & VeraFlags.StickPress) != 0) b |= ControllerButtons.Joy2Press;
+            if ((v.Flags & VeraFlags.Recentered) != 0) b |= ControllerButtons.Recenter;
+            if ((v.Flags & VeraFlags.ImuError) != 0) b |= ControllerButtons.ImuError;
+            return new ControllerState
+            {
+                TimeMs = v.TimeMs,
+                Seq = (byte)v.Seq,
+                AccelG = v.AccelG,
+                GyroDps = v.GyroDps,
+                OrientationRH = (v.Flags & VeraFlags.ImuError) != 0 ? Quaternion.identity : v.OrientationRH,
+                Joy2 = new Vector2(Mathf.Clamp(v.Joy.x, -1, 1), Mathf.Clamp(v.Joy.y, -1, 1)),
+                Buttons = b,
+                Vera = true,
+                TouchA = v.TouchA,
+                TouchB = v.TouchB,
+                Flags = v.Flags,
+                TempC = v.TempC,
+            };
+        }
+
         /// <summary>0..1023 (tâm 511,5) sang -1..1, bỏ vùng chết rồi kéo giãn lại để vẫn đạt được 1.0.</summary>
         public static float Axis(ushort raw, float deadzone)
         {

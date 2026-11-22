@@ -56,7 +56,8 @@ if (lenh === "xay") {
   for (const f of readdirSync(join(GOC, "server/web")).filter((f) => f.endsWith(".html"))) cpSync(join(GOC, "server/web", f), join(dist, "_trang", f));
   // Chỉ các đường dẫn này chạy Function (tính vào hạn mức 100.000 lượt/ngày); ảnh, CSS, JS là tệp tĩnh miễn phí
   const include = ["/auth/*", "/api/*", "/app/*", "/lab/*", "/robot/*", "/may", "/may/*", "/the-thong-tin/*", "/suc-khoe", "/chu-thich", "/tro-ly", "/hoi",
-    "/dang-nhap", "/quan-ly", "/giao-vien", "/hoc-sinh", "/trinh-chieu", "/truc-tiep", "/buoi-hoc", "/hoa", "/sinh"];
+    "/dang-nhap", "/quan-ly", "/giao-vien", "/hoc-sinh", "/trinh-chieu", "/truc-tiep", "/buoi-hoc", "/hoa", "/sinh",
+    "/phong-truc-tuyen", "/phong-hoc"];
   writeFileSync(join(dist, "_routes.json"), JSON.stringify({ version: 1, include, exclude: [] }, null, 2));
   writeFileSync(join(dist, "_headers"), "/tinh/*\n  Cache-Control: no-cache\n/_trang/*\n  Cache-Control: no-store\n");
   console.log(`Đã dựng ${dist}`);

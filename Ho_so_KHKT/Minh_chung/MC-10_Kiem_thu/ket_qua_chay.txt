@@ -1,0 +1,3 @@
+Lệnh: python -m unittest discover -s tests (chạy tại thư mục gốc dự án)
+Lần chạy ngày 13/11/2026 (trợ lý AI chạy khi soạn hồ sơ): Ran 363 tests in 157.915s - OK
+Học sinh tự chạy lại và ghi kết quả của mình vào đây trước khi nộp.

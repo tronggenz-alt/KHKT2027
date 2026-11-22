@@ -63,7 +63,7 @@ def main():
     cong = chon_cong()
     # mở cổng mà không giữ DTR/RTS: giữ hai chân này làm ESP32 kẹt ở trạng thái khởi động lại
     s = serial.Serial()
-    s.port, s.baudrate, s.timeout = cong, 115200, 0.05
+    s.port, s.baudrate, s.timeout = cong, 921600, 0.05
     s.dtr = s.rts = False
     s.open()
     s.rts = True  # nhấn EN một lần để chương trình chạy lại từ đầu, kể cả bước cân con quay
@@ -78,6 +78,7 @@ def main():
     dem, t0 = 0, time.time()
     hz = 0.0
     hoi_phuc = 0
+    lan_xin_q = 0.0
     while True:
         # đọc phần đã có trong bộ đệm rồi tự tách dòng: readlines() chờ tới khi dòng dữ liệu im lặng,
         # mà firmware gửi 100 lần/giây nên nó không bao giờ trả về
@@ -90,6 +91,10 @@ def main():
             bat_dau = time.time() + 6
         for dong in dong_moi:
             d = dong.decode(errors="ignore").strip()
+            # firmware tay_cam_vera mặc định in dòng "J ..." dễ đọc: xin chuyển sang dòng "Q,..." 50 Hz
+            if (d.startswith("J ") or d.startswith("#INFO")) and time.time() - lan_xin_q > 1.0:
+                s.write(b"s1\n")
+                lan_xin_q = time.time()
             if d.startswith("q ") or d.startswith("Q,"):
                 # "q w x y z" (thu_bmi160.ino) hoặc "Q,w,x,y,z,số lần hồi phục" (ESP32_BMI160_Cube.ino)
                 phan = d.replace(",", " ").split()
@@ -136,9 +141,9 @@ def main():
         if k in (ord("q"), 27):
             break
         if k == ord("z"):
-            s.write(b"z")  # firmware đặt lại hướng về 0
+            s.write(b"z\n")  # firmware đặt lại hướng về 0
         if k == ord("c"):
-            s.write(b"c")  # firmware cân lại con quay: để cảm biến yên
+            s.write(b"c\n")  # firmware cân lại con quay: để cảm biến yên
             lich_su.clear()
         if k == ord("r"):
             goc = q

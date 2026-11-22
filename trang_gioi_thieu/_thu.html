@@ -1,0 +1,22 @@
+<!doctype html><meta charset="utf-8"><style>html,body{margin:0;background:#888}iframe{border:0;display:block}</style>
+<script>
+var q = new URLSearchParams(location.search);
+try { localStorage.setItem('vera-mau', q.get('mau') || 'light'); } catch (e) {}
+var f = document.createElement('iframe');
+f.width = q.get('w') || 1440; f.height = q.get('h') || 900;
+f.src = 'index.html#/' + (q.get('tab') || 'gioi-thieu');
+document.documentElement.appendChild(f);
+f.onload = function () {
+  var w = f.contentWindow;
+  setTimeout(function () {
+    if (q.get('cuon')) w.scrollTo(0, +q.get('cuon'));
+    if (q.get('x')) {
+      var x = +q.get('x'), y = +q.get('y'), i = 0;
+      var h = setInterval(function () {
+        w.dispatchEvent(new w.PointerEvent('pointermove', { clientX: x - 60 + i * 6, clientY: y, pointerType: 'mouse' }));
+        if (++i > 10) clearInterval(h);
+      }, 60);
+    }
+  }, 1500);
+};
+</script>

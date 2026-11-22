@@ -2,16 +2,16 @@
 // thanh bên và thanh dưới điện thoại, hộp tìm kiếm. Khung giáo viên, học sinh còn dùng thêm tab theo địa chỉ # và thẻ tài khoản.
 const Phien = (() => {
   // Trang mới: thêm đường dẫn vào TRANG_CO_KHUNG và một dòng vào MENU; trong trang chỉ cần <header class="thanh"> như truc_tiep.html.
-  const TRANG_CO_KHUNG = { "/giao-vien": "giao_vien", "/hoc-sinh": "hoc_sinh", "/truc-tiep": "giao_vien", "/trinh-chieu": "giao_vien", "/buoi-hoc": "giao_vien" };
+  const TRANG_CO_KHUNG = { "/giao-vien": "giao_vien", "/hoc-sinh": "hoc_sinh", "/phong-truc-tuyen": "giao_vien", "/truc-tiep": "giao_vien", "/trinh-chieu": "giao_vien", "/buoi-hoc": "giao_vien", "/hoa": "giao_vien", "/sinh": "giao_vien" };
   const MENU = {
     giao_vien: [
       ["", [["nha", "Hôm nay", "/giao-vien#tong-quan"], ["lop", "Lớp học", "/giao-vien#lop"], ["cham", "Chấm bài", "/giao-vien#ket-qua"]]],
-      ["Buổi học", [["truc", "Theo dõi lớp", "/truc-tiep"], ["dieu", "Điều khiển", "/buoi-hoc"], ["chieu", "Trình chiếu", "/trinh-chieu"]]],
+      ["Buổi học", [["phong", "Phòng trực tuyến", "/phong-truc-tuyen"], ["truc", "Theo dõi lớp", "/truc-tiep"], ["dieu", "Điều khiển", "/buoi-hoc"], ["chieu", "Trình chiếu", "/trinh-chieu"]]],
       ["Phòng thí nghiệm", [["hoa", "Phòng Hóa", "/hoa"], ["sinh", "Phòng Sinh", "/sinh"], ["sach", "Hướng dẫn máy", "/hoa#may"], ["ai", "Trợ lý AI", "/hoa#khoa"]]],
       ["Sắp có", [["han", "Hạn mức AI"]]],
     ],
     hoc_sinh: [
-      ["", [["nha", "Hôm nay", "/hoc-sinh#lop"], ["cham", "Kết quả của tôi", "/hoc-sinh#ket-qua"], ["sinh", "Bài thí nghiệm", "/hoc-sinh#bai"], ["lich", "Lịch phòng", "/hoc-sinh#lich"]]],
+      ["", [["nha", "Hôm nay", "/hoc-sinh#lop"], ["cham", "Kết quả của tôi", "/hoc-sinh#ket-qua"], ["sinh", "Bài thí nghiệm", "/hoc-sinh#bai"], ["lich", "Lịch phòng", "/hoc-sinh#lich"], ["phong", "Vào phòng học", "/phong-hoc"]]],
       ["Tra cứu", [["sach", "Hướng dẫn máy", "/hoc-sinh#may"], ["tu", "Hướng dẫn dụng cụ", "/hoc-sinh#dung-cu"]]],
     ],
   };
@@ -34,6 +34,7 @@ const Phien = (() => {
     han: '<path d="M4 18a9 9 0 1 1 16 0"/><path d="M12 14l3.5-4.5"/><circle cx="12" cy="14.5" r="1.4"/>',
     nguoi: '<circle cx="12" cy="8" r="3.8"/><path d="M4.5 20.5c.7-4 3.8-6.2 7.5-6.2s6.8 2.2 7.5 6.2"/>',
     tim: '<circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/>',
+    phong: '<rect x="3" y="4.5" width="18" height="12" rx="1.5"/><circle cx="12" cy="9.3" r="2.2"/><path d="M8.3 14.5c.6-1.6 2-2.4 3.7-2.4s3.1.8 3.7 2.4"/><path d="M8 20h8"/><path d="M12 16.5V20"/>',
     lich: '<rect x="4" y="5" width="16" height="15.5" rx="1.5"/><path d="M4 10h16"/><path d="M8.5 3v4"/><path d="M15.5 3v4"/>',
     them: '<path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/>',
     dong: '<path d="m6 6 12 12"/><path d="M18 6 6 18"/>',

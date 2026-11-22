@@ -106,6 +106,11 @@ namespace Khkt.Demo
             pourStream.gameObject.SetActive(false);
             PadInput.ControllerChanged += OnControllerChanged;
             PadInput.Notice += OnPadNotice;
+            vera = VeraPointer.Ensure(gameObject);  // tay cầm VERA (G2): tia trỏ bằng hướng tay cầm, thêm lúc chạy nên không cần dựng lại cảnh
+            VeraPointer.Message += OnPadNotice;
+            autoTest = !string.IsNullOrEmpty(System.Environment.GetEnvironmentVariable("KHKT_TEST"));
+            float hut = PlayerPrefs.GetFloat("vera_hut_do", -1f);
+            if (hut >= 0) AimAssist.StrengthDeg = hut;
         }
 
         void OnDestroy()
@@ -113,6 +118,89 @@ namespace Khkt.Demo
             CancelInspectHold();
             PadInput.ControllerChanged -= OnControllerChanged;
             PadInput.Notice -= OnPadNotice;
+            VeraPointer.Message -= OnPadNotice;
+        }
+
+        // ---------- Tay cầm VERA: tia trỏ, hút mục tiêu, nút cảm ứng ----------
+
+        VeraPointer vera;
+        readonly AimAssist assist = new AimAssist();
+        bool autoTest, veraA, veraB, veraDownPrev;
+        /// <summary>Đang trỏ bằng tay cầm VERA (có tay cầm gửi hướng, người chơi dùng tay cầm gần đây hơn chuột).</summary>
+        public bool VeraAiming { get; private set; }
+        /// <summary>Kiểm thử tự động: bật hút mục tiêu cho tia OverrideAimPoint (mặc định tắt để không đổi các bài cũ).</summary>
+        public bool AimAssistInTest { get; set; }
+        public AimAssist Assist => assist;
+        /// <summary>Kiểm thử tự động: cho tia tay cầm VERA chạy dù đang ở chế độ KHKT_TEST.</summary>
+        public bool VeraInTest { get; set; }
+
+        /// <summary>
+        /// Thử xem chỗ trúng h làm được việc gì (không đổi trạng thái: Decide thật chạy lại ngay sau trong Update).
+        /// id = thứ sẽ bị tác động (vật cầm được, chỗ đặt, bình nhận...), để hút mục tiêu biết đang dính vào cái gì.
+        /// </summary>
+        bool ProbeTarget(in RaycastHit h, out Object id)
+        {
+            var saveHit = hit;
+            bool saveHas = hasHit;
+            hit = h;
+            hasHit = true;
+            Decide();
+            bool ok = Current != Act.None && Current != Act.PlaceSurface;
+            id = TargetSocket != null ? TargetSocket : Held != null && TargetContainer != null ? TargetContainer
+                : AttachTarget != null ? (Object)AttachTarget.Part : HoverRoot != null ? HoverRoot : h.collider;
+            hit = saveHit;
+            hasHit = saveHas;
+            return ok;
+        }
+
+        /// <summary>
+        /// Nút cảm ứng VERA theo bản đồ tương tác (docs/tay-cam-tich-hop):
+        ///   tay không: chạm B = cầm vật đang trỏ; A hoặc B = dùng / bấm thiết bị (nút, van, núm);
+        ///   đang cầm (giữ B): buông B = đặt vào chỗ đang trỏ (ô, mặt bàn, khớp lắp); buông B khi không trỏ chỗ đặt = trả về chỗ cũ;
+        ///   giữ A = dùng vật đang cầm (rót, hút, nhỏ, xịt...) và tia đi chậm 4 lần (chế độ tinh); nhấp A = nhỏ 1 giọt, múc 1 thìa...
+        ///   lăn cổ tay quá 35° khi đang trỏ vào bình nhận = rót (như rót thật).
+        /// </summary>
+        void VeraButtons(ref bool down, ref bool pressed, ref bool released)
+        {
+            var s = vera.Source.Latest;
+            bool a = s.Has(VeraFlags.TouchA), b = s.Has(VeraFlags.TouchB);
+            bool aP = a && !veraA, aR = !a && veraA, bP = b && !veraB, bR = !b && veraB;
+            veraA = a;
+            veraB = b;
+            vera.FineMode = Held != null && a;
+            if (Held == null)
+            {
+                bool pickAct = Current == Act.Pick || Current == Act.Swirl;
+                down = b || (a && !pickAct);
+                pressed = down && !veraDownPrev;
+                released = !down && veraDownPrev;
+                veraDownPrev = down;
+                return;
+            }
+            veraDownPrev = false;
+            bool placeAct = Current == Act.Place || Current == Act.PlaceSurface || Current == Act.Attach;
+            if (bR)
+            {
+                down = released = false;
+                if (placeAct) pressed = true;
+                else
+                {
+                    pressed = false;
+                    string ten = Held.name;
+                    ReturnHome();
+                    Say($"Đã trả {ten} về chỗ cũ (buông B khi trỏ vào chỗ đặt để đặt xuống)");
+                }
+                return;
+            }
+            if (placeAct)
+            {
+                down = pressed = released = false;
+                return;
+            }
+            bool rollPour = Current == Act.Pour && Mathf.Abs(vera.Roll) > 35f;
+            down = a || rollPour;
+            pressed = aP;
+            released = aR;
         }
 
         void OnDisable() => CancelInspectHold();
@@ -171,6 +259,8 @@ namespace Khkt.Demo
             bool pressed = down && !wasDown;
             bool released = !down && wasDown;
             wasDown = down;
+            if (VeraAiming && !uiOpen && vera.Source != null) VeraButtons(ref down, ref pressed, ref released);
+            else if (vera != null) vera.FineMode = false;
             if (pressed) pressTime = Time.time;
 
             if (uiOpen)
@@ -555,7 +645,11 @@ namespace Khkt.Demo
         void Raycast(Mouse mouse)
         {
             Ray ray;
-            if (OverrideAimPoint.HasValue)
+            // Tay cầm VERA thắng tia bàn tay webcam (OverrideAimPoint của ArmRig / GestureControl) khi người chơi đang dùng tay cầm;
+            // bài kiểm thử tự động (KHKT_TEST) vẫn điều khiển bằng OverrideAimPoint như cũ
+            VeraAiming = vera != null && vera.HasControl && PadInput.AimFromCenter && (!autoTest || VeraInTest);
+            if (VeraAiming) ray = vera.GetRay(viewCamera);
+            else if (OverrideAimPoint.HasValue)
             {
                 Vector3 o = viewCamera.transform.position;
                 ray = new Ray(o, (OverrideAimPoint.Value - o).normalized);
@@ -590,8 +684,25 @@ namespace Khkt.Demo
                         hasHit = true;
                     }
                 }
+            }
+            lastRay = ray;  // tia thật: bàn tay và vật đang cầm đi theo tia này (không theo tia đã nắn, để vật không giật)
+
+            // Hút mục tiêu: chỉ cho tay cầm (VERA, tay cầm chơi game trỏ tâm màn hình), không cho con trỏ chuột tự do
+            bool assistOn = AimAssist.StrengthDeg > 0 &&
+                            (VeraAiming || (PadInput.AimFromCenter && PadInput.Active && !OverrideAimPoint.HasValue) || (AimAssistInTest && OverrideAimPoint.HasValue));
+            if (!assistOn)
+            {
+                assist.Reset();
+                return;
             }
-            lastRay = ray;
+            Object rawId = null;
+            bool rawOk = hasHit && ProbeTarget(hit, out rawId);
+            bool rawFallback = hasHit && !rawOk && Current == Act.PlaceSurface;  // Current còn từ lần thử chỗ trúng thật ngay trên
+            if (assist.Assist(ray, reach, Time.deltaTime, rawOk, rawId, ProbeTarget, rawFallback, out var ah))
+            {
+                hit = ah;
+                hasHit = true;
+            }
         }
 
         Ray lastRay;

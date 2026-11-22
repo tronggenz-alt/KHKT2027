@@ -1,5 +1,7 @@
 # Tay cầm VR "VERA Arc"
 
+> Bản này đã được thay bằng [VERA Band](27-tay-cam-vera-band.md), đeo vào tay bằng quai. Phần điện tử, đấu nối và 4 cổng GPIO bên dưới vẫn dùng chung.
+
 Thiết kế ngày 03/11/2026, thay cho [VERA Drop](22-tay-cam-vera-drop.md). Vòng tròn nhỏ ngả ra sau có khắc logo và chữ VERA LAB, mặt tối bầu dục, pin vuông 9V nằm trong cán, thân gồm 2 nửa bắt vít. Chỉ dùng cho tay phải.
 
 Kích thước cả bộ 81 × 71 × 123 mm. Khối lượng ước tính khoảng 137 g có pin (53 g nhựa), chưa cân thật.

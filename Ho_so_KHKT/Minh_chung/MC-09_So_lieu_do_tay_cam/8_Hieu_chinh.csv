@@ -1,0 +1,7 @@
+﻿Bước,Trạng thái,Ghi chú
+c – độ lệch con quay lúc bật,Đã làm (tự động mỗi lần khởi động),"−0,18 / +0,37 / −0,30 °/s"
+J – tâm joystick,KHÔNG áp dụng,"Y thả nổi: hiệu chuẩn lúc này sẽ lưu tâm sai (như 749 mV, 333 mV trước đây)"
+n – hệ số nhiệt,Không làm được,"nhiệt chỉ đổi 0,01–0,2 °C (cần ≥ 1,5 °C, bật Wi-Fi để mạch nóng)"
+t – ngưỡng cảm ứng,Giữ 50/35/15%,"nhiễu tối đa 7/255, cách ngưỡng lơ lửng 5 lần"
+"g, j, a, b, căn trục K",Cần cầm tay,g: xoay 5 vòng; j: gạt hết 4 hướng; a/b: chạm nút; K: đặt ngang rồi chúc mũi
+Sửa phần mềm phòng thử,Đã làm,canh.py: cốc nghiêng ngược chiều lăn cổ tay; tu_dong.py: bot rót tính sai hướng vòi

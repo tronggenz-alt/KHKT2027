@@ -7,3 +7,9 @@ compatibility_date = "2026-09-01"
 binding = "DB"
 database_name = "verlab-db"
 database_id = "298c7c98-f48b-42c9-9b58-2e8ae6dc4c59"
+
+# Phòng học trực tuyến: Durable Object nằm ở Worker riêng verlab-phong (cloudflare/phong), đăng Worker đó trước
+[[durable_objects.bindings]]
+name = "PHONG"
+class_name = "PhongTrucTuyen"
+script_name = "verlab-phong"
