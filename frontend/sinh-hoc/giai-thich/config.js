@@ -2,24 +2,25 @@
 // Sửa ở đây, không sửa rải rác trong code. Đơn vị độ dài = đơn vị cảnh 3D (cơ thể cao ~4,2).
 export const CAU_HINH = Object.freeze({
   muiTen: Object.freeze({
-    banKinh: 0.006,          // bán kính thân ống
-    banKinhVien: 0.0096,     // ống viền phát sáng (cộng màu) bao quanh thân
-    doMoVien: 0.25,
-    banKinhDau: 0.013,       // đầu nhọn (hình nón)
-    daiDau: 0.04,
+    banKinh: 0.0085,         // bán kính thân ống mũi tên đang chạy (dễ nhìn ở cả toàn thân lẫn cận cảnh)
+    banKinhVien: 0.0128,     // viền tương phản tối bọc quanh thân giúp nổi bật trên cả phổi sáng lẫn tim đỏ
+    doMoVien: 0.78,
+    banKinhDau: 0.021,       // đầu nhọn (hình nón) – đỉnh nón khớp chính xác điểm cuối
+    daiDau: 0.056,
+    banKinhDiem: 0.014,      // chấm neo điểm đầu và chấm sáng chạy dọc mũi tên chỉ chiều dòng chảy
     doanOng: 54,             // số đoạn dọc ống (vẽ dần theo đoạn)
     vongOng: 12,             // số cạnh tiết diện ống
     vongVien: 10,
-    doCong: 0.2,             // độ cong của mũi tên so với khoảng cách hai đầu (đẩy ra phía trước mô hình)
-    congToiDa: 0.12,
-    doMoDaQua: 0.3,          // mũi tên các bước đã qua: mờ + mảnh lại
-    tyLeDaQua: 0.7,
+    doCong: 0.16,            // độ cong tỷ lệ theo chiều dài mũi tên (không bóp méo mũi tên ngắn)
+    congToiDa: 0.11,
+    doMoDaQua: 0.24,         // mũi tên các bước đã qua: mờ mảnh làm đường dẫn phụ
+    tyLeDaQua: 0.65,
     doMoNhanDaQua: 0.45,
   }),
   xung: Object.freeze({      // bước "tại chỗ" (from = to, vd trao đổi khí): vòng sáng nhịp đập thay cho đèn (không tạo đèn → không biên dịch lại shader)
-    banKinh: 0.05,
-    tanSo: 2.2,              // nhịp / giây
-    doMo: 0.75,
+    banKinh: 0.056,
+    tanSo: 2.0,              // nhịp / giây
+    doMo: 0.92,
   }),
   thoiGian: Object.freeze({
     veMacDinh: 2.4,          // giây vẽ một mũi tên khi bước không ghi duration

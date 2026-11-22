@@ -4814,12 +4814,45 @@ $("#nut-dat-lai").addEventListener("click", datLaiTatCa);
 //      Chỉ có khi trang do máy chủ phục vụ; mở file trực tiếp → ẩn nút chế độ này.
 // =====================================================================================================================
 const GT_MOD = location.protocol.startsWith("http")
-  ? await import("/static/sinh-hoc/giai-thich/index.js?v=3").catch((e) => { console.warn("Không tải được chế độ giải thích từng bước:", e.message); return null; })
+  ? await import("/static/sinh-hoc/giai-thich/index.js?v=4").catch((e) => { console.warn("Không tải được chế độ giải thích từng bước:", e.message); return null; })
   : null;
+// Điểm neo giải phẫu chính xác (tâm buồng tim, ngã ba mạch lớn, tâm nội tạng) dành riêng cho đầu/cuối mũi tên 3D
+const DIEM_MUI_TEN = {
+  tam_that_phai: dTim(-0.030, -0.025, 0.045),
+  tam_that_trai: dTim(0.035, -0.035, 0.005),
+  tam_nhi_phai: dTim(-0.065, 0.050, 0.015),
+  tam_nhi_trai: dTim(0.020, 0.065, -0.035),
+  dong_mach_phoi: dTim(0.015, 0.155, 0.010),
+  dong_mach_chu: dTim(0.000, 0.215, -0.025),
+  tinh_mach_phoi: V(0.135, 2.595, -0.015),
+  tinh_mach_chu: V(-0.055, 2.700, 0.040),
+  phoi_trai: TAM_PHOI.trai.clone().add(V(0, 0.01, 0.01)),
+  phoi_phai: TAM_PHOI.phai.clone().add(V(0, 0.01, 0.01)),
+  dai_nao: V(0.0, 3.34, 0.0),
+  da_day: V(0.115, 2.18, 0.075),
+  than_trai: V(0.135, 2.08, -0.10),
+  than_phai: V(-0.135, 2.03, -0.10),
+  mach_chau: V(0.085, 1.60, -0.04),
+  co_tu_dau_dui: V(0.16, 1.28, 0.065),
+};
+function viTriMuiTen(bp) {
+  if (DIEM_MUI_TEN[bp]) {
+    const he = BO_PHAN[bp]?.he;
+    return DIEM_MUI_TEN[bp].clone().add(he && nhomHe[he] ? nhomHe[he].position : V(0, 0, 0));
+  }
+  const ds = meshTheoBP[bp];
+  if (ds && ds.length) {
+    theGioi.updateMatrixWorld(true);
+    const hop = new THREE.Box3();
+    ds.forEach((m) => hop.expandByObject(m));
+    if (!hop.isEmpty()) return hop.getCenter(V(0, 0, 0));
+  }
+  return neo(bp);
+}
 const giaiThichTungBuoc = GT_MOD ? GT_MOD.taoGiaiThichTungBuoc({
   scene, camera, controls, khung3D, xoaNhan,
   coBoPhan: (id) => !!(meshTheoBP[id] || neoBP[id]),
-  viTri: (id) => neo(id),
+  viTri: (id) => viTriMuiTen(id),
   hopBoPhan(ids) {
     theGioi.updateMatrixWorld(true);
     const hop = new THREE.Box3();
