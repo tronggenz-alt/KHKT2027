@@ -20,7 +20,6 @@ const TUY_CHON = { numHands: 2, minHandDetectionConfidence: 0.42, minHandPresenc
 // 3. Bù 1–2 khung bị rớt thoáng qua (< 95 ms) khi vẩy tay nhanh để xoay/zoom không bị khựng
 export function taoBoOnDinhTay() {
   const BAN_KINH_KHOP = 0.22;
-  const BU_ROT_S = 0.095;
   let truoc = []; // [{ ben, tam: [x, y], v: [vx, vy], diem, theGioi, score, t }]
 
   const tamBanTay = (d) => [(d[0].x + d[9].x) * 0.5, (d[0].y + d[9].y) * 0.5];
@@ -32,7 +31,7 @@ export function taoBoOnDinhTay() {
 
   function datLai() { truoc = []; }
 
-  function xuLy(mp, t) {
+  function xuLy(mp, t, buRotS = 0.095) {
     const hl = (mp && mp.hand_landmarks) || [];
     const hwl = (mp && mp.hand_world_landmarks) || [];
     const hd = (mp && mp.handedness) || [];
@@ -101,12 +100,12 @@ export function taoBoOnDinhTay() {
       }
     }
 
-    // Bù thoáng qua (<= 95 ms) nếu tay bị rớt 1–2 khung lúc lia nhanh / nghiêng bàn tay
+    // Bù thoáng qua nếu tay bị rớt 1–3 khung lúc lia nhanh / nghiêng bàn tay (110 ms khi đang kéo/zoom, 60 ms khi chờ)
     for (let j = 0; j < truoc.length; j++) {
       if (daDungCu.has(j) || moi.length >= 2) continue;
       const cu = truoc[j];
       const dtMat = t - cu.t;
-      if (dtMat > 0 && dtMat <= BU_ROT_S && !moi.some((m) => m.ben === cu.ben)) {
+      if (dtMat > 0 && dtMat <= buRotS && !moi.some((m) => m.ben === cu.ben)) {
         const dx = cu.v[0] * dtMat * 0.45;
         const dy = cu.v[1] * dtMat * 0.45;
         const diemBu = cu.diem.map((p) => ({
@@ -705,7 +704,8 @@ export async function taoDieuKhienTay({
     tTruoc = tGiay;
     const tiLe = vw / vh;
     const mpDaCat = kq ? doiVeKhungDay(kq, cat, vw, vh) : null;
-    const mpOnDinh = boOnDinh.xuLy(mpDaCat, tGiay);
+    const dangTuongTac = dieuKhien.cheDo === 'keo' || dieuKhien.cheDo === 'zoom';
+    const mpOnDinh = boOnDinh.xuLy(mpDaCat, tGiay, dangTuongTac ? 0.11 : 0.06);
     const dsTay = docTay(mpOnDinh, tiLe, tGiay, cacTay);
     soTayHienTai = dsTay.length;
     dsTayCuoi = dsTay;

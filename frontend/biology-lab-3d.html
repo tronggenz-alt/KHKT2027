@@ -2953,6 +2953,8 @@ const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "hi
 renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1)); // Độ nét chuẩn Retina 2× (tự hạ xuống 1,5 nếu máy yếu)
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;          // bóng đổ mềm (phòng giải phẫu)
+renderer.shadowMap.autoUpdate = false;                     // không vẽ lại bản đồ bóng 2048px 120 lần/giây khi chỉ xoay camera (giảm ~90% tải GPU)
+renderer.shadowMap.needsUpdate = true;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.12;
@@ -4827,26 +4829,32 @@ function datTrangThai(ten) {
 $("#nut-nghi").addEventListener("click", () => datTrangThai("nghi"));
 $("#nut-giao-cam").addEventListener("click", () => datTrangThai("giao_cam"));
 
-// điện tim (ECG) đồng bộ pha tim
-const ecg = { canvas: $("#ecg"), mau: [], diemCuoi: 0 };
+// điện tim (ECG) đồng bộ pha tim (tự bỏ qua hoàn toàn khi HUD đang thu gọn để tiết kiệm CPU/GPU)
+const ecg = { canvas: $("#ecg"), ctx: $("#ecg").getContext("2d"), hud: $("#hud-panel"), mau: [], diemCuoi: 0, boDem: 0 };
 function songECG(p) {
   const g = (x, mu, s, a) => a * Math.exp(-((x - mu) ** 2) / (2 * s * s));
   return g(p, 0.06, 0.018, 0.12) + g(p, 0.135, 0.006, -0.12) + g(p, 0.15, 0.007, 1.0) + g(p, 0.165, 0.007, -0.22) + g(p, 0.4, 0.035, 0.28);
 }
 function veECG(dt) {
-  const c = ecg.canvas, g = c.getContext("2d");
+  if (ecg.hud && ecg.hud.classList.contains("thu-nho")) return;
+  const c = ecg.canvas, g = ecg.ctx;
   const soMau = Math.max(1, Math.round(dt * 160));
   const buoc = (sinhLy.nhipTim / 60) / 160;
   for (let i = 0; i < soMau; i++) { ecg.diemCuoi = (ecg.diemCuoi + buoc) % 1; ecg.mau.push(songECG(ecg.diemCuoi)); }
   while (ecg.mau.length > c.width / 2) ecg.mau.shift();
   g.clearRect(0, 0, c.width, c.height);
   g.strokeStyle = "rgba(6,182,212,0.15)"; g.lineWidth = 1;
-  for (let x = 0; x < c.width; x += 20) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, c.height); g.stroke(); }
-  g.strokeStyle = sinhLy.giaoCam > 0.5 ? "#fb7185" : "#34d399"; g.lineWidth = 2.4; g.shadowColor = g.strokeStyle; g.shadowBlur = 8;
   g.beginPath();
-  ecg.mau.forEach((v, i) => { const x = i * 2, y = c.height * 0.68 - v * c.height * 0.55; i ? g.lineTo(x, y) : g.moveTo(x, y); });
+  for (let x = 0; x < c.width; x += 20) { g.moveTo(x, 0); g.lineTo(x, c.height); }
   g.stroke();
-  g.shadowBlur = 0;
+  const mau = sinhLy.giaoCam > 0.5 ? "#fb7185" : "#34d399";
+  g.beginPath();
+  for (let i = 0; i < ecg.mau.length; i++) {
+    const x = i * 2, y = c.height * 0.68 - ecg.mau[i] * c.height * 0.55;
+    if (i) g.lineTo(x, y); else g.moveTo(x, y);
+  }
+  g.strokeStyle = sinhLy.giaoCam > 0.5 ? "rgba(251,113,133,0.28)" : "rgba(52,211,153,0.28)"; g.lineWidth = 6; g.stroke();
+  g.strokeStyle = mau; g.lineWidth = 2.2; g.stroke();
 }
 
 // =====================================================================================================================
@@ -4880,16 +4888,26 @@ function datMucTieu(bpChon, coLap, anHan = false) { // anHan: xem riêng một c
   }
   vo.dich = anHan ? 0 : coLap && tap.size && ![...tap].some((b) => BO_PHAN[b]?.he === "he_co") ? 0.1 : 1;
 }
+const _vDichTam = new THREE.Vector3();
+let _dsHe = null, _lucBongCuoi = -1, _lucDaDayCuoi = -1;
 function capNhatHienThi(dt) {
+  if (!_dsHe) _dsHe = Object.entries(nhomHe);
   const k = 1 - Math.pow(0.0015, dt);
-  for (const bp of Object.keys(trangThaiBP)) {
+  const xung = 0.75 + 0.25 * Math.sin(thoiGian * 4);
+  let doiHien = false;
+  for (const bp in trangThaiBP) {
     const st = trangThaiBP[bp];
     const sangDich = Math.max(st.sang, bp === bpDangRe ? 0.45 : 0, bp === bpDangChon ? 0.75 : 0);
-    st.doMoHien += (st.doMo * (lopAn[lopCua(bp)] ? 0 : 1) - st.doMoHien) * k;
+    const dichMo = st.doMo * (lopAn[lopCua(bp)] ? 0 : 1);
+    st.doMoHien += (dichMo - st.doMoHien) * k;
     st.sangHien += (sangDich - st.sangHien) * k;
     const hienMesh = st.doMoHien > 0.012;
-    for (const m of meshTheoBP[bp] || []) if (m.visible !== hienMesh) m.visible = hienMesh;
-    const xung = 0.75 + 0.25 * Math.sin(thoiGian * 4);
+    const dsMesh = meshTheoBP[bp];
+    if (dsMesh) {
+      for (let j = 0; j < dsMesh.length; j++) {
+        if (dsMesh[j].visible !== hienMesh) { dsMesh[j].visible = hienMesh; doiHien = true; }
+      }
+    }
     if (xQuang && vatLieuXQ[bp]) {
       vatLieuXQ[bp].uniforms.uDoMo.value = st.doMoHien;
       vatLieuXQ[bp].uniforms.uSang.value = st.sangHien * xung;
@@ -4900,24 +4918,36 @@ function capNhatHienThi(dt) {
       if (m.transparent !== trongSuot) { m.transparent = trongSuot; m.needsUpdate = true; }
       m.opacity = doMo;
       m.depthWrite = m.userData.luonGhiSau ? doMo > 0.9 : !trongSuot;
-      m.emissive.setHex(HE[BO_PHAN[bp]?.he]?.sang ?? 0x67e8f9);
-      m.emissiveIntensity = st.sangHien * 0.55 * xung + (bp === "day_than_kinh" ? 0.12 : 0);
+      const cuongDo = st.sangHien * 0.55 * xung + (bp === "day_than_kinh" ? 0.12 : 0);
+      if (cuongDo > 0.001 || m.emissiveIntensity > 0.001) {
+        m.emissive.setHex(HE[BO_PHAN[bp]?.he]?.sang ?? 0x67e8f9);
+        m.emissiveIntensity = cuongDo;
+      }
     }
   }
-  for (const [he, nhom] of Object.entries(nhomHe)) {
-    const dich = TACH[he] ? TACH[he].clone().multiplyScalar(heSoTach) : V(0, 0, 0);
-    nhom.position.lerp(dich, k);
+  for (let i = 0; i < _dsHe.length; i++) {
+    const [he, nhom] = _dsHe[i];
+    if (TACH[he]) _vDichTam.copy(TACH[he]).multiplyScalar(heSoTach);
+    else _vDichTam.set(0, 0, 0);
+    if (nhom.position.distanceToSquared(_vDichTam) > 1e-8) {
+      nhom.position.lerp(_vDichTam, k);
+      doiHien = true;
+    }
   }
   for (const ben of ["trai", "phai"]) {
-    const dich = TAM_PHOI[ben].clone().add(TACH_PHOI[ben].clone().multiplyScalar(heSoTach));
-    phoi[ben].position.lerp(dich, k);
+    _vDichTam.copy(TACH_PHOI[ben]).multiplyScalar(heSoTach).add(TAM_PHOI[ben]);
+    if (phoi[ben].position.distanceToSquared(_vDichTam) > 1e-8) {
+      phoi[ben].position.lerp(_vDichTam, k);
+      doiHien = true;
+    }
   }
+  if (doiHien && renderer.shadowMap.enabled) renderer.shadowMap.needsUpdate = true;
   vatLieuVo.uniforms.uDoMo.value += ((tachLop ? 0.15 : xQuang ? 1.6 : 1) - vatLieuVo.uniforms.uDoMo.value) * k;
   // lớp vỏ cơ: thanh trượt × cô lập × tách; nhóm cơ của hệ cơ theo thanh trượt
   const coAn = lopAn.co || nhomHe.he_co.visible === false;
   vo.doMo += (vo.dich * vo.lopCo * (coAn ? 0 : 1) * (1 - 0.85 * heSoTach) - vo.doMo) * k;
   VL_CO_VO.userData.u.uDoMoLop.value = vo.doMo;
-  for (const m of vatLieuCoDS) if (m !== VL_CO_VO) m.userData.u.uDoMoLop.value = vo.lopCo;
+  for (let i = 0; i < vatLieuCoDS.length; i++) if (vatLieuCoDS[i] !== VL_CO_VO) vatLieuCoDS[i].userData.u.uDoMoLop.value = vo.lopCo;
   voCoThe.visible = xQuang ? !coAn : vo.doMo > 0.01;
 }
 function datXQuang(bat) {
@@ -4954,6 +4984,7 @@ function datBong(bat) {
     scene.traverse((o) => { if (o.material) [].concat(o.material).forEach((m) => { m.needsUpdate = true; }); });
   }
   denKhoa.castShadow = bat;
+  if (bat) renderer.shadowMap.needsUpdate = true;
 }
 function datMoiTruong(ten) {
   cheDoMoiTruong = ten === "xray" ? cheDoMoiTruong : ten;
@@ -5343,9 +5374,9 @@ async function batDieuKhienTay(nguon = "camera") {
     dangNapTay = true;
     try {
       const [{ DieuKhien }, { taoBoApOrbit }, { taoDieuKhienTay }] = await Promise.all([
-        import("/static/dieu-khien-tay/cu-chi.js?v=3"),
-        import("/static/dieu-khien-tay/ap-orbit.js?v=3"),
-        import("/static/dieu-khien-tay/theo-doi-tay.js?v=3")
+        import("/static/dieu-khien-tay/cu-chi.js?v=4"),
+        import("/static/dieu-khien-tay/ap-orbit.js?v=4"),
+        import("/static/dieu-khien-tay/theo-doi-tay.js?v=4")
       ]);
 
       const dieuKhien = new DieuKhien({
@@ -5366,7 +5397,7 @@ async function batDieuKhienTay(nguon = "camera") {
         }
       });
 
-      boApOrbit = taoBoApOrbit({ THREE, camera, controls, dieuKhien, doMuot: 0.04 });
+      boApOrbit = taoBoApOrbit({ THREE, camera, controls, dieuKhien, doMuot: 0.024, cheDoMuot: "sieu_muot" });
       boDieuKhienTay = await taoDieuKhienTay({
         khung3D: document.getElementById("khung-3d") || document.getElementById("khung-giua"),
         vungBang: document.getElementById("khung-giua") || document.getElementById("khung-3d"),
@@ -6329,42 +6360,61 @@ function capNhatSinhLy(dt) {
   for (const ben of ["trai", "phai"]) phoi[ben].scale.set(1 + sau * hit * 0.8, 1 + sau * hit, 1 + sau * hit * 1.1);
   phoi.coHoanh.position.y = phoi.coHoanh.userData.yGoc - 0.05 * hit * (1 + sinhLy.giaoCam);
   phoi.coHoanh.scale.y = 0.55 - 0.18 * hit;
-  // khí O₂ đi vào khi hít, CO₂ đi ra khi thở
+  // khí O₂ đi vào khi hít, CO₂ đi ra khi thở (ghi trực tiếp Float32Array 0 cấp phát rác + bỏ qua khi ẩn hệ hô hấp)
+  const hienHoHap = nhomHe.ho_hap.visible && (trangThaiBP.phoi_trai?.doMoHien ?? 1) > 0.05;
   const pO2 = dongKhi.o2, pCO2 = dongKhi.co2;
-  const phaVao = b < 0.4 ? b / 0.4 : 1;
-  const phaRa = b >= 0.4 ? (b - 0.4) / 0.6 : 0;
-  const tamO2 = Math.round(pO2.n * kep(sinhLy.po2 / 100, 0.25, 1.1));
-  for (let i = 0; i < pO2.n; i++) {
-    const hien = i < tamO2 && b < 0.55;
-    const u = kep(phaVao - (i % 9) * 0.04, 0, 1);
-    pO2.duong[pO2.chiSo[i]].getPointAt(u, v3);
-    pO2.viTri.set(hien ? [v3.x, v3.y, v3.z] : [0, -50, 0], i * 3);
+  pO2.diem.visible = hienHoHap;
+  pCO2.diem.visible = hienHoHap;
+  if (hienHoHap) {
+    const phaVao = b < 0.4 ? b / 0.4 : 1;
+    const phaRa = b >= 0.4 ? (b - 0.4) / 0.6 : 0;
+    const tamO2 = Math.round(pO2.n * kep(sinhLy.po2 / 100, 0.25, 1.1));
+    const aO2 = pO2.viTri;
+    for (let i = 0; i < pO2.n; i++) {
+      const idx = i * 3;
+      if (i < tamO2 && b < 0.55) {
+        const u = kep(phaVao - (i % 9) * 0.04, 0, 1);
+        pO2.duong[pO2.chiSo[i]].getPointAt(u, v3);
+        aO2[idx] = v3.x; aO2[idx + 1] = v3.y; aO2[idx + 2] = v3.z;
+      } else { aO2[idx] = 0; aO2[idx + 1] = -50; aO2[idx + 2] = 0; }
+    }
+    const tamCO2 = Math.round(pCO2.n * kep(sinhLy.pco2 / 45, 0.25, 1.4));
+    const aCO2 = pCO2.viTri;
+    for (let i = 0; i < pCO2.n; i++) {
+      const idx = i * 3;
+      if (i < tamCO2 && b >= 0.4) {
+        const u = kep(1 - phaRa - (i % 9) * 0.04, 0, 1);
+        pCO2.duong[pCO2.chiSo[i]].getPointAt(u, v3);
+        aCO2[idx] = v3.x; aCO2[idx + 1] = v3.y; aCO2[idx + 2] = v3.z;
+      } else { aCO2[idx] = 0; aCO2[idx + 1] = -50; aCO2[idx + 2] = 0; }
+    }
+    pO2.diem.geometry.attributes.position.needsUpdate = true;
+    pCO2.diem.geometry.attributes.position.needsUpdate = true;
+    pO2.diem.position.copy(nhomHe.ho_hap.position);
+    pCO2.diem.position.copy(nhomHe.ho_hap.position);
   }
-  const tamCO2 = Math.round(pCO2.n * kep(sinhLy.pco2 / 45, 0.25, 1.4));
-  for (let i = 0; i < pCO2.n; i++) {
-    const hien = i < tamCO2 && b >= 0.4;
-    const u = kep(1 - phaRa - (i % 9) * 0.04, 0, 1);
-    pCO2.duong[pCO2.chiSo[i]].getPointAt(u, v3);
-    pCO2.viTri.set(hien ? [v3.x, v3.y, v3.z] : [0, -50, 0], i * 3);
+  // thần kinh: tần số phát xung theo trạng thái (0 cấp phát mảng tạm, bỏ qua khi ẩn hệ thần kinh)
+  const hienTK = nhomHe.than_kinh.visible && (trangThaiBP.day_than_kinh?.doMoHien ?? 1) > 0.05;
+  if (hienTK) {
+    sinhLy.xungTho += dt * (2.5 + 14 * sinhLy.giaoCam);
+    while (sinhLy.xungTho > 1) { sinhLy.xungTho -= 1; phatXung(1); }
+    for (let i = xung.hat.length - 1; i >= 0; i--) { const h = xung.hat[i]; h.u += dt * h.tocDo * (1 + sinhLy.giaoCam); if (h.u >= 1) xung.hat.splice(i, 1); }
+    const aX = xung.viTri;
+    for (let i = 0; i < xung.toiDa; i++) {
+      const h = xung.hat[i], idx = i * 3;
+      if (h) { h.duong.getPointAt(h.u, v3); aX[idx] = v3.x; aX[idx + 1] = v3.y; aX[idx + 2] = v3.z; }
+      else { aX[idx] = 0; aX[idx + 1] = -50; aX[idx + 2] = 0; }
+    }
+    xung.diem.geometry.attributes.position.needsUpdate = true;
+    thanKinh.nhomMang.material.opacity = 0.25 + 0.35 * sinhLy.giaoCam + 0.1 * Math.sin(thoiGian * 8);
   }
-  pO2.diem.geometry.attributes.position.needsUpdate = true;
-  pCO2.diem.geometry.attributes.position.needsUpdate = true;
-  pO2.diem.position.copy(nhomHe.ho_hap.position);
-  pCO2.diem.position.copy(nhomHe.ho_hap.position);
-  // thần kinh: tần số phát xung theo trạng thái
-  sinhLy.xungTho += dt * (2.5 + 14 * sinhLy.giaoCam);
-  while (sinhLy.xungTho > 1) { sinhLy.xungTho -= 1; phatXung(1); }
-  for (let i = xung.hat.length - 1; i >= 0; i--) { const h = xung.hat[i]; h.u += dt * h.tocDo * (1 + sinhLy.giaoCam); if (h.u >= 1) xung.hat.splice(i, 1); }
-  for (let i = 0; i < xung.toiDa; i++) {
-    const h = xung.hat[i];
-    if (h) { h.duong.getPointAt(h.u, v3); xung.viTri.set([v3.x, v3.y, v3.z], i * 3); } else xung.viTri.set([0, -50, 0], i * 3);
-  }
-  xung.diem.geometry.attributes.position.needsUpdate = true;
-  thanKinh.nhomMang.material.opacity = 0.25 + 0.35 * sinhLy.giaoCam + 0.1 * Math.sin(thoiGian * 8);
-  // dạ dày: nhu động – đối giao cảm mạnh, giao cảm ức chế
+  // dạ dày: nhu động – chỉ cập nhật 30 Hz khi dạ dày đang hiển thị (giảm ~75% tải upload đỉnh GPU)
   sinhLy.nhuDong = (1 - 0.75 * sinhLy.giaoCam) * (1 + 1.5 * sinhLy.nhanNhuDong);
-  const bd = 0.1 + 0.1 * sinhLy.nhanNhuDong;
-  tieuHoa.daDay.geometry.userData.capNhat((u) => tieuHoa.hamDaDay(u) * (1 + bd * sinhLy.nhuDong * Math.sin(2 * Math.PI * (u * 2.2 - thoiGian * 0.05 * 3 * sinhLy.nhuDong))));
+  if (nhomHe.tieu_hoa.visible && tieuHoa.daDay.visible && (trangThaiBP.da_day?.doMoHien ?? 1) > 0.05 && thoiGian - _lucDaDayCuoi >= 0.033) {
+    _lucDaDayCuoi = thoiGian;
+    const bd = 0.1 + 0.1 * sinhLy.nhanNhuDong;
+    tieuHoa.daDay.geometry.userData.capNhat((u) => tieuHoa.hamDaDay(u) * (1 + bd * sinhLy.nhuDong * Math.sin(2 * Math.PI * (u * 2.2 - thoiGian * 0.05 * 3 * sinhLy.nhuDong))));
+  }
   baiTiet.bangQuang.scale.setScalar(1 + 0.04 * Math.sin(thoiGian * 0.4));
 }
 function capNhatMoiTruong(dt) {
@@ -6399,8 +6449,15 @@ function vongLap() {
   boDieuKhienTay?.capNhatKhung?.(dt);
   boApOrbit?.capNhat(dt);
   controls.update();
+  // Cập nhật bản đồ bóng mềm 2048px ở nhịp ~10 Hz (phổi thở nhẹ) thay vì 120 Hz → giảm ~90% tải GPU đổ bóng
+  if (renderer.shadowMap.enabled && !cheDoViMo && thoiGian - _lucBongCuoi >= 0.095) {
+    _lucBongCuoi = thoiGian;
+    renderer.shadowMap.needsUpdate = true;
+  }
   renderer.render(scene, camera);
-  rendererNhan.render(scene, camera);
+  if (nhanDangHien.length || nhanThongMinh.ds.length || diemNong.length || giaiThichTungBuoc?.dangMo || cheDoViMo) {
+    rendererNhan.render(scene, camera);
+  }
   veECG(dt);
   demKhung++;
   demFPS += thuc;
