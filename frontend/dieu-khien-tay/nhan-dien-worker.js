@@ -48,6 +48,8 @@ function nhanDien(anh, ms) {
   if (!canvasLat || canvasLat.width !== anh.width || canvasLat.height !== anh.height) {
     canvasLat = new OffscreenCanvas(anh.width, anh.height);
     ctxLat = canvasLat.getContext('2d');
+    ctxLat.imageSmoothingEnabled = true;
+    ctxLat.imageSmoothingQuality = 'medium';
     ctxLat.setTransform(-1, 0, 0, 1, anh.width, 0);
   }
   ctxLat.drawImage(anh, 0, 0);
@@ -71,7 +73,7 @@ self.onmessage = async ({ data: m }) => {
     let kq = null, loi = null;
     try {
       kq = nhanDien(m.anh, m.ms);
-      if (demKhung++ % 10 === 0) doSang = doDoSang(m.anh);
+      if (demKhung++ % 24 === 0) doSang = doDoSang(m.anh);
     } catch (e) {
       loi = String((e && e.message) || e);
     }

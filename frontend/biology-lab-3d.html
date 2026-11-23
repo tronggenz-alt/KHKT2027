@@ -5343,20 +5343,21 @@ async function batDieuKhienTay(nguon = "camera") {
     dangNapTay = true;
     try {
       const [{ DieuKhien }, { taoBoApOrbit }, { taoDieuKhienTay }] = await Promise.all([
-        import("/static/dieu-khien-tay/cu-chi.js"),
-        import("/static/dieu-khien-tay/ap-orbit.js"),
-        import("/static/dieu-khien-tay/theo-doi-tay.js")
+        import("/static/dieu-khien-tay/cu-chi.js?v=2"),
+        import("/static/dieu-khien-tay/ap-orbit.js?v=2"),
+        import("/static/dieu-khien-tay/theo-doi-tay.js?v=2")
       ]);
 
       const dieuKhien = new DieuKhien({
         veGocDauNoiBo: false,
         khiSuKien: (suKien) => {
-          if (suKien.loai === "bat_dau") {
+          const kieu = suKien.kieu || suKien.loai;
+          if (kieu === "bat_dau") {
             gsap.killTweensOf(camera.position);
             gsap.killTweensOf(controls.target);
-          } else if (suKien.loai === "dat_lai") {
+          } else if (kieu === "dat_lai") {
             chonGocNhin();
-          } else if (suKien.loai === "cham_chon") {
+          } else if (kieu === "cham_chon") {
             const r = renderer.domElement.getBoundingClientRect();
             const clientX = r.left + (suKien.x || 0.5) * r.width;
             const clientY = r.top + (suKien.y || 0.5) * r.height;
@@ -5365,7 +5366,7 @@ async function batDieuKhienTay(nguon = "camera") {
         }
       });
 
-      boApOrbit = taoBoApOrbit({ THREE, camera, controls, dieuKhien });
+      boApOrbit = taoBoApOrbit({ THREE, camera, controls, dieuKhien, doMuot: 0.06 });
       boDieuKhienTay = await taoDieuKhienTay({
         khung3D: document.getElementById("khung-3d") || document.getElementById("khung-giua"),
         vungBang: document.getElementById("khung-giua") || document.getElementById("khung-3d"),
@@ -6395,6 +6396,7 @@ function vongLap() {
   else viMo[cheDoViMo].capNhat(dt, thoiGian);
   if (dongLoTrinh) { dongLoTrinhTho += dt; dongLoTrinh.hat.capNhat(dt); dongLoTrinh.vet.material.opacity = 0.3 + 0.2 * Math.sin(dongLoTrinhTho * 4); }
   giaiThichTungBuoc?.capNhat(dt);
+  boDieuKhienTay?.capNhatKhung?.(dt);
   boApOrbit?.capNhat(dt);
   controls.update();
   renderer.render(scene, camera);

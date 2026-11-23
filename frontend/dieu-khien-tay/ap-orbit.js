@@ -3,7 +3,7 @@
  * ES Module: Nhận THREE, camera, controls, dieuKhien qua tham số
  */
 
-export function taoBoApOrbit({ THREE, camera, controls, dieuKhien, doMuot = 0.02 }) { // 26/10: 0.03 → 0.02 s cho đỡ trễ
+export function taoBoApOrbit({ THREE, camera, controls, dieuKhien, doMuot = 0.055 }) { // mượt 55 ms: nối liền nhịp camera 25–30 Hz thành chuyển động 60–120 Hz êm mượt
   if (!THREE || !camera || !controls || !dieuKhien) {
     throw new Error('taoBoApOrbit cần đủ { THREE, camera, controls, dieuKhien }');
   }
@@ -71,6 +71,14 @@ export function taoBoApOrbit({ THREE, camera, controls, dieuKhien, doMuot = 0.02
     yawMoc = dieuKhien.yaw;
     pitchMoc = dieuKhien.pitch;
     zoomMoc = dieuKhien.zoom;
+
+    // Khi không có biến thiên nào đang chờ, không chạm vào camera để chuột / hoạt ảnh GSAP mượt hoàn toàn
+    if (Math.abs(hangChoYaw) < 1e-6 && Math.abs(hangChoPitch) < 1e-6 && Math.abs(hangChoZoomRatio - 1.0) < 1e-6) {
+      hangChoYaw = 0.0;
+      hangChoPitch = 0.0;
+      hangChoZoomRatio = 1.0;
+      return;
+    }
 
     // Áp dần một phần của hàng chờ theo hàm mượt k = 1 - exp(-dt / doMuot)
     const k = doMuot > 0 ? (1.0 - Math.exp(-dt / doMuot)) : 1.0;

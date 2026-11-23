@@ -6,10 +6,135 @@ import { RONG_NHAN_DIEN, tinhVungCat, doiVeKhungDay, kichThuocTay, ThongKeTay, g
 const { docTay, raCuaSo, HANG_SO } = cuChiModule;
 const { chonCamera } = chonCamModule;
 
-// Ngưỡng tin cậy để mặc định của MediaPipe (0,5): 0,6 làm rớt tay khi hơi tối / tay nghiêng / chuyển động nhanh.
-// numHands 2 vì cần hai tay để phóng to; khi chỉ thấy 1 tay MediaPipe phải dò lòng bàn tay mỗi khung
-// nên việc nhận diện chạy ở luồng riêng (nhan-dien-worker.js) để không chặn việc vẽ 3D.
-const TUY_CHON = { numHands: 2, minHandDetectionConfidence: 0.5, minHandPresenceConfidence: 0.5, minTrackingConfidence: 0.5 };
+// Ngưỡng tối ưu cho nhận diện tay mượt và bám chắc khi chụm ngón / lia tay nhanh / ánh sáng trong phòng:
+// - minHandDetectionConfidence 0.42: phát hiện bàn tay sớm hơn mà không bắt nhầm nền
+// - minHandPresenceConfidence 0.35 & minTrackingConfidence 0.32: bám khung liên tục khi ngón cái/trỏ che nhau lúc chụm
+const TUY_CHON = { numHands: 2, minHandDetectionConfidence: 0.42, minHandPresenceConfidence: 0.35, minTrackingConfidence: 0.32 };
+
+// Bộ ổn định khung tay trước khi đưa vào docTay (chỉ dùng cho camera trực tiếp):
+// 1. Giữ nguyên nhãn Left/Right theo vị trí lòng bàn tay gần nhất → hết lỗi lật tay giữa chừng làm đứt kéo
+// 2. Lọc mượt 21 điểm + toạ độ 3D thích ứng theo tốc độ (chậm → lọc rung mạnh, nhanh → bắt kịp tức thì)
+// 3. Bù 1–2 khung bị rớt thoáng qua (< 95 ms) khi vẩy tay nhanh để xoay/zoom không bị khựng
+export function taoBoOnDinhTay() {
+  const BAN_KINH_KHOP = 0.22;
+  const BU_ROT_S = 0.095;
+  let truoc = []; // [{ ben, tam: [x, y], v: [vx, vy], diem, theGioi, score, t }]
+
+  const tamBanTay = (d) => [(d[0].x + d[9].x) * 0.5, (d[0].y + d[9].y) * 0.5];
+  const saoDiem = (ds) => ds.map((p) => ({ x: p.x, y: p.y, z: p.z || 0 }));
+  const locMang = (cu, moi, a) => moi.map((p, i) => {
+    const q = cu[i] || p;
+    return { x: q.x + (p.x - q.x) * a, y: q.y + (p.y - q.y) * a, z: (q.z || 0) + ((p.z || 0) - (q.z || 0)) * a };
+  });
+
+  function datLai() { truoc = []; }
+
+  function xuLy(mp, t) {
+    const hl = (mp && mp.hand_landmarks) || [];
+    const hwl = (mp && mp.hand_world_landmarks) || [];
+    const hd = (mp && mp.handedness) || [];
+    const daDungCu = new Set();
+    const moi = [];
+
+    for (let i = 0; i < hl.length; i++) {
+      const diem = hl[i];
+      if (!diem || diem.length < 21) continue;
+      const tam = tamBanTay(diem);
+      let idxTot = -1, kcTot = BAN_KINH_KHOP;
+      for (let j = 0; j < truoc.length; j++) {
+        if (daDungCu.has(j)) continue;
+        const dtCu = Math.max(0, t - truoc[j].t);
+        if (dtCu > 0.35) continue;
+        const px = truoc[j].tam[0] + truoc[j].v[0] * Math.min(dtCu, 0.08);
+        const py = truoc[j].tam[1] + truoc[j].v[1] * Math.min(dtCu, 0.08);
+        const kc = Math.hypot(tam[0] - px, tam[1] - py);
+        if (kc < kcTot) { kcTot = kc; idxTot = j; }
+      }
+
+      const hItem = (hd[i] && hd[i][0]) || {};
+      const tenGoc = hItem.categoryName || hItem.category_name || ('Tay' + i);
+      const theGioiMoi = (hwl[i] && hwl[i].length >= 21) ? saoDiem(hwl[i]) : null;
+
+      if (idxTot >= 0) {
+        daDungCu.add(idxTot);
+        const cu = truoc[idxTot];
+        const dt = Math.max(0.008, t - cu.t);
+        const buoc = Math.hypot(tam[0] - cu.tam[0], tam[1] - cu.tam[1]);
+        // Thích ứng tốc độ: giữ yên/kéo chậm → alpha ~0.44 chống rung ngón; kéo nhanh → alpha ~0.92 không trễ
+        const tyLe = Math.min(1, Math.max(0, (buoc - 0.005) / 0.032));
+        const a2d = 0.44 + tyLe * 0.48;
+        const a3d = 0.42 + tyLe * 0.46;
+        const diemLoc = locMang(cu.diem, diem, a2d);
+        const tgLoc = (theGioiMoi && cu.theGioi) ? locMang(cu.theGioi, theGioiMoi, a3d) : theGioiMoi;
+        const tamLoc = tamBanTay(diemLoc);
+        const vx = Math.max(-2.5, Math.min(2.5, (tamLoc[0] - cu.tam[0]) / dt));
+        const vy = Math.max(-2.5, Math.min(2.5, (tamLoc[1] - cu.tam[1]) / dt));
+        moi.push({
+          ben: cu.ben,
+          tam: tamLoc,
+          v: [cu.v[0] * 0.35 + vx * 0.65, cu.v[1] * 0.35 + vy * 0.65],
+          diem: diemLoc,
+          theGioi: tgLoc,
+          score: hItem.score,
+          t,
+          bu: false
+        });
+      } else {
+        // Tránh trùng tên bên với tay đang tồn tại
+        const tenTrung = moi.some((m) => m.ben === tenGoc);
+        const ben = tenTrung ? (tenGoc === 'Left' ? 'Right' : 'Left') : tenGoc;
+        moi.push({
+          ben,
+          tam,
+          v: [0, 0],
+          diem: saoDiem(diem),
+          theGioi: theGioiMoi,
+          score: hItem.score,
+          t,
+          bu: false
+        });
+      }
+    }
+
+    // Bù thoáng qua (<= 95 ms) nếu tay bị rớt 1–2 khung lúc lia nhanh / nghiêng bàn tay
+    for (let j = 0; j < truoc.length; j++) {
+      if (daDungCu.has(j) || moi.length >= 2) continue;
+      const cu = truoc[j];
+      const dtMat = t - cu.t;
+      if (dtMat > 0 && dtMat <= BU_ROT_S && !moi.some((m) => m.ben === cu.ben)) {
+        const dx = cu.v[0] * dtMat * 0.45;
+        const dy = cu.v[1] * dtMat * 0.45;
+        const diemBu = cu.diem.map((p) => ({
+          x: Math.min(1, Math.max(0, p.x + dx)),
+          y: Math.min(1, Math.max(0, p.y + dy)),
+          z: p.z || 0
+        }));
+        moi.push({
+          ben: cu.ben,
+          tam: tamBanTay(diemBu),
+          v: [cu.v[0] * 0.6, cu.v[1] * 0.6],
+          diem: diemBu,
+          theGioi: cu.theGioi ? saoDiem(cu.theGioi) : null,
+          score: cu.score,
+          t: cu.t,
+          bu: true
+        });
+      }
+    }
+
+    truoc = moi;
+    const ra = { hand_landmarks: [], hand_world_landmarks: [], handedness: [] };
+    for (const h of moi) {
+      ra.hand_landmarks.push(h.diem);
+      if (h.theGioi) ra.hand_world_landmarks.push(h.theGioi);
+      ra.handedness.push([{ categoryName: h.ben, category_name: h.ben, score: h.score }]);
+    }
+    if (ra.hand_world_landmarks.length !== ra.hand_landmarks.length) ra.hand_world_landmarks = [];
+    return ra;
+  }
+
+  return { xuLy, datLai };
+}
 
 // Công tắc ẩn để so cách chạy nhận diện trên máy thật: localStorage 'dkt-nhan-dien' =
 // '' (mặc định: luồng riêng, GPU trước) | 'rieng-cpu' (luồng riêng, CPU trước) | 'chinh' (luồng chính, GPU trước – như bản đầu).
@@ -32,7 +157,7 @@ const DAU_NGON = [4, 8, 12, 16, 20];
 // Tải CSS tự động nếu chưa có
 function damBaoCSS() {
   if (typeof document === 'undefined') return;
-  const href = new URL('./dieu-khien-tay.css', import.meta.url).href;
+  const href = new URL('./dieu-khien-tay.css' + new URL(import.meta.url).search, import.meta.url).href;
   if (!document.querySelector(`link[href="${href}"]`)) {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
@@ -100,6 +225,8 @@ export async function taoDieuKhienTay({
   let dsTayCuoi = [];
   let goiYHienTai = null;
   let thongKe = new ThongKeTay();
+  let dangDungVongRender = false; // true khi vòng render 60–120 Hz đang gọi capNhatKhung(dt)
+  const boOnDinh = taoBoOnDinhTay();
 
   const cacTay = {};
 
@@ -222,18 +349,35 @@ export async function taoDieuKhienTay({
       el,
       ngoai: el.querySelector('.dkt-ct-ngoai'),
       cung: el.querySelector('.dkt-ct-cung'),
-      tam: el.querySelector('.dkt-ct-tam')
+      tam: el.querySelector('.dkt-ct-tam'),
+      hien: false,
+      x: 0,
+      y: 0,
+      tx: 0,
+      ty: 0
     };
+  }
+
+  function datViTriConTro(pt, x, y) {
+    pt.x = x;
+    pt.y = y;
+    pt.el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) translate(-50%, -50%)`;
   }
 
   function capNhatConTro(pt, x, y, cham, tl, cheDo) {
     if (x === null) {
+      pt.hien = false;
       pt.el.style.display = 'none';
       return;
     }
+    const moiHien = !pt.hien;
+    pt.hien = true;
+    pt.tx = x;
+    pt.ty = y;
     pt.el.style.display = 'block';
-    pt.el.style.left = x + 'px';
-    pt.el.style.top = y + 'px';
+    if (moiHien || !dangDungVongRender) {
+      datViTriConTro(pt, x, y);
+    }
 
     const laZoom = (cheDo === 'zoom');
     const mauChinh = laZoom ? '#3b82f6' : '#f97316';
@@ -393,9 +537,9 @@ export async function taoDieuKhienTay({
     stream = await navigator.mediaDevices.getUserMedia({
       video: {
         deviceId: { exact: deviceId },
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
-        frameRate: { ideal: 30 }
+        width: { ideal: 960 },
+        height: { ideal: 540 },
+        frameRate: { ideal: 60 }
       },
       audio: false
     });
@@ -474,7 +618,7 @@ export async function taoDieuKhienTay({
 
     if (luong === 'worker') {
       createImageBitmap(videoEl, cat.sx, cat.sy, cat.sw, cat.sh,
-        { resizeWidth: RONG_NHAN_DIEN, resizeHeight: caoNhanDien, resizeQuality: 'low' })
+        { resizeWidth: RONG_NHAN_DIEN, resizeHeight: caoNhanDien, resizeQuality: 'medium' })
         .then((anh) => {
           if (!dangChay || !worker) { anh.close(); dangCho = false; return; }
           worker.postMessage({ loai: 'khung', anh, ms, meta }, [anh]);
@@ -514,13 +658,16 @@ export async function taoDieuKhienTay({
     const dt = Math.min(0.1, Math.max(0.001, tGiay - tTruoc));
     tTruoc = tGiay;
     const tiLe = vw / vh;
-    const dsTay = kq ? docTay(doiVeKhungDay(kq, cat, vw, vh), tiLe, tGiay, cacTay) : [];
+    const mpDaCat = kq ? doiVeKhungDay(kq, cat, vw, vh) : null;
+    const mpOnDinh = boOnDinh.xuLy(mpDaCat, tGiay);
+    const dsTay = docTay(mpOnDinh, tiLe, tGiay, cacTay);
     soTayHienTai = dsTay.length;
     dsTayCuoi = dsTay;
     thongKe.ghiNhanDien(tGiay, dsTay.length);
 
-    // Cập nhật bộ điều khiển cử chỉ
-    dieuKhien.capNhat(tGiay, dt, dsTay);
+    // Cập nhật bộ điều khiển cử chỉ (nếu vòng render 60–120 Hz đang tự tích phân quán tính mượt thì tránh cộng dồn dt lần 2)
+    const dtDieuKhien = (dangDungVongRender && dieuKhien.cheDo === 'quan_tinh') ? 0 : dt;
+    dieuKhien.capNhat(tGiay, dtDieuKhien, dsTay);
 
     // Cập nhật con trỏ trên khung 3D
     const rect = khung3D.getBoundingClientRect();
@@ -703,6 +850,8 @@ export async function taoDieuKhienTay({
       tTruoc = 0;
       msTruoc = -1;
       thongKe = new ThongKeTay();
+      boOnDinh.datLai();
+      for (const k of Object.keys(cacTay)) delete cacTay[k];
       dsTayCuoi = [];
       doSang = -1;
 
@@ -752,14 +901,61 @@ export async function taoDieuKhienTay({
     }
 
     // Ẩn con trỏ và bảng
+    conTro1.hien = false;
+    conTro2.hien = false;
     conTro1.el.style.display = 'none';
     conTro2.el.style.display = 'none';
     duongZoomSvg.style.display = 'none';
     vongTienDoWrap.classList.remove('hien');
     bangCam.style.display = 'none';
     hopGoiY.style.display = 'none';
+    boOnDinh.datLai();
+    for (const k of Object.keys(cacTay)) delete cacTay[k];
     dsTayCuoi = [];
     anLoi();
+  }
+
+  // Gọi mỗi khung hình render 3D (60–120 Hz): nội suy con trỏ tay bằng GPU translate3d và lướt quán tính cực mượt
+  function capNhatKhung(dt) {
+    dangDungVongRender = true;
+    if (!dangChay) return;
+    if (typeof dt !== 'number' || dt <= 0 || isNaN(dt)) dt = 0.016;
+    const dtKep = Math.min(0.05, dt);
+
+    // Nội suy mượt con trỏ tay ở 60–120 FPS (không nhảy cục theo nhịp camera 25–30 Hz)
+    const k = 1 - Math.exp(-dtKep / 0.030);
+    for (const pt of [conTro1, conTro2]) {
+      if (!pt.hien) continue;
+      const nx = pt.x + (pt.tx - pt.x) * k;
+      const ny = pt.y + (pt.ty - pt.y) * k;
+      datViTriConTro(pt, nx, ny);
+    }
+    if (duongZoomSvg.style.display !== 'none' && conTro1.hien && conTro2.hien) {
+      duongZoomLine.setAttribute('x1', conTro1.x.toFixed(1));
+      duongZoomLine.setAttribute('y1', conTro1.y.toFixed(1));
+      duongZoomLine.setAttribute('x2', conTro2.x.toFixed(1));
+      duongZoomLine.setAttribute('y2', conTro2.y.toFixed(1));
+    }
+
+    // Lướt quán tính ở đúng tần số quét màn hình (60–120 Hz) thay vì giật theo nhịp nhận diện camera
+    if (dieuKhien.cheDo === 'quan_tinh') {
+      dieuKhien.yaw += dieuKhien.wYaw * dtKep;
+      const pMoi = dieuKhien.pitch + dieuKhien.wPitch * dtKep;
+      dieuKhien.pitch = Math.max(-HANG_SO.PITCH_MAX, Math.min(HANG_SO.PITCH_MAX, pMoi));
+      if (dieuKhien.pitch !== pMoi) dieuKhien.wPitch = 0.0;
+      dieuKhien.wYaw *= Math.exp(-dtKep / HANG_SO.QT_TAT);
+      dieuKhien.wPitch *= Math.exp(-dtKep / (HANG_SO.QT_TAT / 2));
+      if (Math.hypot(dieuKhien.wYaw, dieuKhien.wPitch) < 0.05) {
+        dieuKhien.wYaw = 0.0;
+        dieuKhien.wPitch = 0.0;
+        dieuKhien.cheDo = 'cho';
+        if (dieuKhien._dangHoatDong) {
+          dieuKhien._dangHoatDong = false;
+          dieuKhien._phat?.('ket_thuc');
+        }
+        capNhatChip(dieuKhien.cheDo, dieuKhien.veDau);
+      }
+    }
   }
 
   function huy() {
@@ -794,6 +990,7 @@ export async function taoDieuKhienTay({
     bat,
     tat,
     huy,
+    capNhatKhung,
     get trangThai() {
       return {
         bat: dangChay,
