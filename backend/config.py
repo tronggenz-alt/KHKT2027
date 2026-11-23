@@ -95,7 +95,8 @@ def _read_env() -> dict[str, str]:
               "UNPAYWALL_EMAIL", "S2_API_KEY", "TRA_CUU_TU_DONG",
               "OPENAI_API_KEY", "OPENAI_MODEL", "OPENAI_TEMPERATURE", "OPENAI_MAX_TOKENS", "AI_TIMEOUT_GIAY", "AI_TIMEOUT_DAI_GIAY",
               "EMBED_MODEL", "EMBED_DIM", "CHE_DO_CUC_BO", "CAP_ADMIN_EMAIL", "NOTEBOOKLM_COOKIE_KEY",
-              "CHE_DO_APP"):
+              "CHE_DO_APP",
+              "KHOA_WEB_BAT", "KHOA_WEB_MA", "KHOA_WEB_MA_BAM", "KHOA_WEB_MIEN_IP", "KHOA_WEB_MIEN_USER_ID", "KHOA_WEB_CAU_HOI"):
         if os.environ.get(k):
             values[k] = os.environ[k].strip()
     return values
@@ -181,6 +182,13 @@ class Settings:
     cap_admin_email: str = ""
     # NOTEBOOKLM_COOKIE_KEY: khoá AES-256-GCM mã hoá cookie Google NotebookLM (services/notebooklm/ma_hoa.py); KHÔNG in / gửi frontend / ghi log
     notebooklm_cookie_key: str = field(default="", repr=False)
+    # ----- Khoá truy cập web bằng mã 4 số cho IP mới (backend/khoa_web.py)
+    khoa_web_bat: bool = False
+    khoa_web_ma: str = field(default="", repr=False)
+    khoa_web_ma_bam: str = field(default="", repr=False)
+    khoa_web_mien_ip: str = ""
+    khoa_web_mien_user_id: int = 0
+    khoa_web_cau_hoi: str = "Ngày sinh của chủ app là gì"
 
     @property
     def dang_nhap_google(self) -> bool:
@@ -284,6 +292,12 @@ def load_settings() -> Settings:
         che_do_app=che_do_app,
         cap_admin_email=env.get("CAP_ADMIN_EMAIL", "").strip().lower(),
         notebooklm_cookie_key=env.get("NOTEBOOKLM_COOKIE_KEY", ""),
+        khoa_web_bat=_bat(env.get("KHOA_WEB_BAT"), "0"),
+        khoa_web_ma=env.get("KHOA_WEB_MA", ""),
+        khoa_web_ma_bam=env.get("KHOA_WEB_MA_BAM", ""),
+        khoa_web_mien_ip=env.get("KHOA_WEB_MIEN_IP", ""),
+        khoa_web_mien_user_id=_so(env.get("KHOA_WEB_MIEN_USER_ID"), 0),
+        khoa_web_cau_hoi=env.get("KHOA_WEB_CAU_HOI") or "Ngày sinh của chủ app là gì",
     )
 
 

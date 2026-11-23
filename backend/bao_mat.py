@@ -212,6 +212,7 @@ QUY_TAC_TAN_SUAT: dict[str, list[tuple[int, float]]] = {
     "ma_claude": [(10, 60)],                      # nhập mã Claude (khoá 5 lần sai/giờ nằm ở CSDL – ma_claude.py)
     "key_claude": [(10, 60)],                     # nhập Key Claude (khoá 5 lần sai/giờ theo tài khoản + IP nằm ở CSDL – key_claude.py)
     "doi_ma_app": [(10, 60)],                     # đổi mã đăng nhập desktop app (10 lần/phút theo IP)
+    "khoa_web": [(10, 300), (30, 3600)],          # nhập mã mở khoá web (chống dò mã 4 số theo IP)
 }
 
 

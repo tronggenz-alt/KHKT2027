@@ -23,7 +23,7 @@ from .config import setup_logging as _bat_nhat_ky
 
 _bat_nhat_ky()
 sao_luu.khoi_phuc_neu_can()  # máy chủ không ổ đĩa lưu (Render Free): tải dữ liệu từ bản sao lưu GitHub TRƯỚC khi mở CSDL
-from . import co_che_anh, db, giai_nhanh, key_claude, literature, ma_claude, phong_thi_nghiem, pipeline, research, sinh_hoc_ai, tai_khoan, tim_chat  # noqa: E402
+from . import co_che_anh, db, giai_nhanh, key_claude, khoa_web, literature, ma_claude, phong_thi_nghiem, pipeline, research, sinh_hoc_ai, tai_khoan, tim_chat  # noqa: E402
 from .auth import duong_dan_an_toan, can_dang_nhap, gioi_han, kiem_csrf, loi_tai_khoan, nguoi_dung_hien_tai, router as router_tai_khoan
 from .bao_mat import khoa_ky_phien
 from .chemdraw import mo_bang_chemdraw, tim_chemdraw
@@ -84,6 +84,7 @@ async def _vong_doi(_app):
     ai_rieng_xu_ly.chay_nen()  # AI Riêng: hàng chờ tài liệu (tách đoạn, trích bài có lời giải) + nhúng vector – thread nền
     from .auth import cap_admin_theo_cau_hinh
     cap_admin_theo_cau_hinh()
+    khoa_web.ghi_log_khoi_dong()
     sao_luu.bat_dau()          # sao lưu dữ liệu lên GitHub mỗi SAO_LUU_PHUT phút (chỉ khi đã cấu hình)
     yield
     sao_luu.dung()             # web đi ngủ / cập nhật: gửi bản sao lưu cuối
@@ -99,6 +100,7 @@ app.add_middleware(
     same_site="lax",
     https_only=settings.cookie_secure,  # cookie có cờ Secure (+ httponly mặc định của SessionMiddleware)
 )
+app.add_middleware(khoa_web.KhoaWebMiddleware)  # ngoài cùng: khoá mã 4 số cho IP mới (miễn IP đã cấu hình/CSDL + /api/suc-khoe)
 app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 app.include_router(router_tai_khoan)
 app.include_router(router_quan_tri)  # /admin/api/* – chỉ admin
