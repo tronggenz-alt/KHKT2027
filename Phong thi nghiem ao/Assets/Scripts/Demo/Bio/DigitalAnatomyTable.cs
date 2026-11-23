@@ -68,6 +68,9 @@ namespace Khkt.Demo.Bio
             BioFeedback.LogAction("ban_giai_phau_so", "doi_lop_giai_phau",
                 $"Bàn giải phẫu số: chuyển sang lớp '{names[layer]}' (Cơ quan trọng tâm: {OrganNames[selectedOrganIndex]}).");
             enabled = true;
+            // 19/11: mở bản web BIO-LAB 3D cũ của CHEMISTRY (WKWebView trên Mac/iPad, trình duyệt trên Windows).
+            if (!Khkt.Demo.Bio.Portal.BioWebViewBridge.IsOpen)
+                Khkt.Demo.Bio.Portal.BioWebViewBridge.Open();
         }
 
         public void SelectNextOrgan()

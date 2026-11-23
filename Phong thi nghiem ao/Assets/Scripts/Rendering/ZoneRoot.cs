@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Khkt.Interaction;
 using UnityEngine;
 
 namespace Khkt.Rendering
@@ -14,8 +15,17 @@ namespace Khkt.Rendering
 
         static readonly ZoneRoot[] byZone = new ZoneRoot[ZoneMap.Zones.Length];
         static readonly List<ZoneRoot> all = new List<ZoneRoot>();
+        readonly List<Grabbable> cachedGrabbables = new List<Grabbable>(128);
 
         public static IReadOnlyList<ZoneRoot> All => all;
+
+        /// <summary>Lấy các vật cầm được thuộc gốc khu này mà không cấp phát mảng mới.</summary>
+        public List<Grabbable> CollectGrabbables()
+        {
+            cachedGrabbables.Clear();
+            GetComponentsInChildren(true, cachedGrabbables);
+            return cachedGrabbables;
+        }
 
         /// <summary>Gốc tương tác của khu (null nếu cảnh không chia khu).</summary>
         public static ZoneRoot Of(int zone) => zone >= 0 && zone < byZone.Length ? byZone[zone] : null;

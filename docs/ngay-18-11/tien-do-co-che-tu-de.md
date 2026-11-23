@@ -1,0 +1,33 @@
+# Tiến độ: Cơ chế từ đề bài mới
+
+> **XONG (19/11).** Commit: 076d786f, e75072dd, 26cfdde2, 470c0686, cùng commit cuối có `DanhDauBuoc` và báo cáo.
+> KhktCoCheVerify 53/53 đạt (bản sạch HEAD + DanhDauBuoc, kết quả ảnh đề thật). Test Python 18/18. Thử thật đề chữ và ảnh đề đều đạt (Gemini flash-lite).
+> Đã xóa `mau_kiem_thu.bin`; máy chủ 8010 đã tắt. Việc còn lại: người dùng thay khóa Claude trong `.env`.
+
+Lần sau tiếp tục thì đọc tệp này trước. Báo cáo chi tiết: `bao-cao-co-che-tu-de.md`.
+
+## Đã xong
+1. Máy chủ: `server/ai/co_che/giai_de.py`, `POST /co-che/giai-de` (`api.py`), `nap_env` (`may_chu.py`). Đã thêm Gemini (REST) làm dự phòng khi Claude không có khóa hoặc bị 401/403.
+2. `tests/test_co_che_giai_de.py`: 14/14 đạt, `tests/test_co_che_api.py` vẫn đạt.
+3. App: bảng "Đề mới" (`CoCheMoDun.cs`), hộp chọn ảnh (`ChonTepHeThong.cs`: Mac, Windows, Editor; iPad để sau), `MayChuCoChe.GiaiDe`, phần kiểm thử trong `KhktCoCheRunner.cs`.
+4. `KhktCoCheVerify.Run`: **52/52 đạt**, 0 lỗi runtime, FPS 665. Sau khi chạy, `.mat` và ảnh g2..g4 không bị đổi.
+5. Commit đầu: 076d786f. Test Gemini giả lập: 18/18 đạt (commit sau).
+
+## Đang làm / còn lại (theo thứ tự)
+1. ~~Test giả lập Gemini~~ (xong).
+2. ~~Thử khóa Gemini~~: khóa dùng được. 19/11: gemini-pro-latest và gemini-flash-latest lúc trả 429 hết hạn mức, lúc treo; gemini-flash-lite-latest trả lời được (9 s). Đã sửa giai_de.py: quá giờ hoặc 429 thì chuyển sang mô hình sau; thêm flash-lite vào cuối danh sách.
+3. Thử thật (Gemini flash-lite, Claude 401). Đề chữ (cộng HBr vào propen): đạt, 2 bước, AI tự sửa 3 lần, 38,7 s. Ảnh đề SN1 lần 1: 422 (AI sai khung C). Đã thêm `smiles_co_map` (RDKit đánh map sẵn cho chất đầu) và lần 2 đạt: 3 bước, có bước chậm, 24,6 s. Kết quả ở scratchpad `ket_qua_anh.json`.
+   ĐANG LÀM: chạy KhktCoCheVerify với KHKT_CO_CHE_DE_JSON=<ket_qua_anh.json> để chụp kết quả thật ở cả 3D và Giấy. Cùng lúc đang có một phiên Unity của Hóa lý chạy, script tự đợi.
+  (dòng cũ:) thử thật 1 đề chữ và 1 ảnh đề (ảnh tự tạo ở scratchpad, `anh_de_thu.png`: Câu 2, (CH3)3CBr + H2O).
+   - Khóa Claude trong `.env` đang bị 401. Phiên chính đã báo người dùng thay khóa; phiên này không sửa `.env`.
+3b. CoCheMoDun gọi `Giay.DanhDauBuoc(TrinhPhat.ChiSoBuoc)` trong CapNhatChuThich và sau MoBai (phiên Sơ đồ giấy nhờ). Đã sửa, CHƯA commit; cần chạy KhktCoCheVerify lần nữa vì lần đang chạy đồng bộ mã trước khi sửa.
+4. Điền kết quả vào `bao-cao-co-che-tu-de.md`, chỗ đang ghi KET_QUA_UNITY và KET_QUA_THU_THAT.
+5. Xóa `StreamingAssets/CoChe/mau_kiem_thu.bin` (tệp này git bỏ qua), rồi commit.
+
+## Lệnh kiểm thử
+```bash
+.venv/bin/python -m unittest tests.test_co_che_giai_de tests.test_co_che_api
+VERA_GHI_GOI_MAU="$PWD/Phong thi nghiem ao/Assets/StreamingAssets/CoChe/mau_kiem_thu.bin" .venv/bin/python -m unittest tests.test_co_che_dong_goi
+~/AppBuild/VERA_claude/dong_bo_va_chay.sh ~/Developer/Antigravity KhktCoCheVerify.Run co_che_giai_de
+python -m server.ai.co_che.may_chu   # rồi POST http://127.0.0.1:8010/co-che/giai-de
+```

@@ -1,0 +1,130 @@
+{
+  "phien_ban": 1,
+  "mon": "Hoá lý",
+  "chu_de": "Động cơ nhiệt 4 kỳ & Định luật I nhiệt động học",
+  "danh_sach": [
+    {
+      "id": "ch-01",
+      "dang": "I",
+      "tieu_de": "Câu 1 (Phần I): Quá trình nén khí",
+      "cau_hoi": "Trong chu trình Otto lý tưởng của động cơ 4 kỳ, quá trình nén hỗn hợp khí từ điểm chết dưới (ĐCD) lên điểm chết trên (ĐCT) là quá trình nhiệt động nào?",
+      "lua_chon": [
+        "A. Đẳng nhiệt (T = const)",
+        "B. Đoạn nhiệt (Q = 0)",
+        "C. Đẳng áp (p = const)",
+        "D. Đẳng tích (V = const)"
+      ],
+      "dap_an": "B",
+      "giai_thich": "Quá trình nén diễn ra với tốc độ rất nhanh trong xi-lanh nên coi như không có sự trao đổi nhiệt với môi trường bên ngoài (Q = 0), đây là quá trình nén đoạn nhiệt."
+    },
+    {
+      "id": "ch-02",
+      "dang": "I",
+      "tieu_de": "Câu 2 (Phần I): Định luật I trong kỳ sinh công",
+      "cau_hoi": "Theo định luật I nhiệt động lực học (ΔU = A + Q), trong kỳ nổ – sinh công (quá trình giãn nở đoạn nhiệt 3 → 4), biến thiên nội năng ΔU của khí có đặc điểm gì?",
+      "lua_chon": [
+        "A. ΔU > 0 vì khí sinh công ra bên ngoài",
+        "B. ΔU = 0 vì là chu trình lý tưởng",
+        "C. ΔU < 0 vì khí sinh công (A < 0) và không nhận nhiệt (Q = 0)",
+        "D. ΔU không xác định được khi chưa biết khối lượng"
+      ],
+      "dap_an": "C",
+      "giai_thich": "Trong quá trình giãn nở đoạn nhiệt: Q = 0. Khí sinh công đẩy pít-tông nên theo quy ước công khí nhận là A < 0. Do đó ΔU = A < 0, nội năng giảm khiến nhiệt độ khí giảm mạnh từ T₃ xuống T₄."
+    },
+    {
+      "id": "ch-03",
+      "dang": "I",
+      "tieu_de": "Câu 3 (Phần I): Hiệu suất nhiệt chu trình Otto",
+      "cau_hoi": "Hiệu suất nhiệt lý tưởng η của chu trình Otto chuẩn không khí phụ thuộc trực tiếp vào các thông số nào sau đây?",
+      "lua_chon": [
+        "A. Chỉ phụ thuộc vào nhiệt lượng cấp vào q_in",
+        "B. Tỉ số nén r và chỉ số đoạn nhiệt γ của môi chất",
+        "C. Tốc độ quay của trục khuỷu (vòng/phút)",
+        "D. Áp suất khí quyển bên ngoài"
+      ],
+      "dap_an": "B",
+      "giai_thich": "Công thức hiệu suất lý tưởng của chu trình Otto là η = 1 − 1 / (r^(γ − 1)). Hiệu suất chỉ phụ thuộc vào tỉ số nén r và chỉ số đoạn nhiệt γ = cp/cv của khí."
+    },
+    {
+      "id": "ch-04",
+      "dang": "II",
+      "tieu_de": "Câu 4 (Phần II): Đúng / Sai về các kỳ trong chu trình",
+      "cau_hoi": "Xét chu trình hoạt động của động cơ 4 kỳ lý tưởng:",
+      "y": [
+        { "noi_dung": "a) Kỳ nạp và kỳ xả diễn ra ở áp suất coi như không đổi bằng áp suất khí nạp p₁.", "dung": true },
+        { "noi_dung": "b) Quá trình đánh lửa và cháy nhiên liệu trong chu trình Otto được mô hình hoá là cấp nhiệt đẳng tích (V = const).", "dung": true },
+        { "noi_dung": "c) Trong kỳ nén, khí nhận công từ pít-tông nên công A > 0 theo quy ước SGK Vật lí 12.", "dung": true },
+        { "noi_dung": "d) Động cơ nhiệt có thể chuyển hoá 100% nhiệt lượng nhận vào thành công cơ học mà không cần thải nhiệt ra môi trường.", "dung": false }
+      ],
+      "giai_thich": "Ý d sai vì theo nguyên lý II nhiệt động lực học, không một động cơ nhiệt nào có thể biến toàn bộ nhiệt lượng nhận từ nguồn nóng thành công mà không truyền một phần nhiệt cho nguồn lạnh (q_out > 0, η < 1)."
+    },
+    {
+      "id": "ch-05",
+      "dang": "II",
+      "tieu_de": "Câu 5 (Phần II): Đúng / Sai về Định luật I & Biến thiên nội năng",
+      "cau_hoi": "Cho một khối khí thực hiện các biến đổi nhiệt động lực học:",
+      "y": [
+        { "noi_dung": "a) Biểu thức của định luật I nhiệt động lực học theo quy ước SGK Vật lí 12 là ΔU = A + Q.", "dung": true },
+        { "noi_dung": "b) Khi chất khí biến đổi theo một chu trình kín (trạng thái cuối trùng trạng thái đầu), tổng độ biến thiên nội năng toàn chu trình ∮dU = 0.", "dung": true },
+        { "noi_dung": "c) Trong quá trình cấp nhiệt đẳng tích (2 → 3), pít-tông đứng yên nên công A = 0, toàn bộ nhiệt lượng nhận vào làm tăng nội năng (ΔU = Q = m·cv·ΔT).", "dung": true },
+        { "noi_dung": "d) Nếu khí đồng thời nhận nhiệt lượng 1000 J và sinh công 1200 J ra môi trường thì nội năng của khí tăng 200 J.", "dung": false }
+      ],
+      "giai_thich": "Ý d sai vì khí nhận nhiệt Q = +1000 J, khí sinh công 1200 J nghĩa là công khí nhận A = -1200 J. Khi đó ΔU = A + Q = -1200 + 1000 = -200 J, nội năng giảm 200 J."
+    },
+    {
+      "id": "ch-06",
+      "dang": "II",
+      "tieu_de": "Câu 6 (Phần II): Đúng / Sai về Nhiên liệu & Enthalpy cháy",
+      "cau_hoi": "Xét các phản ứng cháy nhiên liệu trong buồng đốt động cơ nhiệt:",
+      "y": [
+        { "noi_dung": "a) Phản ứng cháy của hydrocarbon luôn là phản ứng toả nhiệt, có biến thiên enthalpy chuẩn âm (ΔcH°₂₉₈ < 0).", "dung": true },
+        { "noi_dung": "b) Nhiệt trị thấp (LHV) được xác định khi nước trong sản phẩm cháy ở trạng thái lỏng.", "dung": false },
+        { "noi_dung": "c) Hydrogen (H₂) có nhiệt trị tính trên 1 kg nhiên liệu cao hơn đáng kể so với xăng isooctane (C₈H₁₈).", "dung": true },
+        { "noi_dung": "d) Khi hệ số dư không khí λ = 1, lượng không khí cấp vào vừa đủ theo tỉ lệ hợp thức để đốt cháy hoàn toàn nhiên liệu.", "dung": true }
+      ],
+      "giai_thich": "Ý b sai: LHV (Lower Heating Value) được xác định khi nước ở trạng thái hơi; còn HHV (Higher Heating Value) mới tính nước ngưng tụ thành thể lỏng."
+    },
+    {
+      "id": "ch-07",
+      "dang": "III",
+      "tieu_de": "Câu 7 (Phần III): Nhiệt độ cuối quá trình nén",
+      "cau_hoi": "Một động cơ xăng lý tưởng hoạt động theo chu trình Otto có tỉ số nén r = 8, chỉ số đoạn nhiệt γ = 1,4. Không khí nạp vào ở nhiệt độ T₁ = 300 K. Tính nhiệt độ của không khí ở cuối quá trình nén T₂ (theo đơn vị K, làm tròn đến hàng đơn vị).",
+      "dap_so": "689",
+      "tinh_bang": {
+        "ham": "otto",
+        "tham_so": { "r": 8, "gamma": 1.4, "T1": 300, "p1": 100, "q_in": 1000 },
+        "truong": "T2",
+        "lam_tron": 0
+      },
+      "giai_thich": "Áp dụng công thức nén đoạn nhiệt: T₂ = T₁ · r^(γ − 1) = 300 · 8^(0,4) ≈ 689,22 K. Làm tròn đến hàng đơn vị là 689 K."
+    },
+    {
+      "id": "ch-08",
+      "dang": "III",
+      "tieu_de": "Câu 8 (Phần III): Hiệu suất nhiệt chu trình Otto",
+      "cau_hoi": "Một chu trình Otto lý tưởng có tỉ số nén r = 10, chỉ số đoạn nhiệt γ = 1,4. Tính hiệu suất nhiệt lý tưởng của chu trình theo đơn vị % (làm tròn đến một chữ số sau dấu phẩy, dùng dấu phẩy thập phân ví dụ 60,2).",
+      "dap_so": "60,2",
+      "tinh_bang": {
+        "ham": "otto",
+        "tham_so": { "r": 10, "gamma": 1.4, "T1": 300, "p1": 100, "q_in": 1500 },
+        "truong": "eta_phan_tram",
+        "lam_tron": 1
+      },
+      "giai_thich": "Hiệu suất lý tưởng η = 1 − 1 / (r^(γ − 1)) = 1 − 1 / (10^(0,4)) = 1 − 0,3981 = 0,6019 = 60,19% ≈ 60,2%."
+    },
+    {
+      "id": "ch-09",
+      "dang": "III",
+      "tieu_de": "Câu 9 (Phần III): Công chu trình",
+      "cau_hoi": "Trong một chu trình Otto lý tưởng, nhiệt lượng cấp cho 1 kg khí là q_in = 1000 kJ/kg. Biết nhiệt lượng thải ra ngoài môi trường là q_out = 435,28 kJ/kg. Tính công riêng w sinh ra bởi 1 kg khí trong chu trình (theo đơn vị kJ/kg, làm tròn đến hàng đơn vị).",
+      "dap_so": "565",
+      "tinh_bang": {
+        "ham": "otto",
+        "tham_so": { "r": 8, "gamma": 1.4, "T1": 300, "p1": 100, "q_in": 1000 },
+        "truong": "w",
+        "lam_tron": 0
+      },
+      "giai_thich": "Theo định luật bảo toàn năng lượng cho toàn chu trình: w = q_in − q_out = 1000 − 435,28 = 564,72 kJ/kg. Làm tròn đến hàng đơn vị được 565 kJ/kg."
+    }
+  ]
+}

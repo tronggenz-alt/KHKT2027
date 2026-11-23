@@ -16,6 +16,7 @@ namespace Khkt.Environment
     ///   1-9                : dịch chuyển tới các trạm (LabStation, theo thứ tự order); 0: các trạm phụ
     /// Khi một bảng giao diện đang mở (UiCapture > 0), con trỏ tự thả ra và bàn phím không điều khiển đi lại.
     /// </summary>
+    [DefaultExecutionOrder(-50)]
     [RequireComponent(typeof(CharacterController))]
     public class DesktopViewer : MonoBehaviour
     {
@@ -57,6 +58,9 @@ namespace Khkt.Environment
         float baseFov;
         bool lookEnabled;
         int extraStation, padStation = -1;
+        InAppHandTracker handTracker;
+        Khkt.Interaction.Grabbable lastHeldForRb;
+        Rigidbody lastHeldRb;
 
         void Start()
         {
@@ -70,7 +74,10 @@ namespace Khkt.Environment
             if (viewCam != null) baseFov = viewCam.fieldOfView;
 #if !UNITY_IOS
             if (FindAnyObjectByType<Khkt.Input.HeadTracking>() == null) gameObject.AddComponent<Khkt.Input.HeadTracking>();
-            if (FindAnyObjectByType<Khkt.Input.InAppHandTracker>() == null) gameObject.AddComponent<Khkt.Input.InAppHandTracker>();
+            handTracker = FindAnyObjectByType<Khkt.Input.InAppHandTracker>();
+            if (handTracker == null) handTracker = gameObject.AddComponent<Khkt.Input.InAppHandTracker>();
+            // Tắt tự mở webcam lúc vào lab để không đơ ~1.5s và không tốn GC/GPU khi dùng chuột-bàn phím; bấm F10 để bật
+            if (handTracker != null) handTracker.enabled = false;
             if (FindAnyObjectByType<Khkt.Input.ArmTracking>() == null) gameObject.AddComponent<Khkt.Input.ArmTracking>();
             if (FindAnyObjectByType<Khkt.Input.HandTrackerProcess>() == null) gameObject.AddComponent<Khkt.Input.HandTrackerProcess>();
             if (FindAnyObjectByType<Khkt.Demo.GestureControl>() == null) gameObject.AddComponent<Khkt.Demo.GestureControl>();
@@ -107,18 +114,34 @@ namespace Khkt.Environment
             // Cấp 3: Biển báo vừa / bảng chữ culling ở 12 m (vỏ máy, bàn ghế, tường luôn hiển thị)
             Cull("ChuVua", 12f);
             cam.layerCullDistances = d;
-            cam.layerCullSpherical = true;
         }
 
         void Update()
         {
-            HandleInput(Keyboard.current, Mouse.current);  // máy không có bàn phím / chuột (chỉ tay cầm) vẫn đi được
+            var kb = Keyboard.current;
+            if (kb != null && kb.f10Key.wasPressedThisFrame && handTracker != null && !handTracker.enabled)
+                handTracker.enabled = true;
 
+            HandleInput(kb, Mouse.current);  // máy không có bàn phím / chuột (chỉ tay cầm) vẫn đi được
+            UpdateCameraTransform(Time.deltaTime);
+        }
+
+        void LateUpdate()
+        {
+            // Khóa vị trí/góc nhìn cuối và bật nội suy Rigidbody cho vật đang cầm ở LateUpdate
+            transform.rotation = Quaternion.Euler(0, yaw, 0);
+            UpdateCameraTransform(0f);
+            EnsureHeldRigidbodyInterpolation();
+        }
+
+        void UpdateCameraTransform(float eyeMoveDt)
+        {
             if (cameraTransform != null)
             {
                 Vector3 p = cameraTransform.localPosition;
                 float target = (seated ? seatedEyeHeight : standingEyeHeight) + EyeOffset;
-                p.y = Mathf.MoveTowards(p.y, target, 1.5f * Time.deltaTime);
+                if (eyeMoveDt > 0f)
+                    p.y = Mathf.MoveTowards(p.y, target, 1.5f * eyeMoveDt);
                 cameraTransform.localPosition = p;
                 cameraTransform.localRotation = Quaternion.Euler(pitch, 0, 0);
             }
@@ -127,6 +150,19 @@ namespace Khkt.Environment
             {
                 float want = baseFov / Khkt.Input.HeadTracking.Zoom;
                 if (Mathf.Abs(viewCam.fieldOfView - want) > 0.01f) viewCam.fieldOfView = want;
+            }
+        }
+
+        void EnsureHeldRigidbodyInterpolation()
+        {
+            var hc = Khkt.Demo.HandController.Active;
+            var held = hc != null ? hc.Held : null;
+            if (held != lastHeldForRb)
+            {
+                lastHeldForRb = held;
+                lastHeldRb = held != null ? held.GetComponent<Rigidbody>() : null;
+                if (lastHeldRb != null && lastHeldRb.interpolation == RigidbodyInterpolation.None)
+                    lastHeldRb.interpolation = RigidbodyInterpolation.Interpolate;
             }
         }
 
@@ -147,7 +183,7 @@ namespace Khkt.Environment
                 bool locked = lookEnabled && !ui && !kb.leftAltKey.isPressed && Application.isFocused;
                 if (locked != MouseLook || (locked && Cursor.lockState != CursorLockMode.Locked && !Application.isBatchMode)) ApplyCursor(locked);
 
-                if (locked || (!ui && mouse.rightButton.isPressed))
+                if ((locked || (!ui && mouse.rightButton.isPressed)) && !Khkt.Demo.HandController.RotatingHeld)
                 {
                     Vector2 d = mouse.delta.ReadValue() * lookSensitivity;
                     yaw += d.x;
@@ -295,6 +331,26 @@ namespace Khkt.Environment
             pitch = -Mathf.Atan2(d.y, new Vector2(d.x, d.z).magnitude) * Mathf.Rad2Deg;
             transform.rotation = Quaternion.Euler(0, yaw, 0);
             cameraTransform.localRotation = Quaternion.Euler(pitch, 0, 0);
+        }
+
+        /// <summary>Đặt vị trí và góc nhìn tức thì cho đo hiệu năng và chụp ảnh chuẩn.</summary>
+        public void SetPose(Vector3 worldPos, float yawDeg, float pitchDeg)
+        {
+            if (controller != null) controller.enabled = false;
+            transform.position = worldPos;
+            if (controller != null) controller.enabled = true;
+            seated = false;
+            EyeOffset = 0f;
+            yaw = yawDeg;
+            pitch = Mathf.Clamp(pitchDeg, -80f, 80f);
+            transform.rotation = Quaternion.Euler(0, yaw, 0);
+            if (cameraTransform != null)
+            {
+                var p = cameraTransform.localPosition;
+                p.y = standingEyeHeight;
+                cameraTransform.localPosition = p;
+                cameraTransform.localRotation = Quaternion.Euler(pitch, 0, 0);
+            }
         }
     }
 }

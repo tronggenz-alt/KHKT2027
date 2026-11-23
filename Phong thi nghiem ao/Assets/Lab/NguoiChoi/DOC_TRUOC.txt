@@ -1,0 +1,29 @@
+THÂN NGƯỜI 3D CHO NGƯỜI CÙNG PHÒNG (phòng học chung)
+
+Người khác trong phòng nhìn thấy bạn là một người 3D mặc áo blouse trắng: đứng thở, đi, chạy, quay đầu theo
+hướng nhìn, tay phải với tới đồ đang cầm, cổ tay nghiêng theo lúc rót, ngón tay nắm lại khi cầm.
+Bạn vẫn chỉ thấy hai tay của mình như cũ (ArmRig).
+
+Đặt file vào thư mục Resources/NguoiChoi/ ngay bên dưới thư mục này, đúng tên sau
+(tải ở mixamo.com, Format "FBX for Unity", 30 khung/giây):
+
+  NhanVat.fbx   nhân vật, Skin "With Skin", Pose "T-pose"        (đang dùng: Josh, file gốc Ch23_nonPBR.fbx)
+  DungYen.fbx   đứng chờ, Skin "Without Skin"                    (đang dùng: Breathing Idle)
+  DiBo.fbx      đi bộ, "Without Skin", tick "In Place"           (đang dùng: Walking - Male Standard Walk)
+  Chay.fbx      chạy, "Without Skin", tick "In Place", không bắt buộc (đang dùng: Jogging)
+
+Unity tự làm phần còn lại (Assets/Scripts/Editor/NguoiChoiImporter.cs):
+  - đặt kiểu xương Humanoid, cho chuyển động lặp và đứng tại chỗ;
+  - tách ảnh da, áo nhúng trong NhanVat.fbx ra thư mục Textures/;
+  - tạo áo blouse trắng (Resources/NguoiChoi/AoBlouse.mat) từ ảnh áo khoác của nhân vật (lưới tên Suit, Jacket,
+    Coat, Blazer…): tô trắng nhưng giữ nếp vải. Muốn tạo lại thì xóa AoBlouse.mat rồi Reimport NhanVat.fbx.
+Thiếu NhanVat.fbx hoặc thiếu chuyển động đứng chờ thì người cùng phòng hiện bằng hình khối như trước.
+
+THỬ MỘT MÌNH (không cần phòng học chung): trong Unity bấm Play, vào phòng thí nghiệm, rồi chọn menu
+KHKT → Thử thân người 3D, hoặc bấm phím Y (chạy cả trong app đã dựng). Khung góc phải màn hình là camera sau lưng
+bạn: thấy chính mình dưới dạng người 3D, đi, nhìn, cầm, rót y như người khác thấy. Chọn lại menu để tắt.
+
+Các file Mixamo KHÔNG đưa lên git (kho công khai, Adobe không cho phát tán file gốc): .gitignore đã chặn
+Resources/ và Textures/ ở thư mục này. Máy khác muốn có người 3D thì tự tải lại theo bảng trên.
+
+Nhân vật Josh khoảng 52 nghìn tam giác, ảnh 2048: Mac chạy tốt; iPad nên giảm ảnh xuống 1024 nếu phòng đông người.

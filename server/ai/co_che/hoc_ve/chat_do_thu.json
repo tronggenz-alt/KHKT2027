@@ -1,0 +1,33 @@
+{
+ "ghi_chu": "Chất hữu cơ chọn ngẫu nhiên (random.seed(18112026), 32 mẫu) từ data/chem/hoa_chat.json, bỏ chất không có cấu tạo xác định (dextrin, hồ tinh bột, thuốc thử Schiff, D2O). SMILES ghi tay; muối viết dạng anion. Dùng cho bộ đo dễ nhìn (bo_do --de-nhin).",
+ "chat": [
+  ["537", "Pentyl axetat", "CC(=O)OCCCCC"],
+  ["476", "Etylen glicol", "OCCO"],
+  ["398", "Bromocresol xanh", "Cc1c(Br)c(O)c(Br)cc1C1(c2cc(Br)c(O)c(Br)c2C)OS(=O)(=O)c2ccccc21"],
+  ["459", "1,2-Đibromoetan", "BrCCBr"],
+  ["454", "Clorobenzen", "Clc1ccccc1"],
+  ["396", "Metyl đỏ", "CN(C)c1ccc(cc1)N=Nc1ccccc1C(=O)O"],
+  ["416", "Điphenylamin", "c1ccc(cc1)Nc1ccccc1"],
+  ["503", "Benzophenon", "O=C(c1ccccc1)c1ccccc1"],
+  ["334", "Ion xitrat", "OC(CC(=O)[O-])(CC(=O)[O-])C(=O)[O-]"],
+  ["314", "Ion axetat", "CC(=O)[O-]"],
+  ["495", "Benzanđehit", "O=Cc1ccccc1"],
+  ["533", "Metyl axetat", "CC(=O)OC"],
+  ["458", "Iodometan", "CI"],
+  ["465", "Freon-22", "FC(F)Cl"],
+  ["427", "Propilen", "C=CC"],
+  ["517", "Axit benzoic", "OC(=O)c1ccccc1"],
+  ["440", "Styren", "C=Cc1ccccc1"],
+  ["420", "Propan", "CCC"],
+  ["333", "Ion lactat", "CC(O)C(=O)[O-]"],
+  ["419", "Etan", "CC"],
+  ["561", "Pyridin", "c1ccncc1"],
+  ["395", "Metyl da cam", "CN(C)c1ccc(cc1)N=Nc1ccc(cc1)S(=O)(=O)[O-]"],
+  ["553", "Etylamin", "CCN"],
+  ["564", "Leucin", "CC(C)CC(N)C(=O)O"],
+  ["480", "Phenol", "Oc1ccccc1"],
+  ["456", "Bromobenzen", "Brc1ccccc1"],
+  ["630", "DMF", "CN(C)C=O"],
+  ["327", "Ion oxalat", "[O-]C(=O)C(=O)[O-]"]
+ ]
+}

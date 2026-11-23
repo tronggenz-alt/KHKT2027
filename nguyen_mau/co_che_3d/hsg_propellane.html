@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cơ chế hình thành A4</title>
+<style>
+:root{ --kinh:rgba(18,24,44,.8); --vien:rgba(255,255,255,.12); --chu:#e8ecf5; --chu-phu:#9aa5bd; --muc:#1b2621; }
+body.giay{ --kinh:rgba(255,253,247,.92); --vien:rgba(27,38,33,.14); --chu:#1b2621; --chu-phu:#5d6862; }
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#0b1020;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--chu)}
+#canvas{position:fixed;inset:0}
+#nhan-lop{position:fixed;inset:0;pointer-events:none}
+.tag{font:600 11.5px system-ui;color:#cfd8ea;background:rgba(10,14,30,.55);padding:2px 6px;border-radius:6px;white-space:nowrap}
+.tag.lon{font-size:14px;color:#fff;background:rgba(59,130,246,.35)}
+header{position:fixed;top:14px;left:16px;right:16px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;pointer-events:none;z-index:6}
+header>*{pointer-events:auto}
+header>div{transition:opacity .5s}
+body.giay header>div{opacity:0;pointer-events:none}
+h1{margin:0;font-size:19px}
+header p{margin:3px 0 0;color:var(--chu-phu);font-size:13px}
+#chuyen{position:relative;display:flex;border:1px solid var(--vien);background:var(--kinh);border-radius:999px;padding:4px;cursor:pointer;backdrop-filter:blur(10px);transition:background .9s,border-color .9s}
+#chuyen span{position:relative;z-index:1;padding:7px 16px;font:600 14px system-ui;color:var(--chu-phu);transition:color .5s}
+#chuyen i{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:999px;background:#3b82f6;transition:transform .55s cubic-bezier(.65,0,.35,1),background .9s}
+body.giay #chuyen i{transform:translateX(100%);background:#1b2621}
+#chuyen span.bat{color:#fff}
+body.giay #chuyen span.bat{color:#f6f1e6}
+#goi-y{position:fixed;top:66px;left:16px;font-size:12px;color:var(--chu-phu);transition:opacity .6s}
+body.giay #goi-y{opacity:0}
+#bang{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(780px,calc(100% - 32px));background:var(--kinh);border:1px solid var(--vien);border-radius:16px;padding:14px 16px 12px;backdrop-filter:blur(12px);transition:opacity .6s,transform .6s;z-index:4}
+body.giay #bang{opacity:0;pointer-events:none;transform:translate(-50%,24px)}
+h2{margin:0;font-size:16px}
+#mo-ta{margin:8px 0 10px;font-size:14px;line-height:1.5;min-height:42px}
+#truc{position:relative;display:flex;gap:3px;height:22px;margin-bottom:10px}
+#truc .doan{position:relative;height:6px;margin-top:8px;border-radius:3px;background:rgba(232,236,245,.16);overflow:hidden}
+#truc .doan b{position:absolute;inset:0;width:0;background:#3b82f6}
+#keo{position:absolute;inset:0;width:100%;opacity:0;cursor:pointer;margin:0}
+.nut{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.nut button,.nut select{font:600 14px system-ui;color:var(--chu);background:transparent;border:1px solid var(--vien);border-radius:9px;padding:6px 12px;cursor:pointer}
+.nut button:hover{background:rgba(255,255,255,.08)}
+.nut select option{color:#111}
+.chu-thich{margin-left:auto;font-size:12px;color:var(--chu-phu);display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.chu-thich i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#ffd166;box-shadow:0 0 6px #ffd166;margin-right:5px;vertical-align:1px}
+
+/* ---------- tờ giấy: sơ đồ cơ chế kiểu đáp án ---------- */
+#to-giay{position:fixed;inset:0;overflow:auto;opacity:0;visibility:hidden;padding:76px 16px 48px;z-index:3}
+.to{max-width:920px;margin:0 auto;background:#fffdf7;border:1px solid #e3dccb;box-shadow:0 12px 34px rgba(60,50,20,.10);border-radius:6px;padding:22px 26px 24px;color:var(--muc);font-family:"Times New Roman",Georgia,serif}
+.to h3{font-size:18px;margin:4px 0 10px;font-style:italic;text-decoration:underline;text-decoration-style:wavy;text-decoration-color:#c9a227;text-underline-offset:4px}
+.so-do{display:block;width:100%;height:auto}
+.so-do .lk{stroke:var(--muc);stroke-width:1.6;stroke-linecap:round}
+.so-do .lk.sau{stroke:var(--muc);stroke-width:1.4}
+.so-do .nt{font:15.5px "Times New Roman",serif;text-anchor:middle;dominant-baseline:central;fill:var(--muc)}
+.so-do .ten{font:700 16px "Times New Roman",serif;text-anchor:middle;dominant-baseline:central;fill:var(--muc)}
+.so-do .mt{fill:none;stroke:var(--muc);stroke-width:1.3}
+.so-do .pu{stroke:var(--muc);stroke-width:1.4}
+.so-do .dk{font:italic 14px "Times New Roman",serif;text-anchor:middle;fill:var(--muc)}
+.so-do .goc{fill:var(--muc)}
+.cham{margin:6px 0 0;font:12.5px system-ui;color:#5d6862}
+.cham.dat b:last-child{color:#2e7d32}
+.cham.loi{color:#9a3412}
+#nut-gt{margin-top:14px;font:600 14.5px system-ui;color:#1b2621;background:#f3ecdc;border:1px solid #dccfae;border-radius:10px;padding:8px 14px;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+#nut-gt:hover{background:#ece2c9}
+#nut-gt b{display:inline-block;transition:transform .3s}
+#nut-gt[aria-expanded="true"] b{transform:rotate(180deg)}
+#gt{display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s ease}
+#gt.mo{grid-template-rows:1fr}
+#gt>div{overflow:hidden}
+#gt .noi{margin-top:12px;padding:14px 18px;border-left:3px solid #c9a227;background:#fbf6e9;border-radius:4px;font-size:16.5px;line-height:1.55}
+#gt ol{margin:6px 0 0;padding-left:22px}
+#gt li{margin:4px 0}
+@media (max-width:560px){ h1{font-size:16px} #mo-ta{font-size:13px} .chu-thich{display:none} #chuyen span{padding:6px 12px} .to{padding:14px 12px} }
+</style>
+</head>
+<body>
+<div id="canvas"></div>
+<div id="nhan-lop"></div>
+<div id="to-giay"><article class="to">
+  <h3>Cơ chế hình thành A4:</h3>
+  <div id="so-do"></div>
+  <p id="cham" class="cham"></p>
+  <button id="nut-gt" aria-expanded="false" aria-controls="gt">Giải thích từng bước <b>▾</b></button>
+  <div id="gt"><div><div class="noi" id="gt-noi"></div></div></div>
+</article></div>
+
+<header>
+  <div><h1>Cơ chế hình thành A4</h1><p>[1.1.1]Propellane + MeO₂C–C≡C–CO₂Me · gốc tự do · mức HSG</p></div>
+  <button id="chuyen" title="Phím G"><span class="c3 bat">3D</span><span class="cg">Giấy</span><i></i></button>
+</header>
+<div id="goi-y">Kéo để xoay 360° · cuộn để phóng to · hạt vàng = electron độc thân</div>
+
+<section id="bang">
+  <h2 id="ten-gd"></h2>
+  <p id="mo-ta"></p>
+  <div id="truc"><input id="keo" type="range" min="0" max="1000" value="0" aria-label="Tua"></div>
+  <div class="nut">
+    <button id="lui" title="Bước trước (←)">⏮</button>
+    <button id="chay" title="Chạy / dừng (Space)">⏸</button>
+    <button id="toi" title="Bước sau (→)">⏭</button>
+    <select id="toc"><option value=".5">0.5×</option><option value="1" selected>1×</option><option value="1.6">1.6×</option></select>
+    <button id="nut-h" aria-pressed="false" title="Ẩn / hiện nguyên tử H (phím H)">Ẩn H</button>
+    <div class="chu-thich"><span><i></i>electron</span><span>xám C · trắng H · đỏ O</span></div>
+  </div>
+</section>
+
+<script src="../../build/co_che/hsg_propellane_a4/hsg_propellane_a4.3d.js"></script><!-- dựng bằng: python -m server.ai.co_che.dung_bai_demo -->
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
+</script>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
+import { veSoDo, datKhung, kiemTraDeNhin } from "./ve_giay.js";
+
+const KB = window.KICH_BAN;
+const V = (x, y, z = 0) => new THREE.Vector3(x, y, z);
+const kep = x => Math.min(1, Math.max(0, x));
+const sm = x => { x = kep(x); return x * x * (3 - 2 * x); };
+const seg = (t, a, b) => sm((t - a) / (b - a));
+const $ = id => document.getElementById(id);
+
+// ================================================================ tờ giấy: sơ đồ cơ chế kiểu đáp án HSG (tĩnh, vẽ qua ve_giay.js)
+// Khung khó vẽ lấy từ thư viện mẫu: propellane / bicyclo[1.1.1]pentane = "lều", cyclobutane = "◇", cyclopropene dựng đứng.
+const SO_DO = {
+  khung: [-.4, 29.3, -1.75, 2.85],
+  nt: {
+    d8: [4.05, .9, "MeO₂C"], d6: [5.3, .9], d7: [6.4, .9], d12: [7.65, .9, "CO₂Me"],
+    b6: [12.3, .85], b8: [12.3, 1.8, "CO₂Me"], b7: [13.15, .35], b12: [13.15, -.65, "CO₂Me"],
+    c3: [15.95, 0], c6: [18.9, .55], c8: [18.9, 1.5, "CO₂Me"], c7: [19.75, .05], c12: [20.95, .05, "CO₂Me"],
+    e3: [23.95, 0], e8: [28.05, .95, "CO₂Me"], e12: [28.05, -.95, "CO₂Me"],
+  },
+  lk: [
+    ["a1", "a2"],                                                     // liên kết trung tâm của propellane
+    ["d8", "d6"], ["d6", "d7", 3], ["d7", "d12"],
+    ["b1", "b6"], ["b6", "b8"], ["b6", "b7", 2, [12.5, .3]], ["b7", "b12"],
+    ["c3", "c2", 2], ["c1", "c6"], ["c6", "c8"], ["c6", "c7", 2, [19.1, -.1]], ["c7", "c12"],
+    ["e3", "e2", 2], ["e6", "e8"], ["e7", "e12"],
+  ],
+  goc: [[10.9, -.58], [13.47, .5], [18.37, -.3], [19.75, -.3]],      // electron độc thân
+  mt: [   // mũi tên nửa đầu: từ → qua (điểm điều khiển) → tới; vòng ra ngoài phân tử
+    { tu: [5.8, 1.05], qua: [3.9, 2.55], den: [2.42, .82] },         // e π của alkyne → liên kết mới với C1
+    { tu: [1.8, .05], qua: [2.6, .12], den: [2.3, .66] },            // e liên kết trung tâm → liên kết mới (dấu ")" bên phải lều)
+    { tu: [1.68, -.02], qua: [1.95, -.78], den: [1.45, -.55] },      // e còn lại → C2 (gốc tự do)
+    { tu: [5.9, 1.05], qua: [6.3, 1.65], den: [6.5, 1.1] },          // e π còn lại → C7
+    { tu: [10.88, -.62], qua: [10.45, -.88], den: [10.3, -.32] },    // gốc C2 → C2=C3
+    { tu: [10.3, .15], qua: [9.85, .6], den: [9.95, -.12] },         // e liên kết C1–C3 → C2=C3
+    { tu: [10.65, .2], qua: [10.95, .78], den: [11.32, .58] },       // e còn lại → C1
+    { tu: [18.4, -.36], qua: [18.65, -.95], den: [19.03, -.62] },    // hai gốc kết hợp
+    { tu: [19.72, -.36], qua: [19.5, -.95], den: [19.15, -.62] },
+  ],
+  pu: [{ x1: 3.3, x2: 9.0, y: 0, duoi: "t°" }, { x1: 13.95, x2: 15.25, y: 0 }, { x1: 22.15, x2: 23.45, y: 0 }],
+  ten: [[1.5, -1.45, "A1"], [25.45, -1.45, "A4"]],
+};
+datKhung(SO_DO, "leu", [1.5, 0], { T: "a4", L: "a3", R: "a5", B1: "a1", B2: "a2" });          // A1
+datKhung(SO_DO, "leu", [11.0, 0], { T: "b4", L: "b3", R: "b5", B1: "b1", B2: "b2" });         // trung gian 1
+datKhung(SO_DO, "thoi", [16.8, 0], { Tr: "c2", Tn: "c4", P: "c1", D: "c5" });                 // trung gian 2
+datKhung(SO_DO, "thoi", [24.8, 0], { Tr: "e2", Tn: "e4", P: "e1", D: "e5" });                 // A4
+datKhung(SO_DO, "cyclopropen_dung", [26.1, 0], { S: "e1", Tr: "e6", Du: "e7" });
+
+
+$("so-do").innerHTML = veSoDo(SO_DO);
+{
+  const loi = kiemTraDeNhin(SO_DO), ten = { cat_nhau: "nét cắt nhau", chu_de: "chữ đè", mui_ten_cat: "mũi tên cắt phân tử", mui_ten_sat: "mũi tên sát nhau", goc_hep: "góc hẹp" };
+  const tong = Object.values(loi).reduce((s, x) => s + x.length, 0);
+  $("cham").innerHTML = `Bộ chấm dễ nhìn: ${Object.entries(loi).map(([k, v]) => `${ten[k]} <b>${v.length}</b>`).join(" · ")}` +
+    (tong ? `<br><small>${Object.values(loi).flat().join("; ")}</small>` : " — <b>đạt</b>");
+  $("cham").className = tong ? "cham loi" : "cham dat";
+  console.log("[bộ chấm dễ nhìn]", loi);
+}
+$("gt-noi").innerHTML = `<p><b>Hướng phản ứng.</b> ${KB.giai_thich}</p><ol>${KB.buoc.slice(1).map(b => `<li><b>${b.ten}.</b> ${b.ghi_chu}</li>`).join("")}</ol>`;
+$("nut-gt").onclick = e => { const mo = $("gt").classList.toggle("mo"); e.currentTarget.setAttribute("aria-expanded", mo); };
+
+// ================================================================ cảnh 3D
+const khung = $("canvas"), lopNhan = $("nhan-lop");
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+khung.appendChild(renderer.domElement);
+const nhanR = new CSS2DRenderer({ element: lopNhan });
+const scene = new THREE.Scene();
+const MAU_NEN = new THREE.Color("#0b1020"), MAU_GIAY = new THREE.Color("#f6f1e6"), VANG = new THREE.Color("#ffd166");
+scene.background = MAU_NEN.clone();
+scene.add(new THREE.HemisphereLight(0xdfe8ff, 0x1a1f33, 1.05));
+const d1 = new THREE.DirectionalLight(0xffffff, 1.7); d1.position.set(5, 8, 7); scene.add(d1);
+const d2 = new THREE.DirectionalLight(0x88aaff, .55); d2.position.set(-6, -3, -5); scene.add(d2);
+
+// toạ độ các trạng thái
+const IDS = Object.keys(KB.nguyen_tu);
+const TT = KB.trang_thai.map(s => ({ ...s, P: Object.fromEntries(Object.entries(s.toa_do).map(([k, v]) => [k, V(...v)])) }));
+const tamTT = s => Object.values(s.P).reduce((v, p) => v.add(p), V()).multiplyScalar(1 / IDS.length);
+let ban_kinh = 0;   // bán kính phân tử (từ trạng thái "tiến lại gần" trở đi) quanh tâm của nó
+for (const s of TT.slice(1)) { const c = tamTT(s); for (const p of Object.values(s.P)) ban_kinh = Math.max(ban_kinh, p.distanceTo(c)); }
+const camera = new THREE.PerspectiveCamera(40, 1, .1, 400);
+const TAM = tamTT(TT[1]), XA = ban_kinh / Math.sin(THREE.MathUtils.degToRad(20)) * .85;
+camera.position.copy(TAM).add(V(.35, .45, 1).normalize().multiplyScalar(XA));
+const dk = new OrbitControls(camera, renderer.domElement);
+dk.target.copy(TAM);
+dk.enableDamping = true; dk.enablePan = false; dk.minDistance = 4; dk.maxDistance = XA * 2.2;
+const san = new THREE.PolarGridHelper(ban_kinh * 1.1, 16, 6, 64, 0x3a4a7a, 0x26304f);
+san.position.y = -ban_kinh * .75; san.material.transparent = true; san.material.opacity = .45; scene.add(san);
+
+// nguyên tử
+const MAU = { C: "#33383f", H: "#eef0f4", O: "#e0453a", N: "#3b6fd8", Br: "#a33a26", Cl: "#3fae49" };
+const BK = { C: .33, H: .2, O: .33, N: .33, Br: .5, Cl: .45 };
+const geoCau = new THREE.SphereGeometry(1, 36, 24);
+const NT = {};
+for (const id of IDS) {
+  const e = KB.nguyen_tu[id].e;
+  const mesh = new THREE.Mesh(geoCau, new THREE.MeshStandardMaterial({ color: MAU[e] || "#c0a", roughness: .38, metalness: .06 }));
+  mesh.scale.setScalar(BK[e] || .35); scene.add(mesh);
+  NT[id] = { e, mesh };
+}
+// liên kết: hợp mọi trạng thái, bậc theo từng trạng thái (0 = không có)
+const LK = new Map();
+TT.forEach((s, i) => s.lien_ket.forEach(([a, b, bac]) => {
+  const k = a < b ? `${a}|${b}` : `${b}|${a}`;
+  if (!LK.has(k)) LK.set(k, { a, b, bac: TT.map(() => 0), tru: [] });
+  LK.get(k).bac[i] = bac;
+}));
+const geoTru = new THREE.CylinderGeometry(1, 1, 1, 14, 1, true);
+const MAU_LK = new THREE.Color("#a7afbd");
+for (const l of LK.values()) for (let j = 0; j < 3; j++) {
+  const m = new THREE.Mesh(geoTru, new THREE.MeshStandardMaterial({ color: MAU_LK, roughness: .5, transparent: true }));
+  m.visible = false; scene.add(m); l.tru.push(m);
+}
+const Y = V(0, 1, 0);
+const LECH = { 1: [0], 2: [-.08, .08], 3: [-.13, 0, .13] };
+let anH = false, heSoH = 1;     // heSoH: 1 = hiện H, 0 = ẩn hẳn (đổi mượt trong ~0,35 s)
+function veLK(l, P, bac) {
+  const a = P[l.a], b = P[l.b], d = b.clone().sub(a), len = d.length();
+  const n = bac > .02 ? Math.ceil(bac - 1e-3) : 0;
+  const dir = d.clone().normalize();
+  const nhin = camera.position.clone().sub(a).normalize();
+  const vg = new THREE.Vector3().crossVectors(dir, nhin).normalize();
+  const coH = l.a[0] === "H" || l.b[0] === "H", hs = coH ? sm(heSoH) : 1;   // liên kết tới H co lại khi ẩn H
+  const r = (n > 1 ? .05 : .08 * (coH ? .8 : 1)) * hs;
+  l.tru.forEach((m, j) => {
+    if (j >= n || hs < .01) { m.visible = false; return; }
+    const op = j < Math.floor(bac) ? 1 : bac - Math.floor(bac) || 1;
+    m.visible = true;
+    m.position.copy(a).addScaledVector(d, .5).addScaledVector(vg, LECH[n][j]);
+    m.quaternion.setFromUnitVectors(Y, dir);
+    m.scale.set(r, len, r);
+    m.material.opacity = j === n - 1 && bac % 1 > .001 ? op : 1;
+  });
+}
+
+// electron: hạt + quầng sáng + vệt
+const texSang = (() => {
+  const c = document.createElement("canvas"); c.width = c.height = 64;
+  const x = c.getContext("2d"), g = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+  g.addColorStop(0, "rgba(255,255,255,1)"); g.addColorStop(.35, "rgba(255,255,255,.45)"); g.addColorStop(1, "rgba(255,255,255,0)");
+  x.fillStyle = g; x.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(c);
+})();
+const geoHat = new THREE.SphereGeometry(1, 14, 10);
+class Electron {
+  constructor() {
+    this.hat = new THREE.Mesh(geoHat, new THREE.MeshStandardMaterial({ color: 0, emissive: VANG, transparent: true }));
+    this.hat.scale.setScalar(.08);
+    this.sang = new THREE.Sprite(new THREE.SpriteMaterial({ map: texSang, color: VANG, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false }));
+    this.sang.scale.setScalar(.75);
+    this.n = 24; this.ds = [];
+    this.pos = new Float32Array(this.n * 3); const col = new Float32Array(this.n * 3);
+    for (let i = 0; i < this.n; i++) { const a = (i / (this.n - 1)) ** 1.6; col.set([VANG.r * a, VANG.g * a, VANG.b * a], i * 3); }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(this.pos, 3)); g.setAttribute("color", new THREE.BufferAttribute(col, 3));
+    this.vet = new THREE.Points(g, new THREE.PointsMaterial({ size: .2, map: texSang, vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+    scene.add(this.hat, this.sang, this.vet);
+    this.an();
+  }
+  an() { this.hat.visible = this.sang.visible = this.vet.visible = false; this.ds = []; }
+  dat(p, op, dong) {
+    this.hat.visible = this.sang.visible = this.vet.visible = op > .01;
+    this.hat.position.copy(p); this.sang.position.copy(p);
+    this.hat.material.opacity = op; this.sang.material.opacity = .95 * op;
+    this.sang.scale.setScalar(.7 + .5 * dong);
+    if (!this.ds.length) for (let i = 0; i < this.n; i++) this.ds.push(p.clone());
+    this.ds.shift(); this.ds.push(p.clone());
+    this.ds.forEach((q, i) => q.toArray(this.pos, i * 3));
+    this.vet.geometry.attributes.position.needsUpdate = true;
+    this.vet.material.opacity = op;
+  }
+}
+const KHO_E = Array.from({ length: 16 }, () => new Electron());
+
+// nhãn nổi
+const the = (txt, cls = "tag") => { const el = document.createElement("div"); el.className = cls; el.textContent = txt; const o = new CSS2DObject(el); scene.add(o); return o; };
+const tagEster = [["m8", the("CO₂Me")], ["m12", the("CO₂Me")]];
+const tagA1 = the("A1", "tag lon"), tagDMAD = the("DMAD", "tag lon"), tagA4 = the("A4", "tag lon");
+
+// ================================================================ dòng thời gian
+const GD = [
+  ...KB.buoc.map((b, i) => ({ ...b, dur: i === 0 ? 3.2 : 6.5,
+    mo_ta: i === 0 ? "[1.1.1]Propellane (A1) và dimethyl acetylenedicarboxylate (DMAD) tiến lại gần. Liên kết trung tâm C–C của A1 rất căng (hai C đầu cầu có cấu hình \"đảo ngược\")." : b.ghi_chu })),
+  { tu: TT.length - 1, den: TT.length - 1, mui_ten: [], ten: "Sản phẩm A4", dur: 3, mo_ta: "A4: hợp chất spiro gồm vòng methylenecyclobutane và vòng cyclopropene mang hai nhóm CO₂Me. Xoay để thấy hai vòng vuông góc nhau tại C spiro." },
+];
+const TONG = GD.reduce((s, g) => s + g.dur, 0);
+const BD = []; GD.reduce((s, g) => (BD.push(s), s + g.dur), 0);
+const giaiDoan = T => { for (let i = 0; i < GD.length; i++) if (T < BD[i] + GD[i].dur) return [i, (T - BD[i]) / GD[i].dur]; return [GD.length - 1, 1]; };
+const doanEl = GD.map(g => { const d = document.createElement("div"); d.className = "doan"; d.style.flex = g.dur; d.innerHTML = "<b></b>"; d.title = g.ten; $("truc").insertBefore(d, $("keo")); return d; });
+
+// hướng "ra ngoài" của một nguyên tử (ngược trung bình các liên kết) – chỗ đặt electron độc thân
+function huongNgoai(id, P, iTT) {
+  const ds = [];
+  for (const l of LK.values()) if (l.bac[iTT] > 0 && (l.a === id || l.b === id)) ds.push(P[l.a === id ? l.b : l.a]);
+  const v = V();
+  for (const q of ds) v.add(P[id].clone().sub(q).normalize());
+  if (v.lengthSq() < 1e-4) v.set(0, 1, 0);
+  return v.normalize();
+}
+const giua = (a, b) => a.clone().add(b).multiplyScalar(.5);
+const viTriGoc = (id, P, iTT) => P[id].clone().addScaledVector(huongNgoai(id, P, iTT), .55);
+
+let T = 0, chay = true, tocDo = 1, giay = false, u = 0, gdCu = -1;
+const camNguoi = { huong: camera.position.clone().normalize(), xa: camera.position.length() };
+
+function khung1(dt) {
+  if (chay && !giay) { T += dt * tocDo; if (T >= TONG) { T = TONG; datChay(false); } }
+  u = kep(u + (giay ? 1 : -1) * dt / 1.3);
+  const m = sm(u / .7), lo = sm((u - .45) / .55);
+  const [i, t] = giaiDoan(T), g = GD[i];
+  if (i !== gdCu) { gdCu = i; $("ten-gd").textContent = `${i + 1}. ${g.ten}`; $("mo-ta").textContent = g.mo_ta; }
+  const coMT = g.mui_ten.length > 0;
+  const sP = coMT ? seg(t, .35, 1) : sm(t), sB = seg(t, .45, .8);
+
+  // vị trí
+  const A = TT[g.tu].P, B = TT[g.den].P, P = {};
+  for (const id of IDS) P[id] = A[id].clone().lerp(B[id], sP);
+  heSoH = kep(heSoH + (anH ? -1 : 1) * dt / .35);
+  const hH = sm(heSoH);
+  for (const id of IDS) {
+    const nt = NT[id]; nt.mesh.position.copy(P[id]);
+    if (nt.e === "H") { nt.mesh.scale.setScalar(BK.H * hH); nt.mesh.visible = hH > .01; }
+  }
+  // camera bám theo tâm phân tử (dời cả camera lẫn điểm nhìn, giữ nguyên góc người xem đã xoay)
+  if (u === 0) {
+    const tamMoi = Object.values(P).reduce((v, p) => v.add(p), V()).multiplyScalar(1 / IDS.length);
+    const doi = tamMoi.sub(dk.target).multiplyScalar(.06);
+    dk.target.add(doi); camera.position.add(doi);
+  }
+  for (const l of LK.values()) veLK(l, P, l.bac[g.tu] + (l.bac[g.den] - l.bac[g.tu]) * sB);
+
+  // electron di chuyển theo mũi tên (nửa đầu = 1 e, đầy đủ = 2 e)
+  let k = 0;
+  const dungBoi = {};
+  const nguon = new Set(g.mui_ten.filter(x => x.tu.loai === "cap_e").map(x => "m" + x.tu.nguyen_tu));
+  const eDi = seg(t, .05, .55), eOp = coMT ? 1 - seg(t, .6, .72) : 0;
+  for (const mt of g.mui_ten) {
+    const soE = mt.kieu === "nua_dau" ? 1 : 2;
+    for (let j = 0; j < soE; j++) {
+      let s0, s1;
+      const nhin = camera.position.clone().normalize();
+      if (mt.tu.loai === "cap_e") s0 = viTriGoc("m" + mt.tu.nguyen_tu, P, g.tu);
+      else {
+        const [a, b] = mt.tu.nguyen_tu.map(x => "m" + x), key = [a, b].sort().join("|");
+        dungBoi[key] = (dungBoi[key] || 0) + 1;
+        const vg = new THREE.Vector3().crossVectors(P[b].clone().sub(P[a]), nhin).normalize();
+        s0 = giua(P[a], P[b]).addScaledVector(vg, dungBoi[key] % 2 ? .09 : -.09);
+      }
+      if (mt.den.loai === "nguyen_tu") {
+        const c = "m" + mt.den.nguyen_tu;
+        s1 = mt.tu.loai === "cap_e" ? giua(P["m" + mt.tu.nguyen_tu], P[c]) : viTriGoc(c, P, g.den);
+      } else {
+        const [x, y] = mt.den.nguyen_tu.map(v => "m" + v);
+        s1 = giua(P[x], P[y]);
+      }
+      const len = s0.distanceTo(s1), dir = s1.clone().sub(s0).normalize();
+      const nang = new THREE.Vector3().crossVectors(dir, nhin).normalize(); if (nang.y < 0) nang.negate();
+      const q = giua(s0, s1).addScaledVector(nang, Math.min(1.2, .45 * len + .25));
+      const w = eDi, p = s0.clone().multiplyScalar((1 - w) ** 2).addScaledVector(q, 2 * w * (1 - w)).addScaledVector(s1, w * w);
+      KHO_E[k++].dat(p, eOp * (1 - m), eDi > .02 && eDi < .98 ? 1 : 0);
+    }
+  }
+  // electron độc thân đứng yên
+  const hienGoc = [];
+  if (!coMT || t >= .62) for (const id in TT[g.den].goc_tu_do) hienGoc.push([id, g.den]);
+  else for (const id in TT[g.tu].goc_tu_do) if (!nguon.has(id) && id in TT[g.den].goc_tu_do) hienGoc.push([id, g.tu]);   // gốc không tham gia bước này
+  for (const [id, iTT] of hienGoc) KHO_E[k++].dat(viTriGoc(id, P, iTT), (coMT && t >= .62 ? seg(t, .58, .7) : 1) * (1 - m), 0);
+  while (k < KHO_E.length) KHO_E[k++].an();
+
+  // nhãn
+  for (const [id, o] of tagEster) { o.position.copy(P[id]).add(V(0, .55, 0)); o.element.style.opacity = .85; }
+  const tamCua = ids => ids.reduce((v, x) => v.add(P[x]), V()).multiplyScalar(1 / ids.length);
+  tagA1.position.copy(tamCua(["m1", "m2", "m3", "m4", "m5"])).add(V(0, -1.6, 0));
+  tagDMAD.position.copy(tamCua(["m6", "m7"])).add(V(0, -1.4, 0));
+  tagA1.element.style.opacity = tagDMAD.element.style.opacity = i === 0 ? 1 : 0;
+  tagA4.position.copy(tamCua(["m1", "m6", "m7"])).add(V(0, -1.6, 0));
+  tagA4.element.style.opacity = i === GD.length - 1 ? seg(t, 0, .3) : 0;
+
+  // camera + chuyển sang giấy (nhìn thẳng, thu góc rồi tờ giấy hiện ra)
+  if (u === 0) {
+    dk.enabled = true; dk.update();
+    camNguoi.huong.copy(camera.position).sub(dk.target).normalize(); camNguoi.xa = camera.position.distanceTo(dk.target);
+    if (camera.fov !== 40) { camera.fov = 40; camera.updateProjectionMatrix(); }
+  } else {
+    dk.enabled = false;
+    const fov = 40 - 28 * m, cao = 2 * camNguoi.xa * Math.tan(THREE.MathUtils.degToRad(20));
+    let h = camNguoi.huong.clone().lerp(V(0, 0, 1), m); if (h.lengthSq() < 1e-4) h.set(0, .2, 1); h.normalize();
+    camera.fov = fov; camera.updateProjectionMatrix();
+    camera.position.copy(dk.target).addScaledVector(h, cao * (1 - .25 * m) / (2 * Math.tan(THREE.MathUtils.degToRad(fov / 2))));
+    camera.up.set(0, 1, 0); camera.lookAt(dk.target);
+  }
+  scene.background.copy(MAU_NEN).lerp(MAU_GIAY, m);
+  document.body.style.background = "#" + scene.background.getHexString();
+  khung.style.opacity = lopNhan.style.opacity = 1 - lo;
+  const tg = $("to-giay");
+  tg.style.opacity = lo; tg.style.visibility = lo > .001 ? "visible" : "hidden"; tg.style.pointerEvents = lo > .5 ? "auto" : "none";
+  tg.firstElementChild.style.transform = `translateY(${(1 - lo) * 18}px)`;
+  san.visible = m < .99;
+
+  doanEl.forEach((d, j) => { d.firstChild.style.width = (j < i ? 100 : j > i ? 0 : t * 100) + "%"; });
+  $("keo").value = Math.round(T / TONG * 1000);
+}
+
+function datChay(v) { chay = v; $("chay").textContent = v ? "⏸" : "▶"; }
+function nhay(i) { i = Math.max(0, Math.min(GD.length - 1, i)); T = BD[i] + .001; }
+function doiCheDo() {
+  giay = !giay; document.body.classList.toggle("giay", giay);
+  document.querySelector("#chuyen .c3").classList.toggle("bat", !giay);
+  document.querySelector("#chuyen .cg").classList.toggle("bat", giay);
+}
+$("chuyen").onclick = doiCheDo;
+$("chay").onclick = () => { if (T >= TONG) T = 0; datChay(!chay); };
+$("lui").onclick = () => { const [i, t] = giaiDoan(T); nhay(t < .08 ? i - 1 : i); };
+$("toi").onclick = () => nhay(giaiDoan(T)[0] + 1);
+$("toc").onchange = e => tocDo = +e.target.value;
+function doiH() {
+  anH = !anH;
+  $("nut-h").textContent = anH ? "Hiện H" : "Ẩn H";
+  $("nut-h").setAttribute("aria-pressed", anH);
+}
+$("nut-h").onclick = doiH;
+$("keo").oninput = e => { T = e.target.value / 1000 * TONG; datChay(false); };
+addEventListener("keydown", e => {
+  if (e.target.tagName === "SELECT") return;
+  if (e.key.toLowerCase() === "g") return doiCheDo();
+  if (giay) return;
+  if (e.key.toLowerCase() === "h") return doiH();
+  if (e.code === "Space") { e.preventDefault(); $("chay").click(); }
+  else if (e.key === "ArrowRight") $("toi").click();
+  else if (e.key === "ArrowLeft") $("lui").click();
+});
+function coKhung() {
+  const W = innerWidth, H = innerHeight; renderer.setSize(W, H); nhanR.setSize(W, H); camera.aspect = W / H;
+  camera.setViewOffset(W, H, 0, H * .13, W, H);   // đẩy hình lên trên bảng điều khiển
+  camera.updateProjectionMatrix();
+}
+addEventListener("resize", coKhung); coKhung();
+const dongHo = new THREE.Clock();
+renderer.setAnimationLoop(() => { khung1(Math.min(dongHo.getDelta(), .05)); renderer.render(scene, camera); nhanR.render(scene, camera); });
+window.__coChe = { nhay, doiCheDo, datChay, get T() { return T; }, set T(v) { T = v; }, GD, BD };
+</script>
+</body>
+</html>

@@ -20,6 +20,8 @@ namespace Khkt.Menu
 
         /// <summary>Vừa bấm vào lab từ màn hình chính; IntroScreen đọc rồi xóa khi phòng lab tải xong.</summary>
         public static bool EnterLabPending { get; set; }
+        /// <summary>19/11: rời lab bằng "Về sảnh → Màn chọn ban đầu": MainMenu.Start mở màn chọn 2 luồng thay vì bảng điều khiển.</summary>
+        public static bool VeManChonKhiVe { get; set; }
         public static AccountUser User { get; set; }
         public static string Token { get; set; }
         public static bool GuestActive { get; set; }

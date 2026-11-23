@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>So sánh sơ đồ giấy</title>
+<!-- Mở qua máy chủ tĩnh ở gốc kho: /docs/ngay-18-11/anh/so-do-giay/so_sanh.html?bai=sn1_tbubr&demo=sn2_sn1
+     Trái: bản demo vẽ tay đã duyệt (nếu có) hoặc ảnh app trước khi sửa (anh/c3/<bai>_giay.png). Phải: bản tự sinh mới. -->
+<style>
+:root{--muc:#1b2621;--giay:#fffdf7;--vien:#e3dccb}
+body{margin:0;background:#f6f1e6;font-family:system-ui,sans-serif;color:var(--muc);padding:14px}
+.hai{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+.cot{background:var(--giay);border:1px solid var(--vien);border-radius:6px;padding:10px 14px}
+.cot h2{font:600 15px system-ui;margin:0 0 8px;color:#5d6862}
+.cot img{width:100%;height:auto;display:block}
+.so-do{display:block;width:100%;height:auto}
+.so-do .lk{stroke:var(--muc);stroke-width:1.6;stroke-linecap:round}
+.so-do .lk.sau{stroke:var(--muc);stroke-width:1.4}
+.so-do .nem{fill:var(--muc)}
+.so-do .nt{font:15.5px "Times New Roman",serif;text-anchor:middle;dominant-baseline:central;fill:var(--muc)}
+.so-do .dt{font:12px "Times New Roman",serif;text-anchor:middle;dominant-baseline:central;fill:var(--muc)}
+.so-do .ten{font:700 16px "Times New Roman",serif;text-anchor:middle;dominant-baseline:central;fill:var(--muc)}
+.so-do .mt{fill:none;stroke:#b3261e;stroke-width:1.3}
+.so-do .pu{stroke:var(--muc);stroke-width:1.4;fill:none}
+.so-do .dk{font:italic 14px "Times New Roman",serif;text-anchor:middle;fill:var(--muc)}
+.so-do .goc{fill:var(--muc)}
+.so-do .mt.gach{stroke:#8f9592;stroke-dasharray:6 5}
+.so-do .cheo{fill:#c62828;font:700 22px Arial,sans-serif;text-anchor:middle;dominant-baseline:central}
+.so-do .dtv{fill:var(--giay);stroke:var(--muc);stroke-width:1.2}
+.so-do .dtc{font:700 12px Arial,sans-serif;text-anchor:middle;dominant-baseline:central;fill:var(--muc)}
+.so-do .gd.sai{fill:rgba(198,40,40,.05)} .so-do .gd.chon{fill:rgba(201,162,39,.07)}
+.so-do .gd-vien{stroke-width:3} .so-do .gd-vien.sai{stroke:#c62828} .so-do .gd-vien.chon{stroke:#c9a227}
+.so-do .tieu-de-gd{font:italic 600 17px "Times New Roman",serif;fill:var(--muc);dominant-baseline:central}
+.so-do .song{fill:none;stroke:#c9a227;stroke-width:1.2}
+.so-do.co-chan .nt{font:16px "Times New Roman",serif}
+</style>
+</head>
+<body>
+<div class="hai"><div class="cot" id="trai"></div><div class="cot" id="phai"></div></div>
+<script type="module">
+import { veSoDo } from "../../../../nguyen_mau/co_che_3d/ve_giay.js";
+const q = new URLSearchParams(location.search), bai = q.get("bai"), demo = q.get("demo");
+const sd = await (await fetch(`../../../../build/co_che/${bai}/${bai}.giay.json`)).json();
+document.getElementById("phai").innerHTML = `<h2>Tự sinh (18/11, mới)</h2>${veSoDo(sd)}`;
+const trai = document.getElementById("trai");
+if (demo) {
+  trai.innerHTML = `<h2>Bản demo vẽ tay đã duyệt (${demo}.html, chế độ Giấy)</h2><div id="chu"></div>`;
+  const f = document.createElement("iframe");
+  f.style.cssText = "position:absolute;left:-5000px;width:1200px;height:900px";
+  f.src = `../../../../nguyen_mau/co_che_3d/${demo}.html`;
+  f.onload = () => setTimeout(() => {
+    const d = f.contentDocument, to = d.querySelector(".to");
+    to.querySelectorAll("#nut-gt,#gt,.cham").forEach(e => e.remove());
+    const goc = document.getElementById("chu").attachShadow({ mode: "open" });
+    goc.innerHTML = [...d.querySelectorAll("style")].map(s => s.outerHTML).join("") +
+      `<style>:host{--muc:#1b2621}.to{transform:none!important;box-shadow:none;border:0;padding:0;max-width:none}</style>` + to.outerHTML;
+    document.body.dataset.xong = "1";
+  }, 1500);
+  document.body.appendChild(f);
+} else {
+  trai.innerHTML = `<h2>Trong app trước khi sửa (anh/c3/${bai}_giay.png)</h2><img src="../c3/${bai}_giay.png" alt="">`;
+}
+</script>
+</body>
+</html>

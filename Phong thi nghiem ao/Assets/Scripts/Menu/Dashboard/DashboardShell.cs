@@ -169,8 +169,7 @@ namespace Khkt.Menu.Dashboard
             // Canvas riêng: chuyển động trong trang chính không bắt dựng lại phần còn lại của giao diện
             ownCanvas = gameObject.AddComponent<Canvas>();
             gameObject.AddComponent<GraphicRaycaster>();
-            var bg = gameObject.AddComponent<Image>();
-            bg.color = MenuKit.PaperAlt;
+            MenuKit.Backdrop(root);                           // nền có chiều sâu, ảnh đục (chặn chạm xuống lớp dưới)
 
             content = MenuKit.Stretch(root, "Vùng nội dung", Vector2.zero, Vector2.one, new Vector2(SidebarW, 0), Vector2.zero);
             BuildSidebar(logo);
@@ -183,7 +182,7 @@ namespace Khkt.Menu.Dashboard
             var bg = sidebar.gameObject.AddComponent<Image>();
             bg.color = MenuKit.Paper;
             var edge = MenuKit.Stretch(sidebar, "Viền", new Vector2(1, 0), Vector2.one, new Vector2(-1, 0), Vector2.zero);
-            edge.gameObject.AddComponent<Image>().color = MenuKit.PaperHover;
+            edge.gameObject.AddComponent<Image>().color = MenuKit.Hair;
             edge.GetComponent<Image>().raycastTarget = false;
 
             if (logo != null)
@@ -196,6 +195,9 @@ namespace Khkt.Menu.Dashboard
             GlassKit.Label(sidebar, "Tên", "VERA Lab", 24, MenuKit.Ink, true, TextAnchor.MiddleLeft, new Vector2(80, -30), new Vector2(180, 46));
 
             pill = MenuKit.Fill(sidebar, "Vệt chọn", new Vector2(0, 1), new Vector2(0, 1), new Vector2(16, NavTop), new Vector2(SidebarW - 32, NavH), MenuKit.AccentSoft, MenuKit.RadiusButton).rectTransform;
+            MenuKit.Ring(pill, "Viền", MenuKit.WithAlpha(MenuKit.Accent, 0.22f), MenuKit.RadiusButton);
+            var vach = MenuKit.Fill(pill, "Vạch", new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(-1, 0), new Vector2(4, 22), MenuKit.Accent, MenuKit.RadiusPill);
+            vach.raycastTarget = false;
 
             AddNav("tong_quan", MenuKit.IconHome, "Tổng quan");
             AddNav("diem_so", MenuKit.IconScore, "Điểm số");
@@ -208,7 +210,7 @@ namespace Khkt.Menu.Dashboard
             // Phần tài khoản ghim đáy thanh bên: chiều cao canvas đổi theo tỉ lệ màn hình
             var foot = GlassKit.Rect(sidebar, "Tài khoản", new Vector2(0, 0), new Vector2(0, 0), Vector2.zero, new Vector2(SidebarW, 228));
             var line = GlassKit.Rect(foot, "Kẻ", new Vector2(0, 1), new Vector2(0, 1), new Vector2(20, 0), new Vector2(SidebarW - 40, 1));
-            line.gameObject.AddComponent<Image>().color = MenuKit.PaperHover;
+            line.gameObject.AddComponent<Image>().color = MenuKit.Hair;
             line.GetComponent<Image>().raycastTarget = false;
 
             var avatar = MenuKit.Fill(foot, "Ảnh đại diện", new Vector2(0, 1), new Vector2(0, 1), new Vector2(24, -18), new Vector2(46, 46), MenuKit.Accent, 1f);
@@ -288,7 +290,7 @@ namespace Khkt.Menu.Dashboard
         RectTransform MakePageShell(string key, string title, string note, out Text subtitleLabel)
         {
             var rt = MenuKit.Full(content, "Trang: " + title);
-            GlassKit.Label(rt, "Tiêu đề", title, 36, MenuKit.Ink, true, TextAnchor.UpperLeft, new Vector2(PagePad, -40), new Vector2(900, 48));
+            GlassKit.Label(rt, "Tiêu đề", title, 40, MenuKit.Ink, true, TextAnchor.UpperLeft, new Vector2(PagePad, -40), new Vector2(900, 48));
             subtitleLabel = GlassKit.Label(rt, "Mô tả", note, 18, MenuKit.InkDim, false, TextAnchor.UpperLeft, new Vector2(PagePad, -92), new Vector2(1100, 28));
             rt.gameObject.SetActive(false);
             pages[key] = rt;
@@ -580,7 +582,7 @@ namespace Khkt.Menu.Dashboard
         void Placeholder(string key, string title, string note)
         {
             var rt = MenuKit.Full(content, "Trang: " + title);
-            GlassKit.Label(rt, "Tiêu đề", title, 36, MenuKit.Ink, true, TextAnchor.UpperLeft, new Vector2(56, -48), new Vector2(900, 50));
+            GlassKit.Label(rt, "Tiêu đề", title, 40, MenuKit.Ink, true, TextAnchor.UpperLeft, new Vector2(56, -48), new Vector2(900, 50));
             GlassKit.Label(rt, "Mô tả", note, 18, MenuKit.InkDim, false, TextAnchor.UpperLeft, new Vector2(56, -100), new Vector2(900, 30));
             var card = MenuKit.Card(rt, "Thẻ sắp có", 0f, 1f, -156, 150, 0f, false);
             card.offsetMin = new Vector2(56, card.offsetMin.y);
@@ -686,7 +688,7 @@ namespace Khkt.Menu.Dashboard
                 MenuAnim.ColorTo(item.label, on ? MenuKit.Accent : MenuKit.InkDim);
                 item.label.font = on ? GlassKit.Semibold : GlassKit.Regular;
                 if (item.icon != null) MenuAnim.ColorTo(item.icon, on ? MenuKit.Accent : MenuKit.InkDim);
-                if (on) MenuAnim.Slide(pill, pill.anchoredPosition, item.rt.anchoredPosition, 0.28f);
+                if (on) MenuAnim.Slide(pill, pill.anchoredPosition, item.rt.anchoredPosition, 0.36f, 0f, MenuAnim.Ease.OutQuint);
             }
             foreach (var kv in pages) kv.Value.gameObject.SetActive(kv.Key == key);
 

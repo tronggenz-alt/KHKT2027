@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Khkt.Environment;
 using Khkt.Environment.Tang2;
 using Khkt.Menu;
+using Khkt.Rendering;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -50,8 +51,9 @@ namespace Khkt.Demo
 
         GameObject root, home, setup, settings, themeConfirmDialog, continueBtnObj;
         Text setupNote, aiSaveStatus, serverSaveStatus, guideText, themeConfirmDetail, touchSensValueLabel;
+        Text graphicsHardwareLabel, graphicsStatusLabel;
         Toggle soundToggle, motionToggle, transToggle;
-        Button clickPickChip, clickPanelChip;
+        Button clickPickChip, clickPanelChip, benchmark30Btn;
         Slider touchSensSlider;
         InputField aiUrlInput, serverUrlInput;
 
@@ -61,6 +63,8 @@ namespace Khkt.Demo
         readonly ThemeCardUi[] themeCards = new ThemeCardUi[3];
         readonly Button[] fontScaleChips = new Button[3];
         readonly Button[] panelSizeChips = new Button[3];
+        readonly Button[] graphicsChips = new Button[5];
+        string graphicsBenchmarkMsg = "";
 
         UiTheme.Mode pendingTheme;
         bool captured, started, glassOk;
@@ -74,6 +78,7 @@ namespace Khkt.Demo
         {
             BuildUi();
             UiTheme.Changed += OnThemeChanged;
+            HardwareProfile.Changed += OnHardwareProfileChanged;
 
             if (Application.isPlaying)
             {
@@ -95,8 +100,11 @@ namespace Khkt.Demo
         void OnDestroy()
         {
             UiTheme.Changed -= OnThemeChanged;
+            HardwareProfile.Changed -= OnHardwareProfileChanged;
             if (captured) UiBridge.SetCapture(ref captured, false);
         }
+
+        void OnHardwareProfileChanged() => RefreshGraphicsProfileUi();
 
         void OnThemeChanged()
         {
@@ -193,6 +201,9 @@ namespace Khkt.Demo
             guideText = Label(h, "Phím", GetControlGuidanceText(), 14, Dim, false, TextAnchor.MiddleLeft, new Vector2(52, -680), new Vector2(1136, 26));
 
             MakeButton(h, "Cài đặt", "Cài đặt", new Vector2(52, -720), new Vector2(164, 50), ShowSettings, false, 15);
+            // 19/11: rời lab về sảnh đầu (bảng điều khiển hoặc màn chọn 2 luồng), luôn hỏi lại
+            if (VeSanh.CoTheVe)
+                MakeButton(h, "Nút Về sảnh", "← Về sảnh", new Vector2(232, -720), new Vector2(164, 50), MoHoiVeSanh, false, 15);
             continueBtnObj = MakeButton(h, "Tiếp tục", "Tiếp tục", new Vector2(762, -720), new Vector2(160, 50), Close, false, 15).gameObject;
             continueBtnObj.SetActive(false);
             MakeButton(h, "Vào phòng thí nghiệm", "Vào phòng thí nghiệm", new Vector2(936, -720), new Vector2(252, 50), LaunchSelectedMode, true, 16);
@@ -343,44 +354,59 @@ namespace Khkt.Demo
         void BuildSettingsDisplayTab(Transform pane, float w, float h)
         {
             var p = NewSettingsPage(pane, 0, "Tab Hiển thị", w, h);
-            Label(p, "Mục Giao diện", "Giao diện phòng thí nghiệm", 17, Ink, true, TextAnchor.UpperLeft, new Vector2(0, -2), new Vector2(w, 22));
-            Label(p, "Ghi chú Giao diện", "Chọn bảng màu và kiểu khung. Đổi nền trong phòng lab sẽ tải lại cảnh hiện tại.", 13, Dim, false, TextAnchor.UpperLeft, new Vector2(0, -26), new Vector2(w, 18));
+            Label(p, "Mục Giao diện", "Giao diện phòng thí nghiệm", 16, Ink, true, TextAnchor.UpperLeft, new Vector2(0, 0), new Vector2(w, 22));
 
-            BuildPreviewThemeCard(p, 0, UiTheme.Mode.XanhMuc, "Xanh mực VERA", "Nền tối xanh kỹ thuật",
+            BuildPreviewThemeCard(p, 0, UiTheme.Mode.XanhMuc, "Xanh mực VERA", "Tối xanh kỹ thuật",
                 HexColor(0x0a1322), HexColor(0x111d31), HexColor(0xeaf1ff), HexColor(0x93a7c4), HexColor(0x33d6ff), HexColor(0xffb84d));
-            BuildPreviewThemeCard(p, 1, UiTheme.Mode.Trang, "Trắng", "Nền sáng ban ngày",
+            BuildPreviewThemeCard(p, 1, UiTheme.Mode.Trang, "Trắng", "Sáng ban ngày",
                 HexColor(0xf5f5f7), HexColor(0xffffff), HexColor(0x1d1d1f), HexColor(0x5c5d66), HexColor(0x0b63d1), HexColor(0x9a5600));
-            BuildPreviewThemeCard(p, 2, UiTheme.Mode.Den, "Đen", "Nền tối tương phản cao",
+            BuildPreviewThemeCard(p, 2, UiTheme.Mode.Den, "Đen", "Tương phản cao",
                 HexColor(0x000000), HexColor(0x151517), HexColor(0xf5f5f7), HexColor(0xa1a1a8), HexColor(0x4da3ff), HexColor(0xffb84d));
 
-            Rule(p, new Vector2(0, -216), w);
+            Rule(p, new Vector2(0, -144), w);
 
-            Label(p, "Nhãn Cỡ chữ", "Cỡ chữ:", 15, Ink, true, TextAnchor.MiddleLeft, new Vector2(0, -230), new Vector2(176, 44));
+            Label(p, "Nhãn Cỡ chữ", "Cỡ chữ:", 15, Ink, true, TextAnchor.MiddleLeft, new Vector2(0, -154), new Vector2(176, 44));
             string[] fontLabels = { "Chuẩn", "Lớn", "Rất lớn" };
             for (int i = 0; i < fontLabels.Length; i++)
             {
                 int mode = i;
-                fontScaleChips[i] = MakeChip(p, "CoChu_" + i, fontLabels[i], new Vector2(188f + i * 172f, -230), new Vector2(162, 44),
+                fontScaleChips[i] = MakeChip(p, "CoChu_" + i, fontLabels[i], new Vector2(188f + i * 172f, -154), new Vector2(162, 44),
                     () => SelectFontScale(mode), UiTheme.FontScaleMode == mode, 14);
             }
 
-            Label(p, "Nhãn Cỡ bảng", "Cỡ bảng dụng cụ:", 15, Ink, true, TextAnchor.MiddleLeft, new Vector2(0, -286), new Vector2(176, 44));
+            Label(p, "Nhãn Cỡ bảng", "Cỡ bảng dụng cụ:", 15, Ink, true, TextAnchor.MiddleLeft, new Vector2(0, -206), new Vector2(176, 44));
             string[] panelLabels = { "60%", "75%", "Kín màn hình" };
             for (int i = 0; i < panelLabels.Length; i++)
             {
                 int mode = i;
-                panelSizeChips[i] = MakeChip(p, "CoBang_" + i, panelLabels[i], new Vector2(188f + i * 172f, -286), new Vector2(162, 44),
+                panelSizeChips[i] = MakeChip(p, "CoBang_" + i, panelLabels[i], new Vector2(188f + i * 172f, -206), new Vector2(162, 44),
                     () => SelectPanelSize(mode), UiTheme.PanelSizeMode == mode, 14);
             }
 
-            Rule(p, new Vector2(0, -344), w);
-            Label(p, "Mục Hiển thị", "Khả năng đọc & chuyển động", 17, Ink, true, TextAnchor.UpperLeft, new Vector2(0, -358), new Vector2(w, 22));
-            transToggle = MakeToggle(p, "ToggleTrans", "Nền đặc chống lóa", new Vector2(0, -388), new Vector2(w, 46),
+            Rule(p, new Vector2(0, -258), w);
+            Label(p, "Mục Đồ họa", "Chất lượng đồ họa", 16, Ink, true, TextAnchor.UpperLeft, new Vector2(0, -268), new Vector2(w, 22));
+            graphicsHardwareLabel = Label(p, "Thông tin phần cứng", HardwareProfile.MoTaMay(), 13, Dim, false, TextAnchor.UpperLeft, new Vector2(0, -292), new Vector2(w, 20));
+
+            string[] gfxLabels = { "Tự động", "Thấp", "Vừa", "Cao", "Siêu nét" };
+            const float chipW = 132f, chipGap = 8f;
+            for (int i = 0; i < gfxLabels.Length; i++)
+            {
+                int idx = i;
+                graphicsChips[i] = MakeChip(p, "DoHoa_" + i, gfxLabels[i], new Vector2(i * (chipW + chipGap), -318), new Vector2(chipW, 44),
+                    () => SelectGraphicsLevel(idx), IsGraphicsChipSelected(idx), 14);
+            }
+
+            benchmark30Btn = MakeButton(p, "DoThu30s", "Đo thử 30 giây", new Vector2(0, -370), new Vector2(204, 44), Run30sBenchmarkFromSettings, false, 14);
+            graphicsStatusLabel = Label(p, "Trạng thái đồ họa", "", 13, Accent, false, TextAnchor.MiddleLeft, new Vector2(216, -370), new Vector2(w - 216f, 44));
+
+            Rule(p, new Vector2(0, -422), w);
+            Label(p, "Mục Hiển thị", "Khả năng đọc & chuyển động", 15, Ink, true, TextAnchor.UpperLeft, new Vector2(0, -432), new Vector2(w, 20));
+            transToggle = MakeToggle(p, "ToggleTrans", "Nền đặc chống lóa (tắt hiệu ứng kính mờ)", new Vector2(0, -456), new Vector2(w, 44),
                 GlassKit.ReducedTransparency, v => GlassKit.ReducedTransparency = v);
-            Label(p, "Ghi chú Chống lóa", "Tắt hiệu ứng kính mờ, dùng nền đặc để chữ rõ hơn trên màn hình chói.", 13, Dim, false, TextAnchor.UpperLeft, new Vector2(0, -436), new Vector2(w, 20));
-            motionToggle = MakeToggle(p, "ToggleMotion", "Giảm chuyển động", new Vector2(0, -462), new Vector2(w, 46),
+            motionToggle = MakeToggle(p, "ToggleMotion", "Giảm chuyển động (Reduced Motion)", new Vector2(0, -504), new Vector2(w, 44),
                 ReducedMotion.IsEnabled, v => ReducedMotion.IsEnabled = v);
-            Label(p, "Ghi chú Chuyển động", "Hạn chế hiệu ứng trượt và thu phóng khi đóng mở bảng (Reduced Motion).", 13, Dim, false, TextAnchor.UpperLeft, new Vector2(0, -510), new Vector2(w, 20));
+
+            RefreshGraphicsProfileUi();
         }
 
         static Color HexColor(int rgb) =>
@@ -389,11 +415,11 @@ namespace Khkt.Demo
         void BuildPreviewThemeCard(Transform parent, int index, UiTheme.Mode mode, string label, string subtitle,
             Color previewBg, Color previewSurface, Color previewInk, Color previewDim, Color previewAccent, Color previewAccent2)
         {
-            const float cardW = 220f, cardH = 154f;
+            const float cardW = 220f, cardH = 112f;
             float x = index * (cardW + 17f);
             float corner = UiTheme.IsVera ? 1.8f : 2.6f;
 
-            var cardRt = Rect(parent, "Thẻ nền " + mode, new Vector2(0, 1), new Vector2(0, 1), new Vector2(x, -50), new Vector2(cardW, cardH));
+            var cardRt = Rect(parent, "Thẻ nền " + mode, new Vector2(0, 1), new Vector2(0, 1), new Vector2(x, -26), new Vector2(cardW, cardH));
             var borderImg = cardRt.gameObject.AddComponent<Image>();
             borderImg.sprite = Solid;
             borderImg.type = Image.Type.Sliced;
@@ -420,7 +446,7 @@ namespace Khkt.Demo
             innerImg.raycastTarget = false;
 
             // Khung mẫu thu nhỏ bên trong thẻ xem trước
-            var miniBox = Rect(innerRt, "Mẫu", new Vector2(0, 1), new Vector2(0, 1), new Vector2(12, -10), new Vector2(cardW - 29f, 68f));
+            var miniBox = Rect(innerRt, "Mẫu", new Vector2(0, 1), new Vector2(0, 1), new Vector2(10, -8), new Vector2(cardW - 25f, 44f));
             var miniBg = miniBox.gameObject.AddComponent<Image>();
             miniBg.sprite = Solid;
             miniBg.type = Image.Type.Sliced;
@@ -428,15 +454,14 @@ namespace Khkt.Demo
             miniBg.color = previewSurface;
             miniBg.raycastTarget = false;
 
-            Fill(miniBox, "Thanh nhấn", new Vector2(12, -12), new Vector2(68, 7), previewAccent);
-            Fill(miniBox, "Dòng 1", new Vector2(12, -26), new Vector2(146, 5), new Color(previewInk.r, previewInk.g, previewInk.b, 0.72f));
-            Fill(miniBox, "Dòng 2", new Vector2(12, -38), new Vector2(110, 5), new Color(previewDim.r, previewDim.g, previewDim.b, 0.65f));
-            Fill(miniBox, "Nút mẫu", new Vector2(12, -52), new Vector2(46, 9), previewAccent);
+            Fill(miniBox, "Thanh nhấn", new Vector2(10, -8), new Vector2(58, 5), previewAccent);
+            Fill(miniBox, "Dòng 1", new Vector2(10, -19), new Vector2(132, 4), new Color(previewInk.r, previewInk.g, previewInk.b, 0.72f));
+            Fill(miniBox, "Dòng 2", new Vector2(10, -29), new Vector2(96, 4), new Color(previewDim.r, previewDim.g, previewDim.b, 0.65f));
 
             // 3 chấm bảng màu đặc trưng
             void Swatch(string n, float sx, Color c)
             {
-                var sw = Rect(innerRt, n, new Vector2(0, 1), new Vector2(0, 1), new Vector2(sx, -85), new Vector2(26, 10));
+                var sw = Rect(innerRt, n, new Vector2(0, 1), new Vector2(0, 1), new Vector2(sx, -57), new Vector2(24, 7));
                 var im = sw.gameObject.AddComponent<Image>();
                 im.sprite = Solid;
                 im.type = Image.Type.Sliced;
@@ -444,13 +469,13 @@ namespace Khkt.Demo
                 im.color = c;
                 im.raycastTarget = false;
             }
-            Swatch("Màu 1", 12, previewAccent);
-            Swatch("Màu 2", 44, previewAccent2);
-            Swatch("Màu 3", 76, previewInk);
+            Swatch("Màu 1", 10, previewAccent);
+            Swatch("Màu 2", 38, previewAccent2);
+            Swatch("Màu 3", 66, previewInk);
 
-            Label(innerRt, "Tên", label, 15, previewInk, true, TextAnchor.UpperLeft, new Vector2(12, -101), new Vector2(cardW - 29f, 22));
+            Label(innerRt, "Tên", label, 14, previewInk, true, TextAnchor.UpperLeft, new Vector2(10, -68), new Vector2(cardW - 25f, 20));
             var statusLbl = Label(innerRt, "Trạng thái", UiTheme.Current == mode ? "Đang dùng" : subtitle, 12,
-                UiTheme.Current == mode ? previewAccent : previewDim, UiTheme.Current == mode, TextAnchor.UpperLeft, new Vector2(12, -125), new Vector2(cardW - 29f, 18));
+                UiTheme.Current == mode ? previewAccent : previewDim, UiTheme.Current == mode, TextAnchor.UpperLeft, new Vector2(10, -89), new Vector2(cardW - 25f, 18));
 
             themeCards[index] = new ThemeCardUi
             {
@@ -534,6 +559,76 @@ namespace Khkt.Demo
             img.sprite = Solid;
             img.pixelsPerUnitMultiplier = UiTheme.IsVera ? scale : 2.8f;
             img.color = fallbackBg;
+        }
+
+        GameObject hoiVeSanh;
+        Text hoiVeSanhNoiDung;
+
+        public bool DangHoiVeSanh => hoiVeSanh != null && hoiVeSanh.activeSelf;
+
+        /// <summary>Hộp hỏi "Về sảnh": Ở lại / Về màn chọn ban đầu / Về bảng điều khiển (hoặc Về sảnh nếu chưa đăng nhập).</summary>
+        public void MoHoiVeSanh()
+        {
+            if (hoiVeSanh == null) BuildHoiVeSanh(home.transform.parent);
+            hoiVeSanhNoiDung.text = VeSanh.DangLamDo()
+                ? "Bài đang làm dở sẽ mất. Bạn vẫn muốn rời phòng lab?"
+                : "Rời phòng lab và quay về sảnh đầu?";
+            hoiVeSanh.SetActive(true);
+            hoiVeSanh.transform.SetAsLastSibling();
+        }
+
+        public void DongHoiVeSanh() { if (hoiVeSanh != null) hoiVeSanh.SetActive(false); }
+
+        void XacNhanVeSanh(bool veManChon)
+        {
+            DongHoiVeSanh();
+            IsOpen = false;
+            UiBridge.SetCapture(ref captured, false);
+            VeSanh.Ve(veManChon);
+        }
+
+        void BuildHoiVeSanh(Transform parent)
+        {
+            var scrimRt = new GameObject("Hỏi về sảnh", typeof(RectTransform)).GetComponent<RectTransform>();
+            scrimRt.SetParent(parent, false);
+            scrimRt.anchorMin = Vector2.zero;
+            scrimRt.anchorMax = Vector2.one;
+            scrimRt.offsetMin = scrimRt.offsetMax = Vector2.zero;
+            var scrimImg = scrimRt.gameObject.AddComponent<Image>();
+            scrimImg.sprite = Plain;
+            scrimImg.color = Scrim(0.62f);
+            scrimImg.raycastTarget = true;
+
+            float cornerScale = UiTheme.IsVera ? 1.2f : 2.6f;
+            var borderRt = Rect(scrimRt, "Viền hộp thoại", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(640, 240));
+            var borderImg = borderRt.gameObject.AddComponent<Image>();
+            borderImg.sprite = Solid;
+            borderImg.type = Image.Type.Sliced;
+            borderImg.pixelsPerUnitMultiplier = cornerScale;
+            borderImg.color = Line;
+
+            var cardRt = new GameObject("Khung hộp thoại", typeof(RectTransform)).GetComponent<RectTransform>();
+            cardRt.SetParent(borderRt, false);
+            cardRt.anchorMin = Vector2.zero;
+            cardRt.anchorMax = Vector2.one;
+            cardRt.offsetMin = new Vector2(1.5f, 1.5f);
+            cardRt.offsetMax = new Vector2(-1.5f, -1.5f);
+            var cardImg = cardRt.gameObject.AddComponent<Image>();
+            cardImg.sprite = Solid;
+            cardImg.type = Image.Type.Sliced;
+            cardImg.pixelsPerUnitMultiplier = cornerScale;
+            cardImg.color = Surface;
+
+            Label(cardRt, "Tiêu đề", "Về sảnh", 20, Ink, true, TextAnchor.UpperLeft, new Vector2(28, -24), new Vector2(580, 28));
+            hoiVeSanhNoiDung = Label(cardRt, "Nội dung", "", 16, Dim, false, TextAnchor.UpperLeft, new Vector2(28, -64), new Vector2(580, 56));
+
+            MakeButton(cardRt, "Nút ở lại", "Ở lại", new Vector2(28, -166), new Vector2(120, 48), DongHoiVeSanh, false, 15);
+            MakeButton(cardRt, "Nút về màn chọn", "Màn chọn ban đầu", new Vector2(160, -166), new Vector2(214, 48), () => XacNhanVeSanh(true), false, 15);
+            MakeButton(cardRt, "Nút về bảng điều khiển", GameSession.HasIdentity ? "Bảng điều khiển" : "Về sảnh",
+                new Vector2(386, -166), new Vector2(222, 48), () => XacNhanVeSanh(false), true, 15);
+
+            hoiVeSanh = scrimRt.gameObject;
+            hoiVeSanh.SetActive(false);
         }
 
         void BuildThemeConfirmDialog(Transform parent)
@@ -679,6 +774,50 @@ namespace Khkt.Demo
             int panelMode = UiTheme.PanelSizeMode;
             for (int i = 0; i < panelSizeChips.Length; i++)
                 if (panelSizeChips[i] != null) SetChip(panelSizeChips[i], i == panelMode);
+        }
+
+        static bool IsGraphicsChipSelected(int index)
+        {
+            if (index == 0) return HardwareProfile.TuDong;
+            return !HardwareProfile.TuDong && (int)HardwareProfile.Muc == index - 1;
+        }
+
+        void SelectGraphicsLevel(int index)
+        {
+            graphicsBenchmarkMsg = "";
+            if (index == 0) HardwareProfile.DatTuDong();
+            else HardwareProfile.Dat((MucDoHoa)Mathf.Clamp(index - 1, 0, 3));
+            RefreshGraphicsProfileUi();
+        }
+
+        void Run30sBenchmarkFromSettings()
+        {
+            if (DoKhungHinh.DangDo) return;
+            graphicsBenchmarkMsg = "Đang đo 30 giây...";
+            Close();
+            DoKhungHinh.ChayThu30Giay((deXuat, kq) =>
+            {
+                graphicsBenchmarkMsg = $"Đo 30s: p95 = {kq.p95Ms:0.1} ms ({kq.fpsTrungBinh:0} FPS) → đề xuất {HardwareProfile.TenMuc(deXuat)}";
+                Open();
+                ShowSettings();
+                SelectSettingsTab(0);
+            });
+        }
+
+        void RefreshGraphicsProfileUi()
+        {
+            for (int i = 0; i < graphicsChips.Length; i++)
+                if (graphicsChips[i] != null) SetChip(graphicsChips[i], IsGraphicsChipSelected(i));
+            if (graphicsHardwareLabel != null)
+                graphicsHardwareLabel.text = HardwareProfile.MoTaMay();
+            if (graphicsStatusLabel != null)
+            {
+                graphicsStatusLabel.text = !string.IsNullOrEmpty(graphicsBenchmarkMsg)
+                    ? graphicsBenchmarkMsg
+                    : (HardwareProfile.TuDong
+                        ? $"Đang dùng: Tự động ({HardwareProfile.TenMuc(HardwareProfile.Muc)})"
+                        : $"Đang dùng: {HardwareProfile.TenMuc(HardwareProfile.Muc)}");
+            }
         }
 
         // =====================================================================
@@ -828,6 +967,7 @@ namespace Khkt.Demo
             if (setup != null) setup.SetActive(false);
             if (settings != null) settings.SetActive(false);
             if (themeConfirmDialog != null) themeConfirmDialog.SetActive(false);
+            DongHoiVeSanh();
             if (guideText != null) guideText.text = GetControlGuidanceText();
             if (continueBtnObj != null) continueBtnObj.SetActive(started);
             SelectModeCard(selectedMode);
@@ -840,6 +980,13 @@ namespace Khkt.Demo
             if (root != null) root.SetActive(false);
             UiBridge.SetCapture(ref captured, false);
             started = true;
+        }
+
+        public void OpenDisplaySettings()
+        {
+            Open();
+            ShowSettings();
+            SelectSettingsTab(0);
         }
 
         void RefreshSettingsFields()
@@ -863,6 +1010,7 @@ namespace Khkt.Demo
             RefreshThemeCards();
             RefreshClickModeChips();
             RefreshDisplayScaleChips();
+            RefreshGraphicsProfileUi();
         }
 
         void ShowSettings()
@@ -987,6 +1135,11 @@ namespace Khkt.Demo
             if (kb == null || !kb.escapeKey.wasPressedThisFrame) return;
             if (IsOpen)
             {
+                if (DangHoiVeSanh)
+                {
+                    DongHoiVeSanh();
+                    return;
+                }
                 if (themeConfirmDialog != null && themeConfirmDialog.activeSelf)
                 {
                     CancelThemeSwitch();

@@ -13,7 +13,7 @@ namespace Khkt.Menu.Dashboard
     /// </summary>
     public class MenuAnim : MonoBehaviour
     {
-        public enum Ease { OutCubic, OutBack, InOutCubic, Linear }
+        public enum Ease { OutCubic, OutBack, InOutCubic, Linear, OutQuint, Away }
 
         // Khung hình bị khựng không được làm chuyển động nhảy cóc: giới hạn bước thời gian
         const float MaxStep = 1f / 20f;
@@ -58,6 +58,13 @@ namespace Khkt.Menu.Dashboard
                     return 1f + (c + 1f) * u * u * u + c * u * u;
                 case Ease.InOutCubic:
                     return t < 0.5f ? 4f * t * t * t : 1f - Mathf.Pow(-2f * t + 2f, 3f) / 2f;
+                case Ease.OutQuint:
+                    // gần cubic-bezier(.22,1,.36,1) của CHEMISTRY (--vao): vào nhanh, đậu êm
+                    float q = 1f - t;
+                    return 1f - q * q * q * q * q;
+                case Ease.Away:
+                    // gần cubic-bezier(.33,.17,.67,.5): rời đi tăng tốc dần
+                    return t * t;
                 default:
                     return t;
             }
@@ -151,7 +158,7 @@ namespace Khkt.Menu.Dashboard
         }
 
         /// <summary>Hiện dần từ dưới lên, dùng cho thẻ và màn hình mới. Lần lượt theo delay tạo cảm giác xếp lớp.</summary>
-        public static void Enter(RectTransform rt, float delay = 0f, float rise = 18f, float duration = 0.36f)
+        public static void Enter(RectTransform rt, float delay = 0f, float rise = 16f, float duration = 0.45f)
         {
             var g = Group(rt);
             Vector2 end = Home(rt);
@@ -162,7 +169,38 @@ namespace Khkt.Menu.Dashboard
             {
                 g.alpha = k;
                 rt.anchoredPosition = Vector2.LerpUnclamped(start, end, k);
-            }, delay, Ease.OutCubic, () => Settle(rt));
+            }, delay, Ease.OutQuint, () => Settle(rt));
+        }
+
+        /// <summary>Hộp thoại hiện ra: phóng từ 0,96 lên 1 (đường cong soft) cùng mờ dần, như hienRa('dialog') của CHEMISTRY.</summary>
+        public static void Pop(RectTransform rt, float from = 0.96f, float duration = 0.38f, float delay = 0f)
+        {
+            var g = Group(rt);
+            g.alpha = 0f;
+            rt.localScale = new Vector3(from, from, 1f);
+            To(rt, "nở", duration, k =>
+            {
+                g.alpha = Mathf.Clamp01(k * 1.6f);
+                float s = Mathf.LerpUnclamped(from, 1f, k);
+                rt.localScale = new Vector3(s, s, 1f);
+            }, delay, Ease.OutQuint);
+        }
+
+        /// <summary>Rời màn: mờ đi và chìm nhẹ xuống (đường cong away, ~200 ms), xong thì gọi done.</summary>
+        public static void Leave(RectTransform rt, float duration = 0.2f, Action done = null)
+        {
+            var g = Group(rt);
+            float a0 = g.alpha;
+            To(rt, "nở", duration, k =>
+            {
+                g.alpha = Mathf.LerpUnclamped(a0, 0f, k);
+                float s = Mathf.LerpUnclamped(1f, 0.985f, k);
+                rt.localScale = new Vector3(s, s, 1f);
+            }, 0f, Ease.Away, () =>
+            {
+                rt.localScale = Vector3.one;
+                done?.Invoke();
+            });
         }
 
         public static void Slide(RectTransform rt, Vector2 from, Vector2 to, float duration, float delay = 0f, Ease ease = Ease.OutCubic, Action done = null)
@@ -174,7 +212,16 @@ namespace Khkt.Menu.Dashboard
         /// <summary>Số chạy dần tới giá trị cuối.</summary>
         public static void Count(Text t, float value, string format, float delay = 0f, float duration = 0.7f)
         {
-            To(t, "số", duration, k => t.text = (value * k).ToString(format, System.Globalization.CultureInfo.InvariantCulture), delay);
+            // chỉ tạo chuỗi mới khi con số hiện ra thật sự đổi (đỡ cấp phát mỗi khung)
+            float step = format.Contains(".") ? 0.1f : 1f;
+            int shown = int.MinValue;
+            To(t, "số", duration, k =>
+            {
+                int q = Mathf.RoundToInt(value * k / step);
+                if (q == shown) return;
+                shown = q;
+                t.text = (q * step).ToString(format, System.Globalization.CultureInfo.InvariantCulture);
+            }, delay);
         }
 
         /// <summary>Lắc nhẹ dòng báo lỗi để mắt chú ý tới.</summary>

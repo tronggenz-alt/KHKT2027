@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
+using Khkt.Avatar;
 using Khkt.Demo;
 using Khkt.Environment;
 using Khkt.Interaction;
@@ -24,13 +26,17 @@ namespace Khkt.Network
         {
             public string name = "";
             public GameObject root;
-            public Transform head, body, hand;
-            public Transform label;
-            public Text labelText;
+            public HumanoidAvatar avatar;
+            /// <summary>Người 3D Mixamo (Assets/Lab/NguoiChoi): có file thì thay thân dựng bằng mã, bảng tên vẫn của HumanoidAvatar.</summary>
+            public RemoteAvatar person;
             public Vector3 headPos, handPos;
             public float yaw, pitch;
             public Quaternion handRot = Quaternion.identity;
+            public Vector3 dispHead, dispHand;
+            public float dispYaw, dispPitch;
+            public Quaternion dispHandRot = Quaternion.identity;
             public bool seen;
+            public bool isTeacher;
         }
 
         struct Pose
@@ -68,9 +74,8 @@ namespace Khkt.Network
         float nextSend, nextHello, nextHud;
         bool welcomed;
         Text hud;
-        Material bodyMat, handMat;
 
-        ulong Me => net.LocalClientId;
+        ulong Me => net != null ? net.LocalClientId : 0;
 
         // =====================================================================
         // Vòng đời
@@ -79,11 +84,13 @@ namespace Khkt.Network
         void Start()
         {
             Instance = this;
-            room = RoomConnection.Instance;
-            net = NetworkManager.Singleton;
-            msg = net.CustomMessagingManager;
             viewer = FindAnyObjectByType<DesktopViewer>();
             hand = HandController.Active != null ? HandController.Active : FindAnyObjectByType<HandController>();
+            net = NetworkManager.Singleton;
+            if (net == null || !net.IsListening) return;
+
+            room = RoomConnection.Instance;
+            msg = net.CustomMessagingManager;
 
             msg.RegisterNamedMessageHandler(MsgPose, OnPose);
             msg.RegisterNamedMessageHandler(MsgHello, OnHello);
@@ -95,14 +102,14 @@ namespace Khkt.Network
             msg.RegisterNamedMessageHandler(MsgObject, OnObject);
             msg.RegisterNamedMessageHandler(MsgRelease, OnRelease);
             ZoneStreamer.ZoneChanged += OnZoneChanged;
-            room.Lost += OnRoomLost;
+            if (room != null) room.Lost += OnRoomLost;
             if (net.IsServer) net.OnClientDisconnectCallback += OnClientLeft;
 
             names[Me] = GameSession.DisplayName;
             welcomed = net.IsServer;
             ScanObjects();
             BuildHud();
-            LabMessages.Say(net.IsServer ? $"Đã mở phòng. Mã vào phòng: {room.Code}" : "Đã vào phòng học chung", LabMessages.Tone.Info);
+            LabMessages.Say(net.IsServer ? $"Đã mở phòng. Mã vào phòng: {room?.Code}" : "Đã vào phòng học chung", LabMessages.Tone.Info);
         }
 
         void OnDestroy()
@@ -132,7 +139,11 @@ namespace Khkt.Network
 
         void Update()
         {
-            if (net == null || !net.IsListening) return;
+            if (net == null || !net.IsListening)
+            {
+                MoveRemotes();
+                return;
+            }
             float now = Time.realtimeSinceStartup;
             if (!welcomed && now >= nextHello)
             {
@@ -361,26 +372,44 @@ namespace Khkt.Network
             if (!remote.seen)
             {
                 remote.seen = true;
-                remote.head.position = head;
-                remote.hand.position = handPos;
+                remote.dispHead = head;
+                remote.dispYaw = yaw;
+                remote.dispPitch = pitch;
+                remote.dispHand = handPos;
+                remote.dispHandRot = handRot;
+                Transform camT = viewer != null ? viewer.cameraTransform : null;
+                remote.avatar.ApplyPose(head, yaw, pitch, handPos, handRot, null, camT);
             }
         }
 
         void MoveRemotes()
         {
             float k = 1f - Mathf.Exp(-14f * Time.deltaTime);
-            Transform camT = viewer != null ? viewer.cameraTransform : null;
-            foreach (var r in remotes.Values)
+            Transform camT = viewer != null ? viewer.cameraTransform : (Camera.main != null ? Camera.main.transform : null);
+            foreach (var kv in remotes)
             {
-                if (r.root == null) continue;
+                var r = kv.Value;
+                if (r.root == null || r.avatar == null) continue;
                 // dịch chuyển trạm thì nhảy luôn, không trôi xuyên tường
-                r.head.position = (r.head.position - r.headPos).sqrMagnitude > 9f ? r.headPos : Vector3.Lerp(r.head.position, r.headPos, k);
-                r.head.rotation = Quaternion.Slerp(r.head.rotation, Quaternion.Euler(r.pitch, r.yaw, 0), k);
-                r.hand.position = (r.hand.position - r.handPos).sqrMagnitude > 9f ? r.handPos : Vector3.Lerp(r.hand.position, r.handPos, k);
-                r.hand.rotation = Quaternion.Slerp(r.hand.rotation, r.handRot, k);
-                r.body.SetPositionAndRotation(r.head.position + Vector3.down * 0.72f, Quaternion.Euler(0, r.yaw, 0));
-                r.label.position = r.head.position + Vector3.up * 0.26f;
-                if (camT != null) r.label.rotation = Quaternion.LookRotation(r.label.position - camT.position);
+                bool snap = (r.dispHead - r.headPos).sqrMagnitude > 9f;
+                r.dispHead = snap ? r.headPos : Vector3.Lerp(r.dispHead, r.headPos, k);
+                r.dispYaw = snap ? r.yaw : Mathf.LerpAngle(r.dispYaw, r.yaw, k);
+                r.dispPitch = snap ? r.pitch : Mathf.LerpAngle(r.dispPitch, r.pitch, k);
+                r.dispHand = snap ? r.handPos : Vector3.Lerp(r.dispHand, r.handPos, k);
+                r.dispHandRot = snap ? r.handRot : Quaternion.Slerp(r.dispHandRot, r.handRot, k);
+
+                r.avatar.ApplyPose(r.dispHead, r.dispYaw, r.dispPitch, r.dispHand, r.dispHandRot, null, camT);
+                if (camT != null) r.avatar.UpdateLod(camT.position);
+                if (r.person != null)
+                {
+                    r.person.Drive(r.dispHead, Quaternion.Euler(r.dispPitch, r.dispYaw, 0), r.dispHand, r.dispHandRot, IsHolding(kv.Key));
+                    var plate = r.avatar.NameplateTransform;
+                    if (plate != null)
+                    {
+                        plate.position = r.person.HeadTop + Vector3.up * 0.14f;
+                        if (camT != null) plate.rotation = Quaternion.LookRotation(plate.position - camT.position);
+                    }
+                }
             }
         }
 
@@ -622,65 +651,76 @@ namespace Khkt.Network
         // Hình người, bảng trạng thái
         // =====================================================================
 
-        Remote MakeRemote(ulong id)
+        Remote MakeRemote(ulong id, bool? forceTeacher = null)
         {
-            if (bodyMat == null)
-            {
-                bodyMat = Lit(new Color(0.35f, 0.52f, 0.72f));
-                handMat = Lit(new Color(0.27f, 0.56f, 0.93f));
-            }
-            var r = new Remote { root = new GameObject("Người cùng phòng " + id) };
-            r.body = Part(PrimitiveType.Capsule, r.root.transform, "Thân", new Vector3(0.36f, 0.56f, 0.24f), bodyMat);
-            r.head = Part(PrimitiveType.Sphere, r.root.transform, "Đầu", Vector3.one * 0.21f, bodyMat);
-            // Tấm che mặt cho biết người đó đang nhìn hướng nào
-            var visor = Part(PrimitiveType.Cube, r.head, "Mặt", new Vector3(0.75f, 0.28f, 0.2f), handMat);
-            visor.localPosition = new Vector3(0, 0.08f, 0.44f);
-            r.hand = Part(PrimitiveType.Sphere, r.root.transform, "Tay", new Vector3(0.09f, 0.04f, 0.13f), handMat);
+            string displayName = names.TryGetValue(id, out string found) ? found : "Bạn học";
+            bool isTeacher = forceTeacher ?? IsTeacherRole(id, displayName);
 
-            var labelGo = new GameObject("Tên", typeof(Canvas));
-            labelGo.transform.SetParent(r.root.transform, false);
-            var canvas = labelGo.GetComponent<Canvas>();
-            canvas.renderMode = RenderMode.WorldSpace;
-            var rt = (RectTransform)labelGo.transform;
-            rt.sizeDelta = new Vector2(520, 72);
-            rt.localScale = Vector3.one * 0.0016f;
-            var bg = GlassKit.Rect(rt, "Nền", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(520, 72)).gameObject.AddComponent<Image>();
-            bg.sprite = GlassKit.Solid;
-            bg.type = Image.Type.Sliced;
-            bg.color = new Color(0.04f, 0.06f, 0.1f, 0.78f);
-            bg.raycastTarget = false;
-            r.labelText = GlassKit.Label(rt, "Chữ", "", 42, Color.white, true, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(520, 72), new Vector2(0, 1));
-            r.label = labelGo.transform;
-            SetName(r, names.TryGetValue(id, out string name) ? name : "Bạn học");
-            return r;
+            var root = new GameObject("Người cùng phòng " + id);
+            var avatar = root.AddComponent<HumanoidAvatar>();
+            avatar.Initialize(displayName, isTeacher);
+            // Máy có file nhân vật Mixamo: người 3D đó thay thân dựng bằng mã (ẩn đi, chỉ giữ bảng tên)
+            var person = RemoteAvatar.Create(root.transform, "Thân người 3D");
+            if (person != null)
+                foreach (var rend in avatar.GetComponentsInChildren<Renderer>(true))
+                    if (!rend.transform.IsChildOf(person.transform)) rend.enabled = false;
+
+            return new Remote
+            {
+                name = displayName,
+                root = root,
+                avatar = avatar,
+                person = person,
+                isTeacher = isTeacher
+            };
+        }
+
+        static bool IsTeacherRole(ulong id, string name)
+        {
+            if (id == NetworkManager.ServerClientId) return true;
+            if (string.IsNullOrEmpty(name)) return false;
+            return name.StartsWith("GV", StringComparison.OrdinalIgnoreCase) ||
+                   name.Contains("Giáo viên", StringComparison.OrdinalIgnoreCase);
         }
 
         static void SetName(Remote r, string name)
         {
             r.name = name;
-            if (r.labelText != null) r.labelText.text = name;
+            r.isTeacher = r.isTeacher || IsTeacherRole(ulong.MaxValue, name);
+            if (r.avatar != null) r.avatar.SetName(name, r.isTeacher);
         }
 
-        static Material Lit(Color c)
+        /// <summary>Tạo nhanh một người chơi mô phỏng (chế độ thử 1 máy) qua chính LabPresence & HumanoidAvatar.</summary>
+        public HumanoidAvatar SpawnSimulatedRemote(ulong fakeId, string displayName, bool isTeacher,
+            Vector3 headPos, float yaw, float pitch, Vector3 handPos, Quaternion handRot)
         {
-            var m = new Material(Shader.Find("Universal Render Pipeline/Lit")) { hideFlags = HideFlags.DontSave };
-            m.SetColor("_BaseColor", c);
-            m.SetFloat("_Smoothness", 0.35f);
-            return m;
+            names[fakeId] = displayName;
+            if (!remotes.TryGetValue(fakeId, out var r) || r.root == null)
+            {
+                r = MakeRemote(fakeId, isTeacher);
+                remotes[fakeId] = r;
+            }
+            r.isTeacher = isTeacher;
+            r.name = displayName;
+            r.headPos = r.dispHead = headPos;
+            r.yaw = r.dispYaw = yaw;
+            r.pitch = r.dispPitch = pitch;
+            r.handPos = r.dispHand = handPos;
+            r.handRot = r.dispHandRot = handRot;
+            r.seen = true;
+            r.avatar.SetName(displayName, isTeacher);
+
+            Transform camT = viewer != null ? viewer.cameraTransform : (Camera.main != null ? Camera.main.transform : null);
+            r.avatar.ApplyPose(headPos, yaw, pitch, handPos, handRot, null, camT);
+            if (r.person != null) r.person.Drive(headPos, Quaternion.Euler(pitch, yaw, 0), handPos, handRot, false);
+            if (camT != null) r.avatar.UpdateLod(camT.position);
+            return r.avatar;
         }
 
-        static Transform Part(PrimitiveType type, Transform parent, string name, Vector3 scale, Material mat)
+        bool IsHolding(ulong who)
         {
-            var go = GameObject.CreatePrimitive(type);
-            go.name = name;
-            // không có va chạm: tia chọn vật và người đi xuyên qua hình người khác
-            Destroy(go.GetComponent<Collider>());
-            go.transform.SetParent(parent, false);
-            go.transform.localScale = scale;
-            var mr = go.GetComponent<MeshRenderer>();
-            mr.sharedMaterial = mat;
-            mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            return go.transform;
+            foreach (var kv in owners) if (kv.Value == who) return true;
+            return false;
         }
 
         void BuildHud()
