@@ -6,6 +6,9 @@ import { RONG_NHAN_DIEN, tinhVungCat, doiVeKhungDay, kichThuocTay, ThongKeTay, g
 const { docTay, raCuaSo, HANG_SO } = cuChiModule;
 const { chonCamera } = chonCamModule;
 
+// Chiều rộng ảnh gửi MediaPipe: 480 px vẫn > 2× cỡ mạng Palm (192) & Landmark (224), giảm ~44% pixel sao chép → độ trễ gần như giảm nửa
+const RONG_NHAN_DIEN_MUOT = Math.min(RONG_NHAN_DIEN, 480);
+
 // Ngưỡng tối ưu cho nhận diện tay mượt và bám chắc khi chụm ngón / lia tay nhanh / ánh sáng trong phòng:
 // - minHandDetectionConfidence 0.42: phát hiện bàn tay sớm hơn mà không bắt nhầm nền
 // - minHandPresenceConfidence 0.35 & minTrackingConfidence 0.32: bám khung liên tục khi ngón cái/trỏ che nhau lúc chụm
@@ -60,10 +63,12 @@ export function taoBoOnDinhTay() {
         const cu = truoc[idxTot];
         const dt = Math.max(0.008, t - cu.t);
         const buoc = Math.hypot(tam[0] - cu.tam[0], tam[1] - cu.tam[1]);
-        // Thích ứng tốc độ: giữ yên/kéo chậm → alpha ~0.44 chống rung ngón; kéo nhanh → alpha ~0.92 không trễ
-        const tyLe = Math.min(1, Math.max(0, (buoc - 0.005) / 0.032));
-        const a2d = 0.44 + tyLe * 0.48;
-        const a3d = 0.42 + tyLe * 0.46;
+        // Thích ứng tốc độ cực nhạy (tránh chồng trễ với LocOneEuro):
+        // - 2D: chỉ triệt rung vi mô khi giữ yên (alpha ~0.62), kéo thật nhảy ngay lên 0.96 gần như không trễ
+        // - 3D worldLandmarks: làm êm trục Z (alpha 0.48→0.88) để tỉ lệ chụm không nhảy chập chờn qua ngưỡng
+        const tyLe = Math.min(1, Math.max(0, (buoc - 0.003) / 0.016));
+        const a2d = 0.62 + tyLe * 0.34;
+        const a3d = 0.48 + tyLe * 0.40;
         const diemLoc = locMang(cu.diem, diem, a2d);
         const tgLoc = (theGioiMoi && cu.theGioi) ? locMang(cu.theGioi, theGioiMoi, a3d) : theGioiMoi;
         const tamLoc = tamBanTay(diemLoc);
@@ -220,13 +225,27 @@ export async function taoDieuKhienTay({
   let nguonHienTai = nguon;
   let worker = null;
   let luong = '';            // 'worker' (luồng riêng) hoặc 'chinh' (luồng chính, khi trình duyệt không chạy được worker)
-  let dangCho = false;       // đang chờ kết quả một khung → khung camera mới tới thì bỏ qua, không xếp hàng (đỡ trễ)
+  let dangCho = false;       // đang chờ kết quả một khung → giữ cờ coKhungCho để gửi khung mới nhất NGAY khi worker vừa xong
+  let coKhungCho = false;    // triệt tiêu hiện tượng rớt nhịp 30→15 FPS khi worker chậm hơn chu kỳ camera 1–2 ms
   let doSang = -1;
   let dsTayCuoi = [];
   let goiYHienTai = null;
   let thongKe = new ThongKeTay();
   let dangDungVongRender = false; // true khi vòng render 60–120 Hz đang gọi capNhatKhung(dt)
+  let tCapNhatHudCuoi = 0;        // chỉ cập nhật chữ HUD mỗi 250 ms để không buộc trình duyệt reflow 30 lần/giây
+  let hudChuCu = '', hudChiTietCu = '', goiYCu = null, chipKeyCu = '';
+  let krongCache = khung3D.clientWidth || 800;
+  let kcaoCache = khung3D.clientHeight || 600;
   const boOnDinh = taoBoOnDinhTay();
+  const capNhatKichThuocKhung = () => {
+    krongCache = khung3D.clientWidth || krongCache;
+    kcaoCache = khung3D.clientHeight || kcaoCache;
+  };
+  let roKhung = null;
+  if (typeof ResizeObserver !== 'undefined') {
+    roKhung = new ResizeObserver(capNhatKichThuocKhung);
+    roKhung.observe(khung3D);
+  }
 
   const cacTay = {};
 
@@ -316,7 +335,7 @@ export async function taoDieuKhienTay({
   vungBang.appendChild(bangCam);
 
   const canvasBang = bangCam.querySelector('.dkt-canvas-tay');
-  const ctxBang = canvasBang.getContext('2d');
+  const ctxBang = canvasBang.getContext('2d', { alpha: false });
   const chipTrangThai = bangCam.querySelector('.dkt-chip');
   const hudText = bangCam.querySelector('.dkt-thong-so-hud');
   const hudChiTiet = bangCam.querySelector('.dkt-thong-so-chi-tiet');
@@ -351,6 +370,7 @@ export async function taoDieuKhienTay({
       cung: el.querySelector('.dkt-ct-cung'),
       tam: el.querySelector('.dkt-ct-tam'),
       hien: false,
+      trangThai: '',
       x: 0,
       y: 0,
       tx: 0,
@@ -366,39 +386,47 @@ export async function taoDieuKhienTay({
 
   function capNhatConTro(pt, x, y, cham, tl, cheDo) {
     if (x === null) {
-      pt.hien = false;
-      pt.el.style.display = 'none';
+      if (pt.hien) {
+        pt.hien = false;
+        pt.el.style.display = 'none';
+      }
       return;
     }
     const moiHien = !pt.hien;
-    pt.hien = true;
     pt.tx = x;
     pt.ty = y;
-    pt.el.style.display = 'block';
+    if (moiHien) {
+      pt.hien = true;
+      pt.el.style.display = 'block';
+    }
     if (moiHien || !dangDungVongRender) {
       datViTriConTro(pt, x, y);
     }
 
     const laZoom = (cheDo === 'zoom');
     const mauChinh = laZoom ? '#3b82f6' : '#f97316';
-
-    if (cham) {
-      pt.ngoai.setAttribute('stroke', mauChinh);
-      pt.ngoai.setAttribute('stroke-width', '2.5');
-      pt.cung.style.display = 'none';
-      pt.tam.style.display = 'block';
-      pt.tam.setAttribute('fill', mauChinh);
-    } else {
-      pt.ngoai.setAttribute('stroke', 'rgba(255,255,255,0.85)');
-      pt.ngoai.setAttribute('stroke-width', '1.5');
-      pt.cung.style.display = 'block';
-      pt.cung.setAttribute('stroke', '#22c55e');
-      pt.tam.style.display = 'none';
-
+    const key = `${cham ? 1 : 0}|${laZoom ? 1 : 0}`;
+    if (key !== pt.trangThai) {
+      pt.trangThai = key;
+      if (cham) {
+        pt.ngoai.setAttribute('stroke', mauChinh);
+        pt.ngoai.setAttribute('stroke-width', '2.5');
+        pt.cung.style.display = 'none';
+        pt.tam.style.display = 'block';
+        pt.tam.setAttribute('fill', mauChinh);
+      } else {
+        pt.ngoai.setAttribute('stroke', 'rgba(255,255,255,0.85)');
+        pt.ngoai.setAttribute('stroke-width', '1.5');
+        pt.cung.style.display = 'block';
+        pt.cung.setAttribute('stroke', '#22c55e');
+        pt.tam.style.display = 'none';
+      }
+    }
+    if (!cham) {
       // Tính tỉ lệ đầy
       const doChum = Math.min(1.0, Math.max(0.0, (0.7 - tl) / (0.7 - HANG_SO.CHAM_BAT)));
       const chuVi = 2 * Math.PI * 18; // 113.097
-      pt.cung.setAttribute('stroke-dashoffset', String(chuVi * (1.0 - doChum)));
+      pt.cung.setAttribute('stroke-dashoffset', (chuVi * (1.0 - doChum)).toFixed(1));
     }
   }
 
@@ -417,28 +445,31 @@ export async function taoDieuKhienTay({
 
   function capNhatChip(cheDo, veDau) {
     if (thongBaoLoi) return;
+    let cls, txt;
     if (dangTai) {
-      chipTrangThai.className = 'dkt-chip dkt-chip-cho';
-      chipTrangThai.textContent = 'Đang khởi động…';
-      return;
-    }
-
-    if (veDau) {
-      chipTrangThai.className = 'dkt-chip dkt-chip-hoat-dong';
-      chipTrangThai.textContent = 'Về góc đầu';
+      cls = 'dkt-chip dkt-chip-cho';
+      txt = 'Đang khởi động…';
+    } else if (veDau) {
+      cls = 'dkt-chip dkt-chip-hoat-dong';
+      txt = 'Về góc đầu';
     } else if (cheDo === 'keo') {
-      chipTrangThai.className = 'dkt-chip dkt-chip-hoat-dong';
-      chipTrangThai.textContent = 'Đang xoay';
+      cls = 'dkt-chip dkt-chip-hoat-dong';
+      txt = 'Đang xoay';
     } else if (cheDo === 'quan_tinh') {
-      chipTrangThai.className = 'dkt-chip dkt-chip-luot';
-      chipTrangThai.textContent = 'Đang lướt';
+      cls = 'dkt-chip dkt-chip-luot';
+      txt = 'Đang lướt';
     } else if (cheDo === 'zoom') {
-      chipTrangThai.className = 'dkt-chip dkt-chip-zoom';
-      chipTrangThai.textContent = 'Phóng to / thu nhỏ';
+      cls = 'dkt-chip dkt-chip-zoom';
+      txt = 'Phóng to / thu nhỏ';
     } else {
-      chipTrangThai.className = 'dkt-chip dkt-chip-cho';
-      chipTrangThai.textContent = 'Chờ';
+      cls = 'dkt-chip dkt-chip-cho';
+      txt = 'Chờ';
     }
+    const key = cls + '|' + txt;
+    if (key === chipKeyCu) return;
+    chipKeyCu = key;
+    chipTrangThai.className = cls;
+    chipTrangThai.textContent = txt;
   }
 
   // --------------------------------------------------------------------------
@@ -560,29 +591,39 @@ export async function taoDieuKhienTay({
     const mau = cham ? '#f97316' : '#22c55e';
     ctx.lineWidth = 2;
     ctx.strokeStyle = mau;
-
+    ctx.beginPath();
     for (const [a, b] of NOI) {
       if (px[a] && px[b]) {
-        ctx.beginPath();
         ctx.moveTo(px[a].x, px[a].y);
         ctx.lineTo(px[b].x, px[b].y);
-        ctx.stroke();
       }
     }
+    ctx.stroke();
 
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
     for (let i = 0; i < px.length; i++) {
       const p = px[i];
-      if (!p) continue;
-      const laDau = DAU_NGON.includes(i);
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, laDau ? 4.5 : 2.5, 0, 2 * Math.PI);
-      ctx.fillStyle = laDau ? mau : '#ffffff';
-      ctx.fill();
+      if (!p || DAU_NGON.includes(i)) continue;
+      ctx.moveTo(p.x + 2.5, p.y);
+      ctx.arc(p.x, p.y, 2.5, 0, 2 * Math.PI);
     }
+    ctx.fill();
+
+    ctx.fillStyle = mau;
+    ctx.beginPath();
+    for (let i = 0; i < DAU_NGON.length; i++) {
+      const p = px[DAU_NGON[i]];
+      if (!p) continue;
+      ctx.moveTo(p.x + 4.5, p.y);
+      ctx.arc(p.x, p.y, 4.5, 0, 2 * Math.PI);
+    }
+    ctx.fill();
   }
 
-  // Bảng camera nhỏ: vẽ mỗi khung camera (không chờ nhận diện) + khung xương của lần nhận diện gần nhất.
+  // Bảng camera nhỏ: bỏ qua hoàn toàn khi người dùng thu gọn; khi mở vẽ gộp 1 lần stroke + 2 lần fill (< 0,3 ms)
   function vePiP() {
+    if (bangCam.classList.contains('thu-gon')) return;
     const vw = videoEl.videoWidth || 640, vh = videoEl.videoHeight || 480;
     const bw = 320, bh = Math.round(320 * vh / vw);
     if (canvasBang.width !== bw || canvasBang.height !== bh) {
@@ -595,7 +636,7 @@ export async function taoDieuKhienTay({
     for (const h of dsTayCuoi) veKhungXuong(ctxBang, h.diem, h.cham, bw, bh);
   }
 
-  // Mỗi khung camera: vẽ bảng camera, rồi gửi khung đi nhận diện nếu lần trước đã xong (không xếp hàng → không trễ dồn).
+  // Mỗi khung camera: vẽ bảng camera; nếu worker đang bận thì đánh dấu coKhungCho để gửi NGAY khi worker vừa xong (tránh rớt nhịp 30→15 FPS)
   function xuLyKhungHinh() {
     if (!dangChay) return;
     tiepTucVongLap();
@@ -603,14 +644,19 @@ export async function taoDieuKhienTay({
     const bay = performance.now();
     thongKe.ghiKhungCamera(bay / 1000);
     vePiP();
-    if (dangCho || document.hidden) return;
+    if (document.hidden) return;
+    if (dangCho) {
+      coKhungCho = true;
+      return;
+    }
+    coKhungCho = false;
     guiKhung(bay);
   }
 
   function guiKhung(tChup) {
     const vw = videoEl.videoWidth || 640, vh = videoEl.videoHeight || 480;
     const cat = tinhVungCat(vw, vh);
-    const caoNhanDien = Math.round(RONG_NHAN_DIEN * cat.sh / cat.sw);
+    const caoNhanDien = Math.round(RONG_NHAN_DIEN_MUOT * cat.sh / cat.sw);
     const ms = Math.max(Math.round(tChup - tBatDau), msTruoc + 1);
     msTruoc = ms;
     const meta = { tChup, cat, vw, vh };
@@ -618,7 +664,7 @@ export async function taoDieuKhienTay({
 
     if (luong === 'worker') {
       createImageBitmap(videoEl, cat.sx, cat.sy, cat.sw, cat.sh,
-        { resizeWidth: RONG_NHAN_DIEN, resizeHeight: caoNhanDien, resizeQuality: 'medium' })
+        { resizeWidth: RONG_NHAN_DIEN_MUOT, resizeHeight: caoNhanDien, resizeQuality: 'medium' })
         .then((anh) => {
           if (!dangChay || !worker) { anh.close(); dangCho = false; return; }
           worker.postMessage({ loai: 'khung', anh, ms, meta }, [anh]);
@@ -628,13 +674,13 @@ export async function taoDieuKhienTay({
     }
 
     // Dự phòng trên luồng chính: cắt 4:3 + lật gương lên canvas rồi nhận diện ngay
-    if (procCanvas.width !== RONG_NHAN_DIEN || procCanvas.height !== caoNhanDien) {
-      procCanvas.width = RONG_NHAN_DIEN;
+    if (procCanvas.width !== RONG_NHAN_DIEN_MUOT || procCanvas.height !== caoNhanDien) {
+      procCanvas.width = RONG_NHAN_DIEN_MUOT;
       procCanvas.height = caoNhanDien;
     }
     const t0 = performance.now();
-    procCtx.setTransform(-1, 0, 0, 1, RONG_NHAN_DIEN, 0);
-    procCtx.drawImage(videoEl, cat.sx, cat.sy, cat.sw, cat.sh, 0, 0, RONG_NHAN_DIEN, caoNhanDien);
+    procCtx.setTransform(-1, 0, 0, 1, RONG_NHAN_DIEN_MUOT, 0);
+    procCtx.drawImage(videoEl, cat.sx, cat.sy, cat.sw, cat.sh, 0, 0, RONG_NHAN_DIEN_MUOT, caoNhanDien);
     procCtx.setTransform(1, 0, 0, 1, 0, 0);
     let kq = null, loi = null;
     try {
@@ -669,10 +715,9 @@ export async function taoDieuKhienTay({
     const dtDieuKhien = (dangDungVongRender && dieuKhien.cheDo === 'quan_tinh') ? 0 : dt;
     dieuKhien.capNhat(tGiay, dtDieuKhien, dsTay);
 
-    // Cập nhật con trỏ trên khung 3D
-    const rect = khung3D.getBoundingClientRect();
-    const krong = rect.width;
-    const kcao = rect.height;
+    // Cập nhật đích con trỏ (dùng kích thước đã cache qua ResizeObserver → 0 layout reflow mỗi khung)
+    const krong = krongCache;
+    const kcao = kcaoCache;
 
     const conTroDiem = [];
     for (let i = 0; i < 2; i++) {
@@ -690,10 +735,12 @@ export async function taoDieuKhienTay({
     // Đường nối khi zoom hai tay
     if (dieuKhien.cheDo === 'zoom' && conTroDiem.length === 2 && dsTay[0].cham && dsTay[1].cham) {
       duongZoomSvg.style.display = 'block';
-      duongZoomLine.setAttribute('x1', conTroDiem[0][0]);
-      duongZoomLine.setAttribute('y1', conTroDiem[0][1]);
-      duongZoomLine.setAttribute('x2', conTroDiem[1][0]);
-      duongZoomLine.setAttribute('y2', conTroDiem[1][1]);
+      if (!dangDungVongRender) {
+        duongZoomLine.setAttribute('x1', conTroDiem[0][0]);
+        duongZoomLine.setAttribute('y1', conTroDiem[0][1]);
+        duongZoomLine.setAttribute('x2', conTroDiem[1][0]);
+        duongZoomLine.setAttribute('y2', conTroDiem[1][1]);
+      }
     } else {
       duongZoomSvg.style.display = 'none';
     }
@@ -710,17 +757,32 @@ export async function taoDieuKhienTay({
 
     capNhatChip(dieuKhien.cheDo, dieuKhien.veDau);
 
-    // Số đo để người dùng đọc khi thử thật + gợi ý khi khó nhận ra tay
-    const kichThuocNhoNhat = dsTay.length ? Math.min(...dsTay.map((h) => kichThuocTay(h.diem, tiLe))) : null;
-    goiYHienTai = goiYNhanDien({ doSang, tanSoCamera: thongKe.tanSoCamera, kichThuocNhoNhat,
-                                 giayKhongThayTay: thongKe.giayKhongThayTay(tGiay) });
-    hopGoiY.textContent = goiYHienTai || '';
-    hopGoiY.style.display = goiYHienTai ? 'block' : 'none';
-    hudText.textContent = `${Math.round(thongKe.tanSoNhanDien)} lần/giây | ${Math.round(msNhanDien)} ms | ${soTayHienTai} tay`;
-    hudChiTiet.textContent = `Thấy tay ${Math.round(thongKe.tiLeThayTay * 100)}% · sáng ${doSang < 0 ? '–' : doSang}`
-      + ` · camera ${Math.round(thongKe.tanSoCamera)} hình/giây`
-      + (dsTay.length ? ` · chụm ${dsTay[0].tl.toFixed(2)}` : '')
-      + ` · ${luong === 'worker' ? 'luồng riêng' : 'luồng chính'} ${uyQuyenMay}`;
+    // Giảm tần suất ghi chữ HUD (mỗi 250 ms) để không ép trình duyệt tính lại bố cục 30 lần/giây
+    const bayNow = performance.now();
+    if (bayNow - tCapNhatHudCuoi >= 250) {
+      tCapNhatHudCuoi = bayNow;
+      const kichThuocNhoNhat = dsTay.length ? Math.min(...dsTay.map((h) => kichThuocTay(h.diem, tiLe))) : null;
+      goiYHienTai = goiYNhanDien({ doSang, tanSoCamera: thongKe.tanSoCamera, kichThuocNhoNhat,
+                                   giayKhongThayTay: thongKe.giayKhongThayTay(tGiay) });
+      if (goiYHienTai !== goiYCu) {
+        goiYCu = goiYHienTai;
+        hopGoiY.textContent = goiYHienTai || '';
+        hopGoiY.style.display = goiYHienTai ? 'block' : 'none';
+      }
+      const hudMoi = `${Math.round(thongKe.tanSoNhanDien)} lần/giây | ${Math.round(msNhanDien)} ms | ${soTayHienTai} tay`;
+      if (hudMoi !== hudChuCu) { hudChuCu = hudMoi; hudText.textContent = hudMoi; }
+      const chiTietMoi = `Thấy tay ${Math.round(thongKe.tiLeThayTay * 100)}% · sáng ${doSang < 0 ? '–' : doSang}`
+        + ` · camera ${Math.round(thongKe.tanSoCamera)} hình/giây`
+        + (dsTay.length ? ` · chụm ${dsTay[0].tl.toFixed(2)}` : '')
+        + ` · ${luong === 'worker' ? 'luồng riêng' : 'luồng chính'} ${uyQuyenMay}`;
+      if (chiTietMoi !== hudChiTietCu) { hudChiTietCu = chiTietMoi; hudChiTiet.textContent = chiTietMoi; }
+    }
+
+    // Nếu đã có khung camera mới chờ sẵn trong lúc worker bận → gửi ngay lập tức (không chờ thêm 33 ms)
+    if (coKhungCho && luong === 'worker' && dangChay && !document.hidden && videoEl && videoEl.readyState >= 2) {
+      coKhungCho = false;
+      guiKhung(performance.now());
+    }
   }
 
   function tiepTucVongLap() {
@@ -846,6 +908,9 @@ export async function taoDieuKhienTay({
       dangChay = true;
       dangTai = false;
       dangCho = false;
+      coKhungCho = false;
+      tCapNhatHudCuoi = 0;
+      capNhatKichThuocKhung();
       tBatDau = performance.now();
       tTruoc = 0;
       msTruoc = -1;
@@ -880,6 +945,8 @@ export async function taoDieuKhienTay({
   function tat() {
     dangChay = false;
     dangTai = false;
+    dangCho = false;
+    coKhungCho = false;
     if (playbackTimer) {
       clearTimeout(playbackTimer);
       playbackTimer = null;
@@ -922,15 +989,16 @@ export async function taoDieuKhienTay({
     if (typeof dt !== 'number' || dt <= 0 || isNaN(dt)) dt = 0.016;
     const dtKep = Math.min(0.05, dt);
 
-    // Nội suy mượt con trỏ tay ở 60–120 FPS (không nhảy cục theo nhịp camera 25–30 Hz)
-    const k = 1 - Math.exp(-dtKep / 0.030);
+    // Nội suy mượt con trỏ tay ở 60–120 FPS (không nhảy cục theo nhịp camera, phản hồi nhanh 22 ms)
+    const k = 1 - Math.exp(-dtKep / 0.022);
+    let conTroDoi = false;
     for (const pt of [conTro1, conTro2]) {
       if (!pt.hien) continue;
-      const nx = pt.x + (pt.tx - pt.x) * k;
-      const ny = pt.y + (pt.ty - pt.y) * k;
-      datViTriConTro(pt, nx, ny);
+      if (Math.hypot(pt.tx - pt.x, pt.ty - pt.y) < 0.08) continue;
+      datViTriConTro(pt, pt.x + (pt.tx - pt.x) * k, pt.y + (pt.ty - pt.y) * k);
+      conTroDoi = true;
     }
-    if (duongZoomSvg.style.display !== 'none' && conTro1.hien && conTro2.hien) {
+    if (conTroDoi && duongZoomSvg.style.display !== 'none' && conTro1.hien && conTro2.hien) {
       duongZoomLine.setAttribute('x1', conTro1.x.toFixed(1));
       duongZoomLine.setAttribute('y1', conTro1.y.toFixed(1));
       duongZoomLine.setAttribute('x2', conTro2.x.toFixed(1));
@@ -960,6 +1028,8 @@ export async function taoDieuKhienTay({
 
   function huy() {
     tat();
+    roKhung?.disconnect();
+    roKhung = null;
     if (videoEl && videoEl.parentNode) {
       videoEl.parentNode.removeChild(videoEl);
       videoEl = null;

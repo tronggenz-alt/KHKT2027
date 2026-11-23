@@ -3,7 +3,7 @@
  * ES Module: Nhận THREE, camera, controls, dieuKhien qua tham số
  */
 
-export function taoBoApOrbit({ THREE, camera, controls, dieuKhien, doMuot = 0.055 }) { // mượt 55 ms: nối liền nhịp camera 25–30 Hz thành chuyển động 60–120 Hz êm mượt
+export function taoBoApOrbit({ THREE, camera, controls, dieuKhien, doMuot = 0.038 }) { // 38 ms: vừa siêu mượt ở 60–120 Hz vừa bám sát tay không bị ì
   if (!THREE || !camera || !controls || !dieuKhien) {
     throw new Error('taoBoApOrbit cần đủ { THREE, camera, controls, dieuKhien }');
   }

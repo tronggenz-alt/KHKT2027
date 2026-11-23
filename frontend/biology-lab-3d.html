@@ -5343,9 +5343,9 @@ async function batDieuKhienTay(nguon = "camera") {
     dangNapTay = true;
     try {
       const [{ DieuKhien }, { taoBoApOrbit }, { taoDieuKhienTay }] = await Promise.all([
-        import("/static/dieu-khien-tay/cu-chi.js?v=2"),
-        import("/static/dieu-khien-tay/ap-orbit.js?v=2"),
-        import("/static/dieu-khien-tay/theo-doi-tay.js?v=2")
+        import("/static/dieu-khien-tay/cu-chi.js?v=3"),
+        import("/static/dieu-khien-tay/ap-orbit.js?v=3"),
+        import("/static/dieu-khien-tay/theo-doi-tay.js?v=3")
       ]);
 
       const dieuKhien = new DieuKhien({
@@ -5366,7 +5366,7 @@ async function batDieuKhienTay(nguon = "camera") {
         }
       });
 
-      boApOrbit = taoBoApOrbit({ THREE, camera, controls, dieuKhien, doMuot: 0.06 });
+      boApOrbit = taoBoApOrbit({ THREE, camera, controls, dieuKhien, doMuot: 0.04 });
       boDieuKhienTay = await taoDieuKhienTay({
         khung3D: document.getElementById("khung-3d") || document.getElementById("khung-giua"),
         vungBang: document.getElementById("khung-giua") || document.getElementById("khung-3d"),
