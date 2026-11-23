@@ -7,7 +7,7 @@
 // - clear() xoá + dispose() toàn bộ (gọi khi đổi quy trình / đóng chế độ).
 import * as THREE from "three";
 import { CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
-import { CAU_HINH } from "./config.js?v=5";
+import { CAU_HINH } from "./config.js?v=6";
 
 const C = CAU_HINH.muiTen, X = CAU_HINH.xung;
 const TREN = new THREE.Vector3(0, 1, 0);

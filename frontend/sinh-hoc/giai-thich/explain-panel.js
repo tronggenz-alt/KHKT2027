@@ -2,7 +2,7 @@
 // nút điều khiển, tốc độ, Tự động chạy, thanh đếm thời gian đọc, thu nhỏ, kéo thả / vuốt trên điện thoại).
 // Chỉ hiển thị + phát lệnh người dùng qua onAction(tên, giá_trị); KHÔNG tự điều khiển bước hay 3D.
 // Mọi chữ đưa vào bằng textContent (dữ liệu có thể đến từ AI) – không chèn HTML.
-import { CAU_HINH } from "./config.js";
+import { CAU_HINH } from "./config.js?v=6";
 
 const $ = (s) => document.querySelector(s);
 
@@ -13,6 +13,7 @@ export class ExplainPanel {
     this.khung = $("#khung-giai-thich");
     this._nghe = [];
     this.laThuNho = false;
+    this._canLaiViTri = () => {};
     this._ganSuKien();
     this._ganKeoTha();
   }
@@ -25,7 +26,8 @@ export class ExplainPanel {
   mo() {
     if (!this.khung) return;
     this.khung.classList.remove("an");
-    this.thuNho(!!this.luuDoc("bio-lab-gt-min", false), false);
+    this.thuNho(false, false);
+    this._canLaiViTri();
     const nut = $("#nut-mo-giai-thich");
     nut?.setAttribute("aria-pressed", "true");
     nut?.classList.add("bat");
@@ -41,6 +43,7 @@ export class ExplainPanel {
   thuNho(bat, luu = true) {
     this.laThuNho = !!bat;
     this.khung?.classList.toggle("thu-nho", this.laThuNho);
+    if (!this.laThuNho && this.dangMo) this._canLaiViTri();
     if (luu) this.luuGhi("bio-lab-gt-min", this.laThuNho);
   }
   /** Số điểm ảnh khung 3D bị bảng che (bên phải trên máy tính, phía dưới khi là tấm đáy trên điện thoại) → camera bù. */
@@ -173,23 +176,41 @@ export class ExplainPanel {
     $("#gt-tu-chay")?.addEventListener("change", (e) => this._lenh("tuChay", e.target.checked));
   }
 
-  // kéo thả bằng thanh tiêu đề (máy tính) · vuốt xuống / lên để thu nhỏ / mở (tấm đáy trên điện thoại)
+  // kéo thả bằng thanh tiêu đề (máy tính, toạ độ tương đối theo khung 3D cha để KHÔNG bao giờ bị đẩy ra ngoài vùng hiển thị)
+  // · vuốt xuống / lên để thu nhỏ / mở (tấm đáy trên điện thoại)
   _ganKeoTha() {
     const thanh = $("#gt-thanh-keo"), k = this.khung;
     if (!thanh || !k) return;
-    const manRong = () => !window.matchMedia(`(max-width: 960px)`).matches;
+    const cha = () => k.offsetParent || k.parentElement;
+    const manRong = () => !window.matchMedia("(max-width: 960px)").matches;
     const kep = (x, a, b) => Math.min(b, Math.max(a, x));
-    const dat = (left, top) => {
-      const maxL = Math.max(10, window.innerWidth - (k.offsetWidth || 320) - 10), maxT = Math.max(10, window.innerHeight - 80);
-      Object.assign(k.style, { left: `${kep(left, 10, maxL)}px`, top: `${kep(top, 10, maxT)}px`, right: "auto", bottom: "auto" });
+    const dat = (x, y) => {
+      const p = cha();
+      const pw = p?.clientWidth || window.innerWidth, ph = p?.clientHeight || window.innerHeight;
+      const kw = k.offsetWidth || 320, kh = k.offsetHeight || 220;
+      const maxL = Math.max(8, pw - kw - 8);
+      const maxT = Math.max(8, ph - Math.min(kh, Math.max(72, ph - 16)) - 8);
+      Object.assign(k.style, { left: `${kep(x, 8, maxL)}px`, top: `${kep(y, 8, maxT)}px`, right: "auto", bottom: "auto" });
     };
-    const luu = this.luuDoc("bio-lab-gt-pos", null);
-    if (luu && Number.isFinite(luu.left) && Number.isFinite(luu.top) && manRong()) dat(luu.left, luu.top);
+    const datMacDinh = () => {
+      Object.assign(k.style, { left: "", top: "", right: "", bottom: "" });
+    };
+    this._canLaiViTri = () => {
+      if (!manRong()) { datMacDinh(); return; }
+      const luu = this.luuDoc("bio-lab-gt-pos-v2", null);
+      if (luu && Number.isFinite(luu.x) && Number.isFinite(luu.y)) dat(luu.x, luu.y);
+      else datMacDinh();
+    };
+    this._canLaiViTri();
+    window.addEventListener("resize", () => { if (this.dangMo) this._canLaiViTri(); });
+    if (typeof ResizeObserver !== "undefined" && k.parentElement) {
+      new ResizeObserver(() => { if (this.dangMo) this._canLaiViTri(); }).observe(k.parentElement);
+    }
     let keo = null;
     thanh.addEventListener("pointerdown", (e) => {
       if (!manRong() || e.target.closest("button, select, input")) return;
-      const r = k.getBoundingClientRect();
-      keo = { x: e.clientX, y: e.clientY, l: r.left, t: r.top };
+      const r = k.getBoundingClientRect(), pr = cha()?.getBoundingClientRect() || { left: 0, top: 0 };
+      keo = { x: e.clientX, y: e.clientY, l: r.left - pr.left, t: r.top - pr.top };
       try { thanh.setPointerCapture(e.pointerId); } catch { /* bỏ qua */ }
     });
     thanh.addEventListener("pointermove", (e) => { if (keo) dat(keo.l + e.clientX - keo.x, keo.t + e.clientY - keo.y); });
@@ -197,8 +218,8 @@ export class ExplainPanel {
       if (!keo) return;
       keo = null;
       try { thanh.releasePointerCapture(e.pointerId); } catch { /* bỏ qua */ }
-      const r = k.getBoundingClientRect();
-      this.luuGhi("bio-lab-gt-pos", { left: Math.round(r.left), top: Math.round(r.top) });
+      const r = k.getBoundingClientRect(), pr = cha()?.getBoundingClientRect() || { left: 0, top: 0 };
+      this.luuGhi("bio-lab-gt-pos-v2", { x: Math.round(r.left - pr.left), y: Math.round(r.top - pr.top) });
       this._lenh("diChuyen");
     };
     thanh.addEventListener("pointerup", tha);

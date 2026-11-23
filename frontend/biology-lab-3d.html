@@ -1488,12 +1488,12 @@ body.xem-co-quan .hud, body.xem-co-quan .bang-goc-nhin, body.xem-co-quan .dem-ca
 /* ---------- Chế độ Giải thích từng bước (Mũi tên 3D) ---------- */
 .khung-giai-thich {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 52px;
+  right: 64px;
   left: auto;
-  width: 320px;
-  max-width: calc(100vw - 32px);
-  max-height: min(74vh, 640px);
+  width: 316px;
+  max-width: calc(100% - 80px);
+  max-height: min(74vh, 620px);
   z-index: 25;
   background: rgba(17, 17, 17, 0.94);
   border: 1px solid var(--vien);
@@ -1506,6 +1506,17 @@ body.xem-co-quan .hud, body.xem-co-quan .bang-goc-nhin, body.xem-co-quan .dem-ca
   overflow: hidden;
   transition: opacity 0.25s ease, max-height 0.25s ease, width 0.25s ease;
   user-select: none;
+}
+@media (max-width: 960px) {
+  .khung-giai-thich {
+    top: auto;
+    bottom: 72px;
+    left: 12px;
+    right: 60px;
+    width: auto;
+    max-width: none;
+    max-height: 46vh;
+  }
 }
 .khung-giai-thich.an { display: none !important; }
 .khung-giai-thich.thu-nho {
@@ -5144,7 +5155,7 @@ $("#nut-dat-lai").addEventListener("click", datLaiTatCa);
 //      Chỉ có khi trang do máy chủ phục vụ; mở file trực tiếp → ẩn nút chế độ này.
 // =====================================================================================================================
 const GT_MOD = location.protocol.startsWith("http")
-  ? await import("/static/sinh-hoc/giai-thich/index.js?v=5").catch((e) => { console.warn("Không tải được chế độ giải thích từng bước:", e.message); return null; })
+  ? await import("/static/sinh-hoc/giai-thich/index.js?v=6").catch((e) => { console.warn("Không tải được chế độ giải thích từng bước:", e.message); return null; })
   : null;
 // Điểm neo giải phẫu chính xác (tâm buồng tim, ngã ba mạch lớn, tâm nội tạng) dành riêng cho đầu/cuối mũi tên 3D
 const DIEM_MUI_TEN = {
