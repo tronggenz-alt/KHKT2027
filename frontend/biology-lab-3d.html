@@ -2868,18 +2868,41 @@ const Y_DINH = [
 // =====================================================================================================================
 const khung3D = $("#khung-3d");
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-renderer.setPixelRatio(Math.min(1.5, window.devicePixelRatio || 1)); // Retina ×2 tốn gấp đôi điểm ảnh – 1,5 vẫn sắc nét
+renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1)); // Độ nét chuẩn Retina 2× (tự hạ xuống 1,5 nếu máy yếu)
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;          // bóng đổ mềm (phòng giải phẫu)
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
+renderer.toneMappingExposure = 1.12;
+const ANISO_MAX = Math.min(16, renderer.capabilities.getMaxAnisotropy() || 8);
 khung3D.appendChild(renderer.domElement);
 const rendererNhan = new CSS2DRenderer();
 rendererNhan.domElement.className = "lop-nhan";
 khung3D.appendChild(rendererNhan.domElement);
 
 const scene = new THREE.Scene();
+// Môi trường phản xạ studio giải phẫu (PMREM IBL tạo trực tiếp, không tải file ngoài): tạo độ bóng ẩm và độ sắc nét chuẩn PBR cho mọi cơ quan & xương
+(function taoMoiTruongStudio() {
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  pmrem.compileEquirectangularShader();
+  const s = new THREE.Scene();
+  s.background = new THREE.Color(0x10141c);
+  const hop = (w, h, mau, pos, look = [0, 0, 0]) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: mau, side: THREE.DoubleSide }));
+    m.position.set(...pos);
+    m.lookAt(...look);
+    s.add(m);
+  };
+  hop(9, 9, new THREE.Color(2.6, 2.52, 2.38), [0, 6.2, 1.2]);          // đèn trần phẫu thuật trắng ấm
+  hop(6, 7, new THREE.Color(2.0, 1.88, 1.72), [5.2, 2.6, 4.4]);        // softbox chính trước-phải
+  hop(6, 7, new THREE.Color(1.25, 1.48, 1.85), [-5.4, 2.0, 3.6]);      // softbox bù mát bên trái
+  hop(9, 4, new THREE.Color(1.9, 2.25, 2.65), [0, 3.4, -5.8]);         // dải đèn viền sau tách khối
+  hop(10, 10, new THREE.Color(0.24, 0.28, 0.36), [0, -5.5, 0]);        // sàn phản xạ dịu vùng tối
+  const rt = pmrem.fromScene(s, 0.035);
+  scene.environment = rt.texture;
+  s.traverse((o) => { if (o.isMesh) { o.geometry.dispose(); o.material.dispose(); } });
+  pmrem.dispose();
+})();
 const MAU_NEN = { lab: 0x0a0a0a, studio: 0x0a0a0a, xray: 0x021018, vi_mo: 0x03111b, "studio-trang": 0xf8fafc, giai_phau: 0x2f2f2f };
 scene.background = new THREE.Color(MAU_NEN.lab);
 scene.fog = new THREE.FogExp2(MAU_NEN.lab, 0.045);
@@ -2912,18 +2935,21 @@ const den2 = new THREE.PointLight(0x06b6d4, 7, 0, 2);
 den2.position.set(-1.4, 2.0, 1.4);
 const denTim = new THREE.PointLight(0xff3344, 0, 1.4, 2);
 scene.add(anhSangMoiTruong, anhSangBauTroi, anhSangChinh, anhSangVien, den1, den2, denTim);
-// đèn studio phòng giải phẫu: key light trắng ấm trước – trên (đổ bóng mềm) + rim light phía sau tách viền cơ khỏi nền
-const denKhoa = new THREE.DirectionalLight(0xfff1e2, 0);
+// đèn studio phòng giải phẫu 3 điểm: key light trắng ấm trước – trên (bóng 2048px sắc nét) + fill light xanh dịu + rim light sau tách khối
+const denKhoa = new THREE.DirectionalLight(0xfff2e4, 0);
 denKhoa.position.set(1.6, 5.4, 4.6);
 denKhoa.castShadow = true;
-denKhoa.shadow.mapSize.set(1024, 1024);
+denKhoa.shadow.mapSize.set(2048, 2048);
 Object.assign(denKhoa.shadow.camera, { left: -1.3, right: 1.3, top: 4.2, bottom: -0.6, near: 1, far: 14 });
-denKhoa.shadow.bias = -0.0006;
-denKhoa.shadow.normalBias = 0.02;
+denKhoa.shadow.bias = -0.00035;
+denKhoa.shadow.normalBias = 0.014;
+denKhoa.shadow.radius = 2.0;
 denKhoa.target.position.set(0, 1.7, 0);
+const denBu = new THREE.DirectionalLight(0xcbe2ff, 0);
+denBu.position.set(-3.6, 2.4, 3.2);
 const denVienSau = new THREE.DirectionalLight(0xdbe6ff, 0);
 denVienSau.position.set(-1.4, 3.6, -5.2);
-scene.add(denKhoa, denKhoa.target, denVienSau);
+scene.add(denKhoa, denKhoa.target, denBu, denVienSau);
 function nenGradient(tren, duoi, tron = false) { // nền xám than chuyển sắc (hoặc toả tròn khi xem riêng cơ quan)
   const c = document.createElement("canvas");
   c.width = tron ? 512 : 4; c.height = 512;
@@ -3069,14 +3095,85 @@ for (const id of Object.keys(HE)) { nhomHe[id] = new THREE.Group(); nhomHe[id].n
 function vatLieu(bp, mau, tuyChon = {}) {
   if (vatLieuBP[bp]) return vatLieuBP[bp];
   const m = new THREE.MeshPhysicalMaterial({
-    color: mau, roughness: tuyChon.nham ?? 0.42, metalness: 0.04, clearcoat: tuyChon.bong ?? 0.45, clearcoatRoughness: 0.32,
-    transmission: tuyChon.truyen ?? 0, thickness: 0.25, ior: 1.35, transparent: (tuyChon.doMo ?? 1) < 1 || (tuyChon.truyen ?? 0) > 0,
+    color: mau, roughness: tuyChon.nham ?? 0.38, metalness: 0.03, clearcoat: tuyChon.bong ?? 0.5, clearcoatRoughness: tuyChon.nhamBong ?? 0.22,
+    envMapIntensity: tuyChon.env ?? 1.05,
+    transmission: tuyChon.truyen ?? 0, thickness: 0.25, ior: 1.38, transparent: (tuyChon.doMo ?? 1) < 1 || (tuyChon.truyen ?? 0) > 0,
     opacity: tuyChon.doMo ?? 1, emissive: new THREE.Color(0x000000), emissiveIntensity: 1, side: tuyChon.haiMat ? THREE.DoubleSide : THREE.FrontSide,
   });
   m.depthWrite = !m.transparent;
   m.userData.doMoGoc = m.opacity;
   m.userData.trongSuotGoc = m.transparent;
   vatLieuBP[bp] = m;
+  return m;
+}
+// Shader giải phẫu chuyên biệt (KHÔNG thay đổi toạ độ đỉnh): tạo vân vi cấu trúc 3D theo không gian cục bộ (hoạt động cả trên mesh BodyParts3D không có UV),
+// tăng sắc nét khe rãnh/sống nổi (screen-space curvature cavity AO) và ánh viền xuyên sáng mô học (Fresnel SSS)
+const GLSL_VI_CAU_TRUC = `
+varying vec3 vObjPosG;
+float _h3(vec3 p) {
+  p = fract(p * vec3(0.1031, 0.1030, 0.0973));
+  p += dot(p, p.yxz + 33.33);
+  return fract((p.x + p.y) * p.z);
+}
+float _n3(vec3 p) {
+  vec3 i = floor(p), f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(
+    mix(mix(_h3(i), _h3(i + vec3(1.0,0.0,0.0)), f.x), mix(_h3(i + vec3(0.0,1.0,0.0)), _h3(i + vec3(1.0,1.0,0.0)), f.x), f.y),
+    mix(mix(_h3(i + vec3(0.0,0.0,1.0)), _h3(i + vec3(1.0,0.0,1.0)), f.x), mix(_h3(i + vec3(0.0,1.0,1.0)), _h3(i + vec3(1.0,1.0,1.0)), f.x), f.y),
+    f.z);
+}
+float _fbm3(vec3 p) {
+  return _n3(p) * 0.58 + _n3(p * 2.13 + 7.1) * 0.29 + _n3(p * 4.37 + 13.7) * 0.13;
+}
+`;
+const CAU_HINH_SHADER_GP = {
+  xuong:    { freq: "vec3(26.0, 8.5, 26.0)", bump: "0.0012", cav: "0.24", grain: "0.11", rough: "0.14", rim: "vec3(0.95, 0.92, 0.84)", rimA: "0.075", daFr: false },
+  sun:      { freq: "vec3(22.0, 22.0, 22.0)", bump: "0.0006", cav: "0.16", grain: "0.06", rough: "0.08", rim: "vec3(0.72, 0.88, 0.98)", rimA: "0.11",  daFr: false },
+  rang:     { freq: "vec3(36.0, 14.0, 36.0)", bump: "0.0003", cav: "0.22", grain: "0.04", rough: "0.05", rim: "vec3(1.00, 0.99, 0.95)", rimA: "0.09",  daFr: false },
+  gan_co:   { freq: "vec3(42.0, 7.5, 42.0)",  bump: "0.0011", cav: "0.18", grain: "0.09", rough: "0.12", rim: "vec3(0.98, 0.92, 0.85)", rimA: "0.10",  daFr: false },
+  mach_do:  { freq: "vec3(20.0, 58.0, 20.0)", bump: "0.0008", cav: "0.20", grain: "0.07", rough: "0.08", rim: "vec3(1.00, 0.36, 0.34)", rimA: "0.14",  daFr: false },
+  mach_xanh:{ freq: "vec3(20.0, 58.0, 20.0)", bump: "0.0008", cav: "0.20", grain: "0.07", rough: "0.08", rim: "vec3(0.42, 0.66, 1.00)", rimA: "0.14",  daFr: false },
+  da:       { freq: "vec3(68.0, 68.0, 68.0)", bump: "0.0005", cav: "0.14", grain: "0.05", rough: "0.08", rim: "vec3(1.00, 0.82, 0.72)", rimA: "0.22",  daFr: true  },
+  noi_tang: { freq: "vec3(28.0, 28.0, 28.0)", bump: "0.0004", cav: "0.22", grain: "0.05", rough: "0.07", rim: "vec3(1.00, 0.58, 0.50)", rimA: "0.11",  daFr: false },
+};
+function ganShaderGiaiPhau(m, loai) {
+  if (!m || m.userData.shaderGP === loai) return m;
+  const p = CAU_HINH_SHADER_GP[loai];
+  if (!p) return m;
+  m.userData.shaderGP = loai;
+  m.onBeforeCompile = (sh) => {
+    sh.vertexShader = sh.vertexShader
+      .replace("#include <common>", "#include <common>\nvarying vec3 vObjPosG;")
+      .replace("#include <project_vertex>", "#include <project_vertex>\n\tvObjPosG = transformed;");
+    sh.fragmentShader = sh.fragmentShader
+      .replace("#include <common>", "#include <common>\n" + GLSL_VI_CAU_TRUC)
+      .replace("#include <normal_fragment_maps>", `#include <normal_fragment_maps>
+	{
+	  vec3 _dpx = dFdx(vViewPosition), _dpy = dFdy(vViewPosition);
+	  float _lenP = length(_dpx) + length(_dpy);
+	  float _sil = smoothstep(0.075, 0.014, _lenP);
+	  float _hM = _fbm3(vObjPosG * ${p.freq});
+	  vec3 _r1 = cross(_dpy, normal), _r2 = cross(normal, _dpx);
+	  float _det = dot(_dpx, _r1);
+	  if (abs(_det) > 1e-10) {
+	    vec3 _gN = (sign(_det) * (dFdx(_hM) * _r1 + dFdy(_hM) * _r2) / abs(_det)) * ${p.bump};
+	    float _gL = length(_gN);
+	    if (_gL > 0.30) _gN *= (0.30 / _gL);
+	    normal = normalize(normal - _gN * _sil);
+	  }
+	  vec3 _uP = _dpx / max(length(_dpx), 1e-5), _vP = _dpy / max(length(_dpy), 1e-5);
+	  float _curv = clamp(-(dot(dFdx(normal), _uP) + dot(dFdy(normal), _vP)) * 0.55, -1.0, 1.0) * _sil;
+	  float _gTon = (_hM - 0.5) * 2.0;
+	  diffuseColor.rgb *= clamp(1.0 + _curv * ${p.cav} + _gTon * ${p.grain}, 0.72, 1.24);
+	  roughnessFactor = clamp(roughnessFactor - _gTon * ${p.rough} - max(_curv, 0.0) * 0.06, 0.08, 0.96);
+	  float _fr = pow(1.0 - clamp(abs(dot(normal, normalize(vViewPosition))), 0.0, 1.0), 2.6);
+	  totalEmissiveRadiance += ${p.rim} * (_fr * ${p.rimA}) * clamp(diffuseColor.a, 0.0, 1.0);
+	  ${p.daFr ? "diffuseColor.a = clamp(diffuseColor.a * (0.42 + 1.55 * _fr), 0.0, 0.92);" : ""}
+	}`);
+  };
+  m.customProgramCacheKey = () => "gp-" + loai;
+  m.needsUpdate = true;
   return m;
 }
 function dangKy(mesh, bp, chonDuocKhong = true) {
@@ -3153,15 +3250,27 @@ function dungTuBP3D(lop, he) {
       vl = vatLieuBP[g.bp] = vatLieuCo(false);
       vl.userData.luonGhiSau = true;   // cơ gần như đục: vẫn ghi độ sâu để cơ nông che đúng cơ sâu
       vl.depthWrite = true;
-    } else if (lop === "gan") vl = vatLieu(g.bp, 0xe8cdb5, { nham: 0.32, bong: 0.7 });
-    else if (lop === "mach_do") vl = vatLieu(g.bp, 0xc0262e, { nham: 0.32, bong: 0.7 });
-    else if (lop === "mach_xanh") vl = vatLieu(g.bp, 0x3b5ba8, { nham: 0.36, bong: 0.6 });
-    else if (lop === "da") {
-      vl = vatLieu(g.bp, 0xd9a58e, { doMo: 0.32, nham: 0.55, bong: 0.12 });
-      Object.assign(vl, { sheen: 0.6, sheenColor: new THREE.Color(0xffd2bf), sheenRoughness: 0.5 });
-    } else vl = vatLieu(g.bp, MAU_XUONG_BP3D[g.bp] ?? 0xede3cf, { nham: 0.6, bong: 0.15 });
+    } else if (lop === "gan") {
+      vl = ganShaderGiaiPhau(vatLieu(g.bp, 0xe8cdb5, { nham: 0.28, bong: 0.72, nhamBong: 0.18, env: 1.05 }), "gan_co");
+      Object.assign(vl, { sheen: 0.45, sheenColor: new THREE.Color(0xfff1e2), sheenRoughness: 0.4 });
+    } else if (lop === "mach_do") {
+      vl = ganShaderGiaiPhau(vatLieu(g.bp, 0xc0262e, { nham: 0.24, bong: 0.85, nhamBong: 0.14, env: 1.25 }), "mach_do");
+    } else if (lop === "mach_xanh") {
+      vl = ganShaderGiaiPhau(vatLieu(g.bp, 0x3b5ba8, { nham: 0.28, bong: 0.78, nhamBong: 0.16, env: 1.2 }), "mach_xanh");
+    } else if (lop === "da") {
+      vl = ganShaderGiaiPhau(vatLieu(g.bp, 0xd9a58e, { doMo: 0.30, nham: 0.46, bong: 0.22, env: 0.85 }), "da");
+      Object.assign(vl, { sheen: 0.65, sheenColor: new THREE.Color(0xffd6c4), sheenRoughness: 0.45 });
+    } else if (g.bp === "rang") {
+      vl = ganShaderGiaiPhau(vatLieu(g.bp, MAU_XUONG_BP3D.rang, { nham: 0.16, bong: 0.92, nhamBong: 0.08, env: 1.15 }), "rang");
+    } else if (g.bp === "sun_suon" || g.bp === "dia_dem") {
+      vl = ganShaderGiaiPhau(vatLieu(g.bp, MAU_XUONG_BP3D[g.bp], { nham: 0.36, bong: 0.48, nhamBong: 0.22, env: 0.95 }), "sun");
+      Object.assign(vl, { sheen: 0.35, sheenColor: new THREE.Color(0xe0f2fe), sheenRoughness: 0.5 });
+    } else {
+      vl = ganShaderGiaiPhau(vatLieu(g.bp, MAU_XUONG_BP3D[g.bp] ?? 0xede3cf, { nham: 0.50, bong: 0.24, nhamBong: 0.28, env: 0.88 }), "xuong");
+    }
     const m = new THREE.Mesh(g.geo, vl);
     m.castShadow = lop !== "da";
+    m.receiveShadow = lop !== "da";
     m.renderOrder = lop === "da" ? 22 : lop === "co" || lop === "gan" ? 18 : 0;
     dangKy(m, g.bp);
     themVao(he, m);
@@ -3181,29 +3290,65 @@ const vatLieuVo = new THREE.ShaderMaterial({
     void main(){ float f = pow(1.0 - abs(dot(normalize(vN), normalize(vV))), 2.6); float quet = smoothstep(0.0, 0.05, 0.05 - abs(fract(vY * 0.35 - uThoiGian * 0.12) - 0.5)) * 0.25;
       gl_FragColor = vec4(uMau, (0.035 + f * 0.42 + quet) * uDoMo); }`,
 });
-// ---------- lớp cơ ngoài cùng: vân thớ dọc bó cơ (map + normal map vẽ bằng canvas), gân kem, ướt bóng (clearcoat + sheen hồng),
+// ---------- lớp cơ ngoài cùng: vân thớ 2D độ nét cao 512×512 (albedo + Sobel normal map + roughness map), gân kem, ướt bóng (clearcoat + sheen hồng),
 // xuyên sáng nhẹ (transmission 0,15), ngực – bụng bán trong suốt + viền Fresnel đậm ở mép ----------
 const THO_CO = (() => {
-  const W = 512, H = 256, r = ngauNhien(808);
+  const W = 512, H = 512, r = ngauNhien(808);
   const c = document.createElement("canvas"); c.width = W; c.height = H;
-  const g = c.getContext("2d");
-  const c0 = [0xc9, 0x57, 0x4a], c1 = [0xe0, 0x8a, 0x78];
-  for (let x = 0; x < W; x += 2) {
-    const t = kep(0.5 + 0.5 * Math.sin(x * 0.045 + r() * 0.8) * (0.55 + 0.45 * r()), 0, 1);
-    const m = c0.map((v, i) => Math.round(v + (c1[i] - v) * t));
-    g.fillStyle = `rgb(${m[0]},${m[1]},${m[2]})`;
-    g.fillRect(x, 0, 2, H);
-  }
-  for (let i = 0; i < 260; i++) { g.fillStyle = r() < 0.55 ? "rgba(105,26,22,0.33)" : "rgba(255,214,200,0.16)"; g.fillRect(r() * W, 0, 0.6 + r() * 1.3, H); }
-  const n = document.createElement("canvas"); n.width = W; n.height = 4;
-  const gn = n.getContext("2d"), img = gn.createImageData(W, 4), cao = new Float32Array(W);
-  for (let x = 0; x < W; x++) cao[x] = 0.5 + 0.34 * Math.sin(x * 0.55) + 0.14 * Math.sin(x * 1.7 + 1.3) + 0.14 * (r() - 0.5);
+  const g = c.getContext("2d"), imgM = g.createImageData(W, H);
+  const n = document.createElement("canvas"); n.width = W; n.height = H;
+  const gn = n.getContext("2d"), imgN = gn.createImageData(W, H);
+  const rm = document.createElement("canvas"); rm.width = W; rm.height = H;
+  const gr = rm.getContext("2d"), imgR = gr.createImageData(W, H);
+  const cao = new Float32Array(W * H);
+  const phaBo = new Float32Array(W), tanBo = new Float32Array(W), mangBo = new Float32Array(W);
   for (let x = 0; x < W; x++) {
-    const v = V(-(cao[(x + 1) % W] - cao[(x - 1 + W) % W]) * 2.2, 0, 1).normalize();
-    for (let y = 0; y < 4; y++) { const k = (y * W + x) * 4; img.data.set([(v.x * 0.5 + 0.5) * 255, 128, (v.z * 0.5 + 0.5) * 255, 255], k); }
+    phaBo[x] = r() * Math.PI * 2;
+    tanBo[x] = 0.65 + 0.35 * Math.sin(x * 0.14 + r() * 0.5);
+    mangBo[x] = r() < 0.085 ? 0.55 + 0.45 * r() : 0; // vách mô liên kết nội cơ mảnh (perimysium trắng bạc)
   }
-  gn.putImageData(img, 0, 0);
-  return { mau: c, phap: n };
+  const TAU = Math.PI * 2;
+  for (let y = 0; y < H; y++) {
+    const vy = (y / H) * TAU;
+    for (let x = 0; x < W; x++) {
+      const vx = (x / W) * TAU;
+      const uon = Math.sin(vy * 2 + Math.sin(vx * 3) * 0.8) * 2.4 + Math.sin(vy * 5 + vx * 2) * 0.8;
+      const xs = ((Math.round(x + uon) % W) + W) % W;
+      const boLon = 0.5 + 0.5 * Math.sin(vx * 18 + Math.sin(vy * 2) * 0.45);
+      const thoNho = 0.5 + 0.5 * Math.sin(vx * 78 + phaBo[xs] * 0.25 + Math.sin(vy * 4) * 0.35);
+      const viSoi = 0.5 + 0.5 * Math.sin(vx * 164 + vy * 3);
+      const perim = mangBo[xs] * (0.6 + 0.4 * Math.sin(vy * 3 + xs * 0.05));
+      const h = kep(boLon * 0.48 + thoNho * 0.36 + viSoi * 0.16 - perim * 0.25, 0, 1);
+      cao[y * W + x] = h;
+      const k = (y * W + x) * 4;
+      let R = 172 + h * 62 * tanBo[xs];
+      let G = 52 + h * 68;
+      let B = 48 + h * 60;
+      if (perim > 0.02) {
+        const w = kep(perim * 0.72, 0, 0.75);
+        R = R + (242 - R) * w; G = G + (214 - G) * w; B = B + (204 - B) * w;
+      }
+      imgM.data.set([kep(Math.round(R), 0, 255), kep(Math.round(G), 0, 255), kep(Math.round(B), 0, 255), 255], k);
+      const nh = kep(Math.round((0.58 - h * 0.28 + perim * 0.16) * 255), 40, 235);
+      imgR.data.set([nh, nh, nh, 255], k);
+    }
+  }
+  const doSau = 3.2;
+  for (let y = 0; y < H; y++) {
+    const ym = (y - 1 + H) % H, yp = (y + 1) % H;
+    for (let x = 0; x < W; x++) {
+      const xm = (x - 1 + W) % W, xp = (x + 1) % W;
+      const gx = (cao[ym * W + xp] + 2 * cao[y * W + xp] + cao[yp * W + xp]) - (cao[ym * W + xm] + 2 * cao[y * W + xm] + cao[yp * W + xm]);
+      const gy = (cao[yp * W + xm] + 2 * cao[yp * W + x] + cao[yp * W + xp]) - (cao[ym * W + xm] + 2 * cao[ym * W + x] + cao[ym * W + xp]);
+      const nx = -gx * doSau, ny = -gy * doSau, nz = 1.0, inv = 1 / Math.hypot(nx, ny, nz);
+      const k = (y * W + x) * 4;
+      imgN.data.set([(nx * inv * 0.5 + 0.5) * 255, (ny * inv * 0.5 + 0.5) * 255, (nz * inv * 0.5 + 0.5) * 255, 255], k);
+    }
+  }
+  g.putImageData(imgM, 0, 0);
+  gn.putImageData(imgN, 0, 0);
+  gr.putImageData(imgR, 0, 0);
+  return { mau: c, phap: n, nham: rm };
 })();
 const VUNG_GLSL = `
 uniform float uDoMoLop; uniform float uDoMoNguc; uniform float uGan; varying vec3 vViTriCo;
@@ -3222,15 +3367,15 @@ float vungGan(vec3 p) { // gân / cân mỏng màu kem: cổ tay, cổ chân –
 const vatLieuCoDS = [];
 const KET_CAU_CO = {};
 function vatLieuCo(laVo) {
-  const { tMau, tPhap } = KET_CAU_CO[laVo] || (KET_CAU_CO[laVo] = (() => { // kết cấu dùng chung cho mọi vật liệu cơ cùng loại
-    const tMau = new THREE.CanvasTexture(THO_CO.mau), tPhap = new THREE.CanvasTexture(THO_CO.phap);
+  const { tMau, tPhap, tNham } = KET_CAU_CO[laVo] || (KET_CAU_CO[laVo] = (() => { // kết cấu dùng chung cho mọi vật liệu cơ cùng loại
+    const tMau = new THREE.CanvasTexture(THO_CO.mau), tPhap = new THREE.CanvasTexture(THO_CO.phap), tNham = new THREE.CanvasTexture(THO_CO.nham);
     tMau.colorSpace = THREE.SRGBColorSpace;
-    for (const t of [tMau, tPhap]) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4; t.repeat.set(laVo ? 9 : 3, laVo ? 2 : 1); }
-    return { tMau, tPhap };
+    for (const t of [tMau, tPhap, tNham]) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = ANISO_MAX; t.repeat.set(laVo ? 9 : 3, laVo ? 2 : 1); }
+    return { tMau, tPhap, tNham };
   })());
   const m = new THREE.MeshPhysicalMaterial({
-    color: 0xffffff, map: tMau, normalMap: tPhap, normalScale: new THREE.Vector2(0.7, 0.7), roughness: 0.45, metalness: 0,
-    clearcoat: 0.3, clearcoatRoughness: 0.4, sheen: 0.45, sheenColor: new THREE.Color(0xffa8a8), sheenRoughness: 0.45,
+    color: 0xffffff, map: tMau, normalMap: tPhap, normalScale: new THREE.Vector2(0.95, 0.95), roughness: 1.0, roughnessMap: tNham, metalness: 0,
+    clearcoat: 0.3, clearcoatRoughness: 0.28, sheen: 0.5, sheenColor: new THREE.Color(0xffb4b0), sheenRoughness: 0.42, envMapIntensity: 0.95,
     transmission: 0.15, thickness: 0.5, ior: 1.4, attenuationColor: new THREE.Color(0xc9574a), attenuationDistance: 0.8,
     transparent: true, depthWrite: false, side: THREE.FrontSide, emissive: new THREE.Color(0x000000), emissiveIntensity: 1,
   });
@@ -3245,9 +3390,15 @@ function vatLieuCo(laVo) {
 	{ float g = ${laVo ? "vungGan(vViTriCo)" : "uGan * (smoothstep(0.14, 0.0, vMapUv.y) + smoothstep(0.86, 1.0, vMapUv.y))"};
 	  diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.807, 0.612, 0.462), clamp(g, 0.0, 1.0) * 0.85); }`)
       .replace("#include <normal_fragment_maps>", `#include <normal_fragment_maps>
-	{ float fr = pow(1.0 - abs(dot(normal, normalize(vViewPosition))), 2.0), vt = vungThan(vViTriCo);
+	{ vec3 _dpx = dFdx(vViewPosition), _dpy = dFdy(vViewPosition);
+	  float _sil = smoothstep(0.075, 0.014, length(_dpx) + length(_dpy));
+	  vec3 _uP = _dpx / max(length(_dpx), 1e-5), _vP = _dpy / max(length(_dpy), 1e-5);
+	  float _curv = clamp(-(dot(dFdx(normal), _uP) + dot(dFdy(normal), _vP)) * 0.55, -1.0, 1.0) * _sil;
+	  diffuseColor.rgb *= clamp(1.0 + _curv * 0.22, 0.78, 1.22);
+	  float fr = pow(1.0 - clamp(abs(dot(normal, normalize(vViewPosition))), 0.0, 1.0), 2.2), vt = vungThan(vViTriCo);
 	  float a = mix(1.0, uDoMoNguc, vt); a = mix(a, 1.0, fr * 0.8 * vt);
-	  diffuseColor.rgb *= mix(1.0, 0.7, fr * vt); diffuseColor.a *= a * uDoMoLop; }`);
+	  diffuseColor.rgb *= mix(1.0, 0.72, fr * vt); diffuseColor.a *= a * uDoMoLop;
+	  totalEmissiveRadiance += vec3(0.95, 0.45, 0.40) * (fr * 0.09) * clamp(diffuseColor.a, 0.0, 1.0); }`);
   };
   m.customProgramCacheKey = () => (laVo ? "co-vo" : "co-nhom");
   vatLieuCoDS.push(m);
@@ -4193,37 +4344,213 @@ const MAU_NGA = 0xede3cf;
     neoBP.dong_mach_ngoai_vi = V(0.5, 2.0, 0.09);
     neoBP.tinh_mach_ngoai_vi = V(-0.5, 2.05, 0.06);
   }
-  // màu mô học + vật liệu bóng ẩm cho nội tạng; xương ngà; mạch đỏ / xanh
-  const xop = (() => { // bề mặt phổi hơi xốp: normal map nhiễu
-    const c = document.createElement("canvas"); c.width = c.height = 128;
-    const g = c.getContext("2d"), img = g.createImageData(128, 128), rr = ngauNhien(31);
-    for (let i = 0; i < 128 * 128; i++) img.data.set([128 + (rr() - 0.5) * 120, 128 + (rr() - 0.5) * 120, 235, 255], i * 4);
-    g.putImageData(img, 0, 0);
-    const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(6, 6); return t;
-  })();
-  const dat = (bp, mau, them = {}) => {
+  // Bộ kết cấu PBR mô học chuyên biệt 256–512px liền mạch (Albedo + Sobel NormalMap + RoughnessMap + Anisotropy tối đa) cho từng loại nội tạng
+  const taoLuoiWorley = (o, hat) => {
+    const rr = ngauNhien(hat), px = new Float32Array(o * o), py = new Float32Array(o * o);
+    for (let i = 0; i < o * o; i++) { px[i] = rr(); py[i] = rr(); }
+    return (u, v) => {
+      const fx = u * o, fy = v * o, ix = Math.floor(fx), iy = Math.floor(fy);
+      let d1 = 9, d2 = 9;
+      for (let dy = -1; dy <= 1; dy++) {
+        const cy = ((iy + dy) % o + o) % o;
+        for (let dx = -1; dx <= 1; dx++) {
+          const cx = ((ix + dx) % o + o) % o;
+          const idx = cy * o + cx;
+          const dist = Math.hypot((ix + dx + px[idx]) - fx, (iy + dy + py[idx]) - fy);
+          if (dist < d1) { d2 = d1; d1 = dist; } else if (dist < d2) d2 = dist;
+        }
+      }
+      return [d1, d2 - d1]; // [tâm tế bào, khoảng cách tới vách gian thuỳ]
+    };
+  };
+  const taoNhieuChuKy = (o, hat) => {
+    const rr = ngauNhien(hat), gt = new Float32Array(o * o);
+    for (let i = 0; i < o * o; i++) gt[i] = rr();
+    return (u, v) => {
+      const fx = u * o, fy = v * o, x0 = Math.floor(fx) % o, y0 = Math.floor(fy) % o;
+      const x1 = (x0 + 1) % o, y1 = (y0 + 1) % o, sx = fx - Math.floor(fx), sy = fy - Math.floor(fy);
+      const ux = sx * sx * (3 - 2 * sx), uy = sy * sy * (3 - 2 * sy);
+      const a = gt[y0 * o + x0] + (gt[y0 * o + x1] - gt[y0 * o + x0]) * ux;
+      const b = gt[y1 * o + x0] + (gt[y1 * o + x1] - gt[y1 * o + x0]) * ux;
+      return a + (b - a) * uy;
+    };
+  };
+  const taoBoPBR = (S, hamMauCao, doSauNormal = 2.6, lap = [4, 4]) => {
+    const cM = document.createElement("canvas"); cM.width = cM.height = S;
+    const cN = document.createElement("canvas"); cN.width = cN.height = S;
+    const cR = document.createElement("canvas"); cR.width = cR.height = S;
+    const gM = cM.getContext("2d"), gN = cN.getContext("2d"), gR = cR.getContext("2d");
+    const iM = gM.createImageData(S, S), iN = gN.createImageData(S, S), iR = gR.createImageData(S, S);
+    const cao = new Float32Array(S * S), out = [255, 255, 255, 0.5, 0.4];
+    for (let y = 0; y < S; y++) {
+      const v = y / S;
+      for (let x = 0; x < S; x++) {
+        hamMauCao(x / S, v, out);
+        const idx = y * S + x, k = idx * 4;
+        cao[idx] = out[3];
+        iM.data.set([kep(Math.round(out[0]), 0, 255), kep(Math.round(out[1]), 0, 255), kep(Math.round(out[2]), 0, 255), 255], k);
+        const rh = kep(Math.round(out[4] * 255), 24, 245);
+        iR.data.set([rh, rh, rh, 255], k);
+      }
+    }
+    for (let y = 0; y < S; y++) {
+      const ym = (y - 1 + S) % S, yp = (y + 1) % S;
+      for (let x = 0; x < S; x++) {
+        const xm = (x - 1 + S) % S, xp = (x + 1) % S;
+        const gx = (cao[ym * S + xp] + 2 * cao[y * S + xp] + cao[yp * S + xp]) - (cao[ym * S + xm] + 2 * cao[y * S + xm] + cao[yp * S + xm]);
+        const gy = (cao[yp * S + xm] + 2 * cao[yp * S + x] + cao[yp * S + xp]) - (cao[ym * S + xm] + 2 * cao[ym * S + x] + cao[ym * S + xp]);
+        const nx = -gx * doSauNormal, ny = -gy * doSauNormal, nz = 1.0, inv = 1 / Math.hypot(nx, ny, nz);
+        iN.data.set([(nx * inv * 0.5 + 0.5) * 255, (ny * inv * 0.5 + 0.5) * 255, (nz * inv * 0.5 + 0.5) * 255, 255], (y * S + x) * 4);
+      }
+    }
+    gM.putImageData(iM, 0, 0); gN.putImageData(iN, 0, 0); gR.putImageData(iR, 0, 0);
+    const map = new THREE.CanvasTexture(cM), normalMap = new THREE.CanvasTexture(cN), roughnessMap = new THREE.CanvasTexture(cR);
+    map.colorSpace = THREE.SRGBColorSpace;
+    for (const t of [map, normalMap, roughnessMap]) {
+      t.wrapS = t.wrapT = THREE.RepeatWrapping;
+      t.repeat.set(lap[0], lap[1]);
+      t.anisotropy = ANISO_MAX;
+    }
+    return { map, normalMap, roughnessMap };
+  };
+  const TAU2 = Math.PI * 2;
+  // 1. Phổi: mạng tiểu thuỳ phổi thứ cấp đa giác (vách gian tiểu thuỳ hồng tím mảnh + mao mạch phế nang xốp mịn)
+  const wPhoi = taoLuoiWorley(10, 31), nPhoi = taoNhieuChuKy(16, 37), nPhoi2 = taoNhieuChuKy(32, 41);
+  const PBR_PHOI = taoBoPBR(384, (u, v, o) => {
+    const [d1, bien] = wPhoi(u, v);
+    const vach = Math.exp(-bien * 17);
+    const xopN = nPhoi(u, v) * 0.65 + nPhoi2(u, v) * 0.35;
+    const h = kep((1 - d1 * 0.72) * 0.72 + xopN * 0.28 - vach * 0.55, 0, 1);
+    const sac = 0.88 + h * 0.18 - vach * 0.22;
+    o[0] = 252 * sac - vach * 26; o[1] = 232 * sac - vach * 38; o[2] = 236 * sac - vach * 22;
+    o[3] = h; o[4] = kep(0.38 + vach * 0.24 + (1 - xopN) * 0.14, 0.25, 0.72);
+  }, 2.8, [5, 5]);
+  // 2. Cơ tim: thớ cơ tim đan xiên xoắn + lưới mao mạch vành thượng tâm mạc mịn + màng ngoài tim bóng ẩm
+  const nTim1 = taoNhieuChuKy(14, 71), nTim2 = taoNhieuChuKy(36, 79);
+  const PBR_TIM = taoBoPBR(384, (u, v, o) => {
+    const lech = nTim1(u, v) * 0.08;
+    const tho = 0.5 + 0.5 * Math.sin(((u * 14 + v * 6) + lech * 8) * TAU2);
+    const thoMin = 0.5 + 0.5 * Math.sin(((u * 38 + v * 16) + lech * 10) * TAU2);
+    const mach = Math.exp(-Math.abs(Math.sin((u * 3 - v * 5 + nTim1(u, v) * 0.45) * TAU2)) * 28);
+    const h = kep(tho * 0.52 + thoMin * 0.28 + nTim2(u, v) * 0.20 + mach * 0.32, 0, 1);
+    const sac = 0.86 + h * 0.22;
+    o[0] = 250 * sac - mach * 35; o[1] = 224 * sac - mach * 55; o[2] = 226 * sac - mach * 52;
+    o[3] = h; o[4] = kep(0.22 + (1 - h) * 0.16 - mach * 0.06, 0.14, 0.46);
+  }, 3.1, [3, 3]);
+  // 3. Gan: hạt tiểu thuỳ gan dày mịn + bao Glisson bóng mượt như thật
+  const wGan = taoLuoiWorley(22, 101), nGan = taoNhieuChuKy(24, 107);
+  const PBR_GAN = taoBoPBR(384, (u, v, o) => {
+    const [, bien] = wGan(u, v);
+    const vien = Math.exp(-bien * 14);
+    const dom = nGan(u, v);
+    const h = kep(0.55 + dom * 0.30 - vien * 0.28, 0, 1);
+    const sac = 0.86 + dom * 0.20 - vien * 0.14;
+    o[0] = 248 * sac; o[1] = 232 * sac - vien * 10; o[2] = 228 * sac - vien * 8;
+    o[3] = h; o[4] = kep(0.18 + vien * 0.14 + (1 - dom) * 0.08, 0.12, 0.38);
+  }, 2.0, [4, 4]);
+  // 4. Vỏ đại não: hồi não – rãnh não uốn lượn sâu + mao mạch màng mềm mảnh đỏ
+  const nNao1 = taoNhieuChuKy(6, 131), nNao2 = taoNhieuChuKy(12, 137), nNao3 = taoNhieuChuKy(28, 139);
+  const PBR_NAO = taoBoPBR(384, (u, v, o) => {
+    const wx = u + (nNao1(u, v) - 0.5) * 0.22, wy = v + (nNao1((u + 0.37) % 1, (v + 0.61) % 1) - 0.5) * 0.22;
+    const cuon = Math.sin((wx * 7 + wy * 5 + nNao2(u, v) * 1.4) * TAU2);
+    const ranh = Math.pow(Math.max(0, 1 - Math.abs(cuon)), 2.2);
+    const hoi = 0.5 + 0.5 * Math.abs(cuon);
+    const mach = Math.exp(-Math.abs(cuon) * 18) * (0.4 + 0.6 * nNao3(u, v));
+    const h = kep(hoi * 0.82 + nNao3(u, v) * 0.18 - ranh * 0.38, 0, 1);
+    const sac = 0.78 + h * 0.28 - ranh * 0.18;
+    o[0] = 250 * sac - mach * 12; o[1] = 234 * sac - ranh * 36 - mach * 55; o[2] = 232 * sac - ranh * 32 - mach * 52;
+    o[3] = h; o[4] = kep(0.32 + ranh * 0.26 + (1 - hoi) * 0.10, 0.22, 0.68);
+  }, 3.8, [3, 3]);
+  // 5. Tiểu não: các lá tiểu não (folia) song song sắc nét dày đặc
+  const nTN = taoNhieuChuKy(12, 151);
+  const PBR_TIEU_NAO = taoBoPBR(384, (u, v, o) => {
+    const la = 0.5 + 0.5 * Math.sin((v * 26 + (nTN(u, v) - 0.5) * 0.65) * TAU2);
+    const khe = Math.pow(1 - la, 3);
+    const h = kep(la * 0.85 + nTN((u * 2) % 1, (v * 2) % 1) * 0.15, 0, 1);
+    const sac = 0.78 + h * 0.26 - khe * 0.20;
+    o[0] = 248 * sac; o[1] = 232 * sac - khe * 22; o[2] = 234 * sac - khe * 18;
+    o[3] = h; o[4] = kep(0.36 + khe * 0.24, 0.26, 0.68);
+  }, 4.0, [2, 2]);
+  // 6. Ống tiêu hoá (dạ dày, ruột, thực quản): thớ cơ trơn + tĩnh mạch thanh mạc mảnh bóng ẩm
+  const nTH1 = taoNhieuChuKy(10, 163), nTH2 = taoNhieuChuKy(28, 173);
+  const PBR_TIEU_HOA = taoBoPBR(384, (u, v, o) => {
+    const tho = 0.5 + 0.5 * Math.sin((v * 18 + nTH1(u, v) * 0.8) * TAU2);
+    const mach = Math.exp(-Math.abs(Math.sin((u * 4 + v * 2 + nTH1(u, v) * 0.6) * TAU2)) * 24);
+    const h = kep(tho * 0.48 + nTH2(u, v) * 0.36 + mach * 0.24, 0, 1);
+    const sac = 0.88 + h * 0.18;
+    o[0] = 250 * sac - mach * 18; o[1] = 236 * sac - mach * 42; o[2] = 234 * sac - mach * 38;
+    o[3] = h; o[4] = kep(0.26 + (1 - h) * 0.18, 0.18, 0.50);
+  }, 2.4, [4, 4]);
+  // 7. Thận & lách & túi mật: bao xơ căng mịn có vi mao mạch hình sao
+  const nTh = taoNhieuChuKy(18, 191), nTh2 = taoNhieuChuKy(40, 197);
+  const PBR_THAN_LACH = taoBoPBR(384, (u, v, o) => {
+    const min = nTh(u, v) * 0.6 + nTh2(u, v) * 0.4;
+    const mach = Math.exp(-Math.abs(Math.sin((u * 5 - v * 4 + min * 1.1) * TAU2)) * 28);
+    const h = kep(0.5 + (min - 0.5) * 0.55 + mach * 0.25, 0, 1);
+    const sac = 0.88 + min * 0.18;
+    o[0] = 248 * sac; o[1] = 236 * sac - mach * 28; o[2] = 236 * sac - mach * 24;
+    o[3] = h; o[4] = kep(0.20 + (1 - min) * 0.16, 0.14, 0.42);
+  }, 2.0, [3, 3]);
+  // 8. Tuyến tụy & thượng thận: cấu trúc tiểu thuỳ tuyến chùm (acinar cobblestone) nổi khối rõ rệt
+  const wTuy = taoLuoiWorley(16, 211), nTuy = taoNhieuChuKy(28, 223);
+  const PBR_TUY = taoBoPBR(384, (u, v, o) => {
+    const [d1, bien] = wTuy(u, v);
+    const vach = Math.exp(-bien * 15);
+    const h = kep((1 - d1 * 0.9) * 0.82 + nTuy(u, v) * 0.18 - vach * 0.45, 0, 1);
+    const sac = 0.84 + h * 0.24 - vach * 0.16;
+    o[0] = 252 * sac; o[1] = 242 * sac - vach * 20; o[2] = 224 * sac - vach * 24;
+    o[3] = h; o[4] = kep(0.42 + vach * 0.24, 0.30, 0.72);
+  }, 3.6, [4, 4]);
+
+  const dat = (bp, mau, them = {}, shaderLoai = "noi_tang") => {
     const m = vatLieuBP[bp]; if (!m) return;
     m.color.set(mau);
-    Object.assign(m, { roughness: 0.3, clearcoat: 0.6, clearcoatRoughness: 0.25, transmission: 0 }, them);
+    Object.assign(m, { roughness: 0.30, clearcoat: 0.65, clearcoatRoughness: 0.20, envMapIntensity: 1.15, transmission: 0 }, them);
     const doMo = them.opacity ?? 1;
     m.opacity = m.userData.doMoGoc = doMo;
     m.transparent = m.userData.trongSuotGoc = doMo < 1;
     m.depthWrite = !m.transparent;
+    if (shaderLoai) ganShaderGiaiPhau(m, shaderLoai);
     m.needsUpdate = true;
   };
-  for (const bp of ["phoi_trai", "phoi_phai"]) dat(bp, 0xe8a3a8, { roughness: 0.42, sheen: 0.6, sheenColor: new THREE.Color(0xffd3d8), sheenRoughness: 0.7, normalMap: xop, normalScale: new THREE.Vector2(0.3, 0.3) });
-  dat("tam_that_trai", 0xa8323a); dat("tam_that_phai", 0x9b2d37); dat("tam_nhi_trai", 0xb23b43); dat("tam_nhi_phai", 0x922a35);
-  dat("gan", 0x8b3a2e, { roughness: 0.26, clearcoat: 0.75 });
-  for (const bp of ["da_day", "thuc_quan", "ta_trang", "ruot_non"]) dat(bp, 0xd97b6c);
-  dat("dai_trang", 0xcd7262); dat("ruot_thua", 0xc4685b); dat("truc_trang", 0xc06a5e);
-  for (const bp of ["tui_mat", "tuy", "lach", "than_trai", "than_phai", "tuyen_thuong_than", "bang_quang", "nieu_quan", "nieu_dao", "thanh_quan", "co_hoanh", "khi_quan", "phe_quan"])
-    dat(bp, vatLieuBP[bp]?.color.getHex() ?? 0xffffff);
-  for (const bp of ["dai_nao", "tieu_nao", "than_nao"]) dat(bp, vatLieuBP[bp]?.color.getHex() ?? 0xe7b9b4, { roughness: 0.45, clearcoat: 0.4 });
-  for (const bp of ["cot_song", "xuong_suon", "hop_so", "xuong_uc_don", "xuong_chau"]) dat(bp, MAU_NGA, { roughness: 0.6, clearcoat: 0.15 });
-  for (const bp of ["dong_mach_chu", "tinh_mach_phoi", "mach_chau", "mach_than"]) dat(bp, 0xc0262e, { roughness: 0.32, clearcoat: 0.7 });
-  for (const bp of ["tinh_mach_chu", "dong_mach_phoi"]) dat(bp, 0x3b5ba8, { roughness: 0.36, clearcoat: 0.6 });
-  // hệ cơ của Gemini: đổ bóng + vẽ sau nội tạng
-  nhomHe.he_co.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.renderOrder = 18; } });
+  for (const bp of ["phoi_trai", "phoi_phai"]) dat(bp, 0xe8a3a8, {
+    ...PBR_PHOI, normalScale: new THREE.Vector2(0.52, 0.52), roughness: 1.0, clearcoat: 0.48, clearcoatRoughness: 0.26,
+    envMapIntensity: 1.05, sheen: 0.58, sheenColor: new THREE.Color(0xffdbe0), sheenRoughness: 0.62,
+  });
+  for (const [bp, mau] of [["tam_that_trai", 0xa8323a], ["tam_that_phai", 0x9b2d37], ["tam_nhi_trai", 0xb23b43], ["tam_nhi_phai", 0x922a35]])
+    dat(bp, mau, { ...PBR_TIM, normalScale: new THREE.Vector2(0.56, 0.56), roughness: 1.0, clearcoat: 0.86, clearcoatRoughness: 0.14, envMapIntensity: 1.30 });
+  dat("gan", 0x8b3a2e, { ...PBR_GAN, normalScale: new THREE.Vector2(0.32, 0.32), roughness: 1.0, clearcoat: 0.92, clearcoatRoughness: 0.10, envMapIntensity: 1.35 });
+  for (const bp of ["da_day", "thuc_quan", "ta_trang", "ruot_non"])
+    dat(bp, 0xd97b6c, { ...PBR_TIEU_HOA, normalScale: new THREE.Vector2(0.46, 0.46), roughness: 1.0, clearcoat: 0.72, clearcoatRoughness: 0.18, envMapIntensity: 1.15 });
+  for (const [bp, mau] of [["dai_trang", 0xcd7262], ["ruot_thua", 0xc4685b], ["truc_trang", 0xc06a5e]])
+    dat(bp, mau, { ...PBR_TIEU_HOA, normalScale: new THREE.Vector2(0.48, 0.48), roughness: 1.0, clearcoat: 0.68, clearcoatRoughness: 0.20, envMapIntensity: 1.12 });
+  for (const bp of ["than_trai", "than_phai", "lach", "tui_mat", "bang_quang"])
+    dat(bp, vatLieuBP[bp]?.color.getHex() ?? 0x8f2d3a, { ...PBR_THAN_LACH, normalScale: new THREE.Vector2(0.36, 0.36), roughness: 1.0, clearcoat: 0.82, clearcoatRoughness: 0.14, envMapIntensity: 1.25 });
+  for (const bp of ["tuy", "tuyen_thuong_than"])
+    dat(bp, vatLieuBP[bp]?.color.getHex() ?? 0xf5d061, { ...PBR_TUY, normalScale: new THREE.Vector2(0.75, 0.75), roughness: 1.0, clearcoat: 0.34, clearcoatRoughness: 0.30, envMapIntensity: 0.92 });
+  for (const bp of ["nieu_quan", "nieu_dao"])
+    dat(bp, vatLieuBP[bp]?.color.getHex() ?? 0xfcd34d, { roughness: 0.34, clearcoat: 0.58, envMapIntensity: 1.05 });
+  for (const bp of ["thanh_quan", "khi_quan", "phe_quan"])
+    dat(bp, vatLieuBP[bp]?.color.getHex() ?? 0xe2e8f0, { roughness: 0.34, clearcoat: 0.55, clearcoatRoughness: 0.22, sheen: 0.32, sheenColor: new THREE.Color(0xe6f4ff), envMapIntensity: 1.0 }, "sun");
+  dat("co_hoanh", vatLieuBP.co_hoanh?.color.getHex() ?? 0xb45c4c, { roughness: 0.46, clearcoat: 0.35, envMapIntensity: 0.95 }, "gan_co");
+  for (const bp of ["dai_nao", "than_nao"])
+    dat(bp, vatLieuBP[bp]?.color.getHex() ?? 0xe7b9b4, { ...PBR_NAO, normalScale: new THREE.Vector2(0.78, 0.78), roughness: 1.0, clearcoat: 0.58, clearcoatRoughness: 0.22, envMapIntensity: 1.08 });
+  dat("tieu_nao", vatLieuBP.tieu_nao?.color.getHex() ?? 0xd99aa8, { ...PBR_TIEU_NAO, normalScale: new THREE.Vector2(0.85, 0.85), roughness: 1.0, clearcoat: 0.50, clearcoatRoughness: 0.24, envMapIntensity: 1.02 });
+  for (const bp of ["cot_song", "xuong_suon", "hop_so", "xuong_uc_don", "xuong_chau"])
+    dat(bp, MAU_NGA, { roughness: 0.50, clearcoat: 0.24, clearcoatRoughness: 0.28, envMapIntensity: 0.88 }, "xuong");
+  for (const bp of ["dong_mach_chu", "tinh_mach_phoi", "mach_chau", "mach_than"])
+    dat(bp, 0xc0262e, { roughness: 0.24, clearcoat: 0.86, clearcoatRoughness: 0.14, envMapIntensity: 1.25 }, "mach_do");
+  for (const bp of ["tinh_mach_chu", "dong_mach_phoi"])
+    dat(bp, 0x3b5ba8, { roughness: 0.28, clearcoat: 0.78, clearcoatRoughness: 0.16, envMapIntensity: 1.20 }, "mach_xanh");
+  // đổ bóng & nhận bóng sắc nét giữa lồng ngực – nội tạng – hệ cơ (không áp lên lớp da/vỏ trong suốt)
+  theGioi.traverse((o) => {
+    if (!o.isMesh || o.parent === voCoThe) return;
+    const bp = o.userData?.bp;
+    if (bp === "da" || bp === "co_hoanh") { o.castShadow = false; o.receiveShadow = false; return; }
+    o.castShadow = true;
+    o.receiveShadow = true;
+  });
+  nhomHe.he_co.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; o.renderOrder = 18; } });
 })();
 
 // vật liệu X-quang + trạng thái hiển thị cho mọi bộ phận
@@ -4538,7 +4865,7 @@ if (BP3D) { // mô hình thật cao hơn và bàn chân thấp hơn: hạ cả p
   denKhoa.shadow.camera.updateProjectionMatrix();
   denKhoa.target.position.set(0, 1.45, 0);
 }
-const chatLuong = { bong: true, truyen: true, demThap: 0 };
+const chatLuong = { bong: true, truyen: true, dprCao: true, demThap: 0 };
 function datBong(bat) {
   if (renderer.shadowMap.enabled !== bat) {
     renderer.shadowMap.enabled = bat;
@@ -4560,15 +4887,18 @@ function datMoiTruong(ten) {
   sanStudio.visible = giaiPhau;
   if (!cheDoCoQuan) datNen(giaiPhau ? NEN_GIAI_PHAU : MAU_NEN[ten]);
   scene.fog.color.setHex(MAU_NEN[ten]);
-  scene.fog.density = giaiPhau ? 0.01 : lab3D ? 0.045 : studioTrang ? 0.012 : 0.03;
-  anhSangMoiTruong.color.setHex(giaiPhau ? 0xffffff : 0x9fb7d0);
-  anhSangMoiTruong.intensity = giaiPhau ? 0.3 : studioTrang ? 0.85 : lab3D ? 0.35 : 0.12;
-  anhSangBauTroi.intensity = giaiPhau ? 0.18 : studioTrang ? 0.95 : lab3D ? 0.7 : 0.25;
-  anhSangChinh.intensity = giaiPhau ? 0 : studioTrang ? 2.8 : lab3D ? 1.7 : 2.4;
-  anhSangVien.intensity = giaiPhau ? 0 : studioTrang ? 1.5 : lab3D ? 1.3 : 2.6;
-  den1.intensity = den2.intensity = giaiPhau ? 0 : 7;
-  denKhoa.intensity = giaiPhau ? 2.8 : 0;
-  denVienSau.intensity = giaiPhau ? 2.4 : 0;
+  scene.fog.density = giaiPhau ? 0.008 : lab3D ? 0.042 : studioTrang ? 0.01 : 0.025;
+  anhSangMoiTruong.color.setHex(giaiPhau ? 0xf8fbff : 0x9fb7d0);
+  anhSangMoiTruong.intensity = giaiPhau ? 0.24 : studioTrang ? 0.78 : lab3D ? 0.32 : 0.14;
+  anhSangBauTroi.color.setHex(giaiPhau ? 0xeaf3ff : 0xbfe9ff);
+  anhSangBauTroi.groundColor.setHex(giaiPhau ? 0x161b26 : 0x0b1020);
+  anhSangBauTroi.intensity = giaiPhau ? 0.42 : studioTrang ? 0.90 : lab3D ? 0.65 : 0.30;
+  anhSangChinh.intensity = giaiPhau ? 0 : studioTrang ? 2.6 : lab3D ? 1.75 : 2.35;
+  anhSangVien.intensity = giaiPhau ? 0 : studioTrang ? 1.4 : lab3D ? 1.35 : 2.55;
+  den1.intensity = den2.intensity = giaiPhau ? 0 : 6.2;
+  denKhoa.intensity = giaiPhau ? 2.65 : 0;
+  denBu.intensity = giaiPhau ? 0.95 : studioTrang ? 0.80 : lab3D ? 0.45 : 0.75;
+  denVienSau.intensity = giaiPhau ? 2.35 : 0;
   datBong(giaiPhau && chatLuong.bong);
 }
 $("#chon-moi-truong").addEventListener("change", (e) => datMoiTruong(e.target.value));
@@ -5984,12 +6314,13 @@ function vongLap() {
   demFPS += thuc;
   if (demFPS > 1) {
     window.__bioLabFPS = Math.round(demKhung / demFPS); demKhung = 0; demFPS = 0;
-    if (thoiGian > 5 && !cheDoViMo && (chatLuong.truyen || chatLuong.bong)) {
-      chatLuong.demThap = window.__bioLabFPS < 45 ? chatLuong.demThap + 1 : 0;
+    if (thoiGian > 5 && !cheDoViMo && (chatLuong.truyen || chatLuong.bong || chatLuong.dprCao)) {
+      chatLuong.demThap = window.__bioLabFPS < 42 ? chatLuong.demThap + 1 : 0;
       if (chatLuong.demThap >= 3) {
         chatLuong.demThap = 0;
         if (chatLuong.truyen) { chatLuong.truyen = false; vatLieuCoDS.forEach((m) => { m.transmission = 0; m.needsUpdate = true; }); thongBao("Máy hơi chậm: đã tắt xuyên sáng của lớp cơ để giữ mượt."); }
-        else { chatLuong.bong = false; datBong(false); thongBao("Máy hơi chậm: đã tắt bóng đổ để giữ mượt."); }
+        else if (chatLuong.bong) { chatLuong.bong = false; datBong(false); thongBao("Máy hơi chậm: đã tắt bóng đổ để giữ mượt."); }
+        else { chatLuong.dprCao = false; renderer.setPixelRatio(Math.min(1.5, window.devicePixelRatio || 1)); }
       }
     }
     if (thoiGian - (demCauTruc.luc || 0) > 0.5) capNhatDemCauTruc();
