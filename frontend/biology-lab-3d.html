@@ -1093,6 +1093,43 @@ body.xem-co-quan .ghi-cong-bp3d { display: none; }
 .thanh-co-quan .ten b { font-size: 16px; font-weight: 600; color: #fff; }
 .thanh-co-quan .ten small { display: block; color: var(--mo); font-size: 11px; }
 .thanh-co-quan .bieu-tuong-cq { font-size: 18px; }
+.nut-vien, .the-co-quan .nut-hang .nut {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  background: linear-gradient(180deg, #24262c 0%, #14161b 100%);
+  color: #f1f5f9;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.13), inset 0 -1px 0 rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.55), 0 1px 2px rgba(0, 0, 0, 0.7);
+  transition: transform 140ms ease, background 150ms ease, border-color 150ms ease, box-shadow 150ms ease, color 150ms ease;
+}
+.nut-vien:hover, .the-co-quan .nut-hang .nut:hover {
+  transform: translateY(-1px);
+  background: linear-gradient(180deg, #2e313a 0%, #1a1d24 100%);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.5), 0 7px 18px rgba(0, 0, 0, 0.68), 0 2px 4px rgba(0, 0, 0, 0.75);
+}
+.nut-vien:active, .the-co-quan .nut-hang .nut:active {
+  transform: translateY(0.5px);
+  background: linear-gradient(180deg, #111318 0%, #1a1d24 100%);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.68), 0 1px 3px rgba(0, 0, 0, 0.55);
+}
+.nut-vien[aria-pressed="true"] {
+  background: linear-gradient(180deg, #252d3d 0%, #151a25 100%);
+  border-color: rgba(96, 165, 250, 0.65);
+  color: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(147, 197, 253, 0.28), 0 0 0 1px rgba(59, 130, 246, 0.22), 0 5px 14px rgba(0, 0, 0, 0.62);
+}
 .the-co-quan {
   position: absolute;
   right: 16px;
