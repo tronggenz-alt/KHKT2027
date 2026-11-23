@@ -5374,9 +5374,9 @@ async function batDieuKhienTay(nguon = "camera") {
     dangNapTay = true;
     try {
       const [{ DieuKhien }, { taoBoApOrbit }, { taoDieuKhienTay }] = await Promise.all([
-        import("/static/dieu-khien-tay/cu-chi.js?v=4"),
-        import("/static/dieu-khien-tay/ap-orbit.js?v=4"),
-        import("/static/dieu-khien-tay/theo-doi-tay.js?v=4")
+        import("/static/dieu-khien-tay/cu-chi.js?v=5"),
+        import("/static/dieu-khien-tay/ap-orbit.js?v=5"),
+        import("/static/dieu-khien-tay/theo-doi-tay.js?v=5")
       ]);
 
       const dieuKhien = new DieuKhien({

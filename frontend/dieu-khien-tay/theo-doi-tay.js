@@ -6,21 +6,24 @@ import { RONG_NHAN_DIEN, tinhVungCat, doiVeKhungDay, kichThuocTay, ThongKeTay, g
 const { docTay, raCuaSo, HANG_SO } = cuChiModule;
 const { chonCamera } = chonCamModule;
 
-// Chiều rộng ảnh gửi MediaPipe: 480 px vẫn > 2× cỡ mạng Palm (192) & Landmark (224), giảm ~44% pixel sao chép → độ trễ gần như giảm nửa
-const RONG_NHAN_DIEN_MUOT = Math.min(RONG_NHAN_DIEN, 480);
+// Chiều rộng ảnh gửi MediaPipe: 512 px toàn khung 16:9 (không cắt 2 mép trái/phải → tay trái ở mép trái nhạy 100% như tay phải!)
+const RONG_NHAN_DIEN_MUOT = Math.min(RONG_NHAN_DIEN, 512);
 
-// Ngưỡng tối ưu cho nhận diện tay mượt và bám chắc khi chụm ngón / lia tay nhanh / ánh sáng trong phòng:
-// - minHandDetectionConfidence 0.42: phát hiện bàn tay sớm hơn mà không bắt nhầm nền
-// - minHandPresenceConfidence 0.35 & minTrackingConfidence 0.32: bám khung liên tục khi ngón cái/trỏ che nhau lúc chụm
-const TUY_CHON = { numHands: 2, minHandDetectionConfidence: 0.42, minHandPresenceConfidence: 0.35, minTrackingConfidence: 0.32 };
+// Dùng numHands: 4 để ngay cả khi có người đứng phía sau vẫy tay, MediaPipe vẫn không làm rớt 2 tay của người chính đứng trước màn hình;
+// sau đó taoBoOnDinhTay() lọc chặt chỉ giữ tối đa 2 tay (Trái + Phải) thuộc ĐÚNG 1 người gần camera nhất!
+const TUY_CHON = { numHands: 4, minHandDetectionConfidence: 0.42, minHandPresenceConfidence: 0.35, minTrackingConfidence: 0.32 };
 
-// Bộ ổn định khung tay trước khi đưa vào docTay (chỉ dùng cho camera trực tiếp):
-// 1. Giữ nguyên nhãn Left/Right theo vị trí lòng bàn tay gần nhất → hết lỗi lật tay giữa chừng làm đứt kéo
-// 2. Lọc mượt 21 điểm + toạ độ 3D thích ứng theo tốc độ (chậm → lọc rung mạnh, nhanh → bắt kịp tức thì)
-// 3. Bù 1–2 khung bị rớt thoáng qua (< 95 ms) khi vẩy tay nhanh để xoay/zoom không bị khựng
+// Bộ ổn định + khóa 1 người dùng chính trước màn hình (chỉ dùng cho camera trực tiếp):
+// 1. Lọc chặt 1 người chính gần camera nhất (loại tay người phía sau theo cỡ bàn tay + neo cỡ người chính + tương đồng khoảng cách 2 tay)
+// 2. Ghép cặp tối ưu Trái/Phải theo tổng khoảng cách nhỏ nhất + ưu tiên cùng tay (hết lỗi hoán đổi / cướp tay trái)
+// 3. Khử sai số trục Z giữa ngón cái (#4) & ngón trỏ (#8) khi chụm góc nghiêng → tay trái nhạy ngang tay phải 100%
+// 4. Lọc mượt 21 điểm + bù rớt khung thoáng qua (110 ms khi đang kéo/zoom)
 export function taoBoOnDinhTay() {
-  const BAN_KINH_KHOP = 0.22;
-  let truoc = []; // [{ ben, tam: [x, y], v: [vx, vy], diem, theGioi, score, t }]
+  const BAN_KINH_KHOP = 0.24;
+  const CO_TAY_TOI_THIEU = 0.085; // loại bỏ hoàn toàn bàn tay nhỏ ở xa phía sau (chỉ bắt người đứng trước màn hình)
+  let truoc = [];                 // [{ ben, tam: [x, y], sz, v: [vx, vy], diem, theGioi, score, t }]
+  let coNguoiChinh = 0;           // cỡ lòng bàn tay (cổ tay → gốc ngón giữa) của người chính đứng trước màn hình
+  let tCoNguoiChinh = -1;
 
   const tamBanTay = (d) => [(d[0].x + d[9].x) * 0.5, (d[0].y + d[9].y) * 0.5];
   const saoDiem = (ds) => ds.map((p) => ({ x: p.x, y: p.y, z: p.z || 0 }));
@@ -29,78 +32,193 @@ export function taoBoOnDinhTay() {
     return { x: q.x + (p.x - q.x) * a, y: q.y + (p.y - q.y) * a, z: (q.z || 0) + ((p.z || 0) - (q.z || 0)) * a };
   });
 
-  function datLai() { truoc = []; }
+  // Giảm sai số độ sâu Z giả giữa đầu ngón cái (#4) & ngón trỏ (#8) khi 2 đầu ngón đã sát nhau trên ảnh 2D
+  // (khắc phục dứt điểm lỗi tay trái / tay nghiêng chụm không nhạy mà không gây chụm giả khi ngón đang mở)
+  function canBangChum(diem2d, tg3d, tiLe) {
+    if (!tg3d || tg3d.length < 21 || !diem2d || diem2d.length < 21) return tg3d;
+    const co2d = Math.hypot((diem2d[0].x - diem2d[9].x) * tiLe, diem2d[0].y - diem2d[9].y);
+    if (!(co2d > 1e-4)) return tg3d;
+    const d2d = Math.hypot((diem2d[4].x - diem2d[8].x) * tiLe, diem2d[4].y - diem2d[8].y) / co2d;
+    if (d2d >= 0.36) return tg3d;
+    const co3d = Math.hypot(tg3d[0].x - tg3d[9].x, tg3d[0].y - tg3d[9].y, (tg3d[0].z || 0) - (tg3d[9].z || 0));
+    if (!(co3d > 1e-5)) return tg3d;
+    const p4 = tg3d[4], p8 = tg3d[8];
+    const d3d = Math.hypot(p4.x - p8.x, p4.y - p8.y, (p4.z || 0) - (p8.z || 0)) / co3d;
+    if (d3d <= d2d * 1.02) return tg3d;
+    // Khi 2D rõ ràng đang chụm (d2d < 0.36) nhưng Z monocular đội d3d lên cao → nén bớt thành phần lệch Z giả
+    const muc = Math.min(1, Math.max(0, (0.36 - d2d) / 0.14));
+    const giuZ = 1 - 0.78 * muc;
+    const zGiua = ((p4.z || 0) + (p8.z || 0)) * 0.5;
+    const out = saoDiem(tg3d);
+    out[4].z = zGiua + ((p4.z || 0) - zGiua) * giuZ;
+    out[8].z = zGiua + ((p8.z || 0) - zGiua) * giuZ;
+    // Nếu ngay cả sau nén Z mà 3D vẫn lớn hơn 2D (góc nghiêng che khuất), kéo nhẹ tỷ lệ sát theo khoảng cách 2D thật
+    const dSau = Math.hypot(out[4].x - out[8].x, out[4].y - out[8].y, out[4].z - out[8].z) / co3d;
+    if (dSau > d2d * 1.04) {
+      const mucT = (d2d * 0.98) / dSau;
+      const mx = (out[4].x + out[8].x) * 0.5, my = (out[4].y + out[8].y) * 0.5, mz = (out[4].z + out[8].z) * 0.5;
+      out[4] = { x: mx + (out[4].x - mx) * mucT, y: my + (out[4].y - my) * mucT, z: mz + (out[4].z - mz) * mucT };
+      out[8] = { x: mx + (out[8].x - mx) * mucT, y: my + (out[8].y - my) * mucT, z: mz + (out[8].z - mz) * mucT };
+    }
+    return out;
+  }
 
-  function xuLy(mp, t, buRotS = 0.095) {
+  function datLai() {
+    truoc = [];
+    coNguoiChinh = 0;
+    tCoNguoiChinh = -1;
+  }
+
+  function xuLy(mp, t, buRotS = 0.095, tiLe = 16 / 9) {
     const hl = (mp && mp.hand_landmarks) || [];
     const hwl = (mp && mp.hand_world_landmarks) || [];
     const hd = (mp && mp.handedness) || [];
-    const daDungCu = new Set();
-    const moi = [];
 
+    // Nếu không thấy người chính quá 1,5 giây thì đặt lại neo cỡ bàn tay
+    if (tCoNguoiChinh >= 0 && t - tCoNguoiChinh > 1.5) coNguoiChinh = 0;
+
+    // 1. Thu gom ứng viên hợp lệ & lọc bỏ hoàn toàn bàn tay người đứng xa phía sau
+    const ungVien = [];
+    const nguongCo = Math.max(CO_TAY_TOI_THIEU, coNguoiChinh > 0 ? coNguoiChinh * 0.56 : 0);
     for (let i = 0; i < hl.length; i++) {
       const diem = hl[i];
       if (!diem || diem.length < 21) continue;
+      const sz = Math.hypot((diem[0].x - diem[9].x) * tiLe, diem[0].y - diem[9].y);
+      if (sz < nguongCo) continue;
       const tam = tamBanTay(diem);
-      let idxTot = -1, kcTot = BAN_KINH_KHOP;
-      for (let j = 0; j < truoc.length; j++) {
-        if (daDungCu.has(j)) continue;
-        const dtCu = Math.max(0, t - truoc[j].t);
-        if (dtCu > 0.35) continue;
-        const px = truoc[j].tam[0] + truoc[j].v[0] * Math.min(dtCu, 0.08);
-        const py = truoc[j].tam[1] + truoc[j].v[1] * Math.min(dtCu, 0.08);
-        const kc = Math.hypot(tam[0] - px, tam[1] - py);
-        if (kc < kcTot) { kcTot = kc; idxTot = j; }
-      }
-
+      // Bỏ nhiễu sát mép quá cực đoan (người đứng lấp ló rìa ngoài)
+      if (tam[0] < 0.02 || tam[0] > 0.98 || tam[1] < 0.02 || tam[1] > 0.98) continue;
       const hItem = (hd[i] && hd[i][0]) || {};
       const tenGoc = hItem.categoryName || hItem.category_name || ('Tay' + i);
       const theGioiMoi = (hwl[i] && hwl[i].length >= 21) ? saoDiem(hwl[i]) : null;
+      // Thưởng điểm bám liên tục nếu gần tay của người chính ở khung trước
+      let thuongBam = 0;
+      for (const cu of truoc) {
+        if (t - cu.t <= 0.35 && Math.hypot(tam[0] - cu.tam[0], tam[1] - cu.tam[1]) < BAN_KINH_KHOP) {
+          thuongBam = 0.045;
+          break;
+        }
+      }
+      // Ưu tiên bàn tay lớn nhất (gần màn hình nhất) + nằm ở vùng trước màn hình
+      const lechTam = Math.abs(tam[0] - 0.5) * 0.04;
+      const diemUuTien = sz + thuongBam - lechTam;
+      ungVien.push({ diem, theGioiMoi, tam, sz, tenGoc, score: hItem.score, diemUuTien });
+    }
 
+    // Chỉ giữ tối đa 2 bàn tay thuộc ĐÚNG 1 người đứng gần màn hình nhất
+    ungVien.sort((a, b) => b.diemUuTien - a.diemUuTien);
+    const chon = [];
+    if (ungVien.length > 0) {
+      const h0 = ungVien[0];
+      chon.push(h0);
+      for (let k = 1; k < ungVien.length && chon.length < 2; k++) {
+        const h1 = ungVien[k];
+        // Phải có cỡ tay tương đương người chính (cùng khoảng cách trước màn hình, không phải người đứng sau)
+        if (h1.sz < h0.sz * 0.62) continue;
+        // Hai tay của cùng 1 người không trùng nhau hoàn toàn và không lệch độ cao phi lý
+        if (Math.hypot(h1.tam[0] - h0.tam[0], h1.tam[1] - h0.tam[1]) < 0.03) continue;
+        if (Math.abs(h1.tam[1] - h0.tam[1]) > 0.58) continue;
+        // Không nhận 2 tay cùng tên giống nhau nếu có ứng viên khác tay (tránh 2 tay phải của 2 người)
+        if (h1.tenGoc === h0.tenGoc && ungVien.some((u, idx) => idx > k && u.tenGoc !== h0.tenGoc && u.sz >= h0.sz * 0.62)) continue;
+        chon.push(h1);
+      }
+      const szLon = Math.max(...chon.map((c) => c.sz));
+      coNguoiChinh = coNguoiChinh > 0 ? (coNguoiChinh * 0.88 + szLon * 0.12) : szLon;
+      tCoNguoiChinh = t;
+    }
+
+    // 2. Ghép cặp tối ưu (không tham lam) giữa chon (<= 2 tay) và truoc (<= 2 tay) → không bao giờ hoán đổi Trái ↔ Phải
+    const truocHopLe = [];
+    for (let j = 0; j < truoc.length; j++) {
+      if (Math.max(0, t - truoc[j].t) <= 0.35) truocHopLe.push(j);
+    }
+    const chiPhi = (ci, tj) => {
+      const u = chon[ci], cu = truoc[tj];
+      const dtCu = Math.max(0, t - cu.t);
+      const px = cu.tam[0] + cu.v[0] * Math.min(dtCu, 0.08);
+      const py = cu.tam[1] + cu.v[1] * Math.min(dtCu, 0.08);
+      const kc = Math.hypot(u.tam[0] - px, u.tam[1] - py);
+      if (kc >= BAN_KINH_KHOP) return 99;
+      // Ưu tiên ghép đúng cùng nhãn Left/Right (tránh cướp danh tính khi 2 tay đi gần nhau)
+      const phatKhacBen = (u.tenGoc === cu.ben) ? 0 : 0.065;
+      return kc + phatKhacBen;
+    };
+
+    const ghep = new Array(chon.length).fill(-1);
+    if (chon.length === 1 && truocHopLe.length > 0) {
+      let bestJ = -1, bestC = 99;
+      for (const j of truocHopLe) {
+        const c = chiPhi(0, j);
+        if (c < bestC) { bestC = c; bestJ = j; }
+      }
+      if (bestC < 99) ghep[0] = bestJ;
+    } else if (chon.length === 2 && truocHopLe.length === 1) {
+      const j = truocHopLe[0];
+      const c0 = chiPhi(0, j), c1 = chiPhi(1, j);
+      if (Math.min(c0, c1) < 99) {
+        if (c0 <= c1) ghep[0] = j; else ghep[1] = j;
+      }
+    } else if (chon.length === 2 && truocHopLe.length >= 2) {
+      const j0 = truocHopLe[0], j1 = truocHopLe[1];
+      const pA = [chiPhi(0, j0), chiPhi(1, j1)];
+      const pB = [chiPhi(0, j1), chiPhi(1, j0)];
+      const sumA = pA[0] + pA[1], sumB = pB[0] + pB[1];
+      if (sumA <= sumB) {
+        if (pA[0] < 99) ghep[0] = j0;
+        if (pA[1] < 99) ghep[1] = j1;
+      } else {
+        if (pB[0] < 99) ghep[0] = j1;
+        if (pB[1] < 99) ghep[1] = j0;
+      }
+    }
+
+    const daDungCu = new Set(ghep.filter((x) => x >= 0));
+    const moi = [];
+    for (let i = 0; i < chon.length; i++) {
+      const u = chon[i], idxTot = ghep[i];
       if (idxTot >= 0) {
-        daDungCu.add(idxTot);
         const cu = truoc[idxTot];
         const dt = Math.max(0.008, t - cu.t);
-        const buoc = Math.hypot(tam[0] - cu.tam[0], tam[1] - cu.tam[1]);
-        // Thích ứng tốc độ cực nhạy (tránh chồng trễ với LocOneEuro):
-        // - 2D: chỉ triệt rung vi mô khi giữ yên (alpha ~0.62), kéo thật nhảy ngay lên 0.96 gần như không trễ
-        // - 3D worldLandmarks: làm êm trục Z (alpha 0.48→0.88) để tỉ lệ chụm không nhảy chập chờn qua ngưỡng
+        const buoc = Math.hypot(u.tam[0] - cu.tam[0], u.tam[1] - cu.tam[1]);
         const tyLe = Math.min(1, Math.max(0, (buoc - 0.003) / 0.016));
         const a2d = 0.62 + tyLe * 0.34;
         const a3d = 0.48 + tyLe * 0.40;
-        const diemLoc = locMang(cu.diem, diem, a2d);
-        const tgLoc = (theGioiMoi && cu.theGioi) ? locMang(cu.theGioi, theGioiMoi, a3d) : theGioiMoi;
+        const diemLoc = locMang(cu.diem, u.diem, a2d);
+        const tgLocTho = (u.theGioiMoi && cu.theGioi) ? locMang(cu.theGioi, u.theGioiMoi, a3d) : u.theGioiMoi;
+        const tgLoc = canBangChum(diemLoc, tgLocTho, tiLe);
         const tamLoc = tamBanTay(diemLoc);
         const vx = Math.max(-2.5, Math.min(2.5, (tamLoc[0] - cu.tam[0]) / dt));
         const vy = Math.max(-2.5, Math.min(2.5, (tamLoc[1] - cu.tam[1]) / dt));
         moi.push({
           ben: cu.ben,
           tam: tamLoc,
+          sz: u.sz,
           v: [cu.v[0] * 0.35 + vx * 0.65, cu.v[1] * 0.35 + vy * 0.65],
           diem: diemLoc,
           theGioi: tgLoc,
-          score: hItem.score,
+          score: u.score,
           t,
           bu: false
         });
       } else {
-        // Tránh trùng tên bên với tay đang tồn tại
-        const tenTrung = moi.some((m) => m.ben === tenGoc);
-        const ben = tenTrung ? (tenGoc === 'Left' ? 'Right' : 'Left') : tenGoc;
+        const tenTrung = moi.some((m) => m.ben === u.tenGoc);
+        const ben = tenTrung ? (u.tenGoc === 'Left' ? 'Right' : 'Left') : u.tenGoc;
+        const diemSao = saoDiem(u.diem);
         moi.push({
           ben,
-          tam,
+          tam: u.tam,
+          sz: u.sz,
           v: [0, 0],
-          diem: saoDiem(diem),
-          theGioi: theGioiMoi,
-          score: hItem.score,
+          diem: diemSao,
+          theGioi: canBangChum(diemSao, u.theGioiMoi, tiLe),
+          score: u.score,
           t,
           bu: false
         });
       }
     }
 
-    // Bù thoáng qua nếu tay bị rớt 1–3 khung lúc lia nhanh / nghiêng bàn tay (110 ms khi đang kéo/zoom, 60 ms khi chờ)
+    // 3. Bù thoáng qua nếu tay người chính bị rớt 1–3 khung lúc lia nhanh / nghiêng bàn tay
     for (let j = 0; j < truoc.length; j++) {
       if (daDungCu.has(j) || moi.length >= 2) continue;
       const cu = truoc[j];
@@ -116,6 +234,7 @@ export function taoBoOnDinhTay() {
         moi.push({
           ben: cu.ben,
           tam: tamBanTay(diemBu),
+          sz: cu.sz,
           v: [cu.v[0] * 0.6, cu.v[1] * 0.6],
           diem: diemBu,
           theGioi: cu.theGioi ? saoDiem(cu.theGioi) : null,
@@ -235,6 +354,7 @@ export async function taoDieuKhienTay({
   let hudChuCu = '', hudChiTietCu = '', goiYCu = null, chipKeyCu = '';
   let krongCache = khung3D.clientWidth || 800;
   let kcaoCache = khung3D.clientHeight || 600;
+  let vKeoYaw = 0.0, vKeoPitch = 0.0, tKeoGanNhat = -1; // vận tốc kéo mượt dùng bàn giao liền mạch khi thả tay lướt
   const boOnDinh = taoBoOnDinhTay();
   const capNhatKichThuocKhung = () => {
     krongCache = khung3D.clientWidth || krongCache;
@@ -654,7 +774,8 @@ export async function taoDieuKhienTay({
 
   function guiKhung(tChup) {
     const vw = videoEl.videoWidth || 640, vh = videoEl.videoHeight || 480;
-    const cat = tinhVungCat(vw, vh);
+    // Giữ toàn khung ngang (không cắt 12,5% mép trái/phải) để tay trái ở bên trái khung hình nhạy 100% như tay phải
+    const cat = { sx: 0, sy: 0, sw: vw, sh: vh };
     const caoNhanDien = Math.round(RONG_NHAN_DIEN_MUOT * cat.sh / cat.sw);
     const ms = Math.max(Math.round(tChup - tBatDau), msTruoc + 1);
     msTruoc = ms;
@@ -705,15 +826,48 @@ export async function taoDieuKhienTay({
     const tiLe = vw / vh;
     const mpDaCat = kq ? doiVeKhungDay(kq, cat, vw, vh) : null;
     const dangTuongTac = dieuKhien.cheDo === 'keo' || dieuKhien.cheDo === 'zoom';
-    const mpOnDinh = boOnDinh.xuLy(mpDaCat, tGiay, dangTuongTac ? 0.11 : 0.06);
+    const mpOnDinh = boOnDinh.xuLy(mpDaCat, tGiay, dangTuongTac ? 0.11 : 0.06, tiLe);
     const dsTay = docTay(mpOnDinh, tiLe, tGiay, cacTay);
     soTayHienTai = dsTay.length;
     dsTayCuoi = dsTay;
     thongKe.ghiNhanDien(tGiay, dsTay.length);
 
-    // Cập nhật bộ điều khiển cử chỉ (nếu vòng render 60–120 Hz đang tự tích phân quán tính mượt thì tránh cộng dồn dt lần 2)
+    // Cập nhật bộ điều khiển cử chỉ + theo dõi vận tốc kéo mượt để bàn giao liền mạch khi thả tay lướt (không khựng)
+    const cheDoTruoc = dieuKhien.cheDo;
+    const yawTruoc = dieuKhien.yaw, pitchTruoc = dieuKhien.pitch;
     const dtDieuKhien = (dangDungVongRender && dieuKhien.cheDo === 'quan_tinh') ? 0 : dt;
     dieuKhien.capNhat(tGiay, dtDieuKhien, dsTay);
+
+    if (dieuKhien.cheDo === 'keo') {
+      const dY = dieuKhien.yaw - yawTruoc, dP = dieuKhien.pitch - pitchTruoc;
+      if (Math.abs(dY) > 1e-5 || Math.abs(dP) > 1e-5) {
+        const wy = Math.max(-HANG_SO.QT_MAX, Math.min(HANG_SO.QT_MAX, dY / dt));
+        const wp = Math.max(-HANG_SO.QT_MAX, Math.min(HANG_SO.QT_MAX, dP / dt));
+        vKeoYaw = vKeoYaw * 0.45 + wy * 0.55;
+        vKeoPitch = vKeoPitch * 0.45 + wp * 0.55;
+        tKeoGanNhat = tGiay;
+      } else if (tGiay - tKeoGanNhat > 0.10) {
+        vKeoYaw *= 0.5;
+        vKeoPitch *= 0.5;
+      }
+    } else if (cheDoTruoc === 'keo' && tGiay - tKeoGanNhat <= 0.14) {
+      // Vừa nhả tay sau khi vẩy nhanh: hòa mượt vận tốc quán tính (tránh nhảy tốc độ hoặc hụt lướt do 2 khung xác nhận nhả)
+      const tocKeo = Math.hypot(vKeoYaw, vKeoPitch);
+      if (dieuKhien.cheDo === 'quan_tinh') {
+        dieuKhien.wYaw = Math.max(-HANG_SO.QT_MAX, Math.min(HANG_SO.QT_MAX, dieuKhien.wYaw * 0.55 + vKeoYaw * 0.45));
+        dieuKhien.wPitch = Math.max(-HANG_SO.QT_MAX, Math.min(HANG_SO.QT_MAX, dieuKhien.wPitch * 0.55 + vKeoPitch * 0.25));
+      } else if (dieuKhien.cheDo === 'cho' && tocKeo > HANG_SO.QT_NGUONG * 1.15) {
+        dieuKhien.wYaw = Math.max(-HANG_SO.QT_MAX, Math.min(HANG_SO.QT_MAX, vKeoYaw * 0.85));
+        dieuKhien.wPitch = Math.max(-HANG_SO.QT_MAX, Math.min(HANG_SO.QT_MAX, vKeoPitch * 0.4));
+        dieuKhien.cheDo = 'quan_tinh';
+        dieuKhien._dangHoatDong = true;
+      }
+      vKeoYaw = 0.0;
+      vKeoPitch = 0.0;
+    } else if (dieuKhien.cheDo !== 'quan_tinh') {
+      vKeoYaw = 0.0;
+      vKeoPitch = 0.0;
+    }
 
     // Cập nhật đích con trỏ (dùng kích thước đã cache qua ResizeObserver → 0 layout reflow mỗi khung)
     const krong = krongCache;
@@ -771,9 +925,10 @@ export async function taoDieuKhienTay({
       }
       const hudMoi = `${Math.round(thongKe.tanSoNhanDien)} lần/giây | ${Math.round(msNhanDien)} ms | ${soTayHienTai} tay`;
       if (hudMoi !== hudChuCu) { hudChuCu = hudMoi; hudText.textContent = hudMoi; }
+      const tlMin = dsTay.length ? Math.min(...dsTay.map((h) => h.tl)) : null;
       const chiTietMoi = `Thấy tay ${Math.round(thongKe.tiLeThayTay * 100)}% · sáng ${doSang < 0 ? '–' : doSang}`
         + ` · camera ${Math.round(thongKe.tanSoCamera)} hình/giây`
-        + (dsTay.length ? ` · chụm ${dsTay[0].tl.toFixed(2)}` : '')
+        + (tlMin !== null ? ` · chụm ${tlMin.toFixed(2)}` : '')
         + ` · ${luong === 'worker' ? 'luồng riêng' : 'luồng chính'} ${uyQuyenMay}`;
       if (chiTietMoi !== hudChiTietCu) { hudChiTietCu = chiTietMoi; hudChiTiet.textContent = chiTietMoi; }
     }
@@ -916,6 +1071,9 @@ export async function taoDieuKhienTay({
       msTruoc = -1;
       thongKe = new ThongKeTay();
       boOnDinh.datLai();
+      vKeoYaw = 0;
+      vKeoPitch = 0;
+      tKeoGanNhat = -1;
       for (const k of Object.keys(cacTay)) delete cacTay[k];
       dsTayCuoi = [];
       doSang = -1;
@@ -977,6 +1135,9 @@ export async function taoDieuKhienTay({
     bangCam.style.display = 'none';
     hopGoiY.style.display = 'none';
     boOnDinh.datLai();
+    vKeoYaw = 0;
+    vKeoPitch = 0;
+    tKeoGanNhat = -1;
     for (const k of Object.keys(cacTay)) delete cacTay[k];
     dsTayCuoi = [];
     anLoi();
@@ -1005,15 +1166,16 @@ export async function taoDieuKhienTay({
       duongZoomLine.setAttribute('y2', conTro2.y.toFixed(1));
     }
 
-    // Lướt quán tính ở đúng tần số quét màn hình (60–120 Hz) thay vì giật theo nhịp nhận diện camera
+    // Lướt quán tính ở đúng tần số quét màn hình (60–120 Hz) với tắt dần êm dịu kéo dài (0,82 s) và dừng siêu nhẹ
     if (dieuKhien.cheDo === 'quan_tinh') {
+      const tauLuot = HANG_SO.QT_TAT * 1.35; // ~0.81 s: lướt tự nhiên, giảm tốc mềm như con quay
       dieuKhien.yaw += dieuKhien.wYaw * dtKep;
       const pMoi = dieuKhien.pitch + dieuKhien.wPitch * dtKep;
       dieuKhien.pitch = Math.max(-HANG_SO.PITCH_MAX, Math.min(HANG_SO.PITCH_MAX, pMoi));
       if (dieuKhien.pitch !== pMoi) dieuKhien.wPitch = 0.0;
-      dieuKhien.wYaw *= Math.exp(-dtKep / HANG_SO.QT_TAT);
-      dieuKhien.wPitch *= Math.exp(-dtKep / (HANG_SO.QT_TAT / 2));
-      if (Math.hypot(dieuKhien.wYaw, dieuKhien.wPitch) < 0.05) {
+      dieuKhien.wYaw *= Math.exp(-dtKep / tauLuot);
+      dieuKhien.wPitch *= Math.exp(-dtKep / (tauLuot * 0.55));
+      if (Math.hypot(dieuKhien.wYaw, dieuKhien.wPitch) < 0.012) {
         dieuKhien.wYaw = 0.0;
         dieuKhien.wPitch = 0.0;
         dieuKhien.cheDo = 'cho';
