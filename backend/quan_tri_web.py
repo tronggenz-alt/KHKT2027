@@ -8,13 +8,16 @@ from __future__ import annotations
 import asyncio
 import json
 import re
+import secrets
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-from . import chi_phi_ai, claude_admin, claude_rieng, db, dia_chi_ip, email_rac, key_claude, lo_trinh, ma_claude, ma_giao_dien, nhat_ky, phong_thi_nghiem, sinh_hoc_rag, so_do_he_thong, tai_khoan
+from . import chi_phi_ai, claude_admin, claude_rieng, db, dia_chi_ip, email_rac, key_claude, lo_trinh, ma_claude, ma_giao_dien, nhat_ky, phong_thi_nghiem, quan_tri, sinh_hoc_rag, so_do_he_thong, tai_khoan
 from .auth import gioi_han, kiem_csrf, nguoi_dung_hien_tai
+from .bao_mat import MAT_KHAU_TOI_THIEU, bam_mat_khau
+from .config import settings
 from .db import NguoiDung
 
 
@@ -137,6 +140,104 @@ def khoa(uid: int, vao: KhoaVao, request: Request, admin: NguoiDung = Depends(ca
     except nhat_ky.LoiQuanTri as e:
         raise HTTPException(400, {"loi": str(e), "ma": "khong_khoa_duoc"}) from e
     return {"ok": True, "bi_khoa": u.bi_khoa}
+
+
+class TaoTaiKhoanAdminVao(BaseModel):
+    email: str = Field(..., max_length=254)
+    ten: str = Field("", max_length=80)
+    vai_tro: str = Field("ki_cuu", max_length=20)      # "ki_cuu" | "admin"
+    mat_khau: str = Field("", max_length=200)
+    ngau_nhien: bool = False
+
+
+@router.post("/nguoi-dung/tao", dependencies=[Depends(kiem_csrf)])
+def tao_tai_khoan_quan_tri(vao: TaoTaiKhoanAdminVao, request: Request, admin: NguoiDung = Depends(can_admin)):
+    """Đầy đủ tính năng như quan-tri.command (mục 1 & 5): tạo mới tài khoản admin / kì cựu (hoặc cấp quyền cho email đã có)."""
+    vai_tro = (vao.vai_tro or "").strip().lower()
+    if vai_tro not in ("admin", "ki_cuu"):
+        raise HTTPException(400, {"loi": "Vai trò chỉ hỗ trợ 'ki_cuu' hoặc 'admin'.", "ma": "vai_tro_sai"})
+    email = vao.email.strip().lower()
+    if not email or "@" not in email or "." not in email.split("@", 1)[-1]:
+        raise HTTPException(400, {"loi": "Email không hợp lệ.", "ma": "email_sai"})
+    ki_cuu = vai_tro == "ki_cuu"
+    da_co = db.tim_theo_email(email) or db.lay_theo_sub(db.SUB_EMAIL + email)
+    if da_co is not None and not da_co.cuc_bo:
+        (db.dat_ki_cuu if ki_cuu else db.dat_admin)(da_co.id, True)
+        u = db.lay_nguoi_dung(da_co.id)
+        nhan = "kì cựu" if ki_cuu else "admin"
+        nhat_ky.ghi("doi_quyen", request, admin, phuong_thuc="admin_web", doi_tuong=u.id,
+                    chi_tiet=f"cấp quyền {nhan} cho #{u.id} {u.email}")
+        return {"ok": True, "moi": False, "id": u.id, "email": u.email, "ten": u.ten,
+                "vai_tro": vai_tro, "mat_khau_moi": ""}
+
+    mk = secrets.token_urlsafe(12) if vao.ngau_nhien else vao.mat_khau
+    if len(mk) < MAT_KHAU_TOI_THIEU:
+        raise HTTPException(400, {"loi": f"Mật khẩu cần ít nhất {MAT_KHAU_TOI_THIEU} ký tự.", "ma": "mat_khau_ngan"})
+    try:
+        u, moi = quan_tri.tao_admin(email, vao.ten, mk, ki_cuu=ki_cuu)
+    except quan_tri.LoiQuanTri as e:
+        raise HTTPException(400, {"loi": str(e), "ma": "loi_tao_tai_khoan"}) from e
+    db.dat_xac_thuc_email(u.id)
+    nhan = "kì cựu" if ki_cuu else "admin"
+    nhat_ky.ghi("tao_tai_khoan_admin", request, admin, phuong_thuc="admin_web", doi_tuong=u.id,
+                chi_tiet=f"tạo tài khoản {nhan} #{u.id} {u.email}")
+    return {"ok": True, "moi": moi, "id": u.id, "email": u.email, "ten": u.ten,
+            "vai_tro": vai_tro, "mat_khau_moi": mk if vao.ngau_nhien else ""}
+
+
+class VaiTroVao(BaseModel):
+    quyen: str = Field(..., max_length=20)             # "admin" | "ki_cuu"
+    bat: bool
+
+
+@router.post("/nguoi-dung/{uid}/vai-tro", dependencies=[Depends(kiem_csrf)])
+def doi_vai_tro(uid: int, vao: VaiTroVao, request: Request, admin: NguoiDung = Depends(can_admin)):
+    """Đầy đủ tính năng như quan-tri.command (mục 2, 3, 6, 7): cấp / bỏ quyền admin hoặc kì cựu."""
+    quyen = (vao.quyen or "").strip().lower()
+    if quyen not in ("admin", "ki_cuu"):
+        raise HTTPException(400, {"loi": "Quyền chỉ hỗ trợ 'admin' hoặc 'ki_cuu'.", "ma": "vai_tro_sai"})
+    u = db.lay_nguoi_dung(uid)
+    if u is None:
+        raise HTTPException(404, {"loi": "Không có người dùng này.", "ma": "khong_co"})
+    if u.cuc_bo:
+        raise HTTPException(400, {"loi": "Không đổi quyền tài khoản cục bộ của máy chủ.", "ma": "tai_khoan_cuc_bo"})
+    if quyen == "admin":
+        if not vao.bat and u.id == admin.id:
+            raise HTTPException(400, {"loi": "Không thể tự bỏ quyền admin của chính mình.", "ma": "khong_tu_bo_admin"})
+        if not vao.bat and (u.email or "").strip().lower() in settings.admin_emails:
+            raise HTTPException(400, {"loi": "Email này đang được cố định quyền admin trong biến môi trường ADMIN_EMAILS.", "ma": "admin_env"})
+        db.dat_admin(u.id, vao.bat)
+    else:
+        db.dat_ki_cuu(u.id, vao.bat)
+    u = db.lay_nguoi_dung(uid)
+    nhan = "admin" if quyen == "admin" else "kì cựu"
+    hanh_dong = "cấp" if vao.bat else "bỏ"
+    nhat_ky.ghi("doi_quyen", request, admin, phuong_thuc="admin_web", doi_tuong=u.id,
+                chi_tiet=f"{hanh_dong} quyền {nhan} cho #{u.id} {u.email or u.ten}")
+    return {"ok": True, "id": u.id, "la_admin": tai_khoan.la_chu_app(u),
+            "la_ki_cuu": bool(u.la_ki_cuu and not tai_khoan.la_chu_app(u))}
+
+
+class DatMatKhauAdminVao(BaseModel):
+    mat_khau: str = Field("", max_length=200)
+    ngau_nhien: bool = False
+
+
+@router.post("/nguoi-dung/{uid}/dat-mat-khau", dependencies=[Depends(kiem_csrf)])
+def dat_mat_khau_nguoi_dung(uid: int, vao: DatMatKhauAdminVao, request: Request, admin: NguoiDung = Depends(can_admin)):
+    """Đầy đủ tính năng như quan-tri.command (mục 4): đặt lại mật khẩu cho tài khoản email + mật khẩu."""
+    u = db.lay_nguoi_dung(uid)
+    if u is None:
+        raise HTTPException(404, {"loi": "Không có người dùng này.", "ma": "khong_co"})
+    if u.dang_nhap_bang != "email":
+        raise HTTPException(400, {"loi": "Tài khoản này không dùng mật khẩu (đăng nhập bằng Google hoặc cục bộ).", "ma": "khong_co_mat_khau"})
+    mk = secrets.token_urlsafe(12) if vao.ngau_nhien else vao.mat_khau
+    if len(mk) < MAT_KHAU_TOI_THIEU:
+        raise HTTPException(400, {"loi": f"Mật khẩu mới cần ít nhất {MAT_KHAU_TOI_THIEU} ký tự.", "ma": "mat_khau_ngan"})
+    db.dat_mat_khau(u.id, bam_mat_khau(mk))
+    nhat_ky.ghi("admin_dat_mat_khau", request, admin, phuong_thuc="admin_web", doi_tuong=u.id,
+                chi_tiet=f"đặt lại mật khẩu cho #{u.id} {u.email}")
+    return {"ok": True, "mat_khau_moi": mk if vao.ngau_nhien else ""}
 
 
 @router.get("/canh-bao")

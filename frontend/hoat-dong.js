@@ -9,7 +9,9 @@ const HoatDong = (() => {
   const SU_KIEN = {
     dang_ky: ["Đăng ký", "vang"], dang_nhap: ["Đăng nhập", "xanh"], dang_nhap_sai: ["Đăng nhập sai", "do"], dang_xuat: ["Đăng xuất", ""],
     xac_thuc_email: ["Xác thực email", "xanh"], xac_thuc_sai: ["Nhập sai mã", "do"], dat_lai_mat_khau: ["Đặt lại mật khẩu", "lam"],
-    doi_ten: ["Đổi tên", "lam"], khoa: ["Khoá tài khoản", "do"], mo_khoa: ["Mở khoá tài khoản", "xanh"], doi_nhan: ["Đổi nhãn thành viên", "lam"],
+    doi_ten: ["Đổi tên", "lam"], khoa: ["Khoá tài khoản", "do"], mo_khoa: ["Mở khoá tài khoản", "xanh"],
+    doi_quyen: ["Đổi quyền tài khoản", "lam"], tao_tai_khoan_admin: ["Tạo tài khoản quản trị", "xanh"],
+    admin_dat_mat_khau: ["Admin đặt lại mật khẩu", "lam"], doi_nhan: ["Đổi nhãn thành viên", "lam"],
     gan_ma_claude: ["Nhập mã Claude", "xanh"], nhap_sai_ma_claude: ["Nhập sai mã Claude", "do"], tao_ma_claude: ["Tạo mã Claude", "lam"],
     thu_hoi_ma_claude: ["Thu hồi mã Claude", "do"], them_luot_ma_claude: ["Cộng lượt mã Claude", "lam"],
     kich_hoat_key_claude: ["Kích hoạt Key Claude", "xanh"], nhap_sai_key_claude: ["Nhập sai Key Claude", "do"],
@@ -31,7 +33,7 @@ const HoatDong = (() => {
   const NHOM = {
     login: ["dang_nhap"], register: ["dang_ky"], fail: ["dang_nhap_sai", "xac_thuc_sai"], logout: ["dang_xuat"],
     verify: ["xac_thuc_email", "xac_thuc_sai"], rename: ["doi_ten"], password: ["dat_lai_mat_khau"],
-    admin: ["khoa", "mo_khoa", "doi_nhan", "tao_ma_claude", "thu_hoi_ma_claude", "them_luot_ma_claude", "thu_hoi_key_claude", "mo_lai_key_claude",
+    admin: ["khoa", "mo_khoa", "doi_quyen", "tao_tai_khoan_admin", "admin_dat_mat_khau", "doi_nhan", "tao_ma_claude", "thu_hoi_ma_claude", "them_luot_ma_claude", "thu_hoi_key_claude", "mo_lai_key_claude",
       "bat_key_claude_rieng", "tat_key_claude_rieng", "tu_choi_key_claude_rieng", "duyet_nghi_ngo", "sua_ds_email", "tao_ma_giao_dien",
       "thu_hoi_ma_giao_dien", "doi_thu_tu_ai", "ai_rieng"],
     spam: ["email_nghi_ngo", "duyet_nghi_ngo", "xoa_chua_xac_minh", "sua_ds_email"],
@@ -210,8 +212,11 @@ const HoatDong = (() => {
     }
     const [xt, lxt] = XAC_THUC[d.xac_thuc] || XAC_THUC["-"];
     const coTheKhoa = !d.la_admin && d.dang_nhap_bang !== "cuc_bo";
+    const coTheDoiQuyen = d.dang_nhap_bang !== "cuc_bo";
+    const laChinhMinh = Boolean(TaiKhoan.toi?.nguoi_dung?.email && d.email
+      && TaiKhoan.toi.nguoi_dung.email.toLowerCase() === d.email.toLowerCase());
     const dangNhap = (d.lich_su || []).filter((x) => ["dang_nhap", "dang_nhap_sai", "dang_xuat", "dang_ky", "xac_thuc_email", "xac_thuc_sai",
-      "dat_lai_mat_khau", "khoa", "mo_khoa"].includes(x.su_kien));
+      "dat_lai_mat_khau", "admin_dat_mat_khau", "doi_quyen", "tao_tai_khoan_admin", "khoa", "mo_khoa"].includes(x.su_kien));
     const bg = d.bai_giai || {};
     h.innerHTML = `
       <div class="dau">
@@ -242,10 +247,25 @@ const HoatDong = (() => {
             : d.key_claude_rieng.bat_luc && d.key_claude_rieng.bat ? `<small class="ghi-chu-nho">bật lúc ${esc(d.key_claude_rieng.bat_luc)}${d.key_claude_rieng.bat_boi ? " bởi " + esc(d.key_claude_rieng.bat_boi) : ""}</small>` : ""}
           ${d.key_claude_rieng.yeu_cau_luc ? `<button type="button" class="btn btn-sm btn-nguy-hiem" data-tu-choi-key>Từ chối yêu cầu</button>` : ""}
         </div>` : ""}
+        ${coTheDoiQuyen ? `<div class="mt-4 pt-3 border-t border-chi flex flex-col gap-3">
+          <div class="flex flex-wrap gap-2 items-center">
+            <span class="nhan-mono mr-1">Quyền tài khoản:</span>
+            ${!d.la_admin ? `<button type="button" class="btn btn-sm ${d.la_ki_cuu ? "" : "btn-primary"}" data-vai-tro="ki_cuu" data-bat="${d.la_ki_cuu ? "0" : "1"}">${d.la_ki_cuu ? "Bỏ quyền kì cựu" : "★ Cấp quyền kì cựu"}</button>` : ""}
+            <button type="button" class="btn btn-sm ${d.la_admin ? "btn-nguy-hiem" : ""}" data-vai-tro="admin" data-bat="${d.la_admin ? "0" : "1"}" ${d.la_admin && laChinhMinh ? "disabled title='Không thể tự bỏ quyền admin của chính mình'" : ""}>${d.la_admin ? "Bỏ quyền admin" : "Cấp quyền admin"}</button>
+            <span class="ghi-chu-nho">${d.la_admin ? "Admin: toàn quyền quản trị." : d.la_ki_cuu ? "Kì cựu: giải không giới hạn bằng key chủ app, miễn xác thực email." : "Thành viên thường."}</span>
+          </div>
+          ${d.dang_nhap_bang === "email" ? `<div class="flex flex-wrap gap-2 items-center">
+            <span class="nhan-mono mr-1">Đặt lại mật khẩu:</span>
+            <input type="password" class="o-nhap" style="max-width:210px;height:32px;font-size:13px" data-o-mk-moi placeholder="Mật khẩu mới (≥ 8 ký tự)" maxlength="200">
+            <button type="button" class="btn btn-sm" data-dat-mk="thuong">Lưu mật khẩu</button>
+            <button type="button" class="btn btn-sm" data-dat-mk="nn">Tạo MK ngẫu nhiên</button>
+          </div>
+          <div class="hop-ma-moi" data-mk-kq hidden></div>` : ""}
+        </div>` : ""}
         ${coTheKhoa ? `<div class="mt-4 flex flex-wrap gap-2 items-center">
           <button type="button" class="btn btn-sm ${d.bi_khoa ? "" : "btn-nguy-hiem"}" data-khoa="${d.bi_khoa ? "0" : "1"}">${d.bi_khoa ? "Mở khoá tài khoản" : "Khoá tài khoản"}</button>
           <span class="ghi-chu-nho">${d.bi_khoa ? "Người này đang không đăng nhập được." : "Khoá: đăng xuất ngay và không đăng nhập lại được."}</span>
-        </div>` : d.la_admin ? '<p class="ghi-chu-nho mt-4">Không khoá được tài khoản admin.</p>' : ""}
+        </div>` : d.la_admin ? '<p class="ghi-chu-nho mt-4">Không khoá được tài khoản admin (hãy bỏ quyền admin trước).</p>' : ""}
         <h4>Lịch sử đăng nhập</h4>
         <div data-ls></div>
         <h4>Lịch sử đổi tên</h4>
@@ -268,6 +288,55 @@ const HoatDong = (() => {
     if (tgKey && !tgKey.disabled) tgKey.onchange = () => doiKeyRieng({ bat: tgKey.checked });
     const nutTuChoi = h.querySelector("[data-tu-choi-key]");
     if (nutTuChoi) nutTuChoi.onclick = () => confirm("Từ chối yêu cầu dùng key Claude riêng của người này?") && doiKeyRieng({ bat: false, tu_choi: true });
+    h.querySelectorAll("[data-vai-tro]").forEach((nut) => {
+      if (nut.disabled) return;
+      nut.onclick = async () => {
+        const quyen = nut.dataset.vaiTro;
+        const bat = nut.dataset.bat === "1";
+        const nhan = quyen === "admin" ? "ADMIN" : "KÌ CỰU";
+        if (!confirm(`${bat ? "CẤP" : "BỎ"} quyền ${nhan} cho ${d.ten || ""} <${d.email || "#" + d.id}>?`)) return;
+        nut.disabled = true;
+        try {
+          await gui(`/admin/api/nguoi-dung/${d.id}/vai-tro`, { quyen, bat });
+          await moChiTiet(d.id);
+          if (khiDoiChiTiet) khiDoiChiTiet();
+        } catch (e) {
+          alert(e.message);
+          nut.disabled = false;
+        }
+      };
+    });
+    h.querySelectorAll("[data-dat-mk]").forEach((nut) => {
+      nut.onclick = async () => {
+        const ngau_nhien = nut.dataset.datMk === "nn";
+        const oMk = h.querySelector("[data-o-mk-moi]");
+        const mat_khau = ngau_nhien ? "" : (oMk?.value || "");
+        if (!ngau_nhien && mat_khau.length < 8) { alert("Mật khẩu mới cần ít nhất 8 ký tự."); oMk?.focus(); return; }
+        if (!confirm(`Đặt lại mật khẩu ${ngau_nhien ? "NGẪU NHIÊN " : ""}cho ${d.ten || ""} <${d.email || "#" + d.id}>?`)) return;
+        nut.disabled = true;
+        try {
+          const kq = await gui(`/admin/api/nguoi-dung/${d.id}/dat-mat-khau`, { mat_khau, ngau_nhien });
+          if (oMk) oMk.value = "";
+          const hopKq = h.querySelector("[data-mk-kq]");
+          if (kq.mat_khau_moi && hopKq) {
+            hopKq.hidden = false;
+            hopKq.innerHTML = `<p class="nhan-mono">Mật khẩu mới (chỉ hiện một lần):</p>
+              <div class="flex flex-wrap items-center gap-2 mt-1"><code class="ma-goc">${esc(kq.mat_khau_moi)}</code>
+                <button type="button" class="btn btn-sm" data-chep-mk>Chép</button></div>`;
+            hopKq.querySelector("[data-chep-mk]").onclick = async () => {
+              try { await navigator.clipboard.writeText(kq.mat_khau_moi); alert("Đã chép mật khẩu mới."); } catch { alert("Không chép được – hãy bôi đen rồi chép."); }
+            };
+          } else {
+            alert(`Đã cập nhật mật khẩu mới cho ${d.email || "#" + d.id}.`);
+          }
+          if (khiDoiChiTiet) khiDoiChiTiet();
+        } catch (e) {
+          alert(e.message);
+        } finally {
+          nut.disabled = false;
+        }
+      };
+    });
     const nutKhoa = h.querySelector("[data-khoa]");
     if (nutKhoa) {
       nutKhoa.onclick = async () => {

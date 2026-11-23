@@ -31,6 +31,9 @@ SU_KIEN = {
     "doi_ten": "Đổi tên",
     "khoa": "Khoá tài khoản",
     "mo_khoa": "Mở khoá tài khoản",
+    "doi_quyen": "Đổi quyền tài khoản",
+    "tao_tai_khoan_admin": "Tạo tài khoản quản trị",
+    "admin_dat_mat_khau": "Admin đặt lại mật khẩu",
     "doi_nhan": "Đổi nhãn thành viên",
     "gan_ma_claude": "Nhập mã Claude",
     "nhap_sai_ma_claude": "Nhập sai mã Claude",
@@ -64,7 +67,7 @@ SU_KIEN = {
 # tên nhóm dùng ở bộ lọc (admin_cli --type, ô lọc trên web) → các sự kiện
 NHOM = {
     "login": ("dang_nhap",), "register": ("dang_ky",), "fail": ("dang_nhap_sai", "xac_thuc_sai"), "logout": ("dang_xuat",),
-    "verify": ("xac_thuc_email", "xac_thuc_sai"), "rename": ("doi_ten",), "admin": ("khoa", "mo_khoa", "doi_nhan", "tao_ma_claude", "thu_hoi_ma_claude", "them_luot_ma_claude",
+    "verify": ("xac_thuc_email", "xac_thuc_sai"), "rename": ("doi_ten",), "admin": ("khoa", "mo_khoa", "doi_quyen", "tao_tai_khoan_admin", "admin_dat_mat_khau", "doi_nhan", "tao_ma_claude", "thu_hoi_ma_claude", "them_luot_ma_claude",
                                                        "thu_hoi_key_claude", "mo_lai_key_claude", "bat_key_claude_rieng", "tat_key_claude_rieng",
                                                        "tu_choi_key_claude_rieng", "duyet_nghi_ngo", "sua_ds_email",
                                                        "tao_ma_giao_dien", "thu_hoi_ma_giao_dien", "doi_thu_tu_ai", "doi_phong_thi_nghiem", "doi_ung_dung_lab", "ai_rieng"),

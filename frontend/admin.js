@@ -927,6 +927,52 @@ async function batDau() {
   $("#er-loc-ly-do").addEventListener("change", () => taiEmailRac().catch((e) => toast(esc(e.message), "loi")));
   $("#er-tim").addEventListener("input", () => { clearTimeout(henTimEr); henTimEr = setTimeout(() => taiEmailRac().catch(() => {}), 300); });
   ["#ad-loc-key-bat", "#ad-loc-key-yc"].forEach((id) => $(id).addEventListener("change", veBang));
+  $("#nd-mo-tao")?.addEventListener("click", () => {
+    const khung = $("#nd-khung-tao");
+    khung.hidden = !khung.hidden;
+    if (!khung.hidden) $("#nd-email").focus();
+  });
+  $("#nd-mk-nn")?.addEventListener("change", (e) => {
+    const o = $("#nd-mk");
+    o.disabled = e.target.checked;
+    if (e.target.checked) o.value = "";
+  });
+  $("#nd-form-tao")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const nut = e.target.querySelector("button[type=submit]");
+    const email = $("#nd-email").value.trim();
+    const ten = $("#nd-ten").value.trim();
+    const vai_tro = $("#nd-vai-tro").value;
+    const ngau_nhien = $("#nd-mk-nn").checked;
+    const mat_khau = $("#nd-mk").value;
+    if (!email || !email.includes("@")) { toast("⚠ Hãy nhập email hợp lệ.", "loi"); $("#nd-email").focus(); return; }
+    nut.disabled = true;
+    try {
+      const d = await HoatDong.gui("/admin/api/nguoi-dung/tao", { email, ten, vai_tro, mat_khau, ngau_nhien });
+      const nhan = vai_tro === "admin" ? "Admin" : "Kì cựu";
+      toast(d.moi ? `Đã tạo tài khoản ${nhan}: ${esc(d.email)}` : `Đã cấp quyền ${nhan} cho ${esc(d.email)} (giữ nguyên mật khẩu).`, "ok", 5000);
+      const kq = $("#nd-tao-kq");
+      if (d.mat_khau_moi) {
+        kq.hidden = false;
+        kq.innerHTML = `<p class="nhan-mono">Mật khẩu mới cho ${esc(d.email)} – chỉ hiện một lần</p>
+          <div class="flex flex-wrap items-center gap-3 mt-2"><code class="ma-goc">${esc(d.mat_khau_moi)}</code>
+            <button type="button" class="btn btn-sm" id="nd-chep-mk">Chép</button></div>`;
+        $("#nd-chep-mk").onclick = async () => {
+          try { await navigator.clipboard.writeText(d.mat_khau_moi); toast("Đã chép mật khẩu.", "ok", 2500); } catch { toast("Không chép được – hãy bôi đen rồi chép.", "loi"); }
+        };
+      } else {
+        kq.hidden = true;
+      }
+      $("#nd-email").value = "";
+      $("#nd-ten").value = "";
+      $("#nd-mk").value = "";
+      await Promise.all([taiNguoiDung(), taiTongQuan()]);
+    } catch (err) {
+      toast("⚠ " + esc(err.message), "loi", 8000);
+    } finally {
+      nut.disabled = false;
+    }
+  });
   $("#ad-bang").addEventListener("click", (e) => {
     if (e.target.closest(".o-key-rieng")) e.stopPropagation(); // không mở chi tiết khi bấm công tắc
     const em = e.target.closest(".nut-email");

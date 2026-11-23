@@ -239,12 +239,33 @@
       <div class="flex flex-wrap items-center justify-between gap-3">
         <h2 id="td-nguoi-dung" tabindex="-1" class="font-semibold text-muc text-lg">Người dùng <span id="ad-so-nd" class="ghi-chu-nho"></span></h2>
         <div class="flex flex-wrap items-center gap-3">
+          <button type="button" id="nd-mo-tao" class="btn btn-primary btn-sm">+ Tạo tài khoản (Admin / Kì cựu)</button>
           <label class="ghi-chu-nho flex items-center gap-1"><input type="checkbox" id="ad-loc-key-bat"> Chỉ hiện người được bật key Claude riêng</label>
           <label class="ghi-chu-nho flex items-center gap-1"><input type="checkbox" id="ad-loc-key-yc"> Đang yêu cầu</label>
           <input type="search" id="ad-tim" class="o-nhap" style="max-width: 320px" placeholder="Tìm theo tên hoặc email" aria-label="Tìm người dùng">
         </div>
       </div>
-      <p class="ghi-chu-nho mt-1">Bấm tiêu đề cột để sắp xếp, bấm một dòng để xem chi tiết (lịch sử đăng nhập, đổi tên, khoá / mở khoá), bấm một IP để xem mọi tài khoản từng dùng IP đó.</p>
+      <div id="nd-khung-tao" class="the p-4 mt-3" hidden>
+        <p class="nhan-mono">Tạo tài khoản hoặc cấp quyền nhanh (tương đương quan-tri.command)</p>
+        <p class="ghi-chu-nho mt-1">Email đã có tài khoản sẽ được giữ nguyên mật khẩu và nâng thẳng vai trò; email mới sẽ tạo tài khoản đã xác thực sẵn.</p>
+        <form id="nd-form-tao" class="grid gap-3 mt-3 sm:grid-cols-2 lg:grid-cols-5 items-end" novalidate>
+          <label><span class="nhan-mono block mb-1">Vai trò</span>
+            <select id="nd-vai-tro" class="o-nhap">
+              <option value="ki_cuu">Kì cựu (giải không giới hạn)</option>
+              <option value="admin">Admin (toàn quyền quản trị)</option>
+            </select>
+          </label>
+          <label><span class="nhan-mono block mb-1">Email</span><input type="email" id="nd-email" class="o-nhap" maxlength="254" required placeholder="ban@gmail.com"></label>
+          <label><span class="nhan-mono block mb-1">Tên hiển thị (tuỳ chọn)</span><input type="text" id="nd-ten" class="o-nhap" maxlength="80" placeholder="Để trống lấy theo email"></label>
+          <label><span class="nhan-mono block mb-1">Mật khẩu (≥ 8 ký tự)</span><input type="password" id="nd-mk" class="o-nhap" maxlength="200" placeholder="Hoặc tích ngẫu nhiên"></label>
+          <div class="flex flex-wrap items-center gap-2">
+            <label class="ghi-chu-nho flex items-center gap-1"><input type="checkbox" id="nd-mk-nn"> Ngẫu nhiên</label>
+            <button type="submit" class="btn btn-primary btn-sm">Tạo / Cấp quyền</button>
+          </div>
+        </form>
+        <div id="nd-tao-kq" class="hop-ma-moi mt-3" hidden></div>
+      </div>
+      <p class="ghi-chu-nho mt-1">Bấm tiêu đề cột để sắp xếp, bấm một dòng để xem chi tiết (cấp/bỏ kì cựu, cấp/bỏ admin, đặt lại mật khẩu, khoá/mở khoá, lịch sử đăng nhập), bấm một IP để xem mọi tài khoản từng dùng IP đó.</p>
       <div class="cuon-ngang mt-3">
         <table class="bang-nd">
           <thead><tr>
