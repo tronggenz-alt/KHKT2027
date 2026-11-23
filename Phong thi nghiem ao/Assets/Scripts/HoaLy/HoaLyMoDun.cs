@@ -213,23 +213,27 @@ namespace Khkt.HoaLy
         void Update()
         {
             float dt = Mathf.Min(Time.unscaledDeltaTime, 0.05f);
-            // mở: mờ dần + trượt lên
+            // mở: mờ dần + nở nhẹ từ tâm
             if (tMo < 1f)
             {
-                tMo = Mathf.Min(1f, tMo + dt / 0.32f);
+                tMo = Mathf.Min(1f, tMo + dt / 0.26f);
                 float e = HoaLyUi.EaseOut(tMo);
                 nhomGoc.alpha = e;
-                noiDung.anchoredPosition = new Vector2(0, -18f * (1 - e));
+                float s = Mathf.Lerp(0.955f, 1f, e);
+                noiDung.localScale = new Vector3(s, s, 1f);
+                noiDung.anchoredPosition = Vector2.zero;
             }
-            // chuyển tab: trang mới trượt vào từ phải
+            // chuyển tab: trang mới phóng mở mượt từ 0,965 lên 1 (không trượt ngang qua lại)
             if (tChuyen < 1f && ChiSoTrang >= 0)
             {
-                tChuyen = Mathf.Min(1f, tChuyen + dt / 0.28f);
+                tChuyen = Mathf.Min(1f, tChuyen + dt / 0.24f);
                 float e = HoaLyUi.EaseOut(tChuyen);
                 nhomTrai[ChiSoTrang].alpha = e;
                 nhomPhai[ChiSoTrang].alpha = e;
                 nhomCauHoi.alpha = e;
-                traiTrang[ChiSoTrang].anchoredPosition = new Vector2(28f * (1 - e), 0);
+                float s = Mathf.Lerp(0.968f, 1f, e);
+                traiTrang[ChiSoTrang].localScale = new Vector3(s, s, 1f);
+                traiTrang[ChiSoTrang].anchoredPosition = Vector2.zero;
             }
             // gạch dưới tab chạy theo tab đang chọn
             if (ChiSoTrang >= 0)

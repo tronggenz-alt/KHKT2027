@@ -283,6 +283,7 @@ namespace Khkt.Menu
 
             public void Chon(int i, bool baoTin)
             {
+                bool doi = Dang >= 0 && Dang != i;
                 Dang = i;
                 for (int k = 0; k < the.Count; k++)
                 {
@@ -298,6 +299,8 @@ namespace Khkt.Menu
                     var kh = Body(the[k]).Find("Biểu tượng/Ký hiệu")?.GetComponent<Text>();
                     if (kh != null) kh.color = d ? Accent : InkDim;
                 }
+                if (doi && i >= 0 && i < the.Count && the[i] != null && the[i].gameObject.activeInHierarchy)
+                    MenuAnim.PulseClick(the[i], 0.965f, 1.015f, 0.20f);
                 if (baoTin) chon?.Invoke(i);
             }
         }
@@ -380,7 +383,9 @@ namespace Khkt.Menu
         {
             var b = MakeButton(cha, "Nút ? " + ten, "?", pos, new Vector2(22, 22), () =>
             {
-                giaiThich.gameObject.SetActive(!giaiThich.gameObject.activeSelf);
+                bool mo = !giaiThich.gameObject.activeSelf;
+                giaiThich.gameObject.SetActive(mo);
+                if (mo) MenuAnim.Pop(giaiThich.rectTransform, 0.95f, 0.18f);
             }, 1, BoNut);
             var t = b.transform.Find("Chữ").GetComponent<Text>();
             t.fontSize = 13; t.color = InkMute;

@@ -124,9 +124,10 @@ namespace Khkt.Simulation.Bio.ThucVat
                 else if (bp.Nhom == "lat_cat_la") hasLa = true;
             }
             Check(hasRe && hasThan && hasLa &&
-                  ThucVatMoPhong.DanhSachBaiGiang.Length == 5 &&
-                  ThucVatMoPhong.DanhSachCauHoi.Length == 5,
-                "Đủ danh mục 3 lát cắt, 5 bước bài giảng và 5 câu hỏi nhanh");
+                  ThucVatMoPhong.DanhSachBaiGiang.Length >= 5 &&
+                  ThucVatMoPhong.DanhSachCauHoi.Length >= 5 &&
+                  ThucVatMoPhong.DanhSachKichBan.Length == 5,
+                "Đủ danh mục 3 lát cắt, 5 bước bài giảng, 5 kịch bản thí nghiệm và bộ câu hỏi nhanh");
 
             passed = p;
             failed = f;

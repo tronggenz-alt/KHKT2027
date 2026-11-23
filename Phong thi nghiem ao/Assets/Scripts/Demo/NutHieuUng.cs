@@ -31,7 +31,8 @@ namespace Khkt.Demo
         }
 
         [Header("Cấu hình hiệu ứng")]
-        public float pressedScale = 0.95f;
+        public float hoverScale = 1.022f;
+        public float pressedScale = 0.94f;
         public float animDuration = 0.08f;
         public bool isHoldButton = false;
         public Action onHoldReleaseAction;
@@ -41,6 +42,7 @@ namespace Khkt.Demo
         Vector3 baseScale = Vector3.one;
         Coroutine currentAnim;
         bool isPointerDown = false;
+        bool isHovered = false;
 
         void Awake()
         {
@@ -99,23 +101,30 @@ namespace Khkt.Demo
             if (isPointerDown)
             {
                 isPointerDown = false;
-                PlayPressAnimation(false);
+                PlayReleaseBounce();
             }
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
+            isHovered = false;
             if (isPointerDown)
             {
                 isPointerDown = false;
                 PlayPressAnimation(false);
                 ReleaseHold();
             }
+            else
+            {
+                PlayPressAnimation(false);
+            }
         }
 
         public void OnPointerEnter(PointerEventData eventData)
         {
-            // Tránh kích hoạt lại khi rê chuột nếu ngón tay đã nhấc
+            isHovered = true;
+            if (!isPointerDown)
+                PlayPressAnimation(false);
         }
 
         void OnDisable()
@@ -145,6 +154,7 @@ namespace Khkt.Demo
         void ResetImmediate()
         {
             isPointerDown = false;
+            isHovered = false;
             if (currentAnim != null) { StopCoroutine(currentAnim); currentAnim = null; }
             if (rectTransform != null) rectTransform.localScale = baseScale;
             if (highlightOverlay != null)
@@ -157,16 +167,26 @@ namespace Khkt.Demo
         void PlayPressAnimation(bool down)
         {
             EnsureHighlightOverlay();
+            if (!isActiveAndEnabled) return;
             if (currentAnim != null) StopCoroutine(currentAnim);
             currentAnim = StartCoroutine(AnimateScaleAndAlpha(down));
+        }
+
+        void PlayReleaseBounce()
+        {
+            EnsureHighlightOverlay();
+            if (!isActiveAndEnabled) return;
+            if (currentAnim != null) StopCoroutine(currentAnim);
+            currentAnim = StartCoroutine(AnimateReleaseBounce());
         }
 
         IEnumerator AnimateScaleAndAlpha(bool down)
         {
             bool reduced = ReducedMotion.IsEnabled;
-            float targetScaleFactor = (down && !reduced) ? pressedScale : 1.0f;
+            float targetScaleFactor = down ? pressedScale : (isHovered ? hoverScale : 1.0f);
+            if (reduced) targetScaleFactor = 1.0f;
             Vector3 targetScale = baseScale * targetScaleFactor;
-            float targetAlpha = down ? 0.18f : 0f;
+            float targetAlpha = down ? 0.18f : (isHovered ? 0.06f : 0f);
 
             Vector3 startScale = rectTransform != null ? rectTransform.localScale : baseScale;
             float startAlpha = highlightOverlay != null ? highlightOverlay.color.a : 0f;
@@ -178,7 +198,6 @@ namespace Khkt.Demo
             {
                 elapsed += Time.unscaledDeltaTime;
                 float t = Mathf.Clamp01(elapsed / dur);
-                // Cubic Ease Out: f(t) = 1 - (1 - t)^3
                 float ease = 1f - Mathf.Pow(1f - t, 3f);
 
                 if (rectTransform != null && !reduced)
@@ -191,6 +210,48 @@ namespace Khkt.Demo
             }
 
             if (rectTransform != null && !reduced) rectTransform.localScale = targetScale;
+            if (highlightOverlay != null) highlightOverlay.color = GlassKit.Wash(targetAlpha);
+            currentAnim = null;
+        }
+
+        IEnumerator AnimateReleaseBounce()
+        {
+            bool reduced = ReducedMotion.IsEnabled;
+            float endFactor = (!reduced && isHovered) ? hoverScale : 1.0f;
+            float dipFactor = reduced ? 1.0f : pressedScale;
+            float peakFactor = reduced ? 1.0f : Mathf.Max(endFactor + 0.014f, 1.024f);
+            float targetAlpha = isHovered ? 0.06f : 0f;
+            float startAlpha = highlightOverlay != null ? highlightOverlay.color.a : 0.18f;
+
+            float elapsed = 0f;
+            const float dur = 0.18f;
+            while (elapsed < dur)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / dur);
+                float factor;
+                if (t < 0.25f)
+                {
+                    float u = t / 0.25f;
+                    factor = Mathf.Lerp(dipFactor, peakFactor, 1f - (1f - u) * (1f - u));
+                }
+                else
+                {
+                    float u = (t - 0.25f) / 0.75f;
+                    float ease = 1f - Mathf.Pow(1f - u, 3f);
+                    factor = Mathf.Lerp(peakFactor, endFactor, ease);
+                }
+
+                if (rectTransform != null && !reduced)
+                    rectTransform.localScale = baseScale * factor;
+
+                if (highlightOverlay != null)
+                    highlightOverlay.color = GlassKit.Wash(Mathf.Lerp(startAlpha, targetAlpha, t));
+
+                yield return null;
+            }
+
+            if (rectTransform != null && !reduced) rectTransform.localScale = baseScale * endFactor;
             if (highlightOverlay != null) highlightOverlay.color = GlassKit.Wash(targetAlpha);
             currentAnim = null;
         }

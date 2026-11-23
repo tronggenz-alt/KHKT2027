@@ -260,7 +260,7 @@ namespace Khkt.Assembly
             pickSub.text = $"Bộ đang lắp: {ws.Parts().Count} bộ phận, chiếm {b.size.x * 100:0} × {b.size.z * 100:0} cm, cao {(b.max.y - ws.tableTop) * 100:0} cm. "
                          + "Máy tìm chỗ trống trên bàn, mặt trước bộ quay về phía người làm thí nghiệm.";
             FillChoices(items);
-            pickPanel.SetActive(true);
+            UiMotion.OpenPanel(this, pickPanel, 0.20f);
         }
 
         /// <summary>Bảng chọn bộ đã gia công để lấy về sửa.</summary>
@@ -281,7 +281,7 @@ namespace Khkt.Assembly
             pickSub.text = sets.Count == 0 ? "Chưa có bộ dụng cụ nào đã gia công trong phòng."
                                            : "Chọn bộ cần sửa: bộ được đưa về bàn ảo đúng như lúc gia công (phải đổ hết dung dịch trước).";
             FillChoices(items);
-            pickPanel.SetActive(true);
+            UiMotion.OpenPanel(this, pickPanel, 0.20f);
         }
 
         void Take(int i)

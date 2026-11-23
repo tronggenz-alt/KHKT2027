@@ -166,10 +166,17 @@ a { color: var(--nhan); text-decoration: none; }
   color: #FAFAFA;
 }
 .nut.nho {
+  width: auto;
+  min-width: 32px;
+  height: 30px;
+  padding: 0 10px;
+  font-size: 11.5px;
+  justify-content: center;
+}
+.thanh-tren .nut.nho {
   width: 32px;
   height: 32px;
   padding: 0;
-  justify-content: center;
 }
 .nut.chinh {
   background: #FAFAFA;
@@ -1086,6 +1093,43 @@ body.xem-co-quan .ghi-cong-bp3d { display: none; }
 .thanh-co-quan .ten b { font-size: 16px; font-weight: 600; color: #fff; }
 .thanh-co-quan .ten small { display: block; color: var(--mo); font-size: 11px; }
 .thanh-co-quan .bieu-tuong-cq { font-size: 18px; }
+.nut-vien, .the-co-quan .nut-hang .nut {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  background: linear-gradient(180deg, #24262c 0%, #14161b 100%);
+  color: #f1f5f9;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.13), inset 0 -1px 0 rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.55), 0 1px 2px rgba(0, 0, 0, 0.7);
+  transition: transform 140ms ease, background 150ms ease, border-color 150ms ease, box-shadow 150ms ease, color 150ms ease;
+}
+.nut-vien:hover, .the-co-quan .nut-hang .nut:hover {
+  transform: translateY(-1px);
+  background: linear-gradient(180deg, #2e313a 0%, #1a1d24 100%);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.5), 0 7px 18px rgba(0, 0, 0, 0.68), 0 2px 4px rgba(0, 0, 0, 0.75);
+}
+.nut-vien:active, .the-co-quan .nut-hang .nut:active {
+  transform: translateY(0.5px);
+  background: linear-gradient(180deg, #111318 0%, #1a1d24 100%);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.68), 0 1px 3px rgba(0, 0, 0, 0.55);
+}
+.nut-vien[aria-pressed="true"] {
+  background: linear-gradient(180deg, #252d3d 0%, #151a25 100%);
+  border-color: rgba(96, 165, 250, 0.65);
+  color: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(147, 197, 253, 0.28), 0 0 0 1px rgba(59, 130, 246, 0.22), 0 5px 14px rgba(0, 0, 0, 0.62);
+}
 .the-co-quan {
   position: absolute;
   right: 16px;
@@ -1141,17 +1185,19 @@ body.xem-co-quan .ghi-cong-bp3d { display: none; }
   min-width: 0;
 }
 .the-co-quan .ds-ct small {
-  display: block;
+  display: none;
   color: var(--mo);
   font-size: 11px;
   line-height: 1.35;
+  margin-top: 2px;
 }
+.the-co-quan .ds-ct button.dang small { display: block; }
 
-/* 3D hotspot / Điểm ghim nhãn cơ quan */
+/* 3D hotspot / Điểm ghim nhãn cơ quan (mặc định chỉ hiện tên gọn, nhấn vào mới mở mô tả) */
 .diem-nong {
-  width: 14px;
-  height: 14px;
-  margin: -7px 0 0 -7px;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
   border-radius: 50%;
   border: 2px solid #ffffff;
   background: var(--c, #f43f5e);
@@ -1159,32 +1205,57 @@ body.xem-co-quan .ghi-cong-bp3d { display: none; }
   cursor: pointer;
   pointer-events: auto;
   position: relative;
-  transition: transform 0.15s ease;
+  transition: box-shadow 0.15s ease;
 }
-.diem-nong:hover, .diem-nong.dang { transform: scale(1.3); }
+.diem-nong:hover {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35), 0 2px 10px rgba(0, 0, 0, 0.8);
+}
+.diem-nong.dang {
+  z-index: 9999 !important;
+  box-shadow: 0 0 0 3px var(--c, #f43f5e), 0 0 12px rgba(0, 0, 0, 0.85);
+}
 .diem-nong .meo {
   position: absolute;
-  left: 18px;
-  top: -12px;
+  left: 16px;
+  top: -8px;
   white-space: nowrap;
-  padding: 5px 9px;
-  border-radius: 8px;
-  background: rgba(17, 17, 17, 0.95);
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(17, 17, 17, 0.92);
   border: 1px solid var(--vien);
   backdrop-filter: blur(8px);
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 500;
   color: #EDEDED;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
-  pointer-events: none;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.55);
+  pointer-events: auto;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.diem-nong:hover .meo {
+  border-color: var(--vien-hover);
+  background: rgba(24, 24, 28, 0.96);
+}
+.diem-nong.dang .meo {
+  top: -12px;
+  padding: 6px 10px;
+  border-radius: 9px;
+  border-color: var(--c, var(--nhan));
+  background: rgba(14, 16, 22, 0.96);
+  white-space: normal;
+  min-width: 170px;
+  max-width: 240px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.72);
 }
 .diem-nong .meo small {
-  display: block;
-  color: var(--mo);
+  display: none;
+  color: var(--chu-2);
   font-size: 10.5px;
   font-weight: 400;
-  margin-top: 1px;
+  line-height: 1.4;
+  margin-top: 3px;
 }
+.diem-nong.dang .meo small { display: block; }
 body.xem-co-quan .hud, body.xem-co-quan .bang-goc-nhin, body.xem-co-quan .dem-cau-truc { display: none; }
 
 /* ---------- Panel Chat AI (Bio-Tutor) ---------- */
@@ -1488,12 +1559,12 @@ body.xem-co-quan .hud, body.xem-co-quan .bang-goc-nhin, body.xem-co-quan .dem-ca
 /* ---------- Chế độ Giải thích từng bước (Mũi tên 3D) ---------- */
 .khung-giai-thich {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 52px;
+  right: 64px;
   left: auto;
-  width: 320px;
-  max-width: calc(100vw - 32px);
-  max-height: min(74vh, 640px);
+  width: 316px;
+  max-width: calc(100% - 80px);
+  max-height: min(74vh, 620px);
   z-index: 25;
   background: rgba(17, 17, 17, 0.94);
   border: 1px solid var(--vien);
@@ -1506,6 +1577,17 @@ body.xem-co-quan .hud, body.xem-co-quan .bang-goc-nhin, body.xem-co-quan .dem-ca
   overflow: hidden;
   transition: opacity 0.25s ease, max-height 0.25s ease, width 0.25s ease;
   user-select: none;
+}
+@media (max-width: 960px) {
+  .khung-giai-thich {
+    top: auto;
+    bottom: 72px;
+    left: 12px;
+    right: 60px;
+    width: auto;
+    max-width: none;
+    max-height: 46vh;
+  }
 }
 .khung-giai-thich.an { display: none !important; }
 .khung-giai-thich.thu-nho {
@@ -1672,6 +1754,48 @@ body.xem-co-quan .hud, body.xem-co-quan .bang-goc-nhin, body.xem-co-quan .dem-ca
 .gt-tu-chay { display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--chu-2); cursor: pointer; }
 .gt-tu-chay input { accent-color: var(--nhan); }
 
+/* Nhãn 3D cho bước đang chạy: số bước + tiêu đề trong một thẻ ngang duy nhất, không chồng lên nhau */
+.the-buoc-3d {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: min(340px, 72vw);
+  padding: 5px 12px 5px 6px;
+  border-radius: 999px;
+  background: rgba(12, 16, 24, 0.90);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-left: 3px solid var(--mau-buoc, #06b6d4);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.62);
+  color: #FAFAFA;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+.so-buoc-3d {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+}
+.nhan-buoc-3d {
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #F8FAFC;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
+}
+
 /* Dialogs */
 dialog {
   border: 1px solid var(--vien);
@@ -1796,6 +1920,210 @@ dialog input:focus, dialog select:focus { border-color: var(--nhan); }
     font-size: 11px;
   }
 }
+
+/* ===== HOẠT ẢNH KHỞI ĐỘNG HOLOGRAM CÔNG NGHỆ TƯƠNG LAI (BIO-SCAN 3D · 60 FPS THUẦN GPU) ===== */
+#dang-tai {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(ellipse 68% 60% at 50% 48%, rgba(12, 34, 58, 0.96) 0%, rgba(5, 9, 16, 0.99) 64%, #03050a 100%);
+  overflow: hidden;
+  will-change: opacity;
+  transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+#dang-tai::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(56, 189, 248, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56, 189, 248, 0.055) 1px, transparent 1px);
+  background-size: 36px 36px;
+  mask-image: radial-gradient(circle at 50% 50%, black 25%, transparent 78%);
+  pointer-events: none;
+}
+.holo-stage {
+  position: relative;
+  width: min(390px, 88vw);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  z-index: 2;
+}
+.holo-emblem {
+  position: relative;
+  width: 148px;
+  height: 148px;
+  display: grid;
+  place-items: center;
+}
+.holo-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1.5px solid rgba(56, 189, 248, 0.25);
+}
+.holo-ring.r1 {
+  inset: 0;
+  border-top-color: #38BDF8;
+  border-right-color: rgba(56, 189, 248, 0.65);
+  box-shadow: 0 0 22px rgba(56, 189, 248, 0.22), inset 0 0 18px rgba(56, 189, 248, 0.10);
+  animation: holoSpin 3.4s linear infinite;
+}
+.holo-ring.r2 {
+  inset: 14px;
+  border-style: dashed;
+  border-color: rgba(125, 211, 252, 0.42);
+  animation: holoSpinRev 6.2s linear infinite;
+}
+.holo-ring.r3 {
+  inset: 30px;
+  border-width: 1px;
+  border-bottom-color: #22D3EE;
+  border-left-color: #38BDF8;
+  animation: holoSpin 2.2s linear infinite;
+}
+.holo-core-svg {
+  width: 68px;
+  height: 68px;
+  filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.78));
+  animation: holoPulse 1.8s ease-in-out infinite;
+}
+.holo-title {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  color: #7DD3FC;
+  text-transform: uppercase;
+  text-shadow: 0 0 12px rgba(56, 189, 248, 0.55);
+}
+.holo-status-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  color: #E2E8F0;
+}
+#holo-pct {
+  color: #38BDF8;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.holo-bar-track {
+  width: 100%;
+  height: 4px;
+  border-radius: 99px;
+  background: rgba(56, 189, 248, 0.14);
+  overflow: hidden;
+  border: 1px solid rgba(56, 189, 248, 0.22);
+}
+.holo-bar-fill {
+  width: 8%;
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #0284C7, #38BDF8, #A5F3FC);
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.85);
+  transition: width 0.22s ease-out;
+}
+.holo-subsystems {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+.holo-chip {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  color: rgba(148, 163, 184, 0.65);
+  background: rgba(15, 23, 42, 0.55);
+  transition: all 0.28s ease;
+}
+.holo-chip.san-sang {
+  border-color: rgba(56, 189, 248, 0.72);
+  color: #E0F2FE;
+  background: rgba(14, 165, 233, 0.18);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.28);
+}
+
+/* Khung quét laser HUD siêu nhẹ (0 backdrop-filter, 0 CSS blur — toàn bộ hiệu ứng hologram chạy trực tiếp trong GLSL 60 FPS) */
+#holo-curtain {
+  position: absolute;
+  inset: 0;
+  z-index: 28;
+  pointer-events: none;
+  opacity: 0;
+  will-change: opacity;
+  transition: opacity 0.38s ease;
+  overflow: hidden;
+}
+#holo-curtain.dang-quet { opacity: 1; }
+#holo-beam {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  will-change: transform, opacity;
+  background: linear-gradient(90deg, transparent 6%, rgba(56, 189, 248, 0.72) 22%, #ECFEFF 50%, rgba(56, 189, 248, 0.72) 78%, transparent 94%);
+  box-shadow: 0 0 12px 2px rgba(56, 189, 248, 0.85), 0 0 28px 6px rgba(14, 165, 233, 0.35);
+}
+#holo-beam-tag {
+  position: absolute;
+  left: 26px;
+  top: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  color: #BAE6FD;
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.85);
+}
+.holo-corner {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-color: rgba(56, 189, 248, 0.65);
+  border-style: solid;
+  pointer-events: none;
+}
+.holo-corner.tl { top: 18px; left: 18px; border-width: 2px 0 0 2px; }
+.holo-corner.tr { top: 18px; right: 18px; border-width: 2px 2px 0 0; }
+.holo-corner.bl { bottom: 18px; left: 18px; border-width: 0 0 2px 2px; }
+.holo-corner.br { bottom: 18px; right: 18px; border-width: 0 2px 2px 0; }
+#holo-lock-badge {
+  position: absolute;
+  left: 50%;
+  bottom: 84px;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(56, 189, 248, 0.50);
+  background: rgba(6, 16, 28, 0.84);
+  color: #BAE6FD;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.13em;
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.24);
+  white-space: nowrap;
+}
+#holo-lock-badge.hoan-tat {
+  border-color: rgba(16, 185, 129, 0.72);
+  color: #A7F3D0;
+  box-shadow: 0 0 22px rgba(16, 185, 129, 0.35);
+}
+@keyframes holoSpin { to { transform: rotate(360deg); } }
+@keyframes holoSpinRev { to { transform: rotate(-360deg); } }
+@keyframes holoPulse { 0%, 100% { opacity: 0.78; transform: scale(0.97); } 50% { opacity: 1; transform: scale(1.04); } }
 </style>
 
 <script>
@@ -1809,20 +2137,20 @@ dialog input:focus, dialog select:focus { border-color: var(--nhan); }
   function dongTrangSinhHoc() {
     try {
       if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.unity) {
-        window.webkit.messageHandlers.unity.postMessage('close');
+        window.webkit.messageHandlers.unity.postMessage("close");
       }
     } catch (e) {
-      console.warn('webkit postMessage error:', e);
+      console.warn("webkit postMessage error:", e);
     }
     try {
-      window.location.href = 'veralab://close';
+      window.location.href = "veralab://close";
     } catch (e) {
-      console.warn('location.href error:', e);
+      console.warn("location.href error:", e);
     }
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('nut-ve-lab')?.addEventListener('click', dongTrangSinhHoc);
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("nut-ve-lab")?.addEventListener("click", dongTrangSinhHoc);
   });
 </script>
 <script defer src="vendor/mathjax.3.2.2.js"></script>
@@ -1846,10 +2174,6 @@ dialog input:focus, dialog select:focus { border-color: var(--nhan); }
     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M7 3c0 6 10 6 10 12s-10 6-10 6M17 3c0 6-10 6-10 12M8 7h8M8 17h8M9.5 12h5"/></svg>
     <span>BIO-LAB 3D<small>SINH LÝ · GIẢI PHẪU</small></span>
   </div>
-  <nav class="tab-chinh" role="tablist" aria-label="Chọn môn">
-    <button type="button" role="tab" id="tab-btn-hoa" aria-selected="false" aria-controls="tab-hoa-hoc" onclick="dongTrangSinhHoc()">Hoá học</button>
-    <button type="button" role="tab" id="tab-btn-sinh" aria-selected="true">Sinh học 3D</button>
-  </nav>
   <span class="gian-cach"></span>
   <select class="chon chi-man-rong" id="chon-moi-truong" aria-label="Chế độ phòng lab" title="Chế độ phòng lab">
     <option value="giai_phau">Phòng giải phẫu (Tối)</option>
@@ -2125,7 +2449,41 @@ dialog input:focus, dialog select:focus { border-color: var(--nhan); }
       <button class="nut nho" type="button" id="btn-dieu-khien-tay" aria-pressed="false" title="Điều khiển bằng cử chỉ tay (H)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 11V6a2 2 0 0 0-4 0v4M14 10V4a2 2 0 0 0-4 0v6M10 10.5V2a2 2 0 0 0-4 0v10M6 14v-1.5a2 2 0 0 0-4 0V16a8 8 0 0 0 16 0v-5a2 2 0 0 0-4 0"/></svg><span class="chu-cc">Cử chỉ tay</span></button>
     </div>
-    <div class="dang-tai" id="dang-tai"><div><div class="vong"></div><div class="mo-nho">Đang dựng phòng lab 3D…</div></div></div>
+    <div class="dang-tai" id="dang-tai">
+      <div class="holo-corner tl"></div><div class="holo-corner tr"></div>
+      <div class="holo-corner bl"></div><div class="holo-corner br"></div>
+      <div class="holo-stage">
+        <div class="holo-emblem">
+          <div class="holo-ring r1"></div>
+          <div class="holo-ring r2"></div>
+          <div class="holo-ring r3"></div>
+          <svg class="holo-core-svg" viewBox="0 0 64 64" fill="none" stroke="#38BDF8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="32" cy="12" r="5.5"/>
+            <path d="M22 23c3-2.5 17-2.5 20 0l3 14-4 1-2-10-1 13 3 16h-4l-5-13-5 13h-4l3-16-1-13-2 10-4-1z"/>
+            <path d="M25 27h14M26 31h12M27 35h10" stroke="#A5F3FC" stroke-opacity="0.75"/>
+          </svg>
+        </div>
+        <div class="holo-title">VERA BIO-HOLOGRAM · 3D ANATOMY</div>
+        <div class="holo-status-row">
+          <span id="holo-status">[01] Đang khởi tạo lõi mô phỏng 3D…</span>
+          <span id="holo-pct">08%</span>
+        </div>
+        <div class="holo-bar-track"><div class="holo-bar-fill" id="holo-bar-fill"></div></div>
+        <div class="holo-subsystems">
+          <span class="holo-chip" id="hc-xuong">HỆ XƯƠNG</span>
+          <span class="holo-chip" id="hc-mach">TUẦN HOÀN</span>
+          <span class="holo-chip" id="hc-hohap">HÔ HẤP</span>
+          <span class="holo-chip" id="hc-tieuhoa">TIÊU HOÁ</span>
+          <span class="holo-chip" id="hc-quanghoc">RETINA 2×</span>
+        </div>
+      </div>
+    </div>
+    <div id="holo-curtain" aria-hidden="true">
+      <div class="holo-corner tl"></div><div class="holo-corner tr"></div>
+      <div class="holo-corner bl"></div><div class="holo-corner br"></div>
+      <div id="holo-lock-badge">BIO-SCAN · ĐANG TÁI TẠO HỆ XƯƠNG &amp; NỘI TẠNG 3D…</div>
+      <div id="holo-beam"><span id="holo-beam-tag">HOLOGRAM SYNC · 60 FPS</span></div>
+    </div>
   </section>
 
   <div class="thanh-keo-cot thanh-keo-phai" id="thanh-keo-phai" title="Kéo để đổi độ rộng cột phải"></div>
@@ -2308,12 +2666,25 @@ function ngauNhien(hat) { // mulberry32 – hình dạng ổn định mỗi lầ
 // File frontend/sinh-hoc/bp3d.bin.gz do tools/dung_bp3d.py tạo (đã đặt khớp với nội tạng của trang). Tải TRƯỚC khi dựng cảnh;
 // lỗi (mở file trực tiếp, mất mạng, trình duyệt cũ) → dùng bộ xương / lớp cơ dựng bằng code như trước.
 const BP3D_URL = "sinh-hoc/bp3d.bin.gz";
+function capNhatHoloTienDo(pct, trangThai, chipId) {
+  const bar = document.getElementById("holo-bar-fill");
+  const txtPct = document.getElementById("holo-pct");
+  const txtSt = document.getElementById("holo-status");
+  if (bar) bar.style.width = `${Math.max(4, Math.min(100, Math.round(pct)))}%`;
+  if (txtPct) txtPct.textContent = `${String(Math.round(pct)).padStart(2, "0")}%`;
+  if (txtSt && trangThai) txtSt.textContent = trangThai;
+  if (chipId) document.getElementById(chipId)?.classList.add("san-sang");
+}
+const nhuongKhung = () => new Promise((r) => requestAnimationFrame(r));
+
 async function taiBP3D(url) {
   if (typeof DecompressionStream === "undefined") throw new Error("trình duyệt chưa hỗ trợ giải nén gzip");
   const huy = new AbortController(), hen = setTimeout(() => huy.abort(), 30000);
   try {
+    capNhatHoloTienDo(14, "[01] Đang nạp dữ liệu giải phẫu BodyParts3D…");
     const r = await fetch(url, { signal: huy.signal });
-    if ((!r.ok && r.status !== 0) || !r.body) throw new Error("HTTP " + r.status);
+    if (!r.ok || !r.body) throw new Error("HTTP " + r.status);
+    capNhatHoloTienDo(28, "[01] Giải nén lưới giải phẫu đa giác cao…");
     const buf = await new Response(r.body.pipeThrough(new DecompressionStream("gzip"))).arrayBuffer();
     if (new TextDecoder().decode(new Uint8Array(buf, 0, 4)) !== "BP3D") throw new Error("sai định dạng");
     const nJs = new DataView(buf).getUint32(8, true);
@@ -2321,7 +2692,10 @@ async function taiBP3D(url) {
     let o = 12 + nJs;
     const lay = (Kieu, n) => { const a = new Kieu(buf.slice(o, o + n * Kieu.BYTES_PER_ELEMENT)); o += n * Kieu.BYTES_PER_ELEMENT; return a; };
     const nho = dau.nho, buoc = dau.lon.map((x, i) => (x - nho[i]) / 65535);
-    for (const g of dau.nhom) {
+    const tongNhom = Math.max(1, dau.nhom.length);
+    let mocNhuong = performance.now();
+    for (let gi = 0; gi < dau.nhom.length; gi++) {
+      const g = dau.nhom[gi];
       const q = lay(Uint16Array, g.nv * 3), pos = new Float32Array(g.nv * 3);
       for (let i = 0; i < q.length; i++) pos[i] = nho[i % 3] + q[i] * buoc[i % 3];
       const geo = new THREE.BufferGeometry();
@@ -2337,6 +2711,15 @@ async function taiBP3D(url) {
       geo.computeVertexNormals();
       geo.computeBoundingSphere();
       g.geo = geo;
+      // Nhường khung hình theo ngân sách 8ms mỗi nhịp để hoạt ảnh tải hologram mượt 60 FPS tuyệt đối
+      if (performance.now() - mocNhuong >= 8 || gi === tongNhom - 1) {
+        const tiLe = (gi + 1) / tongNhom;
+        const pct = 28 + tiLe * 40;
+        const chip = tiLe > 0.78 ? "hc-tieuhoa" : tiLe > 0.52 ? "hc-hohap" : tiLe > 0.25 ? "hc-mach" : "hc-xuong";
+        capNhatHoloTienDo(pct, `[02] Dựng lưới giải phẫu 3D (${gi + 1}/${tongNhom})…`, chip);
+        await nhuongKhung();
+        mocNhuong = performance.now();
+      }
     }
     return dau;
   } finally { clearTimeout(hen); }
@@ -2882,18 +3265,43 @@ const Y_DINH = [
 // =====================================================================================================================
 const khung3D = $("#khung-3d");
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-renderer.setPixelRatio(Math.min(1.5, window.devicePixelRatio || 1)); // Retina ×2 tốn gấp đôi điểm ảnh – 1,5 vẫn sắc nét
+renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1)); // Độ nét chuẩn Retina 2× (tự hạ xuống 1,5 nếu máy yếu)
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;          // bóng đổ mềm (phòng giải phẫu)
+renderer.shadowMap.autoUpdate = false;                     // không vẽ lại bản đồ bóng 2048px 120 lần/giây khi chỉ xoay camera (giảm ~90% tải GPU)
+renderer.shadowMap.needsUpdate = true;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
+renderer.toneMappingExposure = 1.12;
+const ANISO_MAX = Math.min(16, renderer.capabilities.getMaxAnisotropy() || 8);
 khung3D.appendChild(renderer.domElement);
 const rendererNhan = new CSS2DRenderer();
 rendererNhan.domElement.className = "lop-nhan";
 khung3D.appendChild(rendererNhan.domElement);
 
 const scene = new THREE.Scene();
+// Môi trường phản xạ studio giải phẫu (PMREM IBL tạo trực tiếp, không tải file ngoài): tạo độ bóng ẩm và độ sắc nét chuẩn PBR cho mọi cơ quan & xương
+(function taoMoiTruongStudio() {
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  pmrem.compileEquirectangularShader();
+  const s = new THREE.Scene();
+  s.background = new THREE.Color(0x10141c);
+  const hop = (w, h, mau, pos, look = [0, 0, 0]) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: mau, side: THREE.DoubleSide }));
+    m.position.set(...pos);
+    m.lookAt(...look);
+    s.add(m);
+  };
+  hop(9, 9, new THREE.Color(2.6, 2.52, 2.38), [0, 6.2, 1.2]);          // đèn trần phẫu thuật trắng ấm
+  hop(6, 7, new THREE.Color(2.0, 1.88, 1.72), [5.2, 2.6, 4.4]);        // softbox chính trước-phải
+  hop(6, 7, new THREE.Color(1.25, 1.48, 1.85), [-5.4, 2.0, 3.6]);      // softbox bù mát bên trái
+  hop(9, 4, new THREE.Color(1.9, 2.25, 2.65), [0, 3.4, -5.8]);         // dải đèn viền sau tách khối
+  hop(10, 10, new THREE.Color(0.24, 0.28, 0.36), [0, -5.5, 0]);        // sàn phản xạ dịu vùng tối
+  const rt = pmrem.fromScene(s, 0.035);
+  scene.environment = rt.texture;
+  s.traverse((o) => { if (o.isMesh) { o.geometry.dispose(); o.material.dispose(); } });
+  pmrem.dispose();
+})();
 const MAU_NEN = { lab: 0x0a0a0a, studio: 0x0a0a0a, xray: 0x021018, vi_mo: 0x03111b, "studio-trang": 0xf8fafc, giai_phau: 0x2f2f2f };
 scene.background = new THREE.Color(MAU_NEN.lab);
 scene.fog = new THREE.FogExp2(MAU_NEN.lab, 0.045);
@@ -2926,18 +3334,21 @@ const den2 = new THREE.PointLight(0x06b6d4, 7, 0, 2);
 den2.position.set(-1.4, 2.0, 1.4);
 const denTim = new THREE.PointLight(0xff3344, 0, 1.4, 2);
 scene.add(anhSangMoiTruong, anhSangBauTroi, anhSangChinh, anhSangVien, den1, den2, denTim);
-// đèn studio phòng giải phẫu: key light trắng ấm trước – trên (đổ bóng mềm) + rim light phía sau tách viền cơ khỏi nền
-const denKhoa = new THREE.DirectionalLight(0xfff1e2, 0);
+// đèn studio phòng giải phẫu 3 điểm: key light trắng ấm trước – trên (bóng mềm 1024px siêu mượt) + fill light xanh dịu + rim light sau tách khối
+const denKhoa = new THREE.DirectionalLight(0xfff2e4, 0);
 denKhoa.position.set(1.6, 5.4, 4.6);
 denKhoa.castShadow = true;
 denKhoa.shadow.mapSize.set(1024, 1024);
 Object.assign(denKhoa.shadow.camera, { left: -1.3, right: 1.3, top: 4.2, bottom: -0.6, near: 1, far: 14 });
-denKhoa.shadow.bias = -0.0006;
-denKhoa.shadow.normalBias = 0.02;
+denKhoa.shadow.bias = -0.00045;
+denKhoa.shadow.normalBias = 0.016;
+denKhoa.shadow.radius = 2.5;
 denKhoa.target.position.set(0, 1.7, 0);
+const denBu = new THREE.DirectionalLight(0xcbe2ff, 0);
+denBu.position.set(-3.6, 2.4, 3.2);
 const denVienSau = new THREE.DirectionalLight(0xdbe6ff, 0);
 denVienSau.position.set(-1.4, 3.6, -5.2);
-scene.add(denKhoa, denKhoa.target, denVienSau);
+scene.add(denKhoa, denKhoa.target, denBu, denVienSau);
 function nenGradient(tren, duoi, tron = false) { // nền xám than chuyển sắc (hoặc toả tròn khi xem riêng cơ quan)
   const c = document.createElement("canvas");
   c.width = tron ? 512 : 4; c.height = 512;
@@ -3083,14 +3494,119 @@ for (const id of Object.keys(HE)) { nhomHe[id] = new THREE.Group(); nhomHe[id].n
 function vatLieu(bp, mau, tuyChon = {}) {
   if (vatLieuBP[bp]) return vatLieuBP[bp];
   const m = new THREE.MeshPhysicalMaterial({
-    color: mau, roughness: tuyChon.nham ?? 0.42, metalness: 0.04, clearcoat: tuyChon.bong ?? 0.45, clearcoatRoughness: 0.32,
-    transmission: tuyChon.truyen ?? 0, thickness: 0.25, ior: 1.35, transparent: (tuyChon.doMo ?? 1) < 1 || (tuyChon.truyen ?? 0) > 0,
+    color: mau, roughness: tuyChon.nham ?? 0.38, metalness: 0.03, clearcoat: tuyChon.bong ?? 0.5, clearcoatRoughness: tuyChon.nhamBong ?? 0.22,
+    envMapIntensity: tuyChon.env ?? 1.05,
+    transmission: tuyChon.truyen ?? 0, thickness: 0.25, ior: 1.38, transparent: (tuyChon.doMo ?? 1) < 1 || (tuyChon.truyen ?? 0) > 0,
     opacity: tuyChon.doMo ?? 1, emissive: new THREE.Color(0x000000), emissiveIntensity: 1, side: tuyChon.haiMat ? THREE.DoubleSide : THREE.FrontSide,
   });
   m.depthWrite = !m.transparent;
   m.userData.doMoGoc = m.opacity;
   m.userData.trongSuotGoc = m.transparent;
   vatLieuBP[bp] = m;
+  return m;
+}
+// Uniform dùng chung cho hoạt ảnh tái tạo Hologram công nghệ tương lai ngay trong GLSL (0% CSS blur, 0 biên dịch lại shader, 60 FPS tuyệt đối)
+const HOLO_BOOT = {
+  uHoloMix:   { value: 0.0 },
+  uHoloScanY: { value: -2.0 },
+  uHoloTime:  { value: 0.0 },
+  uHoloAlpha: { value: 0.0 },
+};
+// Shader giải phẫu chuyên biệt (KHÔNG thay đổi toạ độ đỉnh): tạo vân vi cấu trúc 3D theo không gian cục bộ (hoạt động cả trên mesh BodyParts3D không có UV),
+// tăng sắc nét khe rãnh/sống nổi (screen-space curvature cavity AO), ánh viền xuyên sáng mô học (Fresnel SSS) và tái tạo Hologram 3D thuần GPU khi khởi động
+const GLSL_VI_CAU_TRUC = `
+varying vec3 vObjPosG;
+varying float vWorldYG;
+uniform float uHoloMix;
+uniform float uHoloScanY;
+uniform float uHoloTime;
+uniform float uHoloAlpha;
+float _h3(vec3 p) {
+  p = fract(p * vec3(0.1031, 0.1030, 0.0973));
+  p += dot(p, p.yxz + 33.33);
+  return fract((p.x + p.y) * p.z);
+}
+float _n3(vec3 p) {
+  vec3 i = floor(p), f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(
+    mix(mix(_h3(i), _h3(i + vec3(1.0,0.0,0.0)), f.x), mix(_h3(i + vec3(0.0,1.0,0.0)), _h3(i + vec3(1.0,1.0,0.0)), f.x), f.y),
+    mix(mix(_h3(i + vec3(0.0,0.0,1.0)), _h3(i + vec3(1.0,0.0,1.0)), f.x), mix(_h3(i + vec3(0.0,1.0,1.0)), _h3(i + vec3(1.0,1.0,1.0)), f.x), f.y),
+    f.z);
+}
+float _fbm3(vec3 p) {
+  return _n3(p) * 0.58 + _n3(p * 2.13 + 7.1) * 0.29 + _n3(p * 4.37 + 13.7) * 0.13;
+}
+`;
+const CAU_HINH_SHADER_GP = {
+  xuong:    { freq: "vec3(26.0, 8.5, 26.0)", bump: "0.0012", cav: "0.24", grain: "0.11", rough: "0.14", rim: "vec3(0.95, 0.92, 0.84)", rimA: "0.075", daFr: false },
+  sun:      { freq: "vec3(22.0, 22.0, 22.0)", bump: "0.0006", cav: "0.16", grain: "0.06", rough: "0.08", rim: "vec3(0.72, 0.88, 0.98)", rimA: "0.11",  daFr: false },
+  rang:     { freq: "vec3(36.0, 14.0, 36.0)", bump: "0.0003", cav: "0.22", grain: "0.04", rough: "0.05", rim: "vec3(1.00, 0.99, 0.95)", rimA: "0.09",  daFr: false },
+  gan_co:   { freq: "vec3(42.0, 7.5, 42.0)",  bump: "0.0011", cav: "0.18", grain: "0.09", rough: "0.12", rim: "vec3(0.98, 0.92, 0.85)", rimA: "0.10",  daFr: false },
+  mach_do:  { freq: "vec3(20.0, 58.0, 20.0)", bump: "0.0008", cav: "0.20", grain: "0.07", rough: "0.08", rim: "vec3(1.00, 0.36, 0.34)", rimA: "0.14",  daFr: false },
+  mach_xanh:{ freq: "vec3(20.0, 58.0, 20.0)", bump: "0.0008", cav: "0.20", grain: "0.07", rough: "0.08", rim: "vec3(0.42, 0.66, 1.00)", rimA: "0.14",  daFr: false },
+  da:       { freq: "vec3(68.0, 68.0, 68.0)", bump: "0.0005", cav: "0.14", grain: "0.05", rough: "0.08", rim: "vec3(1.00, 0.82, 0.72)", rimA: "0.22",  daFr: true  },
+  noi_tang: { freq: "vec3(28.0, 28.0, 28.0)", bump: "0.0004", cav: "0.22", grain: "0.05", rough: "0.07", rim: "vec3(1.00, 0.58, 0.50)", rimA: "0.11",  daFr: false },
+};
+function ganShaderGiaiPhau(m, loai) {
+  if (!m || m.userData.shaderGP === loai) return m;
+  const p = CAU_HINH_SHADER_GP[loai];
+  if (!p) return m;
+  m.userData.shaderGP = loai;
+  m.onBeforeCompile = (sh) => {
+    Object.assign(sh.uniforms, HOLO_BOOT);
+    sh.vertexShader = sh.vertexShader
+      .replace("#include <common>", "#include <common>\nvarying vec3 vObjPosG;\nvarying float vWorldYG;")
+      .replace("#include <project_vertex>", "#include <project_vertex>\n\tvObjPosG = transformed;\n\tvWorldYG = (modelMatrix * vec4(transformed, 1.0)).y;");
+    sh.fragmentShader = sh.fragmentShader
+      .replace("#include <common>", "#include <common>\n" + GLSL_VI_CAU_TRUC)
+      .replace("#include <normal_fragment_maps>", `#include <normal_fragment_maps>
+	{
+	  vec3 _dpx = dFdx(vViewPosition), _dpy = dFdy(vViewPosition);
+	  float _lenP = length(_dpx) + length(_dpy);
+	  float _sil = smoothstep(0.075, 0.014, _lenP);
+	  float _hM = _fbm3(vObjPosG * ${p.freq});
+	  vec3 _r1 = cross(_dpy, normal), _r2 = cross(normal, _dpx);
+	  float _det = dot(_dpx, _r1);
+	  if (abs(_det) > 1e-10) {
+	    vec3 _gN = (sign(_det) * (dFdx(_hM) * _r1 + dFdy(_hM) * _r2) / abs(_det)) * ${p.bump};
+	    float _gL = length(_gN);
+	    if (_gL > 0.30) _gN *= (0.30 / _gL);
+	    normal = normalize(normal - _gN * _sil);
+	  }
+	  vec3 _uP = _dpx / max(length(_dpx), 1e-5), _vP = _dpy / max(length(_dpy), 1e-5);
+	  float _curv = clamp(-(dot(dFdx(normal), _uP) + dot(dFdy(normal), _vP)) * 0.55, -1.0, 1.0) * _sil;
+	  float _gTon = (_hM - 0.5) * 2.0;
+	  diffuseColor.rgb *= clamp(1.0 + _curv * ${p.cav} + _gTon * ${p.grain}, 0.72, 1.24);
+	  roughnessFactor = clamp(roughnessFactor - _gTon * ${p.rough} - max(_curv, 0.0) * 0.06, 0.08, 0.96);
+	  float _fr = pow(1.0 - clamp(abs(dot(normal, normalize(vViewPosition))), 0.0, 1.0), 2.6);
+	  totalEmissiveRadiance += ${p.rim} * (_fr * ${p.rimA}) * clamp(diffuseColor.a, 0.0, 1.0);
+	  ${p.daFr ? "diffuseColor.a = clamp(diffuseColor.a * (0.42 + 1.55 * _fr), 0.0, 0.92);" : ""}
+	}`)
+      .replace("#include <dithering_fragment>", `
+	if (uHoloMix > 0.001) {
+	  vec3 _hV = normalize(vViewPosition);
+	  float _hNdotV = clamp(abs(dot(normal, _hV)), 0.0, 1.0);
+	  float _hFres = pow(1.0 - _hNdotV, 2.05);
+	  float _hScan = 0.5 + 0.5 * sin(vWorldYG * 128.0 - uHoloTime * 8.5);
+	  float _hGrid = smoothstep(0.92, 1.0, abs(sin(vObjPosG.x * 46.0))) * 0.24
+	               + smoothstep(0.92, 1.0, abs(sin(vWorldYG * 46.0))) * 0.30;
+	  vec3 _hBg = vec3(0.058, 0.062, 0.072);
+	  vec3 _hCore = vec3(0.05, 0.27, 0.46) * (0.20 + 0.42 * _hNdotV)
+	              + vec3(0.24, 0.82, 1.00) * (_hFres * 1.18 + _hScan * 0.16 + _hGrid * 0.28);
+	  vec3 _hGhost = mix(_hBg, _hCore, uHoloAlpha);
+	  float _hDist = uHoloScanY - vWorldYG;
+	  float _hSolid = smoothstep(-0.04, 0.28, _hDist);
+	  float _hBeam = exp(-abs(_hDist) * 26.0) * (0.72 + 0.28 * _hScan);
+	  float _hTrail = smoothstep(0.0, 0.10, _hDist) * (1.0 - smoothstep(0.10, 0.42, _hDist)) * _hGrid;
+	  vec3 _hFinal = mix(_hGhost, gl_FragColor.rgb, _hSolid);
+	  _hFinal += vec3(0.36, 0.93, 1.00) * (_hBeam * (0.68 + 0.88 * _hFres) + _hTrail * 0.52);
+	  gl_FragColor.rgb = mix(gl_FragColor.rgb, _hFinal, uHoloMix);
+	}
+	#include <dithering_fragment>`);
+  };
+  m.customProgramCacheKey = () => "gp-holo-" + loai;
+  m.needsUpdate = true;
   return m;
 }
 function dangKy(mesh, bp, chonDuocKhong = true) {
@@ -3167,15 +3683,27 @@ function dungTuBP3D(lop, he) {
       vl = vatLieuBP[g.bp] = vatLieuCo(false);
       vl.userData.luonGhiSau = true;   // cơ gần như đục: vẫn ghi độ sâu để cơ nông che đúng cơ sâu
       vl.depthWrite = true;
-    } else if (lop === "gan") vl = vatLieu(g.bp, 0xe8cdb5, { nham: 0.32, bong: 0.7 });
-    else if (lop === "mach_do") vl = vatLieu(g.bp, 0xc0262e, { nham: 0.32, bong: 0.7 });
-    else if (lop === "mach_xanh") vl = vatLieu(g.bp, 0x3b5ba8, { nham: 0.36, bong: 0.6 });
-    else if (lop === "da") {
-      vl = vatLieu(g.bp, 0xd9a58e, { doMo: 0.32, nham: 0.55, bong: 0.12 });
-      Object.assign(vl, { sheen: 0.6, sheenColor: new THREE.Color(0xffd2bf), sheenRoughness: 0.5 });
-    } else vl = vatLieu(g.bp, MAU_XUONG_BP3D[g.bp] ?? 0xede3cf, { nham: 0.6, bong: 0.15 });
+    } else if (lop === "gan") {
+      vl = ganShaderGiaiPhau(vatLieu(g.bp, 0xe8cdb5, { nham: 0.28, bong: 0.72, nhamBong: 0.18, env: 1.05 }), "gan_co");
+      Object.assign(vl, { sheen: 0.45, sheenColor: new THREE.Color(0xfff1e2), sheenRoughness: 0.4 });
+    } else if (lop === "mach_do") {
+      vl = ganShaderGiaiPhau(vatLieu(g.bp, 0xc0262e, { nham: 0.24, bong: 0.85, nhamBong: 0.14, env: 1.25 }), "mach_do");
+    } else if (lop === "mach_xanh") {
+      vl = ganShaderGiaiPhau(vatLieu(g.bp, 0x3b5ba8, { nham: 0.28, bong: 0.78, nhamBong: 0.16, env: 1.2 }), "mach_xanh");
+    } else if (lop === "da") {
+      vl = ganShaderGiaiPhau(vatLieu(g.bp, 0xd9a58e, { doMo: 0.30, nham: 0.46, bong: 0.22, env: 0.85 }), "da");
+      Object.assign(vl, { sheen: 0.65, sheenColor: new THREE.Color(0xffd6c4), sheenRoughness: 0.45 });
+    } else if (g.bp === "rang") {
+      vl = ganShaderGiaiPhau(vatLieu(g.bp, MAU_XUONG_BP3D.rang, { nham: 0.16, bong: 0.92, nhamBong: 0.08, env: 1.15 }), "rang");
+    } else if (g.bp === "sun_suon" || g.bp === "dia_dem") {
+      vl = ganShaderGiaiPhau(vatLieu(g.bp, MAU_XUONG_BP3D[g.bp], { nham: 0.36, bong: 0.48, nhamBong: 0.22, env: 0.95 }), "sun");
+      Object.assign(vl, { sheen: 0.35, sheenColor: new THREE.Color(0xe0f2fe), sheenRoughness: 0.5 });
+    } else {
+      vl = ganShaderGiaiPhau(vatLieu(g.bp, MAU_XUONG_BP3D[g.bp] ?? 0xede3cf, { nham: 0.50, bong: 0.24, nhamBong: 0.28, env: 0.88 }), "xuong");
+    }
     const m = new THREE.Mesh(g.geo, vl);
     m.castShadow = lop !== "da";
+    m.receiveShadow = lop !== "da";
     m.renderOrder = lop === "da" ? 22 : lop === "co" || lop === "gan" ? 18 : 0;
     dangKy(m, g.bp);
     themVao(he, m);
@@ -3195,29 +3723,64 @@ const vatLieuVo = new THREE.ShaderMaterial({
     void main(){ float f = pow(1.0 - abs(dot(normalize(vN), normalize(vV))), 2.6); float quet = smoothstep(0.0, 0.05, 0.05 - abs(fract(vY * 0.35 - uThoiGian * 0.12) - 0.5)) * 0.25;
       gl_FragColor = vec4(uMau, (0.035 + f * 0.42 + quet) * uDoMo); }`,
 });
-// ---------- lớp cơ ngoài cùng: vân thớ dọc bó cơ (map + normal map vẽ bằng canvas), gân kem, ướt bóng (clearcoat + sheen hồng),
-// xuyên sáng nhẹ (transmission 0,15), ngực – bụng bán trong suốt + viền Fresnel đậm ở mép ----------
+// ---------- lớp cơ ngoài cùng: vân thớ 2D độ nét cao 256×256 lặp liền mạch (4× nhanh hơn khi mở trang), gân kem, ướt bóng ----------
 const THO_CO = (() => {
-  const W = 512, H = 256, r = ngauNhien(808);
+  const W = 256, H = 256, r = ngauNhien(808);
   const c = document.createElement("canvas"); c.width = W; c.height = H;
-  const g = c.getContext("2d");
-  const c0 = [0xc9, 0x57, 0x4a], c1 = [0xe0, 0x8a, 0x78];
-  for (let x = 0; x < W; x += 2) {
-    const t = kep(0.5 + 0.5 * Math.sin(x * 0.045 + r() * 0.8) * (0.55 + 0.45 * r()), 0, 1);
-    const m = c0.map((v, i) => Math.round(v + (c1[i] - v) * t));
-    g.fillStyle = `rgb(${m[0]},${m[1]},${m[2]})`;
-    g.fillRect(x, 0, 2, H);
-  }
-  for (let i = 0; i < 260; i++) { g.fillStyle = r() < 0.55 ? "rgba(105,26,22,0.33)" : "rgba(255,214,200,0.16)"; g.fillRect(r() * W, 0, 0.6 + r() * 1.3, H); }
-  const n = document.createElement("canvas"); n.width = W; n.height = 4;
-  const gn = n.getContext("2d"), img = gn.createImageData(W, 4), cao = new Float32Array(W);
-  for (let x = 0; x < W; x++) cao[x] = 0.5 + 0.34 * Math.sin(x * 0.55) + 0.14 * Math.sin(x * 1.7 + 1.3) + 0.14 * (r() - 0.5);
+  const g = c.getContext("2d"), imgM = g.createImageData(W, H);
+  const n = document.createElement("canvas"); n.width = W; n.height = H;
+  const gn = n.getContext("2d"), imgN = gn.createImageData(W, H);
+  const rm = document.createElement("canvas"); rm.width = W; rm.height = H;
+  const gr = rm.getContext("2d"), imgR = gr.createImageData(W, H);
+  const cao = new Float32Array(W * H);
+  const phaBo = new Float32Array(W), tanBo = new Float32Array(W), mangBo = new Float32Array(W);
   for (let x = 0; x < W; x++) {
-    const v = V(-(cao[(x + 1) % W] - cao[(x - 1 + W) % W]) * 2.2, 0, 1).normalize();
-    for (let y = 0; y < 4; y++) { const k = (y * W + x) * 4; img.data.set([(v.x * 0.5 + 0.5) * 255, 128, (v.z * 0.5 + 0.5) * 255, 255], k); }
+    phaBo[x] = r() * Math.PI * 2;
+    tanBo[x] = 0.65 + 0.35 * Math.sin(x * 0.14 + r() * 0.5);
+    mangBo[x] = r() < 0.085 ? 0.55 + 0.45 * r() : 0; // vách mô liên kết nội cơ mảnh (perimysium trắng bạc)
   }
-  gn.putImageData(img, 0, 0);
-  return { mau: c, phap: n };
+  const TAU = Math.PI * 2;
+  for (let y = 0; y < H; y++) {
+    const vy = (y / H) * TAU;
+    for (let x = 0; x < W; x++) {
+      const vx = (x / W) * TAU;
+      const uon = Math.sin(vy * 2 + Math.sin(vx * 3) * 0.8) * 2.4 + Math.sin(vy * 5 + vx * 2) * 0.8;
+      const xs = ((Math.round(x + uon) % W) + W) % W;
+      const boLon = 0.5 + 0.5 * Math.sin(vx * 18 + Math.sin(vy * 2) * 0.45);
+      const thoNho = 0.5 + 0.5 * Math.sin(vx * 78 + phaBo[xs] * 0.25 + Math.sin(vy * 4) * 0.35);
+      const viSoi = 0.5 + 0.5 * Math.sin(vx * 164 + vy * 3);
+      const perim = mangBo[xs] * (0.6 + 0.4 * Math.sin(vy * 3 + xs * 0.05));
+      const h = kep(boLon * 0.48 + thoNho * 0.36 + viSoi * 0.16 - perim * 0.25, 0, 1);
+      cao[y * W + x] = h;
+      const k = (y * W + x) * 4;
+      let R = 172 + h * 62 * tanBo[xs];
+      let G = 52 + h * 68;
+      let B = 48 + h * 60;
+      if (perim > 0.02) {
+        const w = kep(perim * 0.72, 0, 0.75);
+        R = R + (242 - R) * w; G = G + (214 - G) * w; B = B + (204 - B) * w;
+      }
+      imgM.data.set([kep(Math.round(R), 0, 255), kep(Math.round(G), 0, 255), kep(Math.round(B), 0, 255), 255], k);
+      const nh = kep(Math.round((0.58 - h * 0.28 + perim * 0.16) * 255), 40, 235);
+      imgR.data.set([nh, nh, nh, 255], k);
+    }
+  }
+  const doSau = 3.2;
+  for (let y = 0; y < H; y++) {
+    const ym = (y - 1 + H) % H, yp = (y + 1) % H;
+    for (let x = 0; x < W; x++) {
+      const xm = (x - 1 + W) % W, xp = (x + 1) % W;
+      const gx = (cao[ym * W + xp] + 2 * cao[y * W + xp] + cao[yp * W + xp]) - (cao[ym * W + xm] + 2 * cao[y * W + xm] + cao[yp * W + xm]);
+      const gy = (cao[yp * W + xm] + 2 * cao[yp * W + x] + cao[yp * W + xp]) - (cao[ym * W + xm] + 2 * cao[ym * W + x] + cao[ym * W + xp]);
+      const nx = -gx * doSau, ny = -gy * doSau, nz = 1.0, inv = 1 / Math.hypot(nx, ny, nz);
+      const k = (y * W + x) * 4;
+      imgN.data.set([(nx * inv * 0.5 + 0.5) * 255, (ny * inv * 0.5 + 0.5) * 255, (nz * inv * 0.5 + 0.5) * 255, 255], k);
+    }
+  }
+  g.putImageData(imgM, 0, 0);
+  gn.putImageData(imgN, 0, 0);
+  gr.putImageData(imgR, 0, 0);
+  return { mau: c, phap: n, nham: rm };
 })();
 const VUNG_GLSL = `
 uniform float uDoMoLop; uniform float uDoMoNguc; uniform float uGan; varying vec3 vViTriCo;
@@ -3236,15 +3799,15 @@ float vungGan(vec3 p) { // gân / cân mỏng màu kem: cổ tay, cổ chân –
 const vatLieuCoDS = [];
 const KET_CAU_CO = {};
 function vatLieuCo(laVo) {
-  const { tMau, tPhap } = KET_CAU_CO[laVo] || (KET_CAU_CO[laVo] = (() => { // kết cấu dùng chung cho mọi vật liệu cơ cùng loại
-    const tMau = new THREE.CanvasTexture(THO_CO.mau), tPhap = new THREE.CanvasTexture(THO_CO.phap);
+  const { tMau, tPhap, tNham } = KET_CAU_CO[laVo] || (KET_CAU_CO[laVo] = (() => { // kết cấu dùng chung cho mọi vật liệu cơ cùng loại
+    const tMau = new THREE.CanvasTexture(THO_CO.mau), tPhap = new THREE.CanvasTexture(THO_CO.phap), tNham = new THREE.CanvasTexture(THO_CO.nham);
     tMau.colorSpace = THREE.SRGBColorSpace;
-    for (const t of [tMau, tPhap]) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4; t.repeat.set(laVo ? 9 : 3, laVo ? 2 : 1); }
-    return { tMau, tPhap };
+    for (const t of [tMau, tPhap, tNham]) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = ANISO_MAX; t.repeat.set(laVo ? 9 : 3, laVo ? 2 : 1); }
+    return { tMau, tPhap, tNham };
   })());
   const m = new THREE.MeshPhysicalMaterial({
-    color: 0xffffff, map: tMau, normalMap: tPhap, normalScale: new THREE.Vector2(0.7, 0.7), roughness: 0.45, metalness: 0,
-    clearcoat: 0.3, clearcoatRoughness: 0.4, sheen: 0.45, sheenColor: new THREE.Color(0xffa8a8), sheenRoughness: 0.45,
+    color: 0xffffff, map: tMau, normalMap: tPhap, normalScale: new THREE.Vector2(0.95, 0.95), roughness: 1.0, roughnessMap: tNham, metalness: 0,
+    clearcoat: 0.3, clearcoatRoughness: 0.28, sheen: 0.5, sheenColor: new THREE.Color(0xffb4b0), sheenRoughness: 0.42, envMapIntensity: 0.95,
     transmission: 0.15, thickness: 0.5, ior: 1.4, attenuationColor: new THREE.Color(0xc9574a), attenuationDistance: 0.8,
     transparent: true, depthWrite: false, side: THREE.FrontSide, emissive: new THREE.Color(0x000000), emissiveIntensity: 1,
   });
@@ -3259,9 +3822,15 @@ function vatLieuCo(laVo) {
 	{ float g = ${laVo ? "vungGan(vViTriCo)" : "uGan * (smoothstep(0.14, 0.0, vMapUv.y) + smoothstep(0.86, 1.0, vMapUv.y))"};
 	  diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.807, 0.612, 0.462), clamp(g, 0.0, 1.0) * 0.85); }`)
       .replace("#include <normal_fragment_maps>", `#include <normal_fragment_maps>
-	{ float fr = pow(1.0 - abs(dot(normal, normalize(vViewPosition))), 2.0), vt = vungThan(vViTriCo);
+	{ vec3 _dpx = dFdx(vViewPosition), _dpy = dFdy(vViewPosition);
+	  float _sil = smoothstep(0.075, 0.014, length(_dpx) + length(_dpy));
+	  vec3 _uP = _dpx / max(length(_dpx), 1e-5), _vP = _dpy / max(length(_dpy), 1e-5);
+	  float _curv = clamp(-(dot(dFdx(normal), _uP) + dot(dFdy(normal), _vP)) * 0.55, -1.0, 1.0) * _sil;
+	  diffuseColor.rgb *= clamp(1.0 + _curv * 0.22, 0.78, 1.22);
+	  float fr = pow(1.0 - clamp(abs(dot(normal, normalize(vViewPosition))), 0.0, 1.0), 2.2), vt = vungThan(vViTriCo);
 	  float a = mix(1.0, uDoMoNguc, vt); a = mix(a, 1.0, fr * 0.8 * vt);
-	  diffuseColor.rgb *= mix(1.0, 0.7, fr * vt); diffuseColor.a *= a * uDoMoLop; }`);
+	  diffuseColor.rgb *= mix(1.0, 0.72, fr * vt); diffuseColor.a *= a * uDoMoLop;
+	  totalEmissiveRadiance += vec3(0.95, 0.45, 0.40) * (fr * 0.09) * clamp(diffuseColor.a, 0.0, 1.0); }`);
   };
   m.customProgramCacheKey = () => (laVo ? "co-vo" : "co-nhom");
   vatLieuCoDS.push(m);
@@ -3374,18 +3943,113 @@ const dTim = (x, y, z) => V(TIM.x + x, TIM.y + y, TIM.z + z);
 // 7. HỆ HÔ HẤP – PHỔI, KHÍ QUẢN, CÂY PHẾ QUẢN, CƠ HOÀNH
 // =====================================================================================================================
 const phoi = { trai: null, phai: null, coHoanh: null, nhanhPQ: [] };
-const TAM_PHOI = { trai: V(0.19, 2.62, -0.01), phai: V(-0.19, 2.64, -0.01) };
-const BK_PHOI = { trai: V(0.125, 0.27, 0.15), phai: V(0.135, 0.265, 0.155) };
+const TAM_PHOI = { trai: V(0.162, 2.49, 0.018), phai: V(-0.162, 2.50, 0.018) };
+const BK_PHOI = { trai: V(0.128, 0.245, 0.150), phai: V(0.134, 0.245, 0.155) };
 (function dungPhoi() {
   const hinhPhoi = (ben) => (v) => {
-    if (v.y > 0) { const s = 1 - 0.45 * v.y * v.y; v.x *= s; v.z *= s; }       // đỉnh phổi nhọn
-    if (v.y < -0.55) v.y = -0.55 - (v.y + 0.55) * 0.35 + 0.12 * (v.x * v.x + v.z * v.z); // đáy lõm theo vòm cơ hoành
-    if (v.x * ben < 0) v.x *= 0.55;                                               // mặt trung thất phẳng
-    if (ben > 0 && v.x < -0.15 && v.y < 0.1 && v.y > -0.6 && v.z > 0) v.x += 0.35 * (v.z) * (1 - Math.abs(v.y + 0.25) * 2); // khuyết tim
+    if (v.y > 0) { const s = 1 - 0.52 * v.y * v.y; v.x *= s; v.z *= s; }       // đỉnh phổi thon gọn nằm dưới xương sườn 1 & xương đòn
+    if (v.y < -0.55) v.y = -0.55 - (v.y + 0.55) * 0.35 + 0.14 * (v.x * v.x + v.z * v.z); // đáy lõm theo vòm cơ hoành
+    if (v.x * ben < 0) v.x *= 0.62;                                               // mặt trung thất phẳng
+    if (ben > 0 && v.x < -0.12 && v.y < 0.15 && v.y > -0.65 && v.z > -0.1) v.x += 0.36 * Math.max(0, v.z + 0.1) * Math.max(0, 1 - Math.abs(v.y + 0.22) * 1.9); // khuyết tim
+  };
+  // Trục cong giải phẫu của lồng ngực (nghiêng ra trước khi xuống đáy, thu vào trong khi lên đỉnh)
+  const trucPhoi = (tam, bk, dau, wy) => {
+    const uy = Math.max(-1, Math.min(1, (wy - tam.y) / bk.y));
+    return [tam.x - dau * 0.032 * Math.max(0, uy), tam.z - 0.060 * uy];
+  };
+  // Ôm vừa khít mặt trong lồng ngực BodyParts3D thật: không để xương sườn, sụn sườn, xương ức–đòn, cột sống hay xương vai đâm xuyên phổi
+  const nhomLongNguc = BP3D ? BP3D.nhom.filter((g) => ["xuong_suon", "sun_suon", "xuong_uc_don", "cot_song", "xuong_vai"].includes(g.bp)) : [];
+  const omLongNguc = (geo, dau, tam, bk) => {
+    const pos = geo.attributes.position;
+    // Dịch hình học theo độ nghiêng thật của lồng ngực
+    for (let i = 0; i < pos.count; i++) {
+      const lx = pos.getX(i), ly = pos.getY(i), lz = pos.getZ(i);
+      const [cx, cz] = trucPhoi(tam, bk, dau, tam.y + ly);
+      pos.setXYZ(i, lx + (cx - tam.x), ly, lz + (cz - tam.z));
+    }
+    if (nhomLongNguc.length) {
+      const NY = 32, NT = 48, INF = 9.9, leAnToan = 0.024;
+      const yMin = tam.y - bk.y - 0.05, yMax = tam.y + bk.y + 0.05;
+      const rawMin = Array.from({ length: NY }, () => new Float32Array(NT).fill(INF));
+      for (const g of nhomLongNguc) {
+        const arr = g.geo?.attributes?.position?.array;
+        if (!arr) continue;
+        for (let i = 0; i < arr.length; i += 3) {
+          const bx = arr[i], byW = arr[i + 1], bz = arr[i + 2];
+          if (byW < yMin || byW > yMax || bx * dau < -0.02) continue;
+          const by = Math.max(0, Math.min(NY - 1, Math.floor(((byW - yMin) / (yMax - yMin)) * (NY - 1))));
+          const [cx, cz] = trucPhoi(tam, bk, dau, byW);
+          const dx = bx - cx, dz = bz - cz, r = Math.hypot(dx, dz);
+          if (r < 1e-4) continue;
+          const bt = ((Math.floor(((Math.atan2(dz, dx) + Math.PI) / (Math.PI * 2)) * NT) % NT) + NT) % NT;
+          for (let dy = -1; dy <= 1; dy++) {
+            const yy = by + dy;
+            if (yy < 0 || yy >= NY) continue;
+            for (let dt = -1; dt <= 1; dt++) {
+              const tt = (bt + dt + NT) % NT;
+              if (r < rawMin[yy][tt]) rawMin[yy][tt] = r;
+            }
+          }
+        }
+      }
+      let env = rawMin.map((row) => Float32Array.from(row));
+      for (let pass = 0; pass < 8; pass++) {
+        const nxt = env.map((row) => Float32Array.from(row));
+        for (let y = 0; y < NY; y++) for (let t = 0; t < NT; t++) {
+          if (env[y][t] < INF) continue;
+          let m = INF;
+          if (y > 0 && env[y - 1][t] < m) m = env[y - 1][t];
+          if (y + 1 < NY && env[y + 1][t] < m) m = env[y + 1][t];
+          const tp = env[y][(t - 1 + NT) % NT], tn = env[y][(t + 1) % NT];
+          if (tp < m) m = tp;
+          if (tn < m) m = tn;
+          if (m < INF) nxt[y][t] = m;
+        }
+        env = nxt;
+      }
+      for (let pass = 0; pass < 3; pass++) {
+        const sm = env.map((row) => Float32Array.from(row));
+        for (let y = 0; y < NY; y++) for (let t = 0; t < NT; t++) {
+          let sum = 0, cnt = 0;
+          for (let dy = -1; dy <= 1; dy++) {
+            const yy = Math.max(0, Math.min(NY - 1, y + dy));
+            for (let dt = -1; dt <= 1; dt++) {
+              const val = env[yy][(t + dt + NT) % NT];
+              if (val < INF) { sum += val; cnt++; }
+            }
+          }
+          if (cnt) {
+            const avg = sum / cnt;
+            sm[y][t] = rawMin[y][t] < INF ? Math.min(rawMin[y][t], avg) : avg;
+          }
+        }
+        env = sm;
+      }
+      for (let i = 0; i < pos.count; i++) {
+        const wx = tam.x + pos.getX(i), wy = tam.y + pos.getY(i), wz = tam.z + pos.getZ(i);
+        const [cx, cz] = trucPhoi(tam, bk, dau, wy);
+        const dx = wx - cx, dz = wz - cz, r = Math.hypot(dx, dz);
+        if (r < 1e-4) continue;
+        const fy = Math.max(0, Math.min(NY - 1.0001, ((wy - yMin) / (yMax - yMin)) * (NY - 1)));
+        const y0 = Math.floor(fy), y1 = Math.min(NY - 1, y0 + 1), ty = fy - y0;
+        const ft = ((((Math.atan2(dz, dx) + Math.PI) / (Math.PI * 2)) * NT) % NT + NT) % NT;
+        const t0 = Math.floor(ft) % NT, t1 = (t0 + 1) % NT, tt = ft - Math.floor(ft);
+        const rEnv = (env[y0][t0] * (1 - tt) + env[y0][t1] * tt) * (1 - ty) + (env[y1][t0] * (1 - tt) + env[y1][t1] * tt) * ty;
+        const lim = rEnv - leAnToan;
+        if (r > lim && lim > 0.015) {
+          const sc = lim / r;
+          pos.setXYZ(i, (cx + dx * sc) - tam.x, pos.getY(i), (cz + dz * sc) - tam.z);
+        }
+      }
+    }
+    pos.needsUpdate = true;
+    geo.computeVertexNormals();
   };
   for (const ben of ["trai", "phai"]) {
     const dau = ben === "trai" ? 1 : -1;
-    const m = new THREE.Mesh(cauBienDoi(BK_PHOI[ben], hinhPhoi(dau), [64, 48]),
+    const geoPhoi = cauBienDoi(BK_PHOI[ben], hinhPhoi(dau), [64, 48]);
+    omLongNguc(geoPhoi, dau, TAM_PHOI[ben], BK_PHOI[ben]);
+    const m = new THREE.Mesh(geoPhoi,
       vatLieu(ben === "trai" ? "phoi_trai" : "phoi_phai", 0xf6a5b4, { truyen: 0.35, doMo: 0.72, nham: 0.55, bong: 0.3 }));
     m.position.copy(TAM_PHOI[ben]);
     m.renderOrder = 6;
@@ -3394,12 +4058,12 @@ const BK_PHOI = { trai: V(0.125, 0.27, 0.15), phai: V(0.135, 0.265, 0.155) };
     themVao("ho_hap", m);
   }
   // khí quản + vòng sụn
-  const kq = ong([V(0, 3.04, 0.03), V(0, 2.9, 0.015), V(0, 2.77, 0.0)], 0.022, "khi_quan", 0xe2e8f0, { bong: 0.2 });
+  const kq = ong([V(0, 3.04, 0.03), V(0, 2.89, 0.01), V(0, 2.74, -0.015)], 0.022, "khi_quan", 0xe2e8f0, { bong: 0.2 });
   themVao("ho_hap", kq);
   const matSun = vatLieu("khi_quan", 0xe2e8f0);
   for (let i = 0; i < 9; i++) {
     const vong = new THREE.Mesh(new THREE.TorusGeometry(0.024, 0.004, 6, 24, Math.PI * 1.6), matSun);
-    vong.position.set(0, 3.0 - i * 0.026, 0.028 - i * 0.003);
+    vong.position.set(0, 3.0 - i * 0.028, 0.026 - i * 0.0045);
     vong.rotation.set(Math.PI / 2, 0, Math.PI * 0.7);
     dangKy(vong, "khi_quan");
     themVao("ho_hap", vong);
@@ -3415,18 +4079,18 @@ const BK_PHOI = { trai: V(0.125, 0.27, 0.15), phai: V(0.135, 0.265, 0.155) };
     themVao("ho_hap", m);
     if (cap >= 4) return;
     for (let k = 0; k < 2; k++) {
-      const h = huong.clone().add(V((r() - 0.5) * 0.9 + (k ? 0.35 : -0.35) * Math.sign(huong.x || 1), (r() - 0.62) * 0.9, (r() - 0.5) * 0.8)).normalize();
-      nhanh(den, h, dai * 0.72, banKinh * 0.7, cap + 1, ben);
+      const h = huong.clone().add(V((r() - 0.5) * 0.8 + (k ? 0.30 : -0.30) * Math.sign(huong.x || 1), (r() - 0.68) * 0.85, (r() - 0.5) * 0.65)).normalize();
+      nhanh(den, h, dai * 0.68, banKinh * 0.7, cap + 1, ben);
     }
   };
-  const carina = V(0, 2.77, 0.0);
-  nhanh(carina, V(0.75, -0.55, -0.1).normalize(), 0.11, 0.012, 1, "trai");
-  nhanh(carina, V(-0.8, -0.5, -0.1).normalize(), 0.1, 0.013, 1, "phai");
-  // cơ hoành (vòm)
+  const carina = V(0, 2.74, -0.015);
+  nhanh(carina, V(0.70, -0.62, 0.04).normalize(), 0.095, 0.012, 1, "trai");
+  nhanh(carina, V(-0.74, -0.58, 0.04).normalize(), 0.092, 0.013, 1, "phai");
+  // cơ hoành (vòm ôm vừa trong lồng ngực dưới đáy phổi)
   const coHoanh = new THREE.Mesh(new THREE.SphereGeometry(0.42, 48, 16, 0, Math.PI * 2, 0, Math.PI * 0.3),
     vatLieu("co_hoanh", 0xb45c4c, { doMo: 0.55, haiMat: true, nham: 0.6 }));
-  coHoanh.scale.set(0.82, 0.55, 0.52);
-  coHoanh.position.set(0, 2.12, -0.02);
+  coHoanh.scale.set(0.74, 0.54, 0.46);
+  coHoanh.position.set(0, 2.13, 0.035);
   coHoanh.userData.yGoc = coHoanh.position.y;
   dangKy(coHoanh, "co_hoanh");
   phoi.coHoanh = coHoanh;
@@ -3441,10 +4105,10 @@ const BK_PHOI = { trai: V(0.125, 0.27, 0.15), phai: V(0.135, 0.265, 0.155) };
 
   neoBP.thanh_quan = V(0, 3.12, 0.08);
   neoBP.khi_quan = V(0, 2.95, 0.03);
-  neoBP.phe_quan = V(0.08, 2.72, 0.0);
-  neoBP.phoi_trai = V(0.24, 2.7, 0.08);
-  neoBP.phoi_phai = V(-0.25, 2.72, 0.08);
-  neoBP.co_hoanh = V(-0.15, 2.33, 0.12);
+  neoBP.phe_quan = V(0.07, 2.66, 0.0);
+  neoBP.phoi_trai = V(0.17, 2.54, 0.08);
+  neoBP.phoi_phai = V(-0.17, 2.55, 0.08);
+  neoBP.co_hoanh = V(-0.14, 2.32, 0.12);
 })();
 
 // =====================================================================================================================
@@ -3697,10 +4361,10 @@ const tieuHoa = { daDay: null, hamDaDay: null, duongDaDay: null };
   }
   const matSuon = vatLieu("xuong_suon", 0xe5e7eb, { doMo: 0.22, nham: 0.7 });
   for (let i = 0; i < 10; i++) {
-    const y = 2.88 - i * 0.065;
-    const w = 0.2 + 0.13 * Math.sin(Math.min(1, (i + 2) / 7) * Math.PI / 2);
+    const y = 2.86 - i * 0.062;
+    const w = 0.22 + 0.12 * Math.sin(Math.min(1, (i + 2) / 7) * Math.PI / 2);
     for (const s of [1, -1]) {
-      const g = ong([V(0.02 * s, y, -0.17), V(w * 0.8 * s, y - 0.02, -0.15), V(w * s, y - 0.06, 0.0), V(w * 0.7 * s, y - 0.12, 0.17), V(0.03 * s, y - 0.16, 0.2)],
+      const g = ong([V(0.02 * s, y, -0.17), V(w * 0.82 * s, y - 0.02, -0.14), V(w * s, y - 0.06, 0.02), V(w * 0.74 * s, y - 0.11, 0.19), V(0.03 * s, y - 0.15, 0.22)],
         0.007, "xuong_suon", 0xe5e7eb, { doan: 32, vong: 6, chon: false });
       g.material = matSuon;
       themVao("xuong", g);
@@ -4043,7 +4707,7 @@ BO_PHAN.dong_mach_ngoai_vi = { vi: "Động mạch chi & cổ", en: "Limb & neck
 BO_PHAN.tinh_mach_ngoai_vi = { vi: "Tĩnh mạch nông chi & cổ", en: "Superficial veins", la: "V. jugularis externa, cephalica, basilica, saphena magna", he: "tuan_hoan",
   mo_ta: "Tĩnh mạch cảnh ngoài, tĩnh mạch đầu – nền ở tay (lấy máu xét nghiệm), tĩnh mạch hiển lớn ở chân; đưa máu nghèo O₂ (xanh) về tim." };
 const MAU_NGA = 0xede3cf;
-(function dungXuongTayChanVaMach() {
+await (async function dungXuongTayChanVaMach() {
   const matNga = vatLieu("xuong_ban_tay", MAU_NGA, { nham: 0.6, bong: 0.15 });
   const matNgaChan = vatLieu("xuong_ban_chan", MAU_NGA, { nham: 0.6, bong: 0.15 });
   const doan = (a, b, r0, r1 = r0) => { const d = b.clone().sub(a), l = d.length(); const g = new THREE.CylinderGeometry(r1, r0, l, 8, 1); g.translate(0, l / 2, 0);
@@ -4112,37 +4776,227 @@ const MAU_NGA = 0xede3cf;
     neoBP.dong_mach_ngoai_vi = V(0.5, 2.0, 0.09);
     neoBP.tinh_mach_ngoai_vi = V(-0.5, 2.05, 0.06);
   }
-  // màu mô học + vật liệu bóng ẩm cho nội tạng; xương ngà; mạch đỏ / xanh
-  const xop = (() => { // bề mặt phổi hơi xốp: normal map nhiễu
-    const c = document.createElement("canvas"); c.width = c.height = 128;
-    const g = c.getContext("2d"), img = g.createImageData(128, 128), rr = ngauNhien(31);
-    for (let i = 0; i < 128 * 128; i++) img.data.set([128 + (rr() - 0.5) * 120, 128 + (rr() - 0.5) * 120, 235, 255], i * 4);
-    g.putImageData(img, 0, 0);
-    const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(6, 6); return t;
-  })();
-  const dat = (bp, mau, them = {}) => {
+  // Bộ kết cấu PBR mô học chuyên biệt 256–512px liền mạch (Albedo + Sobel NormalMap + RoughnessMap + Anisotropy tối đa) cho từng loại nội tạng
+  const taoLuoiWorley = (o, hat) => {
+    const rr = ngauNhien(hat), px = new Float32Array(o * o), py = new Float32Array(o * o);
+    for (let i = 0; i < o * o; i++) { px[i] = rr(); py[i] = rr(); }
+    return (u, v) => {
+      const fx = u * o, fy = v * o, ix = Math.floor(fx), iy = Math.floor(fy);
+      let d1 = 9, d2 = 9;
+      for (let dy = -1; dy <= 1; dy++) {
+        const cy = ((iy + dy) % o + o) % o;
+        for (let dx = -1; dx <= 1; dx++) {
+          const cx = ((ix + dx) % o + o) % o;
+          const idx = cy * o + cx;
+          const dist = Math.hypot((ix + dx + px[idx]) - fx, (iy + dy + py[idx]) - fy);
+          if (dist < d1) { d2 = d1; d1 = dist; } else if (dist < d2) d2 = dist;
+        }
+      }
+      return [d1, d2 - d1]; // [tâm tế bào, khoảng cách tới vách gian thuỳ]
+    };
+  };
+  const taoNhieuChuKy = (o, hat) => {
+    const rr = ngauNhien(hat), gt = new Float32Array(o * o);
+    for (let i = 0; i < o * o; i++) gt[i] = rr();
+    return (u, v) => {
+      const fx = u * o, fy = v * o, x0 = Math.floor(fx) % o, y0 = Math.floor(fy) % o;
+      const x1 = (x0 + 1) % o, y1 = (y0 + 1) % o, sx = fx - Math.floor(fx), sy = fy - Math.floor(fy);
+      const ux = sx * sx * (3 - 2 * sx), uy = sy * sy * (3 - 2 * sy);
+      const a = gt[y0 * o + x0] + (gt[y0 * o + x1] - gt[y0 * o + x0]) * ux;
+      const b = gt[y1 * o + x0] + (gt[y1 * o + x1] - gt[y1 * o + x0]) * ux;
+      return a + (b - a) * uy;
+    };
+  };
+  const taoBoPBR = (S, hamMauCao, doSauNormal = 2.6, lap = [4, 4]) => {
+    const cM = document.createElement("canvas"); cM.width = cM.height = S;
+    const cN = document.createElement("canvas"); cN.width = cN.height = S;
+    const cR = document.createElement("canvas"); cR.width = cR.height = S;
+    const gM = cM.getContext("2d"), gN = cN.getContext("2d"), gR = cR.getContext("2d");
+    const iM = gM.createImageData(S, S), iN = gN.createImageData(S, S), iR = gR.createImageData(S, S);
+    const cao = new Float32Array(S * S), out = [255, 255, 255, 0.5, 0.4];
+    for (let y = 0; y < S; y++) {
+      const v = y / S;
+      for (let x = 0; x < S; x++) {
+        hamMauCao(x / S, v, out);
+        const idx = y * S + x, k = idx * 4;
+        cao[idx] = out[3];
+        iM.data.set([kep(Math.round(out[0]), 0, 255), kep(Math.round(out[1]), 0, 255), kep(Math.round(out[2]), 0, 255), 255], k);
+        const rh = kep(Math.round(out[4] * 255), 24, 245);
+        iR.data.set([rh, rh, rh, 255], k);
+      }
+    }
+    for (let y = 0; y < S; y++) {
+      const ym = (y - 1 + S) % S, yp = (y + 1) % S;
+      for (let x = 0; x < S; x++) {
+        const xm = (x - 1 + S) % S, xp = (x + 1) % S;
+        const gx = (cao[ym * S + xp] + 2 * cao[y * S + xp] + cao[yp * S + xp]) - (cao[ym * S + xm] + 2 * cao[y * S + xm] + cao[yp * S + xm]);
+        const gy = (cao[yp * S + xm] + 2 * cao[yp * S + x] + cao[yp * S + xp]) - (cao[ym * S + xm] + 2 * cao[ym * S + x] + cao[ym * S + xp]);
+        const nx = -gx * doSauNormal, ny = -gy * doSauNormal, nz = 1.0, inv = 1 / Math.hypot(nx, ny, nz);
+        iN.data.set([(nx * inv * 0.5 + 0.5) * 255, (ny * inv * 0.5 + 0.5) * 255, (nz * inv * 0.5 + 0.5) * 255, 255], (y * S + x) * 4);
+      }
+    }
+    gM.putImageData(iM, 0, 0); gN.putImageData(iN, 0, 0); gR.putImageData(iR, 0, 0);
+    const map = new THREE.CanvasTexture(cM), normalMap = new THREE.CanvasTexture(cN), roughnessMap = new THREE.CanvasTexture(cR);
+    map.colorSpace = THREE.SRGBColorSpace;
+    for (const t of [map, normalMap, roughnessMap]) {
+      t.wrapS = t.wrapT = THREE.RepeatWrapping;
+      t.repeat.set(lap[0], lap[1]);
+      t.anisotropy = ANISO_MAX;
+    }
+    return { map, normalMap, roughnessMap };
+  };
+  const TAU2 = Math.PI * 2;
+  // Sinh 8 bộ kết cấu PBR mô học 256×256 có nhường khung giữa từng bộ → không bao giờ đóng băng giao diện tải
+  // 1. Phổi: mạng tiểu thuỳ phổi thứ cấp đa giác (vách gian tiểu thuỳ hồng tím mảnh + mao mạch phế nang xốp mịn)
+  capNhatHoloTienDo(70, "[03] Tổng hợp kết cấu mô học phổi & tim…", "hc-hohap");
+  await nhuongKhung();
+  const wPhoi = taoLuoiWorley(10, 31), nPhoi = taoNhieuChuKy(16, 37), nPhoi2 = taoNhieuChuKy(32, 41);
+  const PBR_PHOI = taoBoPBR(256, (u, v, o) => {
+    const [d1, bien] = wPhoi(u, v);
+    const vach = Math.exp(-bien * 17);
+    const xopN = nPhoi(u, v) * 0.65 + nPhoi2(u, v) * 0.35;
+    const h = kep((1 - d1 * 0.72) * 0.72 + xopN * 0.28 - vach * 0.55, 0, 1);
+    const sac = 0.88 + h * 0.18 - vach * 0.22;
+    o[0] = 252 * sac - vach * 26; o[1] = 232 * sac - vach * 38; o[2] = 236 * sac - vach * 22;
+    o[3] = h; o[4] = kep(0.38 + vach * 0.24 + (1 - xopN) * 0.14, 0.25, 0.72);
+  }, 2.8, [5, 5]);
+  // 2. Cơ tim: thớ cơ tim đan xiên xoắn + lưới mao mạch vành thượng tâm mạc mịn + màng ngoài tim bóng ẩm
+  await nhuongKhung();
+  const nTim1 = taoNhieuChuKy(14, 71), nTim2 = taoNhieuChuKy(36, 79);
+  const PBR_TIM = taoBoPBR(256, (u, v, o) => {
+    const lech = nTim1(u, v) * 0.08;
+    const tho = 0.5 + 0.5 * Math.sin(((u * 14 + v * 6) + lech * 8) * TAU2);
+    const thoMin = 0.5 + 0.5 * Math.sin(((u * 38 + v * 16) + lech * 10) * TAU2);
+    const mach = Math.exp(-Math.abs(Math.sin((u * 3 - v * 5 + nTim1(u, v) * 0.45) * TAU2)) * 28);
+    const h = kep(tho * 0.52 + thoMin * 0.28 + nTim2(u, v) * 0.20 + mach * 0.32, 0, 1);
+    const sac = 0.86 + h * 0.22;
+    o[0] = 250 * sac - mach * 35; o[1] = 224 * sac - mach * 55; o[2] = 226 * sac - mach * 52;
+    o[3] = h; o[4] = kep(0.22 + (1 - h) * 0.16 - mach * 0.06, 0.14, 0.46);
+  }, 3.1, [3, 3]);
+  // 3. Gan: hạt tiểu thuỳ gan dày mịn + bao Glisson bóng mượt như thật
+  capNhatHoloTienDo(75, "[03] Tổng hợp kết cấu gan & vỏ não…", "hc-tieuhoa");
+  await nhuongKhung();
+  const wGan = taoLuoiWorley(22, 101), nGan = taoNhieuChuKy(24, 107);
+  const PBR_GAN = taoBoPBR(256, (u, v, o) => {
+    const [, bien] = wGan(u, v);
+    const vien = Math.exp(-bien * 14);
+    const dom = nGan(u, v);
+    const h = kep(0.55 + dom * 0.30 - vien * 0.28, 0, 1);
+    const sac = 0.86 + dom * 0.20 - vien * 0.14;
+    o[0] = 248 * sac; o[1] = 232 * sac - vien * 10; o[2] = 228 * sac - vien * 8;
+    o[3] = h; o[4] = kep(0.18 + vien * 0.14 + (1 - dom) * 0.08, 0.12, 0.38);
+  }, 2.0, [4, 4]);
+  // 4. Vỏ đại não: hồi não – rãnh não uốn lượn sâu + mao mạch màng mềm mảnh đỏ
+  await nhuongKhung();
+  const nNao1 = taoNhieuChuKy(6, 131), nNao2 = taoNhieuChuKy(12, 137), nNao3 = taoNhieuChuKy(28, 139);
+  const PBR_NAO = taoBoPBR(256, (u, v, o) => {
+    const wx = u + (nNao1(u, v) - 0.5) * 0.22, wy = v + (nNao1((u + 0.37) % 1, (v + 0.61) % 1) - 0.5) * 0.22;
+    const cuon = Math.sin((wx * 7 + wy * 5 + nNao2(u, v) * 1.4) * TAU2);
+    const ranh = Math.pow(Math.max(0, 1 - Math.abs(cuon)), 2.2);
+    const hoi = 0.5 + 0.5 * Math.abs(cuon);
+    const mach = Math.exp(-Math.abs(cuon) * 18) * (0.4 + 0.6 * nNao3(u, v));
+    const h = kep(hoi * 0.82 + nNao3(u, v) * 0.18 - ranh * 0.38, 0, 1);
+    const sac = 0.78 + h * 0.28 - ranh * 0.18;
+    o[0] = 250 * sac - mach * 12; o[1] = 234 * sac - ranh * 36 - mach * 55; o[2] = 232 * sac - ranh * 32 - mach * 52;
+    o[3] = h; o[4] = kep(0.32 + ranh * 0.26 + (1 - hoi) * 0.10, 0.22, 0.68);
+  }, 3.8, [3, 3]);
+  // 5. Tiểu não: các lá tiểu não (folia) song song sắc nét dày đặc
+  capNhatHoloTienDo(80, "[03] Tổng hợp kết cấu tiêu hoá & thận…", "hc-tieuhoa");
+  await nhuongKhung();
+  const nTN = taoNhieuChuKy(12, 151);
+  const PBR_TIEU_NAO = taoBoPBR(256, (u, v, o) => {
+    const la = 0.5 + 0.5 * Math.sin((v * 26 + (nTN(u, v) - 0.5) * 0.65) * TAU2);
+    const khe = Math.pow(1 - la, 3);
+    const h = kep(la * 0.85 + nTN((u * 2) % 1, (v * 2) % 1) * 0.15, 0, 1);
+    const sac = 0.78 + h * 0.26 - khe * 0.20;
+    o[0] = 248 * sac; o[1] = 232 * sac - khe * 22; o[2] = 234 * sac - khe * 18;
+    o[3] = h; o[4] = kep(0.36 + khe * 0.24, 0.26, 0.68);
+  }, 4.0, [2, 2]);
+  // 6. Ống tiêu hoá (dạ dày, ruột, thực quản): thớ cơ trơn + tĩnh mạch thanh mạc mảnh bóng ẩm
+  await nhuongKhung();
+  const nTH1 = taoNhieuChuKy(10, 163), nTH2 = taoNhieuChuKy(28, 173);
+  const PBR_TIEU_HOA = taoBoPBR(256, (u, v, o) => {
+    const tho = 0.5 + 0.5 * Math.sin((v * 18 + nTH1(u, v) * 0.8) * TAU2);
+    const mach = Math.exp(-Math.abs(Math.sin((u * 4 + v * 2 + nTH1(u, v) * 0.6) * TAU2)) * 24);
+    const h = kep(tho * 0.48 + nTH2(u, v) * 0.36 + mach * 0.24, 0, 1);
+    const sac = 0.88 + h * 0.18;
+    o[0] = 250 * sac - mach * 18; o[1] = 236 * sac - mach * 42; o[2] = 234 * sac - mach * 38;
+    o[3] = h; o[4] = kep(0.26 + (1 - h) * 0.18, 0.18, 0.50);
+  }, 2.4, [4, 4]);
+  // 7. Thận & lách & túi mật: bao xơ căng mịn có vi mao mạch hình sao
+  await nhuongKhung();
+  const nTh = taoNhieuChuKy(18, 191), nTh2 = taoNhieuChuKy(40, 197);
+  const PBR_THAN_LACH = taoBoPBR(256, (u, v, o) => {
+    const min = nTh(u, v) * 0.6 + nTh2(u, v) * 0.4;
+    const mach = Math.exp(-Math.abs(Math.sin((u * 5 - v * 4 + min * 1.1) * TAU2)) * 28);
+    const h = kep(0.5 + (min - 0.5) * 0.55 + mach * 0.25, 0, 1);
+    const sac = 0.88 + min * 0.18;
+    o[0] = 248 * sac; o[1] = 236 * sac - mach * 28; o[2] = 236 * sac - mach * 24;
+    o[3] = h; o[4] = kep(0.20 + (1 - min) * 0.16, 0.14, 0.42);
+  }, 2.0, [3, 3]);
+  // 8. Tuyến tụy & thượng thận: cấu trúc tiểu thuỳ tuyến chùm (acinar cobblestone) nổi khối rõ rệt
+  await nhuongKhung();
+  const wTuy = taoLuoiWorley(16, 211), nTuy = taoNhieuChuKy(28, 223);
+  const PBR_TUY = taoBoPBR(256, (u, v, o) => {
+    const [d1, bien] = wTuy(u, v);
+    const vach = Math.exp(-bien * 15);
+    const h = kep((1 - d1 * 0.9) * 0.82 + nTuy(u, v) * 0.18 - vach * 0.45, 0, 1);
+    const sac = 0.84 + h * 0.24 - vach * 0.16;
+    o[0] = 252 * sac; o[1] = 242 * sac - vach * 20; o[2] = 224 * sac - vach * 24;
+    o[3] = h; o[4] = kep(0.42 + vach * 0.24, 0.30, 0.72);
+  }, 3.6, [4, 4]);
+
+  const dat = (bp, mau, them = {}, shaderLoai = "noi_tang") => {
     const m = vatLieuBP[bp]; if (!m) return;
     m.color.set(mau);
-    Object.assign(m, { roughness: 0.3, clearcoat: 0.6, clearcoatRoughness: 0.25, transmission: 0 }, them);
+    Object.assign(m, { roughness: 0.30, clearcoat: 0.65, clearcoatRoughness: 0.20, envMapIntensity: 1.15, transmission: 0 }, them);
     const doMo = them.opacity ?? 1;
     m.opacity = m.userData.doMoGoc = doMo;
     m.transparent = m.userData.trongSuotGoc = doMo < 1;
     m.depthWrite = !m.transparent;
+    if (shaderLoai) ganShaderGiaiPhau(m, shaderLoai);
     m.needsUpdate = true;
   };
-  for (const bp of ["phoi_trai", "phoi_phai"]) dat(bp, 0xe8a3a8, { roughness: 0.42, sheen: 0.6, sheenColor: new THREE.Color(0xffd3d8), sheenRoughness: 0.7, normalMap: xop, normalScale: new THREE.Vector2(0.3, 0.3) });
-  dat("tam_that_trai", 0xa8323a); dat("tam_that_phai", 0x9b2d37); dat("tam_nhi_trai", 0xb23b43); dat("tam_nhi_phai", 0x922a35);
-  dat("gan", 0x8b3a2e, { roughness: 0.26, clearcoat: 0.75 });
-  for (const bp of ["da_day", "thuc_quan", "ta_trang", "ruot_non"]) dat(bp, 0xd97b6c);
-  dat("dai_trang", 0xcd7262); dat("ruot_thua", 0xc4685b); dat("truc_trang", 0xc06a5e);
-  for (const bp of ["tui_mat", "tuy", "lach", "than_trai", "than_phai", "tuyen_thuong_than", "bang_quang", "nieu_quan", "nieu_dao", "thanh_quan", "co_hoanh", "khi_quan", "phe_quan"])
-    dat(bp, vatLieuBP[bp]?.color.getHex() ?? 0xffffff);
-  for (const bp of ["dai_nao", "tieu_nao", "than_nao"]) dat(bp, vatLieuBP[bp]?.color.getHex() ?? 0xe7b9b4, { roughness: 0.45, clearcoat: 0.4 });
-  for (const bp of ["cot_song", "xuong_suon", "hop_so", "xuong_uc_don", "xuong_chau"]) dat(bp, MAU_NGA, { roughness: 0.6, clearcoat: 0.15 });
-  for (const bp of ["dong_mach_chu", "tinh_mach_phoi", "mach_chau", "mach_than"]) dat(bp, 0xc0262e, { roughness: 0.32, clearcoat: 0.7 });
-  for (const bp of ["tinh_mach_chu", "dong_mach_phoi"]) dat(bp, 0x3b5ba8, { roughness: 0.36, clearcoat: 0.6 });
-  // hệ cơ của Gemini: đổ bóng + vẽ sau nội tạng
-  nhomHe.he_co.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.renderOrder = 18; } });
+  for (const bp of ["phoi_trai", "phoi_phai"]) dat(bp, 0xe8a3a8, {
+    ...PBR_PHOI, normalScale: new THREE.Vector2(0.52, 0.52), roughness: 1.0, clearcoat: 0.48, clearcoatRoughness: 0.26,
+    envMapIntensity: 1.05, sheen: 0.58, sheenColor: new THREE.Color(0xffdbe0), sheenRoughness: 0.62,
+  });
+  for (const [bp, mau] of [["tam_that_trai", 0xa8323a], ["tam_that_phai", 0x9b2d37], ["tam_nhi_trai", 0xb23b43], ["tam_nhi_phai", 0x922a35]])
+    dat(bp, mau, { ...PBR_TIM, normalScale: new THREE.Vector2(0.56, 0.56), roughness: 1.0, clearcoat: 0.86, clearcoatRoughness: 0.14, envMapIntensity: 1.30 });
+  dat("gan", 0x8b3a2e, { ...PBR_GAN, normalScale: new THREE.Vector2(0.32, 0.32), roughness: 1.0, clearcoat: 0.92, clearcoatRoughness: 0.10, envMapIntensity: 1.35 });
+  for (const bp of ["da_day", "thuc_quan", "ta_trang", "ruot_non"])
+    dat(bp, 0xd97b6c, { ...PBR_TIEU_HOA, normalScale: new THREE.Vector2(0.46, 0.46), roughness: 1.0, clearcoat: 0.72, clearcoatRoughness: 0.18, envMapIntensity: 1.15 });
+  for (const [bp, mau] of [["dai_trang", 0xcd7262], ["ruot_thua", 0xc4685b], ["truc_trang", 0xc06a5e]])
+    dat(bp, mau, { ...PBR_TIEU_HOA, normalScale: new THREE.Vector2(0.48, 0.48), roughness: 1.0, clearcoat: 0.68, clearcoatRoughness: 0.20, envMapIntensity: 1.12 });
+  for (const bp of ["than_trai", "than_phai", "lach", "tui_mat", "bang_quang"])
+    dat(bp, vatLieuBP[bp]?.color.getHex() ?? 0x8f2d3a, { ...PBR_THAN_LACH, normalScale: new THREE.Vector2(0.36, 0.36), roughness: 1.0, clearcoat: 0.82, clearcoatRoughness: 0.14, envMapIntensity: 1.25 });
+  for (const bp of ["tuy", "tuyen_thuong_than"])
+    dat(bp, vatLieuBP[bp]?.color.getHex() ?? 0xf5d061, { ...PBR_TUY, normalScale: new THREE.Vector2(0.75, 0.75), roughness: 1.0, clearcoat: 0.34, clearcoatRoughness: 0.30, envMapIntensity: 0.92 });
+  for (const bp of ["nieu_quan", "nieu_dao"])
+    dat(bp, vatLieuBP[bp]?.color.getHex() ?? 0xfcd34d, { roughness: 0.34, clearcoat: 0.58, envMapIntensity: 1.05 });
+  for (const bp of ["thanh_quan", "khi_quan", "phe_quan"])
+    dat(bp, vatLieuBP[bp]?.color.getHex() ?? 0xe2e8f0, { roughness: 0.34, clearcoat: 0.55, clearcoatRoughness: 0.22, sheen: 0.32, sheenColor: new THREE.Color(0xe6f4ff), envMapIntensity: 1.0 }, "sun");
+  dat("co_hoanh", vatLieuBP.co_hoanh?.color.getHex() ?? 0xb45c4c, { roughness: 0.46, clearcoat: 0.35, envMapIntensity: 0.95 }, "gan_co");
+  for (const bp of ["dai_nao", "than_nao"])
+    dat(bp, vatLieuBP[bp]?.color.getHex() ?? 0xe7b9b4, { ...PBR_NAO, normalScale: new THREE.Vector2(0.78, 0.78), roughness: 1.0, clearcoat: 0.58, clearcoatRoughness: 0.22, envMapIntensity: 1.08 });
+  dat("tieu_nao", vatLieuBP.tieu_nao?.color.getHex() ?? 0xd99aa8, { ...PBR_TIEU_NAO, normalScale: new THREE.Vector2(0.85, 0.85), roughness: 1.0, clearcoat: 0.50, clearcoatRoughness: 0.24, envMapIntensity: 1.02 });
+  for (const bp of ["cot_song", "xuong_suon", "hop_so", "xuong_uc_don", "xuong_chau"])
+    dat(bp, MAU_NGA, { roughness: 0.50, clearcoat: 0.24, clearcoatRoughness: 0.28, envMapIntensity: 0.88 }, "xuong");
+  for (const bp of ["dong_mach_chu", "tinh_mach_phoi", "mach_chau", "mach_than"])
+    dat(bp, 0xc0262e, { roughness: 0.24, clearcoat: 0.86, clearcoatRoughness: 0.14, envMapIntensity: 1.25 }, "mach_do");
+  for (const bp of ["tinh_mach_chu", "dong_mach_phoi"])
+    dat(bp, 0x3b5ba8, { roughness: 0.28, clearcoat: 0.78, clearcoatRoughness: 0.16, envMapIntensity: 1.20 }, "mach_xanh");
+  if (vatLieuBP.day_than_kinh) ganShaderGiaiPhau(vatLieuBP.day_than_kinh, "sun");
+  if (vatLieuBP.tuy_song) ganShaderGiaiPhau(vatLieuBP.tuy_song, "sun");
+  // đổ bóng & nhận bóng sắc nét giữa lồng ngực – nội tạng – hệ cơ (không áp lên lớp da/vỏ trong suốt)
+  theGioi.traverse((o) => {
+    if (!o.isMesh || o.parent === voCoThe) return;
+    const bp = o.userData?.bp;
+    if (bp === "da" || bp === "co_hoanh") { o.castShadow = false; o.receiveShadow = false; return; }
+    o.castShadow = true;
+    o.receiveShadow = true;
+  });
+  nhomHe.he_co.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; o.renderOrder = 18; } });
 })();
 
 // vật liệu X-quang + trạng thái hiển thị cho mọi bộ phận
@@ -4241,7 +5095,7 @@ const dongKhi = { o2: null, co2: null };
       const s = ben === "trai" ? 1 : -1;
       const tam = TAM_PHOI[ben], bk = BK_PHOI[ben];
       const cuoi = tam.clone().add(V((r() * 0.6 + 0.1) * bk.x * s, (r() * 1.2 - 0.6) * bk.y, (r() - 0.5) * 1.2 * bk.z));
-      cacDuong.push([P(0, 3.06, 0.03), P(0, 2.9, 0.015), P(0, 2.77, 0.0), P(0.11 * s, 2.69, -0.01), cuoi]);
+      cacDuong.push([P(0, 3.06, 0.03), P(0, 2.89, 0.01), P(0, 2.74, -0.015), P(0.10 * s, 2.62, 0.0), cuoi]);
     }
     return new DongHat(cacDuong, soLuong, mau, kt, 0);
   };
@@ -4337,26 +5191,32 @@ function datTrangThai(ten) {
 $("#nut-nghi").addEventListener("click", () => datTrangThai("nghi"));
 $("#nut-giao-cam").addEventListener("click", () => datTrangThai("giao_cam"));
 
-// điện tim (ECG) đồng bộ pha tim
-const ecg = { canvas: $("#ecg"), mau: [], diemCuoi: 0 };
+// điện tim (ECG) đồng bộ pha tim (tự bỏ qua hoàn toàn khi HUD đang thu gọn để tiết kiệm CPU/GPU)
+const ecg = { canvas: $("#ecg"), ctx: $("#ecg").getContext("2d"), hud: $("#hud-panel"), mau: [], diemCuoi: 0, boDem: 0 };
 function songECG(p) {
   const g = (x, mu, s, a) => a * Math.exp(-((x - mu) ** 2) / (2 * s * s));
   return g(p, 0.06, 0.018, 0.12) + g(p, 0.135, 0.006, -0.12) + g(p, 0.15, 0.007, 1.0) + g(p, 0.165, 0.007, -0.22) + g(p, 0.4, 0.035, 0.28);
 }
 function veECG(dt) {
-  const c = ecg.canvas, g = c.getContext("2d");
+  if (ecg.hud && ecg.hud.classList.contains("thu-nho")) return;
+  const c = ecg.canvas, g = ecg.ctx;
   const soMau = Math.max(1, Math.round(dt * 160));
   const buoc = (sinhLy.nhipTim / 60) / 160;
   for (let i = 0; i < soMau; i++) { ecg.diemCuoi = (ecg.diemCuoi + buoc) % 1; ecg.mau.push(songECG(ecg.diemCuoi)); }
   while (ecg.mau.length > c.width / 2) ecg.mau.shift();
   g.clearRect(0, 0, c.width, c.height);
   g.strokeStyle = "rgba(6,182,212,0.15)"; g.lineWidth = 1;
-  for (let x = 0; x < c.width; x += 20) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, c.height); g.stroke(); }
-  g.strokeStyle = sinhLy.giaoCam > 0.5 ? "#fb7185" : "#34d399"; g.lineWidth = 2.4; g.shadowColor = g.strokeStyle; g.shadowBlur = 8;
   g.beginPath();
-  ecg.mau.forEach((v, i) => { const x = i * 2, y = c.height * 0.68 - v * c.height * 0.55; i ? g.lineTo(x, y) : g.moveTo(x, y); });
+  for (let x = 0; x < c.width; x += 20) { g.moveTo(x, 0); g.lineTo(x, c.height); }
   g.stroke();
-  g.shadowBlur = 0;
+  const mau = sinhLy.giaoCam > 0.5 ? "#fb7185" : "#34d399";
+  g.beginPath();
+  for (let i = 0; i < ecg.mau.length; i++) {
+    const x = i * 2, y = c.height * 0.68 - ecg.mau[i] * c.height * 0.55;
+    if (i) g.lineTo(x, y); else g.moveTo(x, y);
+  }
+  g.strokeStyle = sinhLy.giaoCam > 0.5 ? "rgba(251,113,133,0.28)" : "rgba(52,211,153,0.28)"; g.lineWidth = 6; g.stroke();
+  g.strokeStyle = mau; g.lineWidth = 2.2; g.stroke();
 }
 
 // =====================================================================================================================
@@ -4390,16 +5250,26 @@ function datMucTieu(bpChon, coLap, anHan = false) { // anHan: xem riêng một c
   }
   vo.dich = anHan ? 0 : coLap && tap.size && ![...tap].some((b) => BO_PHAN[b]?.he === "he_co") ? 0.1 : 1;
 }
+const _vDichTam = new THREE.Vector3();
+let _dsHe = null, _lucBongCuoi = -1, _lucDaDayCuoi = -1;
 function capNhatHienThi(dt) {
+  if (!_dsHe) _dsHe = Object.entries(nhomHe);
   const k = 1 - Math.pow(0.0015, dt);
-  for (const bp of Object.keys(trangThaiBP)) {
+  const xung = 0.75 + 0.25 * Math.sin(thoiGian * 4);
+  let doiHien = false;
+  for (const bp in trangThaiBP) {
     const st = trangThaiBP[bp];
     const sangDich = Math.max(st.sang, bp === bpDangRe ? 0.45 : 0, bp === bpDangChon ? 0.75 : 0);
-    st.doMoHien += (st.doMo * (lopAn[lopCua(bp)] ? 0 : 1) - st.doMoHien) * k;
+    const dichMo = st.doMo * (lopAn[lopCua(bp)] ? 0 : 1);
+    st.doMoHien += (dichMo - st.doMoHien) * k;
     st.sangHien += (sangDich - st.sangHien) * k;
     const hienMesh = st.doMoHien > 0.012;
-    for (const m of meshTheoBP[bp] || []) if (m.visible !== hienMesh) m.visible = hienMesh;
-    const xung = 0.75 + 0.25 * Math.sin(thoiGian * 4);
+    const dsMesh = meshTheoBP[bp];
+    if (dsMesh) {
+      for (let j = 0; j < dsMesh.length; j++) {
+        if (dsMesh[j].visible !== hienMesh) { dsMesh[j].visible = hienMesh; doiHien = true; }
+      }
+    }
     if (xQuang && vatLieuXQ[bp]) {
       vatLieuXQ[bp].uniforms.uDoMo.value = st.doMoHien;
       vatLieuXQ[bp].uniforms.uSang.value = st.sangHien * xung;
@@ -4410,24 +5280,62 @@ function capNhatHienThi(dt) {
       if (m.transparent !== trongSuot) { m.transparent = trongSuot; m.needsUpdate = true; }
       m.opacity = doMo;
       m.depthWrite = m.userData.luonGhiSau ? doMo > 0.9 : !trongSuot;
-      m.emissive.setHex(HE[BO_PHAN[bp]?.he]?.sang ?? 0x67e8f9);
-      m.emissiveIntensity = st.sangHien * 0.55 * xung + (bp === "day_than_kinh" ? 0.12 : 0);
+      const cuongDo = st.sangHien * 0.55 * xung + (bp === "day_than_kinh" ? 0.12 : 0);
+      if (cuongDo > 0.001 || m.emissiveIntensity > 0.001) {
+        m.emissive.setHex(HE[BO_PHAN[bp]?.he]?.sang ?? 0x67e8f9);
+        m.emissiveIntensity = cuongDo;
+      }
     }
   }
-  for (const [he, nhom] of Object.entries(nhomHe)) {
-    const dich = TACH[he] ? TACH[he].clone().multiplyScalar(heSoTach) : V(0, 0, 0);
-    nhom.position.lerp(dich, k);
+  for (let i = 0; i < _dsHe.length; i++) {
+    const [he, nhom] = _dsHe[i];
+    if (TACH[he]) _vDichTam.copy(TACH[he]).multiplyScalar(heSoTach);
+    else _vDichTam.set(0, 0, 0);
+    if (nhom.position.distanceToSquared(_vDichTam) > 1e-8) {
+      nhom.position.lerp(_vDichTam, k);
+      doiHien = true;
+    }
   }
   for (const ben of ["trai", "phai"]) {
-    const dich = TAM_PHOI[ben].clone().add(TACH_PHOI[ben].clone().multiplyScalar(heSoTach));
-    phoi[ben].position.lerp(dich, k);
+    _vDichTam.copy(TACH_PHOI[ben]).multiplyScalar(heSoTach).add(TAM_PHOI[ben]);
+    if (phoi[ben].position.distanceToSquared(_vDichTam) > 1e-8) {
+      phoi[ben].position.lerp(_vDichTam, k);
+      doiHien = true;
+    }
   }
+  if (doiHien && renderer.shadowMap.enabled) renderer.shadowMap.needsUpdate = true;
   vatLieuVo.uniforms.uDoMo.value += ((tachLop ? 0.15 : xQuang ? 1.6 : 1) - vatLieuVo.uniforms.uDoMo.value) * k;
   // lớp vỏ cơ: thanh trượt × cô lập × tách; nhóm cơ của hệ cơ theo thanh trượt
   const coAn = lopAn.co || nhomHe.he_co.visible === false;
   vo.doMo += (vo.dich * vo.lopCo * (coAn ? 0 : 1) * (1 - 0.85 * heSoTach) - vo.doMo) * k;
   VL_CO_VO.userData.u.uDoMoLop.value = vo.doMo;
-  for (const m of vatLieuCoDS) if (m !== VL_CO_VO) m.userData.u.uDoMoLop.value = vo.lopCo;
+  for (let i = 0; i < vatLieuCoDS.length; i++) if (vatLieuCoDS[i] !== VL_CO_VO) vatLieuCoDS[i].userData.u.uDoMoLop.value = vo.lopCo;
+  voCoThe.visible = xQuang ? !coAn : vo.doMo > 0.01;
+}
+// Chốt ngay trạng thái ẩn/hiện lớp mặc định trước khi biên dịch GPU (tránh render 2 pass transmission của lớp cơ ẩn trong 1,5 giây đầu!)
+function chotTrangThaiHienThiNgay() {
+  for (const bp in trangThaiBP) {
+    const st = trangThaiBP[bp];
+    const dichMo = st.doMo * (lopAn[lopCua(bp)] ? 0 : 1);
+    st.doMoHien = dichMo;
+    st.sangHien = 0;
+    const hienMesh = dichMo > 0.012;
+    const dsMesh = meshTheoBP[bp];
+    if (dsMesh) {
+      for (let j = 0; j < dsMesh.length; j++) dsMesh[j].visible = hienMesh;
+    }
+    if (vatLieuBP[bp]) {
+      const m = vatLieuBP[bp];
+      const doMo = m.userData.doMoGoc * dichMo;
+      const trongSuot = m.userData.trongSuotGoc || doMo < 0.995;
+      m.transparent = trongSuot;
+      m.opacity = doMo;
+      m.depthWrite = m.userData.luonGhiSau ? doMo > 0.9 : !trongSuot;
+    }
+  }
+  const coAn = lopAn.co || nhomHe.he_co.visible === false;
+  vo.doMo = coAn ? 0 : vo.dich * vo.lopCo;
+  VL_CO_VO.userData.u.uDoMoLop.value = vo.doMo;
   voCoThe.visible = xQuang ? !coAn : vo.doMo > 0.01;
 }
 function datXQuang(bat) {
@@ -4457,13 +5365,14 @@ if (BP3D) { // mô hình thật cao hơn và bàn chân thấp hơn: hạ cả p
   denKhoa.shadow.camera.updateProjectionMatrix();
   denKhoa.target.position.set(0, 1.45, 0);
 }
-const chatLuong = { bong: true, truyen: true, demThap: 0 };
+const chatLuong = { bong: true, truyen: true, dprCao: true, demThap: 0 };
 function datBong(bat) {
   if (renderer.shadowMap.enabled !== bat) {
     renderer.shadowMap.enabled = bat;
     scene.traverse((o) => { if (o.material) [].concat(o.material).forEach((m) => { m.needsUpdate = true; }); });
   }
   denKhoa.castShadow = bat;
+  if (bat) renderer.shadowMap.needsUpdate = true;
 }
 function datMoiTruong(ten) {
   cheDoMoiTruong = ten === "xray" ? cheDoMoiTruong : ten;
@@ -4479,15 +5388,18 @@ function datMoiTruong(ten) {
   sanStudio.visible = giaiPhau;
   if (!cheDoCoQuan) datNen(giaiPhau ? NEN_GIAI_PHAU : MAU_NEN[ten]);
   scene.fog.color.setHex(MAU_NEN[ten]);
-  scene.fog.density = giaiPhau ? 0.01 : lab3D ? 0.045 : studioTrang ? 0.012 : 0.03;
-  anhSangMoiTruong.color.setHex(giaiPhau ? 0xffffff : 0x9fb7d0);
-  anhSangMoiTruong.intensity = giaiPhau ? 0.3 : studioTrang ? 0.85 : lab3D ? 0.35 : 0.12;
-  anhSangBauTroi.intensity = giaiPhau ? 0.18 : studioTrang ? 0.95 : lab3D ? 0.7 : 0.25;
-  anhSangChinh.intensity = giaiPhau ? 0 : studioTrang ? 2.8 : lab3D ? 1.7 : 2.4;
-  anhSangVien.intensity = giaiPhau ? 0 : studioTrang ? 1.5 : lab3D ? 1.3 : 2.6;
-  den1.intensity = den2.intensity = giaiPhau ? 0 : 7;
-  denKhoa.intensity = giaiPhau ? 2.8 : 0;
-  denVienSau.intensity = giaiPhau ? 2.4 : 0;
+  scene.fog.density = giaiPhau ? 0.008 : lab3D ? 0.042 : studioTrang ? 0.01 : 0.025;
+  anhSangMoiTruong.color.setHex(giaiPhau ? 0xf8fbff : 0x9fb7d0);
+  anhSangMoiTruong.intensity = giaiPhau ? 0.24 : studioTrang ? 0.78 : lab3D ? 0.32 : 0.14;
+  anhSangBauTroi.color.setHex(giaiPhau ? 0xeaf3ff : 0xbfe9ff);
+  anhSangBauTroi.groundColor.setHex(giaiPhau ? 0x161b26 : 0x0b1020);
+  anhSangBauTroi.intensity = giaiPhau ? 0.42 : studioTrang ? 0.90 : lab3D ? 0.65 : 0.30;
+  anhSangChinh.intensity = giaiPhau ? 0 : studioTrang ? 2.6 : lab3D ? 1.75 : 2.35;
+  anhSangVien.intensity = giaiPhau ? 0 : studioTrang ? 1.4 : lab3D ? 1.35 : 2.55;
+  den1.intensity = den2.intensity = giaiPhau ? 0 : 6.2;
+  denKhoa.intensity = giaiPhau ? 2.65 : 0;
+  denBu.intensity = giaiPhau ? 0.95 : studioTrang ? 0.80 : lab3D ? 0.45 : 0.75;
+  denVienSau.intensity = giaiPhau ? 2.35 : 0;
   datBong(giaiPhau && chatLuong.bong);
 }
 $("#chon-moi-truong").addEventListener("change", (e) => datMoiTruong(e.target.value));
@@ -4733,10 +5645,43 @@ $("#nut-dat-lai").addEventListener("click", datLaiTatCa);
 //      Chỉ có khi trang do máy chủ phục vụ; mở file trực tiếp → ẩn nút chế độ này.
 // =====================================================================================================================
 const GT_MOD = await import("./sinh-hoc/giai-thich/index.js").catch((e) => { console.warn("Không tải được chế độ giải thích từng bước:", e.message); return null; });
+// Điểm neo giải phẫu chính xác (tâm buồng tim, ngã ba mạch lớn, tâm nội tạng) dành riêng cho đầu/cuối mũi tên 3D
+const DIEM_MUI_TEN = {
+  tam_that_phai: dTim(-0.030, -0.025, 0.045),
+  tam_that_trai: dTim(0.035, -0.035, 0.005),
+  tam_nhi_phai: dTim(-0.065, 0.050, 0.015),
+  tam_nhi_trai: dTim(0.020, 0.065, -0.035),
+  dong_mach_phoi: dTim(0.015, 0.155, 0.010),
+  dong_mach_chu: dTim(0.000, 0.215, -0.025),
+  tinh_mach_phoi: V(0.135, 2.595, -0.015),
+  tinh_mach_chu: V(-0.055, 2.700, 0.040),
+  phoi_trai: TAM_PHOI.trai.clone().add(V(0, 0.01, 0.01)),
+  phoi_phai: TAM_PHOI.phai.clone().add(V(0, 0.01, 0.01)),
+  dai_nao: V(0.0, 3.34, 0.0),
+  da_day: V(0.115, 2.18, 0.075),
+  than_trai: V(0.135, 2.08, -0.10),
+  than_phai: V(-0.135, 2.03, -0.10),
+  mach_chau: V(0.085, 1.60, -0.04),
+  co_tu_dau_dui: V(0.16, 1.28, 0.065),
+};
+function viTriMuiTen(bp) {
+  if (DIEM_MUI_TEN[bp]) {
+    const he = BO_PHAN[bp]?.he;
+    return DIEM_MUI_TEN[bp].clone().add(he && nhomHe[he] ? nhomHe[he].position : V(0, 0, 0));
+  }
+  const ds = meshTheoBP[bp];
+  if (ds && ds.length) {
+    theGioi.updateMatrixWorld(true);
+    const hop = new THREE.Box3();
+    ds.forEach((m) => hop.expandByObject(m));
+    if (!hop.isEmpty()) return hop.getCenter(V(0, 0, 0));
+  }
+  return neo(bp);
+}
 const giaiThichTungBuoc = GT_MOD ? GT_MOD.taoGiaiThichTungBuoc({
-  scene, camera, controls, khung3D,
+  scene, camera, controls, khung3D, xoaNhan,
   coBoPhan: (id) => !!(meshTheoBP[id] || neoBP[id]),
-  viTri: (id) => neo(id),
+  viTri: (id) => viTriMuiTen(id),
   hopBoPhan(ids) {
     theGioi.updateMatrixWorld(true);
     const hop = new THREE.Box3();
@@ -4823,12 +5768,13 @@ async function batDieuKhienTay(nguon = "camera") {
       const dieuKhien = new DieuKhien({
         veGocDauNoiBo: false,
         khiSuKien: (suKien) => {
-          if (suKien.loai === "bat_dau") {
+          const kieu = suKien.kieu || suKien.loai;
+          if (kieu === "bat_dau") {
             gsap.killTweensOf(camera.position);
             gsap.killTweensOf(controls.target);
-          } else if (suKien.loai === "dat_lai") {
+          } else if (kieu === "dat_lai") {
             chonGocNhin();
-          } else if (suKien.loai === "cham_chon") {
+          } else if (kieu === "cham_chon") {
             const r = renderer.domElement.getBoundingClientRect();
             const clientX = r.left + (suKien.x || 0.5) * r.width;
             const clientY = r.top + (suKien.y || 0.5) * r.height;
@@ -4837,7 +5783,7 @@ async function batDieuKhienTay(nguon = "camera") {
         }
       });
 
-      boApOrbit = taoBoApOrbit({ THREE, camera, controls, dieuKhien });
+      boApOrbit = taoBoApOrbit({ THREE, camera, controls, dieuKhien, doMuot: 0.024, cheDoMuot: "sieu_muot" });
       boDieuKhienTay = await taoDieuKhienTay({
         khung3D: document.getElementById("khung-3d") || document.getElementById("khung-giua"),
         vungBang: document.getElementById("khung-giua") || document.getElementById("khung-3d"),
@@ -5036,6 +5982,9 @@ function taoDiemNong(id) {
     if (!meshTheoBP[bp] && !neoBP[bp]) return;
     const el = document.createElement("div");
     el.className = "diem-nong";
+    el.setAttribute("role", "button");
+    el.setAttribute("aria-expanded", "false");
+    el.title = "Nhấn để xem mô tả";
     el.style.setProperty("--c", MAU_DIEM[i % MAU_DIEM.length]);
     el.innerHTML = `<div class="meo">${esc(ten)}<small>${esc(mt)}</small></div>`;
     el.addEventListener("pointerdown", (e) => e.stopPropagation());
@@ -5118,11 +6067,16 @@ function dongCoQuan(bayVe = true) {
 }
 function chonCauTruc(bp) {
   if (!cheDoCoQuan) return;
-  ctDangChon = bp;
-  for (const b of THONG_TIN_CQ[cheDoCoQuan].bp) if (trangThaiBP[b]) trangThaiBP[b].sang = b === bp ? 1 : 0;
-  diemNong.forEach((d) => d.el.classList.toggle("dang", d.bp === bp));
-  document.querySelectorAll("#the-co-quan .ds-ct [data-bp]").forEach((b) => b.classList.toggle("dang", b.dataset.bp === bp));
-  chonBoPhan(bp, false);
+  const boChon = ctDangChon === bp;
+  ctDangChon = boChon ? null : bp;
+  for (const b of THONG_TIN_CQ[cheDoCoQuan].bp) if (trangThaiBP[b]) trangThaiBP[b].sang = (!boChon && b === bp) ? 1 : 0;
+  diemNong.forEach((d) => {
+    const dang = !boChon && d.bp === bp;
+    d.el.classList.toggle("dang", dang);
+    d.el.setAttribute("aria-expanded", String(dang));
+  });
+  document.querySelectorAll("#the-co-quan .ds-ct [data-bp]").forEach((b) => b.classList.toggle("dang", !boChon && b.dataset.bp === bp));
+  if (!boChon) chonBoPhan(bp, false);
 }
 $("#nut-ve-co-the").addEventListener("click", () => dongCoQuan(true));
 $("#nut-tu-xoay").addEventListener("click", (e) => { controls.autoRotate = !controls.autoRotate; controls.autoRotateSpeed = 1.4; e.currentTarget.setAttribute("aria-pressed", String(controls.autoRotate)); });
@@ -5336,7 +6290,17 @@ $("#nut-huong-dan").addEventListener("click", () => denBuocHD(0));
 // 16. CẤP ĐỘ HIỂN VI (Micro-Zoom) – 6 cảnh tế bào / hoá sinh
 // =====================================================================================================================
 const viMo = {};
+const viMoTao = {};
 let cheDoViMo = null;
+function layViMo(ten) {
+  if (viMo[ten]) return viMo[ten];
+  if (!viMoTao[ten]) return null;
+  const c = viMoTao[ten]();
+  c.nhom.visible = false;
+  nhomViMo.add(c.nhom);
+  viMo[ten] = c;
+  return c;
+}
 function nhanViMo(nhom, chu, viTri) {
   const el = document.createElement("div");
   el.className = "nhan-vi-mo";
@@ -5361,8 +6325,8 @@ function hatDiChuyen(nhom, soLuong, mau, kt) {
   nhom.add(p);
   return { p, vt, n: soLuong };
 }
-// --- Phế nang + mao mạch phổi ---
-viMo.pho_nang = (() => {
+// --- Phế nang + mao mạch phổi (khởi tạo lười khi mở soi hiển vi — 0ms lúc tải trang) ---
+viMoTao.pho_nang = () => {
   const nhom = new THREE.Group();
   const r = ngauNhien(11);
   const tamPN = [V(0, 0, 0), V(0.95, 0.3, 0.1), V(-0.9, 0.35, -0.1), V(0.3, 0.95, -0.3), V(-0.25, -0.85, 0.2), V(0.6, -0.6, -0.5), V(-0.5, 0.2, 0.9)];
@@ -5436,9 +6400,9 @@ viMo.pho_nang = (() => {
       co2.p.geometry.attributes.position.needsUpdate = true;
     },
   };
-})();
+};
 // --- Nephron ---
-viMo.nephron = (() => {
+viMoTao.nephron = () => {
   const nhom = new THREE.Group();
   const cau = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(Array.from({ length: 40 }, (_, i) => {
     const t = (i / 40) * Math.PI * 2; return V(Math.sin(t * 3) * 0.32, Math.cos(t * 5) * 0.28, Math.sin(t * 7) * 0.3).add(V(-1.6, 1.0, 0));
@@ -5481,9 +6445,9 @@ viMo.nephron = (() => {
       [loc, hapThu, nuoc].forEach((h) => { h.p.geometry.attributes.position.needsUpdate = true; });
     },
   };
-})();
+};
 // --- Synapse ---
-viMo.synapse = (() => {
+viMoTao.synapse = () => {
   const nhom = new THREE.Group();
   const nut = new THREE.Mesh(new THREE.SphereGeometry(1.1, 48, 32, 0, Math.PI * 2, 0, Math.PI * 0.55), matVM(0xfde68a, 0.35));
   nut.position.y = 0.35;
@@ -5547,9 +6511,9 @@ viMo.synapse = (() => {
       nut.material.emissiveIntensity = 0.15 + 0.15 * Math.max(0, Math.sin(t * 6));
     },
   };
-})();
+};
 // --- Sarcomere cơ tim ---
-viMo.sarcomere = (() => {
+viMoTao.sarcomere = () => {
   const nhom = new THREE.Group();
   const z1 = new THREE.Mesh(new THREE.BoxGeometry(0.08, 2.2, 1.6), matVM(0xfca5a5));
   const z2 = z1.clone();
@@ -5607,9 +6571,9 @@ viMo.sarcomere = (() => {
       atp.p.geometry.attributes.position.needsUpdate = true;
     },
   };
-})();
+};
 // --- Tế bào viền dạ dày ---
-viMo.te_bao_vien = (() => {
+viMoTao.te_bao_vien = () => {
   const nhom = new THREE.Group();
   const teBao = new THREE.Mesh(cauBienDoi(V(1.4, 1.2, 1.1)), matVM(0xfda4af, 0.28));
   const long = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.08, 3), matVM(0xfef08a, 0.25));
@@ -5661,9 +6625,9 @@ viMo.te_bao_vien = (() => {
       bom.forEach((b, i) => { b.material.emissiveIntensity = 0.3 + 0.4 * Math.max(0, Math.sin(thoiGian * 5 + i)); });
     },
   };
-})();
+};
 // --- Tiểu thuỳ gan ---
-viMo.tieu_thuy_gan = (() => {
+viMoTao.tieu_thuy_gan = () => {
   const nhom = new THREE.Group();
   const luc = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.6, 0.5, 6, 1, false), matVM(0x9a3412, 0.28));
   const tmTrungTam = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.7, 24), matVM(0x3b82f6));
@@ -5706,8 +6670,7 @@ viMo.tieu_thuy_gan = (() => {
       [mau, mat, hatUrea].forEach((h) => { h.p.geometry.attributes.position.needsUpdate = true; });
     },
   };
-})();
-Object.values(viMo).forEach((c) => { c.nhom.visible = false; nhomViMo.add(c.nhom); });
+};
 const anhSangViMo = new THREE.PointLight(0xffffff, 18, 0, 2);
 anhSangViMo.position.set(2, 3, 4);
 nhomViMo.add(anhSangViMo);
@@ -5715,7 +6678,7 @@ const VI_MO_THEO_HE = { tuan_hoan: "sarcomere", ho_hap: "pho_nang", than_kinh: "
 const VI_MO_THEO_BP = { gan: "tieu_thuy_gan", tui_mat: "tieu_thuy_gan" };
 let cameraTruocViMo = null;
 async function vaoViMo(ten) {
-  const c = viMo[ten];
+  const c = layViMo(ten);
   if (!c) return;
   xoaNhan();
   xoaLoTrinh();
@@ -5792,42 +6755,61 @@ function capNhatSinhLy(dt) {
   for (const ben of ["trai", "phai"]) phoi[ben].scale.set(1 + sau * hit * 0.8, 1 + sau * hit, 1 + sau * hit * 1.1);
   phoi.coHoanh.position.y = phoi.coHoanh.userData.yGoc - 0.05 * hit * (1 + sinhLy.giaoCam);
   phoi.coHoanh.scale.y = 0.55 - 0.18 * hit;
-  // khí O₂ đi vào khi hít, CO₂ đi ra khi thở
+  // khí O₂ đi vào khi hít, CO₂ đi ra khi thở (ghi trực tiếp Float32Array 0 cấp phát rác + bỏ qua khi ẩn hệ hô hấp)
+  const hienHoHap = nhomHe.ho_hap.visible && (trangThaiBP.phoi_trai?.doMoHien ?? 1) > 0.05;
   const pO2 = dongKhi.o2, pCO2 = dongKhi.co2;
-  const phaVao = b < 0.4 ? b / 0.4 : 1;
-  const phaRa = b >= 0.4 ? (b - 0.4) / 0.6 : 0;
-  const tamO2 = Math.round(pO2.n * kep(sinhLy.po2 / 100, 0.25, 1.1));
-  for (let i = 0; i < pO2.n; i++) {
-    const hien = i < tamO2 && b < 0.55;
-    const u = kep(phaVao - (i % 9) * 0.04, 0, 1);
-    pO2.duong[pO2.chiSo[i]].getPointAt(u, v3);
-    pO2.viTri.set(hien ? [v3.x, v3.y, v3.z] : [0, -50, 0], i * 3);
+  pO2.diem.visible = hienHoHap;
+  pCO2.diem.visible = hienHoHap;
+  if (hienHoHap) {
+    const phaVao = b < 0.4 ? b / 0.4 : 1;
+    const phaRa = b >= 0.4 ? (b - 0.4) / 0.6 : 0;
+    const tamO2 = Math.round(pO2.n * kep(sinhLy.po2 / 100, 0.25, 1.1));
+    const aO2 = pO2.viTri;
+    for (let i = 0; i < pO2.n; i++) {
+      const idx = i * 3;
+      if (i < tamO2 && b < 0.55) {
+        const u = kep(phaVao - (i % 9) * 0.04, 0, 1);
+        pO2.duong[pO2.chiSo[i]].getPointAt(u, v3);
+        aO2[idx] = v3.x; aO2[idx + 1] = v3.y; aO2[idx + 2] = v3.z;
+      } else { aO2[idx] = 0; aO2[idx + 1] = -50; aO2[idx + 2] = 0; }
+    }
+    const tamCO2 = Math.round(pCO2.n * kep(sinhLy.pco2 / 45, 0.25, 1.4));
+    const aCO2 = pCO2.viTri;
+    for (let i = 0; i < pCO2.n; i++) {
+      const idx = i * 3;
+      if (i < tamCO2 && b >= 0.4) {
+        const u = kep(1 - phaRa - (i % 9) * 0.04, 0, 1);
+        pCO2.duong[pCO2.chiSo[i]].getPointAt(u, v3);
+        aCO2[idx] = v3.x; aCO2[idx + 1] = v3.y; aCO2[idx + 2] = v3.z;
+      } else { aCO2[idx] = 0; aCO2[idx + 1] = -50; aCO2[idx + 2] = 0; }
+    }
+    pO2.diem.geometry.attributes.position.needsUpdate = true;
+    pCO2.diem.geometry.attributes.position.needsUpdate = true;
+    pO2.diem.position.copy(nhomHe.ho_hap.position);
+    pCO2.diem.position.copy(nhomHe.ho_hap.position);
   }
-  const tamCO2 = Math.round(pCO2.n * kep(sinhLy.pco2 / 45, 0.25, 1.4));
-  for (let i = 0; i < pCO2.n; i++) {
-    const hien = i < tamCO2 && b >= 0.4;
-    const u = kep(1 - phaRa - (i % 9) * 0.04, 0, 1);
-    pCO2.duong[pCO2.chiSo[i]].getPointAt(u, v3);
-    pCO2.viTri.set(hien ? [v3.x, v3.y, v3.z] : [0, -50, 0], i * 3);
+  // thần kinh: tần số phát xung theo trạng thái (0 cấp phát mảng tạm, bỏ qua khi ẩn hệ thần kinh)
+  const hienTK = nhomHe.than_kinh.visible && (trangThaiBP.day_than_kinh?.doMoHien ?? 1) > 0.05;
+  if (hienTK) {
+    sinhLy.xungTho += dt * (2.5 + 14 * sinhLy.giaoCam);
+    while (sinhLy.xungTho > 1) { sinhLy.xungTho -= 1; phatXung(1); }
+    for (let i = xung.hat.length - 1; i >= 0; i--) { const h = xung.hat[i]; h.u += dt * h.tocDo * (1 + sinhLy.giaoCam); if (h.u >= 1) xung.hat.splice(i, 1); }
+    const aX = xung.viTri;
+    for (let i = 0; i < xung.toiDa; i++) {
+      const h = xung.hat[i], idx = i * 3;
+      if (h) { h.duong.getPointAt(h.u, v3); aX[idx] = v3.x; aX[idx + 1] = v3.y; aX[idx + 2] = v3.z; }
+      else { aX[idx] = 0; aX[idx + 1] = -50; aX[idx + 2] = 0; }
+    }
+    xung.diem.geometry.attributes.position.needsUpdate = true;
+    thanKinh.nhomMang.material.opacity = 0.25 + 0.35 * sinhLy.giaoCam + 0.1 * Math.sin(thoiGian * 8);
   }
-  pO2.diem.geometry.attributes.position.needsUpdate = true;
-  pCO2.diem.geometry.attributes.position.needsUpdate = true;
-  pO2.diem.position.copy(nhomHe.ho_hap.position);
-  pCO2.diem.position.copy(nhomHe.ho_hap.position);
-  // thần kinh: tần số phát xung theo trạng thái
-  sinhLy.xungTho += dt * (2.5 + 14 * sinhLy.giaoCam);
-  while (sinhLy.xungTho > 1) { sinhLy.xungTho -= 1; phatXung(1); }
-  for (let i = xung.hat.length - 1; i >= 0; i--) { const h = xung.hat[i]; h.u += dt * h.tocDo * (1 + sinhLy.giaoCam); if (h.u >= 1) xung.hat.splice(i, 1); }
-  for (let i = 0; i < xung.toiDa; i++) {
-    const h = xung.hat[i];
-    if (h) { h.duong.getPointAt(h.u, v3); xung.viTri.set([v3.x, v3.y, v3.z], i * 3); } else xung.viTri.set([0, -50, 0], i * 3);
-  }
-  xung.diem.geometry.attributes.position.needsUpdate = true;
-  thanKinh.nhomMang.material.opacity = 0.25 + 0.35 * sinhLy.giaoCam + 0.1 * Math.sin(thoiGian * 8);
-  // dạ dày: nhu động – đối giao cảm mạnh, giao cảm ức chế
+  // dạ dày: nhu động – chỉ cập nhật 30 Hz khi dạ dày đang hiển thị (giảm ~75% tải upload đỉnh GPU)
   sinhLy.nhuDong = (1 - 0.75 * sinhLy.giaoCam) * (1 + 1.5 * sinhLy.nhanNhuDong);
-  const bd = 0.1 + 0.1 * sinhLy.nhanNhuDong;
-  tieuHoa.daDay.geometry.userData.capNhat((u) => tieuHoa.hamDaDay(u) * (1 + bd * sinhLy.nhuDong * Math.sin(2 * Math.PI * (u * 2.2 - thoiGian * 0.05 * 3 * sinhLy.nhuDong))));
+  if (nhomHe.tieu_hoa.visible && tieuHoa.daDay.visible && (trangThaiBP.da_day?.doMoHien ?? 1) > 0.05 && thoiGian - _lucDaDayCuoi >= 0.033) {
+    _lucDaDayCuoi = thoiGian;
+    const bd = 0.1 + 0.1 * sinhLy.nhanNhuDong;
+    tieuHoa.daDay.geometry.userData.capNhat((u) => tieuHoa.hamDaDay(u) * (1 + bd * sinhLy.nhuDong * Math.sin(2 * Math.PI * (u * 2.2 - thoiGian * 0.05 * 3 * sinhLy.nhuDong))));
+  }
   baiTiet.bangQuang.scale.setScalar(1 + 0.04 * Math.sin(thoiGian * 0.4));
 }
 function capNhatMoiTruong(dt) {
@@ -5850,30 +6832,41 @@ function capNhatMoiTruong(dt) {
 }
 let dongLoTrinhTho = 0;
 let demKhung = 0, demFPS = 0;
+let capNhatHologramKhoiDong = null;
 function vongLap() {
   const thuc = dongHo.getDelta(), dt = Math.min(0.05, thuc); // dt kẹp cho mô phỏng; FPS đo bằng thời gian thực
   thoiGian += dt;
   capNhatSinhLy(dt);
   capNhatHienThi(dt);
   if (!cheDoViMo) capNhatMoiTruong(dt);
-  else viMo[cheDoViMo].capNhat(dt, thoiGian);
+  else if (viMo[cheDoViMo]) viMo[cheDoViMo].capNhat(dt, thoiGian);
   if (dongLoTrinh) { dongLoTrinhTho += dt; dongLoTrinh.hat.capNhat(dt); dongLoTrinh.vet.material.opacity = 0.3 + 0.2 * Math.sin(dongLoTrinhTho * 4); }
   giaiThichTungBuoc?.capNhat(dt);
+  boDieuKhienTay?.capNhatKhung?.(dt);
   boApOrbit?.capNhat(dt);
+  if (capNhatHologramKhoiDong) capNhatHologramKhoiDong(dt);
   controls.update();
+  // Trong lúc quét hologram khởi động: giữ nguyên bản đồ bóng đã dựng sẵn để đạt 60 FPS tuyệt đối; sau đó làm mới nhẹ mỗi 2s (tức thì khi đổi lớp)
+  if (renderer.shadowMap.enabled && !cheDoViMo && !capNhatHologramKhoiDong && thoiGian - _lucBongCuoi >= 2.0) {
+    _lucBongCuoi = thoiGian;
+    renderer.shadowMap.needsUpdate = true;
+  }
   renderer.render(scene, camera);
-  rendererNhan.render(scene, camera);
+  if (nhanDangHien.length || nhanThongMinh.ds.length || diemNong.length || giaiThichTungBuoc?.dangMo || cheDoViMo) {
+    rendererNhan.render(scene, camera);
+  }
   veECG(dt);
   demKhung++;
   demFPS += thuc;
   if (demFPS > 1) {
     window.__bioLabFPS = Math.round(demKhung / demFPS); demKhung = 0; demFPS = 0;
-    if (thoiGian > 5 && !cheDoViMo && (chatLuong.truyen || chatLuong.bong)) {
-      chatLuong.demThap = window.__bioLabFPS < 45 ? chatLuong.demThap + 1 : 0;
+    if (thoiGian > 5 && !cheDoViMo && (chatLuong.truyen || chatLuong.bong || chatLuong.dprCao)) {
+      chatLuong.demThap = window.__bioLabFPS < 42 ? chatLuong.demThap + 1 : 0;
       if (chatLuong.demThap >= 3) {
         chatLuong.demThap = 0;
         if (chatLuong.truyen) { chatLuong.truyen = false; vatLieuCoDS.forEach((m) => { m.transmission = 0; m.needsUpdate = true; }); thongBao("Máy hơi chậm: đã tắt xuyên sáng của lớp cơ để giữ mượt."); }
-        else { chatLuong.bong = false; datBong(false); thongBao("Máy hơi chậm: đã tắt bóng đổ để giữ mượt."); }
+        else if (chatLuong.bong) { chatLuong.bong = false; datBong(false); thongBao("Máy hơi chậm: đã tắt bóng đổ để giữ mượt."); }
+        else { chatLuong.dprCao = false; renderer.setPixelRatio(Math.min(1.5, window.devicePixelRatio || 1)); }
       }
     }
     if (thoiGian - (demCauTruc.luc || 0) > 0.5) capNhatDemCauTruc();
@@ -6867,12 +7860,12 @@ function urlHoaHoc() {
 }
 function chonTab(hoa) {
   if (hoa) tatDieuKhienTay();
-  if (hoa && /^https?:$/.test(location.protocol)) {
-    location.href = "/";
+  if (hoa) {
+    dongTrangSinhHoc();
     return;
   }
-  $("#tab-btn-hoa").setAttribute("aria-selected", String(hoa));
-  $("#tab-btn-sinh").setAttribute("aria-selected", String(!hoa));
+  $("#tab-btn-hoa")?.setAttribute("aria-selected", String(hoa));
+  $("#tab-btn-sinh")?.setAttribute("aria-selected", String(!hoa));
   $("#tab-hoa-hoc").hidden = !hoa;
   const boCucEl = $("#bo-cuc");
   if (boCucEl) boCucEl.style.display = hoa ? "none" : "";
@@ -6886,8 +7879,8 @@ function chonTab(hoa) {
   } else if (!dungThuCong) resumeRendering();
 }
 window.chonTab = chonTab;
-$("#tab-btn-hoa").addEventListener("click", () => chonTab(true));
-$("#tab-btn-sinh").addEventListener("click", () => chonTab(false));
+$("#tab-btn-hoa")?.addEventListener("click", () => chonTab(true));
+$("#tab-btn-sinh")?.addEventListener("click", () => chonTab(false));
 $("#nut-luu-url-hoa").addEventListener("click", () => {
   const u = $("#o-url-hoa-hoc").value.trim();
   if (!/^https?:\/\//i.test(u)) { thongBao("Địa chỉ phải bắt đầu bằng http:// hoặc https://", "loi"); return; }
@@ -7235,8 +8228,229 @@ datMoiTruong("giai_phau");
 if (BP3D) $("#ghi-cong-bp3d").hidden = false;
 veInspector(null);
 veChiSo();
-renderer.setAnimationLoop(vongLap);
-requestAnimationFrame(() => { const d = $("#dang-tai"); d.style.opacity = "0"; setTimeout(() => d.remove(), 600); });
+// Chốt ngay các lớp ẩn mặc định (da, cơ) trước khi biên dịch GPU — triệt tiêu render 2 pass transmission thừa ở khung đầu!
+chotTrangThaiHienThiNgay();
+
+// ===== TRÌNH TÁI TẠO HOLOGRAM THUẦN GPU GLSL (0% CSS BLUR · 0 THÊM/XOÁ ĐÈN · 60 FPS MƯỢT TUYỆT ĐỐI) =====
+(async function chayHoatAnhHologramKhoiDong() {
+  const bootEl = $("#dang-tai");
+  const curtain = $("#holo-curtain");
+  const beam = $("#holo-beam");
+  const beamTag = $("#holo-beam-tag");
+  const lockBadge = $("#holo-lock-badge");
+  const giamCD = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+
+  // 1. Đo chính xác hộp bao 3D từ riêng nhóm Bộ xương (tránh bị lệch bởi các bể hạt ẩn ở y = -999!) & dựng vòng quét laser 3D siêu nhẹ
+  theGioi.updateMatrixWorld(true);
+  const holoBox = new THREE.Box3().setFromObject(nhomHe.xuong);
+  const holoValid = !holoBox.isEmpty() && Number.isFinite(holoBox.min.y) && (holoBox.max.y - holoBox.min.y) > 0.5 && (holoBox.max.y - holoBox.min.y) < 12;
+  const yChan = holoValid ? holoBox.min.y : (BP3D ? -0.45 : 0.15);
+  const yDinh = holoValid ? holoBox.max.y : 3.65;
+  const holoCenter = holoValid ? holoBox.getCenter(new THREE.Vector3()) : new THREE.Vector3(0, 1.55, 0);
+  const holoSize = holoValid ? holoBox.getSize(new THREE.Vector3()) : new THREE.Vector3(1.2, 3.8, 0.8);
+  const scanRad = Math.max(0.62, Math.min(1.02, Math.max(holoSize.x, holoSize.z) * 0.54));
+
+  let holoRig = null;
+  let ringOuter = null, ringOrbit = null, baseRing = null;
+  let ringOuterGeo = null, ringDiscGeo = null, ringOrbitGeo = null, auraCylGeo = null, baseRingGeo = null;
+  let ringOuterMat = null, ringDiscMat = null, ringOrbitMat = null, auraCylMat = null, baseRingMat = null;
+
+  if (!giamCD) {
+    holoRig = new THREE.Group();
+    holoRig.name = "holo-bio-scan-rig";
+    ringOuterMat = new THREE.MeshBasicMaterial({
+      color: 0x38bdf8, transparent: true, opacity: 0.0, side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending, depthWrite: false
+    });
+    ringDiscMat = new THREE.MeshBasicMaterial({
+      color: 0x0ea5e9, transparent: true, opacity: 0.0, side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending, depthWrite: false
+    });
+    ringOrbitMat = new THREE.MeshBasicMaterial({
+      color: 0xa5f3fc, transparent: true, opacity: 0.0, side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending, depthWrite: false
+    });
+    auraCylMat = new THREE.MeshBasicMaterial({
+      color: 0x22d3ee, transparent: true, opacity: 0.0, side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending, depthWrite: false
+    });
+    baseRingMat = new THREE.MeshBasicMaterial({
+      color: 0x38bdf8, transparent: true, opacity: 0.0, side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending, depthWrite: false
+    });
+    ringOuterGeo = new THREE.RingGeometry(scanRad * 0.92, scanRad * 0.99, 64);
+    ringDiscGeo = new THREE.CircleGeometry(scanRad * 0.925, 48);
+    ringOrbitGeo = new THREE.RingGeometry(scanRad * 1.12, scanRad * 1.155, 64);
+    auraCylGeo = new THREE.CylinderGeometry(scanRad * 0.92, scanRad * 0.85, 0.34, 40, 1, true);
+    baseRingGeo = new THREE.RingGeometry(scanRad * 0.72, scanRad * 0.88, 64);
+
+    ringOuter = new THREE.Mesh(ringOuterGeo, ringOuterMat);
+    ringOuter.rotation.x = -Math.PI * 0.5;
+    const ringDisc = new THREE.Mesh(ringDiscGeo, ringDiscMat);
+    ringDisc.rotation.x = -Math.PI * 0.5;
+    ringOrbit = new THREE.Mesh(ringOrbitGeo, ringOrbitMat);
+    ringOrbit.rotation.x = -Math.PI * 0.5;
+    ringOrbit.position.y = 0.06;
+    const auraCyl = new THREE.Mesh(auraCylGeo, auraCylMat);
+    auraCyl.position.y = 0.17;
+    holoRig.add(ringOuter, ringDisc, ringOrbit, auraCyl);
+    holoRig.position.set(holoCenter.x, yChan - 0.14, holoCenter.z);
+
+    baseRing = new THREE.Mesh(baseRingGeo, baseRingMat);
+    baseRing.rotation.x = -Math.PI * 0.5;
+    baseRing.position.set(holoCenter.x, yChan + 0.02, holoCenter.z);
+    scene.add(holoRig, baseRing);
+
+    // Khởi tạo trạng thái shader hologram mờ trước khi biên dịch
+    HOLO_BOOT.uHoloMix.value = 1.0;
+    HOLO_BOOT.uHoloAlpha.value = 0.0;
+    HOLO_BOOT.uHoloScanY.value = yChan - 0.32;
+    HOLO_BOOT.uHoloTime.value = 0.0;
+    sanStudio.material.opacity = 0.0;
+  }
+
+  // 2. Biên dịch toàn bộ shader PBR + Hologram & làm ấm hàng đợi GPU sau lưng màn khởi động cho tới khi khung hình ổn định 60 FPS
+  capNhatHoloTienDo(88, "[04] Biên dịch quang học & đổ bóng GPU…", "hc-quanghoc");
+  await nhuongKhung();
+  try { renderer.compile(scene, camera); } catch (_) {}
+  renderer.shadowMap.needsUpdate = true;
+  renderer.render(scene, camera);
+
+  // Chạy vòng lặp chính và chờ 2 khung hình liên tiếp đạt tốc độ mượt (< 30ms) rồi mới hạ màn — triệt tiêu hoàn toàn độ khựng đầu tiên!
+  renderer.setAnimationLoop(vongLap);
+  capNhatHoloTienDo(96, "[04] Đồng bộ GPU 60 FPS…", "hc-quanghoc");
+  let khungMuot = 0, mocTruoc = performance.now();
+  for (let w = 0; w < 10; w++) {
+    await nhuongKhung();
+    const tNow = performance.now();
+    const dtMs = tNow - mocTruoc;
+    mocTruoc = tNow;
+    if (w >= 2 && dtMs < 32) {
+      khungMuot++;
+      if (khungMuot >= 2) break;
+    } else {
+      khungMuot = 0;
+    }
+  }
+  capNhatHoloTienDo(100, "[04] Sẵn sàng — Đang kết tinh bộ xương 3D…", "hc-quanghoc");
+
+  if (giamCD || !holoRig) {
+    HOLO_BOOT.uHoloMix.value = 0.0;
+    sanStudio.material.opacity = 0.32;
+    if (bootEl) { bootEl.style.opacity = "0"; setTimeout(() => bootEl.remove(), 420); }
+    curtain?.remove();
+    return;
+  }
+
+  // 3. Lướt nhẹ camera 10° điện ảnh (nhường quyền ngay nếu người dùng chạm chuột/trackpad xoay)
+  let nguoiDungTuXoay = false;
+  const onUserControl = () => { nguoiDungTuXoay = true; };
+  controls.addEventListener("start", onUserControl);
+
+  const camDichPos = CAMERA_GOC.vi_tri.clone();
+  const camDichTarget = CAMERA_GOC.dich.clone();
+  const camOffset = camDichPos.clone().sub(camDichTarget);
+  const gocBatDau = 0.175; // ~10°
+  const cos0 = Math.cos(gocBatDau), sin0 = Math.sin(gocBatDau);
+  camera.position.set(
+    camDichTarget.x + (camOffset.x * cos0 - camOffset.z * sin0) * 1.05,
+    camDichTarget.y + camOffset.y * 1.02,
+    camDichTarget.z + (camOffset.x * sin0 + camOffset.z * cos0) * 1.05
+  );
+  controls.target.copy(camDichTarget);
+  controls.update();
+
+  // Mở màn khởi động -> bắt đầu chuỗi tái tạo Hologram ngay trong vòng lặp VSync duy nhất của WebGL!
+  if (curtain) curtain.classList.add("dang-quet");
+  if (bootEl) {
+    bootEl.style.opacity = "0";
+    setTimeout(() => bootEl.remove(), 480);
+  }
+
+  const tongThoiLuong = 2.65; // giây (0–0.65s: lớp mờ hologram hiện lên → 0.45–2.35s: tia laser quét kết tinh bộ xương sắc nét → 2.35–2.65s: khóa nét 100%)
+  let tChay = 0;
+  const easeOutCubic = (x) => 1 - Math.pow(1 - x, 3);
+  const easeInOutSine = (x) => -(Math.cos(Math.PI * x) - 1) * 0.5;
+  const vProj = new THREE.Vector3();
+
+  capNhatHologramKhoiDong = (dt) => {
+    tChay += dt;
+    const p = Math.min(1, tChay / tongThoiLuong);
+    HOLO_BOOT.uHoloTime.value = tChay;
+
+    // Pha 1 (0.0 → 0.28): lớp mờ hologram xanh cyan dịu dàng hiện dần ra khỏi không gian tối
+    const pHienMo = Math.min(1, p / 0.28);
+    HOLO_BOOT.uHoloAlpha.value = easeOutCubic(pHienMo);
+
+    // Pha 2 (0.16 → 0.88): tia laser quét từ bàn chân lên đỉnh sọ, kết tinh từng đốt xương sắc nét
+    const pQuet = Math.max(0, Math.min(1, (p - 0.16) / 0.72));
+    const eScan = easeInOutSine(pQuet);
+    const yCur = (yChan - 0.16) + (yDinh - yChan + 0.36) * eScan;
+    HOLO_BOOT.uHoloScanY.value = yCur;
+
+    // Pha 3 (0.86 → 1.0): tắt hoàn toàn lớp hologram → 100% chất liệu giải phẫu PBR gốc siêu sắc nét
+    const pThoat = Math.max(0, (p - 0.86) / 0.14);
+    HOLO_BOOT.uHoloMix.value = 1.0 - easeOutCubic(pThoat);
+    sanStudio.material.opacity = 0.32 * Math.min(1, pQuet * 1.8);
+
+    // Vòng quét laser 3D & đĩa chiếu hologram dưới chân đồng bộ tuyệt đối với mặt phẳng quét GLSL
+    const ringVis = easeOutCubic(Math.min(1, p / 0.18)) * (1.0 - easeOutCubic(Math.max(0, (p - 0.80) / 0.20)));
+    holoRig.position.y = Math.max(yChan, Math.min(yDinh + 0.08, yCur));
+    ringOuter.rotation.z = tChay * 1.9;
+    ringOrbit.rotation.z = -tChay * 2.8;
+    baseRing.rotation.z = tChay * 0.9;
+    ringOuterMat.opacity = 0.92 * ringVis;
+    ringDiscMat.opacity = 0.14 * ringVis;
+    ringOrbitMat.opacity = 0.56 * ringVis;
+    auraCylMat.opacity = 0.08 * ringVis;
+    baseRingMat.opacity = 0.55 * ringVis;
+
+    // Đồng bộ vệt HUD laser theo đúng vị trí chiếu 2D của vòng quét 3D trên màn hình (chỉ dùng translate3d — 0 reflow)
+    if (beam && curtain) {
+      vProj.set(holoCenter.x, holoRig.position.y, holoCenter.z).project(camera);
+      const yPx = Math.round((0.5 - vProj.y * 0.5) * curtain.clientHeight);
+      beam.style.transform = `translate3d(0, ${yPx}px, 0)`;
+      beam.style.opacity = ringVis.toFixed(3);
+    }
+    if (beamTag) {
+      const mCur = (1.75 * eScan).toFixed(2);
+      beamTag.textContent = pQuet <= 0.01
+        ? `HOLOGRAM INIT · ${Math.round(pHienMo * 100)}%`
+        : `BIO-SCAN Y:${mCur}m · ${Math.round(eScan * 100)}%`;
+    }
+    if (lockBadge && p >= 0.84 && !lockBadge.classList.contains("hoan-tat")) {
+      lockBadge.classList.add("hoan-tat");
+      lockBadge.textContent = "✓ HỆ XƯƠNG & NỘI TẠNG 3D ĐÃ ĐỒNG BỘ · SẮC NÉT";
+    }
+
+    // Lướt camera mượt về góc chuẩn nếu người dùng chưa tự xoay
+    if (!nguoiDungTuXoay) {
+      const eCam = easeOutCubic(p);
+      const a = gocBatDau * (1 - eCam);
+      const cA = Math.cos(a), sA = Math.sin(a);
+      const distMul = 1.05 - 0.05 * eCam;
+      camera.position.set(
+        camDichTarget.x + (camOffset.x * cA - camOffset.z * sA) * distMul,
+        camDichTarget.y + camOffset.y * (1.02 - 0.02 * eCam),
+        camDichTarget.z + (camOffset.x * sA + camOffset.z * cA) * distMul
+      );
+    }
+
+    if (p >= 1) {
+      capNhatHologramKhoiDong = null;
+      controls.removeEventListener("start", onUserControl);
+      HOLO_BOOT.uHoloMix.value = 0.0;
+      sanStudio.material.opacity = 0.32;
+      scene.remove(holoRig, baseRing);
+      ringOuterGeo.dispose(); ringDiscGeo.dispose(); ringOrbitGeo.dispose(); auraCylGeo.dispose(); baseRingGeo.dispose();
+      ringOuterMat.dispose(); ringDiscMat.dispose(); ringOrbitMat.dispose(); auraCylMat.dispose(); baseRingMat.dispose();
+      if (curtain) {
+        curtain.classList.remove("dang-quet");
+        setTimeout(() => curtain.remove(), 420);
+      }
+    }
+  };
+})();
 </script>
 </body>
 </html>

@@ -32,8 +32,8 @@ namespace Khkt.Menu.Dashboard
         public RectTransform nudge;
         public float nudgeX = 6f;
 
-        // lò xo: rê (h) mềm, nhấn (p) cứng
-        const float HoverK = 320f, HoverC = 32f, PressK = 600f, PressC = 34f;
+        // lò xo: rê (h) mềm, nhấn (p) đàn hồi có lực bật khi click nhanh
+        const float HoverK = 360f, HoverC = 32f, PressK = 760f, PressC = 32f;
         float h, hv, p, pv, hTarget, pTarget;
         bool active, homesTaken;
         Vector2[] liftHome;
@@ -55,12 +55,23 @@ namespace Khkt.Menu.Dashboard
         public void OnPointerDown(PointerEventData e)
         {
             pTarget = 1f;
+            if (!ReducedMotion.IsEnabled)
+            {
+                p = Mathf.Max(p, 0.35f);
+                pv = Mathf.Max(pv, 14f);
+            }
             Wake();
         }
 
         public void OnPointerUp(PointerEventData e)
         {
             pTarget = 0f;
+            if (!ReducedMotion.IsEnabled)
+            {
+                // Nếu click nhanh (chưa kịp nén sâu), giữ độ nén tối thiểu rồi tạo xung bật đàn hồi
+                p = Mathf.Max(p, 0.72f);
+                pv = -18f;
+            }
             Wake();
         }
 
@@ -276,7 +287,11 @@ namespace Khkt.Menu.Dashboard
             if (glider != null)
             {
                 if (first || !isActiveAndEnabled) glider.anchoredPosition = dst.anchoredPosition;
-                else MenuAnim.Slide(glider, glider.anchoredPosition, dst.anchoredPosition, 0.34f, 0f, MenuAnim.Ease.OutQuint);
+                else
+                {
+                    MenuAnim.Slide(glider, glider.anchoredPosition, dst.anchoredPosition, 0.28f, 0f, MenuAnim.Ease.OutQuint);
+                    MenuAnim.PulseClick(glider, 0.96f, 1.015f, 0.22f);
+                }
                 glider.sizeDelta = dst.sizeDelta;
             }
             if (notify) onSelect?.Invoke(i);
@@ -747,7 +762,8 @@ namespace Khkt.Menu.Dashboard
             if (hv != null)
             {
                 hv.lift = lift;
-                hv.pressScale = 0.99f;
+                hv.hoverScale = 1.006f;
+                hv.pressScale = 0.976f;
                 hv.shadowHover = UiTheme.IsLight ? 0.18f : 0.66f;
                 hv.ringHover = ringHover ?? WithAlpha(Accent, UiTheme.IsLight ? 0.55f : 0.65f);
             }
@@ -830,7 +846,8 @@ namespace Khkt.Menu.Dashboard
             label.horizontalOverflow = HorizontalWrapMode.Wrap;
 
             var hover = rt.gameObject.AddComponent<MenuHover>();
-            hover.pressScale = 0.97f;
+            hover.hoverScale = style == 2 ? 1.01f : 1.022f;
+            hover.pressScale = style == 2 ? 0.955f : 0.945f;
             hover.tint = glow;
             hover.tintRest = washRest;
             hover.tintHover = washHover;
@@ -974,6 +991,9 @@ namespace Khkt.Menu.Dashboard
             sw.trackRing = trackRing;
             sw.knob = knob;
             sw.knobFace = knobFace;
+            var hv = track.gameObject.AddComponent<MenuHover>();
+            hv.hoverScale = 1.03f;
+            hv.pressScale = 0.92f;
             return tog;
         }
 

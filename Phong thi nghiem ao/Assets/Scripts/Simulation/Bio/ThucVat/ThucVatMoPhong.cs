@@ -56,9 +56,22 @@ namespace Khkt.Simulation.Bio.ThucVat
         public string Nhom;
         public string CauTao;
         public string ChucNang;
+        public string SoSanhMotLaMam;
+        public string UngDungThucTe;
         public string CauHoiNhanh;
         public string DapAn;
         public string Nguon;
+    }
+
+    public sealed class KichBanThucHanh
+    {
+        public string Ma;
+        public string Ten;
+        public string MoTaNgan;
+        public string KhungNhinGoiY;
+        public string BoPhanGoiY;
+        public DieuKienMoiTruong DieuKien;
+        public string KetLuanKhoaHoc;
     }
 
     public sealed class BuocBaiGiang
@@ -196,139 +209,218 @@ namespace Khkt.Simulation.Bio.ThucVat
         {
             new ThongTinBoPhan
             {
-                Ma = "re_chop_va_long_hut", Ten = "Hệ rễ cọc (chóp rễ & miền lông hút)", Nhom = "tong_the",
-                CauTao = "Rễ chính đâm sâu, phân nhiều rễ bên; đỉnh có chóp rễ bảo vệ, phía trên là miền lông hút với nhiều tế bào biểu bì kéo dài.",
-                ChucNang = "Hấp thụ nước theo thẩm thấu và ion khoáng (thụ động/chủ động), bám giữ cây.",
-                CauHoiNhanh = "Vì sao cây héo khi đất ngập úng lâu?", DapAn = "Rễ thiếu O₂ hô hấp hiếu khí tạo ATP, ngừng hút khoáng và tổn thương lông hút.",
+                Ma = "re_chop_va_long_hut", Ten = "Hệ rễ cọc (chóp rễ, miền lông hút & nốt sần)", Nhom = "tong_the",
+                CauTao = "Rễ cái đâm sâu thẳng đứng, phân nhiều cấp rễ bên và mang nốt sần cố định đạm (vi khuẩn Rhizobium); đỉnh có chóp rễ bảo vệ mô phân sinh, phía trên là miền lông hút dày đặc.",
+                ChucNang = "Hấp thụ nước theo cơ chế thẩm thấu và ion khoáng (thụ động/chủ động tiêu tốn ATP), cộng sinh cố định N₂ thành NH₄⁺, neo giữ cây vững chắc.",
+                SoSanhMotLaMam = "Cây hai lá mầm (đậu) có hệ rễ cọc với rễ cái to rõ; cây một lá mầm (lúa, ngô) có hệ rễ chùm gồm các rễ phụ dài tương đương mọc từ gốc thân.",
+                UngDungThucTe = "Làm đất tơi xốp, thoát nước tốt để cung cấp O₂ cho rễ hô hấp hiếu khí; khi bứng cây đi trồng phải giữ bầu đất để không làm đứt miền lông hút.",
+                CauHoiNhanh = "Vì sao cây héo khi đất ngập úng lâu hoặc bón phân quá đặc?", DapAn = "Ngập úng làm rễ thiếu O₂ tạo ATP và tích tụ độc chất; bón phân quá đặc làm thế nước đất thấp hơn dịch bào khiến lông hút mất nước (hạn sinh lý).",
+                Nguon = "SGK Sinh học 11 GDPT 2018 — Bài trao đổi nước & khoáng"
+            },
+            new ThongTinBoPhan
+            {
+                Ma = "than_cay", Ten = "Thân cây đậu (trục đốt, chồi nách & vận chuyển 2 chiều)", Nhom = "tong_the",
+                CauTao = "Thân thảo hình trụ chia đốt và gióng, mang lá kép 3 lá chét, lá kèm và chồi nách; bên trong các bó mạch hở xếp thành 1 vòng đối xứng qua tầng sinh mạch.",
+                ChucNang = "Nâng đỡ tán lá vươn tới ánh sáng (tính hướng sáng dương do Auxin); dẫn nước–khoáng một chiều đi lên (mạch gỗ) và dịch hữu cơ đi xuống/đến cơ quan chứa (mạch rây).",
+                SoSanhMotLaMam = "Thân hai lá mầm có bó mạch xếp 1 vòng và có tầng sinh mạch giúp thân to ra thứ cấp; thân một lá mầm có bó mạch xếp phân tán và không có tầng sinh mạch.",
+                UngDungThucTe = "Bấm ngọn cây đậu để loại bỏ ưu thế ngọn (giảm Auxin từ đỉnh), kích thích chồi nách bật mạnh giúp tăng số cành mang hoa và quả.",
+                CauHoiNhanh = "Chiều dẫn truyền và động lực trong mạch gỗ và mạch rây khác nhau thế nào?", DapAn = "Mạch gỗ đi từ rễ lên lá nhờ lực kéo thoát hơi nước, lực liên kết và áp suất rễ; mạch rây đi từ cơ quan nguồn (lá) tới cơ quan chứa nhờ chênh lệch áp suất thẩm thấu.",
                 Nguon = "SGK Sinh học 11 GDPT 2018"
             },
             new ThongTinBoPhan
             {
-                Ma = "than_cay", Ten = "Thân cây đậu (cơ quan trục & vận chuyển)", Nhom = "tong_the",
-                CauTao = "Hình trụ chia đốt mang lá và hoa; bó mạch hở xếp thành vòng có tầng sinh mạch.",
-                ChucNang = "Nâng đỡ tán lá hướng sáng (auxin); dẫn nước–khoáng lên (mạch gỗ) và chất hữu cơ xuống/tới cơ quan nhận (mạch rây).",
-                CauHoiNhanh = "Chiều dẫn truyền trong mạch gỗ và mạch rây khác nhau thế nào?", DapAn = "Mạch gỗ đi từ rễ lên lá; mạch rây đi từ lá xuống thân, rễ và các cơ quan chứa.",
+                Ma = "la_cay", Ten = "Lá kép hai lá mầm (gân hình mạng & phiến quang hợp)", Nhom = "tong_the",
+                CauTao = "Lá kép gồm 3 lá chét hình tim nhọn đầu, cuống lá có gối lá cử động theo ánh sáng; hệ gân hình mạng lông chim phân nhánh đến từng cụm tế bào thịt lá, mặt dưới tập trung hàng vạn khí khổng.",
+                ChucNang = "Quang hợp thu năng lượng ánh sáng cố định CO₂ theo chu trình Calvin (C3) tạo đường; thoát hơi nước qua khí khổng tạo lực kéo dòng mạch gỗ và hạ nhiệt độ lá 2–5 °C.",
+                SoSanhMotLaMam = "Lá hai lá mầm có gân hình mạng và cuống lá rõ; lá một lá mầm thường có gân song song hoặc hình cung với bẹ lá ôm thân.",
+                UngDungThucTe = "Trồng cây đúng mật độ, tỉa lá già khuất sáng dưới tán để giảm tiêu hao hô hấp và tối ưu diện tích lá nhận bức xạ PAR.",
+                CauHoiNhanh = "Vì sao gân lá hình mạng giúp lá hai lá mầm quang hợp và thoát hơi nước hiệu quả?", DapAn = "Mạng mạch phân nhánh dày đặc tiếp cận sát từng tế bào mô giậu để cấp nước tức thì và thu hồi đường saccarôzơ nhanh chóng.",
                 Nguon = "SGK Sinh học 11 GDPT 2018"
             },
             new ThongTinBoPhan
             {
-                Ma = "la_cay", Ten = "Lá cây hai lá mầm (gân hình mạng)", Nhom = "tong_the",
-                CauTao = "Phiến mỏng rộng diện tích với hệ gân hình mạng phân nhánh và hàng vạn khí khổng chủ yếu ở mặt dưới.",
-                ChucNang = "Quang hợp tổng hợp chất hữu cơ và thoát hơi nước tạo lực kéo mạch gỗ.",
-                CauHoiNhanh = "Vì sao gân hình mạng dẫn truyền hiệu quả?", DapAn = "Mạng bó mạch tiếp cận gần từng tế bào thịt lá để cấp nước và thu đường nhanh.",
+                Ma = "hoa_dau", Ten = "Hoa đậu lưỡng tính mẫu 5 & Quả đậu non", Nhom = "tong_the",
+                CauTao = "Hoa hình bướm mẫu 5 đặc trưng họ Đậu (Fabaceae): 5 lá đài hợp, tràng 5 cánh (1 cánh cờ lớn dựng đứng, 2 cánh bên, 2 cánh thìa úp bọc nhị và bầu nhụy), 10 nhị (9 hợp 1 rời); quả đậu phát triển từ bầu nhụy chứa dãy hạt hai lá mầm.",
+                ChucNang = "Thực hiện thụ phấn và thụ tinh kép (đặc trưng thực vật hạt kín): 1 tinh tử hợp với trứng tạo hợp tử (2n), 1 tinh tử hợp với nhân cực tạo nội nhũ (3n) nuôi phôi.",
+                SoSanhMotLaMam = "Hoa hai lá mầm thường theo mẫu 4 hoặc mẫu 5, hạt có 2 lá mầm dày tích trữ dinh dưỡng; hoa một lá mầm theo mẫu 3, hạt có 1 lá mầm.",
+                UngDungThucTe = "Bổ sung Bo, Lân và Kali giai đoạn phân hóa mầm hoa giúp tăng tỉ lệ đậu quả và hạt đậu chắc mẩy.",
+                CauHoiNhanh = "Quả và hạt cây đậu được hình thành từ bộ phận nào của hoa sau thụ tinh kép?", DapAn = "Quả hình thành từ bầu nhụy phát triển lên, còn hạt hình thành từ noãn đã thụ tinh.",
+                Nguon = "SGK Sinh học 11 GDPT 2018 — Sinh sản ở thực vật"
+            },
+            new ThongTinBoPhan
+            {
+                Ma = "re_long_hut", Ten = "Tế bào lông hút & Biểu bì rễ (Lát cắt rễ)", Nhom = "lat_cat_re",
+                CauTao = "Tế bào biểu bì rễ biến đổi kéo dài vươn sâu vào khe đất: thành tế bào bằng xenlulôzơ rất mỏng, hoàn toàn không thấm cutin, có không bào trung tâm cực lớn chứa dịch ưu trương và nhiều ti thể.",
+                ChucNang = "Tăng diện tích bề mặt tiếp xúc đất lên hàng chục lần; hút nước tự động theo gradien thế nước (thẩm thấu) và bơm chọn lọc các ion khoáng (K⁺, NO₃⁻, NH₄⁺, PO₄³⁻).",
+                SoSanhMotLaMam = "Cả hai nhóm đều có miền lông hút cấu tạo từ tế bào biểu bì thành mỏng, dễ gãy rụng khi đất khô hạn hoặc thiếu oxy.",
+                UngDungThucTe = "Tưới nước giữ ẩm đất 65–80% và bón phân pha loãng đúng nồng độ để duy trì thế nước đất cao hơn thế nước tế bào lông hút.",
+                CauHoiNhanh = "Thế nước trong không bào tế bào lông hút phải như thế nào so với dung dịch đất để cây hút được nước?", DapAn = "Thế nước trong lông hút phải thấp hơn (áp suất thẩm thấu cao hơn) dung dịch đất để nước thẩm thấu từ đất vào rễ.",
                 Nguon = "SGK Sinh học 11 GDPT 2018"
             },
             new ThongTinBoPhan
             {
-                Ma = "hoa_dau", Ten = "Hoa đậu lưỡng tính (mẫu 5)", Nhom = "tong_the",
-                CauTao = "5 lá đài xanh, 5 cánh tràng đặc trưng, bộ nhị và nhụy chứa noãn.",
-                ChucNang = "Sinh sản hữu tính, thụ phấn – thụ tinh kép tạo hạt và quả.",
-                CauHoiNhanh = "Hoa cây hai lá mầm thường theo mẫu nào?", DapAn = "Mẫu 4 hoặc mẫu 5 (hoa đậu mẫu 5).",
+                Ma = "re_vo_nhu_mo", Ten = "Mô mềm vỏ rễ & 2 con đường vận chuyển (Lát cắt rễ)", Nhom = "lat_cat_re",
+                CauTao = "Nhiều lớp tế bào nhu mô hình đa giác tròn xếp thưa tạo mạng lưới khe gian bào rộng thông từ biểu bì tới sát vòng nội bì; các tế bào nối với nhau qua cầu sinh chất.",
+                ChucNang = "Dẫn truyền nước và ion khoáng hướng tâm qua 2 con đường song song: con đường gian bào (đi theo thành tế bào và khe gian bào — nhanh, chưa chọn lọc) và con đường tế bào chất (đi xuyên qua màng và cầu sinh chất — có chọn lọc).",
+                SoSanhMotLaMam = "Mô mềm vỏ rễ chiếm tỉ lệ tiết diện lớn ở cả rễ non hai lá mầm và một lá mầm, đồng thời dự trữ tinh bột cung cấp cho hô hấp rễ.",
+                UngDungThucTe = "Giữ nhiệt độ đất ấm áp (20–30 °C) giúp màng sinh chất linh hoạt và tăng tốc độ vận chuyển qua cầu sinh chất.",
+                CauHoiNhanh = "Nước và ion khoáng đi từ lông hút vào trung trụ rễ theo hai con đường nào?", DapAn = "Con đường gian bào (qua thành tế bào và khoảng gian bào) và con đường tế bào chất (xuyên qua tế bào chất và cầu sinh chất).",
+                Nguon = "SGK Sinh học 11 GDPT 2018"
+            },
+            new ThongTinBoPhan
+            {
+                Ma = "re_dai_caspari", Ten = "Nội bì & Đai Caspari thấm suberin (Lát cắt rễ)", Nhom = "lat_cat_re",
+                CauTao = "Một vòng đơn tế bào nội bì xếp khít bao quanh trung trụ; trên vách xuyên tâm và vách ngang có dải đai Caspari dày thấm chất bần suberin và lignin kị nước hoàn toàn.",
+                ChucNang = "Đóng vai trò 'trạm kiểm soát sinh học': chặn đứng hoàn toàn dòng nước và ion đi theo con đường gian bào, bắt buộc mọi phân tử nước và ion khoáng phải đi xuyên qua màng sinh chất của tế bào nội bì để kiểm tra chọn lọc trước khi vào mạch gỗ.",
+                SoSanhMotLaMam = "Rễ hai lá mầm có đai Caspari dạng dải băng quanh vách xuyên tâm; rễ một lá mầm già thường hóa gỗ dày hình chữ U ở nội bì.",
+                UngDungThucTe = "Nhờ đai Caspari và màng nội bì, cây ngăn chặn được nhiều kim loại nặng hoặc độc chất hòa tan trong nước đất xâm nhập lên thân lá.",
+                CauHoiNhanh = "Vai trò sinh lý quan trọng nhất của đai Caspari ở nội bì rễ là gì?", DapAn = "Chặn con đường gian bào, buộc nước và ion khoáng phải đi qua màng sinh chất nội bì để kiểm soát chọn lọc lượng nước và chất khoáng vào mạch gỗ.",
+                Nguon = "SGK Sinh học 11 GDPT 2018"
+            },
+            new ThongTinBoPhan
+            {
+                Ma = "re_mach_go", Ten = "Mạch gỗ rễ hình sao (Xylem trung trụ — Lát cắt rễ)", Nhom = "lat_cat_re",
+                CauTao = "Nằm ở chính giữa trụ dẫn (trung trụ), xếp thành hình chữ thập hoặc ngôi sao 4 cánh đặc trưng của rễ hai lá mầm; gồm các quản bào và mạch ống là tế bào chết đã tiêu biến màng ngăn ngang, vách dày hóa gỗ (lignin) bền chắc.",
+                ChucNang = "Tiếp nhận nước và ion khoáng đã qua nội bì, tạo thành dòng mạch gỗ liên tục đi lên thân và lá nhờ sự phối hợp của áp suất rễ, lực liên kết giữa các phân tử nước và lực kéo thoát hơi nước.",
+                SoSanhMotLaMam = "Rễ hai lá mầm có mạch gỗ xếp hình sao (3–5 cánh) ngay tâm trung trụ; rễ một lá mầm có nhiều bó mạch gỗ (8–20 bó) xếp vòng quanh tâm ruột mềm.",
+                UngDungThucTe = "Hiện tượng rỉ nhựa ở gốc cây cắt ngang hoặc ứa giọt ở mép lá vào sáng sớm chứng minh sự tồn tại của áp suất rễ trong mạch gỗ.",
+                CauHoiNhanh = "Đặc điểm cấu tạo nào giúp mạch gỗ chịu được áp suất âm (lực kéo) rất lớn mà không bị bẹp ống?", DapAn = "Các tế bào mạch gỗ có thành dày hóa gỗ (thấm lignin) cứng chắc tạo thành ống dẫn bền cơ học.",
+                Nguon = "SGK Sinh học 11 GDPT 2018"
+            },
+            new ThongTinBoPhan
+            {
+                Ma = "re_mach_ray", Ten = "Mạch rây rễ & Vòng trụ bì (Phloem — Lát cắt rễ)", Nhom = "lat_cat_re",
+                CauTao = "4 bó mạch rây nằm xen kẽ giữa 4 cánh của ngôi sao mạch gỗ; cấu tạo gồm các ống rây (tế bào sống mất nhân, vách ngăn có bản rây đục lỗ) kết hợp chặt với tế bào kèm giàu ti thể.",
+                ChucNang = "Nhận dòng dịch mạch rây (giàu đường saccarôzơ, axit amin, hoocmôn) từ lá chuyển xuống để nuôi đỉnh sinh trưởng rễ, tái tạo lông hút và cung cấp năng lượng ATP cho bơm ion khoáng.",
+                SoSanhMotLaMam = "Ở cả hai nhóm, các bó mạch rây trong rễ luôn nằm xen kẽ (luân phiên) với các cánh/bó mạch gỗ trên cùng một vòng bán kính.",
+                UngDungThucTe = "Khi lá quang hợp tốt, rễ nhận đủ đường saccarôzơ nên phát triển bộ rễ trắng khỏe và hút khoáng mạnh mẽ hơn.",
+                CauHoiNhanh = "Hợp chất hữu cơ chủ yếu nào được vận chuyển trong mạch rây từ lá xuống nuôi rễ?", DapAn = "Đường saccarôzơ (cùng các axit amin, vitamin và hoocmôn thực vật).",
+                Nguon = "SGK Sinh học 11 GDPT 2018"
+            },
+            new ThongTinBoPhan
+            {
+                Ma = "than_bieu_bi", Ten = "Biểu bì thân, Mô dày nâng đỡ & Vỏ (Lát cắt thân)", Nhom = "lat_cat_than",
+                CauTao = "Ngoài cùng là lớp tế bào biểu bì xếp khít phủ cutin; sát dưới là vòng mô dày góc (thành xenlulôzơ dày lên ở các góc) và nhiều lớp mô mềm vỏ chứa lục lạp non, trong cùng là trụ ruột mô mềm rộng.",
+                ChucNang = "Che chở thân non khỏi mất nước và vi sinh vật xâm nhập; mô dày tạo khung đàn hồi giúp thân cây đậu đứng vững và uốn dẻo trước gió mà không gãy.",
+                SoSanhMotLaMam = "Thân hai lá mầm phân biệt rõ vùng vỏ ngoài, vòng bó mạch và vùng ruột ở tâm; thân một lá mầm có mô cứng dưới biểu bì và mô mềm đồng nhất khắp tiết diện.",
+                UngDungThucTe = "Cây trồng ngoài sáng có gió nhẹ thường phát triển lớp mô dày và thành tế bào cứng cáp hơn cây trồng trong bóng râm.",
+                CauHoiNhanh = "Loại mô cơ học nào nằm ngay dưới biểu bì thân non cây hai lá mầm giúp thân dẻo dai chịu gió?", DapAn = "Mô dày (collenchyma) gồm các tế bào sống có thành dày lên bằng xenlulôzơ và pectin.",
                 Nguon = "SGK Sinh học 10–11 GDPT 2018"
             },
             new ThongTinBoPhan
             {
-                Ma = "re_long_hut", Ten = "Tế bào lông hút (lát cắt rễ)", Nhom = "lat_cat_re",
-                CauTao = "Tế bào biểu bì kéo dài, thành xenlulôzơ mỏng không có lớp cutin, không bào lớn chứa dịch ưu trương.",
-                ChucNang = "Tăng diện tích tiếp xúc đất hàng trăm lần để hút nước bằng thẩm thấu và hấp thụ ion khoáng.",
-                CauHoiNhanh = "Thế nước trong không bào lông hút so với dung dịch đất thế nào?", DapAn = "Thấp hơn dung dịch đất để nước tự động thẩm thấu vào trong.",
+                Ma = "than_mach_ray", Ten = "Mạch rây thân & Mũ sợi trụ bì (Ngoài bó mạch — Lát cắt thân)", Nhom = "lat_cat_than",
+                CauTao = "Nằm ở nửa phía ngoài của mỗi bó mạch trong vòng bó mạch thân; phía ngoài cùng được bảo vệ bởi mũ sợi mô cứng (sclerenchyma), bên trong là các ống rây có bản rây và tế bào kèm.",
+                ChucNang = "Vận chuyển dòng dịch mạch rây (đường saccarôzơ nồng độ 10–20%, axit amin, K⁺) từ lá đi xuống rễ hoặc đi lên nuôi chồi non, hoa và quả đậu đang lớn.",
+                SoSanhMotLaMam = "Ở thân hai lá mầm, các bó mạch rây xếp thành một vòng đồng tâm gần vỏ; vì vậy khi bóc/khoanh vỏ thân cây hai lá mầm sẽ cắt đứt hoàn toàn mạch rây.",
+                UngDungThucTe = "Kỹ thuật khoanh vỏ hoặc chiết cành ở cây hai lá mầm giữ chất hữu cơ và auxin tích tụ ở mép trên vết cắt, kích thích ra rễ bất định nhanh.",
+                CauHoiNhanh = "Vì sao khi khoanh một vòng vỏ thân cây hai lá mầm, sau một thời gian mép vỏ phía trên vết cắt lại phình to ra?", DapAn = "Do mạch rây nằm ở phần vỏ ngoài bị cắt đứt, dòng chất hữu cơ từ lá vận chuyển xuống bị ứ đọng lại ở mép trên vết cắt.",
                 Nguon = "SGK Sinh học 11 GDPT 2018"
             },
             new ThongTinBoPhan
             {
-                Ma = "re_vo_nhu_mo", Ten = "Mô mềm vỏ rễ", Nhom = "lat_cat_re",
-                CauTao = "Các lớp tế bào thành mỏng xếp thưa có khe gian bào thông suốt từ biểu bì đến nội bì.",
-                ChucNang = "Dẫn nước và khoáng theo hai con đường: gian bào (nhanh) và tế bào chất (qua cầu sinh chất).",
-                CauHoiNhanh = "Nước đi qua vỏ rễ theo mấy con đường chính?", DapAn = "Hai con đường: gian bào và tế bào chất.",
+                Ma = "than_tang_sinh_mach", Ten = "Tầng sinh mạch / Tượng tầng (Vòng phân sinh thứ cấp — Lát cắt thân)", Nhom = "lat_cat_than",
+                CauTao = "Dải tế bào mô phân sinh bên (1–3 lớp tế bào dẹp, thành mỏng, giàu nguyên sinh chất) nằm kẹp chính giữa phần mạch rây ở phía ngoài và phần mạch gỗ ở phía trong của từng bó mạch và nối liền thành vòng.",
+                ChucNang = "Thực hiện sinh trưởng thứ cấp: phân chia nguyên phân tạo thêm mạch gỗ thứ cấp vào phía trong và mạch rây thứ cấp ra phía ngoài, làm đường kính thân và rễ cây hai lá mầm tăng lên hàng năm.",
+                SoSanhMotLaMam = "Đây là điểm khác biệt giải phẫu cốt lõi: cây hai lá mầm có bó mạch hở (có tầng sinh mạch); cây một lá mầm có bó mạch kín (không có tầng sinh mạch nên thân không to thêm).",
+                UngDungThucTe = "Khi ghép mắt hoặc ghép cành cây hai lá mầm, bắt buộc phải áp khít tầng sinh mạch của cành ghép vào tầng sinh mạch của gốc ghép để mô dẫn liền mạch.",
+                CauHoiNhanh = "Tại sao khi ghép cành ở cây hai lá mầm, người làm vườn phải đặt trùng khít lớp vỏ trong giữa cành ghép và gốc ghép?", DapAn = "Để hai lớp tầng sinh mạch (tượng tầng) tiếp xúc nhau, phân chia tạo mô sẹo và nối thông mạch gỗ – mạch rây mới.",
+                Nguon = "SGK Sinh học 11 GDPT 2018 — Sinh trưởng & phát triển ở thực vật"
+            },
+            new ThongTinBoPhan
+            {
+                Ma = "than_mach_go", Ten = "Mạch gỗ thân (Trong bó mạch — Lát cắt thân)", Nhom = "lat_cat_than",
+                CauTao = "Nằm ở nửa phía trong của mỗi bó mạch (hướng về tâm ruột thân): gồm các mạch ống lớn (metaxylem) ở ngoài và mạch gỗ trước (protoxylem) nhỏ hơn ở sát mũi trong; lòng ống rỗng thông suốt, vách hóa gỗ dày có vân xoắn hoặc mạch điểm.",
+                ChucNang = "Dẫn nước và các ion khoáng hòa tan từ hệ mạch gỗ rễ đi thẳng lên cuống lá và tỏa vào mạng gân lá với lưu lượng thay đổi trực tiếp theo cường độ thoát hơi nước.",
+                SoSanhMotLaMam = "Bó mạch thân hai lá mầm xếp thành 1 vòng đều đặn quanh ruột; bó mạch thân một lá mầm xếp lộn xộn khắp tiết diện thân.",
+                UngDungThucTe = "Cắm cành hoa trắng vào dung dịch màu thực phẩm rồi cắt ngang thân sẽ quan sát thấy các chấm màu chỉ xuất hiện đúng ở vòng mạch gỗ phía trong bó mạch.",
+                CauHoiNhanh = "Trong bó mạch của thân cây hai lá mầm, mạch gỗ và mạch rây được sắp xếp theo trật tự nào từ ngoài vào trong?", DapAn = "Mạch rây ở phía ngoài → Tầng sinh mạch ở giữa → Mạch gỗ ở phía trong (hướng vào tâm ruột).",
                 Nguon = "SGK Sinh học 11 GDPT 2018"
             },
             new ThongTinBoPhan
             {
-                Ma = "re_dai_caspari", Ten = "Nội bì có đai Caspari", Nhom = "lat_cat_re",
-                CauTao = "Vòng tế bào nội bì có vách thấm suberin (đai Caspari) bít kín mọi khe gian bào.",
-                ChucNang = "Chặn dòng gian bào, bắt nước và ion khoáng phải đi qua màng tế bào nội bì để kiểm soát chọn lọc trước khi vào mạch gỗ.",
-                CauHoiNhanh = "Vai trò quan trọng nhất của đai Caspari là gì?", DapAn = "Điều chỉnh lượng nước và kiểm tra chọn lọc các ion khoáng vào trung trụ.",
+                Ma = "la_bieu_bi_cutin", Ten = "Tầng sáp Cutin & Biểu bì lá (Lát cắt lá)", Nhom = "lat_cat_la",
+                CauTao = "Một lớp tế bào biểu bì sống hình chữ nhật ghép khít nhau như lát gạch, trong suốt (không chứa lục lạp trừ tế bào bảo vệ khí khổng); mặt ngoài được phủ lớp màng sáp cutin không thấm nước.",
+                ChucNang = "Bảo vệ các mô mềm bên trong lá, ngăn sự bốc hơi nước tự do không kiểm soát qua bề mặt lá nhưng vẫn hoàn toàn trong suốt để ánh sáng PAR đi xuyên xuống lớp mô giậu.",
+                SoSanhMotLaMam = "Lá cây hai lá mầm có tầng cutin dày ở mặt trên và khí khổng tập trung chủ yếu ở biểu bì mặt dưới; lá cây một lá mầm mọc đứng (lúa, ngô) có khí khổng phân bố đều ở cả hai mặt.",
+                UngDungThucTe = "Lá non mới mọc có lớp cutin rất mỏng nên thoát hơi nước qua cutin mạnh, dễ bị héo rũ khi gặp nắng gắt buổi trưa.",
+                CauHoiNhanh = "Vì sao tế bào biểu bì trên của lá lại trong suốt và không chứa lục lạp?", DapAn = "Để cho các tia sáng mặt trời dễ dàng xuyên qua lớp biểu bì đi tới các tế bào mô giậu bên dưới thực hiện quang hợp.",
                 Nguon = "SGK Sinh học 11 GDPT 2018"
             },
             new ThongTinBoPhan
             {
-                Ma = "re_mach_go", Ten = "Mạch gỗ rễ (Xylem — trung trụ)", Nhom = "lat_cat_re",
-                CauTao = "Xếp hình chữ thập/hình sao ở giữa trung trụ; gồm tế bào chết hóa gỗ rỗng lòng và mất màng ngăn ngang.",
-                ChucNang = "Dẫn nước và ion khoáng liên tục đi lên thân lá với sức cản nhỏ nhất.",
-                CauHoiNhanh = "Đặc điểm nào giúp mạch gỗ chịu được sức kéo âm từ lá?", DapAn = "Thành tế bào hóa gỗ (lignin) rất dày và bền chắc.",
+                Ma = "la_mo_giau_va_mo_xop", Ten = "Thịt lá: Mô giậu giàu lục lạp & Mô xốp khoang khí (Lát cắt lá)", Nhom = "lat_cat_la",
+                CauTao = "Chia 2 tầng rõ rệt: tầng trên là mô giậu gồm các tế bào hình trụ dài xếp sát nhau vuông góc với biểu bì trên, chứa dày đặc hạt lục lạp; tầng dưới là mô xốp gồm tế bào tròn cạnh xếp thưa tạo hệ thống khoang chứa khí lớn thông thẳng xuống khí khổng.",
+                ChucNang = "Mô giậu là trung tâm quang hợp chính thu nhận photon ánh sáng và cố định CO₂; mô xốp vừa quang hợp vừa tạo buồng thông khí giúp CO₂ khuếch tán nhanh từ khí khổng lên mô giậu và hơi nước/O₂ thoát ra ngoài.",
+                SoSanhMotLaMam = "Lá hai lá mầm phân hóa thịt lá dị diện (mô giậu ở trên, mô xốp ở dưới); nhiều lá một lá mầm có thịt lá đồng질 (không phân biệt rõ mô giậu và mô xốp).",
+                UngDungThucTe = "Mặt trên của lá hai lá mầm luôn có màu xanh sẫm hơn mặt dưới chính vì mật độ lục lạp tập trung cực cao ở lớp tế bào mô giậu.",
+                CauHoiNhanh = "Sự sắp xếp khít của mô giậu ở mặt trên và xếp thưa nhiều khoang khí của mô xốp ở mặt dưới có ý nghĩa thích nghi gì?", DapAn = "Mô giậu xếp khít giúp hứng tối đa ánh sáng chiếu từ trên xuống; mô xốp xếp thưa tạo khoang khí lớn giúp CO₂ và O₂ khuếch tán nhanh qua các khí khổng ở mặt dưới.",
                 Nguon = "SGK Sinh học 11 GDPT 2018"
             },
             new ThongTinBoPhan
             {
-                Ma = "re_mach_ray", Ten = "Mạch rây rễ (Phloem)", Nhom = "lat_cat_re",
-                CauTao = "Nằm xen giữa các cánh mạch gỗ; gồm ống rây tế bào sống và tế bào kèm giàu ti thể.",
-                ChucNang = "Nhận dòng đường từ lá chuyển xuống nuôi mô phân sinh đỉnh rễ và tế bào lông hút.",
-                CauHoiNhanh = "Chất hữu cơ vận chuyển chủ yếu trong mạch rây là gì?", DapAn = "Đường saccarôzơ hòa tan.",
+                Ma = "la_gan_bo_mach", Ten = "Bó mạch Gân lá & Bao bó mạch (Mạch gỗ trên – Mạch rây dưới)", Nhom = "lat_cat_la",
+                CauTao = "Nằm giữa thịt lá, được bao quanh bởi vòng tế bào bao bó mạch (parenchyma sheath); nửa phía trên của bó mạch là các ống mạch gỗ (xylem) hướng về mô giậu, nửa phía dưới là các ống mạch rây (phloem) hướng về biểu bì dưới.",
+                ChucNang = "Cấp nước và ion khoáng trực tiếp từ mạch gỗ cho các tế bào mô giậu quang hợp, đồng thời nạp đường saccarôzơ vừa tổng hợp vào mạch rây để chuyển về thân.",
+                SoSanhMotLaMam = "Ở cây C3 hai lá mầm (đậu), tế bào bao bó mạch ít lục lạp và quang hợp hoàn toàn ở thịt lá; ở cây C4 một lá mầm (ngô, mía), bao bó mạch rất phát triển (cấu trúc Kranz) để cố định CO₂.",
+                UngDungThucTe = "Quan sát lát cắt lá giúp học sinh nhớ quy tắc định hướng bó mạch lá: 'Gỗ trên — Rây dưới' (do bó mạch từ thân uốn cong ra cuống lá).",
+                CauHoiNhanh = "Trong bó mạch của gân lá cây hai lá mầm, mạch gỗ và mạch rây nằm ở vị trí nào?", DapAn = "Mạch gỗ nằm ở nửa phía trên (gần biểu bì trên và mô giậu), còn mạch rây nằm ở nửa phía dưới (gần biểu bì dưới).",
                 Nguon = "SGK Sinh học 11 GDPT 2018"
             },
             new ThongTinBoPhan
             {
-                Ma = "than_bieu_bi", Ten = "Biểu bì thân & mô mềm vỏ", Nhom = "lat_cat_than",
-                CauTao = "Lớp biểu bì ngoài phủ cutin; bên dưới là vòng mô dày nâng đỡ và mô mềm vỏ.",
-                ChucNang = "Bảo vệ thân, giảm mất nước qua bề mặt và dự trữ tạm thời.",
-                CauHoiNhanh = "Mô nào nằm sát biểu bì giúp thân non chịu gió không gãy?", DapAn = "Mô dày góc ở vùng vỏ ngoài.",
-                Nguon = "SGK Sinh học 10–11 GDPT 2018"
-            },
-            new ThongTinBoPhan
+                Ma = "la_khi_khong", Ten = "Khí khổng & 2 Tế bào hình hạt đậu (Cơ chế trương nước & ABA)", Nhom = "lat_cat_la",
+                CauTao = "Gồm 2 tế bào bảo vệ hình hạt đậu (chứa lục lạp, không bào và nhân) quay phần lõm vào nhau tạo khe khí khổng; đặc điểm giải phẫu quyết định là thành tế bào phía trong (sát khe) rất dày, còn thành phía ngoài mỏng và đàn hồi.",
+                ChucNang = "Đóng mở chủ động điều tiết >90% lượng hơi nước thoát ra và 100% lượng CO₂/O₂ trao đổi: khi có ánh sáng, bơm K⁺ và tích lũy đường làm tế bào hạt đậu hút nước trương lên → thành ngoài dãn mạnh kéo thành trong cong mở khe; khi đất khô hạn, rễ tiết hoocmôn ABA làm K⁺ thoát ra, tế bào mất nước xẹp xuống → khe đóng kín.",
+                SoSanhMotLaMam = "Tế bào khí khổng cây hai lá mầm có hình hạt đậu (hình thận); tế bào khí khổng cây một lá mầm họ Lúa có hình quả tạ.",
+                UngDungThucTe = "Phun chế phẩm chống hạn hoặc tưới tiết kiệm giúp cây kiểm soát độ mở khí khổng vừa đủ để vẫn nhận CO₂ quang hợp mà không bị mất nước quá mức.",
+                CauHoiNhanh = "Vì sao khi hai tế bào hình hạt đậu hút no nước thì khe khí khổng lại mở rộng ra thay vì phồng khít vào nhau?", DapAn = "Vì thành ngoài mỏng dãn nở mạnh hơn nhiều so với thành trong dày, từ đó kéo vách thành trong uốn cong về hai phía làm mở rộng khe khí khổng.",
+                Nguon = "SGK Sinh học 11 GDPT 2018 — Trao đổi nước & Quang hợp"
+            }
+        };
+
+        // 5 kịch bản thí nghiệm mẫu một chạm phục vụ dạy học trực quan trên lớp
+        public static readonly KichBanThucHanh[] DanhSachKichBan =
+        {
+            new KichBanThucHanh
             {
-                Ma = "than_mach_ray", Ten = "Mạch rây ở thân (nằm ngoài bó mạch)", Nhom = "lat_cat_than",
-                CauTao = "Các ống rây và tế bào kèm nằm ở nửa ngoài của vòng bó mạch.",
-                ChucNang = "Dẫn đường saccarôzơ, axit amin từ lá xuống rễ và tới chồi/hoa quả.",
-                CauHoiNhanh = "Vì sao khoanh vỏ cắt mạch rây làm phình phần thân phía trên?", DapAn = "Dòng chất hữu cơ từ lá đi xuống bị chặn lại và tích tụ ngay trên vết cắt.",
-                Nguon = "SGK Sinh học 11 GDPT 2018"
+                Ma = "toi_uu_c3", Ten = "1. Ban ngày tối ưu",
+                MoTaNgan = "Ánh sáng 28.000 lux, CO₂ 420 ppm, 27 °C, ẩm đất 75%: khí khổng mở rộng, quang hợp & dòng mạch đạt đỉnh.",
+                KhungNhinGoiY = "tong_the", BoPhanGoiY = "than_cay",
+                DieuKien = new DieuKienMoiTruong { AnhSangLux = 28000, Co2Ppm = 420, NhietDoC = 27, DoAmKhongKhiPct = 62, DoAmDatPct = 75, Gio01 = 0.28, GocDenHuongSangDo = 20, SoGioHuongSang = 8 },
+                KetLuanKhoaHoc = "Ở điều kiện tối ưu C3, khí khổng mở >80%, cường độ quang hợp ròng vượt xa hô hấp, dòng mạch gỗ (xanh ↑) và mạch rây (vàng ↓) lưu thông mạnh."
             },
-            new ThongTinBoPhan
+            new KichBanThucHanh
             {
-                Ma = "than_tang_sinh_mach", Ten = "Tầng sinh mạch (tượng tầng)", Nhom = "lat_cat_than",
-                CauTao = "Lớp tế bào phân sinh thứ cấp hẹp kẹp giữa mạch rây (ngoài) và mạch gỗ (trong).",
-                ChucNang = "Phân chia sinh thêm gỗ thứ cấp vào trong và rây thứ cấp ra ngoài giúp thân to ra.",
-                CauHoiNhanh = "Vì sao cây một lá mầm (lúa, ngô) thân không to lên mãi như cây hai lá mầm?", DapAn = "Bó mạch cây một lá mầm thường đóng kín, không có tầng sinh mạch.",
-                Nguon = "SGK Sinh học 11 GDPT 2018"
+                Ma = "kho_han_aba", Ten = "2. Khô hạn & ABA đóng khí khổng",
+                MoTaNgan = "Độ ẩm đất tụt xuống 10%, nắng nóng 37 °C: rễ tiết ABA làm tế bào hạt đậu mất nước, khép chặt khí khổng.",
+                KhungNhinGoiY = "lat_cat_la", BoPhanGoiY = "la_khi_khong",
+                DieuKien = new DieuKienMoiTruong { AnhSangLux = 36000, Co2Ppm = 400, NhietDoC = 37, DoAmKhongKhiPct = 32, DoAmDatPct = 10, Gio01 = 0.55, GocDenHuongSangDo = 15, SoGioHuongSang = 10 },
+                KetLuanKhoaHoc = "Khi đất khô hạn (<15%), nồng độ hoocmôn ABA tăng vọt kích hoạt kênh thoát K⁺ làm tế bào hạt đậu giảm sức trương, đóng khe khí khổng để cứu cây khỏi héo chết."
             },
-            new ThongTinBoPhan
+            new KichBanThucHanh
             {
-                Ma = "than_mach_go", Ten = "Mạch gỗ ở thân (nằm trong bó mạch)", Nhom = "lat_cat_than",
-                CauTao = "Các mạch ống rộng thành dày hóa lignin nằm ở phía trong mỗi bó mạch.",
-                ChucNang = "Nối tiếp mạch gỗ rễ chuyển nước và muối khoáng lên cành lá.",
-                CauHoiNhanh = "Trong bó mạch thân hai lá mầm, mạch gỗ nằm về phía nào?", DapAn = "Phía trong (hướng về tâm ruột).",
-                Nguon = "SGK Sinh học 11 GDPT 2018"
+                Ma = "ban_dem_ho_hap", Ten = "3. Ban đêm (Chỉ hô hấp)",
+                MoTaNgan = "Ánh sáng 0 lux: pha sáng ngừng hoàn toàn, khí khổng khép, cây ngừng thải O₂ và chỉ còn hô hấp tối.",
+                KhungNhinGoiY = "lat_cat_la", BoPhanGoiY = "la_mo_giau_va_mo_xop",
+                DieuKien = new DieuKienMoiTruong { AnhSangLux = 0, Co2Ppm = 410, NhietDoC = 25, DoAmKhongKhiPct = 78, DoAmDatPct = 72, Gio01 = 0.15, GocDenHuongSangDo = 0, SoGioHuongSang = 0 },
+                KetLuanKhoaHoc = "Ban đêm (0 lux < điểm bù ánh sáng 1000 lux), quang hợp thô bằng 0; cây chỉ thực hiện hô hấp hiếu khí (Q₁₀ = 2) nên quang hợp ròng mang giá trị âm."
             },
-            new ThongTinBoPhan
+            new KichBanThucHanh
             {
-                Ma = "la_bieu_bi_cutin", Ten = "Biểu bì lá & lớp cutin", Nhom = "lat_cat_la",
-                CauTao = "Tế bào biểu bì trong suốt xếp khít, mặt ngoài phủ màng sáp cutin.",
-                ChucNang = "Cho ánh sáng xuyên qua tới lục lạp và ngăn bốc hơi nước tự do.",
-                CauHoiNhanh = "Tác dụng của lớp sáp cutin trên biểu bì lá là gì?", DapAn = "Hạn chế mất nước qua bề mặt biểu bì khi nắng gió.",
-                Nguon = "SGK Sinh học 11 GDPT 2018"
+                Ma = "huong_sang_auxin", Ten = "4. Hướng sáng dương (Auxin)",
+                MoTaNgan = "Chiếu đèn nghiêng +60° trong 42 giờ: Auxin (IAA) dồn sang phía tối (~70%) làm thân uốn cong về phía đèn.",
+                KhungNhinGoiY = "tong_the", BoPhanGoiY = "than_cay",
+                DieuKien = new DieuKienMoiTruong { AnhSangLux = 32000, Co2Ppm = 410, NhietDoC = 26, DoAmKhongKhiPct = 65, DoAmDatPct = 74, Gio01 = 0.20, GocDenHuongSangDo = 60, SoGioHuongSang = 42 },
+                KetLuanKhoaHoc = "Ánh sáng đơn hướng làm Auxin (hạt vàng phát sáng) di chuyển ngang về phía khuất sáng của thân, kích thích tế bào phía tối dãn dài nhanh hơn làm ngọn uốn về nguồn sáng."
             },
-            new ThongTinBoPhan
+            new KichBanThucHanh
             {
-                Ma = "la_mo_giau_va_mo_xop", Ten = "Thịt lá: mô giậu & mô xốp", Nhom = "lat_cat_la",
-                CauTao = "Mô giậu nằm trên gồm tế bào trụ giàu lục lạp xếp khít; mô xốp bên dưới để hở nhiều khoang khí.",
-                ChucNang = "Mô giậu quang hợp chính; khoang khí mô xốp khuếch tán CO₂, O₂ và hơi nước đến khí khổng.",
-                CauHoiNhanh = "Vì sao mặt trên lá thường xanh đậm hơn mặt dưới?", DapAn = "Mô giậu sát mặt trên chứa mật độ lục lạp rất lớn.",
-                Nguon = "SGK Sinh học 11 GDPT 2018"
-            },
-            new ThongTinBoPhan
-            {
-                Ma = "la_gan_bo_mach", Ten = "Gân lá (bó mạch gỗ trên – rây dưới)", Nhom = "lat_cat_la",
-                CauTao = "Mạch gỗ hướng lên trên gần mô giậu, mạch rây hướng xuống dưới.",
-                ChucNang = "Cung cấp nước cho quang hợp và thu gom đường về thân.",
-                CauHoiNhanh = "Trong gân lá, loại mạch nào nằm ở nửa trên?", DapAn = "Mạch gỗ (xylem).",
-                Nguon = "SGK Sinh học 11 GDPT 2018"
-            },
-            new ThongTinBoPhan
-            {
-                Ma = "la_khi_khong", Ten = "Khí khổng & 2 tế bào hạt đậu", Nhom = "lat_cat_la",
-                CauTao = "Hai tế bào hình hạt đậu có thành trong dày hơn thành ngoài, úp vào nhau tạo khe mở.",
-                ChucNang = "Đóng mở khe khí khổng điều tiết trao đổi CO₂/O₂ và thoát hơi nước (trương nước thì cong mở; thiếu nước ABA cao thì xẹp đóng).",
-                CauHoiNhanh = "Vì sao thành trong tế bào hạt đậu dày lại giúp mở khí khổng khi no nước?", DapAn = "Khi hút nước trương lên, thành ngoài mỏng dãn nhiều hơn kéo vách thành trong cong lõm ra hai bên làm mở khe.",
-                Nguon = "SGK Sinh học 11 GDPT 2018"
+                Ma = "nha_kinh_co2", Ten = "5. Nhà kính tăng CO₂",
+                MoTaNgan = "Bổ sung CO₂ lên 1050 ppm kết hợp ánh sáng 42.000 lux: bứt phá giới hạn Rubisco, tăng mạnh dòng đường mạch rây.",
+                KhungNhinGoiY = "lat_cat_than", BoPhanGoiY = "than_mach_ray",
+                DieuKien = new DieuKienMoiTruong { AnhSangLux = 42000, Co2Ppm = 1050, NhietDoC = 28, DoAmKhongKhiPct = 68, DoAmDatPct = 80, Gio01 = 0.25, GocDenHuongSangDo = 10, SoGioHuongSang = 6 },
+                KetLuanKhoaHoc = "Tăng nồng độ CO₂ trong nhà kính từ 400 lên 1050 ppm giúp ức chế hô hấp sáng ở cây C3, đẩy tốc độ đồng hóa đường và dòng chảy mạch rây lên mức tối đa."
             }
         };
 
@@ -397,6 +489,27 @@ namespace Khkt.Simulation.Bio.ThucVat
                 LuaChon = new[] { "Dồn về phía bên trái (khuất sáng), làm tế bào bên trái dãn dài nhanh hơn", "Dồn về phía bên phải (được chiếu sáng)", "Phân bố đều 50/50 ở hai phía", "Chuyển hết xuống rễ chính" },
                 DapAnDung = 0,
                 GiaiThich = "Auxin di chuyển ngang sang phía khuất sáng, kích thích tế bào vách dãn dài nhanh hơn nên đỉnh thân cong về phía nguồn sáng."
+            },
+            new CauHoiTracNghiem
+            {
+                Cau = "Vì sao khi hai tế bào hình hạt đậu ở khí khổng hút no nước thì khe khí khổng lại mở rộng ra?",
+                LuaChon = new[] { "Vì thành trong mỏng hơn thành ngoài", "Vì thành ngoài mỏng dãn nở mạnh kéo thành trong dày cong ra hai bên", "Vì lục lạp đẩy nhân tế bào ra ngoài", "Vì lớp cutin co rút lại khi gặp nước" },
+                DapAnDung = 1,
+                GiaiThich = "Tế bào hình hạt đậu có thành ngoài mỏng và thành trong (sát khe) rất dày; khi trương nước, thành ngoài dãn nhiều hơn kéo thành trong uốn cong làm mở khe."
+            },
+            new CauHoiTracNghiem
+            {
+                Cau = "Khi khoanh một vòng vỏ thân cây gỗ hai lá mầm (bóc đứt mạch rây), hiện tượng nào sẽ xảy ra sau vài tuần?",
+                LuaChon = new[] { "Lá cây héo ngay lập tức vì đứt mạch gỗ", "Mép vỏ phía dưới vết cắt phình to", "Mép vỏ phía trên vết cắt phình to do ứ đọng chất hữu cơ từ lá chuyển xuống", "Toàn bộ dòng nước đi xuống rễ tăng gấp đôi" },
+                DapAnDung = 2,
+                GiaiThich = "Mạch rây nằm ở phần vỏ ngoài dẫn chất hữu cơ từ lá xuống rễ; khi bị cắt đứt, chất hữu cơ tích tụ ở mép trên vết cắt làm mô phình to."
+            },
+            new CauHoiTracNghiem
+            {
+                Cau = "Tại sao mặt trên của lá cây hai lá mầm thường có màu xanh đậm hơn mặt dưới?",
+                LuaChon = new[] { "Mặt trên có nhiều khí khổng hơn mặt dưới", "Tế bào mô giậu nằm sát biểu bì mặt trên xếp khít và chứa rất nhiều lục lạp", "Mặt trên không có lớp cutin", "Mạch rây tập trung ở sát mặt trên của lá" },
+                DapAnDung = 1,
+                GiaiThich = "Lớp tế bào mô giậu nằm ngay dưới biểu bì trên có mật độ lục lạp cao gấp nhiều lần lớp mô xốp ở mặt dưới để hứng ánh sáng hiệu quả."
             }
         };
 

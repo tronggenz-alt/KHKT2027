@@ -106,7 +106,10 @@ namespace Khkt.Demo.Bio.Portal
 #else
             bool xong = false;
 #if UNITY_STANDALONE_OSX && !UNITY_EDITOR
-            try { bridge.nativeMac = _BioMac_Open(fullPath) == 1; }
+            string urlMac = MayChuWebNoiBo.Bat(Path.GetDirectoryName(fullPath))
+                ? MayChuWebNoiBo.Url(Path.GetFileName(fullPath))
+                : fullPath;
+            try { bridge.nativeMac = _BioMac_Open(urlMac) == 1; }
             catch (Exception e) { Debug.LogWarning("[BioWebViewBridge] BioWebViewMac lỗi: " + e.Message); bridge.nativeMac = false; }
             if (bridge.nativeMac) { CachHien = "mac"; xong = true; }
 #endif

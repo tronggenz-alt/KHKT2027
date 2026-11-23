@@ -81,6 +81,7 @@ namespace Khkt.Demo.Bio.Portal
                     var phan = dong.Split(' ');
                     if (phan.Length < 2 || (phan[0] != "GET" && phan[0] != "HEAD")) { Gui(s, 405, "text/plain", null); return; }
                     string duong = Uri.UnescapeDataString(phan[1].Split('?', '#')[0]).TrimStart('/');
+                    if (duong.StartsWith("static/", StringComparison.Ordinal)) duong = duong.Substring(7);
                     if (duong.Length == 0) duong = "biology-lab-3d.html";
                     string full = Path.GetFullPath(Path.Combine(root, duong));
                     if (!full.StartsWith(root, StringComparison.Ordinal) || !File.Exists(full)) { Gui(s, 404, "text/plain", null); return; }

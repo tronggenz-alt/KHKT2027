@@ -743,8 +743,19 @@ namespace Khkt.Demo
             padStatus.text = lines.Count > 0 ? string.Join("\n", lines) : "Chưa bật nguồn tay cầm nào";
         }
 
-        public void ToggleHelp() => helpPanel.SetActive(!helpPanel.activeSelf);
-        public void ToggleGraph() => graphPanel.SetActive(!graphPanel.activeSelf);
+        public void ToggleHelp()
+        {
+            if (helpPanel == null) return;
+            if (!helpPanel.activeSelf) UiMotion.OpenPanel(this, helpPanel, 0.20f);
+            else UiMotion.ClosePanel(this, helpPanel, 0.14f);
+        }
+
+        public void ToggleGraph()
+        {
+            if (graphPanel == null) return;
+            if (!graphPanel.activeSelf) UiMotion.OpenPanel(this, graphPanel, 0.20f);
+            else UiMotion.ClosePanel(this, graphPanel, 0.14f);
+        }
 
         // =====================================================================
         // Cập nhật
@@ -1474,6 +1485,8 @@ namespace Khkt.Demo
             MakeButton(winTr, "Nút đổi cách làm", "Đổi cách làm", new Vector2(260, -292), new Vector2(332, 48), TriggerSafetyCancel, true, 16);
 
             SetLayerIfNeeded(safetyPanel.transform, hostCanvas.gameObject.layer);
+            if (Instance != null && win != null)
+                UiMotion.Popup(Instance, win.rectTransform, null, 0.20f);
         }
 
         static void RebuildSafetyModal()

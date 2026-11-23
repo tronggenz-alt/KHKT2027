@@ -264,7 +264,7 @@ namespace Khkt.Menu
                 TrangCuon.XepChip(hang, ds, 0, -2, rong, 14);
             }
             dong.XepLai();
-            MenuAnim.Fade(MenuAnim.Group(the), 0.2f, 1f, 0.3f);
+            MenuAnim.Pop(the, 0.96f, 0.28f);
             dong.TruotToiDapAn(this);
         }
 
@@ -286,7 +286,7 @@ namespace Khkt.Menu
             DoiHoiTiep();
             dong3DNhan?.Invoke(mo);
             this.dong.XepLai();
-            if (mo) { MenuAnim.Fade(MenuAnim.Group(khu3D), 0f, 1f, 0.25f); this.dong.TruotToiDapAn(this); }
+            if (mo) { MenuAnim.Pop(khu3D, 0.96f, 0.25f); this.dong.TruotToiDapAn(this); }
         }
 
         public Action<bool> dong3DNhan;
@@ -307,7 +307,11 @@ namespace Khkt.Menu
             hoiTiep.gameObject.SetActive(mo);
             caoHoiTiep = mo ? 150 : 0;
             dong.XepLai();
-            if (mo) oHoi.ActivateInputField();
+            if (mo)
+            {
+                MenuAnim.Pop(hoiTiep, 0.96f, 0.22f);
+                oHoi.ActivateInputField();
+            }
             if (cauHoi != null) GuiHoi(cauHoi);
         }
 
@@ -381,8 +385,8 @@ namespace Khkt.Menu
             dung?.Invoke(than);
             var g = MenuAnim.Group(goc);
             g.blocksRaycasts = true;
-            MenuAnim.Fade(g, 0f, 1f, 0.2f);
-            MenuAnim.Pop(khung);
+            MenuAnim.Fade(g, 0f, 1f, 0.18f);
+            MenuAnim.Pop(khung, 0.93f, 0.26f);
         }
 
         public Action KhiDong;
@@ -393,7 +397,7 @@ namespace Khkt.Menu
             var kd = KhiDong; KhiDong = null; kd?.Invoke();
             var g = MenuAnim.Group(goc);
             g.blocksRaycasts = false;
-            MenuAnim.Fade(g, g.alpha, 0f, 0.18f, 0f, () => goc.gameObject.SetActive(false));
+            MenuAnim.ClosePop(khung, g, 0.16f, () => goc.gameObject.SetActive(false));
         }
 
         void Update()
@@ -712,7 +716,7 @@ namespace Khkt.Menu
             RenderSettings.sun = den;                 // URP lấy RenderSettings.sun làm đèn chính → phân tử chắc chắn được chiếu
             Khkt.Rendering.CameraKhongHauKy.Gan(x.cam);
             // cỡ ảnh theo TỈ LỆ khung (không theo điểm ảnh màn lúc tạo – màn batchmode/màn nhỏ cho ảnh quá thô): rộng 1600
-            float tl = khung.rect.height > 1 ? khung.rect.width / khung.rect.height : 1.5f;
+            float tl = khung.rect.height > 10 && khung.rect.width > 10 ? khung.rect.width / khung.rect.height : 1.75f;
             int w = 1600, h = Mathf.Clamp(Mathf.RoundToInt(1600f / Mathf.Max(0.3f, tl)), 200, 2048);
             x.rt = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4, name = "Bang3D" };
             x.rt.Create();
@@ -730,19 +734,124 @@ namespace Khkt.Menu
             return x;
         }
 
-        /// <summary>Kiểu khung Mô hình 3D: bóng–que Jmol, nền tối, không nhãn chữ, hiện mọi H.</summary>
-        public void KieuMoHinh()
+        /// <summary>Kiểu khung Mô hình 3D: bóng–que Jmol, ánh sáng studio trên trái, nền tuỳ chọn (mặc định tối), hiện mọi H, không tự lắc.</summary>
+        public void KieuMoHinh(Color? nen = null)
         {
+            cheDoMoHinh = true;
             khongNhan = true;
-            TP.KieuChemistry = true; TP.KieuJmol = true; TP.AnH = false; TP.TuSang = 0.06f;
-            cam.backgroundColor = new Color32(0x12, 0x12, 0x15, 0xff);
+            var bg = nen ?? new Color32(0x12, 0x12, 0x15, 0xff);
+            bool sang = (bg.r + bg.g + bg.b) > 1.5f;
+            TP.KieuChemistry = true; TP.KieuJmol = true; TP.AnH = false; TP.LacGoc = false; TP.TuXoay = false;
+            TP.NenSang = sang;
+            TP.TuSang = sang ? 0f : 0.06f;
+            if (den != null) { den.transform.rotation = Quaternion.Euler(34f, 26f, 0f); den.intensity = sang ? 1.05f : 1.2f; }
+            cam.backgroundColor = bg;
             TP.Nap(TP.KichBan); TP.DatT(1f);
         }
-        bool khongNhan;
+        bool khongNhan, cheDoMoHinh;
+
+        public Camera Cam => cam;
+        public RectTransform Khung => khung;
+        public bool HienNhan
+        {
+            get => !khongNhan;
+            set
+            {
+                khongNhan = !value;
+                if (lopNhan != null) lopNhan.gameObject.SetActive(value);
+            }
+        }
+
+        public void DatNen(Color mau) { if (cam != null) cam.backgroundColor = mau; }
+
+        public void NapLai(KichBan3D kb)
+        {
+            if (TP == null || kb == null) return;
+            TP.Nap(kb);
+            TP.DatT(1f);
+        }
+
+        public void DatLaiGoc() => TP?.DatLaiGoc();
+
+        /// <summary>Chiếu toạ độ mô hình lên toạ độ cục bộ (pivot 0,5; 0,5) trong khung 3D.</summary>
+        public bool ChieuLenKhung(Vector3 molPos, out Vector2 localPos)
+        {
+            localPos = Vector2.zero;
+            if (cam == null || TP == null || khung == null) return false;
+            var sp = cam.WorldToViewportPoint(TP.TheGioi(molPos));
+            if (sp.z <= 0f) return false;
+            var r = khung.rect;
+            localPos = new Vector2((sp.x - 0.5f) * r.width, (sp.y - 0.5f) * r.height);
+            return true;
+        }
+
+        /// <summary>Tìm nguyên tử gần camera nhất dưới con trỏ chuột (để rê xem thông số và bấm đo khoảng cách / góc).</summary>
+        public bool TimNguyenTuTai(Vector2 screenPos, out string id, out string elem, out int index, out Vector3 molPos, out Vector2 localPos)
+        {
+            id = ""; elem = ""; index = -1; molPos = Vector3.zero; localPos = Vector2.zero;
+            if (cam == null || TP == null || TP.KichBan == null || khung == null) return false;
+            var uvOpt = Chuot(screenPos);
+            if (!uvOpt.HasValue) return false;
+            var uv = uvOpt.Value;
+            float aspect = Mathf.Max(0.2f, cam.aspect);
+            float tanHalf = Mathf.Tan(cam.fieldOfView * 0.5f * Mathf.Deg2Rad);
+            float bestZ = float.MaxValue;
+            bool found = false;
+            var r = khung.rect;
+            foreach (var kv in TP.ViTriNguyenTu)
+            {
+                if (TP.CoNguyenTu(kv.Key) < 0.5f || TP.LaHAn(kv.Key)) continue;
+                var vp = cam.WorldToViewportPoint(TP.TheGioi(kv.Value));
+                if (vp.z <= 0.05f || vp.x < 0f || vp.x > 1f || vp.y < 0f || vp.y > 1f) continue;
+                float rWorld = Mathf.Max(0.22f, TP.BanKinhNguyenTu(kv.Key) * 1.15f);
+                float rY = Mathf.Max(0.022f, rWorld / (2f * vp.z * tanHalf));
+                float dx = (uv.x - vp.x) * aspect, dy = uv.y - vp.y;
+                if (dx * dx + dy * dy <= rY * rY && vp.z < bestZ)
+                {
+                    bestZ = vp.z;
+                    found = true;
+                    id = kv.Key;
+                    elem = TP.NguyenTo(kv.Key);
+                    molPos = kv.Value;
+                    index = id.Length > 1 && int.TryParse(id.Substring(1), out var idx) ? idx : 0;
+                    localPos = new Vector2((vp.x - 0.5f) * r.width, (vp.y - 0.5f) * r.height);
+                }
+            }
+            return found;
+        }
+
+        /// <summary>Xuất ảnh PNG độ phân giải bất kỳ (vd 1280×800 hoặc 2560×1600 4K) trực tiếp từ camera 3D.</summary>
+        public void LuuAnhCo(string duong, int w, int h)
+        {
+            if (cam == null) return;
+            var tam = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4 };
+            tam.Create();
+            var cu = cam.targetTexture;
+            bool batCu = cam.enabled;
+            cam.targetTexture = tam;
+            cam.enabled = true;
+            cam.Render();
+            var prev = RenderTexture.active;
+            RenderTexture.active = tam;
+            var tex = new Texture2D(w, h, TextureFormat.RGB24, false);
+            tex.ReadPixels(new Rect(0, 0, w, h), 0, 0);
+            tex.Apply();
+            RenderTexture.active = prev;
+            cam.targetTexture = cu;
+            cam.enabled = batCu;
+            tam.Release();
+            Destroy(tam);
+            System.IO.File.WriteAllBytes(duong, tex.EncodeToPNG());
+            Destroy(tex);
+        }
+
+        /// <summary>Tuỳ chọn chặn tương tác chuột trong khung 3D (ví dụ khi con trỏ nằm trên nút nổi hoặc menu thả).</summary>
+        public Func<Vector2, bool> ChanChuot;
 
         Vector2? Chuot(Vector2 p)
         {
             if (khung == null || !khung.gameObject.activeInHierarchy) return null;
+            if (ChanChuot != null && ChanChuot(p)) return null;
             if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(khung, p, camUi, out var lp)) return null;
             var r = khung.rect;
             var n = new Vector2((lp.x - r.xMin) / Mathf.Max(1, r.width), (lp.y - r.yMin) / Mathf.Max(1, r.height));
@@ -792,8 +901,29 @@ namespace Khkt.Menu
             bool thay = khung.gameObject.activeInHierarchy && !CoCheMoDun.DangMo && !Khkt.CoChe.MoHinh3DMoDun.DangMo && TrenManHinh();
             if (cam.enabled != thay) cam.enabled = thay;
             if (!thay) return;
-            if (khongNhan) return;
+            var rr = khung.rect;
+            if (rt != null && rr.width > 20f && rr.height > 20f)
+            {
+                float tlKhung = rr.width / rr.height, tlRt = (float)rt.width / Mathf.Max(1, rt.height);
+                if (Mathf.Abs(tlKhung - tlRt) > 0.08f)
+                {
+                    int nw = 1600, nh = Mathf.Clamp(Mathf.RoundToInt(1600f / Mathf.Max(0.3f, tlKhung)), 240, 2048);
+                    var moi = new RenderTexture(nw, nh, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4, name = "Bang3D" };
+                    moi.Create();
+                    cam.targetTexture = moi;
+                    if (anh != null) anh.texture = moi;
+                    rt.Release(); Destroy(rt);
+                    rt = moi;
+                    if (TP.KichBan != null) cam.Render();
+                }
+            }
+            if (khongNhan)
+            {
+                if (lopNhan != null && lopNhan.gameObject.activeSelf) lopNhan.gameObject.SetActive(false);
+                return;
+            }
             if (lopNhan == null) { lopNhan = MenuKit.Full(khung, "Nhãn nguyên tử"); lopNhan.SetAsLastSibling(); }
+            else if (!lopNhan.gameObject.activeSelf) lopNhan.gameObject.SetActive(true);
             int dung = 0;
             var r = khung.rect;
             if (cam.enabled && TP.KichBan != null)
@@ -801,6 +931,7 @@ namespace Khkt.Menu
                 {
                     if (TP.CoNguyenTu(kv.Key) < 0.5f) continue;
                     string e = TP.NguyenTo(kv.Key);
+                    if (cheDoMoHinh && e == "H") continue;
                     if (TP.LaHAn(kv.Key)) continue;
                     if (TP.BiChe(kv.Key)) continue;
                     var sp = cam.WorldToScreenPoint(TP.TheGioi(kv.Value));
@@ -812,12 +943,14 @@ namespace Khkt.Menu
                     {
                         var t = GlassKit.Label(lopNhan, "Nhãn", "", 14, Color.white, true, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(44, 22), new Vector2(0.5f, 0.5f));
                         t.rectTransform.pivot = new Vector2(0.5f, 0.5f); t.raycastTarget = false;
-                        var sh = t.gameObject.AddComponent<Shadow>(); sh.effectColor = new Color(0, 0, 0, 0.8f);
+                        var sh = t.gameObject.AddComponent<Shadow>(); sh.effectColor = new Color(0, 0, 0, 0.7f);
                         nhan.Add(t);
                     }
                     var n = nhan[dung++];
                     if (n.text != chu) n.text = chu;
-                    var mauChu = e == "C" || e == "H" ? (Color)new Color32(0x14, 0x18, 0x22, 0xff) : Color.white;
+                    var mauChu = cheDoMoHinh
+                        ? (e == "H" || e == "S" || e == "F" || e == "Cl" ? (Color)new Color32(0x14, 0x18, 0x22, 0xff) : Color.white)
+                        : (e == "C" || e == "H" ? (Color)new Color32(0x14, 0x18, 0x22, 0xff) : Color.white);
                     if (n.color != mauChu) n.color = mauChu;
                     n.fontSize = e == "H" ? 11 : 14;
                     n.rectTransform.anchoredPosition = lp;

@@ -7,15 +7,14 @@
 import { FilesetResolver, HandLandmarker } from '../vendor/mediapipe/tasks-vision-1.1.0/vision_bundle.mjs';
 
 let may = null;
-let canvasLat = null, ctxLat = null;      // khung lật gương (giống cv2.flip(khung, 1) của bản Python)
 let canvasSang = null, ctxSang = null;    // 16×12 điểm ảnh để đo độ sáng
 let demKhung = 0, doSang = -1;
+let msCuoi = 0;                           // bảo đảm timestamp MediaPipe VIDEO luôn tăng nghiêm ngặt (kể cả khi tắt rồi bật lại)
 
 async function khoiTao({ duongWasm, duongMoHinh, tuyChon, thuTu = ['GPU', 'CPU'] }) {
   // useModule = true: trong worker kiểu module không có importScripts, phải nạp bản wasm "module"
   const fileset = await FilesetResolver.forVisionTasks(duongWasm, true);
-  // Thứ tự do luồng chính gửi sang (mặc định GPU rồi CPU). Đo trên trang Sinh học (M2, camera giả 30 hình/giây,
-  // khởi động nguội): luồng riêng + GPU giữ trang 120 hình/giây, nhận diện 17 ms/lần; CPU (WASM SIMD) 26 ms/lần.
+  // Thứ tự do luồng chính gửi sang (mặc định GPU rồi CPU).
   let loiDau = null;
   for (const delegate of thuTu) {
     try {
@@ -24,6 +23,8 @@ async function khoiTao({ duongWasm, duongMoHinh, tuyChon, thuTu = ['GPU', 'CPU']
         runningMode: 'VIDEO',
         ...tuyChon
       });
+      // Khởi nóng shader GPU ngay lúc tạo để khung tay thật đầu tiên không bị khựng biên dịch shader
+      try { msCuoi = 1; may.detectForVideo(new OffscreenCanvas(16, 16), msCuoi); } catch { /* bỏ qua nếu trình duyệt không hỗ trợ */ }
       return { uyQuyen: delegate, loiDau: loiDau && String(loiDau.message || loiDau) };
     } catch (e) {
       if (delegate === thuTu[thuTu.length - 1]) throw e;
@@ -44,19 +45,24 @@ function doDoSang(anh) {
   return Math.round(tong / (d.length / 4));
 }
 
+// Không copy qua OffscreenCanvas để lật ảnh nữa: đưa thẳng ImageBitmap vào MediaPipe (0-copy) rồi lật 21 điểm (x → 1 - x, đổi Left ↔ Right)
 function nhanDien(anh, ms) {
-  if (!canvasLat || canvasLat.width !== anh.width || canvasLat.height !== anh.height) {
-    canvasLat = new OffscreenCanvas(anh.width, anh.height);
-    ctxLat = canvasLat.getContext('2d');
-    ctxLat.setTransform(-1, 0, 0, 1, anh.width, 0);
-  }
-  ctxLat.drawImage(anh, 0, 0);
-  const r = may.detectForVideo(canvasLat, ms);
-  return {
-    landmarks: r.landmarks,
-    worldLandmarks: r.worldLandmarks,
-    handedness: r.handedness.map((h) => h.map((c) => ({ categoryName: c.categoryName, score: c.score })))
-  };
+  const ts = Math.max(ms, msCuoi + 1);
+  msCuoi = ts;
+  const r = may.detectForVideo(anh, ts);
+  const landmarks = (r.landmarks || []).map((hand) =>
+    hand.map((p) => ({ x: 1.0 - p.x, y: p.y, z: p.z }))
+  );
+  const worldLandmarks = (r.worldLandmarks || []).map((hand) =>
+    hand.map((p) => ({ x: -p.x, y: p.y, z: p.z }))
+  );
+  const handedness = (r.handedness || []).map((h) =>
+    h.map((c) => ({
+      categoryName: c.categoryName === 'Left' ? 'Right' : c.categoryName === 'Right' ? 'Left' : c.categoryName,
+      score: c.score
+    }))
+  );
+  return { landmarks, worldLandmarks, handedness };
 }
 
 self.onmessage = async ({ data: m }) => {
@@ -71,7 +77,7 @@ self.onmessage = async ({ data: m }) => {
     let kq = null, loi = null;
     try {
       kq = nhanDien(m.anh, m.ms);
-      if (demKhung++ % 10 === 0) doSang = doDoSang(m.anh);
+      if (demKhung++ % 30 === 0) doSang = doDoSang(m.anh);
     } catch (e) {
       loi = String((e && e.message) || e);
     }

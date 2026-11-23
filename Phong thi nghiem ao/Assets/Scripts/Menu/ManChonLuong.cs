@@ -162,15 +162,15 @@ namespace Khkt.Menu
             ChonMuc(0);
             var g = MenuAnim.Group(goc);
             g.blocksRaycasts = true;
-            MenuAnim.Fade(g, 0f, 1f, 0.2f);
-            MenuAnim.Pop(khung);
+            MenuAnim.Fade(g, 0f, 1f, 0.18f);
+            MenuAnim.Pop(khung, 0.93f, 0.26f);
         }
 
         void Dong()
         {
             var g = MenuAnim.Group(goc);
             g.blocksRaycasts = false;
-            MenuAnim.Fade(g, g.alpha, 0f, 0.18f, 0f, () => goc.gameObject.SetActive(false));
+            MenuAnim.ClosePop(khung, g, 0.16f, () => goc.gameObject.SetActive(false));
         }
 
         void Dung()
@@ -210,7 +210,7 @@ namespace Khkt.Menu
             mucThongTin.gameObject.SetActive(i == 0);
             mucApi.gameObject.SetActive(i == 1);
             var dang = i == 0 ? mucThongTin : mucApi;
-            MenuAnim.Enter(dang, 0f, 8f, 0.3f);
+            MenuAnim.Pop(dang, 0.965f, 0.22f);
             if (i == 0) CapNhatThongTin();
             else { oMayChu.text = Khkt.CoChe.MayChuCoChe.Url; StartCoroutine(KiemMayChu()); }
         }

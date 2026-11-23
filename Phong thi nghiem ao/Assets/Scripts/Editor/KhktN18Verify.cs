@@ -758,6 +758,19 @@ namespace Khkt.EditorTools
                 yield return WaitPlayFrames(6);
                 RenderStageWithOverlay(ctrl.StageCamera, ctrl.UiCanvas, rt, tex, Path.Combine(outDir, "g3_5_quang_hop_va_huong_sang.png"));
 
+                // 6B. Chụp kiểm chứng chế độ 6 Quá trình sinh lý 3D từng bước có mũi tên nhỏ gọn (Hấp thu nước & Quang hợp C3)
+                ctrl.BatDauQuaTrinh("hap_thu_nuoc", 1);
+                yield return WaitSeconds(1.2f);
+                yield return WaitPlayFrames(4);
+                RenderStageWithOverlay(ctrl.StageCamera, ctrl.UiCanvas, rt, tex, Path.Combine(outDir, "g3_7_qua_trinh_mui_ten_re.png"));
+
+                ctrl.BatDauQuaTrinh("quang_hop_c3", 2);
+                yield return WaitSeconds(1.2f);
+                yield return WaitPlayFrames(4);
+                RenderStageWithOverlay(ctrl.StageCamera, ctrl.UiCanvas, rt, tex, Path.Combine(outDir, "g3_8_qua_trinh_mui_ten_la.png"));
+                ctrl.DongQuaTrinh();
+                yield return WaitPlayFrames(4);
+
                 // 7. Đo nhịp khung ở mức Cao khi mở mô-đun
                 int sampleFrames = 45;
                 float tStart = Time.realtimeSinceStartup;
@@ -907,18 +920,6 @@ namespace Khkt.EditorTools
             Camera prevWorldCam = null;
             float prevPlaneDist = 100f;
             int prevLayer = 5;
-            if (overlayCanvas != null)
-            {
-                prevMode = overlayCanvas.renderMode;
-                prevWorldCam = overlayCanvas.worldCamera;
-                prevPlaneDist = overlayCanvas.planeDistance;
-                prevLayer = overlayCanvas.gameObject.layer;
-                overlayCanvas.renderMode = RenderMode.ScreenSpaceCamera;
-                overlayCanvas.worldCamera = stageCam;
-                overlayCanvas.planeDistance = 0.25f;
-                Canvas.ForceUpdateCanvases();
-            }
-
             var oldRt = stageCam.targetTexture;
             bool oldEn = stageCam.enabled;
             int oldMask = stageCam.cullingMask;
@@ -929,6 +930,17 @@ namespace Khkt.EditorTools
                 stageCam.cullingMask = oldMask | (1 << 5);
                 stageCam.nearClipPlane = 0.02f;
                 stageCam.targetTexture = rt;
+                if (overlayCanvas != null)
+                {
+                    prevMode = overlayCanvas.renderMode;
+                    prevWorldCam = overlayCanvas.worldCamera;
+                    prevPlaneDist = overlayCanvas.planeDistance;
+                    prevLayer = overlayCanvas.gameObject.layer;
+                    overlayCanvas.renderMode = RenderMode.ScreenSpaceCamera;
+                    overlayCanvas.worldCamera = stageCam;
+                    overlayCanvas.planeDistance = 0.25f;
+                    Canvas.ForceUpdateCanvases();
+                }
                 stageCam.Render();
                 RenderTexture.active = rt;
                 tex.ReadPixels(new Rect(0, 0, ShotW, ShotH), 0, 0);

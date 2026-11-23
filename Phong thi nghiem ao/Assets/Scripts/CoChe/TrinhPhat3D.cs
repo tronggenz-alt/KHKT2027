@@ -41,6 +41,9 @@ namespace Khkt.CoChe
         public bool KieuCu;
         /// <summary>Bóng–que kiểu Jmol (Mô hình 3D): màu Jmol, que tô hai nửa theo màu hai nguyên tử, bề mặt mờ mềm.</summary>
         public bool KieuJmol;
+        /// <summary>Đang vẽ trên nền sáng (khung nội tuyến): Carbon xám than sâu và H bóng mượt tạo độ nổi 3D như 3Dmol.</summary>
+        public bool NenSang { get => nenSang; set { if (nenSang == value) return; nenSang = value; foreach (var m in matNt.Values) if (m != null) Destroy(m); matNt.Clear(); } }
+        bool nenSang;
         static readonly Dictionary<string, Color> MauJmol = new Dictionary<string, Color>
         {
             {"H", new Color32(0xff, 0xff, 0xff, 0xff)}, {"C", new Color32(0x90, 0x90, 0x90, 0xff)}, {"N", new Color32(0x30, 0x50, 0xf8, 0xff)},
@@ -134,6 +137,16 @@ namespace Khkt.CoChe
         }
         public float KhoangCach = 13f;
         public Quaternion Xoay = Quaternion.Euler(12f, -18f, 0f);
+        /// <summary>Độ dịch khung nhìn (pan) theo mặt phẳng màn hình khi kéo chuột phải hoặc Ctrl+kéo.</summary>
+        public Vector3 TamPan;
+        /// <summary>Đặt lại góc nhìn, vị trí dịch chuyển và độ phóng ban đầu của phân tử.</summary>
+        public void DatLaiGoc()
+        {
+            TamPan = Vector3.zero;
+            dichBuoc = -2;
+            DatNgayGocDich();
+            TuDongGoc = false;
+        }
         /// <summary>Vùng màn hình (tỉ lệ 0..1) dành cho hình 3D: tâm phân tử đặt vào giữa vùng này, kéo chuột trong vùng để xoay.</summary>
         public Rect VungNhin = new Rect(0.25f, 0.12f, 0.75f, 0.76f);
         public bool DangNhanhSai { get; private set; }
@@ -152,7 +165,7 @@ namespace Khkt.CoChe
         readonly List<Matrix4x4> lk = new List<Matrix4x4>(), hat = new List<Matrix4x4>();
         readonly Dictionary<string, Vector3> viTri = new Dictionary<string, Vector3>();
         readonly Dictionary<string, float> coNt = new Dictionary<string, float>();
-        bool keo;
+        bool keo, keoPan;
         Vector2 chuotTruoc;
 
         public int SoBuoc => KichBan == null ? 0 : KichBan.Buoc.Count;
@@ -164,6 +177,7 @@ namespace Khkt.CoChe
             bangLkDem.Clear(); hGanC.Clear();
             ChiSoBuoc = 0; phuongAnCu.Clear();
             T = 0f;
+            TamPan = Vector3.zero;
             DangPhat = false;
             DangNhanhSai = false;
             NhanhHienTai = null;
@@ -319,9 +333,23 @@ namespace Khkt.CoChe
                 var vp = new Vector2(p.x / Mathf.Max(1, Screen.width), p.y / Mathf.Max(1, Screen.height));
                 trongVung = VungNhin.Contains(vp) && (EventSystem.current == null || !EventSystem.current.IsPointerOverGameObject());
             }
-            if (m.leftButton.wasPressedThisFrame && trongVung) { keo = true; chuotTruoc = p; TuDongGoc = false; }
-            if (!m.leftButton.isPressed) keo = false;
-            if (keo)
+            bool ctrl = kb != null && (kb.leftCtrlKey.isPressed || kb.rightCtrlKey.isPressed);
+            if (m.rightButton.wasPressedThisFrame && trongVung) { keoPan = true; keo = false; chuotTruoc = p; TuDongGoc = false; }
+            else if (m.leftButton.wasPressedThisFrame && trongVung)
+            {
+                if (ctrl) { keoPan = true; keo = false; } else { keo = true; keoPan = false; }
+                chuotTruoc = p; TuDongGoc = false;
+            }
+            if (!m.leftButton.isPressed && !m.rightButton.isPressed) { keo = false; keoPan = false; }
+            if (keoPan)
+            {
+                Vector2 d = p - chuotTruoc;
+                chuotTruoc = p;
+                float tanf = Mathf.Tan((Cam != null ? Cam.fieldOfView : 32f) * 0.5f * Mathf.Deg2Rad);
+                float heSo = 2f * KhoangCach * tanf / Mathf.Max(200f, Screen.height);
+                TamPan += new Vector3(d.x * heSo, d.y * heSo, 0f);
+            }
+            else if (keo)
             {
                 Vector2 d = p - chuotTruoc;
                 chuotTruoc = p;
@@ -461,7 +489,7 @@ namespace Khkt.CoChe
             float dx = (cx - 0.5f) * 2f * KhoangCach * tanf * Cam.aspect;
             float dy = (cy - 0.5f) * 2f * KhoangCach * tanf;
             Vector3 tam = W(tamNay);
-            Cam.transform.SetPositionAndRotation(tam + new Vector3(-dx, -dy, -KhoangCach), Quaternion.identity);
+            Cam.transform.SetPositionAndRotation(tam + new Vector3(-dx - TamPan.x, -dy - TamPan.y, -KhoangCach), Quaternion.identity);
         }
 
         // ------------------------------------------------------------------ hình học
@@ -537,10 +565,15 @@ namespace Khkt.CoChe
             m = new Material(matGoc) { enableInstancing = true, name = "CoChe_" + e };
             var bm = bangMau == 1 ? MauCarbonToi : bangMau == 2 ? MauRasmol : MauJmol;
             Color mauNt = KieuJmol ? (bm.TryGetValue(e, out var mj) ? mj : Mau(e)) : KieuCu ? (MauCu.TryGetValue(e, out var mc) ? mc : new Color(1f, 0.55f, 0.75f)) : KieuChemistry ? MauCH(e) : Mau(e);
+            if (KieuJmol && nenSang && bangMau == 0)
+            {
+                if (e == "C") mauNt = new Color32(0x64, 0x67, 0x6d, 0xff);
+                else if (e == "H") mauNt = new Color32(0xea, 0xec, 0xf0, 0xff);
+            }
             m.SetColor("_BaseColor", mauNt);
             m.SetColor("_Color", mauNt);
-            m.SetFloat("_Smoothness", KieuJmol ? 0.45f : 0.62f);
-            float sang = TuSang > 0f ? TuSang : KieuCu ? 0f : 0.12f;
+            m.SetFloat("_Smoothness", KieuJmol ? (nenSang ? 0.58f : 0.45f) : 0.62f);
+            float sang = nenSang ? TuSang : (TuSang > 0f ? TuSang : KieuCu ? 0f : 0.12f);
             if (sang > 0f)
             {
                 m.EnableKeyword("_EMISSION");
@@ -971,6 +1004,8 @@ namespace Khkt.CoChe
         }
 
         /// <summary>Bán kính quả cầu nguyên tử đang vẽ (toạ độ mô hình).</summary>
+        public float BanKinhNguyenTu(string id) => BanKinhVe(id);
+
         float BanKinhVe(string id)
         {
             string e = Nguyen(id);

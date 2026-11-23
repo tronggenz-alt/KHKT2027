@@ -160,7 +160,7 @@ namespace Khkt.Menu
             }
             ShowPanel();
             if (leftColumn != null) leftColumn.gameObject.SetActive(s != Screen.Settings);
-            MenuAnim.Enter((RectTransform)screens[s].transform, 0f, 18f, 0.45f);
+            MenuAnim.Pop((RectTransform)screens[s].transform, 0.94f, 0.28f);
             if (s == Screen.Login && loginServerText != null) loginServerText.text = "Máy chủ: " + GameSession.ServerUrl;
             if (s == Screen.Room) RefreshRoom();
             if (s == Screen.Settings) RefreshSettings();
@@ -769,6 +769,9 @@ namespace Khkt.Menu
             btn.navigation = new Navigation { mode = Navigation.Mode.None };
             btn.targetGraphic = inner;
             btn.onClick.AddListener(() => SelectTheme(mode));
+            var hv = inner.gameObject.AddComponent<MenuHover>();
+            hv.hoverScale = 1.022f;
+            hv.pressScale = 0.955f;
 
             ThemeSwatchPalette(mode, out var swBg, out var swCard, out var swAccent, out var swInk);
             var swW = size.x - 24f;
@@ -819,7 +822,7 @@ namespace Khkt.Menu
                 if (settingsPanes[i] != null) settingsPanes[i].SetActive(on);
             }
             if (settingsTabsUi != null && settingsTabsUi.current != currentSettingsTab) settingsTabsUi.Select(currentSettingsTab);
-            if (settingsPanes[currentSettingsTab] != null) MenuAnim.Enter((RectTransform)settingsPanes[currentSettingsTab].transform, 0f, 8f, 0.3f);
+            if (settingsPanes[currentSettingsTab] != null) MenuAnim.Pop((RectTransform)settingsPanes[currentSettingsTab].transform, 0.96f, 0.24f);
         }
 
         void RefreshSettings()

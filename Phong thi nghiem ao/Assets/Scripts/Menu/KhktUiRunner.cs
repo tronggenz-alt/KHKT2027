@@ -448,27 +448,70 @@ namespace Khkt.Menu
             Bam(gbt.transform, "Điều hướng Mô hình 3D");
             yield return Cho(0.6f);
             Check(gbt.TrangDang == ManGiaiBaiTap.Trang.MoHinh3D, "Thanh điều hướng mở trang Mô hình 3D");
+            Check(gbt.Khung3D != null && !gbt.Khung3D.DangHien, "Trang Mô hình 3D: chưa dựng chất thì thẻ kết quả ẩn");
             yield return Chup(menu, "mo_hinh_3d_Trang");
+
+            // Dựng benzen → hiển thị nội tuyến 2 cột (như ảnh mẫu CHEMISTRY), KHÔNG tự bật toàn màn hình
             var oChat = gbt.GetComponentsInChildren<InputField>(true).FirstOrDefault(x => x.name == "Ô chất");
+            if (oChat != null) oChat.text = "benzen";
+            Bam(gbt.transform, "Nút Dựng mô hình 3D");
+            t0 = Time.realtimeSinceStartup;
+            while ((gbt.Khung3D == null || !gbt.Khung3D.DangHien || gbt.DangDung3D) && Time.realtimeSinceStartup - t0 < 4f) yield return null;
+            yield return Cho(0.7f);
+            Check(gbt.Khung3D != null && gbt.Khung3D.DangHien && !Khkt.CoChe.MoHinh3DMoDun.DangMo,
+                "Dựng 3D: hiện khung 2 cột nội tuyến ngay trong trang, không tự bật toàn màn hình");
+            var xn = gbt.Khung3D != null ? gbt.Khung3D.Xem : null;
+            if (xn != null) { yield return null; xn.VeNgay(); }
+            int soNtB = xn != null ? xn.TP.SoNguyenTuDangVe : 0;
+            var doB = xn != null ? xn.DoAnh() : (Color.clear, 0);
+            Check(xn != null && xn.TP.KieuJmol && soNtB == 12 && doB.Item2 > 100,
+                "Dựng 3D benzen: khung nội tuyến vẽ 3D thật (bóng–que Jmol, 12 nguyên tử)", $"{soNtB} nt, {doB.Item2} điểm");
+            var anh2d = gbt.Khung3D != null ? gbt.Khung3D.GetComponentsInChildren<RawImage>(true).FirstOrDefault(r => r.name == "Ảnh 2D chất") : null;
+            Check(anh2d != null && anh2d.texture != null, "Cột Thông tin chất có ảnh công thức khung 2D");
+            if (xn != null && !string.IsNullOrEmpty(outDir)) xn.LuuAnh(Path.Combine(outDir, "mo_hinh_3d_benzen_khung.png"));
+            yield return Chup(menu, "mo_hinh_3d_ket_qua_Trang");
+
+            // Kiểm tra thanh điều khiển nội tuyến (kiểu vẽ, đo khoảng cách/góc, nhãn, tự xoay, xuất tệp)
+            Bam(gbt.Khung3D.transform, "Kiểu Que");
+            Check(xn != null && xn.TP.KieuVe == 1, "Thanh kiểu nội tuyến: chuyển sang Que");
+            Bam(gbt.Khung3D.transform, "Kiểu Đặc");
+            Check(xn != null && xn.TP.KieuVe == 2, "Thanh kiểu nội tuyến: chuyển sang Đặc");
+            Bam(gbt.Khung3D.transform, "Kiểu Bóng-que");
+            Bam(gbt.Khung3D.transform, "Nút Đo khoảng cách 3D");
+            Check(gbt.Khung3D.CheDoDo == "khoang-cach", "Thanh đo nội tuyến: bật Đo khoảng cách");
+            Bam(gbt.Khung3D.transform, "Nút Đo góc liên kết 3D");
+            Check(gbt.Khung3D.CheDoDo == "goc", "Thanh đo nội tuyến: chuyển sang Đo góc liên kết");
+            Bam(gbt.Khung3D.transform, "Nút Đo góc liên kết 3D");
+            Check(gbt.Khung3D.CheDoDo == "", "Thanh đo nội tuyến: tắt chế độ đo");
+            Bam(gbt.Khung3D.transform, "Nút Tải SDF 3D");
+            Check(!string.IsNullOrEmpty(gbt.Khung3D.DuongTepCuoi) && File.Exists(gbt.Khung3D.DuongTepCuoi), "Nút Tải .sdf (3D) lưu tệp hợp lệ", gbt.Khung3D.DuongTepCuoi);
+            Bam(gbt.Khung3D.transform, "Nút Tải XYZ 3D");
+            Check(!string.IsNullOrEmpty(gbt.Khung3D.DuongTepCuoi) && File.Exists(gbt.Khung3D.DuongTepCuoi), "Nút Tải .xyz lưu tệp hợp lệ", gbt.Khung3D.DuongTepCuoi);
+
+            // Chuyển sang ethanol và kiểm tra nút Toàn màn hình ở góc dưới phải khung 3D
             if (oChat != null) oChat.text = "ethanol";
             Bam(gbt.transform, "Nút Dựng mô hình 3D");
             t0 = Time.realtimeSinceStartup;
-            while ((gbt.Dong3D.Khoi.Count == 0 || !gbt.Dong3D.Khoi[0].CoDapAn) && Time.realtimeSinceStartup - t0 < 4f) yield return null;
-            yield return Cho(0.7f);
-            var xn = gbt.Dong3D.Khoi.Count > 0 && gbt.Dong3D.Khoi[0].Hinh != null ? gbt.Dong3D.Khoi[0].Hinh.GetComponentInChildren<Xem3DNho>(true) : null;
+            while ((gbt.DangDung3D || (xn != null && xn.TP.SoNguyenTuDangVe != 9)) && Time.realtimeSinceStartup - t0 < 4f) yield return null;
+            yield return Cho(0.5f);
             if (xn != null) { yield return null; xn.VeNgay(); }
             int soNt = xn != null ? xn.TP.SoNguyenTuDangVe : 0;
             var doNho = xn != null ? xn.DoAnh() : (Color.clear, 0);
-            Check(xn != null && xn.TP.KieuJmol && soNt == 9 && doNho.Item2 > 100, "Dựng 3D: khung kết quả vẽ 3D thật như khung lớn (bóng–que Jmol, 9 nguyên tử ethanol)", $"{soNt} nt, {doNho.Item2} điểm");
+            Check(xn != null && xn.TP.KieuJmol && soNt == 9 && doNho.Item2 > 100 && !Khkt.CoChe.MoHinh3DMoDun.DangMo,
+                "Dựng 3D ethanol: khung nội tuyến vẽ 9 nguyên tử, vẫn giữ bình thường chưa bật toàn màn hình", $"{soNt} nt, {doNho.Item2} điểm");
             if (xn != null && !string.IsNullOrEmpty(outDir)) xn.LuuAnh(Path.Combine(outDir, "mo_hinh_3d_khung_nho.png"));
-            yield return Chup(menu, "mo_hinh_3d_ket_qua_Trang");
-            Bam(gbt.Dong3D.Khoi[0].transform, "Nút Mở lớn");
-            yield return Cho(1.0f);
-            Check(Khkt.CoChe.MoHinh3DMoDun.DangMo, "3D Mở lớn mở khung xoay 3D");
-            { float tw = Time.realtimeSinceStartup; while (Khkt.CoChe.MoHinh3DMoDun.Instance != null && (Khkt.CoChe.MoHinh3DMoDun.Instance.DangTai || Khkt.CoChe.MoHinh3DMoDun.Instance.SoNguyenTu == 0) && Time.realtimeSinceStartup - tw < 4f) yield return null; }
+
+            // Bấm nút Toàn màn hình ở góc dưới phải → mới bật MoHinh3DMoDun toàn màn hình như app VERA hiện tại
+            var nutFullDuoi = gbt.Khung3D.GetComponentsInChildren<Button>(true).FirstOrDefault(b => b.name == "Nút Toàn màn hình 3D");
+            var rtFullDuoi = nutFullDuoi != null ? (RectTransform)nutFullDuoi.transform : null;
+            Check(rtFullDuoi != null && Mathf.Approximately(rtFullDuoi.anchorMin.x, 1f) && Mathf.Approximately(rtFullDuoi.anchorMin.y, 0f),
+                "Nút Toàn màn hình 3D nằm ở góc dưới bên phải khung 3D");
+            Bam(gbt.Khung3D.transform, "Nút Toàn màn hình 3D");
             yield return Cho(0.8f);
+            Check(Khkt.CoChe.MoHinh3DMoDun.DangMo, "Bấm nút Toàn màn hình góc dưới mới mở lớp phủ toàn màn hình MoHinh3DMoDun");
+            yield return Cho(0.4f);
             Check(Khkt.CoChe.MoHinh3DMoDun.Instance != null && Khkt.CoChe.MoHinh3DMoDun.Instance.TrinhPhat.KieuJmol && Khkt.CoChe.MoHinh3DMoDun.Instance.SoNguyenTu == 9,
-                "Khung 3D bóng–que kiểu Jmol (nền trắng, que hai màu, 9 nguyên tử ethanol)", Khkt.CoChe.MoHinh3DMoDun.Instance != null ? Khkt.CoChe.MoHinh3DMoDun.Instance.SoNguyenTu.ToString() : "");
+                "Khung 3D toàn màn hình bóng–que kiểu Jmol (9 nguyên tử ethanol)", Khkt.CoChe.MoHinh3DMoDun.Instance != null ? Khkt.CoChe.MoHinh3DMoDun.Instance.SoNguyenTu.ToString() : "");
             if (Khkt.CoChe.MoHinh3DMoDun.Instance != null)
             {   // chụp riêng camera 3D (ảnh màn hình thường chỉ có lớp menu)
                 var cam3 = Khkt.CoChe.MoHinh3DMoDun.Instance.Cam;
@@ -498,6 +541,7 @@ namespace Khkt.Menu
             }
             Khkt.CoChe.MoHinh3DMoDun.Dong();
             yield return Frames(3);
+            Check(!Khkt.CoChe.MoHinh3DMoDun.DangMo && gbt.Khung3D.DangHien, "Đóng toàn màn hình quay về khung 3D nội tuyến bình thường");
             Bam(gbt.transform, "Điều hướng Hóa lý");
             yield return Cho(0.6f);
             int hl = gbt.GetComponentsInChildren<RectTransform>(true).Count(r => r.name.StartsWith("Hóa lý ") && r.GetComponentInParent<TrangCuon>(true)?.name == "Trang Hóa lý");
@@ -536,7 +580,15 @@ namespace Khkt.Menu
                 case "/co-che/hoi-dap":
                     return (200, "{\"tra_loi\":\"H2SO4 đặc là chất xúc tác, hút nước làm cân bằng chuyển dịch.\",\"goi_y\":[],\"nguon\":\"ai\"}");
                 case "/co-che/mo-hinh-3d":
-                    return (200, "{\"ten\":\"ethanol\",\"cong_thuc\":\"C2H6O\",\"khoi_luong\":46.07,\"smiles\":\"CCO\",\"nguon\":\"bang_sgk\",\"nguyen_tu\":[" +
+                    if (than != null && than.IndexOf("benzen", StringComparison.OrdinalIgnoreCase) >= 0)
+                        return (200, "{\"ten\":\"Benzene\",\"iupac\":\"benzene\",\"cong_thuc\":\"C6H6\",\"khoi_luong\":78.11,\"smiles\":\"c1ccccc1\",\"cid\":241,\"url\":\"https://pubchem.ncbi.nlm.nih.gov/compound/241\",\"nguon\":\"pubchem\",\"nguon_3d\":\"pubchem_3d\",\"nguon_3d_mo_ta\":\"PubChem 3D conformer (CID 241)\",\"cach_nhan_dien\":\"PubChem (theo tên)\",\"so_nguyen_tu\":12,\"nguyen_tu\":[" +
+                            "{\"e\":\"C\",\"x\":0,\"y\":1.395,\"z\":0},{\"e\":\"C\",\"x\":1.208,\"y\":0.6975,\"z\":0},{\"e\":\"C\",\"x\":1.208,\"y\":-0.6975,\"z\":0}," +
+                            "{\"e\":\"C\",\"x\":0,\"y\":-1.395,\"z\":0},{\"e\":\"C\",\"x\":-1.208,\"y\":-0.6975,\"z\":0},{\"e\":\"C\",\"x\":-1.208,\"y\":0.6975,\"z\":0}," +
+                            "{\"e\":\"H\",\"x\":0,\"y\":2.482,\"z\":0},{\"e\":\"H\",\"x\":2.149,\"y\":1.241,\"z\":0},{\"e\":\"H\",\"x\":2.149,\"y\":-1.241,\"z\":0}," +
+                            "{\"e\":\"H\",\"x\":0,\"y\":-2.482,\"z\":0},{\"e\":\"H\",\"x\":-2.149,\"y\":-1.241,\"z\":0},{\"e\":\"H\",\"x\":-2.149,\"y\":1.241,\"z\":0}]," +
+                            "\"lien_ket\":[{\"a\":0,\"b\":1,\"bac\":2},{\"a\":1,\"b\":2,\"bac\":1},{\"a\":2,\"b\":3,\"bac\":2},{\"a\":3,\"b\":4,\"bac\":1},{\"a\":4,\"b\":5,\"bac\":2},{\"a\":5,\"b\":0,\"bac\":1}," +
+                            "{\"a\":0,\"b\":6,\"bac\":1},{\"a\":1,\"b\":7,\"bac\":1},{\"a\":2,\"b\":8,\"bac\":1},{\"a\":3,\"b\":9,\"bac\":1},{\"a\":4,\"b\":10,\"bac\":1},{\"a\":5,\"b\":11,\"bac\":1}]}");
+                    return (200, "{\"ten\":\"Ethanol\",\"iupac\":\"ethanol\",\"cong_thuc\":\"C2H6O\",\"khoi_luong\":46.07,\"smiles\":\"CCO\",\"cid\":702,\"url\":\"https://pubchem.ncbi.nlm.nih.gov/compound/702\",\"nguon\":\"bang_sgk\",\"nguon_3d\":\"rdkit\",\"nguon_3d_mo_ta\":\"RDKit (ETKDG v3 + MMFF94)\",\"cach_nhan_dien\":\"Bảng SGK (đã kiểm chứng)\",\"so_nguyen_tu\":9,\"nguyen_tu\":[" +
                         "{\"e\":\"C\",\"x\":-1.2,\"y\":0.1,\"z\":0},{\"e\":\"C\",\"x\":0.2,\"y\":-0.4,\"z\":0.1},{\"e\":\"O\",\"x\":1.2,\"y\":0.5,\"z\":-0.1}," +
                         "{\"e\":\"H\",\"x\":-1.9,\"y\":-0.6,\"z\":0.4},{\"e\":\"H\",\"x\":-1.3,\"y\":1.0,\"z\":0.6},{\"e\":\"H\",\"x\":-1.5,\"y\":0.4,\"z\":-1.0}," +
                         "{\"e\":\"H\",\"x\":0.3,\"y\":-1.1,\"z\":0.9},{\"e\":\"H\",\"x\":0.4,\"y\":-1.0,\"z\":-0.8},{\"e\":\"H\",\"x\":2.0,\"y\":0.0,\"z\":0.0}]," +
@@ -584,6 +636,7 @@ namespace Khkt.Menu
                 yield return Frames(3);
                 if (cam == null) { rt.Release(); continue; }
                 Canvas.ForceUpdateCanvases();
+                foreach (var x3 in FindObjectsByType<Xem3DNho>()) if (x3.isActiveAndEnabled) x3.VeNgay();
                 cam.Render();
                 RenderTexture.active = rt;
                 if (readTex == null || readTex.width != w || readTex.height != h) readTex = new Texture2D(w, h, TextureFormat.RGBA32, false);

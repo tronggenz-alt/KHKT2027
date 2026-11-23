@@ -563,7 +563,7 @@ namespace Khkt.Demo
             var winCg = windowGo.GetComponent<CanvasGroup>();
             if (winCg == null) winCg = windowGo.AddComponent<CanvasGroup>();
             winCg.alpha = 0f;
-            UiMotion.FadeIn(this, winCg, 0.16f);
+            UiMotion.Popup(this, win, winCg, 0.22f);
 
             var tl = new Vector2(0f, 1f);
 

@@ -77,7 +77,8 @@ class YeuCauBaoSai(BaseModel):
 
 
 class YeuCau3D(BaseModel):
-    van_ban: str = Field(min_length=1, max_length=200)
+    van_ban: str = Field(default="", max_length=200)
+    anh_base64: str = Field(default="", max_length=giai_de.ANH_TOI_DA * 4 // 3 + 1024)
 
 
 def _muc_luc() -> list[dict]:
@@ -158,7 +159,25 @@ def mau_3d() -> list[str]:
 
 
 @router.post("/mo-hinh-3d")
-def mo_hinh_3d_api(yc: YeuCau3D) -> dict:
+async def mo_hinh_3d_api(yc: YeuCau3D) -> dict:
+    if yc.anh_base64.strip():
+        b64 = yc.anh_base64.split(",", 1)[1] if yc.anh_base64.startswith("data:") else yc.anh_base64
+        try:
+            anh = base64.b64decode(b64, validate=True)
+        except (binascii.Error, ValueError):
+            raise HTTPException(400, "anh_base64 không hợp lệ.") from None
+        try:
+            doc = await hoi_dap.doc_chat_tu_anh(anh)
+            if doc.get("smiles"):
+                return mo_hinh_3d.dung_3d(doc["smiles"], doc.get("ten") or doc["smiles"], "ai_anh",
+                                          {"cach_nhan_dien": "AI nhận diện từ ảnh"})
+            return mo_hinh_3d.tao_mo_hinh(doc.get("ten") or "")
+        except giai_de.LoiGiaiDe as e:
+            raise HTTPException(e.status, e.thong_diep) from e
+        except mo_hinh_3d.LoiMoHinh as e:
+            raise HTTPException(422, str(e)) from e
+    if not yc.van_ban.strip():
+        raise HTTPException(422, "Hãy nhập tên, công thức hoặc SMILES của chất, hoặc chọn ảnh.")
     try:
         return mo_hinh_3d.tao_mo_hinh(yc.van_ban)
     except mo_hinh_3d.LoiMoHinh as e:

@@ -13,7 +13,7 @@ namespace Khkt.Menu.Dashboard
     /// </summary>
     public class MenuAnim : MonoBehaviour
     {
-        public enum Ease { OutCubic, OutBack, InOutCubic, Linear, OutQuint, Away }
+        public enum Ease { OutCubic, OutBack, OutBackSoft, InOutCubic, Linear, OutQuint, Away }
 
         // Khung hình bị khựng không được làm chuyển động nhảy cóc: giới hạn bước thời gian
         const float MaxStep = 1f / 20f;
@@ -56,6 +56,10 @@ namespace Khkt.Menu.Dashboard
                     const float c = 1.4f;
                     float u = t - 1f;
                     return 1f + (c + 1f) * u * u * u + c * u * u;
+                case Ease.OutBackSoft:
+                    const float cs = 0.72f;
+                    float us = t - 1f;
+                    return 1f + (cs + 1f) * us * us * us + cs * us * us;
                 case Ease.InOutCubic:
                     return t < 0.5f ? 4f * t * t * t : 1f - Mathf.Pow(-2f * t + 2f, 3f) / 2f;
                 case Ease.OutQuint:
@@ -157,44 +161,110 @@ namespace Khkt.Menu.Dashboard
             To(g, "mờ", duration, k => g.alpha = Mathf.LerpUnclamped(from, to, k), delay, Ease.OutCubic, done);
         }
 
-        /// <summary>Hiện dần từ dưới lên, dùng cho thẻ và màn hình mới. Lần lượt theo delay tạo cảm giác xếp lớp.</summary>
-        public static void Enter(RectTransform rt, float delay = 0f, float rise = 16f, float duration = 0.45f)
+        /// <summary>Hiện dần kết hợp mở nhẹ tại chỗ (scale 0,972 -> 1), không trượt dài qua lại.</summary>
+        public static void Enter(RectTransform rt, float delay = 0f, float rise = 8f, float duration = 0.36f)
         {
             var g = Group(rt);
             Vector2 end = Home(rt);
-            Vector2 start = end - new Vector2(0, rise);
+            float actualRise = Mathf.Min(rise, 6f);
+            Vector2 start = end - new Vector2(0, actualRise);
             g.alpha = 0f;
             rt.anchoredPosition = start;
+            const float sFrom = 0.972f;
+            rt.localScale = new Vector3(sFrom, sFrom, 1f);
             To(rt, "vào", duration, k =>
             {
-                g.alpha = k;
+                g.alpha = Mathf.Clamp01(k * 1.45f);
                 rt.anchoredPosition = Vector2.LerpUnclamped(start, end, k);
-            }, delay, Ease.OutQuint, () => Settle(rt));
+                float s = Mathf.LerpUnclamped(sFrom, 1f, k);
+                rt.localScale = new Vector3(s, s, 1f);
+            }, delay, Ease.OutQuint, () =>
+            {
+                rt.localScale = Vector3.one;
+                Settle(rt);
+            });
         }
 
-        /// <summary>Hộp thoại hiện ra: phóng từ 0,96 lên 1 (đường cong soft) cùng mờ dần, như hienRa('dialog') của CHEMISTRY.</summary>
-        public static void Pop(RectTransform rt, float from = 0.96f, float duration = 0.38f, float delay = 0f)
+        /// <summary>Hộp thoại/bảng hiện ra: phóng mượt từ from lên 1 với độ nảy tinh tế cùng mờ dần chuyên nghiệp.</summary>
+        public static void Pop(RectTransform rt, float from = 0.94f, float duration = 0.28f, float delay = 0f, Ease ease = Ease.OutBackSoft)
         {
+            if (rt == null) return;
             var g = Group(rt);
             g.alpha = 0f;
             rt.localScale = new Vector3(from, from, 1f);
             To(rt, "nở", duration, k =>
             {
-                g.alpha = Mathf.Clamp01(k * 1.6f);
+                g.alpha = Mathf.Clamp01(k * 1.75f);
                 float s = Mathf.LerpUnclamped(from, 1f, k);
                 rt.localScale = new Vector3(s, s, 1f);
-            }, delay, Ease.OutQuint);
+            }, delay, ease, () =>
+            {
+                if (rt != null) rt.localScale = Vector3.one;
+                if (g != null) g.alpha = 1f;
+            });
         }
 
-        /// <summary>Rời màn: mờ đi và chìm nhẹ xuống (đường cong away, ~200 ms), xong thì gọi done.</summary>
-        public static void Leave(RectTransform rt, float duration = 0.2f, Action done = null)
+        /// <summary>Đóng hộp thoại/bảng: thu gọn nhẹ về toScale (0,93) kèm mờ lớp phủ nền rồi gọi done.</summary>
+        public static void ClosePop(RectTransform rt, CanvasGroup backdropGroup = null, float duration = 0.16f, Action done = null, float toScale = 0.93f)
+        {
+            if (rt == null)
+            {
+                done?.Invoke();
+                return;
+            }
+            var g = Group(rt);
+            float a0 = g.alpha > 0.01f ? g.alpha : 1f;
+            float b0 = backdropGroup != null ? (backdropGroup.alpha > 0.01f ? backdropGroup.alpha : 1f) : 0f;
+            float s0 = rt.localScale.x > 0.1f ? rt.localScale.x : 1f;
+            if (backdropGroup != null && backdropGroup != g) Stop(backdropGroup, "mờ");
+            To(rt, "nở", duration, k =>
+            {
+                if (g != null) g.alpha = Mathf.LerpUnclamped(a0, 0f, k);
+                if (backdropGroup != null && backdropGroup != g) backdropGroup.alpha = Mathf.LerpUnclamped(b0, 0f, k);
+                if (rt != null)
+                {
+                    float s = Mathf.LerpUnclamped(s0, toScale, k);
+                    rt.localScale = new Vector3(s, s, 1f);
+                }
+            }, 0f, Ease.Away, () =>
+            {
+                if (rt != null) rt.localScale = Vector3.one;
+                if (g != null) g.alpha = 1f;
+                if (backdropGroup != null && backdropGroup != g) backdropGroup.alpha = 1f;
+                done?.Invoke();
+            });
+        }
+
+        /// <summary>Hiệu ứng nhấn lún rồi bật nảy mượt cho nút/thẻ khi click nhanh.</summary>
+        public static void PulseClick(Transform t, float dip = 0.94f, float peak = 1.02f, float duration = 0.20f)
+        {
+            if (t == null) return;
+            To(t, "nhấn_nảy", duration, k =>
+            {
+                if (t == null) return;
+                float s;
+                if (k < 0.32f)
+                    s = Mathf.Lerp(1f, dip, k / 0.32f);
+                else if (k < 0.72f)
+                    s = Mathf.Lerp(dip, peak, (k - 0.32f) / 0.40f);
+                else
+                    s = Mathf.Lerp(peak, 1f, (k - 0.72f) / 0.28f);
+                t.localScale = new Vector3(s, s, 1f);
+            }, 0f, Ease.OutCubic, () =>
+            {
+                if (t != null) t.localScale = Vector3.one;
+            });
+        }
+
+        /// <summary>Rời màn: mờ đi và thu nhẹ (đường cong away, ~160 ms), xong thì gọi done.</summary>
+        public static void Leave(RectTransform rt, float duration = 0.16f, Action done = null)
         {
             var g = Group(rt);
             float a0 = g.alpha;
             To(rt, "nở", duration, k =>
             {
                 g.alpha = Mathf.LerpUnclamped(a0, 0f, k);
-                float s = Mathf.LerpUnclamped(1f, 0.985f, k);
+                float s = Mathf.LerpUnclamped(1f, 0.95f, k);
                 rt.localScale = new Vector3(s, s, 1f);
             }, 0f, Ease.Away, () =>
             {
