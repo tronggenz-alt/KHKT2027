@@ -88,7 +88,8 @@ namespace Khkt.Menu.Dashboard
 
         void BuildNotice()
         {
-            noticeBar = GlassKit.Rect(rt, "Thanh thông báo", new Vector2(1, 1), new Vector2(1, 1), new Vector2(-Pad, -36), new Vector2(560, 52));
+            noticeBar = GlassKit.Rect(rt, "Thanh thông báo", new Vector2(1, 1), new Vector2(1, 1),
+                                      new Vector2(-Pad - DashboardShell.BadgeW - 16, -36), new Vector2(560, 52));  // nhường góc phải cho thanh tay cầm
             noticeBg = MenuKit.Paint(noticeBar, MenuKit.WarnSoft, MenuKit.RadiusButton);
             notice = GlassKit.Label(noticeBar, "Thông báo trang chính", "", 16, MenuKit.Warn, false, TextAnchor.MiddleLeft, new Vector2(18, 0), new Vector2(420, 52));
             retry = MenuKit.MakeButton(noticeBar, "Nút Thử lại", "Thử lại", new Vector2(-10, 0), new Vector2(96, 44), Refresh, 3, MenuKit.RadiusButton, new Vector2(1, 0.5f));

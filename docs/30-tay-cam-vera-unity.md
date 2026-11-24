@@ -98,10 +98,74 @@ Sau khi đăng nhập hoặc dùng thử, thanh bên có mục **Tay cầm** (`M
   - tự dò cổng USB (`SerialControllerSource`, thử 115200 rồi 921600 baud) và Wi-Fi (`UdpControllerSource`, cổng 4210);
   - đèn xanh khi đang nhận dữ liệu, vàng khi lỗi cảm biến hướng, đỏ khi chưa thấy tay cầm;
   - hiện số gói/giây, nhiệt độ chip, dòng `#` mới nhất của firmware;
-  - nút **Cân con quay** (lệnh `c`), **Hiệu chỉnh joystick** (lệnh `h`), **Đặt hướng về 0** (lệnh `z`).
+  - nút **Căn joystick**, **Căn trục BMI160**, **Cân con quay** (lệnh `c`), **Đặt hướng về 0** (lệnh `z`). Xem mục 24/11/2026 bên dưới.
 - **Hướng tay cầm:** mô hình 3D quay theo tay cầm thật (camera riêng vẽ vào RenderTexture). Có góc xoay / chúc / nghiêng so với lúc đặt về 0.
 - **Joystick và nút:** chấm theo cần gạt, đèn nhấn cần, thanh mức nút cảm ứng A, B, có vạch ngưỡng bấm 50%.
 - **Thao tác thử:** 13 ô tự đánh dấu khi làm đúng. Gồm đẩy cần 4 hướng, nhấn cần, chạm A, chạm B, chúc mũi lên / xuống 30°, nghiêng trái / phải 30°, xoay trái / phải 45°.
 - **Số đo:** con quay (°/s), gia tốc (g), mức cảm ứng, cờ trạng thái.
 
 Nguồn tay cầm chỉ được tạo khi mở trang và bị huỷ khi rời trang, nên vào lab không bị giữ cổng COM hay UDP. Nếu một chương trình khác đang nghe cổng 4210 (ví dụ `xem_tay_cam_v3.py`), trang không nhận được tay cầm Wi-Fi; tắt chương trình đó trước. Tương tự, Serial Monitor hay phòng thử Python đang mở COM thì trang không đọc được USB. Bài thử `man_hinh_chinh` có 6 kiểm tra cho trang này (đạt 83/83 trên bản đã commit cộng với trang mới).
+
+
+## Sảnh: thanh tay cầm, mô hình thật, căn joystick và trục BMI160 (24/11/2026)
+
+### Kết nối dùng chung cho cả sảnh
+- `Menu/Dashboard/ControllerLink.cs` gắn vào khung sảnh. Khi sảnh hiện, nó mở nguồn USB (tự dò cổng) và Wi-Fi (cổng 4210). Khi rời sảnh (`DashboardShell.Hide`), nó trả cổng ngay để lab mở được tay cầm.
+- **Thanh góc trên bên phải** (`Thanh tay cầm`):
+  - đèn xanh khi đã kết nối, vàng khi lỗi cảm biến hướng, đỏ khi chưa kết nối;
+  - có dòng chữ trạng thái và ảnh 3D nhỏ quay theo tay cầm;
+  - bấm vào thì mở trang Tay cầm.
+- Thanh thông báo lỗi của trang Tổng quan dịch sang trái để nhường chỗ.
+
+### Mô hình 3D thật
+- `tools/tay_cam_band2/xuat_unity.py` dựng lại VERA Band 2 bản in ×1.3 trong thư mục tạm, bằng bản sao `mo_hinh_band2.py`, nên không ghi đè tệp in trong docs.
+  - Chỉ lấy phần nhìn thấy: vỏ 2 nửa, mặt tối, chén, cò, tấm mu tay, chữ, nắp pin, nắp nút, quai. Tổng khoảng 90 nghìn tam giác.
+  - Ghi ra `Assets/Lab/MoHinh/Resources/TayCam/VeraBand2.bytes` (1,1 MB): toạ độ int16, pháp tuyến tách ở cạnh gấp > 35°.
+- `Input/VeraModel.cs` đọc tệp này.
+  - Hệ trục mô hình trùng hệ tay cầm của firmware (x mũi, y trái, z dọc cán), đổi sang Unity bằng `Frames.ToUnity`.
+  - Cần joystick do code vẽ và nghiêng theo cần thật (tối đa 25°). Mặt tối sáng cam khi chạm A, cò sáng xanh khi chạm B.
+- Hướng hiển thị là `Frames.ToUnity(q_mạch ⊗ Mount)`, trừ yaw lúc "Đặt hướng về 0". Đây cũng là công thức tia trỏ trong lab dùng.
+- Máy quay đặt sau lưng người cầm, nên mô hình quay cùng chiều tay.
+
+### Căn joystick (`Input/VeraJoyCal.cs`, bảng `ControllerCalPanel`)
+- **Các bước:** giữa, tiến, lùi, trái, phải, nhấn (giống `tools/canh_joystick.py`).
+  - Bước giữa gửi lệnh `J` để firmware đặt tâm ngay tại chỗ buông tay.
+  - Các bước hướng tự ghi khi cần lệch hơn 0,2 và giữ yên 0,8 giây.
+  - Không thấy nút nhấn thì bấm "Bỏ qua bước".
+- **Cách tính:** làm trên số joystick firmware gửi lên, nên chạy với mọi bản firmware, cả USB lẫn Wi-Fi.
+  - Tìm trục và chiều của tiến, phải.
+  - Lấy độ khuếch đại riêng cho từng nửa trục, để bù biên sai đang lưu trong flash: biên quá rộng làm đẩy hết cần chỉ ra khoảng 0,5.
+  - Lưu ở PlayerPrefs `vera_joy_cal`.
+  - Áp dụng trong `ControllerPackets.FromVera`: `Joy2` là số đã căn, `JoyRaw` là số firmware gốc.
+- **Báo lỗi khi:** tiến và phải cùng trục, một trục không đổi (dây lỏng), hoặc đi ngược chiều. Đẩy chéo hay tâm lệch thì chỉ nhắc.
+- Đổi hướng hoặc biên trong flash tay cầm (lệnh `h`, `j`, `H`, `B`) thì phải căn lại.
+
+### Căn trục BMI160
+- **Hai bước:**
+  1. Cầm tự nhiên: cán dựng đứng, mũi chĩa thẳng ra trước.
+  2. Chúc mũi xuống khoảng 45°.
+- Tính bằng `VeraMount.Compute` và lưu ở `vera_truc_gan`, chung với phím F6 trong lab. Lời nhắc F6 đã đổi sang tư thế cầm tự nhiên, thay cho "nằm ngang".
+- Căn xong, mô hình đứng thẳng khi bạn cầm tự nhiên, và tia trỏ trong lab đi theo mũi tay cầm.
+
+### Kiểm thử
+- Bài `man_hinh_chinh` (`tools/kiem_thu_unity/KhktMenuTest.cs`) kiểm:
+  - thanh góc;
+  - mô hình đọc từ tệp, đúng cỡ (cao 150–175 mm);
+  - nút căn, mở và đóng 2 bảng căn;
+  - phần tính căn joystick theo số giống tay cầm thật: tiến = y+, phải = x−, đẩy hết ra ±1;
+  - báo lỗi khi cùng trục hoặc trục chết;
+  - tìm lại đúng trục khi cảm biến gắn lệch bất kỳ;
+  - rời sảnh thì trả cổng COM, về lại thì mở lại.
+- Trước khi chạy, chép `KhktMenuTest.cs` vào `D:\KHKT_kiem_thu\proj\Assets\Scripts\AutoTest\`, và chép `VeraBand2.bytes` vào `proj\Assets\Lab\MoHinh\Resources\TayCam\`, vì `chay.ps1` không chép hai thứ này.
+
+### Chạy với tay cầm thật (24/11/2026)
+- Đặt `KHKT_TAY_CAM_THAT=1` khi chạy bài `man_hinh_chinh`. Bài này chờ sảnh nhận tay cầm (tối đa 30 giây), ghi 6 giây số đo rồi chụp `tay_cam_that.png`.
+- **Đo với tay cầm thật qua USB COM8:**
+  - nhận được sau 11 giây, 100 gói/s, không khung nào lỗi cảm biến, |a| = 1,05 g;
+  - thanh góc báo "Đã kết nối · USB COM8";
+  - mô hình nằm nghiêng 85° vì chưa căn trục BMI160;
+  - tổng 105/105.
+- Gốc yaw lấy sau 0,5 giây có dữ liệu liên tục, vì gói đầu tiên sau khi mở cổng chưa có hướng thật.
+- **Nhánh `toi-uu/lab-sinh-tu-do` cần bản tạm tắt `ControllerTestRoom.cs`** (lấy từ commit `f1d9e6d`) mới biên dịch được, vì phần partial `Solution` chưa có.
+- **Bản `.exe` chơi được:** `KhktPlayVerify.BuildPlay` với `KHKT_BUILD=D:\KHKT_kiem_thu\ban_tay_cam`.
+- **Firmware mới chưa nạp được:** Smart App Control của Windows chặn trình biên dịch ESP32, và máy không có Arduino IDE. Game không cần bản mới, vì phần căn joystick và căn trục làm ở phía game.

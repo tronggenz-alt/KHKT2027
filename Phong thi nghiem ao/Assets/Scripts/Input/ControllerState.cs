@@ -31,6 +31,8 @@ namespace Khkt.Input
         public Vector2 Joy1;
         /// <summary>Joystick di chuyển, -1..1.</summary>
         public Vector2 Joy2;
+        /// <summary>Tay cầm VERA: số joystick firmware gửi lên, CHƯA qua phần căn ở game (VeraJoyCal). Joy2 là số đã căn.</summary>
+        public Vector2 JoyRaw;
         public ControllerButtons Buttons;
         /// <summary>Mẫu từ tay cầm VERA (gói 5C / 5D): hướng do mạch tính, có cảm ứng A / B, không qua Mahony trên máy tính.</summary>
         public bool Vera;

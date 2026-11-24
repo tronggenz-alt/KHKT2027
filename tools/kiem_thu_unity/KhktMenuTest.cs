@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System;
 using System.Collections;
 using System.IO;
@@ -324,11 +325,44 @@ public class KhktMenuTest : MonoBehaviour
         Check("trang Tay cầm: mô hình 3D vẽ ra ảnh", FindObjectsByType<RawImage>().Any(r => r.name == "Ảnh 3D" && r.texture != null));
         Check("trang Tay cầm: đủ 13 ô thao tác thử", FindObjectsByType<Image>().Count(i => i.name.StartsWith("Ô ")) == 13);
         Check("trang Tay cầm: đang dò tay cầm USB", FindAnyObjectByType<Khkt.Input.SerialControllerSource>() != null);
+        var link = shell.Link;
+        Check("trang Tay cầm: mô hình thật VERA Band 2 đọc từ tệp", link != null && link.Model != null && link.Model.FromFile && link.Model.PartCount >= 10,
+              link?.Model == null ? "chưa dựng" : $"từ tệp {link.Model.FromFile}, {link.Model.PartCount} phần, cỡ {link.Model.Bounds.size * 1000} mm");
+        Check("trang Tay cầm: mô hình đúng cỡ bản in ×1.3 (cao 150–175 mm)", link?.Model != null && link.Model.Bounds.size.y > 0.15f && link.Model.Bounds.size.y < 0.175f);
+        Check("thanh góc: có trạng thái kết nối tay cầm", Status("Trạng thái tay cầm").Contains("kết nối") || Status("Trạng thái tay cầm").Contains("Cổng"), Status("Trạng thái tay cầm"));
+        Check("trang Tay cầm: có nút Căn joystick và Căn trục BMI160", FindButton("Nút căn joystick") != null && FindButton("Nút căn trục BMI160") != null);
         yield return ShotDone("trang_tay_cam");
+        Click("Nút căn joystick");
+        yield return Frames(3);
+        Check("bảng căn joystick: mở được, 6 bước", tc.Cal != null && tc.Cal.Current == ControllerCalPanel.Kind.Joystick && tc.Cal.gameObject.activeInHierarchy && Status("Bước 5").Contains("Nhấn"),
+              Status("Bước 5"));
+        yield return ShotDone("bang_can_joystick");
+        Click("Nút đóng căn");
+        Click("Nút căn trục BMI160");
+        yield return Frames(3);
+        Check("bảng căn trục BMI160: mở được, 2 bước", tc.Cal.Current == ControllerCalPanel.Kind.Mount && Status("Bước 1").Contains("Chúc mũi"), Status("Bước 1"));
+        Click("Nút đóng căn");
+        yield return Frames(1);
+        Check("bảng căn: đóng được", tc.Cal.Current == ControllerCalPanel.Kind.None && !tc.Cal.gameObject.activeInHierarchy);
+        CheckCalMath();
+        if (System.Environment.GetEnvironmentVariable("KHKT_TAY_CAM_THAT") == "1")
+            yield return LiveController(link);
         Click("Mục: Tổng quan");
         yield return WaitAnim();
         yield return null;
-        Check("rời trang Tay cầm: huỷ nguồn tay cầm, trả cổng COM", FindAnyObjectByType<Khkt.Input.SerialControllerSource>() == null);
+        Check("rời trang Tay cầm: sảnh vẫn giữ kết nối cho thanh góc", FindAnyObjectByType<Khkt.Input.SerialControllerSource>() != null);
+        Click("Thanh tay cầm");
+        yield return WaitAnim();
+        Check("bấm thanh góc: mở trang Tay cầm", shell.CurrentPage == "tay_cam", shell.CurrentPage);
+        Click("Mục: Tổng quan");
+        yield return WaitAnim();
+        shell.Hide();
+        yield return Frames(2);
+        Check("rời sảnh: trả cổng COM ngay (lab mở được tay cầm)", GameObject.Find("Tay cầm (sảnh)") == null && FindAnyObjectByType<Khkt.Input.SerialControllerSource>() == null);
+        shell.Show();
+        yield return WaitAnim();
+        yield return WaitLoaded();
+        Check("về lại sảnh: mở lại kết nối tay cầm", FindAnyObjectByType<Khkt.Input.SerialControllerSource>() != null);
 
         // Bấm dồn dập giữa chừng chuyển động: không được lệch vị trí, không kẹt
         var greet = (RectTransform)shell.transform.Find("Vùng nội dung/Trang: Tổng quan/Lời chào");
@@ -579,6 +613,75 @@ public class KhktMenuTest : MonoBehaviour
     static InputField Field(string name) => FindObjectsByType<InputField>().First(f => f.name == name);
 
     static Button FindButton(string name) => FindObjectsByType<Button>().FirstOrDefault(b => b.name == name && b.gameObject.activeInHierarchy);
+
+    /// <summary>
+    /// Chỉ chạy khi KHKT_TAY_CAM_THAT=1 và tay cầm VERA thật đang cắm USB: chờ sảnh nhận tay cầm, ghi 6 giây số đo
+    /// (gói/giây, hướng mô hình, joystick firmware và sau căn, lỗi cảm biến) rồi chụp trang Tay cầm.
+    /// </summary>
+    IEnumerator LiveController(ControllerLink link)
+    {
+        float t0 = Time.realtimeSinceStartup;
+        while (link.Active == null && Time.realtimeSinceStartup - t0 < 30f) yield return null;
+        Check("tay cầm thật: sảnh nhận được tay cầm", link.Active != null, $"{Time.realtimeSinceStartup - t0:0.0} s · {link.ConnectionName}");
+        if (link.Active == null) yield break;
+        yield return new WaitForSecondsRealtime(1.5f);
+        int n = 0, imuErr = 0;
+        Vector3 accMin = Vector3.one * 9, accMax = -Vector3.one * 9;
+        Vector2 rawMin = Vector2.one * 9, rawMax = -Vector2.one * 9;
+        float t1 = Time.realtimeSinceStartup;
+        while (Time.realtimeSinceStartup - t1 < 6f)
+        {
+            var s = link.Latest;
+            n++;
+            if (s.Has(Khkt.Input.VeraFlags.ImuError)) imuErr++;
+            accMin = Vector3.Min(accMin, s.AccelG); accMax = Vector3.Max(accMax, s.AccelG);
+            rawMin = Vector2.Min(rawMin, s.JoyRaw); rawMax = Vector2.Max(rawMax, s.JoyRaw);
+            yield return null;
+        }
+        var st = link.Latest;
+        var e = link.Pose.eulerAngles;
+        Debug.Log($"[KHKT-PLAY] [menu] tay cầm thật: {link.ConnectionName}, {link.PacketsPerSecond} gói/s, nhiệt {st.TempC:0.0} °C, " +
+                  $"gia tốc {st.AccelG} (|a| {st.AccelG.magnitude:0.00}), hướng mô hình (x {e.x:0}, y {e.y:0}, z {e.z:0}), " +
+                  $"joystick firmware {st.JoyRaw} (min {rawMin} max {rawMax}), sau căn {st.Joy2}, căn joystick {(Khkt.Input.VeraJoyCal.Current.Valid ? "có" : "chưa")}, " +
+                  $"căn trục {(link.MountCalibrated ? "có" : "chưa")}, firmware: {link.FirmwareMessage}");
+        Check("tay cầm thật: nhận đều gói (> 40 gói/s)", link.PacketsPerSecond > 40, link.PacketsPerSecond + " gói/s");
+        Check("tay cầm thật: cảm biến hướng chạy (không LOI_IMU)", imuErr == 0, $"{imuErr}/{n} khung lỗi");
+        Check("tay cầm thật: gia tốc kế đo ra trọng lực ~1 g", Mathf.Abs(st.AccelG.magnitude - 1f) < 0.15f, st.AccelG.magnitude.ToString("0.00"));
+        Check("tay cầm thật: mô hình 3D vẽ (ảnh nhỏ ở thanh góc bật)", FindObjectsByType<RawImage>().Any(r => r.name == "Tay cầm 3D nhỏ" && r.enabled && r.texture != null));
+        Check("tay cầm thật: thanh góc báo đã kết nối", Status("Trạng thái tay cầm").Contains("Đã kết nối") || Status("Trạng thái tay cầm").Contains("Lỗi cảm biến"), Status("Trạng thái tay cầm"));
+        yield return ShotDone("tay_cam_that");
+    }
+
+    /// <summary>Phần tính căn joystick (VeraJoyCal) và căn trục BMI160 (VeraMount) với số giả có đáp án.</summary>
+    void CheckCalMath()
+    {
+        // giống tay cầm thật 24/11: tiến = y firmware dương, phải = x firmware ÂM; biên lưu trong flash quá rộng nên đẩy hết chỉ ra ~0,5
+        var err = new List<string>();
+        var notes = new List<string>();
+        bool ok = Khkt.Input.VeraJoyCal.Compute(new Vector2(0.02f, -0.01f), new Vector2(0.03f, 0.51f), new Vector2(0.0f, -0.48f),
+                                               new Vector2(0.55f, 0.01f), new Vector2(-0.46f, -0.02f), out var c, err, notes);
+        var vf = Khkt.Input.VeraJoyCal.Apply(c, new Vector2(0.03f, 0.51f));
+        var vr = Khkt.Input.VeraJoyCal.Apply(c, new Vector2(-0.46f, -0.02f));
+        var vl = Khkt.Input.VeraJoyCal.Apply(c, new Vector2(0.55f, 0.01f));
+        var vb = Khkt.Input.VeraJoyCal.Apply(c, new Vector2(0.0f, -0.48f));
+        Check("căn joystick: suy đúng trục và chiều (tiến = y+, phải = x−)", ok && c.AxisFwd == 1 && c.SignFwd > 0 && c.AxisRight == 0 && c.SignRight < 0, string.Join("; ", err));
+        Check("căn joystick: đẩy hết cỡ ra đủ ±1 đúng hướng", vf.y > 0.95f && Mathf.Abs(vf.x) < 0.1f && vr.x > 0.95f && vl.x < -0.95f && vb.y < -0.95f,
+              $"tiến {vf} phải {vr} trái {vl} lùi {vb}");
+        Check("căn joystick: lưu và đọc lại giống nhau", Khkt.Input.VeraJoyCal.Cal.TryParse(c.ToString(), out var c2) && c2.AxisRight == 0 && Mathf.Abs(c2.GainLeft - c.GainLeft) < 1e-6f);
+        err.Clear();
+        bool bad = Khkt.Input.VeraJoyCal.Compute(Vector2.zero, new Vector2(0, 0.5f), new Vector2(0, -0.5f), new Vector2(0, -0.5f), new Vector2(0, 0.5f), out _, err, notes);
+        Check("căn joystick: tiến và phải cùng trục thì báo lỗi, không lưu", !bad && err.Count > 0);
+        err.Clear();
+        bool dead = Khkt.Input.VeraJoyCal.Compute(Vector2.zero, new Vector2(0, 0.5f), new Vector2(0, -0.5f), new Vector2(0.01f, 0), new Vector2(-0.01f, 0), out _, err, notes);
+        Check("căn joystick: trục không đổi (dây lỏng) thì báo lỗi", !dead && err.Any(e => e.Contains("không đổi")), string.Join("; ", err));
+
+        // căn trục: cảm biến gắn lệch R bất kỳ; cầm tự nhiên đo được R·(0,0,1), chúc mũi 45° đo được R·(−sin45, 0, cos45)
+        var R = Quaternion.Euler(30f, 40f, 50f);
+        float s45 = Mathf.Sin(45f * Mathf.Deg2Rad);
+        bool mok = Khkt.Input.VeraMount.Compute(R * new Vector3(0, 0, 1), R * new Vector3(-s45, 0, s45), out var m, out float deg);
+        Check("căn trục BMI160: tìm lại đúng trục mũi và trục cán", mok && Mathf.Abs(deg - 45f) < 0.5f && Vector3.Angle(m * new Vector3(1, 0, 0), R * new Vector3(1, 0, 0)) < 0.5f &&
+              Vector3.Angle(m * new Vector3(0, 0, 1), R * new Vector3(0, 0, 1)) < 0.5f, $"chúc {deg:0.0}°");
+    }
 
     void Click(string name)
     {

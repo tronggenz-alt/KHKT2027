@@ -104,7 +104,7 @@ namespace Khkt.Input
     }
 
     /// <summary>
-    /// Sửa lệch gắn BMI160 trong thân tay cầm (chép từ tools/phong_thu/nguon.py, SuaTrucGan): đặt tay cầm nằm ngang,
+    /// Sửa lệch gắn BMI160 trong thân tay cầm (chép từ tools/phong_thu/nguon.py, SuaTrucGan): cầm tự nhiên (cán dựng đứng, mũi ra trước = "nằm ngang"),
     /// rồi chúc mũi xuống khoảng 45°. Bước 1 cho trục Z (hướng lên) trong hệ mạch, bước 2 cho trục X (mũi).
     /// M = [X Y Z] (cột, hệ mạch); q_tay_cầm = q_mạch ⊗ q(M). Lưu trong PlayerPrefs.
     /// </summary>

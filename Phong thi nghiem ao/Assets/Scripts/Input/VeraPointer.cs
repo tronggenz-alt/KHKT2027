@@ -9,7 +9,7 @@ namespace Khkt.Input
     /// Tia trỏ bằng tay cầm VERA (G2). Mỗi mẫu tay cầm (USB 50 gói/s, Wi-Fi 100 gói/s) đi qua VeraAimCore (yaw cộng dồn,
     /// pitch tuyệt đối), rồi bộ lọc One Euro; lúc vẽ, dự đoán tiếp theo vận tốc khoảng 12 ms + tuổi mẫu để bù trễ.
     /// Tia đi từ mắt người chơi, yaw tính theo hướng thân (camera), kẹp trong khung nhìn như con trỏ chuột chạm mép.
-    /// F6: căn trục gắn BMI160 (nằm ngang, rồi chúc mũi). HandController tự thêm thành phần này lúc chạy.
+    /// F6: căn trục gắn BMI160 (cầm tự nhiên cán dựng đứng, rồi chúc mũi; trang Tay cầm ở sảnh có cùng bước). HandController tự thêm thành phần này lúc chạy.
     /// </summary>
     public class VeraPointer : MonoBehaviour
     {
@@ -164,7 +164,7 @@ namespace Khkt.Input
             accN = 0;
             accSum = Vector3.zero;
             stillSince = -1f;
-            Message?.Invoke("Căn trục tay cầm (1/2): đặt tay cầm NẰM NGANG, mũi hướng ra trước, để yên 1 giây");
+            Message?.Invoke("Căn trục tay cầm (1/2): cầm tự nhiên, CÁN DỰNG ĐỨNG, mũi chĩa thẳng ra trước, để yên 1 giây");
         }
 
         void MountCalibrationTick()

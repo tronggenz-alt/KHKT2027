@@ -133,7 +133,16 @@ namespace Khkt.Menu.Dashboard
         public PageAiKey AiKey { get; private set; }
         /// <summary>Trang thử tay cầm (mọi vai trò, cả khách).</summary>
         public PageController Controller { get; private set; }
+        /// <summary>Kết nối tay cầm dùng chung cho cả sảnh (thanh góc trên + trang Tay cầm); nhả cổng khi rời sảnh.</summary>
+        public ControllerLink Link { get; private set; }
         public string CurrentPage { get; private set; } = "";
+
+        // thanh trạng thái tay cầm ở góc trên bên phải
+        public const float BadgeW = 300f, BadgeH = 64f;
+        RectTransform badge;
+        RawImage badge3d;
+        Image badgeDot, badgeIcon;
+        Text badgeTitle, badgeLine;
 
         sealed class NavItem
         {
@@ -161,6 +170,8 @@ namespace Khkt.Menu.Dashboard
             shell.root = rt;
             shell.Build(logo);
             rt.gameObject.SetActive(false);
+            // gắn sau khi ẩn: chỉ mở cổng tay cầm khi sảnh thật sự hiện (OnEnable)
+            shell.Link = rt.gameObject.AddComponent<ControllerLink>();
             return shell;
         }
 
@@ -174,6 +185,47 @@ namespace Khkt.Menu.Dashboard
             content = MenuKit.Stretch(root, "Vùng nội dung", Vector2.zero, Vector2.one, new Vector2(SidebarW, 0), Vector2.zero);
             BuildSidebar(logo);
             BuildPages();
+            BuildBadge();
+        }
+
+        // ---------------------------------------------------------------- thanh tay cầm ở góc trên
+        void BuildBadge()
+        {
+            var b = MenuKit.MakeButton(content, "Thanh tay cầm", "", new Vector2(-56, -38), new Vector2(BadgeW, BadgeH), () => Go("tay_cam"), 1,
+                                       MenuKit.RadiusButton, new Vector2(1, 1));
+            badge = (RectTransform)b.transform;
+            var view = GlassKit.Rect(badge, "Tay cầm 3D nhỏ", new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(6, 0), new Vector2(54, 54));
+            badge3d = view.gameObject.AddComponent<RawImage>();
+            badge3d.raycastTarget = false;
+            badgeIcon = MenuKit.IconBadge(badge, "Biểu tượng tay cầm", PageController.IconController, new Vector2(10, -10), 44, MenuKit.PaperAlt, MenuKit.InkDim);
+            badgeIcon.raycastTarget = false;
+            badgeDot = MenuKit.Fill(badge, "Đèn kết nối", new Vector2(0, 1), new Vector2(0, 1), new Vector2(70, -16), new Vector2(11, 11), MenuKit.Error, 1f);
+            badgeDot.sprite = GlassKit.SolidCircle;
+            badgeDot.type = Image.Type.Simple;
+            badgeDot.raycastTarget = false;
+            badgeTitle = GlassKit.Label(badge, "Tên tay cầm", "Tay cầm VERA", 15, MenuKit.Ink, true, TextAnchor.UpperLeft, new Vector2(88, -10), new Vector2(200, 22));
+            badgeLine = GlassKit.Label(badge, "Trạng thái tay cầm", "Chưa kết nối", 13, MenuKit.InkDim, false, TextAnchor.UpperLeft, new Vector2(70, -34), new Vector2(222, 22));
+            badgeTitle.raycastTarget = badgeLine.raycastTarget = false;
+        }
+
+        /// <summary>Chữ trạng thái đang hiện ở thanh góc (cho kiểm thử).</summary>
+        public string BadgeText => badgeLine != null ? badgeLine.text : "";
+
+        void Update()
+        {
+            if (badge == null || Link == null) return;
+            var link = Link;
+            bool on = link.Active != null;
+            bool imuErr = on && link.Latest.Has(Khkt.Input.VeraFlags.ImuError);
+            badgeDot.color = !on ? MenuKit.Error : imuErr ? MenuKit.Warn : MenuKit.Bio;
+            badge3d.texture = link.SmallView;
+            badge3d.enabled = on && link.SmallView != null;
+            badgeIcon.gameObject.SetActive(!badge3d.enabled);
+            if (!on)
+                badgeLine.text = !link.OwnsSources && link.Usb == null && link.Wifi == null ? "Cổng đang dùng ở nơi khác" : "Chưa kết nối · cắm USB hoặc bật Wi-Fi";
+            else
+                badgeLine.text = (imuErr ? "Lỗi cảm biến hướng · " : "Đã kết nối · ") + link.ConnectionName;
+            badgeLine.color = !on ? MenuKit.InkDim : imuErr ? MenuKit.Warn : MenuKit.Bio;
         }
 
         void BuildSidebar(Texture2D logo)
@@ -648,6 +700,7 @@ namespace Khkt.Menu.Dashboard
             }
             visible = true;
             root.gameObject.SetActive(true);
+            Link?.Acquire();  // Hide vừa gọi mà chưa mờ xong thì root còn bật, không có OnEnable: mở lại cổng ở đây
             MenuKit.PrewarmFonts(ownCanvas.rootCanvas.scaleFactor);
             BindUser();
 
@@ -668,6 +721,7 @@ namespace Khkt.Menu.Dashboard
                 return;
             }
             visible = false;
+            Link?.Release();  // trả cổng COM / UDP ngay, trước khi lab mở nguồn tay cầm của nó
             var g = MenuAnim.Group(root);
             g.blocksRaycasts = false;
             MenuAnim.Fade(g, g.alpha, 0f, 0.22f, 0f, () =>

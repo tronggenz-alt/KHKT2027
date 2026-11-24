@@ -39,7 +39,8 @@ namespace Khkt.Input
                 AccelG = v.AccelG,
                 GyroDps = v.GyroDps,
                 OrientationRH = (v.Flags & VeraFlags.ImuError) != 0 ? Quaternion.identity : v.OrientationRH,
-                Joy2 = new Vector2(Mathf.Clamp(v.Joy.x, -1, 1), Mathf.Clamp(v.Joy.y, -1, 1)),
+                Joy2 = VeraJoyCal.Apply(v.Joy),  // phần căn joystick ở sảnh (trang Tay cầm); chưa căn thì giữ số firmware
+                JoyRaw = v.Joy,
                 Buttons = b,
                 Vera = true,
                 TouchA = v.TouchA,

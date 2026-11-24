@@ -8,11 +8,13 @@ namespace Khkt.Menu.Dashboard
 {
     /// <summary>
     /// Trang "Tay cầm" ở sảnh chính: thử tay cầm VERA trước khi vào lab.
-    ///  • Kết nối: tự dò cổng USB (SerialControllerSource) và Wi-Fi (UdpControllerSource), số gói/giây, nhiệt độ, thông báo firmware.
-    ///  • Hướng: mô hình 3D quay theo tay cầm, yaw / pitch / roll so với lúc bấm "Đặt hướng về 0".
+    ///  • Kết nối: dùng ControllerLink chung của sảnh (USB tự dò cổng, Wi-Fi cổng 4210), số gói/giây, nhiệt độ, thông báo firmware.
+    ///  • Hướng: mô hình thật VERA Band 2 ×1.3 (VeraModel) quay theo tay cầm đã bù căn trục BMI160, yaw / pitch / roll so với
+    ///    lúc bấm "Đặt hướng về 0"; cần gạt nghiêng theo joystick, mặt tối / cò sáng khi chạm A / B.
+    ///  • Căn joystick (6 bước) và căn trục BMI160 (2 bước): ControllerCalPanel.
     ///  • Joystick, nhấn cần, 2 nút cảm ứng A, B; số đo con quay, gia tốc.
     ///  • Thao tác thử: danh sách tự đánh dấu khi làm đúng (đẩy cần 4 hướng, chạm A, B, nghiêng, xoay...).
-    /// Nguồn tay cầm chỉ tạo khi trang mở và huỷ khi rời trang, để vào lab không bị giữ cổng COM / UDP.
+    /// Nguồn tay cầm do ControllerLink giữ trong suốt thời gian ở sảnh và trả lại khi vào lab.
     /// </summary>
     public class PageController : MonoBehaviour
     {
@@ -21,14 +23,11 @@ namespace Khkt.Menu.Dashboard
         DashboardShell shell;
         RectTransform page;
 
-        // nguồn
-        GameObject sourceHost;
-        SerialControllerSource usb;
-        UdpControllerSource wifi;
-        float usbLast = -10f, wifiLast = -10f;
+        // nguồn: kết nối chung của sảnh
+        ControllerLink Link => shell != null ? shell.Link : null;
         ControllerSource active;
-        Quaternion zero = Quaternion.identity;
-        bool zeroSet;
+        ControllerCalPanel cal;
+        Text mountText;
 
         // giao diện
         Image statusDot;
@@ -43,12 +42,6 @@ namespace Khkt.Menu.Dashboard
         readonly List<(string name, Image icon, Text label, System.Func<bool> test)> checks = new List<(string, Image, Text, System.Func<bool>)>();
         readonly HashSet<int> done = new HashSet<int>();
         Image[] checkBg;
-
-        // 3D
-        GameObject stage;
-        Transform model;
-        Camera stageCam;
-        RenderTexture rt;
 
         // số đo hiện tại (đã tính cho danh sách thử)
         float yaw, pitch, roll;
@@ -70,7 +63,11 @@ namespace Khkt.Menu.Dashboard
             BuildStick(MenuKit.Body(MenuKit.Card(grid, "Thẻ joystick", 0.65f, 1f, 0, 360, 24, false)));
             BuildChecklist(MenuKit.Body(MenuKit.Card(grid, "Thẻ thao tác", 0f, 0.65f, -384, 300, 24, false)));
             BuildRaw(MenuKit.Body(MenuKit.Card(grid, "Thẻ số đo", 0.65f, 1f, -384, 300, 24, false)));
+            cal = ControllerCalPanel.Create(root, () => Link);
         }
+
+        /// <summary>Bảng căn (cho kiểm thử).</summary>
+        public ControllerCalPanel Cal => cal;
 
         static Text H(Transform p, string t) =>
             GlassKit.Label(p, "Tiêu đề thẻ", t, 19, MenuKit.Ink, true, TextAnchor.UpperLeft, new Vector2(22, -18), new Vector2(420, 28));
@@ -93,9 +90,10 @@ namespace Khkt.Menu.Dashboard
             fwLine.horizontalOverflow = HorizontalWrapMode.Wrap;
             fwLine.rectTransform.sizeDelta = new Vector2(420, 44);
 
-            Btn(b, "Nút cân con quay", "Cân con quay", new Vector2(22, -238), () => Send("c"), 0);
-            Btn(b, "Nút hiệu chỉnh joystick", "Hiệu chỉnh joystick", new Vector2(208, -238), () => Send("h"), 1);
-            Btn(b, "Nút đặt hướng", "Đặt hướng về 0", new Vector2(22, -292), SetZero, 1);
+            Btn(b, "Nút căn joystick", "Căn joystick", new Vector2(22, -238), () => cal.Open(ControllerCalPanel.Kind.Joystick), 0);
+            Btn(b, "Nút căn trục BMI160", "Căn trục BMI160", new Vector2(208, -238), () => cal.Open(ControllerCalPanel.Kind.Mount), 0);
+            Btn(b, "Nút cân con quay", "Cân con quay", new Vector2(22, -292), () => Send("c"), 1);
+            Btn(b, "Nút đặt hướng", "Đặt hướng về 0", new Vector2(208, -292), SetZero, 1);
         }
 
         static void Btn(Transform p, string name, string text, Vector2 pos, System.Action click, int style)
@@ -107,9 +105,7 @@ namespace Khkt.Menu.Dashboard
 
         void Send(string cmd)
         {
-            if (active == usb && usb != null) usb.SendCommand(cmd);
-            else if (active == wifi && wifi != null) wifi.SendCommand(cmd);
-            if (cmd == "h") Flash("Đẩy cần LÊN hết cỡ giữ nửa giây, buông, rồi đẩy sang PHẢI giữ nửa giây");
+            Link?.Send(cmd);
             if (cmd == "c") Flash("Để yên tay cầm 2 giây, không chạm nút");
         }
 
@@ -117,13 +113,7 @@ namespace Khkt.Menu.Dashboard
         float flashUntil;
         void Flash(string t) { flash = t; flashUntil = Time.unscaledTime + 8f; }
 
-        void SetZero()
-        {
-            zero = s.UnityRotation;
-            zeroSet = true;
-            if (active == usb && usb != null) usb.SendCommand("z");
-            else if (active == wifi && wifi != null) wifi.SendCommand("z");
-        }
+        void SetZero() => Link?.SetZero();
 
         // ---------------------------------------------------------------- hướng 3D
         void BuildOrientation(RectTransform b)
@@ -135,53 +125,8 @@ namespace Khkt.Menu.Dashboard
             angles = GlassKit.Label(b, "Góc", "", 16, MenuKit.Ink, true, TextAnchor.UpperCenter, new Vector2(0, -312), new Vector2(0, 26), new Vector2(0.5f, 1));
             angles.rectTransform.pivot = new Vector2(0.5f, 1);
             angles.rectTransform.sizeDelta = new Vector2(440, 26);
-        }
-
-        void EnsureStage()
-        {
-            if (stage != null) return;
-            stage = new GameObject("Xem tay cầm 3D (trang Tay cầm)");
-            stage.transform.position = new Vector3(0, -1000, 0);
-            var mat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard")) { hideFlags = HideFlags.DontSave };
-            Material M(Color c) { var m = new Material(mat) { hideFlags = HideFlags.DontSave }; m.color = c; if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", c); return m; }
-            model = new GameObject("Tay cầm").transform;
-            model.SetParent(stage.transform, false);
-            Part(PrimitiveType.Cube, model, new Vector3(0, 0, 0), new Vector3(0.05f, 0.03f, 0.17f), Quaternion.identity, M(new Color(0.16f, 0.18f, 0.22f)));
-            Part(PrimitiveType.Cylinder, model, new Vector3(0, 0, 0.1f), new Vector3(0.03f, 0.02f, 0.03f), Quaternion.Euler(90, 0, 0), M(MenuKit.Accent));   // mũi
-            Part(PrimitiveType.Cube, model, new Vector3(0, 0.016f, 0.03f), new Vector3(0.03f, 0.004f, 0.03f), Quaternion.identity, M(new Color(0.9f, 0.6f, 0.2f)));  // nút A trên mặt
-            Part(PrimitiveType.Cube, model, new Vector3(0, -0.016f, 0.05f), new Vector3(0.03f, 0.004f, 0.03f), Quaternion.identity, M(new Color(0.3f, 0.8f, 0.5f)));  // nút B dưới
-            Part(PrimitiveType.Cylinder, model, new Vector3(0, 0.022f, -0.035f), new Vector3(0.018f, 0.006f, 0.018f), Quaternion.identity, M(new Color(0.85f, 0.86f, 0.9f)));  // cần gạt
-            var lightGo = new GameObject("Đèn");
-            lightGo.transform.SetParent(stage.transform, false);
-            lightGo.transform.localPosition = new Vector3(0.2f, 0.4f, -0.3f);
-            var light = lightGo.AddComponent<Light>();
-            light.type = LightType.Point;
-            light.range = 2f;
-            light.intensity = 3f;
-            var camGo = new GameObject("Máy quay");
-            camGo.transform.SetParent(stage.transform, false);
-            camGo.transform.localPosition = new Vector3(0, 0.11f, -0.27f);   // sau lưng, hơi cao: mũi tay cầm hướng ra xa người xem
-            camGo.transform.LookAt(stage.transform.position);
-            stageCam = camGo.AddComponent<Camera>();
-            stageCam.fieldOfView = 30;
-            stageCam.nearClipPlane = 0.05f;
-            stageCam.farClipPlane = 2f;
-            stageCam.clearFlags = CameraClearFlags.SolidColor;
-            stageCam.backgroundColor = MenuKit.PaperAlt;
-            rt = new RenderTexture(840, 500, 16) { name = "Tay cầm 3D", antiAliasing = 4 };
-            stageCam.targetTexture = rt;
-            view3d.texture = rt;
-        }
-
-        static void Part(PrimitiveType t, Transform parent, Vector3 pos, Vector3 scale, Quaternion rot, Material m)
-        {
-            var go = GameObject.CreatePrimitive(t);
-            Destroy(go.GetComponent<Collider>());
-            go.transform.SetParent(parent, false);
-            go.transform.localPosition = pos;
-            go.transform.localScale = scale;
-            go.transform.localRotation = rot;
-            go.GetComponent<Renderer>().sharedMaterial = m;
+            mountText = GlassKit.Label(b, "Căn trục", "", 13, MenuKit.InkDim, false, TextAnchor.UpperRight, new Vector2(-22, -22), new Vector2(240, 22), new Vector2(1, 1));
+            mountText.rectTransform.pivot = new Vector2(1, 1);
         }
 
         // ---------------------------------------------------------------- joystick, nút
@@ -230,8 +175,8 @@ namespace Khkt.Menu.Dashboard
             var reset = MenuKit.MakeButton(b, "Nút làm lại", "Làm lại", new Vector2(-22, -14), new Vector2(110, 36), () => { done.Clear(); SetZero(); }, 1, MenuKit.RadiusButton, new Vector2(1, 1));
             reset.transform.Find("Chữ").GetComponent<Text>().fontSize = 14;
 
-            Add("Đẩy cần lên", () => s.Joy2.y > 0.7f);
-            Add("Đẩy cần xuống", () => s.Joy2.y < -0.7f);
+            Add("Đẩy cần lên (tiến)", () => s.Joy2.y > 0.7f);
+            Add("Đẩy cần xuống (lùi)", () => s.Joy2.y < -0.7f);
             Add("Đẩy cần sang trái", () => s.Joy2.x < -0.7f);
             Add("Đẩy cần sang phải", () => s.Joy2.x > 0.7f);
             Add("Nhấn cần", () => s.Has(VeraFlags.StickPress) || s.Pressed(ControllerButtons.Joy2Press));
@@ -283,55 +228,30 @@ namespace Khkt.Menu.Dashboard
         void OnEnable()
         {
             if (page == null) return;
-            EnsureStage();
-            stage.SetActive(true);
-            if (sourceHost == null && FindAnyObjectByType<SerialControllerSource>() == null)
-            {
-                sourceHost = new GameObject("Thử tay cầm (trang Tay cầm)");
-                usb = sourceHost.AddComponent<SerialControllerSource>();
-                usb.portName = "auto";
-                usb.logFirmwareMessages = false;
-                if (FindAnyObjectByType<UdpControllerSource>() == null)
-                {
-                    wifi = sourceHost.AddComponent<UdpControllerSource>();
-                    wifi.logFirmwareMessages = false;
-                }
-            }
-            else
-            {
-                usb ??= FindAnyObjectByType<SerialControllerSource>();
-                wifi ??= FindAnyObjectByType<UdpControllerSource>();
-            }
-            if (usb != null) usb.SampleReceived += OnUsb;
-            if (wifi != null) wifi.SampleReceived += OnWifi;
+            if (Link != null) Link.LargeViewWanted = true;
         }
 
         void OnDisable()
         {
-            if (usb != null) usb.SampleReceived -= OnUsb;
-            if (wifi != null) wifi.SampleReceived -= OnWifi;
-            // trả cổng COM / UDP lại cho lab
-            if (sourceHost != null) { Destroy(sourceHost); sourceHost = null; usb = null; wifi = null; }
-            if (stage != null) stage.SetActive(false);
+            if (Link != null) Link.LargeViewWanted = false;
+            cal?.Close();
             active = null;
         }
-
-        void OnDestroy()
-        {
-            if (stage != null) Destroy(stage);
-            if (rt != null) { rt.Release(); Destroy(rt); }
-        }
-
-        void OnUsb(ControllerState st) => usbLast = Time.unscaledTime;
-        void OnWifi(ControllerState st) => wifiLast = Time.unscaledTime;
 
         // ================================================================ mỗi khung
         void Update()
         {
             if (page == null) return;
             float now = Time.unscaledTime;
-            bool usbLive = usb != null && now - usbLast < 0.6f, wifiLive = wifi != null && now - wifiLast < 0.6f;
-            active = usbLive ? (ControllerSource)usb : wifiLive ? wifi : null;
+            var link = Link;
+            if (link == null) return;
+            var usb = link.Usb;
+            var wifi = link.Wifi;
+            bool usbLive = link.UsbLive, wifiLive = link.WifiLive;
+            active = link.Active;
+            if (view3d.texture != link.LargeView) view3d.texture = link.LargeView;
+            mountText.text = link.MountCalibrated ? "Đã căn trục BMI160" : "Chưa căn trục BMI160";
+            mountText.color = link.MountCalibrated ? MenuKit.Bio : MenuKit.Warn;
 
             // ----- kết nối
             Color c = active != null ? (active.Latest.Has(VeraFlags.ImuError) ? MenuKit.Warn : MenuKit.Bio) : MenuKit.Error;
@@ -340,7 +260,7 @@ namespace Khkt.Menu.Dashboard
             statusText.color = c;
             usbLine.text = usb == null ? "USB: đang dùng ở nơi khác" : "USB: " + (usbLive ? $"đang nhận ({usb.ControllerName})" : usb.IsConnected ? "đã mở cổng, chờ dữ liệu" : "chưa thấy (cắm cáp, tắt Serial Monitor)");
             wifiLine.text = wifi == null ? "Wi-Fi: đang dùng ở nơi khác" : "Wi-Fi: " + (wifiLive ? $"đang nhận ({wifi.ControllerName})" : "chưa có gói (cổng 4210)");
-            int rate = active == usb && usb != null ? usb.PacketsPerSecond : active == wifi && wifi != null ? wifi.PacketsPerSecond : 0;
+            int rate = link.PacketsPerSecond;
             rateLine.text = active == null ? "" : $"{rate} gói/giây · nhiệt độ chip {active.Latest.TempC:0.0} °C";
             string fw = usbLive ? usb.LastFirmwareMessage : wifiLive ? wifi.LastFirmwareMessage : "";
             fwLine.text = now < flashUntil ? flash : string.IsNullOrEmpty(fw) ? "" : "Tay cầm: " + fw;
@@ -358,14 +278,12 @@ namespace Khkt.Menu.Dashboard
             }
             s = active.Latest;
 
-            // ----- hướng (so với lúc đặt về 0)
-            if (!zeroSet) { zero = s.UnityRotation; zeroSet = true; }
-            var rel = Quaternion.Inverse(Quaternion.Euler(0, zero.eulerAngles.y, 0)) * s.UnityRotation;
+            // ----- hướng (đã bù căn trục, so với lúc đặt về 0); mô hình 3D do ControllerLink quay
+            var rel = link.Pose;
             Vector3 f = rel * Vector3.forward, r = rel * Vector3.right;
             pitch = Mathf.Asin(Mathf.Clamp(f.y, -1, 1)) * Mathf.Rad2Deg;
             yaw = Mathf.Atan2(f.x, f.z) * Mathf.Rad2Deg;
             roll = Mathf.Asin(Mathf.Clamp(-r.y, -1, 1)) * Mathf.Rad2Deg;
-            if (model != null) model.localRotation = rel;
             angles.text = $"Xoay {yaw:+0;-0;0}°   ·   Chúc {pitch:+0;-0;0}°   ·   Nghiêng {roll:+0;-0;0}°";
 
             // ----- joystick, nút
@@ -399,7 +317,8 @@ namespace Khkt.Menu.Dashboard
                            $"Gia tốc   x {a.x,6:0.00}   y {a.y,6:0.00}   z {a.z,6:0.00}  g   (|a| = {a.magnitude:0.00})\n" +
                            $"Cảm ứng   A {s.TouchA,3}   B {s.TouchB,3}   (0–255)\n" +
                            $"Trạng thái: {(flags.Count > 0 ? string.Join(", ", flags) : "bình thường")}\n" +
-                           $"Tay cầm VERA: {(s.Vera ? "có" : "không (tay cầm cũ)")}";
+                           $"Joystick firmware x {s.JoyRaw.x:+0.00;-0.00} y {s.JoyRaw.y:+0.00;-0.00} → đã căn x {s.Joy2.x:+0.00;-0.00} y {s.Joy2.y:+0.00;-0.00}" +
+                           (VeraJoyCal.Current.Valid ? "" : " (chưa căn)");
         }
 
         static void Touch(Image bar, Text label, string name, byte level, bool on)
