@@ -14,8 +14,9 @@ namespace Khkt.Demo.Bio.Portal
     ///     Chống kích hoạt 2 lần liên tiếp.
     ///   • Trình tự MỞ:
     ///       1. Khóa di chuyển/HUD (UiCapture++), lưu chính xác vị trí, góc nhìn, FOV.
-    ///       2. Tạm dừng / đóng băng tương tác phòng lab chính & âm thanh (AudioListener.pause = true).
-    ///       3. Mở phòng Sinh học 3D đầy đủ qua BioWebViewBridge.Open(() => OnReturnFromBioLab()).
+    ///       2. Tạm dừng / đóng băng tương tác phòng lab chính (và âm thanh khi mở trang web nhúng).
+    ///       3. Mở phòng Sinh học 3D: Mac, iPad dùng trang BIO-LAB nhúng (BioWebViewBridge); Windows và nền khác
+    ///          mở khung xem giải phẫu 3D trong game (GiaiPhauMoDunImpl), không bật trình duyệt ngoài.
     ///   • Trình tự TRỞ VỀ (OnReturnFromBioLab):
     ///       1. Phục hồi âm thanh lab (AudioListener.pause = false).
     ///       2. Phục hồi ĐÚNG vị trí, góc ngẩng, hướng nhìn, FOV của camera và người chơi.
@@ -165,18 +166,33 @@ namespace Khkt.Demo.Bio.Portal
 
             // 2. Pause hoặc freeze tương tác lab & âm thanh, và set DesktopViewer.UiCapture++
             DesktopViewer.UiCapture++;
-            AudioListener.pause = true;
             PlaySound(clipWhoosh);
 
             currentState = TransitionState.TrongPhong;
 
-            // 3. Mở Phòng Sinh học 3D đầy đủ qua BioWebViewBridge thay vì chuyển sang HoloBioRoom chưa hoàn thiện
-            BioWebViewBridge.Open(() => OnReturnFromBioLab());
+            // 3. Mở Phòng Sinh học 3D.
+            //    Mac, iPad: trang BIO-LAB nhúng trong app (WKWebView), vẫn ở trong app.
+            //    Windows và các nền khác: Unity không có WebView nên trước đây phải bật trình duyệt ngoài;
+            //    nay mở khung xem giải phẫu 3D ngay trong game (từ đó sang được bàn mổ ếch), đóng lại thì về đúng chỗ trong lab.
+            if (DungWebNhung)
+            {
+                AudioListener.pause = true;
+                BioWebViewBridge.Open(() => OnReturnFromBioLab());
+            }
+            else
+            {
+                Khkt.Demo.Bio.GiaiPhau.GiaiPhauMoDunImpl.Mo(() => OnReturnFromBioLab());
+            }
         }
 
         // =====================================================================
         // TRÌNH TỰ TRỞ VỀ (RESTORE LAB TỪ PHÒNG SINH HỌC 3D)
         // =====================================================================
+
+        /// <summary>Chỉ Mac và iPad nhúng được trang web trong app; nền khác mở phòng giải phẫu dựng bằng Unity.</summary>
+        public static bool DungWebNhung =>
+            Application.platform == RuntimePlatform.OSXPlayer || Application.platform == RuntimePlatform.OSXEditor ||
+            Application.platform == RuntimePlatform.IPhonePlayer;
 
         public void OnReturnFromBioLab()
         {

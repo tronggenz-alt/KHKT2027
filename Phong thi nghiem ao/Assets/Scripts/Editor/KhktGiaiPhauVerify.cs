@@ -423,6 +423,41 @@ namespace Khkt.EditorTools
             }
             UiTheme.Set(UiTheme.Mode.XanhMuc, false);
             yield return Frames(2);
+            GiaiPhauMoDunImpl.Dong();
+            yield return Frames(2);
+
+            // Cổng Phòng Sinh học 3D (bấm E / nút Vào): trên Windows mở phòng giải phẫu trong game, đóng thì về lab
+            var cong = UnityEngine.Object.FindAnyObjectByType<BioPortal>(FindObjectsInactive.Include);
+            if (cong != null)
+            {
+                var camLab = Camera.main;
+                int ucTruoc = DesktopViewer.UiCapture;
+                cong.OnEnterButtonClicked();
+                yield return Frames(4);
+                var tr = BioPortalTransition.Instance;
+                bool trongGame = GiaiPhauMoDunImpl.DangMo && !BioWebViewBridge.IsOpen;
+                Check(BioPortalTransition.DungWebNhung || trongGame,
+                      "Cổng Sinh trên Windows: bấm vào mở phòng giải phẫu trong game, không mở trình duyệt",
+                      $"khungXem={GiaiPhauMoDunImpl.DangMo} web={BioWebViewBridge.IsOpen} trạngThái={tr?.CurrentState}");
+                Check(tr != null && tr.CurrentState == BioPortalTransition.TransitionState.TrongPhong && DesktopViewer.UiCapture > ucTruoc,
+                      "Cổng Sinh: lab khóa di chuyển khi đang ở trong phòng", $"uiCapture {DesktopViewer.UiCapture}");
+                if (trongGame)
+                {
+                    yield return Giay(0.8f);
+                    Chup(GiaiPhauMoDunImpl.HienTai.StageCamera, GiaiPhauMoDunImpl.HienTai.UiCanvas, "00_cong_sinh_mo_trong_game.png");
+                    GiaiPhauMoDunImpl.Dong();   // nút Đóng / Esc
+                    yield return Frames(4);
+                }
+                else BioWebViewBridge.Close();
+                Check(tr != null && tr.CurrentState == BioPortalTransition.TransitionState.Nghi && DesktopViewer.UiCapture == ucTruoc
+                      && (camLab == null || camLab.enabled),
+                      "Cổng Sinh: đóng phòng thì về lại lab, mở khóa điều khiển, bật lại camera lab",
+                      $"trạngThái={tr?.CurrentState} uiCapture {DesktopViewer.UiCapture} (gốc {ucTruoc}) cam={(camLab != null && camLab.enabled)}");
+            }
+            else Check(false, "Có cổng Phòng Sinh học 3D trong cảnh");
+
+            GiaiPhauMoDunImpl.Mo();
+            yield return Frames(3);
             // Từ khung xem sang bàn mổ
             var nut = GiaiPhauMoDunImpl.HienTai.UiCanvas.GetComponentsInChildren<Button>(true).FirstOrDefault(b => b.name == "NutBanMo");
             bool coNut = nut != null;   // nút bị hủy cùng canvas khung xem sau khi bấm nên ghi lại trước
