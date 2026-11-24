@@ -24,8 +24,8 @@ namespace Khkt.Demo.Bio
         static readonly string[] Names3 = { "Bộ xương", "Hệ cơ", "Da" };
 
         public static readonly string[] OrganIds = {
-            "tim", "phoi", "gan", "than", "da-day", "nao",
-            "xuong", "co", "da", "mach-mau", "ruot-non", "ruot-gia", "tuy", "tuy-song", "lach"
+            "tim", "phoi", "gan", "than", "da_day", "nao",
+            "xuong", "co", "da", "mach_mau", "ruot_non", "ruot_gia", "tuy", "tuy_song", "lach"
         };
         public static readonly string[] OrganNames = {
             "Tim (72 nhịp/phút)", "Phổi (16 nhịp/phút)", "Gan & Mật", "Thận (Nephron)", "Dạ dày", "Não & Thần kinh",
@@ -54,23 +54,21 @@ namespace Khkt.Demo.Bio
             Show();
         }
 
-        public string UseHint => cachedHint ?? $"Bàn giải phẫu số (BodyParts3D CC BY 4.0): đang xem {ActiveNames[layer % ActiveNames.Length].ToLowerInvariant()} · Cơ quan: {OrganNames[selectedOrganIndex]} · Bấm: đổi lớp / Con lăn: xoay & chọn cơ quan";
+        public string UseHint => cachedHint ?? $"Bàn giải phẫu số (BodyParts3D CC BY 4.0) · Cơ quan: {OrganNames[selectedOrganIndex]} · Bấm: mở mô hình 3D và bàn mổ trong app / Con lăn: xoay mô hình trên bàn";
 
         public void Use(GameObject user) => Use();
 
         public void Use()
         {
-            var names = ActiveNames;
-            layer = (layer + 1) % names.Length;
-            anim = 0f;
-            Show();
             BioFeedback.PlayClick();
-            BioFeedback.LogAction("ban_giai_phau_so", "doi_lop_giai_phau",
-                $"Bàn giải phẫu số: chuyển sang lớp '{names[layer]}' (Cơ quan trọng tâm: {OrganNames[selectedOrganIndex]}).");
-            enabled = true;
-            // 19/11: mở bản web BIO-LAB 3D cũ của CHEMISTRY (WKWebView trên Mac/iPad, trình duyệt trên Windows).
-            if (!Khkt.Demo.Bio.Portal.BioWebViewBridge.IsOpen)
-                Khkt.Demo.Bio.Portal.BioWebViewBridge.Open();
+            BioFeedback.LogAction("ban_giai_phau_so", "mo_giai_phau_3d",
+                $"Bàn giải phẫu số: mở mô hình giải phẫu người 3D trong app, chọn sẵn '{OrganNames[selectedOrganIndex]}'.");
+            // 24/11: mở khung xem 3D ngay trong app (không mở trang web). Lớp hiển thị trên mặt bàn giữ nguyên.
+            if (!Khkt.Demo.Bio.GiaiPhau.GiaiPhauMoDunImpl.DangMo)
+                Khkt.Demo.Bio.GiaiPhau.GiaiPhauMoDunImpl.Mo();
+            var ctl = Khkt.Demo.Bio.GiaiPhau.GiaiPhauMoDunImpl.HienTai;
+            if (ctl != null && Khkt.Demo.Bio.GiaiPhau.Bp3dReader.TimCoQuan(OrganIds[selectedOrganIndex]) != null)
+                ctl.ChonCoQuan(OrganIds[selectedOrganIndex]);
         }
 
         public void SelectNextOrgan()
@@ -90,6 +88,7 @@ namespace Khkt.Demo.Bio
                 $"Ôn tập giải phẫu số: {(correct ? "ĐÚNG" : "SAI")} (Điểm: {quizScore}/{quizAnswered}).");
         }
 
+        /// <summary>Con lăn chỉ xoay mô hình trên mặt bàn (trước đây vừa xoay vừa nhảy cơ quan: hai việc không liên quan).</summary>
         public void OnScroll(float delta)
         {
             if (Mathf.Abs(delta) < 0.001f) return;
@@ -99,13 +98,13 @@ namespace Khkt.Demo.Bio
             {
                 if (ls[i] != null) ls[i].transform.localRotation = Quaternion.Euler(0f, modelYawDeg, 0f);
             }
-            SelectNextOrgan();
+            RebuildHint();
         }
 
         void RebuildHint()
         {
             var names = ActiveNames;
-            cachedHint = $"Bàn giải phẫu số (BodyParts3D CC BY 4.0): lớp {names[layer % names.Length]} · Cơ quan: {OrganNames[selectedOrganIndex]} · Bấm: đổi lớp · Con lăn: xoay ({BioFeedback.FormatVi(modelYawDeg, "0")}°)";
+            cachedHint = $"Bàn giải phẫu số (BodyParts3D CC BY 4.0): lớp {names[layer % names.Length]} · Cơ quan: {OrganNames[selectedOrganIndex]} · Bấm: mở mô hình 3D trong app · Con lăn: xoay ({BioFeedback.FormatVi(modelYawDeg, "0")}°)";
         }
 
         void Show()

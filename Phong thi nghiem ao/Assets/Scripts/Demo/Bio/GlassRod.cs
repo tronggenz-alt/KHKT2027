@@ -40,9 +40,20 @@ namespace Khkt.Demo.Bio
                 $"Đã xoay đũa thủy tinh tại mặt phân cách cồn lạnh (−20 °C) – dịch lọc, thu được {BioFeedback.FormatVi(spooledDnaUg, "0.1")} µg búi sợi ADN trắng đục!");
         }
 
+        /// <summary>Bấm đũa: quấn sợi ADN nếu bình gần nhất thật sự có ADN kết tủa ở lớp cồn (trước đây bấm là có ADN).</summary>
         public void Use(GameObject user)
         {
-            SpoolDna(true, true);
+            var binh = BioGanNhat.Tim<BioVessel>(transform.position, 0.25f, b => !b.isStock);
+            if (binh == null || binh.mix.dnaThreads < 0.01)
+            {
+                BioFeedback.ShowToast(binh == null ? "Không có bình nào ở gần để khuấy hay quấn ADN." : $"{binh.label} chưa có sợi ADN kết tủa (cần dịch phá tế bào có muối và lớp cồn lạnh).");
+                return;
+            }
+            hasSpoolDna = true;
+            spooledDnaUg = (float)(binh.mix.dnaThreads * 100.0);
+            BioFeedback.PlaySuccess();
+            BioFeedback.LogAction("dua_thuy_tinh", "quan_soi_adn", $"Quấn búi sợi ADN trắng từ {binh.label}.");
+            BioFeedback.ShowToast($"Đã quấn búi sợi ADN trắng từ {binh.label}.");
         }
     }
 }

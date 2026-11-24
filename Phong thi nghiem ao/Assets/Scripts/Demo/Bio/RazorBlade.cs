@@ -30,13 +30,12 @@ namespace Khkt.Demo.Bio
 
         public string UseHint => scoredOnionGrid
             ? "Dao lam (đã rạch ô vuông 1 cm trên vảy hành) · Đặt lại vào hộp trên khay an toàn"
-            : "Dao lam · Bấm để rạch ô vuông 1 × 1 cm trên mặt vảy hành";
+            : "Dao lam · Cầm rồi trỏ vào khay mẫu để rạch";
 
         public void Use(GameObject user)
         {
-            scoredOnionGrid = true;
-            BioFeedback.PlayClick();
-            BioFeedback.LogAction("dao_lam", "rach_o_vuong_hanh", "Đã dùng dao lam rạch các ô vuông 1 × 1 cm trên mặt trong vảy hành tím.");
+            // Trước đây bấm dao lam ở đâu cũng ghi "đã rạch vảy hành": nay chỉ hướng dẫn, việc rạch làm khi trỏ dao vào khay mẫu.
+            BioFeedback.ShowToast("Cầm dao lam rồi trỏ vào khay mẫu (vảy hành, lá) để rạch. Xong đặt dao lại vào khay.");
         }
 
         public void CheckSafePlacement(bool inTray)

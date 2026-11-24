@@ -18,6 +18,8 @@ namespace Khkt.Demo.Bio.ThucVat
         public float MinPitch = -65f;
         public float MaxPitch = 80f;
         public float SmoothTime = 8f;
+        /// <summary>Bật thì chỉ chuột phải (hoặc giữa) mới xoay; chuột trái để mô-đun dùng riêng (bàn mổ: rạch bằng dao). Mặc định tắt.</summary>
+        public bool ChiXoayChuotPhai;
 
         public event Action<Collider> OnPartClicked;
         public event Action<Collider> OnPartDoubleClicked;
@@ -94,7 +96,13 @@ namespace Khkt.Demo.Bio.ThucVat
                 Vector2 pos = mouse.position.ReadValue();
                 bool overUi = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
 
-                if (mouse.leftButton.wasPressedThisFrame || mouse.rightButton.wasPressedThisFrame)
+                bool nhan = ChiXoayChuotPhai ? (mouse.rightButton.wasPressedThisFrame || mouse.middleButton.wasPressedThisFrame)
+                                             : (mouse.leftButton.wasPressedThisFrame || mouse.rightButton.wasPressedThisFrame);
+                bool giu = ChiXoayChuotPhai ? (mouse.rightButton.isPressed || mouse.middleButton.isPressed)
+                                            : (mouse.leftButton.isPressed || mouse.rightButton.isPressed);
+                bool tha = ChiXoayChuotPhai ? (mouse.rightButton.wasReleasedThisFrame || mouse.middleButton.wasReleasedThisFrame)
+                                            : (mouse.leftButton.wasReleasedThisFrame || mouse.rightButton.wasReleasedThisFrame);
+                if (nhan)
                 {
                     dragging = !overUi;
                     dragStartedOnUi = overUi;
@@ -102,7 +110,7 @@ namespace Khkt.Demo.Bio.ThucVat
                     lastMousePos = pos;
                 }
 
-                if (dragging && (mouse.leftButton.isPressed || mouse.rightButton.isPressed))
+                if (dragging && giu)
                 {
                     Vector2 delta = pos - lastMousePos;
                     lastMousePos = pos;
@@ -114,10 +122,10 @@ namespace Khkt.Demo.Bio.ThucVat
                     }
                 }
 
-                if ((mouse.leftButton.wasReleasedThisFrame || mouse.rightButton.wasReleasedThisFrame) && dragging)
+                if (tha && dragging)
                 {
                     dragging = false;
-                    if (!dragStartedOnUi && mouse.leftButton.wasReleasedThisFrame && dragAccumPixels < 6f)
+                    if (!ChiXoayChuotPhai && !dragStartedOnUi && mouse.leftButton.wasReleasedThisFrame && dragAccumPixels < 6f)
                         HandleClick(pos);
                 }
 

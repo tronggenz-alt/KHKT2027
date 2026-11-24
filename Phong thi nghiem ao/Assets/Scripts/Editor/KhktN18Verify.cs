@@ -138,6 +138,7 @@ namespace Khkt.EditorTools
         {
             if (type != LogType.Exception && type != LogType.Error && type != LogType.Assert) return;
             if (condition != null && (condition.StartsWith("[N18") || condition.StartsWith("Curl error"))) return;
+            if (stackTrace != null && stackTrace.Contains("UnityEditor.Search.SearchDatabase")) return; // lỗi nội bộ trình soạn thảo khi lập chỉ mục tìm kiếm, không phải mã dự án
             runtimeErrors++;
             if (runtimeErrNotes.Count < 8)
                 runtimeErrNotes.Add($"{condition} | {stackTrace}");
@@ -786,7 +787,7 @@ namespace Khkt.EditorTools
         }
 
         // =====================================================================
-        // Nhóm G4 — Giải phẫu người 3D (19/11: bản web BIO-LAB 3D cũ của CHEMISTRY, thay mô-đun C# G4)
+        // Nhóm G4 — Giải phẫu người 3D (24/11: khung xem trong app; bản web chỉ còn cho cổng sinh học)
         // =====================================================================
 
         static IEnumerator CoRunG4Verify(bool exitWhenDone)
@@ -814,14 +815,14 @@ namespace Khkt.EditorTools
             Check(coMa && imp != null && imp.GetCompatibleWithPlatform(UnityEditor.BuildTarget.StandaloneOSX) && !imp.GetCompatibleWithEditor(),
                   "G4 Plugins/macOS/BioWebViewMac.bundle có mã máy, bật cho bản Mac", $"coMa={coMa} imp={(imp != null)}");
 
-            // 3. Cầu nối hợp đồng Khkt.Bio.GiaiPhau.GiaiPhauMoDun (thẻ Giải phẫu) → BioWebViewBridge
+            // 3. Cầu nối hợp đồng Khkt.Bio.GiaiPhau.GiaiPhauMoDun (thẻ Giải phẫu) → khung xem 3D trong app (24/11, không mở web)
             System.Reflection.MethodInfo mMo = null, mDong = null;
             System.Reflection.PropertyInfo pDangMo = null;
             foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
             {
                 var tBridge = asm.GetType("Khkt.Bio.GiaiPhau.GiaiPhauMoDun", false);
                 if (tBridge == null) continue;
-                mMo = tBridge.GetMethod("Mo", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                mMo = tBridge.GetMethod("Mo", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static, null, Type.EmptyTypes, null);
                 mDong = tBridge.GetMethod("Dong", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
                 pDangMo = tBridge.GetProperty("DangMo", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
                 break;
@@ -832,36 +833,39 @@ namespace Khkt.EditorTools
             try
             {
                 mMo?.Invoke(null, null);
-                yield return WaitPlayFrames(2);
+                yield return WaitPlayFrames(3);
                 bool mo = pDangMo != null && (bool)pDangMo.GetValue(null);
-                Check(mo && BioWebViewBridge.IsOpen && !GiaiPhauMoDunImpl.DangMo && DesktopViewer.UiCapture == ucGoc + 1,
-                      "G4 GiaiPhauMoDun.Mo() mở bản web (không mở mô-đun C# G4), khoá điều khiển lab",
-                      $"cach={BioWebViewBridge.CachHien} uiCapture={DesktopViewer.UiCapture}");
+                Check(mo && GiaiPhauMoDunImpl.DangMo && !BioWebViewBridge.IsOpen && DesktopViewer.UiCapture == ucGoc + 1,
+                      "G4 GiaiPhauMoDun.Mo() mở khung xem 3D trong app (không mở trang web), khoá điều khiển lab",
+                      $"impl={GiaiPhauMoDunImpl.DangMo} web={BioWebViewBridge.IsOpen} uiCapture={DesktopViewer.UiCapture}");
                 mDong?.Invoke(null, null);
                 yield return WaitPlayFrames(2);
-                Check(!BioWebViewBridge.IsOpen && DesktopViewer.UiCapture == ucGoc, "G4 GiaiPhauMoDun.Dong() đóng trang, trả điều khiển lab");
+                Check(!GiaiPhauMoDunImpl.DangMo && DesktopViewer.UiCapture == ucGoc, "G4 GiaiPhauMoDun.Dong() đóng khung xem, trả điều khiển lab");
 
                 // 4. Mở / đóng 5 lần không rò UiCapture
                 bool gonHet = true;
                 for (int c = 0; c < 5; c++)
                 {
-                    BioWebViewBridge.Open();
+                    GiaiPhauMoDunImpl.Mo();
                     yield return WaitPlayFrames(1);
-                    gonHet &= BioWebViewBridge.IsOpen;
-                    BioWebViewBridge.Close();
+                    gonHet &= GiaiPhauMoDunImpl.DangMo;
+                    GiaiPhauMoDunImpl.Dong();
                     yield return WaitPlayFrames(1);
-                    gonHet &= !BioWebViewBridge.IsOpen;
+                    gonHet &= !GiaiPhauMoDunImpl.DangMo;
                 }
-                Check(gonHet && DesktopViewer.UiCapture == ucGoc, "G4 Mở/đóng bản web 5 lần sạch sẽ", $"uiCapture={DesktopViewer.UiCapture}");
+                Check(gonHet && DesktopViewer.UiCapture == ucGoc, "G4 Mở/đóng khung xem 5 lần sạch sẽ", $"uiCapture={DesktopViewer.UiCapture}");
 
-                // 5. Bàn giải phẫu số trong lab mở cùng bản web
+                // 5. Bàn giải phẫu số trong lab mở khung xem trong app, chọn sẵn cơ quan đang trỏ
                 var table = UnityEngine.Object.FindAnyObjectByType<DigitalAnatomyTable>(FindObjectsInactive.Include);
                 if (table != null)
                 {
+                    table.selectedOrganIndex = 4; // dạ dày
                     table.Use();
-                    yield return WaitPlayFrames(2);
-                    Check(BioWebViewBridge.IsOpen && !GiaiPhauMoDunImpl.DangMo, "G4 DigitalAnatomyTable.Use() mở bản web BIO-LAB 3D");
-                    BioWebViewBridge.Close();
+                    yield return WaitPlayFrames(3);
+                    Check(GiaiPhauMoDunImpl.DangMo && !BioWebViewBridge.IsOpen && GiaiPhauMoDunImpl.HienTai.SanKhau.CoQuanDangChon == "da_day",
+                          "G4 DigitalAnatomyTable.Use() mở khung xem 3D trong app, chọn sẵn dạ dày",
+                          $"chon={GiaiPhauMoDunImpl.HienTai?.SanKhau?.CoQuanDangChon}");
+                    GiaiPhauMoDunImpl.Dong();
                     yield return WaitPlayFrames(1);
                 }
 
@@ -894,6 +898,7 @@ namespace Khkt.EditorTools
             finally
             {
                 if (BioWebViewBridge.IsOpen) BioWebViewBridge.Close();
+                if (GiaiPhauMoDunImpl.DangMo) GiaiPhauMoDunImpl.Dong();
                 Application.logMessageReceived -= OnUnityLog;
             }
 

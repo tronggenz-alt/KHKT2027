@@ -22,7 +22,10 @@ namespace Khkt.Demo.Bio
         public bool hasStarterCulture = true;
         public bool lidClosed = true;
 
-        public double LacticAcidGrams => hasStarterCulture ? Fermentation.LacticAcidGramsAt(incubatedHours, lactoseGrams, tempC) : 0.0;
+        double lacticTich;
+        float demVe;
+        /// <summary>Axit lactic tích lũy theo nhiệt độ từng lúc; nóng quá 55 °C vi khuẩn chết, không sinh thêm.</summary>
+        public double LacticAcidGrams => lacticTich;
         public float CurrentPh
         {
             get
@@ -35,7 +38,7 @@ namespace Khkt.Demo.Bio
         }
         public bool IsCoagulated => CurrentPh <= 4.75f;
 
-        public string UseHint => $"Hũ làm sữa chua (L. bulgaricus) [Ủ {BioFeedback.FormatVi((float)tempC, "0")} °C · {BioFeedback.FormatVi((float)incubatedHours, "0.0")} giờ · Axit lactic: {BioFeedback.FormatVi((float)LacticAcidGrams, "0.00")} g · pH = {BioFeedback.FormatVi(CurrentPh, "0.00")} · {(IsCoagulated ? "Sữa đã đông đặc mịn" : "Đang lỏng")}] · Bấm: ủ thêm 3 giờ";
+        public string UseHint => $"Hũ làm sữa chua (L. bulgaricus) [Ủ {BioFeedback.FormatVi((float)tempC, "0")} °C · {BioFeedback.FormatVi((float)incubatedHours, "0.0")} giờ · Axit lactic: {BioFeedback.FormatVi((float)LacticAcidGrams, "0.00")} g · pH = {BioFeedback.FormatVi(CurrentPh, "0.00")} · {(IsCoagulated ? "Sữa đã đông đặc mịn" : "Đang lỏng")}] · Ủ ở 40 – 45 °C (tủ ấm) để lên men lactic";
 
         public void IncubateHours(double hours, double temperatureC = 42.0)
         {
@@ -46,15 +49,30 @@ namespace Khkt.Demo.Bio
                     $"Ủ sữa chua ở nhiệt độ quá cao ({BioFeedback.FormatVi((float)tempC, "0")} °C) làm chết vi khuẩn L. bulgaricus!",
                     "Nhiệt độ tối ưu cho vi khuẩn lactic sữa chua là 40 – 45 °C.");
             }
+            if (tempC > 55.0) hasStarterCulture = false;
+            if (hasStarterCulture)
+                lacticTich += Math.Max(0.0, Fermentation.LacticAcidGramsAt(incubatedHours + hours, lactoseGrams, tempC) - Fermentation.LacticAcidGramsAt(incubatedHours, lactoseGrams, tempC));
             incubatedHours += hours;
             BioFeedback.PlaySuccess();
             BioFeedback.LogAction("bo_lam_sua_chua", "u_len_men_lactic",
                 $"Sau {BioFeedback.FormatVi((float)incubatedHours, "0.0")} giờ ủ ở {BioFeedback.FormatVi((float)tempC, "0")} °C: sinh ra {BioFeedback.FormatVi((float)LacticAcidGrams, "0.00")} g axit lactic, pH giảm còn {BioFeedback.FormatVi(CurrentPh, "0.00")} ({(IsCoagulated ? "casein kết tủa làm sữa đông đặc" : "chưa đông")}).");
         }
 
+        void Update()
+        {
+            float moiTruong = BioGanNhat.NhietDoTai(transform.position);
+            tempC += (moiTruong - tempC) * Mathf.Clamp01(Time.deltaTime * 0.05f);
+            if (tempC > 55.0) hasStarterCulture = false;
+            double h = BioGanNhat.GiayMoPhong(transform.position, Time.deltaTime) / 3600.0;
+            if (hasStarterCulture)
+                lacticTich += Math.Max(0.0, Fermentation.LacticAcidGramsAt(incubatedHours + h, lactoseGrams, tempC) - Fermentation.LacticAcidGramsAt(incubatedHours, lactoseGrams, tempC));
+            incubatedHours += h;
+        }
+
+        /// <summary>Bấm: mở nắp xem độ đông, pH. Không tua thời gian (trước đây mỗi lần bấm cộng 3 giờ).</summary>
         public void Use(GameObject user)
         {
-            IncubateHours(3.0, tempC);
+            BioFeedback.ShowToast($"Hũ sữa chua: {BioFeedback.FormatVi((float)tempC, "0")} °C, {BioFeedback.FormatVi((float)incubatedHours, "0.0")} giờ, pH {BioFeedback.FormatVi(CurrentPh, "0.00")} · {(IsCoagulated ? "đã đông" : "còn lỏng")}{(hasStarterCulture ? "" : " · vi khuẩn đã chết vì nóng")}");
         }
     }
 }

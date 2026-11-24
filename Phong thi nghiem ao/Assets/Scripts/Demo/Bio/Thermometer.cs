@@ -36,9 +36,19 @@ namespace Khkt.Demo.Bio
             return currentReadingC;
         }
 
+        /// <summary>Bấm nhiệt kế: đọc nhiệt độ thật của bình đang nhúng (trong 20 cm), không thì nhiệt độ vùng hoặc không khí phòng.</summary>
         public void Use(GameObject user)
         {
-            MeasureTemperature(37.0f, false);
+            var binh = BioGanNhat.Tim<BioVessel>(transform.position, 0.2f);
+            if (binh != null)
+            {
+                MeasureTemperature(binh.TemperatureC, false);
+                BioFeedback.ShowToast($"{binh.label}: {BioFeedback.FormatVi(binh.TemperatureC, "0.0")} °C");
+                return;
+            }
+            float t = BioGanNhat.NhietDoTai(transform.position);
+            MeasureTemperature(t, false);
+            BioFeedback.ShowToast($"Nhiệt độ không khí tại chỗ: {BioFeedback.FormatVi(t, "0.0")} °C (chưa nhúng vào bình nào)");
         }
     }
 }

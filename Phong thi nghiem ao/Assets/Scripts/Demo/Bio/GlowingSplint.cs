@@ -45,9 +45,23 @@ namespace Khkt.Demo.Bio
             return true;
         }
 
+        /// <summary>Bấm que đóm: thử khí ở miệng bình gần nhất (trong 25 cm) theo lượng O₂ bình đó thật sự vừa sinh ra.</summary>
         public void Use(GameObject user)
         {
-            TestCatalaseTube("Gan gà / Khoai tây tươi sống", 37.0, false);
+            var binh = BioGanNhat.Tim<BioVessel>(transform.position, 0.25f, b => !b.isStock);
+            if (binh == null)
+            {
+                burstIntoFlame = false;
+                BioFeedback.ShowToast("Que đóm vẫn chỉ còn tàn đỏ: chưa đưa tới miệng bình nào đang sinh khí.");
+                return;
+            }
+            burstIntoFlame = binh.mix.o2Recent > 0.5;
+            if (burstIntoFlame)
+            {
+                BioFeedback.PlaySuccess();
+                BioFeedback.LogAction("que_dom", "que_dom_bung_chay_o2", $"Que đóm ở miệng {binh.label} bùng cháy: khí sinh ra là O₂.");
+            }
+            BioFeedback.ShowToast(burstIntoFlame ? $"Tàn đóm bùng cháy ở miệng {binh.label}: khí sinh ra là O₂" : $"Tàn đóm không bùng cháy: {binh.label} chưa sinh đủ O₂", !burstIntoFlame);
         }
     }
 }

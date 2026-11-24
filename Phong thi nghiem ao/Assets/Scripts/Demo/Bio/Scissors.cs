@@ -25,12 +25,12 @@ namespace Khkt.Demo.Bio
             bioTool.kind = BioToolKind.Scalpel;
         }
 
-        public string UseHint => "Kéo mổ nhỏ · Cắt lá rong đuôi chó / lá thài lài tía thành mẩu nhỏ";
+        public string UseHint => "Kéo mổ nhỏ · Cầm rồi trỏ vào khay mẫu để cắt lá, rong";
 
         public void Use(GameObject user)
         {
-            BioFeedback.PlayClick();
-            BioFeedback.LogAction("keo_nho", "cat_mau_la", "Đã dùng kéo nhỏ cắt cành/lá mẫu thực vật.");
+            // Trước đây bấm kéo ghi "đã cắt lá" dù không có mẫu nào.
+            BioFeedback.ShowToast("Cầm kéo rồi trỏ vào khay mẫu (rong đuôi chó, lá) để cắt.");
         }
     }
 }

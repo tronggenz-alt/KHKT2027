@@ -30,9 +30,13 @@ namespace Khkt.Demo.Bio
                 "Túi hấp hủy đã qua chu trình nồi hấp 121 °C – 20 phút: băng chỉ thị nhiệt chuyển sọc đen, toàn bộ vi sinh vật đã bị tiêu diệt.");
         }
 
+        /// <summary>Băng chỉ thị chỉ đổi sọc đen khi túi nằm trong nồi hấp đã chạy xong chu trình (trước đây bấm là đổi).</summary>
         public void Use(GameObject user)
         {
-            MarkAutoclaved();
+            if (indicatorTapeBlackStripes) { BioFeedback.ShowToast("Túi đã hấp tiệt trùng, có thể thải bỏ."); return; }
+            var noi = BioGanNhat.Tim<AutoclaveController>(transform.position, 1.2f);
+            if (noi != null && noi.cycleCompletedSterile) { MarkAutoclaved(); return; }
+            BioFeedback.ShowToast(noi == null ? "Băng chỉ thị chưa đổi màu: túi chưa được đưa vào nồi hấp." : "Băng chỉ thị chưa đổi màu: nồi hấp chưa chạy xong chu trình 121 °C – 20 phút.", true);
         }
     }
 }

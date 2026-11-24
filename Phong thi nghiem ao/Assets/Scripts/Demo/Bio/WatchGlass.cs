@@ -26,17 +26,17 @@ namespace Khkt.Demo.Bio
 
         public string UseHint => sample != null && !sample.IsEmpty
             ? $"Đĩa đồng hồ Ø 75 mm [Đang ngâm: {sample.sampleName} trong NaCl {BioFeedback.FormatVi(soakMolarity, "0.0")} M]"
-            : "Đĩa đồng hồ thủy tinh Ø 75 mm · Bấm: cho biểu bì thài lài tía vào ngâm dung dịch muối";
+            : "Đĩa đồng hồ thủy tinh Ø 75 mm (trống) · Đặt biểu bì đã bóc vào để ngâm dung dịch muối";
 
         public void Use(GameObject user)
         {
-            if (sample == null) return;
-            sample.sampleId = "bieu_bi_thai_lai_tia";
-            sample.sampleName = "Biểu bì lá thài lài tía";
-            sample.volumeMl = 2.0f;
-            BioFeedback.PlayClick();
-            BioFeedback.LogAction("dia_dong_ho", "ngam_mau_dia_dong_ho",
-                $"Đã ngâm mẫu '{sample.sampleName}' trong đĩa đồng hồ chứa dung dịch NaCl {BioFeedback.FormatVi(soakMolarity, "0.0")} M.");
+            // Trước đây bấm vào đĩa trống là tự có biểu bì thài lài tía: nay chỉ báo đúng thứ đang có trong đĩa.
+            if (sample == null || sample.IsEmpty)
+            {
+                BioFeedback.ShowToast("Đĩa đồng hồ đang trống. Dùng kẹp bóc biểu bì từ khay mẫu đã rạch rồi đặt vào đĩa.");
+                return;
+            }
+            BioFeedback.ShowToast($"Đĩa đồng hồ: {sample.sampleName} đang ngâm NaCl {BioFeedback.FormatVi(soakMolarity, "0.0")} M.");
         }
     }
 }

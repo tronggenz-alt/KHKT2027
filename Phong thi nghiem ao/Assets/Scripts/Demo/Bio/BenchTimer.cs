@@ -21,22 +21,19 @@ namespace Khkt.Demo.Bio
 
         public void Use(GameObject user)
         {
-            if (!isRunning && elapsedSeconds == 0f)
-            {
-                isRunning = true;
-                elapsedSeconds = 60.0f;
-            }
-            else if (isRunning)
-            {
-                isRunning = false;
-            }
-            else
-            {
-                elapsedSeconds = 0f;
-            }
+            string viec;
+            if (isRunning) { isRunning = false; viec = $"Dừng ở {BioFeedback.FormatVi(elapsedSeconds, "0.0")} s"; }
+            else if (elapsedSeconds > 0f) { elapsedSeconds = 0f; viec = "Đặt lại về 0,0 s"; }
+            else { isRunning = true; viec = "Bắt đầu đếm"; }
             BioFeedback.PlayClick();
-            BioFeedback.LogAction("dong_ho_bam_gio", "bam_gio_thi_nghiem",
-                $"Đồng hồ bấm giờ: {(isRunning ? "Đã bấm giờ 60,0 s" : $"Dừng ở {BioFeedback.FormatVi(elapsedSeconds, "0.0")} s")}.");
+            BioFeedback.ShowToast("Đồng hồ bấm giờ: " + viec);
+            BioFeedback.LogAction("dong_ho_bam_gio", "bam_gio_thi_nghiem", $"Đồng hồ bấm giờ: {viec}.");
+        }
+
+        // Đếm theo thời gian thật (trước đây bấm lần đầu nhảy thẳng lên 60,0 s mà không đếm gì)
+        void Update()
+        {
+            if (isRunning) elapsedSeconds += Time.deltaTime;
         }
     }
 }

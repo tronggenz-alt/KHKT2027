@@ -201,7 +201,7 @@ namespace Khkt.Demo.Bio.GiaiPhau
             camGo.transform.SetParent(transform, false);
             StageCamera = camGo.AddComponent<Camera>();
             StageCamera.clearFlags = CameraClearFlags.SolidColor;
-            StageCamera.backgroundColor = new Color(0.045f, 0.070f, 0.105f, 1f);
+            StageCamera.backgroundColor = NenSanKhau;
             StageCamera.cullingMask = 1 << GiaiPhauSanKhau3D.AnatomyLayer;
             StageCamera.nearClipPlane = 0.025f;
             StageCamera.farClipPlane = 35f;
@@ -221,6 +221,7 @@ namespace Khkt.Demo.Bio.GiaiPhau
             SanKhau.KhoiTao(HardwareProfile.Muc);
 
             BuildUi();
+            UiTheme.Changed += KhiDoiChuDe;
 
             DatCheDo(CheDoGiaiPhau.KhamPha);
             ChonCoQuan("tim");
@@ -228,8 +229,23 @@ namespace Khkt.Demo.Bio.GiaiPhau
             CapNhatUiTrangThai();
         }
 
+        static Color NenSanKhau => UiTheme.Pick(new Color(0.86f, 0.88f, 0.91f), new Color(0.045f, 0.050f, 0.060f), new Color(0.045f, 0.070f, 0.105f));
+
+        /// <summary>Đổi chủ đề Sáng/Tối khi đang mở: dựng lại giao diện bằng màu mới, giữ nguyên trạng thái mô hình.</summary>
+        void KhiDoiChuDe()
+        {
+            if (StageCamera != null) StageCamera.backgroundColor = NenSanKhau;
+            if (UiCanvas != null) Destroy(UiCanvas.gameObject);
+            sysButtons.Clear(); sysBtnImgs.Clear(); organButtons.Clear();
+            BuildUi();
+            DatCheDo(CheDo);
+            if (!string.IsNullOrEmpty(SanKhau?.CoQuanDangChon)) CapNhatTheKienThuc(SanKhau.CoQuanDangChon);
+            CapNhatUiTrangThai();
+        }
+
         public void CleanupBeforeDestroy()
         {
+            UiTheme.Changed -= KhiDoiChuDe;
             DesktopViewer.UiCapture = Mathf.Max(0, DesktopViewer.UiCapture - 1);
             if (SanKhau != null) SanKhau.GiaiPhongTaiNguyen();
             if (prevMainCam != null) prevMainCam.enabled = prevMainCamEnabled;
@@ -405,7 +421,7 @@ namespace Khkt.Demo.Bio.GiaiPhau
                 txtQuizFeedback.text = dung
                     ? $"✓ CHÍNH XÁC ({q.tenDapAn})!\n{q.giaiThich}"
                     : $"✗ Bạn vừa chọn '{TimTenCoQuan(idCoQuan)}'. Đáp án đúng là '{q.tenDapAn}'.\n{q.giaiThich}";
-                txtQuizFeedback.color = dung ? new Color(0.55f, 1.0f, 0.72f) : new Color(1.0f, 0.72f, 0.52f);
+                txtQuizFeedback.color = dung ? GlassKit.Good : GlassKit.Warn;
             }
             if (txtQuizScore != null)
                 txtQuizScore.text = $"Điểm hiện tại: {DiemCauHoiNhanh} / {BoCauHoiNhanh.Length} (Đã trả lời {SoCauDaTraLoi}/{BoCauHoiNhanh.Length})";
@@ -438,7 +454,7 @@ namespace Khkt.Demo.Bio.GiaiPhau
         static void AppendSection(StringBuilder sb, string header, string[] lines, int maxLines)
         {
             if (lines == null || lines.Length == 0) return;
-            sb.Append("<b><color=#7DD3FC>").Append(header).Append("</color></b>\n");
+            sb.Append("<b><color=").Append(GlassKit.HexAccent).Append(">").Append(header).Append("</color></b>\n");
             int cnt = Mathf.Min(maxLines, lines.Length);
             for (int i = 0; i < cnt; i++)
                 sb.Append("• ").Append(lines[i]).Append('\n');
@@ -449,53 +465,13 @@ namespace Khkt.Demo.Bio.GiaiPhau
         {
             if (SanKhau == null) return;
 
-            foreach (var kv in sysBtnImgs)
-            {
-                if (kv.Value == null) continue;
-                bool on = SanKhau.LayTrangThaiHe(kv.Key);
-                kv.Value.color = on ? new Color(0.11f, 0.45f, 0.65f, 0.92f) : new Color(0.10f, 0.13f, 0.18f, 0.78f);
-            }
-
-            for (int i = 0; i < cutButtons.Length; i++)
-            {
-                if (cutButtons[i] == null) continue;
-                var img = cutButtons[i].GetComponent<Image>();
-                if (img != null)
-                {
-                    bool act = (int)SanKhau.CheDoCat == i;
-                    img.color = act ? new Color(0.16f, 0.56f, 0.72f, 0.95f) : new Color(0.11f, 0.14f, 0.20f, 0.85f);
-                }
-            }
-
-            for (int i = 0; i < modeButtons.Length; i++)
-            {
-                if (modeButtons[i] == null) continue;
-                var img = modeButtons[i].GetComponent<Image>();
-                if (img != null)
-                {
-                    bool act = (int)CheDo == i;
-                    img.color = act ? new Color(0.14f, 0.54f, 0.36f, 0.96f) : new Color(0.11f, 0.14f, 0.20f, 0.85f);
-                }
-            }
-
-            foreach (var kv in organButtons)
-            {
-                if (kv.Value == null) continue;
-                var img = kv.Value.GetComponent<Image>();
-                if (img != null)
-                {
-                    bool sel = SanKhau.CoQuanDangChon == kv.Key;
-                    img.color = sel ? new Color(0.18f, 0.52f, 0.68f, 0.96f) : new Color(0.10f, 0.13f, 0.19f, 0.84f);
-                }
-            }
-
+            foreach (var kv in sysButtons) GlassKit.SetChip(kv.Value, SanKhau.LayTrangThaiHe(kv.Key));
+            for (int i = 0; i < cutButtons.Length; i++) GlassKit.SetChip(cutButtons[i], (int)SanKhau.CheDoCat == i);
+            for (int i = 0; i < modeButtons.Length; i++) GlassKit.SetChip(modeButtons[i], (int)CheDo == i);
+            foreach (var kv in organButtons) GlassKit.SetChip(kv.Value, SanKhau.CoQuanDangChon == kv.Key);
             if (txtTachRaLabel != null)
                 txtTachRaLabel.text = SanKhau.DangTachRa ? "↩ Đưa về cơ thể" : "◎ Tách ra xoay riêng";
-            if (btnTachRa != null)
-            {
-                var img = btnTachRa.GetComponent<Image>();
-                if (img != null) img.color = SanKhau.DangTachRa ? new Color(0.75f, 0.38f, 0.12f, 0.96f) : new Color(0.14f, 0.48f, 0.66f, 0.96f);
-            }
+            GlassKit.SetChip(btnTachRa, SanKhau.DangTachRa);
 
             if (txtStatusBar != null)
             {
@@ -529,9 +505,9 @@ namespace Khkt.Demo.Bio.GiaiPhau
 
             // 1. Thanh tiêu đề trên cùng
             var header = MakeSurfacePanel(root, "ThanhTieuDe", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -12f), new Vector2(1880f, 68f));
-            GlassKit.Label(header, "TieuDeChinh", "GIẢI PHẪU NGƯỜI 3D · VERA LAB", 20, new Color(0.95f, 0.98f, 1f), true, TextAnchor.MiddleLeft,
+            GlassKit.Label(header, "TieuDeChinh", "GIẢI PHẪU NGƯỜI 3D · VERA LAB", 20, GlassKit.Ink, true, TextAnchor.MiddleLeft,
                 new Vector2(20f, -6f), new Vector2(540f, 34f));
-            txtStatusBar = GlassKit.Label(header, "ThanhTrangThai", "", 13, new Color(0.62f, 0.85f, 0.98f), false, TextAnchor.MiddleLeft,
+            txtStatusBar = GlassKit.Label(header, "ThanhTrangThai", "", 13, GlassKit.Dim, false, TextAnchor.MiddleLeft,
                 new Vector2(20f, -38f), new Vector2(680f, 24f));
 
             modeButtons[0] = MakeDarkButton(header, "CheDoKhamPha", "Khám phá 3D", new Vector2(760f, -12f), new Vector2(160f, 44f),
@@ -539,10 +515,13 @@ namespace Khkt.Demo.Bio.GiaiPhau
             modeButtons[1] = MakeDarkButton(header, "CheDoCauHoi", "Câu hỏi nhanh (5 câu)", new Vector2(930f, -12f), new Vector2(210f, 44f),
                 () => DatCheDo(CheDoGiaiPhau.CauHoiNhanh), false, 14);
 
-            MakeDarkButton(header, "GocToanThan", "Toàn thân", new Vector2(1240f, -12f), new Vector2(120f, 44f),
+            MakeDarkButton(header, "GocToanThan", "Toàn thân", new Vector2(1150f, -12f), new Vector2(120f, 44f),
                 () => { if (SanKhau.DangTachRa) DatTachRa(false); else DatGocNhinToanThan(false); }, false, 14);
-            btnTachRa = MakeDarkButton(header, "NutTachRa", "◎ Tách ra xoay riêng", new Vector2(1370f, -12f), new Vector2(220f, 44f),
+            btnTachRa = MakeDarkButton(header, "NutTachRa", "◎ Tách ra xoay riêng", new Vector2(1280f, -12f), new Vector2(220f, 44f),
                 () => DatTachRa(!SanKhau.DangTachRa), true, 14);
+            // Sang bàn mổ tự do (ếch, người) ngay trong app
+            MakeDarkButton(header, "NutBanMo", "Mổ ếch tự do", new Vector2(1510f, -12f), new Vector2(200f, 44f),
+                () => BanMoTuDoMoDun.Mo(Khkt.Simulation.Bio.GiaiPhau.LoaiMau.Ech), false, 14);
             txtTachRaLabel = btnTachRa.GetComponentInChildren<Text>();
 
             MakeDarkButton(header, "DongMoDun", "✕ Đóng (Esc)", new Vector2(1720f, -12f), new Vector2(142f, 44f),
@@ -552,7 +531,7 @@ namespace Khkt.Demo.Bio.GiaiPhau
             var left = MakeSurfacePanel(root, "BangDieuKhienTrai", new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(18f, -10f), new Vector2(430f, 920f));
             float ly = -14f;
 
-            GlassKit.Label(left, "TieuDeHe", "8 HỆ CƠ QUAN & LỚP DA", 14, new Color(0.58f, 0.88f, 1f), true, TextAnchor.MiddleLeft,
+            GlassKit.Label(left, "TieuDeHe", "8 HỆ CƠ QUAN & LỚP DA", 14, GlassKit.Accent, true, TextAnchor.MiddleLeft,
                 new Vector2(16f, ly), new Vector2(390f, 24f));
             ly -= 28f;
 
@@ -573,7 +552,7 @@ namespace Khkt.Demo.Bio.GiaiPhau
                 v => { if (!suppressCallbacks) DatBocLop(v); }, v => $"{Mathf.RoundToInt(v * 100f)}%");
             ly -= 64f;
 
-            GlassKit.Label(left, "TieuDeMatCat", "MẶT PHẲNG CẮT GIẢI PHẪU", 14, new Color(0.58f, 0.88f, 1f), true, TextAnchor.MiddleLeft,
+            GlassKit.Label(left, "TieuDeMatCat", "MẶT PHẲNG CẮT GIẢI PHẪU", 14, GlassKit.Accent, true, TextAnchor.MiddleLeft,
                 new Vector2(16f, ly), new Vector2(390f, 22f));
             ly -= 26f;
 
@@ -610,7 +589,7 @@ namespace Khkt.Demo.Bio.GiaiPhau
                 }, true, 12);
             ly -= 44f;
 
-            GlassKit.Label(left, "TieuDe15CoQuan", "CHỌN NHANH 15 CƠ QUAN (NHẤP TRÊN MÔ HÌNH HOẶC Ở ĐÂY)", 13, new Color(0.58f, 0.88f, 1f), true, TextAnchor.MiddleLeft,
+            GlassKit.Label(left, "TieuDe15CoQuan", "CHỌN NHANH 15 CƠ QUAN (NHẤP TRÊN MÔ HÌNH HOẶC Ở ĐÂY)", 13, GlassKit.Accent, true, TextAnchor.MiddleLeft,
                 new Vector2(16f, ly), new Vector2(398f, 22f));
             ly -= 26f;
 
@@ -637,11 +616,11 @@ namespace Khkt.Demo.Bio.GiaiPhau
 
             // 3. Cột phải A: Thẻ kiến thức cơ quan
             cardPanel = MakeSurfacePanel(root, "TheKienThuc", new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-18f, -10f), new Vector2(450f, 920f));
-            txtCardTitle = GlassKit.Label(cardPanel, "TenCoQuan", "Tim", 22, new Color(0.98f, 0.99f, 1f), true, TextAnchor.MiddleLeft,
+            txtCardTitle = GlassKit.Label(cardPanel, "TenCoQuan", "Tim", 22, GlassKit.Ink, true, TextAnchor.MiddleLeft,
                 new Vector2(20f, -16f), new Vector2(410f, 34f));
-            txtCardMeta = GlassKit.Label(cardPanel, "ChuongTrinhCoQuan", "", 13, new Color(0.55f, 0.86f, 1f), false, TextAnchor.UpperLeft,
+            txtCardMeta = GlassKit.Label(cardPanel, "ChuongTrinhCoQuan", "", 13, GlassKit.Accent, false, TextAnchor.UpperLeft,
                 new Vector2(20f, -52f), new Vector2(410f, 38f));
-            txtCardBody = GlassKit.Label(cardPanel, "NoiDungTheKienThuc", "", 13, new Color(0.92f, 0.95f, 0.98f), false, TextAnchor.UpperLeft,
+            txtCardBody = GlassKit.Label(cardPanel, "NoiDungTheKienThuc", "", 13, GlassKit.Ink, false, TextAnchor.UpperLeft,
                 new Vector2(20f, -96f), new Vector2(410f, 750f));
             txtCardBody.supportRichText = true;
             MakeDarkButton(cardPanel, "TachCoQuanTuThe", "◎ Tách cơ quan đang chọn ra xoay 360°", new Vector2(20f, -856f), new Vector2(410f, 44f),
@@ -649,13 +628,13 @@ namespace Khkt.Demo.Bio.GiaiPhau
 
             // 4. Cột phải B: Câu hỏi nhanh 5 câu (chỉ vào cơ quan trên mô hình 3D)
             quizPanel = MakeSurfacePanel(root, "BangCauHoiNhanh", new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-18f, -10f), new Vector2(450f, 920f));
-            GlassKit.Label(quizPanel, "TieuDeQuiz", "CÂU HỎI NHANH CHỈ CƠ QUAN (5 CÂU)", 17, new Color(0.60f, 0.90f, 1f), true, TextAnchor.MiddleLeft,
+            GlassKit.Label(quizPanel, "TieuDeQuiz", "CÂU HỎI NHANH CHỈ CƠ QUAN (5 CÂU)", 17, GlassKit.Accent, true, TextAnchor.MiddleLeft,
                 new Vector2(20f, -18f), new Vector2(410f, 30f));
-            txtQuizScore = GlassKit.Label(quizPanel, "DiemQuiz", "Điểm hiện tại: 0 / 5", 15, new Color(0.55f, 0.96f, 0.72f), true, TextAnchor.MiddleLeft,
+            txtQuizScore = GlassKit.Label(quizPanel, "DiemQuiz", "Điểm hiện tại: 0 / 5", 15, GlassKit.Good, true, TextAnchor.MiddleLeft,
                 new Vector2(20f, -52f), new Vector2(410f, 28f));
-            txtQuizPrompt = GlassKit.Label(quizPanel, "DeBaiQuiz", "", 16, Color.white, true, TextAnchor.UpperLeft,
+            txtQuizPrompt = GlassKit.Label(quizPanel, "DeBaiQuiz", "", 16, GlassKit.Ink, true, TextAnchor.UpperLeft,
                 new Vector2(20f, -96f), new Vector2(410f, 140f));
-            txtQuizFeedback = GlassKit.Label(quizPanel, "PhanHoiQuiz", "", 15, new Color(0.88f, 0.93f, 0.98f), false, TextAnchor.UpperLeft,
+            txtQuizFeedback = GlassKit.Label(quizPanel, "PhanHoiQuiz", "", 15, GlassKit.Ink, false, TextAnchor.UpperLeft,
                 new Vector2(20f, -256f), new Vector2(410f, 220f));
             MakeDarkButton(quizPanel, "CauTruocBtn", "← Câu trước", new Vector2(20f, -510f), new Vector2(198f, 46f),
                 () => ChuyenCauHoiNhanh(CauHoiHienTai - 1), false, 14);
@@ -668,7 +647,7 @@ namespace Khkt.Demo.Bio.GiaiPhau
             var footer = MakeSurfacePanel(root, "ChanTrangBanQuyen", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 10f), new Vector2(960f, 40f));
             GlassKit.Label(footer, "ChuBanQuyenBP3D",
                 "BodyParts3D © The Database Center for Life Science · CC BY-SA 2.1 JP / CC BY 4.0  |  Kéo xoay · Cuộn thu phóng · Bấm chọn cơ quan",
-                13, new Color(0.75f, 0.88f, 0.98f), false, TextAnchor.MiddleCenter,
+                13, GlassKit.Dim, false, TextAnchor.MiddleCenter,
                 new Vector2(10f, -4f), new Vector2(940f, 32f));
 
             SetLayerRecursive(cvGo.transform, 5);
@@ -686,7 +665,8 @@ namespace Khkt.Demo.Bio.GiaiPhau
             var img = GlassKit.Panel(parent, name, anchor, pivot, pos, size, null, 2f);
             img.material = null;
             img.sprite = GlassKit.Solid;
-            img.color = new Color(0.055f, 0.088f, 0.135f, 0.90f);
+            img.color = GlassKit.SurfaceA(0.94f);
+            img.raycastTarget = true;
             return img.rectTransform;
         }
 
@@ -694,16 +674,13 @@ namespace Khkt.Demo.Bio.GiaiPhau
         {
             var btn = GlassKit.MakeButton(parent, name, label, pos, size, onClick, primary, fontSize);
             var txt = btn.GetComponentInChildren<Text>();
-            if (txt != null) txt.color = new Color(0.95f, 0.98f, 1f);
+            if (txt != null) txt.color = GlassKit.Ink;
             return btn;
         }
 
         static Slider MakeDarkSlider(Transform parent, string name, string title, float y, float min, float max, float val, Action<float> onChanged, Func<float, string> fmt)
         {
-            var s = GlassKit.MakeSlider(parent, name, title, new Vector2(16f, y), new Vector2(398f, 56f), min, max, val, onChanged, fmt);
-            var titleTxt = s.transform.parent.Find("Tiêu đề")?.GetComponent<Text>();
-            if (titleTxt != null) titleTxt.color = new Color(0.92f, 0.95f, 0.99f);
-            return s;
+            return GlassKit.MakeSlider(parent, name, title, new Vector2(16f, y), new Vector2(398f, 56f), min, max, val, onChanged, fmt);
         }
     }
 }

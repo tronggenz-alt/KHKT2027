@@ -70,7 +70,12 @@ namespace Khkt.Demo.Bio
             }
             else if (string.IsNullOrEmpty(heldSpecimenId))
             {
-                PeelSpecimen("bieu_bi_vay_hanh", "Biểu bì vảy hành tím", 0.9f);
+                // Trước đây bấm kẹp ở đâu cũng có biểu bì vảy hành: nay phải cầm kẹp trỏ vào khay mẫu (đã rạch) mới bóc được.
+                BioFeedback.ShowToast("Kẹp đang trống. Cầm kẹp rồi trỏ vào khay mẫu (vảy hành đã rạch ô) để bóc biểu bì.");
+            }
+            else
+            {
+                BioFeedback.ShowToast($"Kẹp đang giữ {heldSpecimenName}. Đưa tới gần lam kính để đặt mẫu.");
             }
         }
     }

@@ -155,6 +155,16 @@ namespace Khkt.Demo.Bio.GiaiPhau
             return baseMesh;
         }
 
+        /// <summary>Lưới giải mã thẳng từ bp3d.bin.gz (luôn đọc được đỉnh, kể cả trong bản dựng), dùng cho bàn mổ người.</summary>
+        public static Mesh LayLuoiDocDuoc(string lop)
+        {
+            string key = lop + "_doc";
+            if (meshCache.TryGetValue(key, out var m) && m != null) return m;
+            m = DecodeLayerFromBinary(lop);
+            if (m != null) meshCache[key] = m;
+            return m;
+        }
+
         static Mesh TryReuseSceneMesh(string lop)
         {
             if (lop != "xuong" && lop != "co" && lop != "da") return null;

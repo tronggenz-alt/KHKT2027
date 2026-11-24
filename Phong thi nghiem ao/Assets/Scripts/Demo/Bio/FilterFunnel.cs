@@ -39,15 +39,23 @@ namespace Khkt.Demo.Bio
                     "Toàn bộ bã mô thực vật/động vật rơi thẳng xuống ống nghiệm làm đục mẫu, không thể kết tủa ADN sạch.");
                 return;
             }
+            // Trước đây bấm phễu là có 8,5 mL dịch lọc chứa ADN: nay phải có dịch nghiền thật trong cối ở gần.
+            var coi = BioGanNhat.Tim<MortarPestle>(transform.position, 0.8f);
+            if (coi == null || !coi.isHomogenized)
+            {
+                BioFeedback.ShowToast(coi == null ? "Không có cối nghiền ở gần: chưa có gì để lọc." : $"Mẫu trong cối mới nghiền {coi.grindStrokes}/{MortarPestle.RequiredStrokes} vòng, chưa thành dịch nghiền.", true);
+                return;
+            }
             isFiltered = true;
-            filtrateVolumeMl = 8.5f;
+            filtrateVolumeMl = coi.hasExtractionBuffer ? 8.5f : 3f;
             if (filtrateSample != null)
             {
                 filtrateSample.sampleId = "dich_loc_adn";
-                filtrateSample.sampleName = "Dịch lọc tế bào chứa ADN";
+                filtrateSample.sampleName = coi.hasExtractionBuffer ? "Dịch lọc tế bào chứa ADN" : "Dịch lọc (tế bào chưa bị phá màng)";
                 filtrateSample.volumeMl = filtrateVolumeMl;
                 filtrateSample.dna.Clear();
-                filtrateSample.dna.Add(new BioDnaBandInfo { bp = 10000, ng = 95.0, smear = false });
+                // Không có đệm (xà phòng phá màng, muối) thì ADN còn kẹt trong nhân, dịch lọc gần như không có ADN tự do
+                if (coi.hasExtractionBuffer) filtrateSample.dna.Add(new BioDnaBandInfo { bp = 10000, ng = 95.0, smear = false });
                 filtrateSample.SyncToData();
             }
             BioFeedback.PlayBubblePop();

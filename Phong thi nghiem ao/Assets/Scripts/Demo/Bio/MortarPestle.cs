@@ -49,11 +49,14 @@ namespace Khkt.Demo.Bio
 
         public void Use(GameObject user)
         {
-            grindStrokes = Mathf.Min(RequiredStrokes, grindStrokes + 2);
-            if (!hasExtractionBuffer && grindStrokes >= RequiredStrokes)
+            if (isHomogenized && !hasExtractionBuffer)
             {
+                // Lần bấm sau khi đã nghiền mịn: người học chủ động rót đệm (trước đây đệm tự xuất hiện khi đủ vòng)
                 AddExtractionBuffer();
+                BioFeedback.ShowToast("Rót đệm tách chiết (nước rửa chén phá màng, NaCl trung hòa ADN) vào dịch nghiền.");
+                return;
             }
+            grindStrokes = Mathf.Min(RequiredStrokes, grindStrokes + 1);
             BioFeedback.PlayClick();
             BioFeedback.LogAction("coi_chay_su", "nghien_mau_coi_su",
                 $"Nghiền mẫu '{rawSampleName}' trong cối sứ: {grindStrokes}/{RequiredStrokes} vòng ({(isHomogenized ? "Đã thành dịch nghiền mịn" : "Đang nghiền")}).");

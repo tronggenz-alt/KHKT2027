@@ -67,9 +67,15 @@ namespace Khkt.Demo.Bio
             }
         }
 
+        /// <summary>Pha loãng từ ống canh khuẩn gốc thật ở gần (1 m) với mật độ hiện có của nó (trước đây luôn dùng 1,25·10⁸).</summary>
         public void Use(GameObject user)
         {
-            PerformSerialDilution(1.25e8, true, true);
+            var goc = BioGanNhat.Tim<BrothTube>(transform.position, 1.0f);
+            if (goc == null) { BioFeedback.ShowToast("Chưa có ống canh khuẩn gốc ở gần để pha loãng.", true); return; }
+            double n0 = goc.CurrentCellsPerMl;
+            if (n0 < 1.0) { BioFeedback.ShowToast("Ống canh khuẩn gốc không có tế bào sống để pha loãng.", true); return; }
+            PerformSerialDilution(n0, true, true);
+            BioFeedback.ShowToast($"Pha loãng 6 bậc từ ống gốc {n0:E2} tế bào/mL: ống 10⁻⁵ = {tubeCfuPerMl[4]:E2} tế bào/mL.");
         }
     }
 }

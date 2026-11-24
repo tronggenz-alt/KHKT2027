@@ -74,3 +74,61 @@ Trước đây nhiều dụng cụ chỉ cầm lên được, hoặc bấm là c
 - `KHKT_TEST=kiem_ke_sinh`: mỗi mã dụng cụ có vật gì, thao tác được bằng cách nào.
 - `tests/BioSimulationTests.cs`: thêm 14 bài cho `BioMix`.
 - Đo: `KhktBenchmark` có thêm cột khung giật và chế độ `-khkt-phan-tich` bật, tắt từng bước vẽ.
+
+## 5. Giải phẫu trong app và bàn mổ tự do (24/11)
+
+### 5.1. Mô hình giải phẫu người 3D mở ngay trong app
+
+Thẻ Giải phẫu và bàn giải phẫu số trong lab trước đây mở trang web BIO-LAB 3D riêng. Nay cả hai mở khung xem 3D trong app (`GiaiPhauMoDunImpl`): lưới BodyParts3D, bóc lớp da → cơ → xương và nội tạng, mặt phẳng cắt, chọn 15 cơ quan, tách cơ quan xoay riêng, tim đập, phổi thở, nhu động, câu hỏi chỉ cơ quan.
+
+- Cầu nối `Khkt.Bio.GiaiPhau.GiaiPhauMoDun` gọi `GiaiPhauMoDunImpl` thay vì `BioWebViewBridge`.
+- Giao diện dùng màu `GlassKit`, đổi chủ đề Sáng/Tối khi đang mở thì dựng lại ngay.
+- Bàn giải phẫu số: bấm mở khung xem và chọn sẵn cơ quan đang trỏ. Con lăn chỉ xoay mô hình trên mặt bàn (trước đây vừa xoay vừa nhảy cơ quan). Mã cơ quan sửa cho khớp danh mục (`da_day`, `ruot_non`…).
+- Cổng sinh học vẫn mở bản web BIO-LAB đầy đủ, vì bản web còn nhiều phần khác ngoài giải phẫu.
+
+### 5.2. Mổ ếch tự do
+
+Mở từ nút "Mổ ếch tự do" trong khung xem giải phẫu. Bài chỉ làm trên ếch đồng (không mổ người). Không có bước quy định: người học tự chọn dụng cụ, tự kéo đường rạch. Mọi thứ thấy được (vạt mở, máu chảy, tim đập, phổi phồng, ruột nhu động, chân co) là kết quả tính từ trạng thái trong `Simulation/Bio/GiaiPhau/MoTuDoMoHinh.cs`.
+
+| Thành phần | Vai trò |
+|---|---|
+| `MoTuDoMoHinh.cs` | Lớp mô dạng lưới ô, vết rạch là cạnh bị cắt; mạch, thần kinh, cơ quan, dịch; sinh lý tim, phổi, ruột, thuốc |
+| `BanMoSanKhau.cs` | Vẽ mẫu từ trạng thái: thân ếch một khối theo dáng thật, lớp mô có độ dày ở mép rạch, vạt lật quanh mép còn dính, vũng máu ở chỗ trũng, giọt máu phụt theo tâm thu |
+| `BanMoLuoi.cs`, `BanMoVatLieu.cs` | Lưới hữu cơ liền (gan 3 thùy, tim 1 thất 2 nhĩ, hành động mạch, phổi túi, thể mỡ), ống quét liên tục cho ruột, mạch, thần kinh; vật liệu URP Lit có vân sinh theo thủ tục (da ếch lấm tấm, cơ bụng có vách gân ngang, tiểu thùy gan, màng bụng có sắc tố đen) |
+| `BanMoTuDo.cs` | Camera (chuột phải xoay), dụng cụ, bảng theo dõi mẫu, ký đồ co bóp tim, nhật ký |
+
+**Luật dụng cụ:**
+- Phải hủy não, tủy qua lỗ chẩm và ghim 4 chi lên khay sáp trước khi mổ.
+- Dao chỉ cắt lớp trên cùng nơi lưỡi chạm; không cắt xương. Kéo phải luồn từ mép đã rạch hoặc mép tự do; đai vai, xương ức của ếch mỏng nên kéo cắt được.
+- Vạt chỉ lật được khi đã rạch rời các phía và chỉ còn dính theo một mép; mảnh rạch vòng thì gắp bỏ được. Vạt chưa ghim tự rơi về sau vài giây.
+- Mạch nằm dưới đường rạch thì đứt: rạch cơ bụng đúng đường giữa đứt tĩnh mạch bụng (nên rạch lệch). Động mạch phụt theo nhịp tim, tĩnh mạch trào đều. Kẹp cầm máu thì ngừng; kẹp cuống trước khi cắt thì không chảy.
+- Cơ quan nằm sau cơ quan khác (túi mật sau gan, dây tọa sau ruột) phải vén ra trước.
+
+**Sinh lý:** tim mô phỏng nút xoang → nhĩ → trễ nhĩ thất → thất, có thời kỳ trơ. Kích thích lúc thất đang co thì không đáp ứng; kích thích cuối tâm trương gây ngoại tâm thu và nghỉ bù. Kích thích dây X làm tim chậm, có thể ngừng rồi thoát ức chế; atropin chặn tác dụng này. Adrenalin tăng nhịp, giảm nhu động; acetylcholin ngược lại, liều cao làm tim ngừng thì tâm trương, rửa Ringer thì đập lại. Ếch biến nhiệt nên Ringer lạnh làm tim chậm. Không nhỏ Ringer thì mô khô, tim chậm dần. Hủy não thì ngừng thở bằng thềm miệng; thổi qua thanh quản phổi phồng rồi xẹp dần. Tim cắt rời vẫn tự đập. Phản xạ tủy với HCl 0,3 % còn khi chỉ hủy não, mất khi hủy tủy hoặc cắt dây tọa.
+
+**Giới hạn:** lớp mô là lưới ô nên đường rạch có dạng bậc thang theo ô. Cơ quan dựng theo thủ tục, chưa phải lưới quét từ mẫu thật. Số liệu ở mức dạy học, đúng chiều thay đổi, gần đúng về độ lớn. Mã mô hình còn nhánh dữ liệu người (không mở được từ app), có thể xóa nếu không dùng lại.
+
+### 5.3. Dụng cụ lab Sinh: bỏ thao tác dựng sẵn
+
+Bấm trực tiếp lên các dụng cụ dưới đây trước đây trả kết quả có sẵn, không phụ thuộc thứ gì trên bàn. Nay kết quả lấy từ trạng thái thật quanh dụng cụ (`BioGanNhat`).
+
+| Dụng cụ | Trước | Nay |
+|---|---|---|
+| Đồng hồ bấm giờ | Bấm là nhảy lên 60,0 s, không đếm | Đếm thời gian thật: bắt đầu, dừng, đặt lại |
+| Nhiệt kế | Luôn đọc 37 °C | Đọc bình đang nhúng, không thì nhiệt độ vùng hoặc phòng |
+| Que đóm | Luôn bùng cháy (gan gà 37 °C) | Thử O₂ thật của bình gần nhất |
+| Bình lên men, hũ sữa chua, ống canh khuẩn | Mỗi lần bấm tua 2–3 giờ | Thời gian, nhiệt độ theo chỗ đặt (bàn, tủ ấm, tủ lạnh); đun nóng thì men, khuẩn chết hẳn |
+| Kẹp, dao lam, kéo, đĩa đồng hồ | Bấm là có biểu bì, đã rạch, đã cắt | Chỉ hướng dẫn; việc bóc, rạch, cắt làm khi trỏ dụng cụ vào khay mẫu |
+| Túi hấp hủy | Bấm là đổi sọc đen | Chỉ đổi khi nằm trong nồi hấp đã chạy xong chu trình |
+| Đũa thủy tinh | Bấm là có ADN | Chỉ quấn khi bình gần có ADN kết tủa thật |
+| Que trang | Bấm là đã khử trùng | Cần đèn cồn đang cháy ở gần; trang lên đĩa Petri thật |
+| Dãy ống pha loãng | Luôn từ 1,25·10⁸ | Lấy mật độ của ống canh khuẩn gốc ở gần |
+| Phễu lọc, cối chày | Phễu tự có dịch lọc chứa ADN; cối tự đổ đệm | Phễu cần dịch nghiền trong cối; không có đệm thì dịch lọc không có ADN tự do; thêm đệm là thao tác riêng |
+| Trạm tách ADN chuối (phòng SHPT) | Bấm 4 lần đi hết 4 bước in sẵn, luôn ra ống ADN | Chỉ thu ADN từ cốc ở gần đã thật sự tách ra sợi ADN theo luật lab Sinh tự do |
+
+Còn lại: bộ sang chậu (3 bước bấm) vẫn là kịch bản; chuỗi tách ADN cũ (cối, phễu, đũa) vẫn trùng với luồng tách ADN trong `BioVessel`. Nên gộp hẳn vào `BioVessel` ở lần sau.
+
+### 5.4. Kiểm thử
+
+- `Khkt.EditorTools.KhktGiaiPhauVerify.Run`: mô hình ếch, sinh lý; mở khung xem, bàn mổ qua tia chuột thật; dụng cụ đã sửa; chụp ảnh vào `docs/anh-giai-phau-tu-do/`.
+- `Khkt.EditorTools.KhktN18Verify.RunG4`: kiểm thử G4 viết lại cho khung xem trong app.

@@ -1,3 +1,7 @@
 <linker>
   <assembly fullname="Khkt.Bio.GiaiPhau.Bridge" preserve="all"/>
+  <assembly fullname="Assembly-CSharp">
+    <type fullname="Khkt.Demo.Bio.GiaiPhau.GiaiPhauMoDunImpl" preserve="all"/>
+    <type fullname="Khkt.Demo.Bio.GiaiPhau.BanMoTuDoMoDun" preserve="all"/>
+  </assembly>
 </linker>
