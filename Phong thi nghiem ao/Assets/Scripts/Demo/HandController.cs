@@ -1540,11 +1540,15 @@ namespace Khkt.Demo
                     if (reachDir.sqrMagnitude < 1e-6f) reachDir = facing * Vector3.forward;
                     Vector3 aim = Vector3.Slerp(facing * Vector3.forward, reachDir.normalized, 0.55f);
                     target = Quaternion.LookRotation(aim, Vector3.up) * Quaternion.Euler(10f, -12f, 0f);
-                    // Tay cầm VERA đang điều khiển tia (24/11/2026): bàn tay chĩa theo hướng tay cầm và lăn cổ tay theo cổ tay thật,
-                    // để người chơi thấy tay ảo cử động cùng tay mình (trước đây chỉ vị trí đi theo điểm tia, hướng bàn tay cố định)
-                    if (VeraAiming && vera != null && lastRay.direction.sqrMagnitude > 0.5f)
-                        target = Quaternion.LookRotation(lastRay.direction, Vector3.up) * Quaternion.AngleAxis(-vera.Roll, Vector3.forward)
+                    // Tay cầm VERA có dữ liệu (24/11/2026): bàn tay phải LUÔN mô phỏng hướng thật của BMI160 — chĩa theo hướng tay cầm
+                    // (trái / phải, lên / xuống) và lăn cổ tay theo cổ tay thật — kể cả khi tia đang do chuột giữ, để người chơi
+                    // nhìn tay ảo là biết tay cầm đang hướng thế nào. Vị trí bàn tay vẫn đi theo tia đang dùng.
+                    if (vera != null && vera.HasControl)
+                    {
+                        Vector3 veraDir = VeraAiming && lastRay.direction.sqrMagnitude > 0.5f ? lastRay.direction : vera.GetRay(viewCamera).direction;
+                        target = Quaternion.LookRotation(veraDir, Vector3.up) * Quaternion.AngleAxis(-vera.Roll, Vector3.forward)
                                  * Quaternion.Euler(10f, -12f, 0f);
+                    }
                 }
                 else target = handFollow * handRot;
                 if (!handRotReady) { handRotSmoothed = target; handRotReady = true; }
