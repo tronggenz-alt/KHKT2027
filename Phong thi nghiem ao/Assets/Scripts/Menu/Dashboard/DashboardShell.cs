@@ -224,8 +224,11 @@ namespace Khkt.Menu.Dashboard
             if (!on)
                 badgeLine.text = !link.OwnsSources && link.Usb == null && link.Wifi == null ? "Cổng đang dùng ở nơi khác" : "Chưa kết nối · cắm USB hoặc bật Wi-Fi";
             else
-                badgeLine.text = (imuErr ? "Lỗi cảm biến hướng · " : "Đã kết nối · ") + link.ConnectionName;
-            badgeLine.color = !on ? MenuKit.InkDim : imuErr ? MenuKit.Warn : MenuKit.Bio;
+                badgeLine.text = (imuErr ? "Lỗi cảm biến hướng · " : link.JoyNoisyAxes != "" ? $"Joystick trục {link.JoyNoisyAxes} nhiễu (dây hở?) · " : "Đã kết nối · ")
+                                 + link.ConnectionName;
+            bool warn = imuErr || on && link.JoyNoisyAxes != "";
+            badgeLine.color = !on ? MenuKit.InkDim : warn ? MenuKit.Warn : MenuKit.Bio;
+            if (on && warn) badgeDot.color = MenuKit.Warn;
         }
 
         void BuildSidebar(Texture2D logo)

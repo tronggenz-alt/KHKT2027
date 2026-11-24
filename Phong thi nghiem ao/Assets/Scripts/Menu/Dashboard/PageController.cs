@@ -288,7 +288,9 @@ namespace Khkt.Menu.Dashboard
 
             // ----- joystick, nút
             joyDot.anchoredPosition = Vector2.ClampMagnitude(s.Joy2, 1f) * (JoyR - 15);
-            joyText.text = $"x {s.Joy2.x:+0.00;-0.00}  y {s.Joy2.y:+0.00;-0.00}";
+            joyText.text = link.JoyNoisyAxes != "" ? $"trục {link.JoyNoisyAxes} nhảy loạn: hàn lại dây VR{link.JoyNoisyAxes.ToLower().Replace(", ", "/VR")}"
+                                                  : $"x {s.Joy2.x:+0.00;-0.00}  y {s.Joy2.y:+0.00;-0.00}";
+            joyText.color = link.JoyNoisyAxes != "" ? MenuKit.Warn : MenuKit.InkDim;
             bool press = s.Has(VeraFlags.StickPress) || s.Pressed(ControllerButtons.Joy2Press);
             pressDot.color = press ? MenuKit.Accent : MenuKit.Line;
             pressText.color = press ? MenuKit.Accent : MenuKit.InkDim;

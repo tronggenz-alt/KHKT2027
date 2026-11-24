@@ -125,7 +125,8 @@ namespace Khkt.Input
             core.Step(s.OrientationRH, dt, rec);
             filter.Step(new Vector2(core.Yaw, core.Pitch), dt);
             lastSampleReal = Time.realtimeSinceStartup;
-            if (filter.Deriv.sqrMagnitude > 15f * 15f) PadInput.MarkPadUse();  // tay đang lia tay cầm: ưu tiên tia tay cầm hơn chuột
+            // tay đang cử động tay cầm (từ 4 °/s, 24/11/2026: trước là 15 °/s nên cử động chậm không giành được tia): ưu tiên tia tay cầm hơn chuột
+            if (filter.Deriv.sqrMagnitude > 4f * 4f) PadInput.MarkPadUse();
         }
 
         /// <summary>Góc tia (yaw dương = trái, pitch dương = ngẩng) đã lọc và dự đoán, kẹp trong khung nhìn của camera.</summary>

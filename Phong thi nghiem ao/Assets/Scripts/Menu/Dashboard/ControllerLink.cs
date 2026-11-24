@@ -32,6 +32,9 @@ namespace Khkt.Menu.Dashboard
         public int PacketsPerSecond => Active == Usb && Usb != null ? Usb.PacketsPerSecond : Active == Wifi && Wifi != null ? Wifi.PacketsPerSecond : 0;
         public string FirmwareMessage => UsbLive ? Usb.LastFirmwareMessage : WifiLive ? Wifi.LastFirmwareMessage : "";
         public string ConnectionName => Active == null ? "" : Active == Usb ? "USB " + Usb.ControllerName : "Wi-Fi " + Wifi.ControllerName;
+        /// <summary>Trục joystick đang nhảy loạn (dây VRx / VRy hở): "", "X", "Y" hoặc "X, Y".</summary>
+        public string JoyNoisyAxes { get; private set; } = "";
+        readonly PadInput.JoyFlapDetector flapX = new PadInput.JoyFlapDetector(), flapY = new PadInput.JoyFlapDetector();
         /// <summary>Có nguồn riêng (false: nguồn do nơi khác tạo, ví dụ lab đang mở).</summary>
         public bool OwnsSources => host != null;
 
@@ -39,7 +42,8 @@ namespace Khkt.Menu.Dashboard
         float usbLast = -10f, wifiLast = -10f;
         float zeroYaw;
         bool zeroSet;
-        float liveSince = -1f;  // bắt đầu có dữ liệu liên tục (gốc yaw lấy sau 0,5 s: gói đầu sau khi mở cổng chưa có hướng thật)
+        float liveSince = -1f;
+        bool noisyX, noisyY;  // bắt đầu có dữ liệu liên tục (gốc yaw lấy sau 0,5 s: gói đầu sau khi mở cổng chưa có hướng thật)
         GameObject stage;
         Camera camSmall, camLarge;
         RenderTexture rtSmall, rtLarge;
@@ -191,6 +195,11 @@ namespace Khkt.Menu.Dashboard
             }
             Latest = Active.Latest;
             var s = Latest;
+            bool nx = flapX.Step(s.JoyRaw.x, now) || flapX.QuietFor(now) < 3f && flapX.QuietFor(now) >= 0f && noisyX;
+            bool ny = flapY.Step(s.JoyRaw.y, now) || flapY.QuietFor(now) < 3f && flapY.QuietFor(now) >= 0f && noisyY;
+            noisyX = nx;
+            noisyY = ny;
+            JoyNoisyAxes = nx && ny ? "X, Y" : nx ? "X" : ny ? "Y" : "";
             var q = WorldPose(s);
             if (liveSince < 0) liveSince = now;
             if (!zeroSet && now - liveSince >= 0.5f && !s.Has(VeraFlags.ImuError))

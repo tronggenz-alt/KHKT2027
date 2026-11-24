@@ -276,7 +276,9 @@ namespace Khkt.Input
 
             if (padTouched) lastPadUse = now;
             var mouse = Mouse.current;
-            if (mouse != null && (mouse.delta.ReadValue().sqrMagnitude > 4f || mouse.leftButton.isPressed || mouse.rightButton.isPressed))
+            // Tay cầm VERA đang gửi hướng: chuột phải di rõ (> 20 px một khung) hoặc bấm mới giành lại tia, chạm nhẹ bàn không tính
+            float mouseMin = VeraPointer.Instance != null && VeraPointer.Instance.HasControl ? 400f : 4f;
+            if (mouse != null && (mouse.delta.ReadValue().sqrMagnitude > mouseMin || mouse.leftButton.isPressed || mouse.rightButton.isPressed))
                 lastMouseUse = now;
         }
 
@@ -369,12 +371,16 @@ namespace Khkt.Input
 
         static float joyBadSinceX = -1, joyBadSinceY = -1, joyOkSinceX = -1, joyOkSinceY = -1, veraTapA = -1, veraADown = -1;
         static bool joyBadX, joyBadY, veraAPrev;
+        static readonly JoyFlapDetector flapX = new JoyFlapDetector(), flapY = new JoyFlapDetector();
+        /// <summary>Trục cần gạt đang bị tạm bỏ (lệch tâm khi nằm yên, hoặc nhảy loạn do dây hở): x, y.</summary>
+        public static bool JoyAxisOffX => joyBadX;
+        public static bool JoyAxisOffY => joyBadY;
 
         static void VeraTick(ControllerState s, bool stickPress, float now)
         {
             bool still = s.Has(VeraFlags.Still);
-            Vector2 j = new Vector2(GuardAxis(s.Joy2.x, still, now, ref joyBadSinceX, ref joyOkSinceX, ref joyBadX, "X"),
-                                    GuardAxis(s.Joy2.y, still, now, ref joyBadSinceY, ref joyOkSinceY, ref joyBadY, "Y"));
+            Vector2 j = new Vector2(GuardAxis(s.Joy2.x, still, now, ref joyBadSinceX, ref joyOkSinceX, ref joyBadX, "X", flapX),
+                                    GuardAxis(s.Joy2.y, still, now, ref joyBadSinceY, ref joyOkSinceY, ref joyBadY, "Y", flapY));
             // vùng chết tròn 8% (trong) / 5% (ngoài) rồi đường cong expo, như phòng thử (xu_ly.joystick)
             float r = j.magnitude;
             j = r < 0.08f ? Vector2.zero : j * (Mathf.Pow(Mathf.Min(1f, (r - 0.08f) / 0.87f), 1.6f) / r);
@@ -405,9 +411,20 @@ namespace Khkt.Input
         /// <summary>
         /// Trục cần gạt lệch tâm khi tay cầm nằm yên trên bàn (không ai chạm) quá 1 s: dây lỏng hoặc tâm lưu sai
         /// (đo 11/11/2026: dây VRy làm nhân vật tự đi 8 m / 3 phút). Tạm bỏ trục đó, dùng lại khi về tâm 2 s liền.
+        /// Thêm 24/11/2026: trục NHẢY LOẠN (dây VRx / VRy hở, chân ADC trôi nổi: đo 142 ↔ 2714 mV giữa 2 gói liền nhau
+        /// khi tay cầm nằm yên) thì bỏ ngay, cả khi đang cầm trên tay (JoyFlapDetector); dùng lại khi hết nhảy 3 s và về tâm.
         /// </summary>
-        static float GuardAxis(float v, bool still, float now, ref float badSince, ref float okSince, ref bool bad, string axis)
+        static float GuardAxis(float v, bool still, float now, ref float badSince, ref float okSince, ref bool bad, string axis, JoyFlapDetector flap)
         {
+            bool flapping = flap.Step(v, now);
+            if (!bad && flapping)
+            {
+                bad = true;
+                okSince = -1;
+                Notice?.Invoke($"Cần gạt trục {axis} nhảy loạn (dây VR{axis.ToLower()} hở / lỏng?): tạm bỏ trục {axis}, kiểm tra mối hàn");
+                return 0f;
+            }
+            if (bad && flap.QuietFor(now) < 3f) { okSince = -1; return 0f; }
             if (!bad)
             {
                 if (still && Mathf.Abs(v) > 0.12f)
@@ -434,6 +451,43 @@ namespace Khkt.Input
             }
             else okSince = -1;
             return bad ? 0f : v;
+        }
+
+        /// <summary>
+        /// Phát hiện một trục cần gạt nhảy qua lại liên tục: trong 1 giây có từ 6 cú nhảy lớn (> 0,3) đổi chiều liên tiếp.
+        /// Tay người gạt nhanh nhất chỉ được 2–3 lần đổi chiều mỗi giây, còn chân ADC hở dây nhảy gần như mỗi gói.
+        /// </summary>
+        public sealed class JoyFlapDetector
+        {
+            const float Jump = 0.3f, Window = 1f;
+            const int Count = 6;
+            float prev;
+            bool has;
+            int lastSign;
+            float lastFlap = -100f;
+            readonly System.Collections.Generic.Queue<float> times = new System.Collections.Generic.Queue<float>();
+
+            /// <summary>Đưa số mới vào; trả về true khi trục đang nhảy loạn.</summary>
+            public bool Step(float v, float now)
+            {
+                if (has)
+                {
+                    float d = v - prev;
+                    if (Mathf.Abs(d) > Jump)
+                    {
+                        int sg = d > 0 ? 1 : -1;
+                        if (sg != lastSign) { times.Enqueue(now); lastFlap = now; }
+                        lastSign = sg;
+                    }
+                }
+                prev = v;
+                has = true;
+                while (times.Count > 0 && now - times.Peek() > Window) times.Dequeue();
+                return times.Count >= Count;
+            }
+
+            /// <summary>Số giây kể từ cú nhảy đổi chiều gần nhất.</summary>
+            public float QuietFor(float now) => now - lastFlap;
         }
 
         static void SetMode(StickMode m)
