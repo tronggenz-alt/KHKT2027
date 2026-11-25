@@ -377,8 +377,11 @@ namespace Khkt.Demo
 
                 bool empty = hand.Held == null;
                 bool scripted = hand.OverrideAimPoint != null;
-                // Tay chỉ rời chỗ nghỉ khi có việc (cầm, thao tác, bấm vào vật); di chuột không kéo tay theo
-                bool engaged = hand.HandEngaged;
+                // Tay chỉ rời chỗ nghỉ khi có việc (cầm, thao tác, bấm vào vật); di chuột không kéo tay theo.
+                // Tay cầm VERA có dữ liệu (25/11/2026): tay phải luôn đưa ra và mô phỏng hướng thật của BMI160 (HandController
+                // đã đặt hướng theo tay cầm), để người chơi nhìn tay ảo là thấy tay cầm đang hướng thế nào
+                bool veraLive = Khkt.Input.VeraPointer.Instance != null && Khkt.Input.VeraPointer.Instance.HasControl;
+                bool engaged = hand.HandEngaged || veraLive;
                 bool instant = scripted && !hand.Fetching;
                 if (instant || !engageReady) { engageW = engaged ? 1f : 0f; engageVel = 0f; engageReady = true; }
                 else Spring(ref engageW, ref engageVel, engaged ? 1f : 0f, engaged ? 9f : 7f, dt);

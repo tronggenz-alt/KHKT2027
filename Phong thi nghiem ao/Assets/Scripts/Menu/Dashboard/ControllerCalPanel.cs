@@ -35,6 +35,7 @@ namespace Khkt.Menu.Dashboard
         string[] steps;
         float holdSince = -1f, stepStart;
         readonly List<Vector2> joyWin = new List<Vector2>();
+        bool mvMode;  // gói có điện áp thật (USB): cả 6 bước đo bằng mV, tâm đo thẳng (không cần lệnh J)
         readonly List<Vector3> accWin = new List<Vector3>();
         Vector3 accPrev;
         Vector2 center, fwd, back, left, right;
@@ -206,6 +207,9 @@ namespace Khkt.Menu.Dashboard
         void TickJoystick(ControllerState s, float now, ControllerLink link)
         {
             Vector2 raw = s.JoyRaw;
+            if (Step == 0 && joyWin.Count == 0 && !waitAfterJ) mvMode = s.HasJoyMv;
+            Vector2 val = mvMode && s.HasJoyMv ? s.JoyMv : raw;
+            float stableTh = mvMode ? 40f : 0.03f, farTh = mvMode ? VeraJoyCal.MinDeflectionMv : VeraJoyCal.MinDeflection;
             if (Step < JoySteps.Length)
             {
                 stepText.text = JoyHow[Step];
@@ -214,12 +218,14 @@ namespace Khkt.Menu.Dashboard
             }
             if (resultReady || Step >= JoySteps.Length)
             {
-                var v = VeraJoyCal.Apply(joyResult, raw);
-                live.text = $"Thử ngay: số firmware x {raw.x:+0.00;-0.00} y {raw.y:+0.00;-0.00}  →  sau căn: phải {v.x:+0.00;-0.00}, tiến {v.y:+0.00;-0.00}";
+                var v = VeraJoyCal.Apply(joyResult, raw, s.JoyMv, s.HasJoyMv);
+                live.text = (mvMode ? $"Thử ngay: chân X {s.JoyMv.x:0} mV, Y {s.JoyMv.y:0} mV" : $"Thử ngay: số firmware x {raw.x:+0.00;-0.00} y {raw.y:+0.00;-0.00}")
+                            + $"  →  sau căn: phải {v.x:+0.00;-0.00}, tiến {v.y:+0.00;-0.00}";
                 progress.rectTransform.sizeDelta = new Vector2(480, 10);
                 return;
             }
-            live.text = $"Số firmware: x {raw.x:+0.00;-0.00}  y {raw.y:+0.00;-0.00}" + (s.Has(VeraFlags.StickPress) ? "  · đang nhấn" : "");
+            live.text = (mvMode ? $"Điện áp: chân X {s.JoyMv.x:0} mV, chân Y {s.JoyMv.y:0} mV" : $"Số firmware: x {raw.x:+0.00;-0.00}  y {raw.y:+0.00;-0.00}")
+                        + (s.Has(VeraFlags.StickPress) ? "  · đang nhấn" : "");
 
             if (Step == 5)
             {
@@ -231,10 +237,10 @@ namespace Khkt.Menu.Dashboard
                 return;
             }
 
-            joyWin.Add(raw);
+            joyWin.Add(val);
             if (joyWin.Count > 30) joyWin.RemoveAt(0);
-            bool stable = joyWin.Count >= 10 && Spread(joyWin) < 0.03f;
-            bool far = Step == 0 || Mathf.Max(Mathf.Abs(raw.x - center.x), Mathf.Abs(raw.y - center.y)) > VeraJoyCal.MinDeflection;
+            bool stable = joyWin.Count >= 10 && Spread(joyWin) < stableTh;
+            bool far = Step == 0 || Mathf.Max(Mathf.Abs(val.x - center.x), Mathf.Abs(val.y - center.y)) > farTh;
             if (waitAfterJ)
             {
                 // lệnh J vừa đặt tâm trên mạch: chờ số firmware ổn định quanh tâm mới rồi ghi lại tâm
@@ -251,6 +257,9 @@ namespace Khkt.Menu.Dashboard
             var m = Mean(joyWin);
             switch (Step)
             {
+                case 0 when mvMode:
+                    center = m;  // tâm đo thẳng bằng mV
+                    break;
                 case 0:
                     link.Send("J");  // firmware đặt tâm = vị trí đang buông
                     jSentAt = now;
@@ -271,15 +280,19 @@ namespace Khkt.Menu.Dashboard
             Step = JoySteps.Length;
             var errors = new List<string>();
             var notes = new List<string>();
-            bool ok = VeraJoyCal.Compute(center, fwd, back, left, right, out joyResult, errors, notes);
+            bool ok = VeraJoyCal.Compute(center, fwd, back, left, right, out joyResult, errors, notes, mvMode);
             if (!press) notes.Add("Nút nhấn cần: không thấy (đã bỏ qua) — kiểm tra dây SW (GPIO27) và GND");
             var lines = new List<string>();
             if (ok)
             {
                 lines.Add($"Tiến = trục {(joyResult.AxisFwd == 0 ? "x" : "y")} {(joyResult.SignFwd > 0 ? "dương" : "âm")}, " +
-                          $"phải = trục {(joyResult.AxisRight == 0 ? "x" : "y")} {(joyResult.SignRight > 0 ? "dương" : "âm")} của firmware.");
-                lines.Add($"Đẩy hết cỡ firmware chỉ ra: tiến {joyResult.GainFwd:0.00}, lùi {joyResult.GainBack:0.00}, " +
-                          $"phải {joyResult.GainRight:0.00}, trái {joyResult.GainLeft:0.00} → game kéo giãn lên 1,0.");
+                          $"phải = trục {(joyResult.AxisRight == 0 ? "x" : "y")} {(joyResult.SignRight > 0 ? "dương" : "âm")} {(mvMode ? "của chân mạch" : "của firmware")}.");
+                if (mvMode)
+                    lines.Add($"Tâm X {joyResult.CenterMv.x:0} mV, Y {joyResult.CenterMv.y:0} mV (cố định, không phụ thuộc tâm firmware học lúc mở cổng). " +
+                              $"Biên: tiến {joyResult.GainFwd:0}, lùi {joyResult.GainBack:0}, phải {joyResult.GainRight:0}, trái {joyResult.GainLeft:0} mV.");
+                else
+                    lines.Add($"Đẩy hết cỡ firmware chỉ ra: tiến {joyResult.GainFwd:0.00}, lùi {joyResult.GainBack:0.00}, " +
+                              $"phải {joyResult.GainRight:0.00}, trái {joyResult.GainLeft:0.00} → game kéo giãn lên 1,0.");
                 lines.Add("Đẩy thử cần, xem số \"sau căn\" bên dưới rồi bấm Lưu.");
             }
             lines.AddRange(errors);

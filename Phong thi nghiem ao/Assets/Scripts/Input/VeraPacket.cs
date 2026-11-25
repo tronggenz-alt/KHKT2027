@@ -34,6 +34,10 @@ namespace Khkt.Input
         public Vector3 AccelG;
         /// <summary>Joystick đã hiệu chuẩn trên mạch, -1..1 (chưa có vùng chết).</summary>
         public Vector2 Joy;
+        /// <summary>Điện áp thật 2 chân joystick (mV, chưa trừ tâm, chưa đổi hướng): chỉ gói thô USB (5D) có; HasJoyMv cho biết.
+        /// Game tính cần gạt từ số này với tâm cố định (VeraJoyCal) vì tâm firmware học lúc mở cổng có thể sai.</summary>
+        public Vector2 JoyMv;
+        public bool HasJoyMv;
         public byte TouchA, TouchB;    // mức 0..255 (lơ lửng ~38, chạm 128)
         public VeraFlags Flags;
         public float TempC;
@@ -87,6 +91,8 @@ namespace Khkt.Input
                 Flags = (VeraFlags)b[o + 12],
                 OrientationRH = Quat(b, o + 14),
                 Joy = new Vector2(I16(b, o + 42) / J, I16(b, o + 44) / J),
+                JoyMv = new Vector2(I16(b, o + 38), I16(b, o + 40)),
+                HasJoyMv = true,
                 TouchA = b[o + 46],
                 TouchB = b[o + 47],
                 GyroDps = g / n,

@@ -372,6 +372,7 @@ namespace Khkt.Input
         static float joyBadSinceX = -1, joyBadSinceY = -1, joyOkSinceX = -1, joyOkSinceY = -1, veraTapA = -1, veraADown = -1;
         static bool joyBadX, joyBadY, veraAPrev;
         static readonly JoyFlapDetector flapX = new JoyFlapDetector(), flapY = new JoyFlapDetector();
+        static readonly JoyJitterDetector jitX = new JoyJitterDetector(), jitY = new JoyJitterDetector();
         /// <summary>Trục cần gạt đang bị tạm bỏ (lệch tâm khi nằm yên, hoặc nhảy loạn do dây hở): x, y.</summary>
         public static bool JoyAxisOffX => joyBadX;
         public static bool JoyAxisOffY => joyBadY;
@@ -379,6 +380,12 @@ namespace Khkt.Input
         static void VeraTick(ControllerState s, bool stickPress, float now)
         {
             bool still = s.Has(VeraFlags.Still);
+            // dây hở (chân ADC trôi nổi): điện áp nhảy mạnh ở hầu hết các khung — đánh dấu như trục nhảy loạn
+            if (s.HasJoyMv)
+            {
+                if (jitX.Step(s.JoyMv.x)) flapX.MarkNoisy(now);
+                if (jitY.Step(s.JoyMv.y)) flapY.MarkNoisy(now);
+            }
             Vector2 j = new Vector2(GuardAxis(s.Joy2.x, still, now, ref joyBadSinceX, ref joyOkSinceX, ref joyBadX, "X", flapX),
                                     GuardAxis(s.Joy2.y, still, now, ref joyBadSinceY, ref joyOkSinceY, ref joyBadY, "Y", flapY));
             // vùng chết tròn 8% (trong) / 5% (ngoài) rồi đường cong expo, như phòng thử (xu_ly.joystick)
@@ -488,6 +495,48 @@ namespace Khkt.Input
 
             /// <summary>Số giây kể từ cú nhảy đổi chiều gần nhất.</summary>
             public float QuietFor(float now) => now - lastFlap;
+
+            /// <summary>Nguồn khác (JoyJitterDetector) thấy trục đang nhiễu: coi như vừa nhảy loạn.</summary>
+            public void MarkNoisy(float now)
+            {
+                for (int i = times.Count; i < Count; i++) times.Enqueue(now);
+                lastFlap = now;
+            }
+        }
+
+        /// <summary>
+        /// Phát hiện chân joystick trôi nổi (dây VRx / VRy hở) từ điện áp thật: trung vị độ nhảy giữa 2 khung liền nhau trong
+        /// 30 khung gần nhất vượt 120 mV. Đo 24/11/2026 với dây hở: nhảy > 50 mV ở 1228/1248 gói, có lần 2571 mV; tay gạt thật
+        /// chỉ có vài khung nhảy lớn nên trung vị vẫn nhỏ, cần giữ yên thì dao động dưới 5 mV.
+        /// </summary>
+        public sealed class JoyJitterDetector
+        {
+            const int N = 30;
+            const float Limit = 120f;
+            readonly float[] d = new float[N];
+            readonly float[] tmp = new float[N];
+            int n, i;
+            float prev;
+            bool has;
+
+            public float Median { get; private set; }
+
+            public bool Step(float mv)
+            {
+                if (has)
+                {
+                    d[i] = Mathf.Abs(mv - prev);
+                    i = (i + 1) % N;
+                    if (n < N) n++;
+                }
+                prev = mv;
+                has = true;
+                if (n < 10) return false;
+                System.Array.Copy(d, tmp, n);
+                System.Array.Sort(tmp, 0, n);
+                Median = tmp[n / 2];
+                return Median > Limit;
+            }
         }
 
         static void SetMode(StickMode m)

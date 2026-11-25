@@ -35,6 +35,7 @@ namespace Khkt.Menu.Dashboard
         /// <summary>Trục joystick đang nhảy loạn (dây VRx / VRy hở): "", "X", "Y" hoặc "X, Y".</summary>
         public string JoyNoisyAxes { get; private set; } = "";
         readonly PadInput.JoyFlapDetector flapX = new PadInput.JoyFlapDetector(), flapY = new PadInput.JoyFlapDetector();
+        readonly PadInput.JoyJitterDetector jitX = new PadInput.JoyJitterDetector(), jitY = new PadInput.JoyJitterDetector();
         /// <summary>Có nguồn riêng (false: nguồn do nơi khác tạo, ví dụ lab đang mở).</summary>
         public bool OwnsSources => host != null;
 
@@ -195,8 +196,13 @@ namespace Khkt.Menu.Dashboard
             }
             Latest = Active.Latest;
             var s = Latest;
-            bool nx = flapX.Step(s.JoyRaw.x, now) || flapX.QuietFor(now) < 3f && flapX.QuietFor(now) >= 0f && noisyX;
-            bool ny = flapY.Step(s.JoyRaw.y, now) || flapY.QuietFor(now) < 3f && flapY.QuietFor(now) >= 0f && noisyY;
+            if (s.HasJoyMv)
+            {
+                if (jitX.Step(s.JoyMv.x)) flapX.MarkNoisy(now);
+                if (jitY.Step(s.JoyMv.y)) flapY.MarkNoisy(now);
+            }
+            bool nx = flapX.Step(s.Joy2.x, now) || flapX.QuietFor(now) < 3f && flapX.QuietFor(now) >= 0f && noisyX;
+            bool ny = flapY.Step(s.Joy2.y, now) || flapY.QuietFor(now) < 3f && flapY.QuietFor(now) >= 0f && noisyY;
             noisyX = nx;
             noisyY = ny;
             JoyNoisyAxes = nx && ny ? "X, Y" : nx ? "X" : ny ? "Y" : "";

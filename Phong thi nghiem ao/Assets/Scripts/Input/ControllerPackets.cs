@@ -39,8 +39,11 @@ namespace Khkt.Input
                 AccelG = v.AccelG,
                 GyroDps = v.GyroDps,
                 OrientationRH = (v.Flags & VeraFlags.ImuError) != 0 ? Quaternion.identity : v.OrientationRH,
-                Joy2 = VeraJoyCal.Apply(v.Joy),  // phần căn joystick ở sảnh (trang Tay cầm); chưa căn thì giữ số firmware
+                // cần gạt: có điện áp thật (USB) thì tính từ mV với tâm cố định, không phụ thuộc tâm firmware học lúc mở cổng
+                Joy2 = VeraJoyCal.Apply(v.Joy, v.JoyMv, v.HasJoyMv),
                 JoyRaw = v.Joy,
+                JoyMv = v.JoyMv,
+                HasJoyMv = v.HasJoyMv,
                 Buttons = b,
                 Vera = true,
                 TouchA = v.TouchA,
