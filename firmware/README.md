@@ -1,8 +1,14 @@
-# Firmware tay cầm CŨ (giữ để tham khảo)
+# Firmware tay cầm
 
-Tay cầm hiện tại là **V2 "Halo"**: ESP32 DevKitC 38 chân + BMI160 + joystick KY-023 + cò analog bằng cảm biến Hall SS49E. Xem [docs/15-tay-cam-v2-halo.md](../docs/15-tay-cam-v2-halo.md). Firmware cho V2 **chưa viết** (đang đặt linh kiện).
+**Bản hiện tại: `tay_cam_vera/`**: ESP32 DevKit V1 + joystick KY-023 + BMI160 + 2 nút cảm ứng điện dung (GPIO13, 14). Gửi gói v3 và gói cũ 29 byte qua Wi-Fi UDP 4210, có chống trôi yaw. Xem [docs/28-firmware-tay-cam-vera.md](../docs/28-firmware-tay-cam-vera.md).
 
-Các thư mục dưới đây là firmware của các bản đã thay:
+| Thư mục | Dùng để |
+| --- | --- |
+| `tay_cam_vera/` | Firmware tay cầm hiện tại |
+| `tay_cam_bmi160/` | Bản chỉ có BMI160, in quaternion qua USB (so sánh độ trôi với bản mới) |
+| `thu_bmi160/` | Thử đọc BMI160 |
+
+Các thư mục dưới đây là firmware của các bản đã thay, giữ để tham khảo:
 
 | Thư mục | Bản tay cầm cũ |
 | --- | --- |

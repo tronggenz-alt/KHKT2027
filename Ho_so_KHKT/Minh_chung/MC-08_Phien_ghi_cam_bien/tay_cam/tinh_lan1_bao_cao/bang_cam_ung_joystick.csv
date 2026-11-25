@@ -1,0 +1,17 @@
+﻿Đại lượng,Giá trị,Đơn vị,Ghi chú
+Nút A: số đo thô trung bình,772.7,đơn vị chạm,
+Nút A: nhiễu số đo thô (độ lệch chuẩn),0.49,đơn vị chạm,= 0.06% mức nền
+Nút A: mức nền trôi đầu → cuối,772 → 773,đơn vị chạm,
+Nút A: mức 0–255 lớn nhất khi không chạm,6,,"ngưỡng lơ lửng 38, chạm 128"
+Nút A: số lần CHẠM MA,0,lần,trong 15.0 phút (mục tiêu 0)
+Nút B: số đo thô trung bình,841.9,đơn vị chạm,
+Nút B: nhiễu số đo thô (độ lệch chuẩn),0.27,đơn vị chạm,= 0.03% mức nền
+Nút B: mức nền trôi đầu → cuối,842 → 842,đơn vị chạm,
+Nút B: mức 0–255 lớn nhất khi không chạm,3,,"ngưỡng lơ lửng 38, chạm 128"
+Nút B: số lần CHẠM MA,0,lần,trong 15.0 phút (mục tiêu 0)
+Joystick X ra khi buông: trung bình,0.0049,−1..1,phải ≈ 0
+Joystick Y ra khi buông: trung bình,-0.2573,−1..1,phải ≈ 0
+"Joystick X, Y: nhiễu (độ lệch chuẩn)","0.0010, 0.2360",−1..1,
+"Joystick điện áp X, Y trung bình","2239, 359",mV,KY-023 cấp 3V3: tâm ≈ 1650
+Joystick sau vùng chết 8% có về 0 không,KHÔNG,,lớn nhất 0.533
+Nhấn cần ma,0,lần,mục tiêu 0

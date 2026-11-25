@@ -1,6 +1,6 @@
 # VERA Lab: tiến độ và hiện trạng toàn dự án
 
-Cập nhật: 18/11/2026. Đây là bản tóm tắt để ai mở dự án (người hay AI) cũng nắm được ngay. Chi tiết nằm trong `docs/` và `contracts.md`.
+Cập nhật: 23/11/2026 (gộp nhánh gop/giao-dien-nguoi-3d vào main). Đây là bản tóm tắt để ai mở dự án (người hay AI) cũng nắm được ngay. Chi tiết nằm trong `docs/` và `contracts.md`.
 
 ## 1. Dự án
 
@@ -30,11 +30,12 @@ Cập nhật: 18/11/2026. Đây là bản tóm tắt để ai mở dự án (ng�
   - Giao diện ngoài lab hết xám, bảng điều khiển 5 thẻ mô-đun, tên và biểu tượng "VERA Lab".
 
 ### Điều khiển bằng cơ thể
-- **Nhận diện tay ngay trong Unity** (`Input/InAppHandTracker.cs`):
-  - mô hình MediaPipe chạy bằng Inference Engine, nằm ở `Assets/Lab/MoHinh/Resources`;
-  - tự bật khi vào lab, F10 bật/tắt;
-  - hai tay hiện sẵn (`Demo/ArmRig.cs`), có lọc 1€ và vùng chết mềm;
-  - trỏ vào vật rồi chụm ngón để cầm.
+- **Điều khiển bằng thao tác tay** (docs/28):
+  - nắm ngang mở danh sách dụng cụ, nắm dọc mở danh sách hóa chất (trượt ra bên phải), ngón trỏ trượt chọn, chụm 2 ngón lấy, giơ ngón út bật máy hoặc đi bàn khác, xòe tay đặt xuống;
+  - tương tác theo từng bàn; F7 xem webcam và điểm mốc;
+  - nguồn tay mặc định là `tools/tay_tracker.py`, tự chạy khi vào lab, F10 bật / tắt;
+  - MediaPipe C# (MediaPipeUnityPlugin) chạy trong .exe (`Input/PluginHandTracker.cs`), không cần Python; Python là dự phòng;
+  - luôn đúng hai bàn tay (`Demo/ArmRig.cs`). Kiểm thử Unity `thao_tac` đạt 19/19.
 - **Tracker Python** (`tools/mediapipe_tracker.py`): mặt, đầu, mắt (F8), Pose. Bảng F9 mô phỏng tracking. Đã sửa dấu yaw. **Có thể bị Smart App Control chặn**, xem mục 4.
 - **Tay cầm ESP32 + BMI160** (SDA 21, SCL 22):
   - firmware `firmware/tay_cam_bmi160` chống trôi khi để yên;
@@ -46,6 +47,11 @@ Cập nhật: 18/11/2026. Đây là bản tóm tắt để ai mở dự án (ng�
   - chạy cố định trên `https://verlab.pages.dev` (Cloudflare Pages Functions + D1, mã ở `cloudflare/`);
   - bản FastAPI cục bộ `server/` vẫn giữ (cổng 8000).
   - Xem docs/25-web-quan-ly-cloudflare.
+- **Phòng học trực tuyến trên trình duyệt** (21/11/2026, docs/32):
+  - giáo viên tạo phòng có mã 6 ký tự và mã QR; học sinh vào ở `/phong-hoc`, khách vào được nếu giáo viên cho phép;
+  - giáo viên nhận realtime qua WebSocket + Durable Object (Worker `verlab-phong`): ai đang trong phòng, ai rời tab, ai không thao tác, giơ tay, câu trả lời, độ trễ;
+  - giáo viên chiếu chữ hoặc bài giảng, khóa màn hình, hỏi nhanh, nhắn, mời ra, bật chế độ kiểm tra; đóng phòng thì lưu bản tổng kết;
+  - kiểm thử cục bộ đạt 66/66 (`cloudflare/kiem_thu_phong.mjs`). **Chưa đăng lên verlab.pages.dev**, chưa thử với cả lớp thật.
 - **Giao diện web "Phòng điều hành"** (tối, màu nhấn #38d6c4): làm theo 6 giai đoạn, xong giai đoạn 1.
 
 ### Tay cầm VR (phần cứng)
@@ -58,18 +64,20 @@ Cập nhật: 18/11/2026. Đây là bản tóm tắt để ai mở dự án (ng�
 | Việc | Trạng thái |
 |---|---|
 | Pose trong Unity (khuỷu, vai thật) | Đã tải mô hình `pose_*.onnx`, chưa nối. Hiện khuỷu suy ra bằng IK |
-| Đo nhận diện tay bằng webcam thật | Chưa đo. Game ghi `[TayUnity] ... khung/giây` vào Player.log mỗi 5 giây |
+| Đo nhận diện tay bằng webcam thật | Chưa đo trong game. Tracker Python xử lý 11 ms/khung |
+| MediaPipe C# trong Unity (bỏ Python) | Chạy trong bản sao kiểm thử và .exe: 17 ms/khung, không giật sau khi bật. Project thật chưa thêm gói (290 MB, không đưa vào git) |
 | Phòng học chung đồng bộ dung dịch, phản ứng | Chưa làm. Máy mở phòng sẽ tính, máy khác chỉ nhận |
 | Phủ phản ứng hóa học (148/242 phản ứng chuẩn) | Kế hoạch 6 giai đoạn chờ duyệt |
 | Phòng robot, bàn lập trình khối lệnh | Tạm dừng |
 | Giao diện web giai đoạn 2–6 | Đang làm ở phiên thiết kế web |
 | Gói in VERA Band | Đang làm |
+| Tay cầm VERA trong app (G2): tia trỏ, hút mục tiêu, nút cảm ứng | Xong, đạt kiểm thử tự động (docs/30). Chưa chạy thử có người cầm; dây joystick Y đang lỏng; Wi-Fi chưa đặt |
 | Bản macOS | Chạy được (18/11). Mac là nền tảng chính từ 15/11 |
 | `.mat` tự đổi sau khi chạy kiểm thử Unity | Chưa tìm ra chỗ. Hoàn tác trước khi commit. Xem TONG_KET 18/11 mục 5 |
 | Lần mở đầu app Mac giật ở tầng 2 | Cần làm nóng shader tầng 2 ở màn chờ |
 | Bản Windows của mô-đun mới | Chưa xuất (máy Mac chưa cài Windows Build Support) |
 | Cảm ứng iPad cho Cơ chế, Thực vật, Giải phẫu | Chưa làm (iPad xếp cuối) |
-| Merge `n18/tich-hop` vào `main` | Chờ người dùng đồng ý |
+| Merge `gop/giao-dien-nguoi-3d` (người 3D, tay chân thực) vào `main` | Đã gộp 23/11/2026; `ArmRig`/`HandRig` lấy bản tay chân thực |
 
 ## 4. Lưu ý quan trọng
 
@@ -88,7 +96,7 @@ Cập nhật: 18/11/2026. Đây là bản tóm tắt để ai mở dự án (ng�
 |---|---|
 | F8 | Điều khiển bằng đầu |
 | F9 | Mô phỏng tracking |
-| F10 | Nhận diện tay |
+| F10 | Bật / tắt nhận diện tay (tự bật khi vào lab) |
 | F11 | Bảng trạng thái MediaPipe |
 | F12 | Căn lại tư thế đầu |
 | Esc | Tạm dừng, về màn hình chính |

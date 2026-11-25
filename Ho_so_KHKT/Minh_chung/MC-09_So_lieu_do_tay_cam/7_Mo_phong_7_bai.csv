@@ -1,0 +1,24 @@
+﻿Bài,Chỉ số,Tiêu chí,Bot lý tưởng,,Cảm biến thật + joystick sửa dây,,Cảm biến thật + joystick hiện tại,
+Trỏ và chọn,Rung tia khi cầm yên (RMS),"< 0,15° (PDF tr.8)",0.064 °,Đạt,0.068 °,Đạt,0.068 °,Đạt
+Trỏ và chọn,Tỉ lệ nhấp trúng,≥ 90%,100.0 %,Đạt,100.0 %,Đạt,100.0 %,Đạt
+Trỏ và chọn,Thời gian trung bình mỗi bia,"< 2,0 s",1.16 s,Đạt,1.16 s,Đạt,1.16 s,Đạt
+Cầm và đặt,Số vật đặt đúng ô,"3/3, sai số ≤ 3 cm",3 /3,Đạt,3 /3,Đạt,0 /3,Chưa đạt
+Cầm và đặt,Sai số đặt trung bình,≤ 3 cm,1.08 cm,Đạt,1.07 cm,Đạt,4.54 cm,Chưa đạt
+Cầm và đặt,Số lần rơi xuống sàn,0,0 lần,Đạt,0 lần,Đạt,0 lần,Đạt
+Cầm và đặt,Thời gian,< 45 s,14.8 s,Đạt,14.8 s,Đạt,90.0 s,Chưa đạt
+Rót đúng 50 mL,Thể tích rót được,50 ± 2 mL,49.65 mL,Đạt,49.66 mL,Đạt,49.65 mL,Đạt
+Rót đúng 50 mL,Lượng tràn ra ngoài,< 2 mL,0.16 mL,Đạt,0.16 mL,Đạt,0.22 mL,Đạt
+Rót đúng 50 mL,Thời gian,< 45 s,17.5 s,Đạt,17.6 s,Đạt,15.7 s,Đạt
+Lắc và khuấy,Ống nghiệm tan hết khi lắc,có,có ,Đạt,có ,Đạt,có ,Đạt
+Lắc và khuấy,Thời gian nhận là đang lắc,≈ 2 s (đủ để tan),2.9 s,Đạt,2.83 s,Đạt,2.88 s,Đạt
+Lắc và khuấy,Số vòng khuấy nhận được,3,3 vòng,Đạt,3 vòng,Đạt,1 vòng,Chưa đạt
+Lắc và khuấy,Thời gian,< 40 s,14.7 s,Đạt,14.7 s,Đạt,90.0 s,Chưa đạt
+Vặn mở nắp,Mở được nắp,có,có ,Đạt,có ,Đạt,có ,Đạt
+Vặn mở nắp,Số lần cầm nắp,≤ 6 (≈ 120°/lần),6 lần,Đạt,6 lần,Đạt,6 lần,Đạt
+Vặn mở nắp,Thời gian,< 25 s,8.1 s,Đạt,8.1 s,Đạt,8.1 s,Đạt
+Đi lại,Tới đúng chỗ,"< 0,35 m, mặt hướng bàn ±30°",0.15 m,Đạt,0.15 m,Đạt,0.06 m,Đạt
+Đi lại,Thời gian,< 20 s,5.7 s,Đạt,5.7 s,Đạt,7.7 s,Đạt
+"Menu tròn, hỏi AI, vuốt",Chọn đúng mục menu,3/3,3 /3,Đạt,3 /3,Đạt,3 /3,Đạt
+"Menu tròn, hỏi AI, vuốt",Thời gian chọn trung bình,"< 3 s (gồm 0,5 s giữ)",1.26 s,Đạt,1.26 s,Đạt,1.26 s,Đạt
+"Menu tròn, hỏi AI, vuốt",Nhấp đúp hỏi AI nhận được,có,có ,Đạt,có ,Đạt,có ,Đạt
+"Menu tròn, hỏi AI, vuốt",Vuốt A → B nhận được,có,có ,Đạt,có ,Đạt,có ,Đạt

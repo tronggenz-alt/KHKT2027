@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /auth/
+Disallow: /app/
+Disallow: /giao-vien
+Disallow: /hoc-sinh
+Disallow: /quan-ly
+
+Sitemap: https://verlab.pages.dev/sitemap.xml

@@ -301,7 +301,7 @@ function canhMatBang(c) {
   };
 }
 
-// ---------------------------------------------------------------- tay cầm VERA Arc
+// ---------------------------------------------------------------- tay cầm VERA Band 2 (mo_hinh/band2.*, xuất bằng tools/tay_cam_band2/xuat_web.py)
 function canhTayCam(c) {
   const canvas = document.getElementById('c-arc');
   const r = taoRenderer(canvas, { dpr: 1.75 });
@@ -315,7 +315,7 @@ function canhTayCam(c) {
   const den3 = new THREE.DirectionalLight(0x8a7bff, 1.6); den3.position.set(4, -2, -4); scene.add(den3);
 
   const truc = new THREE.Group(); scene.add(truc);
-  const goc = new THREE.Group(); goc.rotation.x = -Math.PI / 2; goc.scale.setScalar(.01); goc.position.set(-.03, -.613, 0); truc.add(goc);
+  const goc = new THREE.Group(); goc.rotation.x = -Math.PI / 2; goc.scale.setScalar(.01); truc.add(goc);
 
   // Bệ vòng tròn dưới tay cầm
   const be = new THREE.Group(); be.position.y = -.68; scene.add(be);
@@ -335,13 +335,16 @@ function canhTayCam(c) {
     co: { color: '#aab4ba', roughness: .32, metalness: .7 },
     nut_phu: { color: '#aab4ba', roughness: .32, metalness: .7 },
     chen: { color: '#18c8e6', roughness: .42, clearcoat: .4 },
+    tam_mu_tay: { color: '#18c8e6', roughness: .42, clearcoat: .4 },
+    quai: { color: '#2b3136', roughness: .95 },
     vong: { color: '#18c8e6', roughness: .42, clearcoat: .4 },
     ky023: { color: '#15191d', roughness: .45, metalness: .2 },
     pin9v: { color: '#2b2f34', roughness: .5, metalness: .2 }
   };
-  const vat = {}, ds = [], VO = ['than_phai', 'than_trai', 'chu'];
+  const vat = {}, ds = [], VO = ['than_phai', 'than_trai', 'chu', 'tam_mu_tay', 'nap', 'quai'];
   let xong = false;
-  Promise.all([fetch('mo_hinh/arc.json').then(x => x.json()), fetch('mo_hinh/arc.bin').then(x => x.arrayBuffer())]).then(([tt, buf]) => {
+  Promise.all([fetch('mo_hinh/band2.json').then(x => x.json()), fetch('mo_hinh/band2.bin').then(x => x.arrayBuffer())]).then(([tt, buf]) => {
+    const hopVo = new THREE.Box3();
     for (const p of tt) {
       const g = new THREE.BufferGeometry();
       const ib = new THREE.InterleavedBuffer(new Int16Array(buf, p.v[0], p.v[1] * 5), 5);
@@ -358,7 +361,11 @@ function canhTayCam(c) {
       goc.add(m);
       const o = { ma: p.ma, m, mat, tach: new THREE.Vector3(...p.tach), tam: g.boundingBox.getCenter(new THREE.Vector3()).divideScalar(256) };
       vat[p.ma] = o; ds.push(o);
+      if (!p.lk) hopVo.union(g.boundingBox);
     }
+    // Căn giữa theo hộp bao của vỏ (đơn vị 1/256 mm, trục z hướng lên, nhóm đã xoay -90° quanh x)
+    const tamVo = hopVo.getCenter(new THREE.Vector3()).multiplyScalar(.01 / 256);
+    goc.position.set(-tamVo.x, -tamVo.z, tamVo.y);
     xong = true;
     document.getElementById('tay-cam').classList.add('da-tai');
   }).catch(() => document.getElementById('tay-cam').classList.add('loi-tai'));
@@ -369,7 +376,7 @@ function canhTayCam(c) {
   const CHAM = [
     ['ky023', 'Joystick', 0, 0, 0], ['co', 'Cò bóp cảm biến Hall', 0, 0, 0], ['esp32', 'ESP32 không dây', 0, 0, 0],
     ['bmi160', 'Cảm biến chuyển động', 0, 0, 0], ['pin9v', 'Pin vuông 9V', 0, 0, 0], ['ha_ap', 'Mạch hạ áp MP1584', 0, 0, 0],
-    ['nut6x6', '4 cổng mở rộng', 0, 0, 0]
+    ['nut6x6', 'Nút bấm phụ', 0, 0, 0]
   ].map(a => {
     const hop = document.getElementById('tc-cham');
     const dot = document.createElement('i'); dot.className = 'cham-dot';

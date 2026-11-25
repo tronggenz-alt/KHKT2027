@@ -299,7 +299,8 @@ REAGENTS = {  # thuốc thử pha sẵn: tên (không dấu, chữ thường) ->
     "biuret": [("Na+", 1.0), ("Cu2+", 0.01), ("SO4", 0.01)],
     "ninhydrin": [("ninhydrin", 0.006)],
     "lugol": [("I2", 0.05), ("K+", 0.3), ("I-", 0.3)],
-    "benedict": [("Cu2+", 0.07), ("SO4", 0.07), ("Na+", 1.6), ("Cit", 0.6), ("CO3", 0.5)],
+    # Benedict: 17,3 g CuSO₄·5H₂O + 173 g natri xitrat + 100 g Na₂CO₃ trong 1 lít (pH ≈ 10,5)
+    "benedict": [("Cu2+", 0.069), ("SO4", 0.069), ("Na+", 3.65), ("Cit", 0.59), ("CO3", 0.94)],
     "millon": [("Hg2+", 0.5), ("NO3-", 2.5)],
     "molisch": [("naphtol", 0.35)],
     "schiff": [("schiff", 0.003)],
@@ -322,6 +323,15 @@ HOUSEHOLD = {  # tên (không dấu) -> (thành phần trên 1 lít hoặc 1 mol
     "cloramin b": ([("Na+", 1), ("ClO", 1)], "ran"), "nuoc cat": ([], "long"), "nuoc deion": ([], "long"),
     "xi mang": ([("Ca2+", 1), ("SiO2(s)", 1)], "ran"),
 }
+# Công thức hiển thị (và cho luật nhiệt phân) của hóa chất đời sống ghi tên thương mại trong CSV
+HOUSEHOLD_FORMULA = {"baking soda": "NaHCO3", "muoi iot": "NaCl", "phan kali": "KCl", "phan dam ure": "(NH2)2CO",
+                     "kem danh rang": "CaCO3"}
+# Dung dịch muối của cation thủy phân mạnh phải axit hóa khi pha (không thì vẩn đục HgO, Sn(OH)Cl...): phần axit thêm / 1 mol muối
+ACIDIFY = {"Hg(NO3)2": [("NO3-", 0.5)], "HgCl2": [("Cl-", 0.5)], "SnCl2": [("Cl-", 2.0)], "SnSO4": [("SO4", 1.0)],
+           "Sn(NO3)2": [("NO3-", 2.0)], "Bi(NO3)3": [("NO3-", 2.0)]}
+# Nước cứng tạm thời: dung dịch hiđrocacbonat loãng có CO₂ hòa tan dư (không thì CaCO₃ kết tủa ngay trong chai)
+BICARBONATE_C = {"Ca(HCO3)2": 0.002, "Mg(HCO3)2": 0.002, "Ba(HCO3)2": 0.002}
+
 HOUSEHOLD_M = {"baking soda": 84.007, "muoi iot": 58.44, "phan dam ure": 60.06, "phan lan nung chay": 310.18,
                "phan kali": 74.55, "superphotphat don": 234.05, "superphotphat kep": 234.05, "xa phong": 306.5,
                "chat giat bot": 348.5, "kem danh rang": 100.09, "cloramin b": 213.6, "xi mang": 172.2}
@@ -896,9 +906,17 @@ def build(chem_csv: Path, equip_csv: Path) -> tuple[dict, dict]:
         if r["ascii"] in HOUSEHOLD_M:
             M = HOUSEHOLD_M[r["ascii"]]
         comp, note = composition(r)
+        if r["state"] == "dd" and f in ACIDIFY:
+            comp = comp + ACIDIFY[f]
+        if f in BICARBONATE_C:
+            comp = [(sp, n + 0.3 if sp == "CO3" else n) for sp, n in comp]
         tags = organic_tags(r)
         g = group_of(r)
         C, Cs = parse_conc(r["conc"], M, r["state"])
+        if f in BICARBONATE_C:
+            C, Cs = BICARBONATE_C[f], [BICARBONATE_C[f]]
+        if not f and r["ascii"] in HOUSEHOLD_FORMULA:
+            f = HOUSEHOLD_FORMULA[r["ascii"]]
         if note in ("per_liter", "indicator"):
             C, Cs = 1.0, [1.0]
         if note == "ethanol":

@@ -1,0 +1,16 @@
+﻿Hạng mục,Kết quả,Đánh giá
+"Kết nối USB COM8, firmware v3.0, BMI160 0x69","50 gói/s, mất 0%, 0 mẫu mất / 360 000",Đạt
+Lấy mẫu IMU,"200,0 Hz, dao động chu kỳ 0,077 ms; chạy bằng ĐỒNG HỒ, không phải ngắt INT1 (GPIO19 chưa có xung)",Đạt (cần kiểm dây INT1)
+"Trôi yaw khi nằm yên 10 phút, firmware mới (FW/F1)","0,07° (lần 1); 0,008° từ phút 2–10 (lần 2, sau va chạm lúc 73 s)",Đạt (< 1°)
+Nhiễu con quay (ARW),"0,36–0,45 °/√h ≈ 0,007 °/s/√Hz (tốt hơn datasheet 0,008)",Đạt
+"Mô phỏng trôi khi CẦM TAY, nhiễu đo thật","F1: 1,69° (có đặt bàn) / 4,44° (cầm liên tục) sau 10 phút, giảm 96% / 90% so với M1",Mô phỏng
+"Cảm ứng A, B lúc không chạm","nhiễu 0,08% mức nền; mức lớn nhất 7/255 và 3/255 (ngưỡng lơ lửng 38); 0 chạm ma",Đạt
+Cảm ứng khi CHẠM,chưa đo (không ai chạm),Chưa đo
+Joystick X,"tâm 2240 mV, nhiễu 0,001",Đạt
+Joystick Y,"dây VRy→GPIO35 chập chờn: ~150 mV khi hở, nhảy 2240–2365 mV khi tiếp xúc; nhân vật tự đi 8 m / 3 phút",CHƯA – lỗi đấu nối
+Nguồn joystick,"tâm 2,24 V ⇒ đang cấp ~4,5–5 V; gạt hết có thể đưa >3,6 V vào GPIO34/35",Rủi ro – chuyển sang 3V3
+Độ trễ / hiệu suất,"tuổi dữ liệu 12,6 ms (P95 21,9); khứ hồi lệnh USB 16,5 ms; xử lý 5,3 ms/khung (P99 13,6)",Đạt
+7 bài thao tác – bot lý tưởng,23/23 chỉ số,Đạt
+7 bài – cảm biến thật + joystick đã sửa dây,"23/23; hướng F1 sai yaw TB 0,68°, lớn nhất 3,2°; pitch TB 0,03°",Đạt
+7 bài – cảm biến thật + joystick như hiện tại,18/23: bài 2 (cầm đặt) và bài 4 (khuấy) hỏng do joystick Y trôi,CHƯA
+Wi-Fi,chưa đặt tên Wi-Fi trong cau_hinh.h ⇒ chưa đo,Chưa đo

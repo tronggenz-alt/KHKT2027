@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:,">
+<title>Vào phòng học · VERA Lab</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="/tinh/vera.css">
+<!-- Không dùng phien.js: khách chưa đăng nhập cũng mở được trang này -->
+<style>
+body { min-height: 100dvh; display: flex; flex-direction: column; }
+.thanh .khung { justify-content: space-between; }
+.vao { width: min(100%, 440px); margin: clamp(24px, 8vh, 80px) auto 40px; }
+.vao h1 { font-size: 26px; margin-bottom: 6px; }
+.o-ma input { text-transform: uppercase; letter-spacing: .3em; font-size: 26px !important; font-weight: 700; text-align: center; min-height: 58px !important; }
+.vao .ai { margin-top: 14px; padding: 10px 12px; border-radius: var(--bo-nho); background: var(--nen-2); font-size: 14px; }
+.vao .ai b { font-weight: 600; }
+
+.trong { flex: 1; display: grid; grid-template-rows: auto 1fr auto; gap: 14px; padding-block: 14px calc(14px + env(safe-area-inset-bottom)); }
+.dau-phong { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+.dau-phong h1 { font-size: 20px; }
+.ket-noi { display: inline-flex; align-items: center; gap: 7px; font-size: 13.5px; color: var(--phu); }
+.ket-noi::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--mo); }
+.ket-noi.song::before { background: var(--xanh); }
+.ket-noi.mat::before { background: var(--do); }
+.kiem-tra { padding: 9px 12px; border-radius: var(--bo-nho); background: var(--vang-nhat); color: var(--vang); font-size: 14px; font-weight: 500; }
+.san-khau { min-height: 240px; display: grid; place-items: center; text-align: center; padding: clamp(16px, 3vw, 32px); border: 1px solid var(--vien); border-radius: var(--bo-lon); background: var(--nen); overflow-wrap: anywhere; }
+.san-khau h2 { font-size: clamp(22px, 3.4vw, 34px); line-height: 1.25; margin-bottom: 10px; }
+.san-khau p { font-size: clamp(16px, 2vw, 20px); white-space: pre-line; color: var(--chu); }
+.san-khau img { max-width: 100%; max-height: calc(100dvh - 260px); border-radius: var(--bo-nho); background: #000; }
+.cho { color: var(--phu); }
+.cau { padding: clamp(16px, 2vw, 22px); border: 1px solid var(--nhan); border-radius: var(--bo-lon); background: var(--nen); }
+.cau h2 { font-size: 19px; margin-bottom: 12px; overflow-wrap: anywhere; }
+.cau .chon { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
+.cau .chon button { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: center; min-height: 52px; padding: 8px 14px; text-align: left; border-radius: var(--bo-nho); border: 1px solid var(--vien-dam); background: var(--nen-2); color: var(--chu); cursor: pointer; font: inherit; overflow-wrap: anywhere; }
+.cau .chon button b { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--nen-3); font-weight: 700; }
+.cau .chon button:hover:not(:disabled) { border-color: var(--nhan); }
+.cau .chon button.da { border-color: var(--nhan); background: var(--nhan-nhat); }
+.cau .chon button.da b { background: var(--nhan); color: var(--tren-nhan); }
+.cau .chon button.dung { border-color: var(--xanh); background: var(--xanh-nhat); }
+.cau .chon button.dung b { background: var(--xanh); color: #04201c; }
+.cau .chon button:disabled { cursor: default; }
+.cau .chon button small { display: block; color: var(--phu); font-size: 12.5px; }
+.cau .ghi { margin-top: 10px; font-size: 14px; color: var(--phu); }
+.duoi-phong { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+.nut.tay-len { background: var(--vang); color: #2a1a00; }
+.minh-bach { font-size: 12.5px; color: var(--mo); max-width: 640px; }
+
+.khoa { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 24px; background: rgba(5, 8, 14, .96); text-align: center; }
+.khoa div { max-width: 640px; }
+.khoa svg { width: 54px; height: 54px; color: var(--nhan); margin-bottom: 14px; }
+.khoa h2 { font-size: clamp(26px, 5vw, 44px); line-height: 1.2; overflow-wrap: anywhere; }
+.khoa p { margin-top: 10px; color: var(--phu); }
+.tin { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 40; transform: translateX(-50%); width: min(calc(100% - 32px), 560px); display: grid; gap: 8px; }
+.tin div { padding: 12px 14px; border-radius: var(--bo-nho); background: var(--nen-3); border: 1px solid var(--nhan); box-shadow: 0 8px 30px rgba(0, 0, 0, .5); overflow-wrap: anywhere; }
+.tin div small { display: block; color: var(--nhan); font-size: 12.5px; font-weight: 600; }
+.het { width: min(100%, 520px); margin: clamp(24px, 10vh, 100px) auto; text-align: center; }
+.het h1 { font-size: 24px; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<header class="thanh">
+  <div class="khung">
+    <a class="nhan-hieu" href="/">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2.5 35.2 11.2v17.6L20 37.5 4.8 28.8V11.2z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/><path d="M12.5 13 20 28l7.5-15" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      VERA Lab
+    </a>
+    <span class="phu-chu" id="toi"></span>
+  </div>
+</header>
+
+<main class="khung" style="flex: 1; display: flex; flex-direction: column">
+  <!-- Nhập mã -->
+  <section class="vao" id="man-vao">
+    <h1>Vào phòng học</h1>
+    <p class="phu-chu">Nhập mã 6 ký tự giáo viên đưa cho bạn.</p>
+    <form id="f-vao" novalidate>
+      <label class="o o-ma"><span>Mã phòng</span><input id="ma" maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text" placeholder="------"></label>
+      <div id="o-khach" hidden>
+        <label class="o"><span>Họ tên của bạn</span><input id="ho-ten" maxlength="60" autocomplete="name"><small>Chỉ dùng được nếu giáo viên cho khách vào phòng.</small></label>
+      </div>
+      <p class="bao" id="bao-vao" role="alert" hidden></p>
+      <button class="nut chinh rong" style="margin-top: 18px" id="nut-vao">Vào phòng</button>
+    </form>
+    <div class="ai" id="ai"></div>
+  </section>
+
+  <!-- Trong phòng -->
+  <section class="trong" id="man-phong" hidden>
+    <div>
+      <div class="dau-phong">
+        <div><h1 id="ten-phong"></h1><span class="phu-chu" id="gv-phong"></span></div>
+        <span class="ket-noi" id="ket-noi">Đang nối…</span>
+      </div>
+      <p class="kiem-tra" id="kiem-tra" hidden style="margin-top: 10px">Đang làm bài kiểm tra: giáo viên được báo mỗi khi bạn rời trang này.</p>
+    </div>
+    <div style="display: grid; gap: 14px; align-content: start">
+      <div class="cau" id="cau" hidden></div>
+      <div class="san-khau" id="san-khau" aria-live="polite"><p class="cho">Đang chờ giáo viên…</p></div>
+    </div>
+    <div class="duoi-phong">
+      <p class="minh-bach">Giáo viên thấy: bạn có đang mở trang này không, có chuyển sang tab khác không, có thao tác trong 1 phút qua không, loại thiết bị và độ trễ mạng. Không có camera, micro hay nội dung tab khác.</p>
+      <div style="display: flex; gap: 10px">
+        <button class="nut phu" id="nut-tay">✋ Giơ tay</button>
+        <button class="nut phu" id="nut-roi">Rời phòng</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Hết -->
+  <section class="het" id="man-het" hidden>
+    <h1 id="het-tieu-de"></h1>
+    <p class="phu-chu" id="het-chu"></p>
+    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 18px">
+      <button class="nut chinh" id="het-nut" hidden></button>
+      <a class="nut phu" href="/phong-hoc">Vào phòng khác</a>
+    </div>
+  </section>
+</main>
+
+<div class="khoa" id="khoa" hidden role="alertdialog" aria-modal="true" aria-labelledby="khoa-chu">
+  <div>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="1.8"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>
+    <h2 id="khoa-chu"></h2>
+    <p>Giáo viên đã tạm khóa màn hình. Hãy dừng tay và chú ý.</p>
+  </div>
+</div>
+<div class="tin" id="tin" aria-live="assertive"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const CHU_CAI = "ABCDEF";
+const thamSo = new URLSearchParams(location.search);
+
+let nd = null;            // tài khoản đang đăng nhập (null: khách)
+let phong = null;         // { ma, ten, giao_vien, lop, ban, khach? }
+let ws = null, noiLai = null, soLanNoi = 0, ping = null, guiPingLuc = 0;
+let ketThuc = false;      // bị mời ra, phòng đóng, mở ở tab khác: không tự nối lại
+let chieu = null, cau = null, khoa = { bat: false }, tay = false, cheDo = "hoc";
+let trangThaiDaGui = {};
+let thaoTacCuoi = Date.now(), treMs = null, treDaGui = null, treGuiLuc = 0;
+
+// ---------------------------------------------------------------------------
+// Bước 1: ai đang vào
+// ---------------------------------------------------------------------------
+
+async function napToi() {
+  try {
+    const r = await fetch("/auth/toi");
+    nd = r.ok ? await r.json() : null;
+  } catch { nd = null; }
+  const tiep = encodeURIComponent("/phong-hoc" + (thamSo.get("ma") ? "?ma=" + thamSo.get("ma") : ""));
+  if (nd && nd.vai_tro === "hoc_sinh") {
+    $("ai").innerHTML = `Vào với tài khoản <b>${esc(nd.ho_ten)}</b> (${esc(nd.ten_dang_nhap)}). <a href="/hoc-sinh">Về trang học sinh</a>`;
+    $("toi").textContent = nd.ho_ten;
+  } else if (nd) {
+    $("ai").innerHTML = `Bạn đang đăng nhập tài khoản giáo viên. Giáo viên mở phòng ở trang <a href="/phong-truc-tuyen">Phòng trực tuyến</a>.`;
+  } else {
+    $("o-khach").hidden = false;
+    $("ai").innerHTML = `Có tài khoản học sinh? <a href="/dang-nhap?tiep=${tiep}">Đăng nhập</a> để kết quả được ghi vào lớp của bạn.`;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Bước 2: xin vào phòng
+// ---------------------------------------------------------------------------
+
+const khoaKhach = (ma) => "vera-khach-" + ma;
+
+async function xinVao(ma, ho_ten, khach = "") {
+  const r = await fetch("/api/vao-phong", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ma, ho_ten: ho_ten || "", khach }) });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) {
+    const loi = new Error(typeof d.detail === "string" ? d.detail : "Không vào được phòng");
+    loi.canDangNhap = r.status === 401;
+    throw loi;
+  }
+  return d;
+}
+
+$("ma").addEventListener("input", (e) => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""); });
+
+$("f-vao").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const ma = $("ma").value.trim().toUpperCase(), bao = $("bao-vao");
+  bao.hidden = true;
+  if (ma.length !== 6) { bao.textContent = "Mã phòng gồm 6 ký tự"; bao.hidden = false; return; }
+  $("nut-vao").disabled = true;
+  try {
+    vaoPhong(await xinVao(ma, nd ? "" : $("ho-ten").value.trim()));
+  } catch (loi) {
+    bao.innerHTML = esc(loi.message === "Failed to fetch" ? "Không kết nối được máy chủ" : loi.message) +
+      (loi.canDangNhap ? ` · <a href="/dang-nhap?tiep=${encodeURIComponent("/phong-hoc?ma=" + ma)}">Đăng nhập</a>` : "");
+    bao.hidden = false;
+  }
+  $("nut-vao").disabled = false;
+});
+
+function vaoPhong(p) {
+  phong = p;
+  if (p.khach) try { sessionStorage.setItem(khoaKhach(p.ma), JSON.stringify(p)); } catch { /* chế độ riêng tư */ }
+  history.replaceState(null, "", "/phong-hoc?ma=" + p.ma);
+  $("man-vao").hidden = true;
+  $("man-phong").hidden = false;
+  $("ten-phong").textContent = p.ten;
+  $("gv-phong").textContent = [p.giao_vien && "Giáo viên " + p.giao_vien, p.lop].filter(Boolean).join(" · ");
+  $("toi").textContent = p.ban.ho_ten + (p.ban.loai === "khach" ? " (khách)" : "");
+  document.title = `${p.ten} · VERA Lab`;
+  ketThuc = false;
+  noi();
+}
+
+// ---------------------------------------------------------------------------
+// Bước 3: WebSocket
+// ---------------------------------------------------------------------------
+
+function trangThaiNoi(lop, chu) { $("ket-noi").className = "ket-noi " + lop; $("ket-noi").textContent = chu; }
+
+function noi() {
+  const q = new URLSearchParams({ ma: phong.ma });
+  if (phong.khach) q.set("khach", phong.khach);
+  ws = new WebSocket(`${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/api/vao-phong/ket-noi?${q}`);
+  trangThaiNoi("", "Đang nối…");
+  ws.onopen = () => {
+    soLanNoi = 0;
+    trangThaiNoi("song", "Đã vào phòng");
+    trangThaiDaGui = {};
+    ping = setInterval(guiPing, 20000);
+    setTimeout(guiPing, 1500);
+  };
+  ws.onmessage = (e) => {
+    if (e.data === "pong") {
+      treMs = Math.round(performance.now() - guiPingLuc);
+      if (treDaGui === null || Math.abs(treMs - treDaGui) > 40 || Date.now() - treGuiLuc > 120000) baoTrangThai(true);
+      return;
+    }
+    nhan(JSON.parse(e.data));
+  };
+  ws.onclose = async (e) => {
+    clearInterval(ping);
+    ws = null;
+    if (ketThuc) return;
+    if (e.code === 4001) return het("Bạn đã mở phòng ở nơi khác", "Phòng chỉ nhận một trang cho mỗi người. Trang này đã ngừng.", "Dùng trang này", () => { $("man-het").hidden = true; $("man-phong").hidden = false; noi(); });
+    if (e.code === 4004) return het("Phòng đã đóng", "Giáo viên đã kết thúc buổi học. Cảm ơn bạn đã tham gia.");
+    if (e.code === 4008) return het("Đã ngắt kết nối", "Trang gửi quá nhiều tin trong thời gian ngắn.", "Vào lại", () => location.reload());
+    trangThaiNoi("mat", "Mất kết nối, đang nối lại…");
+    // Không nâng cấp được WebSocket thì trình duyệt không cho biết vì sao: hỏi lại xem còn vào được không
+    if (soLanNoi >= 1) {
+      try { await xinVao(phong.ma, phong.ban.ho_ten, phong.khach || ""); } catch (loi) {
+        if (!/kết nối/.test(loi.message) && loi.message !== "Failed to fetch") return het("Không vào lại được", loi.message);
+      }
+    }
+    noiLai = setTimeout(noi, Math.min(15000, 1000 * 2 ** soLanNoi++));
+  };
+}
+
+function guiPing() {
+  if (ws?.readyState !== 1) return;
+  guiPingLuc = performance.now();
+  ws.send("ping");
+}
+
+const gui = (d) => { if (ws?.readyState === 1) ws.send(JSON.stringify(d)); };
+
+function het(tieuDe, chu, nhanNut, bam) {
+  ketThuc = true;
+  clearTimeout(noiLai);
+  if (ws) { ws.onclose = null; ws.close(); ws = null; }
+  $("khoa").hidden = true;
+  $("man-phong").hidden = true;
+  $("man-het").hidden = false;
+  $("het-tieu-de").textContent = tieuDe;
+  $("het-chu").textContent = chu;
+  $("het-nut").hidden = !nhanNut;
+  if (nhanNut) { $("het-nut").textContent = nhanNut; $("het-nut").onclick = () => { ketThuc = false; bam(); }; }
+}
+
+function nhan(m) {
+  if (m.t === "chao") {
+    $("ten-phong").textContent = m.phong.ten;
+    cheDo = m.phong.che_do;
+    chieu = m.chieu; cau = m.cau_hoi; khoa = m.khoa; tay = m.tay;
+    veTatCa();
+    baoTrangThai(true);
+  } else if (m.t === "phong") {
+    cheDo = m.phong.che_do;
+    $("ten-phong").textContent = m.phong.ten;
+    veKiemTra();
+  } else if (m.t === "chieu") {
+    chieu = m.chieu; veChieu(); baoTrangThai();
+  } else if (m.t === "cau_hoi") {
+    const moi = m.cau_hoi && (!cau || cau.id !== m.cau_hoi.id);
+    cau = m.cau_hoi; veCau(); baoTrangThai();
+    if (moi) navigator.vibrate?.(120);
+  } else if (m.t === "khoa") {
+    khoa = m.khoa; veKhoa();
+  } else if (m.t === "tin") {
+    hienTin(m.noi_dung, m.rieng);
+  } else if (m.t === "tay") {
+    tay = m.gio; veTay();
+  } else if (m.t === "bi_moi_ra") {
+    het("Bạn đã được mời ra khỏi phòng", m.cam ? "Giáo viên không cho vào lại phòng này." : "Bạn có thể nhập lại mã nếu giáo viên cho phép.");
+  } else if (m.t === "tu_choi") {
+    het("Không vào được phòng", m.loi);
+  } else if (m.t === "dong_phong") {
+    het("Phòng đã đóng", "Giáo viên đã kết thúc buổi học. Cảm ơn bạn đã tham gia.");
+  } else if (m.t === "mo_noi_khac") {
+    ketThuc = true;
+    het("Bạn đã mở phòng ở nơi khác", "Phòng chỉ nhận một trang cho mỗi người. Trang này đã ngừng.", "Dùng trang này", () => { $("man-het").hidden = true; $("man-phong").hidden = false; noi(); });
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Vẽ
+// ---------------------------------------------------------------------------
+
+function veKiemTra() { $("kiem-tra").hidden = cheDo !== "kiem_tra"; }
+
+function veChieu() {
+  const s = $("san-khau");
+  const c = chieu;
+  if (!c || c.loai === "tat") { s.innerHTML = `<p class="cho">Đang chờ giáo viên…</p>`; return; }
+  if (c.loai === "tin") {
+    s.innerHTML = `<div>${c.tieu_de ? `<h2>${esc(c.tieu_de)}</h2>` : ""}${c.noi_dung ? `<p>${esc(c.noi_dung)}</p>` : ""}</div>`;
+    gui({ t: "da_xem", phien_ban: c.phien_ban });
+    return;
+  }
+  const q = new URLSearchParams({ ma: phong.ma, bai: c.bai_id, trang: c.trang });
+  if (phong.khach) q.set("khach", phong.khach);
+  const anh = new Image();
+  anh.alt = c.tieu_de;
+  anh.onload = () => { if (chieu === c) { s.replaceChildren(anh); gui({ t: "da_xem", phien_ban: c.phien_ban }); } };
+  anh.onerror = () => { if (chieu === c) s.innerHTML = `<p class="cho">Không tải được trang bài giảng.</p>`; };
+  anh.src = "/api/vao-phong/anh?" + q;
+}
+
+function veCau() {
+  const k = $("cau");
+  if (!cau) { k.hidden = true; return; }
+  k.hidden = false;
+  const tong = cau.dem ? Math.max(1, cau.dem.reduce((a, b) => a + b, 0)) : 0;
+  k.innerHTML = `<h2>${esc(cau.noi_dung)}</h2>
+    <div class="chon">${cau.lua_chon.map((l, i) => {
+      const lop = cau.cong_bo && cau.dap_an === i ? "dung" : cau.da_chon === i ? "da" : "";
+      const dem = cau.cong_bo ? `<small>${cau.dem[i]} bạn · ${Math.round(cau.dem[i] / tong * 100)}%</small>` : "";
+      return `<button type="button" data-chon="${i}" class="${lop}" ${cau.mo ? "" : "disabled"}><b>${CHU_CAI[i]}</b><span>${esc(l)}${dem}</span></button>`;
+    }).join("")}</div>
+    <p class="ghi">${cau.mo ? (cau.da_chon === null ? "Chọn một đáp án. Bạn đổi được cho tới khi giáo viên dừng nhận." : "Đã gửi. Bạn vẫn đổi được cho tới khi giáo viên dừng nhận.")
+      : cau.cong_bo ? (cau.dap_an === null ? "Kết quả cả phòng." : cau.da_chon === cau.dap_an ? "Bạn trả lời đúng." : cau.da_chon === null ? "Bạn chưa trả lời câu này." : `Đáp án đúng là ${CHU_CAI[cau.dap_an]}.`)
+      : "Giáo viên đã dừng nhận trả lời."}</p>`;
+}
+
+function veKhoa() {
+  $("khoa").hidden = !khoa.bat;
+  $("khoa-chu").textContent = khoa.noi_dung || "Tất cả chú ý lên giáo viên";
+  if (khoa.bat) document.activeElement?.blur();
+  gui({ t: "da_khoa", bat: Boolean(khoa.bat) });
+}
+
+function veTay() {
+  $("nut-tay").textContent = tay ? "✋ Hạ tay" : "✋ Giơ tay";
+  $("nut-tay").classList.toggle("tay-len", tay);
+  $("nut-tay").classList.toggle("phu", !tay);
+}
+
+function veTatCa() { veKiemTra(); veChieu(); veCau(); veKhoa(); veTay(); }
+
+function hienTin(noi_dung, rieng) {
+  const o = document.createElement("div");
+  o.innerHTML = `<small>${rieng ? "Giáo viên nhắn riêng" : "Giáo viên nhắn cả phòng"}</small>${esc(noi_dung)}`;
+  $("tin").append(o);
+  navigator.vibrate?.(100);
+  setTimeout(() => o.remove(), 12000);
+}
+
+$("cau").addEventListener("click", (e) => {
+  const nut = e.target.closest("[data-chon]");
+  if (!nut || !cau?.mo) return;
+  cau.da_chon = Number(nut.dataset.chon);
+  gui({ t: "tra_loi", cau_id: cau.id, chon: cau.da_chon });
+  veCau();
+  baoTrangThai();
+});
+$("nut-tay").addEventListener("click", () => { tay = !tay; gui({ t: "tay", gio: tay }); veTay(); });
+$("nut-roi").addEventListener("click", () => {
+  if (!confirm("Rời phòng học?")) return;
+  try { sessionStorage.removeItem(khoaKhach(phong.ma)); } catch { /* bỏ qua */ }
+  ketThuc = true;
+  ws?.close(1000);
+  location.href = nd?.vai_tro === "hoc_sinh" ? "/hoc-sinh" : "/phong-hoc";
+});
+
+// ---------------------------------------------------------------------------
+// Trạng thái trình duyệt gửi cho giáo viên: chỉ gửi khi có thay đổi
+// ---------------------------------------------------------------------------
+
+function thietBi() {
+  const ua = navigator.userAgent;
+  const loai = /iPad|Tablet/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) ? "Máy tính bảng" : /Mobi|Android|iPhone/i.test(ua) ? "Điện thoại" : "Máy tính";
+  const tdt = /Edg\//.test(ua) ? "Edge" : /OPR\//.test(ua) ? "Opera" : /CriOS|Chrome\//.test(ua) ? "Chrome" : /FxiOS|Firefox\//.test(ua) ? "Firefox" : /Safari\//.test(ua) ? "Safari" : "Trình duyệt khác";
+  return `${loai} · ${tdt}`;
+}
+
+function hoatDong() {
+  if (khoa.bat) return "Đang bị khóa màn hình";
+  if (cau?.mo && cau.da_chon === null) return "Đang làm câu hỏi nhanh";
+  if (cau?.mo) return `Đã trả lời câu hỏi (chọn ${CHU_CAI[cau.da_chon]})`;
+  if (chieu && chieu.loai !== "tat") return "Đang xem: " + (chieu.tieu_de || chieu.noi_dung).slice(0, 60);
+  return "Đang chờ giáo viên";
+}
+
+function baoTrangThai(guiTre = false) {
+  if (ws?.readyState !== 1) return;
+  const moi = {
+    hien: document.visibilityState === "visible",
+    focus: document.hasFocus(),
+    ranh: Date.now() - thaoTacCuoi > 60000,
+    hoat_dong: hoatDong(),
+    thiet_bi: thietBi(),
+  };
+  const doi = Object.fromEntries(Object.entries(moi).filter(([k, v]) => trangThaiDaGui[k] !== v));
+  if (guiTre && treMs !== null) { doi.tre_ms = treMs; treDaGui = treMs; treGuiLuc = Date.now(); }
+  if (!Object.keys(doi).length) return;
+  Object.assign(trangThaiDaGui, moi);
+  gui({ t: "tt", ...doi });
+}
+
+document.addEventListener("visibilitychange", () => baoTrangThai());
+addEventListener("focus", () => baoTrangThai());
+addEventListener("blur", () => baoTrangThai());
+for (const ev of ["pointerdown", "pointermove", "keydown", "wheel", "touchstart", "scroll"]) {
+  addEventListener(ev, () => {
+    const dangRanh = Date.now() - thaoTacCuoi > 60000;
+    thaoTacCuoi = Date.now();
+    if (dangRanh) baoTrangThai();
+  }, { passive: true, capture: true });
+}
+setInterval(() => baoTrangThai(), 5000);
+// Khóa máy điện thoại thường làm rớt WebSocket mà không báo: quay lại thì nối ngay
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && phong && !ws && !ketThuc) { clearTimeout(noiLai); noi(); }
+});
+
+// ---------------------------------------------------------------------------
+
+(async () => {
+  await napToi();
+  const ma = (thamSo.get("ma") || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+  $("ma").value = ma;
+  if (!ma) { $("ma").focus(); return; }
+  // Khách đã vào phòng này trong tab này: dùng lại mã khách, không tạo người mới
+  let cu = null;
+  try { cu = JSON.parse(sessionStorage.getItem(khoaKhach(ma)) || "null"); } catch { /* bỏ qua */ }
+  if (cu && !nd) return vaoPhong(cu);
+  if (nd?.vai_tro === "hoc_sinh") {
+    try { return vaoPhong(await xinVao(ma, "")); } catch (loi) { $("bao-vao").textContent = loi.message; $("bao-vao").hidden = false; }
+  } else {
+    $("ho-ten").focus();
+  }
+})();
+</script>
+</body>
+</html>

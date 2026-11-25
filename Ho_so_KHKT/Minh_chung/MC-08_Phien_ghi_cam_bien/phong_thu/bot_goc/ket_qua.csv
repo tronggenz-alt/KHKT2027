@@ -1,0 +1,24 @@
+﻿Bài,Tên bài,Chỉ số,Giá trị,Đơn vị,Tiêu chí,Đạt
+1,Trỏ và chọn,Rung tia khi cầm yên (RMS),0.064,°,"< 0,15° (PDF tr.8)",Đạt
+1,Trỏ và chọn,Tỉ lệ nhấp trúng,100.0,%,≥ 90%,Đạt
+1,Trỏ và chọn,Thời gian trung bình mỗi bia,1.16,s,"< 2,0 s",Đạt
+2,Cầm và đặt,Số vật đặt đúng ô,3,/3,"3/3, sai số ≤ 3 cm",Đạt
+2,Cầm và đặt,Sai số đặt trung bình,1.08,cm,≤ 3 cm,Đạt
+2,Cầm và đặt,Số lần rơi xuống sàn,0,lần,0,Đạt
+2,Cầm và đặt,Thời gian,14.8,s,< 45 s,Đạt
+3,Rót đúng 50 mL,Thể tích rót được,49.65,mL,50 ± 2 mL,Đạt
+3,Rót đúng 50 mL,Lượng tràn ra ngoài,0.16,mL,< 2 mL,Đạt
+3,Rót đúng 50 mL,Thời gian,17.5,s,< 45 s,Đạt
+4,Lắc và khuấy,Ống nghiệm tan hết khi lắc,có,,có,Đạt
+4,Lắc và khuấy,Thời gian nhận là đang lắc,2.9,s,≈ 2 s (đủ để tan),Đạt
+4,Lắc và khuấy,Số vòng khuấy nhận được,3,vòng,3,Đạt
+4,Lắc và khuấy,Thời gian,14.7,s,< 40 s,Đạt
+5,Vặn mở nắp,Mở được nắp,có,,có,Đạt
+5,Vặn mở nắp,Số lần cầm nắp,6,lần,≤ 6 (≈ 120°/lần),Đạt
+5,Vặn mở nắp,Thời gian,8.1,s,< 25 s,Đạt
+6,Đi lại,Tới đúng chỗ,0.15,m,"< 0,35 m, mặt hướng bàn ±30°",Đạt
+6,Đi lại,Thời gian,5.7,s,< 20 s,Đạt
+7,"Menu tròn, hỏi AI, vuốt",Chọn đúng mục menu,3,/3,3/3,Đạt
+7,"Menu tròn, hỏi AI, vuốt",Thời gian chọn trung bình,1.26,s,"< 3 s (gồm 0,5 s giữ)",Đạt
+7,"Menu tròn, hỏi AI, vuốt",Nhấp đúp hỏi AI nhận được,có,,có,Đạt
+7,"Menu tròn, hỏi AI, vuốt",Vuốt A → B nhận được,có,,có,Đạt

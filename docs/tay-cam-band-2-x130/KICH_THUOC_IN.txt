@@ -1,0 +1,42 @@
+VERA BAND 2 - BẢN 130% - KÍCH THƯỚC CẦN BIẾT KHI IN (mm)
+In đúng tỉ lệ 100%, KHÔNG phóng thêm. Nhựa PLA, tổng khoảng 124 g.
+
+1. KHỔ TỪNG TỆP (dài x rộng x cao)
+   than.stl            211,7 x 163,2 x 43,7   (2 nửa thân)        Trắng
+   day_tren.stl         90,8 x  62,6 x 19,2   (mặt tối)           Đen
+   day_duoi.stl         45,2 x  29,4 x  3,2   (nắp pin)           Đen
+   chi_tiet_xanh.stl    83,4 x  39,0 x 52,0   (tấm mu tay, chén)  Xanh ngọc
+   chi_tiet_bac.stl     94,6 x  33,4 x 20,3   (cò, 4 nắp nút)     Bạc / xám
+   Tay cầm lắp xong: khoảng 101 x 102 x 166.
+   Bàn in tối thiểu 220 x 220 (bàn nhỏ hơn: tách 2 nửa thân, in 2 lần).
+
+2. THÔNG SỐ IN
+   Lớp 0,2 · đầu phun 0,4 · vách ngoài ≥ 3 đường · infill 20 %.
+   Vỏ thân dày 1,95; mặt tối dày 2,6. Thân rỗng bên trong, đừng in đặc.
+   Đỡ (support): bên trong 2 nửa thân, dưới tay cò. Brim: tấm mu tay.
+
+3. LỖ LẮP GHÉP (đúng cỡ thật, xin giữ đúng, máy hay nở thì báo trước)
+   Vít ghép thân (7 con M2 x 12):  lỗ mồi Ø1,7 sâu ≤ 9,1 · lỗ xuyên Ø2,2 · hốc đầu vít Ø4,2
+   Vít mặt tối (2 con M2 x 8-10):  lỗ xuyên Ø2,3 · hốc đầu Ø4,2 · lỗ mồi ở tai mặt tối Ø1,9
+   4 cổng nút phụ:                  lỗ Ø9,1 · buồng gờ Ø11,7 · ô nút bấm 6,3 x 6,3 (nút 6 x 6)
+   Nắp nút phụ:                     thân Ø8,6 · gờ Ø11,2 (lọt lỗ Ø9,1)
+   Joystick KY-023:                 4 trụ Ø3,4 cách nhau 30 x 22 · mạch nằm sâu 20,5 dưới mặt tối
+   Chén lục giác quanh cần:         miệng rộng 39 (đỉnh tới đỉnh) · lỗ đáy cho cần lọt: 25,1 giữa 2 cạnh (29 đỉnh tới đỉnh)
+   Lỗ lục giác trên mặt tối:        rộng 39,4 (đỉnh tới đỉnh), vừa chén
+
+4. LỖ VÀ KHE KHÁC
+   Cổng micro-USB (lưng đầu):       16,9 x 9,8
+   Khe công tắc trượt:              3,4 x 7,3, cao 15
+   Ô cửa cò:                         rộng 20,3, cao 33,8
+   Lỗ trục cò:                       Ø2,9 (chốt Ø2,8-3)
+   Hốc nam châm ở cò:                Ø8,1 sâu 5,3 (nam châm Ø8 x 4)
+   Hốc lò xo cò:                     Ø5,7
+   Lỗ lọt pin 9V (đáy cán):          37,1 x 25,4 (pin 48,5 x 26,5 x 17,5, lót xốp 4-5)
+
+5. QUAI ĐEO (băng gai dính 25 mm)
+   Khuyên trên: lòng 28,6 x 7,8 · khe dưới đế: 27,3 x 4,2 · 2 khe tấm mu tay: cao 3,9
+   Tấm mu tay: 41,6 x 52, cong R91, dày 3,1
+
+6. LINH KIỆN ĐẶT TRONG
+   ESP32 DevKit 55 x 28 nằm ngang trong đầu, cổng USB quay ra lưng.
+   BMI160, mạch hạ áp MP1584 (22 x 17), công tắc trượt, pin 9V trong cán.

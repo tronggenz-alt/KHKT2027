@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Khkt.Demo;
 using Unity.InferenceEngine;
@@ -54,13 +54,7 @@ namespace Khkt.Input
 
         void Awake() => Instance = this;
 
-        // vào lab là bật luôn để hai tay theo tay thật; F10 tắt
-        System.Collections.IEnumerator Start()
-        {
-            if (Application.isBatchMode) yield break;
-            yield return new WaitForSecondsRealtime(1.5f);
-            if (!Running) Begin();
-        }
+        // Không tự bật: HandTrackerProcess chạy tracker Python (mượt hơn), chỉ bật bản này khi Python không chạy được
 
         void OnDestroy()
         {
@@ -70,11 +64,6 @@ namespace Khkt.Input
 
         void Update()
         {
-            var kb = Keyboard.current;
-            if (kb != null && kb.f10Key.wasPressedThisFrame)
-            {
-                if (Running) Stop(); else Begin();
-            }
             if (!Running) return;
             if (cam == null || !cam.isPlaying || cam.width < 32)
             {
@@ -93,7 +82,7 @@ namespace Khkt.Input
         // Bật, tắt
         // =====================================================================
 
-        void Begin()
+        public void Begin()
         {
             try
             {
@@ -124,7 +113,7 @@ namespace Khkt.Input
             LabMessages.Say("Nhận diện tay: BẬT (F10 để tắt). Đưa tay vào khung webcam", LabMessages.Tone.Info);
         }
 
-        void Stop()
+        public void Stop()
         {
             if (cam != null) { cam.Stop(); Destroy(cam); cam = null; }
             if (Running) LabMessages.Say("Nhận diện tay: TẮT", LabMessages.Tone.Info);

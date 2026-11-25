@@ -66,6 +66,7 @@ namespace Khkt.Input
         void OnDisable()
         {
             PadInput.Unregister(this);
+            outgoing.Enqueue("r0\n");  // tay cầm VERA: thôi phát gói thô
             outgoing.Enqueue("R0\n");
             outgoing.Enqueue("L0,0\n");
             Thread.Sleep(30);
@@ -88,7 +89,10 @@ namespace Khkt.Input
                 Publish(s);
             }
             while (parser.Messages.TryDequeue(out var m))
+            {
+                LastFirmwareMessage = m;
                 if (logFirmwareMessages) Debug.Log($"[Tay cầm {openPort}] {m}");
+            }
             if (newPort)
             {
                 newPort = false;
@@ -138,41 +142,71 @@ namespace Khkt.Input
         public void CalibrateGyro() => outgoing.Enqueue("C\n");
         /// <summary>Lấy vị trí nghỉ hiện tại của joystick làm tâm (bản ESP32): buông tay khỏi cần.</summary>
         public void CenterJoysticks() => outgoing.Enqueue("J\n");
+        /// <summary>Gửi một lệnh chữ tới firmware (tay cầm VERA: c, h, z, k...). Tự thêm xuống dòng.</summary>
+        public void SendCommand(string cmd) => outgoing.Enqueue(cmd.EndsWith("\n") ? cmd : cmd + "\n");
+        /// <summary>Dòng '#' gần nhất firmware gửi (hiệu chuẩn, lỗi IMU...).</summary>
+        public string LastFirmwareMessage { get; private set; } = "";
 
-        SerialPort Open(string name)
+        /// <summary>Tốc độ cổng thử thêm khi baudRate không thấy tay cầm: firmware tay cầm VERA (từ 18/11/2026) chạy 921600 baud.</summary>
+        public int veraBaudRate = 921600;
+        int openBaud;
+
+        SerialPort Open(string name) => Open(name, openBaud > 0 ? openBaud : baudRate);
+
+        SerialPort Open(string name, int baud)
         {
-            var p = new SerialPort(name, baudRate) { ReadTimeout = 50, WriteTimeout = 50, DtrEnable = dtrEnable, RtsEnable = false };
+            var p = new SerialPort(name, baud) { ReadTimeout = 50, WriteTimeout = 50, DtrEnable = dtrEnable, RtsEnable = false };
             p.Open();
             return p;
         }
 
-        /// <summary>Thử lần lượt các cổng COM, trả về cổng đầu tiên gửi gói hợp lệ trong 1,5 s (đang mở sẵn).</summary>
+        /// <summary>
+        /// Thử lần lượt các cổng COM, trả về cổng đầu tiên gửi gói hợp lệ (đang mở sẵn). Tay cầm cũ tự phát gói 29 byte;
+        /// tay cầm VERA chỉ phát gói nhị phân sau lệnh "r2", và mở cổng có thể làm ESP32 khởi động lại + cân con quay 2 s,
+        /// nên gửi "r2" vài lần và chờ tối đa 6 s nếu cổng đang in dòng '#' của firmware VERA.
+        /// </summary>
         SerialPort Scan()
         {
             var names = SerialPort.GetPortNames().Distinct().OrderBy(n => n.Length).ThenBy(n => n).ToArray();
             var tried = new List<string>();
             var buffer = new byte[256];
             var found = new List<RawPacket>();
+            var foundVera = new List<VeraSample>();
             foreach (var name in names)
             {
                 if (!running) return null;
                 if (skipUntil.TryGetValue(name, out double until) && Clock.Elapsed.TotalSeconds < until) { tried.Add(name); continue; }
+                foreach (int baud in veraBaudRate > 0 && veraBaudRate != baudRate ? new[] { baudRate, veraBaudRate } : new[] { baudRate })
+                {
                 SerialPort p = null;
                 try
                 {
-                    p = Open(name);
+                    p = Open(name, baud);
                     var probe = new PacketParser();
                     found.Clear();
+                    foundVera.Clear();
                     var t0 = Clock.Elapsed.TotalSeconds;
-                    while (found.Count < 3 && Clock.Elapsed.TotalSeconds - t0 < 1.5 && running)
+                    double lastAsk = -10;
+                    bool veraText = false;
+                    while (found.Count < 3 && foundVera.Count < 2 && running)
                     {
-                        try { probe.Feed(buffer, p.Read(buffer, 0, buffer.Length), found); }
+                        double el = Clock.Elapsed.TotalSeconds - t0;
+                        if (el > 6.0 || (el > 1.5 && !veraText && probe.VeraPackets == 0)) break;
+                        if (el - lastAsk > 1.2)
+                        {
+                            lastAsk = el;
+                            try { p.Write("r2\n"); } catch (Exception) { }
+                        }
+                        try { probe.Feed(buffer, p.Read(buffer, 0, buffer.Length), found, foundVera); }
                         catch (TimeoutException) { }
+                        while (probe.Messages.TryDequeue(out var m))
+                            if (m.Contains("VERA") || m.StartsWith("THO") || m.StartsWith("CAL") || m.StartsWith("INFO")) veraText = true;
                     }
-                    if (found.Count >= 3) return p;
+                    if (found.Count >= 3 || foundVera.Count >= 2) { openBaud = baud; return p; }
                 }
                 catch (Exception) { }  // cổng đang bị chương trình khác dùng (Arduino IDE...), cổng Bluetooth chưa ghép đôi...
                 try { p?.Close(); } catch (Exception) { }
+                }
                 skipUntil[name] = Clock.Elapsed.TotalSeconds + 8;  // cổng không có tay cầm: 8 s sau mới thử lại
                 tried.Add(name);
             }
@@ -184,6 +218,8 @@ namespace Khkt.Input
         {
             var buffer = new byte[512];
             var packets = new List<RawPacket>();
+            var vera = new List<VeraSample>();
+            double lastAskRaw = 0;
             SerialPort port = null;
             uint lastT = 0;
             bool haveT = false, warned = false;
@@ -222,14 +258,19 @@ namespace Khkt.Input
                     try { n = port.Read(buffer, 0, buffer.Length); }
                     catch (TimeoutException)
                     {
-                        // Tự dò mà cổng im quá 3 s (tay cầm treo, cổng Bluetooth mất kết nối): đóng và dò lại
-                        if (AutoDetect && Clock.Elapsed.TotalSeconds - lastPacket > 3) throw new TimeoutException("không nhận được gói nào trong 3 s");
+                        // Tự dò mà cổng im quá 6 s (tay cầm treo, cổng Bluetooth mất kết nối): đóng và dò lại
+                        if (AutoDetect && Clock.Elapsed.TotalSeconds - lastPacket > 6) throw new TimeoutException("không nhận được gói nào trong 6 s");
+                        AskRaw(port, ref lastAskRaw, lastPacket);
                         continue;
                     }
 
                     packets.Clear();
-                    parser.Feed(buffer, n, packets);
-                    if (packets.Count > 0) lastPacket = Clock.Elapsed.TotalSeconds;
+                    vera.Clear();
+                    parser.Feed(buffer, n, packets, vera);
+                    if (packets.Count > 0 || vera.Count > 0) lastPacket = Clock.Elapsed.TotalSeconds;
+                    else AskRaw(port, ref lastAskRaw, lastPacket);
+                    // Tay cầm VERA: hướng đã tính trên mạch (chống trôi yaw, bù nhiệt), không chạy Mahony trên máy tính
+                    foreach (var v in vera) samples.Enqueue(ControllerPackets.FromVera(v));
                     foreach (var p in packets)
                     {
                         var s = ControllerPackets.ToState(p, joystickDeadzone, invertJoy1Y, invertJoy2Y);
@@ -263,6 +304,17 @@ namespace Khkt.Input
                 }
             }
             try { port?.Close(); } catch (Exception) { }
+        }
+
+        /// <summary>Tay cầm VERA im quá 2 s (vừa khởi động lại, mất lệnh): xin lại gói thô "r2", tối đa 2 s một lần.</summary>
+        static void AskRaw(SerialPort port, ref double lastAsk, double lastPacket)
+        {
+            double now = Clock.Elapsed.TotalSeconds;
+            if (now - lastPacket > 2 && now - lastAsk > 2)
+            {
+                lastAsk = now;
+                port.Write("r2\n");
+            }
         }
     }
 }
@@ -308,6 +360,8 @@ namespace Khkt.Input
         public override void ResetOrientation() { }
         public void CalibrateGyro() { }
         public void CenterJoysticks() { }
+        public void SendCommand(string cmd) { }
+        public string LastFirmwareMessage => "";
     }
 }
 #endif

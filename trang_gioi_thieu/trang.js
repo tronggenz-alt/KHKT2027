@@ -27,6 +27,7 @@
   // Liên kết cũ của trang một cuộn vẫn dẫn đúng tab
   var DIA_CHI_CU = { dau: 'gioi-thieu', 'tinh-nang': 'san-pham', 'diem-moi': 'san-pham', 'quy-hoach': 'tham-quan', 'lab-hoa': 'tham-quan', 'lab-sinh': 'tham-quan', 'tay-cam': 'cong-nghe', 'hieu-suat': 'tai-ve', 'lo-trinh': 'kiem-chung' };
 
+  var TIEU_DE_GOC = document.title;
   function tabTuDiaChi() {
     var ma = location.hash.replace(/^#\/?/, '');
     if (document.getElementById(ma) && document.getElementById(ma).classList.contains('tab')) return ma;
@@ -43,15 +44,83 @@
       } else a.removeAttribute('aria-current');
     });
     var tab = document.getElementById(ma);
-    document.title = ma === 'gioi-thieu' ? 'VERA Lab · Dự án Khoa học Kỹ thuật' : tab.dataset.ten + ' · VERA Lab';
+    document.title = ma === 'gioi-thieu' ? TIEU_DE_GOC : tab.dataset.ten + ' · VERA Lab – Phòng thí nghiệm ảo Hóa – Sinh';
     if (!lanDau) {
       window.scrollTo(0, 0);
       var tieuDe = tab.querySelector('h1');
       if (tieuDe) tieuDe.focus({ preventScroll: true });
     }
+    window.dispatchEvent(new CustomEvent('vera:tab', { detail: ma }));
   }
-  window.addEventListener('hashchange', function () { moTab(false); });
+  var giamChuyenDong = window.matchMedia('(prefers-reduced-motion: reduce)');
+  window.addEventListener('hashchange', function () {
+    dongMenu();
+    // Trình duyệt hỗ trợ thì chuyển tab bằng View Transitions, thanh trên đứng yên
+    if (document.startViewTransition && !giamChuyenDong.matches) document.startViewTransition(function () { moTab(false); });
+    else moTab(false);
+  });
   moTab(true);
+
+  // Menu gọn trên màn hình hẹp
+  var menu = document.getElementById('menu'), nutMenu = document.getElementById('nut-menu');
+  function dongMenu() {
+    menu.classList.remove('mo');
+    nutMenu.setAttribute('aria-expanded', 'false');
+    nutMenu.setAttribute('aria-label', 'Mở menu');
+  }
+  nutMenu.addEventListener('click', function () {
+    var mo = !menu.classList.contains('mo');
+    menu.classList.toggle('mo', mo);
+    nutMenu.setAttribute('aria-expanded', String(mo));
+    nutMenu.setAttribute('aria-label', mo ? 'Đóng menu' : 'Mở menu');
+    if (mo) { var a = menu.querySelector('[aria-current="page"]') || menu.querySelector('a'); a.focus(); }
+  });
+  menu.addEventListener('click', function (e) { if (e.target.closest('a')) dongMenu(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && menu.classList.contains('mo')) { dongMenu(); nutMenu.focus(); }
+  });
+  document.addEventListener('click', function (e) {
+    if (menu.classList.contains('mo') && !e.target.closest('.thanh')) dongMenu();
+  });
+
+  // Giao diện sáng/tối: "auto" theo máy, nút trên thanh trên đảo giữa sáng và tối
+  var goc = document.documentElement, heMau = window.matchMedia('(prefers-color-scheme: dark)');
+  var nutMau = document.getElementById('nut-mau'), chonMau = document.getElementById('chon-mau');
+  function dangToi() { return goc.dataset.theme ? goc.dataset.theme === 'dark' : heMau.matches; }
+  function capNhatMau() {
+    var luaChon = goc.dataset.theme || 'auto';
+    [].forEach.call(chonMau.querySelectorAll('button'), function (b) { b.setAttribute('aria-pressed', String(b.dataset.mau === luaChon)); });
+    nutMau.setAttribute('aria-label', dangToi() ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối');
+    nutMau.title = nutMau.getAttribute('aria-label');
+    [].forEach.call(document.querySelectorAll('meta[name="theme-color"]'), function (m) {
+      if (goc.dataset.theme) m.content = dangToi() ? '#0b0d12' : '#ffffff';
+      else m.content = /dark/.test(m.media) ? '#0b0d12' : '#ffffff';
+    });
+  }
+  function datMau(m, nguon) {
+    var truoc = dangToi();
+    function apDung() {
+      if (m === 'light' || m === 'dark') goc.dataset.theme = m; else delete goc.dataset.theme;
+      try { if (m === 'light' || m === 'dark') localStorage.setItem('vera-mau', m); else localStorage.removeItem('vera-mau'); } catch (e) {}
+      capNhatMau();
+    }
+    var doiThat = (m === 'dark') !== truoc && (m !== 'auto' || heMau.matches !== truoc);
+    if (!doiThat || !document.startViewTransition || giamChuyenDong.matches || !nguon) { apDung(); return; }
+    // Giao diện mới lan ra thành vòng tròn từ nút vừa bấm
+    var r = nguon.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+    var banKinh = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+    goc.classList.add('doi-mau');
+    var vt = document.startViewTransition(apDung);
+    vt.ready.then(function () {
+      goc.animate({ clipPath: ['circle(0px at ' + x + 'px ' + y + 'px)', 'circle(' + banKinh + 'px at ' + x + 'px ' + y + 'px)'] },
+        { duration: 560, easing: 'cubic-bezier(.4, 0, .2, 1)', pseudoElement: '::view-transition-new(root)' });
+    }).catch(function () {});
+    vt.finished.then(function () { goc.classList.remove('doi-mau'); }, function () { goc.classList.remove('doi-mau'); });
+  }
+  nutMau.addEventListener('click', function () { datMau(dangToi() ? 'light' : 'dark', nutMau); });
+  chonMau.addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) datMau(b.dataset.mau, b); });
+  if (heMau.addEventListener) heMau.addEventListener('change', capNhatMau);
+  capNhatMau();
 
   // Liên kết bỏ qua không đổi địa chỉ, tránh làm bộ chuyển tab hiểu nhầm
   document.getElementById('bo-qua').addEventListener('click', function (e) {
@@ -107,6 +176,36 @@
     });
     return dat;
   }
+
+  // Liên kết mở thẳng một tab con (data-mo-tab) hoặc danh mục nguồn (data-mo-nguon) sau khi chuyển trang
+  var choMo = null;
+  window.addEventListener('vera:tab', function () {
+    if (!choMo) return;
+    var f = choMo; choMo = null;
+    setTimeout(f, 60);
+  });
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest ? e.target.closest('[data-mo-tab], [data-mo-nguon]') : null;
+    if (!a) return;
+    var mo = function () {
+      var dich;
+      if (a.hasAttribute('data-mo-tab')) {
+        var nut = document.getElementById(a.dataset.moTab);
+        if (!nut) return;
+        nut.click();
+        dich = nut.parentNode;
+      } else {
+        dich = document.getElementById('danh-muc-nguon');
+        dich.open = true;
+      }
+      dich.scrollIntoView({ block: 'start', behavior: giamChuyenDong.matches ? 'auto' : 'smooth' });
+    };
+    // Cùng địa chỉ thì không có hashchange: mở ngay; khác địa chỉ thì chờ tab mới hiện xong
+    if (location.hash === a.getAttribute('href')) { setTimeout(mo, 0); return; }
+    choMo = mo;
+    // Dự phòng: trình duyệt hoãn chuyển tab (View Transition chưa chạy) thì vẫn mở sau 0,8 giây
+    setTimeout(function () { if (choMo === mo) { choMo = null; mo(); } }, 800);
+  });
 
   // Chú thích nguồn: mở danh mục, tô sáng mục được dẫn và cho quay về chỗ cũ
   var danhMuc = document.getElementById('danh-muc-nguon');

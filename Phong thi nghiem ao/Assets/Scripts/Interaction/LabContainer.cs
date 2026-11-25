@@ -248,64 +248,24 @@ namespace Khkt.Interaction
         {
             var m = a + s;
             if (!reactive || m.volumeMl < 0.002f) return m;
-            double V = m.volumeMl / 1000.0;
-            double hA = 0, ohA = 0, hB = 0, ohB = 0;
-            bool liquidBoth = a.volumeMl > 0.002f && s.volumeMl > 0.002f;
-            if (liquidBoth)
-            {
-                ChemEngine.FreeIons(a.Mix, a.volumeMl / 1000.0, out hA, out ohA);
-                ChemEngine.FreeIons(s.Mix, s.volumeMl / 1000.0, out hB, out ohB);
-            }
-            double sulfuricBefore = a.volumeMl > 0.01f ? a.Mix.Get("SO4") / (a.volumeMl / 1000.0) : 0;
-            var b = m.Mix.ToBuilder();
             events.Clear();
-            var res = ChemEngine.Equilibrate(b, V, Env, events);
-            m.mix = b.ToMix();
-            double heat = res.HeatJ;
-            if (liquidBoth)
-            {
-                ChemEngine.FreeIons(m.Mix, V, out double hM, out double ohM);
-                heat += ChemEngine.NeutralizationJ(hA, ohA, hB, ohB, hM, ohM);
-            }
-            // Pha loãng axit sunfuric đặc tỏa rất nhiều nhiệt; đổ nước vào axit đặc thì sôi bắn
-            double sulfuricAfter = m.Mix.Get("SO4") / V;
-            if (sulfuricBefore > 6 && sulfuricAfter < sulfuricBefore * 0.97)
-            {
-                double mol = a.Mix.Get("SO4");
-                heat += 60000 * mol * (1 - sulfuricAfter / sulfuricBefore);
-                if (s.volumeMl > 0.5f && s.Mix.Get("SO4") / (s.volumeMl / 1000.0) < 3)
-                    events.Add(new ChemEvent
-                    {
-                        Kind = EventKind.Hazard, Severity = Severity.Danger, Hazard = "ban_be", Key = "nguyhiem:nuocvaoaxit",
-                        Title = "Nước sôi bắn ra! Không được đổ nước vào axit đặc",
-                        Detail = "Pha loãng H₂SO₄ đặc: rót từ từ axit vào nước và khuấy đều, không làm ngược lại.",
-                    });
-            }
-            else if (liquidBoth && a.volumeMl > 0.5f && hB / (s.volumeMl / 1000.0) > 6)
-            {
-                // (hB: H⁺ tự do của phần rót vào. Phải là axit đặc thật, không phải muối sunfat rắn vừa xúc vào.)
-                // Chiều đúng (rót axit đặc vào nước) cũng tỏa đúng chừng ấy nhiệt, chỉ là không bắn. Bản cũ chỉ tính
-                // nhiệt khi axit đặc nằm sẵn trong bình, nên pha loãng đúng cách thì bình không hề ấm lên.
-                double addedConc = s.Mix.Get("SO4") / (s.volumeMl / 1000.0);
-                if (addedConc > 6 && sulfuricAfter < addedConc * 0.97)
-                    heat += 60000 * s.Mix.Get("SO4") * (1 - sulfuricAfter / addedConc);
-            }
+            m.mix = ChemMixer.Merge(a.Mix, a.volumeMl, a.indicatorDrops, s.Mix, s.volumeMl, s.indicatorDrops, Env, events, out double heat);
+            eqTempC = TemperatureC;
             ApplyHeat(heat, m.volumeMl);
-            Raise(events, res.HeatJ > 0 ? (float)res.HeatJ : 0f);
+            Raise(events, 0);
             return m;
         }
+
+        double eqTempC = 25;
+        readonly HeatWatch heatWatch = new HeatWatch();
 
         void ApplyHeat(double joules, float volumeMl)
         {
             if (joules == 0 || volumeMl < 0.05f) return;
             float before = TemperatureC;
-            TemperatureC = Mathf.Min(BoilCapC, TemperatureC + (float)(joules / (volumeMl * 4.18)));  // 1 ml ≈ 1 g nước
-            if (TemperatureC - before > 6f && Notify("nhiet", 8f))
-                ChemEventRaised?.Invoke(this, new ChemEvent
-                {
-                    Kind = EventKind.Heat, Severity = TemperatureC > 80 ? Severity.Warning : Severity.Info, Hazard = TemperatureC > 80 ? "bong" : null,
-                    Key = "nhiet", Title = $"Dung dịch nóng lên (≈ {TemperatureC:0} °C)", Detail = "Phản ứng tỏa nhiệt (trung hòa, hòa tan, kim loại tác dụng với nước...).",
-                });
+            TemperatureC = Mathf.Clamp(TemperatureC + (float)(joules / (volumeMl * 4.18)), -10f, BoilCapC);  // 1 ml ≈ 1 g nước
+            var e = heatWatch.Add(TemperatureC - before, Time.time, TemperatureC);
+            if (e != null && Notify(e.Key, 8f)) ChemEventRaised?.Invoke(this, e);
         }
 
         bool Notify(string key, float minGap)
@@ -333,7 +293,8 @@ namespace Khkt.Interaction
                     e.Detail = (e.Detail ?? "") + " Đang làm trong tủ hút: khí được hút ra ngoài.";
                     if (e.Severity > Severity.Notice) e.Severity = Severity.Notice;
                 }
-                if (Notify(e.Key ?? e.Title, e.Kind == EventKind.Gas ? 6f : 4f))
+                float gap = (e.Key ?? "").StartsWith("quan_sat:") ? 30f : e.Kind == EventKind.Gas ? 6f : 4f;
+                if (Notify(e.Key ?? e.Title, gap))
                     ChemEventRaised?.Invoke(this, e);
             }
             list.Clear();
@@ -385,19 +346,18 @@ namespace Khkt.Interaction
             {
                 float step = stepTimer;
                 stepTimer = 0;
-                if (contents.volumeMl > 0.002f && ChemEngine.NeedsStep(contents.Mix, TemperatureC))
+                if (contents.volumeMl > 0.002f)
                 {
-                    var b = contents.Mix.ToBuilder();
                     events.Clear();
                     float pp = contents.indicatorDrops;
-                    var res = ChemEngine.Step(b, contents.volumeMl / 1000.0, step, Env, events, ref pp);
+                    var mixed = ChemMixer.Tick(contents.Mix, contents.volumeMl, step, Env, ref pp, ref eqTempC, events, out double heat, out bool changed);
                     contents.indicatorDrops = pp;
-                    if (res.Changed || events.Count > 0)
+                    if (changed)
                     {
-                        contents.mix = b.ToMix();
+                        contents.mix = mixed;
                         visualDirty = true;
                     }
-                    ApplyHeat(res.HeatJ, contents.volumeMl);
+                    ApplyHeat(heat, contents.volumeMl);
                     Raise(events, 0);
                 }
                 // Kết tủa lắng dần khi để yên

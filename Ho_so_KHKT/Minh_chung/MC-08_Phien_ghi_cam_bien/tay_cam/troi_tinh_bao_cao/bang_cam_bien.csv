@@ -1,0 +1,28 @@
+﻿Đại lượng,Giá trị,Đơn vị,Ghi chú
+Con quay X chip: độ lệch trung bình,-0.1821,°/s,trước khi firmware trừ độ lệch
+Con quay X chip: nhiễu (độ lệch chuẩn 200 Hz),0.0946,°/s,
+Con quay X chip: ARW (bước ngẫu nhiên góc),0.406,°/√h,Allan ở τ = 1 s
+Con quay X chip: bất ổn định độ lệch,12.61,°/h,"đáy Allan / 0,664, ở τ = 22 s"
+Con quay Y chip: độ lệch trung bình,0.3714,°/s,trước khi firmware trừ độ lệch
+Con quay Y chip: nhiễu (độ lệch chuẩn 200 Hz),0.0993,°/s,
+Con quay Y chip: ARW (bước ngẫu nhiên góc),0.361,°/√h,Allan ở τ = 1 s
+Con quay Y chip: bất ổn định độ lệch,15.15,°/h,"đáy Allan / 0,664, ở τ = 47 s"
+Con quay Z chip: độ lệch trung bình,-0.3004,°/s,trước khi firmware trừ độ lệch
+Con quay Z chip: nhiễu (độ lệch chuẩn 200 Hz),0.2423,°/s,
+Con quay Z chip: ARW (bước ngẫu nhiên góc),0.454,°/√h,Allan ở τ = 1 s
+Con quay Z chip: bất ổn định độ lệch,12.85,°/h,"đáy Allan / 0,664, ở τ = 22 s"
+Con quay quanh trục ĐỨNG: độ lệch trung bình,0.1799,°/s,trước khi firmware trừ độ lệch
+Con quay quanh trục ĐỨNG: nhiễu (độ lệch chuẩn 200 Hz),0.0988,°/s,
+Con quay quanh trục ĐỨNG: ARW (bước ngẫu nhiên góc),0.399,°/√h,Allan ở τ = 1 s
+Con quay quanh trục ĐỨNG: bất ổn định độ lệch,12.76,°/h,"đáy Allan / 0,664, ở τ = 22 s"
+"Gia tốc trung bình X, Y, Z chip","-0.9676, +0.1390, +0.1643",g,"nằm ngang đúng trục thì ≈ 0, 0, +1"
+|a| trung bình,0.9912,g,lệch 1 g: sai tỉ lệ gia tốc kế
+Nhiễu gia tốc (độ lệch chuẩn |a|),3.07,mg,
+"Pitch, roll suy từ gia tốc","+77.5, +40.2",°,pitch gần ±90°: module đang dựng đứng
+Nhiệt độ BMI160 đầu → cuối,27.99 → 27.98,°C,tăng -0.01 °C
+Tần số lấy mẫu thực,200.0,Hz,mục tiêu 200
+Dao động chu kỳ lấy mẫu (độ lệch chuẩn),0.077,ms,
+Mẫu bị mất,0,mẫu,trên 179992
+Hệ số nhiệt firmware đang dùng,"0.0000, 0.0000, 0.0000",°/s/°C,chưa đo bằng lệnh n
+Tỉ lệ con quay Z (lệnh g),1.0,,1.0000 = chưa hiệu chuẩn
+Độ lệch trục đứng đổi theo nhiệt,-0.0095,°/s/°C,hồi quy theo trung bình từng phút

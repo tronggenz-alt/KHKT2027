@@ -1,0 +1,8 @@
+﻿Bài,Tên bài,Chỉ số,Giá trị,Đơn vị,Tiêu chí,Đạt
+1,Trỏ và chọn,Rung tia khi cầm yên (RMS),0.931,°,"< 0,15° (PDF tr.8)",Chưa đạt
+1,Trỏ và chọn,Tỉ lệ nhấp trúng,0.0,%,≥ 90%,Chưa đạt
+1,Trỏ và chọn,Thời gian trung bình mỗi bia,nan,s,"< 2,0 s",Chưa đạt
+2,Cầm và đặt,Số vật đặt đúng ô,0,/3,"3/3, sai số ≤ 3 cm",Chưa đạt
+2,Cầm và đặt,Sai số đặt trung bình,nan,cm,≤ 3 cm,Chưa đạt
+2,Cầm và đặt,Số lần rơi xuống sàn,0,lần,0,Đạt
+2,Cầm và đặt,Thời gian,90.0,s,< 45 s,Chưa đạt

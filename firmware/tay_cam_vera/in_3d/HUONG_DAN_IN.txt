@@ -1,0 +1,33 @@
+VERA BAND 2 - THÔNG SỐ IN 3D
+Vỏ tay cầm đeo trên bàn tay. 5 tệp STL, đơn vị mm, in đúng tỉ lệ 100% (không phóng to, thu nhỏ).
+Nhựa PLA. Tổng khoảng 56 g. Vỏ rỗng bên trong để đặt mạch, xin đừng in đặc.
+
+TỆP                 MÀU NHỰA                KÍCH THƯỚC (mm)        NHỰA     GỒM
+than.stl            Trắng                   165,2 x 125,5 x 33,6   39,5 g   2 nửa thân (trái, phải)
+day_tren.stl        Đen                     69,8 x 48,1 x 19,3     7,4 g    1 nắp trên
+day_duoi.stl        Đen                     34,8 x 22,6 x 2,4      1,5 g    1 nắp khoang pin
+chi_tiet_xanh.stl   Xanh ngọc huỳnh quang   69,4 x 34,0 x 40,0     3,9 g    1 tấm mu tay có logo + 1 chén lục giác
+chi_tiet_bac.stl    Bạc hoặc xám            80,2 x 25,7 x 15,6     3,9 g    1 cò + 4 nắp nút
+
+Mỗi tệp in 1 lần là đủ số lượng (các chi tiết đã xếp sẵn trong tệp).
+Kích thước ghi ở trên là của cả tệp, gồm mọi chi tiết đã xếp cạnh nhau.
+
+CÁCH ĐẶT KHI IN
+- Hai nửa thân: mặt ghép úp xuống bàn in, có đỡ (support) bên trong.
+- Nắp trên: mặt đỉnh úp xuống bàn.
+- Nắp khoang pin: nằm phẳng, gai khóa hướng lên.
+- Tấm mu tay: dựng đứng trên cạnh dưới, nên thêm brim.
+- Chén lục giác: mặt lớn úp xuống bàn.
+- Cò: nằm nghiêng, mặt bên úp xuống bàn, có đỡ dưới tay cò.
+- Nắp nút: mặt có gờ úp xuống bàn.
+
+BẢN 16/11/2026: CHỈ THAY than.stl (4 tệp còn lại giữ nguyên bản 12/11, đã in xong)
+- Đã sửa lỗi lưới của than.stl (tam giác dẹt, màng mỏng trong 2 lỗ nút ở mũi đầu). Kích thước lắp ghép không đổi.
+- Đế phình ở đáy cán nay in đặc (bản cũ rỗng, vách 1,5 mm, bị bể khi in). Khe luồn quai vẫn xuyên qua đế, 2 góc mái khe vát 1 mm.
+- Mái khe quai là nhịp bắc cầu phẳng khoảng 19 mm giữa 2 vách đặc: bật quạt làm mát, hoặc để đỡ trong khe.
+
+LƯU Ý
+- Các chi tiết lắp khít với nhau, cần giữ đúng kích thước. Nếu máy in hay bị nở, xin báo lại trước khi in.
+- Tấm mu tay có thể in bằng TPU (nhựa dẻo) thay PLA cho êm tay, nếu xưởng có.
+- Không có màu xanh ngọc hoặc bạc thì dùng màu gần nhất, báo lại giúp.
+- Bản vẽ kích thước chi tiết: VERA_Band_2_kich_thuoc.pdf (cùng thư mục).

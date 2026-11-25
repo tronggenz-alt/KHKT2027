@@ -165,6 +165,7 @@ namespace Khkt.Simulation.Chem
         }
 
         static List<PairRule> pairs;
+        [ThreadStatic] static double currentTempC;
         static HashSet<string> reversiblePpt;
 
         static void P(string ppt, string cat, int a, string an, int b, double ksp, string colorName, bool beats = false)
@@ -186,6 +187,9 @@ namespace Khkt.Simulation.Chem
             P("AgBr", "Ag+", 1, "Br-", 1, 5e-13, "vàng nhạt", true);
             P("AgI", "Ag+", 1, "I-", 1, 8.5e-17, "vàng", true);
             P("AgSCN", "Ag+", 1, "SCN-", 1, 1e-12, "trắng");
+            P("AgCN", "Ag+", 1, "CN", 1, 6e-17, "trắng");
+            P("HgI2", "Hg2+", 1, "I-", 2, 2.9e-29, "đỏ cam");
+            P("CaSO3", "Ca2+", 1, "SO3", 1, 3.1e-7, "trắng");
             P("Ag2CrO4", "Ag+", 2, "CrVI", 1, 1.1e-12, "đỏ gạch");
             P("Ag3PO4", "Ag+", 3, "PO4", 1, 8.9e-17, "vàng");
             P("Ag2S", "Ag+", 2, "S", 1, 6e-50, "đen", true);
@@ -223,7 +227,7 @@ namespace Khkt.Simulation.Chem
             P("Zn3(PO4)2", "Zn2+", 3, "PO4", 2, 9e-33, "trắng");
             P("FeS", "Fe2+", 1, "S", 1, 6e-19, "đen");
             P("FeCO3", "Fe2+", 1, "CO3", 1, 3.1e-11, "trắng xám");
-            P("FePO4", "Fe3+", 1, "PO4", 1, 1.3e-22, "vàng nhạt");
+            P("FePO4", "Fe3+", 1, "PO4", 1, 9.91e-16, "vàng nhạt");   // FePO₄·2H₂O, CRC Handbook
             P("AlPO4", "Al3+", 1, "PO4", 1, 9.8e-21, "trắng");
             P("MnS", "Mn2+", 1, "S", 1, 3e-14, "hồng nhạt");
             P("MnCO3", "Mn2+", 1, "CO3", 1, 2.2e-11, "trắng hồng");
@@ -240,9 +244,33 @@ namespace Khkt.Simulation.Chem
             foreach (var p in pairs) reversiblePpt.Add(p.Ppt);
         }
 
+        /// <summary>Lực ion I = ½ Σ cᵢ zᵢ² (mol/l), chặn ở 0,5 (giới hạn dùng phương trình Davies).</summary>
+        static double IonicStrength(MixBuilder b, double V, double h)
+        {
+            double I = h + Kw / h;
+            foreach (int s in b.Indices)
+            {
+                var d = SpeciesRegistry.At(s);
+                double c = b.Get(s) / V, z;
+                if (d.Kind == SpeciesKind.Ion || d.Kind == SpeciesKind.Complex) z = d.Charge;
+                else if (d.Kind == SpeciesKind.Weak && d.Ka != null) z = WeakCharge(d, h);
+                else continue;
+                I += c * z * z;
+            }
+            return Math.Min(0.5, 0.5 * I);
+        }
+
+        /// <summary>Hệ số hoạt độ theo Davies: log γ = −0,51 z² (√I / (1 + √I) − 0,3 I).</summary>
+        static double Gamma(int z, double I)
+        {
+            double sq = Math.Sqrt(I);
+            return Math.Pow(10, -0.51 * z * z * (sq / (1 + sq) - 0.3 * I));
+        }
+
         static bool PairPrecipitate(MixBuilder b, double V, double h)
         {
             bool any = false;
+            double ionic = IonicStrength(b, V, h);
             int agN = SpeciesRegistry.IndexOf("AgNH3"), nh3 = SpeciesRegistry.IndexOf("NH3");
             foreach (var r in pairs)
             {
@@ -254,14 +282,18 @@ namespace Khkt.Simulation.Chem
                 if (cat <= 0 || an <= 0) continue;
                 var ad = SpeciesRegistry.At(ai);
                 double frac = AlphaLast(ad, h);
+                // Ksp nhiệt động là tích hoạt độ: chia cho γ để so với tích nồng độ
+                int zc = Math.Abs(SpeciesRegistry.At(ci).Charge), za = Math.Abs(SpeciesRegistry.At(ai).Kind == SpeciesKind.Weak ? SpeciesRegistry.At(ai).Charge - (SpeciesRegistry.At(ai).Ka?.Length ?? 0) : SpeciesRegistry.At(ai).Charge);
+                double ksp = r.Ksp / (Math.Pow(Gamma(zc, ionic), r.A) * Math.Pow(Gamma(za, ionic), r.B));
+                if (r.Ppt == "PbCl2" && currentTempC > 25) ksp *= Math.Exp(0.0785 * (currentTempC - 25));   // độ tan PbCl₂: 1 g/100 ml (20 °C) → 3,2 g/100 ml (100 °C)
                 double q = Math.Pow(cat, r.A) * Math.Pow(frac * an, r.B);
-                if (q <= r.Ksp * 1.0001) continue;
+                if (q <= ksp * 1.0001) continue;
                 double lo = 0, hi = Math.Min(cat / r.A, an / r.B);
                 for (int it = 0; it < 60; it++)
                 {
                     double x = 0.5 * (lo + hi);
                     double g = Math.Pow(Math.Max(0, cat - r.A * x), r.A) * Math.Pow(frac * Math.Max(0, an - r.B * x), r.B);
-                    if (g > r.Ksp) lo = x; else hi = x;
+                    if (g > ksp) lo = x; else hi = x;
                 }
                 double mol = lo * V;
                 if (mol <= 1e-13) continue;
@@ -281,7 +313,7 @@ namespace Khkt.Simulation.Chem
             // Axit silixic: gốc silicat gặp axit (pH < 9) tạo keo trắng
             int si = SpeciesRegistry.IndexOf("SiO3");
             double cs = b.Get(si) / V;
-            if (cs > 2e-3 && h > 1e-9)
+            if (cs > 2e-3 && h > 1e-10)
             {
                 double mol = (cs - 2e-3) * V;
                 b.Add(si, -mol);
@@ -312,7 +344,7 @@ namespace Khkt.Simulation.Chem
 
         static readonly (string metal, string complex, int n)[] AmmineComplexes =
         {
-            ("Cu2+", "CuNH3", 4), ("Zn2+", "ZnNH3", 4), ("Ni2+", "NiNH3", 6), ("Ag+", "AgNH3", 2),
+            ("Cu2+", "CuNH3", 4), ("Zn2+", "ZnNH3", 4), ("Ni2+", "NiNH3", 6), ("Ag+", "AgNH3", 2), ("Co2+", "CoNH3", 6),
         };
 
         static void Complexate(MixBuilder b, double V, double h)
@@ -374,6 +406,7 @@ namespace Khkt.Simulation.Chem
                 var d = SpeciesRegistry.At(s);
                 double m = b.Get(s);
                 if (m <= 0) continue;
+                if (RevertComplex(b, d, m) || RevertSeparated(b, d, m)) continue;
                 if (d.Kind == SpeciesKind.Complex)
                 {
                     switch (d.Id)
@@ -382,6 +415,7 @@ namespace Khkt.Simulation.Chem
                         case "ZnNH3": b.Set(s, 0); b.Add("Zn2+", m); b.Add("NH3", 4 * m); break;
                         case "NiNH3": b.Set(s, 0); b.Add("Ni2+", m); b.Add("NH3", 6 * m); break;
                         case "AgNH3": b.Set(s, 0); b.Add("Ag+", m); b.Add("NH3", 2 * m); break;
+                        case "CoNH3": b.Set(s, 0); b.Add("Co2+", m); b.Add("NH3", 6 * m); break;
                         case "FeSCN": b.Set(s, 0); b.Add("Fe3+", m); b.Add("SCN-", m); break;
                         case "CuPol": b.Set(s, 0); b.Add("Cu2+", m); break;
                     }
@@ -414,6 +448,14 @@ namespace Khkt.Simulation.Chem
             hydroxideOf = new Dictionary<string, string>();
             foreach (var d in SpeciesRegistry.All)
                 if (d.Kind == SpeciesKind.Ion && d.KspOH > 0 && d.HydroxideId != null) hydroxideOf[d.HydroxideId] = d.Id;
+        }
+
+        /// <summary>Mã loài kết tủa hiđroxit ứng với công thức trong danh mục ("Mg(OH)2", "AgOH" → "Ag2O"), null nếu không phải.</summary>
+        public static string HydroxideFor(string formula)
+        {
+            BuildHydroxideMap();
+            if (formula == "AgOH") return "Ag2O";
+            return formula != null && hydroxideOf.ContainsKey(formula) ? formula : null;
         }
 
         /// <summary>Tách phần cation đã kết tủa hiđroxit thành loài kết tủa riêng (để hiện màu, ghi sự kiện).</summary>
@@ -455,17 +497,30 @@ namespace Khkt.Simulation.Chem
             var before = SolidSnapshot(b);
 
             var w = new Work { b = b, V = V, env = env, events = events, res = res };
+            currentTempC = env.TempC;
             RevertReversible(b);
             w.h = SolveH(b, V);
             for (int outer = 0; outer < 6; outer++)
             {
                 RevertReversible(b);
-                bool changed = InstantRules(w);
                 for (int it = 0; it < 5; it++)
                 {
                     w.h = SolveH(b, V);
                     Complexate(b, V, w.h);
+                    ComplexTable(b, V, w.h);
                     PairPrecipitate(b, V, w.h);
+                    SeparateOrganics(b, V, w.h);
+                }
+                // oxi hóa - khử dùng nồng độ ion tự do (sau kết tủa, phức): Ag⁺ + I⁻ ra AgI chứ không khử
+                w.h = SolveH(b, V);
+                bool changed = InstantRules(w);
+                for (int it = 0; it < 3 && changed; it++)
+                {
+                    w.h = SolveH(b, V);
+                    Complexate(b, V, w.h);
+                    ComplexTable(b, V, w.h);
+                    PairPrecipitate(b, V, w.h);
+                    SeparateOrganics(b, V, w.h);
                 }
                 w.h = SolveH(b, V);
                 changed |= GasEscape(w);
@@ -536,18 +591,33 @@ namespace Khkt.Simulation.Chem
         {
             BuildPairs();
             var r = pairs.Find(p => p.Ppt == sp.Id);
-            string eq = null, color = r?.ColorName;
+            string eq = null, color = ChemPalette.NameOf(sp.Id) ?? r?.ColorName;
             if (r != null)
             {
                 var c = SpeciesRegistry.Get(r.Cation);
                 string an = IonFormula(r.Anion);
-                eq = $"{Coef(r.A)}{c.Formula} + {Coef(r.B)}{an} → {sp.Formula}↓";
+                eq = Equation.Balance(new[] { c.Formula, an }, new[] { sp.Formula });
+                if (eq != null) eq += "↓";
+                else eq = $"{Coef(r.A)}{c.Formula} + {Coef(r.B)}{an} → {sp.Formula}↓";
             }
             else if (hydroxideOf.TryGetValue(sp.Id, out var ion))
             {
                 var c = SpeciesRegistry.Get(ion);
-                eq = ion == "Ag+" ? "2Ag⁺ + 2OH⁻ → Ag₂O↓ + H₂O" : $"{c.Formula} + {Coef(c.OHn)}OH⁻ → {sp.Formula}↓";
-                color = HydroxideColorName(sp.Id);
+                // HgO, Ag₂O, Hg₂O: hiđroxit mất nước ngay, phương trình có thêm H₂O
+                eq = Equation.BalanceAuto(new[] { c.Formula, "OH-" }, new[] { sp.Formula }, false);
+                if (eq != null) eq = eq.Replace(sp.Formula + " +", sp.Formula + "↓ +"); 
+                if (eq != null && eq.EndsWith(sp.Formula)) eq += "↓";
+                color = ChemPalette.NameOf(sp.Id) ?? HydroxideColorName(sp.Id);
+            }
+            else if (sp.HasTag("tachra:" + sp.Id.Substring(sp.Id.IndexOf(':') + 1)))
+            {
+                bool liquid = sp.Id.StartsWith("AnilinKT");
+                return new ChemEvent
+                {
+                    Kind = EventKind.Precipitate, Key = "kt:" + sp.Id, Color = sp.Color, Amount = mol,
+                    Title = liquid ? $"{Cap(sp.Name)}: chất lỏng ít tan tách thành lớp / vẩn đục" : $"Vẩn đục: {sp.Name}",
+                    Detail = "Dạng phân tử ít tan trong nước nên tách ra; chuyển thành muối (trong kiềm hoặc axit) thì tan.",
+                };
             }
             string name = sp.Name != sp.Formula ? $"{sp.Formula} ({sp.Name})" : sp.Formula;
             return new ChemEvent
@@ -605,6 +675,7 @@ namespace Khkt.Simulation.Chem
             string title, eq, detail;
             switch (sp.Id)
             {
+                case "CoNH3": title = "Kết tủa tan trong NH₃ dư, dung dịch vàng nâu [Co(NH₃)₆]²⁺"; eq = "Co²⁺ + 6NH₃ → [Co(NH₃)₆]²⁺"; detail = "Để ngoài không khí phức Co(II) bị oxi hóa dần thành Co(III) đỏ nâu."; break;
                 case "CuNH3": title = "Dung dịch xanh thẫm [Cu(NH₃)₄]²⁺"; eq = "Cu(OH)₂ + 4NH₃ → [Cu(NH₃)₄](OH)₂"; detail = "NH₃ dư hòa tan Cu(OH)₂ tạo phức amin đồng màu xanh thẫm."; break;
                 case "AgNH3": title = "Tạo phức tan [Ag(NH₃)₂]⁺"; eq = "Ag⁺ + 2NH₃ → [Ag(NH₃)₂]⁺"; detail = "Đây cũng là thuốc thử Tollens (tráng bạc)."; break;
                 case "ZnNH3": title = "Zn(OH)₂ tan trong NH₃ dư"; eq = "Zn(OH)₂ + 4NH₃ → [Zn(NH₃)₄](OH)₂"; detail = "Khác Al(OH)₃: Zn(OH)₂ tạo phức với amoniac."; break;
@@ -612,7 +683,12 @@ namespace Khkt.Simulation.Chem
                 case "FeSCN": title = "Màu đỏ máu [Fe(SCN)]²⁺"; eq = "Fe³⁺ + SCN⁻ → [Fe(SCN)]²⁺"; detail = "Phản ứng nhận biết ion Fe³⁺ rất nhạy."; break;
                 case "CuPol": title = "Dung dịch xanh lam (phức đồng)"; eq = "2C₃H₅(OH)₃ + Cu(OH)₂ → [C₃H₅(OH)₂O]₂Cu + 2H₂O"; detail = "Ancol đa chức có các nhóm -OH kề nhau (glixerol, glucozơ, saccarozơ) hòa tan Cu(OH)₂."; break;
                 case "FePhenol": title = "Màu tím đặc trưng (phenol + FeCl₃)"; eq = "6C₆H₅OH + Fe³⁺ → [Fe(OC₆H₅)₆]³⁻ + 6H⁺"; detail = "Nhận biết phenol bằng FeCl₃."; break;
-                default: title = "Tạo phức " + sp.Formula; eq = null; detail = ""; break;
+                default:
+                {
+                    var t = TableComplexEvent(sp, mol);
+                    if (t != null) return t;
+                    title = "Tạo phức " + sp.Formula; eq = null; detail = ""; break;
+                }
             }
             return new ChemEvent { Kind = EventKind.Color, Key = "phuc:" + sp.Id, Title = title, Equation = eq, Detail = detail, Color = sp.Color, Amount = mol };
         }

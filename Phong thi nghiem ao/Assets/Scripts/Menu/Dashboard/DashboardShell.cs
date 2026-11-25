@@ -129,6 +129,10 @@ namespace Khkt.Menu.Dashboard
         public MonoBehaviour Host;
 
         public PageOverview Overview { get; private set; }
+        /// <summary>Trang nhập khóa API AI riêng.</summary>
+        public PageAiKey AiKey { get; private set; }
+        /// <summary>Trang thử tay cầm (mọi vai trò, cả khách).</summary>
+        public PageController Controller { get; private set; }
         public string CurrentPage { get; private set; } = "";
 
         sealed class NavItem
@@ -201,6 +205,7 @@ namespace Khkt.Menu.Dashboard
             AddNav("tro_ly", MenuKit.IconRobot, "Trợ lý AI");
             AddNav("huong_dan", MenuKit.IconBook, "Hướng dẫn");
             AddNav("cai_thien", MenuKit.IconGrowth, "Cải thiện");
+            AddNav("tay_cam", PageController.IconController, "Tay cầm");
 
             // Phần tài khoản ghim đáy thanh bên: chiều cao canvas đổi theo tỉ lệ màn hình
             var foot = GlassKit.Rect(sidebar, "Tài khoản", new Vector2(0, 0), new Vector2(0, 0), Vector2.zero, new Vector2(SidebarW, 228));
@@ -267,9 +272,19 @@ namespace Khkt.Menu.Dashboard
 
             Placeholder("diem_so", "Điểm số", "Điểm và nhận xét của giáo viên cho từng bài.");
             BuildAssignmentsPage();
-            Placeholder("tro_ly", "Trợ lý AI", "Hỏi đáp về thí nghiệm đang làm.");
+            var aiPage = MenuKit.Full(content, "Trang: Trợ lý AI");
+            AiKey = aiPage.gameObject.AddComponent<PageAiKey>();
+            AiKey.Build(aiPage);
+            aiPage.gameObject.SetActive(false);
+            pages["tro_ly"] = aiPage;
             Placeholder("huong_dan", "Hướng dẫn", "Tài liệu bài thí nghiệm, máy và dụng cụ.");
             BuildImprovementPage();
+
+            var tayCam = MenuKit.Full(content, "Trang: Tay cầm");
+            Controller = tayCam.gameObject.AddComponent<PageController>();
+            Controller.Build(this, tayCam);
+            tayCam.gameObject.SetActive(false);
+            pages["tay_cam"] = tayCam;
         }
 
         RectTransform MakePageShell(string key, string title, string note, out Text subtitleLabel)
@@ -601,7 +616,9 @@ namespace Khkt.Menu.Dashboard
             int order = 0;
             foreach (var item in nav)
             {
-                item.rt.gameObject.SetActive(true);
+                bool show = !(item.key == "tro_ly" && u == null);   // trang khóa AI riêng cần đăng nhập
+                item.rt.gameObject.SetActive(show);
+                if (!show) continue;
                 item.order = order++;
                 item.rt.anchoredPosition = new Vector2(16, y);
                 y -= NavStep;
@@ -680,8 +697,10 @@ namespace Khkt.Menu.Dashboard
             foreach (var kv in pages) kv.Value.gameObject.SetActive(kv.Key == key);
 
             if (key == "tong_quan") Overview.Open();
+            else if (key == "tay_cam") Controller.Open();
             else
             {
+                if (key == "tro_ly") AiKey.Open();
                 if (pages[key].Find("Tiêu đề") is RectTransform t) MenuAnim.Enter(t, 0f, 12f, 0.28f);
                 if (pages[key].Find("Mô tả") is RectTransform d) MenuAnim.Enter(d, 0.04f, 12f, 0.28f);
                 if (key == "bai_tap")

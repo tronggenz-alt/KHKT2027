@@ -1,0 +1,347 @@
+{
+ "chi_tiet": [
+  {
+   "ma": "than_phai",
+   "ten": "Thân, nửa phải",
+   "mau": "#eef2f4",
+   "tach": [
+    0.0,
+    -40.0,
+    0.0
+   ]
+  },
+  {
+   "ma": "than_trai",
+   "ten": "Thân, nửa trái (có hốc vít)",
+   "mau": "#eef2f4",
+   "tach": [
+    0.0,
+    48.0,
+    0.0
+   ]
+  },
+  {
+   "ma": "nap",
+   "ten": "Mặt tối bầu dục",
+   "mau": "#15191d",
+   "tach": [
+    -15.7,
+    0.0,
+    43.2
+   ]
+  },
+  {
+   "ma": "chen",
+   "ten": "Chén lục giác",
+   "mau": "#18c8e6",
+   "tach": [
+    -24.6,
+    0.0,
+    67.7
+   ]
+  },
+  {
+   "ma": "co",
+   "ten": "Cò Hall",
+   "mau": "#aab4ba",
+   "tach": [
+    52.0,
+    0.0,
+    -8.0
+   ]
+  },
+  {
+   "ma": "tam_mu_tay",
+   "ten": "Tấm mu tay có logo",
+   "mau": "#18c8e6",
+   "tach": [
+    0.0,
+    -30.0,
+    0.0
+   ]
+  },
+  {
+   "ma": "nap_pin",
+   "ten": "Nắp khoang pin",
+   "mau": "#15191d",
+   "tach": [
+    10.0,
+    0.0,
+    -30.0
+   ]
+  },
+  {
+   "ma": "nut_phu",
+   "ten": "Nắp nút phụ (in 4 cái)",
+   "mau": "#aab4ba",
+   "tach": [
+    34.0,
+    0.0,
+    40.0
+   ]
+  },
+  {
+   "ma": "quai",
+   "ten": "Quai băng gai dính 20 mm",
+   "mau": "#2b3136",
+   "tach": [
+    0.0,
+    -30.0,
+    0.0
+   ],
+   "linh_kien": true
+  },
+  {
+   "ma": "nut6x6",
+   "ten": "Nút bấm 6 × 6",
+   "mau": "#26292c",
+   "tach": [
+    22.0,
+    0.0,
+    26.0
+   ],
+   "linh_kien": true
+  },
+  {
+   "ma": "esp32",
+   "ten": "ESP32 DevKitC 38 chân",
+   "mau": "#1d2b33",
+   "tach": [
+    0.0,
+    10.0,
+    18.0
+   ],
+   "linh_kien": true
+  },
+  {
+   "ma": "pin9v",
+   "ten": "Pin vuông 9V",
+   "mau": "#c9862b",
+   "tach": [
+    0.0,
+    0.0,
+    -74.0
+   ],
+   "linh_kien": true
+  },
+  {
+   "ma": "kep_pin",
+   "ten": "Kẹp pin 9V",
+   "mau": "#26292c",
+   "tach": [
+    0.0,
+    0.0,
+    -18.0
+   ],
+   "linh_kien": true
+  },
+  {
+   "ma": "ha_ap",
+   "ten": "Mạch hạ áp MP1584",
+   "mau": "#2563a6",
+   "tach": [
+    -30.0,
+    0.0,
+    30.0
+   ],
+   "linh_kien": true
+  },
+  {
+   "ma": "cong_tac",
+   "ten": "Công tắc trượt",
+   "mau": "#3b4a52",
+   "tach": [
+    24.0,
+    0.0,
+    -18.0
+   ],
+   "linh_kien": true
+  },
+  {
+   "ma": "bmi160",
+   "ten": "BMI160",
+   "mau": "#7b4fd6",
+   "tach": [
+    0.0,
+    10.0,
+    26.0
+   ],
+   "linh_kien": true
+  },
+  {
+   "ma": "ky023",
+   "ten": "Joystick KY-023",
+   "mau": "#26292c",
+   "tach": [
+    -10.3,
+    0.0,
+    28.2
+   ],
+   "linh_kien": true
+  },
+  {
+   "ma": "hall",
+   "ten": "Hall SS49E",
+   "mau": "#c0392b",
+   "tach": [
+    18.0,
+    34.0,
+    -4.0
+   ],
+   "linh_kien": true
+  },
+  {
+   "ma": "nam_cham",
+   "ten": "Nam châm Ø6×3",
+   "mau": "#9aa3a8",
+   "tach": [
+    42.0,
+    8.0,
+    -8.0
+   ],
+   "linh_kien": true
+  },
+  {
+   "ma": "vit",
+   "ten": "Vít M2",
+   "mau": "#aab4ba",
+   "tach": [
+    0.0,
+    72.0,
+    0.0
+   ],
+   "linh_kien": true
+  },
+  {
+   "ma": "chu",
+   "ten": "Logo và chữ khắc (tô màu khi xem)",
+   "mau": "#15191d",
+   "tach": [
+    0,
+    -30,
+    0
+   ],
+   "chi_xem": true
+  }
+ ],
+ "goi_in": [
+  {
+   "file": "than",
+   "ten": "Thân, 2 nửa",
+   "mau": "Trắng",
+   "kich_thuoc": [
+    165.2,
+    125.5,
+    33.6
+   ],
+   "gam_pla": 36.9,
+   "chi_tiet": [
+    {
+     "ma": "than_phai",
+     "so": 1,
+     "cach_in": "mặt ghép xuống bàn, đỡ bên trong"
+    },
+    {
+     "ma": "than_trai",
+     "so": 1,
+     "cach_in": "mặt ghép xuống bàn, đỡ bên trong"
+    }
+   ],
+   "so_khoi": 2
+  },
+  {
+   "file": "day_tren",
+   "ten": "Đáy trên (mặt tối bầu dục)",
+   "mau": "Đen",
+   "kich_thuoc": [
+    69.8,
+    48.1,
+    19.3
+   ],
+   "gam_pla": 7.4,
+   "chi_tiet": [
+    {
+     "ma": "nap",
+     "so": 1,
+     "cach_in": "mặt đỉnh xuống bàn"
+    }
+   ],
+   "so_khoi": 1
+  },
+  {
+   "file": "day_duoi",
+   "ten": "Đáy dưới (nắp khoang pin)",
+   "mau": "Đen",
+   "kich_thuoc": [
+    34.8,
+    22.6,
+    2.4
+   ],
+   "gam_pla": 1.5,
+   "chi_tiet": [
+    {
+     "ma": "nap_pin",
+     "so": 1,
+     "cach_in": "nằm phẳng, gai khóa hướng lên"
+    }
+   ],
+   "so_khoi": 1
+  },
+  {
+   "file": "chi_tiet_xanh",
+   "ten": "Tấm mu tay có logo, chén lục giác",
+   "mau": "Xanh ngọc huỳnh quang",
+   "kich_thuoc": [
+    69.4,
+    34.0,
+    40.0
+   ],
+   "gam_pla": 3.9,
+   "chi_tiet": [
+    {
+     "ma": "tam_mu_tay",
+     "so": 1,
+     "cach_in": "dựng đứng trên cạnh dưới, nên có brim"
+    },
+    {
+     "ma": "chen",
+     "so": 1,
+     "cach_in": "mặt lớn xuống bàn"
+    }
+   ],
+   "so_khoi": 2
+  },
+  {
+   "file": "chi_tiet_bac",
+   "ten": "Cò, 4 nắp nút phụ",
+   "mau": "Bạc hoặc xám",
+   "kich_thuoc": [
+    80.2,
+    25.7,
+    15.6
+   ],
+   "gam_pla": 3.9,
+   "chi_tiet": [
+    {
+     "ma": "co",
+     "so": 1,
+     "cach_in": "nằm nghiêng, mặt bên xuống bàn, đỡ dưới tay cò"
+    },
+    {
+     "ma": "nut_phu",
+     "so": 4,
+     "cach_in": "in 4 cái, mặt gờ xuống bàn"
+    }
+   ],
+   "so_khoi": 5
+  }
+ ],
+ "kich_thuoc": [
+  78,
+  78,
+  128
+ ],
+ "nhua_g": 54,
+ "tong_g": 144,
+ "rong_quai": 20.0
+}

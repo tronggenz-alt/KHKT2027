@@ -69,6 +69,7 @@ namespace Khkt.Simulation.Chem
                         break;
                     }
                     default:
+                        if (d.HasTag("tinh_bot")) hasStarch = true;
                         if (d.Insoluble && d.Kind == SpeciesKind.Molecule)
                         {
                             layerMl += n * d.MolarMass / Math.Max(0.5, d.Density);

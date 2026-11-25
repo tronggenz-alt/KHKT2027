@@ -67,53 +67,16 @@ namespace Khkt.Simulation.Chem
 
             var mn2 = Pr(("Mn2+", 1));
             var mno2 = Pr(("MnO2(kt)", 1));
-            // --- KMnO4 trong axit ---
-            R("MnO4-", 5, mn2, "Fe2+", 1, Pr(("Fe3+", 1)), "Màu tím KMnO₄ mất ngay (Fe²⁺ bị oxi hóa)", "MnO₄⁻ + 5Fe²⁺ + 8H⁺ → Mn²⁺ + 5Fe³⁺ + 4H₂O", 4,
-              detail: "Fe²⁺ khử MnO₄⁻ (tím) thành Mn²⁺ (gần như không màu). Cơ sở phép chuẩn độ pemanganat.");
-            R("MnO4-", 5, mn2, "H2O2", 2, Pr(("khi:O2", 1)), "Mất màu tím, sủi bọt khí O₂", "2MnO₄⁻ + 5H₂O₂ + 6H⁺ → 2Mn²⁺ + 5O₂↑ + 8H₂O", 4,
-              detail: "Ở đây H₂O₂ đóng vai trò chất khử.");
-            R("MnO4-", 5, mn2, "I-", 1, Pr(("I2", 0.5)), "Mất màu tím, dung dịch chuyển nâu (I₂)", "2MnO₄⁻ + 10I⁻ + 16H⁺ → 2Mn²⁺ + 5I₂ + 8H₂O", 4);
-            R("MnO4-", 5, mn2, "SO3", 2, Pr(("SO4", 1)), "Mất màu tím (SO₃²⁻ khử MnO₄⁻)", "2MnO₄⁻ + 5SO₃²⁻ + 6H⁺ → 2Mn²⁺ + 5SO₄²⁻ + 3H₂O", 4);
-            R("MnO4-", 5, mn2, "S", 2, Pr(("S(kt)", 1)), "Mất màu tím, vẩn đục vàng lưu huỳnh", "2MnO₄⁻ + 5H₂S + 6H⁺ → 2Mn²⁺ + 5S↓ + 8H₂O", 4);
-            R("MnO4-", 5, mn2, "Ox", 2, Pr(("khi:CO2", 2)), "Mất màu tím, sủi bọt CO₂ (cần đun nóng)", "2MnO₄⁻ + 5C₂O₄²⁻ + 16H⁺ → 2Mn²⁺ + 10CO₂↑ + 8H₂O", 4, tMin: 55,
-              detail: "Phản ứng chậm ở nhiệt độ thường, nhanh dần khi đun và khi có Mn²⁺ xúc tác.");
-            R("MnO4-", 5, mn2, "Cl-", 1, Pr(("khi:Cl2", 0.5)), "Khí Cl₂ vàng lục thoát ra (độc!)", "2KMnO₄ + 16HCl → 2KCl + 2MnCl₂ + 5Cl₂↑ + 8H₂O", 1,
-              when: w => w.C("Cl-") > 3, hazard: "khi_doc", sev: Severity.Danger, detail: "Điều chế clo trong phòng thí nghiệm: phải làm trong tủ hút.");
-            R("MnO4-", 5, mn2, "Br-", 1, Pr(("Br2", 0.5)), "Mất màu tím, dung dịch vàng nâu (Br₂)", "2MnO₄⁻ + 10Br⁻ + 16H⁺ → 2Mn²⁺ + 5Br₂ + 8H₂O", 2);
-            R("MnO4-", 5, mn2, "NO2", 2, Pr(("NO3-", 1)), "Mất màu tím (nitrit bị oxi hóa)", "2MnO₄⁻ + 5NO₂⁻ + 6H⁺ → 2Mn²⁺ + 5NO₃⁻ + 3H₂O", 4);
-            R("MnO4-", 5, mn2, "Sn2+", 2, Pr(("Sn4+", 1)), "Mất màu tím", "2MnO₄⁻ + 5Sn²⁺ + 16H⁺ → 2Mn²⁺ + 5Sn⁴⁺ + 8H₂O", 4);
+            var cr3 = Pr(("Cr3+", 1));
+            // Chỉ còn các mẫu theo nhóm chức hữu cơ (chất khử là nhãn "@..."): phản ứng vô cơ do bảng cặp oxi hóa - khử (ChemRedoxTable) suy ra.
             R("MnO4-", 5, mn2, "@andehit", 2, null, "Mất màu tím (anđehit bị oxi hóa)", "2MnO₄⁻ + 5RCHO + 6H⁺ → 2Mn²⁺ + 5RCOOH + 3H₂O", 4);
             R("MnO4-", 5, mn2, "@khong_no", 2, null, "Mất màu tím KMnO₄ (liên kết bội bị oxi hóa)", "RCH=CHR' + [O] (KMnO₄/H⁺) → sản phẩm oxi hóa", 4);
-            // --- KMnO4 trong môi trường trung tính / kiềm: MnO2 nâu đen hoặc manganat xanh lục ---
-            R("MnO4-", 3, mno2, "SO3", 2, Pr(("SO4", 1)), "Mất màu tím, kết tủa nâu đen MnO₂", "2MnO₄⁻ + 3SO₃²⁻ + H₂O → 2MnO₂↓ + 3SO₄²⁻ + 2OH⁻", 12, 4);
             R("MnO4-", 3, mno2, "@khong_no", 2, null, "Mất màu tím, kết tủa nâu đen MnO₂", "3CH₂=CH₂ + 2KMnO₄ + 4H₂O → 3C₂H₄(OH)₂ + 2MnO₂↓ + 2KOH", 99, 4,
               detail: "Phản ứng nhận biết liên kết đôi, liên kết ba (anken, ankin).");
             R("MnO4-", 3, mno2, "@andehit", 2, null, "Mất màu tím, kết tủa nâu đen MnO₂", "RCHO + KMnO₄ → RCOOK + MnO₂↓", 99, 4);
-            R("MnO4-", 3, mno2, "Fe2+", 1, Pr(("Fe3+", 1)), "Mất màu tím, có kết tủa nâu", "MnO₄⁻ + 3Fe²⁺ + ... → MnO₂↓ + 3Fe³⁺", 12, 4);
-            R("MnO4-", 3, mno2, "H2O2", 2, Pr(("khi:O2", 1)), "Mất màu tím, sủi bọt O₂, kết tủa MnO₂", "2MnO₄⁻ + 3H₂O₂ → 2MnO₂↓ + 3O₂↑ + 2OH⁻ + 2H₂O", 12, 4);
-            R("MnO4-", 3, mno2, "I-", 1, Pr(("I2", 0.5)), "Mất màu tím, kết tủa nâu MnO₂ và I₂", "2MnO₄⁻ + 6I⁻ + 4H₂O → 2MnO₂↓ + 3I₂ + 8OH⁻", 12, 4);
-            R("MnO4-", 1, Pr(("MnO42-", 1)), "SO3", 2, Pr(("SO4", 1)), "Dung dịch chuyển xanh lục (manganat)", "2MnO₄⁻ + SO₃²⁻ + 2OH⁻ → 2MnO₄²⁻ + SO₄²⁻ + H₂O", 99, 12);
-            // --- Cr(VI) trong axit: da cam → xanh lục ---
-            var cr3 = Pr(("Cr3+", 1));
-            R("CrVI", 3, cr3, "Fe2+", 1, Pr(("Fe3+", 1)), "Da cam chuyển xanh lục (Cr³⁺)", "Cr₂O₇²⁻ + 6Fe²⁺ + 14H⁺ → 2Cr³⁺ + 6Fe³⁺ + 7H₂O", 3);
-            R("CrVI", 3, cr3, "I-", 1, Pr(("I2", 0.5)), "Dung dịch xanh lục, giải phóng I₂", "Cr₂O₇²⁻ + 6I⁻ + 14H⁺ → 2Cr³⁺ + 3I₂ + 7H₂O", 3);
-            R("CrVI", 3, cr3, "SO3", 2, Pr(("SO4", 1)), "Da cam chuyển xanh lục", "Cr₂O₇²⁻ + 3SO₃²⁻ + 8H⁺ → 2Cr³⁺ + 3SO₄²⁻ + 4H₂O", 4);
-            R("CrVI", 3, cr3, "S", 2, Pr(("S(kt)", 1)), "Xanh lục, vẩn đục lưu huỳnh", "Cr₂O₇²⁻ + 3H₂S + 8H⁺ → 2Cr³⁺ + 3S↓ + 7H₂O", 3);
             R("CrVI", 3, cr3, "@ancol", 2, null, "Da cam chuyển xanh lục (ancol bị oxi hóa)", "Cr₂O₇²⁻ + 3C₂H₅OH + 8H⁺ → 2Cr³⁺ + 3CH₃CHO + 7H₂O", 2,
               detail: "Nguyên lý máy đo nồng độ cồn trong hơi thở.");
             R("CrVI", 3, cr3, "@andehit", 2, null, "Da cam chuyển xanh lục", "Cr₂O₇²⁻ + 3RCHO + 8H⁺ → 2Cr³⁺ + 3RCOOH + 4H₂O", 2);
-            R("CrVI", 3, cr3, "H2O2", 2, Pr(("khi:O2", 1)), "Da cam chuyển xanh lục, sủi bọt", "Cr₂O₇²⁻ + 3H₂O₂ + 8H⁺ → 2Cr³⁺ + 3O₂↑ + 7H₂O", 2);
-            // --- Halogen ---
-            R("Cl2", 2, Pr(("Cl-", 2)), "Br-", 1, Pr(("Br2", 0.5)), "Dung dịch chuyển vàng nâu (Br₂)", "Cl₂ + 2Br⁻ → 2Cl⁻ + Br₂", 9, detail: "Clo hoạt động mạnh hơn brom.");
-            R("Cl2", 2, Pr(("Cl-", 2)), "I-", 1, Pr(("I2", 0.5)), "Dung dịch chuyển nâu (I₂)", "Cl₂ + 2I⁻ → 2Cl⁻ + I₂", 9, detail: "Có hồ tinh bột thì chuyển xanh tím.");
-            R("Cl2", 2, Pr(("Cl-", 2)), "Fe2+", 1, Pr(("Fe3+", 1)), "Lục nhạt chuyển vàng nâu (Fe³⁺)", "Cl₂ + 2Fe²⁺ → 2Cl⁻ + 2Fe³⁺");
-            R("Cl2", 2, Pr(("Cl-", 2)), "SO3", 2, Pr(("SO4", 1)), "Clo mất màu", "Cl₂ + SO₃²⁻ + H₂O → 2Cl⁻ + SO₄²⁻ + 2H⁺");
-            R("Cl2", 2, Pr(("Cl-", 2)), "S", 2, Pr(("S(kt)", 1)), "Vẩn đục vàng lưu huỳnh", "Cl₂ + H₂S → 2HCl + S↓");
-            R("Cl2", 2, Pr(("Cl-", 2)), "S2O32-", 8, Pr(("SO4", 2)), "Clo bị khử bởi thiosunfat", "4Cl₂ + S₂O₃²⁻ + 5H₂O → 8Cl⁻ + 2SO₄²⁻ + 10H⁺");
-            R("Br2", 2, Pr(("Br-", 2)), "I-", 1, Pr(("I2", 0.5)), "Brom oxi hóa iotua thành I₂", "Br₂ + 2I⁻ → 2Br⁻ + I₂", 9);
-            R("Br2", 2, Pr(("Br-", 2)), "Fe2+", 1, Pr(("Fe3+", 1)), "Nước brom mất màu", "Br₂ + 2Fe²⁺ → 2Br⁻ + 2Fe³⁺");
-            R("Br2", 2, Pr(("Br-", 2)), "SO3", 2, Pr(("SO4", 1)), "Nước brom mất màu", "Br₂ + SO₃²⁻ + H₂O → 2Br⁻ + SO₄²⁻ + 2H⁺");
-            R("Br2", 2, Pr(("Br-", 2)), "S", 2, Pr(("S(kt)", 1)), "Nước brom mất màu, vẩn đục vàng", "Br₂ + H₂S → 2HBr + S↓");
             R("Br2", 2, Pr(("Br-", 2)), "@khong_no", 2, null, "Nước brom mất màu (phản ứng cộng)", "CH₂=CH₂ + Br₂ → CH₂Br-CH₂Br",
               detail: "Nhận biết hợp chất có liên kết đôi, liên kết ba.");
             R("Br2", 2, Pr(("Br-", 2)), "@andehit", 2, null, "Nước brom mất màu (anđehit bị oxi hóa)", "RCHO + Br₂ + H₂O → RCOOH + 2HBr",
@@ -122,35 +85,6 @@ namespace Khkt.Simulation.Chem
               detail: "Kết tủa 2,4,6-tribromphenol: nhận biết phenol.");
             R("Br2", 6, Pr(("Br-", 2)), "@anilin", 1, Pr(("TBA", 1)), "Nước brom mất màu, kết tủa trắng", "C₆H₅NH₂ + 3Br₂ → C₆H₂Br₃NH₂↓ + 3HBr",
               detail: "Kết tủa 2,4,6-tribromanilin: nhận biết anilin.");
-            R("I2", 2, Pr(("I-", 2)), "S2O32-", 1, Pr(("S4O62-", 0.5)), "Màu nâu của I₂ mất dần", "I₂ + 2S₂O₃²⁻ → 2I⁻ + S₄O₆²⁻",
-              detail: "Cơ sở phép chuẩn độ iot - thiosunfat (hồ tinh bột làm chỉ thị).");
-            R("I2", 2, Pr(("I-", 2)), "SO3", 2, Pr(("SO4", 1)), "Màu iot mất", "I₂ + SO₃²⁻ + H₂O → 2I⁻ + SO₄²⁻ + 2H⁺");
-            R("I2", 2, Pr(("I-", 2)), "S", 2, Pr(("S(kt)", 1)), "Màu iot mất, vẩn đục vàng", "I₂ + H₂S → 2HI + S↓");
-            R("I2", 2, Pr(("I-", 2)), "Sn2+", 2, Pr(("Sn4+", 1)), "Màu iot mất", "I₂ + Sn²⁺ → 2I⁻ + Sn⁴⁺");
-            // --- Fe3+ ---
-            R("Fe3+", 1, Pr(("Fe2+", 1)), "I-", 1, Pr(("I2", 0.5)), "Dung dịch vàng chuyển nâu (I₂)", "2Fe³⁺ + 2I⁻ → 2Fe²⁺ + I₂", 4);
-            R("Fe3+", 1, Pr(("Fe2+", 1)), "S", 2, Pr(("S(kt)", 1)), "Vàng nhạt dần, vẩn đục lưu huỳnh", "2Fe³⁺ + H₂S → 2Fe²⁺ + S↓ + 2H⁺", 4);
-            R("Fe3+", 1, Pr(("Fe2+", 1)), "SO3", 2, Pr(("SO4", 1)), "Màu vàng nâu nhạt dần", "2Fe³⁺ + SO₃²⁻ + H₂O → 2Fe²⁺ + SO₄²⁻ + 2H⁺", 4);
-            R("Fe3+", 1, Pr(("Fe2+", 1)), "Sn2+", 2, Pr(("Sn4+", 1)), "Màu vàng mất", "2Fe³⁺ + Sn²⁺ → 2Fe²⁺ + Sn⁴⁺");
-            // --- H2O2 là chất oxi hóa ---
-            R("H2O2", 2, null, "I-", 1, Pr(("I2", 0.5)), "Dung dịch chuyển nâu vàng (I₂)", "H₂O₂ + 2I⁻ + 2H⁺ → I₂ + 2H₂O", 6);
-            R("H2O2", 2, null, "Fe2+", 1, Pr(("Fe3+", 1)), "Lục nhạt chuyển vàng nâu", "H₂O₂ + 2Fe²⁺ + 2H⁺ → 2Fe³⁺ + 2H₂O", 6);
-            R("H2O2", 2, null, "S", 2, Pr(("S(kt)", 1)), "Vẩn đục vàng lưu huỳnh", "H₂O₂ + H₂S → S↓ + 2H₂O");
-            R("H2O2", 2, null, "SO3", 2, Pr(("SO4", 1)), "SO₃²⁻ bị oxi hóa thành SO₄²⁻", "H₂O₂ + SO₃²⁻ → SO₄²⁻ + H₂O");
-            // --- Nước Gia-ven (ClO⁻) ---
-            R("ClO", 2, Pr(("Cl-", 1)), "Cl-", 1, Pr(("khi:Cl2", 0.5)), "Khí Cl₂ thoát ra (độc!)", "NaClO + 2HCl → NaCl + Cl₂↑ + H₂O", 5,
-              hazard: "khi_doc", sev: Severity.Danger, detail: "Không trộn nước tẩy Javen với chất tẩy có axit.");
-            R("ClO", 2, Pr(("Cl-", 1)), "I-", 1, Pr(("I2", 0.5)), "Giải phóng I₂ (nâu)", "ClO⁻ + 2I⁻ + H₂O → Cl⁻ + I₂ + 2OH⁻");
-            R("ClO", 2, Pr(("Cl-", 1)), "Fe2+", 1, Pr(("Fe3+", 1)), "Fe²⁺ bị oxi hóa", "ClO⁻ + 2Fe²⁺ + 2H⁺ → Cl⁻ + 2Fe³⁺ + H₂O");
-            R("ClO", 2, Pr(("Cl-", 1)), "SO3", 2, Pr(("SO4", 1)), "Sunfit bị oxi hóa", "ClO⁻ + SO₃²⁻ → Cl⁻ + SO₄²⁻");
-            // --- Nitrat đặc, nitrit, iođat, pesunfat, Cu2+ + I- ---
-            R("NO3-", 3, Pr(("khi:NO", 1)), "Fe2+", 1, Pr(("Fe3+", 1)), "Khí NO hóa nâu trong không khí", "3Fe²⁺ + NO₃⁻ + 4H⁺ → 3Fe³⁺ + NO↑ + 2H₂O", 0.5,
-              when: w => w.C("NO3-") > 1, hazard: "khi_doc", sev: Severity.Warning);
-            R("NO2", 1, Pr(("khi:NO", 1)), "I-", 1, Pr(("I2", 0.5)), "Giải phóng I₂ và khí NO", "2NO₂⁻ + 2I⁻ + 4H⁺ → 2NO↑ + I₂ + 2H₂O", 4);
-            R("IO3-", 5, Pr(("I2", 0.5)), "I-", 1, Pr(("I2", 0.5)), "Dung dịch chuyển nâu (I₂)", "IO₃⁻ + 5I⁻ + 6H⁺ → 3I₂ + 3H₂O", 5);
-            R("S2O82-", 2, Pr(("SO4", 2)), "I-", 1, Pr(("I2", 0.5)), "Giải phóng I₂ (chậm dần)", "S₂O₈²⁻ + 2I⁻ → 2SO₄²⁻ + I₂");
-            R("S2O82-", 2, Pr(("SO4", 2)), "Fe2+", 1, Pr(("Fe3+", 1)), "Fe²⁺ bị oxi hóa", "S₂O₈²⁻ + 2Fe²⁺ → 2SO₄²⁻ + 2Fe³⁺");
-            R("Cu2+", 1, Pr(("CuI(s)", 1)), "I-", 2, Pr(("I2", 0.5)), "Kết tủa trắng CuI, dung dịch nâu I₂", "2Cu²⁺ + 4I⁻ → 2CuI↓ + I₂");
         }
 
         static bool ApplyRedox(Work w, Rx r)
@@ -201,7 +135,15 @@ namespace Khkt.Simulation.Chem
             Products(r.OxP, dOx);
             Products(r.RedP, dRed);
             var ox = SpeciesRegistry.Get(r.Ox);
-            Emit(w, gasId != null ? EventKind.Gas : EventKind.Reaction, r.Key, r.Title, r.Detail, r.Eq, r.Sev, r.Hazard, gasId, gasId != null ? gas : dOx, ox?.Color);
+            string eq = r.Eq;
+            if (organics != null && organics.Count > 0)
+            {
+                // phương trình theo đúng chất hữu cơ đang có (không dùng ví dụ etilen cho axetilen, stiren...)
+                int main = organics[0];
+                foreach (int s in organics) if (w.b.Get(s) > w.b.Get(main)) main = s;
+                eq = OrganicEquation(r, SpeciesRegistry.At(main)) ?? (Equation.Check(r.Eq) == null && !r.Eq.Contains("CH₂=CH₂") ? r.Eq : null);
+            }
+            Emit(w, gasId != null ? EventKind.Gas : EventKind.Reaction, r.Key, r.Title, r.Detail, eq, r.Sev, r.Hazard, gasId, gasId != null ? gas : dOx, ox?.Color);
             return true;
         }
 
@@ -212,46 +154,24 @@ namespace Khkt.Simulation.Chem
         static bool InstantRules(Work w)
         {
             BuildRedox();
-            bool changed = false;
+            bool changed = ThptEarly(w);
             foreach (var r in redox) changed |= ApplyRedox(w, r);
+            changed |= RedoxTable(w);
+            changed |= ThptInstant(w);
             var b = w.b;
 
-            // Halogen trong kiềm: tự oxi hóa - khử (mất màu)
-            if (w.Ph > 9)
-            {
-                double cl2 = w.M("Cl2");
-                if (cl2 > 1e-10)
-                {
-                    b.Set("Cl2", 0); b.Add("Cl-", cl2); b.Add("ClO", cl2);
-                    Emit(w, EventKind.Reaction, "pu:Cl2+OH", "Clo mất màu trong kiềm (tạo nước Gia-ven)", null, "Cl₂ + 2NaOH → NaCl + NaClO + H₂O");
-                    changed = true;
-                }
-                double br2 = w.M("Br2");
-                if (br2 > 1e-10)
-                {
-                    b.Set("Br2", 0); b.Add("Br-", br2 * 5 / 3); b.Add("BrO3-", br2 / 3);
-                    Emit(w, EventKind.Reaction, "pu:Br2+OH", "Brom mất màu trong kiềm", null, "3Br₂ + 6OH⁻ → 5Br⁻ + BrO₃⁻ + 3H₂O");
-                    changed = true;
-                }
-                double i2 = w.M("I2");
-                if (i2 > 1e-10 && w.Ph > 10)
-                {
-                    b.Set("I2", 0); b.Add("I-", i2 * 5 / 3); b.Add("IO3-", i2 / 3);
-                    Emit(w, EventKind.Reaction, "pu:I2+OH", "Màu iot mất trong kiềm", null, "3I₂ + 6OH⁻ → 5I⁻ + IO₃⁻ + 3H₂O");
-                    changed = true;
-                }
-            }
-
             // Ank-1-in + [Ag(NH3)2]+ → kết tủa vàng (Ag⁺ và NH₃ ở dạng tổng sau khi hoàn nguyên phức)
-            if (w.Ph > 8 && w.M("Ag+") > 1e-10 && w.M("NH3") > 2 * w.M("Ag+"))
+            double agAll = w.M("Ag+") + w.M("AgNH3");
+            if (w.Ph > 8 && agAll > 1e-10 && w.M("AgNH3") > 1e-10)
             {
                 foreach (int s in b.Snapshot())
                 {
                     var d = SpeciesRegistry.At(s);
                     if (!d.HasTag("ank_1_in")) continue;
-                    double x = Math.Min(b.Get(s), w.M("Ag+") / 2);
+                    double x = Math.Min(b.Get(s), agAll / 2);
                     if (x <= 1e-12) continue;
-                    b.Add(s, -x); b.Add("Ag+", -2 * x); b.Add("Ag2C2", x);
+                    double fromCx = Math.Min(w.M("AgNH3"), 2 * x);
+                    b.Add(s, -x); b.Add("AgNH3", -fromCx); b.Add("NH3", 2 * fromCx); b.Add("Ag+", -(2 * x - fromCx)); b.Add("Ag2C2", x);
                     Emit(w, EventKind.Precipitate, "kt:Ag2C2", "Kết tủa vàng nhạt (bạc axetilua)", "Nhận biết ank-1-in (liên kết ba đầu mạch).",
                          "HC≡CH + 2[Ag(NH₃)₂]⁺ → AgC≡CAg↓ + 2NH₄⁺ + 2NH₃", color: SpeciesRegistry.Get("Ag2C2").Color, amount: x);
                     changed = true;
@@ -372,6 +292,8 @@ namespace Khkt.Simulation.Chem
             double V = w.V, h = w.h;
             bool hot = w.T > 55;
             bool any = false;
+            // khí không tan, không phản ứng (H₂, O₂, N₂, CO...): sục vào dung dịch thì thoát hết ra
+            foreach (int s in b.Snapshot()) if (SpeciesRegistry.At(s).HasTag("khi_tro")) b.Set(s, 0);
             bool Weak(string id, double solubility, string gas, string title, string detail, string eq, string hazard, Severity sev, double smell = double.MaxValue, string smellTitle = null)
             {
                 var d = SpeciesRegistry.Get(id);
@@ -381,8 +303,18 @@ namespace Khkt.Simulation.Chem
                 double c = tot * a0;
                 if (c > smell && smellTitle != null) Emit(w, EventKind.Hazard, "mui:" + gas, smellTitle, detail, null, Severity.Notice, hazard);
                 if (c <= solubility * 1.02) return false;
-                double removeTot = (c - solubility) / Math.Max(a0, 1e-9);
-                double mol = Math.Min(b.Get(d.Index), removeTot * V);
+                // định luật Henry: lượng còn lại sao cho dạng khí tự do bằng độ tan ở pH SAU khi khí thoát (pH đổi khi khí bay ra)
+                double total = b.Get(d.Index), lo = 0, hi = total;
+                for (int it = 0; it < 40; it++)
+                {
+                    double x = 0.5 * (lo + hi);
+                    b.Add(d.Index, -x);
+                    double hx = SolveH(b, V);
+                    b.Add(d.Index, x);
+                    double freeX = (total - x) / V * (id == "NH3" ? 1 - AlphaFirst(d, hx) : AlphaFirst(d, hx));
+                    if (freeX > solubility) lo = x; else hi = x;
+                }
+                double mol = Math.Min(total, hi);
                 b.Add(d.Index, -mol);
                 Emit(w, EventKind.Gas, "khi:" + gas, title, detail, eq, sev, hazard, gas, mol);
                 return true;
@@ -393,7 +325,7 @@ namespace Khkt.Simulation.Chem
                         "SO₃²⁻ + 2H⁺ → SO₂↑ + H₂O", "khi_doc", Severity.Warning, 0.05, "Có mùi hắc của SO₂");
             any |= Weak("S", hot ? 0.03 : 0.1, "H2S", "Khí H₂S mùi trứng thối thoát ra", "H₂S rất độc, làm đen giấy tẩm Pb(NO₃)₂.",
                         "S²⁻ + 2H⁺ → H₂S↑", "khi_doc", Severity.Warning, 0.005, "Có mùi trứng thối (H₂S)");
-            any |= Weak("NH3", hot ? 0.02 : 1.5, "NH3", "Khí NH₃ mùi khai thoát ra", "Amoniac làm quỳ tím ẩm hóa xanh, tạo khói trắng với HCl đặc.",
+            any |= Weak("NH3", hot ? 0.3 : 1.5, "NH3", "Khí NH₃ mùi khai thoát ra", "Amoniac làm quỳ tím ẩm hóa xanh, tạo khói trắng với HCl đặc.",
                         "NH₄⁺ + OH⁻ → NH₃↑ + H₂O (đun nóng)", "khi_doc", Severity.Notice, 0.05, "Có mùi khai (NH₃)");
             any |= Weak("CN", 0.005, "HCN", "Khí HCN cực độc thoát ra!", "Xianua gặp axit giải phóng HCN: tuyệt đối không làm ngoài tủ hút.",
                         "CN⁻ + H⁺ → HCN↑", "khi_doc", Severity.Danger);
@@ -411,6 +343,20 @@ namespace Khkt.Simulation.Chem
                 Emit(w, EventKind.Hazard, "mui:Br2", "Hơi brom nâu đỏ bốc lên (độc, ăn da)", "Brom lỏng dễ bay hơi; thao tác trong tủ hút, đeo găng.", null, Severity.Warning, "khi_doc");
             if (b.Get("NO3-") / V > 6 && h > 3)
                 Emit(w, EventKind.Hazard, "mui:HNO3", "Axit nitric đặc bốc khói", "HNO₃ đặc dễ bay hơi, phân hủy ra NO₂ độc.", null, Severity.Notice, "khi_doc");
+            // HCl, HNO₃ là axit dễ bay hơi: khi đun, tích [H⁺][X⁻] lớn thì khí thoát ra (điều chế HCl từ NaCl rắn + H₂SO₄ đặc)
+            if (w.T > 50)
+                foreach (var (ion, gas, limit) in new[] { ("Cl-", "HCl", 30.0), ("NO3-", "HNO3", 60.0) })
+                {
+                    double c = b.Get(ion) / V, prod = c * h;
+                    if (prod <= limit || c <= 0) continue;
+                    double mol = Math.Min(b.Get(ion), (prod - limit) / Math.Max(h, 1e-6) * V * 0.5);
+                    if (mol <= 1e-9) continue;
+                    b.Add(ion, -mol);
+                    Emit(w, EventKind.Gas, "khi:" + gas, gas == "HCl" ? "Khí HCl thoát ra, gặp hơi ẩm tạo khói trắng" : "Hơi HNO₃ thoát ra",
+                         "Axit dễ bay hơi thoát ra khi đun dung dịch có nồng độ H⁺ và gốc axit lớn (axit khó bay hơi đẩy axit dễ bay hơi).",
+                         gas == "HCl" ? "NaCl + H₂SO₄ → NaHSO₄ + HCl↑ (t°)" : null, Severity.Warning, "khi_doc", gas, mol);
+                    any = true;
+                }
             if (b.Get("Cl-") / V > 8 && h > 6)
                 Emit(w, EventKind.Hazard, "mui:HCl", "HCl đặc bốc khói", "Hơi HCl gây kích ứng mắt và đường hô hấp.", null, Severity.Notice, "khi_doc");
             return any;

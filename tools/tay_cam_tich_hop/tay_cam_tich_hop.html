@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Tay cầm ESP32 tích hợp</title>
+<!--
+  Nghiên cứu tích hợp tay cầm: ESP32 DevKit V1 + joystick + BMI160 + 2 nút cảm ứng điện dung (chân touch của ESP32).
+  In PDF:
+  msedge --headless=new --virtual-time-budget=15000 --no-pdf-header-footer
+         --print-to-pdf=docs/tay-cam-tich-hop/Tay_cam_ESP32_tich_hop.pdf tools/tay_cam_tich_hop/tay_cam_tich_hop.html
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+@page { size: 1280px 720px; margin: 0 }
+:root{ --nen:#f5f7f6; --giay:#ffffff; --muc:#10242b; --phu:#5a6d72; --vien:#d5dfdd; --nhat:#eef3f2;
+  --hoa:#0e7c86; --vr:#11a8c8; --cam:#d98b12; --la:#3a9a4a; --tim:#6b5bd6; --do:#c2452b; --dong:#c87533;
+  --toi:#0d1b21; --f-tieu:'Barlow Condensed','Arial Narrow',sans-serif; --f-than:'Be Vietnam Pro','Segoe UI',sans-serif; --f-so:'JetBrains Mono',Consolas,monospace }
+*{box-sizing:border-box}
+html,body{margin:0;background:#888}
+body{font:400 14px/1.45 var(--f-than);color:var(--muc);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.trang{width:1280px;height:720px;position:relative;overflow:hidden;background:var(--nen);break-after:page;margin:0 auto}
+.trang:last-child{break-after:auto}
+.dau{position:absolute;left:56px;right:56px;top:26px;display:flex;align-items:center;gap:14px}
+.so{font:700 12px var(--f-so);color:var(--hoa);border:1.5px solid var(--hoa);padding:1px 7px}
+.eyebrow{font:600 12px var(--f-tieu);letter-spacing:.16em;text-transform:uppercase;color:var(--phu)}
+.tieu{position:absolute;left:56px;right:56px;top:52px}
+h1{font:700 36px/1.05 var(--f-tieu);text-transform:uppercase;letter-spacing:.01em;margin:0 0 4px}
+.tieu p{margin:0;color:var(--phu);font-size:14.5px;max-width:1150px}
+.than{position:absolute;left:56px;right:56px;top:138px;bottom:44px}
+.chan{position:absolute;left:56px;right:56px;bottom:14px;display:flex;justify-content:space-between;font:500 11px var(--f-than);color:var(--phu);border-top:1px solid var(--vien);padding-top:6px}
+.chan b{color:var(--muc)}
+.luoi{display:grid;gap:16px;height:100%}
+.luoi>*{min-width:0;min-height:0}
+.than.luoi{height:auto}
+.the{background:var(--giay);border:1px solid var(--vien);padding:12px 14px}
+.the h3{font:700 16px/1.2 var(--f-tieu);letter-spacing:.05em;text-transform:uppercase;margin:0 0 6px}
+.the p{margin:0 0 6px}
+.nho{font-size:12px;color:var(--phu)}
+ul.g{margin:0;padding-left:16px}
+ul.g li{margin:0 0 3px}
+.mono{font-family:var(--f-so)}
+table{border-collapse:collapse;width:100%}
+th{font:700 12.5px var(--f-tieu);letter-spacing:.06em;text-transform:uppercase;text-align:left;color:var(--phu);border-bottom:1.5px solid var(--muc);padding:4px 6px}
+td{border-bottom:1px solid var(--vien);padding:4px 6px;vertical-align:top;font-size:12.5px;line-height:1.35}
+td b{font-weight:600}
+.tag{display:inline-block;font:700 10.5px var(--f-so);padding:0 5px;border-radius:2px;color:#fff;background:var(--hoa);vertical-align:1px}
+.tag.cam{background:var(--cam)} .tag.do{background:var(--do)} .tag.la{background:var(--la)} .tag.tim{background:var(--tim)} .tag.dong{background:var(--dong)} .tag.vr{background:var(--vr)}
+svg text{font-family:var(--f-than)}
+svg .m{font-family:var(--f-so)}
+.so-lon{font:700 40px/1 var(--f-tieu);color:var(--hoa)}
+.ngan .the{padding:7px 12px}.ngan .the p{font-size:12.5px;line-height:1.38;margin:0}.ngan .the h3{margin-bottom:3px}
+.to td{font-size:13.2px;padding:5px 6px}
+.ghi{border-left:3px solid var(--cam);background:#fff8ec;padding:8px 12px;font-size:12.5px}
+</style>
+</head>
+<body>
+
+<!-- ============ 1. BÌA ============ -->
+<section class="trang" style="background:var(--toi);color:#e8f1f2">
+  <div style="position:absolute;left:56px;top:48px;right:56px">
+    <div class="eyebrow" style="color:#7fc4cc">VERA Lab · Nghiên cứu tích hợp tay cầm · 09/11/2026</div>
+    <h1 style="font-size:64px;margin-top:14px;color:#fff">Tay cầm tự chế ESP32</h1>
+    <div style="font:600 30px var(--f-tieu);letter-spacing:.04em;color:#11a8c8;text-transform:uppercase">Joystick · BMI160 · 2 nút cảm ứng điện dung</div>
+    <p style="max-width:640px;font-size:16px;color:#b9cdd0;margin-top:18px">
+      Một ESP32 DevKit V1 đọc cả ba loại cảm biến, hợp nhất hướng tay cầm ngay trên mạch, rồi gửi một gói nhị phân
+      100 lần/giây qua Wi-Fi tới Unity. Mục tiêu: tia trỏ không trôi, cần gạt luôn về đúng tâm, nút cảm ứng
+      không bấm ma, độ trễ dưới 30 ms. Không cần mua thêm linh kiện ngoài vài tụ điện và lá đồng.</p>
+  </div>
+  <div style="position:absolute;left:56px;right:56px;bottom:150px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+    <div style="border:1px solid #2a4650;padding:12px 14px"><div class="tag">ESP32</div><h3 style="font:700 18px var(--f-tieu);margin:6px 0 2px;color:#fff">DevKit V1 · 2 nhân</h3><div style="font-size:12.5px;color:#9fb6ba">Nhân 1 đọc cảm biến 200 Hz, nhân 0 lo Wi-Fi. Gửi UDP tới cổng 4210 như các bản trước.</div></div>
+    <div style="border:1px solid #2a4650;padding:12px 14px"><div class="tag cam">Joystick</div><h3 style="font:700 18px var(--f-tieu);margin:6px 0 2px;color:#fff">KY-023 · 2 trục + nhấn</h3><div style="font-size:12.5px;color:#9fb6ba">Đi lại, chọn menu, kéo/đẩy vật. Đọc bằng ADC1 nên vẫn chạy khi bật Wi-Fi.</div></div>
+    <div style="border:1px solid #2a4650;padding:12px 14px"><div class="tag tim">BMI160</div><h3 style="font:700 18px var(--f-tieu);margin:6px 0 2px;color:#fff">Con quay + gia tốc 6 trục</h3><div style="font-size:12.5px;color:#9fb6ba">Hướng tay cầm (quaternion): trỏ, đổ, lắc, khuấy, vặn nắp.</div></div>
+    <div style="border:1px solid #2a4650;padding:12px 14px"><div class="tag dong">Cảm ứng</div><h3 style="font:700 18px var(--f-tieu);margin:6px 0 2px;color:#fff">2 điện cực trên GPIO touch</h3><div style="font-size:12.5px;color:#9fb6ba">Lá đồng dán trong vỏ, nối thẳng chân T4, T6. Biết cả "ngón tay đang đến gần".</div></div>
+  </div>
+  <div style="position:absolute;left:56px;right:56px;bottom:40px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px;border-top:1px solid #2a4650;padding-top:14px">
+    <div><div class="so-lon" style="color:#11a8c8">100 Hz</div><div style="font-size:12px;color:#9fb6ba">gói gửi về Unity (IMU lấy mẫu 200 Hz)</div></div>
+    <div><div class="so-lon" style="color:#11a8c8">&lt; 30 ms</div><div style="font-size:12px;color:#9fb6ba">trễ từ tay tới màn hình (mục tiêu)</div></div>
+    <div><div class="so-lon" style="color:#11a8c8">&lt; 1°</div><div style="font-size:12px;color:#9fb6ba">trôi hướng sau 10 phút để yên (mục tiêu)</div></div>
+    <div><div class="so-lon" style="color:#11a8c8">0</div><div style="font-size:12px;color:#9fb6ba">lần bấm ma trong 10 phút cầm nắm (mục tiêu)</div></div>
+  </div>
+  <div style="position:absolute;right:56px;top:52px;font:600 12px var(--f-so);color:#5f8189;text-align:right">9 trang<br>sơ đồ · tương tác · xử lý tín hiệu<br>yếu tố cản trở · thời gian thực · nghiệm thu</div>
+</section>
+
+<!-- ============ 2. SƠ ĐỒ ĐẤU NỐI ============ -->
+<section class="trang">
+  <div class="dau"><span class="so">02</span><span class="eyebrow">Phần cứng</span></div>
+  <div class="tieu"><h1>Sơ đồ đấu nối</h1><p>Chọn chân đúng là bước khử nhiễu rẻ nhất: analog chỉ trên ADC1, cảm ứng trên chân touch không phải chân khởi động, IMU có dây ngắt để lấy mẫu đều.</p></div>
+  <div class="than luoi" style="grid-template-columns:760px 1fr">
+    <div class="the" style="padding:6px">
+<svg viewBox="0 0 760 486" width="746" height="482">
+  <defs>
+    <g id="dat"><line x1="-6" y1="0" x2="6" y2="0" stroke="#10242b" stroke-width="1.4"/><line x1="-4" y1="3" x2="4" y2="3" stroke="#10242b" stroke-width="1.2"/><line x1="-2" y1="6" x2="2" y2="6" stroke="#10242b" stroke-width="1"/></g>
+  </defs>
+  <!-- ESP32 board -->
+  <text x="380" y="14" text-anchor="middle" font-size="10" fill="#5a6d72">↑ anten (để thoáng, không bị tay che)</text>
+  <rect x="300" y="22" width="160" height="440" rx="8" fill="#0d1b21"/>
+  <text x="380" y="242" text-anchor="middle" font-size="15" font-weight="700" fill="#11a8c8" transform="rotate(-90 380 242)" style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.08em">ESP32 DEVKIT V1 · 30 CHÂN</text>
+  <g class="m" font-size="10.5">
+    <!-- left pins -->
+    <g fill="#6f8a90">
+      <text x="308" y="54">EN</text><text x="308" y="82">VP36</text><text x="308" y="110">VN39</text>
+      <text x="308" y="194">D32</text><text x="308" y="222">D33</text><text x="308" y="250">D25</text><text x="308" y="278">D26</text>
+    </g>
+    <g fill="#ffffff" font-weight="700">
+      <text x="308" y="138">D34</text><text x="308" y="166">D35</text><text x="308" y="306">D27</text>
+      <text x="308" y="334">D14</text><text x="308" y="390">D13</text><text x="308" y="418">GND</text><text x="308" y="446">VIN</text>
+    </g>
+    <text x="308" y="362" fill="#ff7a5c" font-weight="700">D12 ✕</text>
+    <!-- right pins -->
+    <g fill="#6f8a90" text-anchor="end">
+      <text x="452" y="54">D23</text><text x="452" y="110">TX0</text><text x="452" y="138">RX0</text><text x="452" y="222">D18</text>
+      <text x="452" y="278">TX2</text><text x="452" y="306">RX2</text><text x="452" y="334">D4</text>
+    </g>
+    <g fill="#ffffff" text-anchor="end" font-weight="700">
+      <text x="452" y="82">D22</text><text x="452" y="166">D21</text><text x="452" y="194">D19</text><text x="452" y="362">D2</text>
+      <text x="452" y="418">GND</text><text x="452" y="446">3V3</text>
+    </g>
+    <g fill="#ff7a5c" text-anchor="end" font-weight="700"><text x="452" y="250">✕ D5</text><text x="452" y="390">✕ D15</text></g>
+  </g>
+  <g fill="#9fb6ba">
+    <circle cx="300" cy="50" r="3"/><circle cx="300" cy="78" r="3"/><circle cx="300" cy="106" r="3"/><circle cx="300" cy="134" r="3"/><circle cx="300" cy="162" r="3"/><circle cx="300" cy="190" r="3"/><circle cx="300" cy="218" r="3"/><circle cx="300" cy="246" r="3"/><circle cx="300" cy="274" r="3"/><circle cx="300" cy="302" r="3"/><circle cx="300" cy="330" r="3"/><circle cx="300" cy="358" r="3"/><circle cx="300" cy="386" r="3"/><circle cx="300" cy="414" r="3"/><circle cx="300" cy="442" r="3"/>
+    <circle cx="460" cy="50" r="3"/><circle cx="460" cy="78" r="3"/><circle cx="460" cy="106" r="3"/><circle cx="460" cy="134" r="3"/><circle cx="460" cy="162" r="3"/><circle cx="460" cy="190" r="3"/><circle cx="460" cy="218" r="3"/><circle cx="460" cy="246" r="3"/><circle cx="460" cy="274" r="3"/><circle cx="460" cy="302" r="3"/><circle cx="460" cy="330" r="3"/><circle cx="460" cy="358" r="3"/><circle cx="460" cy="386" r="3"/><circle cx="460" cy="414" r="3"/><circle cx="460" cy="442" r="3"/>
+  </g>
+
+  <!-- Joystick -->
+  <rect x="40" y="96" width="130" height="138" rx="6" fill="#fff" stroke="#10242b" stroke-width="1.4"/>
+  <text x="48" y="113" font-size="11.5" font-weight="700">Joystick KY-023</text>
+  <circle cx="82" cy="172" r="27" fill="#eef3f2" stroke="#10242b"/><circle cx="82" cy="172" r="13" fill="#d98b12"/>
+  <g class="m" font-size="10" text-anchor="end"><text x="164" y="131">GND</text><text x="164" y="153">+V</text><text x="164" y="175">VRx</text><text x="164" y="197">VRy</text><text x="164" y="219">SW</text></g>
+  <g fill="none" stroke-width="2.2" stroke-linejoin="round">
+    <polyline points="170,172 230,172 230,134 300,134" stroke="#d98b12"/>
+    <polyline points="170,194 245,194 245,162 300,162" stroke="#d98b12"/>
+    <polyline points="170,216 215,216 215,302 300,302" stroke="#b06d00"/>
+  </g>
+  <g stroke="#10242b" stroke-width="1.3"><line x1="170" y1="128" x2="186" y2="128"/><line x1="170" y1="150" x2="186" y2="150"/></g>
+  <g class="m" font-size="10" font-weight="700"><text x="189" y="131">GND</text><text x="189" y="153" fill="#c2452b">3V3</text></g>
+  <!-- caps -->
+  <g stroke="#10242b" stroke-width="1.3">
+    <line x1="270" y1="134" x2="270" y2="141"/><line x1="263" y1="141" x2="277" y2="141" stroke-width="2"/><line x1="263" y1="145" x2="277" y2="145" stroke-width="2"/><line x1="270" y1="145" x2="270" y2="150"/>
+    <line x1="284" y1="162" x2="284" y2="169"/><line x1="277" y1="169" x2="291" y2="169" stroke-width="2"/><line x1="277" y1="173" x2="291" y2="173" stroke-width="2"/><line x1="284" y1="173" x2="284" y2="178"/>
+  </g>
+  <use href="#dat" x="270" y="150"/><use href="#dat" x="284" y="178"/>
+  <text x="222" y="230" font-size="10" fill="#5a6d72">tụ 100 nF ×2</text>
+  <text x="222" y="292" font-size="10" fill="#b06d00">kéo lên trong</text>
+
+  <!-- Touch pads -->
+  <rect x="60" y="306" width="48" height="48" rx="5" fill="#c87533"/><rect x="66" y="312" width="36" height="36" rx="3" fill="none" stroke="#f3c9a3" stroke-dasharray="3 2"/>
+  <rect x="60" y="362" width="48" height="48" rx="5" fill="#c87533"/><rect x="66" y="368" width="36" height="36" rx="3" fill="none" stroke="#f3c9a3" stroke-dasharray="3 2"/>
+  <text x="84" y="335" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">B</text>
+  <text x="84" y="391" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">A</text>
+  <g fill="none" stroke="#c87533" stroke-width="2.2"><line x1="108" y1="330" x2="300" y2="330"/><line x1="108" y1="386" x2="300" y2="386"/></g>
+  <text x="116" y="322" font-size="10.5" font-weight="600">Chạm B · ngón trỏ · <tspan class="m">T6</tspan></text>
+  <text x="116" y="378" font-size="10.5" font-weight="600">Chạm A · ngón cái · <tspan class="m">T4</tspan></text>
+  <text x="40" y="432" font-size="10" fill="#5a6d72">Lá đồng 15×15 mm dán trong vỏ ≤2 mm.</text>
+  <text x="40" y="446" font-size="10" fill="#5a6d72">Dây ≤10 cm, đi xa anten và dây cần gạt.</text>
+  <text x="40" y="460" font-size="10" fill="#5a6d72">Không cần điện trở, không cần mạch TTP223.</text>
+  <g stroke="#10242b" stroke-width="1.3"><line x1="300" y1="414" x2="284" y2="414"/><line x1="300" y1="442" x2="284" y2="442"/></g>
+  <g class="m" font-size="10" font-weight="700" text-anchor="end"><text x="281" y="417">GND</text><text x="281" y="445" fill="#c2452b">5V</text></g>
+
+  <!-- BMI160 -->
+  <rect x="590" y="100" width="140" height="150" rx="6" fill="#fff" stroke="#10242b" stroke-width="1.4"/>
+  <text x="598" y="117" font-size="11.5" font-weight="700">BMI160 (GY-BMI160)</text>
+  <rect x="680" y="190" width="30" height="30" fill="#6b5bd6"/>
+  <g stroke="#6b5bd6" stroke-width="1.6" fill="#6b5bd6"><line x1="695" y1="205" x2="722" y2="205"/><polygon points="722,201 729,205 722,209"/><line x1="695" y1="205" x2="695" y2="176"/><polygon points="691,176 695,169 699,176"/></g>
+  <text x="716" y="200" font-size="9" fill="#6b5bd6" class="m">X</text><text x="700" y="176" font-size="9" fill="#6b5bd6" class="m">Z</text>
+  <g class="m" font-size="10"><text x="597" y="143">VIN</text><text x="597" y="165">GND</text><text x="597" y="187">SCL</text><text x="597" y="209">SDA</text><text x="597" y="231">INT1</text></g>
+  <g stroke="#10242b" stroke-width="1.3"><line x1="590" y1="140" x2="572" y2="140"/><line x1="590" y1="162" x2="572" y2="162"/></g>
+  <g class="m" font-size="10" font-weight="700" text-anchor="end"><text x="569" y="143" fill="#c2452b">3V3</text><text x="569" y="165">GND</text></g>
+  <g fill="none" stroke-width="2.2" stroke-linejoin="round">
+    <polyline points="590,184 540,184 540,78 460,78" stroke="#6b5bd6"/>
+    <polyline points="590,206 520,206 520,162 460,162" stroke="#6b5bd6"/>
+    <polyline points="590,228 500,228 500,190 460,190" stroke="#6b5bd6" stroke-dasharray="6 4"/>
+  </g>
+  <text x="478" y="74" font-size="10" class="m" fill="#6b5bd6">SCL</text><text x="478" y="158" font-size="10" class="m" fill="#6b5bd6">SDA</text>
+  <text x="478" y="268" font-size="10" fill="#5a6d72">INT1 = ngắt "có dữ liệu mới" (tuỳ chọn, 1 dây)</text>
+  <text x="478" y="282" font-size="10" fill="#5a6d72">Kéo lên SDA/SCL 4,7 kΩ (module thường có sẵn)</text>
+  <text x="478" y="296" font-size="10" fill="#5a6d72">Gắn cứng gần tâm thân, xa module ESP32</text>
+
+  <!-- right board power + LED -->
+  <g stroke="#10242b" stroke-width="1.3"><line x1="460" y1="414" x2="478" y2="414"/><line x1="460" y1="442" x2="478" y2="442"/><line x1="460" y1="358" x2="478" y2="358"/></g>
+  <g class="m" font-size="10" font-weight="700"><text x="482" y="417">GND</text><text x="482" y="445" fill="#c2452b">3V3 → joystick, BMI160</text></g>
+  <circle cx="486" cy="358" r="5" fill="#3a9a4a"/><text x="496" y="362" font-size="10" fill="#5a6d72">LED có sẵn: báo hiệu chuẩn, kết nối</text>
+  <!-- bulk cap -->
+  <rect x="486" y="374" width="272" height="32" rx="3" fill="#fff8ec" stroke="#d98b12"/>
+  <text x="492" y="387" font-size="10">Tụ <tspan font-weight="700">470 µF + 100 nF</tspan> sát chân 3V3–GND:</text><text x="492" y="400" font-size="10">chống sụt áp khi Wi-Fi phát</text>
+  <rect x="488" y="456" width="0" height="0"/>
+  <text x="300" y="478" font-size="10" fill="#5a6d72">VIN 5V từ USB hoặc mạch pin</text>
+</svg>
+    </div>
+    <div class="the">
+      <h3>Bảng chân</h3>
+      <table>
+        <tr><th>Tín hiệu</th><th>Chân</th><th>Vì sao</th></tr>
+        <tr><td style="white-space:nowrap"><span class="tag cam">J</span> VRx, VRy</td><td class="mono" style="white-space:nowrap">34, 35</td><td>ADC1: vẫn đọc được khi Wi-Fi bật (ADC2 thì không)</td></tr>
+        <tr><td style="white-space:nowrap"><span class="tag cam">J</span> Nhấn cần</td><td class="mono">27</td><td>INPUT_PULLUP, khử dội 20 ms</td></tr>
+        <tr><td style="white-space:nowrap"><span class="tag cam">J</span> Nguồn</td><td class="mono">3V3</td><td>Không cấp 5V: điện áp ra sẽ vượt 3,3 V</td></tr>
+        <tr><td style="white-space:nowrap"><span class="tag tim">I</span> SDA, SCL</td><td class="mono" style="white-space:nowrap">21, 22</td><td>I2C mặc định, 400 kHz, dây ngắn</td></tr>
+        <tr><td><span class="tag tim">I</span> INT1</td><td class="mono">19</td><td>Lấy mẫu đều đúng nhịp cảm biến, không phụ thuộc vòng lặp</td></tr>
+        <tr><td style="white-space:nowrap"><span class="tag dong">T</span> Chạm A</td><td class="mono" style="white-space:nowrap">13 (T4)</td><td>Chân cảm ứng, không phải chân khởi động; trùng cổng P1 của VERA Arc</td></tr>
+        <tr><td style="white-space:nowrap"><span class="tag dong">T</span> Chạm B</td><td class="mono" style="white-space:nowrap">14 (T6)</td><td>Như trên; cổng P2</td></tr>
+        <tr><td><span class="tag la">L</span> LED</td><td class="mono">2</td><td>LED có sẵn trên board</td></tr>
+      </table>
+      <div class="ghi" style="margin-top:10px;border-color:var(--do);background:#fdf0ec">
+        <b>Không dùng:</b> GPIO12 (T5) làm chân cảm ứng: bị kéo lên lúc bật là ESP32 không khởi động. Tránh GPIO0, 5, 15 (chân khởi động), GPIO6–11 (bộ nhớ flash), mọi chân ADC2 cho analog.
+      </div>
+      <p class="nho" style="margin-top:8px">Pin và mạch sạc tính riêng; nếu đo điện áp pin, dùng GPIO33 hoặc 36 (ADC1).</p>
+    </div>
+  </div>
+  <div class="chan"><span><b>VERA Lab</b> · Tay cầm ESP32 tích hợp</span><span>Nguồn chân: Espressif ESP32 Datasheet, ESP-IDF Touch Sensor, ADC</span><span>02 / 09</span></div>
+</section>
+
+<!-- ============ 3. BỐ TRÍ & TÍNH NĂNG ============ -->
+<section class="trang">
+  <div class="dau"><span class="so">03</span><span class="eyebrow">Tính năng</span></div>
+  <div class="tieu"><h1>Bố trí trên tay cầm và vai trò từng bộ phận</h1><p>Mỗi ngón một việc: ngón cái gạt cần và chạm A, ngón trỏ giữ chạm B để cầm. Cổ tay điều khiển hướng qua BMI160.</p></div>
+  <div class="than luoi" style="grid-template-columns:560px 1fr">
+    <div class="the" style="padding:8px">
+<svg viewBox="0 0 544 500" width="542" height="496">
+  <text x="20" y="20" font-size="12" font-weight="700" style="font-family:'Barlow Condensed',sans-serif;letter-spacing:.08em">NHÌN NGANG (mũi tay cầm hướng phải)</text>
+  <!-- grip -->
+  <path d="M110 452 Q 98 340 112 222 L 186 222 Q 200 340 176 452 Q 143 466 110 452 Z" fill="#eef3f2" stroke="#10242b" stroke-width="1.6"/>
+  <!-- head -->
+  <rect x="78" y="128" width="168" height="98" rx="38" fill="#f9fbfb" stroke="#10242b" stroke-width="1.6"/>
+  <!-- joystick -->
+  <rect x="122" y="108" width="30" height="22" fill="#5a6d72"/><ellipse cx="137" cy="104" rx="22" ry="7" fill="#d98b12" stroke="#10242b"/>
+  <!-- pad A on top -->
+  <rect x="172" y="124" width="40" height="7" rx="2" fill="#c87533"/>
+  <!-- pad B front -->
+  <rect x="190" y="236" width="8" height="52" rx="2" fill="#c87533" transform="rotate(-4 194 262)"/>
+  <!-- ESP32 inside head -->
+  <rect x="96" y="152" width="120" height="44" rx="4" fill="none" stroke="#11a8c8" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="156" y="178" text-anchor="middle" font-size="10.5" fill="#0e7c86" font-weight="600">ESP32 (anten → mũi)</text>
+  <!-- BMI -->
+  <rect x="128" y="300" width="34" height="22" fill="#6b5bd6"/>
+  <g stroke="#6b5bd6" stroke-width="1.8" fill="#6b5bd6">
+    <line x1="145" y1="311" x2="232" y2="311"/><polygon points="232,306 241,311 232,316"/>
+    <line x1="145" y1="311" x2="145" y2="250"/><polygon points="140,250 145,241 150,250"/>
+  </g>
+  <circle cx="145" cy="311" r="5" fill="#fff" stroke="#6b5bd6" stroke-width="1.6"/><circle cx="145" cy="311" r="1.8" fill="#6b5bd6"/>
+  <text x="244" y="315" font-size="11" fill="#6b5bd6" class="m" font-weight="700">X trước</text>
+  <text x="152" y="252" font-size="11" fill="#6b5bd6" class="m" font-weight="700">Z lên</text>
+  <text x="36" y="336" font-size="10" fill="#6b5bd6" class="m" font-weight="700">Y vào trong</text>
+  <!-- labels -->
+  <g stroke="#5a6d72" stroke-width="1" fill="none"><polyline points="137,96 137,64 262,64"/><polyline points="200,124 214,86 262,86"/><polyline points="198,262 262,262"/><polyline points="162,320 230,350 262,350"/></g>
+  <g font-size="11.5">
+    <text x="266" y="68"><tspan font-weight="700" fill="#b06d00">Joystick</tspan> · ngón cái</text>
+    <text x="266" y="90"><tspan font-weight="700" fill="#c87533">Chạm A</tspan> · ngón cái, cách cần ≥15 mm</text>
+    <text x="266" y="266"><tspan font-weight="700" fill="#c87533">Chạm B</tspan> · chỗ ngón trỏ đặt sẵn</text>
+    <text x="266" y="280" font-size="10.5" fill="#5a6d72">giữ = đang cầm vật (thay cò)</text>
+    <text x="266" y="354"><tspan font-weight="700" fill="#6b5bd6">BMI160</tspan> gần tâm xoay cổ tay</text>
+    <text x="266" y="368" font-size="10.5" fill="#5a6d72">gắn cứng bằng vít, trục X theo mũi tay cầm</text>
+  </g>
+  <!-- palm zone -->
+  <path d="M100 380 Q 96 420 108 448" stroke="#c2452b" stroke-width="5" fill="none" opacity=".35"/>
+  <text x="20" y="420" font-size="10" fill="#c2452b">lòng bàn</text><text x="20" y="432" font-size="10" fill="#c2452b">tay áp ở đây:</text><text x="20" y="444" font-size="10" fill="#c2452b">không đặt</text><text x="20" y="456" font-size="10" fill="#c2452b">điện cực</text>
+  <!-- pointing arrow -->
+  <g stroke="#11a8c8" stroke-width="2" fill="#11a8c8"><line x1="250" y1="176" x2="300" y2="176" stroke-dasharray="5 4"/><polygon points="300,171 310,176 300,181"/></g>
+  <text x="314" y="180" font-size="10.5" fill="#0e7c86">hướng trỏ</text>
+  <!-- top view -->
+  <text x="372" y="420" font-size="12" font-weight="700" style="font-family:'Barlow Condensed',sans-serif;letter-spacing:.08em">NHÌN TỪ TRÊN (mũi bên phải)</text>
+  <rect x="380" y="430" width="0" height="0"/>
+  <g transform="translate(372,428)">
+    <rect x="0" y="0" width="150" height="60" rx="28" fill="#f9fbfb" stroke="#10242b" stroke-width="1.4"/>
+    <circle cx="48" cy="30" r="17" fill="#d98b12" stroke="#10242b"/>
+    <rect x="86" y="14" width="34" height="32" rx="6" fill="#c87533"/><text x="103" y="35" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">A</text>
+    
+  </g>
+</svg>
+    </div>
+    <div class="luoi ngan" style="grid-template-rows:repeat(5,auto);gap:8px;align-content:start">
+      <div class="the"><h3><span class="tag cam">J</span> Joystick · di chuyển &amp; chọn</h3>
+        <p>Xuất <span class="mono">x, y ∈ [−1, 1]</span> đã hiệu chuẩn tâm và biên, cộng trạng thái nhấn cần. Chế độ ĐI: đi lại, xoay người. Chế độ TAY: kéo vật xa/gần, xoay vật. Trong menu tròn: chọn mục theo góc gạt.</p></div>
+      <div class="the"><h3><span class="tag tim">I</span> BMI160 · hướng &amp; cử chỉ</h3>
+        <p>Hợp nhất trên ESP32 thành quaternion 200 Hz, gửi kèm vận tốc góc và gia tốc. Dùng để trỏ (tia theo vận tốc góc nên không sợ trôi), đổ theo góc nghiêng, nhận lắc, khuấy, vặn nắp.</p></div>
+      <div class="the"><h3><span class="tag dong">A</span> Chạm A · hành động</h3>
+        <p>Nhấp: dùng vật đang cầm (bóp pipet, bật đèn cồn). Giữ: mở menu tròn. Nhấp đúp: hỏi trợ lý AI. Gửi cả mức tín hiệu 0–255, nên biết ngón tay đang <b>lơ lửng</b> trên nút để hiện gợi ý trước khi chạm.</p></div>
+      <div class="the"><h3><span class="tag dong">B</span> Chạm B · cầm / thả</h3>
+        <p>Giữ ngón trỏ là cầm, buông là thả, tự nhiên như nắm tay. Giữ A + B 1 giây: căn lại hướng trỏ.</p></div>
+      <div class="the"><h3><span class="tag">E</span> ESP32 · bộ não</h3>
+        <p>Nhân 1 đọc cảm biến, lọc, hợp nhất; nhân 0 gửi Wi-Fi 100 Hz và nghe lệnh từ Unity (căn lại, hiệu chuẩn, đổi ngưỡng). Tự hiệu chuẩn khi bật, lưu thông số vào bộ nhớ trong (NVS).</p></div>
+    </div>
+  </div>
+  <div class="chan"><span><b>VERA Lab</b> · Tay cầm ESP32 tích hợp</span><span>Áp dụng được cho thân VERA Arc / VERA Band (cổng P1, P2 = GPIO13, 14)</span><span>03 / 09</span></div>
+</section>
+
+<!-- ============ 4. TƯƠNG TÁC ============ -->
+<section class="trang">
+  <div class="dau"><span class="so">04</span><span class="eyebrow">Tương tác</span></div>
+  <div class="tieu"><h1>Bản đồ tương tác trong phòng thí nghiệm</h1><p>4 đầu vào, đủ thao tác thật nhờ kết hợp: chạm nói ý định, cổ tay nói cách làm. Không có motor rung nên phản hồi bằng hình và tiếng.</p></div>
+  <div class="than luoi" style="grid-template-columns:1fr 400px">
+    <div class="the" style="padding:8px 12px">
+      <table>
+        <tr><th style="width:150px">Thao tác</th><th>Cách làm</th><th style="width:270px">Dùng trong lab</th></tr>
+        <tr><td><b>Trỏ, chọn</b></td><td>Xoay cổ tay; tia đi theo vận tốc góc</td><td>Chỉ vào dụng cụ, nút trên máy phân tích</td></tr>
+        <tr><td><b>Cầm, thả</b> <span class="tag dong">B</span></td><td>Giữ chạm B; buông là thả</td><td>Cầm cốc, ống nghiệm, đặt lại giá</td></tr>
+        <tr><td><b>Dùng vật</b> <span class="tag dong">A</span></td><td>Nhấp chạm A (&lt;250 ms)</td><td>Bóp pipet, bật đèn cồn, bấm máy đo</td></tr>
+        <tr><td><b>Menu tròn</b> <span class="tag dong">A</span><span class="tag cam">J</span></td><td>Giữ A 0,5 s, gạt cần chọn, nhả A để chọn</td><td>Lấy hoá chất, đổi dụng cụ</td></tr>
+        <tr><td><b>Hỏi AI</b> <span class="tag dong">A</span></td><td>Nhấp đúp A (2 lần trong 350 ms)</td><td>Hỏi trợ lý bằng giọng nói</td></tr>
+        <tr><td><b>Căn lại hướng</b></td><td>Hướng vào màn hình, giữ A + B 1 s</td><td>Sửa tia lệch, đổi chỗ ngồi</td></tr>
+        <tr><td><b>Đi lại</b> <span class="tag cam">J</span></td><td>Gạt cần (chế độ ĐI); nhấn cần đổi ĐI ↔ TAY</td><td>Đi quanh bàn, sang khu khác</td></tr>
+        <tr><td><b>Kéo, xoay vật</b> <span class="tag cam">J</span></td><td>Đang cầm, chế độ TAY: lên/xuống = xa/gần, trái/phải = xoay</td><td>Đưa ống nghiệm vào giá, lật mẫu</td></tr>
+        <tr><td><b>Đổ</b> <span class="tag tim">I</span></td><td>Đang cầm, nghiêng (roll) qua 35°; tốc độ rót tăng theo góc</td><td>Rót dung dịch; nghiêng ít = nhỏ từng giọt</td></tr>
+        <tr><td><b>Lắc</b> <span class="tag tim">I</span></td><td>Lắc nhanh: |a| dao động &gt;0,8 g trong 0,3 s</td><td>Lắc ống nghiệm, hoà tan chất rắn</td></tr>
+        <tr><td><b>Khuấy</b> <span class="tag tim">I</span></td><td>Vẽ vòng tròn đều (con quay quay đều quanh trục đứng)</td><td>Khuấy đũa thuỷ tinh trong cốc</td></tr>
+        <tr><td><b>Vặn</b> <span class="tag dong">B</span><span class="tag tim">I</span></td><td>Giữ B, xoay cổ tay quanh trục dọc X</td><td>Mở nắp lọ, vặn khoá buret</td></tr>
+        <tr><td><b>Chế độ tinh</b> <span class="tag dong">A</span><span class="tag tim">I</span></td><td>Đang cầm, giữ A: độ nhạy ×0,25</td><td>Căn pipet đúng vạch, chỉnh vi vít kính hiển vi</td></tr>
+      </table>
+    </div>
+    <div class="the" style="padding:10px 12px">
+      <h3>Nút cảm ứng: 3 ngưỡng, có trễ</h3>
+<svg viewBox="0 0 376 300" width="374" height="298">
+  <line x1="40" y1="230" x2="366" y2="230" stroke="#10242b"/><line x1="40" y1="20" x2="40" y2="230" stroke="#10242b"/>
+  <text x="34" y="234" text-anchor="end" font-size="10" class="m">0</text><text x="34" y="44" text-anchor="end" font-size="10" class="m">100%</text>
+  <text x="10" y="150" font-size="10" fill="#5a6d72" text-anchor="middle" transform="rotate(-90 10 150)">Δ so với mức chạm đã học</text>
+  <!-- thresholds -->
+  <g stroke-dasharray="5 4" stroke-width="1.3">
+    <line x1="40" y1="135" x2="366" y2="135" stroke="#c2452b"/>
+    <line x1="40" y1="163.5" x2="366" y2="163.5" stroke="#0e7c86"/>
+    <line x1="40" y1="201.5" x2="366" y2="201.5" stroke="#d98b12"/>
+  </g>
+  <text x="364" y="131" text-anchor="end" font-size="10" fill="#c2452b" font-weight="600">50% chạm</text>
+  <text x="364" y="159" text-anchor="end" font-size="10" fill="#0e7c86" font-weight="600">35% nhả</text>
+  <text x="364" y="197" text-anchor="end" font-size="10" fill="#d98b12" font-weight="600">15% lơ lửng</text>
+  <!-- signal -->
+  <path d="M40 228 L70 226 L80 229 L95 225 Q110 190 125 188 L140 186 Q150 120 160 60 L185 56 L200 62 Q210 150 222 152 L240 150 Q250 90 260 62 L280 58 Q292 140 300 226 L330 228 L366 226" fill="none" stroke="#10242b" stroke-width="2.2"/>
+  <!-- state bar -->
+  <g font-size="9.5" text-anchor="middle">
+    <rect x="40" y="244" width="72" height="18" fill="#eef3f2"/><text x="76" y="257">rảnh</text>
+    <rect x="112" y="244" width="40" height="18" fill="#ffe7c2"/><text x="132" y="257">lơ lửng</text>
+    <rect x="152" y="244" width="144" height="18" fill="#c87533"/><text x="224" y="257" fill="#fff" font-weight="700">ĐANG CHẠM</text>
+    <rect x="296" y="244" width="70" height="18" fill="#eef3f2"/><text x="331" y="257">rảnh</text>
+  </g>
+  <text x="40" y="282" font-size="10.5" fill="#5a6d72">Δ tụt xuống 40% vẫn tính là đang chạm: không nhấp nháy.</text>
+  <text x="40" y="296" font-size="10.5" fill="#5a6d72">Xác nhận 2 mẫu liên tiếp (10 ms) mới đổi trạng thái.</text>
+</svg>
+      <div class="ghi" style="margin-top:6px">Thời gian: nhấp &lt;250 ms · giữ ≥500 ms · đúp: 2 nhấp trong 350 ms · căn lại: A + B ≥1 s. Tất cả chỉnh được trong cài đặt Unity.</div>
+    </div>
+  </div>
+  <div class="chan"><span><b>VERA Lab</b> · Tay cầm ESP32 tích hợp</span><span>Chế độ ĐI / TAY giữ như docs/09; cử chỉ đổ, lắc, khuấy, vặn là phần mới</span><span>04 / 09</span></div>
+</section>
+
+<!-- ============ 5. XỬ LÝ TÍN HIỆU ============ -->
+<section class="trang">
+  <div class="dau"><span class="so">05</span><span class="eyebrow">Mượt &amp; chính xác</span></div>
+  <div class="tieu"><h1>Đường xử lý tín hiệu</h1><p>ESP32 làm sạch và hợp nhất ngay cạnh cảm biến, ở tần số cao. Unity làm mượt và diễn giải; thông số chỉnh trong cài đặt, không phải nạp lại firmware.</p></div>
+  <div class="than">
+<svg viewBox="0 0 1168 520" width="1168" height="520">
+  <defs><marker id="mt" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5a6d72"/></marker></defs>
+  <!-- column headers -->
+  <rect x="120" y="0" width="560" height="26" fill="#0d1b21"/><text x="400" y="18" text-anchor="middle" font-size="12" font-weight="700" fill="#11a8c8" style="letter-spacing:.12em">ESP32 · NHÂN 1 · 200 Hz</text>
+  <rect x="698" y="0" width="92" height="26" fill="#d98b12"/><text x="744" y="18" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">GÓI v3</text>
+  <rect x="808" y="0" width="360" height="26" fill="#0e7c86"/><text x="988" y="18" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" style="letter-spacing:.12em">UNITY · MỖI KHUNG HÌNH</text>
+  <rect x="698" y="36" width="92" height="420" fill="#fff8ec" stroke="#d98b12"/>
+  <text x="744" y="230" text-anchor="middle" font-size="12" font-weight="700" fill="#b06d00">UDP</text>
+  <text x="744" y="248" text-anchor="middle" font-size="12" font-weight="700" fill="#b06d00">100 Hz</text>
+  <text x="744" y="266" text-anchor="middle" font-size="10.5" fill="#5a6d72">37 byte</text>
+  <text x="744" y="280" text-anchor="middle" font-size="10.5" fill="#5a6d72">seq + CRC</text>
+
+  <!-- lanes -->
+  <g font-size="11.5">
+  <!-- Joystick lane y=40 -->
+  <rect x="0" y="40" width="108" height="120" fill="#d98b12"/><text x="54" y="96" text-anchor="middle" font-weight="700" fill="#fff" font-size="13">JOYSTICK</text><text x="54" y="114" text-anchor="middle" fill="#fff" font-size="10.5">GPIO34, 35</text>
+  <rect x="120" y="40" width="176" height="120" fill="#fff" stroke="#d5dfdd"/>
+  <text x="130" y="60" font-weight="700">1 · Đọc sạch</text>
+  <text x="130" y="80">ADC1, suy giảm 11 dB</text><text x="130" y="96">trung bình 16 mẫu</text><text x="130" y="112">đổi ra mV bằng hiệu chuẩn</text><text x="130" y="128">eFuse (analogReadMilliVolts)</text><text x="130" y="148" fill="#5a6d72" font-size="10.5">khử nhiễu ADC, phi tuyến</text>
+  <rect x="312" y="40" width="176" height="120" fill="#fff" stroke="#d5dfdd"/>
+  <text x="322" y="60" font-weight="700">2 · Tâm &amp; biên</text>
+  <text x="322" y="80">tâm học lúc bật máy</text><text x="322" y="96">tự học lại khi buông cần</text><text x="322" y="112">yên &gt;1 s; min/max học</text><text x="322" y="128">khi xoay cần, lưu NVS</text><text x="322" y="148" fill="#5a6d72" font-size="10.5">khử lệch tâm, không tới 1,0</text>
+  <rect x="504" y="40" width="176" height="120" fill="#fff" stroke="#d5dfdd"/>
+  <text x="514" y="60" font-weight="700">3 · Chuẩn hoá</text>
+  <text x="514" y="80">ra −1..1 theo từng nửa</text><text x="514" y="96">trục (tâm không ở giữa)</text><text x="514" y="112">EMA nhẹ α = 0,5</text><text x="514" y="128">(trễ thêm &lt;5 ms)</text>
+  <rect x="808" y="40" width="172" height="120" fill="#fff" stroke="#d5dfdd"/>
+  <text x="818" y="60" font-weight="700">4 · Vùng chết tròn</text>
+  <text x="818" y="80">trong 8%, ngoài 5%</text><text x="818" y="96">co giãn lại để vẫn đạt 1,0</text><text x="818" y="112">tròn, không vuông:</text><text x="818" y="128">đi chéo không bị khựng</text>
+  <rect x="996" y="40" width="172" height="120" fill="#fff" stroke="#d5dfdd"/>
+  <text x="1006" y="60" font-weight="700">5 · Đường cong</text>
+  <text x="1006" y="80">expo 1,6: gạt nhẹ = chậm,</text><text x="1006" y="96">tinh; gạt hết = nhanh</text><text x="1006" y="112">menu: hướng có trễ 10°</text><text x="1006" y="128">để không nhảy mục</text>
+
+  <!-- Touch lane y=176 -->
+  <rect x="0" y="176" width="108" height="130" fill="#c87533"/><text x="54" y="234" text-anchor="middle" font-weight="700" fill="#fff" font-size="13">CẢM ỨNG</text><text x="54" y="252" text-anchor="middle" fill="#fff" font-size="10.5">T4, T6</text>
+  <rect x="120" y="176" width="176" height="130" fill="#fff" stroke="#d5dfdd"/>
+  <text x="130" y="196" font-weight="700">1 · Đo ổn định</text>
+  <text x="130" y="216">tăng chu kỳ đo</text><text x="130" y="232">(touchSetCycles)</text><text x="130" y="248">trung vị 3 mẫu bỏ gai</text><text x="130" y="264">do Wi-Fi phát, sụt áp</text><text x="130" y="292" fill="#5a6d72" font-size="10.5">khử gai nhiễu tức thời</text>
+  <rect x="312" y="176" width="176" height="130" fill="#fff" stroke="#d5dfdd"/>
+  <text x="322" y="196" font-weight="700">2 · Mức nền thích nghi</text>
+  <text x="322" y="216">học lúc bật; chỉ trôi theo</text><text x="322" y="232">khi KHÔNG chạm, rất chậm</text><text x="322" y="248">(τ ≈ 20 s); đổi USB ↔ pin</text><text x="322" y="264">thì học lại ngay</text><text x="322" y="292" fill="#5a6d72" font-size="10.5">khử trôi nhiệt, ẩm, đổi nguồn</text>
+  <rect x="504" y="176" width="176" height="130" fill="#fff" stroke="#d5dfdd"/>
+  <text x="514" y="196" font-weight="700">3 · Ngưỡng có trễ</text>
+  <text x="514" y="216">Δ theo % mức chạm thật</text><text x="514" y="232">đã học (không số cứng)</text><text x="514" y="248">chạm 50%, nhả 35%,</text><text x="514" y="264">xác nhận 2 mẫu</text><text x="514" y="292" fill="#5a6d72" font-size="10.5">khử bấm ma, nhấp nháy</text>
+  <rect x="808" y="176" width="172" height="130" fill="#fff" stroke="#d5dfdd"/>
+  <text x="818" y="196" font-weight="700">4 · Máy trạng thái</text>
+  <text x="818" y="216">rảnh → lơ lửng → chạm</text><text x="818" y="232">→ giữ; sinh sự kiện</text><text x="818" y="248">nhấp, đúp, giữ, nhả</text>
+  <rect x="996" y="176" width="172" height="130" fill="#fff" stroke="#d5dfdd"/>
+  <text x="1006" y="196" font-weight="700">5 · Kết hợp</text>
+  <text x="1006" y="216">A + B giữ 1 s = căn lại</text><text x="1006" y="232">vuốt A → B &lt;300 ms</text><text x="1006" y="248">= bước tiếp theo</text><text x="1006" y="264">lơ lửng = hiện gợi ý</text>
+
+  <!-- IMU lane y=322 -->
+  <rect x="0" y="322" width="108" height="134" fill="#6b5bd6"/><text x="54" y="382" text-anchor="middle" font-weight="700" fill="#fff" font-size="13">BMI160</text><text x="54" y="400" text-anchor="middle" fill="#fff" font-size="10.5">I2C + INT1</text>
+  <rect x="120" y="322" width="176" height="134" fill="#fff" stroke="#d5dfdd"/>
+  <text x="130" y="342" font-weight="700">1 · Lấy mẫu đều</text>
+  <text x="130" y="362">200 Hz theo ngắt INT1</text><text x="130" y="378">±1000 °/s, ±8 g</text><text x="130" y="394">lọc thông thấp trong chip</text><text x="130" y="410">dt đo bằng micros()</text><text x="130" y="440" fill="#5a6d72" font-size="10.5">khử sai dt, bão hoà khi lắc</text>
+  <rect x="312" y="322" width="176" height="134" fill="#fff" stroke="#d5dfdd"/>
+  <text x="322" y="342" font-weight="700">2 · Trừ độ lệch</text>
+  <text x="322" y="362">cân lúc bật (đã có)</text><text x="322" y="378">tự học khi yên &gt;0,5 s</text><text x="322" y="394">(đã có) + bù theo nhiệt</text><text x="322" y="410">độ đọc từ BMI160</text><text x="322" y="440" fill="#5a6d72" font-size="10.5">khử trôi do ESP32 nóng lên</text>
+  <rect x="504" y="322" width="176" height="134" fill="#fff" stroke="#d5dfdd"/>
+  <text x="514" y="342" font-weight="700">3 · Hợp nhất Madgwick</text>
+  <text x="514" y="362">β = 0,1 trong 2 s đầu</text><text x="514" y="378">để hội tụ, sau đó 0,033;</text><text x="514" y="394">bỏ gia tốc kế khi |a|</text><text x="514" y="410">lệch 1 g &gt;0,15 g</text><text x="514" y="440" fill="#5a6d72" font-size="10.5">roll, pitch không trôi</text>
+  <rect x="808" y="322" width="172" height="134" fill="#fff" stroke="#d5dfdd"/>
+  <text x="818" y="342" font-weight="700">4 · Dự đoán</text>
+  <text x="818" y="362">quay tiếp theo vận tốc</text><text x="818" y="378">góc ~12 ms (bù trễ</text><text x="818" y="394">mạng + khung hình)</text><text x="818" y="410">tia trỏ: cộng vận tốc góc</text><text x="818" y="426">→ không phụ thuộc yaw</text>
+  <rect x="996" y="322" width="172" height="134" fill="#fff" stroke="#d5dfdd"/>
+  <text x="1006" y="342" font-weight="700">5 · Bộ lọc One Euro</text>
+  <text x="1006" y="362">chậm → lọc mạnh, hết run</text><text x="1006" y="378">nhanh → lọc nhẹ, không trễ</text><text x="1006" y="394">fc,min 1 Hz, β 0,02</text><text x="1006" y="410">cử chỉ đọc gia tốc,</text><text x="1006" y="426">vận tốc góc thô</text>
+  </g>
+  <!-- arrows -->
+  <g stroke="#5a6d72" stroke-width="1.6" marker-end="url(#mt)">
+    <line x1="108" y1="100" x2="118" y2="100"/><line x1="296" y1="100" x2="310" y2="100"/><line x1="488" y1="100" x2="502" y2="100"/><line x1="680" y1="100" x2="696" y2="100"/><line x1="790" y1="100" x2="806" y2="100"/><line x1="980" y1="100" x2="994" y2="100"/>
+    <line x1="108" y1="241" x2="118" y2="241"/><line x1="296" y1="241" x2="310" y2="241"/><line x1="488" y1="241" x2="502" y2="241"/><line x1="680" y1="241" x2="696" y2="241"/><line x1="790" y1="241" x2="806" y2="241"/><line x1="980" y1="241" x2="994" y2="241"/>
+    <line x1="108" y1="389" x2="118" y2="389"/><line x1="296" y1="389" x2="310" y2="389"/><line x1="488" y1="389" x2="502" y2="389"/><line x1="680" y1="389" x2="696" y2="389"/><line x1="790" y1="389" x2="806" y2="389"/><line x1="980" y1="389" x2="994" y2="389"/>
+  </g>
+  <!-- bottom principle -->
+  <rect x="0" y="472" width="1168" height="44" fill="#0d1b21"/>
+  <text x="16" y="499" font-size="13" fill="#e8f1f2"><tspan font-weight="700" fill="#11a8c8">Chìa khoá chống trôi:</tspan> tia trỏ cộng dồn vận tốc góc (như ngắm bằng con quay trên máy chơi game), không đọc yaw tuyệt đối, nên yaw trôi không làm lệch tia.</text>
+</svg>
+  </div>
+  <div class="chan"><span><b>VERA Lab</b> · Tay cầm ESP32 tích hợp</span><span>Madgwick (2010) · One Euro filter, Casiez và cộng sự (CHI 2012) · ESP-IDF ADC, Touch Sensor</span><span>05 / 09</span></div>
+</section>
+
+<!-- ============ 6. YẾU TỐ CẢN TRỞ ============ -->
+<section class="trang">
+  <div class="dau"><span class="so">06</span><span class="eyebrow">Loại bỏ cản trở</span></div>
+  <div class="tieu"><h1>12 yếu tố cản trở và cách khử</h1><p>Khử ở phần cứng trước (rẻ, triệt để), phần mềm sau. Dòng có dấu ✓ là firmware BMI160 hiện tại đã làm.</p></div>
+  <div class="than">
+    <div class="the" style="height:100%;padding:6px 12px">
+      <table class="to">
+        <tr><th style="width:24px">#</th><th style="width:230px">Cản trở</th><th style="width:220px">Biểu hiện</th><th style="width:310px">Khử bằng phần cứng</th><th>Khử bằng phần mềm</th></tr>
+        <tr><td class="mono">1</td><td><span class="tag tim">I</span> <b>Yaw trôi</b> (BMI160 không có la bàn)</td><td>tia trỏ lệch dần khi xoay nhiều</td><td>gắn IMU cứng, trục thẳng với thân</td><td>tia theo vận tốc góc; giữ A+B căn lại; tuỳ chọn ghép yaw từ MediaPipe</td></tr>
+        <tr><td class="mono">2</td><td><span class="tag tim">I</span> <b>Độ lệch con quay đổi theo nhiệt</b></td><td>trôi tăng sau vài phút bật Wi-Fi</td><td>đặt BMI160 xa module ESP32 và ổn áp</td><td>✓ tự học khi yên; thêm bù theo nhiệt độ đọc từ chip</td></tr>
+        <tr><td class="mono">3</td><td><span class="tag tim">I</span> <b>Run tay, nhiễu</b> &amp; <b>bão hoà khi lắc</b></td><td>tia rung; góc nhảy sau khi lắc mạnh</td><td>—</td><td>One Euro filter; dải ±1000 °/s, ±8 g (hiện ±500 °/s, ±4 g)</td></tr>
+        <tr><td class="mono">4</td><td><span class="tag tim">I</span> <b>Lấy mẫu không đều</b></td><td>dt sai → góc sai khi Wi-Fi bận</td><td>dây INT1 → GPIO19</td><td>đọc theo ngắt trên nhân 1; Wi-Fi ở nhân 0</td></tr>
+        <tr><td class="mono">5</td><td><span class="tag tim">I</span> <b>Treo I2C</b>, đọc ra 0</td><td>hướng đứng hình</td><td>dây I2C ≤10 cm, kéo lên 4,7 kΩ</td><td>✓ timeout, gỡ kẹt 9 xung SCL, khởi động lại chip</td></tr>
+        <tr><td class="mono">6</td><td><span class="tag cam">J</span> <b>ADC2 bị Wi-Fi chiếm</b></td><td>joystick đứng im hoặc số rác</td><td>chỉ dùng ADC1: GPIO34, 35</td><td>—</td></tr>
+        <tr><td class="mono">7</td><td><span class="tag cam">J</span> <b>ADC nhiễu, phi tuyến</b>; <b>tâm lệch</b></td><td>tâm dao động, nhân vật tự trôi; gạt hết không đạt 1,0</td><td>tụ 100 nF ở VRx, VRy; xoắn dây tín hiệu với GND</td><td>16 mẫu + mV hiệu chuẩn; học tâm, biên; vùng chết tròn trong 8%, ngoài 5%</td></tr>
+        <tr><td class="mono">8</td><td><span class="tag">E</span> <b>Sụt áp khi Wi-Fi phát</b></td><td>ADC, cảm ứng nhảy; có khi reset</td><td>tụ 470 µF + 100 nF sát 3V3; dây nguồn ngắn, to</td><td>trung vị 3 mẫu bỏ gai</td></tr>
+        <tr><td class="mono">9</td><td><span class="tag dong">T</span> <b>Bấm ma</b> (nhiễu Wi-Fi, mồ hôi, lòng bàn tay áp gần)</td><td>tự cầm, tự thả vật</td><td>điện cực ở chỗ lòng bàn tay không tới; dây ≤10 cm, xa anten; vỏ ≤2 mm</td><td>ngưỡng có trễ 50/35% theo mức chạm đã học; xác nhận 2 mẫu</td></tr>
+        <tr><td class="mono">10</td><td><span class="tag dong">T</span> <b>Mức nền cảm ứng trôi</b> (nhiệt, ẩm, cắm USB ↔ chạy pin)</td><td>nút nhạy dần hoặc chết</td><td>—</td><td>mức nền thích nghi chậm, chỉ khi không chạm; học lại khi đổi nguồn</td></tr>
+        <tr><td class="mono">11</td><td><span class="tag vr">W</span> <b>Wi-Fi ngủ tiết kiệm điện</b> (mặc định)</td><td>trễ, giật cục thất thường</td><td>router 2,4 GHz kênh vắng hoặc điểm phát của laptop</td><td><span class="mono">WiFi.setSleep(false)</span>; gửi đều 100 Hz</td></tr>
+        <tr><td class="mono">12</td><td><span class="tag vr">W</span> <b>Mất gói, đến sai thứ tự</b></td><td>vật nhảy, nút nhả nhầm</td><td>—</td><td>số thứ tự seq: bỏ gói cũ; mỗi gói chứa trạng thái đầy đủ nên mất 1 gói không mất nút</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="chan"><span><b>VERA Lab</b> · Tay cầm ESP32 tích hợp</span><span>I = BMI160 · J = joystick · T = cảm ứng · E = nguồn · W = Wi-Fi</span><span>06 / 09</span></div>
+</section>
+
+<!-- ============ 7. THỜI GIAN THỰC & GÓI ============ -->
+<section class="trang">
+  <div class="dau"><span class="so">07</span><span class="eyebrow">Thời gian thực</span></div>
+  <div class="tieu"><h1>Chia việc 2 nhân, gói v3 và ngân sách độ trễ</h1><p>Đọc cảm biến không bao giờ phải chờ Wi-Fi. Gói gửi trạng thái đầy đủ, nhỏ, có kiểm tra lỗi; Unity luôn dùng gói mới nhất.</p></div>
+  <div class="than luoi" style="grid-template-columns:470px 1fr">
+    <div class="the" style="padding:8px">
+<svg viewBox="0 0 454 510" width="452" height="508">
+  <defs><marker id="m2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5a6d72"/></marker></defs>
+  <rect x="0" y="0" width="454" height="236" fill="#f3f1ff" stroke="#6b5bd6"/>
+  <text x="12" y="22" font-size="13" font-weight="700" fill="#6b5bd6">NHÂN 1 · tác vụ cảm biến (ưu tiên cao)</text>
+  <g font-size="11.5">
+    <rect x="12" y="34" width="200" height="34" fill="#fff" stroke="#d5dfdd"/><text x="22" y="56">Chờ ngắt INT1 (mỗi 5 ms)</text>
+    <rect x="12" y="78" width="200" height="34" fill="#fff" stroke="#d5dfdd"/><text x="22" y="100">Đọc 12 byte IMU, trừ độ lệch</text>
+    <rect x="12" y="122" width="200" height="34" fill="#fff" stroke="#d5dfdd"/><text x="22" y="144">Madgwick → quaternion</text>
+    <rect x="12" y="166" width="200" height="56" fill="#fff" stroke="#d5dfdd"/><text x="22" y="188">Vòng chẵn: joystick 16 mẫu</text><text x="22" y="206">Vòng lẻ: chạm A, chạm B</text>
+    <rect x="240" y="96" width="200" height="70" fill="#0d1b21"/><text x="340" y="124" text-anchor="middle" fill="#fff" font-weight="700">Bộ đệm đôi</text><text x="340" y="144" text-anchor="middle" fill="#9fb6ba" font-size="10.5">ghi bản này, đọc bản kia</text><text x="340" y="158" text-anchor="middle" fill="#9fb6ba" font-size="10.5">không khoá, không chờ</text>
+  </g>
+  <g stroke="#5a6d72" stroke-width="1.5" marker-end="url(#m2)" fill="none">
+    <line x1="112" y1="68" x2="112" y2="76"/><line x1="112" y1="112" x2="112" y2="120"/><line x1="112" y1="156" x2="112" y2="164"/>
+    <polyline points="212,194 226,194 226,140 238,140"/>
+    <path d="M12 200 Q -0 120 10 52" stroke-dasharray="3 3"/>
+    <line x1="340" y1="166" x2="340" y2="290"/>
+  </g>
+  <rect x="0" y="252" width="454" height="258" fill="#eaf6f7" stroke="#0e7c86"/>
+  <text x="12" y="274" font-size="13" font-weight="700" fill="#0e7c86">NHÂN 0 · Wi-Fi + tác vụ mạng</text>
+  <g font-size="11.5">
+    <rect x="240" y="292" width="200" height="34" fill="#fff" stroke="#d5dfdd"/><text x="250" y="314">Mỗi 10 ms lấy bản mới nhất</text>
+    <rect x="240" y="336" width="200" height="34" fill="#fff" stroke="#d5dfdd"/><text x="250" y="358">Đóng gói v3, tính CRC-8</text>
+    <rect x="240" y="380" width="200" height="34" fill="#fff" stroke="#d5dfdd"/><text x="250" y="402">UDP → máy tính :4210</text>
+    <rect x="12" y="292" width="210" height="122" fill="#fff" stroke="#d5dfdd"/>
+    <text x="22" y="312" font-weight="700">Nghe lệnh :4211</text>
+    <text x="22" y="332" class="m" font-size="10.5">z</text><text x="40" y="332" font-size="10.5">căn lại hướng</text>
+    <text x="22" y="350" class="m" font-size="10.5">c</text><text x="40" y="350" font-size="10.5">hiệu chuẩn (để yên)</text>
+    <text x="22" y="368" class="m" font-size="10.5">t…</text><text x="40" y="368" font-size="10.5">đổi ngưỡng cảm ứng</text>
+    <text x="22" y="386" class="m" font-size="10.5">H</text><text x="40" y="386" font-size="10.5">nhịp tim; 5 s mất → quảng bá</text>
+    <text x="22" y="404" class="m" font-size="10.5">I</text><text x="40" y="404" font-size="10.5">thông tin, phiên bản</text>
+  </g>
+  <g stroke="#5a6d72" stroke-width="1.5" marker-end="url(#m2)"><line x1="340" y1="326" x2="340" y2="334"/><line x1="340" y1="370" x2="340" y2="378"/></g>
+  <text x="12" y="440" font-size="11" fill="#10242b"><tspan font-weight="700">Wi-Fi:</tspan> chế độ trạm, <tspan class="m">setSleep(false)</tspan>, công suất tối đa,</text>
+  <text x="12" y="456" font-size="11" fill="#10242b">IP tĩnh; tìm máy tính bằng quảng bá như bản ESP32-CAM.</text>
+  <text x="12" y="480" font-size="11" fill="#5a6d72">Phương án B (cần thêm 1 ESP32 cắm USB làm bộ thu): ESP-NOW,</text>
+  <text x="12" y="496" font-size="11" fill="#5a6d72">không cần router, trễ thấp và đều hơn nữa.</text>
+</svg>
+    </div>
+    <div class="luoi" style="grid-template-rows:auto 1fr;gap:12px">
+      <div class="the">
+        <h3>Gói v3 · 37 byte · little-endian</h3>
+<svg viewBox="0 0 640 64" width="640" height="64">
+  <g font-size="10" text-anchor="middle" class="m">
+    <rect x="0" y="4" width="34" height="30" fill="#5a6d72"/><text x="17" y="23" fill="#fff">A5 5C</text>
+    <rect x="34" y="4" width="17" height="30" fill="#7d9196"/><text x="42" y="23" fill="#fff">v</text>
+    <rect x="51" y="4" width="17" height="30" fill="#7d9196"/><text x="59" y="23" fill="#fff">sq</text>
+    <rect x="68" y="4" width="69" height="30" fill="#9fb6ba"/><text x="102" y="23">t_ms</text>
+    <rect x="137" y="4" width="138" height="30" fill="#6b5bd6"/><text x="206" y="23" fill="#fff">quaternion 4×i16</text>
+    <rect x="275" y="4" width="103" height="30" fill="#8f82e3"/><text x="326" y="23" fill="#fff">gyro 3×i16</text>
+    <rect x="378" y="4" width="103" height="30" fill="#b3aaf0"/><text x="429" y="23">acc 3×i16</text>
+    <rect x="481" y="4" width="69" height="30" fill="#d98b12"/><text x="515" y="23" fill="#fff">joy x,y</text>
+    <rect x="550" y="4" width="34" height="30" fill="#c87533"/><text x="567" y="23" fill="#fff">A B</text>
+    <rect x="584" y="4" width="17" height="30" fill="#0e7c86"/><text x="592" y="23" fill="#fff">b</text>
+    <rect x="601" y="4" width="17" height="30" fill="#3a9a4a"/><text x="609" y="23" fill="#fff">°</text>
+    <rect x="618" y="4" width="17" height="30" fill="#c2452b"/><text x="626" y="23" fill="#fff">c</text>
+  </g>
+  <g font-size="9" fill="#5a6d72" class="m"><text x="0" y="48">0</text><text x="137" y="48">8</text><text x="275" y="48">16</text><text x="378" y="48">22</text><text x="481" y="48">28</text><text x="550" y="48">32</text><text x="618" y="48">36</text></g>
+</svg>
+        <table style="margin-top:2px">
+          <tr><td style="width:120px"><b>quaternion</b></td><td>×16384 (Q14); hợp nhất trên ESP32, không phụ thuộc mất gói</td></tr>
+          <tr><td><b>gyro, acc</b></td><td>°/s ×32,8 (±1000); g ×4096 (±8 g): cho dự đoán và cử chỉ</td></tr>
+          <tr><td><b>joy x, y</b></td><td>i16 −32767..32767, đã hiệu chuẩn tâm, biên</td></tr>
+          <tr><td><b>A, B</b></td><td>mức cảm ứng 0–255 (0 = rảnh, 255 = chạm chắc)</td></tr>
+          <tr><td><b>b</b> (bit)</td><td>0 chạm A · 1 chạm B · 2 nhấn cần · 3 đang yên · 4 vừa căn lại · 5 đang hiệu chuẩn · 7 lỗi IMU</td></tr>
+          <tr><td><b>° · c</b></td><td>nhiệt độ IMU (°C + 40) · CRC-8 (đa thức 0x07, như gói 29 byte cũ)</td></tr>
+        </table>
+        <p class="nho" style="margin:4px 0 0">Mã đồng bộ mới A5 5C nên Unity nhận song song gói 29 byte cũ (A5 5A) và dạng chữ "X,Y,B". 3,7 KB/s: chưa tới 0,1% băng thông Wi-Fi.</p>
+      </div>
+      <div class="the">
+        <h3>Ngân sách độ trễ (ước tính, cần đo)</h3>
+<svg viewBox="0 0 640 128" width="640" height="128">
+  <g font-size="10" text-anchor="middle">
+    <rect x="0" y="8" width="47" height="34" fill="#6b5bd6"/><text x="23" y="29" fill="#fff">mẫu 2,5</text>
+    <rect x="47" y="8" width="10" height="34" fill="#8f82e3"/>
+    <rect x="57" y="8" width="94" height="34" fill="#d98b12"/><text x="104" y="29" fill="#fff">chờ gửi 5</text>
+    <rect x="151" y="8" width="57" height="34" fill="#11a8c8"/><text x="179" y="29" fill="#fff">Wi-Fi 3</text>
+    <rect x="208" y="8" width="151" height="34" fill="#0e7c86"/><text x="283" y="29" fill="#fff">chờ khung Unity 8</text>
+    <rect x="359" y="8" width="151" height="34" fill="#10242b"/><text x="434" y="29" fill="#fff">kết xuất, màn hình 8</text>
+  </g>
+  <text x="518" y="30" font-size="13" font-weight="700">≈ 27 ms</text>
+  <rect x="510" y="50" width="0" height="0"/>
+  <rect x="285" y="50" width="225" height="18" fill="none" stroke="#3a9a4a" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="397" y="63" text-anchor="middle" font-size="10" fill="#3a9a4a" font-weight="600">dự đoán bù ~12 ms → cảm nhận ≈ 15 ms</text>
+  <rect x="151" y="78" width="420" height="18" fill="#fdf0ec" stroke="#c2452b" stroke-dasharray="4 3"/>
+  <text x="160" y="91" font-size="10" fill="#c2452b" font-weight="600">nếu để Wi-Fi ngủ (mặc định): thêm hàng chục ms, lúc có lúc không → giật</text>
+  <text x="0" y="118" font-size="10.5" fill="#5a6d72">Đo thật: quay video 240 hình/s cả tay cầm và màn hình, đếm hình chênh nhau khi lắc nhanh.</text>
+</svg>
+      </div>
+    </div>
+  </div>
+  <div class="chan"><span><b>VERA Lab</b> · Tay cầm ESP32 tích hợp</span><span>Cổng 4210/4211, lệnh H, I, quảng bá giữ như docs/02</span><span>07 / 09</span></div>
+</section>
+
+<!-- ============ 8. HIỆU CHUẨN & NGHIỆM THU ============ -->
+<section class="trang">
+  <div class="dau"><span class="so">08</span><span class="eyebrow">Chính xác</span></div>
+  <div class="tieu"><h1>Hiệu chuẩn tự động và chỉ tiêu nghiệm thu</h1><p>Người dùng gần như không phải làm gì: phần lớn tự động khi bật máy. Hiệu chuẩn đầy đủ chỉ làm một lần cho mỗi tay cầm, lưu vào NVS.</p></div>
+  <div class="than luoi" style="grid-template-columns:500px 1fr">
+    <div class="luoi" style="grid-template-rows:auto auto 1fr;gap:12px">
+      <div class="the" style="border-left:4px solid var(--la)"><h3><span class="tag la">1</span> Mỗi lần bật · tự động, 1 giây</h3>
+        <p>Đặt tay cầm yên trên bàn, không chạm. LED nháy nhanh trong lúc:</p>
+        <ul class="g"><li>đo độ lệch con quay (đã có trong firmware);</li><li>đo mức nền 2 nút cảm ứng;</li><li>đo tâm joystick.</li></ul>
+        <p class="nho" style="margin:4px 0 0">Bị chạm hay lắc giữa chừng thì làm lại; LED sáng đứng là xong.</p></div>
+      <div class="the" style="border-left:4px solid var(--hoa)"><h3><span class="tag">2</span> Mỗi lần dùng · 1 thao tác</h3>
+        <p>Hướng tay cầm vào giữa màn hình, giữ A + B 1 giây: yaw về 0, tia trỏ vào giữa.</p></div>
+      <div class="the" style="border-left:4px solid var(--cam)"><h3><span class="tag cam">3</span> Một lần · khoảng 30 giây, lưu NVS</h3>
+        <ul class="g">
+          <li><b>Joystick:</b> xoay cần 2 vòng sát mép → min, max từng trục.</li>
+          <li><b>Cảm ứng:</b> đặt ngón giữ A rồi B mỗi nút 2 s → mức chạm thật; ngưỡng tính theo % mức này nên mỗi điện cực tự đúng.</li>
+          <li><b>Trục gắn IMU:</b> đặt nằm ngang rồi dựng đứng → ma trận sửa lệch gắn.</li>
+          <li><b>Nhiệt</b> (tuỳ chọn): ghi độ lệch lúc nguội và sau 10 phút Wi-Fi → hệ số bù.</li>
+        </ul>
+        <p class="nho" style="margin:4px 0 0">Kích hoạt bằng lệnh từ Unity hoặc giữ nhấn cần khi bật nguồn.</p></div>
+    </div>
+    <div class="the">
+      <h3>Chỉ tiêu nghiệm thu (mục tiêu, chưa đo)</h3>
+      <table>
+        <tr><th style="width:200px">Chỉ tiêu</th><th style="width:110px">Mục tiêu</th><th>Cách đo</th></tr>
+        <tr><td><b>Trôi yaw khi để yên</b></td><td class="mono">&lt; 1° / 10 phút</td><td>đặt yên, ghi quaternion bằng tools/xem_bmi160.py</td></tr>
+        <tr><td><b>Trôi yaw khi xoay liên tục</b></td><td class="mono">&lt; 5° / phút</td><td>quay 10 vòng rồi đặt về đúng mốc đã đánh dấu trên bàn</td></tr>
+        <tr><td><b>Rung tia khi cầm yên</b></td><td class="mono">&lt; 0,15° RMS</td><td>cầm yên 10 s, độ lệch chuẩn hướng sau lọc</td></tr>
+        <tr><td><b>Sai số roll, pitch</b></td><td class="mono">&lt; 1°</td><td>đặt trên mặt nghiêng 30°, 45° (thước đo góc)</td></tr>
+        <tr><td><b>Trễ đầu–cuối</b></td><td class="mono">&lt; 30 ms</td><td>video 240 hình/s</td></tr>
+        <tr><td><b>Mất gói</b></td><td class="mono">&lt; 1%</td><td>đếm khoảng trống seq trong 5 phút, cách router 3 m</td></tr>
+        <tr><td><b>Joystick về tâm</b></td><td class="mono">100 / 100</td><td>buông cần 100 lần, giá trị sau vùng chết đúng 0</td></tr>
+        <tr><td><b>Joystick đạt biên</b></td><td class="mono">8 / 8 hướng</td><td>gạt hết 8 hướng, |giá trị| = 1,0</td></tr>
+        <tr><td><b>Cảm ứng nhận chạm</b></td><td class="mono">100 / 100</td><td>chạm 100 lần mỗi nút, ngón khô và ngón ẩm</td></tr>
+        <tr><td><b>Bấm ma</b></td><td class="mono">0 / 10 phút</td><td>cầm nắm, lắc, đi lại; cả khi cắm USB và khi chạy pin</td></tr>
+        <tr><td><b>Thời gian nhận chạm</b></td><td class="mono">&lt; 30 ms</td><td>so mốc bit chạm trong gói với video</td></tr>
+      </table>
+      <div class="ghi" style="margin-top:10px">Công cụ đo: mở rộng <span class="mono">tools/xem_bmi160.py</span> thành bảng theo dõi nhận gói v3 qua UDP: vẽ đường Δ cảm ứng, joystick, góc, tỉ lệ mất gói; xuất CSV để đưa số liệu vào báo cáo KHKT.</div>
+    </div>
+  </div>
+  <div class="chan"><span><b>VERA Lab</b> · Tay cầm ESP32 tích hợp</span><span>Lưu thông số bằng thư viện Preferences (NVS) của ESP32</span><span>08 / 09</span></div>
+</section>
+
+<!-- ============ 9. Ý TƯỞNG & LỘ TRÌNH ============ -->
+<section class="trang">
+  <div class="dau"><span class="so">09</span><span class="eyebrow">Ý tưởng · lộ trình</span></div>
+  <div class="tieu"><h1>Ý tưởng mở rộng và các bước làm</h1><p>Các ý tưởng dưới đây đều không cần thêm linh kiện, trừ ESP-NOW. Lộ trình chia giai đoạn để duyệt từng bước.</p></div>
+  <div class="than luoi" style="grid-template-columns:1fr 420px">
+    <div class="luoi" style="grid-template-columns:1fr 1fr;grid-template-rows:repeat(4,1fr);gap:10px">
+      <div class="the"><h3>Gợi ý khi ngón tay đến gần</h3><p>Cảm ứng điện dung biết ngón tay đang lơ lửng trên nút: hiện chú thích "Bóp pipet" trước khi chạm, như con trỏ chuột rê qua.</p></div>
+      <div class="the"><h3>Vuốt giữa 2 nút</h3><p>Chạm A rồi trượt sang B trong 300 ms = sang bước thí nghiệm tiếp theo; B → A = lùi lại.</p></div>
+      <div class="the"><h3>Chấm điểm độ khéo tay</h3><p>Đo độ run khi hút pipet, rót dung dịch; gửi lên web quản lý để giáo viên xem tiến bộ của học sinh.</p></div>
+      <div class="the"><h3>Hết trôi yaw hoàn toàn</h3><p>Ghép hướng từ MediaPipe (camera) với con quay bằng bộ lọc bù chậm: camera giữ đúng lâu dài, con quay cho độ mượt.</p></div>
+      <div class="the"><h3>Ngủ sâu, chạm là thức</h3><p>ESP32 đánh thức được bằng chân cảm ứng: để yên 5 phút thì ngủ, chạm A là dậy. Tiết kiệm pin.</p></div>
+      <div class="the"><h3>Trang cấu hình và nạp qua Wi-Fi</h3><p>ESP32 mở một trang web nhỏ để chỉnh ngưỡng, xem số liệu; nạp firmware qua Wi-Fi (OTA), không phải tháo vỏ.</p></div>
+      <div class="the"><h3>Hồ sơ theo học sinh</h3><p>Ngưỡng cảm ứng, độ nhạy, tay thuận lưu trên web; tay cầm dùng chung cả lớp vẫn hợp từng người.</p></div>
+      <div class="the"><h3>ESP-NOW (cần thêm 1 ESP32)</h3><p>Một ESP32 cắm USB máy tính làm bộ thu: không cần router, trễ thấp và đều, hợp khi thi ở hội trường đông Wi-Fi.</p></div>
+    </div>
+    <div class="luoi" style="grid-template-rows:auto 1fr;gap:12px">
+      <div class="the">
+        <h3>Lộ trình đề xuất</h3>
+        <table>
+          <tr><td style="width:34px"><span class="tag">G1</span></td><td><b>Firmware hợp nhất:</b> 2 nhân, INT1, joystick, cảm ứng, gói v3, Wi-Fi không ngủ</td></tr>
+          <tr><td><span class="tag">G2</span></td><td><b>Unity:</b> đọc gói v3, vùng chết, One Euro, tia theo vận tốc góc, cầm/thả, menu</td></tr>
+          <tr><td><span class="tag">G3</span></td><td><b>Hiệu chuẩn &amp; đo:</b> lưu NVS, bảng theo dõi, chạy bảng chỉ tiêu trang 8</td></tr>
+          <tr><td><span class="tag">G4</span></td><td><b>Cử chỉ:</b> đổ, lắc, khuấy, vặn, chế độ tinh</td></tr>
+          <tr><td><span class="tag">G5</span></td><td><b>Mở rộng:</b> chọn từ các ý tưởng bên trái</td></tr>
+        </table>
+        <p class="nho" style="margin:6px 0 0">Firmware BMI160 hiện có (chống trôi, chống treo I2C) là nền cho G1.</p>
+      </div>
+      <div class="the">
+        <h3>Nguồn tham khảo</h3>
+        <ul class="g nho" style="color:var(--muc);font-size:11.5px">
+          <li>Espressif, <i>ESP32 Series Datasheet</i>: bảng chân, chân khởi động, ADC1/ADC2.</li>
+          <li>ESP-IDF Programming Guide (ESP32): <i>Touch Sensor</i>, <i>ADC Oneshot &amp; Calibration</i>, <i>Wi-Fi Power-saving Mode</i>.</li>
+          <li>Bosch Sensortec, <i>BMI160 Datasheet</i>: ODR, dải đo, ngắt data-ready, cảm biến nhiệt.</li>
+          <li>S. Madgwick (2010), bộ lọc định hướng cho IMU.</li>
+          <li>G. Casiez, N. Roussel, D. Vogel (CHI 2012), <i>1€ Filter</i>.</li>
+          <li>Dự án: firmware/tay_cam_bmi160, docs/02, docs/09, docs/24.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="chan"><span><b>VERA Lab</b> · Tay cầm ESP32 tích hợp</span><span>Nguyễn Ngọc Bảo Trọng · Trần Đức Trọng</span><span>09 / 09</span></div>
+</section>
+
+</body>
+</html>
