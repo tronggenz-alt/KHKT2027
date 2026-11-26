@@ -813,7 +813,7 @@ namespace Khkt.Menu
             clickModeTabs = Tabs(t2, "Chọn cách bấm", new[] { "Nút Cầm ngay", "Nút Mở bảng" }, new[] { "Cầm ngay", "Mở bảng" }, new Vector2(4, -38), new Vector2((PaneW - 16f) / 2f, 44), false, 4f, clickMode, SelectClickMode);
             float savedSens = Mathf.Clamp(PlayerPrefs.GetFloat(TouchSensPrefKey, 0.18f), 0.05f, 0.50f);
             touchSensSlider = GlassKit.MakeSlider(t2, "Thanh độ nhạy", "Độ nhạy vuốt nhìn", new Vector2(0, -108), new Vector2(PaneW, 64), 0.05f, 0.50f, savedSens, OnTouchSensChanged, v => v.ToString("0.00"));
-            armsToggle = Switch(t2, "ToggleArms", "Hiện cánh tay và bàn tay ảo trong lab", new Vector2(0, -190), new Vector2(PaneW, 46), !ArmRig.HiddenByUser, v => ArmRig.HiddenByUser = !v);
+            armsToggle = Switch(t2, "ToggleArms", "Hiện cánh tay (ống tay áo) trong lab, bàn tay luôn hiện", new Vector2(0, -190), new Vector2(PaneW, 46), !ArmRig.HiddenByUser, v => ArmRig.HiddenByUser = !v);
 
             // Tab 3: Trợ lý AI
             var t3 = (RectTransform)settingsPanes[3].transform;

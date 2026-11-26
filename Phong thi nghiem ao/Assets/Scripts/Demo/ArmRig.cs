@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Khkt.Avatar;
 using Khkt.Input;
 using Khkt.Rendering;
@@ -166,7 +167,37 @@ namespace Khkt.Demo
             return cameraTransform.position + flat * local + SwayOffset;
         }
 
-        void LateUpdate() => Step(Time.unscaledDeltaTime);
+        void LateUpdate()
+        {
+            Step(Time.unscaledDeltaTime);
+            ApplySleeves();
+        }
+
+        // Cài đặt ẩn cánh tay: chỉ tắt hình ống tay áo / cánh tay, bàn tay vẫn hiện và cầm nắm như thường
+        readonly List<Renderer> hiddenSleeves = new List<Renderer>();
+        bool sleevesHidden;
+
+        void ApplySleeves()
+        {
+            bool hide = HiddenByUser && !HiddenByCli;
+            if (hide == sleevesHidden) return;
+            sleevesHidden = hide;
+            if (hide)
+            {
+                hiddenSleeves.Clear();
+                for (int i = 0; i < 2; i++)
+                {
+                    if (arms[i] == null || arms[i].root == null) continue;
+                    foreach (var r in arms[i].root.GetComponentsInChildren<Renderer>(true))
+                        if (r.enabled && r.GetComponentInParent<HandRig>(true) == null) { r.enabled = false; hiddenSleeves.Add(r); }
+                }
+            }
+            else
+            {
+                foreach (var r in hiddenSleeves) if (r != null) r.enabled = true;
+                hiddenSleeves.Clear();
+            }
+        }
 
         /// <summary>Một bước cập nhật hai cánh tay (gọi từ LateUpdate; kiểm thử gọi trực tiếp).</summary>
         static int hideFlag = -1;
@@ -185,7 +216,7 @@ namespace Khkt.Demo
             }
         }
 
-        /// <summary>Cài đặt → Điều khiển → "Hiện cánh tay và bàn tay ảo" (bản đi thi): tắt cho đỡ vướng tầm nhìn.</summary>
+        /// <summary>Cài đặt → Điều khiển → "Hiện cánh tay (ống tay áo)" (bản đi thi): tắt cho đỡ vướng tầm nhìn, bàn tay vẫn hiện.</summary>
         public const string HideArmsPrefKey = "an_canh_tay";
         static int userHide = -1;
         public static bool HiddenByUser
@@ -198,7 +229,7 @@ namespace Khkt.Demo
         public void Step(float dt)
         {
             if (cameraTransform == null) return;
-            if (HiddenByCli || HiddenByUser)
+            if (HiddenByCli)
             {
                 for (int i = 0; i < 2; i++) if (arms[i] != null && arms[i].root.activeSelf) arms[i].root.SetActive(false);
                 if (hand != null && hand.hand != null && hand.hand.gameObject.activeSelf) hand.hand.gameObject.SetActive(false);
