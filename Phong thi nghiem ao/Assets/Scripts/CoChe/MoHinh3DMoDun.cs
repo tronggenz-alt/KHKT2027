@@ -28,7 +28,7 @@ namespace Khkt.CoChe
         public string LoiCuoi { get; private set; } = "";
         public bool DangTai { get; private set; }
 
-        RectTransform goc, vungNhin, khungNhan;
+        RectTransform goc, vungNhin, khungNhan, thanhTren, khungNhapDay, nutXem3DRt;
         InputField oNhap;
         Text tenChat, thongTin, trangThai;
         Button nutAnH;
@@ -36,6 +36,8 @@ namespace Khkt.CoChe
         readonly List<Text> nhan = new List<Text>();
         readonly Vector3[] gocVung = new Vector3[4];
         bool daTangUiCapture;
+        Dictionary<string, object> duLieuCuoi;
+        System.Action<Dictionary<string, object>, int, BeMatPhanTu.Loai, int, bool, bool> khiDongCb;
 
         static readonly string[] Mau = { "ethanol", "CH3COOH", "benzen", "glucose", "aspirin", "caffeine", "axeton", "anilin" };
 
@@ -53,6 +55,40 @@ namespace Khkt.CoChe
             if (Instance.gameObject.activeSelf) return;
             Instance.gameObject.SetActive(true);
             Instance.KhiMo();
+        }
+
+        /// <summary>Mở chế độ toàn màn hình với dữ liệu đã dựng sẵn ở khung 3D thường (không gọi lại máy chủ, giữ nguyên kiểu vẽ/góc nhìn).</summary>
+        public static void MoVoiDuLieu(Dictionary<string, object> d, int kieuVe = 0, BeMatPhanTu.Loai beMat = BeMatPhanTu.Loai.Tat,
+                                       int bangMau = 0, bool hienNhan = false, bool tuXoay = false, Quaternion? xoay = null, float khoangCach = 0f,
+                                       System.Action<Dictionary<string, object>, int, BeMatPhanTu.Loai, int, bool, bool> khiDong = null)
+        {
+            if (CoCheMoDun.DangMo) CoCheMoDun.Dong();
+            if (Instance == null)
+            {
+                var go = new GameObject("Mô hình 3D (Giải bài tập)");
+                DontDestroyOnLoad(go);
+                go.SetActive(false);
+                Instance = go.AddComponent<MoHinh3DMoDun>();
+                Instance.Dung();
+            }
+            Instance.khiDongCb = khiDong;
+            if (!Instance.gameObject.activeSelf)
+            {
+                Instance.gameObject.SetActive(true);
+                Instance.KhiMo(d != null);
+            }
+            if (d != null)
+            {
+                Instance.Hien(d);
+                Instance.TrinhPhat.KieuVe = kieuVe;
+                Instance.TrinhPhat.BeMat = beMat;
+                Instance.TrinhPhat.BangMau = bangMau;
+                Instance.khungNhan.gameObject.SetActive(hienNhan);
+                Instance.TrinhPhat.TuXoay = tuXoay;
+                if (xoay.HasValue) { Instance.TrinhPhat.Xoay = xoay.Value; Instance.TrinhPhat.TuDongGoc = false; }
+                if (khoangCach > 0.5f) { Instance.TrinhPhat.KhoangCach = khoangCach; Instance.TrinhPhat.TuDongGoc = false; }
+                Instance.CapNhatNut();
+            }
         }
 
         public static void Dong()
@@ -92,7 +128,7 @@ namespace Khkt.CoChe
 
             TrinhPhat = gameObject.AddComponent<TrinhPhat3D>();
             TrinhPhat.Cam = Cam;
-            TrinhPhat.KieuChemistry = true; TrinhPhat.KieuJmol = true;
+            TrinhPhat.KieuChemistry = true; TrinhPhat.KieuJmol = true; TrinhPhat.LacGoc = false;
             // kéo chuột / trackpad để xoay khi con trỏ nằm trong vùng nhìn (dưới thanh nút, trên ô nhập)
             TrinhPhat.ViTriChuot = p => vungNhin != null && RectTransformUtility.RectangleContainsScreenPoint(vungNhin, p, Cam) ? p : (Vector2?)null;          // bóng–que: cầu 0,27×vdW, que 0,14 Å hai màu
 
@@ -103,6 +139,7 @@ namespace Khkt.CoChe
 
             Color sang = new Color32(0xfa, 0xfa, 0xfa, 0xff), phu = new Color32(0xa1, 0xa1, 0xaa, 0xff);
             var thanh = GlassKit.Rect(goc, "Thanh nổi", new Vector2(0, 1), new Vector2(1, 1), new Vector2(0, -84), new Vector2(0, 0));
+            thanhTren = thanh;
             thanh.anchorMin = new Vector2(0, 1); thanh.anchorMax = new Vector2(1, 1); thanh.pivot = new Vector2(0.5f, 1f);
             thanh.offsetMin = new Vector2(0, -84); thanh.offsetMax = Vector2.zero;
             var nenThanh = thanh.gameObject.AddComponent<Image>(); nenThanh.color = new Color32(0x09, 0x09, 0x0b, 0xe6); nenThanh.raycastTarget = false;
@@ -131,6 +168,7 @@ namespace Khkt.CoChe
             // ô nhập nổi ở đáy
             // ô tìm chất + nút Xem 3D nổi ở đáy, cùng kiểu viên nút tối của thanh trên
             var khungNhap = Pill(goc, "Ô nhập chất (khung)", Vector2.zero, new Vector2(720, 52), NenNut);
+            khungNhapDay = khungNhap;
             khungNhap.anchorMin = khungNhap.anchorMax = khungNhap.pivot = new Vector2(0, 0); khungNhap.anchoredPosition = new Vector2(28, 22);
             var chuNhap = GlassKit.Label(khungNhap, "Chữ", "", 17, new Color32(0xfa, 0xfa, 0xfa, 0xff), false, TextAnchor.MiddleLeft, new Vector2(18, 0), new Vector2(684, 52));
             chuNhap.supportRichText = false; chuNhap.raycastTarget = false;
@@ -148,6 +186,7 @@ namespace Khkt.CoChe
             oNhap.onSubmit.AddListener(XemChat);
             var xem = NutNoi(goc, "Nút Xem 3D", "Xem 3D", Vector2.zero, new Vector2(130, 52), () => XemChat(oNhap.text), true);
             var rx = (RectTransform)xem.transform; rx.anchorMin = rx.anchorMax = rx.pivot = new Vector2(0, 0); rx.anchoredPosition = new Vector2(760, 22);
+            nutXem3DRt = rx;
             xem.GetComponent<Image>().color = new Color32(0xfa, 0xfa, 0xfa, 0xff);                      // nút chính: nền sáng chữ tối như ô đang chọn
             var cx = xem.GetComponentInChildren<Text>(); cx.color = new Color32(0x09, 0x09, 0x0b, 0xff); cx.fontStyle = FontStyle.Bold;
             trangThai = GlassKit.Label(goc, "Trạng thái", "", 15, phu, false, TextAnchor.MiddleLeft, Vector2.zero, new Vector2(900, 30));
@@ -182,6 +221,7 @@ namespace Khkt.CoChe
             b.onClick.AddListener(bam);
             var t = GlassKit.Label(r, "Chữ", chu, 17, new Color32(0xfa, 0xfa, 0xfa, 0xff), false, TextAnchor.MiddleCenter, Vector2.zero, size);
             t.raycastTarget = false; t.horizontalOverflow = HorizontalWrapMode.Overflow;
+            NutHieuUng.Attach(r.gameObject);
             return b;
         }
 
@@ -215,13 +255,16 @@ namespace Khkt.CoChe
             return rt;
         }
 
-        void KhiMo()
+        void KhiMo(bool boQuaMacDinh = false)
         {
             camTat.Clear();
             foreach (var c in Camera.allCameras)
                 if (c != Cam && c.enabled) { c.enabled = false; camTat.Add(c); }
             if (!daTangUiCapture) { DesktopViewer.UiCapture++; daTangUiCapture = true; }
-            if (TrinhPhat.KichBan == null) XemChat("ethanol");
+            if (thanhTren != null) Khkt.Menu.Dashboard.MenuAnim.Pop(thanhTren, 0.96f, 0.24f);
+            if (khungNhapDay != null) Khkt.Menu.Dashboard.MenuAnim.Pop(khungNhapDay, 0.95f, 0.26f);
+            if (nutXem3DRt != null) Khkt.Menu.Dashboard.MenuAnim.Pop(nutXem3DRt, 0.94f, 0.26f);
+            if (!boQuaMacDinh && TrinhPhat.KichBan == null) XemChat("ethanol");
             if (EventSystem.current != null) EventSystem.current.SetSelectedGameObject(oNhap.gameObject);
         }
 
@@ -230,6 +273,9 @@ namespace Khkt.CoChe
             foreach (var c in camTat) if (c != null) c.enabled = true;
             camTat.Clear();
             if (daTangUiCapture) { DesktopViewer.UiCapture = Mathf.Max(0, DesktopViewer.UiCapture - 1); daTangUiCapture = false; }
+            var cb = khiDongCb; khiDongCb = null;
+            if (cb != null && TrinhPhat != null)
+                cb(duLieuCuoi, TrinhPhat.KieuVe, TrinhPhat.BeMat, TrinhPhat.BangMau, khungNhan != null && khungNhan.gameObject.activeSelf, TrinhPhat.TuXoay);
         }
 
         public void XemChat(string q)
@@ -297,6 +343,7 @@ namespace Khkt.CoChe
 
         void Hien(Dictionary<string, object> d)
         {
+            duLieuCuoi = d;
             var kb = TaoKichBan(d);
             var ds = L(Lay(d, "nguyen_tu"));
             TrinhPhat.Nap(kb);

@@ -255,8 +255,8 @@ namespace Khkt.CoChe
             deBai = GlassKit.Label(dau, "Đề", "", 16, ChuPhu, false, TextAnchor.UpperLeft, new Vector2(0, -42), new Vector2(1100, 44));
             deBai.horizontalOverflow = HorizontalWrapMode.Wrap;
             GlassKit.Label(dau, "Gợi ý", "Kéo để xoay 360° · cuộn để phóng to · ← → chuyển bước · Space phát/dừng", 15, ChuPhu, false, TextAnchor.UpperLeft, new Vector2(0, -92), new Vector2(1100, 20));
-            NutKinh(dau, "Nút Chọn bài", "Bài khác ▾", new Vector2(0, -118), new Vector2(150, 40), () => dsBai.gameObject.SetActive(!dsBai.gameObject.activeSelf), 15);
-            NutKinh(dau, "Nút Đề mới", "＋ Đề mới (gõ / ảnh)", new Vector2(160, -118), new Vector2(210, 40), () => { dsBai.gameObject.SetActive(false); BatDeMoi(true); }, 15);
+            NutKinh(dau, "Nút Chọn bài", "Bài khác ▾", new Vector2(0, -118), new Vector2(150, 40), () => BatDanhSachBai(!dsBai.gameObject.activeSelf), 15);
+            NutKinh(dau, "Nút Đề mới", "＋ Đề mới (gõ / ảnh)", new Vector2(160, -118), new Vector2(210, 40), () => { BatDanhSachBai(false); BatDeMoi(true); }, 15);
 
             // ---- nút gạt 3D | Giấy (góc phải) + Đóng
             var gat = GlassKit.Rect(goc, "Nút gạt 3D Giấy", new Vector2(1, 1), new Vector2(1, 1), new Vector2(-150, -22), new Vector2(190, 52));
@@ -319,8 +319,8 @@ namespace Khkt.CoChe
             DungCaiDat();
             DungDanhSach(dsBai);
             hopBaoSai = Khkt.Menu.HopBaoSai.Tao(goc);
-            NutKinh(dsBai, "Giải chuỗi", "Giải chuỗi phản ứng", new Vector2(16, 64), new Vector2(428, 44), () => { dsBai.gameObject.SetActive(false); BatBangChuoi(true); }, 15, new Vector2(0, 0));
-            NutKinh(dsBai, "Cài đặt", "Cài đặt máy chủ", new Vector2(16, 14), new Vector2(428, 44), () => caiDat.gameObject.SetActive(true), 15, new Vector2(0, 0));
+            NutKinh(dsBai, "Giải chuỗi", "Giải chuỗi phản ứng", new Vector2(16, 64), new Vector2(428, 44), () => { BatDanhSachBai(false); BatBangChuoi(true); }, 15, new Vector2(0, 0));
+            NutKinh(dsBai, "Cài đặt", "Cài đặt máy chủ", new Vector2(16, 14), new Vector2(428, 44), () => BatCaiDat(true), 15, new Vector2(0, 0));
             dsBai.gameObject.SetActive(false);
             DatMauGat(false);
             toGiay = to;
@@ -339,8 +339,30 @@ namespace Khkt.CoChe
             CheDoGiay = true;
             Cam.backgroundColor = NenGiay;
             TrinhPhat.NhanDieuKhien = false;
-            nutBaiKhac = NutKinh(goc, "Nút Chọn bài phải", "Bài khác ▾", new Vector2(-170, -26), new Vector2(130, 44), () => dsBai.gameObject.SetActive(!dsBai.gameObject.activeSelf), 15, new Vector2(1, 1));
+            nutBaiKhac = NutKinh(goc, "Nút Chọn bài phải", "Bài khác ▾", new Vector2(-170, -26), new Vector2(130, 44), () => BatDanhSachBai(!dsBai.gameObject.activeSelf), 15, new Vector2(1, 1));
             DatMauGat(true);
+        }
+
+        void BatDanhSachBai(bool mo)
+        {
+            if (dsBai == null) return;
+            dsBai.gameObject.SetActive(mo);
+            if (mo)
+            {
+                dsBai.SetAsLastSibling();
+                Khkt.Menu.Dashboard.MenuAnim.Pop(dsBai, 0.94f, 0.22f);
+            }
+        }
+
+        void BatCaiDat(bool mo)
+        {
+            if (caiDat == null) return;
+            caiDat.gameObject.SetActive(mo);
+            if (mo)
+            {
+                caiDat.SetAsLastSibling();
+                Khkt.Menu.Dashboard.MenuAnim.Pop(caiDat, 0.94f, 0.22f);
+            }
         }
 
         void DungDanhSach(RectTransform trai)
@@ -399,6 +421,7 @@ namespace Khkt.CoChe
             b.onClick.AddListener(() => bam());
             var t = GlassKit.Label(rt, "Chữ", chu, coChu, ChuSang, false, TextAnchor.MiddleCenter, Vector2.zero, co);
             t.raycastTarget = false;
+            NutHieuUng.Attach(rt.gameObject);
             return b;
         }
 
@@ -413,6 +436,7 @@ namespace Khkt.CoChe
             b.onClick.AddListener(() => bam());
             nhan = GlassKit.Label(rt, "Chữ", chu, 16, ChuPhu, true, TextAnchor.MiddleCenter, Vector2.zero, co);
             nhan.raycastTarget = false;
+            NutHieuUng.Attach(rt.gameObject);
             return b;
         }
 
@@ -428,6 +452,7 @@ namespace Khkt.CoChe
             b.onClick.AddListener(() => bam());
             var t = GlassKit.Label(rt, "Chữ", chu, 15, Muc, true, TextAnchor.MiddleCenter, Vector2.zero, co);
             t.raycastTarget = false;
+            NutHieuUng.Attach(rt.gameObject);
             return b;
         }
 
@@ -1015,7 +1040,12 @@ namespace Khkt.CoChe
         {
             giaiThich.gameObject.SetActive(mo);
             nutBangBen.GetComponentInChildren<Text>().text = mo ? "Đóng bảng ◂" : "Các bước ▸";
-            if (mo) { giaiThich.SetAsLastSibling(); ChonTabBen(Mathf.Max(0, tabBen.current)); }
+            if (mo)
+            {
+                giaiThich.SetAsLastSibling();
+                ChonTabBen(Mathf.Max(0, tabBen.current));
+                Khkt.Menu.Dashboard.MenuAnim.Pop(giaiThich, 0.94f, 0.24f);
+            }
         }
 
         /// <summary>Mở bảng bên ở tab i (0 Các bước, 1 Giải thích chi tiết, 2 Hỏi đáp).</summary>
@@ -1347,7 +1377,11 @@ namespace Khkt.CoChe
         public void BatBangChuoi(bool mo)
         {
             bangChuoi.gameObject.SetActive(mo);
-            if (mo) bangChuoi.SetAsLastSibling();
+            if (mo)
+            {
+                bangChuoi.SetAsLastSibling();
+                Khkt.Menu.Dashboard.MenuAnim.Pop(bangChuoi, 0.94f, 0.24f);
+            }
         }
 
         public void GiaiChuoi(string chuoi)
@@ -1465,6 +1499,7 @@ namespace Khkt.CoChe
             if (mo)
             {
                 deMoi.SetAsLastSibling();
+                Khkt.Menu.Dashboard.MenuAnim.Pop(deMoi, 0.94f, 0.24f);
                 if (oDe != null && !DangGiaiDe) oDe.ActivateInputField();
             }
         }

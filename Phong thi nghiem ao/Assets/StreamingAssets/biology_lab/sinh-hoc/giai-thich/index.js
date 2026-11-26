@@ -1,14 +1,14 @@
 // index.js – ghép các module thành chế độ "Giải thích từng bước có mũi tên" cho Phòng Lab Sinh học 3D.
 // Trang 3D chỉ cần: taoGiaiThichTungBuoc(phụ_thuộc) rồi gọi .capNhat(dt) trong vòng render chung.
 //   StepPlayer (trạng thái bước) → sự kiện → ArrowRenderer (mũi tên) · CameraDirector (camera) · HighlightManager (sáng / mờ) · ExplainPanel (khung chữ)
-import { CAU_HINH } from "./config.js";
+import { CAU_HINH } from "./config.js?v=6";
 import { QUY_TRINH, QUY_TRINH_MAC_DINH } from "./data/index.js";
 import { chuanHoaQuyTrinh } from "./kiem-tra.js";
 import { StepPlayer } from "./step-player.js";
-import { ArrowRenderer } from "./arrow-renderer.js";
+import { ArrowRenderer } from "./arrow-renderer.js?v=6";
 import { CameraDirector } from "./camera-director.js";
 import { HighlightManager } from "./highlight-manager.js";
-import { ExplainPanel } from "./explain-panel.js";
+import { ExplainPanel } from "./explain-panel.js?v=6";
 
 export { QUY_TRINH, CAU_HINH };
 
@@ -56,6 +56,7 @@ export function taoGiaiThichTungBuoc(d) {
       d.hatMau.dat(false);      // học theo mũi tên: tắt dòng hạt chạy liên tục cho đỡ rối mắt (bật lại khi đóng)
     }
     muiTen.clear();
+    d.xoaNhan?.();
     bang.mo();
     bang.datDanhMuc(QUY_TRINH, kq.quyTrinh);
     bang.datQuyTrinh(kq.quyTrinh);

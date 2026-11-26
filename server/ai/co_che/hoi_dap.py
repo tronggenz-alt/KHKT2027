@@ -194,3 +194,30 @@ async def doc_chuoi_tu_anh(anh: bytes, goi_ai: giai_de.GoiAI | None = None) -> s
         raise giai_de.LoiGiaiDe("Không đọc được chuỗi trong ảnh" + (f": {_sach(d.get('ly_do'), 200)}" if d.get("ly_do") else ".")
                                 + " Hãy chụp rõ hơn hoặc gõ chuỗi.", "anh_khong_ro", 422)
     return chuoi
+
+
+# ---------------------------------------------------------------- đọc chất trong ảnh cho Mô hình 3D
+SYSTEM_DOC_CHAT = """Ảnh chứa công thức cấu tạo hoặc tên một chất hoá học. Hãy nhận diện MỘT chất chính để dựng mô hình 3D:
+- ten: tên tiếng Việt hoặc tiếng Anh ngắn gọn (vd "Benzene", "Ethanol", "Aspirin").
+- smiles: SMILES chuẩn hợp lệ của chất đó (vd "c1ccccc1", "CCO").
+Nếu không đọc được chất nào, để smiles rỗng và ghi lý do."""
+
+SCHEMA_DOC_CHAT = {
+    "type": "object",
+    "properties": {"ten": {"type": "string"}, "smiles": {"type": "string"}, "ly_do": {"type": "string"}},
+    "required": ["ten", "smiles", "ly_do"],
+    "additionalProperties": False,
+}
+
+
+async def doc_chat_tu_anh(anh: bytes, goi_ai: giai_de.GoiAI | None = None) -> dict:
+    kieu, b64 = giai_de.chuan_bi_anh(anh)
+    noi = [{"type": "image", "source": {"type": "base64", "media_type": kieu, "data": b64}},
+           {"type": "text", "text": "Nhận diện chất hoá học trong ảnh và trả về tên + SMILES."}]
+    d = giai_de.doc_json(await (goi_ai or giai_de.goi_ai_mac_dinh)(SYSTEM_DOC_CHAT, [{"role": "user", "content": noi}], SCHEMA_DOC_CHAT))
+    smi = _sach(d.get("smiles"), 300)
+    ten = _sach(d.get("ten"), 150)
+    if not smi and not ten:
+        raise giai_de.LoiGiaiDe("Không đọc được chất trong ảnh" + (f": {_sach(d.get('ly_do'), 200)}" if d.get("ly_do") else ".")
+                                + " Hãy chụp rõ hơn hoặc gõ tên chất.", "anh_khong_ro", 422)
+    return {"ten": ten, "smiles": smi}

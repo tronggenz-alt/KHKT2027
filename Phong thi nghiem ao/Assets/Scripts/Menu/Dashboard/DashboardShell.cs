@@ -709,8 +709,8 @@ namespace Khkt.Menu.Dashboard
 
             var g = MenuAnim.Group(root);
             g.blocksRaycasts = true;
-            MenuAnim.Fade(g, 0f, 1f, 0.3f);
-            MenuAnim.Slide(sidebar, new Vector2(-40, 0), Vector2.zero, 0.42f);
+            MenuAnim.Fade(g, 0f, 1f, 0.24f);
+            MenuAnim.Pop(sidebar, 0.96f, 0.28f);
 
             CurrentPage = "";
             Go("tong_quan");
@@ -745,7 +745,11 @@ namespace Khkt.Menu.Dashboard
                 MenuAnim.ColorTo(item.label, on ? MenuKit.Accent : MenuKit.InkDim);
                 item.label.font = on ? GlassKit.Semibold : GlassKit.Regular;
                 if (item.icon != null) MenuAnim.ColorTo(item.icon, on ? MenuKit.Accent : MenuKit.InkDim);
-                if (on) MenuAnim.Slide(pill, pill.anchoredPosition, item.rt.anchoredPosition, 0.36f, 0f, MenuAnim.Ease.OutQuint);
+                if (on)
+                {
+                    MenuAnim.Slide(pill, pill.anchoredPosition, item.rt.anchoredPosition, 0.28f, 0f, MenuAnim.Ease.OutQuint);
+                    MenuAnim.PulseClick(pill, 0.96f, 1.02f, 0.20f);
+                }
             }
             foreach (var kv in pages) kv.Value.gameObject.SetActive(kv.Key == key);
 

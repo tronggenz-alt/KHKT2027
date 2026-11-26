@@ -394,8 +394,8 @@ namespace Khkt.Demo
             var menuBtn = MakeHudButton("Nút Menu", "Menu ☰", new Vector2(1, 1), new Vector2(-40, -40), new Vector2(110, 65), () =>
             {
                 bool next = !menuPanel.activeSelf;
-                menuPanel.SetActive(next);
-                if (next) SyncSensSlider();
+                if (next) { UiMotion.OpenPanel(this, menuPanel, 0.20f); SyncSensSlider(); }
+                else UiMotion.ClosePanel(this, menuPanel, 0.14f);
             });
 
             // Nút Trợ giúp (kích thước 110x65)
@@ -416,7 +416,8 @@ namespace Khkt.Demo
             });
             MakeTapTextButton(sp, "Chọn trạm", "Đổi khu thí nghiệm", new Vector2(78, 5), new Vector2(200, 65), () =>
             {
-                stationPanel.SetActive(!stationPanel.activeSelf);
+                if (!stationPanel.activeSelf) UiMotion.OpenPanel(this, stationPanel, 0.20f);
+                else UiMotion.ClosePanel(this, stationPanel, 0.14f);
             });
             MakeTapTextButton(sp, "Trạm sau", "▶", new Vector2(284, 5), new Vector2(66, 65), () =>
             {

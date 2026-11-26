@@ -1120,6 +1120,7 @@ namespace Khkt.Demo.Bio
             ApplyWindowScale();
             galleryOverlay.SetActive(true);
             galleryOverlay.transform.SetAsLastSibling();
+            if (galleryPanel != null) UiMotion.Popup(this, galleryPanel, null, 0.22f);
             RebuildGalleryCards();
             RenderGalleryItem();
         }

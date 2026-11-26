@@ -61,6 +61,14 @@
     self.host = host; self.web = web;
     self.prevResponder = w.firstResponder;
 
+    // Hiệu ứng mở mượt mà (fade-in nhanh 0.22s)
+    host.alphaValue = 0.0;
+    [NSAnimationContext runAnimationGroup:^(NSAnimationContext* ctx) {
+        ctx.duration = 0.22;
+        ctx.allowsImplicitAnimation = YES;
+        host.animator.alphaValue = 1.0;
+    } completionHandler:nil];
+
     if ([path hasPrefix:@"http://"] || [path hasPrefix:@"https://"]) {
         [web loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:path]]];
     } else {
@@ -123,6 +131,11 @@
     NSURL* u = a.request.URL;
     if ([u.scheme isEqualToString:@"http"] || [u.scheme isEqualToString:@"https"]) [[NSWorkspace sharedWorkspace] openURL:u];
     return nil;
+}
+
+// Cấp quyền camera tự động cho WKWebView (điều khiển cử chỉ tay MediaPipe trong BIO-LAB 3D)
+- (void)webView:(WKWebView*)v requestMediaCapturePermissionForOrigin:(WKSecurityOrigin*)origin initiatedByFrame:(WKFrameInfo*)frame type:(WKMediaCaptureType)type decisionHandler:(void (^)(WKPermissionDecision))decisionHandler API_AVAILABLE(macos(12.0)) {
+    decisionHandler(WKPermissionDecisionGrant);
 }
 
 // <input type=file>, alert/confirm của trang

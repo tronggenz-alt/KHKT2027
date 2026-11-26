@@ -351,7 +351,8 @@ namespace Khkt.Menu
             vanBanChuoi.gameObject.SetActive(i == 0);
             anhChuoi.gameObject.SetActive(i == 1);
             mauChuoi.gameObject.SetActive(i == 2);
-            MenuAnim.Enter(i == 0 ? vanBanChuoi : i == 1 ? anhChuoi : mauChuoi, 0f, 6f, 0.25f);
+            var dang = i == 0 ? vanBanChuoi : i == 1 ? anhChuoi : mauChuoi;
+            if (dang != null && dang.gameObject.activeInHierarchy) MenuAnim.Pop(dang, 0.97f, 0.22f);
         }
 
         void ChonAnhChuoi()
@@ -397,10 +398,10 @@ namespace Khkt.Menu
             if (loi) MenuAnim.Shake(trangThaiChuoi.rectTransform);
         }
 
-        DongThoiGian dongChuoi, dongCoChe, dong3D;
+        DongThoiGian dongChuoi, dongCoChe;
         public DongThoiGian DongChuoi => dongChuoi;
         public DongThoiGian DongCoChe => dongCoChe;
-        public DongThoiGian Dong3D => dong3D;
+        public KhungMoHinh3D Khung3D => khung3D;
         public BangLon Bang => bangLon;
         BangLon bangLon;
 
@@ -743,7 +744,8 @@ namespace Khkt.Menu
             anhDe.gameObject.SetActive(i == 1);
             mauDe.gameObject.SetActive(i == 2);
             if (i == 2) NapBaiMau();
-            MenuAnim.Enter(i == 0 ? vanBanDe : i == 1 ? anhDe : mauDe, 0f, 6f, 0.25f);
+            var dang = i == 0 ? vanBanDe : i == 1 ? anhDe : mauDe;
+            if (dang != null && dang.gameObject.activeInHierarchy) MenuAnim.Pop(dang, 0.97f, 0.22f);
         }
 
         /// <summary>Lưới bài mẫu: đọc tên từ các gói .verapack (qua CoCheMoDun, chưa mở lớp phủ).</summary>
@@ -1055,81 +1057,208 @@ namespace Khkt.Menu
 
         // ================================================================== MÔ HÌNH 3D
         InputField oChat;
+        RectTransform vanBan3D, anh3DPanel, khoiKq3D, chanTrang3D;
+        RawImage xemAnh3D;
+        Text tenAnh3D, trangThai3D;
+        Button nutDung3D;
+        byte[] anh3DDu;
+        TrangCuon.TheTab tab3D;
+        KhungMoHinh3D khung3D;
+        float yKq3D;
 
         TrangCuon DungTrang3D()
         {
             var t = TrangCuon.Tao(vung, "Trang Mô hình 3D", true);
-            t.ThanhPhu("Mô hình 3D", () => MoTrang(Trang.Chu), new[] { "Nhập chất" });
+            trang[3] = t;
+            t.ThanhPhu("Mô hình 3D", () => MoTrang(Trang.Chu), new[] { "Nhập chất", "Mô hình 3D" });
             t.DauTrang("Công cụ · Mô hình 3D", "Mô hình 3D",
-                       "Nhập tên (tiếng Việt hoặc tiếng Anh), công thức thu gọn hoặc SMILES của <b>một chất</b> – máy dựng cấu dạng 3D để xoay 360°, phóng to, bật tắt H.");
-            t.GhiBuoc(0, t.DauMuc("01", "Chất cần dựng 3D", "Gõ chất rồi bấm Dựng, hoặc bấm một chip mẫu."));
-            var k = t.Khoi("Khối nhập chất", 190, 36);
-            var th = TrangCuon.The(k, "Thẻ nhập chất", 0, 190);
-            TrangCuon.NhanNho(th, "Nhãn", "Chất cần dựng 3D", new Vector2(28, -24), 400);
-            oChat = TextField(th, "Ô chất", "Ví dụ: ethanol · axit axetic · CH3COOC2H5 · C6H5COOH · CC(=O)OC", new Vector2(28, -56), new Vector2(100, 54), 18);
+                       "Nhập tên (tiếng Việt hoặc tiếng Anh), công thức thu gọn, SMILES hoặc ảnh chất – dựng mô hình 3D trực tiếp trong trang, " +
+                       "đo khoảng cách/góc liên kết và mở toàn màn hình khi cần.");
+
+            // 2 tab chọn cách nhập: Văn bản | Hình ảnh (như giao diện web CHEMISTRY)
+            t.GhiBuoc(0, t.Y);
+            var hangTab = t.Khoi("Tab nhập 3D", 112, 16);
+            tab3D = TrangCuon.NhomTheTab(hangTab, new[] { "Văn bản", "Hình ảnh" },
+                new[] { "Tên (Việt/Anh), công thức hoặc SMILES", "Ảnh công thức cấu tạo hoặc tên chất" },
+                new[] { "T", "▣" }, ChonTab3D);
+            t.LanLuot.Add(hangTab);
+
+            // Thẻ nhập chất (văn bản + chip mẫu / hoặc tải ảnh)
+            var k = t.Khoi("Khối nhập chất", 192, 18);
+            var th = TrangCuon.The(k, "Thẻ nhập chất", 0, 192);
+            t.LanLuot.Add(k);
+
+            vanBan3D = Full(th, "Nhập văn bản 3D");
+            TrangCuon.NhanNho(vanBan3D, "Nhãn", "Chất cần dựng 3D", new Vector2(28, -22), 400);
+            oChat = TextField(vanBan3D, "Ô chất", "Ví dụ: ethanol · axit axetic · CH3COOC2H5 · C6H5COOH · CC(=O)OCC", new Vector2(28, -52), new Vector2(100, 54), 18);
             var ort = (RectTransform)oChat.transform; ort.anchorMax = new Vector2(1, 1); ort.offsetMax = new Vector2(-28, ort.offsetMax.y);
             oChat.onSubmit.AddListener(_ => Dung3D());
-            var chips = new List<(string, string, Action)>();
-            foreach (var m in new[] { "ethanol", "axit axetic", "benzen", "glucozơ", "CH3COOC2H5", "aspirin", "caffeine", "CC(C)(C)C#N" })
+            var mau = new (string hien, string gui)[]
             {
-                string mm = m;
-                chips.Add(("Chất mẫu " + m, m, () => { oChat.text = mm; Dung3D(); }));
+                ("ethanol", "ethanol"), ("axit axetic", "axit axetic"), ("benzen", "benzen"), ("glucozơ", "glucozơ"),
+                ("CH₃COOC₂H₅", "CH3COOC2H5"), ("aspirin", "aspirin"), ("caffeine", "caffeine"), ("CC(C)(O)C#N", "CC(C)(O)C#N"),
+            };
+            var chips = new List<(string, string, Action)>();
+            foreach (var m in mau)
+            {
+                string gui = m.gui;
+                chips.Add(("Chất mẫu " + gui, m.hien, () => { oChat.text = gui; tab3D.Chon(0, false); ChonTab3D(0); Dung3D(); }));
             }
-            TrangCuon.XepChip(th, chips, 28, -126, 1560, 14);
-            t.LanLuot.Add(k);
-            var kn = t.Khoi("Khối nút dựng", 60, 40);
-            MakeButton(kn, "Nút Dựng mô hình 3D", "Dựng mô hình 3D  →", Vector2.zero, new Vector2(250, 56), Dung3D, 0, RadiusButton);
-            GlassKit.Label(kn, "Gợi ý", "Trong khung 3D: kéo để xoay · cuộn để phóng to · Đặt lại góc · Ẩn H.", 15, InkMute, false, TextAnchor.MiddleLeft, new Vector2(272, 0), new Vector2(1100, 56));
+            TrangCuon.XepChip(vanBan3D, chips, 28, -124, 1560, 14);
+
+            anh3DPanel = Full(th, "Nhập hình ảnh 3D");
+            TrangCuon.NhanNho(anh3DPanel, "Nhãn", "Ảnh công thức cấu tạo hoặc tên chất", new Vector2(28, -22), 500);
+            var khungAnh = Fill(anh3DPanel, "Khung ảnh 3D", new Vector2(0, 1), new Vector2(0, 1), new Vector2(28, -52), new Vector2(210, 120), Well, 12f);
+            Ring(khungAnh.transform, "Viền", HairStrong, 12f);
+            xemAnh3D = new GameObject("Ảnh", typeof(RectTransform), typeof(RawImage)).GetComponent<RawImage>();
+            xemAnh3D.transform.SetParent(khungAnh.transform, false);
+            var x3r = xemAnh3D.rectTransform; x3r.anchorMin = Vector2.zero; x3r.anchorMax = Vector2.one; x3r.offsetMin = new Vector2(6, 6); x3r.offsetMax = new Vector2(-6, -6);
+            xemAnh3D.gameObject.SetActive(false);
+            GlassKit.Label(khungAnh.transform, "Gợi ý", "Chưa có ảnh", 14, InkMute, false, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(210, 120));
+            var chonAnh = MakeButton(anh3DPanel, "Nút Chọn ảnh 3D", ChonTepHeThong.HoTro ? "Chọn ảnh chất…" : "Ảnh chất (sắp có trên iPad)", new Vector2(264, -52), new Vector2(210, 46), ChonAnh3D, 1);
+            chonAnh.interactable = ChonTepHeThong.HoTro;
+            MakeButton(anh3DPanel, "Nút Bỏ ảnh 3D", "Bỏ ảnh", new Vector2(486, -52), new Vector2(104, 46), () => DatAnh3D(null, ""), 1);
+            tenAnh3D = GlassKit.Label(anh3DPanel, "Tên ảnh 3D", "AI đọc công thức cấu tạo hoặc tên chất trong ảnh rồi dựng mô hình 3D.", 15, InkDim, false, TextAnchor.UpperLeft, new Vector2(264, -110), new Vector2(960, 56));
+            tenAnh3D.horizontalOverflow = HorizontalWrapMode.Wrap;
+            ChonTab3D(0);
+
+            // Hàng nút chính + trạng thái ngay kế bên (như ảnh mẫu: [Dựng mô hình 3D →] Đã dựng: Benzene)
+            var kn = t.Khoi("Khối nút dựng", 58, 22);
+            nutDung3D = MakeButton(kn, "Nút Dựng mô hình 3D", "Dựng mô hình 3D  →", Vector2.zero, new Vector2(236, 54), Dung3D, 0, RadiusButton);
+            trangThai3D = GlassKit.Label(kn, "Trạng thái 3D", "", 15, InkDim, false, TextAnchor.MiddleLeft, new Vector2(258, 0), new Vector2(1260, 54));
+            trangThai3D.horizontalOverflow = HorizontalWrapMode.Wrap;
             t.LanLuot.Add(kn);
-            t.GhiBuoc(0, t.Y);
-            t.DauMuc("02", "Kết quả", "Mỗi chất một khối: ảnh 3D tĩnh, công thức, khối lượng mol. Mở lớn để xoay 360°, phóng to, ẩn H.");
-            t.ThanhSoan("Gõ tên hoặc công thức rồi Enter, ví dụ: ethanol · CH3COOH · CCO", "Dựng 3D", c => { oChat.text = c; Dung3D(); });
-            dong3D = DongThoiGian.Tao(t, "Chưa dựng chất nào", "Gõ tên hoặc công thức rồi bấm <b>Dựng mô hình 3D</b>, hoặc bấm một chip mẫu.");
+
+            // Thẻ kết quả 2 cột nội tuyến (ẩn khi chưa dựng chất nào; chỉ bật toàn màn hình khi bấm nút Toàn màn hình)
+            yKq3D = t.Y;
+            t.GhiBuoc(1, yKq3D);
+            khoiKq3D = t.Khoi("Khối kết quả 3D", KhungMoHinh3D.ChieuCaoThe, 24);
+            khung3D = KhungMoHinh3D.Tao(khoiKq3D);
+            khung3D.BaoTrangThai = (chu, loi) => DatTrangThai3D(chu, loi);
+            khung3D.BaoSai = ten => baoSai.Mo("mo_hinh_3d", "", ten, -1, "");
+            khung3D.CapNhatTuToanMan = dMoi => DatTrangThai3D("Đã dựng: " + khung3D.TenChatHienTai, false);
+
+            chanTrang3D = t.ChanTrang();
+            CapNhatBoCucTrang3D();
             return t;
+        }
+
+        void ChonTab3D(int i)
+        {
+            if (vanBan3D != null) vanBan3D.gameObject.SetActive(i == 0);
+            if (anh3DPanel != null) anh3DPanel.gameObject.SetActive(i == 1);
+            var dang = i == 0 ? vanBan3D : anh3DPanel;
+            if (dang != null && dang.gameObject.activeInHierarchy) MenuAnim.Pop(dang, 0.97f, 0.22f);
+        }
+
+        void ChonAnh3D()
+        {
+            StartCoroutine(ChonTepHeThong.ChonAnh("Chọn ảnh công thức hoặc tên chất", (duong, loi) =>
+            {
+                if (!string.IsNullOrEmpty(loi)) { DatTrangThai3D(loi, true); return; }
+                if (string.IsNullOrEmpty(duong)) return;
+                var (du, loiDoc) = ChonTepHeThong.DocTep(duong, CoCheMoDun.AnhToiDa);
+                if (du == null) { DatTrangThai3D(loiDoc, true); return; }
+                DatAnh3D(du, System.IO.Path.GetFileName(duong));
+            }));
+        }
+
+        public void DatAnh3D(byte[] du, string ten)
+        {
+            anh3DDu = du;
+            if (xemAnh3D.texture != null) Destroy(xemAnh3D.texture);
+            xemAnh3D.texture = null;
+            xemAnh3D.gameObject.SetActive(false);
+            if (du != null)
+            {
+                var tex = new Texture2D(2, 2);
+                if (tex.LoadImage(du))
+                {
+                    xemAnh3D.texture = tex;
+                    xemAnh3D.gameObject.SetActive(true);
+                    var f = xemAnh3D.gameObject.GetComponent<AspectRatioFitter>() ?? xemAnh3D.gameObject.AddComponent<AspectRatioFitter>();
+                    f.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
+                    f.aspectRatio = tex.width / (float)Mathf.Max(1, tex.height);
+                }
+                else Destroy(tex);
+            }
+            tenAnh3D.text = du == null
+                ? "AI đọc công thức cấu tạo hoặc tên chất trong ảnh rồi dựng mô hình 3D."
+                : $"<b>{ten}</b> ({du.Length / 1024f:0} KB). Bấm Dựng mô hình 3D để AI nhận diện và dựng.";
+            tenAnh3D.supportRichText = true;
+        }
+
+        void DatTrangThai3D(string chu, bool loi)
+        {
+            if (trangThai3D == null) return;
+            trangThai3D.text = chu;
+            trangThai3D.color = loi ? Error : InkDim;
+            if (loi) MenuAnim.Shake(trangThai3D.rectTransform);
+        }
+
+        void CapNhatBoCucTrang3D()
+        {
+            if (trang[3] == null || chanTrang3D == null) return;
+            float y = yKq3D;
+            if (khoiKq3D != null && khoiKq3D.gameObject.activeSelf)
+            {
+                khoiKq3D.offsetMin = new Vector2(TrangCuon.Le, y - KhungMoHinh3D.ChieuCaoThe);
+                khoiKq3D.offsetMax = new Vector2(-TrangCuon.Le, y);
+                y -= KhungMoHinh3D.ChieuCaoThe + 28f;
+            }
+            y -= 16f;
+            chanTrang3D.offsetMin = new Vector2(TrangCuon.Le, y - 60f);
+            chanTrang3D.offsetMax = new Vector2(-TrangCuon.Le, y);
+            trang[3].Y = y - 60f;
+            trang[3].ChotChieuCao(40f);
         }
 
         public bool DangDung3D { get; private set; }
 
         void Dung3D()
         {
+            if (DangDung3D) return;
+            bool dungAnh = tab3D != null && tab3D.Dang == 1;
             string q = (oChat.text ?? "").Trim();
-            if (q.Length == 0 || DangDung3D) return;
-            StartCoroutine(GoiDung3D(q));
+            if (dungAnh ? anh3DDu == null : q.Length == 0)
+            {
+                DatTrangThai3D(dungAnh ? "Hãy chọn ảnh chất trước." : "Hãy nhập tên, công thức hoặc SMILES của chất.", true);
+                return;
+            }
+            StartCoroutine(GoiDung3D(q, dungAnh ? anh3DDu : null));
         }
 
-        IEnumerator GoiDung3D(string q)
+        IEnumerator GoiDung3D(string q, byte[] anh)
         {
             DangDung3D = true;
-            var k = dong3D.Them(q, null);
+            if (nutDung3D != null) nutDung3D.interactable = false;
             float t0 = Time.realtimeSinceStartup;
             bool xong = false, ok = false;
             string kq = "";
-            StartCoroutine(MayChuCoChe.Goi("POST", "/co-che/mo-hinh-3d", "{\"van_ban\":" + MayChuCoChe.ChuoiJson(q) + "}", 40f, (o, x) => { ok = o; kq = x; xong = true; }));
-            string[] buocLam = { "Tìm chất", "Dựng cấu dạng RDKit", "Vẽ" };
+            string than = anh != null
+                ? "{\"anh_base64\":\"" + Convert.ToBase64String(anh) + "\"}"
+                : "{\"van_ban\":" + MayChuCoChe.ChuoiJson(q) + "}";
+            StartCoroutine(MayChuCoChe.Goi("POST", "/co-che/mo-hinh-3d", than, anh != null ? 90f : 40f, (o, x) => { ok = o; kq = x; xong = true; }));
             while (!xong)
             {
                 float s = Time.realtimeSinceStartup - t0;
-                k.DatTienTrinh(TienTrinh(buocLam, Mathf.Min(2, (int)(s / 1.2f)), s));
+                DatTrangThai3D(anh != null ? $"AI đang đọc ảnh và dựng 3D… {s:0} s" : $"Đang tra PubChem và dựng 3D cho \"{q}\"… {s:0} s", false);
                 yield return new WaitForSecondsRealtime(0.2f);
             }
             DangDung3D = false;
-            if (!ok) { k.DatLoi(kq); yield break; }
+            if (nutDung3D != null) nutDung3D.interactable = true;
+            if (!ok) { DatTrangThai3D(string.IsNullOrEmpty(kq) ? "Không dựng được mô hình 3D." : kq, true); yield break; }
             try
             {
                 var d = D(Doc(kq));
-                string nguon = S(d, "nguon") switch { "bang_sgk" => "Bảng SGK (đã kiểm chứng)", "pubchem" => "PubChem", "smiles" => "SMILES bạn nhập", var x => x };
-                k.DatDapAn((rt, w) => HinhDapAn.Ba(rt, d, w, 380), $"{S(d, "ten")}  ·  {S(d, "cong_thuc")}", nguon, S(d, "nguon") == "bang_sgk",
-                    $"M = {F(Lay(d, "khoi_luong")):0.00} g/mol  ·  {L(Lay(d, "nguyen_tu")).Count} nguyên tử (kể cả H)  ·  SMILES {S(d, "smiles")}",
-                    new List<(string, string, int, Action)> {
-                        ("Nút Mở lớn", "Xoay 3D toàn màn hình", 0, () => { MoHinh3DMoDun.Mo(); MoHinh3DMoDun.Instance?.XemChat(q); }),
-                        ("Nút Xuất PNG", "Xuất ảnh", 2, () => StartCoroutine(XuatPng(k.Hinh, "mo_hinh_3d"))),
-                        ("Nút Báo sai 3D", "Báo sai", 2, () => baoSai.Mo("mo_hinh_3d", "", q, -1, "")) },
-                    null, null, null,
-                    () => { MoHinh3DMoDun.Mo(); MoHinh3DMoDun.Instance?.XemChat(q); });
-                // mô hình 3D nguyên bản 18/11 (khung 3D thật, có chiều sâu) mở ngay khi dựng xong
-                if (!Application.isBatchMode) { MoHinh3DMoDun.Mo(); MoHinh3DMoDun.Instance?.XemChat(q); }
+                khung3D.Hien(d);
+                CapNhatBoCucTrang3D();
+                MenuAnim.Pop(khoiKq3D, 0.955f, 0.28f);
+                DatTrangThai3D("Đã dựng: " + khung3D.TenChatHienTai, false);
+                // cuộn mượt tới thẻ kết quả 2 cột; KHÔNG tự bật toàn màn hình (chỉ bật khi bấm nút Toàn màn hình)
+                trang[3].TruotToi(yKq3D + 120f);
             }
-            catch (Exception e) { k.DatLoi("Kết quả lỗi định dạng: " + e.Message); }
+            catch (Exception e) { DatTrangThai3D("Kết quả lỗi định dạng: " + e.Message, true); }
         }
 
         // ================================================================== HÓA LÝ
@@ -1213,8 +1342,8 @@ namespace Khkt.Menu
             goc.SetAsLastSibling();
             var g = MenuAnim.Group(goc);
             g.blocksRaycasts = true;
-            MenuAnim.Fade(g, 0f, 1f, 0.2f);
-            MenuAnim.Pop(khung);
+            MenuAnim.Fade(g, 0f, 1f, 0.18f);
+            MenuAnim.Pop(khung, 0.93f, 0.26f);
             o.ActivateInputField();
         }
 
@@ -1222,7 +1351,7 @@ namespace Khkt.Menu
         {
             var g = MenuAnim.Group(goc);
             g.blocksRaycasts = false;
-            MenuAnim.Fade(g, g.alpha, 0f, 0.16f, 0f, () => goc.gameObject.SetActive(false));
+            MenuAnim.ClosePop(khung, g, 0.15f, () => goc.gameObject.SetActive(false));
         }
 
         public void Gui() => Gui(o.text);

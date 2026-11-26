@@ -208,7 +208,7 @@ namespace Khkt.Demo
         {
             if (IsOpen) return;
             IsOpen = true;
-            panel.SetActive(true);
+            UiMotion.OpenPanel(this, panel, 0.22f);
             UiBridge.SetCapture(ref captured, true);
             input.text = "";
             lastQuery = null;
@@ -218,9 +218,10 @@ namespace Khkt.Demo
 
         public void Close()
         {
+            if (!IsOpen && (panel == null || !panel.activeSelf)) return;
             IsOpen = false;
-            panel.SetActive(false);
             UiBridge.SetCapture(ref captured, false);
+            UiMotion.ClosePanel(this, panel, 0.15f);
         }
 
         void Update()

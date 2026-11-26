@@ -373,8 +373,18 @@ namespace Khkt.Demo.Bio.GiaiPhau
         public void DatCheDo(CheDoGiaiPhau cheDoMoi)
         {
             CheDo = cheDoMoi;
-            if (cardPanel != null) cardPanel.gameObject.SetActive(CheDo == CheDoGiaiPhau.KhamPha);
-            if (quizPanel != null) quizPanel.gameObject.SetActive(CheDo == CheDoGiaiPhau.CauHoiNhanh);
+            if (cardPanel != null)
+            {
+                bool showCard = CheDo == CheDoGiaiPhau.KhamPha;
+                cardPanel.gameObject.SetActive(showCard);
+                if (showCard) UiMotion.Popup(this, cardPanel, null, 0.22f);
+            }
+            if (quizPanel != null)
+            {
+                bool showQuiz = CheDo == CheDoGiaiPhau.CauHoiNhanh;
+                quizPanel.gameObject.SetActive(showQuiz);
+                if (showQuiz) UiMotion.Popup(this, quizPanel, null, 0.22f);
+            }
 
             if (CheDo == CheDoGiaiPhau.CauHoiNhanh)
             {
@@ -651,6 +661,9 @@ namespace Khkt.Demo.Bio.GiaiPhau
                 new Vector2(10f, -4f), new Vector2(940f, 32f));
 
             SetLayerRecursive(cvGo.transform, 5);
+            UiMotion.Popup(this, header, null, 0.22f);
+            UiMotion.Popup(this, left, null, 0.24f);
+            UiMotion.Popup(this, footer, null, 0.22f);
         }
 
         static void SetLayerRecursive(Transform t, int layer)

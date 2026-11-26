@@ -324,6 +324,7 @@ namespace Khkt.Demo.Instruments
             open = true;
             root.SetActive(true);
             root.transform.SetAsLastSibling();
+            if (windowFrame != null) UiMotion.Popup(this, windowFrame, null, 0.22f);
             UiBridge.SetCapture(ref captured, true);
             Say(Guided ? "Chế độ Hướng dẫn: làm theo các bước bên trái; máy chặn thao tác bỏ bước." : "Chế độ Thực hành: tự làm như máy thật; làm sai thì kết quả sai và máy báo lỗi.", 0);
             Refresh();
@@ -760,6 +761,8 @@ namespace Khkt.Demo.Instruments
             b.Append($"\n<color={Hex(Muted)}>Nguồn thông số ghi đầy đủ trong data/may/").Append(d.Code).Append(".json và docs/17, docs/18.</color>");
             popupRight.text = b.ToString();
             popup.SetActive(true);
+            var popRt = popup.transform.Find("Nguyên lý") as RectTransform;
+            if (popRt != null) UiMotion.Popup(this, popRt, null, 0.20f);
         }
 
         // =====================================================================
