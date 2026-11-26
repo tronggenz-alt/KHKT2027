@@ -1,4 +1,6 @@
-// cam_ung.h - 2 nút cảm ứng điện dung nối thẳng chân touch của ESP32 (lá đồng dán trong vỏ).
+// cam_ung.h - 2 nút cảm ứng điện dung nối thẳng chân touch của ESP32 (lá đồng dán trong vỏ),
+// thêm 4 miếng chạm hướng (tiến, lùi, trái, phải) từ 26/11/2026. Miếng chạm là vật dẫn bất kỳ: lá đồng, giấy bạc,
+// đầu dây tuốt vỏ cuộn tròn, con vít.
 //  - Trung vị 3 mẫu bỏ gai nhiễu (Wi-Fi phát, sụt áp).
 //  - Mức = (mức nền - số đo) / (mức tụt khi chạm thật đã học). 0 = rảnh, 1 = chạm chắc.
 //  - Ngưỡng có trễ: chạm khi mức ≥ 0,50, nhả khi < 0,35, mỗi lần đổi phải đúng 2 mẫu liên tiếp.
@@ -24,6 +26,13 @@ struct Nut {
 Nut A{CHAN_CHAM_A};
 Nut B{CHAN_CHAM_B};
 
+// 4 miếng chạm hướng (cau_hinh.h). Chân -1 thành 255 = không nối, bỏ qua.
+enum { H_TIEN, H_LUI, H_TRAI, H_PHAI, SO_HUONG };
+const uint8_t KHONG_NOI = 255;
+Nut H[SO_HUONG] = {Nut{(uint8_t)CHAN_CHAM_TIEN}, Nut{(uint8_t)CHAN_CHAM_LUI}, Nut{(uint8_t)CHAN_CHAM_TRAI},
+                   Nut{(uint8_t)CHAN_CHAM_PHAI}};
+bool coHuong(int i) { return H[i].chan != KHONG_NOI; }
+
 void khoiTao() {
 #if defined(ESP_IDF_VERSION) && ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 5, 0)
   // lõi Arduino-ESP32 3.3 trở lên (driver cảm ứng mới)
@@ -31,7 +40,8 @@ void khoiTao() {
 #else
   touchSetCycles(0x2000, 0x1000);  // lõi cũ: đo lâu hơn mặc định cho ít nhiễu
 #endif
-  for (Nut *n : {&A, &B}) {
+  for (Nut *n : {&A, &B, &H[0], &H[1], &H[2], &H[3]}) {
+    if (n->chan == KHONG_NOI) continue;
     uint32_t v = (uint32_t)touchRead(n->chan);
     n->r[0] = n->r[1] = n->r[2] = v;
     n->tho = v;
@@ -72,6 +82,20 @@ void capNhat(Nut &n, float tyLe, int8_t chieu, float dt, bool dongBangNen = fals
   if (muc < -0.3f) {
     if (++n.demNguoc > 50) { n.nen = m; n.demNguoc = 0; }
   } else n.demNguoc = 0;
+}
+
+// Miếng hướng: mỗi lượt cảm ứng chỉ đọc 2 trong 4 miếng (mỗi miếng 50 lần/giây) để lượt đọc không quá dài
+void capNhatHuong(uint32_t luot, float dt) {
+  for (int i = (luot & 1) ? 2 : 0, k = 0; k < 2; i++, k++)
+    if (coHuong(i)) capNhat(H[i], CHAM_HUONG_TY_LE, 1, dt);
+}
+
+// bit 0..3 = tiến, lùi, trái, phải đang chạm
+uint8_t huongDangCham() {
+  uint8_t b = 0;
+  for (int i = 0; i < SO_HUONG; i++)
+    if (coHuong(i) && H[i].bam) b |= 1 << i;
+  return b;
 }
 
 uint8_t muc8(const Nut &n) {

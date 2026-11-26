@@ -6,12 +6,15 @@ Firmware ở `firmware/tay_cam_vera/`. Thiết kế, sơ đồ chân và tương
 
 | Linh kiện | Chân linh kiện | Chân ESP32 |
 | --- | --- | --- |
-| Joystick KY-023 | VRx, VRy, SW | GPIO34, GPIO35, GPIO27 |
+| Joystick KY-023 (dự phòng từ v3.1) | VRx, VRy | GPIO34, GPIO35 |
+| | SW | bỏ từ v3.1 (trước là GPIO27, `CHAN_JOY_NUT = -1`) |
 | | +5V, GND | **3V3**, GND (không cấp 5V) |
 | BMI160 | SDA, SCL, INT1 | **GPIO25, GPIO26** (đổi từ 21, 22 ngày 18/11/2026), INT1 chưa nối (`CHAN_INT1 = -1`, lấy mẫu theo đồng hồ 200 Hz) |
 | | VIN, GND | 3V3, GND |
 | Nút cảm ứng A (ngón cái) | lá đồng 15 × 15 mm | GPIO13 (T4) |
-| Nút cảm ứng B (ngón trỏ, cầm vật) | lá đồng 15 × 15 mm | GPIO14 (T6) |
+| Nút cảm ứng B (ngón trỏ, cầm vật) | lá đồng 15 × 15 mm | **GPIO27 (T7)** từ v3.1 (trước là GPIO14, dây chập GND) |
+| Miếng chạm TIẾN, LÙI (v3.1) | vật dẫn bất kỳ cỡ đầu ngón tay | **GPIO32 (T9), GPIO33 (T8)** |
+| Miếng chạm TRÁI, PHẢI (v3.1) | vật dẫn bất kỳ cỡ đầu ngón tay | **GPIO4 (T0), GPIO15 (T3)** |
 | Tụ | 100 nF ×2, 470 µF + 100 nF | VRx, VRy xuống GND; sát chân 3V3–GND |
 
 Không nối dây INT1 thì sửa `CHAN_INT1` thành `-1`. Firmware cũng tự chuyển sang đồng hồ 200 Hz nếu không thấy ngắt.
@@ -22,7 +25,7 @@ Không nối dây INT1 thì sửa `CHAN_INT1` thành `-1`. Firmware cũng tự c
 2. Mở `firmware/tay_cam_vera/tay_cam_vera.ino`. Sửa `cau_hinh.h`:
    - `WIFI_TEN`, `WIFI_MAT_KHAU`: Wi-Fi 2,4 GHz. Để nguyên `TEN_WIFI` thì tay cầm chỉ chạy qua USB.
    - `IP_MAY_TINH`: nên điền khi đi thi. Gửi thẳng tới máy tính thì ít trễ và ít mất gói hơn phát quảng bá.
-3. Đặt tay cầm **yên trên bàn**, rồi bấm Upload. Mở Serial Monitor ở 115200 baud.
+3. Đặt tay cầm **yên trên bàn**, rồi bấm Upload. Mở Serial Monitor ở **921600** baud (`TOC_DO_BAUD`).
 4. Lúc khởi động, tay cầm cân trong 2 giây: đo độ lệch con quay, mức nền 2 nút cảm ứng và tâm joystick. Trong lúc đó không chạm vào tay cầm.
 
 Không cần thư viện ngoài. Chỉ dùng `WiFi`, `Wire` và `Preferences` có sẵn trong gói ESP32.
@@ -58,6 +61,9 @@ Các lệnh khác:
 | `z` | Đặt yaw về 0. Cách khác: giữ cả 2 nút cảm ứng 1 giây |
 | `c` | Cân lại con quay (để yên 2 giây) |
 | `J` | Lấy vị trí hiện tại làm tâm joystick |
+| `h` | Học hướng joystick: đẩy cần lên rồi sang phải, lưu flash |
+| `H0,1,0` | Ghi thẳng hướng joystick (đổi XY, đảo X, đảo Y) vào flash. `tools/canh_joystick.py` gửi lệnh này |
+| `B1569,1462,1379,1486` | Ghi thẳng biên joystick (âm X, Y, dương X, Y, mV tính từ tâm) vào flash |
 | `t50,35,15` | Đặt ngưỡng chạm, nhả, lơ lửng (%) |
 | `p` | In thông tin: độ lệch, hệ số nhiệt, tỉ lệ, số đo cảm ứng, Wi-Fi |
 | `x` | Xoá hiệu chuẩn đã lưu |
@@ -224,3 +230,71 @@ Chưa thử với tay cầm thật. Phân tích mất khoảng 2–3 phút cho 1
   - Unity (`SerialControllerSource`) thử 115200 trước, không thấy tay cầm thì thử `veraBaudRate = 921600`, nên tay cầm cũ vẫn chạy.
 - **Đo trong 10 giây:** 93 gói/s, không mất gói. Khoảng cách giữa hai gói: trung vị 8,3 ms, lớn nhất 49 ms (bản 50 gói/s: 17 ms và 64 ms).
 - **Hồi phục I2C:** giữ như bản gốc theo yêu cầu. Bản thử hồi phục theo bậc và tác vụ riêng (bị chê giật) lưu ở `firmware/tay_cam_vera_ban_sua_18_11/`.
+
+## Hướng trôi sau khi BMI160 rớt I2C (24/11/2026)
+
+- **Hiện tượng:** mở phòng thử lên thì tay cầm đúng hướng, cầm lên di chuyển thì lúc ngược trục này, lúc ngược trục khác.
+- **Đo trên COM8:**
+  - lúc mở cổng, firmware báo `imu=LOI`;
+  - bộ đếm `hoiphuc` (lệnh `p`) tăng từ 4 lên 23 trong khoảng 1 phút: BMI160 rớt I2C vài giây một lần;
+  - hướng firmware tính ra vẫn đúng chiều con quay (tương quan +0,95 / +0,99 / +0,78), nên trục `IMU_*` không sai.
+- **Nguyên nhân:**
+  - Bước cân yên lúc bật chỉ đặt nghiêng theo trọng lực khi đọc được IMU.
+  - IMU lỗi lúc bật thì hướng bắt đầu từ 0, rồi Madgwick (beta 0,033) kéo về đúng chậm, vài độ mỗi giây.
+  - Mỗi lần hồi phục (khoảng 0,3 giây), chuyển động trong lúc đó bị mất.
+  - Hướng đang tự trôi cộng với chuyển động của tay nên trông như bị ngược.
+- **Sửa firmware:**
+  - đặt roll, pitch ngay theo trọng lực, giữ nguyên yaw (`huong::datNghiengGiuYaw`), khi hướng chưa từng được đặt hoặc vừa mất mẫu quá `MAT_MAU_DAT_LAI_MS` (200 ms);
+  - chỉ đặt khi |a| trong khoảng 0,85–1,15 g (không lắc mạnh), rồi in `#HUONG ...`;
+  - đọc lại một lần trước khi khởi động lại cảm biến;
+  - I2C hạ từ 400 xuống 100 kHz (`I2C_TAN_SO` trong `cau_hinh.h`);
+  - IMU mất hẳn thì thử lại sau 2 giây thay vì 5 giây.
+- **Giữ nguyên:** cách hồi phục I2C của bản gốc. Bản hồi phục theo bậc 18/11 bị chê giật nên không dùng.
+- **Chưa kiểm:**
+  - Máy có chính sách Application Control chặn `xtensa-esp-elf-g++`, nên chưa kiểm biên dịch. Chỉ soát tay và thử phần toán bằng Python (2000 hướng ngẫu nhiên).
+  - Chưa nạp lên mạch.
+  - Mỗi lần đặt lại, độ nghiêng nhảy ngay về đúng: nếu thấy giật, tăng `MAT_MAU_DAT_LAI_MS`.
+- **Phần cứng vẫn là gốc của lỗi:** hàn lại hoặc làm ngắn dây SDA (GPIO25), SCL (GPIO26), 3V3, GND tới BMI160. Ấn hoặc lắc dây mà `hoiphuc` tăng hoặc báo `LOI_IMU` thì đó là mối nối kém.
+
+## Căn joystick bằng `tools/canh_joystick.py` (24/11/2026)
+
+- **Cách chạy:** `python tools/canh_joystick.py COM8`. Giữ cần ở 6 tư thế: giữa, tiến, lùi, trái, phải, nhấn. Các bước tiến, lùi, trái, phải tự ghi khi cần lệch hơn 500 mV và giữ yên 1 giây.
+- **Kết quả:** lưu ở `du_lieu/tay_cam/joystick_<giờ>.json`, gồm số đo từng bước, hướng suy ra và biên. Phím **A** gửi lệnh `H` và `B` để ghi vào flash tay cầm. `--ap` ghi tệp mới nhất mà không làm lại các bước.
+- **Đo trên tay cầm (tệp `joystick_20261124_164714.json`):**
+  - tâm X 1741, Y 1634 mV;
+  - tiến: Y lên 3150 mV; lùi: Y xuống 142 mV;
+  - phải: X xuống 142 mV; trái: X lên 3150 mV;
+  - suy ra `doi_xy=0`, `dao_x=1`, `dao_y=0`; biên âm 1569/1462, dương 1379/1486 mV.
+  - `cau_hinh.h` đã đổi `JOY_DAO_X` thành 1.
+- **Còn lỗi:**
+  - Nút nhấn cần (SW, GPIO27) không ăn ở cả 2 lần đo: kiểm tra dây SW và GND của module joystick.
+  - Hướng và biên đã lưu trong flash (`joyh`, `cd`) được ưu tiên hơn `cau_hinh.h`. Biên đang lưu (2864/2739/2947/3008) là học sai lúc GND chập chờn. Sau khi nạp bản này, chạy `--ap` để ghi số đúng.
+- **Lần đo đầu (`joystick_20261124_164456.json`):** trục X đứng yên 1741 mV và bị đánh dấu LỖI. Phần JSON không ghi lý do; người dùng cho biết đã di chuyển sai.
+
+## Bản 3.1: miếng chạm hướng thay cần gạt (26/11/2026)
+
+**Vì sao làm:** đo qua USB ngày 25–26/11 thấy module joystick hỏng dây:
+
+- GPIO34 (X) bỏ trống. Chân trôi 150–300 mV và chỉ nhích theo trục Y bên cạnh.
+- GPIO35 (Y) lúc đúng (tâm 1601 mV, gạt đủ 142–3150 mV), lúc kẹt 3150 mV (mất GND), lúc kẹt 142 mV (mất 3V3).
+- Nút SW nhận chập chờn.
+- GPIO14 (chạm B) chập GND, giá trị thô bằng 1, nên game tưởng luôn đang cầm vật.
+
+**Đổi gì:**
+
+| Phần | Bản 3.0 | Bản 3.1 |
+| --- | --- | --- |
+| Đi lại | Cần gạt KY-023 | 4 miếng chạm: GPIO32 tiến, 33 lùi, 4 trái, 15 phải. Chạm hai miếng kề nhau là đi chéo. Joystick vẫn dùng được nếu còn tốt |
+| Chạm B | GPIO14 | GPIO27 |
+| Nút nhấn cần | GPIO27 | bỏ |
+| Trục joystick hỏng | Vẫn dùng, nên nhân vật tự đi | Trục chỉ được tin sau khi thấy cần nằm gần tâm (900–2400 mV) 0,5 giây. Bỏ trục khi chân nhảy kiểu dây hở, khi cả 2 trục cùng vọt từ tâm ra mép trong 10 ms (mất nguồn), hoặc khi 20 giây liền không về tâm. Trục bị bỏ ra 0 và báo game 1650 mV |
+| Tâm học lúc bật | Nhận mọi giá trị (đã từng học 147/142 và 3150/3150 mV) | Chỉ nhận tâm trong 900–2400 mV |
+
+- **Game không cần sửa.** Miếng chạm gửi ra như joystick, gồm cả điện áp giả 1650 ± 1500 mV theo đúng chiều của cần thật: tiến là Y tăng, phải là X giảm. Có đường dốc 0,125 giây để bộ lọc nhảy loạn của game không bỏ nhầm trục.
+- **Không phải dùng lá đồng.** Đầu dây tuốt vỏ cuộn tròn, giấy bạc, con vít hay băng keo đồng đều dùng được. Miếng càng to bằng đầu ngón tay càng nhận chắc. Dây nối về ESP32 nên ngắn và không đi sát dây GND.
+- **Độ nhạy:** chỉnh `CHAM_HUONG_TY_LE` trong `cau_hinh.h` (mặc định 0,25). Chạm nhận chậm thì giảm về 0,15. Chưa chạm đã nhận thì tăng lên 0,40.
+- **Kiểm tra sau khi nạp:**
+  - Lệnh `p` in dòng `JOYTOT` (trục nào đang dùng) và `HUONG_CHAM T=…/… L=… t=… p=…` (số đo, mức nền, `*` là đang chạm).
+  - Lệnh `s2` in `J x y - TL.. (mV X,Y)` mỗi 0,1 giây.
+- **Đã kiểm:** biên dịch với g++ và thư viện Arduino giả, `-Wall -Wextra` không lỗi, không cảnh báo. Mô phỏng 17 trường hợp theo số đo thật đều đạt: kẹt 0 V, kẹt 3,3 V, chân trôi, giữ tiến 10 giây, gạt chéo, mất GND/3V3 lúc đang chạy, gạt nhanh, chạm/buông miếng hướng, tay để gần. **Chưa biên dịch bằng gói ESP32 thật và chưa chạy trên mạch.**
+- **Lưu ý nạp:** trên máy này Smart App Control chặn trình biên dịch `xtensa-esp-elf-g++`, nên Arduino IDE có thể báo lỗi lúc Compile. Nạp từ một máy khác thì không bị.

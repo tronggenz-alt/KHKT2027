@@ -29,6 +29,7 @@ const float TOC_DO_HOC_LECH = 0.01f; // hội tụ khoảng 0,5 giây
 const float VUNG_CHET_DPS = 0.5f;
 
 float q0 = 1, q1 = 0, q2 = 0, q3 = 0;
+bool daDatHuong = false;             // đã đặt nghiêng theo trọng lực ít nhất một lần (IMU lỗi lúc bật thì chưa)
 float lech[3] = {0, 0, 0};           // độ lệch con quay (°/s) tại nhiệt độ nhietMoc
 float tb[3] = {0, 0, 0}, ps[3] = {1, 1, 1};
 uint32_t demYen = 0;
@@ -65,18 +66,32 @@ void datTuGiaToc(const float a[3]) {
   q2 = cp * st;
   q3 = -sp * st;
   batDauBetaMs = millis();
+  daDatHuong = true;
 }
 
-// Đặt yaw về 0, giữ nguyên roll, pitch: q' = quay quanh trục đứng (-yaw) ⊗ q
-void datLaiYaw() {
-  float yaw = atan2f(2 * (q0 * q3 + q1 * q2), 1 - 2 * (q2 * q2 + q3 * q3));
-  float c = cosf(-yaw / 2), s = sinf(-yaw / 2);
+float yawHienTai() { return atan2f(2 * (q0 * q3 + q1 * q2), 1 - 2 * (q2 * q2 + q3 * q3)); }
+
+// q' = quay quanh trục đứng của mặt đất một góc goc (rad) ⊗ q
+void quayQuanhTrucDung(float goc) {
+  float c = cosf(goc / 2), s = sinf(goc / 2);
   float n0 = c * q0 - s * q3;
   float n1 = c * q1 - s * q2;
   float n2 = c * q2 + s * q1;
   float n3 = c * q3 + s * q0;
   float r = 1.0f / sqrtf(n0 * n0 + n1 * n1 + n2 * n2 + n3 * n3);
   q0 = n0 * r; q1 = n1 * r; q2 = n2 * r; q3 = n3 * r;
+}
+
+// Đặt yaw về 0, giữ nguyên roll, pitch
+void datLaiYaw() { quayQuanhTrucDung(-yawHienTai()); }
+
+// Đặt roll, pitch ngay theo trọng lực, giữ yaw đang có (gia tốc kế không biết yaw). Dùng khi IMU lỗi lúc bật rồi mới
+// chạy, hoặc vừa mất mẫu một lúc: không đặt lại thì hướng trôi dần về đúng vài độ mỗi giây, cầm lên di chuyển thấy ngược.
+void datNghiengGiuYaw(const float a[3]) {
+  bool coYaw = daDatHuong;
+  float yaw = yawHienTai();
+  datTuGiaToc(a);
+  if (coYaw) quayQuanhTrucDung(yaw);
 }
 
 // Mahony (Mahony 2008): sửa hướng theo tích có hướng giữa trọng lực đo và trọng lực ước lượng, Ki tích phân sai lệch

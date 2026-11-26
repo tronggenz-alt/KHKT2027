@@ -57,7 +57,7 @@ void goKetBus() {
 void batDauBus() {
   goKetBus();
   Wire.begin(CHAN_SDA, CHAN_SCL);
-  Wire.setClock(400000);
+  Wire.setClock(I2C_TAN_SO);
   Wire.setTimeOut(20);
 }
 

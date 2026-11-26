@@ -5,7 +5,7 @@
 #include <stdarg.h>
 #include "cau_hinh.h"
 
-#define PHIEN_BAN "VERA-TAYCAM v3.0"
+#define PHIEN_BAN "VERA-TAYCAM v3.1"  // 3.1 (26/11/2026): 4 miếng chạm hướng, chạm B sang GPIO27, bỏ trục joystick hỏng
 
 // Bit trạng thái, byte 34 của gói v3
 #define BIT_CHAM_A       0x01
@@ -33,7 +33,9 @@ struct TrangThai {
   // chẩn đoán (in ra Serial)
   uint32_t thoA = 0, thoB = 0;
   float nenA = 0, nenB = 0;
-  float joyMv[2] = {0, 0};
+  float joyMv[2] = {0, 0};      // điện áp báo game: mV thật, hoặc 1650 khi trục không tin, hoặc giả khi chạm miếng hướng
+  float joyMvTho[2] = {0, 0};   // mV đo thật ở chân (chỉ để in chẩn đoán)
+  uint8_t huongCham = 0;        // bit 0..3: miếng tiến, lùi, trái, phải đang chạm
 };
 
 portMUX_TYPE khoaTrangThai = portMUX_INITIALIZER_UNLOCKED;

@@ -20,7 +20,11 @@
  *   r1 / r2 / r0  phát dữ liệu thô 200 Hz qua Wi-Fi / USB / tắt (để ghi bằng tools/ghi_tay_cam.py)
  *   h  hiệu chỉnh hướng joystick: đẩy cần LÊN (về phía mũi) giữ, buông, đẩy sang PHẢI giữ (gắn cần xoay hướng nào cũng được)
  *   p / I  in thông tin      x  xoá hiệu chuẩn đã lưu
- * Giữ nhấn cần joystick lúc cắm điện: chạy hiệu chuẩn đầy đủ (k) ngay sau khi khởi động.
+ * Giữ nhấn cần joystick lúc cắm điện: chạy hiệu chuẩn đầy đủ (k) ngay sau khi khởi động (khi có nối CHAN_JOY_NUT).
+ *
+ * v3.1 (26/11/2026): 4 miếng chạm hướng GPIO32 tiến, 33 lùi, 4 trái, 15 phải (cau_hinh.h) thay cần gạt khi joystick
+ * hỏng; chạm B chuyển sang GPIO27; trục joystick chỉ dùng khi đã thấy cần nằm gần tâm (kẹt 0 V / 3,3 V thì bỏ).
+ * Game không cần sửa: miếng chạm gửi ra như joystick (cả điện áp giả 1650 ± 1500 mV).
  */
 #include "cau_hinh.h"
 #include "chung.h"
@@ -176,9 +180,11 @@ void xuLyHieuChuan(const float a[3], const float g[3], bool imuOk, bool coJoy, b
           cham::A.nen = gomChamA / soMauCham;
           cham::B.nen = gomChamB / soMauCham;
         }
-        if (soMauJoy > 20) {
-          joy::tam[0] = gomJoy[0] / soMauJoy;
-          joy::tam[1] = gomJoy[1] / soMauJoy;
+        // chỉ nhận tâm nằm trong khoảng hợp lý: 25/11/2026 dây hỏng làm mạch học tâm 147/142 mV và 3150/3150 mV
+        for (int i = 0; i < 2 && soMauJoy > 20; i++) {
+          float tb = gomJoy[i] / soMauJoy;
+          if (joy::ganTam(tb)) joy::tam[i] = tb;
+          else bao("CAL tam joystick truc %c = %.0f mV bat thuong (day hong?), giu %.0f", i ? 'Y' : 'X', tb, joy::tam[i]);
         }
         bao("CAL nen cham A=%.0f B=%.0f, tam joystick %.0f,%.0f mV", cham::A.nen, cham::B.nen, joy::tam[0], joy::tam[1]);
       }
@@ -435,8 +441,23 @@ void inThongTin() {
   bao("CHAM A tho=%lu nen=%.0f tyle=%.3f chieu=%d | B tho=%lu nen=%.0f tyle=%.3f chieu=%d", (unsigned long)cham::A.tho,
       cham::A.nen, cd.tyLeA, cd.chieuA, (unsigned long)cham::B.tho, cham::B.nen, cd.tyLeB, cd.chieuB);
   bao("NGUONG bam=%.0f nha=%.0f lolung=%.0f (%%)", cd.bam * 100, cd.nha * 100, cd.loLung * 100);
-  bao("JOY tam=%.0f,%.0f am=%.0f,%.0f duong=%.0f,%.0f mV huong doi_xy=%d dao_x=%d dao_y=%d", joy::tam[0], joy::tam[1],
-      cd.joyAm[0], cd.joyAm[1], cd.joyDuong[0], cd.joyDuong[1], joy::huong.doiXY, joy::huong.daoX, joy::huong.daoY);
+  // tách 2 dòng: một dòng thông báo tối đa 99 ký tự, gộp lại thì mất phần hướng
+  bao("JOY tam=%.0f,%.0f am=%.0f,%.0f duong=%.0f,%.0f mV", joy::tam[0], joy::tam[1], cd.joyAm[0], cd.joyAm[1],
+      cd.joyDuong[0], cd.joyDuong[1]);
+  bao("JOYH doi_xy=%d dao_x=%d dao_y=%d", joy::huong.doiXY, joy::huong.daoX, joy::huong.daoY);
+  bao("JOYTOT X=%s (%.0f mV) Y=%s (%.0f mV)", joy::tot[0] ? "tot" : "bo", joy::mv[0], joy::tot[1] ? "tot" : "bo", joy::mv[1]);
+  {
+    const char ten[] = "TLtp";  // tiến, lùi, trái, phải
+    char s[96];
+    int n = snprintf(s, sizeof s, "HUONG_CHAM");
+    for (int i = 0; i < cham::SO_HUONG && n < (int)sizeof s; i++) {
+      if (cham::coHuong(i))
+        n += snprintf(s + n, sizeof s - n, " %c=%lu/%.0f%s", ten[i], (unsigned long)cham::H[i].tho, cham::H[i].nen,
+                      cham::H[i].bam ? "*" : "");
+      else n += snprintf(s + n, sizeof s - n, " %c=khong", ten[i]);
+    }
+    bao("%s", s);
+  }
   if (strcmp(WIFI_TEN, "TEN_WIFI") == 0) bao("WIFI chua dat ten trong cau_hinh.h: chi chay qua USB");
   else bao("WIFI %s %s may_tinh=%s", WIFI_TEN, wifiDaNoi ? WiFi.localIP().toString().c_str() : "chua noi",
            coMayTinh ? "co" : "chua");
@@ -497,6 +518,30 @@ void xuLyLenh(const char *s) {
     case 'p':
     case 'I': inThongTin(); break;
     case 'h': batDauCheDo(CD_CAN_HUONG_JOY); break;
+    case 'H': {  // ghi thẳng hướng joystick (tools/canh_joystick.py gửi), ví dụ H0,1,0 = doi_xy, dao_x, dao_y
+      int d, x, y;
+      if (sscanf(s + 1, "%d,%d,%d", &d, &x, &y) == 3 && (d | x | y) >= 0 && (d | x | y) <= 1) {
+        joy::huong.doiXY = d;
+        joy::huong.daoX = x;
+        joy::huong.daoY = y;
+        joy::luuHuong();
+        bao("JOYH doi_xy=%d dao_x=%d dao_y=%d, da luu", d, x, y);
+      } else bao("JOYH sai cu phap, vi du: H0,1,0 (doi_xy,dao_x,dao_y; moi so 0 hoac 1)");
+      break;
+    }
+    case 'B': {  // ghi thẳng biên joystick theo trục mạch (mV tính từ tâm), ví dụ B1569,1462,1379,1486 = am X,Y, duong X,Y
+      float a0, a1, d0, d1;
+      if (sscanf(s + 1, "%f,%f,%f,%f", &a0, &a1, &d0, &d1) == 4 && min(min(a0, a1), min(d0, d1)) >= 600 &&
+          max(max(a0, a1), max(d0, d1)) <= 3300) {
+        cd.joyAm[0] = a0;
+        cd.joyAm[1] = a1;
+        cd.joyDuong[0] = d0;
+        cd.joyDuong[1] = d1;
+        luuCaiDat();
+        bao("JOYB am=%.0f,%.0f duong=%.0f,%.0f mV, da luu", a0, a1, d0, d1);
+      } else bao("JOYB sai, vi du: B1569,1462,1379,1486 (am X,Y, duong X,Y; 600..3300 mV)");
+      break;
+    }
     case 'x':
       cd = CaiDat();
       luuCaiDat();
@@ -518,6 +563,8 @@ void tacVuCamBien(void *) {
     attachInterrupt(digitalPinToInterrupt(CHAN_INT1), ngatInt1, RISING);
   }
   uint32_t soLanTre = 0, dem = 0, lanKiemPmu = 0, lanDocOk = millis(), lanThuImu = 0;
+  uint32_t lanImuTot = 0;      // lần cuối đọc được mẫu IMU (0 = chưa có), để biết vừa mất mẫu bao lâu
+  bool canDatNghieng = false;  // chờ tay cầm bớt lắc để đặt lại nghiêng theo trọng lực
   uint32_t truocUs = micros();
   float nhiet = 23;
   bool coNhiet = false;
@@ -556,9 +603,10 @@ void tacVuCamBien(void *) {
     bool imuOk = false;
     if (!imu::loi) {
       imuOk = imu::doc(a, g);
+      if (!imuOk) imuOk = imu::doc(a, g);  // lỗi I2C lẻ: đọc lại một lần trước khi khởi động lại cảm biến (0,3 giây)
       if (imuOk) lanDocOk = millis();
       else imu::hoiPhuc();  // giữ nguyên hướng hiện tại
-    } else if (millis() - lanThuImu > 5000) {  // không có IMU: 5 giây thử lại một lần, joystick, cảm ứng vẫn chạy
+    } else if (millis() - lanThuImu > 2000) {  // không có IMU: 2 giây thử lại một lần (trước là 5), joystick, cảm ứng vẫn chạy
       lanThuImu = millis();
       if (imu::hoiPhuc()) {
         bao("IMU BMI160 da chay lai (dia chi 0x%02X)", imu::diaChi);
@@ -579,12 +627,38 @@ void tacVuCamBien(void *) {
       imu::hoiPhuc();
     }
 
+    // 3b. Đặt lại nghiêng theo trọng lực khi hướng chưa từng được đặt (IMU lỗi lúc bật nên bước cân yên bỏ qua) hoặc
+    // vừa mất mẫu quá MAT_MAU_DAT_LAI_MS (con quay không ghi được chuyển động trong lúc đó). Không đặt lại thì Madgwick
+    // kéo hướng về đúng chỉ vài độ mỗi giây: tay cầm lúc đứng yên trông đúng, cầm lên di chuyển lại thấy ngược.
+    if (imuOk) {
+      uint32_t ms = millis();
+      if (!huong::daDatHuong || (lanImuTot != 0 && ms - lanImuTot > MAT_MAU_DAT_LAI_MS)) canDatNghieng = true;
+      lanImuTot = ms;
+      if (cheDo == CD_CAN_YEN) canDatNghieng = false;  // bước cân yên tự đặt hướng khi xong; chưa đặt được thì lượt sau bật lại
+      float an = sqrtf(a[0] * a[0] + a[1] * a[1] + a[2] * a[2]);
+      if (canDatNghieng && cheDo != CD_CAN_YEN && an > 0.85f && an < 1.15f) {  // không lắc mạnh: gia tốc ≈ trọng lực
+        bool lanDau = !huong::daDatHuong;
+        huong::datNghiengGiuYaw(a);
+        canDatNghieng = false;
+        bao(lanDau ? "HUONG dat theo trong luc (luc bat chua doc duoc IMU)"
+                   : "HUONG dat lai nghieng theo trong luc sau khi mat mau IMU");
+      }
+    }
+
     // 4. Joystick và cảm ứng, xen kẽ (mỗi thứ 100 Hz)
     bool coJoy = (dem & 1) == 0, coCham = !coJoy;
     if (coJoy) joy::capNhat();
     if (coCham) {
       cham::capNhat(cham::A, cd.tyLeA, cd.chieuA, 2 * dt, cheDo == CD_CAN_A);
       cham::capNhat(cham::B, cd.tyLeB, cd.chieuB, 2 * dt, cheDo == CD_CAN_B);
+      cham::capNhatHuong(dem >> 1, 4 * dt);
+    }
+    if (joy::doiTot) {
+      for (int i = 0; i < 2; i++)
+        if (joy::doiTot & (1 << i))
+          bao(joy::tot[i] ? "JOY truc %c on dinh, dung lai" : "JOY truc %c mat tin hieu (%.0f mV): bo qua, dung mieng cham huong",
+              i ? 'Y' : 'X', joy::mv[i]);
+      joy::doiTot = 0;
     }
 
     // 5. Hướng
@@ -619,14 +693,35 @@ void tacVuCamBien(void *) {
       t.gyro[i] = imuOk ? huong::gyroRa[i] : 0;
       t.acc[i] = a[i];
     }
-    joy::layRa(t.joy);
+    // Cần gạt: miếng chạm hướng được ưu tiên, không chạm thì dùng joystick thật (trục nào tin được).
+    // Miếng chạm gửi cả điện áp giả theo đúng chiều joystick thật (tiến = Y tăng, phải = X giảm, tâm 1650 mV)
+    // để game đang đọc mV (Unity VeraJoyCal) chạy được ngay, không cần sửa game.
+    uint8_t hc = cham::huongDangCham();
+    float muc[2] = {(float)((hc >> cham::H_PHAI & 1) - (hc >> cham::H_TRAI & 1)),
+                    (float)((hc >> cham::H_TIEN & 1) - (hc >> cham::H_LUI & 1))};
+    if (muc[0] != 0 && muc[1] != 0) { muc[0] *= 0.7071f; muc[1] *= 0.7071f; }
+    static float joyCham[2] = {0, 0};
+    float buoc = CHAM_HUONG_TOC_DO * dt;
+    for (int i = 0; i < 2; i++) joyCham[i] += constrain(muc[i] - joyCham[i], -buoc, buoc);
+    bool dungCham = hc || fabsf(joyCham[0]) > 0.001f || fabsf(joyCham[1]) > 0.001f;
+    if (dungCham) {
+      t.joy[0] = joyCham[0];
+      t.joy[1] = joyCham[1];
+      t.joyMv[0] = joy::MV_TAM_GIA - 1500 * joyCham[0];
+      t.joyMv[1] = joy::MV_TAM_GIA + 1500 * joyCham[1];
+    } else {
+      joy::layRa(t.joy);
+      t.joyMv[0] = joy::mvRa[0];
+      t.joyMv[1] = joy::mvRa[1];
+    }
+    t.huongCham = hc;
     t.mucA = cham::muc8(cham::A);
     t.mucB = cham::muc8(cham::B);
     uint8_t bit = 0;
     if (cham::A.bam) bit |= BIT_CHAM_A;
     if (cham::B.bam) bit |= BIT_CHAM_B;
     if (joy::nut) bit |= BIT_NHAN_CAN;
-    if (huong::yen) bit |= BIT_DANG_YEN;
+    if (huong::yen && !dungCham) bit |= BIT_DANG_YEN;  // đang chạm miếng hướng = có người cầm (game không bỏ trục)
     if (lanCanLaiMs && millis() - lanCanLaiMs < 300) bit |= BIT_VUA_CAN_LAI;
     if (cheDo != CD_CHAY) bit |= BIT_HIEU_CHUAN;
     if (imu::loi) bit |= BIT_LOI_IMU;
@@ -635,7 +730,7 @@ void tacVuCamBien(void *) {
     t.soLanHoiPhuc = imu::soLanHoiPhuc;
     t.thoA = cham::A.tho; t.thoB = cham::B.tho;
     t.nenA = cham::A.nen; t.nenB = cham::B.nen;
-    t.joyMv[0] = joy::mv[0]; t.joyMv[1] = joy::mv[1];
+    t.joyMvTho[0] = joy::mv[0]; t.joyMvTho[1] = joy::mv[1];
     ghiTrangThai(t);
     if (guiTho && imuOk) themMauTho(a, g, dtUs, t);
   }
@@ -660,7 +755,7 @@ void setup() {
 
   joy::khoiTao();
   delay(20);
-  coYeuCauHieuChuanDayDu = digitalRead(CHAN_JOY_NUT) == LOW;
+  coYeuCauHieuChuanDayDu = joy::dangNhanLucBat();
   if (coYeuCauHieuChuanDayDu) bao("Dang giu nhan can: se hieu chuan day du sau khi khoi dong");
   cham::khoiTao();
 
@@ -730,8 +825,11 @@ void loop() {
     float yaw = atan2f(2 * (t.q[0] * t.q[3] + t.q[1] * t.q[2]), 1 - 2 * (t.q[2] * t.q[2] + t.q[3] * t.q[3])) * 57.29578f;
     float pitch = asinf(constrain(2 * (t.q[0] * t.q[2] - t.q[3] * t.q[1]), -1.0f, 1.0f)) * 57.29578f;
     float roll = atan2f(2 * (t.q[0] * t.q[1] + t.q[2] * t.q[3]), 1 - 2 * (t.q[1] * t.q[1] + t.q[2] * t.q[2])) * 57.29578f;
-    Serial.printf("J %+.2f %+.2f %c | A %3u %c (%lu/%.0f) | B %3u %c (%lu/%.0f) | YPR %7.2f %6.2f %6.2f | %.1fC %s%s\n",
-                  t.joy[0], t.joy[1], (t.bit & BIT_NHAN_CAN) ? 'N' : '-', t.mucA, (t.bit & BIT_CHAM_A) ? '*' : ' ',
+    char h[5] = {t.huongCham & 1 ? 'T' : '.', t.huongCham & 2 ? 'L' : '.', t.huongCham & 4 ? 't' : '.',
+                 t.huongCham & 8 ? 'p' : '.', 0};
+    Serial.printf("J %+.2f %+.2f %c %s (%.0f,%.0f mV) | A %3u %c (%lu/%.0f) | B %3u %c (%lu/%.0f) | YPR %7.2f %6.2f %6.2f | %.1fC %s%s\n",
+                  t.joy[0], t.joy[1], (t.bit & BIT_NHAN_CAN) ? 'N' : '-', h, t.joyMvTho[0], t.joyMvTho[1], t.mucA,
+                  (t.bit & BIT_CHAM_A) ? '*' : ' ',
                   (unsigned long)t.thoA, t.nenA, t.mucB, (t.bit & BIT_CHAM_B) ? '*' : ' ', (unsigned long)t.thoB, t.nenB,
                   yaw, pitch, roll, t.nhietDo, (t.bit & BIT_DANG_YEN) ? "yen " : "", (t.bit & BIT_LOI_IMU) ? "LOI_IMU" : "");
   }
