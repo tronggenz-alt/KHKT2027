@@ -16,6 +16,8 @@ namespace Khkt.Demo
     ///   • "Bắt đầu": đưa người dùng tới đúng trạm, hiện thẻ hướng dẫn từng bước ở góc trên trái (F3: bước tiếp,
     ///     Shift + F3: bước trước, F4: kết thúc). Thẻ không khóa điều khiển nên vừa đọc vừa thao tác được.
     ///   • "Robot làm mẫu": với bài Hóa có kịch bản sẵn (RobotDemos), robot trợ lý tự làm để giám khảo quan sát.
+    ///   • Bản đi thi (26/11/2026): 3 bài nổi bật đứng đầu danh sách (phản ứng đổi màu glucozơ, trợ lý AI ra lệnh cho
+    ///     robot bằng tiếng Việt, mổ ếch tự do) và nút "Hỏi trợ lý AI" (F5) ở mọi bài: gửi sẵn câu hỏi về đúng bài đó.
     /// Tự tạo khi cảnh phòng thí nghiệm nạp xong (cảnh có DesktopViewer), không cần gắn sẵn trong cảnh.
     /// </summary>
     public class DemoShowcase : MonoBehaviour
@@ -29,13 +31,59 @@ namespace Khkt.Demo
             public string robotKey;
             /// <summary>Việc làm thêm sau khi tới trạm (ví dụ đứng trước cổng Cơ thể người 3D).</summary>
             public Action<DesktopViewer> onArrive;
+            /// <summary>Câu gửi trợ lý AI khi bấm "Hỏi trợ lý AI" (F5); bài AI điều khiển robot thì là câu lệnh cho robot.</summary>
+            public string aiQuestion;
         }
 
         public static readonly Demo[] Demos =
         {
             new Demo
             {
-                id = "chuan_do", area = "HÓA HỌC", title = "Chuẩn độ axit – bazơ", where = "Tầng 1 · Bàn chuẩn độ (bàn 1)", minutes = "4 phút", station = 1, robotKey = "chuan_do",
+                id = "glucozo_doi_mau", area = "HÓA HỌC", title = "Phản ứng đổi màu: glucozơ + Cu(OH)₂", where = "Tầng 1 · Bàn định tính (bàn 4)", minutes = "4 phút", station = 2, robotKey = "glucozo_cu_oh2",
+                summary = "Phản ứng đẹp nhất để trình diễn: kết tủa xanh Cu(OH)₂ tan thành phức xanh lam thẫm, đun nóng thì chuyển kết tủa đỏ gạch Cu₂O. Màu và lượng sản phẩm do bộ máy hóa học tính từ đúng lượng chất, không dựng sẵn.",
+                steps = new[]
+                {
+                    "Bấm \"Robot làm mẫu\" (hoặc tự làm): robot tạo Cu(OH)₂ từ CuSO₄ và NaOH trong ống nghiệm, kết tủa xanh lam.",
+                    "Robot thêm dung dịch glucozơ và lắc: kết tủa tan, dung dịch xanh lam thẫm (phức đồng – glucozơ).",
+                    "Robot đun nóng ống nghiệm: xuất hiện kết tủa đỏ gạch Cu₂O. Nhìn vào ống để đọc thẻ thành phần và phương trình.",
+                    "Bấm \"Hỏi trợ lý AI\" (F5): trợ lý giải thích vì sao đổi màu và ứng dụng nhận biết đường.",
+                },
+                aiQuestion = "Giải thích hiện tượng glucozơ với Cu(OH)₂: vì sao lúc đầu kết tủa tan thành dung dịch xanh lam, đun nóng lại ra kết tủa đỏ gạch? Viết phương trình và nêu ứng dụng thực tế.",
+            },
+            new Demo
+            {
+                id = "ai_robot", area = "TRỢ LÝ AI", title = "Trợ lý AI ra lệnh cho robot bằng tiếng Việt", where = "Tầng 1 · Bàn định tính (bàn 4)", minutes = "4 phút", station = 2, robotKey = "nhan_biet_fe3",
+                summary = "Nói với robot như nói với bạn: AI hiểu yêu cầu, nhìn danh sách dụng cụ và hóa chất quanh bàn, lập kế hoạch từng bước rồi robot tự làm thật trong lab và giải thích hiện tượng.",
+                steps = new[]
+                {
+                    "Bấm \"Hỏi trợ lý AI\" (F5): gửi sẵn lệnh \"làm thí nghiệm nhận biết ion Fe³⁺ bằng KSCN rồi giải thích\".",
+                    "Quan sát robot đi lấy lọ FeCl₃, KSCN, rót, nhỏ giọt: dung dịch chuyển đỏ máu. Lời giải thích hiện trong khung trò chuyện.",
+                    "Mời giám khảo tự gõ một yêu cầu (phím T), ví dụ: \"đo pH của dung dịch trong ống nghiệm\" hoặc \"dọn bàn giúp mình\".",
+                    "Chưa có mạng / khóa AI: robot vẫn hiểu các lệnh thường dùng; bấm \"Robot làm mẫu\" để xem cùng thí nghiệm.",
+                },
+                aiQuestion = "Robot ơi, hãy làm thí nghiệm nhận biết ion Fe³⁺ bằng dung dịch KSCN cho mình xem, rồi giải thích hiện tượng và viết phương trình.",
+            },
+            new Demo
+            {
+                id = "mo_ech", area = "SINH HỌC", title = "Mổ ếch tự do trên bàn giải phẫu số", where = "Tầng 2 · Bàn giải phẫu số", minutes = "5 phút", station = 22,
+                summary = "Bàn mổ tự do theo luật giải phẫu thật: chọn dụng cụ, rạch da, mở xoang bụng, quan sát tim, phổi, gan, ruột. Không có thao tác dựng sẵn: làm sai thứ tự thì bàn báo lỗi như ngoài đời.",
+                steps = new[]
+                {
+                    "Bàn mổ ếch mở ra ngay khi tới trạm. Chọn kéo hoặc dao mổ ở khay dụng cụ.",
+                    "Rạch da bụng theo đường giữa, rồi rạch lớp cơ để mở xoang bụng.",
+                    "Quan sát và chạm vào từng cơ quan: tim 3 ngăn, phổi, gan, dạ dày, ruột để đọc thẻ kiến thức.",
+                    "Bấm \"Hỏi trợ lý AI\" (F5) để trợ lý so sánh tim ếch với tim người. Có thể đi qua cổng \"Cơ thể người 3D\" bên cạnh để xem tiếp.",
+                },
+                aiQuestion = "Giải thích cấu tạo tim 3 ngăn của ếch, so sánh với tim 4 ngăn của người và ý nghĩa với đời sống lưỡng cư.",
+                onArrive = viewer =>
+                {
+                    try { Bio.GiaiPhau.BanMoTuDoMoDun.Mo(); }
+                    catch (Exception e) { Debug.LogException(e); }
+                }
+            },
+            new Demo
+            {
+                id = "chuan_do", area = "HÓA HỌC", title = "Chuẩn độ axit – bazơ", where = "Tầng 1 · Bàn chuẩn độ (bàn 1)", minutes = "4 phút", station = 1, robotKey = "chuan_do", aiQuestion = "Giải thích vì sao chuẩn độ HCl bằng NaOH dùng phenolphtalein, điểm tương đương nằm ở pH bao nhiêu và các sai số thường gặp.",
                 summary = "Xác định nồng độ HCl bằng NaOH chuẩn, chỉ thị phenolphtalein. Kết quả so với nồng độ thật và chấm sai số.",
                 steps = new[]
                 {
@@ -47,7 +95,7 @@ namespace Khkt.Demo
             },
             new Demo
             {
-                id = "nhan_biet_ion", area = "HÓA HỌC", title = "Nhận biết ion Cu²⁺ bằng NaOH", where = "Tầng 1 · Bàn định tính (bàn 4)", minutes = "3 phút", station = 2, robotKey = "nhan_biet_cu2",
+                id = "nhan_biet_ion", area = "HÓA HỌC", title = "Nhận biết ion Cu²⁺ bằng NaOH", where = "Tầng 1 · Bàn định tính (bàn 4)", minutes = "3 phút", station = 2, robotKey = "nhan_biet_cu2", aiQuestion = "Giải thích phản ứng nhận biết ion Cu²⁺ bằng NaOH, màu kết tủa, phương trình ion rút gọn, và vì sao thêm HCl thì kết tủa tan.",
                 summary = "Phản ứng tạo kết tủa xanh lam Cu(OH)₂. Bộ máy hóa học tính sản phẩm từ đúng lượng chất đã rót, không dựng sẵn.",
                 steps = new[]
                 {
@@ -59,7 +107,7 @@ namespace Khkt.Demo
             },
             new Demo
             {
-                id = "may_phan_tich", area = "HÓA HỌC", title = "Đo phổ UV-Vis bằng bảng điều khiển máy", where = "Tầng 1 · Phòng máy phân tích hiện đại", minutes = "3 phút", station = 7, robotKey = "phan_tich_nuoc",
+                id = "may_phan_tich", area = "HÓA HỌC", title = "Đo phổ UV-Vis bằng bảng điều khiển máy", where = "Tầng 1 · Phòng máy phân tích hiện đại", minutes = "3 phút", station = 7, robotKey = "phan_tich_nuoc", aiQuestion = "Giải thích nguyên lý máy quang phổ UV-Vis, định luật Lambert-Beer và cách đọc λmax của dung dịch CuSO₄.",
                 summary = "Bấm vào máy để mở bảng điều khiển: chỉnh thông số bằng thanh trượt rồi chạy. Phổ vẽ từ đúng thành phần mẫu.",
                 steps = new[]
                 {
@@ -71,7 +119,7 @@ namespace Khkt.Demo
             },
             new Demo
             {
-                id = "kinh_hien_vi", area = "SINH HỌC", title = "Soi tế bào hành và co nguyên sinh", where = "Tầng 2 · Bàn kính hiển vi (bàn 1)", minutes = "4 phút", station = 21,
+                id = "kinh_hien_vi", aiQuestion = "Giải thích hiện tượng co nguyên sinh và phản co nguyên sinh ở tế bào biểu bì hành tím.", area = "SINH HỌC", title = "Soi tế bào hành và co nguyên sinh", where = "Tầng 2 · Bàn kính hiển vi (bàn 1)", minutes = "4 phút", station = 21,
                 summary = "Kính hiển vi quang học với màn hình soi mới: chọn tiêu bản, đổi vật kính, lấy nét, nhuộm và đo kích thước tế bào.",
                 steps = new[]
                 {
@@ -84,7 +132,7 @@ namespace Khkt.Demo
             },
             new Demo
             {
-                id = "pcr_dien_di", area = "SINH HỌC", title = "PCR và điện di ADN", where = "Tầng 2 · Phòng sinh học phân tử", minutes = "5 phút", station = 28,
+                id = "pcr_dien_di", aiQuestion = "Giải thích 3 giai đoạn của PCR và vì sao nhiệt độ gắn mồi quá cao làm giảm sản phẩm.", area = "SINH HỌC", title = "PCR và điện di ADN", where = "Tầng 2 · Phòng sinh học phân tử", minutes = "5 phút", station = 28,
                 summary = "Nhân bản đoạn ADN bằng máy PCR rồi kiểm tra bằng điện di gel. Băng ADN tính từ thành phần ống và thông số máy.",
                 steps = new[]
                 {
@@ -96,7 +144,7 @@ namespace Khkt.Demo
             },
             new Demo
             {
-                id = "tu_am_noi_hap", area = "SINH HỌC", title = "Tủ ấm và nồi hấp tiệt trùng", where = "Tầng 2 · Tủ ấm và nồi hấp", minutes = "3 phút", station = 24,
+                id = "tu_am_noi_hap", aiQuestion = "Vì sao hấp tiệt trùng cần 121 °C trong ít nhất 15 phút? Giải thích vai trò của áp suất.", area = "SINH HỌC", title = "Tủ ấm và nồi hấp tiệt trùng", where = "Tầng 2 · Tủ ấm và nồi hấp", minutes = "3 phút", station = 24,
                 summary = "Hai máy có bảng điều khiển: thấy ngay vì sao 121 °C trong 15 phút mới đạt tiệt trùng.",
                 steps = new[]
                 {
@@ -107,7 +155,7 @@ namespace Khkt.Demo
             },
             new Demo
             {
-                id = "co_the_nguoi", area = "SINH HỌC", title = "Cơ thể người 3D qua cổng liên kết", where = "Tầng 2 · Khu giải phẫu", minutes = "4 phút", station = 22,
+                id = "co_the_nguoi", aiQuestion = "Giới thiệu ngắn gọn cấu tạo và chức năng của tim người cho học sinh lớp 11.", area = "SINH HỌC", title = "Cơ thể người 3D qua cổng liên kết", where = "Tầng 2 · Khu giải phẫu", minutes = "4 phút", station = 22,
                 summary = "Bước qua cổng để vào phòng mô hình người thật (BodyParts3D): 3 lớp da, cơ, xương, 15 cơ quan và 6 cảnh hiển vi.",
                 steps = new[]
                 {
@@ -129,7 +177,7 @@ namespace Khkt.Demo
         public Demo Active { get; private set; }
         public int Step { get; private set; }
 
-        const float PanelW = 1320f, PanelH = 780f;
+        const float PanelW = 1320f, PanelH = 880f, RowH = 56f;
 
         DesktopViewer viewer;
         GameObject root, launcher, guide;
@@ -139,7 +187,7 @@ namespace Khkt.Demo
         int selected;
         Button[] rows;
         Text dArea, dTitle, dWhere, dSummary, dSteps;
-        Button robotButton;
+        Button robotButton, aiButtonPanel, aiButtonGuide;
         Text gTitle, gStepNo, gStep;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -199,7 +247,7 @@ namespace Khkt.Demo
             var img = Window(root.transform, "Khung bài demo", new Vector2(PanelW, PanelH), new Vector2(0, 6));
             panel = (RectTransform)img.transform;
             var c = panel;
-            Header(c, "BÀI DEMO · DÀNH CHO BAN GIÁM KHẢO", "Chọn một bài để trải nghiệm", "Mỗi bài 3–5 phút. Ứng dụng đưa bạn tới đúng trạm và hướng dẫn từng bước.", PanelW - 240f);
+            Header(c, "BÀI DEMO · DÀNH CHO BAN GIÁM KHẢO", "Chọn một bài để trải nghiệm", "Mỗi bài 3–5 phút. Ứng dụng đưa bạn tới đúng trạm, hướng dẫn từng bước; 3 bài đầu là bài nổi bật, mỗi bài hỏi được trợ lý AI.", PanelW - 240f);
             MakeButton(c, "Đóng", touch ? "Đóng ✕" : "Đóng  Esc", new Vector2(-150, -24), new Vector2(124, 52), Close, false, 15, new Vector2(1, 1));
 
             const float lx = 30f, lw = 470f;
@@ -209,14 +257,14 @@ namespace Khkt.Demo
             {
                 int k = i;
                 var d = Demos[i];
-                var b = MakeChip(c, "Bài " + d.id, "", new Vector2(lx, -146 - i * 74f), new Vector2(lw, 68), () => Select(k), false, 16);
+                var b = MakeChip(c, "Bài " + d.id, "", new Vector2(lx, -146 - i * RowH), new Vector2(lw, RowH - 6f), () => Select(k), false, 16);
                 var t = b.GetComponentInChildren<Text>();
                 t.text = d.title;
                 t.alignment = TextAnchor.UpperLeft;
-                t.rectTransform.anchoredPosition = new Vector2(16, -9);
+                t.rectTransform.anchoredPosition = new Vector2(16, -5);
                 t.rectTransform.sizeDelta = new Vector2(lw - 30, 24);
                 t.horizontalOverflow = HorizontalWrapMode.Overflow;
-                var sub = Label(b.transform, "Phụ", $"{d.area} · {d.minutes}", 13, d.area == "HÓA HỌC" ? Accent2 : Good, true, TextAnchor.UpperLeft, new Vector2(16, -38), new Vector2(lw - 30, 18));
+                var sub = Label(b.transform, "Phụ", $"{d.area} · {d.minutes}" + (i < 3 ? " · NỔI BẬT" : ""), 13, AreaColor(d.area), true, TextAnchor.UpperLeft, new Vector2(16, -29), new Vector2(lw - 30, 18));
                 sub.name = "Phụ";
                 rows[i] = b;
             }
@@ -236,10 +284,11 @@ namespace Khkt.Demo
             Rule(c, new Vector2(30, -PanelH + 98), PanelW - 60);
             MakeButton(c, "Bắt đầu", "Bắt đầu: đưa tôi tới trạm", new Vector2(-370, -PanelH + 82), new Vector2(340, 64), StartSelected, true, 19, new Vector2(1, 1));
             robotButton = MakeButton(c, "Robot làm mẫu", "Robot làm mẫu cho xem", new Vector2(-650, -PanelH + 82), new Vector2(270, 64), RobotSelected, false, 16, new Vector2(1, 1));
+            aiButtonPanel = MakeButton(c, "Hỏi trợ lý AI (bảng)", "Hỏi trợ lý AI", new Vector2(-900, -PanelH + 82), new Vector2(240, 64), () => { var d = Demos[selected]; StartDemo(d); AskAi(); }, false, 16, new Vector2(1, 1));
             root.SetActive(false);
 
             // ----- Thẻ hướng dẫn từng bước (không khóa điều khiển) -----
-            var gi = Panel(canvas.transform, "Thẻ hướng dẫn demo", new Vector2(0, 1), new Vector2(0, 1), new Vector2(24, touch ? -112 : -24), new Vector2(520, 250),
+            var gi = Panel(canvas.transform, "Thẻ hướng dẫn demo", new Vector2(0, 1), new Vector2(0, 1), new Vector2(24, touch ? -112 : -24), new Vector2(520, 304),
                            glassOk ? Glass(shader) : null, 1.4f);
             if (!glassOk && !ReducedTransparency) { gi.sprite = Solid; gi.pixelsPerUnitMultiplier = UiTheme.IsVera ? 1.4f : 2.8f; gi.color = Surface; }
             gi.raycastTarget = true;
@@ -252,7 +301,8 @@ namespace Khkt.Demo
             Rule(g, new Vector2(22, -66), 476);
             gStep = Label(g, "Bước", "", 16, Ink, false, TextAnchor.UpperLeft, new Vector2(22, -76), new Vector2(476, 104));
             gStep.verticalOverflow = VerticalWrapMode.Truncate;
-            float by = -250 + 60;
+            aiButtonGuide = MakeButton(g, "Hỏi trợ lý AI", touch ? "Hỏi trợ lý AI về bài này" : "Hỏi trợ lý AI về bài này   F5", new Vector2(22, -190), new Vector2(476, 46), AskAi, false, 15);
+            float by = -304 + 60;
             MakeButton(g, "Bước trước", "◂", new Vector2(22, by), new Vector2(64, 46), () => MoveStep(-1), false, 18);
             MakeButton(g, "Bước tiếp", touch ? "Bước tiếp ▸" : "Bước tiếp ▸  F3", new Vector2(94, by), new Vector2(214, 46), () => MoveStep(1), true, 15);
             MakeButton(g, "Kết thúc", touch ? "Kết thúc" : "Kết thúc  F4", new Vector2(316, by), new Vector2(182, 46), EndDemo, false, 15);
@@ -297,7 +347,7 @@ namespace Khkt.Demo
             {
                 SetChip(rows[i], i == selected);
                 var sub = rows[i].transform.Find("Phụ");
-                if (sub != null) sub.GetComponent<Text>().color = Demos[i].area == "HÓA HỌC" ? Accent2 : Good;
+                if (sub != null) sub.GetComponent<Text>().color = AreaColor(Demos[i].area);
             }
             dArea.text = $"{d.area} · {d.minutes}";
             dTitle.text = d.title;
@@ -307,6 +357,7 @@ namespace Khkt.Demo
             for (int i = 0; i < d.steps.Length; i++) sb.Append(i > 0 ? "\n\n" : "").Append($"<b>{i + 1}.</b>  ").Append(d.steps[i]);
             dSteps.text = sb.ToString();
             robotButton.gameObject.SetActive(d.robotKey != null && LabRobot.Instance != null);
+            aiButtonPanel.gameObject.SetActive(!string.IsNullOrEmpty(d.aiQuestion));
         }
 
         void StartSelected() => StartDemo(Demos[selected]);
@@ -350,8 +401,20 @@ namespace Khkt.Demo
             ShowStep();
         }
 
+        static Color AreaColor(string area) => area == "HÓA HỌC" ? Accent2 : area == "TRỢ LÝ AI" ? Accent : Good;
+
+        /// <summary>Mở trợ lý AI (khung trò chuyện robot, phím T) và gửi ngay câu hỏi của bài đang chạy.</summary>
+        public void AskAi()
+        {
+            var d = Active ?? Demos[selected];
+            if (d == null || string.IsNullOrEmpty(d.aiQuestion)) return;
+            if (RobotChatUI.AskAbout(d.title, d.aiQuestion))
+                LabMessages.Say("Đã gửi câu hỏi cho trợ lý AI: xem trả lời trong khung trò chuyện (T để đóng / mở)", LabMessages.Tone.Info);
+        }
+
         void ShowStep()
         {
+            if (aiButtonGuide != null) aiButtonGuide.gameObject.SetActive(!string.IsNullOrEmpty(Active.aiQuestion));
             gTitle.text = Active.title;
             gStepNo.text = $"BƯỚC {Step + 1}/{Active.steps.Length}";
             gStep.text = Active.steps[Step];
@@ -376,6 +439,7 @@ namespace Khkt.Demo
                 else if (IsOpen && kb.escapeKey.wasPressedThisFrame) Close();
                 else if (Active != null && kb.f3Key.wasPressedThisFrame) MoveStep(kb.leftShiftKey.isPressed || kb.rightShiftKey.isPressed ? -1 : 1);
                 else if (Active != null && kb.f4Key.wasPressedThisFrame) EndDemo();
+                else if (Active != null && kb.f5Key.wasPressedThisFrame && DesktopViewer.UiCapture == 0) AskAi();
             }
             // Nút mở chỉ hiện khi không có bảng nào che và chưa có bài đang chạy; thẻ hướng dẫn ẩn tạm khi có bảng khác mở
             bool free = DesktopViewer.UiCapture == 0;

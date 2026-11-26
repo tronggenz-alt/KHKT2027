@@ -156,6 +156,10 @@ namespace Khkt.Demo
         VeraPointer vera;
         readonly AimAssist assist = new AimAssist();
         bool autoTest, veraA, veraB, veraDownPrev;
+        // chạm kẹt: báo chạm ngay từ lúc nối tay cầm mà chưa từng nhả thì bỏ qua tới khi nhả (đo 25/11/2026: dây chạm B
+        // chập GND, mạch báo "đang chạm" liên tục nên tay ảo cứ cầm mãi)
+        object veraSourceSeen;
+        bool veraAFree, veraBFree, veraStuckWarned;
         /// <summary>Đang trỏ bằng tay cầm VERA (có tay cầm gửi hướng, người chơi dùng tay cầm gần đây hơn chuột).</summary>
         public bool VeraAiming { get; private set; }
         /// <summary>Kiểm thử tự động: bật hút mục tiêu cho tia OverrideAimPoint (mặc định tắt để không đổi các bài cũ).</summary>
@@ -189,11 +193,29 @@ namespace Khkt.Demo
         ///   đang cầm (giữ B): buông B = đặt vào chỗ đang trỏ (ô, mặt bàn, khớp lắp); buông B khi không trỏ chỗ đặt = trả về chỗ cũ;
         ///   giữ A = dùng vật đang cầm (rót, hút, nhỏ, xịt...) và tia đi chậm 4 lần (chế độ tinh); nhấp A = nhỏ 1 giọt, múc 1 thìa...
         ///   lăn cổ tay quá 35° khi đang trỏ vào bình nhận = rót (như rót thật).
+        /// Bản đi thi: TAY TRÁI nắm chặt trước webcam (InAppHandTracker.LeftGrip) tác dụng như giữ chạm B: tay cầm trỏ
+        /// tới dụng cụ nào, nắm tay trái là tay ảo cầm vật đó; xòe tay trái là thả / đặt vào chỗ đang trỏ.
         /// </summary>
         void VeraButtons(ref bool down, ref bool pressed, ref bool released)
         {
             var s = vera.Source.Latest;
             bool a = s.Has(VeraFlags.TouchA), b = s.Has(VeraFlags.TouchB);
+            if (!ReferenceEquals(veraSourceSeen, vera.Source))
+            {
+                veraSourceSeen = vera.Source;
+                veraAFree = !a;
+                veraBFree = !b;
+                veraStuckWarned = false;
+            }
+            if (!a) veraAFree = true;
+            if (!b) veraBFree = true;
+            if ((!veraAFree || !veraBFree) && !veraStuckWarned)
+            {
+                veraStuckWarned = true;
+                Say($"Tay cầm báo chạm {(!veraBFree ? "B" : "A")} liên tục từ lúc nối (dây chập?): tạm bỏ qua, dùng nắm tay trái để cầm", LabProcedure.Tone.Warn);
+            }
+            a = a && veraAFree;
+            b = (b && veraBFree) || InAppHandTracker.LeftGripNow;
             bool aP = a && !veraA, aR = !a && veraA, bP = b && !veraB, bR = !b && veraB;
             veraA = a;
             veraB = b;
@@ -201,6 +223,21 @@ namespace Khkt.Demo
             if (Held == null)
             {
                 bool pickAct = Current == Act.Pick || Current == Act.Swirl;
+                // B / nắm tay trái khi đang trỏ dụng cụ: cầm NGAY. Không qua "giữ 0,4 s mở bảng chi tiết" của chuột
+                // (giữ là cách cầm của tay cầm, trước đây giữ B lại mở bảng thay vì cầm khi bảng dụng cụ đang bật)
+                if (pickAct && hoverGrab != null && (bP || (b && !veraDownPrev)))
+                {
+                    Pick(hoverGrab);
+                    veraDownPrev = true;
+                    down = pressed = released = false;
+                    return;
+                }
+                if (pickAct && b)
+                {
+                    veraDownPrev = true;
+                    down = pressed = released = false;
+                    return;
+                }
                 down = b || (a && !pickAct);
                 pressed = down && !veraDownPrev;
                 released = !down && veraDownPrev;

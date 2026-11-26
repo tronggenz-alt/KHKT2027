@@ -185,14 +185,30 @@ namespace Khkt.Demo
             }
         }
 
+        /// <summary>Cài đặt → Điều khiển → "Hiện cánh tay và bàn tay ảo" (bản đi thi): tắt cho đỡ vướng tầm nhìn.</summary>
+        public const string HideArmsPrefKey = "an_canh_tay";
+        static int userHide = -1;
+        public static bool HiddenByUser
+        {
+            get { if (userHide < 0) userHide = PlayerPrefs.GetInt(HideArmsPrefKey, 0); return userHide == 1; }
+            set { userHide = value ? 1 : 0; PlayerPrefs.SetInt(HideArmsPrefKey, userHide); PlayerPrefs.Save(); }
+        }
+        bool hidByMe;
+
         public void Step(float dt)
         {
             if (cameraTransform == null) return;
-            if (HiddenByCli)
+            if (HiddenByCli || HiddenByUser)
             {
                 for (int i = 0; i < 2; i++) if (arms[i] != null && arms[i].root.activeSelf) arms[i].root.SetActive(false);
                 if (hand != null && hand.hand != null && hand.hand.gameObject.activeSelf) hand.hand.gameObject.SetActive(false);
+                hidByMe = true;
                 return;
+            }
+            if (hidByMe)
+            {
+                hidByMe = false;
+                if (hand != null && hand.hand != null && !hand.hand.gameObject.activeSelf) hand.hand.gameObject.SetActive(true);
             }
             dt = Mathf.Clamp(dt, 1e-4f, 0.1f);
             stepDt = dt;

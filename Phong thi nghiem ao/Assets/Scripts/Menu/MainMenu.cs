@@ -50,7 +50,11 @@ namespace Khkt.Menu
         readonly Dictionary<Screen, Text> status = new Dictionary<Screen, Text>();
 
         RawImage bgImage;
-        InputField loginUser, loginPass, regClass, regName, regUser, regPass, regPass2, pwOld, pwNew, pwNew2, serverField, aiUrlField;
+        InputField loginUser, loginPass, regClass, regName, regUser, regPass, regPass2, pwOld, pwNew, pwNew2, serverField, aiUrlField, aiKeyField;
+        MenuTabs aiProviderTabs;
+        Text aiKeyStatus;
+        string aiProvider = ApiKeyStore.Gemini;
+        bool aiKeyBusy;
         Text loadText, loginServerText, aiStatusText;
         RectTransform uiRoot, loginRoot, panelRoot, leftColumn;
         DashboardShell dashboard;
@@ -65,7 +69,7 @@ namespace Khkt.Menu
         int currentSettingsTab;
         Image[] themeCardBorders;
         Text[] themeCardLabels;
-        Toggle transToggle, motionToggle, soundToggle;
+        Toggle transToggle, motionToggle, soundToggle, armsToggle;
         Slider touchSensSlider;
         MenuTabs settingsTabsUi, clickModeTabs, fontScaleChips, panelSizeChips;
         bool busy;
@@ -379,6 +383,83 @@ namespace Khkt.Menu
             GameSession.ServerUrl = url;
             if (loginServerText != null) loginServerText.text = "Máy chủ: " + GameSession.ServerUrl;
             Say(Screen.Settings, "Đã lưu địa chỉ máy chủ.", false);
+        }
+
+        // ---------- Khóa API AI riêng (Cài đặt → Trợ lý AI) ----------
+
+        void SelectAiProvider(int i)
+        {
+            if (i < 0 || i >= ApiKeyStore.Providers.Length) return;
+            aiProvider = ApiKeyStore.Providers[i];
+            SetChipRow(aiProviderTabs, i);
+            if (aiKeyField != null && aiKeyField.placeholder is Text ph) ph.text = "Bắt đầu bằng " + ApiKeyStore.KeyPrefix(aiProvider);
+        }
+
+        /// <summary>Hiện khóa đang dùng (đã che) kèm lời nhắn; msg null thì chỉ hiện trạng thái.</summary>
+        void RefreshAiKey(string msg, bool error)
+        {
+            if (aiKeyStatus == null) return;
+            var cur = ApiKeyStore.Current;
+            string who = GameSession.User != null ? "tài khoản này" : "máy này";
+            string state = cur != null
+                ? $"Đang dùng: {ApiKeyStore.ProviderName(cur.provider)} · {ApiKeyStore.Mask(cur.key)} · mô hình {cur.ModelOrDefault}"
+                : $"Chưa có khóa riêng cho {who}: robot và trợ lý dùng máy chủ AI ở trên.";
+            aiKeyStatus.text = string.IsNullOrEmpty(msg) ? state : msg + "\n" + state;
+            aiKeyStatus.color = error ? Error : msg != null ? Bio : InkDim;
+            if (cur != null && msg == null)
+            {
+                int i = Array.IndexOf(ApiKeyStore.Providers, cur.provider);
+                if (i >= 0) SelectAiProvider(i);
+            }
+        }
+
+        ApiKeyStore.Entry AiKeyFromField(out string problem)
+        {
+            problem = null;
+            string key = aiKeyField != null ? aiKeyField.text.Trim() : "";
+            if (key.Length == 0) { problem = "Dán khóa API vào ô trước."; return null; }
+            if (!ApiKeyStore.LooksLike(aiProvider, key))
+            {
+                problem = $"Khóa {ApiKeyStore.ProviderName(aiProvider)} thường bắt đầu bằng {ApiKeyStore.KeyPrefix(aiProvider)}: kiểm tra lại hoặc chọn đúng nhà cung cấp.";
+                return null;
+            }
+            return new ApiKeyStore.Entry { provider = aiProvider, model = "", key = key };
+        }
+
+        void DoSaveAiKey()
+        {
+            if (aiKeyBusy) return;
+            var e = AiKeyFromField(out var problem);
+            if (e == null) { RefreshAiKey(problem, true); return; }
+            try
+            {
+                ApiKeyStore.Save(ApiKeyStore.OwnerOrDevice, e);
+                aiKeyField.text = "";
+                RefreshAiKey("Đã lưu khóa (mã hóa trên máy này).", false);
+            }
+            catch (Exception ex) { RefreshAiKey("Không lưu được khóa: " + ex.Message, true); }
+        }
+
+        void DoCheckAiKey()
+        {
+            if (aiKeyBusy) return;
+            bool typed = aiKeyField != null && aiKeyField.text.Trim().Length > 0;
+            string problem = null;
+            var e = typed ? AiKeyFromField(out problem) : ApiKeyStore.Current;
+            if (e == null) { RefreshAiKey(typed ? problem : "Chưa có khóa để kiểm tra.", true); return; }
+            aiKeyBusy = true;
+            if (aiKeyStatus != null) { aiKeyStatus.color = InkDim; aiKeyStatus.text = $"Đang kiểm tra khóa {ApiKeyStore.ProviderName(e.provider)}…"; }
+            StartCoroutine(Khkt.Demo.Ai.DirectAi.Check(e,
+                ok => { aiKeyBusy = false; RefreshAiKey("Khóa dùng được. " + ok, false); },
+                fail => { aiKeyBusy = false; RefreshAiKey("Khóa không dùng được: " + fail, true); }));
+        }
+
+        void DoDeleteAiKey()
+        {
+            if (aiKeyBusy) return;
+            ApiKeyStore.Delete(ApiKeyStore.OwnerOrDevice);
+            if (aiKeyField != null) aiKeyField.text = "";
+            RefreshAiKey("Đã xóa khóa.", false);
         }
 
         void DoSaveAiUrl()
@@ -732,6 +813,7 @@ namespace Khkt.Menu
             clickModeTabs = Tabs(t2, "Chọn cách bấm", new[] { "Nút Cầm ngay", "Nút Mở bảng" }, new[] { "Cầm ngay", "Mở bảng" }, new Vector2(4, -38), new Vector2((PaneW - 16f) / 2f, 44), false, 4f, clickMode, SelectClickMode);
             float savedSens = Mathf.Clamp(PlayerPrefs.GetFloat(TouchSensPrefKey, 0.18f), 0.05f, 0.50f);
             touchSensSlider = GlassKit.MakeSlider(t2, "Thanh độ nhạy", "Độ nhạy vuốt nhìn", new Vector2(0, -108), new Vector2(PaneW, 64), 0.05f, 0.50f, savedSens, OnTouchSensChanged, v => v.ToString("0.00"));
+            armsToggle = Switch(t2, "ToggleArms", "Hiện cánh tay và bàn tay ảo trong lab", new Vector2(0, -190), new Vector2(PaneW, 46), !ArmRig.HiddenByUser, v => ArmRig.HiddenByUser = !v);
 
             // Tab 3: Trợ lý AI
             var t3 = (RectTransform)settingsPanes[3].transform;
@@ -739,7 +821,25 @@ namespace Khkt.Menu
             aiUrlField = MakeField(t3, Screen.Settings, "Ô địa chỉ AI", "Địa chỉ máy chủ AI (trợ lý & robot)", 0, false, PaneW);
             aiUrlField.text = savedAiUrl;
             MakeButton(t3, "Nút Lưu AI", "Lưu", new Vector2(0, -98), new Vector2(200, 48), DoSaveAiUrl, 0);
-            aiStatusText = GlassKit.Label(t3, "Trạng thái AI", "", 15, Bio, false, TextAnchor.UpperLeft, new Vector2(0, -160), new Vector2(PaneW, 38));
+            aiStatusText = GlassKit.Label(t3, "Trạng thái AI", "", 15, Bio, false, TextAnchor.UpperLeft, new Vector2(0, -154), new Vector2(PaneW, 30));
+
+            // Khóa API AI riêng: dùng được ngay cả khi vào "Dùng thử" (khóa chung của máy này), không cần máy chủ AI
+            GlassKit.Label(t3, "Nhãn khóa API", "Khóa API AI riêng (robot và trợ lý gọi thẳng nhà cung cấp, không cần máy chủ)", 15, InkDim, true,
+                           TextAnchor.UpperLeft, new Vector2(0, -192), new Vector2(PaneW, 24));
+            var provNames = new string[ApiKeyStore.Providers.Length];
+            var provTexts = new string[ApiKeyStore.Providers.Length];
+            for (int i = 0; i < provNames.Length; i++)
+            {
+                provNames[i] = "Nút nhà cung cấp " + ApiKeyStore.Providers[i];
+                provTexts[i] = ApiKeyStore.ProviderName(ApiKeyStore.Providers[i]).Replace("Google ", "").Replace("Anthropic ", "");
+            }
+            aiProviderTabs = Tabs(t3, "Chọn nhà cung cấp AI", provNames, provTexts, new Vector2(4, -222), new Vector2((PaneW - 20f) / 4f, 42), false, 4f, 0, SelectAiProvider);
+            aiKeyField = MakeField(t3, Screen.Settings, "Ô khóa API", "Khóa API (dán vào đây; không hiện lại sau khi lưu)", -278, true, PaneW);
+            float third = (PaneW - 24f) / 3f;
+            MakeButton(t3, "Nút Lưu khóa API", "Lưu khóa", new Vector2(0, -368), new Vector2(third, 46), DoSaveAiKey, 0);
+            MakeButton(t3, "Nút Kiểm tra khóa API", "Kiểm tra", new Vector2(third + 12f, -368), new Vector2(third, 46), DoCheckAiKey, 1);
+            MakeButton(t3, "Nút Xóa khóa API", "Xóa khóa", new Vector2(2 * third + 24f, -368), new Vector2(third, 46), DoDeleteAiKey, 1);
+            aiKeyStatus = GlassKit.Label(t3, "Trạng thái khóa API", "", 15, InkDim, false, TextAnchor.UpperLeft, new Vector2(0, -426), new Vector2(PaneW, 90));
 
             // Tab 4: Máy chủ
             var t4 = (RectTransform)settingsPanes[4].transform;
@@ -752,7 +852,11 @@ namespace Khkt.Menu
 
             System.Action leave = () => { if (!busy) Show(GameSession.HasIdentity ? Screen.Home : Screen.Login); };
             MakeButton(s, "Nút quay lại từ cài đặt", "Quay lại", new Vector2(0, -SetH + 54), new Vector2(200, 52), leave, 1);
-            submit[Screen.Settings] = () => { if (currentSettingsTab == 3) DoSaveAiUrl(); else if (currentSettingsTab == 4) DoSaveServer(); };
+            submit[Screen.Settings] = () =>
+            {
+                if (currentSettingsTab == 3) { if (aiKeyField != null && aiKeyField.text.Trim().Length > 0) DoSaveAiKey(); else DoSaveAiUrl(); }
+                else if (currentSettingsTab == 4) DoSaveServer();
+            };
             back[Screen.Settings] = leave;
 
             SelectSettingsTab(0);
@@ -828,9 +932,11 @@ namespace Khkt.Menu
             if (aiUrlField != null)
                 aiUrlField.text = PlayerPrefs.GetString(AiClient.ServerUrlPrefKey, "http://127.0.0.1:8000");
             if (aiStatusText != null) aiStatusText.text = "";
+            RefreshAiKey(null, false);
             if (transToggle != null) transToggle.SetIsOnWithoutNotify(GlassKit.ReducedTransparency);
             if (motionToggle != null) motionToggle.SetIsOnWithoutNotify(ReducedMotion.IsEnabled);
             if (soundToggle != null) soundToggle.SetIsOnWithoutNotify(NutHieuUng.SoundEnabled);
+            if (armsToggle != null) armsToggle.SetIsOnWithoutNotify(!ArmRig.HiddenByUser);
             if (touchSensSlider != null)
                 touchSensSlider.SetValueWithoutNotify(Mathf.Clamp(PlayerPrefs.GetFloat(TouchSensPrefKey, 0.18f), 0.05f, 0.50f));
 

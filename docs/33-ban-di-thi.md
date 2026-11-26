@@ -1,0 +1,70 @@
+# Bản đi thi (26/11/2026)
+
+Bản `.exe` dùng khi đi thi. Thư mục `VERA_Lab` được nén thành một tệp `.zip`. Bản này gộp 5 thay đổi so với `main` e936d8f.
+
+## 1. Dụng cụ nhỏ to hơn 35%
+
+- Ống nghiệm, giá ống nghiệm, cốc, bình nón, bình cầu, ống nhỏ giọt, bình tia, pipet, nhiệt kế, đũa thủy tinh, đĩa petri, bát sứ, đèn cồn và kẹp được phóng to ×1,35 khi cảnh nạp. Mã nằm ở `Interaction/DungCuPhongTo.cs`, gọi từ `Grabbable.Awake`.
+- Gốc dụng cụ ở đáy, nên dụng cụ vẫn đứng đúng trên mặt bàn. Dung tích và hóa học không đổi vì `capacityMl` không phụ thuộc kích thước. Độ cao điểm cầm, chiều dài và bán kính khi nằm được phóng theo, nên tay ảo và robot cầm đúng chỗ.
+- Đặt vào ổ vừa khít cỡ thật thì về cỡ gốc, lấy ra lại to. Các ổ đó gồm máy ly tâm, máy đo quang, máy phân tích, đầu dò, cân và ổ dưới buret. Đầu buret chỉ cao hơn miệng bình nón 5 mm, nên bình to sẽ đâm vào buret.
+- Không phóng:
+  - lọ hóa chất, vì kệ kho xếp sát nhau;
+  - buret, phễu, ống ly tâm, cuvet, tiêu bản;
+  - bộ phận lắp ráp (`ApparatusPart`).
+- Đổi hệ số bằng biến môi trường `KHKT_PHONG_TO`, ví dụ `1.3`. Đặt `1` là tắt.
+
+## 2. Bàn thí nghiệm đen tiêu chuẩn
+
+- Công cụ `Editor/KhktBanDen.cs` (menu **KHKT → Đổi bàn thí nghiệm sang đen**) đổi mọi bàn thí nghiệm trong 12 cảnh của bản build:
+  - mặt bàn "Mặt bàn…" và "Mặt làm việc" sang epoxy đen bóng mờ (`BanDen_MatBan`);
+  - tủ dưới, cánh tủ, ngăn kéo, chân bàn sang đen than (`BanDen_Than`).
+- Mặt bàn gỗ (bàn giáo viên, bàn trang trí) giữ nguyên.
+- Trình dựng cảnh (`LabSceneBuilder`) cũng đổi màu mặt bàn sang đen. Nếu dựng lại cảnh, chạy lại `KhktBanDen.Run` để thân bàn cũng đen.
+
+## 3. Webcam: hướng đầu và nắm / thả bằng tay trái
+
+Webcam chạy ngay trong ứng dụng (Unity Inference Engine), không gọi Python. Lý do: máy thi có thể bật Smart App Control, chặn Python, OpenCV và MediaPipe, và bản `.exe` không kèm `tools/`. Webcam tự bật sau khi vào lab 1,5 giây.
+
+| Việc | Cách làm |
+| --- | --- |
+| Xoay góc nhìn | Quay đầu quá khoảng 30° về một phía. Góc nhìn xoay liên tục về phía đó, nhìn thẳng thì dừng |
+| Phóng to / nhìn rộng | Ghé gần webcam để phóng to, ngả ra xa để nhìn rộng |
+| Căn hướng đầu | Lúc webcam bật, nhìn thẳng màn hình 2 giây. **F12** để căn lại |
+| Cầm vật | Tay cầm VERA (BMI160) trỏ vào dụng cụ, **nắm chặt tay trái** trước webcam |
+| Thả / đặt vật | **Xòe tay trái**. Đang trỏ chỗ đặt thì đặt vào đó, không thì trả về chỗ cũ |
+| Bật / tắt | **F10** bật hoặc tắt webcam. **F8** chỉ bật hoặc tắt phần xoay theo đầu |
+
+- **Mặt:**
+  - Dùng YuNet (`face_detection_yunet_2023mar`), mã ở `Input/YuNetFace.cs`, mô hình ở `Lab/MoHinh/Resources/face_yunet.onnx`.
+  - Cách giải mã đối chiếu với `cv2.FaceDetectorYN` trên 6 ảnh chân dung: trùng đến 0,1 px.
+  - Tư thế đầu tính như `tools/head_tracker.py` (ảnh 320 px), lọc One Euro, rồi đưa vào `HeadTracking.Feed`. Vì vậy ngưỡng 30° / 50° và mức phóng giữ như cũ.
+- **Tay trái:**
+  - Lấy tay ở bên trái khung hình đã lật như gương. Thấy 2 tay thì lấy cổ tay bên trái hơn; thấy 1 tay thì chỉ nhận nếu tay đó ở nửa trái, vì tay phải đang cầm tay cầm VERA.
+  - Không dùng nhãn trái/phải của mô hình, vì chưa kiểm chứng trên webcam thật.
+  - Nắm (`nam_doc` / `nam_ngang` của `HandGesture`) giữ 0,12 giây thì tính là nắm. Xòe 0,15 giây, hoặc mất tay 0,6 giây, thì tính là thả.
+- **Chạm kẹt:** nếu tay cầm báo chạm A hoặc B liên tục ngay từ lúc nối mà chưa từng nhả, game bỏ qua chạm đó tới khi nhả và báo trên màn hình. Lỗi này đo được ngày 25/11, khi dây chạm B chập GND.
+
+## 4. Ô khóa API ở Cài đặt → Trợ lý AI
+
+- Có các phần:
+  - chọn nhà cung cấp: Gemini, Groq, Claude, OpenAI;
+  - ô dán khóa;
+  - nút **Lưu khóa**, **Kiểm tra** (gọi thử nhà cung cấp) và **Xóa khóa**.
+- Dùng được cả khi vào **Dùng thử**, không cần đăng nhập. Khóa lưu thành **khóa chung của máy này** (`ApiKeyStore.DeviceOwner`), mã hóa bằng DPAPI.
+- Tài khoản đã đăng nhập mà chưa có khóa riêng thì dùng khóa chung đó.
+- Khóa đã lưu không bao giờ hiện lại, chỉ hiện dạng che.
+
+## 5. Bài demo cho giám khảo (F2)
+
+- 3 bài nổi bật đứng đầu danh sách:
+  - **Phản ứng đổi màu glucozơ + Cu(OH)₂**: kết tủa xanh, chuyển phức xanh lam thẫm, đun nóng ra Cu₂O đỏ gạch. Robot làm mẫu được.
+  - **Trợ lý AI ra lệnh cho robot bằng tiếng Việt**: gửi sẵn lệnh "làm thí nghiệm nhận biết Fe³⁺ bằng KSCN rồi giải thích". AI lập kế hoạch, robot làm thật trong lab.
+  - **Mổ ếch tự do**: tới bàn giải phẫu số thì bàn mổ ếch tự mở.
+- Bài nào cũng có nút **Hỏi trợ lý AI** (**F5**): mở khung trò chuyện và gửi câu hỏi về đúng bài đó.
+- Không có mạng hoặc khóa AI thì robot vẫn hiểu các lệnh thường dùng, và nút **Robot làm mẫu** vẫn chạy.
+
+## Kiểm thử
+
+- Bài thử tự động trong Unity (tạm, không đưa vào bản build): phóng to dụng cụ, ổ máy về cỡ gốc, mặt bàn đen, YuNet C# so với OpenCV, khóa API khách, bảng demo, và tay cầm VERA giả trỏ vật rồi tay trái nắm / xòe.
+- Kết quả ghi ở phần cuối báo cáo phiên.
+- **Chưa thử với webcam và người thật:** độ nhạy cử chỉ nắm / xòe và hướng đầu cần thử trước buổi thi.

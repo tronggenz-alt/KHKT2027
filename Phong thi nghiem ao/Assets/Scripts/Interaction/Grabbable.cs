@@ -6,6 +6,7 @@ namespace Khkt.Interaction
     /// Dụng cụ cầm lên, đặt xuống được. Gốc tọa độ của vật ở đáy (đặt lên mặt bàn là đúng chỗ).
     /// kind dùng để ổ đặt biết có nhận vật này không (ví dụ kẹp buret chỉ nhận "buret").
     /// </summary>
+    [DefaultExecutionOrder(-500)]  // phóng to dụng cụ (DungCuPhongTo) trước khi các thành phần khác của vật đọc kích thước
     public class Grabbable : MonoBehaviour
     {
         public string kind = "dung_cu";
@@ -35,9 +36,14 @@ namespace Khkt.Interaction
             HomePosition = transform.position;
             HomeRotation = transform.rotation;
             Khkt.Rendering.LiveSet<Grabbable>.Add(this);
+            DungCuPhongTo.Apply(this);
         }
 
-        void OnDestroy() => Khkt.Rendering.LiveSet<Grabbable>.Remove(this);
+        void OnDestroy()
+        {
+            Khkt.Rendering.LiveSet<Grabbable>.Remove(this);
+            DungCuPhongTo.Forget(this);
+        }
 
         void Start() => HomeSocket = Socket;
 

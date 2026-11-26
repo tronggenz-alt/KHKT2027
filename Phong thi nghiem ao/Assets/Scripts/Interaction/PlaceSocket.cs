@@ -39,6 +39,7 @@ namespace Khkt.Interaction
             Occupant = g;
             g.transform.SetPositionAndRotation(transform.position, transform.rotation);
             g.SetSocket(this);
+            DungCuPhongTo.OnPut(g, this);
             var b = g.GetComponent<BuretStopcock>();
             if (b != null) b.mounted = mountsBuret;
             Changed?.Invoke(g);
@@ -48,6 +49,7 @@ namespace Khkt.Interaction
         {
             if (Occupant != g) return;
             Occupant = null;
+            DungCuPhongTo.OnRelease(g);
             var b = g.GetComponent<BuretStopcock>();
             if (b != null) b.mounted = false;
             Changed?.Invoke(null);

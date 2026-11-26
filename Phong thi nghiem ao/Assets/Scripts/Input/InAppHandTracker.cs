@@ -14,6 +14,10 @@ namespace Khkt.Input
     ///  • Mỗi khung: lật ảnh như soi gương, cắt vùng tay đã xoay thẳng, chạy mô hình 21 điểm (224 px).
     ///    Mô hình dò bàn tay (192 px) chỉ chạy khi còn thiếu tay, cách 3 khung một lần.
     ///  • Kết quả (21 điểm 3D theo mét, vị trí cổ tay trên ảnh, chụm ngón) đưa vào ArmTracking cho ArmRig.
+    ///  • Bản đi thi (26/11/2026), cùng một webcam:
+    ///    - dò mặt YuNet (YuNetFace) cách 1 khung, tính hướng đầu như head_tracker.py rồi đưa vào HeadTracking
+    ///      (quay đầu để xoay góc nhìn, ghé gần để phóng to; F8 bật / tắt, F12 căn lại);
+    ///    - cử chỉ TAY TRÁI: nắm chặt = cầm dụng cụ tay cầm VERA (BMI160) đang trỏ, xòe tay = thả (LeftGrip).
     /// </summary>
     public class InAppHandTracker : MonoBehaviour
     {
@@ -25,7 +29,31 @@ namespace Khkt.Input
             public bool pinch;
             public string side;          // chốt lúc mới thấy tay rồi giữ nguyên: nhãn của mô hình hay nhảy qua lại
             public int misses;
+            public bool seen;            // khung này thấy tay
+            public Vector2 wrist;        // cổ tay trong khung đã lật như gương (0..1): tay trái người dùng ở bên trái
+            public string gesture = "khac";
+            public bool pinchG;
+            public readonly HandGesture.Vote vote = new HandGesture.Vote();
         }
+
+        // ---------- tay trái: nắm / thả (bản đi thi) ----------
+        /// <summary>Tay trái đang nắm chặt (đã khử dội): HandController coi như giữ chạm B của tay cầm VERA.</summary>
+        public static bool LeftGrip { get; private set; }
+        /// <summary>Thấy tay trái trong khung (ở khung xử lý gần nhất).</summary>
+        public static bool LeftVisible { get; private set; }
+        /// <summary>Kiểm thử: ép trạng thái nắm tay trái (null = theo webcam).</summary>
+        public static bool? TestLeftGrip;
+        public static bool LeftGripNow => TestLeftGrip ?? LeftGrip;
+        public static string LeftGesture { get; private set; } = "";
+        float fistSince = -1f, openSince = -1f, lastGripMsg = -100f;
+
+        // ---------- mặt: hướng đầu (bản đi thi) ----------
+        YuNetFace face;
+        bool faceFailed;
+        readonly OneEuroScalar fYaw = new OneEuroScalar(0.7f, 0.02f), fPitch = new OneEuroScalar(0.7f, 0.02f), fE = new OneEuroScalar(0.7f, 0.02f);
+        readonly HeadTracking.Packet facePacket = new HeadTracking.Packet();
+        public bool FaceSeen { get; private set; }
+        public float FaceYaw { get; private set; }
 
         /// <summary>Lỡ mất tay vài khung (mờ, chớp sáng) vẫn giữ vùng cắt để bắt lại, không bật tắt liên tục.</summary>
         const int HoldFrames = 6;
@@ -94,6 +122,12 @@ namespace Khkt.Input
                     lmIn = new Tensor<float>(new TensorShape(1, LmN, LmN, 3));
                     LoadAnchors();
                 }
+                if (face == null && !faceFailed)
+                {
+                    try { face = YuNetFace.Create(); }
+                    catch (Exception fe) { faceFailed = true; Debug.LogWarning("[TayUnity] Không nạp được mô hình mặt YuNet: " + fe.Message); }
+                    if (face == null) faceFailed = true;
+                }
                 cam = new WebCamTexture(PickCamera(), 640, 480, 30);
                 cam.Play();
             }
@@ -110,15 +144,24 @@ namespace Khkt.Input
             statMs = 0;
             foreach (var t in tracks) t.active = false;
             if (MediaPipeHandSource.Instance != null) MediaPipeHandSource.Instance.handTrackingEnabled = true;
-            LabMessages.Say("Nhận diện tay: BẬT (F10 để tắt). Đưa tay vào khung webcam", LabMessages.Tone.Info);
+            fYaw.Reset(); fPitch.Reset(); fE.Reset();
+            LabMessages.Say("Webcam BẬT (F10 tắt): nắm tay TRÁI để cầm vật tay cầm đang trỏ, xòe tay để thả", LabMessages.Tone.Info);
+            if (face != null && HeadTracking.Instance != null)
+            {
+                HeadTracking.InAppSource = true;
+                HeadTracking.Instance.BeginInApp();
+            }
         }
 
         public void Stop()
         {
             if (cam != null) { cam.Stop(); Destroy(cam); cam = null; }
-            if (Running) LabMessages.Say("Nhận diện tay: TẮT", LabMessages.Tone.Info);
+            if (Running) LabMessages.Say("Webcam: TẮT (F10 bật lại)", LabMessages.Tone.Info);
             Running = false;
             HandsVisible = 0;
+            LeftGrip = LeftVisible = FaceSeen = false;
+            fistSince = openSince = -1f;
+            if (HeadTracking.InAppSource && HeadTracking.Instance != null) HeadTracking.Instance.StopInApp();
         }
 
         void OnDisable() => Stop();
@@ -127,6 +170,8 @@ namespace Khkt.Input
         {
             Stop();
             detWorker?.Dispose(); lmWorker?.Dispose(); detIn?.Dispose(); lmIn?.Dispose();
+            face?.Dispose();
+            face = null;
         }
 
         /// <summary>Webcam của máy, bỏ qua camera ảo và camera điện thoại.</summary>
@@ -176,11 +221,16 @@ namespace Khkt.Input
             int seen = 0;
             foreach (var t in tracks)
             {
+                t.seen = false;
                 if (!t.active) continue;
-                if (Landmarks(t, w, h)) { seen++; t.misses = 0; }
-                else if (++t.misses > HoldFrames) { t.active = false; t.side = null; }
+                if (Landmarks(t, w, h)) { seen++; t.misses = 0; t.seen = true; }
+                else if (++t.misses > HoldFrames) { t.active = false; t.side = null; t.vote.Clear(); }
             }
             HandsVisible = seen;
+            UpdateLeftGrip();
+
+            // mặt: 1/6 số khung (khoảng 5 lần/giây, đủ cho quay đầu vì HeadTracking đã làm mượt), thu nhỏ ở luồng phụ, không chờ GPU
+            if (face != null && HeadTracking.Instance != null && HeadTracking.Instance.InAppRunning) FaceStep(w, h);
 
             float ms = (Time.realtimeSinceStartup - t0) * 1000f;
             statFrames++;
@@ -333,10 +383,78 @@ namespace Khkt.Input
                 else if (Mathf.Abs(handed - 0.5f) > 0.3f) t.side = handed >= 0.5f ? "phai" : "trai";
                 else t.side = img[0].x >= 0.5f ? "phai" : "trai";
             }
+            t.wrist = img[0];
+            t.gesture = t.vote.Add(HandGesture.Classify(img, world, ref t.pinchG));
             string ben = t.side;
             var at = ArmTracking.Instance;
             if (at != null) at.FeedHand(ben, world, new Vector2(1f - img[0].x, img[0].y), t.pinch);
             return true;
+        }
+
+        /// <summary>
+        /// Tay trái là tay ở bên TRÁI khung đã lật như gương (như soi gương). Thấy 2 tay: tay có cổ tay bên trái hơn;
+        /// thấy 1 tay: tay đó nếu ở nửa trái (tay phải cầm tay cầm VERA thường ở nửa phải). Không tin nhãn trái / phải của
+        /// mô hình (chưa kiểm chứng trên webcam thật, docs/20).
+        /// Nắm (nam_doc / nam_ngang) liên tục 0,12 s thì nắm; xòe hay cử chỉ khác 0,15 s thì thả; mất tay 0,6 s cũng thả.
+        /// </summary>
+        void UpdateLeftGrip()
+        {
+            Track left = null;
+            Track a = tracks[0].seen ? tracks[0] : null, b = tracks[1].seen ? tracks[1] : null;
+            if (a != null && b != null) left = a.wrist.x <= b.wrist.x ? a : b;
+            else if ((a ?? b) != null && (a ?? b).wrist.x < 0.5f) left = a ?? b;
+            LeftVisible = left != null;
+            LeftGesture = left != null ? left.gesture : "";
+            float now = Time.realtimeSinceStartup;
+            bool fist = left != null && left.gesture.StartsWith("nam");
+            if (fist) { if (fistSince < 0) fistSince = now; openSince = -1f; }
+            else { if (openSince < 0) openSince = now; fistSince = -1f; }
+            bool was = LeftGrip;
+            if (!LeftGrip && fist && now - fistSince >= 0.12f) LeftGrip = true;
+            else if (LeftGrip && !fist && now - openSince >= (left == null ? 0.6f : 0.15f)) LeftGrip = false;
+            if (LeftGrip && !was && now - lastGripMsg > 20f)
+            {
+                lastGripMsg = now;
+                LabMessages.Say("Tay trái NẮM: cầm vật tay cầm đang trỏ (xòe tay để thả)", LabMessages.Tone.Info);
+            }
+        }
+
+        /// <summary>Dò mặt, tính hướng đầu (như head_tracker.py, lọc One Euro) rồi đưa cho HeadTracking.</summary>
+        void FaceStep(int w, int h)
+        {
+            bool ok = false;
+            float now = Time.realtimeSinceStartup;
+            try
+            {
+                if (!face.Busy)
+                {
+                    if (frame % 6 == 0) face.Submit(px, w, h);
+                    return;
+                }
+                if (!face.TryCollect(out ok)) return;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning("[TayUnity] Dò mặt lỗi, tắt điều khiển bằng đầu: " + ex.Message);
+                face.Dispose();
+                face = null;
+                faceFailed = true;
+                return;
+            }
+            facePacket.Reset();
+            facePacket.t = now;
+            facePacket.nguon = "yunet_unity";
+            if (ok && YuNetFace.Pose(face.Points, out float yaw, out float pitch, out float e, out float roll))
+            {
+                facePacket.ok = 1;
+                facePacket.yaw = fYaw.Filter(yaw, now);
+                facePacket.pitch = fPitch.Filter(pitch, now);
+                facePacket.e = fE.Filter(e, now);
+                facePacket.roll = roll;
+                FaceYaw = facePacket.yaw;
+            }
+            FaceSeen = facePacket.ok == 1;
+            HeadTracking.Instance.Feed(facePacket);
         }
 
         /// <summary>Ánh xạ trực tiếp 21 mốc bàn tay MediaPipe (camera space, mét) vào khung xương giải phẫu HandRig.</summary>

@@ -34,10 +34,17 @@ namespace Khkt.Input
 
         void Awake() => Instance = this;
 
+        /// <summary>
+        /// Bản đi thi: webcam chạy ngay trong ứng dụng (tay + mặt, InAppHandTracker), không gọi Python (máy thi có thể
+        /// bật Smart App Control, bản .exe cũng không kèm tools/). Đặt KHKT_TAY_PYTHON=1 để dùng lại tracker Python.
+        /// </summary>
+        public static bool InAppOnly => System.Environment.GetEnvironmentVariable("KHKT_TAY_PYTHON") != "1";
+
         System.Collections.IEnumerator Start()
         {
             if (Application.isBatchMode) yield break;
-            yield return new WaitForSecondsRealtime(0.8f);
+            // chờ cảnh lab ổn định (mở webcam + nạp mô hình làm đứng hình khoảng 1 giây)
+            yield return new WaitForSecondsRealtime(InAppOnly ? 1.5f : 0.8f);
             if (Enabled) Begin();
         }
 
@@ -121,6 +128,17 @@ namespace Khkt.Input
             UsingFallback = false;
             UsingPlugin = false;
             announced = false;
+            if (InAppOnly)
+            {
+                var t = InAppHandTracker.Instance;
+                if (t != null)
+                {
+                    UsingFallback = true;
+                    t.enabled = true;
+                    t.Begin();
+                }
+                return;
+            }
             if (HeadTracking.Instance != null && HeadTracking.Instance.ProcessRunning) { pausedForHead = true; return; }
             if (proc != null || finding != null) return;
 #if KHKT_MEDIAPIPE_PLUGIN

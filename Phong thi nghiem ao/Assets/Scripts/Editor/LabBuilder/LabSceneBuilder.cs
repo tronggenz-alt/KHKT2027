@@ -188,7 +188,8 @@ namespace Khkt.EditorTools
             floorHall = Mat("SanHanhLang", new Color(0.76f, 0.74f, 0.7f), 0.3f, 0, tiles, new Vector2(22.5f, 1.83f));
             floorBalcony = Mat("SanBanCong", new Color(0.78f, 0.72f, 0.66f), 0.25f, 0, tiles, new Vector2(22.5f, 1.5f));
             sill = Mat("BauCua", new Color(0.86f, 0.86f, 0.85f), 0.4f, 0.3f);
-            epoxy = Mat("MatBanPhenolic", new Color(0.8f, 0.81f, 0.81f), 0.42f);
+            // 26/11/2026 (bản đi thi): mặt bàn thí nghiệm đen tiêu chuẩn (epoxy đen); thân bàn đổi đen bằng KhktBanDen.Run
+            epoxy = Mat("MatBanPhenolic", new Color(0.035f, 0.037f, 0.041f), 0.62f);
             epoxyDark = Mat("MatBanEpoxy", new Color(0.13f, 0.14f, 0.16f), 0.65f);
             cabinet = Mat("ThanTu", new Color(0.95f, 0.95f, 0.93f), 0.35f);
             cabinetDoor = Mat("CanhTu", new Color(1f, 1f, 1f), 0.3f, 0, Tex("VanGoSoi", 256, 256, OakPixel), new Vector2(1f, 1f));

@@ -66,8 +66,42 @@ namespace Khkt.Menu
             }
         }
 
-        /// <summary>Khóa của tài khoản đang đăng nhập (null nếu chưa có hoặc là khách).</summary>
-        public static Entry Current => Load(Owner);
+        /// <summary>
+        /// Khóa dùng chung của máy này (nhập ở Cài đặt → Trợ lý AI, không cần đăng nhập): dùng cho khách và cho tài khoản
+        /// chưa lưu khóa riêng.
+        /// </summary>
+        public const string DeviceOwner = "may_nay";
+
+        /// <summary>Chủ khóa khi lưu từ Cài đặt: tài khoản đang đăng nhập, khách thì là máy này.</summary>
+        public static string OwnerOrDevice => Owner ?? DeviceOwner;
+
+        /// <summary>Khóa đang dùng: của tài khoản đang đăng nhập; chưa có (hoặc là khách) thì khóa chung của máy này.</summary>
+        public static Entry Current
+        {
+            get
+            {
+                string o = Owner;
+                if (o != null)
+                {
+                    var e = Load(o);
+                    if (e != null) return e;
+                }
+                if (!deviceLoaded)
+                {
+                    // bộ đệm riêng: không giành bộ đệm của tài khoản (mỗi lần đọc là một lần giải mã DPAPI)
+                    string keepOwner = cacheOwner;
+                    var keep = cache;
+                    deviceCache = Load(DeviceOwner);
+                    cacheOwner = keepOwner;
+                    cache = keep;
+                    deviceLoaded = true;
+                }
+                return deviceCache;
+            }
+        }
+
+        static Entry deviceCache;
+        static bool deviceLoaded;
 
         public static bool HasKey => Current != null;
 
@@ -104,6 +138,7 @@ namespace Khkt.Menu
             File.Move(tmp, path);
             cacheOwner = owner;
             cache = new Entry { provider = e.provider, model = (e.model ?? "").Trim(), key = e.key.Trim() };
+            if (owner == DeviceOwner) { deviceCache = cache; deviceLoaded = true; }
         }
 
         public static void Delete(string owner)
@@ -112,6 +147,7 @@ namespace Khkt.Menu
             try { string p = PathFor(owner); if (File.Exists(p)) File.Delete(p); }
             catch (Exception ex) { Debug.LogWarning("[khoa_ai] không xóa được tệp khóa: " + ex.GetType().Name); }
             if (owner == cacheOwner) cache = null;
+            if (owner == DeviceOwner) { deviceCache = null; deviceLoaded = true; }
         }
 
         /// <summary>Đăng xuất: quên bản giải mã trong bộ nhớ (tệp mã hóa vẫn còn cho lần đăng nhập sau).</summary>
@@ -119,6 +155,7 @@ namespace Khkt.Menu
         {
             cache = null;
             cacheOwner = null;
+            deviceLoaded = false;
         }
 
         /// <summary>Che khóa để hiện: sk-ant-…a1b2.</summary>

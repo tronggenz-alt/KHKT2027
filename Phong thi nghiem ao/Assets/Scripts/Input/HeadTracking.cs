@@ -94,6 +94,34 @@ namespace Khkt.Input
 
         public string Status { get; private set; } = "Tắt";
 
+        /// <summary>
+        /// Bản đi thi: hướng đầu do InAppHandTracker tính ngay trong Unity (YuNet, Inference Engine) rồi gọi Feed,
+        /// không chạy Python, không mở cổng UDP. F8 chỉ bật / tắt phần xoay theo đầu (webcam vẫn chạy cho tay).
+        /// </summary>
+        public static bool InAppSource { get; set; }
+        public bool InAppRunning => running && InAppSource;
+
+        public void BeginInApp()
+        {
+            if (running) return;
+            lastError = null;
+            currentEngine = TrackingEngine.YuNet;
+            running = true;
+            processPaused = false;
+            StartCalibration();
+        }
+
+        public void StopInApp()
+        {
+            if (!running) return;
+            running = false;
+            calibrated = false;
+            turn = 0f;
+            pitchTurn = 0f;
+            zoomTarget = 1f;
+            Status = "Tắt";
+        }
+
         [Serializable]
         public class HandData
         {
@@ -351,7 +379,7 @@ namespace Khkt.Input
 
                     calibrated = true;
                     Status = "Đang điều khiển";
-                    Say($"Đã căn ({currentEngine}): quay đầu để xoay, ghé gần để phóng to, ngả xa để nhìn rộng (F9 căn lại, F8 tắt)");
+                    Say($"Đã căn hướng đầu: quay đầu để xoay, ghé gần để phóng to, ngả xa để nhìn rộng (F12 căn lại, F8 tắt)");
                 }
                 return;
             }
@@ -439,6 +467,17 @@ namespace Khkt.Input
 
         void ResumeTracking()
         {
+            if (InAppSource)
+            {
+                var tracker = InAppHandTracker.Instance;
+                if (tracker != null && !tracker.Running)
+                {
+                    tracker.enabled = true;
+                    tracker.Begin();  // bật webcam: Begin tự gọi BeginInApp
+                }
+                else BeginInApp();
+                return;
+            }
             if (processPaused && proc != null && !proc.HasExited)
             {
                 // Bật lại tức thì (< 1s)
@@ -518,7 +557,8 @@ namespace Khkt.Input
             pitchTurn = 0;
             zoomTarget = 1f;
             Status = "Đang căn";
-            Say($"Điều khiển bằng đầu ({currentEngine}): BẬT – nhìn thẳng màn hình 2 giây để căn tư thế");
+            Say(InAppSource ? "Điều khiển bằng đầu: BẬT – nhìn thẳng màn hình 2 giây để căn tư thế"
+                            : $"Điều khiển bằng đầu ({currentEngine}): BẬT – nhìn thẳng màn hình 2 giây để căn tư thế");
         }
 
         bool Launch(TrackingEngine eng)
