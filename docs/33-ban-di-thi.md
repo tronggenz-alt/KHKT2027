@@ -68,3 +68,17 @@ Webcam chạy ngay trong ứng dụng (Unity Inference Engine), không gọi Pyt
 - Bài thử tự động trong Unity (tạm, không đưa vào bản build): phóng to dụng cụ, ổ máy về cỡ gốc, mặt bàn đen, YuNet C# so với OpenCV, khóa API khách, bảng demo, và tay cầm VERA giả trỏ vật rồi tay trái nắm / xòe.
 - Kết quả ghi ở phần cuối báo cáo phiên.
 - **Chưa thử với webcam và người thật:** độ nhạy cử chỉ nắm / xòe và hướng đầu cần thử trước buổi thi.
+
+## 6. Nói tiếng Việt với trợ lý AI (27/11/2026)
+
+- **Tay cầm VERA:** tay rảnh, không trỏ vào dụng cụ nào, **giữ nút chạm A 3 giây**. Trong lúc giữ, góc dưới bên phải hiện thanh đếm. Đủ 3 giây thì khung trợ lý mở và bắt đầu thu âm. **Giữ tiếp để nói, thả A là gửi cho AI.**
+  - Tay đang cầm vật: giữ A vẫn là dùng vật (rót, nhỏ giọt). Đang trỏ vào thiết bị: A vẫn là bấm thiết bị.
+  - A báo chạm liên tục từ lúc nối (dây chập) thì bị bỏ qua tới khi thả.
+- **Nút Mic** trên khung trợ lý (hoặc phím **V** khi khung mở): bấm để bắt đầu nói, nút đổi thành đỏ "Dừng", bấm lần nữa để gửi.
+- **Chuyển giọng nói thành chữ:** dùng AI của Google (Gemini, mô hình `gemini-flash-latest`) bằng khóa API ở Cài đặt → Trợ lý AI. Khóa Groq và OpenAI dùng Whisper (tiếng Việt). Khóa Claude không nhận âm thanh, game báo rõ.
+  - Ghi 16 kHz mono, tối đa 30 giây. Âm nhỏ được tăng âm tự động; lời nhắc nêu thuật ngữ hóa học (NaOH, HCl, CuSO₄, ống nghiệm, buret...).
+  - Chữ nhận được hiện thành tin "Bạn" trong khung trò chuyện và gửi cho AI như người dùng gõ.
+  - Lỗi (không có micro, nói quá ngắn, không nghe thấy tiếng, hết hạn mức, mất mạng) hiện ở dòng trạng thái của khung, tự tắt sau 8 giây. Khóa không bao giờ nằm trong địa chỉ hay thông báo lỗi.
+- **Cần:** micro (laptop có sẵn), quyền micro cho ứng dụng (Windows → Quyền riêng tư → Micro), mạng, và một khóa Gemini miễn phí lấy ở aistudio.google.com.
+- **Đã kiểm (20/20):** khuôn WAV, yêu cầu Gemini và Whisper tới máy chủ giả đúng khuôn, Claude báo lỗi rõ, mất mạng không lộ khóa, giữ A 1,5 / 2,5 giây chưa nghe, quá 3 giây thì nghe, thả A thì gửi, chạm A ngắn không kích hoạt, nút Mic bấm hai lần. Yêu cầu gọi tới máy chủ Google thật bằng khóa giả được Google trả "API key not valid", tức khuôn yêu cầu đúng.
+- **Chưa thử:** nói thật vào micro và nhận chữ thật (cần khóa Gemini thật của bạn).

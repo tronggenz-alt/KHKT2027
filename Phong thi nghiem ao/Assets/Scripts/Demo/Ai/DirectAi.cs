@@ -215,6 +215,94 @@ namespace Khkt.Demo.Ai
             }
         }
 
+        // ------------------------------------------------------------------
+        // Giọng nói → chữ (bản đi thi 27/11/2026): Gemini nhận âm thanh trực tiếp; Groq và OpenAI dùng Whisper
+        // ------------------------------------------------------------------
+
+        const string VoicePrompt =
+            "Chép lại CHÍNH XÁC lời nói tiếng Việt trong đoạn âm thanh. Người nói là học sinh trong phòng thí nghiệm hóa học và sinh học: " +
+            "giữ nguyên tên hóa chất và công thức (NaOH, HCl, CuSO4, KSCN, FeCl3, phenolphtalein...), tên dụng cụ (ống nghiệm, buret, pipet, bình tam giác...) " +
+            "và thuật ngữ sinh học. Có dấu tiếng Việt và dấu câu. Chỉ trả về đúng nội dung lời nói, không giải thích, không thêm lời dẫn. " +
+            "Nếu không có lời nói rõ ràng thì trả về một chuỗi rỗng.";
+
+        /// <summary>Chuyển tệp WAV (16 bit, mono) thành chữ tiếng Việt. Claude không nhận âm thanh nên báo lỗi rõ ràng.</summary>
+        public static IEnumerator Transcribe(ApiKeyStore.Entry e, byte[] wav, Action<string> ok, Action<string> fail)
+        {
+            if (e == null || !e.Valid) { fail?.Invoke("Chưa có khóa AI."); yield break; }
+            if (e.provider == ApiKeyStore.Claude)
+            {
+                fail?.Invoke("Khóa Claude không nhận âm thanh: dùng khóa Google Gemini (miễn phí), Groq hoặc OpenAI để nói chuyện với trợ lý");
+                yield break;
+            }
+            for (int attempt = 0; attempt < 2; attempt++)
+            {
+                UnityWebRequest r;
+                if (e.provider == ApiKeyStore.Gemini)
+                {
+                    string model = e.ModelOrDefault.StartsWith("gemini") ? e.ModelOrDefault : "gemini-flash-latest";
+                    var body = new JObject
+                    {
+                        ["contents"] = new JArray(new JObject
+                        {
+                            ["role"] = "user",
+                            ["parts"] = new JArray(
+                                new JObject { ["text"] = VoicePrompt },
+                                new JObject { ["inline_data"] = new JObject { ["mime_type"] = "audio/wav", ["data"] = Convert.ToBase64String(wav) } }),
+                        }),
+                        ["generationConfig"] = new JObject { ["temperature"] = 0 },
+                    };
+                    string url = GeminiBase.Replace("/openai", "") + "/models/" + model + ":generateContent";
+                    r = new UnityWebRequest(url, "POST")
+                    {
+                        uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body.ToString(Newtonsoft.Json.Formatting.None))),
+                        downloadHandler = new DownloadHandlerBuffer(),
+                    };
+                    r.SetRequestHeader("Content-Type", "application/json");
+                    r.SetRequestHeader("x-goog-api-key", e.key.Trim());
+                }
+                else
+                {
+                    bool groq = e.provider == ApiKeyStore.Groq;
+                    var form = new List<IMultipartFormSection>
+                    {
+                        new MultipartFormDataSection("model", groq ? "whisper-large-v3-turbo" : "whisper-1"),
+                        new MultipartFormDataSection("language", "vi"),
+                        new MultipartFormDataSection("response_format", "json"),
+                        new MultipartFormDataSection("prompt", "Phòng thí nghiệm hóa học, sinh học: NaOH, HCl, CuSO4, ống nghiệm, buret, pipet."),
+                        new MultipartFormFileSection("file", wav, "giong_noi.wav", "audio/wav"),
+                    };
+                    r = UnityWebRequest.Post(Base(e.provider) + "/audio/transcriptions", form);
+                    Auth(r, e);
+                }
+                using (r)
+                {
+                    r.timeout = 40;
+                    yield return r.SendWebRequest();
+                    if (r.result != UnityWebRequest.Result.Success)
+                    {
+                        if (attempt == 0 && (r.responseCode >= 500 || r.responseCode == 0)) { yield return new WaitForSecondsRealtime(0.8f); continue; }
+                        fail?.Invoke(Describe(r, e));
+                        yield break;
+                    }
+                    string text;
+                    try
+                    {
+                        var root = JObject.Parse(r.downloadHandler.text);
+                        if (e.provider == ApiKeyStore.Gemini)
+                        {
+                            var parts = root["candidates"]?[0]?["content"]?["parts"] as JArray;
+                            text = parts == null ? "" : string.Concat(parts.Select(p => p["text"]?.ToString() ?? ""));
+                        }
+                        else text = root["text"]?.ToString() ?? "";
+                    }
+                    catch { fail?.Invoke("Nhà cung cấp trả lời không đúng định dạng."); yield break; }
+                    text = text.Trim().Trim('"', '\u201c', '\u201d').Trim();
+                    ok?.Invoke(text);
+                    yield break;
+                }
+            }
+        }
+
         static void Auth(UnityWebRequest r, ApiKeyStore.Entry e)
         {
             if (e.provider == ApiKeyStore.Claude)

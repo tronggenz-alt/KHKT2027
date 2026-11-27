@@ -34,7 +34,9 @@ namespace Khkt.Demo
         GameObject panel;
         Image panelImg, bubbleImg;
         InputField input;
-        Button closeBtn, sendBtn;
+        Button closeBtn, sendBtn, micBtn;
+        Image voiceHintImg;
+        Text voiceHintText;
         readonly List<Button> quickBtns = new List<Button>();
         Text titleLabel, log, status, bubbleOwner;
         CanvasGroup bubbleGroup;
@@ -81,9 +83,22 @@ namespace Khkt.Demo
                 string q = quick[i];
                 quickBtns.Add(MakeButton(p, "Gợi ý", q, new Vector2(24 + (i % 3) * 160, -418 - (i / 3) * 44), new Vector2(152, 40), () => Send(q), false, 13));
             }
-            input = MakeInput(p, "Ô nhập", "Hỏi hoặc ra lệnh cho robot...", new Vector2(24, -506), new Vector2(366, 48), 16);
+            input = MakeInput(p, "Ô nhập", "Hỏi hoặc nói với robot...", new Vector2(24, -506), new Vector2(300, 48), 16);
+            micBtn = MakeButton(p, "Mic", "Mic", new Vector2(332, -506), new Vector2(60, 48), () => { if (VoiceChat.Instance != null) VoiceChat.Instance.Toggle(); }, false, 14);
             sendBtn = MakeButton(p, "Gửi", "Gửi", new Vector2(400, -506), new Vector2(96, 48), () => Send(input.text), true);
             panel.SetActive(false);
+            if (FindAnyObjectByType<VoiceChat>() == null) gameObject.AddComponent<VoiceChat>();
+
+            // Gợi ý giữ A (tay cầm) khi khung trợ lý đang đóng
+            voiceHintImg = Panel(ui.Canvas.transform, "Gợi ý giọng nói", new Vector2(1, 0), new Vector2(1, 0), new Vector2(-20, 24), new Vector2(520, 56), glass, 1.6f);
+            if (!glassOk && !ReducedTransparency)
+            {
+                voiceHintImg.sprite = Solid;
+                voiceHintImg.pixelsPerUnitMultiplier = UiTheme.IsVera ? 1.6f : 2.8f;
+                voiceHintImg.color = Surface;
+            }
+            voiceHintText = Label(voiceHintImg.transform, "Chữ", "", 16, Ink, true, TextAnchor.MiddleLeft, new Vector2(20, -8), new Vector2(480, 40));
+            voiceHintImg.gameObject.SetActive(false);
 
             // Bong bóng lời robot khi khung trò chuyện đang đóng
             bubbleImg = Panel(ui.Canvas.transform, "Lời robot", new Vector2(1, 0), new Vector2(1, 0), new Vector2(-20, 100), new Vector2(460, 70), glass, 1.6f);
@@ -248,6 +263,17 @@ namespace Khkt.Demo
             return true;
         }
 
+        /// <summary>Dòng gợi ý "giữ A để nói" khi khung trợ lý đang đóng; null = ẩn.</summary>
+        public void SetVoiceHint(string s)
+        {
+            if (voiceHintImg == null) return;
+            bool show = !string.IsNullOrEmpty(s) && !IsOpen;
+            if (voiceHintImg.gameObject.activeSelf != show) voiceHintImg.gameObject.SetActive(show);
+            if (show && voiceHintText.text != s) voiceHintText.text = s;
+        }
+
+        public bool HasMicButton => micBtn != null;
+
         public void Open()
         {
             if (ClassRules.ChatLocked)
@@ -296,6 +322,20 @@ namespace Khkt.Demo
             nextStatus = Time.unscaledTime + 0.25f;
             var ai = AiClient.Instance;
             var robot = LabRobot.Instance;
+            var vc = VoiceChat.Instance;
+            if (micBtn != null && vc != null)
+            {
+                var mt = micBtn.transform.Find("Chữ")?.GetComponent<Text>();
+                bool rec = vc.State == VoiceChat.Mode.Listening;
+                if (mt != null) mt.text = rec ? "Dừng" : vc.State == VoiceChat.Mode.Transcribing ? "..." : "Mic";
+                var mi = micBtn.targetGraphic as Image;
+                if (mi != null) mi.color = rec ? new Color(0.86f, 0.2f, 0.2f, 1f) : (UiTheme.IsVera ? ButtonFill : ButtonFill);
+            }
+            if (vc != null && vc.Message.Length > 0)
+            {
+                status.text = (vc.State == VoiceChat.Mode.Listening ? "<color=#FF5A5A>●</color> " : "") + vc.Message;
+                return;
+            }
             status.text = (ai != null && ai.Direct && ai.LastDirectError.Length > 0 ? "<color=#FF8A7A>●</color> Khóa AI riêng lỗi: hiểu lệnh cơ bản (xem trang Trợ lý AI ở sảnh)"
                            : ai != null && ai.Online ? $"<color={HexGood}>●</color> AI đám mây: {ai.Provider} {ai.Model}" : $"<color={HexWarn}>●</color> Ngoại tuyến: hiểu lệnh cơ bản (chạy server/ai để có AI)")
                           + (robot != null ? "  ·  " + robot.StatusText : "") + (waiting ? "  ·  đang nghĩ..." : "");
