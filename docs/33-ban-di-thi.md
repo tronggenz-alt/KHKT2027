@@ -98,3 +98,10 @@ Webcam chạy ngay trong ứng dụng (Unity Inference Engine), không gọi Pyt
 ## 8. Tay cầm 5 miếng chạm và Cài đặt → Tay cầm (27/11/2026)
 
 Firmware 3.3 có 5 miếng: TIẾN (GPIO27), LÙI (GPIO13), TRÁI (GPIO32), PHẢI (GPIO33), OK (GPIO4). Firmware gửi trạng thái thô; app giải tổ hợp theo **Cài đặt → Tay cầm**: bảng 8 thao tác × 5 miếng, bấm ô để bật / tắt miếng, lưu ngay, có nút "Khôi phục mặc định" và báo đỏ khi hai thao tác trùng tổ hợp. Chi tiết và bảng đấu nối: docs/28, mục "Bản 3.3".
+
+## 9. Cánh tay ảo không ráp theo webcam nữa (27/11/2026)
+
+- **Lỗi:** khi webcam thấy tay, cánh tay ảo được ráp theo bàn tay thật. Webcam không thấy khuỷu nên khuỷu phải đoán, làm ống tay áo bị kéo thành một tấm trắng lớn và bàn tay giơ lơ lửng.
+- **Sửa:** cánh tay ảo luôn ở tư thế nghỉ, hoặc theo tay cầm VERA / chuột như bình thường.
+- **Webcam vẫn dùng để:** xoay theo đầu, và nắm / xòe tay trái để cầm / thả. Khi tay trái thật nắm, bàn tay trái ảo cũng nắm lại để người chơi thấy.
+- **Bật lại kiểu cũ:** biến môi trường `KHKT_TAY_WEBCAM=1` (`ArmRig.WebcamArms`).
