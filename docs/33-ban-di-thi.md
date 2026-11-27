@@ -82,3 +82,14 @@ Webcam chạy ngay trong ứng dụng (Unity Inference Engine), không gọi Pyt
 - **Cần:** micro (laptop có sẵn), quyền micro cho ứng dụng (Windows → Quyền riêng tư → Micro), mạng, và một khóa Gemini miễn phí lấy ở aistudio.google.com.
 - **Đã kiểm (20/20):** khuôn WAV, yêu cầu Gemini và Whisper tới máy chủ giả đúng khuôn, Claude báo lỗi rõ, mất mạng không lộ khóa, giữ A 1,5 / 2,5 giây chưa nghe, quá 3 giây thì nghe, thả A thì gửi, chạm A ngắn không kích hoạt, nút Mic bấm hai lần. Yêu cầu gọi tới máy chủ Google thật bằng khóa giả được Google trả "API key not valid", tức khuôn yêu cầu đúng.
 - **Chưa thử:** nói thật vào micro và nhận chữ thật (cần khóa Gemini thật của bạn).
+
+## 7. Sửa lỗi hai tay và lỗi lag khi nhấn E vào phòng giải phẫu (27/11/2026)
+
+- **Tay phải bị méo khi chụm tay trái:**
+  - Nguyên nhân: bàn tay trái theo dõi bằng webcam bị dùng làm "người lái" của tay phải ảo (`ArmRig.Drive`): điểm ngắm của tay phải đặt vào lòng bàn tay trái, và chụm tay trái được coi là giữ chuột. Ngoài ra nhãn trái/phải của mô hình nhảy qua lại khi chụm.
+  - Sửa: khi có tay cầm VERA, tay phải (kể cả tia trỏ, cầm, thả) chỉ do tay cầm điều khiển; webcam chỉ lo tay trái (cánh tay trái ảo và nắm / xòe để cầm / thả). Bên tay xác định theo vị trí trong khung hình đã lật như gương, không theo nhãn của mô hình.
+  - Kiểm thử trong Unity: chụm tay trái, rồi chụm / mở liên tục 8 lần, rồi tay trái rời khung: tay phải lệch 0,0 cm, 0,0°; không còn bị "lái". 5/5 đạt.
+- **Lag khi nhấn E ở cổng Phòng Sinh học 3D (mở phòng giải phẫu):**
+  - Đo trước khi sửa: lần nhấn E đầu tiên đứng hình khoảng 1,3 s. Gỡ nén `bp3d.bin.gz` và giải mã 115 nghìn đỉnh lớp xương mất khoảng 490 ms trên luồng chính, dựng sân khấu 142 ms, rồi một khung hình vẽ đầu tiên 664 ms. Lần thứ hai chỉ 25 ms.
+  - Sửa 1: gỡ nén và giải mã đỉnh chạy ở luồng nền ngay sau khi vào khu sinh học (4 giây sau khi cổng nạp, `Bp3dReader.CoPrewarm`); luồng chính chỉ dựng Mesh chia theo khung hình. Đo: nạp trước 0,3 s, khung hình tệ nhất 25 ms.
+  - Sửa 2: màn hình "Đang tải mô hình giải phẫu 3D" phủ kín màn hình, hiện trước khi dựng phòng, che khoảng khựng của khung vẽ đầu tiên (`GiaiPhauDangTai`). Sau khi tắt màn hình tải, khung hình tệ nhất 17 ms (trước là 664 ms).

@@ -248,11 +248,15 @@ namespace Khkt.Demo
             var at = ArmTracking.Instance;
             bool master = MediaPipeHandSource.Instance == null || MediaPipeHandSource.Instance.handTrackingEnabled;
             ArmTracking.Side driver = null;
+            // Có tay cầm VERA: tay PHẢI (và tia trỏ, giữ / thả) chỉ do tay cầm điều khiển. Webcam chỉ lo tay TRÁI (nắm / xòe
+            // để cầm / thả, hiện ở cánh tay trái ảo). Hai tay độc lập: trước đây bàn tay trái theo dõi được dùng làm
+            // "người lái" tay phải (đặt điểm ngắm vào lòng bàn tay trái, chụm tay trái = giữ chuột) nên tay phải bị méo.
+            bool veraOwnsRight = VeraPointer.Instance != null && VeraPointer.Instance.HasControl;
 
             for (int i = 0; i < 2; i++)
             {
                 var s = at == null ? null : i == 0 ? at.Right : at.Left;
-                bool show = master && s != null && (s.handSeen || s.armSeen);
+                bool show = master && s != null && (s.handSeen || s.armSeen) && !(veraOwnsRight && i == 0);
                 if (arms[i] == null) arms[i] = Build(i);
                 if (!arms[i].root.activeSelf) arms[i].root.SetActive(true);
                 if (show != arms[i].tracked) { arms[i].tracked = show; arms[i].ResetFilters(); }
@@ -260,7 +264,7 @@ namespace Khkt.Demo
                 if (show)
                 {
                     PoseTracked(arms[i], s, i, dt);
-                    if (s.handSeen && driver == null) { driver = s; drivingSide = i; }
+                    if (s.handSeen && driver == null && !veraOwnsRight) { driver = s; drivingSide = i; }
                 }
                 else
                 {

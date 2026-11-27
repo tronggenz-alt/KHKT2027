@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -185,23 +186,72 @@ namespace Khkt.Demo.Bio.GiaiPhau
             return null;
         }
 
+        // ---- Nạp trước ở luồng nền (27/11/2026): nhấn E vào phòng giải phẫu lần đầu từng đứng hình ~1,3 s, trong đó gỡ nén
+        // 3,4 MB và giải mã 115 nghìn đỉnh lớp xương khoảng 490 ms trên luồng chính. Nay gỡ nén và giải mã đỉnh chạy ở luồng nền
+        // khi người chơi vào lab sinh; luồng chính chỉ còn dựng đối tượng Mesh, chia ra từng khung hình. ----
+        static System.Threading.Tasks.Task<byte[]> gunzipTask;
+        static System.Threading.Tasks.Task decodeTask;
+        sealed class Predecoded { public List<Vector3> verts; public List<int> indices; }
+        static readonly Dictionary<string, Predecoded> predecoded = new Dictionary<string, Predecoded>();
+        static readonly string[] PrewarmLayers = { "xuong", "co", "da", "mach_do", "mach_xanh", "gan" };
+        public static bool Prewarmed { get; private set; }
+
+        static byte[] Gunzip(string path)
+        {
+            using (var fs = File.OpenRead(path))
+            using (var gz = new GZipStream(fs, CompressionMode.Decompress))
+            using (var ms = new MemoryStream(4 * 1024 * 1024))
+            {
+                gz.CopyTo(ms);
+                return ms.ToArray();
+            }
+        }
+
+        /// <summary>Nạp trước dữ liệu giải phẫu: gỡ nén và giải mã đỉnh ở luồng nền, dựng Mesh từng khung hình. Gọi một lần, an toàn gọi lại.</summary>
+        public static IEnumerator CoPrewarm(MucDoHoa muc)
+        {
+            if (Prewarmed || gunzipTask != null) yield break;
+            string path = Bp3dPath;
+            if (!File.Exists(path)) yield break;
+            gunzipTask = System.Threading.Tasks.Task.Run(() => Gunzip(path));
+            while (!gunzipTask.IsCompleted) yield return null;
+            if (gunzipTask.IsFaulted) { Debug.LogWarning("[GiaiPhau] Nạp trước: không gỡ nén được: " + gunzipTask.Exception?.GetBaseException().Message); yield break; }
+            yield return null;
+            if (!EnsureHeaderLoaded()) yield break;      // đọc tiêu đề JSON: rất nhanh, phải ở luồng chính
+            decodeTask = System.Threading.Tasks.Task.Run(() =>
+            {
+                foreach (var lop in PrewarmLayers)
+                {
+                    if (DecodeLayerArrays(lop, out var v, out var i))
+                        lock (predecoded) predecoded[lop] = new Predecoded { verts = v, indices = i };
+                }
+            });
+            while (!decodeTask.IsCompleted) yield return null;
+            foreach (var lop in PrewarmLayers)
+            {
+                LayLuoiLop(lop, muc);                    // dựng Mesh từ đỉnh đã giải mã sẵn
+                yield return null;
+            }
+            Prewarmed = true;
+        }
+
         static bool EnsureHeaderLoaded()
         {
             if (cachedHeader != null && cachedDecompressed != null) return true;
+            if (cachedDecompressed == null && gunzipTask != null)
+            {
+                try { cachedDecompressed = gunzipTask.Result; } catch { cachedDecompressed = null; gunzipTask = null; }
+            }
+            if (cachedDecompressed != null) goto daGoNen;
             if (!File.Exists(Bp3dPath))
             {
                 Debug.LogWarning($"[GiaiPhau] Không tìm thấy {Bp3dPath}");
                 return false;
             }
 
-            using (var fs = File.OpenRead(Bp3dPath))
-            using (var gz = new GZipStream(fs, CompressionMode.Decompress))
-            using (var ms = new MemoryStream(4 * 1024 * 1024))
-            {
-                gz.CopyTo(ms);
-                cachedDecompressed = ms.ToArray();
-            }
+            cachedDecompressed = Gunzip(Bp3dPath);
 
+        daGoNen:
             if (cachedDecompressed.Length < 12 ||
                 cachedDecompressed[0] != (byte)'B' || cachedDecompressed[1] != (byte)'P' ||
                 cachedDecompressed[2] != (byte)'3' || cachedDecompressed[3] != (byte)'D')
@@ -233,16 +283,44 @@ namespace Khkt.Demo.Bio.GiaiPhau
 
         static Mesh DecodeLayerFromBinary(string targetLop)
         {
-            if (!EnsureHeaderLoaded()) return null;
+            List<Vector3> verts;
+            List<int> indices;
+            Predecoded pre = null;
+            lock (predecoded)
+            {
+                if (predecoded.TryGetValue(targetLop, out pre)) predecoded.Remove(targetLop);
+            }
+            if (pre != null) { verts = pre.verts; indices = pre.indices; }
+            else
+            {
+                if (!EnsureHeaderLoaded()) return null;
+                DecodeLayerArrays(targetLop, out verts, out indices);
+            }
+            if (verts.Count == 0 || indices.Count == 0) return null;
 
+            var mesh = new Mesh
+            {
+                name = $"BP3D_Runtime_{targetLop}",
+                indexFormat = verts.Count > 65000 ? IndexFormat.UInt32 : IndexFormat.UInt16
+            };
+            mesh.SetVertices(verts);
+            mesh.SetIndices(indices, MeshTopology.Triangles, 0);
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
+            return mesh;
+        }
+
+        /// <summary>Giải mã đỉnh và chỉ số của một lớp (chỉ đọc dữ liệu đã nạp, không dùng API Unity nên chạy được ở luồng nền).</summary>
+        static bool DecodeLayerArrays(string targetLop, out List<Vector3> verts, out List<int> indices)
+        {
             float[] nho = cachedHeader.nho;
             float[] lon = cachedHeader.lon;
             float stepX = (lon[0] - nho[0]) / 65535f;
             float stepY = (lon[1] - nho[1]) / 65535f;
             float stepZ = (lon[2] - nho[2]) / 65535f;
 
-            var verts = new List<Vector3>(32768);
-            var indices = new List<int>(65536);
+            verts = new List<Vector3>(32768);
+            indices = new List<int>(65536);
 
             for (int gIdx = 0; gIdx < cachedHeader.nhom.Length; gIdx++)
             {
@@ -291,18 +369,7 @@ namespace Khkt.Demo.Bio.GiaiPhau
                 }
             }
 
-            if (verts.Count == 0 || indices.Count == 0) return null;
-
-            var mesh = new Mesh
-            {
-                name = $"BP3D_Runtime_{targetLop}",
-                indexFormat = verts.Count > 65000 ? IndexFormat.UInt32 : IndexFormat.UInt16
-            };
-            mesh.SetVertices(verts);
-            mesh.SetIndices(indices, MeshTopology.Triangles, 0);
-            mesh.RecalculateNormals();
-            mesh.RecalculateBounds();
-            return mesh;
+            return verts.Count > 0 && indices.Count > 0;
         }
 
         static Mesh SimplifyMeshSpatial(Mesh src, float cellSize)

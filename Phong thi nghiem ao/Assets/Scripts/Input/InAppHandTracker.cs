@@ -374,21 +374,25 @@ namespace Khkt.Input
             float ratio = (world[4] - world[8]).magnitude / Mathf.Max(1e-4f, (world[0] - world[9]).magnitude);
             t.pinch = t.pinch ? ratio < 0.40f : ratio < 0.28f;
 
-            // bên tay: chốt một lần. Đã có tay kia thì lấy bên còn lại; không thì theo mô hình (ảnh đã lật như
-            // gương nên "right" là tay phải người dùng), mô hình lưỡng lự thì theo nửa khung hình
-            if (t.side == null)
-            {
-                var other = t == tracks[0] ? tracks[1] : tracks[0];
-                if (other.active && other.side != null) t.side = other.side == "phai" ? "trai" : "phai";
-                else if (Mathf.Abs(handed - 0.5f) > 0.3f) t.side = handed >= 0.5f ? "phai" : "trai";
-                else t.side = img[0].x >= 0.5f ? "phai" : "trai";
-            }
+            // Bên tay theo VỊ TRÍ trong khung đã lật như gương (tay trái người dùng nằm bên trái), không theo nhãn của mô hình:
+            // nhãn đó đổi qua lại khi chụm / nắm tay (làm tay ảo bên kia bị kéo méo). Thấy 2 tay: tay có cổ tay bên trái hơn
+            // là tay trái. Thấy 1 tay: nửa trái = tay trái, nửa phải = tay phải; vùng giữa (0,38–0,62) giữ bên cũ.
             t.wrist = img[0];
+            t.side = SideOf(t, handed);
             t.gesture = t.vote.Add(HandGesture.Classify(img, world, ref t.pinchG));
             string ben = t.side;
             var at = ArmTracking.Instance;
             if (at != null) at.FeedHand(ben, world, new Vector2(1f - img[0].x, img[0].y), t.pinch);
             return true;
+        }
+
+        string SideOf(Track t, float handedFallback)
+        {
+            var other = t == tracks[0] ? tracks[1] : tracks[0];
+            if (other.active && other.seen && other.misses == 0) return t.wrist.x <= other.wrist.x ? "trai" : "phai";
+            float x = t.wrist.x;
+            if (t.side != null && x > 0.38f && x < 0.62f) return t.side;
+            return x < 0.5f ? "trai" : "phai";
         }
 
         /// <summary>
@@ -400,9 +404,7 @@ namespace Khkt.Input
         void UpdateLeftGrip()
         {
             Track left = null;
-            Track a = tracks[0].seen ? tracks[0] : null, b = tracks[1].seen ? tracks[1] : null;
-            if (a != null && b != null) left = a.wrist.x <= b.wrist.x ? a : b;
-            else if ((a ?? b) != null && (a ?? b).wrist.x < 0.5f) left = a ?? b;
+            foreach (var tr in tracks) if (tr.seen && tr.side == "trai") left = tr;
             LeftVisible = left != null;
             LeftGesture = left != null ? left.gesture : "";
             float now = Time.realtimeSinceStartup;

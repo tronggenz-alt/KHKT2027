@@ -181,7 +181,9 @@ namespace Khkt.Demo.Bio.Portal
             }
             else
             {
-                Khkt.Demo.Bio.GiaiPhau.GiaiPhauMoDunImpl.Mo(() => OnReturnFromBioLab());
+                // Màn hình "Đang tải" che khoảng khựng của lần dựng + vẽ đầu tiên (27/11/2026), thay vì lab đứng hình
+                StartCoroutine(Khkt.Demo.Bio.GiaiPhau.GiaiPhauDangTai.ChayDuoiManHinhTai(
+                    () => Khkt.Demo.Bio.GiaiPhau.GiaiPhauMoDunImpl.Mo(() => OnReturnFromBioLab())));
             }
         }
 

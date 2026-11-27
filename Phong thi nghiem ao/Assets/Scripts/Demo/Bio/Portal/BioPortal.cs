@@ -108,6 +108,14 @@ namespace Khkt.Demo.Bio.Portal
         {
             EnsureCardUI();
             StartCoroutine(CoPrewarmRoomWhenNear());
+            StartCoroutine(CoPrewarmAnatomyData());
+        }
+
+        /// <summary>Nạp trước dữ liệu giải phẫu ở luồng nền ít giây sau khi vào khu sinh học, để nhấn E không còn đứng hình.</summary>
+        IEnumerator CoPrewarmAnatomyData()
+        {
+            yield return new WaitForSeconds(4f);
+            yield return Khkt.Demo.Bio.GiaiPhau.Bp3dReader.CoPrewarm(Khkt.Rendering.HardwareProfile.Muc);
         }
 
         /// <summary>Khi người dùng tới gần cổng (12 m) thì nạp trước phòng mô hình người, để lúc bước qua cổng không khựng.</summary>
