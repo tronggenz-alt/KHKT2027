@@ -1,0 +1,72 @@
+[C1] Cơ chế Hóa: đưa lõi vào kho, làm bộ bài demo, nâng "tư duy vẽ"
+
+LUẬT CHUNG (giữ suốt việc này)
+- Dự án VERA Lab: kho git ~/Developer/Antigravity. Unity 6000.6.7f1 ở /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app. Đọc AGENTS.md trước tiên.
+- Nền tảng: Mac là chính, rồi Windows, iPad cuối cùng. Không dùng đường dẫn cứng hay API chỉ có trên Mac.
+- Chỉ sửa file trong PHẠM VI. Cần sửa file ngoài phạm vi thì ghi vào báo cáo, không tự sửa.
+- Git: chỉ `git add <từng file>`. Cấm `git add -A`, `git add .`, force push, reset --hard, stash. Không push, không merge vào main, không đưa lên web.
+- Commit nhỏ, tiêu đề bắt đầu bằng mã việc, ví dụ `[C1] ...`.
+- Kho GitHub đang CÔNG KHAI: không commit khóa, mật khẩu, .env, CSDL, dữ liệu cơ chế gốc, gói .verapack.
+- Không xóa Library/, Builds/, ~/AppBuild/VERALab_ui, cache Unity, /Applications/Unity, ~/Documents/Antigravity, ~/CHEMISTRY_xem. Không sửa nhánh chemistry, không đụng LaunchAgent vn.giaichuoihuuco.*.
+- RAM chỉ 8 GB: Claude không mở Unity có giao diện. Chạy Unity bằng ~/AppBuild/VERA_claude/dong_bo_va_chay.sh (script tự đợi khi đang có Unity khác chạy).
+- Giao diện, chú thích, tài liệu viết tiếng Việt. Tên file mới không dấu, không cách.
+- Kết thúc: viết báo cáo docs/ngay-18-11/bao-cao-<mã>.md, commit, trả lời dòng đầu `XONG <mã>` hoặc `CHƯA XONG <mã>: <lý do>`.
+- Quá giờ mà chưa xong: làm theo "Nếu trễ", để mã chạy được, commit, ghi phần còn lại.
+
+BỐI CẢNH
+- Bản thử cơ chế 3D ⇄ giấy nằm ở nhánh claude/chemistry-3d-rag-mechanism-c9669e, commit 494acdb7, thư mục nguyen_mau/co_che_3d (có HOP_DONG_APP.md, QUY_UOC_VE.md, hoc_ve/).
+- Lõi co_che.py (định dạng cơ chế và hàm kiểm tra RDKit), mo_hinh_3d.py, renderer.py, ve_co_che.py nằm trong backend/ của nhánh chemistry.
+- Hôm nay cơ chế sẽ được GẮN VÀO VERA. Tôi đồng ý việc này.
+- Làm trong worktree của phiên này. Chuyển sang nhánh n18/co-che (P0 đã tạo từ main). Bước này không cần Unity. Thời gian: khoảng 3 giờ.
+
+VIỆC
+1. Đưa mã vào nhánh mà KHÔNG mang theo dữ liệu gốc.
+   - KHÔNG merge commit 494acdb7. Commit đó chứa du_lieu/khung_mau_dap_an.json, là kho mẫu học từ đáp án HSG, cần giữ kín.
+   - Lấy mã (.py, .js, .html, .md) bằng `git checkout <nhánh> -- <đường dẫn>`.
+   - Lấy các module thật sự cần từ backend/ của nhánh chemistry đưa vào server/ai/co_che/. Đọc các dòng import để biết cần module nào.
+   - Dữ liệu kín (kho mẫu, báo cáo bộ đo, dữ liệu đáp án, bài demo) đặt ở ~/Developer/VERA_du_lieu_rieng/co_che/. Chạy `git init` ở ~/Developer/VERA_du_lieu_rieng để có lịch sử riêng tại máy. Mã đọc thư mục này qua biến môi trường VERA_DU_LIEU_RIENG, mặc định là thư mục trên.
+   - Thêm vào .gitignore các mẫu tên của dữ liệu kín.
+   - Kiểm tra bằng `git log --all --oneline -- '*khung_mau_dap_an*'` và `git branch -r --contains 494acdb7`. Báo tôi nếu dữ liệu này đã từng lên GitHub. Chỉ báo, không viết lại lịch sử.
+2. Bộ bài demo ("cơ sở bài"): 8 bài trong ~/Developer/VERA_du_lieu_rieng/co_che/bai_demo/<ma>/. Mỗi bài có:
+   - bai.json: đề, lớp, mục tiêu, điều kiện, các bước, giải thích ngắn từng bước, 3 câu hỏi kiểm tra có đáp án, lỗi hay gặp, nguồn;
+   - co_che.json: theo định dạng co_che.py.
+   Tám bài:
+   1) SN2: CH₃Br + OH⁻.
+   2) SN1: (CH₃)₃CBr + H₂O, có nhánh SN2 bị chặn (màn chắn cản trở không gian).
+   3) E2: 2-bromobutan + KOH/etanol, quy tắc Zaitsev, có nhánh sai do không anti-periplanar.
+   4) Cộng HBr vào propen: Markovnikov, cacbocation bậc 2.
+   5) Thế Cl vào metan theo gốc tự do: khơi mào, phát triển mạch, tắt mạch.
+   6) Nitro hóa benzen: thế electrophin, ion arenium cộng hưởng.
+   7) Este hóa Fischer: CH₃COOH + C₂H₅OH với H₂SO₄ đặc.
+   8) Bài HSG [1.1.1]propellane + DMAD → A4 (đã có).
+   Hóa học phải đúng:
+   - Kiểm tra từng bước bằng co_che.kiem_tra (bảo toàn nguyên tử, điện tích, hóa trị).
+   - Đối chiếu SGK Hóa 11–12 chương trình GDPT 2018.
+   - Bài nào không qua kiểm tra thì sửa cho qua, không được bỏ qua.
+3. Sinh .3d.json và .giay.json cho cả 8 bài bằng dung_kich_ban_3d.py và hoc_ve/ve_theo_mau.py. Viết một lệnh dựng tất cả, ví dụ `python -m server.ai.co_che.dung_bai_demo`. Kết quả ra thư mục build bị git bỏ qua. Bước C2 sẽ đóng gói mã hóa.
+4. Tư duy vẽ (hoc_ve/tu_duy_ve.py). Mục tiêu: vẽ được khung chưa có trong kho mẫu mà vẫn dễ nhìn.
+   - Đo trước: chạy bộ đo bo_do.py trên 8 bài và 20 chất ngẫu nhiên không có trong kho mẫu (lấy từ data/chem). Ghi điểm.
+   - Sửa các nguyên tắc vẽ:
+     + mạch zigzag 120°;
+     + vòng 6 cạnh đặt theo hướng chuẩn;
+     + dò va chạm giữa nhãn và nét, đẩy lệch khi chồng;
+     + hướng nhãn MeO₂C hay CO₂Me tùy phía;
+     + nét đậm và nét gạch cho lập thể;
+     + mũi tên cong không cắt qua chữ;
+     + khung lồng vẽ kiểu "lều".
+   - Đo sau và lập bảng trước/sau. Điểm của 8 bài demo không được giảm.
+   - Xem nhanh bằng launch.json "co-che-3d" (so_sanh_ve.html). Chụp ảnh 8 sơ đồ giấy vào docs/ngay-18-11/anh/c1/.
+5. Unit test trong tests/test_co_che_demo.py:
+   - một ví dụ SN2 nhỏ nằm trong kho để test luôn chạy được;
+   - nếu thư mục dữ liệu kín tồn tại thì chạy thêm cả 8 bài: qua kiểm tra RDKit, .3d.json đúng HOP_DONG_APP.md, .giay.json không có nhãn chồng nhau;
+   - không có thư mục đó thì bỏ qua (skip).
+
+XONG KHI
+- 8 bài sinh đủ file.
+- `python -m unittest discover -s tests` xanh (5 tệp test máy chủ hỏng sẵn từ mốc gốc do FastAPI 0.162 — xem moc-goc.md — không bắt buộc sửa; chỉ cần không có test hỏng MỚI).
+- Có bảng điểm tư duy vẽ trước/sau và ảnh 8 sơ đồ.
+- Đã viết báo cáo bao-cao-C1.md và commit.
+
+NẾU TRỄ: còn 6 bài (bỏ bài 6 và 7). Tư duy vẽ chỉ sửa lỗi chồng nhãn.
+
+PHẠM VI: server/ai/co_che/*, nguyen_mau/co_che_3d/*, tests/test_co_che*.py, .gitignore, ~/Developer/VERA_du_lieu_rieng/*. Không đụng thư mục Unity ở bước này.

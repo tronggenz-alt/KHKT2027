@@ -1,0 +1,34 @@
+[C4] Đồ họa giao diện ngoài lab (màn hình chính, bảng điều khiển, cài đặt, biểu tượng app) + độ sắc nét của giao diện
+
+Làm tiếp C3, cùng worktree, nhánh n18/co-che. Luật chung giữ như C1. Thời gian: khoảng 2,5 giờ.
+
+TRƯỚC KHI LÀM: merge bản mới nhất của n18/antigravity vào n18/co-che (chỉ lấy những gì đã commit, vì Antigravity đang làm G4), rồi biên dịch lại.
+
+ĐỌC
+Menu/MainMenu.cs, Menu/Dashboard/* (DashboardShell, PageOverview, MenuKit), Demo/UiTheme.cs, GlassKit.cs, ModernUI.cs, UiMotion.cs, NutHieuUng.cs, IntroScreen.cs.
+BAO_CAO_WAVE6_MAC.md (mục 7.7 và 7.8), docs/giao-dien-hd/, docs/do-hoa-hd/art-bible.md.
+trang_gioi_thieu/: lấy màu và logo của trang giới thiệu để đồng bộ thương hiệu.
+Giao diện ở đây dựng bằng mã. Không sửa tay YAML của cảnh trừ khi bắt buộc.
+
+VIỆC
+ 1. Chụp hiện trạng mọi màn ngoài lab, ở 1440×900 và 2880×1800 (Retina), với cả 3 nền. Lưu vào docs/ngay-18-11/anh/c4/truoc_*. Chụp theo cách KhktWave6Runner đang chụp.
+ 2. Độ sắc nét
+    - Chỉnh CanvasScaler (độ phân giải tham chiếu, mức match).
+    - Chữ TMP: atlas phải đủ ký tự tiếng Việt có dấu (thử "Ặ ỷ ữ ợ ự ẫ"), cỡ atlas và padding đủ sắc trên Retina, phóng to không mờ.
+    - Ảnh giao diện: tắt mipmap, không nén mất nét, làm ở kích thước 2x.
+    - Viền 1 px phải thẳng hàng điểm ảnh.
+ 3. Đồ họa
+    - Màn chính: nền là ảnh dựng thật của phòng lab (chụp bằng camera trong cảnh, làm mờ nhẹ, phủ một lớp màu thương hiệu) thay cho nền phẳng. Logo VERA Lab rõ nét. Nút "Vào phòng thí nghiệm" nổi bật.
+    - Bảng điều khiển (DashboardShell): thẻ mô-đun có ảnh thu nhỏ cho Phòng Hóa, Phòng Sinh, Cơ chế 3D, Thực vật 3D, Giải phẫu.
+      Mỗi thẻ gọi Mo() bằng cách tìm lớp theo tên trong mọi assembly đã nạp: Khkt.CoChe.CoCheMoDun, Khkt.Bio.ThucVat.ThucVatMoDun, Khkt.Bio.GiaiPhau.GiaiPhauMoDun. Lớp nào chưa có thì thẻ ghi "Sắp có". Như vậy biên dịch không lỗi dù nhánh bên kia chưa gộp.
+    - Màn chờ khi nạp cảnh: thanh tiến trình thật (AsyncOperation.progress) kèm mẹo an toàn phòng thí nghiệm.
+    - Biểu tượng app cho Mac (từ ảnh 1024 ra đủ các cỡ) và Windows. Tên cửa sổ là "VERA Lab".
+    - Giữ đúng 3 nền của UiTheme, nút cao tối thiểu 44 pt, hoạt cảnh nhẹ theo UiMotion.
+ 4. Chụp lại ảnh "sau" cùng khung với ảnh "trước", đặt cạnh nhau để so.
+ 5. Kiểm thử: KhktWave6Verify phải đạt (nhất là mục 7.7 và 7.8). Thêm nhóm giao diện vào KhktCoCheVerify hoặc tạo file KhktUiVerify.cs.
+
+XONG KHI: mọi màn ngoài lab sắc nét trên Retina; chữ tiếng Việt không vỡ dấu; có các thẻ mô-đun và biểu tượng app; kiểm thử đạt; đã viết báo cáo bao-cao-C4.md và commit.
+
+NẾU TRỄ: bỏ màn chờ và biểu tượng Windows.
+
+PHẠM VI: Menu/*, Menu/Dashboard/*, Demo/UiTheme.cs, GlassKit.cs, ModernUI.cs, UiMotion.cs, NutHieuUng.cs, IntroScreen.cs (trừ tab Hiển thị của G1), Lab/Logo/*, ảnh giao diện mới, ProjectSettings (chỉ biểu tượng và tên).

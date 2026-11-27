@@ -15,7 +15,7 @@ namespace Khkt.Demo
     ///   • 100% nút bấm đạt diện tích chạm chuẩn Apple HIG (>= 44x44 pt, tương đương >= 65 canvas units trên iPad Air M3).
     ///   • Tối ưu vị trí ngón cái hai bên màn hình; vùng giữa và nửa phải màn hình thoáng để vuốt xoay góc nhìn.
     ///   • Nhãn động theo thiết bị: Ẩn phím tắt PC (Q, F, Space, Enter, C, H, G) khi đang dùng cảm ứng.
-    ///   • Tích hợp NutHieuUng cho mọi nút với phản hồi hình ảnh (co 0.95x) và âm thanh click.
+    ///   • Tích hợp NutHieuUng cho mọi nút với phản hồi hình ảnh (kính lỏng: phồng, sáng từ điểm chạm, nảy khi nhả) và âm thanh click.
     ///   • Xử lý an toàn safeArea chống lỗi chia cho 0 khi chạy batchmode.
     /// </summary>
     public class TouchHud : MonoBehaviour

@@ -239,6 +239,19 @@ namespace Khkt.Menu.Dashboard
             var edge = MenuKit.Stretch(sidebar, "Viền", new Vector2(1, 0), Vector2.one, new Vector2(-1, 0), Vector2.zero);
             edge.gameObject.AddComponent<Image>().color = MenuKit.Hair;
             edge.GetComponent<Image>().raycastTarget = false;
+            if (MenuKit.Kinh)
+            {
+                // Kính lỏng: thanh bên là tấm kính nổi, cách mép 12 điểm, bo góc lớn (sidebar iPadOS 26 / macOS Tahoe)
+                bg.color = new Color(1, 1, 1, 0.001f);
+                edge.gameObject.SetActive(false);
+                sidebar.gameObject.AddComponent<KinhLongBeMat>();   // nút trong thanh bên không chồng kính
+                var kinh = MenuKit.Stretch(sidebar, "Kính thanh bên", Vector2.zero, Vector2.one, new Vector2(12, 12), new Vector2(-4, -12));
+                kinh.SetAsFirstSibling();
+                MenuKit.Shadow(kinh, "Bóng", 30f, MenuKit.RadiusLarge + 6f, -10f, UiTheme.IsLight ? 0.10f : 0.40f).transform.SetAsFirstSibling();
+                var ki = MenuKit.Paint(MenuKit.Full(kinh, "Mặt kính"), Color.white, MenuKit.RadiusLarge + 6f);
+                MenuKit.LamKinh(ki, MenuKit.RadiusLarge + 6f);
+                MenuKit.Ring(kinh, "Viền kính", UiTheme.IsLight ? new Color(1, 1, 1, 0.7f) : new Color(1, 1, 1, 0.12f), MenuKit.RadiusLarge + 6f);
+            }
 
             if (logo != null)
             {

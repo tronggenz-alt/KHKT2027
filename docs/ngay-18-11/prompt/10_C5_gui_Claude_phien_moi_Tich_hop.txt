@@ -1,0 +1,38 @@
+[C5] Gộp hai nhánh, kiểm thử toàn bộ, xuất app Mac (và Windows nếu được), tổng kết ngày 18/11
+
+LUẬT CHUNG
+- Dự án VERA Lab: kho git ~/Developer/Antigravity. Unity 6000.6.7f1 ở /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app. Đọc AGENTS.md trước tiên. Ưu tiên Mac, rồi Windows, iPad cuối cùng.
+- Git: chỉ `git add <từng file>`. Cấm `git add -A`, force push, reset --hard, stash. KHÔNG merge vào main, KHÔNG push, KHÔNG đưa lên web. Chờ tôi quyết.
+- Kho GitHub đang CÔNG KHAI: không để lọt khóa, .env, CSDL, dữ liệu cơ chế gốc, gói .verapack.
+- Không xóa Library/, Builds/, ~/AppBuild/VERALab_ui, cache Unity, /Applications/Unity.
+- Dựng cảnh hay chụp ảnh thì không dùng -nographics.
+
+ĐIỀU KIỆN: Antigravity đã báo XONG G4 (hoặc đã dừng và commit); Claude đã báo XONG C4; tôi đã tắt Unity có giao diện. Chạy `pgrep -fl Unity`: nếu còn Unity thì dừng và nhắc tôi.
+
+VIỆC
+ 1. Gộp nhánh ở ~/Developer/Antigravity
+    - Kiểm tra thư mục sạch. Tạo nhánh n18/tich-hop từ main.
+    - Merge --no-ff n18/antigravity, rồi n18/co-che.
+    - Gặp xung đột: giữ ý của cả hai bên và theo bảng PHẠM VI (file của ai thì bên đó quyết). Xung đột khó thì dừng và hỏi tôi.
+ 2. Kiểm tra
+    - `python -m unittest discover -s tests` (dùng .venv). So với mốc gốc: không có test hỏng MỚI; 5 tệp test máy chủ hỏng sẵn do FastAPI 0.162 thì ghi lại, không chặn.
+    - Unity biên dịch 0 lỗi.
+    - KhktWave6Verify đạt 67/67, so với mốc trong docs/ngay-18-11/moc-goc.md.
+    - Toàn bộ KhktN18Verify (G2–G4) và KhktCoCheVerify đạt.
+    - Quét Windows: không có đường dẫn cứng /Users, /tmp, ~; không có API chỉ có trên Mac nằm ngoài #if.
+    - Quét lộ dữ liệu: chạy tests/test_khong_lo_du_lieu.py; `git diff main --stat` không có .key, .env, .db, .verapack hay khung_mau.
+ 3. Cảnh: nếu G4 chưa dựng lại cảnh sau G2–G4 thì dựng lại ở đây (cần GPU, không -nographics).
+ 4. Xuất app Mac
+    - Dùng Khkt.EditorTools.MacBuild.Build, ra ~/AppBuild/VERA_mac/VERA Lab.app (ngoài kho git).
+    - Mở app thật bằng `open`. Chạy DoKhungHinh (tham số -vera-do) ở mức Tự động. Ghi p50, p95 và số khung giật, so với số TRƯỚC của G1.
+    - Kiểm tra app có khóa giải gói (mở được bài cơ chế), và máy chủ cơ chế cục bộ chạy được theo cách C2 đã ghi (cổng 8010 hoặc cổng đã chọn).
+ 5. Windows: nếu có module Windows thì chạy MacBuild.BuildWindows, ra ~/AppBuild/VERA_win/ để chép sang máy Windows thử. Không có module thì ghi danh sách việc cần thử trên máy Windows.
+ 6. iPad: KHÔNG làm hôm nay (theo thứ tự ưu tiên). Chỉ ghi những chỗ có thể vướng: WebView, cảm ứng cho các mô-đun mới.
+ 7. Duyệt mã nhanh toàn bộ thay đổi trong ngày (`git diff main...n18/tich-hop`): tìm lỗi rõ ràng, rò bộ nhớ, null, cấp phát mỗi khung, đường dẫn. Lỗi nhỏ thì sửa, lỗi lớn thì ghi lại.
+ 8. Tổng kết
+    - Viết docs/ngay-18-11/TONG_KET.md: bảng 9 việc trong ghi chú (N1–N9) với trạng thái Xong / Một phần / Chưa, số đo, ảnh, việc mai làm tiếp.
+    - Cập nhật TIEN_DO.md (mục Đã xong và Đang dở).
+    - Commit trên n18/tich-hop.
+ 9. Cho máy ngủ: tắt máy chủ cơ chế và ollama nếu C5 đã bật (`ollama stop` mô hình đang chạy), rồi tạo tệp ~/AppBuild/XONG_NGAY_18-11. Script canh_gac_ngu.sh sẽ cho máy ngủ khi tôi không dùng máy 15 phút. Nếu script đó không chạy (kiểm bằng `pgrep -f canh_gac_ngu.sh`) thì tự hẹn: `nohup sh -c 'sleep 300; pmset sleepnow' >/dev/null 2>&1 &`.
+
+TRẢ LỜI: dòng đầu `XONG C5`. Sau đó là bảng N1–N9, đường dẫn app, các số đo chính, và 5 thao tác tôi nên tự bấm thử.

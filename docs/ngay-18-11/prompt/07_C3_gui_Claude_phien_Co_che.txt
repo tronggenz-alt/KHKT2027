@@ -1,0 +1,56 @@
+[C3] Trình xem cơ chế 3D ⇄ giấy và bảng giải chuỗi trong Unity (làm cho Mac trước)
+
+Làm tiếp C2, cùng worktree, nhánh n18/co-che. Luật chung giữ như C1. Thời gian: khoảng 3 giờ.
+
+ĐIỀU KIỆN TRƯỚC KHI LÀM
+ - Antigravity đã commit `[G1] HardwareProfile` (mốc M1). Merge n18/antigravity vào n18/co-che để có HardwareProfile.cs. Nếu nhánh kia đang dở dang thì chỉ cherry-pick commit HardwareProfile.
+ - KHÔNG mở Unity có giao diện. Biên dịch và chạy thử bằng ~/AppBuild/VERA_claude/dong_bo_va_chay.sh. Script tự đợi khi có Unity -batchmode khác đang chạy.
+
+ĐỌC
+nguyen_mau/co_che_3d/HOP_DONG_APP.md, QUY_UOC_VE.md, ve_giay.js, hsg_propellane.html. Bản thử là chuẩn cho giao diện và cách phát.
+Thêm: Rendering/HardwareProfile.cs, và Demo/GlassKit.cs, UiTheme.cs, ModernUI.cs, ToolPreview.cs (theo phong cách giao diện hiện có).
+
+VIỆC (namespace Khkt.CoChe, thư mục Phong thi nghiem ao/Assets/Scripts/CoChe/)
+ 1. GoiCoChe.cs
+    - Đọc .verapack từ StreamingAssets/CoChe, hoặc tải từ máy chủ cơ chế.
+    - Kiểm HMAC, giải AES-CBC, giải nén. Tất cả chỉ diễn ra trong bộ nhớ, không ghi bản rõ ra đĩa.
+    - Test giải được đúng gói mẫu do Python tạo.
+ 2. Lớp dữ liệu theo đúng hợp đồng .3d.json và .giay.json. Đổi dấu trục z để sang hệ tọa độ trái của Unity.
+ 3. TrinhPhat3D.cs
+    - Nguyên tử là quả cầu: màu CPK, bán kính theo nguyên tố, độ mịn lấy HardwareProfile.SoManhCau, vẽ bằng GPU instancing.
+    - Liên kết là hình trụ, thể hiện bậc 1, 2, 3.
+    - Nội suy giữa các trạng thái như bản thử: electron đi trước, nguyên tử bắt đầu dịch từ khoảng 35% thời gian của bước.
+    - Mỗi mũi tên là hạt electron bay theo đường cong. Tổng số hạt không quá SoHatToiDa.
+    - Liên kết mới thì mọc dần, liên kết mất thì mờ dần.
+    - Màn chắn chỉ hiện khi nhánh sai đang bị cản, bình thường ẩn hẳn.
+    - Có nút "Ẩn H".
+    - Điều khiển: kéo chuột xoay 360°, cuộn để phóng to, phím ← → chuyển bước, Space để phát/dừng.
+ 4. SoDoGiay.cs
+    - Vẽ .giay.json bằng một UI Graphic tự dựng lưới.
+    - Thể hiện được: nét đơn, đôi, ba; nét phía sau có khe che; mũi tên cong nửa đầu (Bézier); mũi tên phản ứng có chữ trên và dưới; chấm gốc tự do; nhãn A1…
+    - Chữ dùng TextMeshPro, chỉ số dưới Unicode (CO₂Me) hiện đúng.
+    - Phải giống ve_giay.js: chụp hai bản cạnh nhau để so.
+ 5. Chuyển 3D ⇄ Giấy
+    - Chỉ có hoạt cảnh lúc chuyển: 3D trải phẳng ra rồi tờ giấy hiện lên, 0,8 s, mượt.
+    - Ô "Giải thích" mặc định đóng, bấm mới mở.
+    - Nút "Hỏi AI" gọi /co-che/giai-thich. Không kết nối được máy chủ thì nút mờ đi và ghi rõ lý do.
+ 6. Bảng giải chuỗi
+    - Có ô nhập chuỗi và 3 chuỗi mẫu.
+    - Gọi /co-che/giai-chuoi, hiện kết quả từng bước dạng thẻ.
+    - Bước nào có cơ chế thì bấm vào là mở trình phát.
+ 7. Khkt.CoChe.CoCheMoDun với Mo(), Dong(), DangMo (theo hợp đồng chung)
+    - Mở ra là lớp phủ toàn màn hình, có danh sách 8 bài.
+    - Phím tắt trong lab: chọn phím chưa ai dùng. Kiểm tra KeyboardMouseControllerSource, HandController, IntroScreen; hiện đã dùng F7–F12, Esc, B, T, H…
+    - Gắn phím tắt bằng [RuntimeInitializeOnLoadMethod]. Không sửa HandController, không sửa cảnh.
+ 8. Cài đặt máy chủ cơ chế: ô nhập URL, mặc định theo HOP_DONG_APP.md (127.0.0.1:8010 hoặc cổng C2 đã chọn), lưu bằng PlayerPrefs.
+ 9. Kiểm thử: Editor/KhktCoCheVerify.cs có hàm Run.
+    - Nạp 8 gói, phát hết các bước ở hai mức Thấp và Cao, chuyển qua lại hai chế độ.
+    - Mở bảng giải chuỗi với máy chủ giả.
+    - Chụp ảnh từng bài ở cả hai chế độ vào Path.GetTempPath()/vera_coche_shots, rồi chép sang docs/ngay-18-11/anh/c3/.
+    - 0 lỗi biên dịch, 0 ngoại lệ. KhktWave6Verify vẫn đạt 67/67.
+
+XONG KHI: tất cả mục trên đạt; khi phát bài propellane ở mức Cao đạt ≥ 60 FPS trên máy này; đã viết báo cáo bao-cao-C3.md và commit.
+
+NẾU TRỄ: hoạt cảnh chuyển chế độ thay bằng mờ chéo; bảng giải chuỗi chỉ hiện chữ.
+
+PHẠM VI: Scripts/CoChe/*, Editor/KhktCoCheVerify.cs, StreamingAssets/CoChe/ và Resources/CoChe/ (git bỏ qua). Không sửa file của Antigravity.

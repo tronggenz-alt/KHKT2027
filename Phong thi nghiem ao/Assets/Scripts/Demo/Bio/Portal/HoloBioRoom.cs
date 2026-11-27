@@ -723,7 +723,7 @@ namespace Khkt.Demo.Bio.Portal
             layerBarPanel.anchoredPosition = new Vector2(0f, -60f);
 
             var img = barGo.GetComponent<Image>();
-            img.sprite = GlassKit.Rounded;
+            img.sprite = GlassKit.Solid;
             img.type = Image.Type.Sliced;
             img.color = new Color(10f / 255f, 18f / 255f, 34f / 255f, 0.85f);
 
@@ -752,7 +752,7 @@ namespace Khkt.Demo.Bio.Portal
             toolbarPanel.anchoredPosition = new Vector2(-30f, 60f);
 
             var img = tbGo.GetComponent<Image>();
-            img.sprite = GlassKit.Rounded;
+            img.sprite = GlassKit.Solid;
             img.type = Image.Type.Sliced;
             img.color = new Color(10f / 255f, 18f / 255f, 34f / 255f, 0.82f);
 
@@ -783,7 +783,7 @@ namespace Khkt.Demo.Bio.Portal
             organListDrawer.anchoredPosition = new Vector2(30f, 0f);
 
             var img = dGo.GetComponent<Image>();
-            img.sprite = GlassKit.Rounded;
+            img.sprite = GlassKit.Solid;
             img.type = Image.Type.Sliced;
             img.color = new Color(10f / 255f, 18f / 255f, 34f / 255f, 0.88f);
 

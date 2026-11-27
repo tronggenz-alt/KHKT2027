@@ -286,13 +286,15 @@ namespace Khkt.Menu.Dashboard
             var dst = (RectTransform)buttons[i].transform;
             if (glider != null)
             {
-                if (first || !isActiveAndEnabled) glider.anchoredPosition = dst.anchoredPosition;
+                var vc = glider.GetComponent<KinhLongVetChon>();
+                if (vc != null) vc.Toi(dst.anchoredPosition, dst.sizeDelta, first || !isActiveAndEnabled);
+                else if (first || !isActiveAndEnabled) glider.anchoredPosition = dst.anchoredPosition;
                 else
                 {
                     MenuAnim.Slide(glider, glider.anchoredPosition, dst.anchoredPosition, 0.28f, 0f, MenuAnim.Ease.OutQuint);
                     MenuAnim.PulseClick(glider, 0.96f, 1.015f, 0.22f);
                 }
-                glider.sizeDelta = dst.sizeDelta;
+                if (vc == null) glider.sizeDelta = dst.sizeDelta;
             }
             if (notify) onSelect?.Invoke(i);
         }
@@ -459,6 +461,23 @@ namespace Khkt.Menu.Dashboard
         /// <summary>Bóng cũ một lớp (giữ tên cho mã cũ).</summary>
         public static Sprite SoftShadow => ShadowSprite(26f, 16f);
 
+        // ------------------------------------------------------------------ kính lỏng (27/11/2026)
+        /// <summary>Đang dùng giao diện Kính lỏng (và người dùng không bật Nền đặc chống lóa).</summary>
+        public static bool Kinh => GlassKit.LiquidGlass && !GlassKit.ReducedTransparency && GlassKit.KinhLongMat() != null;
+
+        /// <summary>Biến một Image thành mặt kính lỏng bo góc radius (≤ 1 là viên nang theo chiều cao h).</summary>
+        public static Image LamKinh(Image img, float radius, float h = 0f, bool nhe = false)
+        {
+            if (img == null) return null;
+            float r = radius <= 1f ? Mathf.Max(h * 0.5f, 6f) : radius;
+            img.sprite = GlassKit.Rounded;
+            img.type = Image.Type.Sliced;
+            img.pixelsPerUnitMultiplier = 30f / Mathf.Max(r, 3f);
+            img.material = GlassKit.KinhLongMat(nhe);
+            if (img.GetComponent<KinhLongBeMat>() == null) img.gameObject.AddComponent<KinhLongBeMat>();
+            return img;
+        }
+
         // ------------------------------------------------------------------ dựng khối
         public static RectTransform Stretch(Transform parent, string name, Vector2 min, Vector2 max, Vector2 offMin, Vector2 offMax)
         {
@@ -599,6 +618,12 @@ namespace Khkt.Menu.Dashboard
             raw.texture = BackdropTexture();
             raw.color = Color.white;
             raw.raycastTarget = true;
+            if (Kinh)
+            {
+                // hình nền nhiều màu cho kính khúc xạ, dời nhẹ theo chuột (KinhLongNen)
+                KinhLongNen.Attach(raw);
+                return raw;
+            }
             if (dots)
             {
                 var drt = Full(rt, "Vân chấm");
@@ -713,6 +738,7 @@ namespace Khkt.Menu.Dashboard
 
         static void Dress(RectTransform rt, bool hover, float radius)
         {
+            if (Kinh) { DressKinh(rt, hover, radius); return; }
             bool light = UiTheme.IsLight;
             float dropRest = light ? 0.07f : 0.42f, dropHover = light ? 0.15f : 0.62f;
             float nearRest = light ? 0.05f : 0.30f, nearHover = light ? 0.07f : 0.36f;
@@ -736,6 +762,36 @@ namespace Khkt.Menu.Dashboard
             hv.liftTargets = sheen != null
                 ? new[] { body, ring.rectTransform, sheen.rectTransform }
                 : new[] { body, ring.rectTransform };
+        }
+
+        /// <summary>
+        /// Thẻ kính lỏng: bóng mềm rất nhẹ (kính nổi trên nền), thân là kính khúc xạ hình nền, viền sáng mảnh.
+        /// Cấu trúc giữ như thẻ cũ (Bóng, Bóng sát, Thân, Viền) để mọi màn đang dùng Body()/CardRing() không đổi.
+        /// </summary>
+        static void DressKinh(RectTransform rt, bool hover, float radius)
+        {
+            bool light = UiTheme.IsLight;
+            float dropRest = light ? 0.10f : 0.40f, dropHover = light ? 0.18f : 0.60f;
+            float nearRest = light ? 0.04f : 0.22f;
+            var drop = Shadow(rt, "Bóng", 34f, radius, -16f, dropRest);
+            var near = Shadow(rt, "Bóng sát", 3f, radius, -1f, nearRest);
+            var body = Stretch(rt, "Thân", Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            var bi = Paint(body, Color.white, radius);
+            LamKinh(bi, radius);
+            bi.raycastTarget = hover;
+            Color ringC = light ? new Color(1f, 1f, 1f, 0.30f) : new Color(1f, 1f, 1f, 0.08f);
+            var ring = Ring(rt, "Viền", ringC, radius);
+            var hv = rt.gameObject.AddComponent<MenuHover>();
+            hv.shadow = drop;
+            hv.shadowRest = dropRest;
+            hv.shadowHover = hover ? dropHover : dropRest;
+            hv.shadowNear = near;
+            hv.nearRest = nearRest;
+            hv.nearHover = nearRest;
+            hv.ring = ring;
+            hv.ringRest = ringC;
+            hv.ringHover = hover ? (light ? Color.white : new Color(1f, 1f, 1f, 0.26f)) : ringC;
+            hv.liftTargets = new[] { body, ring.rectTransform };
         }
 
         /// <summary>Nơi đặt nội dung bên trong thẻ do Card tạo.</summary>
@@ -813,11 +869,17 @@ namespace Khkt.Menu.Dashboard
 
             var face = Paint(Full(rt, "Mặt"), style == 0 ? Accent : style == 1 ? Paper : style == 3 ? Color.white : new Color(1, 1, 1, 0.001f), radius);
             face.raycastTarget = true;
-            if (style == 0) Gradient(face, new Color(1.08f, 1.08f, 1.08f, 1f), new Color(0.93f, 0.93f, 0.93f, 1f));
+            // Kính lỏng: nút nổi (không nằm trên mặt kính khác) là kính — nút chính là kính nhuộm màu nhấn (glassProminent),
+            // nút phụ là kính trong (glass). Nút nằm trong thẻ kính thì không chồng kính: nút phụ dùng nền mờ trong suốt.
+            bool kinh = Kinh && style != 2 && style != 3;
+            bool trongKinh = kinh && KinhLongBeMat.TrongKinh(parent);
+            if (kinh && !trongKinh) LamKinh(face, radius, size.y, style == 1);
+            else if (kinh && style == 1) face.color = WithAlpha(Paper, light ? 0.55f : 0.35f);
+            if (style == 0 && !(kinh && !trongKinh)) Gradient(face, new Color(1.08f, 1.08f, 1.08f, 1f), new Color(0.93f, 0.93f, 0.93f, 1f));
 
             Image ring = null;
-            if (style == 1) ring = Ring(rt, "Viền", HairStrong, radius);
-            else if (style == 0) Sheen(rt, radius, 0.32f);
+            if (style == 1) ring = Ring(rt, "Viền", kinh ? (light ? new Color(1, 1, 1, 0.75f) : new Color(1, 1, 1, 0.14f)) : HairStrong, radius);
+            else if (style == 0 && !kinh) Sheen(rt, radius, 0.32f);
 
             var glow = Paint(Full(rt, "Sáng"), new Color(1, 1, 1, 0f), radius);
             Color washRest, washHover;
@@ -863,7 +925,15 @@ namespace Khkt.Menu.Dashboard
                 hover.ringRest = HairStrong;
                 hover.ringHover = light ? new Color(0, 0, 0, 0.30f) : new Color(1, 1, 1, 0.30f);
             }
-            if (style != 2)
+            if (kinh)
+            {
+                // phản hồi chạm Liquid Glass (phồng, sáng từ điểm chạm, co giãn, nảy) thay cho co/nhấc của MenuHover
+                hover.hoverScale = 1f;
+                hover.pressScale = 1f;
+                if (ring != null) hover.ringRest = ring.color;
+                NutHieuUng.Attach(rt.gameObject);
+            }
+            else if (style != 2)
             {
                 hover.lift = 1f;
                 var targets = new List<RectTransform>();
@@ -936,8 +1006,13 @@ namespace Khkt.Menu.Dashboard
             }
             var glider = GlassKit.Rect(root, "Vệt chọn", new Vector2(0, 1), new Vector2(0, 1), Vector2.zero, itemSize);
             Shadow(glider, "Bóng", 4f, RadiusButton, -1f, UiTheme.IsLight ? 0.08f : 0.35f);
-            Paint(Full(glider, "Mặt"), vertical ? AccentSoft : Paper, RadiusButton);
+            var gm = Paint(Full(glider, "Mặt"), vertical ? AccentSoft : Paper, RadiusButton);
             Ring(glider, "Viền", vertical ? WithAlpha(Accent, 0.28f) : HairStrong, RadiusButton);
+            if (Kinh)
+            {
+                if (!vertical) gm.color = WithAlpha(Paper, UiTheme.IsLight ? 0.82f : 0.55f);
+                KinhLongVetChon.Attach(glider);
+            }
 
             var tabs = root.gameObject.AddComponent<MenuTabs>();
             tabs.glider = glider;
@@ -991,6 +1066,7 @@ namespace Khkt.Menu.Dashboard
             sw.trackRing = trackRing;
             sw.knob = knob;
             sw.knobFace = knobFace;
+            if (Kinh) sw.kinh = true;
             var hv = track.gameObject.AddComponent<MenuHover>();
             hv.hoverScale = 1.03f;
             hv.pressScale = 0.92f;
@@ -1068,18 +1144,55 @@ namespace Khkt.Menu.Dashboard
     }
 
     /// <summary>Hình ảnh của công tắc: theo Toggle.isOn, núm trượt và rãnh đổi màu bằng lò xo (không cấp phát).</summary>
-    public class MenuSwitch : MonoBehaviour
+    public class MenuSwitch : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerExitHandler
     {
         public Toggle toggle;
         public Image track, trackRing, knobFace;
         public RectTransform knob;
         public float travel = 11f;              // núm chạy ±travel quanh giữa rãnh
+        /// <summary>Kính lỏng: núm hóa viên kính trong khi chạm / đang gạt (như công tắc iOS 26).</summary>
+        public bool kinh;
         float k = -1f, v;
+        bool down;
+        LoXo g = new LoXo(0f);
+        Image glass;
+        Vector2 knobSize;
+
+        public void OnPointerDown(PointerEventData e) { if (kinh && (toggle == null || toggle.IsInteractable())) down = true; }
+        public void OnPointerUp(PointerEventData e) => down = false;
+        public void OnPointerExit(PointerEventData e) => down = false;
+
+        void KinhNum(float dt)
+        {
+            if (knob == null) return;
+            if (knobSize == Vector2.zero) knobSize = knob.sizeDelta;
+            bool reduced = ReducedMotion.IsEnabled;
+            g.Target = !reduced && (down || Mathf.Abs(v) > 0.6f) ? 1f : 0f;
+            g.Step(dt, g.Target > g.Value ? 0.16f : 0.34f, 0.8f);
+            float gv = Mathf.Clamp01(g.Value);
+            float st = reduced ? 0f : Mathf.Clamp(Mathf.Abs(v) * 0.03f, 0f, 0.3f);
+            knob.sizeDelta = new Vector2(knobSize.x * (1f + 0.55f * gv + st), knobSize.y * (1f + 0.12f * gv - st * 0.25f));
+            if (knobFace != null) knobFace.canvasRenderer.SetAlpha(1f - 0.82f * gv);
+            if (gv > 0.01f && glass == null)
+            {
+                var rt = MenuKit.Full(knob, "Kính núm");
+                glass = rt.gameObject.AddComponent<Image>();
+                glass.sprite = KinhLong.NumKinh;
+                glass.type = Image.Type.Sliced;
+                glass.raycastTarget = false;
+            }
+            if (glass != null)
+            {
+                glass.pixelsPerUnitMultiplier = KinhLong.NangMultiplier(knob.sizeDelta.y);
+                glass.canvasRenderer.SetAlpha(gv);
+            }
+        }
 
         void Update()
         {
             if (toggle == null) return;
             float target = toggle.isOn ? 1f : 0f;
+            if (kinh) KinhNum(Time.unscaledDeltaTime);
             if (k >= 0f && Mathf.Abs(k - target) < 0.002f && Mathf.Abs(v) < 0.01f) return;
             if (k < 0f || ReducedMotion.IsEnabled) { k = target; v = 0f; }
             else

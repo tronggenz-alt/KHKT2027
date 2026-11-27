@@ -1,0 +1,3 @@
+Dừng việc đang làm. Đưa mã về trạng thái biên dịch được. Commit phần đã chạy được với tiêu đề `[<mã việc>] dừng giữa chừng`.
+Ghi vào báo cáo docs/ngay-18-11/bao-cao-<mã>.md: đã xong gì, đang kẹt ở đâu (kèm thông báo lỗi), cần gì để làm tiếp.
+Không xóa gì, không reset --hard, không stash. Trả lời dòng đầu `CHƯA XONG <mã>: <lý do ngắn>`.

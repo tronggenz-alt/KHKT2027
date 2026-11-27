@@ -1,0 +1,68 @@
+[G3] Mô hình 3D thực vật: cấu trúc, chức năng, chuyển động dạy học theo thời gian thực
+
+LUẬT CHUNG (giữ suốt việc này)
+- Dự án VERA Lab: kho git ~/Developer/Antigravity. Unity 6000.6.7f1 ở /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app. Đọc AGENTS.md trước tiên.
+- Nền tảng: Mac là chính, rồi Windows, iPad cuối cùng. Không dùng đường dẫn cứng hay API chỉ có trên Mac.
+- Chỉ sửa file trong PHẠM VI. Cần sửa file ngoài phạm vi thì ghi vào báo cáo, không tự sửa.
+- Git: chỉ `git add <từng file>`. Cấm `git add -A`, `git add .`, force push, reset --hard, stash. Không push, không merge vào main, không đưa lên web.
+- Commit nhỏ, tiêu đề bắt đầu bằng `[G3]`.
+- Không xóa Library/, Builds/, ~/AppBuild/VERALab_ui, cache Unity, /Applications/Unity.
+- RAM 8 GB: mỗi lúc chỉ MỘT Unity -batchmode. Trước khi chạy: `pgrep -fl -- -batchmode`. Nếu đang có thì đợi. Dựng cảnh hay chụp ảnh thì không dùng -nographics.
+- Giao diện, chú thích, tài liệu viết tiếng Việt. Tên file mới không dấu, không cách.
+- Kết thúc: viết báo cáo docs/ngay-18-11/bao-cao-G3.md, commit, trả lời dòng đầu `XONG G3` hoặc `CHƯA XONG G3: <lý do>`.
+- Quá giờ mà chưa xong: làm theo "Nếu trễ", để mã biên dịch được, commit, ghi phần còn lại.
+
+THƯ MỤC VÀ NHÁNH: ~/Developer/Antigravity, nhánh n18/antigravity. Thời gian: khoảng 3 giờ.
+
+ĐỌC TRƯỚC
+Demo/Bio/PhotosynthesisRig.cs, PotometerRig.cs, PhototropismBox.cs, NftRackController.cs, MistSystem.cs, ClimateSensor.cs, TeachingModel.cs.
+Cách dựng hình bằng mã: Editor/LabBuilder/LabKit*.cs. Nhà kính tầng 2: Editor/LabBuilder/Tang2/*.
+Thêm: data/sinh/*, docs/20-tang-2-khu-sinh-hoc.md, Rendering/HardwareProfile.cs.
+
+NỘI DUNG KHOA HỌC
+Phải đúng chương trình Sinh 10–11 GDPT 2018. Con số nào cũng ghi nguồn trong data/sinh/thuc_vat.json.
+
+1. Cấu trúc
+ Một cây hai lá mầm, ví dụ cây đậu: rễ (chóp rễ, miền lông hút), thân, lá, hoa.
+ Có ba lát cắt phóng to, bấm vào là mở:
+  - Rễ: lông hút, vỏ, nội bì có đai Caspari, mạch gỗ, mạch rây.
+  - Thân: biểu bì, vỏ, bó mạch (gỗ ở trong, rây ở ngoài), tầng sinh mạch.
+  - Lá: biểu bì có lớp cutin, mô giậu, mô xốp, gân lá, khí khổng với 2 tế bào hạt đậu.
+ Mỗi bộ phận có chú thích bật/tắt được và thẻ kiến thức (tên, cấu tạo, chức năng, câu hỏi nhanh).
+
+2. Chức năng chạy theo thời gian thực
+ Chỉnh bằng các thanh trượt: ánh sáng (lux), CO₂ (ppm), nhiệt độ (°C), độ ẩm không khí (%), độ ẩm đất (%), gió.
+  - Hút nước: dòng hạt đi lên trong mạch gỗ, tốc độ tỉ lệ với thoát hơi nước. Dòng đường trong mạch rây đi xuống.
+  - Thoát hơi nước qua khí khổng: khí khổng mở/đóng theo ánh sáng, độ ẩm và tình trạng thiếu nước (ABA). Thấy rõ tế bào hạt đậu trương lên hay xẹp xuống.
+  - Quang hợp: CO₂ đi vào, O₂ đi ra. Cường độ theo đường bão hòa ánh sáng và CO₂, có điểm bù ánh sáng và nhiệt độ tối ưu. Ban đêm chỉ còn hô hấp.
+  - Hướng sáng: chiếu đèn một phía, auxin dồn về phía tối, thân uốn cong dần (có tua nhanh thời gian).
+  - Tua nhanh ngày/đêm: ×1, ×60, ×600.
+ Nếu PhotosynthesisRig hay PotometerRig đã có công thức thì dùng chung hàm, không được tạo con số mâu thuẫn.
+ Phần mô phỏng viết bằng C# thuần, đặt ở Scripts/Simulation/Bio/ThucVat (không using UnityEngine), có unit test.
+
+3. Chế độ dạy học
+  - "Bài giảng": 5 bước có lời dẫn (cấu trúc → hút nước → thoát hơi nước → quang hợp → hướng sáng).
+  - "Tự do": dùng thanh trượt tùy ý.
+  - "Câu hỏi": 5 câu, chấm điểm ngay.
+
+KỸ THUẬT
+ - Dựng hình bằng mã theo kiểu LabKit: thân là ống cong, lá là mặt có gân, rễ phân nhánh. Không dùng mô hình tải về. Lá đung đưa bằng shader nhẹ (Lab/Shaders/LaCay*).
+ - Dòng chảy trong mạch làm bằng shader cuộn UV hoặc bằng hạt. Số hạt không quá HardwareProfile.SoHatToiDa.
+ - Mở bằng Khkt.Bio.ThucVat.ThucVatMoDun.Mo(), kèm Dong() và bool DangMo (theo hợp đồng chung, không đổi tên).
+   + Mở ra là lớp phủ toàn màn hình với sân khấu riêng (layer riêng).
+   + Camera quỹ đạo: kéo chuột để xoay, cuộn để phóng to, nhấp đúp vào bộ phận để lấy nét. Esc để đóng.
+   + Viết lớp camera quỹ đạo dùng chung được, vì G4 sẽ dùng lại.
+ - Lối vào trong lab: đặt "bàn mô hình thực vật" ở nhà kính tầng 2, gắn lúc chạy (runtime) để khỏi phải dựng lại cảnh. Ngắm vào rồi bấm thì gọi Mo().
+
+KIỂM THỬ (nhóm "G3" trong Editor/KhktN18Verify.cs)
+ - Mở và đóng mô-đun.
+ - Kéo thanh trượt, số phải đổi đúng chiều: ánh sáng tăng thì quang hợp tăng tới mức bão hòa; độ ẩm không khí tăng thì thoát hơi nước giảm.
+ - Chụp 6 ảnh vào docs/ngay-18-11/anh/g3/.
+ - Unit test phần mô phỏng phải qua.
+ - KhktWave6Verify vẫn đạt 67/67.
+
+XONG KHI: đủ 3 lát cắt, 4 quá trình, chế độ Bài giảng; có lối vào ở nhà kính; tất cả kiểm thử đạt; khi mở mô-đun ở mức Cao đạt ≥ 60 FPS.
+
+NẾU TRỄ: bỏ hoa và chế độ "Câu hỏi". Giữ 3 lát cắt và 4 quá trình.
+
+PHẠM VI: Demo/Bio/ThucVat/*, Simulation/Bio/ThucVat/*, Lab/Shaders/LaCay*, data/sinh/thuc_vat.json, Editor/KhktN18Verify.cs (nhóm G3).

@@ -1,0 +1,53 @@
+[C2] Bảo vệ dữ liệu cơ chế + AI chạy tại máy (RAG local) + API giải chuỗi + thông số phần cứng phía máy chủ
+
+Làm tiếp C1, cùng worktree, nhánh n18/co-che. Luật chung giữ như C1. Thời gian: khoảng 3 giờ.
+
+PHẦN 1: BẢO VỆ, CHỐNG CHÉP Ý TƯỞNG
+Trong báo cáo phải nói thật: mã hóa phía app chỉ chặn được sao chép thông thường; người quyết tâm dịch ngược app vẫn lấy được khóa. Vì vậy làm 3 lớp:
+ a) Dữ liệu gốc không bao giờ vào kho công khai. Phần tách dữ liệu đã làm ở C1. Thêm tests/test_khong_lo_du_lieu.py dò `git ls-files` tìm tên tệp hoặc nội dung giống khóa và dữ liệu kín.
+ b) Gói mã hóa cho app: server/ai/co_che/dong_goi.py tạo <ma>.verapack.
+    - Cấu trúc: "VERA1" + phiên bản + salt + IV + AES-256-CBC(gzip(JSON gộp bai + 3d + giay)) + HMAC-SHA256. Mã hóa trước rồi ký; so HMAC bằng hàm thời gian hằng.
+    - Dùng AES-CBC kèm HMAC thay cho AES-GCM, vì Aes.Create() chạy trên mọi nền tảng Unity/IL2CPP, còn AesGcm có thể không có trên iOS.
+    - Khóa 32 byte, sinh ngẫu nhiên một lần, lưu ở ~/Developer/VERA_du_lieu_rieng/khoa/vera_co_che.key.
+    - Chép khóa vào Unity tại Assets/Resources/CoChe/khoa.bytes (git bỏ qua) để bản dựng có khóa. Trong app, khóa được che (XOR với các hằng đặt rải nhiều nơi). Ghi rõ việc che này chỉ làm khó thêm.
+    - Đóng dấu ẩn trong gói (mã máy dựng + ngày) để lần ra nguồn nếu bị rò.
+    - Gói xuất ra Assets/StreamingAssets/CoChe/*.verapack (git bỏ qua).
+ c) "Bộ não" ở máy chủ: kho mẫu, tư duy vẽ, bộ đo và RAG chỉ chạy ở máy chủ Python (máy Mac này hoặc máy GPU thuê). App chỉ nhận hình đã dựng.
+ Test: đóng gói rồi giải gói phải khớp; sửa 1 byte thì gói bị từ chối.
+
+PHẦN 2: AI TẠI MÁY (RAG LOCAL)
+ - server/ai/cau_hinh_may.py: đọc RAM và chip/GPU (Apple Silicon dùng sysctl; Windows dùng psutil hoặc wmic; Linux dùng nvidia-smi), rồi chọn mô hình:
+   + RAM ≤ 8 GB → qwen2.5:3b-instruct;
+   + 16 GB → qwen2.5:7b-instruct;
+   + GPU ≥ 24 GB → vera-hoa-32b (đã có Modelfile).
+   File này cũng chọn số lần thử dựng cấu dạng RDKit và thời gian chờ. Cho phép ghi đè bằng biến môi trường. Đây là phần "thông số phần cứng" phía máy chủ.
+ - Tải mô hình cho máy này: `ollama pull qwen2.5:3b-instruct`, khoảng 2 GB. Kiểm tra đĩa trước, còn dưới 6 GB thì hỏi tôi.
+ - Tạo Modelfile nhỏ vera-hoa-3b: num_ctx 8192, cùng lời dặn với Modelfile 32B. Đặt keep_alive 5 phút để trả RAM cho Unity. Thử xong chạy `ollama stop`.
+ - RAG: dùng server/ai/rag.py có sẵn (BM25 + vector bge-m3, mô hình này đã có trong ollama). Thêm nguồn kiến thức cơ chế: 8 bài demo và các quy tắc cơ chế đã kiểm chứng. Đọc từ thư mục riêng; chỉ mục cũng lưu ở thư mục riêng, không vào git.
+ - Điểm cuối /co-che/giai-thich:
+   + nhận câu hỏi và mã bài; dùng RAG và mô hình tại máy để trả lời tiếng Việt, có trích nguồn;
+   + mô hình KHÔNG được tự tạo cơ chế mới, chỉ giải thích và điền chất vào mẫu đã kiểm chứng;
+   + mọi cơ chế AI đề xuất phải qua co_che.kiem_tra, trượt thì trả về lời giải thích theo mẫu;
+   + thứ tự nhà cung cấp: tại máy trước, trực tuyến sau (dùng cơ chế thứ tự nhà cung cấp có sẵn).
+
+PHẦN 3: API GIẢI CHUỖI
+ - Đọc cách app CHEMISTRY giải chuỗi trên nhánh chemistry: backend/pipeline.py, giai_nhanh.py, parser.py, co_che.py và route /api/giai trong main.py.
+ - Chép phần lõi cần thiết vào server/ai/co_che/giai_chuoi.py. Không import chéo từ ~/CHEMISTRY_xem, không sửa nhánh chemistry, không đụng LaunchAgent vn.giaichuoihuuco.*.
+ - Thêm vào máy chủ VERA cục bộ (FastAPI trong server/) các điểm cuối:
+   + GET /co-che/bai: danh sách bài;
+   + GET /co-che/bai/{ma}: trả gói .verapack;
+   + POST /co-che/giai-chuoi với dữ liệu ví dụ {"chuoi": "C2H4 -> C2H5OH -> CH3CHO -> CH3COOH"}: trả từng bước gồm chất, điều kiện, loại phản ứng, và mã cơ chế nếu khớp mẫu (kèm .3d/.giay đã dựng). Phần nào không chắc thì ghi "chưa kiểm chứng".
+ - Có 3 chuỗi mẫu chạy được khi không có mạng.
+ - Cổng: kiểm tra xung đột cổng 8000 với dịch vụ CHEMISTRY. Nếu trùng thì máy chủ cơ chế của VERA chạy cổng 8010 (cấu hình được). Ghi URL này vào nguyen_mau/co_che_3d/HOP_DONG_APP.md, mục mới "Máy chủ cơ chế", để C3 dùng.
+
+KIỂM THỬ: tests/test_co_che_api.py (dùng FastAPI TestClient), cùng test cho cau_hinh_may và dong_goi. Toàn bộ `python -m unittest discover -s tests` phải xanh (5 tệp test máy chủ hỏng sẵn từ mốc gốc do FastAPI 0.162 — xem moc-goc.md — không bắt buộc sửa; chỉ cần không có test hỏng MỚI).
+
+XONG KHI
+- Có 8 gói .verapack (hoặc 6 nếu C1 đã cắt bớt).
+- Ba điểm cuối chạy được.
+- Báo cáo bao-cao-C2.md có bảng đo: thời gian trả lời của /co-che/giai-thich với mô hình 3B (giây), RAM dùng, kết quả 5 câu hỏi mẫu (đúng hay sai, tự chấm theo SGK).
+- Đã commit.
+
+NẾU TRỄ: bỏ đóng dấu ẩn và phần chọn mô hình cho Windows/Linux. Giữ gói mã hóa, /co-che/bai, /co-che/giai-thich và 3 chuỗi mẫu.
+
+PHẠM VI: server/ai/co_che/*, server/ai/cau_hinh_may.py, các điểm cuối mới trong server/, tests/test_co_che*.py, tests/test_khong_lo_du_lieu.py, .gitignore, ~/Developer/VERA_du_lieu_rieng/*.

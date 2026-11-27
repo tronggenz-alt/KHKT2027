@@ -1,0 +1,34 @@
+[P0] Chuẩn bị ngày làm việc 18/11 cho VERA Lab. Chỉ chuẩn bị, KHÔNG sửa mã nguồn.
+
+Bối cảnh: hôm nay hai AI làm song song.
+- Antigravity làm Unity trực tiếp trong thư mục chính ~/Developer/Antigravity, nhánh n18/antigravity, được mở Unity có giao diện.
+- Claude làm phần cơ chế Hóa trên nhánh n18/co-che (worktree riêng). Claude biên dịch và chạy thử Unity bằng -batchmode trong bản sao riêng ~/AppBuild/VERA_claude.
+- Máy: MacBook M2, RAM 8 GB, ổ còn khoảng 15 GB. Mỗi lúc chỉ được chạy MỘT Unity -batchmode.
+
+Làm lần lượt:
+1. Đọc AGENTS.md, TIEN_DO.md, BAO_CAO_WAVE6_MAC.md. Chạy `pgrep -fl Unity`: nếu có Unity đang chạy thì dừng lại và báo tôi.
+2. Giữ máy thức khi còn làm, cho máy ngủ khi xong hoặc khi các AI đã dừng (hết token, kẹt). Viết ~/AppBuild/canh_gac_ngu.sh rồi chạy nền bằng nohup. Script làm như sau:
+   - Giữ máy thức bằng `caffeinate -dimsu -w $$` (tự hết khi script dừng).
+   - Cứ 5 phút kiểm tra một lần. Chỉ cho máy ngủ khi người dùng đã không chạm phím/chuột ít nhất 15 phút (đọc HIDIdleTime bằng `ioreg -c IOHIDSystem`) VÀ gặp một trong ba điều:
+     (a) có tệp ~/AppBuild/XONG_NGAY_18-11 (C5 tạo ở cuối ngày);
+     (b) 90 phút liền không có tệp nào thay đổi trong ~/Developer/Antigravity (bỏ qua Library, Temp, Logs) và ~/Developer/VERA_du_lieu_rieng, đồng thời không có tiến trình Unity, xcodebuild hay ollama đang chạy. Nghĩa là các AI đã dừng;
+     (c) đã quá 01:00 đêm.
+   - Trước khi cho ngủ: ghi lý do vào ~/AppBuild/canh_gac_ngu.log, đợi 2 phút để còn kịp hủy, rồi chạy `pmset sleepnow` và thoát.
+   - Tắt tay được bằng `pkill -f canh_gac_ngu.sh`.
+3. Ổ đĩa: chạy `df -h /`. Nếu còn dưới 12 GB thì liệt kê những thứ dọn được an toàn (cache Google, pip, Homebrew, uv, worktree cũ đã gộp) kèm dung lượng, CHƯA xóa, hỏi tôi trước. Tuyệt đối không đụng: Library/ và Builds/ của Unity, ~/AppBuild/VERALab_ui (cả dd), cache Unity, /Applications/Unity, ~/Documents/Antigravity, ~/Developer/Antigravity-luu-ban-cu, ~/CHEMISTRY_xem.
+4. Git ở ~/Developer/Antigravity: `git status` phải sạch. Có thay đổi chưa commit thì dừng và báo tôi, không stash. Tạo nhánh n18/antigravity và n18/co-che từ main (không đẩy lên GitHub). Chuyển thư mục chính sang n18/antigravity.
+5. Tạo bản sao Unity cho Claude bằng bản sao APFS, gần như không tốn đĩa:
+   mkdir -p "$HOME/AppBuild/VERA_claude"
+   cp -cR "$HOME/Developer/Antigravity/Phong thi nghiem ao" "$HOME/Developer/Antigravity/data" "$HOME/Developer/Antigravity/phong_sinh" "$HOME/Developer/Antigravity/tools" "$HOME/AppBuild/VERA_claude/"
+   Viết script ~/AppBuild/VERA_claude/dong_bo_va_chay.sh <thư mục worktree> <Lớp.Hàm> [tên log]. Script làm các việc sau:
+   (a) rsync Assets/, ProjectSettings/, Packages/ và data/ từ worktree sang bản sao (--delete trong Assets, giữ nguyên Library);
+   (b) nếu `pgrep -f -- -batchmode` thấy Unity khác đang chạy thì đợi, cứ 2 phút xem lại một lần;
+   (c) chạy /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/MacOS/Unity -batchmode -buildTarget StandaloneOSX -projectPath <bản sao> -executeMethod <Lớp.Hàm> -logFile <TMPDIR>/<tên log>.log, không dùng -nographics;
+   (d) in 40 dòng cuối của log và mọi dòng có "error CS" hoặc "Exception".
+6. Lấy mốc gốc trên bản sao: chạy KhktWave6Verify.Run bằng script trên. Ghi số PASS/FAIL. Cuối ngày sẽ so với mốc này.
+7. Python: ~/Developer/Antigravity/.venv phải chạy được `python -m unittest discover -s tests` (ghi số test đạt). Kiểm tra `import rdkit`, chưa có thì `pip install rdkit` trong .venv. Ghi lại kết quả `ollama --version` và `ollama list`.
+8. Chạy `lsof -i :8000` xem ai đang giữ cổng 8000, và xem tình trạng LaunchAgent vn.giaichuoihuuco.app. Chỉ xem, không sửa.
+9. Ghi kết quả vào docs/ngay-18-11/moc-goc.md trên nhánh n18/antigravity, commit đúng file đó với tiêu đề `[P0] mốc gốc ngày 18/11`.
+
+Không push, không đưa lên web, không git add -A.
+Dòng đầu câu trả lời ghi `SẴN SÀNG` hoặc `CHƯA SẴN SÀNG: <lý do>`. Sau đó là bảng: ổ trống, RAM trống, mốc Wave6 (PASS/FAIL), số test Python, rdkit, ollama, cổng 8000, LaunchAgent.

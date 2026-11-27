@@ -21,6 +21,8 @@ namespace Khkt.Menu
         public Action ChonPhongLab;
         public Action ChonGiaiBaiTap;
         public Action Thoat;
+        /// <summary>Đổi giao diện: true = Kính lỏng, false = Cổ điển (MainMenu lưu rồi dựng lại màn).</summary>
+        public Action<bool> DoiGiaoDien;
 
         RectTransform goc;
         readonly List<RectTransform> lanLuot = new List<RectTransform>();
@@ -62,6 +64,15 @@ namespace Khkt.Menu
             var thoat = MakeButton(goc, "Nút Thoát ứng dụng", "Thoát", new Vector2(-40, -30), new Vector2(96, 44), () => Thoat?.Invoke(), 2, RadiusButton, new Vector2(1, 1));
             ((RectTransform)thoat.transform).pivot = new Vector2(1, 1);
 
+            // Nút chuyển giao diện: Kính lỏng | Cổ điển (nhóm chọn 2 mục, vệt chọn trượt)
+            var chuyen = Tabs(goc, "Chuyển giao diện", new[] { "Nút Kính lỏng", "Nút Cổ điển" }, new[] { "Kính lỏng", "Cổ điển" },
+                              Vector2.zero, new Vector2(118, 40), false, 4f, GlassKit.LiquidGlass ? 0 : 1,
+                              i => DoiGiaoDien?.Invoke(i == 0));
+            var crt = (RectTransform)chuyen.transform;
+            crt.anchorMin = crt.anchorMax = new Vector2(1, 1);
+            crt.pivot = new Vector2(1, 1);
+            crt.anchoredPosition = new Vector2(-156, -32);
+
             var giua = new Vector2(0.5f, 0.5f);
             var tag = Tag(goc, "Nhãn chào", "VERA Lab · Hóa học & Sinh học THPT", new Vector2(0, 300), AccentSoft, WithAlpha(Accent, 0.28f), Accent, giua);
             var chao = GlassKit.Label(goc, "Lời chào", "Hôm nay bạn muốn làm gì?", 60, Ink, true, TextAnchor.MiddleCenter, new Vector2(0, 232), new Vector2(1400, 84));
@@ -94,11 +105,16 @@ namespace Khkt.Menu
             var than = Body(the);
             var nen = than.GetComponent<Image>();
             nen.color = Color.white;
-            Gradient(nen, dau, cuoi, 145f);
-            if (UiTheme.IsLight) Sheen(the, RadiusLarge, 0.22f);
+            // Kính lỏng: thẻ là kính trong, không nhuộm màu; chữ dùng màu chữ của chủ đề
+            bool kinh = Kinh;
+            if (!kinh) Gradient(nen, dau, cuoi, 145f);
+            Color mauChu = kinh ? Ink : Color.white;
+            Color chuPhu = kinh ? InkDim : new Color(1, 1, 1, 0.74f);
+            if (kinh) { nhat = InkDim; cuoi = Hex(0x111827); }   // chữ trên nút trắng "Vào ngay" luôn tối
+            if (UiTheme.IsLight && !Kinh) Sheen(the, RadiusLarge, 0.22f);  // kính lỏng tự có viền phản chiếu
             var hv = the.GetComponent<MenuHover>();
             var bong = the.Find("Bóng").GetComponent<Image>();
-            Color mauBong = UiTheme.IsLight ? cuoi : new Color(0, 0, 0, 1);
+            Color mauBong = UiTheme.IsLight && !kinh ? cuoi : new Color(0, 0, 0, 1);
             float nghi = UiTheme.IsLight ? 0.30f : 0.55f, noi = UiTheme.IsLight ? 0.48f : 0.75f;
             bong.color = WithAlpha(mauBong, nghi);
             var vien = CardRing(the);
@@ -114,11 +130,11 @@ namespace Khkt.Menu
             hv.liftTargets = ds.ToArray();
 
             const float Pad = 40f;
-            Tag(than, "Nhãn", nhan, new Vector2(Pad, -40), new Color(1, 1, 1, 0.12f), new Color(1, 1, 1, 0.20f), nhat);
-            var tieuDe = GlassKit.Label(than, "Tên", ten, 48, Color.white, true, TextAnchor.UpperLeft, new Vector2(Pad, -86), new Vector2(480, 64));
-            TextShadow(tieuDe, 0.35f, 2f);
+            Tag(than, "Nhãn", nhan, new Vector2(Pad, -40), kinh ? WithAlpha(Ink, 0.05f) : new Color(1, 1, 1, 0.12f), kinh ? Hair : new Color(1, 1, 1, 0.20f), nhat);
+            var tieuDe = GlassKit.Label(than, "Tên", ten, 48, mauChu, true, TextAnchor.UpperLeft, new Vector2(Pad, -86), new Vector2(480, 64));
+            if (!kinh || !UiTheme.IsLight) TextShadow(tieuDe, 0.35f, 2f);
             GlassKit.Label(than, "Dòng phụ", phu, 18, nhat, true, TextAnchor.UpperLeft, new Vector2(Pad, -156), new Vector2(480, 28));
-            var mt = GlassKit.Label(than, "Mô tả", moTa, 17, new Color(1, 1, 1, 0.74f), false, TextAnchor.UpperLeft, new Vector2(Pad, -192), new Vector2(440, 52));
+            var mt = GlassKit.Label(than, "Mô tả", moTa, 17, chuPhu, false, TextAnchor.UpperLeft, new Vector2(Pad, -192), new Vector2(440, 52));
             mt.horizontalOverflow = HorizontalWrapMode.Wrap;
 
             // nút giả "Vào ngay →": khối chứa (bóng trước, mặt trắng sau) để bóng nằm dưới mặt
