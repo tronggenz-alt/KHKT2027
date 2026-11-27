@@ -40,6 +40,7 @@ namespace Khkt.Demo
         public KinhLongMatCat LoaiMatCat = KinhLongMatCat.Squircle;
         public bool LaDieuHuong = false;
         public bool LaNenSang = false;
+        [HideInInspector] public float TienDoNenSang = -1f;
         public bool HinhVienNang = false;
         [Range(0f, 120f)] public float BanKinhBo = 22f;
         [Range(0f, 4f)] public float MucMo = 3.05f;
@@ -68,6 +69,7 @@ namespace Khkt.Demo
         static Shader _shaderKinh;
 
         public Material VatLieu => _matInstance;
+        public RectTransform rectTransform => graphic != null ? graphic.rectTransform : transform as RectTransform;
 
         public static KinhHinh Gan(Graphic g, KinhLongCheDo cheDo = KinhLongCheDo.Regular, float banKinhBo = 22f, bool laDieuHuong = false)
         {
@@ -158,7 +160,7 @@ namespace Khkt.Demo
             _matInstance.SetFloat(IdLoaiMatCat, (float)LoaiMatCat);
             _matInstance.SetFloat(IdCheDo, (float)CheDo);
             _matInstance.SetFloat(IdLaDieuHuong, LaDieuHuong ? 1f : 0f);
-            _matInstance.SetFloat(IdLaNenSang, LaNenSang ? 1f : 0f);
+            _matInstance.SetFloat(IdLaNenSang, TienDoNenSang >= 0f ? Mathf.Clamp01(TienDoNenSang) : (LaNenSang ? 1f : 0f));
             _matInstance.SetFloat(IdMucMo, MucMo);
             _matInstance.SetFloat(IdVienKhucXa, VienKhucXa);
             _matInstance.SetFloat(IdCuongDoKhucXa, CuongDoKhucXa);

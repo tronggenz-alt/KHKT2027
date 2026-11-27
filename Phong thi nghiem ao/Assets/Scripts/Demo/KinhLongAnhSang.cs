@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Khkt.Environment.Tang2;
@@ -5,83 +6,122 @@ using Khkt.Environment.Tang2;
 namespace Khkt.Demo
 {
     /// <summary>
-    /// Đèn chung cho mọi tấm kính lỏng (shader Khkt/KinhMo): đặt biến toàn cục _KL_Light mỗi khung hình.
-    ///   • Mac/Windows: hướng đèn nghiêng theo vị trí chuột so với tâm màn hình, viền sáng trượt quanh mép kính khi rê chuột.
-    ///   • iPad: hướng đèn theo độ nghiêng máy (gia tốc kế), như vệt sáng trên kính iOS 26 khi xoay máy.
-    ///   • Rê/nghiêng nhanh làm đèn "bừng" lên một chút rồi dịu lại (z &gt; 1), đứng yên thì về 1.
-    ///   • Giảm chuyển động: đèn đứng yên ở góc trên bên trái.
-    /// Tự tạo khi chạy, không cần đặt trong cảnh.
+    /// Điều khiển hướng nguồn sáng môi trường toàn cục (_KL_Light):
+    ///   - Trong Phòng Lab (không có KinhLongCameraNen): giữ nguyên hành vi cũ để không đổi bất kỳ pixel Lab nào.
+    ///   - Ngoài Phòng Lab (Kinh Lỏng Apple): neo chính ở (-0.45, 0.89), nghiêng tối đa ±15° theo con trỏ chuột (Mac/Windows)
+    ///     hoặc cảm biến gia tốc (iPad) khi không bật Giảm chuyển động.
+    ///   - Hỗ trợ hiệu ứng quét ánh sáng dọc vành nút (QuetVien) lúc xuất hiện hoặc chọn.
     /// </summary>
     public class KinhLongAnhSang : MonoBehaviour
     {
         static readonly int LightId = Shader.PropertyToID("_KL_Light");
-        static readonly Vector2 Goc = new Vector2(-0.45f, 0.89f);   // đèn mặc định: trên, lệch trái
+        static readonly Vector2 HuongNeoChinh = new Vector2(-0.45f, 0.89f).normalized;
+        static KinhLongAnhSang _instance;
 
-        LoXo2 huong;
-        LoXo nangLuong = new LoXo(1f);
-        Vector2 chuotTruoc;
-        bool coChuotTruoc;
-        bool daBatGiaToc;
+        Vector2 _dir;
+        Vector2 _target;
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStatics()
+        {
+            _instance = null;
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static void TuTao()
         {
-            Shader.SetGlobalVector(LightId, new Vector4(Goc.x, Goc.y, 1f, 0f));
-            if (FindAnyObjectByType<KinhLongAnhSang>() != null) return;
-            var go = new GameObject("Đèn kính lỏng") { hideFlags = HideFlags.HideInHierarchy };
+            Shader.SetGlobalVector(LightId, new Vector4(HuongNeoChinh.x, HuongNeoChinh.y, 0f, 1f));
+            if (_instance != null || FindAnyObjectByType<KinhLongAnhSang>() != null) return;
+            var go = new GameObject("KinhLongAnhSang") { hideFlags = HideFlags.HideAndDontSave };
             DontDestroyOnLoad(go);
-            go.AddComponent<KinhLongAnhSang>();
+            _instance = go.AddComponent<KinhLongAnhSang>();
         }
 
         void Awake()
         {
-            huong = new LoXo2(Goc);
+            _instance = this;
+            _dir = HuongNeoChinh;
+            _target = HuongNeoChinh;
+            Shader.SetGlobalVector(LightId, new Vector4(_dir.x, _dir.y, 0f, 1f));
         }
 
         void Update()
         {
-            float dt = Time.unscaledDeltaTime;
-            Vector2 dich = Goc;
-            float bung = 0f;
-
-            if (!ReducedMotion.IsEnabled)
+            if (ReducedMotion.IsEnabled)
             {
-                var mouse = Mouse.current;
-                if (mouse != null && Screen.width > 0 && Screen.height > 0)
+                _target = HuongNeoChinh;
+            }
+            else if (KinhLongCameraNen.IsCameraNenActive(Camera.main) || FindAnyObjectByType<HaiTangCanvas>() != null)
+            {
+                // Ngoài Phòng Lab: ánh sáng neo trên-trái (-0.45, 0.89) và uốn nhẹ tối đa ±15° theo con trỏ hoặc nghiêng máy
+                float tilt = 0f;
+                var accel = Accelerometer.current;
+                if (Application.isMobilePlatform && accel != null)
                 {
-                    Vector2 p = mouse.position.ReadValue();
-                    Vector2 lech = new Vector2(p.x / Screen.width * 2f - 1f, p.y / Screen.height * 2f - 1f);
-                    lech = Vector2.ClampMagnitude(lech, 1.2f);
-                    // đèn ở phía con trỏ: viền phía con trỏ sáng nhất
-                    dich = (Goc * 0.55f + lech * 0.9f);
-                    if (coChuotTruoc && dt > 0f)
-                    {
-                        float tocDo = (p - chuotTruoc).magnitude / Mathf.Max(Screen.height, 1) / dt; // màn hình / giây
-                        bung = Mathf.Clamp01(tocDo * 0.18f) * 0.55f;
-                    }
-                    chuotTruoc = p;
-                    coChuotTruoc = true;
+                    if (!accel.enabled) InputSystem.EnableDevice(accel);
+                    tilt = Mathf.Clamp(accel.acceleration.ReadValue().x * 2.0f, -1f, 1f);
                 }
                 else
                 {
-                    var acc = Accelerometer.current;
-                    if (acc != null)
+                    var mouse = Mouse.current;
+                    if (mouse != null && Screen.width > 1)
                     {
-                        if (!daBatGiaToc && !acc.enabled) { InputSystem.EnableDevice(acc); daBatGiaToc = true; }
-                        Vector3 a = acc.acceleration.ReadValue();
-                        Vector2 nghieng = new Vector2(-a.x, -a.y - 0.55f);
-                        dich = Goc * 0.6f + Vector2.ClampMagnitude(nghieng, 1f) * 0.9f;
-                        bung = Mathf.Clamp01(huong.Velocity.magnitude * 0.25f) * 0.45f;
+                        float nx = Mathf.Clamp01(mouse.position.ReadValue().x / Screen.width) * 2f - 1f;
+                        tilt = Mathf.Clamp(nx, -1f, 1f);
                     }
+                }
+
+                float angleRad = -tilt * (15f * Mathf.Deg2Rad);
+                float cos = Mathf.Cos(angleRad);
+                float sin = Mathf.Sin(angleRad);
+                _target = new Vector2(
+                    HuongNeoChinh.x * cos - HuongNeoChinh.y * sin,
+                    HuongNeoChinh.x * sin + HuongNeoChinh.y * cos).normalized;
+            }
+            else
+            {
+                // Trong Phòng Lab: giữ nguyên hành vi phản chiếu nhẹ cũ của KinhMo.shader
+                var mouse = Mouse.current;
+                if (mouse != null && Screen.width > 1 && Screen.height > 1)
+                {
+                    Vector2 mp = mouse.position.ReadValue();
+                    Vector2 uv = new Vector2(mp.x / Screen.width - 0.5f, mp.y / Screen.height - 0.5f);
+                    _target = (HuongNeoChinh + uv * 0.45f).normalized;
+                }
+                else
+                {
+                    _target = HuongNeoChinh;
                 }
             }
 
-            if (dich.sqrMagnitude < 1e-4f) dich = Goc;
-            huong.Target = dich.normalized;
-            Vector2 h = huong.Step(dt, 0.55f, 0.9f);
-            nangLuong.Target = 1f + bung;
-            float e = nangLuong.Step(dt, bung > nangLuong.Value - 1f ? 0.12f : 0.9f, 1f);
-            Shader.SetGlobalVector(LightId, new Vector4(h.x, h.y, Mathf.Max(e, 0.6f), Time.unscaledTime));
+            float k = 1f - Mathf.Exp(-10f * Mathf.Min(Time.unscaledDeltaTime, 0.05f));
+            _dir = Vector2.Lerp(_dir, _target, k).normalized;
+            Shader.SetGlobalVector(LightId, new Vector4(_dir.x, _dir.y, 0f, 1f));
+        }
+
+        public static void QuetVien(KinhHinh kinh, float thoiLuong = 0.48f)
+        {
+            if (kinh == null || ReducedMotion.IsEnabled) return;
+            if (_instance == null) TuTao();
+            if (_instance != null)
+                _instance.StartCoroutine(_instance.ChayQuetVien(kinh, Mathf.Max(0.15f, thoiLuong)));
+        }
+
+        IEnumerator ChayQuetVien(KinhHinh kinh, float dur)
+        {
+            float t = 0f;
+            while (t < dur && kinh != null)
+            {
+                t += Mathf.Min(Time.unscaledDeltaTime, 0.05f);
+                kinh.QuetVien = Mathf.Clamp01(t / dur);
+                kinh.CapNhatVatLieu();
+                yield return null;
+            }
+            if (kinh != null)
+            {
+                kinh.QuetVien = -1f;
+                kinh.CapNhatVatLieu();
+            }
         }
     }
 }

@@ -30,6 +30,8 @@ namespace Khkt.Demo
                 StartCoroutine(ChayP1());
             else if (CheDo == "P3")
                 StartCoroutine(ChayP3());
+            else if (CheDo == "P4")
+                StartCoroutine(ChayP4());
         }
 
         // ========================================================================= P1
@@ -174,6 +176,107 @@ namespace Khkt.Demo
             Destroy(rt);
 
             Debug.Log("[P3_PASS] Đã chụp xong các ảnh chuẩn (a)-(e) 2880x1800 và đạt toàn bộ kiểm tra quang học §12.2 (#1, #2, #3, #5)!");
+            EditorApplication.Exit(0);
+        }
+
+        // ========================================================================= P4
+        IEnumerator ChayP4()
+        {
+            PlayerPrefs.SetInt("KHKT_KINH_LONG", 1);
+            UiTheme.Set(UiTheme.Mode.XanhMuc, false);
+            KinhLongQuangHoc.DamBaoKhoiTao();
+            var tieuDiem = KinhLongTieuDiem.DamBao();
+
+            var (baseCam, canvas, haiTang) = TaoSanKhauCoBan(new Color(0.06f, 0.08f, 0.12f, 1f));
+            var rt = new RenderTexture(1280, 720, 24, RenderTextureFormat.ARGB32);
+            rt.Create();
+            baseCam.targetTexture = rt;
+            KinhLongBlurCache.EpChupMoiKhung = true;
+
+            var contentRoot = new GameObject("P4Content", typeof(RectTransform));
+            contentRoot.layer = 5;
+            contentRoot.transform.SetParent(canvas.transform, false);
+            Stretch((RectTransform)contentRoot.transform);
+
+            var navRoot = new GameObject("P4Nav", typeof(RectTransform));
+            navRoot.transform.SetParent(canvas.transform, false);
+            Stretch((RectTransform)navRoot.transform);
+            KinhGuongDieuHuong.Gan(navRoot, haiTang, true);
+
+            // Nền Content nửa trái tối (#10141D), nửa phải giấy trắng (#F6F7FA)
+            var bgDark = TaoHop(contentRoot.transform, "BgDark", new Vector2(-480, 0), new Vector2(960, 1080), new Color(0.06f, 0.08f, 0.11f, 1f));
+            var bgLight = TaoHop(contentRoot.transform, "BgLight", new Vector2(480, 0), new Vector2(960, 1080), new Color(0.96f, 0.97f, 0.98f, 1f));
+
+            // 1. Nút nhỏ 56x48 (<= 64u) bật TuDong ở bên tối trước rồi trượt sang bên sáng
+            var smallGlass = TaoKinh(navRoot.transform, "SmallAdaptive", new Vector2(-360, 0), new Vector2(56, 48),
+                KinhLongCheDo.Regular, laSang: false, vienNang: true, laDieuHuong: true, bongCuongDo: 0.20f);
+            var smallVung = smallGlass.gameObject.AddComponent<VungKinhApple>();
+            smallVung.CheDoThichUng = KinhLongThichUngCheDo.TuDong;
+            var smallLbl = TaoChu(smallGlass.transform, "A", 20, Color.white);
+            var smallAdapt = KinhLongThichUng.Gan(smallGlass, smallVung);
+
+            // 2. Bảng lớn 420x120 (> 64u) đặt đè trên nền sáng -> PHẢI khóa theo UiTheme.IsLight (Dark)
+            var largeGlass = TaoKinh(navRoot.transform, "LargeLocked", new Vector2(480, 140), new Vector2(420, 120),
+                KinhLongCheDo.Regular, laSang: true, vienNang: true, laDieuHuong: true);
+            var largeVung = largeGlass.gameObject.AddComponent<VungKinhApple>();
+            largeVung.CheDoThichUng = KinhLongThichUngCheDo.KhoaTheoChuDe;
+            var largeAdapt = KinhLongThichUng.Gan(largeGlass, largeVung);
+
+            yield return null;
+            yield return null;
+            Canvas.ForceUpdateCanvases();
+            baseCam.Render();
+            yield return null; // cho AsyncGPUReadback trả về lưới 24x14
+
+            float tWait = 0f;
+            while (!KinhLongBlurCache.CoLuoiGpu && tWait < 0.5f)
+            {
+                baseCam.Render();
+                tWait += 0.02f;
+                yield return null;
+            }
+
+            smallAdapt.CapNhatNgay();
+            largeAdapt.CapNhatNgay();
+            bool smallStartDark = !smallAdapt.DangSang && smallLbl.color.r > 0.8f;
+            bool largeLockedDark = !largeAdapt.DangSang;
+            float shadowDark = smallGlass.BongCuongDo;
+
+            // Di chuyển nút nhỏ sang nền sáng (+480, 0) và chờ lưới sáng GPU cập nhật + chuyển mượt
+            smallGlass.rectTransform.anchoredPosition = new Vector2(480, 0);
+            for (int f = 0; f < 20; f++)
+            {
+                if (f == 8 || f == 14) baseCam.Render();
+                yield return null;
+                smallAdapt.CapNhatNgay();
+            }
+            bool smallTurnedLight = smallAdapt.DangSang && smallLbl.color.r < 0.25f;
+            float shadowLight = smallGlass.BongCuongDo;
+
+            // Kiểm tra ánh sáng môi trường _KL_Light lệch phải trong +-15 độ của (-0.45, 0.89)
+            Vector4 lightVec = Shader.GetGlobalVector("_KL_Light");
+            float dotNeo = Vector2.Dot(new Vector2(lightVec.x, lightVec.y).normalized, new Vector2(-0.45f, 0.89f).normalized);
+            bool lightOk = dotNeo >= Mathf.Cos(16f * Mathf.Deg2Rad);
+
+            // Kiểm tra làm dịu mất tiêu điểm (trong batchmode mặc định = 0, khi giả lập = 1)
+            float focusDefault = Shader.GetGlobalFloat("_KL_MatTieuDiem");
+            KinhLongTieuDiem.DatGiaLapNgay(true);
+            float focusSim = Shader.GetGlobalFloat("_KL_MatTieuDiem");
+            KinhLongTieuDiem.DatGiaLapNgay(false);
+
+            Debug.Log($"[P4 Check] coLuoiGpu={KinhLongBlurCache.CoLuoiGpu} smallStartDark={smallStartDark} smallTurnedLight={smallTurnedLight} largeLockedDark={largeLockedDark} shadowDark={shadowDark:F3} shadowLight={shadowLight:F3} lightDot={dotNeo:F4} focusDefault={focusDefault} focusSim={focusSim}");
+
+            baseCam.targetTexture = null;
+            rt.Release();
+            Destroy(rt);
+
+            if (!smallStartDark || !smallTurnedLight || !largeLockedDark || shadowLight <= shadowDark || !lightOk || focusDefault > 0.01f || focusSim < 0.99f)
+            {
+                Fail($"[P4_FAIL] startDark={smallStartDark} turnLight={smallTurnedLight} largeDark={largeLockedDark} shadow={shadowDark:F3}->{shadowLight:F3} light={lightOk} focus={focusDefault}->{focusSim}");
+                yield break;
+            }
+
+            Debug.Log("[P4_PASS] Thành công P4: thích ứng Sáng/Tối trễ hai ngưỡng, bóng đổ thích ứng, ánh sáng neo ±15° & mất tiêu điểm an toàn batchmode!");
             EditorApplication.Exit(0);
         }
 

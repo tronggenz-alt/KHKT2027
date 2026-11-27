@@ -387,12 +387,14 @@ Shader "Khkt/KinhLongApple"
                 }
                 else
                 {
-                    bgLin = (_LaNenSang > 0.5) ? float3(0.82, 0.84, 0.88) : float3(0.025, 0.032, 0.045);
+                    float s = saturate(_LaNenSang);
+                    bgLin = lerp(float3(0.025, 0.032, 0.045), float3(0.82, 0.84, 0.88), s);
                 }
 
                 // Toàn bộ nén dải sáng, độ rực và cộng loé thực hiện trong không gian sRGB nhận thức
                 float3 c = LinearToSRGB(max(bgLin, 0.0));
                 float luma = dot(c, float3(0.2126, 0.7152, 0.0722));
+                float nenSang = saturate(_LaNenSang);
 
                 float clearness = clamp(_KL_DoTrongKinh, 0.0, 1.0);
                 float baseNen = (_CheDoKinh > 0.5)
@@ -400,11 +402,11 @@ Shader "Khkt/KinhLongApple"
                     : (_CuongDoNen * lerp(0.92, 0.30, clearness));
 
                 // Kính Tối Regular đặt trên vùng nền rực/sáng tự tăng nén dải sáng để chữ trắng luôn rõ >= 4.5:1
-                float brightOverDark = saturate((luma - 0.12) * 1.85) * (1.0 - _LaNenSang) * (1.0 - _CheDoKinh);
+                float brightOverDark = saturate((luma - 0.12) * 1.85) * (1.0 - nenSang) * (1.0 - _CheDoKinh);
                 baseNen = saturate(baseNen + brightOverDark * 0.78 + _KL_GiamTrongSuot * 0.35);
                 if (_KL_TangTuongPhan > 0.5) baseNen = 0.85;
 
-                float ldich = (_LaNenSang > 0.5) ? 0.90 : 0.10;
+                float ldich = lerp(0.10, 0.90, nenSang);
                 float lt = lerp(luma, ldich, baseNen);
 
                 if (luma > 1e-4)
@@ -459,7 +461,7 @@ Shader "Khkt/KinhLongApple"
 
                 float specBloom = (mCurve < 0.999) ? (1.0 + sin(mCurve * 3.14159) * 0.65) : 1.0;
                 float specVal = saturate((rimFactor + interactiveSpec) * _CuongDoVienSang * specBloom * (1.0 - _KL_MatTieuDiem * 0.45));
-                float specCap = (_LaNenSang > 0.5) ? 0.85 : 0.78;
+                float specCap = lerp(0.78, 0.85, nenSang);
                 float sp = saturate(specVal) * specCap;
 
                 // Screen blend đơn sắc (giữ độ tinh khiết không màu)

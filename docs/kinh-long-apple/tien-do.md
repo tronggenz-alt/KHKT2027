@@ -67,8 +67,14 @@
     - `(b)` Khúc xạ Snell ở vành viên nang: `deflection = 0.275`.
     - `(d)` Tương phản chữ trên kính `CR_Light = 15.01`, `CR_Dark = 16.31` (`≥ 4.5:1`), tách sạch 2 tầng `TwoLayerClean = True`.
   - Tạo & kiểm tra bằng mắt các ảnh đối chiếu `ffmpeg hstack` `so_sanh_a.png`, `so_sanh_b.png`, `so_sanh_d.png` (so với `4b_158s`, `4k_731s`, `4j_712s`).
-- **P4**: Thích ứng Sáng/Tối, bóng đổ thích ứng, ánh sáng môi trường & tối dịu khi mất tiêu điểm. *(Đang thực hiện)*
-- **P5**: Chuyển động lỏng (ngưng tụ Hermite, rọi con trỏ, nảy macOS/iPad, kéo gel & biến hình công tắc/thanh trượt).
+- **P4 — Thích ứng Sáng/Tối, bóng đổ thích ứng, ánh sáng môi trường & mất tiêu điểm:** **Hoàn thành**
+  - Tạo `KinhLongThichUng.cs`:
+    - Phần tử nhỏ (`≤ 64u`, `TuDong`): đo lưới độ sáng `24×14` từ GPU với trễ hai ngưỡng `[0.42, 0.58]`, chuyển mượt `0.22s`, đổi màu chữ trung tính (`#14161A` / `#F5F7FA`) và điều chỉnh cường độ bóng đổ thích ứng theo độ sáng nền.
+    - Bảng lớn (`> 64u` hoặc `KhoaTheoChuDe`): khóa theo `UiTheme.IsLight` chống nhấp nháy.
+    - `KinhLongTieuDiem`: dịu nhẹ 0.25s khi mất tiêu điểm (`OnApplicationFocus(false)`), bỏ qua mặc định trong `-batchmode` trừ khi bật `GiaLapMatTieuDiem`.
+  - Cập nhật `KinhLongAnhSang.cs`: giữ nguyên hành vi Phòng Lab; ngoài Lab neo nguồn sáng tại `(-0.45, 0.89)` uốn nhẹ `±15°` theo chuột (Mac/Win) hoặc gia tốc kế (iPad), thêm `QuetVien()`.
+  - Đã kiểm tra `KinhLongPhongThu.KiemTraP4Batch` → `[P4_PASS]` (`coLuoiGpu=True`, `smallStartDark=True`, `smallTurnedLight=True`, `largeLockedDark=True`, `shadowDark=0.170 → shadowLight=0.252`, `lightDot=0.9664`, `focusDefault=0 → focusSim=1`).
+- **P5**: Chuyển động lỏng (ngưng tụ Hermite, rọi con trỏ, nảy macOS/iPad, kéo gel & biến hình công tắc/thanh trượt). *(Đang thực hiện)*
 - **P6**: `HopKinh` (`sminPoly`), giọt chọn không màu, bùng popover & viền cuộn.
 - **P7**: Phủ khắp mọi màn hình ngoài Lab & xóa sạch mọi nhuộm màu trên kính.
 - **P8**: Trợ năng & thanh trượt `"Độ trong của kính"` (`KHKT_DO_TRONG`).

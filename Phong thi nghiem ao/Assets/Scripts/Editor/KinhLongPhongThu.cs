@@ -21,5 +21,15 @@ namespace Khkt.EditorTools
             runner.CheDo = "P3";
             EditorApplication.EnterPlaymode();
         }
+
+        public static void KiemTraP4Batch()
+        {
+            KhktKinhLongSetup.CaiRendererFeature();
+            EditorPrefs.SetInt("ScriptCompilationDuringPlay", 1);
+            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            var runner = new GameObject("KhktPhongThuRunner").AddComponent<KhktPhongThuRunner>();
+            runner.CheDo = "P4";
+            EditorApplication.EnterPlaymode();
+        }
     }
 }
