@@ -1043,7 +1043,10 @@ namespace Khkt.Menu
         {
             // không chặn theo busy: lúc mở app, bước khôi phục đăng nhập chạy nền giữ busy = true tới khi máy chủ trả lời,
             // nút Kính lỏng | Cổ điển ở màn chọn lối vào bị nuốt mất. Đổi giao diện không đụng tới đăng nhập.
-            if (GlassKit.LiquidGlass == kinhLong) return;
+            // chọn Kính lỏng mà "Nền đặc chống lóa" đang bật thì kính vẫn bị thay bằng nền đặc: tắt nó đi
+            bool canTatNenDac = kinhLong && GlassKit.ReducedTransparency;
+            if (GlassKit.LiquidGlass == kinhLong && !canTatNenDac) return;
+            if (canTatNenDac) GlassKit.ReducedTransparency = false;
             GlassKit.LiquidGlass = kinhLong;
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
