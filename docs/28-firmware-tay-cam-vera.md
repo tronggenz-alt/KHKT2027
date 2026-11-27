@@ -1,4 +1,4 @@
-# Firmware tay cầm VERA: ESP32 + joystick + BMI160 + 2 nút cảm ứng
+# Firmware tay cầm VERA: ESP32 + BMI160 + 4 miếng chạm (joystick dự phòng)
 
 Firmware ở `firmware/tay_cam_vera/`. Thiết kế, sơ đồ chân và tương tác ở [Tay_cam_ESP32_tich_hop.pdf](tay-cam-tich-hop/Tay_cam_ESP32_tich_hop.pdf). Đây là giai đoạn G1 của lộ trình trong PDF. **Firmware mới qua bước kiểm tra biên dịch, chưa chạy trên mạch thật.**
 
@@ -11,10 +11,11 @@ Firmware ở `firmware/tay_cam_vera/`. Thiết kế, sơ đồ chân và tương
 | | +5V, GND | **3V3**, GND (không cấp 5V) |
 | BMI160 | SDA, SCL, INT1 | **GPIO25, GPIO26** (đổi từ 21, 22 ngày 18/11/2026), INT1 chưa nối (`CHAN_INT1 = -1`, lấy mẫu theo đồng hồ 200 Hz) |
 | | VIN, GND | 3V3, GND |
-| Nút cảm ứng A (ngón cái) | lá đồng 15 × 15 mm | GPIO13 (T4) |
-| Nút cảm ứng B (ngón trỏ, cầm vật) | lá đồng 15 × 15 mm | **GPIO27 (T7)** từ v3.1 (trước là GPIO14, dây chập GND) |
-| Miếng chạm TIẾN, LÙI (v3.1) | vật dẫn bất kỳ cỡ đầu ngón tay | **GPIO32 (T9), GPIO33 (T8)** |
-| Miếng chạm TRÁI, PHẢI (v3.1) | vật dẫn bất kỳ cỡ đầu ngón tay | **GPIO4 (T0), GPIO15 (T3)** |
+| **Miếng chạm TIẾN** (ngón trỏ; nút B cũ) | vật dẫn cỡ đầu ngón tay, 1 dây | **GPIO27 (T7)** |
+| **Miếng chạm LÙI** (ngón cái; nút A cũ) | vật dẫn cỡ đầu ngón tay, 1 dây | **GPIO13 (T4)** |
+| **Miếng chạm TRÁI** (ngón giữa) | vật dẫn cỡ đầu ngón tay, 1 dây | **GPIO32 (T9)** |
+| **Miếng chạm PHẢI** (ngón áp út) | vật dẫn cỡ đầu ngón tay, 1 dây | **GPIO33 (T8)** |
+| Chân bỏ không dùng từ v3.2 | | GPIO4, GPIO15 (v3.1 dùng cho TRÁI, PHẢI): gỡ dây; GPIO14 (dây chập GND): gỡ dây |
 | Tụ | 100 nF ×2, 470 µF + 100 nF | VRx, VRy xuống GND; sát chân 3V3–GND |
 
 Không nối dây INT1 thì sửa `CHAN_INT1` thành `-1`. Firmware cũng tự chuyển sang đồng hồ 200 Hz nếu không thấy ngắt.
@@ -298,3 +299,41 @@ Chưa thử với tay cầm thật. Phân tích mất khoảng 2–3 phút cho 1
   - Lệnh `s2` in `J x y - TL.. (mV X,Y)` mỗi 0,1 giây.
 - **Đã kiểm:** biên dịch với g++ và thư viện Arduino giả, `-Wall -Wextra` không lỗi, không cảnh báo. Mô phỏng 17 trường hợp theo số đo thật đều đạt: kẹt 0 V, kẹt 3,3 V, chân trôi, giữ tiến 10 giây, gạt chéo, mất GND/3V3 lúc đang chạy, gạt nhanh, chạm/buông miếng hướng, tay để gần. **Chưa biên dịch bằng gói ESP32 thật và chưa chạy trên mạch.**
 - **Lưu ý nạp:** trên máy này Smart App Control chặn trình biên dịch `xtensa-esp-elf-g++`, nên Arduino IDE có thể báo lỗi lúc Compile. Nạp từ một máy khác thì không bị.
+
+
+## Bản 3.2: bốn miếng chạm, A và B làm nút di chuyển, chức năng bằng tổ hợp (27/11/2026)
+
+Đổi vai trò: hai nút A, B cũ trở thành 2 trong 4 nút di chuyển; cầm / dùng / nói với AI do **tổ hợp** thực hiện. Mã nằm ở `pad4.h`; game không cần sửa vì firmware vẫn gửi cờ chạm A, B và điện áp joystick giả như cũ.
+
+**Bảng đấu nối (ESP32 DevKit V1):**
+
+| Miếng | Ngón | Chân ESP32 | Việc |
+| --- | --- | --- | --- |
+| TIẾN | trỏ | GPIO27 (T7) | đi tới |
+| LÙI | cái | GPIO13 (T4) | đi lùi |
+| TRÁI | giữa | GPIO32 (T9) | quay trái |
+| PHẢI | áp út | GPIO33 (T8) | quay phải |
+| BMI160 | | SDA GPIO25, SCL GPIO26, VIN 3V3, GND | hướng trỏ |
+
+**Thao tác:**
+
+| Thao tác | Kết quả trong game |
+| --- | --- |
+| Chạm một miếng | đi tới / lùi, quay trái / phải |
+| Chạm hai miếng khác cặp (TIẾN + TRÁI...) | vừa đi vừa quay (chéo) |
+| **Bóp TIẾN + LÙI** (trỏ + cái) | nút **B**: giữ = cầm vật đang trỏ, buông = đặt vào chỗ đang trỏ |
+| **Chạm TRÁI + PHẢI** (giữa + áp út) | nút **A**: dùng (bấm thiết bị, nhỏ giọt; rót khi đang cầm) |
+| TIẾN + LÙI + TRÁI (hoặc PHẢI) | cầm và quay trái (phải) |
+| Cả bốn miếng | cầm + dùng (rót, chế độ tinh) |
+| **Giữ TRÁI + PHẢI 3 giây** lúc tay rảnh, không trỏ vào dụng cụ nào | nói với trợ lý AI: nói tiếp, thả để gửi |
+| Nắm tay trái trước webcam | cầm (như bóp), xòe tay trái = thả |
+
+- **Cặp đối nhau triệt tiêu chuyển động** (tiến trừ lùi bằng 0), nên bóp hay chạm đôi không làm nhân vật nhích.
+- **Chống giật:**
+  - Một miếng phải chạm đủ 90 ms (`PAD_TRE_DI_CHUYEN_MS`) mới tính là đi.
+  - Hễ cặp đối nhau cùng chạm thì không miếng nào được đi.
+  - Nhả một cặp lệch nhau thì miếng còn lại bị bỏ qua 150 ms (`PAD_GIAN_CACH_MS`), nên buông cầm không bị "lùi một cái".
+- **Độ nhạy:** `CHAM_HUONG_TY_LE` trong `cau_hinh.h` (0,25) dùng chung cho cả bốn miếng. Nhận chậm thì giảm xuống 0,15; chưa chạm đã nhận thì tăng lên 0,40. Lệnh hiệu chuẩn `a`, `b` vẫn chạy nhưng không còn ảnh hưởng độ nhạy lúc chơi.
+- **Căn hướng:** bỏ cách "giữ A + B 1 giây". Dùng lệnh `z` qua USB, hoặc nút căn lại trong trang Tay cầm của game.
+- **Gỡ lỗi qua USB:** gõ `s2`, dòng số liệu hiện `TLtp` (chữ hoa/chữ thường: miếng nào đang chạm); gõ `p`, dòng `HUONG_CHAM` hiện số đo hai miếng TRÁI, PHẢI. Số đo hai miếng LÙI, TIẾN hiện ở dòng `CHAM A` (= LÙI) và `B` (= TIẾN).
+- **Đã kiểm (g++ với thư viện Arduino giả):** toàn bộ firmware biên dịch không lỗi, không cảnh báo (`-Wall -Wextra`). Mô phỏng 16 thao tác đều đạt: đi / quay từng hướng, chéo, bóp, chạm đôi, bóp lệch 40 và 120 ms, nhả lệch, cầm + quay, cả bốn, chạm ngắn 30 ms, chuỗi đi tới → cầm → quay → đặt. **Chưa biên dịch bằng gói ESP32 thật và chưa chạy trên mạch.**

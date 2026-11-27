@@ -84,9 +84,9 @@ void capNhat(Nut &n, float tyLe, int8_t chieu, float dt, bool dongBangNen = fals
   } else n.demNguoc = 0;
 }
 
-// Miếng hướng: mỗi lượt cảm ứng chỉ đọc 2 trong 4 miếng (mỗi miếng 50 lần/giây) để lượt đọc không quá dài
-void capNhatHuong(uint32_t luot, float dt) {
-  for (int i = (luot & 1) ? 2 : 0, k = 0; k < 2; i++, k++)
+// Miếng TRÁI, PHẢI (bản 3.2: TIẾN, LÙI là hai nút A, B cũ). Cả hai miếng đọc mỗi lần gọi.
+void capNhatHuong(float dt) {
+  for (int i = 0; i < SO_HUONG; i++)
     if (coHuong(i)) capNhat(H[i], CHAM_HUONG_TY_LE, 1, dt);
 }
 

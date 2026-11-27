@@ -119,7 +119,7 @@ namespace Khkt.Demo
             if (t >= 0.5f)
             {
                 int bars = Mathf.Clamp(Mathf.FloorToInt(t / HoldSeconds * 10f), 0, 10);
-                Hint($"Giữ nút A để nói với trợ lý  [{new string('#', bars)}{new string('-', 10 - bars)}]  còn {HoldSeconds - t:0.0} s");
+                Hint($"Giữ nút A (chạm TRÁI + PHẢI) để nói với trợ lý  [{new string('#', bars)}{new string('-', 10 - bars)}]  còn {HoldSeconds - t:0.0} s");
             }
         }
 

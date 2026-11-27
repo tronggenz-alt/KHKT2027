@@ -34,14 +34,14 @@
 #define CHAN_SDA       25   // 18/11/2026: BMI160 chuyển sang GPIO25 (trước là 21)
 #define CHAN_SCL       26   // 18/11/2026: BMI160 chuyển sang GPIO26 (trước là 22)
 #define CHAN_INT1      -1   // không nối dây INT1: lấy mẫu theo đồng hồ 200 Hz. Nối INT1 vào GPIO19 thì đổi lại 19
-#define CHAN_CHAM_A    13   // T4, nút cảm ứng ngón cái
-#define CHAN_CHAM_B    27   // T7, nút cảm ứng ngón trỏ (cầm vật). 26/11/2026: chuyển từ GPIO14 (T6, dây chập GND)
-// 4 miếng chạm hướng (26/11/2026): thay cần gạt khi joystick hỏng. Chạm là đi, hai miếng kề nhau là đi chéo.
-// Chỉ dùng chân cảm ứng không ảnh hưởng lúc khởi động (tránh GPIO0, 2, 12). -1 = không nối miếng đó.
-#define CHAN_CHAM_TIEN 32   // T9
-#define CHAN_CHAM_LUI  33   // T8
-#define CHAN_CHAM_TRAI 4    // T0
-#define CHAN_CHAM_PHAI 15   // T3 (chỉ đổi dòng chữ in ra lúc khởi động, an toàn)
+// 27/11/2026 (bản 3.2): BỐN miếng chạm thay cần gạt. A và B cũ làm 2 trong 4 nút di chuyển; cầm / dùng / nói với AI làm
+// bằng tổ hợp (xem pad4.h). Mỗi miếng là vật dẫn cỡ đầu ngón tay, nối 1 dây thẳng về chân ESP32.
+#define CHAN_CHAM_A    13   // T4,  miếng LÙI  (ngón cái),   gửi game: một nửa nút "bóp" TIẾN + LÙI = B (cầm / đặt)
+#define CHAN_CHAM_B    27   // T7,  miếng TIẾN (ngón trỏ)
+#define CHAN_CHAM_TIEN -1   // không dùng (miếng TIẾN chính là CHAN_CHAM_B)
+#define CHAN_CHAM_LUI  -1   // không dùng (miếng LÙI chính là CHAN_CHAM_A)
+#define CHAN_CHAM_TRAI 32   // T9,  miếng TRÁI (ngón giữa)
+#define CHAN_CHAM_PHAI 33   // T8,  miếng PHẢI (ngón áp út); TRÁI + PHẢI = nút A của game (dùng)
 #define CHAN_LED       2    // LED xanh có sẵn trên board
 
 // Tốc độ I2C tới BMI160. 24/11/2026: ở 400 kHz BMI160 rớt kết nối vài giây một lần (dây dài, mối hàn), hạ xuống 100 kHz
@@ -90,5 +90,11 @@
 // Miếng chạm hướng: coi chạm thật làm số đo tụt chừng này so với mức nền (chưa có lệnh hiệu chuẩn riêng).
 // Chạm nhận chậm / không nhận: giảm (0.15). Chưa chạm đã nhận (tay cầm gần miếng): tăng (0.40).
 #define CHAM_HUONG_TY_LE     0.25f
+// Một miếng phải chạm đủ chừng này (ms) mới tính là "đi": bóp hai miếng lệch nhau vài chục ms không làm nhân vật giật một nhịp
+#define PAD_TRE_DI_CHUYEN_MS 90
+// Nhả một cặp bóp thì miếng còn lại bị bỏ qua chừng này (ms), tránh "lùi / tiến một cái" khi buông lệch nhau
+#define PAD_GIAN_CACH_MS     150
+// Tốc độ tăng / giảm của trục đi và quay (đơn vị / giây). Cũ: CHAM_HUONG_TOC_DO
+#define PAD_TOC_DO           8.0f
 // Tốc độ đổi hướng khi chạm / buông miếng hướng (đơn vị / giây): 8 = lên hết cỡ trong 0,125 s, game không thấy giật
 #define CHAM_HUONG_TOC_DO    8.0f

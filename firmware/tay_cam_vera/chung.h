@@ -5,7 +5,7 @@
 #include <stdarg.h>
 #include "cau_hinh.h"
 
-#define PHIEN_BAN "VERA-TAYCAM v3.1"  // 3.1 (26/11/2026): 4 miếng chạm hướng, chạm B sang GPIO27, bỏ trục joystick hỏng
+#define PHIEN_BAN "VERA-TAYCAM v3.2"  // 3.2 (27/11/2026): 4 miếng chạm (A, B cũ làm tiến, lùi), bóp = cầm, chạm cặp kia = dùng
 
 // Bit trạng thái, byte 34 của gói v3
 #define BIT_CHAM_A       0x01

@@ -71,7 +71,7 @@ Webcam chạy ngay trong ứng dụng (Unity Inference Engine), không gọi Pyt
 
 ## 6. Nói tiếng Việt với trợ lý AI (27/11/2026)
 
-- **Tay cầm VERA:** tay rảnh, không trỏ vào dụng cụ nào, **giữ nút chạm A 3 giây**. Trong lúc giữ, góc dưới bên phải hiện thanh đếm. Đủ 3 giây thì khung trợ lý mở và bắt đầu thu âm. **Giữ tiếp để nói, thả A là gửi cho AI.**
+- **Tay cầm VERA:** tay rảnh, không trỏ vào dụng cụ nào, **giữ nút A 3 giây** (với firmware v3.2 là chạm TRÁI + PHẢI cùng lúc). Trong lúc giữ, góc dưới bên phải hiện thanh đếm. Đủ 3 giây thì khung trợ lý mở và bắt đầu thu âm. **Giữ tiếp để nói, thả A là gửi cho AI.**
   - Tay đang cầm vật: giữ A vẫn là dùng vật (rót, nhỏ giọt). Đang trỏ vào thiết bị: A vẫn là bấm thiết bị.
   - A báo chạm liên tục từ lúc nối (dây chập) thì bị bỏ qua tới khi thả.
 - **Nút Mic** trên khung trợ lý (hoặc phím **V** khi khung mở): bấm để bắt đầu nói, nút đổi thành đỏ "Dừng", bấm lần nữa để gửi.

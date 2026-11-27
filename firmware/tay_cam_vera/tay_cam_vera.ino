@@ -11,7 +11,7 @@
  *   loop() - lệnh qua USB, đèn LED, in số liệu ra USB.
  *
  * Lệnh (qua USB hoặc UDP; lệnh 1 chữ không cần Enter):
- *   z  đặt yaw về 0 (hoặc giữ cả 2 nút cảm ứng 1 giây)     c / C  cân con quay (để yên 1 giây)
+ *   z  đặt yaw về 0                                          c / C  cân con quay (để yên 1 giây)
  *   J  lấy tâm joystick ngay (buông cần)                    j      hiệu chuẩn biên joystick (xoay cần sát mép 8 giây)
  *   a  hiệu chuẩn nút A (đặt ngón tay giữ 3 giây)            b      hiệu chuẩn nút B
  *   g  hiệu chuẩn tỉ lệ con quay (xoay 5 vòng trên bàn)      k      hiệu chuẩn đầy đủ: j, a, b
@@ -22,9 +22,10 @@
  *   p / I  in thông tin      x  xoá hiệu chuẩn đã lưu
  * Giữ nhấn cần joystick lúc cắm điện: chạy hiệu chuẩn đầy đủ (k) ngay sau khi khởi động (khi có nối CHAN_JOY_NUT).
  *
- * v3.1 (26/11/2026): 4 miếng chạm hướng GPIO32 tiến, 33 lùi, 4 trái, 15 phải (cau_hinh.h) thay cần gạt khi joystick
- * hỏng; chạm B chuyển sang GPIO27; trục joystick chỉ dùng khi đã thấy cần nằm gần tâm (kẹt 0 V / 3,3 V thì bỏ).
- * Game không cần sửa: miếng chạm gửi ra như joystick (cả điện áp giả 1650 ± 1500 mV).
+ * v3.2 (27/11/2026): BỐN miếng chạm thay cần gạt hỏng (xem pad4.h): TIẾN GPIO27, LÙI GPIO13 (hai nút A, B cũ), TRÁI GPIO32,
+ * PHẢI GPIO33. Bóp TIẾN + LÙI = nút B của game (cầm / đặt); chạm TRÁI + PHẢI = nút A của game (dùng; giữ 3 giây lúc tay rảnh
+ * = nói với trợ lý AI). Trục joystick thật chỉ dùng khi đã thấy cần nằm gần tâm (kẹt 0 V / 3,3 V thì bỏ).
+ * Game không cần sửa: tổ hợp gửi ra như joystick (cả điện áp giả 1650 ± 1500 mV) và hai cờ chạm A, B.
  */
 #include "cau_hinh.h"
 #include "chung.h"
@@ -32,6 +33,7 @@
 #include "huong.h"
 #include "joystick.h"
 #include "cam_ung.h"
+#include "pad4.h"
 #include "mang.h"
 
 TaskHandle_t tacVuCamBienHandle = nullptr;
@@ -568,8 +570,7 @@ void tacVuCamBien(void *) {
   uint32_t truocUs = micros();
   float nhiet = 23;
   bool coNhiet = false;
-  uint32_t batDauCaHai = 0;
-  bool daCanLaiLanNay = false;
+  pad4::Bo pad;
   TickType_t nhip = xTaskGetTickCount();
   batDauCheDo(CD_CAN_YEN);
 
@@ -645,13 +646,17 @@ void tacVuCamBien(void *) {
       }
     }
 
-    // 4. Joystick và cảm ứng, xen kẽ (mỗi thứ 100 Hz)
+    // 4. Joystick và cảm ứng, xen kẽ (joystick 100 Hz; cảm ứng 100 Hz, mỗi lượt đọc 2 miếng, hai lượt đủ 4 miếng: 50 Hz/miếng)
     bool coJoy = (dem & 1) == 0, coCham = !coJoy;
     if (coJoy) joy::capNhat();
     if (coCham) {
-      cham::capNhat(cham::A, cd.tyLeA, cd.chieuA, 2 * dt, cheDo == CD_CAN_A);
-      cham::capNhat(cham::B, cd.tyLeB, cd.chieuB, 2 * dt, cheDo == CD_CAN_B);
-      cham::capNhatHuong(dem >> 1, 4 * dt);
+      if (((dem >> 1) & 1) == 0) {
+        // miếng LÙI (A cũ) và TIẾN (B cũ): độ nhạy chung CHAM_HUONG_TY_LE như TRÁI, PHẢI (đang hiệu chuẩn a / b thì theo cd)
+        cham::capNhat(cham::A, cheDo == CD_CAN_A ? cd.tyLeA : CHAM_HUONG_TY_LE, cheDo == CD_CAN_A ? cd.chieuA : 1, 4 * dt, cheDo == CD_CAN_A);
+        cham::capNhat(cham::B, cheDo == CD_CAN_B ? cd.tyLeB : CHAM_HUONG_TY_LE, cheDo == CD_CAN_B ? cd.chieuB : 1, 4 * dt, cheDo == CD_CAN_B);
+      } else {
+        cham::capNhatHuong(4 * dt);
+      }
     }
     if (joy::doiTot) {
       for (int i = 0; i < 2; i++)
@@ -672,18 +677,8 @@ void tacVuCamBien(void *) {
       luuCaiDat();
     }
 
-    // 6. Giữ cả 2 nút 1 giây: đặt yaw về 0 (một lần mỗi lần giữ)
-    if (cheDo == CD_CHAY && cham::A.bam && cham::B.bam) {
-      if (batDauCaHai == 0) batDauCaHai = millis();
-      if (!daCanLaiLanNay && millis() - batDauCaHai >= 1000) {
-        huong::datLaiYaw();
-        lanCanLaiMs = millis();
-        daCanLaiLanNay = true;
-      }
-    } else {
-      batDauCaHai = 0;
-      daCanLaiLanNay = false;
-    }
+    // 6. (Bản 3.2 bỏ cách đặt yaw về 0 bằng miếng chạm: giữ cả bốn miếng là thao tác rót, đặt lại ở giữa lúc rót làm tia nhảy.
+    // Căn lại bằng lệnh z, hoặc nút căn lại trong trang Tay cầm của game.)
 
     // 7. Ghi trạng thái cho tác vụ mạng và loop()
     TrangThai t;
@@ -693,17 +688,19 @@ void tacVuCamBien(void *) {
       t.gyro[i] = imuOk ? huong::gyroRa[i] : 0;
       t.acc[i] = a[i];
     }
-    // Cần gạt: miếng chạm hướng được ưu tiên, không chạm thì dùng joystick thật (trục nào tin được).
-    // Miếng chạm gửi cả điện áp giả theo đúng chiều joystick thật (tiến = Y tăng, phải = X giảm, tâm 1650 mV)
-    // để game đang đọc mV (Unity VeraJoyCal) chạy được ngay, không cần sửa game.
-    uint8_t hc = cham::huongDangCham();
-    float muc[2] = {(float)((hc >> cham::H_PHAI & 1) - (hc >> cham::H_TRAI & 1)),
-                    (float)((hc >> cham::H_TIEN & 1) - (hc >> cham::H_LUI & 1))};
-    if (muc[0] != 0 && muc[1] != 0) { muc[0] *= 0.7071f; muc[1] *= 0.7071f; }
-    static float joyCham[2] = {0, 0};
-    float buoc = CHAM_HUONG_TOC_DO * dt;
-    for (int i = 0; i < 2; i++) joyCham[i] += constrain(muc[i] - joyCham[i], -buoc, buoc);
-    bool dungCham = hc || fabsf(joyCham[0]) > 0.001f || fabsf(joyCham[1]) > 0.001f;
+    // Bốn miếng chạm (pad4.h): đi / quay + tổ hợp cầm (TIẾN+LÙI) và dùng (TRÁI+PHẢI). Chạm thì thay cần gạt; không chạm thì dùng
+    // joystick thật (trục nào tin được). Gửi game cả điện áp giả theo đúng chiều joystick thật (tiến = Y tăng, phải = X giảm,
+    // tâm 1650 mV) và hai cờ chạm A (= dùng) / B (= cầm) nên game không cần sửa.
+    bool ch[pad4::SO];
+    ch[pad4::TIEN] = cham::B.bam;
+    ch[pad4::LUI] = cham::A.bam;
+    ch[pad4::TRAI] = cham::coHuong(cham::H_TRAI) && cham::H[cham::H_TRAI].bam;
+    ch[pad4::PHAI] = cham::coHuong(cham::H_PHAI) && cham::H[cham::H_PHAI].bam;
+    if (cheDo != CD_CHAY) ch[0] = ch[1] = ch[2] = ch[3] = false;   // đang hiệu chuẩn: không phát tín hiệu ra game
+    pad.capNhat(millis(), ch, dt);
+    float joyCham[2] = {pad.ra.x, pad.ra.y};
+    bool dungCham = pad.dangDung();
+    uint8_t hc = pad.ra.dang;
     if (dungCham) {
       t.joy[0] = joyCham[0];
       t.joy[1] = joyCham[1];
@@ -715,11 +712,11 @@ void tacVuCamBien(void *) {
       t.joyMv[1] = joy::mvRa[1];
     }
     t.huongCham = hc;
-    t.mucA = cham::muc8(cham::A);
-    t.mucB = cham::muc8(cham::B);
+    t.mucA = pad.ra.dung ? 255 : 0;   // nút A của game = TRÁI + PHẢI (dùng)
+    t.mucB = pad.ra.cam ? 255 : 0;    // nút B của game = TIẾN + LÙI (cầm / đặt)
     uint8_t bit = 0;
-    if (cham::A.bam) bit |= BIT_CHAM_A;
-    if (cham::B.bam) bit |= BIT_CHAM_B;
+    if (pad.ra.dung) bit |= BIT_CHAM_A;
+    if (pad.ra.cam) bit |= BIT_CHAM_B;
     if (joy::nut) bit |= BIT_NHAN_CAN;
     if (huong::yen && !dungCham) bit |= BIT_DANG_YEN;  // đang chạm miếng hướng = có người cầm (game không bỏ trục)
     if (lanCanLaiMs && millis() - lanCanLaiMs < 300) bit |= BIT_VUA_CAN_LAI;
