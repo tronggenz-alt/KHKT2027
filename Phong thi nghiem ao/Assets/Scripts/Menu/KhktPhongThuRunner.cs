@@ -32,6 +32,8 @@ namespace Khkt.Demo
                 StartCoroutine(ChayP3());
             else if (CheDo == "P4")
                 StartCoroutine(ChayP4());
+            else if (CheDo == "P5")
+                StartCoroutine(ChayP5());
         }
 
         // ========================================================================= P1
@@ -278,6 +280,186 @@ namespace Khkt.Demo
 
             Debug.Log("[P4_PASS] Thành công P4: thích ứng Sáng/Tối trễ hai ngưỡng, bóng đổ thích ứng, ánh sáng neo ±15° & mất tiêu điểm an toàn batchmode!");
             EditorApplication.Exit(0);
+        }
+
+        // ========================================================================= P5
+        IEnumerator ChayP5()
+        {
+            Directory.CreateDirectory(ThuMucXuat);
+            PlayerPrefs.SetInt("KHKT_KINH_LONG", 1);
+            PlayerPrefs.SetInt("KHKT_GIAM_CHUYEN_DONG", 0);
+            KinhLongQuangHoc.DamBaoKhoiTao();
+
+            var (baseCam, canvas, haiTang) = TaoSanKhauCoBan(new Color(0.06f, 0.08f, 0.13f, 1f));
+            var rt = new RenderTexture(Rong, Cao, 24, RenderTextureFormat.ARGB32);
+            rt.Create();
+            baseCam.targetTexture = rt;
+            KinhLongBlurCache.EpChupMoiKhung = true;
+
+            var contentRoot = new GameObject("P5Content", typeof(RectTransform));
+            contentRoot.layer = 5;
+            contentRoot.transform.SetParent(canvas.transform, false);
+            Stretch((RectTransform)contentRoot.transform);
+
+            var navRoot = new GameObject("P5Nav", typeof(RectTransform));
+            navRoot.transform.SetParent(canvas.transform, false);
+            Stretch((RectTransform)navRoot.transform);
+            KinhGuongDieuHuong.Gan(navRoot, haiTang, true);
+
+            // 1. (§12.2 #4) Chụp ngưng tụ 0.00s, 0.14s, 0.25s, 0.40s không biến mất alpha thân kính
+            var texBg = TaoAnhNenGradient();
+            TaoRaw(contentRoot.transform, "BgC", Vector2.zero, new Vector2(1920, 1080), texBg);
+            // Dải chữ / sọc chạy ngang phía sau để thấy rõ đường cong mờ & khúc xạ khi ngưng tụ
+            TaoHop(contentRoot.transform, "StripC", new Vector2(0, 0), new Vector2(1500, 34), new Color(0.95f, 0.72f, 0.20f, 1f));
+            var txtBg = TaoChu(contentRoot.transform, "▶   Ngưng tụ quang học iOS 26 • 0.00s → 0.40s   ▶", 34, Color.white);
+            txtBg.rectTransform.anchoredPosition = new Vector2(0, -56);
+            txtBg.rectTransform.sizeDelta = new Vector2(1500, 50);
+            float[] normSteps = { 0.02f, 0.35f, 0.65f, 1.00f };
+            string[] labelSteps = { "0.00s", "0.14s", "0.25s", "0.40s" };
+            float[] xs = { -540f, -180f, 180f, 540f };
+            for (int i = 0; i < 4; i++)
+            {
+                var card = TaoKinh(navRoot.transform, $"Mat_{i}", new Vector2(xs[i], 0), new Vector2(280, 170),
+                    KinhLongCheDo.Regular, laSang: false, vienNang: false, laDieuHuong: true, mucMo: 2.8f, banKinh: 34f);
+                var ngungTu = card.gameObject.AddComponent<KinhLongNgungTuApple>();
+                ngungTu.DatTaiThoiDiem(normSteps[i]);
+                TaoChu(card.transform, $"Ngưng tụ {labelSteps[i]}", 24, Color.white);
+            }
+            yield return CapNhatVaChup(baseCam, rt, "truong_hop_c_ngung_tu.png");
+
+            // Kiểm tra vật lý phản ứng nút Mac bounce / iPad 1.15x / kéo gel bảo toàn thể tích / ReducedMotion
+            var btnGlass = TaoKinh(navRoot.transform, "BtnBounce", new Vector2(-420, -340), new Vector2(220, 68),
+                KinhLongCheDo.Regular, laSang: false, vienNang: true, laDieuHuong: true);
+            var hieuUng = NutHieuUngApple.Attach(btnGlass.gameObject);
+            hieuUng.KichHoatKiemThuNhan(iPad: false, dragOffset: Vector2.zero);
+            hieuUng.BuocMoPhong(0.08f);
+            float macScaleDown = hieuUng.ScaleHienTai.x;
+            hieuUng.OnPointerUp(null);
+            float peakBounce = 1f;
+            for (int i = 0; i < 16; i++)
+            {
+                hieuUng.BuocMoPhong(0.016f);
+                peakBounce = Mathf.Max(peakBounce, hieuUng.ScaleHienTai.x);
+            }
+
+            hieuUng.KichHoatKiemThuNhan(iPad: true, dragOffset: Vector2.zero);
+            for (int i = 0; i < 20; i++) hieuUng.BuocMoPhong(0.016f);
+            float ipadScale = hieuUng.ScaleHienTai.x;
+
+            hieuUng.KichHoatKiemThuNhan(iPad: false, dragOffset: new Vector2(90f, 0f));
+            for (int i = 0; i < 16; i++) hieuUng.BuocMoPhong(0.016f);
+            float sx = hieuUng.ScaleHienTai.x / 0.965f;
+            float sy = hieuUng.ScaleHienTai.y / 0.965f;
+            float volProduct = sx * sy;
+            NutHieuUngApple.GiaLapIpad = false;
+
+            // 2. (§12.2 #6) Chụp truong_hop_e_cong_tac_thanh_truot: bên trái nghỉ (tròn đặc), bên phải đang nhấn/kéo biến hình thấu kính thật
+            XoaCon(contentRoot.transform);
+            XoaCon(navRoot.transform);
+            TaoRaw(contentRoot.transform, "BgE", Vector2.zero, new Vector2(1920, 1080), texBg);
+
+            // Rãnh công tắc trái (nghỉ) & phải (đang nhấn nâng thấu kính Lip)
+            var swLeft = TaoCongTacKiemThu(contentRoot.transform, navRoot.transform, new Vector2(-360, 140), isOn: true, pressed: false);
+            var swRight = TaoCongTacKiemThu(contentRoot.transform, navRoot.transform, new Vector2(360, 140), isOn: true, pressed: true);
+
+            // Thanh trượt trái (nghỉ: width == height) & phải (đang kéo: Squircle 1.70x1.30 thấu kính thật)
+            var slLeft = TaoThanhTruotKiemThu(contentRoot.transform, navRoot.transform, new Vector2(-360, -140), pressed: false);
+            var slRight = TaoThanhTruotKiemThu(contentRoot.transform, navRoot.transform, new Vector2(360, -140), pressed: true);
+
+            yield return CapNhatVaChup(baseCam, rt, "truong_hop_e_cong_tac_thanh_truot.png");
+
+            bool okRestSwitch = Mathf.Abs(swLeft.knob.sizeDelta.x - 62f) < 0.5f && swLeft.knobImage.color.a > 0.95f;
+            bool okPressSwitch = swRight.DangDungThauKinhApple && swRight.knob.sizeDelta.x > 85f && swRight.knobImage.color.a < 0.15f;
+            bool okRestSlider = Mathf.Abs(slLeft.handle.sizeDelta.x - slLeft.handle.sizeDelta.y) < 0.5f;
+            bool okPressSlider = slRight.handle.sizeDelta.x > slRight.handle.sizeDelta.y * 1.25f;
+            bool okMacBounce = macScaleDown < 0.99f && peakBounce > 1.005f && peakBounce < 1.08f;
+            bool okIpad = ipadScale > 1.08f;
+            bool okVolume = Mathf.Abs(volProduct - 1f) < 0.08f;
+
+            Debug.Log($"[P5 Check] macDown={macScaleDown:F3} macPeak={peakBounce:F3} ipad={ipadScale:F3} gelVol={volProduct:F3} swRest={okRestSwitch} swPress={okPressSwitch} slRest={okRestSlider} slPress={okPressSlider}");
+
+            baseCam.targetTexture = null;
+            rt.Release();
+            Destroy(rt);
+            Destroy(texBg);
+
+            if (!okRestSwitch || !okPressSwitch || !okRestSlider || !okPressSlider || !okMacBounce || !okIpad || !okVolume)
+            {
+                Fail($"[P5_FAIL] restSw={okRestSwitch} pressSw={okPressSwitch} restSl={okRestSlider} pressSl={okPressSlider} mac={okMacBounce} ipad={okIpad} vol={okVolume}");
+                yield break;
+            }
+
+            Debug.Log("[P5_PASS] Thành công P5: Ngưng tụ Hermite, nảy Mac/iPad, kéo gel bảo toàn thể tích & biến hình thấu kính công tắc/thanh trượt!");
+            EditorApplication.Exit(0);
+        }
+
+        static KinhLongCongTac TaoCongTacKiemThu(Transform contentParent, Transform navParent, Vector2 pos, bool isOn, bool pressed)
+        {
+            var track = TaoHop(contentParent, "SwitchTrack", pos, new Vector2(160, 76), new Color(0.20f, 0.78f, 0.35f, 1f));
+            var tImg = track.GetComponent<Image>();
+            tImg.sprite = KinhLong.VienNang;
+            tImg.type = Image.Type.Sliced;
+            var tgl = track.AddComponent<Toggle>();
+            tgl.isOn = isOn;
+
+            var holder = new GameObject("SwitchNavHolder", typeof(RectTransform));
+            holder.layer = navParent.gameObject.layer;
+            holder.transform.SetParent(navParent, false);
+            var hldRt = (RectTransform)holder.transform;
+            hldRt.anchorMin = hldRt.anchorMax = new Vector2(0.5f, 0.5f);
+            hldRt.anchoredPosition = pos;
+            hldRt.sizeDelta = new Vector2(160, 76);
+
+            var knobGo = new GameObject("SwitchKnob", typeof(RectTransform), typeof(Image));
+            knobGo.layer = navParent.gameObject.layer;
+            knobGo.transform.SetParent(holder.transform, false);
+            var kRt = (RectTransform)knobGo.transform;
+            kRt.anchorMin = kRt.anchorMax = new Vector2(0.5f, 0.5f);
+            kRt.pivot = new Vector2(0.5f, 0.5f);
+            kRt.anchoredPosition = new Vector2(isOn ? 36f : -36f, 0f);
+            kRt.sizeDelta = new Vector2(62f, 62f);
+            var kImg = knobGo.GetComponent<Image>();
+            kImg.color = Color.white;
+            kImg.sprite = KinhLong.VienNang;
+            kImg.type = Image.Type.Sliced;
+
+            var sw = KinhLongCongTac.Attach(tgl, kRt, kImg, 36f);
+            sw.BatCheDoApple(true);
+            sw.DatTrangThaiKiemThu(pressed, pressed ? 1f : 0f);
+            return sw;
+        }
+
+        static KinhLongNumTruot TaoThanhTruotKiemThu(Transform contentParent, Transform navParent, Vector2 pos, bool pressed)
+        {
+            var rail = TaoHop(contentParent, "SliderRail", pos, new Vector2(460, 22), new Color(0.18f, 0.52f, 0.96f, 1f));
+            var sl = rail.AddComponent<Slider>();
+            sl.minValue = 0f; sl.maxValue = 1f; sl.value = 0.5f;
+
+            var holder = new GameObject("SliderNavHolder", typeof(RectTransform));
+            holder.layer = navParent.gameObject.layer;
+            holder.transform.SetParent(navParent, false);
+            var hldRt = (RectTransform)holder.transform;
+            hldRt.anchorMin = hldRt.anchorMax = new Vector2(0.5f, 0.5f);
+            hldRt.anchoredPosition = pos;
+            hldRt.sizeDelta = new Vector2(460, 60);
+
+            var hGo = new GameObject("Núm", typeof(RectTransform), typeof(Image));
+            hGo.layer = navParent.gameObject.layer;
+            hGo.transform.SetParent(holder.transform, false);
+            var hRt = (RectTransform)hGo.transform;
+            hRt.anchorMin = hRt.anchorMax = new Vector2(0.5f, 0.5f);
+            hRt.pivot = new Vector2(0.5f, 0.5f);
+            hRt.anchoredPosition = Vector2.zero;
+            hRt.sizeDelta = new Vector2(54f, 54f);
+            var hImg = hGo.GetComponent<Image>();
+            hImg.color = Color.white;
+            hImg.sprite = KinhLong.VienNang;
+            hImg.type = Image.Type.Sliced;
+
+            var nt = KinhLongNumTruot.Attach(sl, hRt, hImg, null);
+            nt.BatCheDoApple(true);
+            nt.DatTrangThaiKiemThu(pressed, pressed ? 1f : 0f);
+            return nt;
         }
 
         IEnumerator DựngVaChupA(Camera cam, RenderTexture rt, Transform content, Transform nav)

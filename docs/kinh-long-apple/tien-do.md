@@ -74,8 +74,12 @@
     - `KinhLongTieuDiem`: dịu nhẹ 0.25s khi mất tiêu điểm (`OnApplicationFocus(false)`), bỏ qua mặc định trong `-batchmode` trừ khi bật `GiaLapMatTieuDiem`.
   - Cập nhật `KinhLongAnhSang.cs`: giữ nguyên hành vi Phòng Lab; ngoài Lab neo nguồn sáng tại `(-0.45, 0.89)` uốn nhẹ `±15°` theo chuột (Mac/Win) hoặc gia tốc kế (iPad), thêm `QuetVien()`.
   - Đã kiểm tra `KinhLongPhongThu.KiemTraP4Batch` → `[P4_PASS]` (`coLuoiGpu=True`, `smallStartDark=True`, `smallTurnedLight=True`, `largeLockedDark=True`, `shadowDark=0.170 → shadowLight=0.252`, `lightDot=0.9664`, `focusDefault=0 → focusSim=1`).
-- **P5**: Chuyển động lỏng (ngưng tụ Hermite, rọi con trỏ, nảy macOS/iPad, kéo gel & biến hình công tắc/thanh trượt). *(Đang thực hiện)*
-- **P6**: `HopKinh` (`sminPoly`), giọt chọn không màu, bùng popover & viền cuộn.
+- **P5 — Chuyển động lỏng (ngưng tụ Hermite, rọi con trỏ, nảy Mac/iPad, kéo gel & biến hình công tắc/thanh trượt):** **Hoàn thành**
+  - Tạo `KinhLongNgungTuApple.cs` (`KinhLongNgungTuApple` đường cong Hermite `0.00s → 0.40s` không làm mờ alpha cả bảng; `NutHieuUngApple` rọi con trỏ `_RoiTam`, sóng chạm `_ChamTam`, nảy `LoXo(0.35, 0.55)` trên Mac/Win, pop `1.15×` trên iPad, kéo gel `CaoSu` bảo toàn thể tích `sx × sy ≈ 1`, viền focus `Tab` & nhánh `ReducedMotion`).
+  - Nâng cấp `KinhLongCongTac.cs` và `KinhLongNumTruot.cs`: giữ nguyên hành vi `NumKinh` trong Lab; ngoài Lab khi nhấn/kéo biến hình thành thấu kính thật `KinhHinh` (`Lip` `1.55×1.30` cho công tắc, `Squircle` `1.70×1.30` cho thanh trượt phóng đại rãnh màu) và khi nghỉ trả về đúng núm vuông/tròn trắng.
+  - Đã kiểm tra `KinhLongPhongThu.KiemTraP5Batch` → `[P5_PASS]` (`macDown=0.978`, `macPeak=1.006`, `ipad=1.150`, `gelVol=0.971`, `swRest/Press=True`, `slRest/Press=True`).
+  - Tạo & đối chiếu bằng mắt `so_sanh_c_ngung_tu.png` (vs `4c_180_37s`) và `so_sanh_e_cong_tac_thanh_truot.png` (vs `4f_256s` & `4g_265s`).
+- **P6**: `HopKinh` (`sminPoly`), giọt chọn không màu, bùng popover & viền cuộn. *(Đang thực hiện)*
 - **P7**: Phủ khắp mọi màn hình ngoài Lab & xóa sạch mọi nhuộm màu trên kính.
 - **P8**: Trợ năng & thanh trượt `"Độ trong của kính"` (`KHKT_DO_TRONG`).
 - **P9**: Kiểm định đủ 10 tiêu chí §12.2, đối chiếu `lab_truoc` vs `lab_sau` & build ứng dụng Mac thật.
