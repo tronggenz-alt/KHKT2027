@@ -48,8 +48,12 @@
 ---
 
 ## Nhật ký các pha tiếp theo
-- **P1**: Hệ thống 2 tầng Canvas/Camera, Layer 14 `KinhDieuHuong`, `KinhLongThapMo.shader`, `KinhLongBlurFeature` (RenderGraph URP 17) & nâng cấp `KinhLongNen`. *(Đang chuẩn bị)*
-- **P2**: `Khkt/KinhLongApple`, LUT Snell 128x1, `Khkt/BoGocAnh`, `KinhHinh` & đăng ký AlwaysIncludedShaders/WarmUp.
+- **P1 — Hệ thống 2 tầng Canvas/RenderGraph, Layer 14 `KinhDieuHuong`, `KinhLongThapMo.shader`, `KinhLongBlurFeature` & `KinhLongNen`:** **Hoàn thành**
+  - Khai báo Layer `14: KinhDieuHuong` trong `ProjectSettings/TagManager.asset`.
+  - Tạo `VungKinhApple.cs`, `KinhLongHaiTang.cs` (`KinhLongLop`, `KinhLongCameraNen`, `DongBoCanvasDieuHuong`, `HaiTangCanvas`, `KinhGuongDieuHuong`), `KinhLongThapMo.shader` (Copy + Dual Kawase 5-tap Downsample + 8-tap Tent Upsample), `KinhLongBlurFeature.cs` (RenderGraph URP 17 trên một camera duy nhất, tách Layer 14 khỏi pass vẽ mặc định của `PC_Renderer.asset` & `Mobile_Renderer.asset`, tạo `_KL_NoiDung` & `_KL_Mo1..4`, cache 0 ms khi đứng yên + `AsyncGPUReadback` lưới sáng 24×14, sau đó vẽ riêng `RendererList` Layer 14 đè lên).
+  - Nâng cấp `KinhLongNen.cs` lên nền mịn 1920×1080 kèm tháp mờ tính sẵn 1 lần `_KL_NenMo1..4` + lưới sáng CPU 24×14.
+  - Đã kiểm tra PlayMode `KhktKinhLongSetup.KiemTraP1Batch` → `[P1_PASS]` (`Center=0.949,0.451,0.110`, `Nav=0.110,0.851,0.451`, `NoiDungAtNav=0.949,0.451,0.110` tách sạch Layer 14, `NoiDung=1280x720`, `Mo1=640x360`, `Mo4=80x45`, `IdleSkip=True`).
+- **P2**: `Khkt/KinhLongApple`, LUT Snell 128x1, `Khkt/BoGocAnh`, `KinhHinh` & đăng ký AlwaysIncludedShaders/WarmUp. *(Đang thực hiện)*
 - **P3**: Dựng `KinhLongPhongThu` (bộ trường hợp a–g @ 2880x1800) & hiệu chỉnh quang học tĩnh.
 - **P4**: Thích ứng Sáng/Tối, bóng đổ thích ứng, ánh sáng môi trường & tối dịu khi mất tiêu điểm.
 - **P5**: Chuyển động lỏng (ngưng tụ Hermite, rọi con trỏ, nảy macOS/iPad, kéo gel & biến hình công tắc/thanh trượt).
