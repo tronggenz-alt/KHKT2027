@@ -155,7 +155,7 @@ namespace Khkt.Demo
 
         VeraPointer vera;
         readonly AimAssist assist = new AimAssist();
-        bool autoTest, veraA, veraB, veraDownPrev, veraHoldNoPick;
+        bool autoTest, veraA, veraB, veraDownPrev, veraHoldNoPick, fistPrev, fistPicked, fistHolding;
         // chạm kẹt: báo chạm ngay từ lúc nối tay cầm mà chưa từng nhả thì bỏ qua tới khi nhả (đo 25/11/2026: dây chạm B
         // chập GND, mạch báo "đang chạm" liên tục nên tay ảo cứ cầm mãi)
         object veraSourceSeen;
@@ -274,6 +274,47 @@ namespace Khkt.Demo
             released = aR;
         }
 
+        /// <summary>
+        /// Nắm tay trái trước webcam khi KHÔNG có tay cầm VERA trỏ (chuột / tâm màn hình trỏ vật): nắm = cầm vật đang trỏ (nắm trước
+        /// rồi trỏ cũng được), xòe = đặt vào chỗ đang trỏ, không trỏ chỗ đặt thì trả vật về chỗ cũ. Trước đây nắm tay chỉ có tác
+        /// dụng khi tay cầm VERA đang nối nên không cầm được cốc (tay ảo vẫn chụm lại vì ArmRig đọc cùng cử chỉ).
+        /// </summary>
+        void FistButtons(ref bool down, ref bool pressed, ref bool released)
+        {
+            bool fist = InAppHandTracker.LeftGripNow;
+            bool fistUp = !fist && fistPrev;
+            fistPrev = fist;
+            if (!fist) fistPicked = false;
+            if (Held == null)
+            {
+                fistHolding = false;
+                bool pickAct = Current == Act.Pick || Current == Act.Swirl;
+                if (fist && !fistPicked && pickAct && hoverGrab != null)
+                {
+                    fistPicked = true;
+                    fistHolding = true;
+                    CancelInspectHold();
+                    Pick(hoverGrab);
+                    down = pressed = released = false;
+                }
+                return;
+            }
+            if (fistUp && fistHolding)
+            {
+                fistHolding = false;
+                bool placeAct = Current == Act.Place || Current == Act.PlaceSurface || Current == Act.Attach;
+                down = released = false;
+                if (placeAct) pressed = true;
+                else
+                {
+                    pressed = false;
+                    string ten = Held.name;
+                    ReturnHome();
+                    Say($"Đã trả {ten} về chỗ cũ (xòe tay trái khi trỏ vào chỗ đặt để đặt xuống)");
+                }
+            }
+        }
+
         void OnDisable() => CancelInspectHold();
 
         void OnPadNotice(string text) => Say(text);
@@ -331,7 +372,11 @@ namespace Khkt.Demo
             bool released = !down && wasDown;
             wasDown = down;
             if (VeraAiming && !uiOpen && vera.Source != null) VeraButtons(ref down, ref pressed, ref released);
-            else if (vera != null) vera.FineMode = false;
+            else
+            {
+                if (vera != null) vera.FineMode = false;
+                if (!uiOpen) FistButtons(ref down, ref pressed, ref released);
+            }
             if (pressed) pressTime = Time.time;
             // bấm vào nút/khóa/vật (tay rảnh): tay đưa tới chạm rồi về
             if (pressed && Held == null && hasHit && Current != Act.None && Current != Act.Pick) tapUntil = Time.time + 0.75f;
