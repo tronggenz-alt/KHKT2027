@@ -157,6 +157,10 @@ namespace Khkt.Demo.Ai
             "(môi trường H2SO4 loãng), kim loại với axit loãng, nhận biết ion, trung hòa, chuẩn độ, điện phân dung dịch, " +
             "glucozơ với Cu(OH)2, tốc độ phản ứng, cân bằng hóa học. Chỉ từ chối (ke_hoach rỗng, giải thích nhẹ nhàng) khi yêu cầu " +
             "chế tạo chất nổ, pháo, chất độc / ma túy, hoặc tạo lượng lớn khí độc ngoài tủ hút.\n" +
+            "- Đã NÓI sẽ làm gì (mang, lấy, rót, đo, đun...) thì ke_hoach PHẢI có đủ các bước đó, không được chỉ trả lời bằng lời. " +
+            "Câu ngắn như 'tôi', 'cho tôi', 'ok', 'có', 'làm đi' là trả lời câu robot vừa hỏi trong HỘI THOẠI GẦN ĐÂY: làm luôn yêu cầu " +
+            "trước đó (ví dụ 'lấy KI cho' rồi 'tôi' = lay_hoa_chat KI rồi dat ban_nguoi_dung). Yêu cầu lấy hóa chất mà chưa rõ cho ai thì " +
+            "mặc định mang ra bàn người dùng, không hỏi lại.\n" +
             "- Robot tự đi lên / xuống tầng bằng thang bộ khi vật cần tới ở tầng khác (lay_hoa_chat từ tầng 2 vẫn được: robot xuống " +
             "phòng hóa chất tầng 1 rồi mang lên).\n" +
             "- Khi người dùng ở TẦNG 2 (lab sinh, mã vật dạng binh_sinh_, sinh_pham_, dung_cu_sinh_, mau_sinh_, hop_cap_, num_, nut_, nap_, " +
@@ -436,6 +440,75 @@ namespace Khkt.Demo.Ai
         public static ChemEntry FindChemical(string query) => ChemicalCatalog.Instance != null ? FindChemical(query, ChemicalCatalog.Instance.Chemicals) : null;
 
         public static ChemEntry FindChemical(string query, ChemEntry[] all)
+        {
+            if (all == null) return null;
+            string q = query ?? "";
+            // "dung dịch KI", "lọ NaOH": phần còn lại đúng một công thức thì lấy chất đó (trước đây khớp nhầm "Dung dịch iot (I2/KI)")
+            string lead = Regex.Replace(q, @"(?i)^\s*(dung d[iị]ch|dd|l[oọ]|chai|b[iì]nh)\s+", "").Trim();
+            ChemEntry hit;
+            if (lead != q.Trim() && (hit = FormulaOnly(lead, all)) != null) return hit;
+            hit = FindChemicalExact(query, all);
+            if (hit != null) return hit;
+            // AI hay ghi "kali iodua (KI)", "kali iotua", "đồng sunphat": thử công thức trong ngoặc / từ viết hoa, bỏ chữ "dung dịch",
+            // rồi tên gần đúng (sai 1-2 chữ cái, "ph" = "f", bỏ hóa trị "(II)")
+            foreach (Match m in Regex.Matches(q, @"\(([^)]+)\)"))
+                if ((hit = FindChemicalExact(m.Groups[1].Value, all)) != null) return hit;
+            string bare = Regex.Replace(q, @"\([^)]*\)", " ");
+            bare = Regex.Replace(bare, @"(?i)\b(dung d[iị]ch|dd|l[oọ]|chai|b[iì]nh|m[oộ]t [ií]t)\b", " ").Trim();
+            if (bare.Length > 0 && bare != q && (hit = FindChemicalExact(bare, all)) != null) return hit;
+            foreach (Match m in Regex.Matches(q, @"\b[A-Z][A-Za-z0-9()]{0,11}\b"))
+                if ((hit = FormulaOnly(m.Value, all)) != null) return hit;
+            string qf0 = Loose(bare.Length > 0 ? bare : q);
+            if (qf0.Length < 5) return null;
+            ChemEntry best = null;
+            int bestD = 3;
+            foreach (var c in all)
+            {
+                if (c == null || string.IsNullOrEmpty(c.ten)) continue;
+                int d = Lev(Loose(c.ten), qf0, bestD);
+                if (d < bestD || (d == bestD && best != null && c.trang_thai == "dd" && best.trang_thai != "dd")) { best = c; bestD = d; }
+            }
+            return bestD <= 2 ? best : null;
+        }
+
+        static string Loose(string s) =>
+            Regex.Replace(Regex.Replace(FoldHoa(s), @"\((i|ii|iii|iv|v|vi|vii)\)", ""), @"\s+", " ").Replace("ph", "f").Trim();
+
+        /// <summary>Chất có công thức đúng bằng chuỗi (ưu tiên dung dịch), null nếu chuỗi không phải công thức nào.</summary>
+        static ChemEntry FormulaOnly(string f, ChemEntry[] all)
+        {
+            string ff = FoldHoa(f);
+            if (ff.Length == 0 || !f.Any(char.IsUpper)) return null;
+            ChemEntry best = null;
+            foreach (var c in all)
+                if (c != null && !string.IsNullOrEmpty(c.cong_thuc) && FoldHoa(c.cong_thuc) == ff &&
+                    (best == null || (c.trang_thai == "dd" && best.trang_thai != "dd")))
+                    best = c;
+            return best;
+        }
+
+        static int Lev(string a, string b, int cap)
+        {
+            if (Math.Abs(a.Length - b.Length) >= cap) return cap;
+            var prev = new int[b.Length + 1];
+            var cur = new int[b.Length + 1];
+            for (int j = 0; j <= b.Length; j++) prev[j] = j;
+            for (int i = 1; i <= a.Length; i++)
+            {
+                cur[0] = i;
+                int rowMin = cur[0];
+                for (int j = 1; j <= b.Length; j++)
+                {
+                    cur[j] = Math.Min(Math.Min(prev[j] + 1, cur[j - 1] + 1), prev[j - 1] + (a[i - 1] == b[j - 1] ? 0 : 1));
+                    rowMin = Math.Min(rowMin, cur[j]);
+                }
+                if (rowMin >= cap) return cap;
+                var t = prev; prev = cur; cur = t;
+            }
+            return Math.Min(prev[b.Length], cap);
+        }
+
+        static ChemEntry FindChemicalExact(string query, ChemEntry[] all)
         {
             string qf = FoldHoa(query);
             if (qf.Length == 0 || all == null) return null;

@@ -59,7 +59,7 @@ namespace Khkt.Input
         const int HoldFrames = 6;
 
         const int DetN = 192, LmN = 224, Anchors = 2016;
-        const float DetThreshold = 0.5f, PresenceThreshold = 0.5f;
+        const float DetThreshold = 0.4f, PresenceThreshold = 0.5f;   // 27/11: nắm tay (mất ngón) điểm dò thấp hơn xòe tay
 
         public static InAppHandTracker Instance { get; private set; }
         public bool Running { get; private set; }

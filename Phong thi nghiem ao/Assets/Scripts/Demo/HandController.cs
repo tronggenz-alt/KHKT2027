@@ -155,7 +155,7 @@ namespace Khkt.Demo
 
         VeraPointer vera;
         readonly AimAssist assist = new AimAssist();
-        bool autoTest, veraA, veraB, veraDownPrev;
+        bool autoTest, veraA, veraB, veraDownPrev, veraHoldNoPick;
         // chạm kẹt: báo chạm ngay từ lúc nối tay cầm mà chưa từng nhả thì bỏ qua tới khi nhả (đo 25/11/2026: dây chạm B
         // chập GND, mạch báo "đang chạm" liên tục nên tay ảo cứ cầm mãi)
         object veraSourceSeen;
@@ -220,13 +220,17 @@ namespace Khkt.Demo
             veraA = a;
             veraB = b;
             vera.FineMode = Held != null && a;
+            if (!b) veraHoldNoPick = false;
             if (Held == null)
             {
                 bool pickAct = Current == Act.Pick || Current == Act.Swirl;
+                // nắm tay trái (hoặc giữ B) TRƯỚC rồi mới trỏ tới vật: vẫn cầm khi tia chạm vật (trước đây phải nắm lại lần nữa)
+                if (b && hoverGrab == null) veraHoldNoPick = true;
                 // B / nắm tay trái khi đang trỏ dụng cụ: cầm NGAY. Không qua "giữ 0,4 s mở bảng chi tiết" của chuột
                 // (giữ là cách cầm của tay cầm, trước đây giữ B lại mở bảng thay vì cầm khi bảng dụng cụ đang bật)
-                if (pickAct && hoverGrab != null && (bP || (b && !veraDownPrev)))
+                if (pickAct && hoverGrab != null && (bP || (b && !veraDownPrev) || (b && veraHoldNoPick)))
                 {
+                    veraHoldNoPick = false;
                     Pick(hoverGrab);
                     veraDownPrev = true;
                     down = pressed = released = false;
