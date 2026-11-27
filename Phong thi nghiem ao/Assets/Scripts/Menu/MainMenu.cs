@@ -767,12 +767,12 @@ namespace Khkt.Menu
         void BuildSettings(RectTransform p)
         {
             const float SetW = 900f, SetH = 720f, SideW = 200f, PaneX = 236f, PaneW = SetW - PaneX;
-            var s = NewScreen(p, Screen.Settings, "Cài đặt", "Cài đặt", "Tùy chỉnh giao diện, âm thanh, điều khiển, trợ lý AI và máy chủ.", SetW, SetH);
+            var s = NewScreen(p, Screen.Settings, "Cài đặt", "Cài đặt", "Tùy chỉnh giao diện, âm thanh, điều khiển, trợ lý AI, máy chủ và tổ hợp tay cầm.", SetW, SetH);
 
             GlassKit.Fill(s, "Kẻ đầu", new Vector2(0, -98), new Vector2(SetW, 1), Hair);
             GlassKit.Fill(s, "Kẻ cột mục", new Vector2(SideW + 18, -114), new Vector2(1, 520), Hair);
 
-            string[] tabTitles = { "Hiển thị", "Âm thanh", "Điều khiển", "Trợ lý AI", "Máy chủ" };
+            string[] tabTitles = { "Hiển thị", "Âm thanh", "Điều khiển", "Trợ lý AI", "Máy chủ", "Tay cầm" };
             settingsPanes = new GameObject[tabTitles.Length];
             var tabNames = new string[tabTitles.Length];
             for (int i = 0; i < tabTitles.Length; i++) tabNames[i] = "Mục " + tabTitles[i];
@@ -850,6 +850,9 @@ namespace Khkt.Menu
             MakeButton(t4, "Nút Máy chủ trực tuyến", "Máy chủ trực tuyến", new Vector2(0, -198), new Vector2(half, 48), () => serverField.text = GameSession.CloudServerUrl, 1);
             MakeButton(t4, "Nút Mặc định", "Máy chủ trên máy này", new Vector2(half + 12f, -198), new Vector2(half, 48), () => serverField.text = GameSession.LocalServerUrl, 1);
 
+            // Tab 5: Tay cầm (5 miếng chạm): người dùng tự đặt tổ hợp cho từng thao tác
+            BuildPadComboTab((RectTransform)settingsPanes[5].transform, PaneW);
+
             System.Action leave = () => { if (!busy) Show(GameSession.HasIdentity ? Screen.Home : Screen.Login); };
             MakeButton(s, "Nút quay lại từ cài đặt", "Quay lại", new Vector2(0, -SetH + 54), new Vector2(200, 52), leave, 1);
             submit[Screen.Settings] = () =>
@@ -917,6 +920,65 @@ namespace Khkt.Menu
             }
         }
 
+        // ---------- Cài đặt → Tay cầm: tổ hợp 5 miếng chạm (Khkt.Input.VeraPadMap) ----------
+        readonly Button[,] padChips = new Button[Khkt.Input.VeraPadMap.ActCount, Khkt.Input.VeraPadMap.PadCount];
+        Text padStatus;
+
+        void BuildPadComboTab(RectTransform t5, float paneW)
+        {
+            GlassKit.Label(t5, "Nhãn tổ hợp", "Tổ hợp 5 miếng chạm của tay cầm VERA (firmware 3.3)", 17, Ink, true, TextAnchor.UpperLeft, Vector2.zero, new Vector2(paneW, 26));
+            GlassKit.Label(t5, "Hướng dẫn tổ hợp",
+                "Bấm ô để bật / tắt miếng trong tổ hợp của từng thao tác. Các miếng đã bật phải chạm CÙNG LÚC. Tổ hợp nhiều miếng được ưu tiên: " +
+                "miếng đang thuộc một tổ hợp không còn tính là đi / quay. Lưu ngay, dùng được luôn trong lab.",
+                13, InkDim, false, TextAnchor.UpperLeft, new Vector2(0, -28), new Vector2(paneW, 40));
+            const float labelW = 214f, chipW = 82f, gap = 6f, rowH = 44f, top = -104f;
+            for (int j = 0; j < Khkt.Input.VeraPadMap.PadCount; j++)
+                GlassKit.Label(t5, "Cột " + j, Khkt.Input.VeraPadMap.PadNames[j] + "\n<size=11>" + Khkt.Input.VeraPadMap.PadPins[j] + "</size>", 13, InkDim, true,
+                               TextAnchor.MiddleCenter, new Vector2(labelW + j * (chipW + gap), top + 34), new Vector2(chipW, 32));
+            for (int a = 0; a < Khkt.Input.VeraPadMap.ActCount; a++)
+            {
+                float y = top - a * rowH;
+                GlassKit.Label(t5, "Thao tác " + a, Khkt.Input.VeraPadMap.ActNames[a], 14, Ink, false, TextAnchor.MiddleLeft, new Vector2(0, y), new Vector2(labelW - 8, 38));
+                for (int j = 0; j < Khkt.Input.VeraPadMap.PadCount; j++)
+                {
+                    int aa = a, jj = j;
+                    padChips[a, j] = MakeButton(t5, $"Ô tổ hợp {a}-{j}", "", new Vector2(labelW + j * (chipW + gap), y - 2), new Vector2(chipW, 36),
+                        () => { Khkt.Input.VeraPadMap.Toggle((Khkt.Input.VeraPadMap.Act)aa, 1 << jj); RefreshPadCombos(); }, 1);
+                }
+            }
+            float yb = top - Khkt.Input.VeraPadMap.ActCount * rowH - 8f;
+            padStatus = GlassKit.Label(t5, "Trạng thái tổ hợp", "", 13, InkDim, false, TextAnchor.UpperLeft, new Vector2(0, yb), new Vector2(paneW - 214, 52));
+            MakeButton(t5, "Nút mặc định tổ hợp", "Khôi phục mặc định", new Vector2(paneW - 200, yb), new Vector2(200, 44),
+                       () => { Khkt.Input.VeraPadMap.ResetDefaults(); RefreshPadCombos(); }, 1);
+            RefreshPadCombos();
+        }
+
+        void RefreshPadCombos()
+        {
+            if (padStatus == null) return;
+            var conflicts = new System.Text.StringBuilder();
+            for (int a = 0; a < Khkt.Input.VeraPadMap.ActCount; a++)
+            {
+                int m = Khkt.Input.VeraPadMap.Get((Khkt.Input.VeraPadMap.Act)a);
+                for (int j = 0; j < Khkt.Input.VeraPadMap.PadCount; j++)
+                {
+                    var btn = padChips[a, j];
+                    if (btn == null) continue;
+                    bool on = (m & (1 << j)) != 0;
+                    if (btn.targetGraphic is Image face) face.color = on ? Accent : Paper;
+                    var lbl = btn.transform.Find("Chữ")?.GetComponent<Text>();
+                    if (lbl != null) { lbl.text = on ? "Bật" : ""; lbl.color = on ? OnAccent : Ink; }
+                }
+                var other = Khkt.Input.VeraPadMap.Conflict((Khkt.Input.VeraPadMap.Act)a);
+                if (other != null && conflicts.Length < 160)
+                    conflicts.Append(conflicts.Length > 0 ? "; " : "").Append($"\"{Khkt.Input.VeraPadMap.ActNames[a]}\" trùng \"{other}\"");
+            }
+            padStatus.color = conflicts.Length > 0 ? Error : InkDim;
+            padStatus.text = conflicts.Length > 0
+                ? "Trùng tổ hợp (thao tác đứng trên thắng): " + conflicts
+                : "Đã lưu. Bản firmware cũ (4 miếng, 3.2 trở về trước) không dùng bảng này.";
+        }
+
         void SelectSettingsTab(int idx)
         {
             currentSettingsTab = Mathf.Clamp(idx, 0, settingsPanes.Length - 1);
@@ -937,6 +999,7 @@ namespace Khkt.Menu
             if (aiStatusText != null) aiStatusText.text = "";
             RefreshAiKey(null, false);
             if (transToggle != null) transToggle.SetIsOnWithoutNotify(GlassKit.ReducedTransparency);
+            RefreshPadCombos();
             if (motionToggle != null) motionToggle.SetIsOnWithoutNotify(ReducedMotion.IsEnabled);
             if (soundToggle != null) soundToggle.SetIsOnWithoutNotify(NutHieuUng.SoundEnabled);
             if (armsToggle != null) armsToggle.SetIsOnWithoutNotify(!ArmRig.HiddenByUser);

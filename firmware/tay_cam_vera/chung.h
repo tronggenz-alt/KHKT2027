@@ -5,7 +5,7 @@
 #include <stdarg.h>
 #include "cau_hinh.h"
 
-#define PHIEN_BAN "VERA-TAYCAM v3.2"  // 3.2 (27/11/2026): 4 miếng chạm (A, B cũ làm tiến, lùi), bóp = cầm, chạm cặp kia = dùng
+#define PHIEN_BAN "VERA-TAYCAM v3.3"  // 3.3 (27/11/2026): 5 miếng chạm thô gửi app (TIẾN, LÙI, TRÁI, PHẢI, OK), app giải tổ hợp
 
 // Bit trạng thái, byte 34 của gói v3
 #define BIT_CHAM_A       0x01
@@ -36,6 +36,8 @@ struct TrangThai {
   float joyMv[2] = {0, 0};      // điện áp báo game: mV thật, hoặc 1650 khi trục không tin, hoặc giả khi chạm miếng hướng
   float joyMvTho[2] = {0, 0};   // mV đo thật ở chân (chỉ để in chẩn đoán)
   uint8_t huongCham = 0;        // bit 0..3: miếng tiến, lùi, trái, phải đang chạm
+  uint8_t padMask = 0;          // bit 0..4: TIẾN, LÙI, TRÁI, PHẢI, OK đang chạm (gửi app, gói thô byte 22)
+  uint8_t padMuc[5] = {0, 0, 0, 0, 0};  // mức chạm 0..255 từng miếng (gói thô byte 23..27)
 };
 
 portMUX_TYPE khoaTrangThai = portMUX_INITIALIZER_UNLOCKED;

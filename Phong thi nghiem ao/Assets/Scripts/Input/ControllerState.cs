@@ -36,6 +36,9 @@ namespace Khkt.Input
         /// <summary>Tay cầm VERA qua USB: điện áp thật 2 chân joystick (mV); HasJoyMv = false khi không có (Wi-Fi).</summary>
         public Vector2 JoyMv;
         public bool HasJoyMv;
+        /// <summary>Firmware 3.3: 5 miếng chạm thô (bit 0..4 = TIẾN, LÙI, TRÁI, PHẢI, OK), đã giải tổ hợp ở VeraPadMap.</summary>
+        public bool HasPads;
+        public int PadMask;
         public ControllerButtons Buttons;
         /// <summary>Mẫu từ tay cầm VERA (gói 5C / 5D): hướng do mạch tính, có cảm ứng A / B, không qua Mahony trên máy tính.</summary>
         public bool Vera;

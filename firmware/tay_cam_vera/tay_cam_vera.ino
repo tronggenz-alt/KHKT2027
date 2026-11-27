@@ -22,6 +22,8 @@
  *   p / I  in thông tin      x  xoá hiệu chuẩn đã lưu
  * Giữ nhấn cần joystick lúc cắm điện: chạy hiệu chuẩn đầy đủ (k) ngay sau khi khởi động (khi có nối CHAN_JOY_NUT).
  *
+ * v3.3 (27/11/2026): NĂM miếng chạm, thêm OK ở GPIO4. Gói thô byte 2 = 2, byte 22 = 5 miếng thô, byte 23..27 = mức chạm; app
+ *   giải tổ hợp theo Cài đặt → Tay cầm (Khkt.Input.VeraPadMap). Bản tự giải dưới đây (pad4.h) chỉ dành cho app cũ.
  * v3.2 (27/11/2026): BỐN miếng chạm thay cần gạt hỏng (xem pad4.h): TIẾN GPIO27, LÙI GPIO13 (hai nút A, B cũ), TRÁI GPIO32,
  * PHẢI GPIO33. Bóp TIẾN + LÙI = nút B của game (cầm / đặt); chạm TRÁI + PHẢI = nút A của game (dùng; giữ 3 giây lúc tay rảnh
  * = nói với trợ lý AI). Trục joystick thật chỉ dùng khi đã thấy cần nằm gần tâm (kẹt 0 V / 3,3 V thì bỏ).
@@ -409,7 +411,7 @@ void themMauTho(const float a[3], const float g[3], uint32_t dtUs, const TrangTh
   for (int k = THO_SO_MAU; k < 4; k++) memcpy(b + 48 + k * 14, b + 48 + (k - THO_SO_MAU) * 14, 14);
   b[0] = 0xA5;
   b[1] = 0x5D;
-  b[2] = 1;
+  b[2] = 2;   // 2 = bản 3.3: byte 22..28 là 5 miếng chạm (trước: số đo thô chạm A, B)
   b[3] = THO_SO_MAU;
   b[4] = chiSoMauTho & 0xFF;
   b[5] = chiSoMauTho >> 8;
@@ -419,8 +421,10 @@ void themMauTho(const float a[3], const float g[3], uint32_t dtUs, const TrangTh
   b[12] = t.bit;
   b[13] = (uint8_t)cheDo;
   for (int i = 0; i < 4; i++) ghiTho16(b + 14 + 2 * i, lroundf(t.q[i] * 16384.0f));
-  ghiTho32(b + 22, t.thoA);
-  ghiTho32(b + 26, t.thoB);
+  b[22] = t.padMask;
+  for (int i = 0; i < 5; i++) b[23 + i] = t.padMuc[i];
+  b[28] = 33;  // phiên bản firmware 3.3
+  b[29] = 0;
   ghiTho32(b + 30, (uint32_t)lroundf(t.nenA));
   ghiTho32(b + 34, (uint32_t)lroundf(t.nenB));
   ghiTho16(b + 38, lroundf(t.joyMv[0]));
@@ -449,7 +453,7 @@ void inThongTin() {
   bao("JOYH doi_xy=%d dao_x=%d dao_y=%d", joy::huong.doiXY, joy::huong.daoX, joy::huong.daoY);
   bao("JOYTOT X=%s (%.0f mV) Y=%s (%.0f mV)", joy::tot[0] ? "tot" : "bo", joy::mv[0], joy::tot[1] ? "tot" : "bo", joy::mv[1]);
   {
-    const char ten[] = "TLtp";  // tiến, lùi, trái, phải
+    const char ten[] = "Oxtp";  // OK, dự phòng, trái, phải (TIẾN, LÙI ở dòng CHAM B, A)
     char s[96];
     int n = snprintf(s, sizeof s, "HUONG_CHAM");
     for (int i = 0; i < cham::SO_HUONG && n < (int)sizeof s; i++) {
@@ -696,10 +700,18 @@ void tacVuCamBien(void *) {
     ch[pad4::LUI] = cham::A.bam;
     ch[pad4::TRAI] = cham::coHuong(cham::H_TRAI) && cham::H[cham::H_TRAI].bam;
     ch[pad4::PHAI] = cham::coHuong(cham::H_PHAI) && cham::H[cham::H_PHAI].bam;
-    if (cheDo != CD_CHAY) ch[0] = ch[1] = ch[2] = ch[3] = false;   // đang hiệu chuẩn: không phát tín hiệu ra game
+    bool okCham = cham::coHuong(cham::H_OK) && cham::H[cham::H_OK].bam;
+    if (cheDo != CD_CHAY) { ch[0] = ch[1] = ch[2] = ch[3] = false; okCham = false; }   // đang hiệu chuẩn: không phát ra app
+    // 5 miếng thô cho app 3.3 (app tự giải tổ hợp theo Cài đặt); pad4 bên dưới chỉ là bản tự giải cho app cũ
+    t.padMask = (ch[pad4::TIEN] ? 1 : 0) | (ch[pad4::LUI] ? 2 : 0) | (ch[pad4::TRAI] ? 4 : 0) | (ch[pad4::PHAI] ? 8 : 0) | (okCham ? 16 : 0);
+    t.padMuc[0] = cham::muc8(cham::B);
+    t.padMuc[1] = cham::muc8(cham::A);
+    t.padMuc[2] = cham::coHuong(cham::H_TRAI) ? cham::muc8(cham::H[cham::H_TRAI]) : 0;
+    t.padMuc[3] = cham::coHuong(cham::H_PHAI) ? cham::muc8(cham::H[cham::H_PHAI]) : 0;
+    t.padMuc[4] = cham::coHuong(cham::H_OK) ? cham::muc8(cham::H[cham::H_OK]) : 0;
     pad.capNhat(millis(), ch, dt);
     float joyCham[2] = {pad.ra.x, pad.ra.y};
-    bool dungCham = pad.dangDung();
+    bool dungCham = pad.dangDung() || okCham;
     uint8_t hc = pad.ra.dang;
     if (dungCham) {
       t.joy[0] = joyCham[0];
@@ -713,10 +725,10 @@ void tacVuCamBien(void *) {
     }
     t.huongCham = hc;
     t.mucA = pad.ra.dung ? 255 : 0;   // nút A của game = TRÁI + PHẢI (dùng)
-    t.mucB = pad.ra.cam ? 255 : 0;    // nút B của game = TIẾN + LÙI (cầm / đặt)
+    t.mucB = (pad.ra.cam || okCham) ? 255 : 0;    // app cũ: nút B = bóp TIẾN + LÙI hoặc OK (cầm / đặt)
     uint8_t bit = 0;
     if (pad.ra.dung) bit |= BIT_CHAM_A;
-    if (pad.ra.cam) bit |= BIT_CHAM_B;
+    if (pad.ra.cam || okCham) bit |= BIT_CHAM_B;
     if (joy::nut) bit |= BIT_NHAN_CAN;
     if (huong::yen && !dungCham) bit |= BIT_DANG_YEN;  // đang chạm miếng hướng = có người cầm (game không bỏ trục)
     if (lanCanLaiMs && millis() - lanCanLaiMs < 300) bit |= BIT_VUA_CAN_LAI;
@@ -822,8 +834,8 @@ void loop() {
     float yaw = atan2f(2 * (t.q[0] * t.q[3] + t.q[1] * t.q[2]), 1 - 2 * (t.q[2] * t.q[2] + t.q[3] * t.q[3])) * 57.29578f;
     float pitch = asinf(constrain(2 * (t.q[0] * t.q[2] - t.q[3] * t.q[1]), -1.0f, 1.0f)) * 57.29578f;
     float roll = atan2f(2 * (t.q[0] * t.q[1] + t.q[2] * t.q[3]), 1 - 2 * (t.q[1] * t.q[1] + t.q[2] * t.q[2])) * 57.29578f;
-    char h[5] = {t.huongCham & 1 ? 'T' : '.', t.huongCham & 2 ? 'L' : '.', t.huongCham & 4 ? 't' : '.',
-                 t.huongCham & 8 ? 'p' : '.', 0};
+    char h[6] = {t.padMask & 1 ? 'T' : '.', t.padMask & 2 ? 'L' : '.', t.padMask & 4 ? 't' : '.',
+                 t.padMask & 8 ? 'p' : '.', t.padMask & 16 ? 'O' : '.', 0};
     Serial.printf("J %+.2f %+.2f %c %s (%.0f,%.0f mV) | A %3u %c (%lu/%.0f) | B %3u %c (%lu/%.0f) | YPR %7.2f %6.2f %6.2f | %.1fC %s%s\n",
                   t.joy[0], t.joy[1], (t.bit & BIT_NHAN_CAN) ? 'N' : '-', h, t.joyMvTho[0], t.joyMvTho[1], t.mucA,
                   (t.bit & BIT_CHAM_A) ? '*' : ' ',

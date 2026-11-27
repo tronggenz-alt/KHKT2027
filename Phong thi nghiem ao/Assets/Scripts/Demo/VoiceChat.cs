@@ -56,13 +56,16 @@ namespace Khkt.Demo
             var vp = VeraPointer.Instance;
             var src = vp != null ? vp.Source : null;
             if (src == null || !src.IsConnected) return false;
-            return src.Latest.Has(VeraFlags.TouchA);
+            // firmware 3.3 (5 miếng): tổ hợp "Nói với trợ lý" riêng (Cài đặt → Tay cầm); bản cũ: giữ nút A
+            return src.Latest.HasPads ? src.Latest.Has(VeraFlags.Talk) : src.Latest.Has(VeraFlags.TouchA);
         }
 
         bool CanStartHold()
         {
             if (RobotChatUI.Instance == null || ClassRules.ChatLocked) return false;
             if (RobotChatUI.Instance.IsOpen) return true;
+            var vp = VeraPointer.Instance;
+            if (vp != null && vp.Source != null && vp.Source.Latest.HasPads) return true;   // tổ hợp riêng: không lẫn với thao tác khác
             var hand = FindAnyObjectByType<HandController>();
             if (hand == null) return true;
             // tay đang cầm vật: giữ A là dùng vật (rót, nhỏ giọt); đang trỏ thiết bị: A là bấm thiết bị
@@ -119,7 +122,9 @@ namespace Khkt.Demo
             if (t >= 0.5f)
             {
                 int bars = Mathf.Clamp(Mathf.FloorToInt(t / HoldSeconds * 10f), 0, 10);
-                Hint($"Giữ nút A (chạm TRÁI + PHẢI) để nói với trợ lý  [{new string('#', bars)}{new string('-', 10 - bars)}]  còn {HoldSeconds - t:0.0} s");
+                var lp = VeraPointer.Instance != null && VeraPointer.Instance.Source != null && VeraPointer.Instance.Source.Latest.HasPads;
+                string combo = lp ? VeraPadMap.Describe(VeraPadMap.Get(VeraPadMap.Act.Noi)) : "nút A";
+                Hint($"Giữ {combo} để nói với trợ lý  [{new string('#', bars)}{new string('-', 10 - bars)}]  còn {HoldSeconds - t:0.0} s");
             }
         }
 

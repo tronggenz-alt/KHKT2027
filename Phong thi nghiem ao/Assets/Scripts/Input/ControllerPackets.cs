@@ -26,12 +26,32 @@ namespace Khkt.Input
         /// </summary>
         public static ControllerState FromVera(in VeraSample v)
         {
+            // Firmware 3.3: 5 miếng chạm thô → tổ hợp người dùng đặt (Cài đặt → Tay cầm). Ghi đè cờ A / B / căn lại và cần gạt
+            // của firmware (firmware vẫn gửi bản tự giải cho app cũ).
+            var flags = v.Flags;
+            Vector2 joy2;
+            byte ta = v.TouchA, tb = v.TouchB;
+            if (v.HasPads)
+            {
+                var r = VeraPadMap.Step(v.PadMask, v.TimeMs);
+                flags &= ~(VeraFlags.TouchA | VeraFlags.TouchB | VeraFlags.Recentered | VeraFlags.Talk);
+                if (r.Use) flags |= VeraFlags.TouchA;
+                if (r.Grab) flags |= VeraFlags.TouchB;
+                if (r.Recenter) flags |= VeraFlags.Recentered;
+                if (r.Talk) flags |= VeraFlags.Talk;
+                if (v.PadMask != 0) flags &= ~VeraFlags.Still;   // đang chạm = có người cầm
+                joy2 = r.Move;
+                ta = (byte)(r.Use ? 255 : 0);
+                tb = (byte)(r.Grab ? 255 : 0);
+            }
+            else joy2 = VeraJoyCal.Apply(v.Joy, v.JoyMv, v.HasJoyMv);
+
             var b = ControllerButtons.None;
-            if ((v.Flags & VeraFlags.TouchB) != 0) b |= ControllerButtons.Trigger;
-            if ((v.Flags & VeraFlags.TouchA) != 0) b |= ControllerButtons.Joy1Press;
-            if ((v.Flags & VeraFlags.StickPress) != 0) b |= ControllerButtons.Joy2Press;
-            if ((v.Flags & VeraFlags.Recentered) != 0) b |= ControllerButtons.Recenter;
-            if ((v.Flags & VeraFlags.ImuError) != 0) b |= ControllerButtons.ImuError;
+            if ((flags & VeraFlags.TouchB) != 0) b |= ControllerButtons.Trigger;
+            if ((flags & VeraFlags.TouchA) != 0) b |= ControllerButtons.Joy1Press;
+            if ((flags & VeraFlags.StickPress) != 0) b |= ControllerButtons.Joy2Press;
+            if ((flags & VeraFlags.Recentered) != 0) b |= ControllerButtons.Recenter;
+            if ((flags & VeraFlags.ImuError) != 0) b |= ControllerButtons.ImuError;
             return new ControllerState
             {
                 TimeMs = v.TimeMs,
@@ -40,15 +60,17 @@ namespace Khkt.Input
                 GyroDps = v.GyroDps,
                 OrientationRH = (v.Flags & VeraFlags.ImuError) != 0 ? Quaternion.identity : v.OrientationRH,
                 // cần gạt: có điện áp thật (USB) thì tính từ mV với tâm cố định, không phụ thuộc tâm firmware học lúc mở cổng
-                Joy2 = VeraJoyCal.Apply(v.Joy, v.JoyMv, v.HasJoyMv),
+                Joy2 = joy2,
                 JoyRaw = v.Joy,
                 JoyMv = v.JoyMv,
-                HasJoyMv = v.HasJoyMv,
+                HasJoyMv = v.HasJoyMv && !v.HasPads,
+                HasPads = v.HasPads,
+                PadMask = v.PadMask,
                 Buttons = b,
                 Vera = true,
-                TouchA = v.TouchA,
-                TouchB = v.TouchB,
-                Flags = v.Flags,
+                TouchA = ta,
+                TouchB = tb,
+                Flags = flags,
                 TempC = v.TempC,
             };
         }

@@ -26,10 +26,10 @@ struct Nut {
 Nut A{CHAN_CHAM_A};
 Nut B{CHAN_CHAM_B};
 
-// 4 miếng chạm hướng (cau_hinh.h). Chân -1 thành 255 = không nối, bỏ qua.
-enum { H_TIEN, H_LUI, H_TRAI, H_PHAI, SO_HUONG };
+// Các miếng chạm ngoài A (LÙI), B (TIẾN): OK, dự phòng, TRÁI, PHẢI (cau_hinh.h). Chân -1 thành 255 = không nối, bỏ qua.
+enum { H_OK, H_DU, H_TRAI, H_PHAI, SO_HUONG };
 const uint8_t KHONG_NOI = 255;
-Nut H[SO_HUONG] = {Nut{(uint8_t)CHAN_CHAM_TIEN}, Nut{(uint8_t)CHAN_CHAM_LUI}, Nut{(uint8_t)CHAN_CHAM_TRAI},
+Nut H[SO_HUONG] = {Nut{(uint8_t)CHAN_CHAM_OK}, Nut{(uint8_t)CHAN_CHAM_DU}, Nut{(uint8_t)CHAN_CHAM_TRAI},
                    Nut{(uint8_t)CHAN_CHAM_PHAI}};
 bool coHuong(int i) { return H[i].chan != KHONG_NOI; }
 
@@ -84,7 +84,7 @@ void capNhat(Nut &n, float tyLe, int8_t chieu, float dt, bool dongBangNen = fals
   } else n.demNguoc = 0;
 }
 
-// Miếng TRÁI, PHẢI (bản 3.2: TIẾN, LÙI là hai nút A, B cũ). Cả hai miếng đọc mỗi lần gọi.
+// Miếng OK, TRÁI, PHẢI (TIẾN, LÙI là hai nút A, B cũ). Đọc tất cả mỗi lần gọi.
 void capNhatHuong(float dt) {
   for (int i = 0; i < SO_HUONG; i++)
     if (coHuong(i)) capNhat(H[i], CHAM_HUONG_TY_LE, 1, dt);

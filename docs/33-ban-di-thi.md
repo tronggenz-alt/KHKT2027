@@ -93,3 +93,8 @@ Webcam chạy ngay trong ứng dụng (Unity Inference Engine), không gọi Pyt
   - Đo trước khi sửa: lần nhấn E đầu tiên đứng hình khoảng 1,3 s. Gỡ nén `bp3d.bin.gz` và giải mã 115 nghìn đỉnh lớp xương mất khoảng 490 ms trên luồng chính, dựng sân khấu 142 ms, rồi một khung hình vẽ đầu tiên 664 ms. Lần thứ hai chỉ 25 ms.
   - Sửa 1: gỡ nén và giải mã đỉnh chạy ở luồng nền ngay sau khi vào khu sinh học (4 giây sau khi cổng nạp, `Bp3dReader.CoPrewarm`); luồng chính chỉ dựng Mesh chia theo khung hình. Đo: nạp trước 0,3 s, khung hình tệ nhất 25 ms.
   - Sửa 2: màn hình "Đang tải mô hình giải phẫu 3D" phủ kín màn hình, hiện trước khi dựng phòng, che khoảng khựng của khung vẽ đầu tiên (`GiaiPhauDangTai`). Sau khi tắt màn hình tải, khung hình tệ nhất 17 ms (trước là 664 ms).
+
+
+## 8. Tay cầm 5 miếng chạm và Cài đặt → Tay cầm (27/11/2026)
+
+Firmware 3.3 có 5 miếng: TIẾN (GPIO27), LÙI (GPIO13), TRÁI (GPIO32), PHẢI (GPIO33), OK (GPIO4). Firmware gửi trạng thái thô; app giải tổ hợp theo **Cài đặt → Tay cầm**: bảng 8 thao tác × 5 miếng, bấm ô để bật / tắt miếng, lưu ngay, có nút "Khôi phục mặc định" và báo đỏ khi hai thao tác trùng tổ hợp. Chi tiết và bảng đấu nối: docs/28, mục "Bản 3.3".

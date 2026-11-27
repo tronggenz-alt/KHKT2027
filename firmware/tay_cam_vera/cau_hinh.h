@@ -34,14 +34,15 @@
 #define CHAN_SDA       25   // 18/11/2026: BMI160 chuyển sang GPIO25 (trước là 21)
 #define CHAN_SCL       26   // 18/11/2026: BMI160 chuyển sang GPIO26 (trước là 22)
 #define CHAN_INT1      -1   // không nối dây INT1: lấy mẫu theo đồng hồ 200 Hz. Nối INT1 vào GPIO19 thì đổi lại 19
-// 27/11/2026 (bản 3.2): BỐN miếng chạm thay cần gạt. A và B cũ làm 2 trong 4 nút di chuyển; cầm / dùng / nói với AI làm
-// bằng tổ hợp (xem pad4.h). Mỗi miếng là vật dẫn cỡ đầu ngón tay, nối 1 dây thẳng về chân ESP32.
-#define CHAN_CHAM_A    13   // T4,  miếng LÙI  (ngón cái),   gửi game: một nửa nút "bóp" TIẾN + LÙI = B (cầm / đặt)
+// 27/11/2026 (bản 3.3): NĂM miếng chạm thay cần gạt: TIẾN, LÙI (hai nút A, B cũ), TRÁI, PHẢI, OK. Firmware gửi app trạng thái
+// thô của cả 5 miếng (gói thô byte 22); app tự giải tổ hợp theo Cài đặt → Tay cầm (đổi tổ hợp không cần nạp lại).
+// Mỗi miếng là vật dẫn cỡ đầu ngón tay, nối 1 dây thẳng về chân ESP32, không nối GND.
+#define CHAN_CHAM_A    13   // T4,  miếng LÙI  (ngón cái)
 #define CHAN_CHAM_B    27   // T7,  miếng TIẾN (ngón trỏ)
-#define CHAN_CHAM_TIEN -1   // không dùng (miếng TIẾN chính là CHAN_CHAM_B)
-#define CHAN_CHAM_LUI  -1   // không dùng (miếng LÙI chính là CHAN_CHAM_A)
+#define CHAN_CHAM_OK   4    // T0,  miếng OK   (mặc định trong app: cầm / đặt)
+#define CHAN_CHAM_DU   -1   // dự phòng, chưa nối
 #define CHAN_CHAM_TRAI 32   // T9,  miếng TRÁI (ngón giữa)
-#define CHAN_CHAM_PHAI 33   // T8,  miếng PHẢI (ngón áp út); TRÁI + PHẢI = nút A của game (dùng)
+#define CHAN_CHAM_PHAI 33   // T8,  miếng PHẢI (ngón áp út)
 #define CHAN_LED       2    // LED xanh có sẵn trên board
 
 // Tốc độ I2C tới BMI160. 24/11/2026: ở 400 kHz BMI160 rớt kết nối vài giây một lần (dây dài, mối hàn), hạ xuống 100 kHz

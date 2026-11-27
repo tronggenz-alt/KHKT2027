@@ -14,6 +14,7 @@ namespace Khkt.Input
         Still = 0x08,       // tay cầm đang nằm yên (firmware đang học lại độ lệch con quay)
         Recentered = 0x10,  // vừa giữ A + B 1 giây: firmware đặt yaw về 0
         Calibrating = 0x20,
+        Talk = 0x40,        // app (VeraPadMap): tổ hợp "Nói với trợ lý" đang giữ (firmware không gửi bit này)
         ImuError = 0x80,
     }
 
@@ -38,6 +39,9 @@ namespace Khkt.Input
         /// Game tính cần gạt từ số này với tâm cố định (VeraJoyCal) vì tâm firmware học lúc mở cổng có thể sai.</summary>
         public Vector2 JoyMv;
         public bool HasJoyMv;
+        /// <summary>Firmware 3.3 (gói thô, byte 2 = 2): 5 miếng chạm thô, bit 0..4 = TIẾN, LÙI, TRÁI, PHẢI, OK.</summary>
+        public bool HasPads;
+        public int PadMask;
         public byte TouchA, TouchB;    // mức 0..255 (lơ lửng ~38, chạm 128)
         public VeraFlags Flags;
         public float TempC;
@@ -93,6 +97,8 @@ namespace Khkt.Input
                 Joy = new Vector2(I16(b, o + 42) / J, I16(b, o + 44) / J),
                 JoyMv = new Vector2(I16(b, o + 38), I16(b, o + 40)),
                 HasJoyMv = true,
+                HasPads = b[o + 2] >= 2,
+                PadMask = b[o + 2] >= 2 ? b[o + 22] & 0x1F : 0,
                 TouchA = b[o + 46],
                 TouchB = b[o + 47],
                 GyroDps = g / n,

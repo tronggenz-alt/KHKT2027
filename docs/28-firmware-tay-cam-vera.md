@@ -337,3 +337,44 @@ Chưa thử với tay cầm thật. Phân tích mất khoảng 2–3 phút cho 1
 - **Căn hướng:** bỏ cách "giữ A + B 1 giây". Dùng lệnh `z` qua USB, hoặc nút căn lại trong trang Tay cầm của game.
 - **Gỡ lỗi qua USB:** gõ `s2`, dòng số liệu hiện `TLtp` (chữ hoa/chữ thường: miếng nào đang chạm); gõ `p`, dòng `HUONG_CHAM` hiện số đo hai miếng TRÁI, PHẢI. Số đo hai miếng LÙI, TIẾN hiện ở dòng `CHAM A` (= LÙI) và `B` (= TIẾN).
 - **Đã kiểm (g++ với thư viện Arduino giả):** toàn bộ firmware biên dịch không lỗi, không cảnh báo (`-Wall -Wextra`). Mô phỏng 16 thao tác đều đạt: đi / quay từng hướng, chéo, bóp, chạm đôi, bóp lệch 40 và 120 ms, nhả lệch, cầm + quay, cả bốn, chạm ngắn 30 ms, chuỗi đi tới → cầm → quay → đặt. **Chưa biên dịch bằng gói ESP32 thật và chưa chạy trên mạch.**
+
+## Bản 3.3: năm miếng chạm, app tự giải tổ hợp theo Cài đặt (27/11/2026)
+
+Thêm miếng **OK**. Firmware chỉ gửi trạng thái thô của 5 miếng; **app giải tổ hợp** theo bảng người dùng tự đặt ở **Cài đặt → Tay cầm**, nên đổi tổ hợp không cần nạp lại mạch.
+
+**Bảng đấu nối (ESP32 DevKit V1):**
+
+| Miếng | Ngón gợi ý | Chân ESP32 |
+| --- | --- | --- |
+| TIẾN | trỏ | GPIO27 (T7) |
+| LÙI | cái | GPIO13 (T4) |
+| TRÁI | giữa | GPIO32 (T9) |
+| PHẢI | áp út | GPIO33 (T8) |
+| **OK** (mới) | cái hoặc lòng bàn tay | **GPIO4 (T0)** |
+| BMI160 | | SDA GPIO25, SCL GPIO26, VIN 3V3, GND |
+
+Mỗi miếng nối một dây, không nối GND. Gỡ dây khỏi GPIO14, GPIO15.
+
+**Tổ hợp mặc định trong app (đổi được):**
+
+| Thao tác | Tổ hợp |
+| --- | --- |
+| Đi tới / Đi lùi / Quay trái / Quay phải | TIẾN / LÙI / TRÁI / PHẢI |
+| Cầm / đặt (giữ để mang) | OK |
+| Dùng / rót (giữ) | TIẾN + LÙI |
+| Nói với trợ lý (giữ 3 giây) | TRÁI + PHẢI |
+| Căn lại hướng tia (giữ 1 giây) | TIẾN + LÙI + TRÁI + PHẢI |
+
+- **Quy tắc giải tổ hợp (`Khkt.Input.VeraPadMap`):**
+  - Tổ hợp nhiều miếng được xét trước; miếng đã thuộc một tổ hợp đang chạm thì không còn tính cho thao tác ít miếng hơn.
+  - Tổ hợp phải chạm đủ 90 ms mới bật. Nhả lệch một tổ hợp thì miếng còn lại bị bỏ qua 150 ms.
+  - Hai thao tác trùng tổ hợp thì thao tác đứng trên thắng; Cài đặt báo đỏ chỗ trùng.
+- **Gói thô (USB):**
+  - Byte 2 = 2 nghĩa là bản 3.3.
+  - Byte 22 là 5 miếng (bit 0..4 = TIẾN, LÙI, TRÁI, PHẢI, OK); byte 23..27 là mức chạm 0..255; byte 28 = 33.
+  - Firmware vẫn gửi kèm bản tự giải (`pad4.h`, OK = cầm) cho app cũ.
+- **Gỡ lỗi:** lệnh `s2` in `TLtpO` cho 5 miếng; lệnh `p` in dòng `HUONG_CHAM O=... t=... p=...`.
+- **Đã kiểm:**
+  - Firmware biên dịch bằng g++ không lỗi, không cảnh báo.
+  - Bài thử trong Unity 29/29 đạt: giải gói 3.3 và gói cũ, 4 hướng, chéo, OK = cầm, bóp = dùng, OK + bóp = rót, TRÁI + PHẢI = nói, cả 4 miếng 1,5 s căn lại đúng một nhịp, bóp lệch 40 ms không giật, nhả lệch không lùi, đổi tổ hợp lưu và nạp lại, không cho rỗng, cờ trạng thái gửi đúng cho game, mục Tay cầm trong Cài đặt (bấm ô, khôi phục mặc định, báo trùng).
+  - **Chưa biên dịch bằng gói ESP32 thật và chưa chạy trên mạch.**
