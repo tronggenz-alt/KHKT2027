@@ -590,7 +590,7 @@ PlayerSettings:
   enableCrashReportAPI: 0
   cameraUsageDescription: "\u1EE8ng d\u1EE5ng c\u1EA7n truy c\u1EADp camera \u0111\u1EC3 theo d\xF5i c\u1EED ch\u1EC9 b\xE0n tay (Hand Tracking)."
   locationUsageDescription: 
-  microphoneUsageDescription: 
+  microphoneUsageDescription: "\u1EE8ng d\u1EE5ng c\u1EA7n micro \u0111\u1EC3 b\u1EA1n n\xF3i ti\u1EBFng Vi\u1EC7t v\u1EDBi tr\u1EE3 l\xFD AI (gi\u1EEF n\xFAt A tr\xEAn tay c\u1EA7m r\u1ED3i n\xF3i)."
   bluetoothUsageDescription: 
   macOSTargetOSVersion: 12.0
   switchNMETAOverride: 

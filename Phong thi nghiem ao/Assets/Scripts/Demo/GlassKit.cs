@@ -240,39 +240,40 @@ namespace Khkt.Demo
                 if (m.HasProperty("_Chroma")) m.SetFloat("_Chroma", chroma);
                 if (m.HasProperty("_Specular")) m.SetFloat("_Specular", specular);
                 if (m.HasProperty("_Adaptive")) m.SetFloat("_Adaptive", 1f);
+                if (m.HasProperty("_VertTint")) m.SetFloat("_VertTint", 0.42f);   // kính màu chỉ phớt màu
                 if (m.HasProperty("_Vibrancy")) m.SetFloat("_Vibrancy", UiTheme.IsLight ? 1.05f : 1.2f);
-                if (m.HasProperty("_EdgeClear")) m.SetFloat("_EdgeClear", UiTheme.IsLight ? 0.25f : (light ? 0.45f : 0.4f));
-                if (m.HasProperty("_Reflect")) m.SetFloat("_Reflect", light ? 0.25f : 0.2f);
+                if (m.HasProperty("_EdgeClear")) m.SetFloat("_EdgeClear", 0.08f);
+                if (m.HasProperty("_Reflect")) m.SetFloat("_Reflect", 0.08f);
             }
             if (UiTheme.IsLight)
             {
-                m.SetColor("_Tint", light ? new Color(1f, 1f, 1f, 0.32f) : new Color(1f, 1f, 1f, 0.40f));
+                m.SetColor("_Tint", light ? new Color(1f, 1f, 1f, 0.20f) : new Color(1f, 1f, 1f, 0.26f));
                 m.SetFloat("_Dark", 0f);
-                m.SetColor("_BorderColor", new Color(1f, 1f, 1f, 0.55f));
+                m.SetColor("_BorderColor", new Color(1f, 1f, 1f, 0.45f));
                 m.SetFloat("_Blur", light ? 10f : 18f);   // trắng mờ đục nhẹ (frosted)
                 if (m.HasProperty("_AccentColor")) m.SetColor("_AccentColor", Color.clear);
                 if (m.HasProperty("_Grid")) m.SetFloat("_Grid", 0f);
-                Liquid(light ? 36f : 30f, 0.7f, 1.45f);
+                Liquid(light ? 16f : 14f, 0.35f, 1.1f);
             }
             else if (UiTheme.IsDark)
             {
-                m.SetColor("_Tint", light ? new Color(0.32f, 0.34f, 0.40f, 0.32f) : new Color(0.24f, 0.26f, 0.32f, 0.40f));
+                m.SetColor("_Tint", light ? new Color(0.32f, 0.34f, 0.40f, 0.22f) : new Color(0.24f, 0.26f, 0.32f, 0.30f));
                 m.SetFloat("_Dark", light ? 0.06f : 0.12f);
                 m.SetColor("_BorderColor", new Color(1f, 1f, 1f, 0.22f));
                 m.SetFloat("_Blur", light ? 6f : 12f);
                 if (m.HasProperty("_AccentColor")) m.SetColor("_AccentColor", Color.clear);
                 if (m.HasProperty("_Grid")) m.SetFloat("_Grid", 0f);
-                Liquid(light ? 36f : 30f, 1f, 1f);
+                Liquid(light ? 16f : 14f, 0.4f, 0.9f);
             }
             else
             {
-                m.SetColor("_Tint", light ? new Color(0.34f, 0.54f, 0.80f, 0.22f) : new Color(0.14f, 0.22f, 0.36f, 0.40f));
+                m.SetColor("_Tint", light ? new Color(0.34f, 0.54f, 0.80f, 0.16f) : new Color(0.14f, 0.22f, 0.36f, 0.30f));
                 m.SetFloat("_Dark", light ? 0.06f : 0.14f);
                 m.SetColor("_BorderColor", light ? new Color(0.62f, 0.86f, 1f, 0.5f) : new Color(0.45f, 0.78f, 1f, 0.42f));
                 m.SetFloat("_Blur", light ? 6f : 12f);
                 if (m.HasProperty("_AccentColor")) m.SetColor("_AccentColor", new Color(Accent.r, Accent.g, Accent.b, 0.9f));
                 if (m.HasProperty("_Grid")) m.SetFloat("_Grid", light ? 0f : 0.8f);
-                Liquid(light ? 36f : 30f, 1f, 1f);
+                Liquid(light ? 16f : 14f, 0.4f, 0.9f);
             }
             if (!LiquidGlass)
             {
@@ -308,7 +309,8 @@ namespace Khkt.Demo
         /// </summary>
         static Sprite MakeLiquidShape(int size, float radius, float depthPx, float slice)
         {
-            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false)
+            // linear = true: kênh màu là DỮ LIỆU (độ sâu, pháp tuyến), không được đổi gamma sRGB khi shader đọc
+            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false, true)
             { wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear, hideFlags = HideFlags.DontSave };
             var px = new Color[size * size];
             float half = size / 2f;

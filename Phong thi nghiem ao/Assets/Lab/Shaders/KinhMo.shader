@@ -161,13 +161,14 @@ Shader "Khkt/KinhMo"
                 // 1. Khúc xạ: mặt cắt vành tròn h(x) = sqrt(1 - (1 - x)^2), độ lệch ~ độ dốc, chặn ở mép cho khỏi vô hạn
                 float x = saturate(depth);
                 float rim = 1.0 - x;
-                float slope = rim * rsqrt(max(1.0 - rim * rim, 0.035));
-                float bend = saturate(slope * 0.22) * cond;
+                // chỉ uốn trong dải sát mép (~10 px), nhẹ — không phồng như bong bóng
+                float edgeZone = smoothstep(0.26, 0.0, x);
+                float bend = edgeZone * edgeZone * cond;
                 float2 shift = -n * bend * _Refraction * texel;
                 float2 ruv = suv + shift;
 
                 // 3. Mờ — vành kính ít mờ hơn lòng kính để nhìn rõ sự uốn cong
-                float blurPx = _Blur * lerp(0.55, 1.0, smoothstep(0.0, 0.6, x));
+                float blurPx = _Blur * lerp(0.8, 1.0, smoothstep(0.0, 0.3, x));
                 float3 bg = BlurAt(ruv, texel * blurPx);
 
                 // 2. Tán sắc trên vành
@@ -224,8 +225,8 @@ Shader "Khkt/KinhMo"
                 }
 
                 // viền mảnh tách kính khỏi nền
-                float border = smoothstep(0.045, 0.012, x);
-                col = lerp(col, _BorderColor.rgb, border * _BorderColor.a * 0.55);
+                float border = smoothstep(0.03, 0.008, x);
+                col = lerp(col, _BorderColor.rgb, border * _BorderColor.a * 0.4);
 
                 // 5. Ánh sáng
                 float2 L = _KL_Light.xy;
@@ -237,27 +238,23 @@ Shader "Khkt/KinhMo"
                 float lightBg = smoothstep(0.35, 0.9, lumTint);        // kính sáng (chủ đề Trắng): vệt sáng dịu hơn
 
                 // hai lớp phản chiếu: đường sắc mảnh sát mép (~1,5 px) + dải mềm (~4 px), và quầng rộng phía trong
-                float rimSharp = smoothstep(0.05, 0.012, x) * smoothstep(0.0, 0.01, x + 0.004);
-                float rimBand = smoothstep(0.12, 0.02, x);
-                float rimSoft = smoothstep(0.5, 0.0, x);
+                float rimSharp = smoothstep(0.035, 0.008, x) * smoothstep(0.0, 0.01, x + 0.004);
+                float rimBand = smoothstep(0.08, 0.015, x);
                 float key = pow(saturate(facing), 2.2);
                 float back = pow(saturate(-facing), 3.0);
                 float glint = pow(saturate(facing), 28.0);            // điểm lóe nơi mép quay thẳng về đèn
-                float spec = rimSharp * (key * 0.75 + back * 0.32 + glint * 0.9)
-                           + rimBand * (key * 0.30 + back * 0.12)
-                           + rimSoft * key * 0.07;
+                float spec = rimSharp * (key * 0.7 + back * 0.25 + glint * 0.5)
+                           + rimBand * (key * 0.10 + back * 0.04);
                 spec *= _Specular * energy * cond * lerp(1.0, 0.6, lightBg);
                 // vệt sáng cộng kiểu "screen" để không cháy trắng thành mảng nhựa
                 float3 sp = specTint * saturate(spec);
                 col = 1.0 - (1.0 - col) * (1.0 - sp);
 
                 // Fresnel đều quanh mép + bóng trong mảnh ở phía khuất đèn tạo độ dày
-                col += specTint * fres * 0.05 * cond;
-                col *= 1.0 - smoothstep(0.30, 0.04, x) * saturate(-facing * 0.9 + 0.15) * 0.14 * cond;
+                col += specTint * fres * 0.02 * cond;
 
                 // khúc xạ ánh sáng xuyên qua vành: dải hơi sáng nằm phía trong, đối diện đèn (caustic)
-                float caustic = smoothstep(0.08, 0.2, x) * smoothstep(0.38, 0.2, x) * back;
-                col += specTint * caustic * 0.035 * (1.0 - lightBg) * _Specular * cond;
+
 
                 // nhiễu rất nhỏ chống dải màu trên vùng chuyển mượt (gradient) của kính
                 float nz = frac(sin(dot(i.pos.xy, float2(12.9898, 78.233))) * 43758.5453) - 0.5;

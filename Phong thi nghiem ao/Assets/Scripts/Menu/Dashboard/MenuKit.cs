@@ -779,7 +779,7 @@ namespace Khkt.Menu.Dashboard
             var bi = Paint(body, Color.white, radius);
             LamKinh(bi, radius);
             bi.raycastTarget = hover;
-            Color ringC = light ? new Color(1f, 1f, 1f, 0.45f) : new Color(1f, 1f, 1f, 0.12f);
+            Color ringC = light ? new Color(1f, 1f, 1f, 0.30f) : new Color(1f, 1f, 1f, 0.08f);
             var ring = Ring(rt, "Viền", ringC, radius);
             var hv = rt.gameObject.AddComponent<MenuHover>();
             hv.shadow = drop;

@@ -105,16 +105,20 @@ namespace Khkt.Menu.Dashboard
             // 18/11: thẻ màu nhấn dải chéo (như thẻ lớn CHEMISTRY) thay cho ảnh dưới lớp màu che bằng Mask stencil (góc răng cưa)
             var nen = body.GetComponent<Image>();
             nen.color = Color.white;
-            MenuKit.Gradient(nen, MenuKit.Accent, Color.Lerp(MenuKit.AccentDeep, Color.black, UiTheme.IsLight ? 0.15f : 0.35f), 120f);
-            if (UiTheme.IsLight) MenuKit.Sheen(cardLab, MenuKit.RadiusCard, 0.25f);
-            MenuKit.CardRing(cardLab).color = new Color(1, 1, 1, 0.14f);
-            var hvLab = cardLab.GetComponent<MenuHover>();
-            if (hvLab != null) hvLab.ringRest = hvLab.ringHover = new Color(1, 1, 1, 0.14f);
-            var bongLab = cardLab.Find("Bóng").GetComponent<Image>();
-            bongLab.color = MenuKit.WithAlpha(UiTheme.IsLight ? MenuKit.AccentDeep : Color.black, UiTheme.IsLight ? 0.28f : 0.5f);
-            if (hvLab != null) hvLab.shadowRest = hvLab.shadowHover = bongLab.color.a;
-            GlassKit.Label(body, "Tiêu đề thẻ", "Phòng thí nghiệm", 26, MenuKit.OnAccent, true, TextAnchor.UpperLeft, new Vector2(32, -24), new Vector2(620, 36));
-            GlassKit.Label(body, "Mô tả thẻ", "Tự tay làm thí nghiệm Hóa học, Sinh học trong phòng lab ảo.", 17, MenuKit.WithAlpha(MenuKit.OnAccent, 0.94f), false, TextAnchor.UpperLeft, new Vector2(32, -64), new Vector2(700, 28));
+            bool kinh = MenuKit.Kinh;   // kính lỏng: thẻ kính trong không nhuộm như các thẻ khác, chữ màu chữ thường
+            if (!kinh)
+            {
+                MenuKit.Gradient(nen, MenuKit.Accent, Color.Lerp(MenuKit.AccentDeep, Color.black, UiTheme.IsLight ? 0.15f : 0.35f), 120f);
+                if (UiTheme.IsLight) MenuKit.Sheen(cardLab, MenuKit.RadiusCard, 0.25f);
+                MenuKit.CardRing(cardLab).color = new Color(1, 1, 1, 0.14f);
+                var hvLab = cardLab.GetComponent<MenuHover>();
+                if (hvLab != null) hvLab.ringRest = hvLab.ringHover = new Color(1, 1, 1, 0.14f);
+                var bongLab = cardLab.Find("Bóng").GetComponent<Image>();
+                bongLab.color = MenuKit.WithAlpha(UiTheme.IsLight ? MenuKit.AccentDeep : Color.black, UiTheme.IsLight ? 0.28f : 0.5f);
+                if (hvLab != null) hvLab.shadowRest = hvLab.shadowHover = bongLab.color.a;
+            }
+            GlassKit.Label(body, "Tiêu đề thẻ", "Phòng thí nghiệm", 26, kinh ? MenuKit.Ink : MenuKit.OnAccent, true, TextAnchor.UpperLeft, new Vector2(32, -24), new Vector2(620, 36));
+            GlassKit.Label(body, "Mô tả thẻ", "Tự tay làm thí nghiệm Hóa học, Sinh học trong phòng lab ảo.", 17, kinh ? MenuKit.InkDim : MenuKit.WithAlpha(MenuKit.OnAccent, 0.94f), false, TextAnchor.UpperLeft, new Vector2(32, -64), new Vector2(700, 28));
             var size = new Vector2(270, 58);
             MenuKit.MakeButton(body, "Nút Vào phòng thí nghiệm", "Vào phòng thí nghiệm", new Vector2(-32, 0), size, () => EnterStation(-1), 3, MenuKit.RadiusButton, new Vector2(1, 0.5f));
             var roomBtn = MenuKit.MakeButton(body, "Nút chuyển Phòng học chung", "Phòng học chung", new Vector2(-32 - size.x - 16, 0), new Vector2(190, size.y), () => shell.OpenRoom?.Invoke(), 0, MenuKit.RadiusButton, new Vector2(1, 0.5f));
