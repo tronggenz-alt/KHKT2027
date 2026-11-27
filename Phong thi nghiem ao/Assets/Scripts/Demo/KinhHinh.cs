@@ -42,7 +42,7 @@ namespace Khkt.Demo
         public bool LaNenSang = false;
         public bool HinhVienNang = false;
         [Range(0f, 120f)] public float BanKinhBo = 22f;
-        [Range(0f, 4f)] public float MucMo = 2.35f;
+        [Range(0f, 4f)] public float MucMo = 3.05f;
         [Range(2f, 40f)] public float VienKhucXa = 18f;
         [Range(0f, 2.5f)] public float CuongDoKhucXa = 1.0f;
         [Range(0f, 1f)] public float CuongDoNen = 0.48f;

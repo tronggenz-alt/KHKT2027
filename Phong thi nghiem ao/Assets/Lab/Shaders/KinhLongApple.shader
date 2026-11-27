@@ -366,7 +366,7 @@ Shader "Khkt/KinhLongApple"
                 float2 pixToUv = 1.0 / max(_ScreenParams.xy, float2(64.0, 64.0));
                 float2 refOffset = -n2 * (lutDisp * effRefractScale) * pixToUv;
 
-                float caAmt = _KL_TanSac * abs(lutDisp) * (1.0 - smoothstep(0.0, 0.6, uLut)) * (1.0 - _KL_TangTuongPhan);
+                float caAmt = _KL_TanSac * abs(lutDisp) * (1.0 - smoothstep(0.0, 0.6, uLut)) * (1.0 - _KL_TangTuongPhan) * smoothstep(0.0, 1.0, _CheDoKinh);
                 float2 tangent = float2(-n2.y, n2.x);
                 float2 caVec = (n2 * 0.7 + tangent * 0.3) * caAmt * pixToUv;
 
@@ -396,13 +396,15 @@ Shader "Khkt/KinhLongApple"
 
                 float clearness = clamp(_KL_DoTrongKinh, 0.0, 1.0);
                 float baseNen = (_CheDoKinh > 0.5)
-                    ? (_CuongDoNen * 0.14)
-                    : (_CuongDoNen * lerp(0.88, 0.24, clearness));
+                    ? (_CuongDoNen * 0.08)
+                    : (_CuongDoNen * lerp(0.92, 0.30, clearness));
 
-                baseNen = saturate(baseNen + _KL_GiamTrongSuot * 0.35);
+                // Kính Tối Regular đặt trên vùng nền rực/sáng tự tăng nén dải sáng để chữ trắng luôn rõ >= 4.5:1
+                float brightOverDark = saturate((luma - 0.12) * 1.85) * (1.0 - _LaNenSang) * (1.0 - _CheDoKinh);
+                baseNen = saturate(baseNen + brightOverDark * 0.78 + _KL_GiamTrongSuot * 0.35);
                 if (_KL_TangTuongPhan > 0.5) baseNen = 0.85;
 
-                float ldich = (_LaNenSang > 0.5) ? 0.90 : 0.16;
+                float ldich = (_LaNenSang > 0.5) ? 0.90 : 0.10;
                 float lt = lerp(luma, ldich, baseNen);
 
                 if (luma > 1e-4)
@@ -431,7 +433,7 @@ Shader "Khkt/KinhLongApple"
                 float oppArc = pow(saturate(-align), 3.2) * 0.28;
 
                 float rimSharp = smoothstep(2.6, 0.4, -sd) * smoothstep(-0.35, 0.6, -sd);
-                float rimSoft = smoothstep(10.0, 0.2, -sd) * 0.28;
+                float rimSoft = smoothstep(6.0, 0.2, -sd) * 0.16;
                 float rimFactor = (rimSharp * 0.85 + rimSoft) * (primaryArc + oppArc);
 
                 // Điểm loé rọi con trỏ (_RoiTam) và sóng chạm nhấn (_ChamTam)
@@ -463,8 +465,8 @@ Shader "Khkt/KinhLongApple"
                 // Screen blend đơn sắc (giữ độ tinh khiết không màu)
                 c = 1.0 - (1.0 - saturate(c)) * (1.0 - sp.xxx);
 
-                // Viền tối sub-pixel iOS 27 (0.75px) tách nét thân kính khỏi nền
-                float darkRim = smoothstep(-0.8, 0.05, sd) * smoothstep(1.0, 0.15, sd);
+                // Viền tối sub-pixel iOS 27 (0.75px) tách nét thân kính khỏi nền (lọc mượt ở đầu mũi viên nang)
+                float darkRim = smoothstep(-1.1, 0.05, sd) * smoothstep(1.15, 0.2, sd);
                 float darkRimStr = (_KL_TangTuongPhan > 0.5)
                     ? (smoothstep(-1.5, 0.0, sd) * 0.55)
                     : (darkRim * _CuongDoVienToi);

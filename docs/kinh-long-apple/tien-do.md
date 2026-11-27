@@ -59,8 +59,15 @@
   - Tạo `BoGocAnh.shader` bo góc phân tích cho ảnh mẫu và `KinhHinh.cs` (`BaseMeshEffect`) truyền kích thước thật `(w, h)` & mở rộng quad cho bóng đổ không lệch hit-test.
   - Đăng ký cả 3 shader vào `AlwaysIncludedShaders` (`ProjectSettings/GraphicsSettings.asset`) và `HardwareProfile.WarmUpShadersOnce()`.
   - Đã kiểm tra `KhktKinhLongSetup.KiemTraP2Batch` → `[P2_PASS]`.
-- **P3**: Dựng `KinhLongPhongThu` (bộ trường hợp a–g @ 2880x1800) & hiệu chỉnh quang học tĩnh. *(Đang thực hiện)*
-- **P4**: Thích ứng Sáng/Tối, bóng đổ thích ứng, ánh sáng môi trường & tối dịu khi mất tiêu điểm.
+- **P3 — Phòng thử quang học `KinhLongPhongThu` (2880×1800) & hiệu chỉnh tĩnh:** **Hoàn thành**
+  - Dựng `KinhLongPhongThu.cs` & `KhktPhongThuRunner.cs` chạy PlayMode 2880×1800 xuất `truong_hop_{a,b,c_tinh,d,e_tinh}.png` tại `~/AppBuild/kinh_long_so_sanh/`.
+  - Sửa kênh `TexCoord1 | TexCoord2` trên `CanvasDieuHuongKinh` xóa triệt để vết góc quad, tắt tán sắc cầu vồng trên kính Regular mờ chữ 17pt, và tinh chỉnh nén dải sáng kính Tối.
+  - Kết quả kiểm chuẩn định lượng (`[P3_PASS]`):
+    - `(a)` Sai lệch trung tính trên xám `#808080`: `neutralMaxDiff = 0.0000` (`≤ 2/255`), chênh sáng vành `rimBoost = 0.345`.
+    - `(b)` Khúc xạ Snell ở vành viên nang: `deflection = 0.275`.
+    - `(d)` Tương phản chữ trên kính `CR_Light = 15.01`, `CR_Dark = 16.31` (`≥ 4.5:1`), tách sạch 2 tầng `TwoLayerClean = True`.
+  - Tạo & kiểm tra bằng mắt các ảnh đối chiếu `ffmpeg hstack` `so_sanh_a.png`, `so_sanh_b.png`, `so_sanh_d.png` (so với `4b_158s`, `4k_731s`, `4j_712s`).
+- **P4**: Thích ứng Sáng/Tối, bóng đổ thích ứng, ánh sáng môi trường & tối dịu khi mất tiêu điểm. *(Đang thực hiện)*
 - **P5**: Chuyển động lỏng (ngưng tụ Hermite, rọi con trỏ, nảy macOS/iPad, kéo gel & biến hình công tắc/thanh trượt).
 - **P6**: `HopKinh` (`sminPoly`), giọt chọn không màu, bùng popover & viền cuộn.
 - **P7**: Phủ khắp mọi màn hình ngoài Lab & xóa sạch mọi nhuộm màu trên kính.

@@ -174,8 +174,14 @@ namespace Khkt.Demo
             if (CanvasDieuHuong.sortingLayerID != CanvasNoiDung.sortingLayerID)
                 CanvasDieuHuong.sortingLayerID = CanvasNoiDung.sortingLayerID;
             int targetOrder = CanvasNoiDung.sortingOrder + 50;
-            if (CanvasDieuHuong.sortingOrder != targetOrder)
+            if (!Mathf.Approximately(CanvasDieuHuong.sortingOrder, targetOrder))
                 CanvasDieuHuong.sortingOrder = targetOrder;
+
+            var channels = CanvasNoiDung.additionalShaderChannels | AdditionalCanvasShaderChannels.TexCoord1 | AdditionalCanvasShaderChannels.TexCoord2;
+            if (CanvasNoiDung.additionalShaderChannels != channels)
+                CanvasNoiDung.additionalShaderChannels = channels;
+            if (CanvasDieuHuong.additionalShaderChannels != channels)
+                CanvasDieuHuong.additionalShaderChannels = channels;
 
             if (ScalerNoiDung != null && ScalerDieuHuong != null)
             {
