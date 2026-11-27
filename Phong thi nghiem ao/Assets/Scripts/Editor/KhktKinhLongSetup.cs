@@ -80,10 +80,61 @@ namespace Khkt.EditorTools
                 }
             }
 
-            ThemShaderVaoAlwaysIncluded("Hidden/Khkt/KinhLongThapMo");
+            ThemShaderVaoAlwaysIncluded("Hidden/Khkt/KinhLongThapMo", "Khkt/KinhLongApple", "Khkt/BoGocAnh");
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             Debug.Log($"[KhktKinhLongSetup] Hoàn tất cài đặt Renderer Features (mới thêm: {updated}).");
+        }
+
+        public static void KiemTraP2Batch()
+        {
+            CaiRendererFeature();
+
+            string[] shaders = { "Hidden/Khkt/KinhLongThapMo", "Khkt/KinhLongApple", "Khkt/BoGocAnh" };
+            foreach (string sName in shaders)
+            {
+                Shader sh = Shader.Find(sName);
+                if (sh == null)
+                    throw new System.Exception($"[P2_FAIL] Không tìm thấy shader: {sName}");
+                if (!sh.isSupported)
+                    throw new System.Exception($"[P2_FAIL] Shader không được hỗ trợ trên GPU hiện tại: {sName}");
+
+                int errCount = 0;
+                int msgCount = ShaderUtil.GetShaderMessageCount(sh);
+                if (msgCount > 0)
+                {
+                    var msgs = ShaderUtil.GetShaderMessages(sh);
+                    foreach (var m in msgs)
+                    {
+                        if (m.severity == UnityEditor.Rendering.ShaderCompilerMessageSeverity.Error)
+                        {
+                            Debug.LogError($"[P2_SHADER_ERR] {sName}: {m.message}");
+                            errCount++;
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"[P2_SHADER_WARN] {sName}: {m.message}");
+                        }
+                    }
+                }
+                if (errCount > 0)
+                    throw new System.Exception($"[P2_FAIL] Shader {sName} có {errCount} lỗi biên dịch!");
+                Debug.Log($"[P2 Check] Shader '{sName}' OK (isSupported=True, compilerMessages={msgCount})");
+            }
+
+            KinhLongQuangHoc.DamBaoKhoiTao();
+            Texture2D lut = KinhLongQuangHoc.BangKhucXa;
+            if (lut == null || lut.width != 128 || lut.height != 1 || lut.format != TextureFormat.RGBAHalf)
+                throw new System.Exception($"[P2_FAIL] LUT Snell không hợp lệ: {(lut != null ? lut.width + "x" + lut.height + " " + lut.format : "null")}");
+
+            Color mid = lut.GetPixel(16, 0);
+            Color plateau = lut.GetPixel(126, 0);
+            Debug.Log($"[P2 Check] LUT Snell 128x1 RGBAHalf OK: u=16/127={mid}, u=126/127={plateau}");
+            if (Mathf.Abs(mid.r) < 0.01f || Mathf.Abs(plateau.r) > 0.5f)
+                throw new System.Exception($"[P2_FAIL] Đường cong LUT khúc xạ bất thường: mid={mid}, plateau={plateau}");
+
+            Debug.Log("[P2_PASS] Tất cả 3 shader biên dịch sạch & LUT khúc xạ Snell 128x1 hợp lệ!");
+            EditorApplication.Exit(0);
         }
 
         public static void CaiRendererFeatureBatch()

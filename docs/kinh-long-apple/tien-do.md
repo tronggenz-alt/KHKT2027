@@ -53,8 +53,13 @@
   - Tạo `VungKinhApple.cs`, `KinhLongHaiTang.cs` (`KinhLongLop`, `KinhLongCameraNen`, `DongBoCanvasDieuHuong`, `HaiTangCanvas`, `KinhGuongDieuHuong`), `KinhLongThapMo.shader` (Copy + Dual Kawase 5-tap Downsample + 8-tap Tent Upsample), `KinhLongBlurFeature.cs` (RenderGraph URP 17 trên một camera duy nhất, tách Layer 14 khỏi pass vẽ mặc định của `PC_Renderer.asset` & `Mobile_Renderer.asset`, tạo `_KL_NoiDung` & `_KL_Mo1..4`, cache 0 ms khi đứng yên + `AsyncGPUReadback` lưới sáng 24×14, sau đó vẽ riêng `RendererList` Layer 14 đè lên).
   - Nâng cấp `KinhLongNen.cs` lên nền mịn 1920×1080 kèm tháp mờ tính sẵn 1 lần `_KL_NenMo1..4` + lưới sáng CPU 24×14.
   - Đã kiểm tra PlayMode `KhktKinhLongSetup.KiemTraP1Batch` → `[P1_PASS]` (`Center=0.949,0.451,0.110`, `Nav=0.110,0.851,0.451`, `NoiDungAtNav=0.949,0.451,0.110` tách sạch Layer 14, `NoiDung=1280x720`, `Mo1=640x360`, `Mo4=80x45`, `IdleSkip=True`).
-- **P2**: `Khkt/KinhLongApple`, LUT Snell 128x1, `Khkt/BoGocAnh`, `KinhHinh` & đăng ký AlwaysIncludedShaders/WarmUp. *(Đang thực hiện)*
-- **P3**: Dựng `KinhLongPhongThu` (bộ trường hợp a–g @ 2880x1800) & hiệu chỉnh quang học tĩnh.
+- **P2 — Shader `Khkt/KinhLongApple`, LUT Snell 128×1, `Khkt/BoGocAnh` & `KinhHinh`:** **Hoàn thành**
+  - Tạo `KinhLongQuangHoc.cs` sinh LUT khúc xạ Snell 3D `128×1 RGBAHalf Linear` (`_KL_BangKhucXa`) cho 4 tiết diện `Squircle`, `Lip`, `Circle`, `Concave` (`n = 1.5`), cùng biến toàn cục `_KL_DoTrongKinh = 0.35`.
+  - Tạo `KinhLongApple.shader` tương thích uGUI (`_ClipRect`, Stencil), SDF squircle/pill ổn định số, nhánh `#pragma multi_compile_local _ _HOP_KINH` (`sminPoly` tới 16 khối), lấy mẫu 2 nguồn `_KL_NoiDung/_KL_Mo1..4` vs `_KL_Nen/_KL_NenMo1..4`, nén dải sáng & screen blend trong không gian sRGB (`LinearToSRGB` → `SRGBToLinear`), không nhuộm màu nền kính, viền sáng định hướng + viền tối sub-pixel iOS 27 + bóng đổ thích ứng + dither đơn sắc.
+  - Tạo `BoGocAnh.shader` bo góc phân tích cho ảnh mẫu và `KinhHinh.cs` (`BaseMeshEffect`) truyền kích thước thật `(w, h)` & mở rộng quad cho bóng đổ không lệch hit-test.
+  - Đăng ký cả 3 shader vào `AlwaysIncludedShaders` (`ProjectSettings/GraphicsSettings.asset`) và `HardwareProfile.WarmUpShadersOnce()`.
+  - Đã kiểm tra `KhktKinhLongSetup.KiemTraP2Batch` → `[P2_PASS]`.
+- **P3**: Dựng `KinhLongPhongThu` (bộ trường hợp a–g @ 2880x1800) & hiệu chỉnh quang học tĩnh. *(Đang thực hiện)*
 - **P4**: Thích ứng Sáng/Tối, bóng đổ thích ứng, ánh sáng môi trường & tối dịu khi mất tiêu điểm.
 - **P5**: Chuyển động lỏng (ngưng tụ Hermite, rọi con trỏ, nảy macOS/iPad, kéo gel & biến hình công tắc/thanh trượt).
 - **P6**: `HopKinh` (`sminPoly`), giọt chọn không màu, bùng popover & viền cuộn.
