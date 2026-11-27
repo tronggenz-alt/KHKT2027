@@ -135,6 +135,12 @@ salt = 0..15, IV = 16..31, JSON `{"ma":"mau","x":"Ặ ỷ ữ"}`.
 - Chạy: `python -m server.ai.co_che.may_chu` → **`http://127.0.0.1:8010`** (đổi bằng `VERA_CO_CHE_HOST`, `VERA_CO_CHE_PORT`).
   Cổng 8000 để cho app CHEMISTRY (LaunchAgent `vn.giaichuoihuuco.app` chạy `--port 8000`) và máy chủ lab `server/ai/main.py`.
 - App lưu URL trong PlayerPrefs, mặc định `http://127.0.0.1:8010`. iPad/Windows trong LAN: chạy máy chủ với `VERA_CO_CHE_HOST=0.0.0.0`.
+- Khóa AI riêng (27/11): người dùng có khóa Claude/Gemini ở Cài đặt → Trợ lý AI thì app gửi kèm các yêu cầu cần AI
+  (`giai-de`, `giai-chuoi`, `mo-hinh-3d`, `hoi-dap`, `giai-thich-chi-tiet`) qua tiêu đề `X-Vera-Nha-Cung-Cap` (`claude` | `gemini`),
+  `X-Vera-Khoa-AI`, `X-Vera-Mo-Hinh` (bỏ trống được). Chỉ gửi khi URL là https hoặc máy này / LAN (`MayChuCoChe.DuocGuiKhoa`).
+  Máy chủ gọi AI bằng khóa đó trước, khóa bị từ chối → 401 `{"detail": {"thong_diep", "ma": "sai_key_rieng"}}`;
+  quá tải / lỗi khác → khóa trong `.env` của máy chủ như khi không có khóa riêng. Khóa không được lưu hay ghi log;
+  `thong_tin.mo_hinh` ghi đuôi ` (khóa riêng)` khi lượt đó dùng khóa của người dùng.
 
 | Điểm cuối | Vào | Ra |
 |---|---|---|

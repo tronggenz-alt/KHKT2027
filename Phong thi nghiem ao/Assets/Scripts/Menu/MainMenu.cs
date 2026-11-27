@@ -827,7 +827,7 @@ namespace Khkt.Menu
             aiStatusText = GlassKit.Label(t3, "Trạng thái AI", "", 15, Bio, false, TextAnchor.UpperLeft, new Vector2(0, -154), new Vector2(PaneW, 30));
 
             // Khóa API AI riêng: dùng được ngay cả khi vào "Dùng thử" (khóa chung của máy này), không cần máy chủ AI
-            GlassKit.Label(t3, "Nhãn khóa API", "Khóa API AI riêng (robot và trợ lý gọi thẳng nhà cung cấp, không cần máy chủ)", 15, InkDim, true,
+            GlassKit.Label(t3, "Nhãn khóa API", "Khóa API AI riêng (robot, trợ lý; Giải bài tập nhận khóa Claude, Gemini)", 15, InkDim, true,
                            TextAnchor.UpperLeft, new Vector2(0, -192), new Vector2(PaneW, 24));
             var provNames = new string[ApiKeyStore.Providers.Length];
             var provTexts = new string[ApiKeyStore.Providers.Length];

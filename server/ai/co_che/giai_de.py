@@ -5,6 +5,11 @@ bỏ phần đăng nhập/kế hoạch. AI cho cả chữ và ảnh: Claude trư
 Claude không có khóa hoặc khóa bị từ chối (401/403) → Gemini qua REST (GEMINI_API_KEY, GEMINI_MODEL_CO_CHE hoặc
 gemini-pro-latest → gemini-flash-latest), như CHEMISTRY gốc vẫn dùng Gemini làm chính. Cả hai hỏng → LoiGiaiDe 503 nêu cả hai lý do.
 
+Khóa AI riêng của người dùng (Cài đặt → Trợ lý AI trong app, Claude hoặc Gemini): app gửi kèm từng yêu cầu qua tiêu đề
+X-Vera-Khoa-AI / X-Vera-Nha-Cung-Cap / X-Vera-Mo-Hinh, api.py đặt vào `khoa_rieng` (ContextVar, chỉ sống trong yêu cầu đó).
+Có khóa riêng → gọi bằng khóa đó trước; khóa bị từ chối → báo lỗi rõ (không lặng lẽ dùng khóa máy chủ); quá tải / quá giờ /
+lỗi khác → AI của máy chủ như khi không có khóa riêng. Khóa riêng không bao giờ được lưu, ghi log hay ghi vào kết quả.
+
     giai_de(van_ban="CH3CH2Br + NaOH loãng", anh=None) → dict   (async)
 
 Luồng:
@@ -72,6 +77,38 @@ def muc_tu_duy(muc) -> dict:
         return MUC_TU_DUY[max(0, min(3, int(muc)))]
     except (TypeError, ValueError):
         return MUC_TU_DUY[1]
+
+
+class KhoaRieng:
+    """Khóa AI riêng mà app gửi kèm một yêu cầu. Không có __repr__ lộ khóa (log, traceback chỉ thấy nhà cung cấp + mô hình)."""
+
+    __slots__ = ("nha_cung_cap", "khoa", "mo_hinh")
+
+    def __init__(self, nha_cung_cap: str, khoa: str, mo_hinh: str = ""):
+        self.nha_cung_cap, self.khoa, self.mo_hinh = nha_cung_cap, khoa, mo_hinh
+
+    def __repr__(self) -> str:
+        return f"KhoaRieng({self.nha_cung_cap}, mo_hinh={self.mo_hinh or 'mặc định'})"
+
+
+NHA_CUNG_CAP_RIENG = ("claude", "gemini")       # Groq / OpenAI: máy chủ cơ chế chưa gọi được → bỏ qua, dùng AI của máy chủ
+khoa_rieng: _cv.ContextVar[KhoaRieng | None] = _cv.ContextVar("khoa_rieng", default=None)
+KHOA_RIENG_BI_TU_CHOI = ("Khóa {ncc} của bạn (Cài đặt → Trợ lý AI) bị từ chối – kiểm tra lại khóa, "
+                         "hoặc xóa khóa để dùng AI của máy chủ.")
+
+
+def doc_khoa_rieng(nha_cung_cap: str | None, khoa: str | None, mo_hinh: str | None = None) -> KhoaRieng | None:
+    """Giá trị tiêu đề → KhoaRieng, hoặc None khi thiếu / nhà cung cấp chưa hỗ trợ / khóa trông không hợp lệ.
+    Tên mô hình chỉ nhận chữ, số, . _ - (đi vào đường dẫn URL của Gemini) và phải đúng họ của nhà cung cấp."""
+    ncc = (nha_cung_cap or "").strip().lower()
+    khoa = (khoa or "").strip()
+    if ncc not in NHA_CUNG_CAP_RIENG or not 20 <= len(khoa) <= 300 or not re.fullmatch(r"[\x21-\x7e]+", khoa):
+        return None
+    mo_hinh = (mo_hinh or "").strip()
+    mo_hinh = mo_hinh[7:] if mo_hinh.startswith("models/") else mo_hinh
+    if not re.fullmatch(r"[A-Za-z0-9._-]{1,80}", mo_hinh) or not mo_hinh.startswith(ncc + "-"):
+        mo_hinh = ""
+    return KhoaRieng(ncc, khoa, mo_hinh)
 CHO_MOI_LAN_GOI = 180.0             # giây cho một lần gọi Claude
 CHO_GEMINI = 90.0                   # giây cho một lần gọi một mô hình Gemini (quá thì thử mô hình sau)
 VAN_DE_ANH = ("", "khong_phai_de_hoa", "mo", "toi", "bi_cat", "khac")
@@ -217,35 +254,51 @@ def ten_mo_hinh() -> str:
 _client = None
 
 
-def _lay_client():
-    global _client
-    if _client is None:
-        try:
-            import anthropic
-        except ImportError as e:
-            raise LoiGiaiDe("Máy chủ chưa cài thư viện anthropic (pip install anthropic).", "thieu_thu_vien", 503) from e
-        _client = anthropic.AsyncAnthropic(timeout=CHO_MOI_LAN_GOI, max_retries=1)
-    return _client
-
-
-async def goi_claude(system: str, messages: list, schema: dict) -> str:
-    """Một lượt Messages API, trả chữ JSON (structured output theo schema). Lỗi mạng/khóa → LoiGiaiDe."""
-    if not co_khoa_ai():
-        raise LoiGiaiDe("Máy chủ cơ chế chưa có khóa Claude (ANTHROPIC_API_KEY trong .env ở gốc kho) – chưa giải được đề mới. "
-                        "8 bài mẫu vẫn mở được.", "thieu_key", 503)
+def _nhap_anthropic():
     try:
         import anthropic
     except ImportError as e:
         raise LoiGiaiDe("Máy chủ chưa cài thư viện anthropic (pip install anthropic).", "thieu_thu_vien", 503) from e
+    return anthropic
+
+
+def _lay_client():
+    global _client
+    if _client is None:
+        _client = _nhap_anthropic().AsyncAnthropic(timeout=CHO_MOI_LAN_GOI, max_retries=1)
+    return _client
+
+
+async def goi_claude(system: str, messages: list, schema: dict) -> str:
+    """Một lượt Messages API bằng khóa của máy chủ, trả chữ JSON (structured output theo schema). Lỗi mạng/khóa → LoiGiaiDe."""
+    if not co_khoa_ai():
+        raise LoiGiaiDe("Máy chủ cơ chế chưa có khóa Claude (ANTHROPIC_API_KEY trong .env ở gốc kho) – chưa giải được đề mới. "
+                        "8 bài mẫu vẫn mở được.", "thieu_key", 503)
+    _nhap_anthropic()
+    return await _goi_claude_voi(_lay_client(), ten_mo_hinh(), system, messages, schema, None)
+
+
+async def goi_claude_rieng(k: KhoaRieng, system: str, messages: list, schema: dict) -> str:
+    """Như goi_claude nhưng bằng khóa riêng của người dùng (client riêng cho lượt này, đóng ngay sau khi xong).
+    Truyền api_key tường minh nên SDK không đọc ANTHROPIC_API_KEY / ANTHROPIC_AUTH_TOKEN / hồ sơ đăng nhập của máy chủ."""
+    anthropic = _nhap_anthropic()
+    async with anthropic.AsyncAnthropic(api_key=k.khoa, timeout=CHO_MOI_LAN_GOI, max_retries=1) as c:
+        return await _goi_claude_voi(c, k.mo_hinh or ten_mo_hinh(), system, messages, schema, k)
+
+
+async def _goi_claude_voi(client, mo_hinh: str, system: str, messages: list, schema: dict, rieng: KhoaRieng | None) -> str:
+    anthropic = _nhap_anthropic()
     try:
-        r = await _lay_client().beta.messages.create(
-            model=ten_mo_hinh(), max_tokens=16000,
+        r = await client.beta.messages.create(
+            model=mo_hinh, max_tokens=16000,
             system=[{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
             messages=messages,
             output_config={"effort": os.environ.get("CLAUDE_EFFORT_CO_CHE") or muc_tu_duy(muc_hien_tai.get())["effort"],
                            "format": {"type": "json_schema", "schema": schema}},
         )
     except anthropic.AuthenticationError as e:
+        if rieng is not None:
+            raise LoiGiaiDe(KHOA_RIENG_BI_TU_CHOI.format(ncc="Claude"), "sai_key_rieng", 401) from e
         raise LoiGiaiDe("Khóa Claude (ANTHROPIC_API_KEY) không hợp lệ.", "sai_key", 503) from e
     except anthropic.RateLimitError as e:
         raise LoiGiaiDe("Claude đang quá tải hoặc hết hạn mức – thử lại sau ít phút.", "qua_tai", 503) from e
@@ -313,8 +366,8 @@ def _ssl_ctx():
         return ssl.create_default_context()
 
 
-def _post_gemini(mo_hinh: str, than: dict, cho: float) -> tuple[int, dict]:
-    khoa = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or ""
+def _post_gemini(mo_hinh: str, than: dict, cho: float, khoa: str | None = None) -> tuple[int, dict]:
+    khoa = khoa or os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or ""
     req = urllib.request.Request(GEMINI_URL.format(m=mo_hinh), data=json.dumps(than).encode("utf-8"), method="POST",
                                  headers={"Content-Type": "application/json", "x-goog-api-key": khoa})
     try:
@@ -327,28 +380,38 @@ def _post_gemini(mo_hinh: str, than: dict, cho: float) -> tuple[int, dict]:
             return e.code, {}
 
 
-async def goi_gemini(system: str, messages: list, schema: dict) -> str:
-    if not co_khoa_gemini():
+async def goi_gemini(system: str, messages: list, schema: dict, rieng: KhoaRieng | None = None) -> str:
+    """Gemini qua REST bằng khóa của máy chủ, hoặc bằng khóa riêng `rieng` của người dùng (mô hình người dùng chọn thử trước;
+    hạn mức là của khóa đó nên không ghi vào danh sách tạm bỏ của máy chủ)."""
+    if rieng is None and not co_khoa_gemini():
         raise LoiGiaiDe("Máy chủ chưa có khóa Gemini (GEMINI_API_KEY).", "thieu_key_gemini", 503)
     than = {"systemInstruction": {"parts": [{"text": system}]}, "contents": _noi_dung_gemini(messages),
             "generationConfig": {"responseMimeType": "application/json", "responseJsonSchema": _schema_gemini(schema),
                                  "maxOutputTokens": 32000, "temperature": 0.2}}
+    if rieng is None:
+        ds, them = ds_mo_hinh_gemini(), ()
+    else:
+        ds = [rieng.mo_hinh, *muc_tu_duy(muc_hien_tai.get())["gemini"], "gemini-pro-latest", "gemini-flash-latest"]
+        ds, them = [m for i, m in enumerate(ds) if m and m not in ds[:i]], (rieng.khoa,)
     loi_cuoi = ""
-    for mo_hinh in ds_mo_hinh_gemini():
+    for mo_hinh in ds:
         try:
-            ma, d = await asyncio.to_thread(_post_gemini, mo_hinh, than, CHO_GEMINI)
+            ma, d = await asyncio.to_thread(_post_gemini, mo_hinh, than, CHO_GEMINI, *them)
         except (TimeoutError, urllib.error.URLError, OSError) as e:
             if isinstance(e, TimeoutError) or "timed out" in str(e):      # mô hình này treo → thử mô hình sau
                 loi_cuoi += f"{mo_hinh}: quá {CHO_GEMINI:.0f} s; "
-                _gemini_tam_bo[mo_hinh] = time.time() + GEMINI_TAM_BO_GIAY
+                if rieng is None:
+                    _gemini_tam_bo[mo_hinh] = time.time() + GEMINI_TAM_BO_GIAY
                 continue
             raise LoiGiaiDe(f"Không gọi được Gemini: {e}", "loi_ai", 502) from e
         thong_bao = ((d.get("error") or {}).get("message") or "")[:200]
         if ma in (401, 403) or (ma == 400 and "API key" in thong_bao):
+            if rieng is not None:
+                raise LoiGiaiDe(KHOA_RIENG_BI_TU_CHOI.format(ncc="Gemini"), "sai_key_rieng", 401)
             raise LoiGiaiDe("Khóa Gemini (GEMINI_API_KEY) không hợp lệ.", "sai_key_gemini", 503)
         if ma in (404, 429, 500, 503):                       # không có mô hình này / hết hạn mức / quá tải → mô hình sau
             loi_cuoi += f"{mo_hinh}: {ma} {thong_bao[:90]}; "
-            if ma != 404:
+            if ma != 404 and rieng is None:
                 _gemini_tam_bo[mo_hinh] = time.time() + GEMINI_TAM_BO_GIAY
             continue
         if ma != 200:
@@ -359,17 +422,48 @@ async def goi_gemini(system: str, messages: list, schema: dict) -> str:
         chu = "".join(p.get("text", "") for p in (ung.get("content") or {}).get("parts", []) if not p.get("thought"))
         if not chu.strip():
             raise LoiGiaiDe(f"Gemini không trả lời ({ung.get('finishReason') or 'rỗng'}).", "tu_choi", 422)
-        _da_dung.append(mo_hinh)
+        _da_dung.append(mo_hinh + (DAU_KHOA_RIENG if rieng is not None else ""))
         return chu.strip()
     raise LoiGiaiDe(f"Gemini quá tải hoặc hết hạn mức ({loi_cuoi.rstrip('; ')}) – thử lại sau.", "qua_tai", 503)
 
 
-# ---------------------------------------------------------------- chọn nhà cung cấp: Claude → Gemini
+# ---------------------------------------------------------------- chọn nhà cung cấp: khóa riêng → Claude → Gemini
 _da_dung: list[str] = []          # mô hình đã trả lời trong lượt giải hiện tại (ghi vào thong_tin)
 _claude_hong = ""                 # Claude bị từ chối khóa ở lần trước → bỏ qua tới khi máy chủ khởi động lại
+DAU_KHOA_RIENG = " (khóa riêng)"  # đuôi tên mô hình trong thong_tin khi lượt đó dùng khóa của người dùng
+
+
+async def goi_ai_rieng(system: str, messages: list, schema: dict) -> str:
+    """Chỉ dùng khóa riêng của yêu cầu này (không có → LoiGiaiDe "khong_khoa_rieng"), không lùi sang khóa máy chủ."""
+    k = khoa_rieng.get()
+    if k is None:
+        raise LoiGiaiDe("Yêu cầu này không kèm khóa AI riêng.", "khong_khoa_rieng", 400)
+    if k.nha_cung_cap == "gemini":
+        return await goi_gemini(system, messages, schema, k)
+    chu = await goi_claude_rieng(k, system, messages, schema)
+    _da_dung.append((k.mo_hinh or ten_mo_hinh()) + DAU_KHOA_RIENG)
+    return chu
 
 
 async def goi_ai_mac_dinh(system: str, messages: list, schema: dict) -> str:
+    """Khóa riêng của người dùng (nếu app gửi kèm) → khóa Claude của máy chủ → khóa Gemini của máy chủ."""
+    loi_rieng: LoiGiaiDe | None = None
+    if khoa_rieng.get() is not None:
+        try:
+            return await goi_ai_rieng(system, messages, schema)
+        except LoiGiaiDe as e:
+            if e.ma in ("sai_key_rieng", "tu_choi", "bi_cat", "thieu_thu_vien"):
+                raise
+            loi_rieng = e                 # quá tải / quá giờ / lỗi khác → AI của máy chủ như khi không có khóa riêng
+    try:
+        return await _goi_ai_may_chu(system, messages, schema)
+    except LoiGiaiDe as e:
+        if loi_rieng is not None and e.ma == "thieu_key":     # máy chủ không có khóa nào: lỗi của khóa riêng có ích hơn
+            raise loi_rieng from e
+        raise
+
+
+async def _goi_ai_may_chu(system: str, messages: list, schema: dict) -> str:
     global _claude_hong
     if not _claude_hong:
         try:

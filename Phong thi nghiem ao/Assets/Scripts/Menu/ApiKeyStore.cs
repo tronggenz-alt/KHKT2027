@@ -11,7 +11,9 @@ namespace Khkt.Menu
     /// Khóa API AI đám mây riêng của từng tài khoản, chỉ nằm trên máy này.
     /// Lưu ở persistentDataPath/khoa_ai/&lt;băm(máy chủ + mã tài khoản)&gt;.bin, đã mã hóa:
     /// Windows dùng DPAPI (chỉ đúng người dùng Windows đó giải được); máy khác dùng AES với khóa sinh từ mã máy
-    /// (chỉ che, không chắc bằng DPAPI). Khóa không bao giờ được ghi log, gửi lên máy chủ hay ghi vào tệp của dự án.
+    /// (chỉ che, không chắc bằng DPAPI). Khóa không bao giờ được ghi log hay ghi vào tệp của dự án. Nơi duy nhất khóa rời app:
+    /// yêu cầu Giải bài tập tới máy chủ cơ chế (MayChuCoChe, chỉ khóa Claude/Gemini, chỉ khi máy chủ ở máy này, mạng LAN
+    /// hoặc https); máy chủ dùng khóa cho riêng yêu cầu đó rồi bỏ, không lưu.
     /// </summary>
     public static class ApiKeyStore
     {

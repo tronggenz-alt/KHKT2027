@@ -293,6 +293,179 @@ class TestApiGiaiDe(unittest.TestCase):
         self.assertEqual(r.status_code, 504)
 
 
+KHOA_CLAUDE_GIA = "sk-ant-gia-cua-nguoi-dung-0123456789"
+KHOA_GEMINI_GIA = "AIzaGiaCuaNguoiDung0123456789abcdef"
+
+
+def chay_voi_khoa(k, coro_fn):
+    """Chạy coro_fn() trong ngữ cảnh có khoa_rieng = k (như api.py đặt cho một yêu cầu)."""
+    async def boc():
+        giai_de.khoa_rieng.set(k)
+        return await coro_fn()
+    return chay(boc())
+
+
+class ClaudeGia:
+    """Thay anthropic.AsyncAnthropic: ghi khóa + tham số, trả lời hoặc ném lỗi định sẵn."""
+    tao: list[dict] = []
+    goi: list[dict] = []
+    loi: Exception | None = None
+
+    def __init__(self, **kw):
+        ClaudeGia.tao.append(kw)
+        self.beta = self
+        self.messages = self
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *a):
+        return False
+
+    async def create(self, **kw):
+        ClaudeGia.goi.append(kw)
+        if ClaudeGia.loi is not None:
+            raise ClaudeGia.loi
+        from types import SimpleNamespace
+        return SimpleNamespace(stop_reason="end_turn", content=[SimpleNamespace(type="text", text='{"ok": true}')])
+
+
+class TestKhoaRieng(unittest.TestCase):
+    """Khóa AI riêng app gửi kèm (X-Vera-*): dùng trước, khóa sai báo rõ, quá tải lùi về khóa máy chủ, không rò sang yêu cầu khác."""
+
+    def setUp(self):
+        giai_de._claude_hong = ""
+        giai_de._da_dung.clear()
+        giai_de._gemini_tam_bo.clear()
+        ClaudeGia.tao, ClaudeGia.goi, ClaudeGia.loi = [], [], None
+
+    def tearDown(self):
+        giai_de._claude_hong = ""
+
+    def test_doc_tieu_de(self):
+        k = giai_de.doc_khoa_rieng(" Claude ", KHOA_CLAUDE_GIA, "claude-sonnet-5-5")
+        self.assertEqual((k.nha_cung_cap, k.khoa, k.mo_hinh), ("claude", KHOA_CLAUDE_GIA, "claude-sonnet-5-5"))
+        self.assertNotIn(KHOA_CLAUDE_GIA, repr(k))                                   # log / traceback không lộ khóa
+        self.assertEqual(giai_de.doc_khoa_rieng("gemini", KHOA_GEMINI_GIA, "models/gemini-pro-latest").mo_hinh, "gemini-pro-latest")
+        self.assertEqual(giai_de.doc_khoa_rieng("gemini", KHOA_GEMINI_GIA, "gemini-x/../../v1:abc").mo_hinh, "")   # không vào URL
+        self.assertEqual(giai_de.doc_khoa_rieng("claude", KHOA_CLAUDE_GIA, "gemini-pro-latest").mo_hinh, "")      # sai họ → mặc định
+        for ncc, khoa in (("groq", "gsk_" + "a" * 30), ("openai", "sk-" + "a" * 30), ("claude", "ngan"),
+                          ("claude", "sk-ant-co khoang trang-0123456789"), ("", KHOA_CLAUDE_GIA), ("claude", None)):
+            self.assertIsNone(giai_de.doc_khoa_rieng(ncc, khoa, ""), (ncc, khoa))
+
+    def test_claude_dung_khoa_nguoi_dung(self):
+        async def may_chu(*a):
+            raise AssertionError("không được dùng khóa máy chủ")
+        k = giai_de.doc_khoa_rieng("claude", KHOA_CLAUDE_GIA, "claude-sonnet-5-5")
+        with mock.patch("anthropic.AsyncAnthropic", ClaudeGia), mock.patch.object(giai_de, "goi_claude", may_chu), \
+                mock.patch.dict(os.environ, {"ANTHROPIC_API_KEY": "k-may-chu"}):
+            chu = chay_voi_khoa(k, lambda: giai_de.goi_ai_mac_dinh("s", [{"role": "user", "content": "x"}], {"type": "object"}))
+        self.assertEqual(chu, '{"ok": true}')
+        self.assertEqual(ClaudeGia.tao[0]["api_key"], KHOA_CLAUDE_GIA)
+        self.assertEqual(ClaudeGia.goi[0]["model"], "claude-sonnet-5-5")
+        self.assertEqual(giai_de._da_dung, ["claude-sonnet-5-5" + giai_de.DAU_KHOA_RIENG])
+
+    def test_claude_khoa_sai_bao_ro(self):
+        import anthropic
+        import httpx2
+        ClaudeGia.loi = anthropic.AuthenticationError(
+            "invalid x-api-key", response=httpx2.Response(401, request=httpx2.Request("POST", "https://api.anthropic.com/v1/messages")),
+            body=None)
+        may_chu = mock.AsyncMock(return_value="{}")
+        with mock.patch("anthropic.AsyncAnthropic", ClaudeGia), mock.patch.object(giai_de, "goi_claude", may_chu):
+            with self.assertRaises(giai_de.LoiGiaiDe) as cm:
+                chay_voi_khoa(giai_de.doc_khoa_rieng("claude", KHOA_CLAUDE_GIA),
+                              lambda: giai_de.goi_ai_mac_dinh("s", [{"role": "user", "content": "x"}], {}))
+        self.assertEqual((cm.exception.ma, cm.exception.status), ("sai_key_rieng", 401))
+        self.assertIn("Cài đặt → Trợ lý AI", cm.exception.thong_diep)
+        self.assertNotIn(KHOA_CLAUDE_GIA, cm.exception.thong_diep)
+        may_chu.assert_not_called()                          # không lặng lẽ dùng khóa máy chủ
+        self.assertFalse(giai_de._claude_hong)               # khóa máy chủ không bị đánh dấu hỏng
+
+    def test_qua_tai_lui_ve_may_chu(self):
+        async def rieng_qua_tai(*a):
+            raise giai_de.LoiGiaiDe("Claude quá tải.", "qua_tai", 503)
+        may_chu = mock.AsyncMock(return_value='{"tu": "may_chu"}')
+        with mock.patch.object(giai_de, "goi_claude_rieng", rieng_qua_tai), mock.patch.object(giai_de, "goi_claude", may_chu):
+            chu = chay_voi_khoa(giai_de.doc_khoa_rieng("claude", KHOA_CLAUDE_GIA),
+                                lambda: giai_de.goi_ai_mac_dinh("s", [{"role": "user", "content": "x"}], {}))
+        self.assertEqual(chu, '{"tu": "may_chu"}')
+        may_chu.assert_awaited_once()
+
+    def test_qua_tai_may_chu_khong_khoa_bao_loi_khoa_rieng(self):
+        async def rieng_qua_tai(*a):
+            raise giai_de.LoiGiaiDe("Claude quá tải.", "qua_tai", 503)
+        with mock.patch.object(giai_de, "goi_claude_rieng", rieng_qua_tai), \
+                mock.patch.dict(os.environ, {"ANTHROPIC_API_KEY": "", "ANTHROPIC_AUTH_TOKEN": "", "GEMINI_API_KEY": "",
+                                             "GOOGLE_API_KEY": ""}):
+            with self.assertRaises(giai_de.LoiGiaiDe) as cm:
+                chay_voi_khoa(giai_de.doc_khoa_rieng("claude", KHOA_CLAUDE_GIA),
+                              lambda: giai_de.goi_ai_mac_dinh("s", [{"role": "user", "content": "x"}], {}))
+        self.assertEqual(cm.exception.ma, "qua_tai")
+
+    def test_gemini_dung_khoa_nguoi_dung(self):
+        goi = []
+
+        def post(mo_hinh, than, cho, khoa=None):
+            goi.append((mo_hinh, khoa))
+            if len(goi) == 1:
+                return 429, {"error": {"message": "quota"}}
+            return 200, {"candidates": [{"content": {"parts": [{"text": '{"ok": 1}'}]}}]}
+        k = giai_de.doc_khoa_rieng("gemini", KHOA_GEMINI_GIA, "gemini-flash-latest")
+        with mock.patch.object(giai_de, "_post_gemini", post), mock.patch.dict(os.environ, {"GEMINI_API_KEY": "k-may-chu"}):
+            chu = chay_voi_khoa(k, lambda: giai_de.goi_ai_mac_dinh("s", [{"role": "user", "content": "x"}], {}))
+        self.assertEqual(chu, '{"ok": 1}')
+        self.assertEqual(goi[0], ("gemini-flash-latest", KHOA_GEMINI_GIA))      # mô hình người dùng chọn thử trước
+        self.assertTrue(all(kh == KHOA_GEMINI_GIA for _, kh in goi))
+        self.assertEqual(giai_de._gemini_tam_bo, {})       # 429 của khóa riêng không làm máy chủ bỏ qua mô hình
+        self.assertTrue(giai_de._da_dung[0].endswith(giai_de.DAU_KHOA_RIENG))
+
+    def test_gemini_khoa_sai_bao_ro(self):
+        def post(mo_hinh, than, cho, khoa=None):
+            return 400, {"error": {"message": "API key not valid. Please pass a valid API key."}}
+        with mock.patch.object(giai_de, "_post_gemini", post):
+            with self.assertRaises(giai_de.LoiGiaiDe) as cm:
+                chay_voi_khoa(giai_de.doc_khoa_rieng("gemini", KHOA_GEMINI_GIA),
+                              lambda: giai_de.goi_ai_mac_dinh("s", [{"role": "user", "content": "x"}], {}))
+        self.assertEqual(cm.exception.ma, "sai_key_rieng")
+        self.assertIn("Gemini", cm.exception.thong_diep)
+
+    def test_api_doc_tieu_de_tung_yeu_cau(self):
+        thay = []
+
+        async def ghi(*a, **k):
+            thay.append(giai_de.khoa_rieng.get())
+            return {"ok": True}
+        c = TestClient(app)
+        with mock.patch.object(giai_de, "giai_de", ghi):
+            r = c.post("/co-che/giai-de", json={"van_ban": "x"},
+                       headers={"X-Vera-Nha-Cung-Cap": "claude", "X-Vera-Khoa-AI": KHOA_CLAUDE_GIA, "X-Vera-Mo-Hinh": "claude-sonnet-5-5"})
+            self.assertEqual(r.status_code, 200, r.text)
+            r = c.post("/co-che/giai-de", json={"van_ban": "x"})
+            self.assertEqual(r.status_code, 200, r.text)
+        self.assertEqual((thay[0].nha_cung_cap, thay[0].khoa, thay[0].mo_hinh), ("claude", KHOA_CLAUDE_GIA, "claude-sonnet-5-5"))
+        self.assertIsNone(thay[1])                           # không rò sang yêu cầu sau
+
+    def test_api_khoa_sai_tra_401(self):
+        async def sai(*a, **k):
+            raise giai_de.LoiGiaiDe(giai_de.KHOA_RIENG_BI_TU_CHOI.format(ncc="Claude"), "sai_key_rieng", 401)
+        with mock.patch.object(giai_de, "giai_de", sai):
+            r = TestClient(app).post("/co-che/giai-de", json={"van_ban": "x"},
+                                     headers={"X-Vera-Nha-Cung-Cap": "claude", "X-Vera-Khoa-AI": KHOA_CLAUDE_GIA})
+        self.assertEqual(r.status_code, 401)
+        self.assertEqual(r.json()["detail"]["ma"], "sai_key_rieng")
+
+    def test_giai_chuoi_dung_khoa_rieng_truoc(self):
+        from server.ai.co_che import giai_chuoi
+        rieng = mock.AsyncMock(return_value='{"chuoi": [], "buoc": [{"tu": "A", "den": "B", "phan_ung": "p", "dieu_kien": ""}]}')
+        tai_may = mock.AsyncMock(side_effect=AssertionError("không cần AI tại máy"))
+        with mock.patch.object(giai_de, "goi_ai_rieng", rieng), mock.patch("server.ai.co_che.giai_thich.goi_tai_may", tai_may):
+            kq = chay_voi_khoa(giai_de.doc_khoa_rieng("claude", KHOA_CLAUDE_GIA), lambda: giai_chuoi._nho_ai([], "A -> B"))
+        self.assertEqual(kq["buoc"][0]["tu"], "A")
+        self.assertIs(rieng.await_args.args[2], giai_chuoi.SCHEMA_GIAI)
+        tai_may.assert_not_called()
+
+
 class TestNapEnv(unittest.TestCase):
     def test_chi_nap_bien_can(self):
         with tempfile.TemporaryDirectory() as d:

@@ -150,10 +150,31 @@ SYSTEM_GIAI = """Bạn là giáo viên Hoá hữu cơ THPT Việt Nam (chương 
 - Chất đã cho sẵn trong ĐÃ BIẾT thì giữ nguyên. Không viết văn xuôi, không viết phương trình."""
 
 
+_CHUOI = {"type": "string"}
+SCHEMA_GIAI = {
+    "type": "object",
+    "properties": {
+        "chuoi": {"type": "array", "items": {"type": "object", "properties": {"ki_hieu": _CHUOI, "ten": _CHUOI, "smiles": _CHUOI},
+                                             "required": ["ki_hieu", "ten", "smiles"], "additionalProperties": False}},
+        "buoc": {"type": "array", "items": {"type": "object", "properties": {"tu": _CHUOI, "den": _CHUOI, "phan_ung": _CHUOI,
+                                                                             "dieu_kien": _CHUOI},
+                                            "required": ["tu", "den", "phan_ung", "dieu_kien"], "additionalProperties": False}},
+    },
+    "required": ["chuoi", "buoc"],
+    "additionalProperties": False,
+}
+
+
 async def _nho_ai(chat: list[dict], chuoi: str) -> dict | None:
+    from . import giai_de
     from .giai_thich import goi_tai_may
     da_biet = [{"ki_hieu": c["ki_hieu"], "smiles": c["smiles"]} for c in chat if c["smiles"]]
     user = f"CHUỖI: {chuoi}\nĐÃ BIẾT: {json.dumps(da_biet, ensure_ascii=False)}"
+    if giai_de.khoa_rieng.get() is not None:        # khóa AI riêng app gửi kèm → dùng trước; hỏng thì như cũ (tại máy → máy chủ)
+        try:
+            return giai_de.doc_json(await giai_de.goi_ai_rieng(SYSTEM_GIAI, [{"role": "user", "content": user}], SCHEMA_GIAI))
+        except (giai_de.LoiGiaiDe, ValueError):
+            pass
     try:
         text, _ = await goi_tai_may(SYSTEM_GIAI, user, 600)
     except Exception:  # noqa: BLE001

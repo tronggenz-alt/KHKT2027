@@ -16,6 +16,10 @@
     POST /co-che/giai-thich-chi-tiet  {"ten","de","loai","buoc":[{"ten","ghi_chu"}]} → tổng quan + từng bước + lưu ý (hoi_dap.py)
     POST /co-che/hoi-dap         {"cau_hoi","ma_bai"?,"ten","de","buoc","lich_su":[{"vai","noi_dung"}]} → trả lời theo bài đang xem
     POST /co-che/bao-sai         {"ma_bai"?,"ten","mo_ta","che_do"?,"buoc"?,"nguon"?} → ghi data/bao_sai/<nguon>.jsonl
+
+Khóa AI riêng của người dùng (tuỳ chọn, mọi điểm cuối): tiêu đề X-Vera-Nha-Cung-Cap ("claude" | "gemini"), X-Vera-Khoa-AI,
+X-Vera-Mo-Hinh (có thể trống). Có thì phần AI của yêu cầu đó gọi bằng khóa này trước (giai_de.goi_ai_mac_dinh); khóa bị
+nhà cung cấp từ chối → 401 {"detail": {"thong_diep", "ma": "sai_key_rieng"}}. Khóa chỉ sống trong yêu cầu, không lưu, không ghi log.
 """
 from __future__ import annotations
 
@@ -27,7 +31,7 @@ import os
 import re
 from dataclasses import asdict
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
 
@@ -35,7 +39,15 @@ from . import dong_goi, giai_chuoi, giai_de, giai_thich, hoi_dap, mo_hinh_3d, tr
 from .duong_dan import thu_muc_build
 from ..cau_hinh_may import thong_so
 
-router = APIRouter(prefix="/co-che", tags=["co-che"])
+
+async def _nhan_khoa_rieng(request: Request) -> None:
+    """Tiêu đề X-Vera-* → giai_de.khoa_rieng cho riêng yêu cầu này. Phải là async: phụ thuộc async chạy cùng ngữ cảnh với
+    điểm cuối nên ContextVar đặt ở đây điểm cuối đọc được (phụ thuộc thường chạy trong luồng khác, giá trị sẽ mất)."""
+    h = request.headers
+    giai_de.khoa_rieng.set(giai_de.doc_khoa_rieng(h.get("x-vera-nha-cung-cap"), h.get("x-vera-khoa-ai"), h.get("x-vera-mo-hinh")))
+
+
+router = APIRouter(prefix="/co-che", tags=["co-che"], dependencies=[Depends(_nhan_khoa_rieng)])
 
 
 class YeuCauGiaiThich(BaseModel):

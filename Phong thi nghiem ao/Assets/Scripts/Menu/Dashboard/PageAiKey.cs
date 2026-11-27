@@ -9,6 +9,7 @@ namespace Khkt.Menu.Dashboard
     /// <summary>
     /// Trang "Trợ lý AI" ở sảnh: mỗi giáo viên / học sinh tự nhập khóa API AI đám mây (Gemini, Groq, Claude, OpenAI).
     /// Có khóa thì robot và chú thích hiện tượng trong lab gọi thẳng nhà cung cấp; không có thì dùng AI của máy chủ như cũ.
+    /// Giải bài tập: khóa Claude/Gemini được gửi kèm yêu cầu tới máy chủ cơ chế (Khkt.CoChe.MayChuCoChe), máy chủ gọi AI bằng khóa đó.
     /// Ô khóa không bao giờ hiện lại khóa đã lưu, chỉ hiện dạng che.
     /// </summary>
     public class PageAiKey : MonoBehaviour
@@ -34,7 +35,7 @@ namespace Khkt.Menu.Dashboard
         {
             root = page;
             GlassKit.Label(page, "Tiêu đề", "Trợ lý AI", 36, MenuKit.Ink, true, TextAnchor.UpperLeft, new Vector2(X, -48), new Vector2(900, 50));
-            GlassKit.Label(page, "Mô tả", "Dùng khóa API AI của riêng bạn: robot và trợ lý trong lab gọi thẳng nhà cung cấp, không qua máy chủ của trường.",
+            GlassKit.Label(page, "Mô tả", "Dùng khóa API AI của riêng bạn cho robot, trợ lý trong lab và Giải bài tập (Giải bài tập nhận khóa Claude hoặc Gemini).",
                            18, MenuKit.InkDim, false, TextAnchor.UpperLeft, new Vector2(X, -100), new Vector2(980, 30));
 
             var card = MenuKit.Card(page, "Thẻ", 0f, 1f, -150, 600, 0f, false);
@@ -68,7 +69,7 @@ namespace Khkt.Menu.Dashboard
 
             status = GlassKit.Label(body, "Trạng thái", "", 16, MenuKit.InkDim, false, TextAnchor.UpperLeft, new Vector2(x, y), new Vector2(980, 48));
             y -= 56;
-            note = GlassKit.Label(body, "Ghi chú", "", 15, MenuKit.InkDim, false, TextAnchor.UpperLeft, new Vector2(x, y), new Vector2(980, 70));
+            note = GlassKit.Label(body, "Ghi chú", "", 15, MenuKit.InkDim, false, TextAnchor.UpperLeft, new Vector2(x, y), new Vector2(980, 92));
         }
 
         InputField MakeField(Transform parent, string name, string label, float x, ref float y, bool password, out Text hint)
@@ -153,7 +154,9 @@ namespace Khkt.Menu.Dashboard
             note.text = (ApiKeyStore.UsesDpapi
                     ? "Khóa được mã hóa bằng DPAPI của Windows, chỉ lưu trên máy này và chỉ tài khoản Windows này giải được. "
                     : "Khóa được mã hóa AES theo mã máy và chỉ lưu trên máy này (trên máy không phải Windows, cách này chỉ che khóa, không chắc bằng DPAPI). ") +
-                "Khóa riêng theo từng tài khoản, không gửi lên máy chủ, không ghi vào nhật ký. Chi phí gọi AI tính vào tài khoản của khóa. " +
+                "Khóa riêng theo từng tài khoản, không ghi vào nhật ký. Chi phí gọi AI tính vào tài khoản của khóa. " +
+                "Robot và trợ lý gọi thẳng nhà cung cấp. Giải bài tập gửi khóa Claude/Gemini kèm từng yêu cầu tới máy chủ cơ chế " +
+                "(chỉ khi máy chủ ở máy này, trong mạng LAN hoặc dùng https); máy chủ dùng cho yêu cầu đó rồi bỏ, không lưu. " +
                 "Khi giáo viên tắt AI, bật kiểm tra hay khóa hóa chất, robot vẫn tuân theo.";
         }
 

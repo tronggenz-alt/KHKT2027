@@ -1,6 +1,10 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
+using Khkt.Menu;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -9,9 +13,56 @@ namespace Khkt.CoChe
     /// <summary>
     /// Gọi máy chủ cơ chế (server/ai/co_che/may_chu.py, HOP_DONG_APP.md mục 5). URL lưu trong PlayerPrefs, mặc định
     /// http://127.0.0.1:8010. Kiểm thử đặt GiaLap để trả lời giả, không cần mạng.
+    /// Có khóa AI riêng Claude/Gemini (Cài đặt → Trợ lý AI) thì các yêu cầu cần AI gửi kèm khóa qua tiêu đề X-Vera-*: máy chủ
+    /// gọi AI bằng khóa đó cho riêng yêu cầu ấy, không lưu. Chỉ gửi tới máy chủ trên máy này, trong mạng LAN hoặc qua https.
     /// </summary>
     public static class MayChuCoChe
     {
+        /// <summary>Đường dẫn có gọi AI đám mây trên máy chủ (giai_de.goi_ai_mac_dinh): chỉ những yêu cầu này mang khóa riêng.</summary>
+        static readonly HashSet<string> DuongCoAi = new HashSet<string>
+        {
+            "/co-che/giai-de", "/co-che/giai-chuoi", "/co-che/mo-hinh-3d", "/co-che/hoi-dap", "/co-che/giai-thich-chi-tiet",
+        };
+
+        /// <summary>
+        /// Tiêu đề khóa AI riêng cho một yêu cầu (rỗng khi không có khóa, khóa Groq/OpenAI mà máy chủ cơ chế chưa gọi được,
+        /// đường dẫn không cần AI, hoặc máy chủ ở Internet qua http trơn).
+        /// </summary>
+        public static List<KeyValuePair<string, string>> TieuDeKhoaRieng(string duong, string url, ApiKeyStore.Entry e)
+        {
+            var ds = new List<KeyValuePair<string, string>>();
+            if (e == null || !e.Valid || !DuongCoAi.Contains(duong) || !DuocGuiKhoa(url)) return ds;
+            if (e.provider != ApiKeyStore.Claude && e.provider != ApiKeyStore.Gemini) return ds;
+            ds.Add(new KeyValuePair<string, string>("X-Vera-Nha-Cung-Cap", e.provider));
+            ds.Add(new KeyValuePair<string, string>("X-Vera-Khoa-AI", e.key.Trim()));
+            if (!string.IsNullOrWhiteSpace(e.model)) ds.Add(new KeyValuePair<string, string>("X-Vera-Mo-Hinh", e.model.Trim()));
+            return ds;
+        }
+
+        /// <summary>
+        /// Được gửi khóa tới máy chủ này không: https, hoặc http tới máy này / mạng LAN (10.x, 172.16–31.x, 192.168.x, 169.254.x,
+        /// IPv6 nội bộ, tên .local). Máy chủ ở Internet qua http trơn thì không, để khóa không đi qua mạng ở dạng chữ đọc được.
+        /// </summary>
+        public static bool DuocGuiKhoa(string url)
+        {
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var u)) return false;
+            if (u.Scheme == Uri.UriSchemeHttps) return true;
+            if (u.Scheme != Uri.UriSchemeHttp) return false;
+            if (u.IsLoopback) return true;
+            string h = u.Host.Trim('[', ']').ToLowerInvariant();
+            if (h == "localhost" || h.EndsWith(".local")) return true;
+            if (!IPAddress.TryParse(h, out var ip)) return false;
+            var b = ip.GetAddressBytes();
+            if (ip.AddressFamily == AddressFamily.InterNetwork)
+                return b[0] == 10 || (b[0] == 172 && b[1] >= 16 && b[1] <= 31) || (b[0] == 192 && b[1] == 168) || (b[0] == 169 && b[1] == 254);
+            return ip.AddressFamily == AddressFamily.InterNetworkV6 && (ip.IsIPv6LinkLocal || ip.IsIPv6SiteLocal || (b[0] & 0xFE) == 0xFC);
+        }
+
+        static void GanKhoaRieng(UnityWebRequest r, string duong)
+        {
+            foreach (var kv in TieuDeKhoaRieng(duong, Url, ApiKeyStore.Current)) r.SetRequestHeader(kv.Key, kv.Value);
+        }
+
         public const string KhoaUrl = "VERA_CO_CHE_URL";
         public const string UrlMacDinh = "http://127.0.0.1:8010";
 
@@ -40,10 +91,11 @@ namespace Khkt.CoChe
                 r.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(than));
                 r.SetRequestHeader("Content-Type", "application/json");
             }
+            GanKhoaRieng(r, duong);
             r.timeout = Mathf.CeilToInt(cho);
             yield return r.SendWebRequest();
             if (r.result != UnityWebRequest.Result.Success)
-                xong(false, r.responseCode > 0 ? $"Máy chủ trả mã {r.responseCode}" : $"Không kết nối được {Url} ({r.error})");
+                xong(false, r.responseCode > 0 ? LoiTuMayChu(r.responseCode, r.downloadHandler?.text) : $"Không kết nối được {Url} ({r.error})");
             else xong(true, r.downloadHandler.text);
         }
 
@@ -70,6 +122,7 @@ namespace Khkt.CoChe
             r.downloadHandler = new DownloadHandlerBuffer();
             r.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(than));
             r.SetRequestHeader("Content-Type", "application/json");
+            GanKhoaRieng(r, "/co-che/giai-de");
             r.timeout = Mathf.CeilToInt(cho);
             yield return r.SendWebRequest();
             if (r.result == UnityWebRequest.Result.Success) xong(true, r.downloadHandler.text);
