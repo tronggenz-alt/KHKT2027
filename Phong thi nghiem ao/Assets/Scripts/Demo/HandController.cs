@@ -100,6 +100,8 @@ namespace Khkt.Demo
         public bool ForceFetchAnimation { get; set; }
         /// <summary>Tay phải cần rời chỗ nghỉ: đang cầm, đang thao tác, vừa bấm vào vật, hoặc ngắm theo kịch bản.</summary>
         public bool HandEngaged => Held != null || Acting || Time.time < tapUntil || OverrideAimPoint.HasValue;
+        /// <summary>Vật đang cầm do TAY TRÁI thật nắm trước webcam: vật nằm bên tay trái ảo (ArmRig cho tay trái ôm vật), tay phải rảnh.</summary>
+        public bool HeldByLeft { get; private set; }
         bool handRotReady;
         public const float TurnPitchMax = 75f, TurnYawMax = 70f, TurnRollMin = -170f, TurnRollMax = 150f;
         /// <summary>Đang giữ V xoay vật bằng chuột (DesktopViewer tạm không xoay camera).</summary>
@@ -155,7 +157,7 @@ namespace Khkt.Demo
 
         VeraPointer vera;
         readonly AimAssist assist = new AimAssist();
-        bool autoTest, veraA, veraB, veraDownPrev;
+        bool autoTest, veraA, veraB, veraDownPrev, veraHoldNoPick, fistPrev, fistPicked, fistHolding;
         // chạm kẹt: báo chạm ngay từ lúc nối tay cầm mà chưa từng nhả thì bỏ qua tới khi nhả (đo 25/11/2026: dây chạm B
         // chập GND, mạch báo "đang chạm" liên tục nên tay ảo cứ cầm mãi)
         object veraSourceSeen;
@@ -220,14 +222,20 @@ namespace Khkt.Demo
             veraA = a;
             veraB = b;
             vera.FineMode = Held != null && a;
+            if (!b) veraHoldNoPick = false;
             if (Held == null)
             {
                 bool pickAct = Current == Act.Pick || Current == Act.Swirl;
+                // nắm tay trái (hoặc giữ B) TRƯỚC rồi mới trỏ tới vật: vẫn cầm khi tia chạm vật (trước đây phải nắm lại lần nữa)
+                if (b && hoverGrab == null) veraHoldNoPick = true;
                 // B / nắm tay trái khi đang trỏ dụng cụ: cầm NGAY. Không qua "giữ 0,4 s mở bảng chi tiết" của chuột
                 // (giữ là cách cầm của tay cầm, trước đây giữ B lại mở bảng thay vì cầm khi bảng dụng cụ đang bật)
-                if (pickAct && hoverGrab != null && (bP || (b && !veraDownPrev)))
+                if (pickAct && hoverGrab != null && (bP || (b && !veraDownPrev) || (b && veraHoldNoPick)))
                 {
+                    veraHoldNoPick = false;
+                    bool byFist = InAppHandTracker.LeftGripNow && !(s.Has(VeraFlags.TouchB) && veraBFree);
                     Pick(hoverGrab);
+                    HeldByLeft = byFist && Held != null;
                     veraDownPrev = true;
                     down = pressed = released = false;
                     return;
@@ -268,6 +276,48 @@ namespace Khkt.Demo
             down = a || rollPour;
             pressed = aP;
             released = aR;
+        }
+
+        /// <summary>
+        /// Nắm tay trái trước webcam khi KHÔNG có tay cầm VERA trỏ (chuột / tâm màn hình trỏ vật): nắm = cầm vật đang trỏ (nắm trước
+        /// rồi trỏ cũng được), xòe = đặt vào chỗ đang trỏ, không trỏ chỗ đặt thì trả vật về chỗ cũ. Trước đây nắm tay chỉ có tác
+        /// dụng khi tay cầm VERA đang nối nên không cầm được cốc (tay ảo vẫn chụm lại vì ArmRig đọc cùng cử chỉ).
+        /// </summary>
+        void FistButtons(ref bool down, ref bool pressed, ref bool released)
+        {
+            bool fist = InAppHandTracker.LeftGripNow;
+            bool fistUp = !fist && fistPrev;
+            fistPrev = fist;
+            if (!fist) fistPicked = false;
+            if (Held == null)
+            {
+                fistHolding = false;
+                bool pickAct = Current == Act.Pick || Current == Act.Swirl;
+                if (fist && !fistPicked && pickAct && hoverGrab != null)
+                {
+                    fistPicked = true;
+                    fistHolding = true;
+                    CancelInspectHold();
+                    Pick(hoverGrab);
+                    HeldByLeft = Held != null;
+                    down = pressed = released = false;
+                }
+                return;
+            }
+            if (fistUp && fistHolding)
+            {
+                fistHolding = false;
+                bool placeAct = Current == Act.Place || Current == Act.PlaceSurface || Current == Act.Attach;
+                down = released = false;
+                if (placeAct) pressed = true;
+                else
+                {
+                    pressed = false;
+                    string ten = Held.name;
+                    ReturnHome();
+                    Say($"Đã trả {ten} về chỗ cũ (xòe tay trái khi trỏ vào chỗ đặt để đặt xuống)");
+                }
+            }
         }
 
         void OnDisable() => CancelInspectHold();
@@ -327,7 +377,11 @@ namespace Khkt.Demo
             bool released = !down && wasDown;
             wasDown = down;
             if (VeraAiming && !uiOpen && vera.Source != null) VeraButtons(ref down, ref pressed, ref released);
-            else if (vera != null) vera.FineMode = false;
+            else
+            {
+                if (vera != null) vera.FineMode = false;
+                if (!uiOpen) FistButtons(ref down, ref pressed, ref released);
+            }
             if (pressed) pressTime = Time.time;
             // bấm vào nút/khóa/vật (tay rảnh): tay đưa tới chạm rồi về
             if (pressed && Held == null && hasHit && Current != Act.None && Current != Act.Pick) tapUntil = Time.time + 0.75f;
@@ -1458,6 +1512,10 @@ namespace Khkt.Demo
             Vector3 rayPoint = hasHit ? hit.point - lastRay.direction * 0.07f : lastRay.origin + lastRay.direction * 0.6f;
             float dist = Vector3.Distance(cam.position, rayPoint);
             Vector3 free = cam.position + (rayPoint - cam.position).normalized * Mathf.Clamp(dist, minHandDistance, maxHandDistance);
+            if (Held == null) HeldByLeft = false;
+            Vector3 freeRight = free;
+            // tay trái cầm: vật dời sang bên trái chỗ trỏ một chút (nằm trong tay trái ảo), tay phải vẫn trỏ ở chỗ cũ
+            if (HeldByLeft) free -= Flat(cam.right).normalized * 0.26f + Vector3.up * 0.02f;
 
             bool pouring = Current == Act.Pour || Current == Act.Spray || Current == Act.Scoop || Current == Act.Bubble;
             tilt = Mathf.MoveTowards(tilt, pouring && Acting ? 105f : pouring ? 35f : 0f, 160f * dt);
@@ -1549,7 +1607,7 @@ namespace Khkt.Demo
                 if (!(pouring && TargetContainer != null)) UpdateStream(Vector3.zero, Vector3.zero, false);
                 t.SetPositionAndRotation(objPos, objRot);
                 gripTarget = objPos + objRot * (Vector3.up * Held.gripHeightM);
-                handPos = gripTarget;
+                handPos = HeldByLeft ? freeRight : gripTarget;
             }
             else
             {

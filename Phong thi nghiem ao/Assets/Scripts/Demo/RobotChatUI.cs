@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using Khkt.Environment;
@@ -359,6 +360,20 @@ namespace Khkt.Demo
                     if (!string.IsNullOrEmpty(r.tra_loi)) Add("Robot", r.tra_loi);
                     if (r.ke_hoach != null && r.ke_hoach.Length > 0 && LabRobot.Instance != null)
                         LabRobot.Instance.ExecutePlan(new List<RobotStep>(r.ke_hoach));
+                    else
+                    {
+                        // AI hứa làm ("em mang KI ra...") mà không có bước hợp lệ: không đứng im. Báo bước bị bỏ (nếu có) rồi làm
+                        // theo bộ hiểu lệnh cơ bản với câu lệnh gần nhất ("lấy KI cho" rồi "tôi" → lệnh là "lấy KI cho").
+                        bool dropped = r.bo_qua != null && r.bo_qua.Length > 0;
+                        if (dropped)
+                        {
+                            Add("Robot", "<color=#F5B861>Chưa làm được:</color> " + string.Join("; ", r.bo_qua));
+                            Debug.LogWarning("[Robot AI] bỏ bước: " + string.Join("; ", r.bo_qua));
+                        }
+                        string cmd = LastCommand(text);
+                        bool promised = Has(ChemicalCatalog.Fold(r.tra_loi ?? ""), "mang ", "lay ", "dem ", "dua ", "rot ", "do ph", "dun ", "lac ", "lam mau", "thuc hien");
+                        if (cmd != null && (dropped || promised)) LocalAct(cmd);
+                    }
                 }, err =>
                 {
                     waiting = false;
@@ -469,6 +484,32 @@ namespace Khkt.Demo
             return true;
         }
 
+        static readonly string[] ActVerbs = { "mang", "lay ", "lay", "dem ", "dua ", "rot ", "do ph", "dun ", "lac ", "khuay", "ly tam", "chuan do", "nhan biet", "don ", "tu hut" };
+
+        /// <summary>Câu lệnh gần nhất của người dùng có động từ hành động (câu hiện tại, nếu không thì câu trước trong hội thoại).</summary>
+        string LastCommand(string text)
+        {
+            string q = ChemicalCatalog.Fold(text) + " ";
+            if (ActVerbs.Any(v => q.Contains(v))) return text;
+            for (int i = history.Count - 1; i >= 0; i--)
+            {
+                var h = history[i];
+                if (!h.StartsWith("Bạn: ")) continue;
+                string t = h.Substring(5);
+                if (t == text) continue;
+                if (ActVerbs.Any(v => (ChemicalCatalog.Fold(t) + " ").Contains(v))) return t;
+            }
+            return null;
+        }
+
+        /// <summary>Như Local nhưng bỏ câu "Mình làm được: ..." khi không hiểu (đã có câu trả lời của AI).</summary>
+        void LocalAct(string text)
+        {
+            int n = entries.Count;
+            Local(text);
+            if (entries.Count == n + 1 && entries[n].text.StartsWith("Mình làm được:")) { entries.RemoveAt(n); RebuildLog(); }
+        }
+
         void Local(string text)
         {
             string q = ChemicalCatalog.Fold(text);
@@ -515,8 +556,11 @@ namespace Khkt.Demo
             if ((bring || find) && cat != null)
             {
                 string key = q;
-                foreach (var w in new[] { "giup minh", "giup", "cho minh", "ra ban", "ra day", "mang", "lay", "dua", "dem", "tim", "o dau", "cho nao", "vi tri", "nam o", "hoa chat", "lo", "chai", "?", "." })
-                    key = key.Replace(w, " ");
+                // bỏ từ đệm theo NGUYÊN TỪ (trước đây bỏ chuỗi "lo" làm "kali clorua" thành "kali c rua")
+                key = System.Text.RegularExpressions.Regex.Replace(key, @"[?.!,]", " ");
+                foreach (var w in new[] { "giup minh", "giup", "cho minh", "cho toi", "cho em", "ra ban", "ra day", "mang", "lay", "dua", "dem", "tim", "o dau", "cho nao", "vi tri", "nam o", "hoa chat", "dung dich", "lo", "chai", "binh", "cho", "voi", "di", "nhe", "nha", "ra", "giup", "minh", "toi", "em" })
+                    key = System.Text.RegularExpressions.Regex.Replace(" " + key + " ", @"(?<=\s)" + System.Text.RegularExpressions.Regex.Escape(w) + @"(?=\s)", " ");
+                key = System.Text.RegularExpressions.Regex.Replace(key, @"\s+", " ");
                 var found = cat.Search(key.Trim(), 1);
                 if (found.Count > 0)
                 {

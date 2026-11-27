@@ -234,73 +234,102 @@ namespace Khkt.Demo.Ai
                 fail?.Invoke("Khóa Claude không nhận âm thanh: dùng khóa Google Gemini (miễn phí), Groq hoặc OpenAI để nói chuyện với trợ lý");
                 yield break;
             }
-            for (int attempt = 0; attempt < 2; attempt++)
+            // Bản đi thi 27/11 (sửa chậm): mô hình "gemini-flash-latest" có suy nghĩ, chép 5 giây âm thanh mất > 40 s rồi hết giờ
+            // (Player.log: Curl error 28 hai lần). Chép lời không cần suy nghĩ: thử mô hình nhanh trước, chờ ngắn, hỏng thì sang mô hình sau.
+            var chain = new List<(string model, int timeout, bool noThink)>();
+            if (e.provider == ApiKeyStore.Gemini)
             {
-                UnityWebRequest r;
-                if (e.provider == ApiKeyStore.Gemini)
+                chain.Add(("gemini-flash-lite-latest", 12, false));
+                chain.Add(("gemini-2.5-flash", 15, true));
+                string own = e.ModelOrDefault;
+                if (own.StartsWith("gemini") && own != "gemini-flash-lite-latest" && own != "gemini-2.5-flash") chain.Add((own, 30, false));
+            }
+            else
+            {
+                chain.Add((null, 20, false));
+                chain.Add((null, 25, false));
+            }
+            string lastErr = "Không chuyển được lời nói thành chữ";
+            for (int attempt = 0; attempt < chain.Count; attempt++)
+            {
+                var (model, timeout, noThink) = chain[attempt];
+                for (int think = noThink ? 0 : 1; think < 2; think++)
                 {
-                    string model = e.ModelOrDefault.StartsWith("gemini") ? e.ModelOrDefault : "gemini-flash-latest";
-                    var body = new JObject
+                    UnityWebRequest r;
+                    if (e.provider == ApiKeyStore.Gemini)
                     {
-                        ["contents"] = new JArray(new JObject
+                        var gen = new JObject { ["temperature"] = 0, ["maxOutputTokens"] = 1024 };
+                        if (think == 0) gen["thinkingConfig"] = new JObject { ["thinkingBudget"] = 0 };
+                        var body = new JObject
                         {
-                            ["role"] = "user",
-                            ["parts"] = new JArray(
-                                new JObject { ["text"] = VoicePrompt },
-                                new JObject { ["inline_data"] = new JObject { ["mime_type"] = "audio/wav", ["data"] = Convert.ToBase64String(wav) } }),
-                        }),
-                        ["generationConfig"] = new JObject { ["temperature"] = 0 },
-                    };
-                    string url = GeminiBase.Replace("/openai", "") + "/models/" + model + ":generateContent";
-                    r = new UnityWebRequest(url, "POST")
+                            ["contents"] = new JArray(new JObject
+                            {
+                                ["role"] = "user",
+                                ["parts"] = new JArray(
+                                    new JObject { ["text"] = VoicePrompt },
+                                    new JObject { ["inline_data"] = new JObject { ["mime_type"] = "audio/wav", ["data"] = Convert.ToBase64String(wav) } }),
+                            }),
+                            ["generationConfig"] = gen,
+                        };
+                        string url = GeminiBase.Replace("/openai", "") + "/models/" + model + ":generateContent";
+                        r = new UnityWebRequest(url, "POST")
+                        {
+                            uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body.ToString(Newtonsoft.Json.Formatting.None))),
+                            downloadHandler = new DownloadHandlerBuffer(),
+                        };
+                        r.SetRequestHeader("Content-Type", "application/json");
+                        r.SetRequestHeader("x-goog-api-key", e.key.Trim());
+                    }
+                    else
                     {
-                        uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body.ToString(Newtonsoft.Json.Formatting.None))),
-                        downloadHandler = new DownloadHandlerBuffer(),
-                    };
-                    r.SetRequestHeader("Content-Type", "application/json");
-                    r.SetRequestHeader("x-goog-api-key", e.key.Trim());
-                }
-                else
-                {
-                    bool groq = e.provider == ApiKeyStore.Groq;
-                    var form = new List<IMultipartFormSection>
+                        bool groq = e.provider == ApiKeyStore.Groq;
+                        var form = new List<IMultipartFormSection>
+                        {
+                            new MultipartFormDataSection("model", groq ? "whisper-large-v3-turbo" : "whisper-1"),
+                            new MultipartFormDataSection("language", "vi"),
+                            new MultipartFormDataSection("response_format", "json"),
+                            new MultipartFormDataSection("prompt", "Phòng thí nghiệm hóa học, sinh học: NaOH, HCl, CuSO4, ống nghiệm, buret, pipet."),
+                            new MultipartFormFileSection("file", wav, "giong_noi.wav", "audio/wav"),
+                        };
+                        r = UnityWebRequest.Post(Base(e.provider) + "/audio/transcriptions", form);
+                        Auth(r, e);
+                    }
+                    using (r)
                     {
-                        new MultipartFormDataSection("model", groq ? "whisper-large-v3-turbo" : "whisper-1"),
-                        new MultipartFormDataSection("language", "vi"),
-                        new MultipartFormDataSection("response_format", "json"),
-                        new MultipartFormDataSection("prompt", "Phòng thí nghiệm hóa học, sinh học: NaOH, HCl, CuSO4, ống nghiệm, buret, pipet."),
-                        new MultipartFormFileSection("file", wav, "giong_noi.wav", "audio/wav"),
-                    };
-                    r = UnityWebRequest.Post(Base(e.provider) + "/audio/transcriptions", form);
-                    Auth(r, e);
-                }
-                using (r)
-                {
-                    r.timeout = 40;
-                    yield return r.SendWebRequest();
-                    if (r.result != UnityWebRequest.Result.Success)
-                    {
-                        if (attempt == 0 && (r.responseCode >= 500 || r.responseCode == 0)) { yield return new WaitForSecondsRealtime(0.8f); continue; }
-                        fail?.Invoke(Describe(r, e));
+                        r.timeout = timeout;
+                        float t0 = Time.realtimeSinceStartup;
+                        yield return r.SendWebRequest();
+                        float took = Time.realtimeSinceStartup - t0;
+                        if (r.result != UnityWebRequest.Result.Success)
+                        {
+                            long c = r.responseCode;
+                            lastErr = Describe(r, e);
+                            Debug.LogWarning($"[Giọng nói] {model ?? e.provider} lỗi {c} sau {took:0.0} s");
+                            if (think == 0 && c == 400) continue;                       // mô hình không nhận thinkingConfig: gửi lại không có
+                            if (c == 0 || c == 400 || c == 404 || c == 429 || c >= 500) break;   // hết giờ / quá tải / không có mô hình: sang mô hình sau
+                            fail?.Invoke(lastErr);                                     // khóa sai, hết hạn mức...: báo ngay
+                            yield break;
+                        }
+                        string text;
+                        try
+                        {
+                            var root = JObject.Parse(r.downloadHandler.text);
+                            if (e.provider == ApiKeyStore.Gemini)
+                            {
+                                var parts = root["candidates"]?[0]?["content"]?["parts"] as JArray;
+                                text = parts == null ? "" : string.Concat(parts.Where(p => p["thought"]?.Type != JTokenType.Boolean || !p["thought"].Value<bool>()).Select(p => p["text"]?.ToString() ?? ""));
+                            }
+                            else text = root["text"]?.ToString() ?? "";
+                        }
+                        catch { fail?.Invoke("Nhà cung cấp trả lời không đúng định dạng."); yield break; }
+                        Debug.Log($"[Giọng nói] {model ?? e.provider} chép xong sau {took:0.0} s");
+                        text = text.Trim().Trim('"', '\u201c', '\u201d').Trim();
+                        ok?.Invoke(text);
                         yield break;
                     }
-                    string text;
-                    try
-                    {
-                        var root = JObject.Parse(r.downloadHandler.text);
-                        if (e.provider == ApiKeyStore.Gemini)
-                        {
-                            var parts = root["candidates"]?[0]?["content"]?["parts"] as JArray;
-                            text = parts == null ? "" : string.Concat(parts.Select(p => p["text"]?.ToString() ?? ""));
-                        }
-                        else text = root["text"]?.ToString() ?? "";
-                    }
-                    catch { fail?.Invoke("Nhà cung cấp trả lời không đúng định dạng."); yield break; }
-                    text = text.Trim().Trim('"', '\u201c', '\u201d').Trim();
-                    ok?.Invoke(text);
-                    yield break;
                 }
             }
+            fail?.Invoke(lastErr);
         }
 
         static void Auth(UnityWebRequest r, ApiKeyStore.Entry e)

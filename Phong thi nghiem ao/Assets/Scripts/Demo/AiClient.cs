@@ -168,6 +168,7 @@ namespace Khkt.Demo
             LastDirectError = "";
             var ids = new HashSet<string>();
             if (req.the_gioi?.vat != null) foreach (var v in req.the_gioi.vat) if (v?.id != null) ids.Add(v.id);
+            Debug.Log("[Robot AI] " + Cut(data.ToString(Newtonsoft.Json.Formatting.None), 1500));
             var dropped = new List<string>();
             var steps = RobotPlanLocal.Validate(data["ke_hoach"] as JArray ?? new JArray(), ids, RobotPlanLocal.FindChemical, dropped);
             steps = RobotPlanLocal.CutLocked(steps, ClassRules.IsLocked, dropped, out string lockNote);

@@ -216,6 +216,17 @@ namespace Khkt.Demo
             }
         }
 
+        static int webcamArmsFlag = -1;
+        /// <summary>Cánh tay ảo ráp theo bàn tay webcam (kiểu cũ, tắt ở bản đi thi): KHKT_TAY_WEBCAM=1 để bật.</summary>
+        public static bool WebcamArms
+        {
+            get
+            {
+                if (webcamArmsFlag < 0) webcamArmsFlag = System.Environment.GetEnvironmentVariable("KHKT_TAY_WEBCAM") == "1" ? 1 : 0;
+                return webcamArmsFlag == 1;
+            }
+        }
+
         /// <summary>Cài đặt → Điều khiển → "Hiện cánh tay (ống tay áo)" (bản đi thi): tắt cho đỡ vướng tầm nhìn, bàn tay vẫn hiện.</summary>
         public const string HideArmsPrefKey = "an_canh_tay";
         static int userHide = -1;
@@ -252,11 +263,15 @@ namespace Khkt.Demo
             // để cầm / thả, hiện ở cánh tay trái ảo). Hai tay độc lập: trước đây bàn tay trái theo dõi được dùng làm
             // "người lái" tay phải (đặt điểm ngắm vào lòng bàn tay trái, chụm tay trái = giữ chuột) nên tay phải bị méo.
             bool veraOwnsRight = VeraPointer.Instance != null && VeraPointer.Instance.HasControl;
+            // Bản đi thi (27/11/2026): cánh tay ảo KHÔNG ráp theo bàn tay webcam nữa. Webcam không thấy khuỷu nên cánh tay suy ra
+            // bị méo (ống tay áo kéo thành tấm lớn, bàn tay lơ lửng). Webcam vẫn lo xoay theo đầu và nắm / xòe tay trái để cầm / thả;
+            // bàn tay trái ảo nắm lại khi tay trái thật nắm. Bật lại kiểu cũ: biến môi trường KHKT_TAY_WEBCAM=1.
+            bool webcamArms = WebcamArms;
 
             for (int i = 0; i < 2; i++)
             {
                 var s = at == null ? null : i == 0 ? at.Right : at.Left;
-                bool show = master && s != null && (s.handSeen || s.armSeen) && !(veraOwnsRight && i == 0);
+                bool show = webcamArms && master && s != null && (s.handSeen || s.armSeen) && !(veraOwnsRight && i == 0);
                 if (arms[i] == null) arms[i] = Build(i);
                 if (!arms[i].root.activeSelf) arms[i].root.SetActive(true);
                 if (show != arms[i].tracked) { arms[i].tracked = show; arms[i].ResetFilters(); }
@@ -426,13 +441,14 @@ namespace Khkt.Demo
                 Vector3 ctrlPos = lastCtrlPos;
                 Quaternion ctrlRot = lastCtrlRot;
 
-                bool empty = hand.Held == null;
+                bool leftHeld = hand.HeldByLeft;   // vật nằm trong tay trái: tay phải coi như rảnh
+                bool empty = hand.Held == null || leftHeld;
                 bool scripted = hand.OverrideAimPoint != null;
                 // Tay chỉ rời chỗ nghỉ khi có việc (cầm, thao tác, bấm vào vật); di chuột không kéo tay theo.
                 // Tay cầm VERA có dữ liệu (25/11/2026): tay phải luôn đưa ra và mô phỏng hướng thật của BMI160 (HandController
                 // đã đặt hướng theo tay cầm), để người chơi nhìn tay ảo là thấy tay cầm đang hướng thế nào
                 bool veraLive = Khkt.Input.VeraPointer.Instance != null && Khkt.Input.VeraPointer.Instance.HasControl;
-                bool engaged = hand.HandEngaged || veraLive;
+                bool engaged = (hand.HandEngaged && !leftHeld) || veraLive;
                 bool instant = scripted && !hand.Fetching;
                 if (instant || !engageReady) { engageW = engaged ? 1f : 0f; engageVel = 0f; engageReady = true; }
                 else Spring(ref engageW, ref engageVel, engaged ? 1f : 0f, engaged ? 9f : 7f, dt);
@@ -489,6 +505,7 @@ namespace Khkt.Demo
 
                 // Đỡ cốc: tay phải đang rót/hút/nhỏ/đo vào một vật chứa trong tầm tay trái
                 Transform want = AssistOverride;
+                if (want == null && hand != null && hand.Held != null && hand.HeldByLeft) want = hand.Held.transform;   // tay trái cầm vật
                 if (want == null && hand != null && hand.Held != null && hand.TargetContainer != null && IsAssistAct(hand.Current))
                     want = hand.TargetContainer.transform;
                 bool canAssist = want != null && ComputeAssist(want, flat, rig);
@@ -502,7 +519,8 @@ namespace Khkt.Demo
                     pos = Vector3.Lerp(pos, apos, assistW);
                     rot = Quaternion.Slerp(rot, assistRot, assistW);
                 }
-                rig.SetTargetPose(assistW > 0.35f ? HandPoseId.ChumCam : HandPoseId.Nghi);
+                // tay trái thật nắm trước webcam (cầm vật bằng tay cầm VERA): bàn tay trái ảo nắm lại cho người chơi thấy
+                rig.SetTargetPose(assistW > 0.35f || InAppHandTracker.LeftGripNow ? HandPoseId.ChumCam : HandPoseId.Nghi);
                 rig.TargetContactObject = assistW > 0.7f ? assistCached : null;
                 rig.transform.SetPositionAndRotation(pos, rot);
                 handLocalOut1 = cameraTransform.InverseTransformPoint(pos);
