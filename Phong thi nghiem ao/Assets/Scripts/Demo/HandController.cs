@@ -100,6 +100,8 @@ namespace Khkt.Demo
         public bool ForceFetchAnimation { get; set; }
         /// <summary>Tay phải cần rời chỗ nghỉ: đang cầm, đang thao tác, vừa bấm vào vật, hoặc ngắm theo kịch bản.</summary>
         public bool HandEngaged => Held != null || Acting || Time.time < tapUntil || OverrideAimPoint.HasValue;
+        /// <summary>Vật đang cầm do TAY TRÁI thật nắm trước webcam: vật nằm bên tay trái ảo (ArmRig cho tay trái ôm vật), tay phải rảnh.</summary>
+        public bool HeldByLeft { get; private set; }
         bool handRotReady;
         public const float TurnPitchMax = 75f, TurnYawMax = 70f, TurnRollMin = -170f, TurnRollMax = 150f;
         /// <summary>Đang giữ V xoay vật bằng chuột (DesktopViewer tạm không xoay camera).</summary>
@@ -231,7 +233,9 @@ namespace Khkt.Demo
                 if (pickAct && hoverGrab != null && (bP || (b && !veraDownPrev) || (b && veraHoldNoPick)))
                 {
                     veraHoldNoPick = false;
+                    bool byFist = InAppHandTracker.LeftGripNow && !(s.Has(VeraFlags.TouchB) && veraBFree);
                     Pick(hoverGrab);
+                    HeldByLeft = byFist && Held != null;
                     veraDownPrev = true;
                     down = pressed = released = false;
                     return;
@@ -295,6 +299,7 @@ namespace Khkt.Demo
                     fistHolding = true;
                     CancelInspectHold();
                     Pick(hoverGrab);
+                    HeldByLeft = Held != null;
                     down = pressed = released = false;
                 }
                 return;
@@ -1507,6 +1512,10 @@ namespace Khkt.Demo
             Vector3 rayPoint = hasHit ? hit.point - lastRay.direction * 0.07f : lastRay.origin + lastRay.direction * 0.6f;
             float dist = Vector3.Distance(cam.position, rayPoint);
             Vector3 free = cam.position + (rayPoint - cam.position).normalized * Mathf.Clamp(dist, minHandDistance, maxHandDistance);
+            if (Held == null) HeldByLeft = false;
+            Vector3 freeRight = free;
+            // tay trái cầm: vật dời sang bên trái chỗ trỏ một chút (nằm trong tay trái ảo), tay phải vẫn trỏ ở chỗ cũ
+            if (HeldByLeft) free -= Flat(cam.right).normalized * 0.26f + Vector3.up * 0.02f;
 
             bool pouring = Current == Act.Pour || Current == Act.Spray || Current == Act.Scoop || Current == Act.Bubble;
             tilt = Mathf.MoveTowards(tilt, pouring && Acting ? 105f : pouring ? 35f : 0f, 160f * dt);
@@ -1598,7 +1607,7 @@ namespace Khkt.Demo
                 if (!(pouring && TargetContainer != null)) UpdateStream(Vector3.zero, Vector3.zero, false);
                 t.SetPositionAndRotation(objPos, objRot);
                 gripTarget = objPos + objRot * (Vector3.up * Held.gripHeightM);
-                handPos = gripTarget;
+                handPos = HeldByLeft ? freeRight : gripTarget;
             }
             else
             {

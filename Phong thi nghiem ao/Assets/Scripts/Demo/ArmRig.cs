@@ -441,13 +441,14 @@ namespace Khkt.Demo
                 Vector3 ctrlPos = lastCtrlPos;
                 Quaternion ctrlRot = lastCtrlRot;
 
-                bool empty = hand.Held == null;
+                bool leftHeld = hand.HeldByLeft;   // vật nằm trong tay trái: tay phải coi như rảnh
+                bool empty = hand.Held == null || leftHeld;
                 bool scripted = hand.OverrideAimPoint != null;
                 // Tay chỉ rời chỗ nghỉ khi có việc (cầm, thao tác, bấm vào vật); di chuột không kéo tay theo.
                 // Tay cầm VERA có dữ liệu (25/11/2026): tay phải luôn đưa ra và mô phỏng hướng thật của BMI160 (HandController
                 // đã đặt hướng theo tay cầm), để người chơi nhìn tay ảo là thấy tay cầm đang hướng thế nào
                 bool veraLive = Khkt.Input.VeraPointer.Instance != null && Khkt.Input.VeraPointer.Instance.HasControl;
-                bool engaged = hand.HandEngaged || veraLive;
+                bool engaged = (hand.HandEngaged && !leftHeld) || veraLive;
                 bool instant = scripted && !hand.Fetching;
                 if (instant || !engageReady) { engageW = engaged ? 1f : 0f; engageVel = 0f; engageReady = true; }
                 else Spring(ref engageW, ref engageVel, engaged ? 1f : 0f, engaged ? 9f : 7f, dt);
@@ -504,6 +505,7 @@ namespace Khkt.Demo
 
                 // Đỡ cốc: tay phải đang rót/hút/nhỏ/đo vào một vật chứa trong tầm tay trái
                 Transform want = AssistOverride;
+                if (want == null && hand != null && hand.Held != null && hand.HeldByLeft) want = hand.Held.transform;   // tay trái cầm vật
                 if (want == null && hand != null && hand.Held != null && hand.TargetContainer != null && IsAssistAct(hand.Current))
                     want = hand.TargetContainer.transform;
                 bool canAssist = want != null && ComputeAssist(want, flat, rig);
