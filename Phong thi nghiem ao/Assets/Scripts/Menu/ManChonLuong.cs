@@ -21,6 +21,8 @@ namespace Khkt.Menu
         public Action ChonPhongLab;
         public Action ChonGiaiBaiTap;
         public Action Thoat;
+        /// <summary>Đổi giao diện: true = Kính lỏng, false = Cổ điển (MainMenu lưu rồi dựng lại màn).</summary>
+        public Action<bool> DoiGiaoDien;
 
         RectTransform goc;
         readonly List<RectTransform> lanLuot = new List<RectTransform>();
@@ -62,6 +64,15 @@ namespace Khkt.Menu
             var thoat = MakeButton(goc, "Nút Thoát ứng dụng", "Thoát", new Vector2(-40, -30), new Vector2(96, 44), () => Thoat?.Invoke(), 2, RadiusButton, new Vector2(1, 1));
             ((RectTransform)thoat.transform).pivot = new Vector2(1, 1);
 
+            // Nút chuyển giao diện: Kính lỏng | Cổ điển (nhóm chọn 2 mục, vệt chọn trượt)
+            var chuyen = Tabs(goc, "Chuyển giao diện", new[] { "Nút Kính lỏng", "Nút Cổ điển" }, new[] { "Kính lỏng", "Cổ điển" },
+                              Vector2.zero, new Vector2(118, 40), false, 4f, GlassKit.LiquidGlass ? 0 : 1,
+                              i => DoiGiaoDien?.Invoke(i == 0));
+            var crt = (RectTransform)chuyen.transform;
+            crt.anchorMin = crt.anchorMax = new Vector2(1, 1);
+            crt.pivot = new Vector2(1, 1);
+            crt.anchoredPosition = new Vector2(-156, -32);
+
             var giua = new Vector2(0.5f, 0.5f);
             var tag = Tag(goc, "Nhãn chào", "VERA Lab · Hóa học & Sinh học THPT", new Vector2(0, 300), AccentSoft, WithAlpha(Accent, 0.28f), Accent, giua);
             var chao = GlassKit.Label(goc, "Lời chào", "Hôm nay bạn muốn làm gì?", 60, Ink, true, TextAnchor.MiddleCenter, new Vector2(0, 232), new Vector2(1400, 84));
@@ -95,7 +106,7 @@ namespace Khkt.Menu
             var nen = than.GetComponent<Image>();
             nen.color = Color.white;
             Gradient(nen, dau, cuoi, 145f);
-            if (UiTheme.IsLight) Sheen(the, RadiusLarge, 0.22f);
+            if (UiTheme.IsLight && !Kinh) Sheen(the, RadiusLarge, 0.22f);  // kính lỏng tự có viền phản chiếu
             var hv = the.GetComponent<MenuHover>();
             var bong = the.Find("Bóng").GetComponent<Image>();
             Color mauBong = UiTheme.IsLight ? cuoi : new Color(0, 0, 0, 1);

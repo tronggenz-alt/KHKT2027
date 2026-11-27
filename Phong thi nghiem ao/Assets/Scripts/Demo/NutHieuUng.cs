@@ -1,7 +1,7 @@
 using System;
-using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
 using Khkt.Environment.Tang2;
 using Khkt.Interaction.Bio;
@@ -9,14 +9,16 @@ using Khkt.Interaction.Bio;
 namespace Khkt.Demo
 {
     /// <summary>
-    /// Bộ hiệu ứng nút bấm cảm ứng iPad chuẩn Apple HIG & Material Design 3 (Giai đoạn 3):
-    ///   • Phản hồi hình ảnh: Lớp phủ HighlightOverlay (raycastTarget = false), co giãn nhẹ 0.95x bằng coroutine mượt mà.
-    ///   • Phản hồi âm thanh: Click nhẹ từ BioFeedback (có thể tắt trong Cài đặt).
-    ///   • Luật an toàn tuyệt đối: Nút giữ luôn nhả khi nhấc ngón, trượt ra ngoài (PointerExit),
-    ///     khi SetActive(false), khi mất focus, hoặc khi mở bảng khác.
-    ///   • Tương thích hoàn toàn với ReducedMotion (tắt scale, giữ chuyển đổi alpha).
+    /// Phản hồi chạm kiểu Liquid Glass (glassEffect .interactive() của Apple), viết lại 27/11/2026:
+    ///   • Nhấn: nút phồng lên (~10 px tổng, tối đa 8 %) bằng lò xo nhanh; kính sáng lên từ ĐÚNG điểm chạm (KinhLongAnhCham).
+    ///   • Giữ và kéo: nút co giãn đàn hồi theo hướng kéo (cao su), quầng sáng đi theo ngón tay / con trỏ.
+    ///   • Nhả: bật về có nảy nhẹ như giọt nước; quầng sáng bừng rồi lan rộng và tắt dần.
+    ///   • Mac/Windows: rê chuột qua nút có quầng sáng dịu đi theo con trỏ (không phồng).
+    ///   • Co giãn quanh tâm nút, không lệch theo pivot; không đè bố cục (LayoutGroup).
+    ///   • Luật an toàn giữ nguyên: nút giữ luôn nhả khi nhấc ngón, trượt ra ngoài, SetActive(false), mất focus.
+    ///   • Giảm chuyển động: không phồng, không co giãn, không nảy; chỉ còn quầng sáng mờ dần.
     /// </summary>
-    public class NutHieuUng : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerExitHandler, IPointerEnterHandler
+    public class NutHieuUng : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerExitHandler, IPointerEnterHandler, IPointerMoveHandler
     {
         public const string SoundPrefKey = "KHKT_AM_THANH_GIAO_DIEN";
 
@@ -31,64 +33,148 @@ namespace Khkt.Demo
         }
 
         [Header("Cấu hình hiệu ứng")]
+        [Tooltip("Rê chuột (Mac/Windows): nút nhích to nhẹ.")]
         public float hoverScale = 1.022f;
+        [Tooltip("Giao diện Cổ điển: nút co lại khi nhấn. Kính lỏng thì phồng lên.")]
         public float pressedScale = 0.94f;
-        public float animDuration = 0.08f;
         public bool isHoldButton = false;
         public Action onHoldReleaseAction;
+        [Tooltip("Phồng khi nhấn (true, kiểu Liquid Glass) hay co lại (false, kiểu cũ).")]
+        public bool liquid = true;
 
         RectTransform rectTransform;
-        Image highlightOverlay;
+        Image legacyOverlay;
+        KinhLongAnhCham anh;
+        Image hinh;
+        Selectable sel;
+
         Vector3 baseScale = Vector3.one;
-        Coroutine currentAnim;
-        bool isPointerDown = false;
-        bool isHovered = false;
+        Vector3 lastOffset;
+        bool isPointerDown;
+        bool hovering;
+        bool dangChay;
+
+        LoXo phong = new LoXo(1f);        // hệ số phồng
+        LoXo2 gian = new LoXo2(Vector2.zero);   // co giãn theo hướng kéo (tỉ lệ)
+        LoXo2 doi = new LoXo2(Vector2.zero);    // độ dời theo hướng kéo (px)
+        LoXo sang = new LoXo(0f);         // độ sáng quầng
+        LoXo lan = new LoXo(1f);          // bán kính quầng (bội số)
+        Vector2 tamSang, tamDich;          // tâm quầng (cục bộ, gốc ở tâm)
+        Vector2 diemNhan;                  // điểm bắt đầu nhấn (cục bộ)
+        float bungNha;                     // năng lượng lúc nhả, tắt dần
 
         void Awake()
         {
             rectTransform = GetComponent<RectTransform>();
             if (rectTransform != null) baseScale = rectTransform.localScale;
-            EnsureHighlightOverlay();
-        }
-
-        void EnsureHighlightOverlay()
-        {
-            if (highlightOverlay != null)
-            {
-                highlightOverlay.sprite = GlassKit.Solid;
-                return;
-            }
+            sel = GetComponent<Selectable>();
+            hinh = GetComponent<Image>();
+            if (hinh == null && sel != null) hinh = sel.targetGraphic as Image;
+            liquid = liquid && GlassKit.LiquidGlass;
             var t = transform.Find("HighlightOverlay");
             if (t != null)
             {
-                highlightOverlay = t.GetComponent<Image>();
-                if (highlightOverlay != null)
-                {
-                    highlightOverlay.sprite = GlassKit.Solid;
-                    highlightOverlay.color = GlassKit.Wash(0f);
-                }
-                return;
+                legacyOverlay = t.GetComponent<Image>();
+                if (legacyOverlay != null) legacyOverlay.color = GlassKit.Wash(0f);
             }
+        }
 
-            var go = new GameObject("HighlightOverlay", typeof(RectTransform));
-            go.transform.SetParent(transform, false);
-            var rt = (RectTransform)go.transform;
-            rt.anchorMin = Vector2.zero;
-            rt.anchorMax = Vector2.one;
-            rt.offsetMin = Vector2.zero;
-            rt.offsetMax = Vector2.zero;
+        bool CoTheBam => sel == null || sel.IsInteractable();
 
-            highlightOverlay = go.AddComponent<Image>();
-            highlightOverlay.sprite = GlassKit.Solid;
-            highlightOverlay.type = Image.Type.Sliced;
-            highlightOverlay.color = GlassKit.Wash(0f);
-            highlightOverlay.raycastTarget = false; // Tuyệt đối không cản trở raycast
+        void EnsureAnh()
+        {
+            if (anh != null) return;
+            var t = transform.Find("Ánh chạm");
+            if (t != null) anh = t.GetComponent<KinhLongAnhCham>();
+            if (anh == null)
+            {
+                var go = new GameObject("Ánh chạm", typeof(RectTransform), typeof(CanvasRenderer));
+                go.transform.SetParent(transform, false);
+                var rt = (RectTransform)go.transform;
+                rt.anchorMin = Vector2.zero;
+                rt.anchorMax = Vector2.one;
+                rt.offsetMin = rt.offsetMax = Vector2.zero;
+                var le = go.AddComponent<LayoutElement>();
+                le.ignoreLayout = true;
+                anh = go.AddComponent<KinhLongAnhCham>();
+            }
+            // nằm ngay trên nền nút, dưới chữ và biểu tượng
+            int idx = 0;
+            var vien = transform.Find("Viền");
+            if (vien != null) idx = vien.GetSiblingIndex() + 1;
+            anh.transform.SetSiblingIndex(Mathf.Min(idx, transform.childCount - 1));
+            anh.raycastTarget = false;
+            SyncShape();
+        }
+
+        void SyncShape()
+        {
+            if (anh == null) return;
+            if (hinh != null && hinh.sprite == GlassKit.Rounded)
+            {
+                // mặt kính lỏng: sprite mang dữ liệu khúc xạ, mượn hình đặc cùng bán kính (góc 30) cho quầng sáng
+                anh.shape = GlassKit.Solid;
+                anh.multiplier = hinh.pixelsPerUnitMultiplier;
+            }
+            else if (hinh != null && hinh.sprite != null && hinh.type == Image.Type.Sliced)
+            {
+                anh.shape = hinh.sprite;
+                anh.multiplier = hinh.pixelsPerUnitMultiplier;
+            }
+            else if (hinh != null && hinh.sprite != null)
+            {
+                anh.shape = hinh.sprite;
+                anh.multiplier = 1f;
+            }
+            else
+            {
+                anh.shape = GlassKit.Solid;
+                anh.multiplier = 3f;
+            }
+            anh.color = MauAnh();
+        }
+
+        /// <summary>Nút nền sáng (chủ đề Trắng, nút phụ) dùng quầng màu nhấn dịu; nút nền tối hoặc màu nhấn dùng quầng trắng.</summary>
+        Color MauAnh()
+        {
+            Color fill = hinh != null ? hinh.color : Color.black;
+            float lum = 0.2126f * fill.r + 0.7152f * fill.g + 0.0722f * fill.b;
+            if (lum > 0.78f && fill.a > 0.5f)
+                return new Color(GlassKit.Accent.r, GlassKit.Accent.g, GlassKit.Accent.b, 0.30f);
+            return new Color(1f, 1f, 1f, UiTheme.IsLight ? 0.42f : 0.30f);
+        }
+
+        Vector2 Local(PointerEventData e)
+        {
+            if (rectTransform == null) return Vector2.zero;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, e.position, e.pressEventCamera ?? e.enterEventCamera, out var p);
+            return p - rectTransform.rect.center;
+        }
+
+        static bool LaCamUng(PointerEventData e) =>
+            e is ExtendedPointerEventData x && (x.pointerType == UIPointerType.Touch || x.pointerType == UIPointerType.Tracked);
+
+        float Pop()
+        {
+            if (!liquid) return Mathf.Clamp(pressedScale, 0.8f, 1f);
+            if (rectTransform == null) return 1.05f;
+            Vector2 s = rectTransform.rect.size;
+            float big = Mathf.Max(Mathf.Max(s.x, s.y), 1f);
+            return 1f + Mathf.Clamp(10f / big, 0.02f, 0.08f);
         }
 
         public void OnPointerDown(PointerEventData eventData)
         {
+            if (!CoTheBam) return;
             isPointerDown = true;
-            PlayPressAnimation(true);
+            EnsureAnh();
+            diemNhan = Local(eventData);
+            tamDich = diemNhan;
+            if (sang.Value < 0.05f) tamSang = diemNhan;
+            phong.Target = ReducedMotion.IsEnabled ? 1f : Pop();
+            sang.Target = 1f;
+            lan.Target = 1f;
+            dangChay = true;
             if (SoundEnabled)
             {
                 if (isHoldButton) BioFeedback.PlayButton();
@@ -96,35 +182,128 @@ namespace Khkt.Demo
             }
         }
 
+        public void OnPointerMove(PointerEventData eventData)
+        {
+            if (!isPointerDown && !hovering) return;
+            Vector2 p = Local(eventData);
+            tamDich = p;
+            if (isPointerDown && !ReducedMotion.IsEnabled && rectTransform != null)
+            {
+                Vector2 size = rectTransform.rect.size;
+                Vector2 d = p - diemNhan;
+                // dời đàn hồi tối đa ~6 px, giãn theo trục kéo tối đa ~6 %, trục kia co lại nửa chừng (giữ thể tích)
+                doi.Target = new Vector2(KinhLong.CaoSu(d.x, 12f), KinhLong.CaoSu(d.y, 12f)) * 0.5f;
+                float gx = KinhLong.CaoSu(Mathf.Abs(d.x), Mathf.Max(size.x, 1f) * 0.12f) / Mathf.Max(size.x, 1f);
+                float gy = KinhLong.CaoSu(Mathf.Abs(d.y), Mathf.Max(size.y, 1f) * 0.12f) / Mathf.Max(size.y, 1f);
+                gian.Target = new Vector2(gx - gy * 0.5f, gy - gx * 0.5f);
+            }
+            dangChay = true;
+        }
+
         public void OnPointerUp(PointerEventData eventData)
         {
             if (isPointerDown)
             {
                 isPointerDown = false;
-                PlayReleaseBounce();
+                Nha(true);
             }
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
-            isHovered = false;
+            hovering = false;
             if (isPointerDown)
             {
                 isPointerDown = false;
-                PlayPressAnimation(false);
+                Nha(false);
                 ReleaseHold();
             }
             else
             {
-                PlayPressAnimation(false);
+                sang.Target = 0f;
+                phong.Target = 1f;
+                dangChay = true;
             }
         }
 
         public void OnPointerEnter(PointerEventData eventData)
         {
-            isHovered = true;
-            if (!isPointerDown)
-                PlayPressAnimation(false);
+            // chỉ chuột mới có trạng thái rê; cảm ứng không có
+            if (LaCamUng(eventData) || isPointerDown || !CoTheBam) return;
+            hovering = true;
+            EnsureAnh();
+            tamDich = Local(eventData);
+            if (sang.Value < 0.05f) tamSang = tamDich;
+            sang.Target = 0.32f;
+            lan.Target = 1.15f;
+            if (!ReducedMotion.IsEnabled) phong.Target = hoverScale;
+            dangChay = true;
+        }
+
+        void Nha(bool bamTrung)
+        {
+            phong.Target = hovering && !ReducedMotion.IsEnabled ? hoverScale : 1f;
+            gian.Target = Vector2.zero;
+            doi.Target = Vector2.zero;
+            if (bamTrung && !ReducedMotion.IsEnabled)
+            {
+                // bừng sáng rồi lan rộng, tắt dần
+                bungNha = 1f;
+                sang.Value = Mathf.Max(sang.Value, 1.15f);
+                lan.Target = 1.9f;
+            }
+            sang.Target = hovering ? 0.32f : 0f;
+            dangChay = true;
+        }
+
+        void LateUpdate()
+        {
+            if (!dangChay) return;
+            float dt = Time.unscaledDeltaTime;
+            bool reduced = ReducedMotion.IsEnabled;
+
+            bool nhan = isPointerDown;
+            phong.Step(dt, nhan ? KinhLong.NhanResponse : KinhLong.NhaResponse, nhan ? KinhLong.NhanDamping : KinhLong.NhaDamping);
+            gian.Step(dt, nhan ? 0.18f : KinhLong.NhaResponse, nhan ? 0.9f : KinhLong.NhaDamping);
+            doi.Step(dt, nhan ? 0.18f : KinhLong.NhaResponse, nhan ? 0.9f : KinhLong.NhaDamping);
+            sang.Step(dt, sang.Target > sang.Value ? 0.14f : (bungNha > 0f ? 0.55f : 0.32f), 1f);
+            lan.Step(dt, 0.5f, 1f);
+            tamSang = Vector2.Lerp(tamSang, tamDich, 1f - Mathf.Exp(-dt * 22f));
+            bungNha = Mathf.Max(0f, bungNha - dt * 2.2f);
+            if (bungNha <= 0f && !nhan && !hovering) lan.Target = 1f;
+
+            if (rectTransform != null)
+            {
+                if (reduced)
+                {
+                    KinhLong.ApplyAroundCenter(rectTransform, baseScale, Vector2.one, Vector2.zero, ref lastOffset);
+                }
+                else
+                {
+                    float p = phong.Value;
+                    Vector2 g = gian.Value;
+                    KinhLong.ApplyAroundCenter(rectTransform, baseScale, new Vector2(p * (1f + g.x), p * (1f + g.y)), doi.Value, ref lastOffset);
+                }
+            }
+
+            if (anh != null)
+            {
+                Vector2 size = rectTransform != null ? rectTransform.rect.size : new Vector2(100, 44);
+                float r = Mathf.Max(size.y * 1.1f, Mathf.Min(size.x, size.y * 3f) * 0.55f) * lan.Value;
+                float s = Mathf.Max(0f, sang.Value);
+                // lớp sáng đều nhẹ khi nhấn (cả nút sáng lên một chút), quầng tập trung ở điểm chạm
+                anh.Set(tamSang, r, liquid ? s * 0.85f : 0f, Mathf.Clamp01(s) * (isPointerDown ? (liquid ? 0.16f : 0.22f) : 0.06f));
+            }
+
+            bool nghi = !isPointerDown && !hovering && phong.Resting(0.0004f) && gian.Resting(0.0004f) && doi.Resting(0.02f)
+                        && Mathf.Abs(sang.Value - sang.Target) < 0.003f && bungNha <= 0f && lan.Resting(0.002f);
+            if (nghi)
+            {
+                phong.Snap(1f); gian.Snap(Vector2.zero); doi.Snap(Vector2.zero);
+                if (rectTransform != null) KinhLong.ApplyAroundCenter(rectTransform, baseScale, Vector2.one, Vector2.zero, ref lastOffset);
+                if (anh != null && sang.Target <= 0f) { sang.Snap(0f); anh.Set(tamSang, 1f, 0f, 0f); }
+                dangChay = hovering;  // rê chuột: tiếp tục cho quầng đi theo con trỏ
+            }
         }
 
         void OnDisable()
@@ -154,106 +333,14 @@ namespace Khkt.Demo
         void ResetImmediate()
         {
             isPointerDown = false;
-            isHovered = false;
-            if (currentAnim != null) { StopCoroutine(currentAnim); currentAnim = null; }
-            if (rectTransform != null) rectTransform.localScale = baseScale;
-            if (highlightOverlay != null)
-            {
-                highlightOverlay.sprite = GlassKit.Solid;
-                highlightOverlay.color = GlassKit.Wash(0f);
-            }
-        }
-
-        void PlayPressAnimation(bool down)
-        {
-            EnsureHighlightOverlay();
-            if (!isActiveAndEnabled) return;
-            if (currentAnim != null) StopCoroutine(currentAnim);
-            currentAnim = StartCoroutine(AnimateScaleAndAlpha(down));
-        }
-
-        void PlayReleaseBounce()
-        {
-            EnsureHighlightOverlay();
-            if (!isActiveAndEnabled) return;
-            if (currentAnim != null) StopCoroutine(currentAnim);
-            currentAnim = StartCoroutine(AnimateReleaseBounce());
-        }
-
-        IEnumerator AnimateScaleAndAlpha(bool down)
-        {
-            bool reduced = ReducedMotion.IsEnabled;
-            float targetScaleFactor = down ? pressedScale : (isHovered ? hoverScale : 1.0f);
-            if (reduced) targetScaleFactor = 1.0f;
-            Vector3 targetScale = baseScale * targetScaleFactor;
-            float targetAlpha = down ? 0.18f : (isHovered ? 0.06f : 0f);
-
-            Vector3 startScale = rectTransform != null ? rectTransform.localScale : baseScale;
-            float startAlpha = highlightOverlay != null ? highlightOverlay.color.a : 0f;
-
-            float elapsed = 0f;
-            float dur = animDuration > 0.01f ? animDuration : 0.08f;
-
-            while (elapsed < dur)
-            {
-                elapsed += Time.unscaledDeltaTime;
-                float t = Mathf.Clamp01(elapsed / dur);
-                float ease = 1f - Mathf.Pow(1f - t, 3f);
-
-                if (rectTransform != null && !reduced)
-                    rectTransform.localScale = Vector3.LerpUnclamped(startScale, targetScale, ease);
-
-                if (highlightOverlay != null)
-                    highlightOverlay.color = GlassKit.Wash(Mathf.Lerp(startAlpha, targetAlpha, ease));
-
-                yield return null;
-            }
-
-            if (rectTransform != null && !reduced) rectTransform.localScale = targetScale;
-            if (highlightOverlay != null) highlightOverlay.color = GlassKit.Wash(targetAlpha);
-            currentAnim = null;
-        }
-
-        IEnumerator AnimateReleaseBounce()
-        {
-            bool reduced = ReducedMotion.IsEnabled;
-            float endFactor = (!reduced && isHovered) ? hoverScale : 1.0f;
-            float dipFactor = reduced ? 1.0f : pressedScale;
-            float peakFactor = reduced ? 1.0f : Mathf.Max(endFactor + 0.014f, 1.024f);
-            float targetAlpha = isHovered ? 0.06f : 0f;
-            float startAlpha = highlightOverlay != null ? highlightOverlay.color.a : 0.18f;
-
-            float elapsed = 0f;
-            const float dur = 0.18f;
-            while (elapsed < dur)
-            {
-                elapsed += Time.unscaledDeltaTime;
-                float t = Mathf.Clamp01(elapsed / dur);
-                float factor;
-                if (t < 0.25f)
-                {
-                    float u = t / 0.25f;
-                    factor = Mathf.Lerp(dipFactor, peakFactor, 1f - (1f - u) * (1f - u));
-                }
-                else
-                {
-                    float u = (t - 0.25f) / 0.75f;
-                    float ease = 1f - Mathf.Pow(1f - u, 3f);
-                    factor = Mathf.Lerp(peakFactor, endFactor, ease);
-                }
-
-                if (rectTransform != null && !reduced)
-                    rectTransform.localScale = baseScale * factor;
-
-                if (highlightOverlay != null)
-                    highlightOverlay.color = GlassKit.Wash(Mathf.Lerp(startAlpha, targetAlpha, t));
-
-                yield return null;
-            }
-
-            if (rectTransform != null && !reduced) rectTransform.localScale = baseScale * endFactor;
-            if (highlightOverlay != null) highlightOverlay.color = GlassKit.Wash(targetAlpha);
-            currentAnim = null;
+            hovering = false;
+            bungNha = 0f;
+            phong.Snap(1f); gian.Snap(Vector2.zero); doi.Snap(Vector2.zero);
+            sang.Snap(0f); lan.Snap(1f);
+            if (rectTransform != null) KinhLong.ApplyAroundCenter(rectTransform, baseScale, Vector2.one, Vector2.zero, ref lastOffset);
+            if (anh != null) anh.Set(tamSang, 1f, 0f, 0f);
+            if (legacyOverlay != null) legacyOverlay.color = GlassKit.Wash(0f);
+            dangChay = false;
         }
 
         /// <summary>

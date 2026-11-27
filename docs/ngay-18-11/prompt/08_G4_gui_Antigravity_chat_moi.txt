@@ -1,0 +1,58 @@
+[G4] Phần giải phẫu người chạy ngay trong app (Mac không phải mở trình duyệt)
+
+LUẬT CHUNG (giữ suốt việc này)
+- Dự án VERA Lab: kho git ~/Developer/Antigravity. Unity 6000.6.7f1 ở /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app. Đọc AGENTS.md trước tiên.
+- Nền tảng: Mac là chính, rồi Windows, iPad cuối cùng. Không dùng đường dẫn cứng hay API chỉ có trên Mac.
+- Chỉ sửa file trong PHẠM VI. Cần sửa file ngoài phạm vi thì ghi vào báo cáo, không tự sửa.
+- Git: chỉ `git add <từng file>`. Cấm `git add -A`, `git add .`, force push, reset --hard, stash. Không push, không merge vào main, không đưa lên web.
+- Commit nhỏ, tiêu đề bắt đầu bằng `[G4]`.
+- Không xóa Library/, Builds/, ~/AppBuild/VERALab_ui, cache Unity, /Applications/Unity.
+- RAM 8 GB: mỗi lúc chỉ MỘT Unity -batchmode. Trước khi chạy: `pgrep -fl -- -batchmode`. Nếu đang có thì đợi. Dựng cảnh hay chụp ảnh thì không dùng -nographics.
+- Giao diện, chú thích, tài liệu viết tiếng Việt. Tên file mới không dấu, không cách.
+- Kết thúc: viết báo cáo docs/ngay-18-11/bao-cao-G4.md, commit, trả lời dòng đầu `XONG G4` hoặc `CHƯA XONG G4: <lý do>`.
+- Quá giờ mà chưa xong: làm theo "Nếu trễ", để mã biên dịch được, commit, ghi phần còn lại.
+
+THƯ MỤC VÀ NHÁNH: ~/Developer/Antigravity, nhánh n18/antigravity. Thời gian: khoảng 3 giờ. Đây là việc cuối của Antigravity hôm nay.
+
+HIỆN TRẠNG
+BIO-LAB 3D (StreamingAssets/biology_lab, dữ liệu BodyParts3D trong sinh-hoc/bp3d.bin.gz, 15 cơ quan, thẻ kiến thức) mở bằng WebView trên iPad. Trên Mac nó lại mở trình duyệt ngoài, vì BioWebViewBridge gọi Application.OpenURL. Mac là nền tảng chính nên cần một bản chạy ngay trong Unity.
+
+ĐỌC TRƯỚC
+Demo/Bio/Portal/* (BioWebViewBridge, BioPortalTransition…), Demo/Bio/DigitalAnatomyTable.cs, SkeletonStand.cs, TeachingModel.cs.
+StreamingAssets/biology_lab/biology-lab-3d.html: đọc đoạn JS nạp bp3d.bin.gz để biết định dạng.
+Thêm: thư mục sinh-hoc/kien-thuc và sinh-hoc/giai-thich, docs/27-cong-phong-sinh-hoc-3d.md, Rendering/HardwareProfile.cs, lớp camera quỹ đạo G3 vừa làm.
+
+VIỆC
+ 1. Bộ đọc bp3d.bin.gz bằng C#
+    - Giải nén GZip, dựng Mesh, dùng chỉ số 32-bit khi cần.
+    - Chỉ nạp hệ nào đang cần, không nạp hết lúc vào app.
+    - Giảm lưới theo HardwareProfile.
+ 2. Khkt.Bio.GiaiPhau.GiaiPhauMoDun với Mo(), Dong(), DangMo (theo hợp đồng chung). Có sân khấu riêng, dùng lại camera quỹ đạo của G3.
+ 3. Chức năng
+    - Bật/tắt từng hệ: xương, cơ, tiêu hóa, tuần hoàn, hô hấp, thần kinh, bài tiết, nội tiết (hệ nào có dữ liệu thì làm).
+    - Bóc lớp: thanh trượt từ da → cơ → xương và nội tạng, lớp ngoài mờ dần.
+    - Mặt cắt: mặt phẳng cắt dọc hoặc ngang, kéo được (dùng shader cắt).
+    - Bấm vào cơ quan: viền sáng và hiện thẻ kiến thức (dùng nội dung tiếng Việt có sẵn trong sinh-hoc/kien-thuc). Nút "Tách ra" đưa cơ quan ra giữa để xoay riêng.
+    - Hoạt cảnh dạy học:
+      + tim đập, nhịp chỉnh được 60–120 lần/phút, dòng máu đỏ và xanh đi qua các ngăn;
+      + phổi phồng và xẹp theo nhịp thở;
+      + nhu động ruột (biến dạng đỉnh đơn giản).
+    - Câu hỏi nhanh: đọc tên cơ quan, người học chỉ đúng vào cơ quan đó (5 câu).
+    - Ghi công BodyParts3D (giấy phép CC BY-SA 2.1 JP) trong mô-đun và trong docs.
+ 4. Lối vào
+    - Trên Mac và Windows: DigitalAnatomyTable và cổng tầng 2 mở GiaiPhauMoDun thay cho trình duyệt.
+    - iPad giữ nguyên đường WebView cũ. Không sửa BioWebViewPlugin.mm.
+ 5. Nếu còn giờ: bài thực hành mổ ảo dùng các dụng cụ có sẵn (Scissors, Forceps, DissectingNeedle). Không kịp thì chỉ ghi ý tưởng vào báo cáo.
+ 6. Cuối G4: nếu G2, G3, G4 có thay đổi cần dựng lại cảnh thì dựng lại MỘT lần ở đây (menu KHKT > Dựng phòng thí nghiệm, có giao diện, không -nographics). Sau đó chạy lại toàn bộ KhktWave6Verify và KhktN18Verify.
+
+KIỂM THỬ (nhóm "G4" trong Editor/KhktN18Verify.cs)
+ - Mở/đóng 5 lần, bộ nhớ không tăng mãi (đo bằng Profiler.GetTotalAllocatedMemoryLong).
+ - Bật lần lượt từng hệ, bấm thử 3 cơ quan, dùng mặt cắt.
+ - Chụp 6 ảnh vào docs/ngay-18-11/anh/g4/.
+ - Lần mở đầu tiên mất ≤ 3 giây trên máy này.
+
+XONG KHI: trên Mac mở được giải phẫu ngay trong app; mọi kiểm thử đạt; KhktWave6Verify vẫn 67/67.
+
+NẾU TRỄ: bỏ nhu động ruột và câu hỏi. Giữ bật/tắt hệ, bóc lớp, bấm cơ quan, tim đập.
+
+PHẠM VI: Demo/Bio/GiaiPhau/*, Demo/Bio/DigitalAnatomyTable.cs, Demo/Bio/Portal/BioWebViewBridge.cs và BioPortalTransition.cs (chỉ nhánh Mac/Windows), Lab/Shaders/MatCat*, Editor/KhktN18Verify.cs (nhóm G4).

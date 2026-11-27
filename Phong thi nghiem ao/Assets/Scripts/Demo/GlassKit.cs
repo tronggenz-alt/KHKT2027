@@ -6,13 +6,16 @@ namespace Khkt.Demo
 {
     /// <summary>
     /// Bộ dựng giao diện VERA Instrument (dựng lại 2026-11-13, chủ đề khoa học và kỹ thuật):
-    ///   • Hình khối: tấm vát góc 45° như mặt máy đo, viền mảnh, bốn ke góc và một vạch nhấn ở mép trên.
-    ///   • Nền: kính tối màu xanh mực có lưới bản vẽ kỹ thuật (shader Khkt/KinhMo), chữ sáng, một màu nhấn lam ngọc
+    ///   • Hình khối: bo góc liên tục (squircle) ở cả ba chủ đề, viền mảnh.
+    ///   • Nền: kính lỏng (shader Khkt/KinhMo), chủ đề Xanh mực có lưới bản vẽ kỹ thuật, chữ sáng, một màu nhấn lam ngọc
     ///     cho thao tác và màu hổ phách cho số đo, cảnh báo.
     ///   • Mảnh ghép dùng chung: Header (mã bảng + tiêu đề + đường kẻ), Rule, MakeSlider, MakeChip, Readout, Backdrop.
     ///   • Phông Be Vietnam Pro nhúng trong Resources/GiaoDien/Phong/ (đủ dấu tiếng Việt, chỉ số trên/dưới).
     ///   • Mọi nút tạo qua MakeButton đều có NutHieuUng, bỏ navigation để không dính tiêu điểm trên cảm ứng.
     ///   • Cờ ReducedTransparency: nền đặc thay kính mờ (chống lóa).
+    ///   • 27/11/2026: bảng là kính lỏng (Liquid Glass) — shader Khkt/KinhMo khúc xạ mép, tán sắc, viền phản chiếu theo đèn
+    ///     (KinhLongAnhSang); mọi hình bo góc liên tục; nút, chip, công tắc, thanh trượt có chuyển động lò xo kiểu Apple
+    ///     (NutHieuUng, KinhLongGiotChon, KinhLongCongTac, KinhLongNumTruot, KinhLongNgungTu).
     /// Tên hàm và tham số giữ như bộ GlassKit cũ nên mọi màn hình đang dùng đều đổi theo.
     /// </summary>
     public static class GlassKit
@@ -82,6 +85,47 @@ namespace Khkt.Demo
             }
         }
 
+        public const string LiquidGlassPrefKey = "KHKT_KINH_LONG";
+        /// <summary>
+        /// Giao diện Kính lỏng (Liquid Glass, mặc định) hay Cổ điển (kính mờ phẳng, thẻ đặc như trước 27/11/2026).
+        /// Đổi xong cần dựng lại màn (MainMenu tải lại cảnh); vật liệu đang có cập nhật ngay.
+        /// </summary>
+        public static bool LiquidGlass
+        {
+            get => PlayerPrefs.GetInt(LiquidGlassPrefKey, 1) == 1;
+            set
+            {
+                PlayerPrefs.SetInt(LiquidGlassPrefKey, value ? 1 : 0);
+                PlayerPrefs.Save();
+                if (glass != null) Configure(glass, false);
+                if (glassLight != null) Configure(glassLight, true);
+            }
+        }
+
+        /// <summary>Vật liệu kính lỏng cho mọi màn (kể cả ngoài lab, khúc xạ hình nền KinhLongNen). Null nếu thiếu shader.</summary>
+        public static Material KinhLongMat(bool light = false)
+        {
+            var sh = Shader.Find("Khkt/KinhMo");
+            return sh != null ? Glass(sh, light) : null;
+        }
+
+        public const string IncreasedContrastPrefKey = "KHKT_TANG_TUONG_PHAN";
+        /// <summary>
+        /// Tăng tương phản (như cài đặt Increase Contrast của Apple cho Liquid Glass): kính đặc hơn, viền rõ,
+        /// bớt độ rực và phản chiếu. Đổi là cập nhật ngay vật liệu đang dùng, không cần dựng lại giao diện.
+        /// </summary>
+        public static bool IncreasedContrast
+        {
+            get => PlayerPrefs.GetInt(IncreasedContrastPrefKey, 0) == 1;
+            set
+            {
+                PlayerPrefs.SetInt(IncreasedContrastPrefKey, value ? 1 : 0);
+                PlayerPrefs.Save();
+                if (glass != null) Configure(glass, false);
+                if (glassLight != null) Configure(glassLight, true);
+            }
+        }
+
         static Sprite rounded, circle, solid, solidCircle, plain, border;
         static Font regular, semibold;
         static Material glass, glassLight;
@@ -116,20 +160,17 @@ namespace Khkt.Demo
             DestroyObj(ref tex);
         }
 
-        /// <summary>Hình cho shader kính mờ: Xanh mực dùng tấm vát 45°, Trắng/Đen dùng bo góc mượt.</summary>
-        public static Sprite Rounded => rounded != null ? rounded : rounded = UiTheme.IsVera
-            ? MakeShape(96, 20f, 1.5f, true, false, false)
-            : MakeShape(96, 12f, 1.5f, false, false, false);
+        /// <summary>Hình cho shader kính lỏng (độ sâu + pháp tuyến mép).</summary>
+        public static Sprite Rounded => rounded != null ? rounded : rounded = MakeLiquidShape(128, 30f, LiquidDepthPx, 44f);
+
+        /// <summary>Độ sâu (pixel sprite) mà kênh R của Rounded mã hóa, tính từ mép vào lòng kính.</summary>
+        public const float LiquidDepthPx = 40f;
         public static Sprite Circle => circle != null ? circle : circle = MakeRounded(64, 32, 1.6f);
         /// <summary>Hình đặc màu trắng (dùng với vật liệu UI thường để tô màu nền nút, thanh, ô).</summary>
-        public static Sprite Solid => solid != null ? solid : solid = UiTheme.IsVera
-            ? MakeShape(96, 20f, 1.5f, true, true, false)
-            : MakeShape(96, 30f, 1.5f, false, true, false);
+        public static Sprite Solid => solid != null ? solid : solid = MakeShape(96, 30f, 1.5f, true, false);
         public static Sprite SolidCircle => solidCircle != null ? solidCircle : solidCircle = MakeRounded(64, 32, 1.6f, true);
-        /// <summary>Đường viền 9-slice khớp với Solid (vát góc ở Xanh mực, bo góc mượt ở Trắng/Đen).</summary>
-        public static Sprite Border => border != null ? border : border = UiTheme.IsVera
-            ? MakeShape(96, 20f, 1.5f, true, false, true)
-            : MakeShape(96, 30f, 1.5f, false, false, true);
+        /// <summary>Đường viền 9-slice khớp với Solid.</summary>
+        public static Sprite Border => border != null ? border : border = MakeShape(96, 30f, 1.5f, false, true);
         /// <summary>Ô trắng vuông (đường kẻ, thanh trượt, nền phẳng).</summary>
         public static Sprite Plain
         {
@@ -183,96 +224,151 @@ namespace Khkt.Demo
             if (!light && glass != null) return glass;
             if (light && glassLight != null) return glassLight;
             var m = new Material(shader) { hideFlags = HideFlags.DontSave };
-            if (UiTheme.IsLight)
-            {
-                m.SetColor("_Tint", light ? new Color(1f, 1f, 1f, 0.80f) : new Color(1f, 1f, 1f, 0.86f));
-                m.SetFloat("_Dark", 0f);
-                m.SetColor("_BorderColor", Line);
-                m.SetFloat("_Blur", light ? 6f : 14f);
-                if (m.HasProperty("_AccentColor")) m.SetColor("_AccentColor", Color.clear);
-                if (m.HasProperty("_Grid")) m.SetFloat("_Grid", 0f);
-            }
-            else if (UiTheme.IsDark)
-            {
-                m.SetColor("_Tint", light ? new Color(0.14f, 0.14f, 0.16f, 0.78f) : new Color(0.08f, 0.08f, 0.09f, 0.84f));
-                m.SetFloat("_Dark", light ? 0.35f : 0.55f);
-                m.SetColor("_BorderColor", Line);
-                m.SetFloat("_Blur", light ? 6f : 14f);
-                if (m.HasProperty("_AccentColor")) m.SetColor("_AccentColor", Color.clear);
-                if (m.HasProperty("_Grid")) m.SetFloat("_Grid", 0f);
-            }
-            else
-            {
-                m.SetColor("_Tint", light ? new Color(0.30f, 0.52f, 0.78f, 0.26f) : new Color(0.03f, 0.065f, 0.12f, 0.74f));
-                m.SetFloat("_Dark", light ? 0.25f : 0.5f);
-                m.SetColor("_BorderColor", light ? new Color(0.62f, 0.86f, 1f, 0.5f) : new Color(0.45f, 0.78f, 1f, 0.42f));
-                m.SetFloat("_Blur", light ? 6f : 14f);
-                if (m.HasProperty("_AccentColor")) m.SetColor("_AccentColor", new Color(Accent.r, Accent.g, Accent.b, light ? 0f : 0.9f));
-                if (m.HasProperty("_Grid")) m.SetFloat("_Grid", light ? 0f : 1f);
-            }
+            Configure(m, light);
             if (light) glassLight = m; else glass = m;
             return m;
         }
 
-        static Sprite MakeRounded(int size, float radius, float border, bool white = false) =>
-            MakeShape(size, radius, border, false, white, false);
+        /// <summary>Đặt thông số kính lỏng theo chủ đề, biến thể (bảng / chip) và cờ Tăng tương phản.</summary>
+        static void Configure(Material m, bool light)
+        {
+            // Kính lỏng: khúc xạ mép, tán sắc, viền phản chiếu theo hướng đèn (KinhLongAnhSang), lớp phủ tự thích ứng.
+            // Bảng (light = false) đặc hơn để chữ dài đọc dễ; chip, nút (light = true) trong hơn, khúc xạ mạnh hơn.
+            void Liquid(float refraction, float chroma, float specular)
+            {
+                if (m.HasProperty("_Refraction")) m.SetFloat("_Refraction", refraction);
+                if (m.HasProperty("_Chroma")) m.SetFloat("_Chroma", chroma);
+                if (m.HasProperty("_Specular")) m.SetFloat("_Specular", specular);
+                if (m.HasProperty("_Adaptive")) m.SetFloat("_Adaptive", 1f);
+                if (m.HasProperty("_Vibrancy")) m.SetFloat("_Vibrancy", UiTheme.IsLight ? 1.05f : 1.2f);
+                if (m.HasProperty("_EdgeClear")) m.SetFloat("_EdgeClear", UiTheme.IsLight ? 0.25f : (light ? 0.45f : 0.4f));
+                if (m.HasProperty("_Reflect")) m.SetFloat("_Reflect", light ? 0.25f : 0.2f);
+            }
+            if (UiTheme.IsLight)
+            {
+                m.SetColor("_Tint", light ? new Color(1f, 1f, 1f, 0.32f) : new Color(1f, 1f, 1f, 0.40f));
+                m.SetFloat("_Dark", 0f);
+                m.SetColor("_BorderColor", new Color(1f, 1f, 1f, 0.55f));
+                m.SetFloat("_Blur", light ? 10f : 18f);   // trắng mờ đục nhẹ (frosted)
+                if (m.HasProperty("_AccentColor")) m.SetColor("_AccentColor", Color.clear);
+                if (m.HasProperty("_Grid")) m.SetFloat("_Grid", 0f);
+                Liquid(light ? 36f : 30f, 0.7f, 1.45f);
+            }
+            else if (UiTheme.IsDark)
+            {
+                m.SetColor("_Tint", light ? new Color(0.32f, 0.34f, 0.40f, 0.32f) : new Color(0.24f, 0.26f, 0.32f, 0.40f));
+                m.SetFloat("_Dark", light ? 0.06f : 0.12f);
+                m.SetColor("_BorderColor", new Color(1f, 1f, 1f, 0.22f));
+                m.SetFloat("_Blur", light ? 6f : 12f);
+                if (m.HasProperty("_AccentColor")) m.SetColor("_AccentColor", Color.clear);
+                if (m.HasProperty("_Grid")) m.SetFloat("_Grid", 0f);
+                Liquid(light ? 36f : 30f, 1f, 1f);
+            }
+            else
+            {
+                m.SetColor("_Tint", light ? new Color(0.34f, 0.54f, 0.80f, 0.22f) : new Color(0.14f, 0.22f, 0.36f, 0.40f));
+                m.SetFloat("_Dark", light ? 0.06f : 0.14f);
+                m.SetColor("_BorderColor", light ? new Color(0.62f, 0.86f, 1f, 0.5f) : new Color(0.45f, 0.78f, 1f, 0.42f));
+                m.SetFloat("_Blur", light ? 6f : 12f);
+                if (m.HasProperty("_AccentColor")) m.SetColor("_AccentColor", new Color(Accent.r, Accent.g, Accent.b, 0.9f));
+                if (m.HasProperty("_Grid")) m.SetFloat("_Grid", light ? 0f : 0.8f);
+                Liquid(light ? 36f : 30f, 1f, 1f);
+            }
+            if (!LiquidGlass)
+            {
+                // Cổ điển: kính mờ phẳng như bản trước — không khúc xạ, không tán sắc, phủ đặc
+                var t0 = m.GetColor("_Tint");
+                m.SetColor("_Tint", new Color(t0.r, t0.g, t0.b, Mathf.Min(t0.a + 0.26f, 0.9f)));
+                if (m.HasProperty("_Refraction")) m.SetFloat("_Refraction", 0f);
+                if (m.HasProperty("_Chroma")) m.SetFloat("_Chroma", 0f);
+                if (m.HasProperty("_Specular")) m.SetFloat("_Specular", 0.12f);
+                if (m.HasProperty("_Vibrancy")) m.SetFloat("_Vibrancy", 1f);
+                if (m.HasProperty("_Reflect")) m.SetFloat("_Reflect", 0f);
+                if (m.HasProperty("_EdgeClear")) m.SetFloat("_EdgeClear", 0f);
+                if (m.HasProperty("_Adaptive")) m.SetFloat("_Adaptive", 0.5f);
+                m.SetFloat("_Blur", light ? 8f : 16f);
+            }
+            if (IncreasedContrast)
+            {
+                var t = m.GetColor("_Tint");
+                m.SetColor("_Tint", new Color(t.r, t.g, t.b, Mathf.Min(t.a + 0.26f, 0.95f)));
+                var bc = m.GetColor("_BorderColor");
+                m.SetColor("_BorderColor", UiTheme.IsLight ? new Color(0f, 0f, 0f, 0.55f) : new Color(bc.r, bc.g, bc.b, 0.95f));
+                if (m.HasProperty("_Vibrancy")) m.SetFloat("_Vibrancy", 1.1f);
+                if (m.HasProperty("_Reflect")) m.SetFloat("_Reflect", 0.12f);
+                if (m.HasProperty("_EdgeClear")) m.SetFloat("_EdgeClear", 0.15f);
+                if (m.HasProperty("_Chroma")) m.SetFloat("_Chroma", 0.4f);
+            }
+        }
 
         /// <summary>
-        /// Tạo sprite 9-slice vát góc 45° (chamfer) hoặc bo góc mượt (rounded):
-        /// white = true: nền đặc trắng (kèm viền sáng nhẹ nếu vát góc); borderOnly = true: chỉ vẽ đường viền trắng;
-        /// còn lại: kênh dùng cho Khkt/KinhMo (A hình, R viền, G ke góc, B vạch nhấn mép trên nếu vát góc).
+        /// Sprite 9-slice cho kính lỏng: góc bo liên tục (siêu elip bậc 4, kiểu "squircle" của Apple).
+        /// A = hình (khử răng cưa), R = độ sâu tính từ mép (0 ở mép → 1 khi sâu hơn depthPx),
+        /// G, B = pháp tuyến mép hướng ra ngoài (0,5 + 0,5·n). Độ sâu và pháp tuyến đúng trong dải viền 9-slice.
         /// </summary>
-        static Sprite MakeShape(int size, float corner, float borderWidth, bool chamfer, bool white, bool borderOnly)
+        static Sprite MakeLiquidShape(int size, float radius, float depthPx, float slice)
+        {
+            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false)
+            { wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear, hideFlags = HideFlags.DontSave };
+            var px = new Color[size * size];
+            float half = size / 2f;
+            for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    float sx = x + 0.5f - half, sy = y + 0.5f - half;
+                    float outside = SquircleSdf(Mathf.Abs(sx), Mathf.Abs(sy), half, radius, out Vector2 g);
+                    g.x *= Mathf.Sign(sx);
+                    g.y *= Mathf.Sign(sy);
+                    float a = Mathf.Clamp01(0.5f - outside);
+                    float depth = Mathf.Clamp01(-outside / depthPx);
+                    px[y * size + x] = new Color(depth, g.x * 0.5f + 0.5f, g.y * 0.5f + 0.5f, a);
+                }
+            tex.SetPixels(px);
+            tex.Apply();
+            float b = Mathf.Min(slice, half - 1);
+            return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect, new Vector4(b, b, b, b));
+        }
+
+        /// <summary>Khoảng cách có dấu tới hình chữ nhật góc siêu elip (bậc 4) và pháp tuyến (góc phần tư dương).</summary>
+        static float SquircleSdf(float ax, float ay, float half, float radius, out Vector2 normal)
+        {
+            float qx = ax - (half - radius), qy = ay - (half - radius);
+            if (qx > 0f && qy > 0f)
+            {
+                float x4 = qx * qx * qx * qx, y4 = qy * qy * qy * qy;
+                float len4 = Mathf.Pow(x4 + y4, 0.25f);
+                normal = new Vector2(qx * qx * qx, qy * qy * qy).normalized;
+                return len4 - radius;
+            }
+            normal = qx > qy ? new Vector2(1f, 0f) : new Vector2(0f, 1f);
+            return Mathf.Max(qx, qy) - radius;
+        }
+
+        static Sprite MakeRounded(int size, float radius, float border, bool white = false) =>
+            MakeShape(size, radius, border, white, false);
+
+        /// <summary>
+        /// Sprite 9-slice bo góc liên tục (siêu elip bậc 4): white = nền đặc trắng, borderOnly = chỉ đường viền trắng.
+        /// </summary>
+        static Sprite MakeShape(int size, float corner, float borderWidth, bool white, bool borderOnly)
         {
             var tex = new Texture2D(size, size, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, hideFlags = HideFlags.DontSave };
             var px = new Color[size * size];
             float half = size / 2f;
-            const float inv = 0.70710678f;
             for (int y = 0; y < size; y++)
                 for (int x = 0; x < size; x++)
                 {
                     float ax = Mathf.Abs(x + 0.5f - half), ay = Mathf.Abs(y + 0.5f - half);
-                    float outside;
-                    if (chamfer)
-                    {
-                        float dBox = Mathf.Max(ax, ay) - half;
-                        float dCut = (ax + ay - (2f * half - corner)) * inv;
-                        outside = Mathf.Max(dBox, dCut) + 0.75f;
-                    }
-                    else
-                    {
-                        float qx = ax - (half - corner);
-                        float qy = ay - (half - corner);
-                        outside = new Vector2(Mathf.Max(qx, 0), Mathf.Max(qy, 0)).magnitude + Mathf.Min(Mathf.Max(qx, qy), 0) - corner;
-                    }
-
+                    float outside = SquircleSdf(ax, ay, half, corner, out _);
                     float a = Mathf.Clamp01(0.5f - outside);
                     float edge = Mathf.Clamp01(1f - Mathf.Abs(outside + borderWidth * 0.5f) / (borderWidth * 0.5f + 0.5f));
-                    if (borderOnly)
-                    {
-                        px[y * size + x] = new Color(1f, 1f, 1f, edge * a);
-                        continue;
-                    }
-                    if (white)
-                    {
-                        float v = chamfer ? Mathf.Lerp(0.90f, 1f, edge) : 1f;
-                        px[y * size + x] = new Color(v, v, v, a);
-                        continue;
-                    }
-                    if (!chamfer)
-                    {
-                        px[y * size + x] = new Color(edge, 0f, 0f, a);
-                        continue;
-                    }
-                    float inset = -outside - 5f;
-                    float bracket = Mathf.Clamp01(1f - Mathf.Abs(inset) / 1.1f);
-                    bool inCorner = ax > half - corner - 9f && ay > half - corner - 9f;
-                    float topLine = (y > size - 4 && ax < half - corner - 2f) ? 1f : 0f;
-                    px[y * size + x] = new Color(edge, inCorner ? bracket * a : 0f, topLine * a, a);
+                    px[y * size + x] = borderOnly ? new Color(1f, 1f, 1f, edge * a)
+                                     : white ? new Color(1f, 1f, 1f, a)
+                                     : new Color(edge, 0f, 0f, a);
                 }
             tex.SetPixels(px);
             tex.Apply();
-            float b = chamfer ? Mathf.Min(corner + 12f, half - 1) : Mathf.Min(corner + 2f, half - 1);
+            float b = Mathf.Min(corner + 2f, half - 1);
             return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect, new Vector4(b, b, b, b));
         }
 
@@ -298,13 +394,14 @@ namespace Khkt.Demo
             img.pixelsPerUnitMultiplier = cornerScale;
             img.material = mat;
             img.raycastTarget = false;
+            if (mat != null && !ReducedTransparency && LiquidGlass) KinhLongNgungTu.Attach(img);
 
             // Nếu người dùng bật ReducedTransparency thì dùng nền đặc mờ nhẹ để chống lóa
             if (ReducedTransparency)
             {
                 img.material = null;
                 img.sprite = Solid;
-                img.pixelsPerUnitMultiplier = UiTheme.IsVera ? cornerScale : Mathf.Max(cornerScale * 2.5f, 2.5f);
+                img.pixelsPerUnitMultiplier = cornerScale;  // Solid (góc 30) khớp góc kính (Rounded, góc 30)
                 img.color = Surface;
             }
 
@@ -576,6 +673,7 @@ namespace Khkt.Demo
             sl.wholeNumbers = wholeNumbers;
             sl.SetValueWithoutNotify(Mathf.Clamp(value, min, max));
             if (onChange != null) sl.onValueChanged.AddListener(v => onChange(v));
+            if (LiquidGlass) KinhLongNumTruot.Attach(sl, handle, hi, inner);
             return sl;
         }
 
@@ -608,6 +706,8 @@ namespace Khkt.Demo
                 t.color = on ? Accent : Ink;
                 t.font = on ? Semibold : Regular;
             }
+            // nền "đã chọn" dùng chung một giọt kính trượt giữa các chip cùng nhóm (KinhLongGiotChon)
+            if (!ReducedTransparency && LiquidGlass) KinhLongGiotChon.Bao(b, on);
         }
 
         /// <summary>Lớp mờ tối phủ sau một bảng nổi (bảng không chiếm cả màn hình): chặn chạm xuống cảnh, bấm ra ngoài để đóng.</summary>
@@ -664,7 +764,7 @@ namespace Khkt.Demo
             if (!glassOk)
             {
                 img.sprite = Solid;
-                img.pixelsPerUnitMultiplier = UiTheme.IsVera ? 1.15f : 2.8f;
+                img.pixelsPerUnitMultiplier = 1.15f;
                 img.color = Surface;
             }
             img.raycastTarget = true;  // chạm vào thân bảng không lọt xuống lớp nền mờ (không tự đóng)
@@ -811,6 +911,7 @@ namespace Khkt.Demo
 
             tog.SetIsOnWithoutNotify(initial);
             Apply(initial);
+            if (LiquidGlass) KinhLongCongTac.Attach(tog, knobRt, knobImg, 12f);
             tog.onValueChanged.AddListener(v =>
             {
                 Apply(v);

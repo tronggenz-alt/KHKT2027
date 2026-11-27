@@ -231,7 +231,7 @@ namespace Khkt.Demo.Bio.Portal
                 cardPanel.anchoredPosition = new Vector2(-30f, 0f);
 
                 var bgImg = cardGo.GetComponent<Image>();
-                bgImg.sprite = GlassKit.Rounded;
+                bgImg.sprite = GlassKit.Solid;
                 bgImg.type = Image.Type.Sliced;
                 bgImg.color = new Color(10f / 255f, 18f / 255f, 34f / 255f, 0.92f);
 
@@ -243,7 +243,7 @@ namespace Khkt.Demo.Bio.Portal
                 rtOut.anchorMax = Vector2.one;
                 rtOut.sizeDelta = Vector2.zero;
                 var imgOut = outlineGo.GetComponent<Image>();
-                imgOut.sprite = GlassKit.Rounded;
+                imgOut.sprite = GlassKit.Border;
                 imgOut.type = Image.Type.Sliced;
                 imgOut.color = new Color(34f / 255f, 211f / 255f, 238f / 255f, 0.35f);
                 imgOut.raycastTarget = false;
@@ -324,7 +324,7 @@ namespace Khkt.Demo.Bio.Portal
                 quizPanel.anchoredPosition = Vector2.zero;
 
                 var qBg = qGo.GetComponent<Image>();
-                qBg.sprite = GlassKit.Rounded;
+                qBg.sprite = GlassKit.Solid;
                 qBg.type = Image.Type.Sliced;
                 qBg.color = new Color(8f / 255f, 15f / 255f, 30f / 255f, 0.98f);
 
@@ -348,7 +348,7 @@ namespace Khkt.Demo.Bio.Portal
                 rtQCard.sizeDelta = new Vector2(-60f, 85f);
                 rtQCard.anchoredPosition = new Vector2(0f, -65f);
                 var imgQ = qCardGo.GetComponent<Image>();
-                imgQ.sprite = GlassKit.Rounded;
+                imgQ.sprite = GlassKit.Solid;
                 imgQ.type = Image.Type.Sliced;
                 imgQ.color = new Color(20f / 255f, 32f / 255f, 55f / 255f, 0.7f);
 
@@ -380,7 +380,7 @@ namespace Khkt.Demo.Bio.Portal
                 rtExp.sizeDelta = new Vector2(-60f, 75f);
                 rtExp.anchoredPosition = new Vector2(0f, 70f);
                 var imgExp = expGo.GetComponent<Image>();
-                imgExp.sprite = GlassKit.Rounded;
+                imgExp.sprite = GlassKit.Solid;
                 imgExp.type = Image.Type.Sliced;
                 imgExp.color = new Color(15f / 255f, 25f / 255f, 42f / 255f, 0.85f);
 

@@ -69,7 +69,7 @@ namespace Khkt.Menu
         int currentSettingsTab;
         Image[] themeCardBorders;
         Text[] themeCardLabels;
-        Toggle transToggle, motionToggle, soundToggle, armsToggle;
+        Toggle transToggle, contrastToggle, liquidToggle, motionToggle, soundToggle, armsToggle;
         Slider touchSensSlider;
         MenuTabs settingsTabsUi, clickModeTabs, fontScaleChips, panelSizeChips;
         bool busy;
@@ -630,6 +630,7 @@ namespace Khkt.Menu
             chonLuong.ChonPhongLab = () => { chonLuong.An(); StartCoroutine(VaoPhongLab()); };
             chonLuong.ChonGiaiBaiTap = () => { chonLuong.An(); MoGiaiBaiTap(false); };
             chonLuong.Thoat = Application.Quit;
+            chonLuong.DoiGiaoDien = DoiGiaoDien;
             chonLuong.gameObject.SetActive(false);
         }
 
@@ -795,8 +796,10 @@ namespace Khkt.Menu
                 var mode = modes[i];
                 BuildThemePreviewCard(t0, i, mode, new Vector2(i * (cardW + 12f), -30), new Vector2(cardW, 148));
             }
-            transToggle = Switch(t0, "ToggleTrans", "Nền đặc chống lóa", new Vector2(0, -194), new Vector2(PaneW, 46), GlassKit.ReducedTransparency, v => GlassKit.ReducedTransparency = v);
-            motionToggle = Switch(t0, "ToggleMotion", "Giảm chuyển động", new Vector2(0, -248), new Vector2(PaneW, 46), ReducedMotion.IsEnabled, v => ReducedMotion.IsEnabled = v);
+            transToggle = Switch(t0, "ToggleTrans", "Nền đặc chống lóa", new Vector2(0, -194), new Vector2(PaneW * 0.5f - 12f, 46), GlassKit.ReducedTransparency, v => GlassKit.ReducedTransparency = v);
+            contrastToggle = Switch(t0, "ToggleContrast", "Tăng tương phản", new Vector2(PaneW * 0.5f + 12f, -194), new Vector2(PaneW * 0.5f - 12f, 46), GlassKit.IncreasedContrast, v => GlassKit.IncreasedContrast = v);
+            motionToggle = Switch(t0, "ToggleMotion", "Giảm chuyển động", new Vector2(0, -248), new Vector2(PaneW * 0.5f - 12f, 46), ReducedMotion.IsEnabled, v => ReducedMotion.IsEnabled = v);
+            liquidToggle = Switch(t0, "ToggleKinhLong", "Giao diện kính lỏng", new Vector2(PaneW * 0.5f + 12f, -248), new Vector2(PaneW * 0.5f - 12f, 46), GlassKit.LiquidGlass, DoiGiaoDien);
             fontScaleChips = BuildChipRow(t0, "CoChu", "Cỡ chữ", new[] { "Chuẩn", "Lớn", "Rất lớn" }, -312f, PaneW, UiTheme.FontScaleMode, SelectFontScale);
             panelSizeChips = BuildChipRow(t0, "CoBang", "Cỡ bảng dụng cụ", new[] { "60%", "75%", "Kín màn hình" }, -404f, PaneW, UiTheme.PanelSizeMode, SelectPanelSize);
 
@@ -1000,6 +1003,8 @@ namespace Khkt.Menu
             RefreshAiKey(null, false);
             if (transToggle != null) transToggle.SetIsOnWithoutNotify(GlassKit.ReducedTransparency);
             RefreshPadCombos();
+            if (contrastToggle != null) contrastToggle.SetIsOnWithoutNotify(GlassKit.IncreasedContrast);
+            if (liquidToggle != null) liquidToggle.SetIsOnWithoutNotify(GlassKit.LiquidGlass);
             if (motionToggle != null) motionToggle.SetIsOnWithoutNotify(ReducedMotion.IsEnabled);
             if (soundToggle != null) soundToggle.SetIsOnWithoutNotify(NutHieuUng.SoundEnabled);
             if (armsToggle != null) armsToggle.SetIsOnWithoutNotify(!ArmRig.HiddenByUser);
@@ -1031,6 +1036,14 @@ namespace Khkt.Menu
         {
             PlayerPrefs.SetFloat(TouchSensPrefKey, Mathf.Clamp(v, 0.05f, 0.50f));
             PlayerPrefs.Save();
+        }
+
+        /// <summary>Chuyển Kính lỏng ⇄ Cổ điển: lưu lựa chọn rồi dựng lại màn (như đổi chủ đề).</summary>
+        public void DoiGiaoDien(bool kinhLong)
+        {
+            if (busy || GlassKit.LiquidGlass == kinhLong) return;
+            GlassKit.LiquidGlass = kinhLong;
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
 
         void SelectTheme(UiTheme.Mode mode)

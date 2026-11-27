@@ -141,7 +141,7 @@ namespace Khkt.Demo.Bio.Portal
             microHeaderPanel.anchoredPosition = new Vector2(0f, -25f);
 
             var bg = panelGo.GetComponent<Image>();
-            bg.sprite = GlassKit.Rounded;
+            bg.sprite = GlassKit.Solid;
             bg.type = Image.Type.Sliced;
             bg.color = new Color(10f / 255f, 18f / 255f, 34f / 255f, 0.92f);
 
@@ -153,7 +153,7 @@ namespace Khkt.Demo.Bio.Portal
             rtB.anchorMax = Vector2.one;
             rtB.sizeDelta = Vector2.zero;
             var imgB = borderGo.GetComponent<Image>();
-            imgB.sprite = GlassKit.Rounded;
+            imgB.sprite = GlassKit.Border;
             imgB.type = Image.Type.Sliced;
             imgB.color = new Color(34f / 255f, 211f / 255f, 238f / 255f, 0.35f);
             imgB.raycastTarget = false;

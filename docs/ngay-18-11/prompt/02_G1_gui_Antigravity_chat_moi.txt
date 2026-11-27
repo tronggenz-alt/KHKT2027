@@ -1,0 +1,98 @@
+[G1] Hồ sơ phần cứng + hết giật khi di chuyển + thông số sắc nét (VERA Lab, Unity)
+
+LUẬT CHUNG (giữ suốt việc này)
+- Dự án VERA Lab: kho git ~/Developer/Antigravity. Unity 6000.6.7f1 ở /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app. Đọc AGENTS.md trước tiên.
+- Nền tảng: Mac là chính, rồi Windows, iPad cuối cùng. Không dùng đường dẫn cứng (/Users, /tmp, ~) hay API chỉ có trên Mac. Dùng Path.Combine, Application.persistentDataPath, Path.GetTempPath().
+- Chỉ sửa file trong PHẠM VI của việc này. Cần sửa file ngoài phạm vi thì ghi vào báo cáo, không tự sửa.
+- Git: chỉ `git add <từng file>` của mình. Cấm `git add -A`, `git add .`, force push, reset --hard, stash. Không push, không merge vào main, không đưa lên web.
+- Commit nhỏ: mỗi phần chạy được thì commit một lần, tiêu đề bắt đầu bằng mã việc, ví dụ `[G1] ...`.
+- Kho GitHub đang CÔNG KHAI: không commit khóa, mật khẩu, .env, CSDL, dữ liệu cơ chế gốc, gói .verapack.
+- Không xóa: Library/, Builds/, ~/AppBuild/VERALab_ui, cache Unity, /Applications/Unity, ~/Documents/Antigravity. Không tạo dự án trong ~/Documents hay ~/Desktop.
+- Máy M2 có 8 GB RAM: mỗi lúc chỉ MỘT Unity -batchmode. Trước khi chạy: `pgrep -fl -- -batchmode`. Nếu đang có thì đợi, 2 phút xem lại. Unity có giao diện đang mở dự án thì batchmode báo khóa: đóng giao diện trước hoặc chạy kiểm thử từ menu trong giao diện. Dựng cảnh hay chụp ảnh thì không dùng -nographics.
+- Giao diện, chú thích, tài liệu viết tiếng Việt. Tên file và thư mục mới không dấu, không cách.
+- Kết thúc: viết báo cáo docs/ngay-18-11/bao-cao-<mã>.md (đã làm gì, file đã đổi, lệnh thử và kết quả bằng số, ảnh, việc còn lại), commit, rồi trả lời dòng đầu đúng dạng `XONG <mã>` hoặc `CHƯA XONG <mã>: <lý do>`.
+- Quá giờ mà chưa xong: làm theo mục "Nếu trễ", để mã biên dịch được, commit, ghi phần còn lại. Không bỏ dở giữa chừng.
+
+THƯ MỤC VÀ NHÁNH: làm trực tiếp trong ~/Developer/Antigravity, nhánh n18/antigravity (đã tạo sẵn). KHÔNG tạo worktree, vì Unity không mở được dự án nằm trong thư mục ẩn ~/.gemini. Thời gian: khoảng 2,5 giờ.
+
+MỤC TIÊU
+(1) App Mac xuất ra chạy mượt khi đi lại, xoay camera, lên thang bộ, chuyển khu.
+(2) Người dùng chọn được mức đồ họa hợp với phần cứng.
+(3) Hình sắc nét trên màn Retina.
+
+ĐỌC TRƯỚC
+TIEN_DO.md, BAO_CAO_WAVE6_MAC.md, docs/23-toi-uu-va-lab-sinh-tu-do.md, docs/do-hoa-hd/trang-thai.md.
+Mã: Scripts/Rendering/* (FramePacing, ZoneStreamer, ZoneMap, ZoneRoot, ClusterHlod, ImpostorBillboard, LiveSet), Scripts/Environment/* (camera người chơi), Demo/IntroScreen.cs (tab Hiển thị), Editor/IosBuild.cs.
+Cài đặt: ProjectSettings/QualitySettings.asset, ProjectSettings/ProjectSettings.asset (macRetinaSupport), Settings/PC_RPAsset, Settings/Mobile_RPAsset, các Renderer.
+
+VIỆC
+A. Đo trước khi sửa (bắt buộc)
+ 1. Viết Scripts/Editor/MacBuild.cs với các hàm:
+    - Khkt.EditorTools.MacBuild.Build: StandaloneOSX, ra ~/AppBuild/VERA_mac/VERA Lab.app, NGOÀI kho git.
+    - .BuildDev: như trên nhưng là Development Build.
+    - .BuildWindows: StandaloneWindows64. Chỉ chạy khi có module Windows; không có thì ghi log nhẹ, không báo lỗi.
+    Bản xuất không được chứa script kiểm thử (KhktWave6Runner, KhktAutoTest…): bọc chúng bằng #if UNITY_EDITOR || KHKT_TEST hoặc loại khỏi bản dựng. Không xóa script.
+ 2. Viết Scripts/Rendering/DoKhungHinh.cs, bật bằng tham số dòng lệnh -vera-do hoặc phím F7 (kiểm tra F7 chưa ai dùng).
+    - Chạy một "đường đi chuẩn" cố định 90 giây: sảnh tầng 1 → quầy hóa chất → xoay 360° → lên thang bộ → nhà kính tầng 2 → kính hiển vi.
+    - Ghi thời gian từng khung. Tính p50/p95/p99, số khung trên 33 ms và trên 50 ms, lượng cấp phát GC.
+    - Ghi CSV và bản tóm tắt vào Application.persistentDataPath/do_khung/.
+ 3. Dựng bản Mac, chạy đường đi chuẩn 2 lần, ghi bộ số "TRƯỚC".
+
+B. Tìm và sửa nguyên nhân giật. Dựa vào số đo, không đoán. Xét lần lượt từng nguyên nhân dưới đây, chỉ sửa cái có thật:
+ - ZoneStreamer nạp hoặc gỡ khu đồng bộ gây khựng: nạp trước theo hướng đi, chia việc qua nhiều khung, dùng async.
+ - Shader biên dịch lần đầu khi nhìn thấy: làm nóng trước ở màn chờ (ShaderVariantCollection, hoặc GraphicsStateCollection của Unity 6 trên Metal).
+ - Cấp phát mỗi khung ở UI/IMGUI, LINQ, nối chuỗi: bỏ cấp phát trong Update/OnGUI trên đường nóng.
+ - Camera cập nhật sai chỗ hoặc vật lý không nội suy: camera và vật đang cầm chạy theo LateUpdate, Rigidbody của vật đang cầm bật interpolate.
+ - Bóng đổ hoặc phản chiếu cập nhật thời gian thực khi di chuyển; texture streaming thiếu ngân sách.
+ - Nhịp khung: FramePacing vẫn là nơi duy nhất đặt nhịp. Xử lý màn 120 Hz (ProMotion, màn ngoài).
+
+C. Hồ sơ phần cứng
+ Tạo Scripts/Rendering/HardwareProfile.cs đúng hợp đồng dưới đây. Claude và các mô-đun khác sẽ dùng file này, KHÔNG đổi tên:
+
+   namespace Khkt.Rendering {
+     public enum MucDoHoa { Thap = 0, Vua = 1, Cao = 2, SieuNet = 3 }
+     public static class HardwareProfile {
+       public static MucDoHoa Muc { get; }
+       public static bool TuDong { get; }
+       public static event System.Action Changed;
+       public static void Dat(MucDoHoa muc);
+       public static void DatTuDong();
+       public static MucDoHoa DeXuat();
+       public static string MoTaMay();
+       public static int SoManhCau { get; }     // 12 / 16 / 24 / 32
+       public static int SoHatToiDa { get; }    // 200 / 500 / 1500 / 3000
+       public static float TiLeRender { get; }  // 0.7 / 0.85 / 1 / 1
+       public static bool BongMem { get; }
+     }
+   }
+
+ - Chế độ Tự động đoán mức theo SystemInfo (tên GPU, bộ nhớ đồ họa, RAM, số nhân): Apple M1/M2 8 GB → Cao, Intel Iris Xe → Vừa, máy yếu hơn → Thấp.
+ - Mỗi mức đặt các thông số: render scale (dưới 1 thì kèm bộ nâng độ phân giải FSR hoặc STP), MSAA, bóng đổ (khoảng cách, số cascade, độ phân giải), LOD bias, giới hạn mip của texture, hậu kỳ, số hạt tối đa, độ mịn quả cầu.
+ - Đổi mức có tác dụng ngay, không cần khởi động lại. Lưu lựa chọn bằng PlayerPrefs. Lần chạy đầu để Tự động.
+ - Tab "Hiển thị" trong IntroScreen gồm:
+   + 5 chip: Tự động, Thấp, Vừa, Cao, Siêu nét;
+   + dòng chữ nhỏ "Máy này: <GPU>, <RAM> GB → đề xuất <mức>";
+   + nút "Đo thử 30 giây": chạy DoKhungHinh bản rút gọn rồi gợi ý mức.
+
+ MỐC M1: ngay khi HardwareProfile.cs biên dịch được, commit RIÊNG file này với tiêu đề `[G1] HardwareProfile: hợp đồng mức đồ họa`. Ghi một dòng `M1 ĐẠT` trong câu trả lời rồi làm tiếp.
+
+D. Thông số sắc nét
+ - Bật Retina cho Mac (macRetinaSupport). Kiểm tra ở mức Cao và Siêu nét, khung hình phải có độ phân giải bằng số điểm ảnh vật lý của màn.
+ - Khử răng cưa: so MSAA 4x, SMAA và TAA trên cảnh có chữ biển báo và vạch chia buret, chọn mặc định ít nhòe nhất. TAA làm nhòe chữ thì không để mặc định.
+ - Bật lọc dị hướng cho vân sàn và mặt bàn. Mip bias không âm quá −0,5.
+ - KHÔNG đổi vật liệu và ánh sáng nướng sẵn, vì phần đồ họa HD đó đã được duyệt.
+
+E. Đo lại bộ số "SAU" như bước A.3, ở mức Tự động và mức Thấp. Chụp ảnh so sánh độ sắc nét trước/sau vào docs/ngay-18-11/anh/g1/.
+
+XONG KHI
+- Bản Mac dựng được bằng MacBuild.Build.
+- Đường đi chuẩn ở mức Tự động trên máy này đạt p95 ≤ 18 ms và không quá 2 khung trên 50 ms mỗi phút. Không đạt thì ghi rõ nguyên nhân còn lại kèm số đo.
+- Đổi mức trong Cài đặt có tác dụng ngay.
+- KhktWave6Verify vẫn đạt 67/67.
+- Báo cáo có bảng TRƯỚC/SAU.
+
+NẾU TRỄ: bỏ nút "Đo thử 30 giây" và bỏ phần so sánh SMAA/TAA. Giữ MacBuild, DoKhungHinh, HardwareProfile.
+
+PHẠM VI
+- Được sửa: Scripts/Rendering/*, Scripts/Environment/* (phần camera), Scripts/Editor/MacBuild.cs, Demo/IntroScreen.cs (chỉ tab Hiển thị), ProjectSettings/QualitySettings.asset, ProjectSettings/ProjectSettings.asset (chỉ mục Mac/Retina/đồ họa), Settings/*RPAsset*, Settings/*Renderer*.
+- Không sửa: HandController.cs, Menu/*, Scripts/CoChe/*, server/*.

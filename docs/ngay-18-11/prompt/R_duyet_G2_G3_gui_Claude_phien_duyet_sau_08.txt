@@ -1,0 +1,15 @@
+[R] Duyệt nhanh việc Antigravity vừa làm. Chỉ đọc, KHÔNG sửa, không commit.
+
+Ở ~/Developer/Antigravity, nhánh n18/antigravity, xem các commit có tiêu đề bắt đầu bằng [G1] (hoặc [G2], [G3] — tôi ghi ở cuối tin này). Dùng `git log --oneline main..n18/antigravity` và `git show`.
+
+Tìm các lỗi sau:
+- lỗi biên dịch hoặc lỗi chạy trên Windows (đường dẫn cứng, API chỉ có trên Mac);
+- NullReference, rò bộ nhớ, cấp phát mỗi khung trong Update/OnGUI;
+- sửa file ngoài phạm vi được giao. Phạm vi: G1 = Rendering, Environment (camera), MacBuild, tab Hiển thị của IntroScreen, Quality/URP. G2 = HandRig, ArmRig, phần tay trong HandController, InAppHandTracker, Network, Avatar. G3 = Demo/Bio/ThucVat, Simulation/Bio/ThucVat, LaCay, thuc_vat.json;
+- làm hỏng 3 cụm HandController đã duyệt (xem BAO_CAO_WAVE6_MAC.md);
+- hợp đồng HardwareProfile hoặc ThucVatMoDun bị đổi tên;
+- khóa, mật khẩu, dữ liệu lọt vào commit.
+
+Trả lời tối đa 10 mục. Mỗi mục ghi: file:dòng, lỗi, cách sửa trong 1 câu, mức "Phải sửa" hoặc "Nên sửa". Không thấy gì thì ghi "Không thấy lỗi đáng kể".
+
+Mã việc cần duyệt: G2 và G3

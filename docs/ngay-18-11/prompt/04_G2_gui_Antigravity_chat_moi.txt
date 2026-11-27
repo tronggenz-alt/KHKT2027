@@ -1,0 +1,57 @@
+[G2] Bàn tay người chân thật + mô hình người 3D (thân của mình, người khác trong phòng học chung)
+
+LUẬT CHUNG (giữ suốt việc này)
+- Dự án VERA Lab: kho git ~/Developer/Antigravity. Unity 6000.6.7f1 ở /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app. Đọc AGENTS.md trước tiên.
+- Nền tảng: Mac là chính, rồi Windows, iPad cuối cùng. Không dùng đường dẫn cứng hay API chỉ có trên Mac.
+- Chỉ sửa file trong PHẠM VI. Cần sửa file ngoài phạm vi thì ghi vào báo cáo, không tự sửa.
+- Git: chỉ `git add <từng file>`. Cấm `git add -A`, `git add .`, force push, reset --hard, stash. Không push, không merge vào main, không đưa lên web.
+- Commit nhỏ, tiêu đề bắt đầu bằng mã việc, ví dụ `[G2] ...`.
+- Kho GitHub đang CÔNG KHAI: không commit khóa, mật khẩu, .env, CSDL.
+- Không xóa Library/, Builds/, ~/AppBuild/VERALab_ui, cache Unity, /Applications/Unity.
+- RAM 8 GB: mỗi lúc chỉ MỘT Unity -batchmode. Trước khi chạy: `pgrep -fl -- -batchmode`. Nếu đang có thì đợi, 2 phút xem lại. Dựng cảnh hay chụp ảnh thì không dùng -nographics.
+- Giao diện, chú thích, tài liệu viết tiếng Việt. Tên file mới không dấu, không cách.
+- Kết thúc: viết báo cáo docs/ngay-18-11/bao-cao-<mã>.md, commit, trả lời dòng đầu `XONG <mã>` hoặc `CHƯA XONG <mã>: <lý do>`.
+- Quá giờ mà chưa xong: làm theo "Nếu trễ", để mã biên dịch được, commit, ghi phần còn lại.
+
+THƯ MỤC VÀ NHÁNH: ~/Developer/Antigravity, nhánh n18/antigravity (G1 đã làm ở đây). Không tạo worktree. Thời gian: khoảng 2 giờ.
+
+ĐỌC TRƯỚC
+Demo/HandRig.cs, Demo/ArmRig.cs, Demo/HandController.cs. HandController đã có 3 cụm thay đổi được duyệt trong BAO_CAO_WAVE6_MAC.md, không được phá.
+Thêm: Input/InAppHandTracker.cs, Input/ArmTracking.cs, Scripts/Network/*, docs/26-phong-hoc-chung-va-lop-hoc-tren-web.md, docs/20-mediapipe.md, Rendering/HardwareProfile.cs.
+
+VIỆC
+A. Chụp hiện trạng
+ - 6 tư thế: xòe, chụm cầm, cầm bình nón, cầm pipet, vặn khóa buret, chỉ tay. Mỗi tư thế chụp từ góc nhìn người chơi và từ góc nghiêng, lưu vào docs/ngay-18-11/anh/g2/truoc_*.png.
+ - Liệt kê lỗi thấy được: tỉ lệ ngón, khớp gập ngược, ngón cái không đối diện, cổ tay hở so với tay áo, ngón xuyên vào vật, da trông như nhựa.
+
+B. Sửa bàn tay
+ - Tỉ lệ theo bàn tay người thật: các đốt ngón giảm dần, ngón cái gồm 2 đốt và xương bàn, gan tay có độ dày, mu tay hơi cong, có móng tay.
+ - Giới hạn góc khớp đúng sinh lý, không gập ngược. Ngón cái xoay về phía đối diện khi cầm.
+ - Tư thế cầm theo loại dụng cụ (bình, ống nghiệm, pipet, buret, kẹp, que). Lưu thành bảng dữ liệu tư thế, chuyển giữa các tư thế mềm trong 0,15 s.
+ - Ngón không xuyên vật: đặt đầu ngón lên bề mặt bằng raycast và IK 2 khớp đơn giản, sai lệch tối đa 3 mm.
+ - Vật liệu da: màu da tự nhiên, giả tán xạ dưới da cho rẻ (wrap lighting, viền sáng ấm), không dùng shader nặng.
+ - Găng tay nitrile xanh: bật/tắt trong Cài đặt > Điều khiển, mặc định BẬT khi ở trong lab (đúng quy tắc an toàn).
+ - Cổ tay nối liền mạch với tay áo blouse.
+ - Nhận diện tay bằng camera (InAppHandTracker) phải điều khiển đúng bàn tay mới: ánh xạ 21 điểm MediaPipe vào các khớp mới.
+
+C. Mô hình người 3D
+ - Dựng bằng mã, không tải mô hình ngoài có giấy phép không rõ ràng.
+ - Hình dáng: áo blouse trắng, quần, giày, kính bảo hộ, cao khoảng 1,65 m như học sinh THPT.
+ - Có 2–3 mức chi tiết (LOD) chọn theo HardwareProfile.
+ - Phòng học chung: người khác hiện bằng mô hình này thay cho khối đơn giản (nếu hiện đang là khối). Đầu và hai tay đi theo dữ liệu mạng sẵn có. Có bảng tên trên đầu. Màu tay áo theo vai trò giáo viên hay học sinh.
+ - Thân của chính mình: nhìn xuống thấy thân và tay áo, có thể tắt.
+ - Robot giữ nguyên.
+
+D. Kiểm thử
+ - Tạo Editor/KhktN18Verify.cs (G3, G4 sẽ thêm nhóm của mình vào file này). Nhóm "G2": chụp lại 6 tư thế, không có lỗi.
+ - Giả lập 1 người chơi từ xa trong chế độ thử (không cần 2 máy) để chụp mô hình người.
+ - KhktWave6Verify vẫn đạt 67/67.
+
+XONG KHI
+- Có ảnh sau_*.png chụp cùng góc với truoc_*.png. Bàn tay nhìn tự nhiên, không ngón nào xuyên vật trong 6 tư thế.
+- Người khác trong phòng học chung hiện bằng mô hình người.
+- Đo bằng DoKhungHinh: FPS không tụt quá 5% so với số SAU của G1.
+
+NẾU TRỄ: bỏ phần "thân của chính mình", LOD chỉ giữ 2 mức.
+
+PHẠM VI: Demo/HandRig.cs, Demo/ArmRig.cs, Demo/HandController.cs (chỉ phần dựng và tư thế tay, không đổi luồng cầm/thả hay cổng an toàn), Input/InAppHandTracker.cs (ánh xạ khớp), Scripts/Network/*, Scripts/Avatar/* (mới), Editor/KhktN18Verify.cs (mới), shader da mới trong Lab/Shaders/.
