@@ -1041,7 +1041,9 @@ namespace Khkt.Menu
         /// <summary>Chuyển Kính lỏng ⇄ Cổ điển: lưu lựa chọn rồi dựng lại màn (như đổi chủ đề).</summary>
         public void DoiGiaoDien(bool kinhLong)
         {
-            if (busy || GlassKit.LiquidGlass == kinhLong) return;
+            // không chặn theo busy: lúc mở app, bước khôi phục đăng nhập chạy nền giữ busy = true tới khi máy chủ trả lời,
+            // nút Kính lỏng | Cổ điển ở màn chọn lối vào bị nuốt mất. Đổi giao diện không đụng tới đăng nhập.
+            if (GlassKit.LiquidGlass == kinhLong) return;
             GlassKit.LiquidGlass = kinhLong;
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
